@@ -15,10 +15,15 @@ export {
 export {
 	memory,
 	memoryInitPromise,
-	getItemsStorage,
-	setItemsStorage,
+	getStoredItems,
+	saveItems,
+	clearStoredItems,
 	getCustomerStorage,
 	setCustomerStorage,
+	getItemsLastSync,
+	setItemsLastSync,
+	getCustomersLastSync,
+	setCustomersLastSync,
 	getSalesPersonsStorage,
 	setSalesPersonsStorage,
 	getOpeningStorage,
@@ -39,6 +44,7 @@ export {
 	purgeOldQueueEntries,
 	MAX_QUEUE_ITEMS,
 	resetOfflineState,
+	reduceCacheUsage,
 	clearAllCache,
 	forceClearAllCache,
 	getCacheUsageEstimate,
@@ -92,30 +98,25 @@ export {
 	savePriceListItems,
 	getCachedPriceListItems,
 	clearPriceListCache,
-        saveItemDetailsCache,
-        getCachedItemDetails,
+	saveItemDetailsCache,
+	getCachedItemDetails,
+	saveItemsBulk,
+	getAllStoredItems,
+	searchStoredItems,
 } from "./items.js";
 
-export {
-       saveItemGroups,
-       getCachedItemGroups,
-       clearItemGroups,
-} from "./item_groups.js";
+export { saveItemGroups, getCachedItemGroups, clearItemGroups } from "./item_groups.js";
 
 // Customers exports
 export {
-        saveCustomerBalance,
-        getCachedCustomerBalance,
-        clearCustomerBalanceCache,
-        clearExpiredCustomerBalances,
+	saveCustomerBalance,
+	getCachedCustomerBalance,
+	clearCustomerBalanceCache,
+	clearExpiredCustomerBalances,
 } from "./customers.js";
 
 // Coupons exports
-export {
-        saveCoupons,
-        getCachedCoupons,
-        clearCoupons,
-} from "./coupons.js";
+export { saveCoupons, getCachedCoupons, clearCoupons } from "./coupons.js";
 
 // Translation cache exports
 export { getTranslationsCache, saveTranslationsCache } from "./cache.js";

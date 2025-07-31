@@ -80,6 +80,7 @@ export default {
 			networkOnline: navigator.onLine || false,
 			serverOnline: false,
 			serverConnecting: false,
+			internetReachable: false,
 			isIpHost: false,
 
 			// Sync data

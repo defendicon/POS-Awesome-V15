@@ -48,17 +48,17 @@ def get_customer_group_condition(pos_profile):
 
 
 @frappe.whitelist()
-def get_customer_names(pos_profile):
+def get_customer_names(pos_profile, limit=None, offset=None, modified_after=None):
 	_pos_profile = json.loads(pos_profile)
 	ttl = _pos_profile.get("posa_server_cache_duration")
 	if ttl:
 		ttl = int(ttl) * 60
 
 	@redis_cache(ttl=ttl or 1800)
-	def __get_customer_names(pos_profile):
-		return _get_customer_names(pos_profile)
+	def __get_customer_names(pos_profile, limit=None, offset=None, modified_after=None):
+		return _get_customer_names(pos_profile, limit, offset, modified_after)
 
-	def _get_customer_names(pos_profile):
+	def _get_customer_names(pos_profile, limit=None, offset=None, modified_after=None):
 		pos_profile = json.loads(pos_profile)
 		filters = {"disabled": 0}
 
@@ -66,10 +66,13 @@ def get_customer_names(pos_profile):
 		if customer_groups:
 			filters["customer_group"] = ["in", customer_groups]
 
+		if modified_after:
+		        filters["modified"] = [">", modified_after]
+
 		customers = frappe.get_all(
-			"Customer",
-			filters=filters,
-			fields=[
+		        "Customer",
+		        filters=filters,
+		        fields=[
 				"name",
 				"mobile_no",
 				"email_id",
@@ -77,14 +80,16 @@ def get_customer_names(pos_profile):
 				"customer_name",
 				"primary_address",
 			],
-			order_by="name",
+		        order_by="name",
+		        limit_start=offset,
+		        limit_page_length=limit,
 		)
 		return customers
 
-	if _pos_profile.get("posa_use_server_cache"):
-		return __get_customer_names(pos_profile)
+	if _pos_profile.get("posa_use_server_cache") and not (limit or offset or modified_after):
+		return __get_customer_names(pos_profile, limit, offset, modified_after)
 	else:
-		return _get_customer_names(pos_profile)
+		return _get_customer_names(pos_profile, limit, offset, modified_after)
 
 
 @frappe.whitelist()
@@ -123,25 +128,25 @@ def get_customer_info(customer):
 
 	addresses = frappe.db.sql(
 		"""
-        SELECT
-            address.name as address_name,
-            address.address_line1,
-            address.address_line2,
-            address.city,
-            address.state,
-            address.country,
-            address.address_type
-        FROM `tabAddress` address
-        INNER JOIN `tabDynamic Link` link
-            ON (address.name = link.parent)
-        WHERE
-            link.link_doctype = 'Customer'
-            AND link.link_name = %s
-            AND address.disabled = 0
-            AND address.address_type = 'Shipping'
-        ORDER BY address.creation DESC
-        LIMIT 1
-        """,
+	SELECT
+	    address.name as address_name,
+	    address.address_line1,
+	    address.address_line2,
+	    address.city,
+	    address.state,
+	    address.country,
+	    address.address_type
+	FROM `tabAddress` address
+	INNER JOIN `tabDynamic Link` link
+	    ON (address.name = link.parent)
+	WHERE
+	    link.link_doctype = 'Customer'
+	    AND link.link_name = %s
+	    AND address.disabled = 0
+	    AND address.address_type = 'Shipping'
+	ORDER BY address.creation DESC
+	LIMIT 1
+	""",
 		(customer.name,),
 		as_dict=True,
 	)
@@ -332,23 +337,23 @@ def set_customer_info(customer, fieldname, value=""):
 def get_customer_addresses(customer):
 	return frappe.db.sql(
 		"""
-        SELECT 
-            address.name,
-            address.address_line1,
-            address.address_line2,
-            address.address_title,
-            address.city,
-            address.state,
-            address.country,
-            address.address_type
-        FROM `tabAddress` as address
-        INNER JOIN `tabDynamic Link` AS link
+	SELECT 
+	    address.name,
+	    address.address_line1,
+	    address.address_line2,
+	    address.address_title,
+	    address.city,
+	    address.state,
+	    address.country,
+	    address.address_type
+	FROM `tabAddress` as address
+	INNER JOIN `tabDynamic Link` AS link
 				ON address.name = link.parent
-        WHERE link.link_doctype = 'Customer'
-            AND link.link_name = '{0}'
-            AND address.disabled = 0
-        ORDER BY address.name
-        """.format(customer),
+	WHERE link.link_doctype = 'Customer'
+	    AND link.link_name = '{0}'
+	    AND address.disabled = 0
+	ORDER BY address.name
+	""".format(customer),
 		as_dict=1,
 	)
 

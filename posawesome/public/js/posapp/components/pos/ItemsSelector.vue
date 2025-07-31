@@ -135,35 +135,39 @@
 											density="compact"
 											color="primary"
 										></v-switch>
-                                                                              <v-switch
-                                                                              v-model="temp_enable_custom_items_per_page"
-                                                                              :label="__('Custom items per page')"
-                                                                              hide-details
-                                                                              density="compact"
-                                                                              color="primary"
-                                                                              class="mb-2"
-                                                                              >
-                                                                              </v-switch>
-                                                                              <v-text-field
-                                                                              v-if="temp_enable_custom_items_per_page"
-                                                                              v-model="temp_items_per_page"
-                                                                              type="number"
-                                                                              density="compact"
-                                                                              variant="outlined"
-                                                                              color="primary"
-                                                                              :bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-                                                                              hide-details
-                                                                              :label="__('Items per page')"
-                                                                              class="mb-2 dark-field"
-                                                                              >
-                                                                              </v-text-field>
-                                                                        </v-card-text>
-                                                                        <v-card-actions class="pa-4 pt-0">
-                                                                                <v-btn color="error" variant="text" @click="cancelItemSettings">{{ __("Cancel") }}</v-btn>
-                                                                                <v-spacer></v-spacer>
-                                                                                <v-btn color="primary" variant="tonal" @click="applyItemSettings">{{ __("Apply") }}</v-btn>
-                                                                        </v-card-actions>
-                                                                </v-card>
+										<v-switch
+											v-model="temp_enable_custom_items_per_page"
+											:label="__('Custom items per page')"
+											hide-details
+											density="compact"
+											color="primary"
+											class="mb-2"
+										>
+										</v-switch>
+										<v-text-field
+											v-if="temp_enable_custom_items_per_page"
+											v-model="temp_items_per_page"
+											type="number"
+											density="compact"
+											variant="outlined"
+											color="primary"
+											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+											hide-details
+											:label="__('Items per page')"
+											class="mb-2 dark-field"
+										>
+										</v-text-field>
+									</v-card-text>
+									<v-card-actions class="pa-4 pt-0">
+										<v-btn color="error" variant="text" @click="cancelItemSettings">{{
+											__("Cancel")
+										}}</v-btn>
+										<v-spacer></v-spacer>
+										<v-btn color="primary" variant="tonal" @click="applyItemSettings">{{
+											__("Apply")
+										}}</v-btn>
+									</v-card-actions>
+								</v-card>
 							</v-dialog>
 						</div>
 					</v-col>
@@ -174,6 +178,7 @@
 							ref="itemsContainer"
 							v-if="items_view == 'card'"
 							:style="{ maxHeight: 'calc(100% - 80px)' }"
+							@scroll.passive="onCardScroll"
 						>
 							<v-card
 								v-for="item in filtered_items"
@@ -243,6 +248,7 @@
 								:style="{ maxHeight: 'calc(100% - 80px)' }"
 								item-key="item_code"
 								@click:row="click_item_row"
+								@scroll.passive="onListScroll"
 							>
 								<template v-slot:item.rate="{ item }">
 									<div>
@@ -363,20 +369,26 @@ import {
 	getLocalStock,
 	isOffline,
 	initializeStockCache,
-	getItemsStorage,
-	setItemsStorage,
+	searchStoredItems,
+	saveItems,
+	clearStoredItems,
 	getLocalStockCache,
 	setLocalStockCache,
 	initPromise,
+	memoryInitPromise,
 	checkDbHealth,
 	getCachedPriceListItems,
 	savePriceListItems,
+	clearPriceListCache,
 	updateLocalStockCache,
 	isStockCacheReady,
 	getCachedItemDetails,
 	saveItemDetailsCache,
 	saveItemGroups,
 	getCachedItemGroups,
+	getItemsLastSync,
+	setItemsLastSync,
+	forceClearAllCache,
 } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 
@@ -423,17 +435,23 @@ export default {
 		show_item_settings: false,
 		hide_qty_decimals: false,
 		temp_hide_qty_decimals: false,
-                hide_zero_rate_items: false,
-                temp_hide_zero_rate_items: false,
-                isDragging: false,
-                // Items per page configuration
-                enable_custom_items_per_page: false,
-                temp_enable_custom_items_per_page: false,
-                items_per_page: 50,
-                temp_items_per_page: 50,
-                // Track if the current search was triggered by a scanner
-                search_from_scanner: false,
-        }),
+		hide_zero_rate_items: false,
+		temp_hide_zero_rate_items: false,
+		isDragging: false,
+		// Items per page configuration
+		enable_custom_items_per_page: false,
+		temp_enable_custom_items_per_page: false,
+		items_per_page: 50,
+		temp_items_per_page: 50,
+		// Page size for incremental item loading. When browser local
+		// storage is enabled this will be adjusted to 500 so items are
+		// fetched in manageable batches. Otherwise a high limit
+		// effectively disables incremental loading.
+		itemsPageLimit: 10000,
+		// Track if the current search was triggered by a scanner
+		search_from_scanner: false,
+		currentPage: 0,
+	}),
 
 	watch: {
 		customer: _.debounce(function () {
@@ -443,7 +461,15 @@ export default {
 					// Fallback to full reload if nothing is loaded
 					if (!this.items_loaded || !this.filtered_items.length) {
 						this.items_loaded = false;
-						this.get_items(true);
+						if (!isOffline()) {
+							this.get_items(true);
+						} else {
+							if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+								this.get_items(true);
+							} else {
+								this.get_items();
+							}
+						}
 					} else {
 						// Only refresh prices for visible items when smart reload is enabled
 						this.$nextTick(() => this.refreshPricesForVisibleItems());
@@ -451,7 +477,15 @@ export default {
 				} else {
 					// Fall back to full reload
 					this.items_loaded = false;
-					this.get_items(true);
+					if (!isOffline()) {
+						this.get_items(true);
+					} else {
+						if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+							this.get_items(true);
+						} else {
+							this.get_items();
+						}
+					}
 				}
 				return;
 			}
@@ -460,17 +494,25 @@ export default {
 			if (this.items_loaded && this.filtered_items && this.filtered_items.length > 0) {
 				this.$nextTick(() => this.refreshPricesForVisibleItems());
 			} else {
-				this.get_items();
+				if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+					this.get_items(true);
+				} else {
+					this.get_items();
+				}
 			}
 		}, 300),
-		customer_price_list: _.debounce(function () {
+		customer_price_list: _.debounce(async function () {
 			if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
 					if (!this.items_loaded || !this.items.length) {
 						this.items_loaded = false;
-						this.get_items(true);
+						if (!isOffline()) {
+							this.get_items(true);
+						} else {
+							this.get_items();
+						}
 					} else {
 						// Only refresh prices for visible items when smart reload is enabled
 						this.$nextTick(() => this.refreshPricesForVisibleItems());
@@ -478,13 +520,17 @@ export default {
 				} else {
 					// Fall back to full reload
 					this.items_loaded = false;
-					this.get_items(true);
+					if (!isOffline()) {
+						this.get_items(true);
+					} else {
+						this.get_items();
+					}
 				}
 				return;
 			}
 			// Apply cached rates if available for immediate update
 			if (this.items_loaded && this.items && this.items.length > 0) {
-				const cached = getCachedPriceListItems(this.customer_price_list);
+				const cached = await getCachedPriceListItems(this.customer_price_list);
 				if (cached && cached.length) {
 					const map = {};
 					cached.forEach((ci) => {
@@ -504,14 +550,28 @@ export default {
 			}
 			// No cache found - force a reload so prices are updated
 			this.items_loaded = false;
-			this.get_items(true);
+			if (!isOffline()) {
+				this.get_items(true);
+			} else {
+				if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+					this.get_items(true);
+				} else {
+					this.get_items();
+				}
+			}
 		}, 300),
 		new_line() {
 			this.eventBus.emit("set_new_line", this.new_line);
 		},
 		item_group(newValue, oldValue) {
 			if (this.pos_profile && this.pos_profile.pose_use_limit_search && newValue !== oldValue) {
-				this.get_items();
+				if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+					this.get_items(true);
+				} else {
+					this.get_items();
+				}
+			} else if (this.pos_profile && this.pos_profile.posa_local_storage && newValue !== oldValue) {
+				this.loadVisibleItems(true);
 			}
 		},
 		filtered_items(new_value, old_value) {
@@ -539,17 +599,57 @@ export default {
 		exchange_rate() {
 			this.applyCurrencyConversionToItems();
 		},
-               windowWidth() {
-                       // Keep the configured items per page on resize
-                       this.itemsPerPage = this.items_per_page;
-               },
-               windowHeight() {
-                       // Maintain the configured items per page on resize
-                       this.itemsPerPage = this.items_per_page;
-               },
-       },
+		windowWidth() {
+			// Keep the configured items per page on resize
+			this.itemsPerPage = this.items_per_page;
+		},
+		windowHeight() {
+			// Maintain the configured items per page on resize
+			this.itemsPerPage = this.items_per_page;
+		},
+		items_loaded(val) {
+			if (val) {
+				this.eventBus.emit("items_loaded");
+			}
+		},
+	},
 
-       methods: {
+	methods: {
+		async loadVisibleItems(reset = false) {
+			await initPromise;
+			await checkDbHealth();
+			if (reset) {
+				this.currentPage = 0;
+				this.items = [];
+			}
+			const search = this.get_search(this.first_search);
+			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
+			const pageItems = await searchStoredItems({
+				search,
+				itemGroup,
+				limit: this.itemsPerPage,
+				offset: this.currentPage * this.itemsPerPage,
+			});
+			if (reset) this.items = pageItems;
+			else this.items = [...this.items, ...pageItems];
+			this.eventBus.emit("set_all_items", this.items);
+			if (pageItems.length) this.update_items_details(pageItems);
+		},
+		onCardScroll() {
+			const el = this.$refs.itemsContainer;
+			if (!el) return;
+			if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+				this.currentPage += 1;
+				this.loadVisibleItems();
+			}
+		},
+		onListScroll(event) {
+			const el = event.target;
+			if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+				this.currentPage += 1;
+				this.loadVisibleItems();
+			}
+		},
 		refreshPricesForVisibleItems() {
 			const vm = this;
 			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
@@ -656,7 +756,10 @@ export default {
 		show_coupons() {
 			this.eventBus.emit("show_coupons", "true");
 		},
-		forceReloadItems() {
+		async forceReloadItems() {
+			// Clear cached price list items so the reload always
+			// fetches the latest data from the server
+			await clearPriceListCache();
 			// Always recreate the worker when forcing a reload so
 			// subsequent reloads fetch fresh data from the server.
 			if (!this.itemWorker && typeof Worker !== "undefined") {
@@ -680,12 +783,12 @@ export default {
 				return;
 			}
 
-			if (force_server && this.pos_profile.posa_local_storage) {
-				localStorage.setItem("items_storage", "");
-			}
+			const shouldClear = force_server && this.pos_profile.posa_local_storage && !isOffline();
+			let cleared = false;
 
 			const vm = this;
 			this.loading = true;
+			const syncSince = getItemsLastSync();
 
 			// Removed noisy debug log
 			let search = this.get_search(this.first_search);
@@ -710,8 +813,13 @@ export default {
 			// Removed noisy debug log
 
 			// Attempt to load cached items for the current price list
-			if (!force_server && this.pos_profile && !this.pos_profile.pose_use_limit_search) {
-				const cached = getCachedPriceListItems(vm.customer_price_list);
+			if (
+				!force_server &&
+				this.pos_profile &&
+				this.pos_profile.posa_local_storage &&
+				!this.pos_profile.pose_use_limit_search
+			) {
+				const cached = await getCachedPriceListItems(vm.customer_price_list);
 				if (cached && cached.length) {
 					vm.items = cached;
 					vm.items.forEach((it) => {
@@ -729,7 +837,9 @@ export default {
 					vm.items_loaded = true;
 
 					if (vm.items && vm.items.length > 0) {
-						vm.prePopulateStockCache(vm.items);
+						if (vm.items.length <= 500) {
+							vm.prePopulateStockCache(vm.items);
+						}
 						vm.update_items_details(vm.items);
 					}
 					return;
@@ -740,31 +850,39 @@ export default {
 			if (
 				vm.pos_profile &&
 				vm.pos_profile.posa_local_storage &&
-				getItemsStorage().length &&
 				!vm.pos_profile.pose_use_limit_search &&
 				!force_server
 			) {
-				vm.items = getItemsStorage();
-				// Fallback to cached UOMs when loading from storage
-				vm.items.forEach((it) => {
-					if (!it.item_uoms || it.item_uoms.length === 0) {
-						const cached = getItemUOMs(it.item_code);
-						if (cached.length > 0) {
-							it.item_uoms = cached;
-						} else if (it.stock_uom) {
-							it.item_uoms = [{ uom: it.stock_uom, conversion_factor: 1.0 }];
-						}
-					}
+				const stored = await searchStoredItems({
+					search: sr,
+					itemGroup: gr,
+					limit: this.itemsPageLimit,
 				});
-				this.eventBus.emit("set_all_items", vm.items);
-				vm.loading = false;
-				vm.items_loaded = true;
+				if (stored.length) {
+					vm.items = stored;
+					// Fallback to cached UOMs when loading from storage
+					vm.items.forEach((it) => {
+						if (!it.item_uoms || it.item_uoms.length === 0) {
+							const cached = getItemUOMs(it.item_code);
+							if (cached.length > 0) {
+								it.item_uoms = cached;
+							} else if (it.stock_uom) {
+								it.item_uoms = [{ uom: it.stock_uom, conversion_factor: 1.0 }];
+							}
+						}
+					});
+					this.eventBus.emit("set_all_items", vm.items);
+					vm.loading = false;
+					vm.items_loaded = true;
 
-				if (vm.items && vm.items.length > 0) {
-					await vm.prePopulateStockCache(vm.items);
-					vm.update_items_details(vm.items);
+					if (vm.items && vm.items.length > 0) {
+						if (vm.items.length <= 500) {
+							await vm.prePopulateStockCache(vm.items);
+						}
+						vm.update_items_details(vm.items);
+					}
+					return;
 				}
-				return;
 			}
 			// Removed noisy debug log
 
@@ -783,6 +901,9 @@ export default {
 							item_group: gr,
 							search_value: sr,
 							customer: vm.customer,
+							modified_after: syncSince,
+							limit: this.itemsPageLimit,
+							offset: 0,
 						}),
 					});
 
@@ -792,8 +913,14 @@ export default {
 						if (this.items_request_token !== request_token) return;
 						if (ev.data.type === "parsed") {
 							const parsed = ev.data.items;
-							vm.items = parsed.message || parsed;
-							savePriceListItems(vm.customer_price_list, vm.items);
+							const newItems = parsed.message || parsed;
+							if (syncSince && vm.items && vm.items.length) {
+								const map = new Map(vm.items.map((it) => [it.item_code, it]));
+								newItems.forEach((it) => map.set(it.item_code, it));
+								vm.items = Array.from(map.values());
+							} else {
+								vm.items = newItems;
+							}
 							// Ensure UOMs are available for each item
 							vm.items.forEach((it) => {
 								if (it.item_uoms && it.item_uoms.length > 0) {
@@ -808,6 +935,15 @@ export default {
 								}
 							});
 							vm.eventBus.emit("set_all_items", vm.items);
+							if (newItems.length === this.itemsPageLimit) {
+								this.backgroundLoadItems(this.itemsPageLimit, syncSince, shouldClear);
+							} else {
+								setItemsLastSync(new Date().toISOString());
+								if (vm.itemWorker) {
+									vm.itemWorker.terminate();
+									vm.itemWorker = null;
+								}
+							}
 							vm.loading = false;
 							vm.items_loaded = true;
 							console.info("Items Loaded");
@@ -822,7 +958,9 @@ export default {
 							saveItemGroups(groups);
 
 							// Pre-populate stock cache when items are freshly loaded
-							vm.prePopulateStockCache(vm.items);
+							if (vm.items.length <= 500) {
+								vm.prePopulateStockCache(vm.items);
+							}
 
 							vm.$nextTick(() => {
 								if (vm.search && vm.pos_profile && !vm.pos_profile.pose_use_limit_search) {
@@ -834,33 +972,8 @@ export default {
 							if (vm.items && vm.items.length > 0) {
 								vm.update_items_details(vm.items);
 							}
-
-							if (
-								vm.pos_profile &&
-								vm.pos_profile.posa_local_storage &&
-								!vm.pos_profile.pose_use_limit_search
-							) {
-								try {
-									setItemsStorage(vm.items);
-									vm.items.forEach((it) => {
-										if (it.item_uoms && it.item_uoms.length > 0) {
-											saveItemUOMs(it.item_code, it.item_uoms);
-										}
-									});
-								} catch (e) {
-									console.error(e);
-								}
-							}
-
 							if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
 								vm.enter_event();
-							}
-
-							// Terminate the worker after items are parsed to
-							// release memory held by the worker thread.
-							if (vm.itemWorker) {
-								vm.itemWorker.terminate();
-								vm.itemWorker = null;
 							}
 						} else if (ev.data.type === "error") {
 							console.error("Item worker parse error:", ev.data.error);
@@ -870,7 +983,7 @@ export default {
 					this.itemWorker.postMessage({
 						type: "parse_and_cache",
 						json: text,
-						priceList: vm.customer_price_list,
+						priceList: vm.customer_price_list || "",
 					});
 				} catch (err) {
 					console.error("Failed to fetch items", err);
@@ -885,11 +998,21 @@ export default {
 						item_group: gr,
 						search_value: sr,
 						customer: vm.customer,
+						modified_after: syncSince,
+						limit: vm.itemsPageLimit,
+						offset: 0,
 					},
 					callback: async function (r) {
 						if (vm.items_request_token !== request_token) return;
 						if (r.message) {
-							vm.items = r.message;
+							const newItems = r.message;
+							if (syncSince && vm.items && vm.items.length) {
+								const map = new Map(vm.items.map((it) => [it.item_code, it]));
+								newItems.forEach((it) => map.set(it.item_code, it));
+								vm.items = Array.from(map.values());
+							} else {
+								vm.items = newItems;
+							}
 							// Ensure UOMs are available for each item
 							vm.items.forEach((it) => {
 								if (it.item_uoms && it.item_uoms.length > 0) {
@@ -904,9 +1027,14 @@ export default {
 								}
 							});
 							vm.eventBus.emit("set_all_items", vm.items);
+							if (newItems.length === this.itemsPageLimit) {
+								this.backgroundLoadItems(this.itemsPageLimit, syncSince, shouldClear);
+							} else {
+								setItemsLastSync(new Date().toISOString());
+							}
 							vm.loading = false;
 							vm.items_loaded = true;
-							savePriceListItems(vm.customer_price_list, vm.items);
+							await savePriceListItems(vm.customer_price_list, vm.items);
 							console.info("Items Loaded");
 
 							const groups = Array.from(
@@ -919,7 +1047,9 @@ export default {
 							saveItemGroups(groups);
 
 							// Pre-populate stock cache when items are freshly loaded
-							vm.prePopulateStockCache(vm.items);
+							if (vm.items.length <= 500) {
+								vm.prePopulateStockCache(vm.items);
+							}
 
 							vm.$nextTick(() => {
 								if (vm.search && vm.pos_profile && !vm.pos_profile.pose_use_limit_search) {
@@ -938,8 +1068,12 @@ export default {
 								!vm.pos_profile.pose_use_limit_search
 							) {
 								try {
-									setItemsStorage(r.message);
-									r.message.forEach((it) => {
+									if (shouldClear && !cleared) {
+										await clearStoredItems();
+										cleared = true;
+									}
+									await saveItems(vm.items);
+									vm.items.forEach((it) => {
 										if (it.item_uoms && it.item_uoms.length > 0) {
 											saveItemUOMs(it.item_code, it.item_uoms);
 										}
@@ -952,6 +1086,112 @@ export default {
 								vm.enter_event();
 							}
 						}
+					},
+				});
+			}
+		},
+		async backgroundLoadItems(offset, syncSince, clearBefore = false) {
+			const limit = this.itemsPageLimit;
+			// When the limit is extremely high, treat it as
+			// "no incremental loading" and exit early.
+			if (!limit || limit >= 10000) {
+				return;
+			}
+			const lastSync = syncSince;
+			if (this.itemWorker) {
+				try {
+					const res = await fetch("/api/method/posawesome.posawesome.api.items.get_items", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"X-Frappe-CSRF-Token": frappe.csrf_token,
+						},
+						credentials: "same-origin",
+						body: JSON.stringify({
+							pos_profile: JSON.stringify(this.pos_profile),
+							price_list: this.customer_price_list,
+							item_group: this.item_group !== "ALL" ? this.item_group.toLowerCase() : "",
+							search_value: this.search || "",
+							customer: this.customer,
+							modified_after: lastSync,
+							limit,
+							offset,
+						}),
+					});
+					const text = await res.text();
+					const count = await new Promise((resolve) => {
+						this.itemWorker.onmessage = (ev) => {
+							if (ev.data.type === "parsed") {
+								resolve(ev.data.items.length);
+							} else if (ev.data.type === "error") {
+								console.error("Item worker parse error:", ev.data.error);
+								resolve(0);
+							}
+						};
+						this.itemWorker.postMessage({
+							type: "parse_and_cache",
+							json: text,
+							priceList: this.customer_price_list || "",
+						});
+					});
+					if (count === limit) {
+						await this.backgroundLoadItems(offset + limit, syncSince, clearBefore);
+					} else {
+						setItemsLastSync(new Date().toISOString());
+						if (this.itemWorker) {
+							this.itemWorker.terminate();
+							this.itemWorker = null;
+						}
+						if (this.items && this.items.length > 0) {
+							await this.prePopulateStockCache(this.items);
+						}
+					}
+				} catch (err) {
+					console.error("Failed to background load items", err);
+				}
+			} else {
+				frappe.call({
+					method: "posawesome.posawesome.api.items.get_items",
+					args: {
+						pos_profile: JSON.stringify(this.pos_profile),
+						price_list: this.customer_price_list,
+						item_group: this.item_group !== "ALL" ? this.item_group.toLowerCase() : "",
+						search_value: this.search || "",
+						customer: this.customer,
+						modified_after: lastSync,
+						limit,
+						offset,
+					},
+					callback: async (r) => {
+						const rows = r.message || [];
+						rows.forEach((it) => {
+							const existing = this.items.find((i) => i.item_code === it.item_code);
+							if (existing) Object.assign(existing, it);
+							else this.items.push(it);
+						});
+						this.eventBus.emit("set_all_items", this.items);
+						if (
+							this.pos_profile &&
+							this.pos_profile.posa_local_storage &&
+							!this.pos_profile.pose_use_limit_search
+						) {
+							if (clearBefore) {
+								await clearStoredItems();
+								clearBefore = false;
+							}
+							await saveItems(this.items);
+						}
+						if (rows.length === limit) {
+							this.backgroundLoadItems(offset + limit, syncSince, clearBefore);
+						} else {
+							setItemsLastSync(new Date().toISOString());
+							if (this.items && this.items.length > 0) {
+								await this.prePopulateStockCache(this.items);
+							}
+						}
+					},
+					error: (err) => {
+						console.error("Failed to background load items", err);
 					},
 				});
 			}
@@ -1169,8 +1409,14 @@ export default {
 			if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
 				// Only trigger search when query length meets minimum threshold
 				if (vm.search && vm.search.length >= 3) {
-					vm.get_items();
+					if (vm.pos_profile && !vm.pos_profile.posa_local_storage) {
+						vm.get_items(true);
+					} else {
+						vm.get_items();
+					}
 				}
+			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
+				vm.loadVisibleItems(true);
 			} else {
 				// Save the current filtered items before search to maintain quantity data
 				const current_items = [...vm.filtered_items];
@@ -1421,15 +1667,25 @@ export default {
 			if (this.prePopulateInProgress) {
 				return;
 			}
+			if (!Array.isArray(items) || items.length === 0) {
+				return;
+			}
 			this.prePopulateInProgress = true;
 			try {
-				// Use the new isStockCacheReady function
-				if (isStockCacheReady()) {
+				const cache = getLocalStockCache();
+				const cacheSize = Object.keys(cache).length;
+
+				if (isStockCacheReady() && cacheSize >= items.length) {
 					console.debug("Stock cache already initialized");
 					return;
 				}
 
-				console.info("Pre-populating stock cache for", items.length, "items");
+				if (items.length > 500) {
+					console.info("Pre-populating stock cache for", items.length, "items in batches");
+				} else {
+					console.info("Pre-populating stock cache for", items.length, "items");
+				}
+
 				await initializeStockCache(items, this.pos_profile);
 			} catch (error) {
 				console.error("Failed to pre-populate stock cache:", error);
@@ -1733,7 +1989,7 @@ export default {
 				html += `
           <div class="item-option p-3 mb-2 border rounded cursor-pointer" data-item-index="${index}" style="border: 1px solid #ddd; cursor: pointer;">
             <div class="d-flex align-items-center">
-              <img src="${item.image || "/assets/posawesome/js/posapp/components/pos/placeholder-image.png"}" 
+              <img src="${item.image || "/assets/posawesome/js/posapp/components/pos/placeholder-image.png"}"
                    style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;" />
               <div>
                 <div class="font-weight-bold">${item.item_name}</div>
@@ -1788,29 +2044,29 @@ export default {
 			return !Number.isInteger(value);
 		},
 
-                toggleItemSettings() {
-                        this.temp_hide_qty_decimals = this.hide_qty_decimals;
-                        this.temp_hide_zero_rate_items = this.hide_zero_rate_items;
-                        this.temp_enable_custom_items_per_page = this.enable_custom_items_per_page;
-                        this.temp_items_per_page = this.items_per_page;
-                        this.show_item_settings = true;
-                },
-                cancelItemSettings() {
-                        this.show_item_settings = false;
-                },
-                applyItemSettings() {
-                        this.hide_qty_decimals = this.temp_hide_qty_decimals;
-                        this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
-                        this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
-                        if (this.enable_custom_items_per_page) {
-                                this.items_per_page = parseInt(this.temp_items_per_page) || 50;
-                        } else {
-                                this.items_per_page = 50;
-                        }
-                        this.itemsPerPage = this.items_per_page;
-                        this.saveItemSettings();
-                        this.show_item_settings = false;
-                },
+		toggleItemSettings() {
+			this.temp_hide_qty_decimals = this.hide_qty_decimals;
+			this.temp_hide_zero_rate_items = this.hide_zero_rate_items;
+			this.temp_enable_custom_items_per_page = this.enable_custom_items_per_page;
+			this.temp_items_per_page = this.items_per_page;
+			this.show_item_settings = true;
+		},
+		cancelItemSettings() {
+			this.show_item_settings = false;
+		},
+		applyItemSettings() {
+			this.hide_qty_decimals = this.temp_hide_qty_decimals;
+			this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
+			this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
+			if (this.enable_custom_items_per_page) {
+				this.items_per_page = parseInt(this.temp_items_per_page) || 50;
+			} else {
+				this.items_per_page = 50;
+			}
+			this.itemsPerPage = this.items_per_page;
+			this.saveItemSettings();
+			this.show_item_settings = false;
+		},
 		onDragStart(event, item) {
 			this.isDragging = true;
 
@@ -1835,42 +2091,42 @@ export default {
 			// Emit event to hide drop feedback
 			this.eventBus.emit("item-drag-end");
 		},
-                saveItemSettings() {
-                        try {
-                                const settings = {
-                                        hide_qty_decimals: this.hide_qty_decimals,
-                                        hide_zero_rate_items: this.hide_zero_rate_items,
-                                        enable_custom_items_per_page: this.enable_custom_items_per_page,
-                                        items_per_page: this.items_per_page,
-                                };
-                                localStorage.setItem("posawesome_item_selector_settings", JSON.stringify(settings));
-                        } catch (e) {
-                                console.error("Failed to save item selector settings:", e);
-                        }
-                },
-                loadItemSettings() {
-                        try {
-                                const saved = localStorage.getItem("posawesome_item_selector_settings");
-                                if (saved) {
-                                        const opts = JSON.parse(saved);
-                                        if (typeof opts.hide_qty_decimals === "boolean") {
-                                                this.hide_qty_decimals = opts.hide_qty_decimals;
-                                        }
-                                        if (typeof opts.hide_zero_rate_items === "boolean") {
-                                                this.hide_zero_rate_items = opts.hide_zero_rate_items;
-                                        }
-                                        if (typeof opts.enable_custom_items_per_page === "boolean") {
-                                                this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
-                                        }
-                                        if (typeof opts.items_per_page === "number") {
-                                                this.items_per_page = opts.items_per_page;
-                                                this.itemsPerPage = this.items_per_page;
-                                        }
-                                }
-                        } catch (e) {
-                                console.error("Failed to load item selector settings:", e);
-                        }
-                },
+		saveItemSettings() {
+			try {
+				const settings = {
+					hide_qty_decimals: this.hide_qty_decimals,
+					hide_zero_rate_items: this.hide_zero_rate_items,
+					enable_custom_items_per_page: this.enable_custom_items_per_page,
+					items_per_page: this.items_per_page,
+				};
+				localStorage.setItem("posawesome_item_selector_settings", JSON.stringify(settings));
+			} catch (e) {
+				console.error("Failed to save item selector settings:", e);
+			}
+		},
+		loadItemSettings() {
+			try {
+				const saved = localStorage.getItem("posawesome_item_selector_settings");
+				if (saved) {
+					const opts = JSON.parse(saved);
+					if (typeof opts.hide_qty_decimals === "boolean") {
+						this.hide_qty_decimals = opts.hide_qty_decimals;
+					}
+					if (typeof opts.hide_zero_rate_items === "boolean") {
+						this.hide_zero_rate_items = opts.hide_zero_rate_items;
+					}
+					if (typeof opts.enable_custom_items_per_page === "boolean") {
+						this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
+					}
+					if (typeof opts.items_per_page === "number") {
+						this.items_per_page = opts.items_per_page;
+						this.itemsPerPage = this.items_per_page;
+					}
+				}
+			} catch (e) {
+				console.error("Failed to load item selector settings:", e);
+			}
+		},
 	},
 
 	computed: {
@@ -2043,7 +2299,21 @@ export default {
 		},
 	},
 
-	created: function () {
+	created() {
+		memoryInitPromise.then(async () => {
+			const profile = await ensurePosProfile();
+			if (profile) {
+				// Adjust page limit based on local storage setting
+				this.itemsPageLimit = profile.posa_local_storage ? 500 : 10000;
+				if (profile.posa_local_storage) {
+					this.loadVisibleItems(true);
+				} else {
+					await forceClearAllCache();
+					await this.get_items(true);
+				}
+			}
+		});
+
 		this.loadItemSettings();
 		if (typeof Worker !== "undefined") {
 			try {
@@ -2068,10 +2338,20 @@ export default {
 		this.$nextTick(function () {});
 		this.eventBus.on("register_pos_profile", async (data) => {
 			await initPromise;
+			await memoryInitPromise;
 			await checkDbHealth();
 			this.pos_profile = data.pos_profile;
-			if (this.pos_profile.posa_force_reload_items && !this.pos_profile.posa_smart_reload_mode) {
+			// Update page limit whenever profile is registered
+			this.itemsPageLimit = this.pos_profile.posa_local_storage ? 500 : 10000;
+			if (!this.pos_profile.posa_local_storage) {
+				await forceClearAllCache();
 				await this.get_items(true);
+			} else if (this.pos_profile.posa_force_reload_items && !this.pos_profile.posa_smart_reload_mode) {
+				if (!isOffline()) {
+					await this.get_items(true);
+				} else {
+					await this.get_items();
+				}
 			} else {
 				await this.get_items();
 			}
@@ -2099,7 +2379,19 @@ export default {
 		// Manually trigger a full item reload when requested
 		this.eventBus.on("force_reload_items", async () => {
 			this.items_loaded = false;
-			await this.get_items(true);
+			if (!isOffline()) {
+				if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+					await forceClearAllCache();
+				}
+				await this.get_items(true);
+			} else {
+				if (this.pos_profile && !this.pos_profile.posa_local_storage) {
+					await forceClearAllCache();
+					await this.get_items(true);
+				} else {
+					await this.get_items();
+				}
+			}
 		});
 
 		// Refresh item quantities when connection to server is restored
@@ -2134,10 +2426,16 @@ export default {
 		if (!this.pos_profile || Object.keys(this.pos_profile).length === 0) {
 			this.pos_profile = profile || {};
 		}
+		// Apply correct page limit based on local storage option
+		this.itemsPageLimit = this.pos_profile.posa_local_storage ? 500 : 10000;
+		if (this.pos_profile && !this.pos_profile.posa_local_storage && !this.items_loaded) {
+			await forceClearAllCache();
+			await this.get_items(true);
+		}
 		this.scan_barcoud();
-               // Apply the configured items per page on mount
-               this.itemsPerPage = this.items_per_page;
-       },
+		// Apply the configured items per page on mount
+		this.itemsPerPage = this.items_per_page;
+	},
 
 	beforeUnmount() {
 		// Clear interval when component is destroyed

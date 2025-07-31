@@ -1,4 +1,4 @@
-import { memory, resetOfflineState, setLastSyncTotals, MAX_QUEUE_ITEMS } from "./cache.js";
+import { memory, resetOfflineState, setLastSyncTotals, MAX_QUEUE_ITEMS, reduceCacheUsage } from "./cache.js";
 import { persist } from "./core.js";
 import { updateLocalStock } from "./stock.js";
 
@@ -249,6 +249,9 @@ export async function syncOfflineInvoices() {
 			persist("offline_invoices", memory.offline_invoices);
 		} else {
 			clearOfflineInvoices();
+			if (synced > 0 && drafted === 0) {
+				reduceCacheUsage();
+			}
 		}
 
 		const totals = { pending: pendingLeft, synced, drafted };

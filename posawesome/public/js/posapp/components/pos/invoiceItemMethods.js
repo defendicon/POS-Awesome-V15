@@ -1578,9 +1578,9 @@ export default {
 	},
 
 	// Apply cached price list rates to existing invoice items
-	apply_cached_price_list(price_list) {
-		const cached = getCachedPriceListItems(price_list);
-		if (!cached) {
+	async apply_cached_price_list(price_list) {
+		const cached = await getCachedPriceListItems(price_list);
+		if (!Array.isArray(cached) || !cached.length) {
 			return;
 		}
 

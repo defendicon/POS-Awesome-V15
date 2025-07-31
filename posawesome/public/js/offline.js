@@ -27,7 +27,6 @@ const memory = {
 	customer_balance_cache: {},
 	local_stock_cache: {},
 	stock_cache_ready: false, // New flag to track if stock cache is initialized
-	items_storage: [],
 	customer_storage: [],
 	pos_opening_storage: null,
 	opening_dialog_storage: null,
@@ -45,33 +44,38 @@ let invoiceSyncInProgress = false;
 // Modify initializeStockCache function to set the flag
 export async function initializeStockCache(items, pos_profile) {
 	try {
-		// If stock cache is already initialized, skip
-		if (memory.stock_cache_ready && Object.keys(memory.local_stock_cache || {}).length > 0) {
-			console.debug("Stock cache already initialized, skipping");
+		const existingCache = memory.local_stock_cache || {};
+		const missingItems = Array.isArray(items) ? items.filter((it) => !existingCache[it.item_code]) : [];
+
+		if (missingItems.length === 0) {
+			if (!memory.stock_cache_ready) {
+				memory.stock_cache_ready = true;
+				persist("stock_cache_ready");
+			}
+			console.debug("Stock cache already initialized");
+			console.info("Stock cache initialized with", Object.keys(existingCache).length, "items");
 			return true;
 		}
 
-		console.info("Initializing stock cache for", items.length, "items");
+		console.info("Initializing stock cache for", missingItems.length, "new items");
 
-		const updatedItems = await fetchItemStockQuantities(items, pos_profile);
+		const updatedItems = await fetchItemStockQuantities(missingItems, pos_profile);
 
 		if (updatedItems && updatedItems.length > 0) {
-			const stockCache = {};
-
 			updatedItems.forEach((item) => {
 				if (item.actual_qty !== undefined) {
-					stockCache[item.item_code] = {
+					existingCache[item.item_code] = {
 						actual_qty: item.actual_qty,
 						last_updated: new Date().toISOString(),
 					};
 				}
 			});
 
-			memory.local_stock_cache = stockCache;
-			memory.stock_cache_ready = true; // Set flag to true
+			memory.local_stock_cache = existingCache;
+			memory.stock_cache_ready = true;
 			persist("local_stock_cache");
-			persist("stock_cache_ready"); // Persist the flag
-			console.info("Stock cache initialized with", Object.keys(stockCache).length, "items");
+			persist("stock_cache_ready");
+			console.info("Stock cache initialized with", Object.keys(existingCache).length, "items");
 			return true;
 		}
 		return false;
@@ -164,6 +168,27 @@ export function resetOfflineState() {
 	persist("offline_customers");
 	persist("offline_payments");
 	persist("pos_last_sync_totals");
+}
+
+export function reduceCacheUsage() {
+	memory.price_list_cache = {};
+	memory.item_details_cache = {};
+	memory.uom_cache = {};
+	memory.offers_cache = [];
+	memory.customer_balance_cache = {};
+	memory.local_stock_cache = {};
+	memory.stock_cache_ready = false;
+	memory.coupons_cache = {};
+	memory.item_groups_cache = [];
+	persist("price_list_cache");
+	persist("item_details_cache");
+	persist("uom_cache");
+	persist("offers_cache");
+	persist("customer_balance_cache");
+	persist("local_stock_cache");
+	persist("stock_cache_ready");
+	persist("coupons_cache");
+	persist("item_groups_cache");
 }
 
 // Add new validation function
@@ -468,6 +493,9 @@ export async function syncOfflineInvoices() {
 			persist("offline_invoices");
 		} else {
 			clearOfflineInvoices();
+			if (synced > 0 && drafted === 0) {
+				reduceCacheUsage();
+			}
 		}
 
 		const totals = { pending: pendingLeft, synced, drafted };
@@ -925,18 +953,58 @@ export function updateLocalStockWithActualQuantities(invoiceItems, serverItems) 
 }
 
 // --- Generic getters and setters for cached data ----------------------------
-export function getItemsStorage() {
-	return memory.items_storage || [];
+export async function getStoredItems() {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		return await db.table("items").toArray();
+	} catch (e) {
+		console.error("Failed to get stored items", e);
+		return [];
+	}
 }
 
-export function setItemsStorage(items) {
+export async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0 } = {}) {
 	try {
-		memory.items_storage = JSON.parse(JSON.stringify(items));
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		let collection = db.table("items");
+		if (itemGroup && itemGroup.toLowerCase() !== "all") {
+			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
+		}
+		if (search) {
+			const term = search.toLowerCase();
+			collection = collection.filter(
+				(it) =>
+					(it.item_name && it.item_name.toLowerCase().includes(term)) ||
+					(it.item_code && it.item_code.toLowerCase().includes(term)),
+			);
+		}
+		return await collection.offset(offset).limit(limit).toArray();
 	} catch (e) {
-		console.error("Failed to serialize items for storage", e);
-		memory.items_storage = [];
+		console.error("Failed to query stored items", e);
+		return [];
 	}
-	persist("items_storage");
+}
+
+export async function saveItems(items) {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		await db.table("items").bulkPut(items);
+	} catch (e) {
+		console.error("Failed to save items", e);
+	}
+}
+
+export async function clearStoredItems() {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		await db.table("items").clear();
+	} catch (e) {
+		console.error("Failed to clear stored items", e);
+	}
 }
 
 export function getCustomerStorage() {
@@ -944,7 +1012,19 @@ export function getCustomerStorage() {
 }
 
 export function setCustomerStorage(customers) {
-	memory.customer_storage = customers;
+	try {
+		memory.customer_storage = customers.map((c) => ({
+			name: c.name,
+			customer_name: c.customer_name,
+			mobile_no: c.mobile_no,
+			email_id: c.email_id,
+			primary_address: c.primary_address,
+			tax_id: c.tax_id,
+		}));
+	} catch (e) {
+		console.error("Failed to trim customers for storage", e);
+		memory.customer_storage = [];
+	}
 	persist("customer_storage");
 }
 
@@ -1046,7 +1126,6 @@ export async function clearAllCache() {
 	memory.customer_balance_cache = {};
 	memory.local_stock_cache = {};
 	memory.stock_cache_ready = false;
-	memory.items_storage = [];
 	memory.customer_storage = [];
 	memory.pos_opening_storage = null;
 	memory.opening_dialog_storage = null;
@@ -1076,7 +1155,6 @@ export async function forceClearAllCache() {
 	memory.customer_balance_cache = {};
 	memory.local_stock_cache = {};
 	memory.stock_cache_ready = false;
-	memory.items_storage = [];
 	memory.customer_storage = [];
 	memory.pos_opening_storage = null;
 	memory.opening_dialog_storage = null;

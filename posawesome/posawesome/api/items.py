@@ -64,6 +64,7 @@ def get_items(
 	customer=None,
 	limit=None,
 	offset=None,
+	modified_after=None,
 ):
 	_pos_profile = json.loads(pos_profile)
 	use_price_list = _pos_profile.get("posa_use_server_cache")
@@ -77,15 +78,17 @@ def get_items(
 		customer=None,
 		limit=None,
 		offset=None,
+		modified_after=None,
 	):
 		return _get_items(
-			pos_profile,
-			price_list,
-			item_group,
-			search_value,
-			customer,
-			limit,
-			offset,
+		        pos_profile,
+		        price_list,
+		        item_group,
+		        search_value,
+		        customer,
+		        limit,
+		        offset,
+		        modified_after,
 		)
 
 	def _get_items(
@@ -96,6 +99,7 @@ def get_items(
 		customer=None,
 		limit=None,
 		offset=None,
+		modified_after=None,
 	):
 		pos_profile = json.loads(pos_profile)
 		condition = ""
@@ -173,6 +177,8 @@ def get_items(
 
 		# Build ORM filters
 		filters = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
+		if modified_after:
+		        filters["modified"] = [">", modified_after]
 
 		# Add item group filter
 		item_groups = get_item_groups(pos_profile.get("name"))
@@ -358,23 +364,25 @@ def get_items(
 
 	if use_price_list:
 		return __get_items(
-			pos_profile,
-			price_list,
-			item_group,
-			search_value,
-			customer,
-			limit,
-			offset,
+		        pos_profile,
+		        price_list,
+		        item_group,
+		        search_value,
+		        customer,
+		        limit,
+		        offset,
+		        modified_after,
 		)
 	else:
 		return _get_items(
-			pos_profile,
-			price_list,
-			item_group,
-			search_value,
-			customer,
-			limit,
-			offset,
+		        pos_profile,
+		        price_list,
+		        item_group,
+		        search_value,
+		        customer,
+		        limit,
+		        offset,
+		        modified_after,
 		)
 
 
@@ -482,12 +490,15 @@ def get_items_details(pos_profile, items_data, price_list=None):
 		for item in items_data:
 			item_code = item.get("item_code")
 			if item_code:
+				if item.get("has_variants"):
+					# Skip template items to avoid ValidationError
+					continue
 				item_detail = get_item_detail(
 					json.dumps(item),
-					warehouse=warehouse,
-					price_list=price_list or pos_profile.get("selling_price_list"),
-					company=company,
-				)
+						warehouse=warehouse,
+						price_list=price_list or pos_profile.get("selling_price_list"),
+						company=company,
+					)
 				if item_detail:
 					result.append(item_detail)
 

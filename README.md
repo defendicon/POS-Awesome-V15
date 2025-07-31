@@ -27,7 +27,7 @@ After switching branches or pulling latest changes:
    Customers can be invoiced in different currencies.
    Exchange Rate is fetched automatically based on selected currency. When a price list has its own exchange rate set, POS Awesome uses that rate and falls back to the standard ERPNext rate otherwise.
    Invoices made with posawesome display Grand Total in both base and selected currency in erpnext.
-3. Supports offline mode for creating invoices and customers, saves data locally with stock validation, and syncs automatically when reconnected. If **Allow Negative Stock** is enabled in Stock Settings, offline invoices can still be saved even when quantities are below zero.
+3. Supports offline mode for creating invoices and customers, saves data locally with stock validation, and syncs automatically when reconnected. If **Allow Negative Stock** is enabled in Stock Settings, offline invoices can still be saved even when quantities are below zero. **Enable browser local storage from settings and also enable the server cache for offline mode.**
 4. User-friendly and provides a good user experience and speed of use
 5. The cashier can either use list view or card view during sales transactions. Card view shows the images of the items
 6. Supports enqueue invoice submission after printing the receipt for faster processing

@@ -85,6 +85,8 @@ export default {
 			payment: false,
 			showOffers: false,
 			coupons: false,
+			itemsLoaded: false,
+			customersLoaded: false,
 		};
 	},
 
@@ -113,6 +115,11 @@ export default {
 			frappe.db.get_doc("POS Settings", undefined).then((doc) => {
 				this.eventBus.emit("set_pos_settings", doc);
 			});
+		},
+		checkLoadingComplete() {
+			if (this.itemsLoaded && this.customersLoaded) {
+				console.info("Loading completed");
+			}
 		},
 	},
 
@@ -158,6 +165,15 @@ export default {
 			this.eventBus.on("submit_closing_pos", (data) => {
 				this.submit_closing_pos(data);
 			});
+
+			this.eventBus.on("items_loaded", () => {
+				this.itemsLoaded = true;
+				this.checkLoadingComplete();
+			});
+			this.eventBus.on("customers_loaded", () => {
+				this.customersLoaded = true;
+				this.checkLoadingComplete();
+			});
 		});
 	},
 	beforeUnmount() {
@@ -169,6 +185,8 @@ export default {
 		this.eventBus.off("show_coupons");
 		this.eventBus.off("open_closing_dialog");
 		this.eventBus.off("submit_closing_pos");
+		this.eventBus.off("items_loaded");
+		this.eventBus.off("customers_loaded");
 	},
 	// In the created() or mounted() lifecycle hook
 	created() {
@@ -181,7 +199,7 @@ export default {
 <style scoped>
 .dynamic-container {
 	/* add space for the navbar with better spacing */
-	padding-top: calc(25px + var(--dynamic-lg));
+	/*padding-top: calc(25px + var(--dynamic-lg));*/
 	/* Navbar height (25px) + larger spacing */
 	transition: all 0.3s ease;
 }
