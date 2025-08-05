@@ -32,11 +32,11 @@
 		<!-- Cache Usage Meter -->
 		<slot name="cache-usage-meter"></slot>
 
-    <!-- Database Usage Gadget -->
-    <slot name="db-usage-gadget"></slot>
+		<!-- Database Usage Gadget -->
+		<slot name="db-usage-gadget"></slot>
 
-    <!-- CPU Load Gadget -->
-    <slot name="cpu-gadget"></slot>
+		<!-- CPU Load Gadget -->
+		<slot name="cpu-gadget"></slot>
 
 		<div class="profile-section mx-1">
 			<v-chip color="primary" variant="outlined" class="profile-chip">
@@ -189,7 +189,7 @@ export default {
 }
 
 /* Dark theme adjustments */
-:deep(.dark-theme) .navbar-enhanced,
+:deep([data-theme="dark"]) .navbar-enhanced,
 :deep(.v-theme--dark) .navbar-enhanced {
 	background-image: linear-gradient(
 		135deg,
@@ -201,27 +201,27 @@ export default {
 	color: var(--text-primary, #ffffff) !important;
 }
 
-:deep(.dark-theme) .navbar-enhanced:hover,
+:deep([data-theme="dark"]) .navbar-enhanced:hover,
 :deep(.v-theme--dark) .navbar-enhanced:hover {
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
-:deep(.dark-theme) .nav-icon,
+:deep([data-theme="dark"]) .nav-icon,
 :deep(.v-theme--dark) .nav-icon {
 	color: var(--text-primary, #ffffff) !important;
 }
 
-:deep(.dark-theme) .nav-icon:hover,
+:deep([data-theme="dark"]) .nav-icon:hover,
 :deep(.v-theme--dark) .nav-icon:hover {
 	background-color: rgba(144, 202, 249, 0.1);
 }
 
-:deep(.dark-theme) .navbar-title,
+:deep([data-theme="dark"]) .navbar-title,
 :deep(.v-theme--dark) .navbar-title {
 	color: var(--text-primary, #ffffff) !important;
 }
 
-:deep(.dark-theme) .profile-chip,
+:deep([data-theme="dark"]) .profile-chip,
 :deep(.v-theme--dark) .profile-chip {
 	background-color: var(--surface-secondary, #2d2d2d) !important;
 	color: var(--text-primary, #ffffff) !important;

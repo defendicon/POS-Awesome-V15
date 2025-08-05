@@ -21,7 +21,13 @@
 			hide-default-footer
 			:single-expand="true"
 			:header-props="headerProps"
-                        @update:expanded="val => $emit('update:expanded', val.map(v => typeof v === 'object' ? v.posa_row_id : v))"
+			@update:expanded="
+				(val) =>
+					$emit(
+						'update:expanded',
+						val.map((v) => (typeof v === 'object' ? v.posa_row_id : v)),
+					)
+			"
 			:search="itemSearch"
 		>
 			<!-- Quantity column -->
@@ -513,7 +519,7 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _ from "lodash";
 export default {
 	name: "ItemsTable",
 	props: {
@@ -584,9 +590,9 @@ export default {
 			}
 		},
 
-		onDragEnterFromSelector(event) {
-			this.$emit("show-drop-feedback", true);
-		},
+                onDragEnterFromSelector() {
+                        this.$emit("show-drop-feedback", true);
+                },
 
 		onDragLeaveFromSelector(event) {
 			// Only hide feedback if leaving the entire table area
@@ -612,10 +618,10 @@ export default {
 		addItem(newItem) {
 			// Find a matching item (by item_code, uom, and rate)
 			const match = this.items.find(
-				item =>
+				(item) =>
 					item.item_code === newItem.item_code &&
 					item.uom === newItem.uom &&
-					item.rate === newItem.rate
+					item.rate === newItem.rate,
 			);
 			if (match) {
 				// If found, increment quantity
@@ -626,7 +632,7 @@ export default {
 				this.items.push({ ...newItem });
 			}
 		},
-		addItemDebounced: _.debounce(function(item) {
+		addItemDebounced: _.debounce(function (item) {
 			this.addItem(item);
 		}, 50),
 	},
@@ -668,8 +674,11 @@ export default {
 	letter-spacing: 0.5px;
 	padding: 12px 16px;
 	transition: background-color var(--transition-normal);
-	border-bottom: 2px solid var(--table-header-border);
-	background-color: var(--table-header-bg);
+        border-bottom: 2px solid var(--table-header-border);
+        background-color: var(
+                --table-header-bg,
+                var(--surface-secondary, #f5f5f5)
+        );
 	color: var(--table-header-text);
 	position: sticky;
 	top: 0;
@@ -727,7 +736,7 @@ export default {
 	border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-:deep(.dark-theme) .action-panel,
+:deep([data-theme="dark"]) .action-panel,
 :deep(.v-theme--dark) .action-panel {
 	background-color: rgba(255, 255, 255, 0.05);
 	border: 1px solid rgba(255, 255, 255, 0.1);
@@ -805,40 +814,40 @@ export default {
 }
 
 /* Dark theme button styles */
-:deep(.dark-theme) .item-action-btn.delete-btn,
+:deep([data-theme="dark"]) .item-action-btn.delete-btn,
 :deep(.v-theme--dark) .item-action-btn.delete-btn {
 	background: linear-gradient(145deg, #4a1515, #3a1010) !important;
 	color: #ff8a80 !important;
 }
 
-:deep(.dark-theme) .item-action-btn.delete-btn:hover,
+:deep([data-theme="dark"]) .item-action-btn.delete-btn:hover,
 :deep(.v-theme--dark) .item-action-btn.delete-btn:hover {
 	background: linear-gradient(145deg, #5a1a1a, #4a1515) !important;
 }
 
-:deep(.dark-theme) .item-action-btn.minus-btn,
+:deep([data-theme="dark"]) .item-action-btn.minus-btn,
 :deep(.v-theme--dark) .item-action-btn.minus-btn {
 	background: linear-gradient(145deg, #4a3c10, #3a2e0c) !important;
 	color: #ffe082 !important;
 }
 
-:deep(.dark-theme) .item-action-btn.minus-btn:hover,
+:deep([data-theme="dark"]) .item-action-btn.minus-btn:hover,
 :deep(.v-theme--dark) .item-action-btn.minus-btn:hover {
 	background: linear-gradient(145deg, #5a4a14, #4a3c10) !important;
 }
 
-:deep(.dark-theme) .item-action-btn.plus-btn,
+:deep([data-theme="dark"]) .item-action-btn.plus-btn,
 :deep(.v-theme--dark) .item-action-btn.plus-btn {
 	background: linear-gradient(145deg, #1b4620, #133419) !important;
 	color: #a5d6a7 !important;
 }
 
-:deep(.dark-theme) .item-action-btn.plus-btn:hover,
+:deep([data-theme="dark"]) .item-action-btn.plus-btn:hover,
 :deep(.v-theme--dark) .item-action-btn.plus-btn:hover {
 	background: linear-gradient(145deg, #235828, #1b4620) !important;
 }
 
-:deep(.dark-theme) .item-action-btn .v-icon,
+:deep([data-theme="dark"]) .item-action-btn .v-icon,
 :deep(.v-theme--dark) .item-action-btn .v-icon {
 	opacity: 0.9;
 }
@@ -870,7 +879,7 @@ export default {
 	border-top: 1px dashed rgba(0, 0, 0, 0.1);
 }
 
-:deep(.dark-theme) .form-section,
+:deep([data-theme="dark"]) .form-section,
 :deep(.v-theme--dark) .form-section {
 	border-top: 1px dashed rgba(255, 255, 255, 0.1);
 }
@@ -903,7 +912,7 @@ export default {
 	background-color: rgba(0, 0, 0, 0.02);
 }
 
-:deep(.dark-theme) .draggable-row:hover,
+:deep([data-theme="dark"]) .draggable-row:hover,
 :deep(.v-theme--dark) .draggable-row:hover {
 	background-color: rgba(255, 255, 255, 0.05);
 }
@@ -944,12 +953,12 @@ export default {
 }
 
 /* Dark theme drag styles */
-:deep(.dark-theme) .drag-source,
+:deep([data-theme="dark"]) .drag-source,
 :deep(.v-theme--dark) .drag-source {
 	background-color: rgba(144, 202, 249, 0.1) !important;
 }
 
-:deep(.dark-theme) .drag-over,
+:deep([data-theme="dark"]) .drag-over,
 :deep(.v-theme--dark) .drag-over {
 	background-color: rgba(144, 202, 249, 0.2) !important;
 	border-top: 2px solid #90caf9;

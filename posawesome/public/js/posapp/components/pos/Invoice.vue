@@ -1294,7 +1294,7 @@ export default {
 	transform: translateY(-100%);
 }
 
-:deep(.dark-theme) .column-selector-container,
+:deep([data-theme="dark"]) .column-selector-container,
 :deep(.v-theme--dark) .column-selector-container {
 	background-color: #1e1e1e;
 }

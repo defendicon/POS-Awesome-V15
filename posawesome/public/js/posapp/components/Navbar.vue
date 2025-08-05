@@ -31,10 +31,10 @@
 				/>
 			</template>
 
-      <!-- Slot for CPU gadget -->
-      <template #cpu-gadget>
-        <ServerUsageGadget />
-      </template>
+			<!-- Slot for CPU gadget -->
+			<template #cpu-gadget>
+				<ServerUsageGadget />
+			</template>
 
 			<!-- Slot for Database Usage Gadget -->
 			<template #db-usage-gadget>
@@ -349,7 +349,7 @@ nav {
 }
 
 /* Dark theme adjustments */
-:deep(.dark-theme) nav,
+:deep([data-theme="dark"]) nav,
 :deep(.v-theme--dark) nav {
 	background-color: var(--background) !important;
 }

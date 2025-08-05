@@ -2,17 +2,17 @@
 	<div :style="responsiveStyles">
 		<v-card
 			:class="[
-				'selection mx-auto my-0 py-0 mt-3 dynamic-card resizable',
+                               'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable',
 				isDarkTheme ? '' : 'bg-grey-lighten-5',
 			]"
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
-				backgroundColor: isDarkTheme ? '#121212' : '',
-				resize: 'vertical',
-				overflow: 'auto',
-			}"
-		>
+                               backgroundColor: isDarkTheme ? '#121212' : '',
+                               resize: 'vertical',
+                                overflow: items_view === 'card' ? 'hidden' : 'auto',
+                        }"
+                >
 			<v-progress-linear
 				:active="loading"
 				:indeterminate="loading"
@@ -25,161 +25,168 @@
 			</v-overlay>
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
-				<v-row class="items">
-					<v-col class="pb-0">
-						<v-text-field
-							density="compact"
-							clearable
-							autofocus
-							variant="solo"
-							color="primary"
-							:label="frappe._('Search Items')"
-							hint="Search by item code, serial number, batch no or barcode"
-							hide-details
-							v-model="debounce_search"
-							@keydown.esc="esc_event"
-							@keydown.enter="search_onchange"
-							@click:clear="clearSearch"
-							prepend-inner-icon="mdi-magnify"
-							@focus="handleItemSearchFocus"
-							ref="debounce_search"
-						>
-							<!-- Add camera scan button if enabled -->
-							<template v-slot:append-inner v-if="pos_profile.posa_enable_camera_scanning">
+				<div class="sticky-header">
+					<v-row class="items">
+						<v-col class="pb-0">
+							<v-text-field
+								density="compact"
+								clearable
+								autofocus
+								variant="solo"
+								color="primary"
+								:label="frappe._('Search Items')"
+								hint="Search by item code, serial number, batch no or barcode"
+								hide-details
+								v-model="debounce_search"
+								@keydown.esc="esc_event"
+								@keydown.enter="search_onchange"
+								@click:clear="clearSearch"
+								prepend-inner-icon="mdi-magnify"
+								@focus="handleItemSearchFocus"
+								ref="debounce_search"
+							>
+								<!-- Add camera scan button if enabled -->
+								<template v-slot:append-inner v-if="pos_profile.posa_enable_camera_scanning">
+									<v-btn
+										icon="mdi-camera"
+										size="small"
+										color="primary"
+										variant="text"
+										@click="startCameraScanning"
+										:title="__('Scan with Camera')"
+									>
+									</v-btn>
+								</template>
+							</v-text-field>
+						</v-col>
+						<v-col cols="3" class="pb-0" v-if="pos_profile.posa_input_qty">
+							<v-text-field
+								density="compact"
+								variant="solo"
+								color="primary"
+								:label="frappe._('QTY')"
+								hide-details
+								v-model="debounce_qty"
+								type="text"
+								@keydown.enter="enter_event"
+								@keydown.esc="esc_event"
+								@focus="clearQty"
+							></v-text-field>
+						</v-col>
+						<v-col cols="2" class="pb-0" v-if="pos_profile.posa_new_line">
+							<v-checkbox
+								v-model="new_line"
+								color="accent"
+								value="true"
+								label="NLine"
+								density="default"
+								hide-details
+							></v-checkbox>
+						</v-col>
+						<v-col cols="12" class="dynamic-margin-xs">
+							<div class="settings-container">
 								<v-btn
-									icon="mdi-camera"
-									size="small"
-									color="primary"
+									density="compact"
 									variant="text"
-									@click="startCameraScanning"
-									:title="__('Scan with Camera')"
+									color="primary"
+									prepend-icon="mdi-cog-outline"
+									@click="toggleItemSettings"
+									class="settings-btn"
 								>
+									{{ __("Settings") }}
 								</v-btn>
-							</template>
-						</v-text-field>
-					</v-col>
-					<v-col cols="3" class="pb-0" v-if="pos_profile.posa_input_qty">
-						<v-text-field
-							density="compact"
-							variant="solo"
-							color="primary"
-							:label="frappe._('QTY')"
-							hide-details
-							v-model="debounce_qty"
-							type="text"
-							@keydown.enter="enter_event"
-							@keydown.esc="esc_event"
-							@focus="clearQty"
-						></v-text-field>
-					</v-col>
-					<v-col cols="2" class="pb-0" v-if="pos_profile.posa_new_line">
-						<v-checkbox
-							v-model="new_line"
-							color="accent"
-							value="true"
-							label="NLine"
-							density="default"
-							hide-details
-						></v-checkbox>
-					</v-col>
-					<v-col cols="12" class="dynamic-margin-xs">
-						<div class="settings-container">
-							<v-btn
-								density="compact"
-								variant="text"
-								color="primary"
-								prepend-icon="mdi-cog-outline"
-								@click="toggleItemSettings"
-								class="settings-btn"
-							>
-								{{ __("Settings") }}
-							</v-btn>
-							<v-spacer></v-spacer>
-							<v-btn
-								density="compact"
-								variant="text"
-								color="primary"
-								prepend-icon="mdi-refresh"
-								@click="forceReloadItems"
-								class="settings-btn"
-							>
-								{{ __("Reload Items") }}
-							</v-btn>
+								<v-spacer></v-spacer>
+								<v-btn
+									density="compact"
+									variant="text"
+									color="primary"
+									prepend-icon="mdi-refresh"
+									@click="forceReloadItems"
+									class="settings-btn"
+								>
+									{{ __("Reload Items") }}
+								</v-btn>
 
-							<v-dialog v-model="show_item_settings" max-width="400px">
-								<v-card>
-									<v-card-title class="text-h6 pa-4 d-flex align-center">
-										<span>{{ __("Item Selector Settings") }}</span>
-										<v-spacer></v-spacer>
-										<v-btn
-											icon="mdi-close"
-											variant="text"
-											density="compact"
-											@click="show_item_settings = false"
-										></v-btn>
-									</v-card-title>
-									<v-divider></v-divider>
-									<v-card-text class="pa-4">
-										<v-switch
-											v-model="temp_hide_qty_decimals"
-											:label="__('Hide quantity decimals')"
-											hide-details
-											density="compact"
-											color="primary"
-											class="mb-2"
-										></v-switch>
-										<v-switch
-											v-model="temp_hide_zero_rate_items"
-											:label="__('Hide zero rated items')"
-											hide-details
-											density="compact"
-											color="primary"
-										></v-switch>
-										<v-switch
-											v-model="temp_enable_custom_items_per_page"
-											:label="__('Custom items per page')"
-											hide-details
-											density="compact"
-											color="primary"
-											class="mb-2"
-										>
-										</v-switch>
-										<v-text-field
-											v-if="temp_enable_custom_items_per_page"
-											v-model="temp_items_per_page"
-											type="number"
-											density="compact"
-											variant="outlined"
-											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											hide-details
-											:label="__('Items per page')"
-											class="mb-2 dark-field"
-										>
-										</v-text-field>
-									</v-card-text>
-									<v-card-actions class="pa-4 pt-0">
-										<v-btn color="error" variant="text" @click="cancelItemSettings">{{
-											__("Cancel")
-										}}</v-btn>
-										<v-spacer></v-spacer>
-										<v-btn color="primary" variant="tonal" @click="applyItemSettings">{{
-											__("Apply")
-										}}</v-btn>
-									</v-card-actions>
-								</v-card>
-							</v-dialog>
-						</div>
-					</v-col>
+								<v-dialog v-model="show_item_settings" max-width="400px">
+									<v-card>
+										<v-card-title class="text-h6 pa-4 d-flex align-center">
+											<span>{{ __("Item Selector Settings") }}</span>
+											<v-spacer></v-spacer>
+											<v-btn
+												icon="mdi-close"
+												variant="text"
+												density="compact"
+												@click="show_item_settings = false"
+											></v-btn>
+										</v-card-title>
+										<v-divider></v-divider>
+										<v-card-text class="pa-4">
+											<v-switch
+												v-model="temp_hide_qty_decimals"
+												:label="__('Hide quantity decimals')"
+												hide-details
+												density="compact"
+												color="primary"
+												class="mb-2"
+											></v-switch>
+											<v-switch
+												v-model="temp_hide_zero_rate_items"
+												:label="__('Hide zero rated items')"
+												hide-details
+												density="compact"
+												color="primary"
+											></v-switch>
+											<v-switch
+												v-model="temp_enable_custom_items_per_page"
+												:label="__('Custom items per page')"
+												hide-details
+												density="compact"
+												color="primary"
+												class="mb-2"
+											>
+											</v-switch>
+											<v-text-field
+												v-if="temp_enable_custom_items_per_page"
+												v-model="temp_items_per_page"
+												type="number"
+												density="compact"
+												variant="outlined"
+												color="primary"
+												:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+												hide-details
+												:label="__('Items per page')"
+												class="mb-2 dark-field"
+											>
+											</v-text-field>
+										</v-card-text>
+										<v-card-actions class="pa-4 pt-0">
+											<v-btn color="error" variant="text" @click="cancelItemSettings">{{
+												__("Cancel")
+											}}</v-btn>
+											<v-spacer></v-spacer>
+											<v-btn
+												color="primary"
+												variant="tonal"
+												@click="applyItemSettings"
+												>{{ __("Apply") }}</v-btn
+											>
+										</v-card-actions>
+									</v-card>
+								</v-dialog>
+							</div>
+						</v-col>
+					</v-row>
+				</div>
+				<v-row class="items">
 					<v-col cols="12" class="pt-0 mt-0">
-						<div
-							fluid
-							class="items-grid dynamic-scroll"
-							ref="itemsContainer"
-							v-if="items_view == 'card'"
-							:style="{ maxHeight: 'calc(100% - 80px)' }"
-							@scroll.passive="onCardScroll"
-						>
+                                               <div
+                                                       fluid
+                                                       class="items-grid dynamic-scroll"
+                                                       ref="itemsContainer"
+                                                       v-if="items_view == 'card'"
+                                                       :class="{ 'item-container': isOverflowing }"
+                                                       @scroll.passive="onCardScroll"
+                                               >
 							<v-card
 								v-for="item in filtered_items"
 								:key="item.item_code"
@@ -245,7 +252,7 @@
 								:headers="headers"
 								:items="filtered_items"
 								class="sleek-data-table overflow-y-auto"
-								:style="{ maxHeight: 'calc(100% - 80px)' }"
+								:style="{ height: 'calc(100% - 80px)' }"
 								item-key="item_code"
 								@click:row="click_item_row"
 								@scroll.passive="onListScroll"
@@ -359,6 +366,8 @@
 </template>
 
 <script type="module">
+/* eslint-disable no-unused-vars */
+/* global frappe, __, setLocalStockCache, flt, onScan, get_currency_symbol, current_items, wordCount */
 import format from "../../format";
 import _ from "lodash";
 import CameraScanner from "./CameraScanner.vue";
@@ -449,9 +458,10 @@ export default {
 		// effectively disables incremental loading.
 		itemsPageLimit: 10000,
 		// Track if the current search was triggered by a scanner
-		search_from_scanner: false,
-		currentPage: 0,
-	}),
+                search_from_scanner: false,
+                currentPage: 0,
+                isOverflowing: false,
+        }),
 
 	watch: {
 		customer: _.debounce(function () {
@@ -574,16 +584,17 @@ export default {
 				this.loadVisibleItems(true);
 			}
 		},
-		filtered_items(new_value, old_value) {
-			// Update item details if items changed
-			if (
-				this.pos_profile &&
-				!this.pos_profile.pose_use_limit_search &&
-				new_value.length !== old_value.length
-			) {
-				this.update_items_details(new_value);
-			}
-		},
+                filtered_items(new_value, old_value) {
+                        // Update item details if items changed
+                        if (
+                                this.pos_profile &&
+                                !this.pos_profile.pose_use_limit_search &&
+                                new_value.length !== old_value.length
+                        ) {
+                                this.update_items_details(new_value);
+                        }
+                        this.$nextTick(this.checkItemContainerOverflow);
+                },
 		// Automatically search and add item whenever the query changes
 		first_search: _.debounce(function (val) {
 			// Call without arguments so search_onchange treats it like an Enter key
@@ -607,12 +618,21 @@ export default {
 			// Maintain the configured items per page on resize
 			this.itemsPerPage = this.items_per_page;
 		},
-		items_loaded(val) {
-			if (val) {
-				this.eventBus.emit("items_loaded");
-			}
-		},
-	},
+                items_loaded(val) {
+                        if (val) {
+                                this.eventBus.emit("items_loaded");
+                        }
+                },
+                items_view() {
+                        this.$nextTick(() => {
+                                if (this.items_view === "card") {
+                                        this.checkItemContainerOverflow();
+                                } else {
+                                        this.isOverflowing = false;
+                                }
+                        });
+                },
+        },
 
 	methods: {
 		async loadVisibleItems(reset = false) {
@@ -643,16 +663,31 @@ export default {
 				this.loadVisibleItems();
 			}
 		},
-		onListScroll(event) {
-			const el = event.target;
-			if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
-				this.currentPage += 1;
-				this.loadVisibleItems();
-			}
-		},
-		refreshPricesForVisibleItems() {
-			const vm = this;
-			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
+                onListScroll(event) {
+                        const el = event.target;
+                        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+                                this.currentPage += 1;
+                                this.loadVisibleItems();
+                        }
+                },
+                checkItemContainerOverflow() {
+                        const el = this.$refs.itemsContainer;
+                        if (!el) {
+                                this.isOverflowing = false;
+                                return;
+                        }
+                        const maxHeight = parseFloat(
+                                getComputedStyle(el).getPropertyValue("--container-height")
+                        );
+                        if (isNaN(maxHeight)) {
+                                this.isOverflowing = false;
+                                return;
+                        }
+                        this.isOverflowing = el.scrollHeight > maxHeight;
+                },
+                refreshPricesForVisibleItems() {
+                        const vm = this;
+                        if (!vm.filtered_items || vm.filtered_items.length === 0) return;
 
 			vm.loading = true;
 
@@ -1391,7 +1426,7 @@ export default {
 				this.$refs.debounce_search.focus();
 			}
 		},
-		search_onchange: _.debounce(function (newSearchTerm) {
+		search_onchange: _.debounce(async function (newSearchTerm) {
 			const vm = this;
 
 			// Determine the actual query string and trim whitespace
@@ -1416,7 +1451,10 @@ export default {
 					}
 				}
 			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
-				vm.loadVisibleItems(true);
+				await vm.loadVisibleItems(true);
+				if (vm.search && vm.search.length >= 3) {
+					vm.enter_event();
+				}
 			} else {
 				// Save the current filtered items before search to maintain quantity data
 				const current_items = [...vm.filtered_items];
@@ -2432,10 +2470,12 @@ export default {
 			await forceClearAllCache();
 			await this.get_items(true);
 		}
-		this.scan_barcoud();
-		// Apply the configured items per page on mount
-		this.itemsPerPage = this.items_per_page;
-	},
+                this.scan_barcoud();
+                // Apply the configured items per page on mount
+                this.itemsPerPage = this.items_per_page;
+                window.addEventListener("resize", this.checkItemContainerOverflow);
+                this.$nextTick(this.checkItemContainerOverflow);
+        },
 
 	beforeUnmount() {
 		// Clear interval when component is destroyed
@@ -2473,28 +2513,42 @@ export default {
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
 		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
-		this.eventBus.off("force_reload_items");
-	},
+                this.eventBus.off("update_customer_price_list");
+                this.eventBus.off("update_customer");
+                this.eventBus.off("force_reload_items");
+                window.removeEventListener("resize", this.checkItemContainerOverflow);
+        },
 };
 </script>
 
 <style scoped>
-.dynamic-card {
-	composes: pos-card;
-}
-
+/* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
 	padding: var(--dynamic-sm);
 }
 
+.sticky-header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	background-color: var(--surface-primary, #fff);
+	box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+[data-theme="dark"] .sticky-header {
+	background-color: var(--surface-primary, #1e1e1e);
+}
+
 .dynamic-scroll {
-	transition: max-height var(--transition-normal);
-	padding-bottom: var(--dynamic-xs);
-	overflow-y: auto;
-	scrollbar-gutter: stable;
+       transition: max-height var(--transition-normal);
+       padding-bottom: var(--dynamic-xs);
+}
+
+.item-container {
+       max-height: var(--container-height);
+       overflow-y: auto;
+       scrollbar-gutter: stable;
 }
 
 .items-grid {
@@ -2503,15 +2557,16 @@ export default {
 	gap: var(--dynamic-sm);
 	align-items: start;
 	align-content: start;
+	justify-content: flex-start;
 }
 
 .dynamic-item-card {
-	margin: var(--dynamic-xs);
 	transition: var(--transition-normal);
 	background-color: var(--surface-secondary);
 	display: flex;
 	flex-direction: column;
 	height: auto;
+	max-width: 180px;
 	box-sizing: border-box;
 }
 

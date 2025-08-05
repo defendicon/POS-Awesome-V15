@@ -1222,31 +1222,31 @@ export default {
 
 <style>
 /* Dark mode input styling */
-:deep(.dark-theme) .dark-field,
+:deep([data-theme="dark"]) .dark-field,
 :deep(.v-theme--dark) .dark-field,
-::v-deep(.dark-theme) .dark-field,
+::v-deep([data-theme="dark"]) .dark-field,
 ::v-deep(.v-theme--dark) .dark-field {
 	background-color: #1e1e1e !important;
 }
 
-:deep(.dark-theme) .dark-field :deep(.v-field__input),
+:deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
 :deep(.v-theme--dark) .dark-field :deep(.v-field__input),
-:deep(.dark-theme) .dark-field :deep(input),
+:deep([data-theme="dark"]) .dark-field :deep(input),
 :deep(.v-theme--dark) .dark-field :deep(input),
-:deep(.dark-theme) .dark-field :deep(.v-label),
+:deep([data-theme="dark"]) .dark-field :deep(.v-label),
 :deep(.v-theme--dark) .dark-field :deep(.v-label),
-::v-deep(.dark-theme) .dark-field .v-field__input,
+::v-deep([data-theme="dark"]) .dark-field .v-field__input,
 ::v-deep(.v-theme--dark) .dark-field .v-field__input,
-::v-deep(.dark-theme) .dark-field input,
+::v-deep([data-theme="dark"]) .dark-field input,
 ::v-deep(.v-theme--dark) .dark-field input,
-::v-deep(.dark-theme) .dark-field .v-label,
+::v-deep([data-theme="dark"]) .dark-field .v-label,
 ::v-deep(.v-theme--dark) .dark-field .v-label {
 	color: #fff !important;
 }
 
-:deep(.dark-theme) .dark-field :deep(.v-field__overlay),
+:deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
 :deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
-::v-deep(.dark-theme) .dark-field .v-field__overlay,
+::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
 ::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
 	background-color: #1e1e1e !important;
 }

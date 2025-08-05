@@ -17,7 +17,7 @@
 						variant="outlined"
 						color="primary"
 						:label="frappe._('Coupon')"
-						bg-color="white"
+						:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 						hide-details
 						v-model="new_coupon"
 						class="coupon-input"
@@ -79,6 +79,7 @@
 </template>
 
 <script>
+/* global __, frappe */
 export default {
 	data: () => ({
 		loading: false,

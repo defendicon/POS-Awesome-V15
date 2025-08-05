@@ -233,14 +233,14 @@ export default {
 	background-color: #f5f5f5 !important;
 }
 
-:deep(.dark-theme) .cards,
-:deep(.dark-theme) .cards .v-card__underlay,
+:deep([data-theme="dark"]) .cards,
+:deep([data-theme="dark"]) .cards .v-card__underlay,
 :deep(.v-theme--dark) .cards,
 :deep(.v-theme--dark) .cards .v-card__underlay,
 :deep(.cards.v-theme--dark),
 :deep(.cards.v-theme--dark) .v-card__underlay,
-::v-deep(.dark-theme) .cards,
-::v-deep(.dark-theme) .cards .v-card__underlay,
+::v-deep([data-theme="dark"]) .cards,
+::v-deep([data-theme="dark"]) .cards .v-card__underlay,
 ::v-deep(.v-theme--dark) .cards,
 ::v-deep(.v-theme--dark) .cards .v-card__underlay,
 ::v-deep(.cards.v-theme--dark),

@@ -112,32 +112,32 @@
 }
 
 /* Dark mode styling */
-:deep(.dark-theme) .customer-autocomplete,
+:deep([data-theme="dark"]) .customer-autocomplete,
 :deep(.v-theme--dark) .customer-autocomplete,
-::v-deep(.dark-theme) .customer-autocomplete,
+::v-deep([data-theme="dark"]) .customer-autocomplete,
 ::v-deep(.v-theme--dark) .customer-autocomplete {
 	/* Use surface color for dark mode */
 	background-color: #1e1e1e !important;
 }
 
-:deep(.dark-theme) .customer-autocomplete :deep(.v-field__input),
+:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-field__input),
 :deep(.v-theme--dark) .customer-autocomplete :deep(.v-field__input),
-:deep(.dark-theme) .customer-autocomplete :deep(input),
+:deep([data-theme="dark"]) .customer-autocomplete :deep(input),
 :deep(.v-theme--dark) .customer-autocomplete :deep(input),
-:deep(.dark-theme) .customer-autocomplete :deep(.v-label),
+:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-label),
 :deep(.v-theme--dark) .customer-autocomplete :deep(.v-label),
-::v-deep(.dark-theme) .customer-autocomplete .v-field__input,
+::v-deep([data-theme="dark"]) .customer-autocomplete .v-field__input,
 ::v-deep(.v-theme--dark) .customer-autocomplete .v-field__input,
-::v-deep(.dark-theme) .customer-autocomplete input,
+::v-deep([data-theme="dark"]) .customer-autocomplete input,
 ::v-deep(.v-theme--dark) .customer-autocomplete input,
-::v-deep(.dark-theme) .customer-autocomplete .v-label,
+::v-deep([data-theme="dark"]) .customer-autocomplete .v-label,
 ::v-deep(.v-theme--dark) .customer-autocomplete .v-label {
 	color: #fff !important;
 }
 
-:deep(.dark-theme) .customer-autocomplete :deep(.v-field__overlay),
+:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-field__overlay),
 :deep(.v-theme--dark) .customer-autocomplete :deep(.v-field__overlay),
-::v-deep(.dark-theme) .customer-autocomplete .v-field__overlay,
+::v-deep([data-theme="dark"]) .customer-autocomplete .v-field__overlay,
 ::v-deep(.v-theme--dark) .customer-autocomplete .v-field__overlay {
 	background-color: #1e1e1e !important;
 }

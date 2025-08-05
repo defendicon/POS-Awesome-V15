@@ -1,7 +1,7 @@
 <template>
 	<v-row justify="center">
 		<v-dialog v-model="dialog" max-width="1000px" persistent>
-			<v-card class="offline-invoices-card">
+                       <v-card class="pos-card offline-invoices-card">
 				<!-- Enhanced White Header -->
 				<v-card-title class="offline-header pa-6">
 					<div class="header-content">
@@ -147,7 +147,8 @@
 					</v-btn>
 					<v-spacer></v-spacer>
 					<v-btn
-						theme="dark"
+						color="error"
+						variant="flat"
 						@click="dialog = false"
 						class="pos-action-btn cancel-action-btn"
 						size="large"
@@ -242,23 +243,19 @@ export default {
 </script>
 
 <style>
-/* Replace with standardized pos-card class */
+/* Uses standardized pos-card class directly in the template */
 .offline-invoices-card {
-	composes: pos-card;
-	border-radius: var(--border-radius-xl) !important;
+       border-radius: var(--border-radius-xl) !important;
+       overflow: hidden;
 }
 
-/* Remove redundant dark theme overrides */
-
-/* Keep specific header styling */
+/* Header styling */
 .offline-header {
 	background: var(--surface-primary);
 	color: var(--text-primary);
 	border-bottom: 1px solid var(--field-border);
 	position: relative;
 }
-
-/* Remove redundant dark theme overrides for header */
 
 .offline-header::before {
 	content: "";
@@ -270,7 +267,7 @@ export default {
 	background: linear-gradient(90deg, var(--primary-start) 0%, var(--primary-end) 100%);
 }
 
-/* Keep specific layout styles */
+/* Layout styles */
 .header-content {
 	display: flex;
 	align-items: center;
@@ -328,140 +325,18 @@ export default {
 	border-radius: var(--border-radius-md);
 }
 
-/* Enhanced White Background Styling */
-.offline-invoices-card {
-	border-radius: 20px !important;
-	overflow: hidden;
-	background: white;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Dark theme adjustments for the offline invoices card */
-:deep(.dark-theme) .offline-invoices-card,
-:deep(.v-theme--dark) .offline-invoices-card,
-::v-deep(.dark-theme) .offline-invoices-card,
-::v-deep(.v-theme--dark) .offline-invoices-card {
-	background-color: #1e1e1e !important;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Enhanced White Header */
-.offline-header {
-	background: white;
-	color: #1a1a1a;
-	border-bottom: 1px solid #f0f0f0;
-	position: relative;
-}
-
-/* Dark theme adjustments for the header */
-:deep(.dark-theme) .offline-header,
-:deep(.v-theme--dark) .offline-header,
-::v-deep(.dark-theme) .offline-header,
-::v-deep(.v-theme--dark) .offline-header {
-	background-color: #1e1e1e !important;
-	color: #fff !important;
-	border-bottom-color: #333 !important;
-}
-
-.offline-header::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 4px;
-	background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
-}
-
-.header-content {
-	display: flex;
-	align-items: center;
-	gap: 20px;
-}
-
-.header-icon-wrapper {
-	background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-	border-radius: 16px;
-	padding: 16px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	box-shadow: 0 4px 16px rgba(25, 118, 210, 0.3);
-}
-
-.header-icon {
-	color: white;
-}
-
-.header-text {
-	flex: 1;
-}
-
-.header-title {
-	margin: 0 0 4px 0;
-	font-weight: 700;
-	color: #1a1a1a;
-	font-size: 1.5rem;
-}
-
-.header-subtitle {
-	margin: 0 0 12px 0;
-	font-size: 14px;
-	color: #666;
-	font-weight: 400;
-}
-
-.header-stats {
-	display: flex;
-	gap: 8px;
-}
-
-.status-chip {
-	font-weight: 600;
-	border-radius: 12px;
-}
-
-.header-actions {
-	display: flex;
-	gap: 12px;
-}
-
-.sync-btn {
-	border-radius: 12px;
-	font-weight: 600;
-	text-transform: none;
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-}
-
 .header-divider {
-	border-color: #f0f0f0;
+	border-color: var(--field-border);
 }
 
-/* White Background Content */
+/* Content containers */
 .white-background {
-	background: white;
+	background: var(--surface-primary);
 }
 
-/* Dark theme for the card content */
-:deep(.dark-theme) .white-background,
-:deep(.v-theme--dark) .white-background,
-::v-deep(.dark-theme) .white-background,
-::v-deep(.v-theme--dark) .white-background {
-	background-color: #121212 !important;
-}
-
-/* Enhanced Empty State */
 .empty-state {
-	padding: 64px 24px;
-	background: white;
-}
-
-/* Dark theme for the empty state */
-:deep(.dark-theme) .empty-state,
-:deep(.v-theme--dark) .empty-state,
-::v-deep(.dark-theme) .empty-state,
-::v-deep(.v-theme--dark) .empty-state {
-	background-color: #121212 !important;
+	padding: var(--dynamic-xl) var(--dynamic-md);
+	background: var(--surface-primary);
 }
 
 .empty-icon-wrapper {
@@ -475,108 +350,50 @@ export default {
 	filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.3));
 }
 
-/* Table Container */
 .table-container {
-	background: white;
-}
-
-/* Dark theme for table container */
-:deep(.dark-theme) .table-container,
-:deep(.v-theme--dark) .table-container,
-::v-deep(.dark-theme) .table-container,
-::v-deep(.v-theme--dark) .table-container {
-	background-color: #121212 !important;
+	background: var(--surface-primary);
 }
 
 .table-header {
-	padding: 0 4px;
+	padding: 0 var(--dynamic-xs);
+	color: var(--text-secondary);
 }
 
-/* Dark theme for table header text */
-:deep(.dark-theme) .table-header,
-:deep(.v-theme--dark) .table-header,
-::v-deep(.dark-theme) .table-header,
-::v-deep(.v-theme--dark) .table-header {
-	color: #e0e0e0 !important;
-}
-
-/* Enhanced Table Styling */
 .white-table {
-	background: white;
-	border: 1px solid #f0f0f0;
-	border-radius: 16px;
+	background: var(--surface-primary);
+	border: 1px solid var(--field-border);
+	border-radius: var(--border-radius-lg);
 	overflow: hidden;
 }
 
-/* Dark mode adjustments for invoice table */
-:deep(.dark-theme) .white-table,
-:deep(.v-theme--dark) .white-table,
-::v-deep(.dark-theme) .white-table,
-::v-deep(.v-theme--dark) .white-table {
-	background-color: #121212 !important;
-}
-
-:deep(.dark-theme) .white-table :deep(th),
-:deep(.v-theme--dark) .white-table :deep(th),
-:deep(.dark-theme) .white-table :deep(td),
-:deep(.v-theme--dark) .white-table :deep(td),
-::v-deep(.dark-theme) .white-table th,
-::v-deep(.v-theme--dark) .white-table th,
-::v-deep(.dark-theme) .white-table td,
-::v-deep(.v-theme--dark) .white-table td {
-	color: #fff !important;
-	background-color: #1e1e1e !important;
-	border-color: #373737 !important;
-}
-
-/* Ensure table headings are dark themed */
-:deep(.dark-theme) .white-table :deep(thead th),
-:deep(.v-theme--dark) .white-table :deep(thead th),
-::v-deep(.dark-theme) .white-table thead th,
-::v-deep(.v-theme--dark) .white-table thead th {
-	background-color: #121212 !important;
-	color: #fff !important;
-}
-
-/* Ensure internal header content is also dark */
-:deep(.dark-theme) .white-table :deep(.v-data-table-header__content),
-:deep(.v-theme--dark) .white-table :deep(.v-data-table-header__content),
-::v-deep(.dark-theme) .white-table .v-data-table-header__content,
-::v-deep(.v-theme--dark) .white-table .v-data-table-header__content {
-	background-color: #121212 !important;
-}
-
-/* Ensure thead background is dark */
-:deep(.dark-theme) .white-table :deep(thead),
-:deep(.v-theme--dark) .white-table :deep(thead),
-::v-deep(.dark-theme) .white-table thead,
-::v-deep(.v-theme--dark) .white-table thead {
-	background-color: #121212 !important;
+.white-table :deep(th),
+.white-table :deep(td) {
+	border-bottom: 1px solid var(--field-border);
 }
 
 :deep(.v-data-table-header) {
-	background: #fafafa;
-	border-bottom: 2px solid #f0f0f0;
+	background: var(--table-header-bg);
+	border-bottom: 2px solid var(--field-border);
 }
 
 :deep(.v-data-table-header th) {
 	font-weight: 600;
-	color: #424242;
+	color: var(--table-header-text);
 	font-size: 0.875rem;
-	padding: 16px;
+	padding: var(--dynamic-md);
 }
 
 :deep(.v-data-table__tr) {
-	border-bottom: 1px solid #f5f5f5;
+	border-bottom: 1px solid var(--field-border);
 }
 
 :deep(.v-data-table__tr:hover) {
-	background-color: rgba(25, 118, 210, 0.02);
+	background-color: var(--table-row-hover);
 }
 
 :deep(.v-data-table__td) {
-	padding: 16px;
-	border-bottom: 1px solid #f5f5f5;
+	padding: var(--dynamic-md);
+	border-bottom: 1px solid var(--field-border);
 }
 
 /* Enhanced Cell Styling */
@@ -590,12 +407,12 @@ export default {
 }
 
 .date-chip {
-	border-radius: 8px;
+	border-radius: var(--border-radius-sm);
 	font-weight: 500;
 }
 
 .delete-btn {
-	border-radius: 8px;
+	border-radius: var(--border-radius-sm);
 	transition: all 0.2s ease;
 }
 
@@ -605,22 +422,22 @@ export default {
 }
 
 .close-btn {
-	border-radius: 8px;
+	border-radius: var(--border-radius-sm);
 	text-transform: none;
 	font-weight: 500;
-	padding: 8px 24px;
+	padding: var(--dynamic-sm) var(--dynamic-lg);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
 	.offline-header {
-		padding: 16px !important;
+		padding: var(--dynamic-md) !important;
 	}
 
 	.header-content {
 		flex-direction: column;
 		align-items: flex-start;
-		gap: 16px;
+		gap: var(--dynamic-md);
 	}
 
 	.header-actions {
@@ -633,47 +450,35 @@ export default {
 	}
 }
 
-/* Action Buttons - Updated to match standard */
+/* Action Buttons */
 .dialog-actions-container {
-	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-	border-top: 1px solid #e0e0e0 !important;
-	padding: 16px 24px !important;
-	gap: 12px !important;
-}
-
-/* Dark theme for dialog footer */
-:deep(.dark-theme) .dialog-actions-container,
-:deep(.v-theme--dark) .dialog-actions-container,
-::v-deep(.dark-theme) .dialog-actions-container,
-::v-deep(.v-theme--dark) .dialog-actions-container {
-	background: #1e1e1e !important;
-	border-top-color: #333 !important;
+	background: linear-gradient(135deg, var(--dialog-bg-start) 0%, var(--dialog-bg-end) 100%) !important;
+	border-top: 1px solid var(--dialog-border) !important;
+	padding: var(--dynamic-md) var(--dynamic-lg) !important;
+	gap: var(--dynamic-sm) !important;
 }
 
 .pos-action-btn {
-	border-radius: 12px !important;
+	border-radius: var(--border-radius-md) !important;
 	text-transform: none !important;
 	font-weight: 600 !important;
-	padding: 12px 32px !important;
+	padding: var(--dynamic-md) var(--dynamic-xl) !important;
 	min-width: 120px !important;
 	transition: all 0.3s ease !important;
-	color: white !important;
+	color: var(--text-primary) !important;
 }
 
-.pos-action-btn .v-icon {
-	color: white !important;
-}
-
+.pos-action-btn .v-icon,
 .pos-action-btn span {
-	color: white !important;
+	color: var(--text-primary) !important;
 }
 
 .cancel-action-btn {
-	background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
+	background: linear-gradient(135deg, var(--cancel-start) 0%, var(--cancel-end) 100%) !important;
 }
 
 .sync-action-btn {
-	background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+	background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%) !important;
 }
 
 .cancel-action-btn:hover,
@@ -697,6 +502,6 @@ export default {
 
 .pos-action-btn:disabled .v-icon,
 .pos-action-btn:disabled span {
-	color: white !important;
+	color: var(--text-primary) !important;
 }
 </style>

@@ -1,89 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Offline</title>
+		<style>
+			body {
+				font-family: "Roboto", Arial, sans-serif;
+				text-align: center;
+				padding: 2rem;
+				background-color: #f5f5f5;
+				color: #333;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				height: 100vh;
+				margin: 0;
+			}
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline</title>
-  <style>
-    body {
-      font-family: 'Roboto', Arial, sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background-color: #f5f5f5;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
+			.container {
+				background-color: white;
+				border-radius: 8px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+				padding: 2rem;
+				max-width: 500px;
+				width: 100%;
+			}
 
-    .container {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-      max-width: 500px;
-      width: 100%;
-    }
+			.icon {
+				font-size: 4rem;
+				color: #ff9800;
+				margin-bottom: 1rem;
+			}
 
-    .icon {
-      font-size: 4rem;
-      color: #ff9800;
-      margin-bottom: 1rem;
-    }
+			h1 {
+				color: #1976d2;
+				margin-bottom: 1rem;
+			}
 
-    h1 {
-      color: #1976d2;
-      margin-bottom: 1rem;
-    }
+			p {
+				margin-bottom: 1.5rem;
+				line-height: 1.5;
+			}
 
-    p {
-      margin-bottom: 1.5rem;
-      line-height: 1.5;
-    }
+			.info {
+				background-color: #e3f2fd;
+				border-left: 4px solid #1976d2;
+				padding: 1rem;
+				text-align: left;
+				margin-bottom: 1.5rem;
+			}
 
-    .info {
-      background-color: #e3f2fd;
-      border-left: 4px solid #1976d2;
-      padding: 1rem;
-      text-align: left;
-      margin-bottom: 1.5rem;
-    }
+			/* Removed the retry-btn styles */
 
-    /* Removed the retry-btn styles */
-  </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-</head>
+			@media (prefers-color-scheme: dark) {
+				body {
+					background-color: #121212;
+					color: #f5f5f5;
+				}
 
-<body>
-  <div class="container">
-    <div class="icon">wifi_off</div>
-      <h1>You are offline</h1>
-      <p>POS Awesome is currently in offline mode. You can continue working with limited functionality.</p>
+				.container {
+					background-color: #1e1e1e;
+					box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+				}
 
-      <div class="info">
-        <p><strong>Available in offline mode:</strong></p>
-        <ul>
-          <li>Create new invoices</li>
-          <li>Save invoices locally</li>
-          <li>View cached items and customers</li>
-        </ul>
-        <p><strong>Unavailable until reconnected:</strong></p>
-        <ul>
-          <li>Syncing with server</li>
-          <li>Fetching new data</li>
-          <li>Printing receipts</li>
-        </ul>
-      </div>
+				.icon {
+					color: #ffb74d;
+				}
 
-    </div>
-</body>
+				h1 {
+					color: #90caf9;
+				}
 
+				.info {
+					background-color: #1e3a5f;
+					border-left: 4px solid #90caf9;
+				}
+			}
+		</style>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style" />
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="icon">wifi_off</div>
+			<h1>You are offline</h1>
+			<p>
+				POS Awesome is currently in offline mode. You can continue working with limited functionality.
+			</p>
+
+			<div class="info">
+				<p><strong>Available in offline mode:</strong></p>
+				<ul>
+					<li>Create new invoices</li>
+					<li>Save invoices locally</li>
+					<li>View cached items and customers</li>
+				</ul>
+				<p><strong>Unavailable until reconnected:</strong></p>
+				<ul>
+					<li>Syncing with server</li>
+					<li>Fetching new data</li>
+					<li>Printing receipts</li>
+				</ul>
+			</div>
+		</div>
+	</body>
 </html>

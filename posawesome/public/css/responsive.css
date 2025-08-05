@@ -71,7 +71,7 @@ body {
 	overflow: hidden;
 }
 
-:root.dark-theme {
+[data-theme="dark"] {
 	/* Dark mode colors */
 	--cancel-start: #cf6679;
 	--cancel-end: #e57373;
@@ -350,7 +350,7 @@ body {
 }
 
 /* Keep cards dark in dark theme */
-:root.dark-theme .cards,
+[data-theme="dark"] .cards,
 .v-theme--dark .cards {
 	background-color: #121212;
 }
@@ -434,7 +434,7 @@ body {
 	background-color: var(--surface-secondary) !important;
 }
 
-:root.dark-theme .dark-field,
+[data-theme="dark"] .dark-field,
 .v-theme--dark .dark-field {
 	background-color: #1e1e1e !important;
 }
@@ -517,32 +517,32 @@ body {
 
 /* ===== DARK MODE OVERRIDES ===== */
 /* These styles apply to all dark mode elements */
-:root.dark-theme .pos-card,
+[data-theme="dark"] .pos-card,
 .v-theme--dark .pos-card {
 	background-color: var(--surface-primary);
 	box-shadow: var(--shadow-lg);
 }
 
-:root.dark-theme .pos-table th:hover,
+[data-theme="dark"] .pos-table th:hover,
 .v-theme--dark .pos-table th:hover {
 	background-color: rgba(255, 255, 255, 0.05);
 }
 
-:root.dark-theme .pos-form-field,
+[data-theme="dark"] .pos-form-field,
 .v-theme--dark .pos-form-field {
 	background-color: var(--field-bg);
 }
 
-:root.dark-theme .pos-form-field input,
-:root.dark-theme .pos-form-field .v-field__input,
-:root.dark-theme .pos-form-field .v-label,
+[data-theme="dark"] .pos-form-field input,
+[data-theme="dark"] .pos-form-field .v-field__input,
+[data-theme="dark"] .pos-form-field .v-label,
 .v-theme--dark .pos-form-field input,
 .v-theme--dark .pos-form-field .v-field__input,
 .v-theme--dark .pos-form-field .v-label {
 	color: var(--text-primary);
 }
 
-:root.dark-theme .pos-form-field .v-field__overlay,
+[data-theme="dark"] .pos-form-field .v-field__overlay,
 .v-theme--dark .pos-form-field .v-field__overlay {
 	background-color: var(--field-bg);
 }

@@ -202,14 +202,17 @@ export async function searchStoredItems({ search = "", itemGroup = "", limit = 1
 		if (itemGroup && itemGroup.toLowerCase() !== "all") {
 			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
 		}
-		if (search) {
-			const term = search.toLowerCase();
-			collection = collection.filter(
-				(it) =>
-					(it.item_name && it.item_name.toLowerCase().includes(term)) ||
-					(it.item_code && it.item_code.toLowerCase().includes(term)),
-			);
-		}
+                if (search) {
+                        const term = search.toLowerCase();
+                        collection = collection.filter((it) => {
+                                const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
+                                const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
+                                const barcodeMatch = Array.isArray(it.item_barcode)
+                                        ? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
+                                        : it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
+                                return nameMatch || codeMatch || barcodeMatch;
+                        });
+                }
 		const res = await collection.offset(offset).limit(limit).toArray();
                return res;
 	} catch (e) {

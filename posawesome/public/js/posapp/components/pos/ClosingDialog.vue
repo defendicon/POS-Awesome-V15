@@ -143,22 +143,22 @@ export default {
 	}),
 	watch: {},
 
-        methods: {
-                close_dialog() {
-                        this.closingDialog = false;
-                },
-                submit_dialog() {
-                        const invalid = (this.dialog_data.payments || []).some(
-                                (p) => isNaN(parseFloat(p.closing_amount))
-                        );
-                        if (invalid) {
-                                alert(this.__("Invalid closing amount"));
-                                return;
-                        }
-                        this.eventBus.emit("submit_closing_pos", this.dialog_data);
-                        this.closingDialog = false;
-                },
-        },
+	methods: {
+		close_dialog() {
+			this.closingDialog = false;
+		},
+		submit_dialog() {
+			const invalid = (this.dialog_data.payments || []).some((p) =>
+				isNaN(parseFloat(p.closing_amount)),
+			);
+			if (invalid) {
+				alert(this.__("Invalid closing amount"));
+				return;
+			}
+			this.eventBus.emit("submit_closing_pos", this.dialog_data);
+			this.closingDialog = false;
+		},
+	},
 
 	computed: {
 		isDarkTheme() {
@@ -319,39 +319,39 @@ export default {
 }
 
 /* Dark theme overrides */
-:deep(.dark-theme) .closing-dialog-card,
+:deep([data-theme="dark"]) .closing-dialog-card,
 :deep(.v-theme--dark) .closing-dialog-card,
-::v-deep(.dark-theme) .closing-dialog-card,
+::v-deep([data-theme="dark"]) .closing-dialog-card,
 ::v-deep(.v-theme--dark) .closing-dialog-card {
 	background: #1e1e1e !important;
 }
 
-:deep(.dark-theme) .closing-header,
+:deep([data-theme="dark"]) .closing-header,
 :deep(.v-theme--dark) .closing-header,
-::v-deep(.dark-theme) .closing-header,
+::v-deep([data-theme="dark"]) .closing-header,
 ::v-deep(.v-theme--dark) .closing-header {
 	background: #1e1e1e !important;
 	color: #fff !important;
 	border-bottom: 1px solid #373737;
 }
 
-:deep(.dark-theme) .white-background,
+:deep([data-theme="dark"]) .white-background,
 :deep(.v-theme--dark) .white-background,
-::v-deep(.dark-theme) .white-background,
+::v-deep([data-theme="dark"]) .white-background,
 ::v-deep(.v-theme--dark) .white-background {
 	background-color: #1e1e1e !important;
 }
 
-:deep(.dark-theme) .white-table,
+:deep([data-theme="dark"]) .white-table,
 :deep(.v-theme--dark) .white-table,
-::v-deep(.dark-theme) .white-table,
+::v-deep([data-theme="dark"]) .white-table,
 ::v-deep(.v-theme--dark) .white-table {
 	background-color: #1e1e1e !important;
 }
 
-:deep(.dark-theme) .dialog-actions-container,
+:deep([data-theme="dark"]) .dialog-actions-container,
 :deep(.v-theme--dark) .dialog-actions-container,
-::v-deep(.dark-theme) .dialog-actions-container,
+::v-deep([data-theme="dark"]) .dialog-actions-container,
 ::v-deep(.v-theme--dark) .dialog-actions-container {
 	background: #1e1e1e !important;
 	border-top: 1px solid #373737;
