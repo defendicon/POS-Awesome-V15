@@ -104,12 +104,17 @@ function set_form_payments_data(data, frm) {
 }
 
 function add_to_pos_transaction(d, frm) {
-	frm.add_child("pos_transactions", {
-		sales_invoice: d.name,
-		posting_date: d.posting_date,
-		grand_total: d.grand_total,
-		customer: d.customer,
-	});
+        const child = {
+                posting_date: d.posting_date,
+                grand_total: d.grand_total,
+                customer: d.customer,
+        };
+        if (d.doctype === "POS Invoice") {
+                child.pos_invoice = d.name;
+        } else {
+                child.sales_invoice = d.name;
+        }
+        frm.add_child("pos_transactions", child);
 }
 
 function add_to_pos_payments(d, frm) {

@@ -100,6 +100,7 @@ DocType: POS Opening Shift Detail,POS Opening Shift Detail,POS Detalhes de Abert
 DocType: POS Closing Shift,POS Profile,POS Perfil
 apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,POS Profile {} does not belongs to company {},POS Perfil {} não pertence a empresa {}
 Custom Field - label: Sales Invoice-posa_pos_opening_shift,POS Shift,POS Turno
+Custom Field - label: POS Invoice-posa_pos_opening_shift,POS Shift,POS Turno
 DocType: POS Closing Shift,POS Transactions,POS Transções
 DocType: POS Closing Shift,POSAwesome,POSAwesome
 DocType: POS Closing Shift,Payment Reconciliation,Reconciliação de Pagamento
@@ -109,6 +110,7 @@ DocType: POS Closing Shift,Posting Date,Data de Postagem
 Custom Field - label: Batch-posa_batch_price,Price,Preço
 DocType: POS Offer,Price Discount Scheme ,Esquema de Desconto de Preço
 Custom Field - label: Sales Invoice-posa_is_printed,Printed,Imprimido
+Custom Field - label: POS Invoice-posa_is_printed,Printed,Imprimido
 DocType: POS Offer,Product Discount Scheme,Esquema de Desconto de Produto
 DocType: POS Offer,Promo Type,Tipo de Promo
 DocType: POS Offer,Qualifying Transaction / Item,Qualificando Transação / Item
@@ -140,6 +142,7 @@ DocType: POS Closing Shift,Total Quantity,Quantidade Total
 DocType: POS Offer,Transaction,Transação
 Custom Field - label: Item Barcode-posa_uom,UOM,UDM
 Custom Field - label: POS Profile-posa_local_storage,Use Browser Local Storage,Use o armazenamento local do navegador
+Custom Field - label: POS Profile-posa_force_server_items,Fetch Items Directly from Server,Buscar itens diretamente do servidor
 Custom Field - label: POS Profile-use_cashback,Use Cashback,Use Cashback
 Custom Field - label: POS Profile-use_customer_credit,Use Customer Credit,Usar Credito de Cliente
 apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,User {} has been disabled. Please select valid user/cashier,Usuário {} foi desactivado. Por favor selecione um usuário/caixa valido
@@ -149,3 +152,36 @@ DocType: POS Offer,Warehouse,Armazém
 apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,is Offer,é Oferta
 apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Type,Tipo
 apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Total Qty,Qtd TotalCustom Field - label: POS Profile-posa_create_only_sales_order,Create Only Sales Order,Criar Apenas Ordem de Venda
+Menu,Menu
+Actions,Ações
+Close Shift,Fechar Turno
+End current session,Finalizar sessão atual
+Print Last Invoice,Imprimir Última Fatura
+Reprint previous transaction,Reimprimir transação anterior
+Sync Offline Invoices,Sincronizar Faturas Offline
+Upload pending transactions,Carregar transações pendentes
+Go Online,Conectar
+Go Offline,Desconectar
+Disable offline mode,Desativar modo offline
+Work without server connection,Trabalhar sem conexão com servidor
+Clear Cache,Limpar Cache
+Remove local data and refresh,Remover dados locais e atualizar
+About,Sobre
+App information,Informações do aplicativo
+Language,Idioma
+Change interface language,Alterar idioma da interface
+Light Mode,Modo Claro
+Dark Mode,Modo Escuro
+Switch theme appearance,Alternar aparência do tema
+Logout,Sair
+Sign out of session,Sair da sessão
+Select Language,Selecionar Idioma
+Choose your preferred language for the POS interface,Escolha seu idioma preferido para a interface POS
+Language will be changed to,O idioma será alterado para
+Cancel,Cancelar
+Change Language,Alterar Idioma
+Close,Fechar
+Cannot change language - same language selected,Não é possível alterar o idioma - mesmo idioma selecionado
+Language changed successfully! Reloading...,Idioma alterado com sucesso! Recarregando...
+Failed to change language,Falha ao alterar o idioma
+Unknown error,Erro desconhecido

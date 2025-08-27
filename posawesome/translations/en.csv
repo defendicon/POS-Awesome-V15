@@ -1,1 +1,35 @@
 POS Awesome,POS Awesome
+Fetch Items Directly from Server,Fetch Items Directly from Server
+Menu,Menu
+Actions,Actions
+Close Shift,Close Shift
+End current session,End current session
+Print Last Invoice,Print Last Invoice
+Reprint previous transaction,Reprint previous transaction
+Sync Offline Invoices,Sync Offline Invoices
+Upload pending transactions,Upload pending transactions
+Go Online,Go Online
+Go Offline,Go Offline
+Disable offline mode,Disable offline mode
+Work without server connection,Work without server connection
+Clear Cache,Clear Cache
+Remove local data and refresh,Remove local data and refresh
+About,About
+App information,App information
+Language,Language
+Change interface language,Change interface language
+Light Mode,Light Mode
+Dark Mode,Dark Mode
+Switch theme appearance,Switch theme appearance
+Logout,Logout
+Sign out of session,Sign out of session
+Select Language,Select Language
+Choose your preferred language for the POS interface,Choose your preferred language for the POS interface
+Language will be changed to,Language will be changed to
+Cancel,Cancel
+Change Language,Change Language
+Close,Close
+Cannot change language - same language selected,Cannot change language - same language selected
+Language changed successfully! Reloading...,Language changed successfully! Reloading...
+Failed to change language,Failed to change language
+Unknown error,Unknown error

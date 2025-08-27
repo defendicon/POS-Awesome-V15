@@ -1,5 +1,6 @@
 """Expose API functions for POS Awesome."""
 
+from .bundles import get_bundle_components
 from .customers import (
 	create_customer,
 	get_customer_addresses,
@@ -21,6 +22,7 @@ from .items import (
 	get_item_attributes,
 	get_item_detail,
 	get_items,
+	get_items_count,
 	get_items_details,
 	get_items_from_barcode,
 	get_items_groups,
@@ -46,12 +48,12 @@ from .shifts import (
 	get_opening_dialog_data,
 )
 from .utilities import (
-        get_app_branch,
-        get_app_info,
-        get_language_options,
-        get_selling_price_lists,
-        get_translation_dict,
-        get_version,
-        get_pos_profile_tax_inclusive,
+	get_app_branch,
+	get_app_info,
+	get_language_options,
+	get_pos_profile_tax_inclusive,
+	get_selling_price_lists,
+	get_translation_dict,
+	get_version,
 )
 from .utils import get_active_pos_profile, get_default_warehouse

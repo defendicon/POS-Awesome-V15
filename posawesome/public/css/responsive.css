@@ -121,15 +121,19 @@ body {
 .dynamic-spacing-xs {
 	padding: var(--dynamic-xs);
 }
+
 .dynamic-spacing-sm {
 	padding: var(--dynamic-sm);
 }
+
 .dynamic-spacing-md {
 	padding: var(--dynamic-md);
 }
+
 .dynamic-spacing-lg {
 	padding: var(--dynamic-lg);
 }
+
 .dynamic-spacing-xl {
 	padding: var(--dynamic-xl);
 }
@@ -137,15 +141,19 @@ body {
 .dynamic-margin-xs {
 	margin: var(--dynamic-xs);
 }
+
 .dynamic-margin-sm {
 	margin: var(--dynamic-sm);
 }
+
 .dynamic-margin-md {
 	margin: var(--dynamic-md);
 }
+
 .dynamic-margin-lg {
 	margin: var(--dynamic-lg);
 }
+
 .dynamic-margin-xl {
 	margin: var(--dynamic-xl);
 }
@@ -155,18 +163,22 @@ body {
 	padding-left: var(--dynamic-xs);
 	padding-right: var(--dynamic-xs);
 }
+
 .dynamic-px-sm {
 	padding-left: var(--dynamic-sm);
 	padding-right: var(--dynamic-sm);
 }
+
 .dynamic-px-md {
 	padding-left: var(--dynamic-md);
 	padding-right: var(--dynamic-md);
 }
+
 .dynamic-px-lg {
 	padding-left: var(--dynamic-lg);
 	padding-right: var(--dynamic-lg);
 }
+
 .dynamic-px-xl {
 	padding-left: var(--dynamic-xl);
 	padding-right: var(--dynamic-xl);
@@ -176,18 +188,22 @@ body {
 	padding-top: var(--dynamic-xs);
 	padding-bottom: var(--dynamic-xs);
 }
+
 .dynamic-py-sm {
 	padding-top: var(--dynamic-sm);
 	padding-bottom: var(--dynamic-sm);
 }
+
 .dynamic-py-md {
 	padding-top: var(--dynamic-md);
 	padding-bottom: var(--dynamic-md);
 }
+
 .dynamic-py-lg {
 	padding-top: var(--dynamic-lg);
 	padding-bottom: var(--dynamic-lg);
 }
+
 .dynamic-py-xl {
 	padding-top: var(--dynamic-xl);
 	padding-bottom: var(--dynamic-xl);
@@ -197,18 +213,22 @@ body {
 	margin-left: var(--dynamic-xs);
 	margin-right: var(--dynamic-xs);
 }
+
 .dynamic-mx-sm {
 	margin-left: var(--dynamic-sm);
 	margin-right: var(--dynamic-sm);
 }
+
 .dynamic-mx-md {
 	margin-left: var(--dynamic-md);
 	margin-right: var(--dynamic-md);
 }
+
 .dynamic-mx-lg {
 	margin-left: var(--dynamic-lg);
 	margin-right: var(--dynamic-lg);
 }
+
 .dynamic-mx-xl {
 	margin-left: var(--dynamic-xl);
 	margin-right: var(--dynamic-xl);
@@ -218,18 +238,22 @@ body {
 	margin-top: var(--dynamic-xs);
 	margin-bottom: var(--dynamic-xs);
 }
+
 .dynamic-my-sm {
 	margin-top: var(--dynamic-sm);
 	margin-bottom: var(--dynamic-sm);
 }
+
 .dynamic-my-md {
 	margin-top: var(--dynamic-md);
 	margin-bottom: var(--dynamic-md);
 }
+
 .dynamic-my-lg {
 	margin-top: var(--dynamic-lg);
 	margin-bottom: var(--dynamic-lg);
 }
+
 .dynamic-my-xl {
 	margin-top: var(--dynamic-xl);
 	margin-bottom: var(--dynamic-xl);
@@ -255,12 +279,15 @@ body {
 .text-weight-normal {
 	font-weight: 400;
 }
+
 .text-weight-medium {
 	font-weight: 500;
 }
+
 .text-weight-semibold {
 	font-weight: 600;
 }
+
 .text-weight-bold {
 	font-weight: 700;
 }
@@ -330,6 +357,68 @@ body {
 .v-btn[color="accent"][theme="dark"] .v-btn__content {
 	color: white;
 }
+
+/* ===== PROGRESS LINEAR BAR FIXES ===== */
+/* Fix for absolute positioned progress bars */
+.v-progress-linear--absolute {
+	position: absolute !important;
+	z-index: 10 !important;
+	width: 100% !important;
+}
+
+/* Ensure parent containers support absolute positioning */
+.v-card:has(.v-progress-linear--absolute),
+.v-app-bar:has(.v-progress-linear--absolute) {
+	position: relative !important;
+}
+
+/* Fallback for browsers that don't support :has() selector */
+.v-card,
+.v-app-bar {
+	position: relative;
+}
+
+/* Specific classes for components with progress bars */
+.selection.v-card,
+.navbar-enhanced.v-app-bar {
+	position: relative !important;
+}
+
+/* Fix theme conflicts */
+.v-progress-linear.v-theme--light {
+	background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.v-progress-linear.v-theme--light .v-progress-linear__determinate,
+.v-progress-linear.v-theme--light .v-progress-linear__indeterminate {
+	background-color: var(--v-theme-primary, #1976d2) !important;
+}
+
+/* Ensure progress bars don't interfere with content */
+.v-progress-linear--absolute+.v-overlay {
+	z-index: 11 !important;
+}
+
+/* Enhanced progress bar for smooth experience */
+.v-progress-linear__determinate {
+	transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Global progress bar enhancements */
+.v-progress-linear {
+	border-radius: 0 !important;
+}
+
+.v-progress-linear--absolute {
+	box-shadow: none !important;
+}
+
+/* Smooth transitions for all progress elements */
+.v-progress-linear * {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+
 
 /* ===== COMMON CARD STYLES ===== */
 .pos-card {

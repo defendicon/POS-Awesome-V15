@@ -17,8 +17,8 @@ After switching branches or pulling latest changes:
 4. cd ../..
 5. bench build --app posawesome
 6. bench --site your.site migrate
-   - If the build exits with code 143, verify that your system has enough RAM or swap space.
-   - You can also try building the app in smaller parts to reduce memory usage.
+    - If the build exits with code 143, verify that your system has enough RAM or swap space.
+    - You can also try building the app in smaller parts to reduce memory usage.
 
 ### Main Features
 
@@ -61,22 +61,39 @@ After switching branches or pulling latest changes:
 34. A lot more bug fixes from the version 14
 35. Offline invoices that fail to submit are saved as draft documents
 
-### How to Install
+### Quick Start
 
-#### Self Hosting:
+Follow these steps to install and start using POS Awesome:
 
-1. `bench get-app --branch Version-15 https://github.com/defendicon/POS-Awesome-V15`
-2. `bench setup requirements`
-3. `bench build --app posawesome`
-4. `bench restart`
-5. `bench --site [your.site.name] install-app posawesome`
-6. `bench --site [your.site.name] migrate`
+1. **Install the app** in your bench:
+    1. `bench get-app --branch Version-15 https://github.com/defendicon/POS-Awesome-V15`
+    2. `bench setup requirements`
+    3. `bench build --app posawesome`
+    4. `bench restart`
+    5. `bench --site your.site.name install-app posawesome`
+    6. `bench --site your.site.name migrate`
 
----
+2. **Open the POS Awesome workspace**
 
-### How To Use:
+    Log in to ERPNext, go to the home page, and click **POS Awesome** from the left-hand menu.
 
-[POS Awesome Wiki](https://github.com/yrestom/POS-Awesome/wiki)
+3. **Create a POS Profile**
+    - Navigate to **POS Awesome → POS Profile → New**.
+    - Fill in the mandatory fields:
+        - **Name** – any label for this profile.
+        - **Company** – the company under which transactions will be recorded.
+        - **Warehouse** – the default warehouse for item stock deduction.
+        - **Customer** – a default customer (create one if none exists).
+        - **Applicable for Users** – add the users allowed to use this POS.
+        - **Payment Methods** – add accepted modes (e.g., Cash, Card).
+
+4. **Save the profile**
+
+5. **Start selling**
+
+    Return to the **POS Awesome** workspace and launch the POS. Select the newly created profile if prompted and begin creating invoices.
+
+For more details, see the [POS Awesome Wiki](https://github.com/yrestom/POS-Awesome/wiki).
 
 ---
 
