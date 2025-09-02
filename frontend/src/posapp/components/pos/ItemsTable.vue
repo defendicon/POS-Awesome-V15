@@ -117,15 +117,15 @@
 
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
-				<div class="amount-value right-aligned">
-					{{
+				<div class="currency-display right-aligned">
+					<span class="amount-value">{{
 						formatFloat(
 							item.discount_percentage ||
 								(item.price_list_rate
 									? (item.discount_amount / item.price_list_rate) * 100
 									: 0),
 						)
-					}}%
+					}}%</span>
 				</div>
 			</template>
 
@@ -179,75 +179,9 @@
 
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
-				<td :colspan="headers.length" class="ma-0 pa-0">
-					<div class="expanded-content">
-						<!-- Enhanced Action Panel with better visual hierarchy -->
-						<div class="action-panel">
-							<div class="action-panel-header">
-								<v-icon size="small" class="action-panel-icon">mdi-cog</v-icon>
-								<span class="action-panel-title">{{ __("Quick Actions") }}</span>
-							</div>
-							<div class="action-panel-content">
-								<div class="action-button-group">
-									<v-btn
-										:disabled="!!item.posa_is_replace"
-										size="large"
-										color="error"
-										variant="tonal"
-										class="item-action-btn delete-btn"
-										@click.stop="removeItem(item)"
-									>
-										<v-icon size="large">mdi-trash-can-outline</v-icon>
-										<span class="action-label">{{ __("Remove") }}</span>
-									</v-btn>
-									<v-btn
-										v-if="item.is_bundle"
-										:disabled="!!item.posa_is_replace"
-										size="large"
-										color="primary"
-										variant="tonal"
-										class="item-action-btn bundle-btn"
-										@click.stop="$emit('view-packed', item.bundle_id)"
-									>
-										<v-icon size="large">mdi-package-variant</v-icon>
-										<span class="action-label">{{ __("Items Included") }}</span>
-									</v-btn>
-								</div>
-
-								<div class="action-button-group">
-									<v-btn
-										:disabled="!!item.posa_is_replace"
-										size="large"
-										color="warning"
-										variant="tonal"
-										class="item-action-btn minus-btn"
-										@click.stop="subtractOne(item)"
-									>
-										<v-icon size="large">mdi-minus-circle-outline</v-icon>
-										<span class="action-label">{{ __("Decrease") }}</span>
-									</v-btn>
-									<v-btn
-										:disabled="
-											!!item.posa_is_replace ||
-											((!stock_settings.allow_negative_stock ||
-												pos_profile.posa_block_sale_beyond_available_qty) &&
-												item.max_qty !== undefined &&
-												item.qty >= item.max_qty)
-										"
-										size="large"
-										color="success"
-										variant="tonal"
-										class="item-action-btn plus-btn"
-										@click.stop="addOne(item)"
-									>
-										<v-icon size="large">mdi-plus-circle-outline</v-icon>
-										<span class="action-label">{{ __("Increase") }}</span>
-									</v-btn>
-								</div>
-							</div>
-						</div>
-
-						<!-- Enhanced Item Details Form with better organization -->
+				<td :colspan="headers.length" class="ma-0 pa-0 expanded-row-cell">
+					<div class="expanded-content responsive-expanded-content">
+						<!-- Item Details Form -->
 						<div class="item-details-form">
 							<!-- Basic Information Section -->
 							<div class="form-section">
@@ -912,16 +846,24 @@ export default {
 </script>
 
 <style scoped>
-/* Modern table styling with enhanced visual hierarchy */
+/* Modern table styling with clean design */
 .modern-items-table {
-	border-radius: var(--border-radius-lg);
+	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: var(--shadow-md);
-	border: 1px solid rgba(0, 0, 0, 0.09);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(0, 0, 0, 0.1);
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
+	background: #ffffff;
+}
+
+:deep([data-theme="dark"]) .modern-items-table,
+:deep(.v-theme--dark) .modern-items-table {
+	background: #1a202c;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Ensure items table can scroll when many rows exist */
@@ -944,21 +886,30 @@ export default {
 	font-size: 0.8rem;
 	text-transform: uppercase;
 	letter-spacing: 0.3px;
-	padding: 8px 12px;
-	transition: background-color var(--transition-normal);
-	border-bottom: 2px solid var(--table-header-border);
-	background-color: var(--table-header-bg, var(--surface-secondary, #f5f5f5));
-	color: var(--table-header-text);
+	padding: 12px;
+	transition: background-color 0.2s ease;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	background-color: #f8f9fa;
+	color: #495057;
 	position: sticky;
 	top: 0;
 	z-index: 1;
-	/* Handle long header text */
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	max-width: 150px;
 	min-width: 80px;
-	position: relative;
+	text-align: center;
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+	height: 40px;
+}
+
+:deep([data-theme="dark"]) .modern-items-table :deep(th),
+:deep(.v-theme--dark) .modern-items-table :deep(th) {
+	background-color: #2d3748;
+	color: #e2e8f0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Header text wrapper for better control */
@@ -989,111 +940,121 @@ export default {
 
 /* Table row styling */
 .modern-items-table :deep(tr) {
-	transition: all 0.2s ease;
+	transition: background-color 0.2s ease;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .modern-items-table :deep(tr:hover) {
-	background-color: var(--table-row-hover);
-	transform: translateY(-1px);
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+	background-color: rgba(0, 0, 0, 0.02);
+}
+
+:deep([data-theme="dark"]) .modern-items-table :deep(tr) {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover) {
+	background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* Table cell styling */
 .modern-items-table :deep(td) {
-	padding: 16px 16px;
+	padding: 16px 12px;
 	vertical-align: middle;
 	height: 60px;
+	text-align: center;
+	color: #374151;
+	position: relative;
 }
 
-/* Expanded content styling */
+/* Ensure all cell contents fill the cell */
+.modern-items-table :deep(td) > div {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+:deep([data-theme="dark"]) .modern-items-table :deep(td),
+:deep(.v-theme--dark) .modern-items-table :deep(td) {
+	color: #e5e7eb;
+}
+
+/* =================================================================
+   EXPANDED CONTENT - CLEAN STRUCTURE
+   ================================================================= */
+
+/* Base expanded row styling */
+.expanded-row-cell {
+	padding: 0 !important;
+	width: 100%;
+	overflow: hidden;
+}
+
+/* Main expanded content container */
 .expanded-content {
 	padding: 24px;
-	background: linear-gradient(135deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
-	border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-	box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.03);
-	animation: fadeIn 0.4s ease;
-	border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
+	width: 100%;
+	box-sizing: border-box;
+	background: #f8f9fa;
+	border-radius: 0 0 8px 8px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-top: none;
+	animation: expandIn 0.3s ease forwards;
+	
+	/* Enable container queries */
+	container-type: inline-size;
+	container-name: expanded-content;
 }
 
+/* Dark theme */
 :deep([data-theme="dark"]) .expanded-content,
 :deep(.v-theme--dark) .expanded-content {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.03) 100%);
-	box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #2d3748;
+	border-color: rgba(255, 255, 255, 0.1);
 }
 
-@keyframes fadeIn {
+@keyframes expandIn {
 	from {
 		opacity: 0;
-		transform: translateY(-15px);
+		transform: translateY(-20px) scale(0.95);
+		max-height: 0;
 	}
 
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+		max-height: 1000px;
+	}
+}
+
+@keyframes shimmer {
+	0% { transform: translateX(-100%); }
+	50% { transform: translateX(100%); }
+	100% { transform: translateX(100%); }
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
 	to {
 		opacity: 1;
 		transform: translateY(0);
 	}
 }
 
-/* Action panel styling */
-.action-panel {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	padding: 16px;
-	margin-bottom: 20px;
-	background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--surface-tertiary) 100%);
-	border-radius: var(--border-radius-lg);
-	border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	transition: all 0.3s ease;
+@keyframes pulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.05); }
 }
 
-:deep([data-theme="dark"]) .action-panel,
-:deep(.v-theme--dark) .action-panel {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.06) 100%);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
+/* =================================================================
+   EXPANDED CONTENT LAYOUT - SINGLE COLUMN VERTICAL STACK
+   ================================================================= */
 
-.action-panel-header {
-	display: flex;
-	align-items: center;
-	padding-bottom: 8px;
-	border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
-}
-
-:deep([data-theme="dark"]) .action-panel-header,
-:deep(.v-theme--dark) .action-panel-header {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.action-panel-icon {
-	margin-right: 8px;
-	color: var(--primary-color, #1976d2);
-}
-
-.action-panel-title {
-	font-weight: 600;
-	font-size: 0.9rem;
-	color: var(--text-primary);
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-}
-
-.action-panel-content {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 12px;
-	flex-wrap: wrap;
-}
-
-.action-button-group {
-	display: flex;
-	gap: 8px;
-}
 
 /* Item action buttons styling */
 .item-action-btn {
@@ -1201,60 +1162,46 @@ export default {
 	opacity: 0.9;
 }
 
-/* Form layout styling */
+/* =================================================================
+   FORM LAYOUT - SINGLE COLUMN OPTIMIZED
+   ================================================================= */
+
+/* Main form container - single column stack */
 .item-details-form {
-	margin-top: 16px;
-}
-
-.form-row {
+	width: 100%;
 	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-bottom: 8px;
+	flex-direction: column;
+	gap: 20px;
 }
 
-.form-field {
-	flex: 1;
-	min-width: 200px;
-}
-
-.form-field.full-width {
-	flex-basis: 100%;
-}
-
+/* Form sections - optimized for vertical stacking */
 .form-section {
-	margin-top: 12px;
-	padding: 10px;
-	background: var(--surface-secondary);
-	border-radius: var(--border-radius-lg);
-	border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+	width: 100%;
+	padding: 24px;
+	box-sizing: border-box;
+	
+	background: #ffffff;
+	border-radius: 12px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	
+	/* Smooth transitions */
 	transition: all 0.3s ease;
 }
 
 .form-section:hover {
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	transform: translateY(-2px);
 }
 
-:deep([data-theme="dark"]) .form-section,
-:deep(.v-theme--dark) .form-section {
-	background: rgba(255, 255, 255, 0.02);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-:deep([data-theme="dark"]) .form-section:hover,
-:deep(.v-theme--dark) .form-section:hover {
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
+/* Section headers - clean and modern */
 .section-header {
 	display: flex;
 	align-items: center;
-	margin-bottom: 8px;
-	padding-bottom: 8px;
-	border-bottom: 2px solid var(--primary-color, #1976d2);
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid #1976d2;
 	position: relative;
 }
 
@@ -1263,78 +1210,397 @@ export default {
 	position: absolute;
 	bottom: -2px;
 	left: 0;
-	width: 40px;
+	width: 60px;
 	height: 2px;
-	background: linear-gradient(90deg, var(--primary-color, #1976d2), transparent);
+	background: linear-gradient(90deg, #1976d2, rgba(25, 118, 210, 0.3));
+	border-radius: 1px;
 }
 
 .section-icon {
-	margin-right: 10px;
-	color: var(--primary-color, #1976d2);
+	color: #1976d2;
 	background: rgba(25, 118, 210, 0.1);
-	padding: 6px;
-	border-radius: 8px;
-}
-
-:deep([data-theme="dark"]) .section-icon,
-:deep(.v-theme--dark) .section-icon {
-	background: rgba(144, 202, 249, 0.1);
+	padding: 8px;
+	border-radius: 10px;
 }
 
 .section-title {
 	font-weight: 600;
-	font-size: 0.85rem;
-	color: var(--text-primary);
+	font-size: 0.9rem;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
+	color: var(--text-primary);
+}
+
+/* Form rows - flexible and responsive */
+.form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	width: 100%;
+}
+
+.form-field {
+	flex: 1;
+	min-width: 250px;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.form-field.full-width {
+	flex-basis: 100%;
+	min-width: 100%;
+}
+
+/* Dark theme */
+:deep([data-theme="dark"]) .form-section,
+:deep(.v-theme--dark) .form-section {
+	background: #1a202c;
+	border-color: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+:deep([data-theme="dark"]) .form-section:hover,
+:deep(.v-theme--dark) .form-section:hover {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+:deep([data-theme="dark"]) .section-icon,
+:deep(.v-theme--dark) .section-icon {
+	background: rgba(144, 202, 249, 0.15);
+}
+
+/* =================================================================
+   RESPONSIVE DESIGN - CONTAINER QUERIES
+   ================================================================= */
+
+/* Small containers - mobile optimization */
+@container expanded-content (max-width: 600px) {
+	.expanded-content {
+		padding: 16px;
+	}
+	
+	.item-details-form {
+		gap: 16px;
+	}
+	
+	.form-section {
+		padding: 20px 16px;
+		border-radius: 8px;
+	}
+	
+	.form-row {
+		flex-direction: column;
+		gap: 12px;
+	}
+	
+	.form-field {
+		min-width: 100%;
+	}
+	
+	.section-header {
+		margin-bottom: 16px;
+		padding-bottom: 12px;
+	}
+	
+	.section-title {
+		font-size: 0.85rem;
+	}
+}
+
+/* Medium containers - tablet optimization */
+@container expanded-content (max-width: 900px) {
+	.form-field {
+		min-width: min(200px, 48%);
+	}
+	
+	.form-section {
+		padding: 20px;
+	}
+}
+
+/* =================================================================
+   RTL SUPPORT - ENHANCED WITH MULTIPLE SELECTORS
+   ================================================================= */
+
+/* Base RTL layout - Enhanced selectors */
+[dir="rtl"] .expanded-content,
+[lang^="ar"] .expanded-content,
+[lang^="he"] .expanded-content,
+[lang^="fa"] .expanded-content,
+html[dir="rtl"] .expanded-content,
+body[dir="rtl"] .expanded-content {
+	direction: rtl !important;
+}
+
+/* RTL form layout - Enhanced selectors */
+[dir="rtl"] .form-row,
+[lang^="ar"] .form-row,
+[lang^="he"] .form-row,
+[lang^="fa"] .form-row,
+html[dir="rtl"] .form-row,
+body[dir="rtl"] .form-row {
+	flex-direction: row-reverse !important;
+}
+
+[dir="rtl"] .item-details-form,
+[lang^="ar"] .item-details-form,
+[lang^="he"] .item-details-form,
+[lang^="fa"] .item-details-form,
+html[dir="rtl"] .item-details-form,
+body[dir="rtl"] .item-details-form {
+	text-align: right !important;
+	direction: rtl !important;
+}
+
+/* RTL section headers - Enhanced selectors */
+[dir="rtl"] .section-header,
+[lang^="ar"] .section-header,
+[lang^="he"] .section-header,
+[lang^="fa"] .section-header,
+html[dir="rtl"] .section-header,
+body[dir="rtl"] .section-header {
+	flex-direction: row-reverse !important;
+	text-align: right !important;
+}
+
+[dir="rtl"] .section-header::after,
+[lang^="ar"] .section-header::after,
+[lang^="he"] .section-header::after,
+[lang^="fa"] .section-header::after,
+html[dir="rtl"] .section-header::after,
+body[dir="rtl"] .section-header::after {
+	right: 0 !important;
+	left: auto !important;
+	background: linear-gradient(-90deg, #1976d2, rgba(25, 118, 210, 0.3)) !important;
+}
+
+[dir="rtl"] .section-title,
+[lang^="ar"] .section-title,
+[lang^="he"] .section-title,
+[lang^="fa"] .section-title,
+html[dir="rtl"] .section-title,
+body[dir="rtl"] .section-title {
+	text-align: right !important;
+}
+
+/* RTL form fields - Enhanced selectors */
+[dir="rtl"] .form-field,
+[lang^="ar"] .form-field,
+[lang^="he"] .form-field,
+[lang^="fa"] .form-field,
+html[dir="rtl"] .form-field,
+body[dir="rtl"] .form-field {
+	text-align: right !important;
+	direction: rtl !important;
+}
+
+/* RTL quantity counter in expanded content - use same order approach */
+[dir="rtl"] .expanded-content .qty-counter-container,
+[lang^="ar"] .expanded-content .qty-counter-container,
+[lang^="he"] .expanded-content .qty-counter-container,
+[lang^="fa"] .expanded-content .qty-counter-container,
+.expanded-content .qty-counter-container.rtl-layout,
+html[dir="rtl"] .expanded-content .qty-counter-container,
+body[dir="rtl"] .expanded-content .qty-counter-container {
+	flex-direction: row !important; /* Use order instead of row-reverse */
+}
+
+/* Same button ordering for expanded content (reverse order values for RTL context) */
+[dir="rtl"] .expanded-content .qty-counter-container .plus-btn,
+[lang^="ar"] .expanded-content .qty-counter-container .plus-btn,
+[lang^="he"] .expanded-content .qty-counter-container .plus-btn,
+[lang^="fa"] .expanded-content .qty-counter-container .plus-btn,
+.expanded-content .qty-counter-container.rtl-layout .plus-btn,
+html[dir="rtl"] .expanded-content .qty-counter-container .plus-btn,
+body[dir="rtl"] .expanded-content .qty-counter-container .plus-btn {
+	order: 3 !important; /* Plus button should appear first visually in RTL */
+}
+
+[dir="rtl"] .expanded-content .qty-counter-container .qty-display,
+[lang^="ar"] .expanded-content .qty-counter-container .qty-display,
+[lang^="he"] .expanded-content .qty-counter-container .qty-display,
+[lang^="fa"] .expanded-content .qty-counter-container .qty-display,
+.expanded-content .qty-counter-container.rtl-layout .qty-display,
+html[dir="rtl"] .expanded-content .qty-counter-container .qty-display,
+body[dir="rtl"] .expanded-content .qty-counter-container .qty-display {
+	order: 2 !important; /* Quantity stays in middle */
+}
+
+[dir="rtl"] .expanded-content .qty-counter-container .minus-btn,
+[lang^="ar"] .expanded-content .qty-counter-container .minus-btn,
+[lang^="he"] .expanded-content .qty-counter-container .minus-btn,
+[lang^="fa"] .expanded-content .qty-counter-container .minus-btn,
+.expanded-content .qty-counter-container.rtl-layout .minus-btn,
+html[dir="rtl"] .expanded-content .qty-counter-container .minus-btn,
+body[dir="rtl"] .expanded-content .qty-counter-container .minus-btn {
+	order: 1 !important; /* Minus button should appear last visually in RTL */
+}
+
+/* Keep numbers LTR in expanded content */
+[dir="rtl"] .expanded-content .qty-display,
+[lang^="ar"] .expanded-content .qty-display,
+[lang^="he"] .expanded-content .qty-display,
+[lang^="fa"] .expanded-content .qty-display,
+html[dir="rtl"] .expanded-content .qty-display,
+body[dir="rtl"] .expanded-content .qty-display {
+	direction: ltr !important; /* Keep numbers readable */
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+	.modern-items-table {
+		border-radius: 12px;
+		margin: 0 4px;
+	}
+
+	.modern-items-table :deep(th) {
+		font-size: 0.65rem;
+		padding: 12px 6px;
+		letter-spacing: 0.5px;
+	}
+
+	.modern-items-table :deep(td) {
+		padding: 16px 8px;
+		height: 56px;
+		font-size: 0.85rem;
+	}
+
+	.expanded-content {
+		padding: 20px 16px;
+		border-radius: 0 0 12px 12px;
+	}
 }
 
 @media (max-width: 600px) {
+	.expanded-content {
+		padding: clamp(12px, 3vw, 16px);
+	}
+
 	.form-section {
 		margin-top: 8px;
-		padding: 8px;
+		padding: clamp(10px, 2.5vw, 16px);
+		border-radius: clamp(8px, 2vw, 12px);
+		animation: fadeInUp 0.3s ease;
 	}
 
 	.form-row {
-		gap: 6px;
-		margin-bottom: 6px;
+		gap: clamp(6px, 1.5vw, 10px);
+		margin-bottom: clamp(8px, 2vw, 12px);
+		flex-direction: column;
 	}
 
 	.section-header {
-		margin-bottom: 6px;
+		margin-bottom: clamp(8px, 2vw, 12px);
 		padding-bottom: 6px;
+		flex-wrap: wrap;
 	}
 
 	.form-field {
-		min-width: 140px;
+		min-width: 100%;
+		flex: none;
+		width: 100%;
 	}
 
 	.section-title {
+		font-size: clamp(0.75rem, 2vw, 0.85rem);
+		line-height: 1.2;
+	}
+
+	.section-icon {
+		margin-right: clamp(6px, 1.5vw, 10px);
+		padding: clamp(4px, 1vw, 6px);
+	}
+	
+	.modern-items-table {
+		border-radius: 8px;
+		margin: 0 2px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+	}
+
+	.modern-items-table :deep(th) {
+		font-size: 0.6rem;
+		padding: 8px 4px;
+		max-width: 80px;
+		min-width: 50px;
+		letter-spacing: 0.3px;
+	}
+
+	.modern-items-table :deep(td) {
+		padding: 12px 4px;
+		height: 48px;
 		font-size: 0.8rem;
 	}
 
-	/* Responsive header adjustments for smaller screens */
-	.modern-items-table :deep(th) {
-		font-size: 0.7rem;
-		padding: 6px 8px;
-		max-width: 120px;
-		min-width: 60px;
-	}
-
 	.modern-items-table :deep(th[data-column-key="item_name"]) {
-		min-width: 150px;
-		max-width: 180px;
+		min-width: 120px;
+		max-width: 150px;
 	}
 
 	.modern-items-table :deep(th[data-column-key="qty"]) {
-		min-width: 120px;
-		max-width: 140px;
+		min-width: 100px;
+		max-width: 120px;
 	}
 
 	.modern-items-table :deep(th[data-column-key="rate"]),
 	.modern-items-table :deep(th[data-column-key="amount"]) {
-		min-width: 80px;
-		max-width: 100px;
+		min-width: 70px;
+		max-width: 90px;
+	}
+
+	.qty-counter-container {
+		min-width: 110px;
+		width: 110px;
+		height: auto;
+		gap: 4px;
+		padding: 2px;
+	}
+
+	.qty-control-btn {
+		width: 28px !important;
+		height: 28px !important;
+		min-width: 28px !important;
+		border-radius: 6px !important;
+	}
+
+	.qty-display {
+		min-width: 32px;
+		padding: 4px 6px;
+		font-size: 0.8rem;
+		height: 28px;
+	}
+
+	.action-button-group {
+		flex-direction: column;
+		gap: 6px;
+		width: 100%;
+	}
+
+	.item-action-btn {
+		width: 100% !important;
+		min-width: 100% !important;
+		height: 40px !important;
+		justify-content: center;
+	}
+
+	.item-action-btn .action-label {
+		display: inline-block !important;
+	}
+
+	.expanded-content {
+		padding: 16px;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.action-panel {
+		padding: 12px;
+		gap: 8px;
+	}
+
+	.action-panel-content {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
 	}
 }
 
@@ -1352,47 +1618,127 @@ export default {
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Enhanced form field styling */
+/* Enhanced form field styling with context awareness */
 .form-field :deep(.v-field) {
-	border-radius: 8px !important;
-	transition: all 0.3s ease !important;
+	border-radius: clamp(6px, 2vw, 12px) !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	background: rgba(255, 255, 255, 0.8) !important;
+	backdrop-filter: blur(10px) !important;
+	border: 1px solid rgba(0, 0, 0, 0.06) !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
 }
 
+.form-field :deep(.v-field__input) {
+	padding: clamp(8px, 2vw, 12px) !important;
+	font-size: clamp(0.8rem, 2vw, 0.9rem) !important;
+	min-height: auto !important;
+}
+
+.form-field :deep(.v-field__prepend-inner) {
+	padding-right: clamp(4px, 1vw, 8px) !important;
+}
+
+/* Improved responsive text field sizing */
+.form-field :deep(.v-text-field .v-field__input) {
+	flex-wrap: nowrap;
+	overflow: hidden;
+}
+
+.form-field :deep(.v-autocomplete .v-field__input) {
+	flex-wrap: nowrap;
+}
+
+
 .form-field :deep(.v-field:hover) {
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-1px);
+	border-color: rgba(37, 99, 235, 0.2) !important;
 }
 
 .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2) !important;
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 20px rgba(37, 99, 235, 0.15) !important;
+	transform: translateY(-1px);
+	border-color: rgba(37, 99, 235, 0.4) !important;
+	background: rgba(255, 255, 255, 0.95) !important;
+}
+
+:deep([data-theme="dark"]) .form-field :deep(.v-field),
+:deep(.v-theme--dark) .form-field :deep(.v-field) {
+	background: rgba(30, 30, 30, 0.8) !important;
+	border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+:deep([data-theme="dark"]) .form-field :deep(.v-field:hover),
+:deep(.v-theme--dark) .form-field :deep(.v-field:hover) {
+	border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+:deep([data-theme="dark"]) .form-field :deep(.v-field--focused),
+:deep(.v-theme--dark) .form-field :deep(.v-field--focused) {
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 20px rgba(59, 130, 246, 0.25) !important;
+	border-color: rgba(59, 130, 246, 0.5) !important;
+	background: rgba(30, 30, 30, 0.95) !important;
 }
 
 /* Currency and amount display with enhanced Arabic number support */
 .currency-display {
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
 }
 
 .currency-display.right-aligned {
-	justify-content: flex-end;
+	justify-content: center;
 }
 
 .amount-value.right-aligned {
-	text-align: right;
+	text-align: center;
 }
 
 /* RTL support for currency displays */
 [dir="rtl"] .currency-display.right-aligned {
-	justify-content: flex-start;
+	justify-content: center;
 }
 
 [dir="rtl"] .amount-value.right-aligned {
-	text-align: left;
+	text-align: center;
 }
 
 [dir="rtl"] .currency-symbol {
 	margin-left: 2px;
 	margin-right: 0;
+}
+
+/* RTL specific alignment for discount percentage and amount values */
+[dir="rtl"] .currency-display.right-aligned .amount-value,
+[lang^="ar"] .currency-display.right-aligned .amount-value,
+[lang^="he"] .currency-display.right-aligned .amount-value,
+[lang^="fa"] .currency-display.right-aligned .amount-value,
+html[dir="rtl"] .currency-display.right-aligned .amount-value,
+body[dir="rtl"] .currency-display.right-aligned .amount-value {
+	direction: ltr !important;
+	text-align: center !important;
+	vertical-align: middle !important;
+	line-height: 1 !important;
+}
+
+/* RTL specific alignment for standalone amount-value with right-aligned class */
+[dir="rtl"] .amount-value.right-aligned,
+[lang^="ar"] .amount-value.right-aligned,
+[lang^="he"] .amount-value.right-aligned,
+[lang^="fa"] .amount-value.right-aligned,
+html[dir="rtl"] .amount-value.right-aligned,
+body[dir="rtl"] .amount-value.right-aligned {
+	direction: ltr !important;
+	text-align: center !important;
+	vertical-align: middle !important;
+	line-height: 1 !important;
 }
 
 .currency-symbol {
@@ -1497,12 +1843,54 @@ export default {
 .modern-items-table :deep(th[data-column-key="rate"]),
 .modern-items-table :deep(td[data-column-key="rate"]),
 .modern-items-table :deep(th[data-column-key="amount"]),
-.modern-items-table :deep(td[data-column-key="amount"]),
-.modern-items-table :deep(th[data-column-key="price_list_rate"]),
-.modern-items-table :deep(td[data-column-key="price_list_rate"]) {
+.modern-items-table :deep(td[data-column-key="amount"]) {
 	min-width: 100px;
 	max-width: 130px;
-	text-align: right;
+	text-align: center !important;
+}
+
+/* Ensure consistent header padding for rate/amount columns */
+.modern-items-table :deep(th[data-column-key="rate"]),
+.modern-items-table :deep(th[data-column-key="amount"]) {
+	padding: 12px !important;
+}
+
+/* Only cells get custom padding */
+.modern-items-table :deep(td[data-column-key="rate"]),
+.modern-items-table :deep(td[data-column-key="amount"]) {
+	padding: 16px 8px;
+}
+
+
+.modern-items-table :deep(th[data-column-key="price_list_rate"]),
+.modern-items-table :deep(td[data-column-key="price_list_rate"]) {
+	min-width: 120px;
+	max-width: 140px;
+	text-align: center !important;
+	font-weight: 500;
+}
+
+/* Ensure consistent header padding for price list rate column */
+.modern-items-table :deep(th[data-column-key="price_list_rate"]) {
+	padding: 12px !important;
+}
+
+/* Only cells get custom padding */
+.modern-items-table :deep(td[data-column-key="price_list_rate"]) {
+	padding: 16px 8px;
+}
+
+
+/* Specific header styling for Price List Rate */
+.modern-items-table :deep(th[data-column-key="price_list_rate"]) {
+	background: linear-gradient(135deg, var(--table-header-bg) 0%, rgba(25, 118, 210, 0.02) 100%);
+	border-right: 1px solid rgba(25, 118, 210, 0.1);
+}
+
+/* Enhanced header hover effects */
+.modern-items-table :deep(th:hover) {
+	background-color: rgba(25, 118, 210, 0.05);
+	transition: background-color 0.2s ease;
 }
 
 .modern-items-table :deep(th[data-column-key="discount_value"]),
@@ -1511,8 +1899,41 @@ export default {
 .modern-items-table :deep(td[data-column-key="discount_amount"]) {
 	min-width: 90px;
 	max-width: 120px;
-	text-align: right;
+	text-align: center !important;
 }
+
+/* Ensure consistent header padding for discount columns */
+.modern-items-table :deep(th[data-column-key="discount_value"]),
+.modern-items-table :deep(th[data-column-key="discount_amount"]) {
+	padding: 12px !important;
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+}
+
+/* Additional fix for headers containing percentage or Arabic text */
+.modern-items-table :deep(th) {
+	display: table-cell !important;
+	vertical-align: middle !important;
+}
+
+/* Specific fix for headers with Arabic text and special characters */
+.modern-items-table :deep(th .v-data-table-header__content) {
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	height: 100% !important;
+}
+
+/* Only cells get custom padding */
+.modern-items-table :deep(td[data-column-key="discount_value"]),
+.modern-items-table :deep(td[data-column-key="discount_amount"]) {
+	padding: 16px 8px;
+	vertical-align: middle !important;
+	line-height: 1 !important;
+}
+
 
 .modern-items-table :deep(th[data-column-key="posa_is_offer"]),
 .modern-items-table :deep(td[data-column-key="posa_is_offer"]) {
@@ -1544,7 +1965,7 @@ export default {
 [dir="rtl"] .modern-items-table :deep(td[data-column-key="discount_value"]),
 [dir="rtl"] .modern-items-table :deep(th[data-column-key="discount_amount"]),
 [dir="rtl"] .modern-items-table :deep(td[data-column-key="discount_amount"]) {
-	text-align: left;
+	text-align: center !important;
 }
 
 /* Drag and drop styles */
@@ -1620,64 +2041,139 @@ export default {
 	height: 32px !important;
 	min-width: 32px !important;
 	border-radius: 8px !important;
-	transition: all 0.2s ease !important;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 	font-weight: 600 !important;
+	backdrop-filter: blur(10px) !important;
+	position: relative !important;
+	overflow: hidden !important;
+	flex-shrink: 0;
+}
+
+.qty-control-btn::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.2);
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.qty-control-btn:hover::before {
+	transform: translateX(0);
+}
+
+.qty-control-btn .v-icon {
+	position: relative;
+	z-index: 1;
 }
 
 .qty-counter-container {
-	display: grid;
-	grid-template-columns: 32px 1fr 32px;
-	grid-template-rows: 1fr;
+	display: flex;
 	align-items: center;
-	justify-items: center;
+	justify-content: center;
 	gap: 8px;
 	padding: 4px;
 	min-width: 130px;
 	width: 130px;
-	height: 40px;
+	height: auto;
+	background: rgba(255, 255, 255, 0.6);
+	border-radius: 12px;
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(0, 0, 0, 0.04);
+	transition: all 0.3s ease;
+	margin: 0 auto;
 }
 
-/* Default LTR: minus=1, qty=2, plus=3 */
-.qty-counter-container .minus-btn {
-	grid-column: 1;
-	grid-row: 1;
+.qty-counter-container:hover {
+	background: rgba(255, 255, 255, 0.8);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+	transform: translateY(-1px);
 }
 
-.qty-counter-container .qty-display {
-	grid-column: 2;
-	grid-row: 1;
+:deep([data-theme="dark"]) .qty-counter-container,
+:deep(.v-theme--dark) .qty-counter-container {
+	background: rgba(30, 30, 30, 0.6);
+	border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.qty-counter-container .plus-btn {
-	grid-column: 3;
-	grid-row: 1;
+:deep([data-theme="dark"]) .qty-counter-container:hover,
+:deep(.v-theme--dark) .qty-counter-container:hover {
+	background: rgba(30, 30, 30, 0.8);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* RTL: plus=1, qty=2, minus=3 */
-.qty-counter-container.rtl-layout .minus-btn {
-	grid-column: 3;
-	grid-row: 1;
+/* RTL support for quantity counter - Enhanced with multiple selectors */
+/* HTML order: - | qty | + */
+/* RTL desired: + | qty | - */
+
+/* Use CSS order for precise RTL layout: + | qty | - */
+[dir="rtl"] .qty-counter-container,
+[lang^="ar"] .qty-counter-container,
+[lang^="he"] .qty-counter-container,
+[lang^="fa"] .qty-counter-container,
+.qty-counter-container.rtl-layout,
+html[dir="rtl"] .qty-counter-container,
+body[dir="rtl"] .qty-counter-container {
+	/* Keep normal flex direction but use order */
+	flex-direction: row !important;
 }
 
-.qty-counter-container.rtl-layout .plus-btn {
-	grid-column: 1;
-	grid-row: 1;
+/* RTL Button ordering: + | qty | - (reverse order values for RTL context) */
+[dir="rtl"] .qty-counter-container .plus-btn,
+[lang^="ar"] .qty-counter-container .plus-btn,
+[lang^="he"] .qty-counter-container .plus-btn,
+[lang^="fa"] .qty-counter-container .plus-btn,
+.qty-counter-container.rtl-layout .plus-btn,
+html[dir="rtl"] .qty-counter-container .plus-btn,
+body[dir="rtl"] .qty-counter-container .plus-btn {
+	order: 3 !important; /* Plus button should appear first visually */
 }
 
-/* Keep numbers LTR for readability */
-[dir="rtl"] .qty-display {
-	direction: ltr;
+[dir="rtl"] .qty-counter-container .qty-display,
+[lang^="ar"] .qty-counter-container .qty-display,
+[lang^="he"] .qty-counter-container .qty-display,
+[lang^="fa"] .qty-counter-container .qty-display,
+.qty-counter-container.rtl-layout .qty-display,
+html[dir="rtl"] .qty-counter-container .qty-display,
+body[dir="rtl"] .qty-counter-container .qty-display {
+	order: 2 !important; /* Quantity stays in middle */
+}
+
+[dir="rtl"] .qty-counter-container .minus-btn,
+[lang^="ar"] .qty-counter-container .minus-btn,
+[lang^="he"] .qty-counter-container .minus-btn,
+[lang^="fa"] .qty-counter-container .minus-btn,
+.qty-counter-container.rtl-layout .minus-btn,
+html[dir="rtl"] .qty-counter-container .minus-btn,
+body[dir="rtl"] .qty-counter-container .minus-btn {
+	order: 1 !important; /* Minus button should appear last visually */
+}
+
+/* Keep numbers readable in RTL - multiple selectors */
+[dir="rtl"] .qty-display,
+[lang^="ar"] .qty-display,
+[lang^="he"] .qty-display,
+[lang^="fa"] .qty-display,
+.qty-counter-container.rtl-layout .qty-display,
+html[dir="rtl"] .qty-display,
+body[dir="rtl"] .qty-display {
+	direction: ltr !important;
+	text-align: center;
 }
 
 .qty-display {
 	min-width: 40px;
 	text-align: center;
 	font-weight: 600;
-	padding: 4px 8px;
-	border-radius: 4px;
-	background: rgba(0, 0, 0, 0.02);
-	border: 1px solid rgba(0, 0, 0, 0.08);
+	padding: 6px 8px;
+	border-radius: 6px;
+	background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.08) 100%);
+	border: 1px solid rgba(37, 99, 235, 0.1);
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -1686,6 +2182,15 @@ export default {
 		"tnum" 1,
 		"lnum" 1,
 		"kern" 1;
+	color: #1e40af;
+	font-size: 0.85rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
 }
 
 :deep([data-theme="dark"]) .qty-display,
@@ -1700,13 +2205,27 @@ export default {
 }
 
 .qty-control-btn.minus-btn {
-	background: linear-gradient(145deg, #fff3e0, #ffe0b2) !important;
-	color: #ef6c00 !important;
+	background: linear-gradient(145deg, #fef3c7, #fbbf24) !important;
+	color: #92400e !important;
+	border: 2px solid rgba(251, 191, 36, 0.3) !important;
+}
+
+.qty-control-btn.minus-btn:hover {
+	background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
+	box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-2px) scale(1.05) !important;
 }
 
 .qty-control-btn.plus-btn {
-	background: linear-gradient(145deg, #e8f5e9, #c8e6c9) !important;
-	color: #2e7d32 !important;
+	background: linear-gradient(145deg, #d1fae5, #34d399) !important;
+	color: #065f46 !important;
+	border: 2px solid rgba(52, 211, 153, 0.3) !important;
+}
+
+.qty-control-btn.plus-btn:hover {
+	background: linear-gradient(145deg, #34d399, #10b981) !important;
+	box-shadow: 0 6px 20px rgba(52, 211, 153, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-2px) scale(1.05) !important;
 }
 
 
@@ -1725,20 +2244,50 @@ export default {
 
 /* Delete action button styling */
 .delete-action-btn {
-	min-width: 40px !important;
-	height: 40px !important;
-	border-radius: 10px !important;
-	transition: all 0.2s ease !important;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+	min-width: 44px !important;
+	height: 44px !important;
+	border-radius: 12px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
 	font-weight: 600 !important;
-	background: linear-gradient(145deg, #ffebee, #ffcdd2) !important;
-	color: #d32f2f !important;
+	background: linear-gradient(145deg, #fef2f2, #fecaca) !important;
+	color: #dc2626 !important;
+	border: 2px solid rgba(239, 68, 68, 0.2) !important;
+	position: relative !important;
+	overflow: hidden !important;
+}
+
+.delete-action-btn::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(45deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15));
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.delete-action-btn:hover::before {
+	transform: translateX(0);
 }
 
 .delete-action-btn:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
-	background: linear-gradient(145deg, #ffcdd2, #ef9a9a) !important;
+	transform: translateY(-2px) scale(1.05);
+	box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+	background: linear-gradient(145deg, #fecaca, #f87171) !important;
+}
+
+.delete-action-btn .v-icon {
+	position: relative;
+	z-index: 1;
+	transition: all 0.2s ease;
+}
+
+.delete-action-btn:hover .v-icon {
+	animation: pulse 0.6s ease-in-out;
 }
 
 :deep([data-theme="dark"]) .delete-action-btn,
