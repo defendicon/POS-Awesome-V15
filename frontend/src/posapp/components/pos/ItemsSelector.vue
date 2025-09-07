@@ -297,16 +297,19 @@
 								</div>
 							</div>
 						</div>
-                                               <div v-else class="items-table-container bg-white dark:bg-gray-900 dark:text-gray-100">
-                                                        <v-data-table-virtual
-                                                                :headers="headers"
-                                                                :items="filtered_items"
-                                                                class="sleek-data-table overflow-y-auto dark:bg-gray-800 dark:text-gray-100"
-                                                                :style="{ height: 'calc(100% - 80px)' }"
-                                                                item-key="item_code"
-                                                                fixed-header
-                                                                height="100%"
-                                                                :header-props="headerProps"
+						<div
+							v-else
+							class="items-table-container bg-white dark:bg-gray-900 dark:text-gray-100"
+						>
+							<v-data-table-virtual
+								:headers="headers"
+								:items="filtered_items"
+								class="sleek-data-table overflow-y-auto dark:bg-gray-800 dark:text-gray-100"
+								:style="{ height: 'calc(100% - 80px)' }"
+								item-key="item_code"
+								fixed-header
+								height="100%"
+								:header-props="headerProps"
 								:no-data-text="__('No items found')"
 								@click:row="click_item_row"
 								@scroll.passive="onListScroll"
