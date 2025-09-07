@@ -71,7 +71,10 @@
 					>
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
-					<div class="qty-display amount-value number-field-rtl" :class="{ 'negative-number': isNegative(item.qty) }">
+					<div
+						class="qty-display amount-value number-field-rtl"
+						:class="{ 'negative-number': isNegative(item.qty) }"
+					>
 						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
 					</div>
 					<v-btn
@@ -118,14 +121,16 @@
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
 				<div class="currency-display right-aligned">
-					<span class="amount-value">{{
-						formatFloat(
-							item.discount_percentage ||
-								(item.price_list_rate
-									? (item.discount_amount / item.price_list_rate) * 100
-									: 0),
-						)
-					}}%</span>
+					<span class="amount-value"
+						>{{
+							formatFloat(
+								item.discount_percentage ||
+									(item.price_list_rate
+										? (item.discount_amount / item.price_list_rate) * 100
+										: 0),
+							)
+						}}%</span
+					>
 				</div>
 			</template>
 
@@ -175,7 +180,6 @@
 					<v-icon size="small">mdi-delete-outline</v-icon>
 				</v-btn>
 			</template>
-
 
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
@@ -717,25 +721,25 @@ export default {
 		},
 		isRTL() {
 			// Multiple RTL detection methods
-			const htmlDir = document.documentElement.getAttribute('dir');
-			const bodyDir = document.body.getAttribute('dir');
+			const htmlDir = document.documentElement.getAttribute("dir");
+			const bodyDir = document.body.getAttribute("dir");
 			const computedDir = window.getComputedStyle(document.documentElement).direction;
-			const lang = document.documentElement.getAttribute('lang') || navigator.language;
-			
+			const lang = document.documentElement.getAttribute("lang") || navigator.language;
+
 			// Check if current language is RTL
-			const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi'];
-			const isRTLLanguage = rtlLanguages.some(rtlLang => lang.startsWith(rtlLang));
-			
-			console.log('RTL Detection:', {
+			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
+			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
+
+			console.log("RTL Detection:", {
 				htmlDir,
 				bodyDir,
 				computedDir,
 				lang,
 				isRTLLanguage,
-				result: htmlDir === 'rtl' || bodyDir === 'rtl' || computedDir === 'rtl' || isRTLLanguage
+				result: htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage,
 			});
-			
-			return htmlDir === 'rtl' || bodyDir === 'rtl' || computedDir === 'rtl' || isRTLLanguage;
+
+			return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
 		},
 	},
 	methods: {
@@ -829,7 +833,7 @@ export default {
 				this.removeItem(item);
 			} else {
 				// Use the existing setFormatedQty function for non-zero values
-				this.setFormatedQty(item, 'qty', null, false, event.target.value);
+				this.setFormatedQty(item, "qty", null, false, event.target.value);
 			}
 		},
 		handleMinusClick(item) {
@@ -1002,7 +1006,7 @@ export default {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-top: none;
 	animation: expandIn 0.3s ease forwards;
-	
+
 	/* Enable container queries */
 	container-type: inline-size;
 	container-name: expanded-content;
@@ -1030,9 +1034,15 @@ export default {
 }
 
 @keyframes shimmer {
-	0% { transform: translateX(-100%); }
-	50% { transform: translateX(100%); }
-	100% { transform: translateX(100%); }
+	0% {
+		transform: translateX(-100%);
+	}
+	50% {
+		transform: translateX(100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
 }
 
 @keyframes fadeInUp {
@@ -1047,14 +1057,18 @@ export default {
 }
 
 @keyframes pulse {
-	0%, 100% { transform: scale(1); }
-	50% { transform: scale(1.05); }
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
 }
 
 /* =================================================================
    EXPANDED CONTENT LAYOUT - SINGLE COLUMN VERTICAL STACK
    ================================================================= */
-
 
 /* Item action buttons styling */
 .item-action-btn {
@@ -1179,12 +1193,12 @@ export default {
 	width: 100%;
 	padding: 24px;
 	box-sizing: border-box;
-	
+
 	background: #ffffff;
 	border-radius: 12px;
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-	
+
 	/* Smooth transitions */
 	transition: all 0.3s ease;
 }
@@ -1279,30 +1293,30 @@ export default {
 	.expanded-content {
 		padding: 16px;
 	}
-	
+
 	.item-details-form {
 		gap: 16px;
 	}
-	
+
 	.form-section {
 		padding: 20px 16px;
 		border-radius: 8px;
 	}
-	
+
 	.form-row {
 		flex-direction: column;
 		gap: 12px;
 	}
-	
+
 	.form-field {
 		min-width: 100%;
 	}
-	
+
 	.section-header {
 		margin-bottom: 16px;
 		padding-bottom: 12px;
 	}
-	
+
 	.section-title {
 		font-size: 0.85rem;
 	}
@@ -1313,7 +1327,7 @@ export default {
 	.form-field {
 		min-width: min(200px, 48%);
 	}
-	
+
 	.form-section {
 		padding: 20px;
 	}
@@ -1527,7 +1541,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 		margin-right: clamp(6px, 1.5vw, 10px);
 		padding: clamp(4px, 1vw, 6px);
 	}
-	
+
 	.modern-items-table {
 		border-radius: 8px;
 		margin: 0 2px;
@@ -1666,7 +1680,6 @@ body[dir="rtl"] .expanded-content .qty-display {
 	flex-wrap: nowrap;
 }
 
-
 .form-field :deep(.v-field:hover) {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-1px);
@@ -1674,7 +1687,9 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 20px rgba(37, 99, 235, 0.15) !important;
+	box-shadow:
+		0 0 0 3px rgba(37, 99, 235, 0.1),
+		0 4px 20px rgba(37, 99, 235, 0.15) !important;
 	transform: translateY(-1px);
 	border-color: rgba(37, 99, 235, 0.4) !important;
 	background: rgba(255, 255, 255, 0.95) !important;
@@ -1693,7 +1708,9 @@ body[dir="rtl"] .expanded-content .qty-display {
 
 :deep([data-theme="dark"]) .form-field :deep(.v-field--focused),
 :deep(.v-theme--dark) .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 20px rgba(59, 130, 246, 0.25) !important;
+	box-shadow:
+		0 0 0 3px rgba(59, 130, 246, 0.2),
+		0 4px 20px rgba(59, 130, 246, 0.25) !important;
 	border-color: rgba(59, 130, 246, 0.5) !important;
 	background: rgba(30, 30, 30, 0.95) !important;
 }
@@ -1877,7 +1894,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	padding: 16px 8px;
 }
 
-
 .modern-items-table :deep(th[data-column-key="price_list_rate"]),
 .modern-items-table :deep(td[data-column-key="price_list_rate"]) {
 	min-width: 120px;
@@ -1895,7 +1911,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 .modern-items-table :deep(td[data-column-key="price_list_rate"]) {
 	padding: 16px 8px;
 }
-
 
 /* Specific header styling for Price List Rate */
 .modern-items-table :deep(th[data-column-key="price_list_rate"]) {
@@ -1949,7 +1964,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	vertical-align: middle !important;
 	line-height: 1 !important;
 }
-
 
 .modern-items-table :deep(th[data-column-key="posa_is_offer"]),
 .modern-items-table :deep(td[data-column-key="posa_is_offer"]) {
@@ -2058,7 +2072,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 	min-width: 32px !important;
 	border-radius: 8px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.06),
+		0 1px 3px rgba(0, 0, 0, 0.04) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
 	position: relative !important;
@@ -2067,7 +2083,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .qty-control-btn::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -2240,7 +2256,9 @@ body[dir="rtl"] .number-field-rtl {
 
 .qty-control-btn.minus-btn:hover {
 	background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
-	box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	box-shadow:
+		0 6px 20px rgba(251, 191, 36, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
 
@@ -2252,10 +2270,11 @@ body[dir="rtl"] .number-field-rtl {
 
 .qty-control-btn.plus-btn:hover {
 	background: linear-gradient(145deg, #34d399, #10b981) !important;
-	box-shadow: 0 6px 20px rgba(52, 211, 153, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	box-shadow:
+		0 6px 20px rgba(52, 211, 153, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
-
 
 :deep([data-theme="dark"]) .qty-control-btn.minus-btn,
 :deep(.v-theme--dark) .qty-control-btn.minus-btn {
@@ -2269,14 +2288,15 @@ body[dir="rtl"] .number-field-rtl {
 	color: #81c784 !important;
 }
 
-
 /* Delete action button styling */
 .delete-action-btn {
 	min-width: 44px !important;
 	height: 44px !important;
 	border-radius: 12px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+	box-shadow:
+		0 4px 12px rgba(239, 68, 68, 0.15),
+		0 2px 4px rgba(0, 0, 0, 0.08) !important;
 	font-weight: 600 !important;
 	background: linear-gradient(145deg, #fef2f2, #fecaca) !important;
 	color: #dc2626 !important;
@@ -2286,7 +2306,7 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .delete-action-btn::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -2304,7 +2324,9 @@ body[dir="rtl"] .number-field-rtl {
 
 .delete-action-btn:hover {
 	transform: translateY(-2px) scale(1.05);
-	box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+	box-shadow:
+		0 8px 24px rgba(239, 68, 68, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.1) !important;
 	background: linear-gradient(145deg, #fecaca, #f87171) !important;
 }
 
@@ -2328,5 +2350,4 @@ body[dir="rtl"] .number-field-rtl {
 :deep(.v-theme--dark) .delete-action-btn:hover {
 	background: linear-gradient(145deg, #5a1a1a, #4a1515) !important;
 }
-
 </style>
