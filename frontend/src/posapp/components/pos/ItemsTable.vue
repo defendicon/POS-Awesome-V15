@@ -1,36 +1,36 @@
 <template>
-	<div
-		class="my-0 py-0 overflow-y-auto items-table-container"
-		:style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
-		@dragover="onDragOverFromSelector($event)"
-		@drop="onDropFromSelector($event)"
-		@dragenter="onDragEnterFromSelector"
-		@dragleave="onDragLeaveFromSelector"
-	>
-		<v-data-table-virtual
-			:headers="headers"
-			:items="items"
-			:theme="$theme.current"
-			:expanded="expanded"
-			show-expand
-			item-value="posa_row_id"
-			class="modern-items-table elevation-2"
-			:items-per-page="itemsPerPage"
-			expand-on-click
-			density="compact"
-			hide-default-footer
-			:single-expand="true"
-			:header-props="headerProps"
-			:no-data-text="__('No items in cart')"
-			@update:expanded="
-				(val) =>
-					$emit(
-						'update:expanded',
-						val.map((v) => (typeof v === 'object' ? v.posa_row_id : v)),
-					)
-			"
-			:search="itemSearch"
-		>
+        <div
+                class="my-0 py-0 overflow-y-auto items-table-container bg-white dark:bg-gray-900 dark:text-gray-100"
+                :style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
+                @dragover="onDragOverFromSelector($event)"
+                @drop="onDropFromSelector($event)"
+                @dragenter="onDragEnterFromSelector"
+                @dragleave="onDragLeaveFromSelector"
+        >
+                <v-data-table-virtual
+                        :headers="headers"
+                        :items="items"
+                        :theme="$theme.current"
+                        :expanded="expanded"
+                        show-expand
+                        item-value="posa_row_id"
+                        class="modern-items-table elevation-2 bg-white dark:bg-gray-800 dark:text-gray-100"
+                        :items-per-page="itemsPerPage"
+                        expand-on-click
+                        density="compact"
+                        hide-default-footer
+                        :single-expand="true"
+                        :header-props="headerProps"
+                        :no-data-text="__('No items in cart')"
+                        @update:expanded="
+                                (val) =>
+                                        $emit(
+                                                'update:expanded',
+                                                val.map((v) => (typeof v === 'object' ? v.posa_row_id : v)),
+                                        )
+                        "
+                        :search="itemSearch"
+                >
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
 				<div class="d-flex align-center">
@@ -61,40 +61,43 @@
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
 				<div class="qty-counter-container" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
-					<v-btn
-						:disabled="!!item.posa_is_replace"
-						size="small"
-						color="warning"
-						variant="tonal"
-						class="qty-control-btn minus-btn"
-						@click.stop="handleMinusClick(item)"
-					>
-						<v-icon size="small">mdi-minus</v-icon>
-					</v-btn>
-					<div
-						class="qty-display amount-value number-field-rtl"
-						:class="{ 'negative-number': isNegative(item.qty) }"
-					>
-						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
-					</div>
-					<v-btn
-						:disabled="
-							!!item.posa_is_replace ||
-							((!stock_settings.allow_negative_stock ||
-								pos_profile.posa_block_sale_beyond_available_qty) &&
-								item.max_qty !== undefined &&
-								item.qty >= item.max_qty)
-						"
-						size="small"
-						color="success"
-						variant="tonal"
-						class="qty-control-btn plus-btn"
-						@click.stop="addOne(item)"
-					>
-						<v-icon size="small">mdi-plus</v-icon>
-					</v-btn>
-				</div>
-			</template>
+                                        <v-btn
+                                                :disabled="!!item.posa_is_replace"
+                                                size="small"
+                                                color="warning"
+                                                variant="tonal"
+                                                class="qty-control-btn minus-btn"
+                                                @click.stop="handleMinusClick(item)"
+                                        >
+                                                <v-icon size="small">mdi-minus</v-icon>
+                                        </v-btn>
+                                        <input
+                                                type="number"
+                                                min="1"
+                                                class="qty-input qty-display amount-value number-field-rtl"
+                                                :class="{ 'negative-number': isNegative(item.qty) }"
+                                                v-model.number="item.qty"
+                                                @change="handleQtyChange(item)"
+                                                @blur="handleQtyChange(item)"
+                                        />
+                                        <v-btn
+                                                :disabled="
+                                                        !!item.posa_is_replace ||
+                                                        ((!stock_settings.allow_negative_stock ||
+                                                                pos_profile.posa_block_sale_beyond_available_qty) &&
+                                                                item.max_qty !== undefined &&
+                                                                item.qty >= item.max_qty)
+                                                "
+                                                size="small"
+                                                color="success"
+                                                variant="tonal"
+                                                class="qty-control-btn plus-btn"
+                                                @click.stop="addOne(item)"
+                                        >
+                                                <v-icon size="small">mdi-plus</v-icon>
+                                        </v-btn>
+                                </div>
+                        </template>
 
 			<!-- Rate column -->
 			<template v-slot:item.rate="{ item }">
@@ -830,25 +833,27 @@ export default {
 				this.editedName = item.item_name;
 			}
 		},
-		handleQtyChange(item, event) {
-			const newQty = parseFloat(event.target.value) || 0;
-			if (newQty === 0) {
-				// Remove the item when quantity is set to 0
-				this.removeItem(item);
-			} else {
-				// Use the existing setFormatedQty function for non-zero values
-				this.setFormatedQty(item, "qty", null, false, event.target.value);
-			}
-		},
-		handleMinusClick(item) {
-			if (item.qty <= 1) {
-				// Remove the item when quantity would become 0 or less
-				this.removeItem(item);
-			} else {
-				// Use the existing subtractOne function
-				this.subtractOne(item);
-			}
-		},
+                handleQtyChange(item, event) {
+                        let newQty;
+                        if (event && event.target) {
+                                newQty = parseFloat(event.target.value);
+                        } else {
+                                newQty = parseFloat(item.qty);
+                        }
+                        if (!newQty || newQty < 1) {
+                                newQty = 1;
+                        }
+                        this.setFormatedQty(item, "qty", null, false, newQty);
+                },
+                handleMinusClick(item) {
+                        if (item.qty > 1) {
+                                // Use the existing subtractOne function
+                                this.subtractOne(item);
+                        } else {
+                                // Enforce minimum quantity of 1
+                                this.setFormatedQty(item, "qty", null, false, 1);
+                        }
+                },
 	},
 };
 </script>
@@ -2215,36 +2220,44 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .qty-display {
-	min-width: 40px;
-	text-align: center;
-	font-weight: 600;
-	padding: 6px 8px;
-	border-radius: 6px;
-	background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.08) 100%);
-	border: 1px solid rgba(37, 99, 235, 0.1);
-	font-family:
-		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
-		sans-serif;
-	font-variant-numeric: lining-nums tabular-nums;
-	font-feature-settings:
-		"tnum" 1,
-		"lnum" 1,
-		"kern" 1;
-	color: #1e40af;
-	font-size: 0.85rem;
-	transition: all 0.2s ease;
-	box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
-	flex: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
+        min-width: 40px;
+        text-align: center;
+        font-weight: 600;
+        padding: 4px 6px;
+        border-radius: 4px;
+        background: transparent;
+        border: none;
+        font-family:
+                "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+                sans-serif;
+        font-variant-numeric: lining-nums tabular-nums;
+        font-feature-settings:
+                "tnum" 1,
+                "lnum" 1,
+                "kern" 1;
+        font-size: 0.85rem;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
 }
 
-:deep([data-theme="dark"]) .qty-display,
-:deep(.v-theme--dark) .qty-display {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.12);
+.qty-input {
+        outline: none;
+        box-shadow: none;
+        background: transparent;
+        border: none;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+}
+
+.qty-input[type='number'] {
+        -moz-appearance: textfield;
 }
 
 .qty-control-btn:hover {
