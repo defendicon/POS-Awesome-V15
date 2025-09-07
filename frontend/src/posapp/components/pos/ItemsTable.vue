@@ -704,13 +704,13 @@ export default {
 			editedName: "",
 		};
 	},
-        computed: {
-                headerProps() {
-                        return this.isDarkTheme ? { class: "dark-table-header" } : {};
-                },
-                isDarkTheme() {
-                        return this.$theme.current === "dark";
-                },
+	computed: {
+		headerProps() {
+			return this.isDarkTheme ? { class: "dark-table-header" } : {};
+		},
+		isDarkTheme() {
+			return this.$theme.current === "dark";
+		},
 		hide_qty_decimals() {
 			try {
 				const saved = localStorage.getItem("posawesome_item_selector_settings");
@@ -856,20 +856,20 @@ export default {
 <style scoped>
 /* Modern table styling with clean design */
 .modern-items-table {
-border-radius: 8px;
-overflow: hidden;
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-border: 1px solid rgba(0, 0, 0, 0.1);
-height: 100%;
-display: flex;
-flex-direction: column;
-transition: all 0.3s ease;
-background: #ffffff;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	transition: all 0.3s ease;
+	background: #ffffff;
 }
 
 :deep(.dark-table-header) {
-background-color: #121212 !important;
-color: #ffffff !important;
+	background-color: #121212 !important;
+	color: #ffffff !important;
 }
 
 :deep([data-theme="dark"]) .modern-items-table,
@@ -1024,9 +1024,9 @@ color: #ffffff !important;
 /* Dark theme */
 :deep([data-theme="dark"]) .expanded-content,
 :deep(.v-theme--dark) .expanded-content {
-background: #2d3748;
-border-color: rgba(255, 255, 255, 0.1);
-color: #e5e7eb;
+	background: #2d3748;
+	border-color: rgba(255, 255, 255, 0.1);
+	color: #e5e7eb;
 }
 
 @keyframes expandIn {
@@ -1279,10 +1279,10 @@ color: #e5e7eb;
 /* Dark theme */
 :deep([data-theme="dark"]) .form-section,
 :deep(.v-theme--dark) .form-section {
-background: #1a202c;
-border-color: rgba(255, 255, 255, 0.1);
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-color: #e5e7eb;
+	background: #1a202c;
+	border-color: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	color: #e5e7eb;
 }
 
 :deep([data-theme="dark"]) .form-section:hover,
