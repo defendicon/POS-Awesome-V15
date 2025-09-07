@@ -1,25 +1,28 @@
 <template>
-        <div
-                class="my-0 py-0 overflow-y-auto items-table-container bg-white dark:bg-gray-800 dark:text-gray-100"
-                :style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
-                @dragover="onDragOverFromSelector($event)"
-                @drop="onDropFromSelector($event)"
-                @dragenter="onDragEnterFromSelector"
-                @dragleave="onDragLeaveFromSelector"
-        >
+	<div
+		class="my-0 py-0 overflow-y-auto items-table-container bg-white dark:bg-gray-800 dark:text-gray-100"
+		:style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
+		@dragover="onDragOverFromSelector($event)"
+		@drop="onDropFromSelector($event)"
+		@dragenter="onDragEnterFromSelector"
+		@dragleave="onDragLeaveFromSelector"
+	>
 		<v-data-table-virtual
 			:headers="headers"
 			:items="items"
 			:theme="$theme.current"
 			:expanded="expanded"
 			show-expand
-                        item-value="posa_row_id"
-                        :class="['modern-items-table elevation-2', isDarkTheme ? 'dark:bg-gray-800 dark:text-gray-100' : 'bg-white']"
-                        :items-per-page="itemsPerPage"
-                        expand-on-click
-                        density="compact"
-                        hide-default-footer
-                        :single-expand="true"
+			item-value="posa_row_id"
+			:class="[
+				'modern-items-table elevation-2',
+				isDarkTheme ? 'dark:bg-gray-800 dark:text-gray-100' : 'bg-white',
+			]"
+			:items-per-page="itemsPerPage"
+			expand-on-click
+			density="compact"
+			hide-default-footer
+			:single-expand="true"
 			:header-props="headerProps"
 			:no-data-text="__('No items in cart')"
 			@update:expanded="
@@ -60,43 +63,43 @@
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
-                                <div class="qty-counter-container" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
-                                        <v-btn
-                                                :disabled="!!item.posa_is_replace"
-                                                size="small"
-                                                color="warning"
-                                                variant="tonal"
-                                                class="qty-control-btn minus-btn"
-                                                @click.stop="handleMinusClick(item)"
-                                        >
-                                                <v-icon size="small">mdi-minus</v-icon>
-                                        </v-btn>
-                                        <input
-                                                type="number"
-                                                class="qty-display qty-input number-field-rtl"
-                                                :class="{ 'negative-number': isNegative(item.qty) }"
-                                                v-model.number="item.qty"
-                                                @change="handleQtyChange(item, $event)"
-                                                @blur="handleQtyBlur(item)"
-                                        />
-                                        <v-btn
-                                                :disabled="
-                                                        !!item.posa_is_replace ||
-                                                        ((!stock_settings.allow_negative_stock ||
-                                                                pos_profile.posa_block_sale_beyond_available_qty) &&
-                                                                item.max_qty !== undefined &&
-                                                                item.qty >= item.max_qty)
-                                                "
-                                                size="small"
-                                                color="success"
-                                                variant="tonal"
-                                                class="qty-control-btn plus-btn"
-                                                @click.stop="addOne(item)"
-                                        >
-                                                <v-icon size="small">mdi-plus</v-icon>
-                                        </v-btn>
-                                </div>
-                        </template>
+				<div class="qty-counter-container" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
+					<v-btn
+						:disabled="!!item.posa_is_replace"
+						size="small"
+						color="warning"
+						variant="tonal"
+						class="qty-control-btn minus-btn"
+						@click.stop="handleMinusClick(item)"
+					>
+						<v-icon size="small">mdi-minus</v-icon>
+					</v-btn>
+					<input
+						type="number"
+						class="qty-display qty-input number-field-rtl"
+						:class="{ 'negative-number': isNegative(item.qty) }"
+						v-model.number="item.qty"
+						@change="handleQtyChange(item, $event)"
+						@blur="handleQtyBlur(item)"
+					/>
+					<v-btn
+						:disabled="
+							!!item.posa_is_replace ||
+							((!stock_settings.allow_negative_stock ||
+								pos_profile.posa_block_sale_beyond_available_qty) &&
+								item.max_qty !== undefined &&
+								item.qty >= item.max_qty)
+						"
+						size="small"
+						color="success"
+						variant="tonal"
+						class="qty-control-btn plus-btn"
+						@click.stop="addOne(item)"
+					>
+						<v-icon size="small">mdi-plus</v-icon>
+					</v-btn>
+				</div>
+			</template>
 
 			<!-- Rate column -->
 			<template v-slot:item.rate="{ item }">
@@ -832,27 +835,27 @@ export default {
 				this.editedName = item.item_name;
 			}
 		},
-                handleQtyChange(item, event) {
-                        const newQty = parseFloat(event.target.value) || 0;
-                        if (newQty === 0) {
-                                // Remove the item when quantity is set to 0
-                                this.removeItem(item);
-                        } else {
-                                // Use the existing setFormatedQty function for non-zero values
-                                this.setFormatedQty(item, "qty", null, false, event.target.value);
-                        }
-                },
-                handleQtyBlur(item) {
-                        if (!item.qty || item.qty < 1) {
-                                item.qty = 1;
-                                this.setFormatedQty(item, "qty", null, false, item.qty);
-                        }
-                },
-                handleMinusClick(item) {
-                        if (item.qty <= 1) {
-                                // Remove the item when quantity would become 0 or less
-                                this.removeItem(item);
-                        } else {
+		handleQtyChange(item, event) {
+			const newQty = parseFloat(event.target.value) || 0;
+			if (newQty === 0) {
+				// Remove the item when quantity is set to 0
+				this.removeItem(item);
+			} else {
+				// Use the existing setFormatedQty function for non-zero values
+				this.setFormatedQty(item, "qty", null, false, event.target.value);
+			}
+		},
+		handleQtyBlur(item) {
+			if (!item.qty || item.qty < 1) {
+				item.qty = 1;
+				this.setFormatedQty(item, "qty", null, false, item.qty);
+			}
+		},
+		handleMinusClick(item) {
+			if (item.qty <= 1) {
+				// Remove the item when quantity would become 0 or less
+				this.removeItem(item);
+			} else {
 				// Use the existing subtractOne function
 				this.subtractOne(item);
 			}
@@ -870,8 +873,8 @@ export default {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	height: 100%;
 	display: flex;
-        flex-direction: column;
-        transition: all 0.3s ease;
+	flex-direction: column;
+	transition: all 0.3s ease;
 }
 
 :deep([data-theme="dark"]) .modern-items-table,
@@ -1604,14 +1607,14 @@ body[dir="rtl"] .expanded-content .qty-display {
 		border-radius: 6px !important;
 	}
 
-        .qty-display {
-                min-width: 32px;
-                padding: 0;
-                font-size: 0.8rem;
-                height: 28px;
-                border: none;
-                background: transparent;
-        }
+	.qty-display {
+		min-width: 32px;
+		padding: 0;
+		font-size: 0.8rem;
+		height: 28px;
+		border: none;
+		background: transparent;
+	}
 
 	.action-button-group {
 		flex-direction: column;
@@ -2224,33 +2227,33 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .qty-display {
-        min-width: 40px;
-        text-align: center;
-        font-weight: 600;
-        padding: 4px 0;
-        border: none;
-        background: transparent;
-        font-size: 0.85rem;
-        flex: 1;
-        height: 32px;
+	min-width: 40px;
+	text-align: center;
+	font-weight: 600;
+	padding: 4px 0;
+	border: none;
+	background: transparent;
+	font-size: 0.85rem;
+	flex: 1;
+	height: 32px;
 }
 
 :deep([data-theme="dark"]) .qty-display,
 :deep(.v-theme--dark) .qty-display {
-        background: transparent;
-        border: none;
-        color: #e5e7eb;
+	background: transparent;
+	border: none;
+	color: #e5e7eb;
 }
 
 /* Remove number input spinners for a cleaner look */
 .qty-input::-webkit-outer-spin-button,
 .qty-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+	-webkit-appearance: none;
+	margin: 0;
 }
 
-.qty-input[type='number'] {
-        -moz-appearance: textfield;
+.qty-input[type="number"] {
+	-moz-appearance: textfield;
 }
 
 .qty-control-btn:hover {
