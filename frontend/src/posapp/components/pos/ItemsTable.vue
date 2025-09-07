@@ -1024,8 +1024,9 @@ export default {
 /* Dark theme */
 :deep([data-theme="dark"]) .expanded-content,
 :deep(.v-theme--dark) .expanded-content {
-	background: #2d3748;
-	border-color: rgba(255, 255, 255, 0.1);
+        background: #2d3748;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
 }
 
 @keyframes expandIn {
@@ -2114,26 +2115,26 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .qty-counter-container {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	padding: 4px;
-	min-width: 130px;
-	width: 130px;
-	height: auto;
-	background: rgba(255, 255, 255, 0.6);
-	border-radius: 12px;
-	backdrop-filter: blur(10px);
-	border: 1px solid rgba(0, 0, 0, 0.04);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 2px;
+        min-width: 110px;
+        width: 110px;
+        height: auto;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.04);
 	transition: all 0.3s ease;
 	margin: 0 auto;
 }
 
 .qty-counter-container:hover {
-	background: rgba(255, 255, 255, 0.8);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-	transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
 }
 
 :deep([data-theme="dark"]) .qty-counter-container,
@@ -2220,11 +2221,11 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .qty-display {
-	min-width: 40px;
-	text-align: center;
-	font-weight: 600;
-	padding: 4px 6px;
-	border-radius: 4px;
+        min-width: 32px;
+        text-align: center;
+        font-weight: 600;
+        padding: 4px 6px;
+        border-radius: 4px;
 	background: transparent;
 	border: none;
 	font-family:
