@@ -1,13 +1,13 @@
 <template>
-       <div
-               class="my-0 py-0 overflow-y-auto items-table-container"
-               :class="{ 'v-theme--dark': isDarkTheme }"
-               :style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
-               @dragover="onDragOverFromSelector($event)"
-               @drop="onDropFromSelector($event)"
-               @dragenter="onDragEnterFromSelector"
-               @dragleave="onDragLeaveFromSelector"
-       >
+	<div
+		class="my-0 py-0 overflow-y-auto items-table-container"
+		:class="{ 'v-theme--dark': isDarkTheme }"
+		:style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
+		@dragover="onDragOverFromSelector($event)"
+		@drop="onDropFromSelector($event)"
+		@dragenter="onDragEnterFromSelector"
+		@dragleave="onDragLeaveFromSelector"
+	>
 		<v-data-table-virtual
 			:headers="headers"
 			:items="items"
