@@ -208,8 +208,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Item Code')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											v-model="item.item_code"
 											disabled
@@ -222,8 +222,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="
 												formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
@@ -247,8 +247,8 @@
 									<div class="form-field">
 										<v-select
 											density="compact"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											:label="frappe._('UOM')"
 											v-model="item.uom"
 											:items="item.item_uoms"
@@ -281,8 +281,8 @@
 											color="primary"
 											id="rate"
 											:label="frappe._('Rate')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatCurrency(item.rate)"
 											@change="[
@@ -304,8 +304,8 @@
 											color="primary"
 											id="discount_percentage"
 											:label="frappe._('Discount %')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatFloat(item.discount_percentage || 0)"
 											@change="[
@@ -333,8 +333,8 @@
 											color="primary"
 											id="discount_amount"
 											:label="frappe._('Discount Amount')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatCurrency(item.discount_amount || 0)"
 											@change="[
@@ -363,8 +363,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Price List Rate')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatCurrency(item.price_list_rate || 0)"
 											:disabled="!pos_profile.posa_allow_price_list_rate_change"
@@ -379,8 +379,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Total Amount')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatCurrency(item.qty * item.rate)"
 											disabled
@@ -418,8 +418,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Available QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatFloat(item.actual_qty)"
 											disabled
@@ -432,8 +432,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Stock QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatFloat(item.stock_qty)"
 											disabled
@@ -446,8 +446,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Stock UOM')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											v-model="item.stock_uom"
 											disabled
@@ -462,8 +462,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Warehouse')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											v-model="item.warehouse"
 											disabled
@@ -476,8 +476,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Group')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											v-model="item.item_group"
 											disabled
@@ -511,8 +511,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Serial No QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											v-model="item.serial_no_selected_count"
 											type="number"
@@ -532,8 +532,8 @@
 											density="compact"
 											chips
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											:label="frappe._('Serial No')"
 											multiple
 											@update:model-value="setSerialNo(item)"
@@ -558,8 +558,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Batch No. Available QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											:model-value="formatFloat(item.actual_batch_qty)"
 											disabled
@@ -572,8 +572,8 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Batch No Expiry Date')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											hide-details
 											v-model="item.batch_no_expiry_date"
 											disabled
@@ -588,8 +588,8 @@
 											variant="outlined"
 											density="compact"
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											bg-color="var(--input-bg)"
+											class="sleek-field u-input"
 											:label="frappe._('Batch No')"
 											@update:model-value="setBatchQty(item, $event)"
 											hide-details
