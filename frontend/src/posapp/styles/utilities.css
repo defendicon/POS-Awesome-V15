@@ -18,6 +18,10 @@
 	border-color: var(--input-border);
 }
 .u-input .v-field__input,
+.u-input .v-field__field {
+	background: var(--input-bg);
+}
+.u-input .v-field__input,
 .u-input .v-field__field,
 .u-input input,
 .u-input .v-select__selection-text {
