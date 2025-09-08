@@ -2084,34 +2084,4 @@ export default {
 	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
 	transition: box-shadow 0.3s ease-in-out;
 }
-
-/* Dark mode styling for input fields */
-:deep([data-theme="dark"]) .,
-:deep(.v-theme--dark) .,
-::v-deep([data-theme="dark"]) .,
-::v-deep(.v-theme--dark) . {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .:deep(.v-field__input),
-:deep(.v-theme--dark) .:deep(.v-field__input),
-:deep([data-theme="dark"]) .:deep(input),
-:deep(.v-theme--dark) .:deep(input),
-:deep([data-theme="dark"]) .:deep(.v-label),
-:deep(.v-theme--dark) .:deep(.v-label),
-::v-deep([data-theme="dark"]) ..v-field__input,
-::v-deep(.v-theme--dark) ..v-field__input,
-::v-deep([data-theme="dark"]) .input,
-::v-deep(.v-theme--dark) .input,
-::v-deep([data-theme="dark"]) ..v-label,
-::v-deep(.v-theme--dark) ..v-label {
-	color: #fff !important;
-}
-
-:deep([data-theme="dark"]) .:deep(.v-field__overlay),
-:deep(.v-theme--dark) .:deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) ..v-field__overlay,
-::v-deep(.v-theme--dark) ..v-field__overlay {
-	background-color: #1e1e1e !important;
-}
 </style>
