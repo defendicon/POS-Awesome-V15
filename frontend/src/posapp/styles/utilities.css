@@ -1,0 +1,49 @@
+.u-card {
+	background: var(--card);
+	color: var(--fg);
+	border: 1px solid var(--border);
+}
+
+.u-input {
+	background: var(--input-bg);
+	color: var(--input-fg);
+	border: 1px solid var(--input-border);
+	border-radius: var(--border-radius-md);
+}
+.u-input::placeholder {
+	color: var(--input-placeholder);
+}
+.u-input:focus-within {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: 2px;
+}
+
+.u-table thead {
+	background: var(--table-header);
+	color: var(--fg);
+}
+.u-table tbody tr {
+	background: var(--table-row);
+	border-bottom: 1px solid var(--divider);
+}
+.u-table tbody tr:hover {
+	background: var(--table-row-hover);
+}
+.u-table tbody tr.selected {
+	background: var(--table-row-selected);
+}
+
+.u-scrollbar {
+	scrollbar-color: var(--border) transparent;
+}
+.u-scrollbar::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+.u-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+.u-scrollbar::-webkit-scrollbar-thumb {
+	background-color: var(--border);
+	border-radius: 4px;
+}

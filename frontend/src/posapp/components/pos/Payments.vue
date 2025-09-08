@@ -1,11 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
 	<div class="pa-0">
-		<v-card
-			:class="['selection mx-auto pa-1 my-0 mt-3', isDarkTheme ? '' : 'bg-grey-lighten-5']"
-			:style="isDarkTheme ? 'background-color:#1E1E1E' : ''"
-			style="max-height: 68vh; height: 68vh"
-		>
+		<v-card class="selection mx-auto pa-1 my-0 mt-3 u-card" style="max-height: 68vh; height: 68vh">
 			<v-progress-linear
 				:active="loading"
 				:indeterminate="loading"
@@ -13,7 +9,7 @@
 				location="top"
 				color="info"
 			></v-progress-linear>
-			<div ref="paymentContainer" class="overflow-y-auto pa-2" style="max-height: 67vh">
+			<div ref="paymentContainer" class="overflow-y-auto pa-2 u-scrollbar" style="max-height: 67vh">
 				<!-- Payment Summary (Paid, To Be Paid, Change) -->
 				<v-row v-if="invoice_doc" class="pa-1" dense>
 					<v-col cols="7">
@@ -21,8 +17,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Paid Amount')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							v-model="total_payments_display"
 							readonly
@@ -36,8 +32,8 @@
 							variant="solo"
 							color="primary"
 							label="To Be Paid"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							v-model="diff_payment_display"
 							:prefix="currencySymbol(invoice_doc.currency)"
@@ -53,8 +49,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Paid Change')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							:model-value="formatCurrency(paid_change)"
 							:prefix="currencySymbol(invoice_doc.currency)"
 							:rules="paid_change_rules"
@@ -71,8 +67,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Credit Change')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							:model-value="formatCurrency(credit_change)"
 							:prefix="currencySymbol(invoice_doc.currency)"
 							density="compact"
@@ -96,8 +92,8 @@
 								variant="solo"
 								color="primary"
 								:label="frappe._(payment.mode_of_payment)"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field sleek-field"
+								bg-color="var(--input-bg)"
+								class="sleek-field u-input"
 								hide-details
 								:model-value="formatCurrency(payment.amount)"
 								@change="setFormatedCurrency(payment, 'amount', null, false, $event)"
@@ -159,8 +155,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Redeem Loyalty Points')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(loyalty_amount)"
 							type="text"
@@ -174,8 +170,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('You can redeem up to')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatFloat(available_points_amount)"
 							:prefix="currencySymbol(invoice_doc.currency)"
@@ -200,8 +196,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Redeemed Customer Credit')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(redeemed_customer_credit)"
 							type="text"
@@ -218,8 +214,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('You can redeem credit up to')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(available_customer_credit)"
 							:prefix="currencySymbol(invoice_doc.currency)"
@@ -238,8 +234,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Net Total')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							:model-value="formatCurrency(invoice_doc.net_total, displayCurrency)"
 							readonly
 							:prefix="currencySymbol()"
@@ -252,8 +248,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Tax and Charges')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="
 								formatCurrency(invoice_doc.total_taxes_and_charges, displayCurrency)
@@ -269,8 +265,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Total Amount')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(invoice_doc.total, displayCurrency)"
 							readonly
@@ -284,8 +280,8 @@
 							variant="solo"
 							color="primary"
 							:label="diff_label"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(diff_payment, displayCurrency)"
 							readonly
@@ -299,8 +295,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Discount Amount')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(invoice_doc.discount_amount)"
 							readonly
@@ -314,8 +310,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Grand Total')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(invoice_doc.grand_total)"
 							readonly
@@ -329,8 +325,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Rounded Total')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							:model-value="formatCurrency(invoice_doc.rounded_total)"
 							readonly
@@ -348,7 +344,7 @@
 							:min-date="new Date()"
 							auto-apply
 							:dark="isDarkTheme"
-							class="dark-field sleek-field"
+							class="sleek-field u-input"
 							@update:model-value="update_delivery_date()"
 						/>
 					</v-col>
@@ -365,8 +361,8 @@
 							:items="addresses"
 							item-title="address_title"
 							item-value="name"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							:no-data-text="__('Address not found')"
 							hide-details
 							:customFilter="addressFilter"
@@ -407,10 +403,10 @@
 					<!-- Additional Notes (if enabled in POS profile) -->
 					<v-col cols="12" v-if="pos_profile.posa_display_additional_notes">
 						<v-textarea
-							class="pa-0 dark-field sleek-field"
+							class="pa-0 sleek-field u-input"
 							variant="solo"
 							density="compact"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+							bg-color="var(--input-bg)"
 							clearable
 							color="primary"
 							auto-grow
@@ -431,8 +427,8 @@
 								:label="frappe._('Purchase Order')"
 								variant="solo"
 								density="compact"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field sleek-field"
+								bg-color="var(--input-bg)"
+								class="sleek-field u-input"
 								clearable
 								color="primary"
 								hide-details
@@ -446,7 +442,7 @@
 								:min-date="new Date()"
 								auto-apply
 								:dark="isDarkTheme"
-								class="dark-field sleek-field"
+								class="sleek-field u-input"
 								@update:model-value="update_po_date()"
 							/>
 							<v-text-field
@@ -508,17 +504,17 @@
 							:min-date="new Date()"
 							auto-apply
 							:dark="isDarkTheme"
-							class="dark-field sleek-field"
+							class="sleek-field u-input"
 							@update:model-value="update_credit_due_date()"
 						/>
 						<v-text-field
-							class="mt-2 dark-field sleek-field"
+							class="mt-2 sleek-field u-input"
 							density="compact"
 							variant="solo"
 							type="number"
 							min="0"
 							max="365"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+							bg-color="var(--input-bg)"
 							v-model.number="credit_due_days"
 							:label="frappe._('Days until due')"
 							hide-details
@@ -568,8 +564,8 @@
 								variant="solo"
 								color="primary"
 								:label="frappe._('Available Credit')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field sleek-field"
+								bg-color="var(--input-bg)"
+								class="sleek-field u-input"
 								hide-details
 								:model-value="formatCurrency(row.total_credit)"
 								readonly
@@ -582,8 +578,8 @@
 								variant="solo"
 								color="primary"
 								:label="frappe._('Redeem Credit')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field sleek-field"
+								bg-color="var(--input-bg)"
+								class="sleek-field u-input"
 								hide-details
 								type="text"
 								:model-value="formatCurrency(row.credit_to_redeem)"
@@ -613,8 +609,8 @@
 							:items="sales_persons"
 							item-title="title"
 							item-value="value"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							:no-data-text="__('Sales Person not found')"
 							hide-details
 							:disabled="readonly"
@@ -683,8 +679,8 @@
 							type="number"
 							min="0"
 							max="365"
-							class="dark-field sleek-field"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+							class="sleek-field u-input"
+							bg-color="var(--input-bg)"
 							v-model.number="custom_days_value"
 							:label="frappe._('Days')"
 							hide-details
@@ -716,8 +712,8 @@
 							variant="solo"
 							color="primary"
 							:label="frappe._('Mobile Number')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							bg-color="var(--input-bg)"
+							class="sleek-field u-input"
 							hide-details
 							v-model="invoice_doc.contact_mobile"
 							type="number"
@@ -2090,32 +2086,32 @@ export default {
 }
 
 /* Dark mode styling for input fields */
-:deep([data-theme="dark"]) .dark-field,
-:deep(.v-theme--dark) .dark-field,
-::v-deep([data-theme="dark"]) .dark-field,
-::v-deep(.v-theme--dark) .dark-field {
+:deep([data-theme="dark"]) .,
+:deep(.v-theme--dark) .,
+::v-deep([data-theme="dark"]) .,
+::v-deep(.v-theme--dark) . {
 	background-color: #1e1e1e !important;
 }
 
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__input),
-:deep([data-theme="dark"]) .dark-field :deep(input),
-:deep(.v-theme--dark) .dark-field :deep(input),
-:deep([data-theme="dark"]) .dark-field :deep(.v-label),
-:deep(.v-theme--dark) .dark-field :deep(.v-label),
-::v-deep([data-theme="dark"]) .dark-field .v-field__input,
-::v-deep(.v-theme--dark) .dark-field .v-field__input,
-::v-deep([data-theme="dark"]) .dark-field input,
-::v-deep(.v-theme--dark) .dark-field input,
-::v-deep([data-theme="dark"]) .dark-field .v-label,
-::v-deep(.v-theme--dark) .dark-field .v-label {
+:deep([data-theme="dark"]) .:deep(.v-field__input),
+:deep(.v-theme--dark) .:deep(.v-field__input),
+:deep([data-theme="dark"]) .:deep(input),
+:deep(.v-theme--dark) .:deep(input),
+:deep([data-theme="dark"]) .:deep(.v-label),
+:deep(.v-theme--dark) .:deep(.v-label),
+::v-deep([data-theme="dark"]) ..v-field__input,
+::v-deep(.v-theme--dark) ..v-field__input,
+::v-deep([data-theme="dark"]) .input,
+::v-deep(.v-theme--dark) .input,
+::v-deep([data-theme="dark"]) ..v-label,
+::v-deep(.v-theme--dark) ..v-label {
 	color: #fff !important;
 }
 
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
-::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
+:deep([data-theme="dark"]) .:deep(.v-field__overlay),
+:deep(.v-theme--dark) .:deep(.v-field__overlay),
+::v-deep([data-theme="dark"]) ..v-field__overlay,
+::v-deep(.v-theme--dark) ..v-field__overlay {
 	background-color: #1e1e1e !important;
 }
 </style>

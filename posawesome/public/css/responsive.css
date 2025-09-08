@@ -60,6 +60,28 @@
 	--field-bg: var(--surface-secondary);
 	--field-border: #e0e0e0;
 	--field-focus: rgba(25, 118, 210, 0.1);
+
+	/* Alias design tokens */
+	--bg: var(--surface-primary);
+	--fg: var(--text-primary);
+	--card: var(--surface-elevated);
+	--popover: var(--surface-elevated);
+	--border: var(--field-border);
+	--divider: var(--field-border);
+	--hover: var(--table-row-hover);
+	--active: var(--table-row-hover);
+	--selected: rgba(25, 118, 210, 0.15);
+	--focus-ring: var(--primary-start);
+	--table-header: var(--table-header-bg);
+	--table-row: var(--surface-primary);
+	--table-row-hover: var(--table-row-hover);
+	--table-row-selected: var(--selected);
+	--input-bg: var(--field-bg);
+	--input-fg: var(--text-primary);
+	--input-border: var(--field-border);
+	--input-placeholder: var(--text-disabled);
+	--backdrop: rgba(0, 0, 0, 0.5);
+	--fg-inverted: #ffffff;
 }
 
 /* Ensure the main viewport fills the screen without scroll */
@@ -115,6 +137,28 @@ body {
 	--field-bg: var(--surface-secondary);
 	--field-border: #373737;
 	--field-focus: rgba(187, 134, 252, 0.1);
+
+	/* Alias design tokens */
+	--bg: var(--background);
+	--fg: var(--text-primary);
+	--card: var(--surface-secondary);
+	--popover: var(--surface-elevated);
+	--border: var(--field-border);
+	--divider: var(--divider);
+	--hover: rgba(255, 255, 255, 0.06);
+	--active: rgba(255, 255, 255, 0.12);
+	--selected: rgba(187, 134, 252, 0.2);
+	--focus-ring: var(--primary-start);
+	--table-header: var(--table-header-bg);
+	--table-row: var(--surface-primary);
+	--table-row-hover: var(--table-row-hover);
+	--table-row-selected: var(--selected);
+	--input-bg: var(--field-bg);
+	--input-fg: var(--text-primary);
+	--input-border: var(--field-border);
+	--input-placeholder: var(--text-disabled);
+	--backdrop: rgba(0, 0, 0, 0.7);
+	--fg-inverted: #000000;
 }
 
 /* ===== SPACING UTILITIES ===== */

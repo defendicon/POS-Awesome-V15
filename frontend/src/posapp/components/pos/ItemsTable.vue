@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="my-0 py-0 overflow-y-auto items-table-container"
+		class="my-0 py-0 overflow-y-auto items-table-container u-scrollbar"
 		:style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
 		@dragover="onDragOverFromSelector($event)"
 		@drop="onDropFromSelector($event)"
@@ -14,7 +14,7 @@
 			:expanded="expanded"
 			show-expand
 			item-value="posa_row_id"
-			class="modern-items-table elevation-2"
+			class="modern-items-table elevation-2 u-table"
 			:items-per-page="itemsPerPage"
 			expand-on-click
 			density="compact"
@@ -60,7 +60,11 @@
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
-				<div class="qty-counter-container" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
+				<div
+					class="qty-counter-container u-input"
+					:class="{ 'rtl-layout': isRTL }"
+					:title="`RTL: ${isRTL}`"
+				>
 					<v-btn
 						:disabled="!!item.posa_is_replace"
 						size="small"
@@ -188,7 +192,7 @@
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
 				<td :colspan="headers.length" class="ma-0 pa-0 expanded-row-cell">
-					<div class="expanded-content responsive-expanded-content">
+					<div class="expanded-content responsive-expanded-content u-card">
 						<!-- Item Details Form -->
 						<div class="item-details-form">
 							<!-- Basic Information Section -->
@@ -706,7 +710,7 @@ export default {
 	},
 	computed: {
 		headerProps() {
-			return this.isDarkTheme ? { style: "background-color:#121212;color:#fff" } : {};
+			return { style: "background-color:var(--table-header);color:var(--fg)" };
 		},
 		isDarkTheme() {
 			return this.$theme.current === "dark";
@@ -859,24 +863,36 @@ export default {
 	border-radius: 8px;
 	overflow: hidden;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--border);
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
-	background: #ffffff;
-}
-
-:deep([data-theme="dark"]) .modern-items-table,
-:deep(.v-theme--dark) .modern-items-table {
-	background: #1a202c;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	background: var(--card);
 }
 
 /* Ensure items table can scroll when many rows exist */
 .items-table-container {
 	overflow-y: auto;
+}
+
+.qty-counter-container {
+	display: flex;
+	align-items: center;
+}
+
+.qty-counter-container.u-input {
+	padding: 0;
+}
+
+.qty-counter-container.u-input:focus-within {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: 2px;
+}
+
+.qty-control-btn {
+	border-left: 1px solid var(--input-border);
+	border-radius: 0;
 }
 
 /* Table wrapper styling */
@@ -896,9 +912,9 @@ export default {
 	letter-spacing: 0.3px;
 	padding: 12px;
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	background-color: #f8f9fa;
-	color: #495057;
+	border-bottom: 1px solid var(--divider);
+	background-color: var(--table-header);
+	color: var(--fg);
 	position: sticky;
 	top: 0;
 	z-index: 1;
@@ -911,13 +927,6 @@ export default {
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
 	height: 40px;
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(th),
-:deep(.v-theme--dark) .modern-items-table :deep(th) {
-	background-color: #2d3748;
-	color: #e2e8f0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Header text wrapper for better control */
@@ -949,19 +958,11 @@ export default {
 /* Table row styling */
 .modern-items-table :deep(tr) {
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+	border-bottom: 1px solid var(--divider);
 }
 
 .modern-items-table :deep(tr:hover) {
-	background-color: rgba(0, 0, 0, 0.02);
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(tr) {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover) {
-	background-color: rgba(255, 255, 255, 0.03);
+	background-color: var(--table-row-hover);
 }
 
 /* Table cell styling */
@@ -970,7 +971,7 @@ export default {
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
-	color: #374151;
+	color: var(--fg);
 	position: relative;
 }
 
@@ -982,11 +983,6 @@ export default {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(td),
-:deep(.v-theme--dark) .modern-items-table :deep(td) {
-	color: #e5e7eb;
 }
 
 /* =================================================================
@@ -1005,10 +1001,9 @@ export default {
 	padding: 24px;
 	width: 100%;
 	box-sizing: border-box;
-	background: #f8f9fa;
+	background: var(--card);
 	border-radius: 0 0 8px 8px;
-	border: 1px solid rgba(0, 0, 0, 0.1);
-	border-top: none;
+	border-top: 1px solid var(--divider);
 	animation: expandIn 0.3s ease forwards;
 
 	/* Enable container queries */
@@ -1017,11 +1012,6 @@ export default {
 }
 
 /* Dark theme */
-:deep([data-theme="dark"]) .expanded-content,
-:deep(.v-theme--dark) .expanded-content {
-	background: #2d3748;
-	border-color: rgba(255, 255, 255, 0.1);
-}
 
 @keyframes expandIn {
 	from {
@@ -1198,9 +1188,9 @@ export default {
 	padding: 24px;
 	box-sizing: border-box;
 
-	background: #ffffff;
+	background: var(--card);
 	border-radius: 12px;
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--divider);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
 	/* Smooth transitions */

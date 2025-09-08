@@ -10,15 +10,11 @@
 			:style="{
 				height: invoiceHeight || 'var(--container-height)',
 				maxHeight: invoiceHeight || 'var(--container-height)',
-				backgroundColor: isDarkTheme ? '#121212' : '',
+				backgroundColor: 'var(--card)',
 				resize: 'vertical',
 				overflow: 'auto',
 			}"
-			:class="[
-				'cards my-0 py-0 mt-3 resizable',
-				isDarkTheme ? '' : 'bg-grey-lighten-5',
-				{ 'return-mode': isReturnInvoice },
-			]"
+			:class="['cards my-0 py-0 mt-3 resizable u-card', { 'return-mode': isReturnInvoice }]"
 			@mouseup="saveInvoiceHeight"
 			@touchend="saveInvoiceHeight"
 		>
@@ -45,7 +41,7 @@
 							hide-details
 							variant="solo"
 							color="primary"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+							:bg-color="'var(--input-bg)'"
 							class="dark-field sleek-field"
 							:items="invoiceTypes"
 							:label="frappe._('Type')"
@@ -1366,7 +1362,7 @@ export default {
 /* Style for selected checkbox button */
 .v-checkbox-btn.v-selected {
 	background-color: var(--submit-start) !important;
-	color: white;
+	color: var(--fg-inverted);
 }
 
 /* Bottom border for elements */
@@ -1411,7 +1407,7 @@ export default {
 	top: 0;
 	right: 0;
 	background-color: rgb(var(--v-theme-error));
-	color: white;
+	color: var(--fg-inverted);
 	padding: 4px 12px;
 	font-weight: bold;
 	border-bottom-left-radius: 8px;
