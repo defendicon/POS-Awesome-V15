@@ -10,7 +10,20 @@
 	border: 1px solid var(--input-border);
 	border-radius: var(--border-radius-md);
 }
-.u-input::placeholder {
+.u-input .v-field__overlay {
+	background: var(--input-bg);
+	border-color: var(--input-border);
+}
+.u-input .v-field__outline {
+	border-color: var(--input-border);
+}
+.u-input .v-field__input,
+.u-input .v-field__field,
+.u-input input,
+.u-input .v-select__selection-text {
+	color: var(--input-fg);
+}
+.u-input input::placeholder {
 	color: var(--input-placeholder);
 }
 .u-input:focus-within {
