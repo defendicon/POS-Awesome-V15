@@ -1,21 +1,24 @@
 <template>
-	<div
-		class="my-0 py-0 overflow-y-auto items-table-container"
-		:style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
-		@dragover="onDragOverFromSelector($event)"
-		@drop="onDropFromSelector($event)"
-		@dragenter="onDragEnterFromSelector"
-		@dragleave="onDragLeaveFromSelector"
-	>
-		<v-data-table-virtual
-			:headers="headers"
-			:items="items"
-			:theme="$theme.current"
-			:expanded="expanded"
-			show-expand
-			item-value="posa_row_id"
-			class="modern-items-table elevation-2"
-			:items-per-page="itemsPerPage"
+        <div
+                :class="['my-0 py-0 overflow-y-auto items-table-container', isDarkTheme ? '' : 'bg-grey-lighten-5']"
+                :style="{
+                        height: 'calc(100% - 80px)',
+                        maxHeight: 'calc(100% - 80px)',
+                        backgroundColor: isDarkTheme ? '#1E1E1E' : ''
+                }"
+                @dragover="onDragOverFromSelector($event)"
+                @drop="onDropFromSelector($event)"
+                @dragenter="onDragEnterFromSelector"
+                @dragleave="onDragLeaveFromSelector"
+        >
+                <v-data-table-virtual
+                        :headers="headers"
+                        :items="items"
+                        :expanded="expanded"
+                        show-expand
+                        item-value="posa_row_id"
+                        class="modern-items-table elevation-2"
+                        :items-per-page="itemsPerPage"
 			expand-on-click
 			density="compact"
 			hide-default-footer
