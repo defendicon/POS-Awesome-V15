@@ -20,10 +20,7 @@ def get_customer_groups(pos_profile):
         # Get items based on the item groups defined in the POS profile
         for data in pos_profile.get("customer_groups"):
             customer_groups.extend(
-                [
-                    "%s" % frappe.db.escape(d.get("name"))
-                    for d in get_child_nodes("Customer Group", data.get("customer_group"))
-                ]
+                [d.get("name") for d in get_child_nodes("Customer Group", data.get("customer_group"))]
             )
 
     return list(set(customer_groups))
@@ -43,9 +40,10 @@ def get_customer_group_condition(pos_profile):
     cond = "disabled = 0"
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
-        cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
+        escaped_groups = [frappe.db.escape(g) for g in customer_groups]
+        cond = " customer_group in ({})".format(", ".join(escaped_groups))
 
-    return cond % tuple(customer_groups)
+    return cond
 
 
 @frappe.whitelist()
