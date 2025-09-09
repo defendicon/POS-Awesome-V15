@@ -1580,7 +1580,10 @@ export default {
 				);
 				if (cached) {
 					vm.customer_info = { ...cached };
-					if (vm.pos_profile.posa_force_reload_items && cached.customer_price_list) {
+					if (
+						vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
+						cached.customer_price_list
+					) {
 						vm.selected_price_list = cached.customer_price_list;
 						vm.eventBus.emit("update_customer_price_list", cached.customer_price_list);
 						vm.apply_cached_price_list(cached.customer_price_list);
@@ -1592,7 +1595,10 @@ export default {
 					.find((c) => c.customer_name === vm.customer);
 				if (queued) {
 					vm.customer_info = { ...queued, name: queued.customer_name };
-					if (vm.pos_profile.posa_force_reload_items && queued.customer_price_list) {
+					if (
+						vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
+						queued.customer_price_list
+					) {
 						vm.selected_price_list = queued.customer_price_list;
 						vm.eventBus.emit("update_customer_price_list", queued.customer_price_list);
 						vm.apply_cached_price_list(queued.customer_price_list);
@@ -1620,7 +1626,10 @@ export default {
 			// When force reload is enabled, automatically switch to the
 			// customer's default price list so that item rates are fetched
 			// correctly from the server.
-			if (vm.pos_profile.posa_force_reload_items && message.customer_price_list) {
+			if (
+				vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
+				message.customer_price_list
+			) {
 				vm.selected_price_list = message.customer_price_list;
 				vm.eventBus.emit("update_customer_price_list", message.customer_price_list);
 				vm.apply_cached_price_list(message.customer_price_list);
