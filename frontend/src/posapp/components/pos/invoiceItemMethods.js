@@ -1317,7 +1317,11 @@ export default {
 						item.serial_no_data = updated_item.serial_no_data;
 						if (updated_item.rate !== undefined) {
 							if (!item.locked_price && !item.posa_offer_applied) {
-								if (updated_item.rate !== 0 || !item.rate) {
+								if (
+									this.pos_profile.posa_force_price_from_customer_price_list ||
+									updated_item.rate !== 0 ||
+									!item.rate
+								) {
 									item.rate = updated_item.rate;
 									item.price_list_rate = updated_item.price_list_rate || updated_item.rate;
 								}
@@ -1438,7 +1442,11 @@ export default {
 						// adjusted rates from being reset whenever an item row is expanded.
 						if (force_update || !item.base_rate) {
 							// Always store base rates from server in base currency
-							if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
+							if (
+								vm.pos_profile.posa_force_price_from_customer_price_list ||
+								data.price_list_rate !== 0 ||
+								!item.base_price_list_rate
+							) {
 								item.base_price_list_rate = data.price_list_rate;
 								if (!item.posa_offer_applied) {
 									item.base_rate = data.price_list_rate;

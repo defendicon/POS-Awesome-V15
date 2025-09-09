@@ -1062,7 +1062,11 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
+						if (
+							vm.pos_profile.posa_force_price_from_customer_price_list ||
+							det.rate !== 0 ||
+							!item.rate
+						) {
 							upd.rate = det.rate;
 							upd.price_list_rate = det.price_list_rate || det.rate;
 						}
@@ -1096,7 +1100,11 @@ export default {
 							saveItemUOMs(item.item_code, updItem.item_uoms);
 						}
 						if (updItem.rate !== undefined) {
-							if (updItem.rate !== 0 || !item.rate) {
+							if (
+								vm.pos_profile.posa_force_price_from_customer_price_list ||
+								updItem.rate !== 0 ||
+								!item.rate
+							) {
 								upd.rate = updItem.rate;
 								upd.price_list_rate = updItem.price_list_rate || updItem.rate;
 							}
@@ -1981,7 +1989,11 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
+						if (
+							vm.pos_profile.posa_force_price_from_customer_price_list ||
+							det.rate !== 0 ||
+							!item.rate
+						) {
 							item.rate = det.rate;
 							item.price_list_rate = det.price_list_rate || det.rate;
 						}
