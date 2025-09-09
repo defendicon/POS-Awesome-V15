@@ -867,8 +867,8 @@ export default {
 	background: #ffffff;
 }
 
-:deep([data-theme="dark"]) .modern-items-table,
-:deep(.v-theme--dark) .modern-items-table {
+:deep([data-theme="dark"] .modern-items-table),
+:deep(.modern-items-table.v-theme--dark) {
 	background: #1a202c;
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -896,9 +896,9 @@ export default {
 	letter-spacing: 0.3px;
 	padding: 12px;
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	background-color: #f8f9fa;
-	color: #495057;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+	background-color: #f8f9fa !important;
+	color: #495057 !important;
 	position: sticky;
 	top: 0;
 	z-index: 1;
@@ -913,11 +913,11 @@ export default {
 	height: 40px;
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th),
-:deep(.v-theme--dark) .modern-items-table :deep(th) {
-	background-color: #2d3748;
-	color: #e2e8f0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+:deep([data-theme="dark"] .modern-items-table th),
+:deep(.modern-items-table.v-theme--dark th) {
+	background-color: #2d3748 !important;
+	color: #e2e8f0 !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Header text wrapper for better control */
@@ -956,11 +956,13 @@ export default {
 	background-color: rgba(0, 0, 0, 0.02);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(tr) {
+:deep([data-theme="dark"] .modern-items-table tr),
+:deep(.modern-items-table.v-theme--dark tr) {
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover) {
+:deep([data-theme="dark"] .modern-items-table tr:hover),
+:deep(.modern-items-table.v-theme--dark tr:hover) {
 	background-color: rgba(255, 255, 255, 0.03);
 }
 
@@ -984,8 +986,8 @@ export default {
 	box-sizing: border-box;
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(td),
-:deep(.v-theme--dark) .modern-items-table :deep(td) {
+:deep([data-theme="dark"] .modern-items-table td),
+:deep(.modern-items-table.v-theme--dark td) {
 	color: #e5e7eb;
 }
 
@@ -1717,6 +1719,35 @@ body[dir="rtl"] .expanded-content .qty-display {
 		0 4px 20px rgba(59, 130, 246, 0.25) !important;
 	border-color: rgba(59, 130, 246, 0.5) !important;
 	background: rgba(30, 30, 30, 0.95) !important;
+}
+
+:deep([data-theme="dark"]) .dark-field,
+:deep(.v-theme--dark) .dark-field,
+::v-deep([data-theme="dark"]) .dark-field,
+::v-deep(.v-theme--dark) .dark-field {
+	background-color: #1e1e1e !important;
+}
+
+:deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
+:deep(.v-theme--dark) .dark-field :deep(.v-field__input),
+:deep([data-theme="dark"]) .dark-field :deep(input),
+:deep(.v-theme--dark) .dark-field :deep(input),
+:deep([data-theme="dark"]) .dark-field :deep(.v-label),
+:deep(.v-theme--dark) .dark-field :deep(.v-label),
+::v-deep([data-theme="dark"]) .dark-field .v-field__input,
+::v-deep(.v-theme--dark) .dark-field .v-field__input,
+::v-deep([data-theme="dark"]) .dark-field input,
+::v-deep(.v-theme--dark) .dark-field input,
+::v-deep([data-theme="dark"]) .dark-field .v-label,
+::v-deep(.v-theme--dark) .dark-field .v-label {
+	color: #fff !important;
+}
+
+:deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
+:deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
+::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
+::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
+	background-color: #1e1e1e !important;
 }
 
 /* Currency and amount display with enhanced Arabic number support */
