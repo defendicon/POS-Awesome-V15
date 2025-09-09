@@ -1362,6 +1362,8 @@ export default {
 					}
 				}
 
+				await savePriceListItems(vm.customer_price_list || vm.pos_profile.selling_price_list, items);
+
 				if (hasMore) {
 					const last = items[items.length - 1]?.item_name || null;
 					console.log("[ItemsSelector] more items available, starting background load", {
@@ -1500,7 +1502,7 @@ export default {
 						this.itemWorker.postMessage({
 							type: "parse_and_cache",
 							json: text,
-							priceList: this.customer_price_list || "",
+							priceList: this.active_price_list || "",
 						});
 					});
 					if (this.items_request_token !== requestToken) {
