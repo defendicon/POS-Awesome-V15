@@ -108,13 +108,16 @@ async function bulkPutPrices(priceList, items) {
 		if (!db.isOpen()) {
 			await db.open();
 		}
-		const records = items.map((it) => ({
-			price_list: priceList,
-			item_code: it.item_code,
-			rate: it.rate,
-			price_list_rate: it.price_list_rate || it.rate,
-			timestamp: Date.now(),
-		}));
+		const records = items.map((it) => {
+			const price = it.price_list_rate ?? it.rate ?? 0;
+			return {
+				price_list: priceList,
+				item_code: it.item_code,
+				rate: price,
+				price_list_rate: price,
+				timestamp: Date.now(),
+			};
+		});
 		await db.table("item_prices").bulkPut(records);
 	} catch (e) {
 		console.error("Worker bulkPut prices failed", e);

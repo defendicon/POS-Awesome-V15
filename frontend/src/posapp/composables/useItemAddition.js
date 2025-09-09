@@ -351,7 +351,7 @@ export function useItemAddition() {
 		new_item.discount_amount = 0;
 		new_item.discount_percentage = 0;
 		new_item.discount_amount_per_item = 0;
-		new_item.price_list_rate = item.price_list_rate || item.rate;
+		new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;
 
 		// Setup base rates properly for multi-currency
 		const baseCurrency = context.price_list_currency || context.pos_profile.currency;

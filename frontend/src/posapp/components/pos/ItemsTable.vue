@@ -362,7 +362,7 @@
 											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
-											:model-value="formatCurrency(item.price_list_rate || 0)"
+											:model-value="formatCurrency(item.price_list_rate ?? 0)"
 											:disabled="!pos_profile.posa_allow_price_list_rate_change"
 											prepend-inner-icon="mdi-format-list-numbered"
 											:prefix="currencySymbol(pos_profile.currency)"
