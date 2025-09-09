@@ -1695,29 +1695,29 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 :deep(:is([data-theme="dark"], .v-theme--dark)) .form-field :deep(.v-field--focused) {
-        box-shadow:
-                0 0 0 3px rgba(59, 130, 246, 0.2),
-                0 4px 20px rgba(59, 130, 246, 0.25) !important;
-        border-color: rgba(59, 130, 246, 0.5) !important;
-        background: rgba(30, 30, 30, 0.95) !important;
+	box-shadow:
+		0 0 0 3px rgba(59, 130, 246, 0.2),
+		0 4px 20px rgba(59, 130, 246, 0.25) !important;
+	border-color: rgba(59, 130, 246, 0.5) !important;
+	background: rgba(30, 30, 30, 0.95) !important;
 }
 
 :deep(:is([data-theme="dark"], .v-theme--dark)) .dark-field {
-        background-color: #1e1e1e !important;
+	background-color: #1e1e1e !important;
 }
 
 :deep(:is([data-theme="dark"], .v-theme--dark)) .dark-field :deep(:is(.v-field__input, input, .v-label)) {
-        color: #fff !important;
+	color: #fff !important;
 }
 
 :deep(:is([data-theme="dark"], .v-theme--dark)) .dark-field :deep(.v-field__overlay) {
-        background-color: #1e1e1e !important;
+	background-color: #1e1e1e !important;
 }
 
 /* Currency and amount display with enhanced Arabic number support */
 .currency-display {
-        display: flex;
-        align-items: center;
+	display: flex;
+	align-items: center;
 	justify-content: center;
 	width: 100%;
 	height: 100%;
