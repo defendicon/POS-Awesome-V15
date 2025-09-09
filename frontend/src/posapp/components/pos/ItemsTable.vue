@@ -188,15 +188,15 @@
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
 				<td :colspan="headers.length" class="ma-0 pa-0 expanded-row-cell">
-                                        <div
-                                                class="expanded-content responsive-expanded-content"
-                                                :class="{ 'v-theme--dark': isDarkTheme }"
-                                                :data-theme="isDarkTheme ? 'dark' : undefined"
-                                        >
-                                                <!-- Item Details Form -->
-                                                <div class="item-details-form">
-                                                        <!-- Basic Information Section -->
-                                                        <div class="form-section">
+					<div
+						class="expanded-content responsive-expanded-content"
+						:class="{ 'v-theme--dark': isDarkTheme }"
+						:data-theme="isDarkTheme ? 'dark' : undefined"
+					>
+						<!-- Item Details Form -->
+						<div class="item-details-form">
+							<!-- Basic Information Section -->
+							<div class="form-section">
 								<div class="section-header">
 									<v-icon size="small" class="section-icon">mdi-information-outline</v-icon>
 									<span class="section-title">{{ __("Basic Information") }}</span>
@@ -1248,16 +1248,16 @@ export default {
 }
 
 .section-title {
-        font-weight: 600;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--text-primary);
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--text-primary);
 }
 
 :deep([data-theme="dark"]) .section-title,
 :deep(.v-theme--dark) .section-title {
-        color: #e2e8f0;
+	color: #e2e8f0;
 }
 
 /* Form rows - flexible and responsive */
@@ -1284,10 +1284,10 @@ export default {
 /* Dark theme */
 :deep([data-theme="dark"]) .form-section,
 :deep(.v-theme--dark) .form-section {
-        background: #1a202c;
-        border-color: rgba(255, 255, 255, 0.1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        color: #e2e8f0;
+	background: #1a202c;
+	border-color: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	color: #e2e8f0;
 }
 
 :deep([data-theme="dark"]) .form-section:hover,
@@ -1757,7 +1757,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 :deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
 ::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
 ::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
-        background-color: #1e1e1e !important;
+	background-color: #1e1e1e !important;
 }
 
 :deep([data-theme="dark"]) .dark-field :deep(.v-field__outline),
@@ -1776,7 +1776,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 ::v-deep(.v-theme--dark) .dark-field .v-field__outline__end,
 ::v-deep([data-theme="dark"]) .dark-field .v-field__outline__notch,
 ::v-deep(.v-theme--dark) .dark-field .v-field__outline__notch {
-        border-color: rgba(255, 255, 255, 0.2) !important;
+	border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 :deep([data-theme="dark"]) .dark-field :deep(.v-field__prepend-inner .v-icon),
@@ -1787,7 +1787,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 ::v-deep(.v-theme--dark) .dark-field .v-field__prepend-inner .v-icon,
 ::v-deep([data-theme="dark"]) .dark-field .v-field__append-inner .v-icon,
 ::v-deep(.v-theme--dark) .dark-field .v-field__append-inner .v-icon {
-        color: #fff !important;
+	color: #fff !important;
 }
 
 /* Currency and amount display with enhanced Arabic number support */
