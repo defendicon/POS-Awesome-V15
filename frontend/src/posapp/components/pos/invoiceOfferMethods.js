@@ -189,7 +189,7 @@ export default {
 							return;
 						}
 						const items = [];
-						const rate = item.original_price_list_rate || item.price_list_rate;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 						const res = this.checkQtyAnountOffer(offer, item.stock_qty, item.stock_qty * rate);
 						if (res.apply) {
 							items.push(item.posa_row_id);
@@ -221,7 +221,7 @@ export default {
 							return;
 						}
 						total_count += item.stock_qty;
-						const rate = item.original_price_list_rate || item.price_list_rate;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 						total_amount += item.stock_qty * rate;
 						items.push(item.posa_row_id);
 					}
@@ -258,7 +258,7 @@ export default {
 							return;
 						}
 						total_count += item.stock_qty;
-						const rate = item.original_price_list_rate || item.price_list_rate;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 						total_amount += item.stock_qty * rate;
 						items.push(item.posa_row_id);
 					}
@@ -285,7 +285,7 @@ export default {
 				combined.forEach((item) => {
 					if (!item.posa_is_offer && !item.posa_is_replace) {
 						total_qty += item.stock_qty;
-						const rate = item.original_price_list_rate || item.price_list_rate;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 						total_amount += item.stock_qty * rate;
 						items.push(item.posa_row_id);
 					}
@@ -659,7 +659,7 @@ export default {
 			new_item.price_list_rate = 0;
 		} else {
 			// Use the item's price list rate if available
-			new_item.price_list_rate = item.price_list_rate || item.rate;
+			new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;
 			// Determine base price list rate just like invoice items
 			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
 			if (this.selected_currency !== baseCurrency) {
@@ -718,7 +718,7 @@ export default {
 
 						// Determine original base price for reference
 						const base_price = this.flt(
-							(item.original_base_price_list_rate ||
+							(item.original_base_price_list_rate ??
 								item.base_price_list_rate / conversion_factor) * conversion_factor,
 							this.currency_precision,
 						);
@@ -770,7 +770,7 @@ export default {
 						// Calculate discount in base currency first
 						// Use normalized price * current conversion factor
 						const base_price = this.flt(
-							(item.original_base_price_list_rate ||
+							(item.original_base_price_list_rate ??
 								item.base_price_list_rate / conversion_factor) * conversion_factor,
 							this.currency_precision,
 						);

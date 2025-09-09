@@ -242,11 +242,13 @@
 													<span class="price-amount">
 														{{
 															format_currency(
-																item.base_price_list_rate || item.rate,
+																item.base_price_list_rate ?? item.rate ?? 0,
 																item.original_currency ||
 																	pos_profile.currency,
 																ratePrecision(
-																	item.base_price_list_rate || item.rate,
+																	item.base_price_list_rate ??
+																		item.rate ??
+																		0,
 																),
 															)
 														}}
@@ -319,9 +321,11 @@
 											}}
 											{{
 												format_currency(
-													item.base_price_list_rate || item.rate,
+													item.base_price_list_rate ?? item.rate ?? 0,
 													item.original_currency || pos_profile.currency,
-													ratePrecision(item.base_price_list_rate || item.rate),
+													ratePrecision(
+														item.base_price_list_rate ?? item.rate ?? 0,
+													),
 												)
 											}}
 										</div>
@@ -640,8 +644,13 @@ export default {
 					this.items.forEach((it) => {
 						const ci = map[it.item_code];
 						if (ci) {
-							it.rate = ci.rate;
-							it.price_list_rate = ci.price_list_rate || ci.rate;
+							const force =
+								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = ci.price_list_rate ?? ci.rate ?? 0;
+							if (force || price) {
+								it.rate = price;
+								it.price_list_rate = price;
+							}
 						}
 					});
 					this.eventBus.emit("set_all_items", this.items);
@@ -1062,9 +1071,11 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
-							upd.rate = det.rate;
-							upd.price_list_rate = det.price_list_rate || det.rate;
+						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+						const price = det.price_list_rate ?? det.rate ?? 0;
+						if (force || price) {
+							upd.rate = price;
+							upd.price_list_rate = price;
 						}
 					}
 					if (det.currency) {
@@ -1096,9 +1107,11 @@ export default {
 							saveItemUOMs(item.item_code, updItem.item_uoms);
 						}
 						if (updItem.rate !== undefined) {
-							if (updItem.rate !== 0 || !item.rate) {
-								upd.rate = updItem.rate;
-								upd.price_list_rate = updItem.price_list_rate || updItem.rate;
+							const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = updItem.price_list_rate ?? updItem.rate ?? 0;
+							if (force || price) {
+								upd.rate = price;
+								upd.price_list_rate = price;
 							}
 						}
 						if (updItem.currency) {
@@ -1981,9 +1994,11 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
-							item.rate = det.rate;
-							item.price_list_rate = det.price_list_rate || det.rate;
+						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+						const price = det.price_list_rate ?? det.rate ?? 0;
+						if (force || price) {
+							item.rate = price;
+							item.price_list_rate = price;
 						}
 					}
 					if (det.currency) {

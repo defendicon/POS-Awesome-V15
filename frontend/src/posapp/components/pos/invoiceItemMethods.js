@@ -695,7 +695,7 @@ export default {
 
 				new_item.price_list_rate = flt(item.price_list_rate); // Keep price list rate in USD
 				new_item.base_price_list_rate =
-					item.base_price_list_rate || flt(item.price_list_rate / this.exchange_rate);
+					item.base_price_list_rate ?? flt(item.price_list_rate / this.exchange_rate);
 
 				// Calculate amounts
 				new_item.amount = flt(item.qty) * new_item.rate; // Amount in USD
@@ -710,7 +710,7 @@ export default {
 				new_item.rate = flt(item.rate);
 				new_item.base_rate = item.base_rate || flt(item.rate);
 				new_item.price_list_rate = flt(item.price_list_rate);
-				new_item.base_price_list_rate = item.base_price_list_rate || flt(item.price_list_rate);
+				new_item.base_price_list_rate = item.base_price_list_rate ?? flt(item.price_list_rate);
 				new_item.amount = flt(item.qty) * new_item.rate;
 				new_item.base_amount = new_item.amount;
 				new_item.discount_amount = flt(item.discount_amount);
@@ -1316,13 +1316,16 @@ export default {
 						item.batch_no_data = updated_item.batch_no_data;
 						item.serial_no_data = updated_item.serial_no_data;
 						if (updated_item.rate !== undefined) {
+							const force =
+								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
 							if (!item.locked_price && !item.posa_offer_applied) {
-								if (updated_item.rate !== 0 || !item.rate) {
-									item.rate = updated_item.rate;
-									item.price_list_rate = updated_item.price_list_rate || updated_item.rate;
+								if (force || price) {
+									item.rate = price;
+									item.price_list_rate = price;
 								}
-							} else if (!item.price_list_rate) {
-								item.price_list_rate = updated_item.price_list_rate || updated_item.rate;
+							} else if (!item.price_list_rate && (force || price)) {
+								item.price_list_rate = price;
 							}
 						}
 						if (updated_item.currency) {
@@ -1379,7 +1382,7 @@ export default {
 					conversion_rate: 1,
 					currency: this.pos_profile.currency,
 					qty: item.qty,
-					price_list_rate: item.base_price_list_rate || item.price_list_rate,
+					price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
 					child_docname: `New ${currentDoc.doctype} Item 1`,
 					cost_center: this.pos_profile.cost_center,
 					pos_profile: this.pos_profile.name,
@@ -1862,7 +1865,7 @@ export default {
 					fieldname: "new_rate",
 					fieldtype: "Float",
 					label: __("New Price List Rate"),
-					default: item.price_list_rate || item.rate,
+					default: item.price_list_rate ?? item.rate ?? 0,
 					reqd: 1,
 				},
 			],

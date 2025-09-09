@@ -53,13 +53,16 @@ export async function savePriceListItems(priceList, items) {
 		if (!priceList) return;
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		const rates = items.map((it) => ({
-			price_list: priceList,
-			item_code: it.item_code,
-			rate: it.rate,
-			price_list_rate: it.price_list_rate || it.rate,
-			timestamp: Date.now(),
-		}));
+		const rates = items.map((it) => {
+			const price = it.price_list_rate ?? it.rate ?? 0;
+			return {
+				price_list: priceList,
+				item_code: it.item_code,
+				rate: price,
+				price_list_rate: price,
+				timestamp: Date.now(),
+			};
+		});
 		await db.table("item_prices").bulkPut(rates);
 	} catch (e) {
 		console.error("Failed to save price list items", e);
@@ -82,11 +85,12 @@ export async function getCachedPriceListItems(priceList, ttl = 24 * 60 * 60 * 10
 		const result = valid
 			.map((p) => {
 				const it = map.get(p.item_code);
+				const price = p.price_list_rate ?? p.rate ?? 0;
 				return it
 					? {
 							...it,
-							rate: p.rate,
-							price_list_rate: p.price_list_rate || p.rate,
+							rate: price,
+							price_list_rate: price,
 						}
 					: null;
 			})

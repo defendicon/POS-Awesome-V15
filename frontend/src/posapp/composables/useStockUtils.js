@@ -47,7 +47,7 @@ export function useStockUtils() {
 			const cached = context.getCachedPriceListItems(priceList) || [];
 			const match = cached.find((p) => p.item_code === item.item_code && p.uom === new_uom.uom);
 			if (match) {
-				uomRate = match.price_list_rate || match.rate;
+				uomRate = match.price_list_rate ?? match.rate ?? 0;
 			}
 		}
 		if (!uomRate && typeof isOffline === "function" && !isOffline()) {
@@ -172,7 +172,7 @@ export function useStockUtils() {
 
 				// Determine original base price for reference
 				const base_price = context.flt(
-					(item.original_base_price_list_rate ||
+					(item.original_base_price_list_rate ??
 						item.base_price_list_rate / old_conversion_factor) * item.conversion_factor,
 					context.currency_precision,
 				);
