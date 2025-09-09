@@ -856,22 +856,22 @@ export default {
 <style scoped>
 /* Modern table styling with clean design */
 .modern-items-table {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        transition: all 0.3s ease;
-        background: #ffffff;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	transition: all 0.3s ease;
+	background: #ffffff;
 }
 
 :deep([data-theme="dark"] .modern-items-table),
 :deep(.modern-items-table.v-theme--dark) {
-        background: #1a202c;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	background: #1a202c;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Ensure items table can scroll when many rows exist */
@@ -890,34 +890,34 @@ export default {
 
 /* Table header styling */
 .modern-items-table :deep(th) {
-        font-weight: 600;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        padding: 12px;
-        transition: background-color 0.2s ease;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        background-color: #f8f9fa !important;
-        color: #495057 !important;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 150px;
-        min-width: 80px;
-        text-align: center;
-        vertical-align: middle !important;
-        line-height: 1.2 !important;
-        height: 40px;
+	font-weight: 600;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	padding: 12px;
+	transition: background-color 0.2s ease;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+	background-color: #f8f9fa !important;
+	color: #495057 !important;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 150px;
+	min-width: 80px;
+	text-align: center;
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+	height: 40px;
 }
 
 :deep([data-theme="dark"] .modern-items-table th),
 :deep(.modern-items-table.v-theme--dark th) {
-        background-color: #2d3748 !important;
-        color: #e2e8f0 !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+	background-color: #2d3748 !important;
+	color: #e2e8f0 !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Header text wrapper for better control */
@@ -958,12 +958,12 @@ export default {
 
 :deep([data-theme="dark"] .modern-items-table tr),
 :deep(.modern-items-table.v-theme--dark tr) {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 :deep([data-theme="dark"] .modern-items-table tr:hover),
 :deep(.modern-items-table.v-theme--dark tr:hover) {
-        background-color: rgba(255, 255, 255, 0.03);
+	background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* Table cell styling */
@@ -988,7 +988,7 @@ export default {
 
 :deep([data-theme="dark"] .modern-items-table td),
 :deep(.modern-items-table.v-theme--dark td) {
-        color: #e5e7eb;
+	color: #e5e7eb;
 }
 
 /* =================================================================
@@ -2068,7 +2068,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* Expanded row styling */
 .expanded-row {
-        background-color: var(--surface-secondary);
+	background-color: var(--surface-secondary);
 }
 
 /* Dark mode input styling */
@@ -2076,7 +2076,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 :deep(.v-theme--dark) .dark-field,
 ::v-deep([data-theme="dark"]) .dark-field,
 ::v-deep(.v-theme--dark) .dark-field {
-        background-color: #1e1e1e !important;
+	background-color: #1e1e1e !important;
 }
 
 :deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
@@ -2091,14 +2091,14 @@ body[dir="rtl"] .amount-value.right-aligned {
 ::v-deep(.v-theme--dark) .dark-field input,
 ::v-deep([data-theme="dark"]) .dark-field .v-label,
 ::v-deep(.v-theme--dark) .dark-field .v-label {
-        color: #fff !important;
+	color: #fff !important;
 }
 
 :deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
 :deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
 ::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
 ::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
-        background-color: #1e1e1e !important;
+	background-color: #1e1e1e !important;
 }
 
 /* QTY Counter Styling */
