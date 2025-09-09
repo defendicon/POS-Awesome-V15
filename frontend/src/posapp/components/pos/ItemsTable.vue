@@ -204,7 +204,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Item Code')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											v-model="item.item_code"
@@ -218,7 +217,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="
@@ -243,7 +241,6 @@
 									<div class="form-field">
 										<v-select
 											density="compact"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											:label="frappe._('UOM')"
 											v-model="item.uom"
@@ -277,7 +274,6 @@
 											color="primary"
 											id="rate"
 											:label="frappe._('Rate')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatCurrency(item.rate)"
@@ -300,7 +296,6 @@
 											color="primary"
 											id="discount_percentage"
 											:label="frappe._('Discount %')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatFloat(item.discount_percentage || 0)"
@@ -329,7 +324,6 @@
 											color="primary"
 											id="discount_amount"
 											:label="frappe._('Discount Amount')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatCurrency(item.discount_amount || 0)"
@@ -359,7 +353,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Price List Rate')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatCurrency(item.price_list_rate ?? 0)"
@@ -375,7 +368,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Total Amount')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatCurrency(item.qty * item.rate)"
@@ -414,7 +406,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Available QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatFloat(item.actual_qty)"
@@ -428,7 +419,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Stock QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatFloat(item.stock_qty)"
@@ -442,7 +432,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Stock UOM')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											v-model="item.stock_uom"
@@ -458,7 +447,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Warehouse')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											v-model="item.warehouse"
@@ -472,7 +460,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Group')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											v-model="item.item_group"
@@ -507,7 +494,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Serial No QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											v-model="item.serial_no_selected_count"
@@ -528,7 +514,6 @@
 											density="compact"
 											chips
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											:label="frappe._('Serial No')"
 											multiple
@@ -554,7 +539,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Batch No. Available QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											:model-value="formatFloat(item.actual_batch_qty)"
@@ -568,7 +552,6 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Batch No Expiry Date')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											hide-details
 											v-model="item.batch_no_expiry_date"
@@ -584,7 +567,6 @@
 											variant="outlined"
 											density="compact"
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 											class="dark-field"
 											:label="frappe._('Batch No')"
 											@update:model-value="setBatchQty(item, $event)"
@@ -706,7 +688,8 @@ export default {
 	},
 	computed: {
 		headerProps() {
-			return this.isDarkTheme ? { style: "background-color:#121212;color:#fff" } : {};
+			// Rely on Vuetify theme variables instead of hardcoded colors
+			return {};
 		},
 		isDarkTheme() {
 			return this.$theme.current === "dark";
@@ -859,19 +842,13 @@ export default {
 	border-radius: 8px;
 	overflow: hidden;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
-	background: #ffffff;
-}
-
-:deep([data-theme="dark"]) .modern-items-table,
-:deep(.v-theme--dark) .modern-items-table {
-	background: #1a202c;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	background: rgb(var(--v-theme-surface));
+	color: rgb(var(--v-theme-on-surface));
 }
 
 /* Ensure items table can scroll when many rows exist */
@@ -896,9 +873,9 @@ export default {
 	letter-spacing: 0.3px;
 	padding: 12px;
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	background-color: #f8f9fa;
-	color: #495057;
+	border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+	background-color: rgb(var(--v-theme-surface-variant));
+	color: rgb(var(--v-theme-on-surface));
 	position: sticky;
 	top: 0;
 	z-index: 1;
@@ -911,13 +888,6 @@ export default {
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
 	height: 40px;
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(th),
-:deep(.v-theme--dark) .modern-items-table :deep(th) {
-	background-color: #2d3748;
-	color: #e2e8f0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Header text wrapper for better control */
@@ -949,19 +919,11 @@ export default {
 /* Table row styling */
 .modern-items-table :deep(tr) {
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+	border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .modern-items-table :deep(tr:hover) {
-	background-color: rgba(0, 0, 0, 0.02);
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(tr) {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover) {
-	background-color: rgba(255, 255, 255, 0.03);
+	background-color: rgba(var(--v-theme-on-surface), 0.04);
 }
 
 /* Table cell styling */
@@ -970,7 +932,7 @@ export default {
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
-	color: #374151;
+	color: rgb(var(--v-theme-on-surface));
 	position: relative;
 }
 
@@ -982,11 +944,6 @@ export default {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-}
-
-:deep([data-theme="dark"]) .modern-items-table :deep(td),
-:deep(.v-theme--dark) .modern-items-table :deep(td) {
-	color: #e5e7eb;
 }
 
 /* =================================================================
@@ -1005,22 +962,15 @@ export default {
 	padding: 24px;
 	width: 100%;
 	box-sizing: border-box;
-	background: #f8f9fa;
+	background: rgb(var(--v-theme-surface));
 	border-radius: 0 0 8px 8px;
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	border-top: none;
 	animation: expandIn 0.3s ease forwards;
 
 	/* Enable container queries */
 	container-type: inline-size;
 	container-name: expanded-content;
-}
-
-/* Dark theme */
-:deep([data-theme="dark"]) .expanded-content,
-:deep(.v-theme--dark) .expanded-content {
-	background: #2d3748;
-	border-color: rgba(255, 255, 255, 0.1);
 }
 
 @keyframes expandIn {
