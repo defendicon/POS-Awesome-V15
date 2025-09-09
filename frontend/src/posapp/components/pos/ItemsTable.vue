@@ -16,22 +16,18 @@
 			:expanded="expanded"
 			show-expand
 			item-value="posa_row_id"
-			class="modern-items-table elevation-2"
+			class="pos-table elevation-2"
 			:class="tableClasses"
-			:items-per-page="itemsPerPage"
+			:items-per-page="virtualScrollConfig.itemsPerPage"
+			:item-height="virtualScrollConfig.itemHeight"
+			:buffer-size="virtualScrollConfig.bufferSize"
 			expand-on-click
 			:density="tableDensity"
 			hide-default-footer
 			:single-expand="true"
 			:header-props="dynamicHeaderProps"
 			:no-data-text="__('No items in cart')"
-			@update:expanded="
-				(val) =>
-					$emit(
-						'update:expanded',
-						val.map((v) => (typeof v === 'object' ? v.posa_row_id : v)),
-					)
-			"
+			@update:expanded="handleExpandedUpdate"
 			:search="itemSearch"
 		>
 			<!-- Item name column -->
@@ -63,7 +59,7 @@
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
-				<div class="qty-counter-container" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
+				<div class="pos-table__qty-counter" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
 					<v-btn
 						:disabled="!!item.posa_is_replace"
 						size="small"
@@ -75,12 +71,12 @@
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
 					<div 
-						class="qty-display amount-value number-field-rtl" 
+						class="pos-table__qty-display amount-value number-field-rtl" 
 						:class="{ 
 							'negative-number': isNegative(item.qty),
-							'large-number': getQtyDisplayLength(item.qty) > 6 
+							'large-number': memoizedQtyLength(item.qty) > 6 
 						}"
-						:data-length="getQtyDisplayLength(item.qty)"
+						:data-length="memoizedQtyLength(item.qty)"
 						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
 					>
 						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
@@ -191,7 +187,12 @@
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
 				<td :colspan="responsiveHeaders.length + 1" class="ma-0 pa-0 expanded-row-cell">
-					<div class="expanded-content responsive-expanded-content" :class="expandedContentClasses">
+					<!-- Lazy load expanded content only when item is actually expanded -->
+					<div 
+						v-if="isItemExpanded(item.posa_row_id)" 
+						class="expanded-content responsive-expanded-content" 
+						:class="expandedContentClasses"
+					>
 						<!-- Item Details Form -->
 						<div class="item-details-form">
 							<!-- Basic Information Section -->
@@ -636,6 +637,13 @@
 							</div>
 						</div>
 					</div>
+					<!-- Lazy loading placeholder when item is not expanded -->
+					<div v-else class="expanded-placeholder">
+						<div class="text-center pa-4">
+							<v-progress-circular indeterminate size="small"></v-progress-circular>
+							<div class="text-caption mt-2">{{ __("Loading details...") }}</div>
+						</div>
+					</div>
 				</td>
 			</template>
 		</v-data-table-virtual>
@@ -711,6 +719,10 @@ export default {
 			resizeObserver: null,
 			breakpoint: 'xl',
 			columnVisibility: new Map(),
+			// Performance optimization caches
+			qtyLengthCache: new Map(),
+			expandedCache: new Map(),
+			lastUpdateTime: 0,
 		};
 	},
 	computed: {
@@ -796,6 +808,58 @@ export default {
 			return {
 				...baseProps,
 				class: `responsive-header container-${this.breakpoint}`,
+			};
+		},
+		
+		// Virtual scrolling configuration for optimal performance
+		virtualScrollConfig() {
+			const itemCount = this.items?.length || 0;
+			const containerHeight = this.containerHeight;
+			
+			// Dynamic configuration based on dataset size and container
+			return {
+				itemHeight: this.tableDensity === 'compact' ? 48 : 
+							this.tableDensity === 'comfortable' ? 72 : 60,
+				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
+				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
+			};
+		},
+		
+		// Memoized quantity display length calculation with cache management
+		memoizedQtyLength() {
+			return (qty) => {
+				if (this.qtyLengthCache.has(qty)) return this.qtyLengthCache.get(qty);
+				const length = String(Math.abs(qty || 0)).replace('.', '').length;
+				this.qtyLengthCache.set(qty, length);
+				
+				// Limit cache size to prevent memory leaks
+				if (this.qtyLengthCache.size > 1000) {
+					const firstKey = this.qtyLengthCache.keys().next().value;
+					this.qtyLengthCache.delete(firstKey);
+				}
+				
+				return length;
+			};
+		},
+		
+		// Lazy loading helper for expanded content with cache
+		isItemExpanded() {
+			return (itemId) => {
+				const cacheKey = `${itemId}_${this.expanded.length}`;
+				
+				if (this.expandedCache.has(cacheKey)) {
+					return this.expandedCache.get(cacheKey);
+				}
+				
+				const isExpanded = this.expanded.includes(itemId);
+				this.expandedCache.set(cacheKey, isExpanded);
+				
+				// Clear cache periodically to prevent memory bloat
+				if (this.expandedCache.size > 100) {
+					this.expandedCache.clear();
+				}
+				
+				return isExpanded;
 			};
 		},
 		isDarkTheme() {
@@ -898,16 +962,30 @@ export default {
 		
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== 'undefined') {
-				this.resizeObserver = new ResizeObserver((entries) => {
+				// Debounced resize handler for better performance
+				const debouncedResizeHandler = _.debounce((entries) => {
 					for (let entry of entries) {
 						const { width, height } = entry.contentRect;
-						this.containerWidth = width;
-						this.containerHeight = height;
-						this.updateBreakpoint();
-						// Emit resize event for parent components
-						this.$emit('container-resize', { width, height, breakpoint: this.breakpoint });
+						
+						// Only update if dimensions actually changed
+						if (this.containerWidth !== width || this.containerHeight !== height) {
+							this.containerWidth = width;
+							this.containerHeight = height;
+							this.updateBreakpoint();
+							
+							// Batch emit for better performance
+							this.$nextTick(() => {
+								this.$emit('container-resize', { 
+									width, 
+									height, 
+									breakpoint: this.breakpoint 
+								});
+							});
+						}
 					}
-				});
+				}, 16); // ~60fps throttling
+				
+				this.resizeObserver = new ResizeObserver(debouncedResizeHandler);
 				
 				this.$nextTick(() => {
 					if (this.$refs.tableContainer) {
@@ -1033,30 +1111,60 @@ export default {
 			}
 		},
 		
+		// Enhanced method with memoization for better performance
 		getQtyDisplayLength(qty) {
-			// Calculate the display length of the formatted quantity
-			const formattedQty = this.formatFloat(qty, this.hide_qty_decimals ? 0 : undefined);
-			return String(formattedQty).length;
+			return this.memoizedQtyLength(qty);
+		},
+		
+		// Optimized expanded update handler
+		handleExpandedUpdate(val) {
+			const mappedValues = val.map((v) => (typeof v === 'object' ? v.posa_row_id : v));
+			this.$emit('update:expanded', mappedValues);
 		},
 	},
 	
 	mounted() {
 		this.setupResizeObserver();
-		// Initial dimension update
+		
+		// Performance optimization: defer non-critical initialization
 		this.$nextTick(() => {
 			this.updateContainerDimensions();
+			
+			// Log performance metrics in development
+			if (process.env.NODE_ENV === 'development') {
+				console.log('ItemsTable Performance Optimizations Active:', {
+					virtualScrolling: true,
+					memoizedQtyCalculations: true,
+					debouncedResizing: true,
+					lazyExpandedContent: true,
+					cacheManagement: true,
+					itemCount: this.items?.length || 0,
+					containerDimensions: { 
+						width: this.containerWidth, 
+						height: this.containerHeight 
+					}
+				});
+			}
 		});
 	},
 	
 	beforeUnmount() {
 		this.cleanupResizeObserver();
+		
+		// Clean up performance caches to prevent memory leaks
+		if (this.qtyLengthCache) {
+			this.qtyLengthCache.clear();
+		}
+		if (this.expandedCache) {
+			this.expandedCache.clear();
+		}
 	},
 };
 </script>
 
 <style scoped>
 /* Modern table styling with clean design */
-.modern-items-table {
+.pos-table {
 	border-radius: 8px;
 	overflow: hidden;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1072,8 +1180,8 @@ export default {
 	padding: 0;
 }
 
-:deep([data-theme="dark"]) .modern-items-table,
-:deep(.v-theme--dark) .modern-items-table {
+:deep([data-theme="dark"]) .pos-table,
+:deep(.v-theme--dark) .pos-table {
 	background: #1a202c;
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -1090,8 +1198,8 @@ export default {
 }
 
 /* Table wrapper styling */
-.modern-items-table :deep(.v-data-table__wrapper),
-.modern-items-table :deep(.v-table__wrapper) {
+.pos-table :deep(.v-data-table__wrapper),
+.pos-table :deep(.v-table__wrapper) {
 	border-radius: 0;
 	height: 100%;
 	width: 100%;
@@ -1104,7 +1212,7 @@ export default {
 }
 
 /* Enhanced table header styling with stable hover support */
-.modern-items-table :deep(th) {
+.pos-table :deep(th) {
 	font-weight: 600;
 	font-size: 0.8rem;
 	text-transform: uppercase;
@@ -1137,8 +1245,8 @@ export default {
 	box-sizing: border-box;
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th),
-:deep(.v-theme--dark) .modern-items-table :deep(th) {
+:deep([data-theme="dark"]) .pos-table :deep(th),
+:deep(.v-theme--dark) .pos-table :deep(th) {
 	background-color: #2d3748;
 	color: #e2e8f0;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -1147,7 +1255,7 @@ export default {
 /* Header text wrapper is now handled in the improved stable section above */
 
 /* Improved stable header hover effects */
-.modern-items-table :deep(th) {
+.pos-table :deep(th) {
 	/* Ensure stable positioning */
 	position: relative;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1155,7 +1263,7 @@ export default {
 	will-change: background-color, transform;
 }
 
-.modern-items-table :deep(th:hover) {
+.pos-table :deep(th:hover) {
 	/* Smooth background transition without layout changes */
 	background-color: rgba(25, 118, 210, 0.08);
 	transform: translateY(-1px);
@@ -1163,7 +1271,7 @@ export default {
 	z-index: 2;
 }
 
-.modern-items-table :deep(th .v-data-table-header__content) {
+.pos-table :deep(th .v-data-table-header__content) {
 	/* Stable content container */
 	display: flex;
 	align-items: center;
@@ -1182,7 +1290,7 @@ export default {
 	box-sizing: border-box;
 }
 
-.modern-items-table :deep(th:hover .v-data-table-header__content) {
+.pos-table :deep(th:hover .v-data-table-header__content) {
 	/* Enhanced text on hover without disrupting layout */
 	color: rgba(25, 118, 210, 0.9);
 	font-weight: 600;
@@ -1191,25 +1299,25 @@ export default {
 }
 
 /* Table row styling */
-.modern-items-table :deep(tr) {
+.pos-table :deep(tr) {
 	transition: background-color 0.2s ease;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.modern-items-table :deep(tr:hover) {
+.pos-table :deep(tr:hover) {
 	background-color: rgba(0, 0, 0, 0.02);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(tr) {
+:deep([data-theme="dark"]) .pos-table :deep(tr) {
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover) {
+:deep([data-theme="dark"]) .pos-table :deep(tr:hover) {
 	background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* Table cell styling */
-.modern-items-table :deep(td) {
+.pos-table :deep(td) {
 	padding: 16px 12px;
 	vertical-align: middle;
 	height: 60px;
@@ -1219,7 +1327,7 @@ export default {
 }
 
 /* Ensure all cell contents fill the cell */
-.modern-items-table :deep(td) > div {
+.pos-table :deep(td) > div {
 	width: 100%;
 	height: 100%;
 	display: flex;
@@ -1228,8 +1336,8 @@ export default {
 	box-sizing: border-box;
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(td),
-:deep(.v-theme--dark) .modern-items-table :deep(td) {
+:deep([data-theme="dark"]) .pos-table :deep(td),
+:deep(.v-theme--dark) .pos-table :deep(td) {
 	color: #e5e7eb;
 }
 
@@ -1674,54 +1782,54 @@ body[dir="rtl"] .form-field {
 }
 
 /* RTL quantity counter in expanded content - use same order approach */
-[dir="rtl"] .expanded-content .qty-counter-container,
-[lang^="ar"] .expanded-content .qty-counter-container,
-[lang^="he"] .expanded-content .qty-counter-container,
-[lang^="fa"] .expanded-content .qty-counter-container,
-.expanded-content .qty-counter-container.rtl-layout,
-html[dir="rtl"] .expanded-content .qty-counter-container,
-body[dir="rtl"] .expanded-content .qty-counter-container {
+[dir="rtl"] .expanded-content .pos-table__qty-counter,
+[lang^="ar"] .expanded-content .pos-table__qty-counter,
+[lang^="he"] .expanded-content .pos-table__qty-counter,
+[lang^="fa"] .expanded-content .pos-table__qty-counter,
+.expanded-content .pos-table__qty-counter.rtl-layout,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter {
 	flex-direction: row !important; /* Use order instead of row-reverse */
 }
 
 /* Same button ordering for expanded content (reverse order values for RTL context) */
-[dir="rtl"] .expanded-content .qty-counter-container .plus-btn,
-[lang^="ar"] .expanded-content .qty-counter-container .plus-btn,
-[lang^="he"] .expanded-content .qty-counter-container .plus-btn,
-[lang^="fa"] .expanded-content .qty-counter-container .plus-btn,
-.expanded-content .qty-counter-container.rtl-layout .plus-btn,
-html[dir="rtl"] .expanded-content .qty-counter-container .plus-btn,
-body[dir="rtl"] .expanded-content .qty-counter-container .plus-btn {
+[dir="rtl"] .expanded-content .pos-table__qty-counter .plus-btn,
+[lang^="ar"] .expanded-content .pos-table__qty-counter .plus-btn,
+[lang^="he"] .expanded-content .pos-table__qty-counter .plus-btn,
+[lang^="fa"] .expanded-content .pos-table__qty-counter .plus-btn,
+.expanded-content .pos-table__qty-counter.rtl-layout .plus-btn,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter .plus-btn,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter .plus-btn {
 	order: 3 !important; /* Plus button should appear first visually in RTL */
 }
 
-[dir="rtl"] .expanded-content .qty-counter-container .qty-display,
-[lang^="ar"] .expanded-content .qty-counter-container .qty-display,
-[lang^="he"] .expanded-content .qty-counter-container .qty-display,
-[lang^="fa"] .expanded-content .qty-counter-container .qty-display,
-.expanded-content .qty-counter-container.rtl-layout .qty-display,
-html[dir="rtl"] .expanded-content .qty-counter-container .qty-display,
-body[dir="rtl"] .expanded-content .qty-counter-container .qty-display {
+[dir="rtl"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+[lang^="ar"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+[lang^="he"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+[lang^="fa"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+.expanded-content .pos-table__qty-counter.rtl-layout .pos-table__qty-display,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter .pos-table__qty-display {
 	order: 2 !important; /* Quantity stays in middle */
 }
 
-[dir="rtl"] .expanded-content .qty-counter-container .minus-btn,
-[lang^="ar"] .expanded-content .qty-counter-container .minus-btn,
-[lang^="he"] .expanded-content .qty-counter-container .minus-btn,
-[lang^="fa"] .expanded-content .qty-counter-container .minus-btn,
-.expanded-content .qty-counter-container.rtl-layout .minus-btn,
-html[dir="rtl"] .expanded-content .qty-counter-container .minus-btn,
-body[dir="rtl"] .expanded-content .qty-counter-container .minus-btn {
+[dir="rtl"] .expanded-content .pos-table__qty-counter .minus-btn,
+[lang^="ar"] .expanded-content .pos-table__qty-counter .minus-btn,
+[lang^="he"] .expanded-content .pos-table__qty-counter .minus-btn,
+[lang^="fa"] .expanded-content .pos-table__qty-counter .minus-btn,
+.expanded-content .pos-table__qty-counter.rtl-layout .minus-btn,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter .minus-btn,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter .minus-btn {
 	order: 1 !important; /* Minus button should appear last visually in RTL */
 }
 
 /* Keep numbers LTR in expanded content */
-[dir="rtl"] .expanded-content .qty-display,
-[lang^="ar"] .expanded-content .qty-display,
-[lang^="he"] .expanded-content .qty-display,
-[lang^="fa"] .expanded-content .qty-display,
-html[dir="rtl"] .expanded-content .qty-display,
-body[dir="rtl"] .expanded-content .qty-display {
+[dir="rtl"] .expanded-content .pos-table__qty-display,
+[lang^="ar"] .expanded-content .pos-table__qty-display,
+[lang^="he"] .expanded-content .pos-table__qty-display,
+[lang^="fa"] .expanded-content .pos-table__qty-display,
+html[dir="rtl"] .expanded-content .pos-table__qty-display,
+body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	direction: ltr !important; /* Keep numbers readable */
 }
 
@@ -1777,7 +1885,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 /* Dynamic table styling based on container size */
-.modern-items-table.responsive-table {
+.pos-table.responsive-table {
 	width: 100%;
 	height: 100%;
 	max-width: 100%;
@@ -1790,35 +1898,35 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 /* Container-aware headers */
-.modern-items-table.container-xs :deep(th) {
+.pos-table.container-xs :deep(th) {
 	font-size: var(--header-font-size);
 	padding: 8px 4px;
 	min-width: 60px;
 	max-width: 120px;
 }
 
-.modern-items-table.container-sm :deep(th) {
+.pos-table.container-sm :deep(th) {
 	font-size: var(--header-font-size);
 	padding: 10px 6px;
 	min-width: 70px;
 	max-width: 140px;
 }
 
-.modern-items-table.container-md :deep(th) {
+.pos-table.container-md :deep(th) {
 	font-size: var(--header-font-size);
 	padding: 12px 8px;
 	min-width: 80px;
 	max-width: 160px;
 }
 
-.modern-items-table.container-lg :deep(th) {
+.pos-table.container-lg :deep(th) {
 	font-size: var(--header-font-size);
 	padding: var(--cell-padding);
 	min-width: 90px;
 	max-width: 180px;
 }
 
-.modern-items-table.container-xl :deep(th) {
+.pos-table.container-xl :deep(th) {
 	font-size: var(--header-font-size);
 	padding: var(--cell-padding);
 	min-width: 100px;
@@ -1826,18 +1934,18 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 /* Container-aware cells */
-.modern-items-table.container-xs :deep(td),
-.modern-items-table.container-sm :deep(td),
-.modern-items-table.container-md :deep(td),
-.modern-items-table.container-lg :deep(td),
-.modern-items-table.container-xl :deep(td) {
+.pos-table.container-xs :deep(td),
+.pos-table.container-sm :deep(td),
+.pos-table.container-md :deep(td),
+.pos-table.container-lg :deep(td),
+.pos-table.container-xl :deep(td) {
 	padding: var(--cell-padding);
 	height: var(--cell-height);
 	vertical-align: middle;
 }
 
 /* Compact view adjustments */
-.responsive-table-container.compact-view .modern-items-table {
+.responsive-table-container.compact-view .pos-table {
 	border-radius: 0;
 	margin: 0;
 	padding: 0;
@@ -1845,7 +1953,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 	max-width: 100%;
 }
 
-.responsive-table-container.compact-view .qty-counter-container {
+.responsive-table-container.compact-view .pos-table__qty-counter {
 	min-width: 110px;
 	max-width: 140px;
 	width: auto;
@@ -1858,7 +1966,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 	min-width: 28px !important;
 }
 
-.responsive-table-container.compact-view .qty-display {
+.responsive-table-container.compact-view .pos-table__qty-display {
 	min-width: 35px;
 	max-width: 65px;
 	height: 28px;
@@ -1868,14 +1976,14 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 /* Medium view adjustments */
-.responsive-table-container.medium-view .qty-counter-container {
+.responsive-table-container.medium-view .pos-table__qty-counter {
 	min-width: 130px;
 	max-width: 160px;
 	width: auto;
 }
 
 /* Large view adjustments */
-.responsive-table-container.large-view .qty-counter-container {
+.responsive-table-container.large-view .pos-table__qty-counter {
 	min-width: 140px;
 	max-width: 180px;
 	width: auto;
@@ -1933,9 +2041,9 @@ body[dir="rtl"] .expanded-content .qty-display {
 }
 
 /* Full width enforcement for all nested elements */
-.modern-items-table :deep(.v-data-table),
-.modern-items-table :deep(.v-data-table-virtual),
-.modern-items-table :deep(.v-table) {
+.pos-table :deep(.v-data-table),
+.pos-table :deep(.v-data-table-virtual),
+.pos-table :deep(.v-table) {
 	width: 100% !important;
 	max-width: 100% !important;
 	margin: 0 !important;
@@ -1943,7 +2051,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 	border-radius: 0 !important;
 }
 
-.modern-items-table :deep(.v-data-table__wrapper) {
+.pos-table :deep(.v-data-table__wrapper) {
 	width: 100% !important;
 	max-width: 100% !important;
 	margin: 0 !important;
@@ -1951,7 +2059,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 	border: none !important;
 }
 
-.modern-items-table :deep(table) {
+.pos-table :deep(table) {
 	width: 100% !important;
 	max-width: 100% !important;
 	margin: 0 !important;
@@ -1959,13 +2067,13 @@ body[dir="rtl"] .expanded-content .qty-display {
 	table-layout: auto !important;
 }
 
-.modern-items-table :deep(thead),
-.modern-items-table :deep(tbody) {
+.pos-table :deep(thead),
+.pos-table :deep(tbody) {
 	width: 100% !important;
 	max-width: 100% !important;
 }
 
-.modern-items-table :deep(tr) {
+.pos-table :deep(tr) {
 	width: 100% !important;
 	max-width: 100% !important;
 	margin: 0 !important;
@@ -1989,20 +2097,20 @@ body[dir="rtl"] .expanded-content .qty-display {
 	contain: layout style;
 }
 
-.modern-items-table.responsive-table {
+.pos-table.responsive-table {
 	will-change: transform;
 	contain: layout;
 }
 
 /* Smooth transitions during resize */
-.modern-items-table :deep(th),
-.modern-items-table :deep(td) {
+.pos-table :deep(th),
+.pos-table :deep(td) {
 	transition: padding 0.2s ease, font-size 0.2s ease, width 0.2s ease;
 }
 
 /* Enhanced responsive design */
 @media (max-width: 768px) {
-	.modern-items-table {
+	.pos-table {
 		border-radius: 0;
 		margin: 0;
 		padding: 0;
@@ -2010,13 +2118,13 @@ body[dir="rtl"] .expanded-content .qty-display {
 		max-width: 100%;
 	}
 
-	.modern-items-table :deep(th) {
+	.pos-table :deep(th) {
 		font-size: 0.65rem;
 		padding: 12px 6px;
 		letter-spacing: 0.5px;
 	}
 
-	.modern-items-table :deep(td) {
+	.pos-table :deep(td) {
 		padding: 16px 8px;
 		height: 56px;
 		font-size: 0.85rem;
@@ -2068,7 +2176,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 		padding: clamp(4px, 1vw, 6px);
 	}
 	
-	.modern-items-table {
+	.pos-table {
 		border-radius: 0;
 		margin: 0;
 		padding: 0;
@@ -2077,7 +2185,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 	}
 
-	.modern-items-table :deep(th) {
+	.pos-table :deep(th) {
 		font-size: 0.6rem;
 		padding: 8px 4px;
 		max-width: 80px;
@@ -2085,29 +2193,29 @@ body[dir="rtl"] .expanded-content .qty-display {
 		letter-spacing: 0.3px;
 	}
 
-	.modern-items-table :deep(td) {
+	.pos-table :deep(td) {
 		padding: 12px 4px;
 		height: 48px;
 		font-size: 0.8rem;
 	}
 
-	.modern-items-table :deep(th[data-column-key="item_name"]) {
+	.pos-table :deep(th[data-column-key="item_name"]) {
 		min-width: 120px;
 		max-width: 150px;
 	}
 
-	.modern-items-table :deep(th[data-column-key="qty"]) {
+	.pos-table :deep(th[data-column-key="qty"]) {
 		min-width: 100px;
 		max-width: 120px;
 	}
 
-	.modern-items-table :deep(th[data-column-key="rate"]),
-	.modern-items-table :deep(th[data-column-key="amount"]) {
+	.pos-table :deep(th[data-column-key="rate"]),
+	.pos-table :deep(th[data-column-key="amount"]) {
 		min-width: 70px;
 		max-width: 90px;
 	}
 
-	.qty-counter-container {
+	.pos-table__qty-counter {
 		min-width: 110px;
 		width: 110px;
 		height: auto;
@@ -2122,7 +2230,7 @@ body[dir="rtl"] .expanded-content .qty-display {
 		border-radius: 6px !important;
 	}
 
-	.qty-display {
+	.pos-table__qty-display {
 		min-width: 35px;
 		max-width: 70px;
 		padding: 4px 3px;
@@ -2365,8 +2473,8 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Enhanced Arabic support for all numeric displays in the table */
-.modern-items-table :deep(td),
-.modern-items-table :deep(th) {
+.pos-table :deep(td),
+.pos-table :deep(th) {
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -2380,80 +2488,70 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Column width constraints and alignment */
-.modern-items-table :deep(th[data-column-key="item_name"]),
-.modern-items-table :deep(td[data-column-key="item_name"]) {
+.pos-table :deep(th[data-column-key="item_name"]),
+.pos-table :deep(td[data-column-key="item_name"]) {
 	min-width: 200px;
 	max-width: 250px;
 	text-align: left;
 }
 
-.modern-items-table :deep(th[data-column-key="qty"]),
-.modern-items-table :deep(td[data-column-key="qty"]) {
+.pos-table :deep(th[data-column-key="qty"]),
+.pos-table :deep(td[data-column-key="qty"]) {
 	min-width: 140px;
 	max-width: 160px;
 	text-align: center;
 }
 
-.modern-items-table :deep(th[data-column-key="uom"]),
-.modern-items-table :deep(td[data-column-key="uom"]) {
+.pos-table :deep(th[data-column-key="uom"]),
+.pos-table :deep(td[data-column-key="uom"]) {
 	min-width: 80px;
 	max-width: 100px;
 	text-align: center;
 }
 
-.modern-items-table :deep(th[data-column-key="rate"]),
-.modern-items-table :deep(td[data-column-key="rate"]),
-.modern-items-table :deep(th[data-column-key="amount"]),
-.modern-items-table :deep(td[data-column-key="amount"]) {
+.pos-table :deep(th[data-column-key="rate"]),
+.pos-table :deep(td[data-column-key="rate"]),
+.pos-table :deep(th[data-column-key="amount"]),
+.pos-table :deep(td[data-column-key="amount"]) {
 	min-width: 100px;
 	max-width: 130px;
 	text-align: center !important;
 }
 
 /* Ensure consistent header padding for rate/amount columns */
-.modern-items-table :deep(th[data-column-key="rate"]),
-.modern-items-table :deep(th[data-column-key="amount"]) {
+.pos-table :deep(th[data-column-key="rate"]),
+.pos-table :deep(th[data-column-key="amount"]) {
 	padding: 12px !important;
 }
 
-/* Only cells get custom padding */
-.modern-items-table :deep(td[data-column-key="rate"]),
-.modern-items-table :deep(td[data-column-key="amount"]) {
-	padding: 16px 8px;
+/* Consolidated column cell padding */
+.pos-table :deep(td[data-column-key="rate"]),
+.pos-table :deep(td[data-column-key="amount"]),
+.pos-table :deep(td[data-column-key="price_list_rate"]) {
+	padding: var(--cell-padding);
 }
 
-
-.modern-items-table :deep(th[data-column-key="price_list_rate"]),
-.modern-items-table :deep(td[data-column-key="price_list_rate"]) {
+.pos-table :deep(th[data-column-key="price_list_rate"]),
+.pos-table :deep(td[data-column-key="price_list_rate"]) {
 	min-width: 120px;
 	max-width: 140px;
 	text-align: center !important;
 	font-weight: 500;
 }
 
-/* Ensure consistent header padding for price list rate column */
-.modern-items-table :deep(th[data-column-key="price_list_rate"]) {
-	padding: 12px !important;
-}
-
-/* Only cells get custom padding */
-.modern-items-table :deep(td[data-column-key="price_list_rate"]) {
-	padding: 16px 8px;
-}
-
 
 /* Specific header styling for Price List Rate */
-.modern-items-table :deep(th[data-column-key="price_list_rate"]) {
+.pos-table :deep(th[data-column-key="price_list_rate"]) {
 	background: linear-gradient(135deg, var(--table-header-bg) 0%, rgba(25, 118, 210, 0.02) 100%);
 	border-right: 1px solid rgba(25, 118, 210, 0.1);
 }
 
 /* Advanced header tooltip for truncated text */
-.modern-items-table :deep(th.has-tooltip) {
+.pos-table :deep(th.has-tooltip) {
 	position: relative;
 }
 
-.modern-items-table :deep(th.has-tooltip::after) {
+.pos-table :deep(th.has-tooltip::after) {
 	content: attr(data-tooltip);
 	position: absolute;
 	bottom: -45px;
@@ -2481,7 +2579,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 	line-height: 1.3;
 }
 
-.modern-items-table :deep(th.has-tooltip::before) {
+.pos-table :deep(th.has-tooltip::before) {
 	content: '';
 	position: absolute;
 	bottom: -8px;
@@ -2499,70 +2597,70 @@ body[dir="rtl"] .amount-value.right-aligned {
 	pointer-events: none;
 }
 
-.modern-items-table :deep(th.has-tooltip:hover::after) {
+.pos-table :deep(th.has-tooltip:hover::after) {
 	opacity: 1;
 	visibility: visible;
 	transform: translateX(-50%) translateY(0);
 	transition-delay: 0.5s;
 }
 
-.modern-items-table :deep(th.has-tooltip:hover::before) {
+.pos-table :deep(th.has-tooltip:hover::before) {
 	opacity: 1;
 	visibility: visible;
 	transition-delay: 0.5s;
 }
 
 /* Dark theme support for header hover and tooltips */
-:deep([data-theme="dark"]) .modern-items-table :deep(th),
-:deep(.v-theme--dark) .modern-items-table :deep(th) {
+:deep([data-theme="dark"]) .pos-table :deep(th),
+:deep(.v-theme--dark) .pos-table :deep(th) {
 	background-color: #2d3748;
 	color: #e2e8f0;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th:hover),
-:deep(.v-theme--dark) .modern-items-table :deep(th:hover) {
+:deep([data-theme="dark"]) .pos-table :deep(th:hover),
+:deep(.v-theme--dark) .pos-table :deep(th:hover) {
 	background-color: rgba(144, 202, 249, 0.15);
 	box-shadow: 0 4px 12px rgba(144, 202, 249, 0.25);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th:hover .v-data-table-header__content),
-:deep(.v-theme--dark) .modern-items-table :deep(th:hover .v-data-table-header__content) {
+:deep([data-theme="dark"]) .pos-table :deep(th:hover .v-data-table-header__content),
+:deep(.v-theme--dark) .pos-table :deep(th:hover .v-data-table-header__content) {
 	color: rgba(144, 202, 249, 0.95);
 	text-shadow: 0 1px 2px rgba(144, 202, 249, 0.15);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th.has-tooltip::after),
-:deep(.v-theme--dark) .modern-items-table :deep(th.has-tooltip::after) {
+:deep([data-theme="dark"]) .pos-table :deep(th.has-tooltip::after),
+:deep(.v-theme--dark) .pos-table :deep(th.has-tooltip::after) {
 	background: rgba(15, 15, 15, 0.95);
 	color: #e2e8f0;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th.has-tooltip::before),
-:deep(.v-theme--dark) .modern-items-table :deep(th.has-tooltip::before) {
+:deep([data-theme="dark"]) .pos-table :deep(th.has-tooltip::before),
+:deep(.v-theme--dark) .pos-table :deep(th.has-tooltip::before) {
 	border-bottom-color: rgba(15, 15, 15, 0.95);
 }
 
 /* Additional header stability and interaction improvements */
-.modern-items-table :deep(th:active) {
+.pos-table :deep(th:active) {
 	transform: translateY(0px);
 	transition: transform 0.1s ease;
 }
 
-.modern-items-table :deep(th:focus) {
+.pos-table :deep(th:focus) {
 	outline: 2px solid rgba(25, 118, 210, 0.3);
 	outline-offset: -2px;
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th:focus),
-:deep(.v-theme--dark) .modern-items-table :deep(th:focus) {
+:deep([data-theme="dark"]) .pos-table :deep(th:focus),
+:deep(.v-theme--dark) .pos-table :deep(th:focus) {
 	outline-color: rgba(144, 202, 249, 0.4);
 }
 
 /* Prevent text selection and improve cursor feedback */
-.modern-items-table :deep(th),
-.modern-items-table :deep(th *) {
+.pos-table :deep(th),
+.pos-table :deep(th *) {
 	user-select: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -2570,9 +2668,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Smooth transition for all header properties to prevent jitter */
-.modern-items-table :deep(th),
-.modern-items-table :deep(th .v-data-table-header__content),
-.modern-items-table :deep(th .v-icon) {
+.pos-table :deep(th),
+.pos-table :deep(th .v-data-table-header__content),
+.pos-table :deep(th .v-icon) {
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	backface-visibility: hidden;
 	-webkit-backface-visibility: hidden;
@@ -2581,26 +2679,26 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Prevent layout shift during hover */
-.modern-items-table :deep(th) {
+.pos-table :deep(th) {
 	contain: layout style;
 }
 
 /* Enhanced header border for better visual stability */
-.modern-items-table :deep(th) {
+.pos-table :deep(th) {
 	border-right: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.modern-items-table :deep(th:last-child) {
+.pos-table :deep(th:last-child) {
 	border-right: none;
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th),
-:deep(.v-theme--dark) .modern-items-table :deep(th) {
+:deep([data-theme="dark"]) .pos-table :deep(th),
+:deep(.v-theme--dark) .pos-table :deep(th) {
 	border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(th:last-child),
-:deep(.v-theme--dark) .modern-items-table :deep(th:last-child) {
+:deep([data-theme="dark"]) .pos-table :deep(th:last-child),
+:deep(.v-theme--dark) .pos-table :deep(th:last-child) {
 	border-right: none;
 }
 
@@ -2609,8 +2707,8 @@ body[dir="rtl"] .amount-value.right-aligned {
    ================================================================= */
 
 /* Hide empty placeholder/spacer rows generated by Vuetify */
-.modern-items-table :deep(tr[style*="height: 0px"]),
-.modern-items-table :deep(tr[style*="height:0px"]) {
+.pos-table :deep(tr[style*="height: 0px"]),
+.pos-table :deep(tr[style*="height:0px"]) {
 	display: none !important;
 	height: 0 !important;
 	line-height: 0 !important;
@@ -2620,10 +2718,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Hide empty cells within spacer rows */
-.modern-items-table :deep(tr[style*="height: 0px"] td),
-.modern-items-table :deep(tr[style*="height:0px"] td),
-.modern-items-table :deep(td[style*="height: 0px"]),
-.modern-items-table :deep(td[style*="height:0px"]) {
+.pos-table :deep(tr[style*="height: 0px"] td),
+.pos-table :deep(tr[style*="height:0px"] td),
+.pos-table :deep(td[style*="height: 0px"]),
+.pos-table :deep(td[style*="height:0px"]) {
 	display: none !important;
 	height: 0 !important;
 	line-height: 0 !important;
@@ -2633,19 +2731,19 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Additional targeting for Vuetify virtual table placeholders */
-.modern-items-table :deep(.v-data-table__tr--placeholder),
-.modern-items-table :deep(.v-table__tr--placeholder) {
+.pos-table :deep(.v-data-table__tr--placeholder),
+.pos-table :deep(.v-table__tr--placeholder) {
 	display: none !important;
 }
 
 /* Hide any empty rows with zero or minimal height */
-.modern-items-table :deep(tr) {
+.pos-table :deep(tr) {
 	min-height: var(--cell-height, 60px);
 }
 
-.modern-items-table :deep(tr:empty),
-.modern-items-table :deep(tr[style*="height: 0"]),
-.modern-items-table :deep(tr[style*="height:0"]) {
+.pos-table :deep(tr:empty),
+.pos-table :deep(tr[style*="height: 0"]),
+.pos-table :deep(tr[style*="height:0"]) {
 	display: none !important;
 	visibility: hidden !important;
 	opacity: 0 !important;
@@ -2654,50 +2752,50 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Ensure table rows have consistent spacing */
-.modern-items-table :deep(tbody tr:not([style*="height: 0"])) {
+.pos-table :deep(tbody tr:not([style*="height: 0"])) {
 	height: var(--cell-height, 60px);
 	min-height: var(--cell-height, 60px);
 }
 
 /* Clean up any unwanted spacing from virtual scrolling */
-.modern-items-table :deep(.v-virtual-scroll__item[style*="height: 0"]),
-.modern-items-table :deep(.v-virtual-scroll__spacer[style*="height: 0"]) {
+.pos-table :deep(.v-virtual-scroll__item[style*="height: 0"]),
+.pos-table :deep(.v-virtual-scroll__spacer[style*="height: 0"]) {
 	display: none !important;
 }
 
 /* Force table to have clean spacing */
-.modern-items-table :deep(table) {
+.pos-table :deep(table) {
 	border-spacing: 0;
 	border-collapse: collapse;
 }
 
 /* Ensure tbody has no unwanted spacing */
-.modern-items-table :deep(tbody) {
+.pos-table :deep(tbody) {
 	border-spacing: 0;
 }
 
 /* Hide any Vuetify generated dividers or spacers */
-.modern-items-table :deep(.v-divider),
-.modern-items-table :deep(.v-spacer) {
+.pos-table :deep(.v-divider),
+.pos-table :deep(.v-spacer) {
 	display: none !important;
 }
 
 /* Additional cleanup for v-data-table-virtual specific elements */
-.modern-items-table :deep(.v-data-table-virtual__spacer) {
+.pos-table :deep(.v-data-table-virtual__spacer) {
 	display: none !important;
 	height: 0 !important;
 }
 
 /* Hide empty measurement/calculation rows */
-.modern-items-table :deep(tr[data-test-id]),
-.modern-items-table :deep(tr[data-testid]),
-.modern-items-table :deep(tr[class*="measurement"]),
-.modern-items-table :deep(tr[class*="placeholder"]) {
+.pos-table :deep(tr[data-test-id]),
+.pos-table :deep(tr[data-testid]),
+.pos-table :deep(tr[class*="measurement"]),
+.pos-table :deep(tr[class*="placeholder"]) {
 	display: none !important;
 }
 
 /* Ensure no phantom spacing around table body */
-.modern-items-table :deep(tbody) {
+.pos-table :deep(tbody) {
 	vertical-align: top;
 	border-top: none;
 	border-bottom: none;
@@ -2706,14 +2804,14 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Clean up any row group spacing */
-.modern-items-table :deep(tbody tr) {
+.pos-table :deep(tbody tr) {
 	vertical-align: middle;
 }
 
 /* Remove any default table spacing that might create gaps */
-.modern-items-table :deep(table),
-.modern-items-table :deep(tbody),
-.modern-items-table :deep(thead) {
+.pos-table :deep(table),
+.pos-table :deep(tbody),
+.pos-table :deep(thead) {
 	border-collapse: collapse;
 	border-spacing: 0;
 	margin: 0;
@@ -2721,19 +2819,19 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Ensure expanded rows don't create unwanted spacing */
-.modern-items-table :deep(tr.v-data-table__expanded) {
+.pos-table :deep(tr.v-data-table__expanded) {
 	border: none;
 }
 
 /* Clean slate for table structure */
-.modern-items-table :deep(*) {
+.pos-table :deep(*) {
 	box-sizing: border-box;
 }
 
 /* Force removal of any invisible/zero-height elements that might cause spacing */
-.modern-items-table :deep([style*="display: none"]),
-.modern-items-table :deep([style*="visibility: hidden"]),
-.modern-items-table :deep([style*="opacity: 0"]) {
+.pos-table :deep([style*="display: none"]),
+.pos-table :deep([style*="visibility: hidden"]),
+.pos-table :deep([style*="opacity: 0"]) {
 	display: none !important;
 	height: 0 !important;
 	margin: 0 !important;
@@ -2741,11 +2839,11 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Enhanced expanded row width utilization */
-.modern-items-table :deep(tr.v-data-table__expanded__content) {
+.pos-table :deep(tr.v-data-table__expanded__content) {
 	width: 100% !important;
 }
 
-.modern-items-table :deep(tr.v-data-table__expanded__content td) {
+.pos-table :deep(tr.v-data-table__expanded__content td) {
 	width: 100% !important;
 	max-width: 100% !important;
 	padding: 0 !important;
@@ -2753,43 +2851,43 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Ensure expanded rows don't have unwanted borders */
-.modern-items-table :deep(.v-data-table__expanded__content) {
+.pos-table :deep(.v-data-table__expanded__content) {
 	border: none !important;
 	background: transparent !important;
 }
 
 /* Fix for Vuetify expanded row positioning */
-.modern-items-table :deep(.v-data-table__expanded__content .expanded-row-cell) {
+.pos-table :deep(.v-data-table__expanded__content .expanded-row-cell) {
 	width: 100% !important;
 	border: none !important;
 	background: transparent !important;
 }
 
-.modern-items-table :deep(th[data-column-key="discount_value"]),
-.modern-items-table :deep(td[data-column-key="discount_value"]),
-.modern-items-table :deep(th[data-column-key="discount_amount"]),
-.modern-items-table :deep(td[data-column-key="discount_amount"]) {
+.pos-table :deep(th[data-column-key="discount_value"]),
+.pos-table :deep(td[data-column-key="discount_value"]),
+.pos-table :deep(th[data-column-key="discount_amount"]),
+.pos-table :deep(td[data-column-key="discount_amount"]) {
 	min-width: 90px;
 	max-width: 120px;
 	text-align: center !important;
 }
 
 /* Ensure consistent header padding for discount columns */
-.modern-items-table :deep(th[data-column-key="discount_value"]),
-.modern-items-table :deep(th[data-column-key="discount_amount"]) {
+.pos-table :deep(th[data-column-key="discount_value"]),
+.pos-table :deep(th[data-column-key="discount_amount"]) {
 	padding: 12px !important;
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
 }
 
 /* Additional fix for headers containing percentage or Arabic text */
-.modern-items-table :deep(th) {
+.pos-table :deep(th) {
 	display: table-cell !important;
 	vertical-align: middle !important;
 }
 
 /* Specific fix for headers with Arabic text and special characters */
-.modern-items-table :deep(th .v-data-table-header__content) {
+.pos-table :deep(th .v-data-table-header__content) {
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
 	display: flex !important;
@@ -2798,45 +2896,45 @@ body[dir="rtl"] .amount-value.right-aligned {
 	height: 100% !important;
 }
 
-/* Only cells get custom padding */
-.modern-items-table :deep(td[data-column-key="discount_value"]),
-.modern-items-table :deep(td[data-column-key="discount_amount"]) {
-	padding: 16px 8px;
+/* Discount column cells */
+.pos-table :deep(td[data-column-key="discount_value"]),
+.pos-table :deep(td[data-column-key="discount_amount"]) {
+	padding: var(--cell-padding);
 	vertical-align: middle !important;
 	line-height: 1 !important;
 }
 
 
-.modern-items-table :deep(th[data-column-key="posa_is_offer"]),
-.modern-items-table :deep(td[data-column-key="posa_is_offer"]) {
+.pos-table :deep(th[data-column-key="posa_is_offer"]),
+.pos-table :deep(td[data-column-key="posa_is_offer"]) {
 	min-width: 70px;
 	max-width: 90px;
 	text-align: center;
 }
 
-.modern-items-table :deep(th[data-column-key="actions"]),
-.modern-items-table :deep(td[data-column-key="actions"]) {
+.pos-table :deep(th[data-column-key="actions"]),
+.pos-table :deep(td[data-column-key="actions"]) {
 	min-width: 80px;
 	max-width: 100px;
 	text-align: center;
 }
 
 /* RTL support for table columns */
-[dir="rtl"] .modern-items-table :deep(th[data-column-key="item_name"]),
-[dir="rtl"] .modern-items-table :deep(td[data-column-key="item_name"]) {
+[dir="rtl"] .pos-table :deep(th[data-column-key="item_name"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="item_name"]) {
 	text-align: right;
 }
 
-[dir="rtl"] .modern-items-table :deep(th[data-column-key="rate"]),
-[dir="rtl"] .modern-items-table :deep(td[data-column-key="rate"]),
-[dir="rtl"] .modern-items-table :deep(th[data-column-key="amount"]),
-[dir="rtl"] .modern-items-table :deep(td[data-column-key="amount"]),
-[dir="rtl"] .modern-items-table :deep(th[data-column-key="price_list_rate"]),
-[dir="rtl"] .modern-items-table :deep(td[data-column-key="price_list_rate"]),
-[dir="rtl"] .modern-items-table :deep(th[data-column-key="discount_value"]),
-[dir="rtl"] .modern-items-table :deep(td[data-column-key="discount_value"]),
-[dir="rtl"] .modern-items-table :deep(th[data-column-key="discount_amount"]),
-[dir="rtl"] .modern-items-table :deep(td[data-column-key="discount_amount"]) {
+[dir="rtl"] .pos-table :deep(th[data-column-key="rate"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="rate"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="amount"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="amount"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="price_list_rate"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="price_list_rate"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="discount_value"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="discount_value"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="discount_amount"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="discount_amount"]) {
 	text-align: center !important;
 }
 
@@ -2944,7 +3042,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 	z-index: 1;
 }
 
-.qty-counter-container {
+.pos-table__qty-counter {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -2966,20 +3064,20 @@ body[dir="rtl"] .amount-value.right-aligned {
 	box-sizing: border-box;
 }
 
-.qty-counter-container:hover {
+.pos-table__qty-counter:hover {
 	background: rgba(255, 255, 255, 0.8);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 	transform: translateY(-1px);
 }
 
-:deep([data-theme="dark"]) .qty-counter-container,
-:deep(.v-theme--dark) .qty-counter-container {
+:deep([data-theme="dark"]) .pos-table__qty-counter,
+:deep(.v-theme--dark) .pos-table__qty-counter {
 	background: rgba(30, 30, 30, 0.6);
 	border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-:deep([data-theme="dark"]) .qty-counter-container:hover,
-:deep(.v-theme--dark) .qty-counter-container:hover {
+:deep([data-theme="dark"]) .pos-table__qty-counter:hover,
+:deep(.v-theme--dark) .pos-table__qty-counter:hover {
 	background: rgba(30, 30, 30, 0.8);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
@@ -2989,56 +3087,56 @@ body[dir="rtl"] .amount-value.right-aligned {
 /* RTL desired: + | qty | - */
 
 /* Use CSS order for precise RTL layout: + | qty | - */
-[dir="rtl"] .qty-counter-container,
-[lang^="ar"] .qty-counter-container,
-[lang^="he"] .qty-counter-container,
-[lang^="fa"] .qty-counter-container,
-.qty-counter-container.rtl-layout,
-html[dir="rtl"] .qty-counter-container,
-body[dir="rtl"] .qty-counter-container {
+[dir="rtl"] .pos-table__qty-counter,
+[lang^="ar"] .pos-table__qty-counter,
+[lang^="he"] .pos-table__qty-counter,
+[lang^="fa"] .pos-table__qty-counter,
+.pos-table__qty-counter.rtl-layout,
+html[dir="rtl"] .pos-table__qty-counter,
+body[dir="rtl"] .pos-table__qty-counter {
 	/* Keep normal flex direction but use order */
 	flex-direction: row !important;
 }
 
 /* RTL Button ordering: + | qty | - (reverse order values for RTL context) */
-[dir="rtl"] .qty-counter-container .plus-btn,
-[lang^="ar"] .qty-counter-container .plus-btn,
-[lang^="he"] .qty-counter-container .plus-btn,
-[lang^="fa"] .qty-counter-container .plus-btn,
-.qty-counter-container.rtl-layout .plus-btn,
-html[dir="rtl"] .qty-counter-container .plus-btn,
-body[dir="rtl"] .qty-counter-container .plus-btn {
+[dir="rtl"] .pos-table__qty-counter .plus-btn,
+[lang^="ar"] .pos-table__qty-counter .plus-btn,
+[lang^="he"] .pos-table__qty-counter .plus-btn,
+[lang^="fa"] .pos-table__qty-counter .plus-btn,
+.pos-table__qty-counter.rtl-layout .plus-btn,
+html[dir="rtl"] .pos-table__qty-counter .plus-btn,
+body[dir="rtl"] .pos-table__qty-counter .plus-btn {
 	order: 3 !important; /* Plus button should appear first visually */
 }
 
-[dir="rtl"] .qty-counter-container .qty-display,
-[lang^="ar"] .qty-counter-container .qty-display,
-[lang^="he"] .qty-counter-container .qty-display,
-[lang^="fa"] .qty-counter-container .qty-display,
-.qty-counter-container.rtl-layout .qty-display,
-html[dir="rtl"] .qty-counter-container .qty-display,
-body[dir="rtl"] .qty-counter-container .qty-display {
+[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display,
+[lang^="ar"] .pos-table__qty-counter .pos-table__qty-display,
+[lang^="he"] .pos-table__qty-counter .pos-table__qty-display,
+[lang^="fa"] .pos-table__qty-counter .pos-table__qty-display,
+.pos-table__qty-counter.rtl-layout .pos-table__qty-display,
+html[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display,
+body[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display {
 	order: 2 !important; /* Quantity stays in middle */
 }
 
-[dir="rtl"] .qty-counter-container .minus-btn,
-[lang^="ar"] .qty-counter-container .minus-btn,
-[lang^="he"] .qty-counter-container .minus-btn,
-[lang^="fa"] .qty-counter-container .minus-btn,
-.qty-counter-container.rtl-layout .minus-btn,
-html[dir="rtl"] .qty-counter-container .minus-btn,
-body[dir="rtl"] .qty-counter-container .minus-btn {
+[dir="rtl"] .pos-table__qty-counter .minus-btn,
+[lang^="ar"] .pos-table__qty-counter .minus-btn,
+[lang^="he"] .pos-table__qty-counter .minus-btn,
+[lang^="fa"] .pos-table__qty-counter .minus-btn,
+.pos-table__qty-counter.rtl-layout .minus-btn,
+html[dir="rtl"] .pos-table__qty-counter .minus-btn,
+body[dir="rtl"] .pos-table__qty-counter .minus-btn {
 	order: 1 !important; /* Minus button should appear last visually */
 }
 
 /* Keep numbers readable in RTL - multiple selectors */
-[dir="rtl"] .qty-display,
-[lang^="ar"] .qty-display,
-[lang^="he"] .qty-display,
-[lang^="fa"] .qty-display,
-.qty-counter-container.rtl-layout .qty-display,
-html[dir="rtl"] .qty-display,
-body[dir="rtl"] .qty-display {
+[dir="rtl"] .pos-table__qty-display,
+[lang^="ar"] .pos-table__qty-display,
+[lang^="he"] .pos-table__qty-display,
+[lang^="fa"] .pos-table__qty-display,
+.pos-table__qty-counter.rtl-layout .pos-table__qty-display,
+html[dir="rtl"] .pos-table__qty-display,
+body[dir="rtl"] .pos-table__qty-display {
 	direction: ltr !important;
 	text-align: center;
 }
@@ -3055,7 +3153,7 @@ body[dir="rtl"] .number-field-rtl {
 	unicode-bidi: embed !important;
 }
 
-.qty-display {
+.pos-table__qty-display {
 	/* Dynamic width based on content with proper constraints */
 	min-width: 50px;
 	max-width: 100px;
@@ -3092,14 +3190,14 @@ body[dir="rtl"] .number-field-rtl {
 	word-spacing: -0.1em;
 }
 
-:deep([data-theme="dark"]) .qty-display,
-:deep(.v-theme--dark) .qty-display {
+:deep([data-theme="dark"]) .pos-table__qty-display,
+:deep(.v-theme--dark) .pos-table__qty-display {
 	background: rgba(255, 255, 255, 0.05);
 	border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Special handling for very large numbers */
-.qty-display.large-number {
+.pos-table__qty-display.large-number {
 	min-width: 70px;
 	max-width: 120px;
 	font-size: 0.75rem;
@@ -3108,47 +3206,47 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 /* Special handling for negative numbers */
-.qty-display.negative-number {
+.pos-table__qty-display.negative-number {
 	color: #dc2626;
 	background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(239, 68, 68, 0.08) 100%);
 	border-color: rgba(220, 38, 38, 0.15);
 }
 
-:deep([data-theme="dark"]) .qty-display.negative-number,
-:deep(.v-theme--dark) .qty-display.negative-number {
+:deep([data-theme="dark"]) .pos-table__qty-display.negative-number,
+:deep(.v-theme--dark) .pos-table__qty-display.negative-number {
 	color: #ff8a80;
 	background: rgba(255, 138, 128, 0.1);
 	border-color: rgba(255, 138, 128, 0.2);
 }
 
 /* Dynamic container expansion for larger numbers */
-.qty-counter-container:has(.large-number) {
+.pos-table__qty-counter:has(.large-number) {
 	min-width: 150px;
 	max-width: 200px;
 }
 
 /* Responsive text sizing based on number length */
-.qty-display[data-length="1"],
-.qty-display[data-length="2"] {
+.pos-table__qty-display[data-length="1"],
+.pos-table__qty-display[data-length="2"] {
 	font-size: 0.85rem;
 	min-width: 40px;
 }
 
-.qty-display[data-length="3"],
-.qty-display[data-length="4"] {
+.pos-table__qty-display[data-length="3"],
+.pos-table__qty-display[data-length="4"] {
 	font-size: 0.8rem;
 	min-width: 50px;
 }
 
-.qty-display[data-length="5"],
-.qty-display[data-length="6"] {
+.pos-table__qty-display[data-length="5"],
+.pos-table__qty-display[data-length="6"] {
 	font-size: 0.75rem;
 	min-width: 60px;
 }
 
-.qty-display[data-length="7"],
-.qty-display[data-length="8"],
-.qty-display[data-length="9"] {
+.pos-table__qty-display[data-length="7"],
+.pos-table__qty-display[data-length="8"],
+.pos-table__qty-display[data-length="9"] {
 	font-size: 0.7rem;
 	min-width: 70px;
 	max-width: 100px;
