@@ -956,11 +956,13 @@ export default {
 	background-color: rgba(0, 0, 0, 0.02);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(tr) {
+:deep([data-theme="dark"]) .modern-items-table :deep(tr),
+:deep(.v-theme--dark) .modern-items-table :deep(tr) {
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover) {
+:deep([data-theme="dark"]) .modern-items-table :deep(tr:hover),
+:deep(.v-theme--dark) .modern-items-table :deep(tr:hover) {
 	background-color: rgba(255, 255, 255, 0.03);
 }
 
