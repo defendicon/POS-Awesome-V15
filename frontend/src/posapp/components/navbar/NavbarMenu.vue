@@ -229,9 +229,10 @@
 
 				<v-switch
 					v-model="useWesternNumerals"
-					class="mt-3"
+					class="mt-3 western-numerals-switch"
 					density="compact"
 					inset
+					:color="useWesternNumerals ? 'success' : 'error'"
 					:label="__('Use Western numerals')"
 					@update:modelValue="saveWesternPreference"
 				></v-switch>
@@ -353,6 +354,11 @@ export default {
 				this.useWesternNumerals = false;
 			}
 			this.originalWesternNumerals = this.useWesternNumerals;
+
+			// Force reactivity update
+			this.$nextTick(() => {
+				this.$forceUpdate();
+			});
 		},
 
 		saveWesternPreference() {
@@ -873,5 +879,52 @@ export default {
 :deep(.v-theme--dark) .warning-icon {
 	background: linear-gradient(135deg, #ffb74d 0%, #ffc107 100%);
 	box-shadow: 0 2px 6px rgba(255, 183, 77, 0.3);
+}
+
+/* Western Numerals Switch Custom Colors */
+.western-numerals-switch :deep(.v-switch__track) {
+	background-color: #f44336 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch :deep(.v-switch--inset .v-switch__track) {
+	background-color: #f44336 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch :deep(.v-switch__thumb) {
+	background-color: white !important;
+}
+
+.western-numerals-switch.v-input--is-focused :deep(.v-switch__track),
+.western-numerals-switch:hover :deep(.v-switch__track) {
+	background-color: #d32f2f !important;
+}
+
+/* Active state - Green */
+.western-numerals-switch :deep(.v-selection-control--dirty .v-switch__track) {
+	background-color: #4caf50 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch :deep(.v-selection-control--dirty .v-switch--inset .v-switch__track) {
+	background-color: #4caf50 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch.v-input--is-focused :deep(.v-selection-control--dirty .v-switch__track),
+.western-numerals-switch:hover :deep(.v-selection-control--dirty .v-switch__track) {
+	background-color: #388e3c !important;
+}
+
+/* Dark theme adjustments for the switch */
+:deep([data-theme="dark"]) .western-numerals-switch .v-switch__track,
+:deep(.v-theme--dark) .western-numerals-switch .v-switch__track {
+	background-color: #f44336 !important;
+}
+
+:deep([data-theme="dark"]) .western-numerals-switch .v-selection-control--dirty .v-switch__track,
+:deep(.v-theme--dark) .western-numerals-switch .v-selection-control--dirty .v-switch__track {
+	background-color: #4caf50 !important;
 }
 </style>

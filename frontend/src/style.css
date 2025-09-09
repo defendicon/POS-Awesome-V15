@@ -1,3 +1,6 @@
+/* Import POS Table component styles */
+@import url("./posapp/components/pos/items-table-styles.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

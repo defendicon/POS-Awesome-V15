@@ -1,34 +1,33 @@
 <template>
 	<div
-		class="my-0 py-0 overflow-y-auto items-table-container"
-		:style="{ height: 'calc(100% - 80px)', maxHeight: 'calc(100% - 80px)' }"
+		ref="tableContainer"
+		class="my-0 py-0 overflow-y-auto items-table-container responsive-table-container"
+		:style="containerStyles"
+		:class="containerClasses"
 		@dragover="onDragOverFromSelector($event)"
 		@drop="onDropFromSelector($event)"
 		@dragenter="onDragEnterFromSelector"
 		@dragleave="onDragLeaveFromSelector"
 	>
 		<v-data-table-virtual
-			:headers="headers"
+			:headers="responsiveHeaders"
 			:items="items"
 			:theme="$theme.current"
 			:expanded="expanded"
 			show-expand
 			item-value="posa_row_id"
-			class="modern-items-table elevation-2"
-			:items-per-page="itemsPerPage"
+			class="pos-table elevation-2"
+			:class="tableClasses"
+			:items-per-page="virtualScrollConfig.itemsPerPage"
+			:item-height="virtualScrollConfig.itemHeight"
+			:buffer-size="virtualScrollConfig.bufferSize"
 			expand-on-click
-			density="compact"
+			:density="tableDensity"
 			hide-default-footer
 			:single-expand="true"
-			:header-props="headerProps"
+			:header-props="dynamicHeaderProps"
 			:no-data-text="__('No items in cart')"
-			@update:expanded="
-				(val) =>
-					$emit(
-						'update:expanded',
-						val.map((v) => (typeof v === 'object' ? v.posa_row_id : v)),
-					)
-			"
+			@update:expanded="handleExpandedUpdate"
 			:search="itemSearch"
 		>
 			<!-- Item name column -->
@@ -60,14 +59,50 @@
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
-				<div class="amount-value" :class="{ 'negative-number': isNegative(item.qty) }">
-					{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
+				<div class="pos-table__qty-counter" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
+					<v-btn
+						:disabled="!!item.posa_is_replace"
+						size="small"
+						color="warning"
+						variant="tonal"
+						class="qty-control-btn minus-btn"
+						@click.stop="handleMinusClick(item)"
+					>
+						<v-icon size="small">mdi-minus</v-icon>
+					</v-btn>
+					<div
+						class="pos-table__qty-display amount-value number-field-rtl"
+						:class="{
+							'negative-number': isNegative(item.qty),
+							'large-number': memoizedQtyLength(item.qty) > 6,
+						}"
+						:data-length="memoizedQtyLength(item.qty)"
+						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
+					>
+						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
+					</div>
+					<v-btn
+						:disabled="
+							!!item.posa_is_replace ||
+							((!stock_settings.allow_negative_stock ||
+								pos_profile.posa_block_sale_beyond_available_qty) &&
+								item.max_qty !== undefined &&
+								item.qty >= item.max_qty)
+						"
+						size="small"
+						color="success"
+						variant="tonal"
+						class="qty-control-btn plus-btn"
+						@click.stop="addOne(item)"
+					>
+						<v-icon size="small">mdi-plus</v-icon>
+					</v-btn>
 				</div>
 			</template>
 
 			<!-- Rate column -->
 			<template v-slot:item.rate="{ item }">
-				<div class="currency-display">
+				<div class="currency-display right-aligned">
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">{{
 						formatCurrency(item.rate)
@@ -77,7 +112,7 @@
 
 			<!-- Amount column -->
 			<template v-slot:item.amount="{ item }">
-				<div class="currency-display">
+				<div class="currency-display right-aligned">
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span
 						class="amount-value"
@@ -89,21 +124,23 @@
 
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
-				<div class="amount-value">
-					{{
-						formatFloat(
-							item.discount_percentage ||
-								(item.price_list_rate
-									? (item.discount_amount / item.price_list_rate) * 100
-									: 0),
-						)
-					}}%
+				<div class="currency-display right-aligned">
+					<span class="amount-value"
+						>{{
+							formatFloat(
+								item.discount_percentage ||
+									(item.price_list_rate
+										? (item.discount_amount / item.price_list_rate) * 100
+										: 0),
+							)
+						}}%</span
+					>
 				</div>
 			</template>
 
 			<!-- Discount amount column -->
 			<template v-slot:item.discount_amount="{ item }">
-				<div class="currency-display">
+				<div class="currency-display right-aligned">
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span
 						class="amount-value"
@@ -115,7 +152,7 @@
 
 			<!-- Price list rate column -->
 			<template v-slot:item.price_list_rate="{ item }">
-				<div class="currency-display">
+				<div class="currency-display right-aligned">
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span
 						class="amount-value"
@@ -138,77 +175,30 @@
 				</v-btn>
 			</template>
 
+			<!-- Actions column -->
+			<template v-slot:item.actions="{ item }">
+				<v-btn
+					:disabled="!!item.posa_is_replace"
+					size="default"
+					color="error"
+					variant="tonal"
+					class="delete-action-btn"
+					@click.stop="removeItem(item)"
+				>
+					<v-icon size="small">mdi-delete-outline</v-icon>
+				</v-btn>
+			</template>
+
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
-				<td :colspan="headers.length" class="ma-0 pa-0">
-					<div class="expanded-content">
-						<!-- Enhanced Action Panel with better visual hierarchy -->
-						<div class="action-panel">
-							<div class="action-panel-header">
-								<v-icon size="small" class="action-panel-icon">mdi-cog</v-icon>
-								<span class="action-panel-title">{{ __("Quick Actions") }}</span>
-							</div>
-							<div class="action-panel-content">
-								<div class="action-button-group">
-									<v-btn
-										:disabled="!!item.posa_is_replace"
-										size="large"
-										color="error"
-										variant="tonal"
-										class="item-action-btn delete-btn"
-										@click.stop="removeItem(item)"
-									>
-										<v-icon size="large">mdi-trash-can-outline</v-icon>
-										<span class="action-label">{{ __("Remove") }}</span>
-									</v-btn>
-									<v-btn
-										v-if="item.is_bundle"
-										:disabled="!!item.posa_is_replace"
-										size="large"
-										color="primary"
-										variant="tonal"
-										class="item-action-btn bundle-btn"
-										@click.stop="$emit('view-packed', item.bundle_id)"
-									>
-										<v-icon size="large">mdi-package-variant</v-icon>
-										<span class="action-label">{{ __("Items Included") }}</span>
-									</v-btn>
-								</div>
-
-								<div class="action-button-group">
-									<v-btn
-										:disabled="!!item.posa_is_replace"
-										size="large"
-										color="warning"
-										variant="tonal"
-										class="item-action-btn minus-btn"
-										@click.stop="subtractOne(item)"
-									>
-										<v-icon size="large">mdi-minus-circle-outline</v-icon>
-										<span class="action-label">{{ __("Decrease") }}</span>
-									</v-btn>
-									<v-btn
-										:disabled="
-											!!item.posa_is_replace ||
-											((!stock_settings.allow_negative_stock ||
-												pos_profile.posa_block_sale_beyond_available_qty) &&
-												item.max_qty !== undefined &&
-												item.qty >= item.max_qty)
-										"
-										size="large"
-										color="success"
-										variant="tonal"
-										class="item-action-btn plus-btn"
-										@click.stop="addOne(item)"
-									>
-										<v-icon size="large">mdi-plus-circle-outline</v-icon>
-										<span class="action-label">{{ __("Increase") }}</span>
-									</v-btn>
-								</div>
-							</div>
-						</div>
-
-						<!-- Enhanced Item Details Form with better organization -->
+				<td :colspan="responsiveHeaders.length + 1" class="ma-0 pa-0 expanded-row-cell">
+					<!-- Lazy load expanded content only when item is actually expanded -->
+					<div
+						v-if="isItemExpanded(item.posa_row_id)"
+						class="expanded-content responsive-expanded-content"
+						:class="expandedContentClasses"
+					>
+						<!-- Item Details Form -->
 						<div class="item-details-form">
 							<!-- Basic Information Section -->
 							<div class="form-section">
@@ -243,9 +233,7 @@
 											:model-value="
 												formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
 											"
-											@change="
-												setFormatedQty(item, 'qty', null, false, $event.target.value)
-											"
+											@change="handleQtyChange(item, $event)"
 											:rules="[isNumber]"
 											:disabled="!!item.posa_is_replace"
 											prepend-inner-icon="mdi-numeric"
@@ -654,6 +642,13 @@
 							</div>
 						</div>
 					</div>
+					<!-- Lazy loading placeholder when item is not expanded -->
+					<div v-else class="expanded-placeholder">
+						<div class="text-center pa-4">
+							<v-progress-circular indeterminate size="small"></v-progress-circular>
+							<div class="text-caption mt-2">{{ __("Loading details...") }}</div>
+						</div>
+					</div>
 				</td>
 			</template>
 		</v-data-table-virtual>
@@ -723,11 +718,161 @@ export default {
 			editNameDialog: false,
 			editNameTarget: null,
 			editedName: "",
+			// Container awareness properties
+			containerWidth: 0,
+			containerHeight: 0,
+			resizeObserver: null,
+			breakpoint: "xl",
+			columnVisibility: new Map(),
+			// Performance optimization caches
+			qtyLengthCache: new Map(),
+			expandedCache: new Map(),
+			lastUpdateTime: 0,
 		};
 	},
 	computed: {
+		// Dynamic container styles based on parent
+		containerStyles() {
+			return {
+				height: "calc(100% - 80px)",
+				maxHeight: "calc(100% - 80px)",
+				"--container-width": this.containerWidth + "px",
+				"--container-height": this.containerHeight + "px",
+			};
+		},
+
+		containerClasses() {
+			return {
+				[`breakpoint-${this.breakpoint}`]: true,
+				"compact-view": this.containerWidth < 600,
+				"medium-view": this.containerWidth >= 600 && this.containerWidth < 900,
+				"large-view": this.containerWidth >= 900,
+				"expanded-active": this.expanded.length > 0,
+			};
+		},
+
+		tableClasses() {
+			return {
+				[`container-${this.breakpoint}`]: true,
+				"responsive-table": true,
+			};
+		},
+
+		expandedContentClasses() {
+			return {
+				[`expanded-${this.breakpoint}`]: true,
+				"compact-expanded": this.containerWidth < 600,
+			};
+		},
+
+		// Responsive headers based on container size
+		responsiveHeaders() {
+			if (!this.headers || this.headers.length === 0) return [];
+
+			return this.headers
+				.filter((header) => {
+					// Always show required columns
+					if (
+						header.required ||
+						header.key === "item_name" ||
+						header.key === "qty" ||
+						header.key === "actions"
+					) {
+						return true;
+					}
+
+					// Hide columns based on container width
+					if (this.containerWidth < 500) {
+						// Ultra-compact: only essential columns
+						return ["item_name", "qty", "amount", "actions"].includes(header.key);
+					} else if (this.containerWidth < 700) {
+						// Compact: essential + rate
+						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
+					} else if (this.containerWidth < 900) {
+						// Medium: hide advanced columns
+						return !["discount_value", "price_list_rate"].includes(header.key);
+					}
+
+					// Large: show all columns
+					return true;
+				})
+				.map((header) => ({
+					...header,
+					width: this.calculateColumnWidth(header),
+					minWidth: this.calculateMinColumnWidth(header),
+				}));
+		},
+
+		// Dynamic table density based on container size
+		tableDensity() {
+			if (this.containerWidth < 500) return "compact";
+			if (this.containerWidth < 800) return "default";
+			return "comfortable";
+		},
+
 		headerProps() {
 			return this.isDarkTheme ? { style: "background-color:#121212;color:#fff" } : {};
+		},
+
+		// Enhanced header props with responsive behavior
+		dynamicHeaderProps() {
+			const baseProps = this.headerProps;
+			return {
+				...baseProps,
+				class: `responsive-header container-${this.breakpoint}`,
+			};
+		},
+
+		// Virtual scrolling configuration for optimal performance
+		virtualScrollConfig() {
+			const itemCount = this.items?.length || 0;
+			const containerHeight = this.containerHeight;
+
+			// Dynamic configuration based on dataset size and container
+			return {
+				itemHeight:
+					this.tableDensity === "compact" ? 48 : this.tableDensity === "comfortable" ? 72 : 60,
+				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
+				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
+			};
+		},
+
+		// Memoized quantity display length calculation with cache management
+		memoizedQtyLength() {
+			return (qty) => {
+				if (this.qtyLengthCache.has(qty)) return this.qtyLengthCache.get(qty);
+				const length = String(Math.abs(qty || 0)).replace(".", "").length;
+				this.qtyLengthCache.set(qty, length);
+
+				// Limit cache size to prevent memory leaks
+				if (this.qtyLengthCache.size > 1000) {
+					const firstKey = this.qtyLengthCache.keys().next().value;
+					this.qtyLengthCache.delete(firstKey);
+				}
+
+				return length;
+			};
+		},
+
+		// Lazy loading helper for expanded content with cache
+		isItemExpanded() {
+			return (itemId) => {
+				const cacheKey = `${itemId}_${this.expanded.length}`;
+
+				if (this.expandedCache.has(cacheKey)) {
+					return this.expandedCache.get(cacheKey);
+				}
+
+				const isExpanded = this.expanded.includes(itemId);
+				this.expandedCache.set(cacheKey, isExpanded);
+
+				// Clear cache periodically to prevent memory bloat
+				if (this.expandedCache.size > 100) {
+					this.expandedCache.clear();
+				}
+
+				return isExpanded;
+			};
 		},
 		isDarkTheme() {
 			return this.$theme.current === "dark";
@@ -744,8 +889,137 @@ export default {
 			}
 			return false;
 		},
+		isRTL() {
+			// Multiple RTL detection methods
+			const htmlDir = document.documentElement.getAttribute("dir");
+			const bodyDir = document.body.getAttribute("dir");
+			const computedDir = window.getComputedStyle(document.documentElement).direction;
+			const lang = document.documentElement.getAttribute("lang") || navigator.language;
+
+			// Check if current language is RTL
+			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
+			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
+
+			console.log("RTL Detection:", {
+				htmlDir,
+				bodyDir,
+				computedDir,
+				lang,
+				isRTLLanguage,
+				result: htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage,
+			});
+
+			return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
+		},
 	},
 	methods: {
+		// Container awareness methods
+		updateContainerDimensions() {
+			if (this.$refs.tableContainer) {
+				const rect = this.$refs.tableContainer.getBoundingClientRect();
+				this.containerWidth = rect.width;
+				this.containerHeight = rect.height;
+				this.updateBreakpoint();
+			}
+		},
+
+		updateBreakpoint() {
+			if (this.containerWidth < 500) {
+				this.breakpoint = "xs";
+			} else if (this.containerWidth < 700) {
+				this.breakpoint = "sm";
+			} else if (this.containerWidth < 900) {
+				this.breakpoint = "md";
+			} else if (this.containerWidth < 1200) {
+				this.breakpoint = "lg";
+			} else {
+				this.breakpoint = "xl";
+			}
+		},
+
+		calculateColumnWidth(header) {
+			const baseWidths = {
+				item_name: { min: 150, max: 250, ratio: 0.3 },
+				qty: { min: 120, max: 160, ratio: 0.15 },
+				rate: { min: 100, max: 130, ratio: 0.12 },
+				amount: { min: 100, max: 130, ratio: 0.12 },
+				discount_value: { min: 80, max: 110, ratio: 0.1 },
+				discount_amount: { min: 90, max: 120, ratio: 0.11 },
+				price_list_rate: { min: 110, max: 140, ratio: 0.13 },
+				actions: { min: 80, max: 100, ratio: 0.08 },
+				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
+			};
+
+			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
+			const calculatedWidth = this.containerWidth * config.ratio;
+
+			return Math.max(config.min, Math.min(config.max, calculatedWidth));
+		},
+
+		calculateMinColumnWidth(header) {
+			const minWidths = {
+				item_name: 120,
+				qty: 100,
+				rate: 80,
+				amount: 80,
+				discount_value: 70,
+				discount_amount: 80,
+				price_list_rate: 90,
+				actions: 60,
+				posa_is_offer: 50,
+			};
+
+			return minWidths[header.key] || 60;
+		},
+
+		setupResizeObserver() {
+			if (typeof ResizeObserver !== "undefined") {
+				// Debounced resize handler for better performance
+				const debouncedResizeHandler = _.debounce((entries) => {
+					for (let entry of entries) {
+						const { width, height } = entry.contentRect;
+
+						// Only update if dimensions actually changed
+						if (this.containerWidth !== width || this.containerHeight !== height) {
+							this.containerWidth = width;
+							this.containerHeight = height;
+							this.updateBreakpoint();
+
+							// Batch emit for better performance
+							this.$nextTick(() => {
+								this.$emit("container-resize", {
+									width,
+									height,
+									breakpoint: this.breakpoint,
+								});
+							});
+						}
+					}
+				}, 16); // ~60fps throttling
+
+				this.resizeObserver = new ResizeObserver(debouncedResizeHandler);
+
+				this.$nextTick(() => {
+					if (this.$refs.tableContainer) {
+						this.resizeObserver.observe(this.$refs.tableContainer);
+						this.updateContainerDimensions(); // Initial measurement
+					}
+				});
+			} else {
+				// Fallback to window resize for older browsers
+				window.addEventListener("resize", this.updateContainerDimensions);
+			}
+		},
+
+		cleanupResizeObserver() {
+			if (this.resizeObserver) {
+				this.resizeObserver.disconnect();
+				this.resizeObserver = null;
+			} else {
+				window.removeEventListener("resize", this.updateContainerDimensions);
+			}
+		},
+
 		onDragOverFromSelector(event) {
 			// Check if drag data is from item selector
 			const dragData = event.dataTransfer.types.includes("application/json");
@@ -829,159 +1103,350 @@ export default {
 				this.editedName = item.item_name;
 			}
 		},
+		handleQtyChange(item, event) {
+			const newQty = parseFloat(event.target.value) || 0;
+			if (newQty === 0) {
+				// Remove the item when quantity is set to 0
+				this.removeItem(item);
+			} else {
+				// Use the existing setFormatedQty function for non-zero values
+				this.setFormatedQty(item, "qty", null, false, event.target.value);
+			}
+		},
+		handleMinusClick(item) {
+			if (item.qty <= 1) {
+				// Remove the item when quantity would become 0 or less
+				this.removeItem(item);
+			} else {
+				// Use the existing subtractOne function
+				this.subtractOne(item);
+			}
+		},
+
+		// Enhanced method with memoization for better performance
+		getQtyDisplayLength(qty) {
+			return this.memoizedQtyLength(qty);
+		},
+
+		// Optimized expanded update handler
+		handleExpandedUpdate(val) {
+			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
+			this.$emit("update:expanded", mappedValues);
+		},
+	},
+
+	mounted() {
+		this.setupResizeObserver();
+
+		// Performance optimization: defer non-critical initialization
+		this.$nextTick(() => {
+			this.updateContainerDimensions();
+
+			// Log performance metrics in development
+			if (process.env.NODE_ENV === "development") {
+				console.log("ItemsTable Performance Optimizations Active:", {
+					virtualScrolling: true,
+					memoizedQtyCalculations: true,
+					debouncedResizing: true,
+					lazyExpandedContent: true,
+					cacheManagement: true,
+					itemCount: this.items?.length || 0,
+					containerDimensions: {
+						width: this.containerWidth,
+						height: this.containerHeight,
+					},
+				});
+			}
+		});
+	},
+
+	beforeUnmount() {
+		this.cleanupResizeObserver();
+
+		// Clean up performance caches to prevent memory leaks
+		if (this.qtyLengthCache) {
+			this.qtyLengthCache.clear();
+		}
+		if (this.expandedCache) {
+			this.expandedCache.clear();
+		}
 	},
 };
 </script>
 
 <style scoped>
-/* Modern table styling with enhanced visual hierarchy */
-.modern-items-table {
-	border-radius: var(--border-radius-lg);
+/* Modern table styling with clean design */
+.pos-table {
+	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: var(--shadow-md);
-	border: 1px solid rgba(0, 0, 0, 0.09);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(0, 0, 0, 0.1);
 	height: 100%;
+	width: 100%;
+	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
+	background: #ffffff;
+	margin: 0;
+	padding: 0;
+}
+
+:deep([data-theme="dark"]) .pos-table,
+:deep(.v-theme--dark) .pos-table {
+	background: #1a202c;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Ensure items table can scroll when many rows exist */
 .items-table-container {
 	overflow-y: auto;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
 /* Table wrapper styling */
-.modern-items-table :deep(.v-data-table__wrapper),
-.modern-items-table :deep(.v-table__wrapper) {
-	border-radius: var(--border-radius-sm);
+.pos-table :deep(.v-data-table__wrapper),
+.pos-table :deep(.v-table__wrapper) {
+	border-radius: 0;
 	height: 100%;
+	width: 100%;
+	max-width: 100%;
 	overflow-y: auto;
 	scrollbar-width: thin;
+	margin: 0;
+	padding: 0;
+	border: none;
 }
 
-/* Table header styling */
-.modern-items-table :deep(th) {
+/* Enhanced table header styling with stable hover support */
+.pos-table :deep(th) {
 	font-weight: 600;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	padding: 12px 16px;
-	transition: background-color var(--transition-normal);
-	border-bottom: 2px solid var(--table-header-border);
-	background-color: var(--table-header-bg, var(--surface-secondary, #f5f5f5));
-	color: var(--table-header-text);
+	letter-spacing: 0.3px;
+	padding: 12px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	background-color: #f8f9fa;
+	color: #495057;
 	position: sticky;
 	top: 0;
+	z-index: 3;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 150px;
+	min-width: 80px;
+	text-align: center;
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+	height: 40px;
+	/* Enhanced transitions and stability */
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	background-clip: padding-box;
+	border-radius: 0;
+	user-select: none;
+	cursor: default;
+	will-change: background-color, transform, box-shadow;
+	border: none;
+	outline: none;
+	box-sizing: border-box;
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th),
+:deep(.v-theme--dark) .pos-table :deep(th) {
+	background-color: #2d3748;
+	color: #e2e8f0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Header text wrapper is now handled in the improved stable section above */
+
+/* Improved stable header hover effects */
+.pos-table :deep(th) {
+	/* Ensure stable positioning */
+	position: relative;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	background-clip: padding-box;
+	will-change: background-color, transform;
+}
+
+.pos-table :deep(th:hover) {
+	/* Smooth background transition without layout changes */
+	background-color: rgba(25, 118, 210, 0.08);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+	z-index: 2;
+}
+
+.pos-table :deep(th .v-data-table-header__content) {
+	/* Stable content container */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
 	z-index: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.pos-table :deep(th:hover .v-data-table-header__content) {
+	/* Enhanced text on hover without disrupting layout */
+	color: rgba(25, 118, 210, 0.9);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-shadow: 0 1px 2px rgba(25, 118, 210, 0.1);
 }
 
 /* Table row styling */
-.modern-items-table :deep(tr) {
-	transition: all 0.2s ease;
+.pos-table :deep(tr) {
+	transition: background-color 0.2s ease;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.modern-items-table :deep(tr:hover) {
-	background-color: var(--table-row-hover);
-	transform: translateY(-1px);
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+.pos-table :deep(tr:hover) {
+	background-color: rgba(0, 0, 0, 0.02);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(tr) {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(tr:hover) {
+	background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* Table cell styling */
-.modern-items-table :deep(td) {
-	padding: 12px 16px;
+.pos-table :deep(td) {
+	padding: 16px 12px;
 	vertical-align: middle;
+	height: 60px;
+	text-align: center;
+	color: #374151;
+	position: relative;
 }
 
-/* Expanded content styling */
+/* Ensure all cell contents fill the cell */
+.pos-table :deep(td) > div {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(td),
+:deep(.v-theme--dark) .pos-table :deep(td) {
+	color: #e5e7eb;
+}
+
+/* =================================================================
+   EXPANDED CONTENT - CLEAN STRUCTURE
+   ================================================================= */
+
+/* Base expanded row styling - ensure full width utilization */
+.expanded-row-cell {
+	padding: 0 !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	overflow: hidden;
+	box-sizing: border-box;
+	/* Ensure it spans the full table width including expand column */
+	position: relative;
+}
+
+/* Main expanded content container */
 .expanded-content {
 	padding: 24px;
-	background: linear-gradient(135deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
-	border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-	box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.03);
-	animation: fadeIn 0.4s ease;
-	border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box;
+	background: #f8f9fa;
+	border-radius: 0 0 8px 8px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-top: none;
+	animation: expandIn 0.3s ease forwards;
+
+	/* Enable container queries */
+	container-type: inline-size;
+	container-name: expanded-content;
+
+	/* Ensure full width utilization */
+	margin: 0;
+	position: relative;
+	overflow: visible;
 }
 
+/* Dark theme */
 :deep([data-theme="dark"]) .expanded-content,
 :deep(.v-theme--dark) .expanded-content {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.03) 100%);
-	box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #2d3748;
+	border-color: rgba(255, 255, 255, 0.1);
 }
 
-@keyframes fadeIn {
+@keyframes expandIn {
 	from {
 		opacity: 0;
-		transform: translateY(-15px);
+		transform: translateY(-20px) scale(0.95);
+		max-height: 0;
 	}
 
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+		max-height: 1000px;
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	50% {
+		transform: translateX(100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
 	to {
 		opacity: 1;
 		transform: translateY(0);
 	}
 }
 
-/* Action panel styling */
-.action-panel {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	padding: 16px;
-	margin-bottom: 20px;
-	background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--surface-tertiary) 100%);
-	border-radius: var(--border-radius-lg);
-	border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	transition: all 0.3s ease;
+@keyframes pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
 }
 
-:deep([data-theme="dark"]) .action-panel,
-:deep(.v-theme--dark) .action-panel {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.06) 100%);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.action-panel-header {
-	display: flex;
-	align-items: center;
-	padding-bottom: 8px;
-	border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
-}
-
-:deep([data-theme="dark"]) .action-panel-header,
-:deep(.v-theme--dark) .action-panel-header {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.action-panel-icon {
-	margin-right: 8px;
-	color: var(--primary-color, #1976d2);
-}
-
-.action-panel-title {
-	font-weight: 600;
-	font-size: 0.9rem;
-	color: var(--text-primary);
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-}
-
-.action-panel-content {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 12px;
-	flex-wrap: wrap;
-}
-
-.action-button-group {
-	display: flex;
-	gap: 8px;
-}
+/* =================================================================
+   EXPANDED CONTENT LAYOUT - SINGLE COLUMN VERTICAL STACK
+   ================================================================= */
 
 /* Item action buttons styling */
 .item-action-btn {
@@ -1089,60 +1554,46 @@ export default {
 	opacity: 0.9;
 }
 
-/* Form layout styling */
+/* =================================================================
+   FORM LAYOUT - SINGLE COLUMN OPTIMIZED
+   ================================================================= */
+
+/* Main form container - single column stack */
 .item-details-form {
-	margin-top: 16px;
-}
-
-.form-row {
+	width: 100%;
 	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-bottom: 8px;
+	flex-direction: column;
+	gap: 20px;
 }
 
-.form-field {
-	flex: 1;
-	min-width: 200px;
-}
-
-.form-field.full-width {
-	flex-basis: 100%;
-}
-
+/* Form sections - optimized for vertical stacking */
 .form-section {
-	margin-top: 12px;
-	padding: 10px;
-	background: var(--surface-secondary);
-	border-radius: var(--border-radius-lg);
-	border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+	width: 100%;
+	padding: 24px;
+	box-sizing: border-box;
+
+	background: #ffffff;
+	border-radius: 12px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+	/* Smooth transitions */
 	transition: all 0.3s ease;
 }
 
 .form-section:hover {
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	transform: translateY(-2px);
 }
 
-:deep([data-theme="dark"]) .form-section,
-:deep(.v-theme--dark) .form-section {
-	background: rgba(255, 255, 255, 0.02);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-:deep([data-theme="dark"]) .form-section:hover,
-:deep(.v-theme--dark) .form-section:hover {
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
+/* Section headers - clean and modern */
 .section-header {
 	display: flex;
 	align-items: center;
-	margin-bottom: 8px;
-	padding-bottom: 8px;
-	border-bottom: 2px solid var(--primary-color, #1976d2);
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid #1976d2;
 	position: relative;
 }
 
@@ -1151,54 +1602,699 @@ export default {
 	position: absolute;
 	bottom: -2px;
 	left: 0;
-	width: 40px;
+	width: 60px;
 	height: 2px;
-	background: linear-gradient(90deg, var(--primary-color, #1976d2), transparent);
+	background: linear-gradient(90deg, #1976d2, rgba(25, 118, 210, 0.3));
+	border-radius: 1px;
 }
 
 .section-icon {
-	margin-right: 10px;
-	color: var(--primary-color, #1976d2);
+	color: #1976d2;
 	background: rgba(25, 118, 210, 0.1);
-	padding: 6px;
-	border-radius: 8px;
-}
-
-:deep([data-theme="dark"]) .section-icon,
-:deep(.v-theme--dark) .section-icon {
-	background: rgba(144, 202, 249, 0.1);
+	padding: 8px;
+	border-radius: 10px;
 }
 
 .section-title {
 	font-weight: 600;
-	font-size: 0.85rem;
-	color: var(--text-primary);
+	font-size: 0.9rem;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
+	color: var(--text-primary);
 }
 
-@media (max-width: 600px) {
+/* Form rows - flexible and responsive */
+.form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	width: 100%;
+}
+
+.form-field {
+	flex: 1;
+	min-width: 250px;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.form-field.full-width {
+	flex-basis: 100%;
+	min-width: 100%;
+}
+
+/* Dark theme */
+:deep([data-theme="dark"]) .form-section,
+:deep(.v-theme--dark) .form-section {
+	background: #1a202c;
+	border-color: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+:deep([data-theme="dark"]) .form-section:hover,
+:deep(.v-theme--dark) .form-section:hover {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+:deep([data-theme="dark"]) .section-icon,
+:deep(.v-theme--dark) .section-icon {
+	background: rgba(144, 202, 249, 0.15);
+}
+
+/* =================================================================
+   RESPONSIVE DESIGN - CONTAINER QUERIES
+   ================================================================= */
+
+/* Small containers - mobile optimization */
+@container expanded-content (max-width: 600px) {
+	.expanded-content {
+		padding: 16px;
+	}
+
+	.item-details-form {
+		gap: 16px;
+	}
+
 	.form-section {
-		margin-top: 8px;
-		padding: 8px;
+		padding: 20px 16px;
+		border-radius: 8px;
 	}
 
 	.form-row {
-		gap: 6px;
-		margin-bottom: 6px;
-	}
-
-	.section-header {
-		margin-bottom: 6px;
-		padding-bottom: 6px;
+		flex-direction: column;
+		gap: 12px;
 	}
 
 	.form-field {
-		min-width: 140px;
+		min-width: 100%;
+	}
+
+	.section-header {
+		margin-bottom: 16px;
+		padding-bottom: 12px;
 	}
 
 	.section-title {
+		font-size: 0.85rem;
+	}
+}
+
+/* Medium containers - tablet optimization */
+@container expanded-content (max-width: 900px) {
+	.form-field {
+		min-width: min(200px, 48%);
+	}
+
+	.form-section {
+		padding: 20px;
+	}
+}
+
+/* =================================================================
+   RTL SUPPORT - ENHANCED WITH MULTIPLE SELECTORS
+   ================================================================= */
+
+/* Base RTL layout - Enhanced selectors */
+[dir="rtl"] .expanded-content,
+[lang^="ar"] .expanded-content,
+[lang^="he"] .expanded-content,
+[lang^="fa"] .expanded-content,
+html[dir="rtl"] .expanded-content,
+body[dir="rtl"] .expanded-content {
+	direction: rtl !important;
+}
+
+/* RTL form layout - Enhanced selectors */
+[dir="rtl"] .form-row,
+[lang^="ar"] .form-row,
+[lang^="he"] .form-row,
+[lang^="fa"] .form-row,
+html[dir="rtl"] .form-row,
+body[dir="rtl"] .form-row {
+	flex-direction: row-reverse !important;
+}
+
+[dir="rtl"] .item-details-form,
+[lang^="ar"] .item-details-form,
+[lang^="he"] .item-details-form,
+[lang^="fa"] .item-details-form,
+html[dir="rtl"] .item-details-form,
+body[dir="rtl"] .item-details-form {
+	text-align: right !important;
+	direction: rtl !important;
+}
+
+/* RTL section headers - Enhanced selectors */
+[dir="rtl"] .section-header,
+[lang^="ar"] .section-header,
+[lang^="he"] .section-header,
+[lang^="fa"] .section-header,
+html[dir="rtl"] .section-header,
+body[dir="rtl"] .section-header {
+	flex-direction: row-reverse !important;
+	text-align: right !important;
+}
+
+/* RTL section icon positioning - place icon on the right side */
+[dir="rtl"] .section-icon,
+[lang^="ar"] .section-icon,
+[lang^="he"] .section-icon,
+[lang^="fa"] .section-icon,
+html[dir="rtl"] .section-icon,
+body[dir="rtl"] .section-icon {
+	order: 2 !important;
+	margin-left: 0 !important;
+	margin-right: 12px !important;
+}
+
+[dir="rtl"] .section-header::after,
+[lang^="ar"] .section-header::after,
+[lang^="he"] .section-header::after,
+[lang^="fa"] .section-header::after,
+html[dir="rtl"] .section-header::after,
+body[dir="rtl"] .section-header::after {
+	right: 0 !important;
+	left: auto !important;
+	background: linear-gradient(-90deg, #1976d2, rgba(25, 118, 210, 0.3)) !important;
+}
+
+[dir="rtl"] .section-title,
+[lang^="ar"] .section-title,
+[lang^="he"] .section-title,
+[lang^="fa"] .section-title,
+html[dir="rtl"] .section-title,
+body[dir="rtl"] .section-title {
+	text-align: right !important;
+	direction: rtl !important;
+	width: 100% !important;
+	display: block !important;
+	order: 1 !important;
+}
+
+/* RTL form fields - Enhanced selectors */
+[dir="rtl"] .form-field,
+[lang^="ar"] .form-field,
+[lang^="he"] .form-field,
+[lang^="fa"] .form-field,
+html[dir="rtl"] .form-field,
+body[dir="rtl"] .form-field {
+	text-align: right !important;
+	direction: rtl !important;
+}
+
+/* RTL quantity counter in expanded content - use same order approach */
+[dir="rtl"] .expanded-content .pos-table__qty-counter,
+[lang^="ar"] .expanded-content .pos-table__qty-counter,
+[lang^="he"] .expanded-content .pos-table__qty-counter,
+[lang^="fa"] .expanded-content .pos-table__qty-counter,
+.expanded-content .pos-table__qty-counter.rtl-layout,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter {
+	flex-direction: row !important; /* Use order instead of row-reverse */
+}
+
+/* Same button ordering for expanded content (reverse order values for RTL context) */
+[dir="rtl"] .expanded-content .pos-table__qty-counter .plus-btn,
+[lang^="ar"] .expanded-content .pos-table__qty-counter .plus-btn,
+[lang^="he"] .expanded-content .pos-table__qty-counter .plus-btn,
+[lang^="fa"] .expanded-content .pos-table__qty-counter .plus-btn,
+.expanded-content .pos-table__qty-counter.rtl-layout .plus-btn,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter .plus-btn,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter .plus-btn {
+	order: 3 !important; /* Plus button should appear first visually in RTL */
+}
+
+[dir="rtl"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+[lang^="ar"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+[lang^="he"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+[lang^="fa"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+.expanded-content .pos-table__qty-counter.rtl-layout .pos-table__qty-display,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter .pos-table__qty-display,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter .pos-table__qty-display {
+	order: 2 !important; /* Quantity stays in middle */
+}
+
+[dir="rtl"] .expanded-content .pos-table__qty-counter .minus-btn,
+[lang^="ar"] .expanded-content .pos-table__qty-counter .minus-btn,
+[lang^="he"] .expanded-content .pos-table__qty-counter .minus-btn,
+[lang^="fa"] .expanded-content .pos-table__qty-counter .minus-btn,
+.expanded-content .pos-table__qty-counter.rtl-layout .minus-btn,
+html[dir="rtl"] .expanded-content .pos-table__qty-counter .minus-btn,
+body[dir="rtl"] .expanded-content .pos-table__qty-counter .minus-btn {
+	order: 1 !important; /* Minus button should appear last visually in RTL */
+}
+
+/* Keep numbers LTR in expanded content */
+[dir="rtl"] .expanded-content .pos-table__qty-display,
+[lang^="ar"] .expanded-content .pos-table__qty-display,
+[lang^="he"] .expanded-content .pos-table__qty-display,
+[lang^="fa"] .expanded-content .pos-table__qty-display,
+html[dir="rtl"] .expanded-content .pos-table__qty-display,
+body[dir="rtl"] .expanded-content .pos-table__qty-display {
+	direction: ltr !important; /* Keep numbers readable */
+}
+
+/* =================================================================
+   CONTAINER-AWARE RESPONSIVE STYLES
+   ================================================================= */
+
+/* Base responsive container styles */
+.responsive-table-container {
+	position: relative;
+	transition: all 0.3s ease;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+/* Breakpoint-specific container classes */
+.responsive-table-container.breakpoint-xs {
+	--table-padding: 8px;
+	--header-font-size: 0.65rem;
+	--cell-padding: 8px 4px;
+	--cell-height: 48px;
+}
+
+.responsive-table-container.breakpoint-sm {
+	--table-padding: 12px;
+	--header-font-size: 0.7rem;
+	--cell-padding: 12px 6px;
+	--cell-height: 52px;
+}
+
+.responsive-table-container.breakpoint-md {
+	--table-padding: 16px;
+	--header-font-size: 0.75rem;
+	--cell-padding: 14px 8px;
+	--cell-height: 56px;
+}
+
+.responsive-table-container.breakpoint-lg {
+	--table-padding: 16px;
+	--header-font-size: 0.8rem;
+	--cell-padding: 16px 12px;
+	--cell-height: 60px;
+}
+
+.responsive-table-container.breakpoint-xl {
+	--table-padding: 20px;
+	--header-font-size: 0.85rem;
+	--cell-padding: 18px 12px;
+	--cell-height: 64px;
+}
+
+/* Dynamic table styling based on container size */
+.pos-table.responsive-table {
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	overflow: hidden;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-left: none;
+	border-right: none;
+	border-radius: 0;
+}
+
+/* Container-aware headers */
+.pos-table.container-xs :deep(th) {
+	font-size: var(--header-font-size);
+	padding: 8px 4px;
+	min-width: 60px;
+	max-width: 120px;
+}
+
+.pos-table.container-sm :deep(th) {
+	font-size: var(--header-font-size);
+	padding: 10px 6px;
+	min-width: 70px;
+	max-width: 140px;
+}
+
+.pos-table.container-md :deep(th) {
+	font-size: var(--header-font-size);
+	padding: 12px 8px;
+	min-width: 80px;
+	max-width: 160px;
+}
+
+.pos-table.container-lg :deep(th) {
+	font-size: var(--header-font-size);
+	padding: var(--cell-padding);
+	min-width: 90px;
+	max-width: 180px;
+}
+
+.pos-table.container-xl :deep(th) {
+	font-size: var(--header-font-size);
+	padding: var(--cell-padding);
+	min-width: 100px;
+	max-width: 200px;
+}
+
+/* Container-aware cells */
+.pos-table.container-xs :deep(td),
+.pos-table.container-sm :deep(td),
+.pos-table.container-md :deep(td),
+.pos-table.container-lg :deep(td),
+.pos-table.container-xl :deep(td) {
+	padding: var(--cell-padding);
+	height: var(--cell-height);
+	vertical-align: middle;
+}
+
+/* Compact view adjustments */
+.responsive-table-container.compact-view .pos-table {
+	border-radius: 0;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	max-width: 100%;
+}
+
+.responsive-table-container.compact-view .pos-table__qty-counter {
+	min-width: 110px;
+	max-width: 140px;
+	width: auto;
+	gap: 4px;
+}
+
+.responsive-table-container.compact-view .qty-control-btn {
+	width: 28px !important;
+	height: 28px !important;
+	min-width: 28px !important;
+}
+
+.responsive-table-container.compact-view .pos-table__qty-display {
+	min-width: 35px;
+	max-width: 65px;
+	height: 28px;
+	font-size: 0.7rem;
+	padding: 4px 3px;
+	letter-spacing: -0.03em;
+}
+
+/* Medium view adjustments */
+.responsive-table-container.medium-view .pos-table__qty-counter {
+	min-width: 130px;
+	max-width: 160px;
+	width: auto;
+}
+
+/* Large view adjustments */
+.responsive-table-container.large-view .pos-table__qty-counter {
+	min-width: 140px;
+	max-width: 180px;
+	width: auto;
+}
+
+/* Enhanced expanded content responsiveness */
+.expanded-content.expanded-xs {
+	padding: 12px;
+	border-radius: 0 0 6px 6px;
+}
+
+.expanded-content.expanded-sm {
+	padding: 16px;
+	border-radius: 0 0 8px 8px;
+}
+
+.expanded-content.expanded-md {
+	padding: 20px;
+	border-radius: 0 0 10px 10px;
+}
+
+.expanded-content.expanded-lg {
+	padding: 24px;
+	border-radius: 0 0 12px 12px;
+}
+
+.expanded-content.expanded-xl {
+	padding: 28px;
+	border-radius: 0 0 12px 12px;
+}
+
+/* Compact expanded content */
+.expanded-content.compact-expanded .form-section {
+	padding: 16px 12px;
+	margin-bottom: 12px;
+	border-radius: 8px;
+}
+
+.expanded-content.compact-expanded .form-row {
+	flex-direction: column;
+	gap: 8px;
+}
+
+.expanded-content.compact-expanded .form-field {
+	min-width: 100%;
+}
+
+.expanded-content.compact-expanded .section-header {
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+}
+
+.expanded-content.compact-expanded .section-title {
+	font-size: 0.8rem;
+}
+
+/* Full width enforcement for all nested elements */
+.pos-table :deep(.v-data-table),
+.pos-table :deep(.v-data-table-virtual),
+.pos-table :deep(.v-table) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+}
+
+.pos-table :deep(.v-data-table__wrapper) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: none !important;
+}
+
+.pos-table :deep(table) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	border-collapse: collapse !important;
+	table-layout: auto !important;
+}
+
+.pos-table :deep(thead),
+.pos-table :deep(tbody) {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
+.pos-table :deep(tr) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Remove any card or container margins around the table */
+.items-table-wrapper,
+.items-table-wrapper :deep(.v-card),
+.items-table-wrapper :deep(.v-sheet) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+}
+
+/* Performance optimizations */
+.responsive-table-container {
+	will-change: width, height;
+	contain: layout style;
+}
+
+.pos-table.responsive-table {
+	will-change: transform;
+	contain: layout;
+}
+
+/* Smooth transitions during resize */
+.pos-table :deep(th),
+.pos-table :deep(td) {
+	transition:
+		padding 0.2s ease,
+		font-size 0.2s ease,
+		width 0.2s ease;
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+	.pos-table {
+		border-radius: 0;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.pos-table :deep(th) {
+		font-size: 0.65rem;
+		padding: 12px 6px;
+		letter-spacing: 0.5px;
+	}
+
+	.pos-table :deep(td) {
+		padding: 16px 8px;
+		height: 56px;
+		font-size: 0.85rem;
+	}
+
+	.expanded-content {
+		padding: 20px 16px;
+		border-radius: 0 0 12px 12px;
+	}
+}
+
+@media (max-width: 600px) {
+	.expanded-content {
+		padding: clamp(12px, 3vw, 16px);
+	}
+
+	.form-section {
+		margin-top: 8px;
+		padding: clamp(10px, 2.5vw, 16px);
+		border-radius: clamp(8px, 2vw, 12px);
+		animation: fadeInUp 0.3s ease;
+	}
+
+	.form-row {
+		gap: clamp(6px, 1.5vw, 10px);
+		margin-bottom: clamp(8px, 2vw, 12px);
+		flex-direction: column;
+	}
+
+	.section-header {
+		margin-bottom: clamp(8px, 2vw, 12px);
+		padding-bottom: 6px;
+		flex-wrap: wrap;
+	}
+
+	.form-field {
+		min-width: 100%;
+		flex: none;
+		width: 100%;
+	}
+
+	.section-title {
+		font-size: clamp(0.75rem, 2vw, 0.85rem);
+		line-height: 1.2;
+	}
+
+	.section-icon {
+		margin-right: clamp(6px, 1.5vw, 10px);
+		padding: clamp(4px, 1vw, 6px);
+	}
+
+	.pos-table {
+		border-radius: 0;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		max-width: 100%;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+	}
+
+	.pos-table :deep(th) {
+		font-size: 0.6rem;
+		padding: 8px 4px;
+		max-width: 80px;
+		min-width: 50px;
+		letter-spacing: 0.3px;
+	}
+
+	.pos-table :deep(td) {
+		padding: 12px 4px;
+		height: 48px;
 		font-size: 0.8rem;
+	}
+
+	.pos-table :deep(th[data-column-key="item_name"]) {
+		min-width: 120px;
+		max-width: 150px;
+	}
+
+	.pos-table :deep(th[data-column-key="qty"]) {
+		min-width: 100px;
+		max-width: 120px;
+	}
+
+	.pos-table :deep(th[data-column-key="rate"]),
+	.pos-table :deep(th[data-column-key="amount"]) {
+		min-width: 70px;
+		max-width: 90px;
+	}
+
+	.pos-table__qty-counter {
+		min-width: 110px;
+		width: 110px;
+		height: auto;
+		gap: 4px;
+		padding: 2px;
+	}
+
+	.qty-control-btn {
+		width: 28px !important;
+		height: 28px !important;
+		min-width: 28px !important;
+		border-radius: 6px !important;
+	}
+
+	.pos-table__qty-display {
+		min-width: 35px;
+		max-width: 70px;
+		padding: 4px 3px;
+		font-size: 0.75rem;
+		height: 28px;
+		letter-spacing: -0.03em;
+	}
+
+	.action-button-group {
+		flex-direction: column;
+		gap: 6px;
+		width: 100%;
+	}
+
+	.item-action-btn {
+		width: 100% !important;
+		min-width: 100% !important;
+		height: 40px !important;
+		justify-content: center;
+	}
+
+	.item-action-btn .action-label {
+		display: inline-block !important;
+	}
+
+	.expanded-content {
+		padding: 16px;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.action-panel {
+		padding: 12px;
+		gap: 8px;
+	}
+
+	.action-panel-content {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
 	}
 }
 
@@ -1216,25 +2312,130 @@ export default {
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Enhanced form field styling */
+/* Enhanced form field styling with context awareness */
 .form-field :deep(.v-field) {
-	border-radius: 8px !important;
-	transition: all 0.3s ease !important;
+	border-radius: clamp(6px, 2vw, 12px) !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	background: rgba(255, 255, 255, 0.8) !important;
+	backdrop-filter: blur(10px) !important;
+	border: 1px solid rgba(0, 0, 0, 0.06) !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+}
+
+.form-field :deep(.v-field__input) {
+	padding: clamp(8px, 2vw, 12px) !important;
+	font-size: clamp(0.8rem, 2vw, 0.9rem) !important;
+	min-height: auto !important;
+}
+
+.form-field :deep(.v-field__prepend-inner) {
+	padding-right: clamp(4px, 1vw, 8px) !important;
+}
+
+/* Improved responsive text field sizing */
+.form-field :deep(.v-text-field .v-field__input) {
+	flex-wrap: nowrap;
+	overflow: hidden;
+}
+
+.form-field :deep(.v-autocomplete .v-field__input) {
+	flex-wrap: nowrap;
 }
 
 .form-field :deep(.v-field:hover) {
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-1px);
+	border-color: rgba(37, 99, 235, 0.2) !important;
 }
 
 .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2) !important;
+	box-shadow:
+		0 0 0 3px rgba(37, 99, 235, 0.1),
+		0 4px 20px rgba(37, 99, 235, 0.15) !important;
+	transform: translateY(-1px);
+	border-color: rgba(37, 99, 235, 0.4) !important;
+	background: rgba(255, 255, 255, 0.95) !important;
+}
+
+:deep([data-theme="dark"]) .form-field :deep(.v-field),
+:deep(.v-theme--dark) .form-field :deep(.v-field) {
+	background: rgba(30, 30, 30, 0.8) !important;
+	border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+:deep([data-theme="dark"]) .form-field :deep(.v-field:hover),
+:deep(.v-theme--dark) .form-field :deep(.v-field:hover) {
+	border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+:deep([data-theme="dark"]) .form-field :deep(.v-field--focused),
+:deep(.v-theme--dark) .form-field :deep(.v-field--focused) {
+	box-shadow:
+		0 0 0 3px rgba(59, 130, 246, 0.2),
+		0 4px 20px rgba(59, 130, 246, 0.25) !important;
+	border-color: rgba(59, 130, 246, 0.5) !important;
+	background: rgba(30, 30, 30, 0.95) !important;
 }
 
 /* Currency and amount display with enhanced Arabic number support */
 .currency-display {
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+.currency-display.right-aligned {
+	justify-content: center;
+}
+
+.amount-value.right-aligned {
+	text-align: center;
+}
+
+/* RTL support for currency displays */
+[dir="rtl"] .currency-display.right-aligned {
+	justify-content: center;
+}
+
+[dir="rtl"] .amount-value.right-aligned {
+	text-align: center;
+}
+
+[dir="rtl"] .currency-symbol {
+	margin-left: 2px;
+	margin-right: 0;
+}
+
+/* RTL specific alignment for discount percentage and amount values */
+[dir="rtl"] .currency-display.right-aligned .amount-value,
+[lang^="ar"] .currency-display.right-aligned .amount-value,
+[lang^="he"] .currency-display.right-aligned .amount-value,
+[lang^="fa"] .currency-display.right-aligned .amount-value,
+html[dir="rtl"] .currency-display.right-aligned .amount-value,
+body[dir="rtl"] .currency-display.right-aligned .amount-value {
+	direction: ltr !important;
+	text-align: center !important;
+	vertical-align: middle !important;
+	line-height: 1 !important;
+}
+
+/* RTL specific alignment for standalone amount-value with right-aligned class */
+[dir="rtl"] .amount-value.right-aligned,
+[lang^="ar"] .amount-value.right-aligned,
+[lang^="he"] .amount-value.right-aligned,
+[lang^="fa"] .amount-value.right-aligned,
+html[dir="rtl"] .amount-value.right-aligned,
+body[dir="rtl"] .amount-value.right-aligned {
+	direction: ltr !important;
+	text-align: center !important;
+	vertical-align: middle !important;
+	line-height: 1 !important;
 }
 
 .currency-symbol {
@@ -1300,8 +2501,8 @@ export default {
 }
 
 /* Enhanced Arabic support for all numeric displays in the table */
-.modern-items-table :deep(td),
-.modern-items-table :deep(th) {
+.pos-table :deep(td),
+.pos-table :deep(th) {
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -1312,6 +2513,460 @@ export default {
 		"kern" 1;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Column width constraints and alignment */
+.pos-table :deep(th[data-column-key="item_name"]),
+.pos-table :deep(td[data-column-key="item_name"]) {
+	min-width: 200px;
+	max-width: 250px;
+	text-align: left;
+}
+
+.pos-table :deep(th[data-column-key="qty"]),
+.pos-table :deep(td[data-column-key="qty"]) {
+	min-width: 140px;
+	max-width: 160px;
+	text-align: center;
+}
+
+.pos-table :deep(th[data-column-key="uom"]),
+.pos-table :deep(td[data-column-key="uom"]) {
+	min-width: 80px;
+	max-width: 100px;
+	text-align: center;
+}
+
+.pos-table :deep(th[data-column-key="rate"]),
+.pos-table :deep(td[data-column-key="rate"]),
+.pos-table :deep(th[data-column-key="amount"]),
+.pos-table :deep(td[data-column-key="amount"]) {
+	min-width: 100px;
+	max-width: 130px;
+	text-align: center !important;
+}
+
+/* Ensure consistent header padding for rate/amount columns */
+.pos-table :deep(th[data-column-key="rate"]),
+.pos-table :deep(th[data-column-key="amount"]) {
+	padding: 12px !important;
+}
+
+/* Consolidated column cell padding */
+.pos-table :deep(td[data-column-key="rate"]),
+.pos-table :deep(td[data-column-key="amount"]),
+.pos-table :deep(td[data-column-key="price_list_rate"]) {
+	padding: var(--cell-padding);
+}
+
+.pos-table :deep(th[data-column-key="price_list_rate"]),
+.pos-table :deep(td[data-column-key="price_list_rate"]) {
+	min-width: 120px;
+	max-width: 140px;
+	text-align: center !important;
+	font-weight: 500;
+}
+
+/* Specific header styling for Price List Rate */
+.pos-table :deep(th[data-column-key="price_list_rate"]) {
+	background: linear-gradient(135deg, var(--table-header-bg) 0%, rgba(25, 118, 210, 0.02) 100%);
+	border-right: 1px solid rgba(25, 118, 210, 0.1);
+}
+
+/* Advanced header tooltip for truncated text */
+.pos-table :deep(th.has-tooltip) {
+	position: relative;
+}
+
+.pos-table :deep(th.has-tooltip::after) {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: -45px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: rgba(33, 33, 33, 0.95);
+	color: white;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	font-weight: 400;
+	text-transform: none;
+	letter-spacing: normal;
+	white-space: nowrap;
+	z-index: 100;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease,
+		transform 0.3s ease;
+	transform: translateX(-50%) translateY(-5px);
+	max-width: 200px;
+	word-wrap: break-word;
+	text-align: center;
+	line-height: 1.3;
+}
+
+.pos-table :deep(th.has-tooltip::before) {
+	content: "";
+	position: absolute;
+	bottom: -8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: 6px solid rgba(33, 33, 33, 0.95);
+	z-index: 101;
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease;
+	pointer-events: none;
+}
+
+.pos-table :deep(th.has-tooltip:hover::after) {
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(-50%) translateY(0);
+	transition-delay: 0.5s;
+}
+
+.pos-table :deep(th.has-tooltip:hover::before) {
+	opacity: 1;
+	visibility: visible;
+	transition-delay: 0.5s;
+}
+
+/* Dark theme support for header hover and tooltips */
+:deep([data-theme="dark"]) .pos-table :deep(th),
+:deep(.v-theme--dark) .pos-table :deep(th) {
+	background-color: #2d3748;
+	color: #e2e8f0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th:hover),
+:deep(.v-theme--dark) .pos-table :deep(th:hover) {
+	background-color: rgba(144, 202, 249, 0.15);
+	box-shadow: 0 4px 12px rgba(144, 202, 249, 0.25);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th:hover .v-data-table-header__content),
+:deep(.v-theme--dark) .pos-table :deep(th:hover .v-data-table-header__content) {
+	color: rgba(144, 202, 249, 0.95);
+	text-shadow: 0 1px 2px rgba(144, 202, 249, 0.15);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th.has-tooltip::after),
+:deep(.v-theme--dark) .pos-table :deep(th.has-tooltip::after) {
+	background: rgba(15, 15, 15, 0.95);
+	color: #e2e8f0;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th.has-tooltip::before),
+:deep(.v-theme--dark) .pos-table :deep(th.has-tooltip::before) {
+	border-bottom-color: rgba(15, 15, 15, 0.95);
+}
+
+/* Additional header stability and interaction improvements */
+.pos-table :deep(th:active) {
+	transform: translateY(0px);
+	transition: transform 0.1s ease;
+}
+
+.pos-table :deep(th:focus) {
+	outline: 2px solid rgba(25, 118, 210, 0.3);
+	outline-offset: -2px;
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th:focus),
+:deep(.v-theme--dark) .pos-table :deep(th:focus) {
+	outline-color: rgba(144, 202, 249, 0.4);
+}
+
+/* Prevent text selection and improve cursor feedback */
+.pos-table :deep(th),
+.pos-table :deep(th *) {
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+
+/* Smooth transition for all header properties to prevent jitter */
+.pos-table :deep(th),
+.pos-table :deep(th .v-data-table-header__content),
+.pos-table :deep(th .v-icon) {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	transform: translate3d(0, 0, 0);
+	-webkit-transform: translate3d(0, 0, 0);
+}
+
+/* Prevent layout shift during hover */
+.pos-table :deep(th) {
+	contain: layout style;
+}
+
+/* Enhanced header border for better visual stability */
+.pos-table :deep(th) {
+	border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.pos-table :deep(th:last-child) {
+	border-right: none;
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th),
+:deep(.v-theme--dark) .pos-table :deep(th) {
+	border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+:deep([data-theme="dark"]) .pos-table :deep(th:last-child),
+:deep(.v-theme--dark) .pos-table :deep(th:last-child) {
+	border-right: none;
+}
+
+/* =================================================================
+   ELIMINATE UNWANTED VUETIFY TABLE SPACERS AND EMPTY ROWS
+   ================================================================= */
+
+/* Hide empty placeholder/spacer rows generated by Vuetify */
+.pos-table :deep(tr[style*="height: 0px"]),
+.pos-table :deep(tr[style*="height:0px"]) {
+	display: none !important;
+	height: 0 !important;
+	line-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+}
+
+/* Hide empty cells within spacer rows */
+.pos-table :deep(tr[style*="height: 0px"] td),
+.pos-table :deep(tr[style*="height:0px"] td),
+.pos-table :deep(td[style*="height: 0px"]),
+.pos-table :deep(td[style*="height:0px"]) {
+	display: none !important;
+	height: 0 !important;
+	line-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+}
+
+/* Additional targeting for Vuetify virtual table placeholders */
+.pos-table :deep(.v-data-table__tr--placeholder),
+.pos-table :deep(.v-table__tr--placeholder) {
+	display: none !important;
+}
+
+/* Hide any empty rows with zero or minimal height */
+.pos-table :deep(tr) {
+	min-height: var(--cell-height, 60px);
+}
+
+.pos-table :deep(tr:empty),
+.pos-table :deep(tr[style*="height: 0"]),
+.pos-table :deep(tr[style*="height:0"]) {
+	display: none !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	height: 0 !important;
+	line-height: 0 !important;
+}
+
+/* Ensure table rows have consistent spacing */
+.pos-table :deep(tbody tr:not([style*="height: 0"])) {
+	height: var(--cell-height, 60px);
+	min-height: var(--cell-height, 60px);
+}
+
+/* Clean up any unwanted spacing from virtual scrolling */
+.pos-table :deep(.v-virtual-scroll__item[style*="height: 0"]),
+.pos-table :deep(.v-virtual-scroll__spacer[style*="height: 0"]) {
+	display: none !important;
+}
+
+/* Force table to have clean spacing */
+.pos-table :deep(table) {
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+
+/* Ensure tbody has no unwanted spacing */
+.pos-table :deep(tbody) {
+	border-spacing: 0;
+}
+
+/* Hide any Vuetify generated dividers or spacers */
+.pos-table :deep(.v-divider),
+.pos-table :deep(.v-spacer) {
+	display: none !important;
+}
+
+/* Additional cleanup for v-data-table-virtual specific elements */
+.pos-table :deep(.v-data-table-virtual__spacer) {
+	display: none !important;
+	height: 0 !important;
+}
+
+/* Hide empty measurement/calculation rows */
+.pos-table :deep(tr[data-test-id]),
+.pos-table :deep(tr[data-testid]),
+.pos-table :deep(tr[class*="measurement"]),
+.pos-table :deep(tr[class*="placeholder"]) {
+	display: none !important;
+}
+
+/* Ensure no phantom spacing around table body */
+.pos-table :deep(tbody) {
+	vertical-align: top;
+	border-top: none;
+	border-bottom: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Clean up any row group spacing */
+.pos-table :deep(tbody tr) {
+	vertical-align: middle;
+}
+
+/* Remove any default table spacing that might create gaps */
+.pos-table :deep(table),
+.pos-table :deep(tbody),
+.pos-table :deep(thead) {
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* Ensure expanded rows don't create unwanted spacing */
+.pos-table :deep(tr.v-data-table__expanded) {
+	border: none;
+}
+
+/* Clean slate for table structure */
+.pos-table :deep(*) {
+	box-sizing: border-box;
+}
+
+/* Force removal of any invisible/zero-height elements that might cause spacing */
+.pos-table :deep([style*="display: none"]),
+.pos-table :deep([style*="visibility: hidden"]),
+.pos-table :deep([style*="opacity: 0"]) {
+	display: none !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Enhanced expanded row width utilization */
+.pos-table :deep(tr.v-data-table__expanded__content) {
+	width: 100% !important;
+}
+
+.pos-table :deep(tr.v-data-table__expanded__content td) {
+	width: 100% !important;
+	max-width: 100% !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* Ensure expanded rows don't have unwanted borders */
+.pos-table :deep(.v-data-table__expanded__content) {
+	border: none !important;
+	background: transparent !important;
+}
+
+/* Fix for Vuetify expanded row positioning */
+.pos-table :deep(.v-data-table__expanded__content .expanded-row-cell) {
+	width: 100% !important;
+	border: none !important;
+	background: transparent !important;
+}
+
+.pos-table :deep(th[data-column-key="discount_value"]),
+.pos-table :deep(td[data-column-key="discount_value"]),
+.pos-table :deep(th[data-column-key="discount_amount"]),
+.pos-table :deep(td[data-column-key="discount_amount"]) {
+	min-width: 90px;
+	max-width: 120px;
+	text-align: center !important;
+}
+
+/* Ensure consistent header padding for discount columns */
+.pos-table :deep(th[data-column-key="discount_value"]),
+.pos-table :deep(th[data-column-key="discount_amount"]) {
+	padding: 12px !important;
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+}
+
+/* Additional fix for headers containing percentage or Arabic text */
+.pos-table :deep(th) {
+	display: table-cell !important;
+	vertical-align: middle !important;
+}
+
+/* Specific fix for headers with Arabic text and special characters */
+.pos-table :deep(th .v-data-table-header__content) {
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	height: 100% !important;
+}
+
+/* Discount column cells */
+.pos-table :deep(td[data-column-key="discount_value"]),
+.pos-table :deep(td[data-column-key="discount_amount"]) {
+	padding: var(--cell-padding);
+	vertical-align: middle !important;
+	line-height: 1 !important;
+}
+
+.pos-table :deep(th[data-column-key="posa_is_offer"]),
+.pos-table :deep(td[data-column-key="posa_is_offer"]) {
+	min-width: 70px;
+	max-width: 90px;
+	text-align: center;
+}
+
+.pos-table :deep(th[data-column-key="actions"]),
+.pos-table :deep(td[data-column-key="actions"]) {
+	min-width: 80px;
+	max-width: 100px;
+	text-align: center;
+}
+
+/* RTL support for table columns */
+[dir="rtl"] .pos-table :deep(th[data-column-key="item_name"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="item_name"]) {
+	text-align: right;
+}
+
+[dir="rtl"] .pos-table :deep(th[data-column-key="rate"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="rate"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="amount"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="amount"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="price_list_rate"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="price_list_rate"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="discount_value"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="discount_value"]),
+[dir="rtl"] .pos-table :deep(th[data-column-key="discount_amount"]),
+[dir="rtl"] .pos-table :deep(td[data-column-key="discount_amount"]) {
+	text-align: center !important;
 }
 
 /* Drag and drop styles */
@@ -1379,5 +3034,362 @@ export default {
 /* Expanded row styling */
 .expanded-row {
 	background-color: var(--surface-secondary);
+}
+
+/* QTY Counter Styling */
+.qty-control-btn {
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	border-radius: 8px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.06),
+		0 1px 3px rgba(0, 0, 0, 0.04) !important;
+	font-weight: 600 !important;
+	backdrop-filter: blur(10px) !important;
+	position: relative !important;
+	overflow: hidden !important;
+	flex-shrink: 0;
+}
+
+.qty-control-btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.2);
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.qty-control-btn:hover::before {
+	transform: translateX(0);
+}
+
+.qty-control-btn .v-icon {
+	position: relative;
+	z-index: 1;
+}
+
+.pos-table__qty-counter {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 4px;
+	/* More flexible sizing for larger numbers */
+	min-width: 130px;
+	max-width: 180px;
+	width: auto;
+	height: auto;
+	background: rgba(255, 255, 255, 0.6);
+	border-radius: 12px;
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(0, 0, 0, 0.04);
+	transition: all 0.3s ease;
+	margin: 0 auto;
+	/* Allow container to grow with content */
+	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+.pos-table__qty-counter:hover {
+	background: rgba(255, 255, 255, 0.8);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+	transform: translateY(-1px);
+}
+
+:deep([data-theme="dark"]) .pos-table__qty-counter,
+:deep(.v-theme--dark) .pos-table__qty-counter {
+	background: rgba(30, 30, 30, 0.6);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:deep([data-theme="dark"]) .pos-table__qty-counter:hover,
+:deep(.v-theme--dark) .pos-table__qty-counter:hover {
+	background: rgba(30, 30, 30, 0.8);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* RTL support for quantity counter - Enhanced with multiple selectors */
+/* HTML order: - | qty | + */
+/* RTL desired: + | qty | - */
+
+/* Use CSS order for precise RTL layout: + | qty | - */
+[dir="rtl"] .pos-table__qty-counter,
+[lang^="ar"] .pos-table__qty-counter,
+[lang^="he"] .pos-table__qty-counter,
+[lang^="fa"] .pos-table__qty-counter,
+.pos-table__qty-counter.rtl-layout,
+html[dir="rtl"] .pos-table__qty-counter,
+body[dir="rtl"] .pos-table__qty-counter {
+	/* Keep normal flex direction but use order */
+	flex-direction: row !important;
+}
+
+/* RTL Button ordering: + | qty | - (reverse order values for RTL context) */
+[dir="rtl"] .pos-table__qty-counter .plus-btn,
+[lang^="ar"] .pos-table__qty-counter .plus-btn,
+[lang^="he"] .pos-table__qty-counter .plus-btn,
+[lang^="fa"] .pos-table__qty-counter .plus-btn,
+.pos-table__qty-counter.rtl-layout .plus-btn,
+html[dir="rtl"] .pos-table__qty-counter .plus-btn,
+body[dir="rtl"] .pos-table__qty-counter .plus-btn {
+	order: 3 !important; /* Plus button should appear first visually */
+}
+
+[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display,
+[lang^="ar"] .pos-table__qty-counter .pos-table__qty-display,
+[lang^="he"] .pos-table__qty-counter .pos-table__qty-display,
+[lang^="fa"] .pos-table__qty-counter .pos-table__qty-display,
+.pos-table__qty-counter.rtl-layout .pos-table__qty-display,
+html[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display,
+body[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display {
+	order: 2 !important; /* Quantity stays in middle */
+}
+
+[dir="rtl"] .pos-table__qty-counter .minus-btn,
+[lang^="ar"] .pos-table__qty-counter .minus-btn,
+[lang^="he"] .pos-table__qty-counter .minus-btn,
+[lang^="fa"] .pos-table__qty-counter .minus-btn,
+.pos-table__qty-counter.rtl-layout .minus-btn,
+html[dir="rtl"] .pos-table__qty-counter .minus-btn,
+body[dir="rtl"] .pos-table__qty-counter .minus-btn {
+	order: 1 !important; /* Minus button should appear last visually */
+}
+
+/* Keep numbers readable in RTL - multiple selectors */
+[dir="rtl"] .pos-table__qty-display,
+[lang^="ar"] .pos-table__qty-display,
+[lang^="he"] .pos-table__qty-display,
+[lang^="fa"] .pos-table__qty-display,
+.pos-table__qty-counter.rtl-layout .pos-table__qty-display,
+html[dir="rtl"] .pos-table__qty-display,
+body[dir="rtl"] .pos-table__qty-display {
+	direction: ltr !important;
+	text-align: center;
+}
+
+/* Enhanced RTL support for number fields without currency - prevents shifting */
+[dir="rtl"] .number-field-rtl,
+[lang^="ar"] .number-field-rtl,
+[lang^="he"] .number-field-rtl,
+[lang^="fa"] .number-field-rtl,
+html[dir="rtl"] .number-field-rtl,
+body[dir="rtl"] .number-field-rtl {
+	direction: ltr !important;
+	text-align: center !important;
+	unicode-bidi: embed !important;
+}
+
+.pos-table__qty-display {
+	/* Dynamic width based on content with proper constraints */
+	min-width: 50px;
+	max-width: 100px;
+	width: auto;
+	flex: 1 1 auto;
+	text-align: center;
+	font-weight: 600;
+	padding: 6px 4px;
+	border-radius: 6px;
+	background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.08) 100%);
+	border: 1px solid rgba(37, 99, 235, 0.1);
+	font-family:
+		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+		sans-serif;
+	font-variant-numeric: lining-nums tabular-nums;
+	font-feature-settings:
+		"tnum" 1,
+		"lnum" 1,
+		"kern" 1;
+	color: #1e40af;
+	font-size: 0.8rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	/* Handle overflow gracefully */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	/* Better number display */
+	letter-spacing: -0.02em;
+	word-spacing: -0.1em;
+}
+
+:deep([data-theme="dark"]) .pos-table__qty-display,
+:deep(.v-theme--dark) .pos-table__qty-display {
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Special handling for very large numbers */
+.pos-table__qty-display.large-number {
+	min-width: 70px;
+	max-width: 120px;
+	font-size: 0.75rem;
+	padding: 6px 3px;
+	letter-spacing: -0.04em;
+}
+
+/* Special handling for negative numbers */
+.pos-table__qty-display.negative-number {
+	color: #dc2626;
+	background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(239, 68, 68, 0.08) 100%);
+	border-color: rgba(220, 38, 38, 0.15);
+}
+
+:deep([data-theme="dark"]) .pos-table__qty-display.negative-number,
+:deep(.v-theme--dark) .pos-table__qty-display.negative-number {
+	color: #ff8a80;
+	background: rgba(255, 138, 128, 0.1);
+	border-color: rgba(255, 138, 128, 0.2);
+}
+
+/* Dynamic container expansion for larger numbers */
+.pos-table__qty-counter:has(.large-number) {
+	min-width: 150px;
+	max-width: 200px;
+}
+
+/* Responsive text sizing based on number length */
+.pos-table__qty-display[data-length="1"],
+.pos-table__qty-display[data-length="2"] {
+	font-size: 0.85rem;
+	min-width: 40px;
+}
+
+.pos-table__qty-display[data-length="3"],
+.pos-table__qty-display[data-length="4"] {
+	font-size: 0.8rem;
+	min-width: 50px;
+}
+
+.pos-table__qty-display[data-length="5"],
+.pos-table__qty-display[data-length="6"] {
+	font-size: 0.75rem;
+	min-width: 60px;
+}
+
+.pos-table__qty-display[data-length="7"],
+.pos-table__qty-display[data-length="8"],
+.pos-table__qty-display[data-length="9"] {
+	font-size: 0.7rem;
+	min-width: 70px;
+	max-width: 100px;
+}
+
+.qty-control-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
+}
+
+.qty-control-btn.minus-btn {
+	background: linear-gradient(145deg, #fef3c7, #fbbf24) !important;
+	color: #92400e !important;
+	border: 2px solid rgba(251, 191, 36, 0.3) !important;
+}
+
+.qty-control-btn.minus-btn:hover {
+	background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
+	box-shadow:
+		0 6px 20px rgba(251, 191, 36, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.qty-control-btn.plus-btn {
+	background: linear-gradient(145deg, #d1fae5, #34d399) !important;
+	color: #065f46 !important;
+	border: 2px solid rgba(52, 211, 153, 0.3) !important;
+}
+
+.qty-control-btn.plus-btn:hover {
+	background: linear-gradient(145deg, #34d399, #10b981) !important;
+	box-shadow:
+		0 6px 20px rgba(52, 211, 153, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+:deep([data-theme="dark"]) .qty-control-btn.minus-btn,
+:deep(.v-theme--dark) .qty-control-btn.minus-btn {
+	background: linear-gradient(145deg, #4a3c10, #3a2e0c) !important;
+	color: #ffb74d !important;
+}
+
+:deep([data-theme="dark"]) .qty-control-btn.plus-btn,
+:deep(.v-theme--dark) .qty-control-btn.plus-btn {
+	background: linear-gradient(145deg, #1b4620, #133419) !important;
+	color: #81c784 !important;
+}
+
+/* Delete action button styling */
+.delete-action-btn {
+	min-width: 44px !important;
+	height: 44px !important;
+	border-radius: 12px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow:
+		0 4px 12px rgba(239, 68, 68, 0.15),
+		0 2px 4px rgba(0, 0, 0, 0.08) !important;
+	font-weight: 600 !important;
+	background: linear-gradient(145deg, #fef2f2, #fecaca) !important;
+	color: #dc2626 !important;
+	border: 2px solid rgba(239, 68, 68, 0.2) !important;
+	position: relative !important;
+	overflow: hidden !important;
+}
+
+.delete-action-btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(45deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15));
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.delete-action-btn:hover::before {
+	transform: translateX(0);
+}
+
+.delete-action-btn:hover {
+	transform: translateY(-2px) scale(1.05);
+	box-shadow:
+		0 8px 24px rgba(239, 68, 68, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.1) !important;
+	background: linear-gradient(145deg, #fecaca, #f87171) !important;
+}
+
+.delete-action-btn .v-icon {
+	position: relative;
+	z-index: 1;
+	transition: all 0.2s ease;
+}
+
+.delete-action-btn:hover .v-icon {
+	animation: pulse 0.6s ease-in-out;
+}
+
+:deep([data-theme="dark"]) .delete-action-btn,
+:deep(.v-theme--dark) .delete-action-btn {
+	background: linear-gradient(145deg, #4a1515, #3a1010) !important;
+	color: #ff8a80 !important;
+}
+
+:deep([data-theme="dark"]) .delete-action-btn:hover,
+:deep(.v-theme--dark) .delete-action-btn:hover {
+	background: linear-gradient(145deg, #5a1a1a, #4a1515) !important;
 }
 </style>
