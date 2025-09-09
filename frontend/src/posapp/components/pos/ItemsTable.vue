@@ -188,11 +188,15 @@
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
 				<td :colspan="headers.length" class="ma-0 pa-0 expanded-row-cell">
-					<div class="expanded-content responsive-expanded-content">
-						<!-- Item Details Form -->
-						<div class="item-details-form">
-							<!-- Basic Information Section -->
-							<div class="form-section">
+                                        <div
+                                                class="expanded-content responsive-expanded-content"
+                                                :class="{ 'v-theme--dark': isDarkTheme }"
+                                                :data-theme="isDarkTheme ? 'dark' : undefined"
+                                        >
+                                                <!-- Item Details Form -->
+                                                <div class="item-details-form">
+                                                        <!-- Basic Information Section -->
+                                                        <div class="form-section">
 								<div class="section-header">
 									<v-icon size="small" class="section-icon">mdi-information-outline</v-icon>
 									<span class="section-title">{{ __("Basic Information") }}</span>
@@ -1244,11 +1248,16 @@ export default {
 }
 
 .section-title {
-	font-weight: 600;
-	font-size: 0.9rem;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-primary);
+}
+
+:deep([data-theme="dark"]) .section-title,
+:deep(.v-theme--dark) .section-title {
+        color: #e2e8f0;
 }
 
 /* Form rows - flexible and responsive */
@@ -1275,9 +1284,10 @@ export default {
 /* Dark theme */
 :deep([data-theme="dark"]) .form-section,
 :deep(.v-theme--dark) .form-section {
-	background: #1a202c;
-	border-color: rgba(255, 255, 255, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        background: #1a202c;
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        color: #e2e8f0;
 }
 
 :deep([data-theme="dark"]) .form-section:hover,
