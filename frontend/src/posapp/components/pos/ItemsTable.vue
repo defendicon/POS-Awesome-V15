@@ -70,11 +70,11 @@
 					>
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
-					<div 
-						class="pos-table__qty-display amount-value number-field-rtl" 
-						:class="{ 
+					<div
+						class="pos-table__qty-display amount-value number-field-rtl"
+						:class="{
 							'negative-number': isNegative(item.qty),
-							'large-number': memoizedQtyLength(item.qty) > 6 
+							'large-number': memoizedQtyLength(item.qty) > 6,
 						}"
 						:data-length="memoizedQtyLength(item.qty)"
 						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
@@ -125,14 +125,16 @@
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
 				<div class="currency-display right-aligned">
-					<span class="amount-value">{{
-						formatFloat(
-							item.discount_percentage ||
-								(item.price_list_rate
-									? (item.discount_amount / item.price_list_rate) * 100
-									: 0),
-						)
-					}}%</span>
+					<span class="amount-value"
+						>{{
+							formatFloat(
+								item.discount_percentage ||
+									(item.price_list_rate
+										? (item.discount_amount / item.price_list_rate) * 100
+										: 0),
+							)
+						}}%</span
+					>
 				</div>
 			</template>
 
@@ -183,14 +185,13 @@
 				</v-btn>
 			</template>
 
-
 			<!-- Expanded row content using Vuetify's built-in system -->
 			<template v-slot:expanded-row="{ item }">
 				<td :colspan="responsiveHeaders.length + 1" class="ma-0 pa-0 expanded-row-cell">
 					<!-- Lazy load expanded content only when item is actually expanded -->
-					<div 
-						v-if="isItemExpanded(item.posa_row_id)" 
-						class="expanded-content responsive-expanded-content" 
+					<div
+						v-if="isItemExpanded(item.posa_row_id)"
+						class="expanded-content responsive-expanded-content"
 						:class="expandedContentClasses"
 					>
 						<!-- Item Details Form -->
@@ -717,7 +718,7 @@ export default {
 			containerWidth: 0,
 			containerHeight: 0,
 			resizeObserver: null,
-			breakpoint: 'xl',
+			breakpoint: "xl",
 			columnVisibility: new Map(),
 			// Performance optimization caches
 			qtyLengthCache: new Map(),
@@ -729,79 +730,86 @@ export default {
 		// Dynamic container styles based on parent
 		containerStyles() {
 			return {
-				height: 'calc(100% - 80px)',
-				maxHeight: 'calc(100% - 80px)',
-				'--container-width': this.containerWidth + 'px',
-				'--container-height': this.containerHeight + 'px',
+				height: "calc(100% - 80px)",
+				maxHeight: "calc(100% - 80px)",
+				"--container-width": this.containerWidth + "px",
+				"--container-height": this.containerHeight + "px",
 			};
 		},
-		
+
 		containerClasses() {
 			return {
 				[`breakpoint-${this.breakpoint}`]: true,
-				'compact-view': this.containerWidth < 600,
-				'medium-view': this.containerWidth >= 600 && this.containerWidth < 900,
-				'large-view': this.containerWidth >= 900,
-				'expanded-active': this.expanded.length > 0,
+				"compact-view": this.containerWidth < 600,
+				"medium-view": this.containerWidth >= 600 && this.containerWidth < 900,
+				"large-view": this.containerWidth >= 900,
+				"expanded-active": this.expanded.length > 0,
 			};
 		},
-		
+
 		tableClasses() {
 			return {
 				[`container-${this.breakpoint}`]: true,
-				'responsive-table': true,
+				"responsive-table": true,
 			};
 		},
-		
+
 		expandedContentClasses() {
 			return {
 				[`expanded-${this.breakpoint}`]: true,
-				'compact-expanded': this.containerWidth < 600,
+				"compact-expanded": this.containerWidth < 600,
 			};
 		},
-		
+
 		// Responsive headers based on container size
 		responsiveHeaders() {
 			if (!this.headers || this.headers.length === 0) return [];
-			
-			return this.headers.filter(header => {
-				// Always show required columns
-				if (header.required || header.key === 'item_name' || header.key === 'qty' || header.key === 'actions') {
+
+			return this.headers
+				.filter((header) => {
+					// Always show required columns
+					if (
+						header.required ||
+						header.key === "item_name" ||
+						header.key === "qty" ||
+						header.key === "actions"
+					) {
+						return true;
+					}
+
+					// Hide columns based on container width
+					if (this.containerWidth < 500) {
+						// Ultra-compact: only essential columns
+						return ["item_name", "qty", "amount", "actions"].includes(header.key);
+					} else if (this.containerWidth < 700) {
+						// Compact: essential + rate
+						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
+					} else if (this.containerWidth < 900) {
+						// Medium: hide advanced columns
+						return !["discount_value", "price_list_rate"].includes(header.key);
+					}
+
+					// Large: show all columns
 					return true;
-				}
-				
-				// Hide columns based on container width
-				if (this.containerWidth < 500) {
-					// Ultra-compact: only essential columns
-					return ['item_name', 'qty', 'amount', 'actions'].includes(header.key);
-				} else if (this.containerWidth < 700) {
-					// Compact: essential + rate
-					return ['item_name', 'qty', 'rate', 'amount', 'actions'].includes(header.key);
-				} else if (this.containerWidth < 900) {
-					// Medium: hide advanced columns
-					return !['discount_value', 'price_list_rate'].includes(header.key);
-				}
-				
-				// Large: show all columns
-				return true;
-			}).map(header => ({
-				...header,
-				width: this.calculateColumnWidth(header),
-				minWidth: this.calculateMinColumnWidth(header),
-			}));
+				})
+				.map((header) => ({
+					...header,
+					width: this.calculateColumnWidth(header),
+					minWidth: this.calculateMinColumnWidth(header),
+				}));
 		},
-		
+
 		// Dynamic table density based on container size
 		tableDensity() {
-			if (this.containerWidth < 500) return 'compact';
-			if (this.containerWidth < 800) return 'default';
-			return 'comfortable';
+			if (this.containerWidth < 500) return "compact";
+			if (this.containerWidth < 800) return "default";
+			return "comfortable";
 		},
-		
+
 		headerProps() {
 			return this.isDarkTheme ? { style: "background-color:#121212;color:#fff" } : {};
 		},
-		
+
 		// Enhanced header props with responsive behavior
 		dynamicHeaderProps() {
 			const baseProps = this.headerProps;
@@ -810,55 +818,55 @@ export default {
 				class: `responsive-header container-${this.breakpoint}`,
 			};
 		},
-		
+
 		// Virtual scrolling configuration for optimal performance
 		virtualScrollConfig() {
 			const itemCount = this.items?.length || 0;
 			const containerHeight = this.containerHeight;
-			
+
 			// Dynamic configuration based on dataset size and container
 			return {
-				itemHeight: this.tableDensity === 'compact' ? 48 : 
-							this.tableDensity === 'comfortable' ? 72 : 60,
+				itemHeight:
+					this.tableDensity === "compact" ? 48 : this.tableDensity === "comfortable" ? 72 : 60,
 				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
 				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
 			};
 		},
-		
+
 		// Memoized quantity display length calculation with cache management
 		memoizedQtyLength() {
 			return (qty) => {
 				if (this.qtyLengthCache.has(qty)) return this.qtyLengthCache.get(qty);
-				const length = String(Math.abs(qty || 0)).replace('.', '').length;
+				const length = String(Math.abs(qty || 0)).replace(".", "").length;
 				this.qtyLengthCache.set(qty, length);
-				
+
 				// Limit cache size to prevent memory leaks
 				if (this.qtyLengthCache.size > 1000) {
 					const firstKey = this.qtyLengthCache.keys().next().value;
 					this.qtyLengthCache.delete(firstKey);
 				}
-				
+
 				return length;
 			};
 		},
-		
+
 		// Lazy loading helper for expanded content with cache
 		isItemExpanded() {
 			return (itemId) => {
 				const cacheKey = `${itemId}_${this.expanded.length}`;
-				
+
 				if (this.expandedCache.has(cacheKey)) {
 					return this.expandedCache.get(cacheKey);
 				}
-				
+
 				const isExpanded = this.expanded.includes(itemId);
 				this.expandedCache.set(cacheKey, isExpanded);
-				
+
 				// Clear cache periodically to prevent memory bloat
 				if (this.expandedCache.size > 100) {
 					this.expandedCache.clear();
 				}
-				
+
 				return isExpanded;
 			};
 		},
@@ -879,25 +887,25 @@ export default {
 		},
 		isRTL() {
 			// Multiple RTL detection methods
-			const htmlDir = document.documentElement.getAttribute('dir');
-			const bodyDir = document.body.getAttribute('dir');
+			const htmlDir = document.documentElement.getAttribute("dir");
+			const bodyDir = document.body.getAttribute("dir");
 			const computedDir = window.getComputedStyle(document.documentElement).direction;
-			const lang = document.documentElement.getAttribute('lang') || navigator.language;
-			
+			const lang = document.documentElement.getAttribute("lang") || navigator.language;
+
 			// Check if current language is RTL
-			const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'yi'];
-			const isRTLLanguage = rtlLanguages.some(rtlLang => lang.startsWith(rtlLang));
-			
-			console.log('RTL Detection:', {
+			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
+			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
+
+			console.log("RTL Detection:", {
 				htmlDir,
 				bodyDir,
 				computedDir,
 				lang,
 				isRTLLanguage,
-				result: htmlDir === 'rtl' || bodyDir === 'rtl' || computedDir === 'rtl' || isRTLLanguage
+				result: htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage,
 			});
-			
-			return htmlDir === 'rtl' || bodyDir === 'rtl' || computedDir === 'rtl' || isRTLLanguage;
+
+			return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
 		},
 	},
 	methods: {
@@ -910,21 +918,21 @@ export default {
 				this.updateBreakpoint();
 			}
 		},
-		
+
 		updateBreakpoint() {
 			if (this.containerWidth < 500) {
-				this.breakpoint = 'xs';
+				this.breakpoint = "xs";
 			} else if (this.containerWidth < 700) {
-				this.breakpoint = 'sm';
+				this.breakpoint = "sm";
 			} else if (this.containerWidth < 900) {
-				this.breakpoint = 'md';
+				this.breakpoint = "md";
 			} else if (this.containerWidth < 1200) {
-				this.breakpoint = 'lg';
+				this.breakpoint = "lg";
 			} else {
-				this.breakpoint = 'xl';
+				this.breakpoint = "xl";
 			}
 		},
-		
+
 		calculateColumnWidth(header) {
 			const baseWidths = {
 				item_name: { min: 150, max: 250, ratio: 0.3 },
@@ -937,13 +945,13 @@ export default {
 				actions: { min: 80, max: 100, ratio: 0.08 },
 				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
 			};
-			
+
 			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
 			const calculatedWidth = this.containerWidth * config.ratio;
-			
+
 			return Math.max(config.min, Math.min(config.max, calculatedWidth));
 		},
-		
+
 		calculateMinColumnWidth(header) {
 			const minWidths = {
 				item_name: 120,
@@ -956,37 +964,37 @@ export default {
 				actions: 60,
 				posa_is_offer: 50,
 			};
-			
+
 			return minWidths[header.key] || 60;
 		},
-		
+
 		setupResizeObserver() {
-			if (typeof ResizeObserver !== 'undefined') {
+			if (typeof ResizeObserver !== "undefined") {
 				// Debounced resize handler for better performance
 				const debouncedResizeHandler = _.debounce((entries) => {
 					for (let entry of entries) {
 						const { width, height } = entry.contentRect;
-						
+
 						// Only update if dimensions actually changed
 						if (this.containerWidth !== width || this.containerHeight !== height) {
 							this.containerWidth = width;
 							this.containerHeight = height;
 							this.updateBreakpoint();
-							
+
 							// Batch emit for better performance
 							this.$nextTick(() => {
-								this.$emit('container-resize', { 
-									width, 
-									height, 
-									breakpoint: this.breakpoint 
+								this.$emit("container-resize", {
+									width,
+									height,
+									breakpoint: this.breakpoint,
 								});
 							});
 						}
 					}
 				}, 16); // ~60fps throttling
-				
+
 				this.resizeObserver = new ResizeObserver(debouncedResizeHandler);
-				
+
 				this.$nextTick(() => {
 					if (this.$refs.tableContainer) {
 						this.resizeObserver.observe(this.$refs.tableContainer);
@@ -995,19 +1003,19 @@ export default {
 				});
 			} else {
 				// Fallback to window resize for older browsers
-				window.addEventListener('resize', this.updateContainerDimensions);
+				window.addEventListener("resize", this.updateContainerDimensions);
 			}
 		},
-		
+
 		cleanupResizeObserver() {
 			if (this.resizeObserver) {
 				this.resizeObserver.disconnect();
 				this.resizeObserver = null;
 			} else {
-				window.removeEventListener('resize', this.updateContainerDimensions);
+				window.removeEventListener("resize", this.updateContainerDimensions);
 			}
 		},
-		
+
 		onDragOverFromSelector(event) {
 			// Check if drag data is from item selector
 			const dragData = event.dataTransfer.types.includes("application/json");
@@ -1098,7 +1106,7 @@ export default {
 				this.removeItem(item);
 			} else {
 				// Use the existing setFormatedQty function for non-zero values
-				this.setFormatedQty(item, 'qty', null, false, event.target.value);
+				this.setFormatedQty(item, "qty", null, false, event.target.value);
 			}
 		},
 		handleMinusClick(item) {
@@ -1110,47 +1118,47 @@ export default {
 				this.subtractOne(item);
 			}
 		},
-		
+
 		// Enhanced method with memoization for better performance
 		getQtyDisplayLength(qty) {
 			return this.memoizedQtyLength(qty);
 		},
-		
+
 		// Optimized expanded update handler
 		handleExpandedUpdate(val) {
-			const mappedValues = val.map((v) => (typeof v === 'object' ? v.posa_row_id : v));
-			this.$emit('update:expanded', mappedValues);
+			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
+			this.$emit("update:expanded", mappedValues);
 		},
 	},
-	
+
 	mounted() {
 		this.setupResizeObserver();
-		
+
 		// Performance optimization: defer non-critical initialization
 		this.$nextTick(() => {
 			this.updateContainerDimensions();
-			
+
 			// Log performance metrics in development
-			if (process.env.NODE_ENV === 'development') {
-				console.log('ItemsTable Performance Optimizations Active:', {
+			if (process.env.NODE_ENV === "development") {
+				console.log("ItemsTable Performance Optimizations Active:", {
 					virtualScrolling: true,
 					memoizedQtyCalculations: true,
 					debouncedResizing: true,
 					lazyExpandedContent: true,
 					cacheManagement: true,
 					itemCount: this.items?.length || 0,
-					containerDimensions: { 
-						width: this.containerWidth, 
-						height: this.containerHeight 
-					}
+					containerDimensions: {
+						width: this.containerWidth,
+						height: this.containerHeight,
+					},
 				});
 			}
 		});
 	},
-	
+
 	beforeUnmount() {
 		this.cleanupResizeObserver();
-		
+
 		// Clean up performance caches to prevent memory leaks
 		if (this.qtyLengthCache) {
 			this.qtyLengthCache.clear();
@@ -1367,11 +1375,11 @@ export default {
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	border-top: none;
 	animation: expandIn 0.3s ease forwards;
-	
+
 	/* Enable container queries */
 	container-type: inline-size;
 	container-name: expanded-content;
-	
+
 	/* Ensure full width utilization */
 	margin: 0;
 	position: relative;
@@ -1400,9 +1408,15 @@ export default {
 }
 
 @keyframes shimmer {
-	0% { transform: translateX(-100%); }
-	50% { transform: translateX(100%); }
-	100% { transform: translateX(100%); }
+	0% {
+		transform: translateX(-100%);
+	}
+	50% {
+		transform: translateX(100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
 }
 
 @keyframes fadeInUp {
@@ -1417,14 +1431,18 @@ export default {
 }
 
 @keyframes pulse {
-	0%, 100% { transform: scale(1); }
-	50% { transform: scale(1.05); }
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
 }
 
 /* =================================================================
    EXPANDED CONTENT LAYOUT - SINGLE COLUMN VERTICAL STACK
    ================================================================= */
-
 
 /* Item action buttons styling */
 .item-action-btn {
@@ -1549,12 +1567,12 @@ export default {
 	width: 100%;
 	padding: 24px;
 	box-sizing: border-box;
-	
+
 	background: #ffffff;
 	border-radius: 12px;
 	border: 1px solid rgba(0, 0, 0, 0.1);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-	
+
 	/* Smooth transitions */
 	transition: all 0.3s ease;
 }
@@ -1649,30 +1667,30 @@ export default {
 	.expanded-content {
 		padding: 16px;
 	}
-	
+
 	.item-details-form {
 		gap: 16px;
 	}
-	
+
 	.form-section {
 		padding: 20px 16px;
 		border-radius: 8px;
 	}
-	
+
 	.form-row {
 		flex-direction: column;
 		gap: 12px;
 	}
-	
+
 	.form-field {
 		min-width: 100%;
 	}
-	
+
 	.section-header {
 		margin-bottom: 16px;
 		padding-bottom: 12px;
 	}
-	
+
 	.section-title {
 		font-size: 0.85rem;
 	}
@@ -1683,7 +1701,7 @@ export default {
 	.form-field {
 		min-width: min(200px, 48%);
 	}
-	
+
 	.form-section {
 		padding: 20px;
 	}
@@ -2105,7 +2123,10 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 /* Smooth transitions during resize */
 .pos-table :deep(th),
 .pos-table :deep(td) {
-	transition: padding 0.2s ease, font-size 0.2s ease, width 0.2s ease;
+	transition:
+		padding 0.2s ease,
+		font-size 0.2s ease,
+		width 0.2s ease;
 }
 
 /* Enhanced responsive design */
@@ -2175,7 +2196,7 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 		margin-right: clamp(6px, 1.5vw, 10px);
 		padding: clamp(4px, 1vw, 6px);
 	}
-	
+
 	.pos-table {
 		border-radius: 0;
 		margin: 0;
@@ -2319,7 +2340,6 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	flex-wrap: nowrap;
 }
 
-
 .form-field :deep(.v-field:hover) {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-1px);
@@ -2327,7 +2347,9 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 20px rgba(37, 99, 235, 0.15) !important;
+	box-shadow:
+		0 0 0 3px rgba(37, 99, 235, 0.1),
+		0 4px 20px rgba(37, 99, 235, 0.15) !important;
 	transform: translateY(-1px);
 	border-color: rgba(37, 99, 235, 0.4) !important;
 	background: rgba(255, 255, 255, 0.95) !important;
@@ -2346,7 +2368,9 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 
 :deep([data-theme="dark"]) .form-field :deep(.v-field--focused),
 :deep(.v-theme--dark) .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 20px rgba(59, 130, 246, 0.25) !important;
+	box-shadow:
+		0 0 0 3px rgba(59, 130, 246, 0.2),
+		0 4px 20px rgba(59, 130, 246, 0.25) !important;
 	border-color: rgba(59, 130, 246, 0.5) !important;
 	background: rgba(30, 30, 30, 0.95) !important;
 }
@@ -2539,7 +2563,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	font-weight: 500;
 }
 
-
 /* Specific header styling for Price List Rate */
 .pos-table :deep(th[data-column-key="price_list_rate"]) {
 	background: linear-gradient(135deg, var(--table-header-bg) 0%, rgba(25, 118, 210, 0.02) 100%);
@@ -2571,7 +2594,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 	pointer-events: none;
 	opacity: 0;
 	visibility: hidden;
-	transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease,
+		transform 0.3s ease;
 	transform: translateX(-50%) translateY(-5px);
 	max-width: 200px;
 	word-wrap: break-word;
@@ -2580,7 +2606,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .pos-table :deep(th.has-tooltip::before) {
-	content: '';
+	content: "";
 	position: absolute;
 	bottom: -8px;
 	left: 50%;
@@ -2593,7 +2619,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 	z-index: 101;
 	opacity: 0;
 	visibility: hidden;
-	transition: opacity 0.3s ease, visibility 0.3s ease;
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease;
 	pointer-events: none;
 }
 
@@ -2904,7 +2932,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	line-height: 1 !important;
 }
 
-
 .pos-table :deep(th[data-column-key="posa_is_offer"]),
 .pos-table :deep(td[data-column-key="posa_is_offer"]) {
 	min-width: 70px;
@@ -3012,7 +3039,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 	min-width: 32px !important;
 	border-radius: 8px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.06),
+		0 1px 3px rgba(0, 0, 0, 0.04) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
 	position: relative !important;
@@ -3021,7 +3050,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .qty-control-btn::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -3265,7 +3294,9 @@ body[dir="rtl"] .number-field-rtl {
 
 .qty-control-btn.minus-btn:hover {
 	background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
-	box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	box-shadow:
+		0 6px 20px rgba(251, 191, 36, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
 
@@ -3277,10 +3308,11 @@ body[dir="rtl"] .number-field-rtl {
 
 .qty-control-btn.plus-btn:hover {
 	background: linear-gradient(145deg, #34d399, #10b981) !important;
-	box-shadow: 0 6px 20px rgba(52, 211, 153, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	box-shadow:
+		0 6px 20px rgba(52, 211, 153, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
-
 
 :deep([data-theme="dark"]) .qty-control-btn.minus-btn,
 :deep(.v-theme--dark) .qty-control-btn.minus-btn {
@@ -3294,14 +3326,15 @@ body[dir="rtl"] .number-field-rtl {
 	color: #81c784 !important;
 }
 
-
 /* Delete action button styling */
 .delete-action-btn {
 	min-width: 44px !important;
 	height: 44px !important;
 	border-radius: 12px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+	box-shadow:
+		0 4px 12px rgba(239, 68, 68, 0.15),
+		0 2px 4px rgba(0, 0, 0, 0.08) !important;
 	font-weight: 600 !important;
 	background: linear-gradient(145deg, #fef2f2, #fecaca) !important;
 	color: #dc2626 !important;
@@ -3311,7 +3344,7 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .delete-action-btn::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -3329,7 +3362,9 @@ body[dir="rtl"] .number-field-rtl {
 
 .delete-action-btn:hover {
 	transform: translateY(-2px) scale(1.05);
-	box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+	box-shadow:
+		0 8px 24px rgba(239, 68, 68, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.1) !important;
 	background: linear-gradient(145deg, #fecaca, #f87171) !important;
 }
 
@@ -3353,5 +3388,4 @@ body[dir="rtl"] .number-field-rtl {
 :deep(.v-theme--dark) .delete-action-btn:hover {
 	background: linear-gradient(145deg, #5a1a1a, #4a1515) !important;
 }
-
 </style>
