@@ -695,7 +695,7 @@ export default {
 
 				new_item.price_list_rate = flt(item.price_list_rate); // Keep price list rate in USD
 				new_item.base_price_list_rate =
-					item.base_price_list_rate || flt(item.price_list_rate / this.exchange_rate);
+					item.base_price_list_rate ?? flt(item.price_list_rate / this.exchange_rate);
 
 				// Calculate amounts
 				new_item.amount = flt(item.qty) * new_item.rate; // Amount in USD
@@ -710,7 +710,7 @@ export default {
 				new_item.rate = flt(item.rate);
 				new_item.base_rate = item.base_rate || flt(item.rate);
 				new_item.price_list_rate = flt(item.price_list_rate);
-				new_item.base_price_list_rate = item.base_price_list_rate || flt(item.price_list_rate);
+				new_item.base_price_list_rate = item.base_price_list_rate ?? flt(item.price_list_rate);
 				new_item.amount = flt(item.qty) * new_item.rate;
 				new_item.base_amount = new_item.amount;
 				new_item.discount_amount = flt(item.discount_amount);
@@ -1316,13 +1316,16 @@ export default {
 						item.batch_no_data = updated_item.batch_no_data;
 						item.serial_no_data = updated_item.serial_no_data;
 						if (updated_item.rate !== undefined) {
+							const force =
+								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
 							if (!item.locked_price && !item.posa_offer_applied) {
-								if (updated_item.rate !== 0 || !item.rate) {
-									item.rate = updated_item.rate;
-									item.price_list_rate = updated_item.price_list_rate || updated_item.rate;
+								if (force || price) {
+									item.rate = price;
+									item.price_list_rate = price;
 								}
-							} else if (!item.price_list_rate) {
-								item.price_list_rate = updated_item.price_list_rate || updated_item.rate;
+							} else if (!item.price_list_rate && (force || price)) {
+								item.price_list_rate = price;
 							}
 						}
 						if (updated_item.currency) {
@@ -1379,7 +1382,7 @@ export default {
 					conversion_rate: 1,
 					currency: this.pos_profile.currency,
 					qty: item.qty,
-					price_list_rate: item.base_price_list_rate || item.price_list_rate,
+					price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
 					child_docname: `New ${currentDoc.doctype} Item 1`,
 					cost_center: this.pos_profile.cost_center,
 					pos_profile: this.pos_profile.name,
@@ -1577,7 +1580,10 @@ export default {
 				);
 				if (cached) {
 					vm.customer_info = { ...cached };
-					if (vm.pos_profile.posa_force_reload_items && cached.customer_price_list) {
+					if (
+						vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
+						cached.customer_price_list
+					) {
 						vm.selected_price_list = cached.customer_price_list;
 						vm.eventBus.emit("update_customer_price_list", cached.customer_price_list);
 						vm.apply_cached_price_list(cached.customer_price_list);
@@ -1589,7 +1595,10 @@ export default {
 					.find((c) => c.customer_name === vm.customer);
 				if (queued) {
 					vm.customer_info = { ...queued, name: queued.customer_name };
-					if (vm.pos_profile.posa_force_reload_items && queued.customer_price_list) {
+					if (
+						vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
+						queued.customer_price_list
+					) {
 						vm.selected_price_list = queued.customer_price_list;
 						vm.eventBus.emit("update_customer_price_list", queued.customer_price_list);
 						vm.apply_cached_price_list(queued.customer_price_list);
@@ -1617,7 +1626,10 @@ export default {
 			// When force reload is enabled, automatically switch to the
 			// customer's default price list so that item rates are fetched
 			// correctly from the server.
-			if (vm.pos_profile.posa_force_reload_items && message.customer_price_list) {
+			if (
+				vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
+				message.customer_price_list
+			) {
 				vm.selected_price_list = message.customer_price_list;
 				vm.eventBus.emit("update_customer_price_list", message.customer_price_list);
 				vm.apply_cached_price_list(message.customer_price_list);
@@ -1862,7 +1874,7 @@ export default {
 					fieldname: "new_rate",
 					fieldtype: "Float",
 					label: __("New Price List Rate"),
-					default: item.price_list_rate || item.rate,
+					default: item.price_list_rate ?? item.rate ?? 0,
 					reqd: 1,
 				},
 			],
