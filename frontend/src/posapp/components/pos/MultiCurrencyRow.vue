@@ -6,8 +6,7 @@
 				variant="solo"
 				color="primary"
 				:label="frappe._('Currency')"
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				hide-details
 				v-model="internal_selected_currency"
 				:items="available_currencies"
@@ -20,8 +19,7 @@
 				variant="solo"
 				color="primary"
 				:label="'Price List ' + price_list_currency + ' to ' + internal_selected_currency"
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				hide-details
 				v-model="internal_plc_rate"
 				:rules="[isNumber]"
@@ -34,8 +32,7 @@
 				variant="solo"
 				color="primary"
 				:label="frappe._('Conversion Rate')"
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				hide-details
 				v-model="internal_conversion_rate"
 				:rules="[isNumber]"
@@ -64,9 +61,6 @@ export default {
 		};
 	},
 	computed: {
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
 	},
 	watch: {
 		selected_currency(val) {

@@ -1,10 +1,9 @@
 <template>
-	<nav :class="rtlClasses">
+	<nav :class="['pos-themed-card', rtlClasses]">
 		<!-- Use the modular NavbarAppBar component -->
 		<NavbarAppBar
 			:pos-profile="posProfile"
 			:pending-invoices="pendingInvoices"
-			:is-dark="isDark"
 			:loading-progress="loadingProgress"
 			:loading-active="loadingActive"
 			:loading-message="loadingMessage"
@@ -52,7 +51,6 @@
 					:manual-offline="manualOffline"
 					:network-online="networkOnline"
 					:server-online="serverOnline"
-					:is-dark="isDark"
 					@close-shift="openCloseShift"
 					@print-last-invoice="printLastInvoice"
 					@sync-invoices="syncPendingInvoices"
@@ -72,7 +70,6 @@
 			:company="company"
 			:company-img="companyImg"
 			:items="items"
-			:is-dark="isDark"
 			@change-page="changePage"
 		/>
 
@@ -81,9 +78,9 @@
 
 		<!-- Keep existing dialogs -->
 		<v-dialog v-model="freeze" persistent max-width="290">
-			<v-card>
-				<v-card-title class="text-h5">{{ freezeTitle }}</v-card-title>
-				<v-card-text>{{ freezeMsg }}</v-card-text>
+			<v-card class="pos-themed-card">
+				<v-card-title class="text-h5 pos-text-primary">{{ freezeTitle }}</v-card-title>
+				<v-card-text class="pos-text-secondary">{{ freezeMsg }}</v-card-text>
 			</v-card>
 		</v-dialog>
 
@@ -103,7 +100,7 @@
 		>
 			{{ snackText }}
 			<template v-slot:actions>
-				<v-btn color="white" variant="text" @click="snack = false">{{ __("Close") }}</v-btn>
+				<v-btn class="pos-themed-button" variant="text" @click="snack = false">{{ __("Close") }}</v-btn>
 			</template>
 		</v-snackbar>
 	</nav>
@@ -166,7 +163,6 @@ export default {
 			default: () => ({ pending: 0, synced: 0, drafted: 0 }),
 		},
 		manualOffline: Boolean,
-		isDark: Boolean,
 		cacheUsage: {
 			type: Number,
 			default: 0,
@@ -386,9 +382,4 @@ nav {
 	z-index: 9999;
 }
 
-/* Dark theme adjustments */
-:deep([data-theme="dark"]) nav,
-:deep(.v-theme--dark) nav {
-	background-color: var(--background) !important;
-}
 </style>

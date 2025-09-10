@@ -123,7 +123,7 @@
 .scanner-container {
 	position: relative;
 	overflow: hidden;
-	background: #121212;
+	background: var(--pos-bg-primary);
 }
 
 .barcode-scanner {

@@ -13,8 +13,7 @@
 				item-title="name"
 				item-value="name"
 				return-object
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				:no-data-text="__('Charges not found')"
 				hide-details
 				:customFilter="deliveryChargesFilter"
@@ -38,8 +37,7 @@
 				variant="solo"
 				color="primary"
 				:label="frappe._('Delivery Charges Rate')"
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				hide-details
 				:model-value="formatCurrency(delivery_charges_rate)"
 				:prefix="currencySymbol(pos_profile.currency)"
@@ -67,9 +65,6 @@ export default {
 		};
 	},
 	computed: {
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
 	},
 	watch: {
 		selected_delivery_charge(val) {

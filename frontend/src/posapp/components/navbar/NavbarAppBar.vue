@@ -3,9 +3,7 @@
 		app
 		flat
 		height="56"
-		:color="appBarColor"
-		:theme="isDark ? 'dark' : 'light'"
-		:class="['navbar-enhanced elevation-2 px-2 pb-1', rtlClasses, isRtl ? 'rtl-app-bar' : 'ltr-app-bar']"
+		:class="['navbar-enhanced elevation-2 px-2 pb-1 pos-themed-card pos-theme-immediate', rtlClasses, isRtl ? 'rtl-app-bar' : 'ltr-app-bar']"
 		:style="[rtlStyles, { flexDirection: isRtl ? 'row-reverse' : 'row' }]"
 	>
 		<!-- Brand Section (left in LTR, right in RTL) -->
@@ -13,7 +11,7 @@
 			<v-app-bar-nav-icon
 				ref="navIcon"
 				@click="$emit('nav-click')"
-				:class="['text-secondary nav-icon', isRtl ? 'rtl-nav-icon' : 'ltr-nav-icon']"
+				:class="['pos-text-primary nav-icon', isRtl ? 'rtl-nav-icon' : 'ltr-nav-icon']"
 			/>
 
 			<v-img
@@ -54,18 +52,17 @@
 
 			<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
 				<v-chip
-					color="primary"
 					variant="outlined"
-					:class="['profile-chip', isRtl ? 'rtl-profile-chip' : 'ltr-profile-chip']"
+					:class="['profile-chip pos-themed-card', isRtl ? 'rtl-profile-chip' : 'ltr-profile-chip']"
 				>
 					<v-icon
 						:start="!isRtl"
 						:end="isRtl"
-						:class="isRtl ? 'rtl-profile-icon' : 'ltr-profile-icon'"
+						:class="['pos-text-primary', isRtl ? 'rtl-profile-icon' : 'ltr-profile-icon']"
 					>
 						mdi-account-circle
 					</v-icon>
-					<span :class="isRtl ? 'rtl-profile-text' : 'ltr-profile-text'">
+					<span :class="['pos-text-primary', isRtl ? 'rtl-profile-text' : 'ltr-profile-text']">
 						{{ displayName }}
 					</span>
 				</v-chip>
@@ -73,18 +70,17 @@
 
 			<v-btn
 				icon
-				color="primary"
 				:class="[
-					'offline-invoices-btn',
+					'offline-invoices-btn pos-themed-button',
 					isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
 					{ 'has-pending': pendingInvoices > 0 },
 				]"
 				@click="$emit('show-offline-invoices')"
 			>
 				<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
-					<v-icon>mdi-file-document-multiple-outline</v-icon>
+					<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
 				</v-badge>
-				<v-icon v-else>mdi-file-document-multiple-outline</v-icon>
+				<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
 				<v-tooltip activator="parent" :location="isRtl ? 'bottom start' : 'bottom end'">
 					{{ __("Offline Invoices") }} ({{ pendingInvoices }})
 				</v-tooltip>
@@ -138,7 +134,6 @@ export default {
 			type: Number,
 			deflt: 0,
 		},
-		isDark: Boolean,
 		loadingProgress: {
 			type: Number,
 			default: 0,
@@ -154,7 +149,7 @@ export default {
 	},
 	computed: {
 		appBarColor() {
-			return this.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
+			return this.$theme.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
 		},
 
 		displayName() {
@@ -183,13 +178,14 @@ export default {
 <style scoped>
 /* Enhanced Navbar Styling */
 .navbar-enhanced {
-	background-image: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-	background-color: #ffffff !important;
-	border-bottom: 2px solid #e3f2fd !important;
+	background-image: linear-gradient(135deg, var(--pos-bg-primary) 0%, var(--pos-bg-secondary) 100%) !important;
+	background-color: var(--pos-bg-primary) !important;
+	border-bottom: 2px solid var(--pos-border) !important;
 	backdrop-filter: blur(10px);
 	transition: all 0.3s ease;
 	padding-bottom: 4px !important;
 	overflow: visible !important;
+	color: var(--pos-text-primary) !important;
 }
 
 /* RTL/LTR App Bar Layout */
@@ -311,7 +307,7 @@ export default {
 }
 
 .navbar-enhanced:hover {
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+	box-shadow: 0 4px 20px var(--pos-shadow) !important;
 }
 
 /* Logo Styling */
@@ -345,6 +341,8 @@ export default {
 	align-items: center;
 	min-width: max-content;
 	flex-shrink: 0;
+	/* Use same blue as Menu button - matching gradient blue */
+	color: #1976d2 !important;
 }
 
 .navbar-title:hover {
@@ -393,18 +391,25 @@ export default {
 	margin-left: 0;
 }
 
-/* Navigation Icon */
+/* Navigation Icon - Elite Style */
 .nav-icon {
 	border-radius: 12px;
 	padding: 8px;
-	transition: all 0.3s ease;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	min-width: 40px;
 	min-height: 40px;
+	color: #1976d2 !important;
+	background: rgba(25, 118, 210, 0.08) !important;
+	border: 1px solid rgba(25, 118, 210, 0.12);
+	backdrop-filter: blur(8px);
 }
 
 .nav-icon:hover {
-	background-color: rgba(25, 118, 210, 0.1);
-	transform: scale(1.1);
+	background: rgba(25, 118, 210, 0.12) !important;
+	color: #1565c0 !important;
+	border-color: rgba(25, 118, 210, 0.2);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
 }
 
 .rtl-nav-icon {
@@ -424,6 +429,13 @@ export default {
 	/* Second to last in actions section */
 }
 
+.profile-chip {
+	color: #1976d2 !important;
+	border-color: rgba(25, 118, 210, 0.2) !important;
+	background: rgba(25, 118, 210, 0.06) !important;
+	backdrop-filter: blur(8px);
+}
+
 .rtl-profile-section {
 	order: 2;
 }
@@ -436,15 +448,17 @@ export default {
 	font-weight: 500;
 	padding: 8px 16px;
 	border-radius: 20px;
-	transition: all 0.3s ease;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	display: flex;
 	align-items: center;
 	gap: 8px;
 }
 
 .profile-chip:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+	transform: translateY(-1px);
+	background: rgba(25, 118, 210, 0.1) !important;
+	border-color: rgba(25, 118, 210, 0.25) !important;
+	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.12);
 }
 
 /* RTL Profile Chip Styling */
@@ -508,13 +522,46 @@ export default {
 	margin-left: 0 !important;
 }
 
-/* Offline Invoices Button Enhancement */
+/* Offline Invoices Button Enhancement - Elite Style */
 .offline-invoices-btn {
 	position: relative;
-	transition: all 0.3s ease;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	padding: 4px;
 	min-width: 40px;
 	min-height: 40px;
+	background: rgba(25, 118, 210, 0.08) !important;
+	border: 1px solid rgba(25, 118, 210, 0.12);
+	border-radius: 12px;
+	backdrop-filter: blur(8px);
+}
+
+.offline-invoices-btn .pos-text-primary {
+	color: #1976d2 !important;
+}
+
+/* Elite styling for navbar text and icons */
+.navbar-enhanced .pos-text-primary {
+	color: #1976d2 !important;
+}
+
+/* Ensure profile text and icons use elite colors */
+.profile-chip .pos-text-primary,
+.profile-chip .ltr-profile-text,
+.profile-chip .rtl-profile-text {
+	color: #1976d2 !important;
+	font-weight: 500;
+}
+
+/* Navbar icons with refined styling */
+.navbar-enhanced .v-icon.pos-text-primary,
+.navbar-enhanced .mdi-menu-down,
+.navbar-enhanced .v-icon--end.pos-text-primary {
+	color: #1976d2 !important;
+	transition: color 0.25s ease;
+}
+
+.navbar-enhanced .v-icon.pos-text-primary:hover {
+	color: #1565c0 !important;
 }
 
 .rtl-offline-btn {
@@ -528,7 +575,14 @@ export default {
 }
 
 .offline-invoices-btn:hover {
-	transform: scale(1.05);
+	transform: translateY(-1px);
+	background: rgba(25, 118, 210, 0.12) !important;
+	border-color: rgba(25, 118, 210, 0.2);
+	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+}
+
+.offline-invoices-btn:hover .pos-text-primary {
+	color: #1565c0 !important;
 }
 
 .offline-invoices-btn.has-pending {
@@ -549,45 +603,6 @@ export default {
 	}
 }
 
-/* Dark theme adjustments */
-:deep([data-theme="dark"]) .navbar-enhanced,
-:deep(.v-theme--dark) .navbar-enhanced {
-	background-image: linear-gradient(
-		135deg,
-		var(--surface-primary, #1e1e1e) 0%,
-		var(--surface-secondary, #2d2d2d) 100%
-	) !important;
-	background-color: var(--surface-primary, #1e1e1e) !important;
-	border-bottom: 2px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
-	color: var(--text-primary, #ffffff) !important;
-}
-
-:deep([data-theme="dark"]) .navbar-enhanced:hover,
-:deep(.v-theme--dark) .navbar-enhanced:hover {
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-}
-
-:deep([data-theme="dark"]) .nav-icon,
-:deep(.v-theme--dark) .nav-icon {
-	color: var(--text-primary, #ffffff) !important;
-}
-
-:deep([data-theme="dark"]) .nav-icon:hover,
-:deep(.v-theme--dark) .nav-icon:hover {
-	background-color: rgba(144, 202, 249, 0.1);
-}
-
-:deep([data-theme="dark"]) .navbar-title,
-:deep(.v-theme--dark) .navbar-title {
-	color: var(--text-primary, #ffffff) !important;
-}
-
-:deep([data-theme="dark"]) .profile-chip,
-:deep(.v-theme--dark) .profile-chip {
-	background-color: var(--surface-secondary, #2d2d2d) !important;
-	color: var(--text-primary, #ffffff) !important;
-	border-color: var(--primary-light, #90caf9) !important;
-}
 
 /* ===== GLASS MORPHISM LOADING BAR ===== */
 .loading-container {
@@ -679,12 +694,12 @@ export default {
 	}
 
 	.loading-message {
-		color: #bb86fc;
+		color: var(--pos-primary);
 	}
 
 	.progress-badge {
-		background: #bb86fc;
-		color: #000;
+		background: var(--pos-primary);
+		color: var(--pos-text-primary);
 	}
 }
 

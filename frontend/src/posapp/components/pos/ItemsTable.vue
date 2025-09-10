@@ -1,7 +1,7 @@
 <template>
 	<div
 		ref="tableContainer"
-		class="my-0 py-0 overflow-y-auto items-table-container responsive-table-container"
+		class="my-0 py-0 overflow-y-auto items-table-container responsive-table-container pos-themed-card"
 		:style="containerStyles"
 		:class="containerClasses"
 		@dragover="onDragOverFromSelector($event)"
@@ -12,11 +12,10 @@
 		<v-data-table-virtual
 			:headers="responsiveHeaders"
 			:items="items"
-			:theme="$theme.current"
 			:expanded="expanded"
 			show-expand
 			item-value="posa_row_id"
-			class="pos-table elevation-2"
+			class="pos-table elevation-2 pos-themed-card"
 			:class="tableClasses"
 			:items-per-page="virtualScrollConfig.itemsPerPage"
 			:item-height="virtualScrollConfig.itemHeight"
@@ -63,9 +62,8 @@
 					<v-btn
 						:disabled="!!item.posa_is_replace"
 						size="small"
-						color="warning"
-						variant="tonal"
-						class="qty-control-btn minus-btn"
+						variant="flat"
+						class="pos-table__qty-btn pos-table__qty-btn--minus"
 						@click.stop="handleMinusClick(item)"
 					>
 						<v-icon size="small">mdi-minus</v-icon>
@@ -90,9 +88,8 @@
 								item.qty >= item.max_qty)
 						"
 						size="small"
-						color="success"
-						variant="tonal"
-						class="qty-control-btn plus-btn"
+						variant="flat"
+						class="pos-table__qty-btn pos-table__qty-btn--plus"
 						@click.stop="addOne(item)"
 					>
 						<v-icon size="small">mdi-plus</v-icon>
@@ -173,10 +170,9 @@
 			<template v-slot:item.actions="{ item }">
 				<v-btn
 					:disabled="!!item.posa_is_replace"
-					size="default"
-					color="error"
-					variant="tonal"
-					class="delete-action-btn"
+					size="small"
+					variant="flat"
+					class="pos-table__delete-btn"
 					@click.stop="removeItem(item)"
 				>
 					<v-icon size="small">mdi-delete-outline</v-icon>
@@ -208,8 +204,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Item Code')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											v-model="item.item_code"
 											disabled
@@ -222,8 +217,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="
 												formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
@@ -247,8 +241,7 @@
 									<div class="form-field">
 										<v-select
 											density="compact"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											:label="frappe._('UOM')"
 											v-model="item.uom"
 											:items="item.item_uoms"
@@ -281,8 +274,7 @@
 											color="primary"
 											id="rate"
 											:label="frappe._('Rate')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(item.rate)"
 											@change="[
@@ -304,8 +296,7 @@
 											color="primary"
 											id="discount_percentage"
 											:label="frappe._('Discount %')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatFloat(item.discount_percentage || 0)"
 											@change="[
@@ -333,8 +324,7 @@
 											color="primary"
 											id="discount_amount"
 											:label="frappe._('Discount Amount')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(item.discount_amount || 0)"
 											@change="[
@@ -363,8 +353,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Price List Rate')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(item.price_list_rate || 0)"
 											:disabled="!pos_profile.posa_allow_price_list_rate_change"
@@ -379,8 +368,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Total Amount')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(item.qty * item.rate)"
 											disabled
@@ -418,8 +406,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Available QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatFloat(item.actual_qty)"
 											disabled
@@ -432,8 +419,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Stock QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatFloat(item.stock_qty)"
 											disabled
@@ -446,8 +432,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Stock UOM')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											v-model="item.stock_uom"
 											disabled
@@ -462,8 +447,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Warehouse')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											v-model="item.warehouse"
 											disabled
@@ -476,8 +460,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Group')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											v-model="item.item_group"
 											disabled
@@ -511,8 +494,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Serial No QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											v-model="item.serial_no_selected_count"
 											type="number"
@@ -532,8 +514,7 @@
 											density="compact"
 											chips
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											:label="frappe._('Serial No')"
 											multiple
 											@update:model-value="setSerialNo(item)"
@@ -558,8 +539,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Batch No. Available QTY')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:model-value="formatFloat(item.actual_batch_qty)"
 											disabled
@@ -572,8 +552,7 @@
 											variant="outlined"
 											color="primary"
 											:label="frappe._('Batch No Expiry Date')"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											v-model="item.batch_no_expiry_date"
 											disabled
@@ -588,8 +567,7 @@
 											variant="outlined"
 											density="compact"
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											:label="frappe._('Batch No')"
 											@update:model-value="setBatchQty(item, $event)"
 											hide-details
@@ -629,8 +607,7 @@
 											format="dd-MM-yyyy"
 											:min-date="new Date()"
 											auto-apply
-											:dark="isDarkTheme"
-											@update:model-value="validateDueDate(item)"
+																						@update:model-value="validateDueDate(item)"
 										/>
 									</div>
 								</div>
@@ -799,7 +776,7 @@ export default {
 		},
 		
 		headerProps() {
-			return this.isDarkTheme ? { style: "background-color:#121212;color:#fff" } : {};
+			return {};
 		},
 		
 		// Enhanced header props with responsive behavior
@@ -861,9 +838,6 @@ export default {
 				
 				return isExpanded;
 			};
-		},
-		isDarkTheme() {
-			return this.$theme.current === "dark";
 		},
 		hide_qty_decimals() {
 			try {
@@ -1167,25 +1141,19 @@ export default {
 .pos-table {
 	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 8px var(--pos-shadow);
+	border: 1px solid var(--pos-border);
 	height: 100%;
 	width: 100%;
 	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
-	background: #ffffff;
+	background: var(--pos-card-bg);
 	margin: 0;
 	padding: 0;
 }
 
-:deep([data-theme="dark"]) .pos-table,
-:deep(.v-theme--dark) .pos-table {
-	background: #1a202c;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
 
 /* Ensure items table can scroll when many rows exist */
 .items-table-container {
@@ -1211,16 +1179,16 @@ export default {
 	border: none;
 }
 
-/* Enhanced table header styling with stable hover support */
+/* Enhanced table header styling with global theme support */
 .pos-table :deep(th) {
 	font-weight: 600;
 	font-size: 0.8rem;
 	text-transform: uppercase;
 	letter-spacing: 0.3px;
 	padding: 12px;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	background-color: #f8f9fa;
-	color: #495057;
+	border-bottom: 1px solid var(--pos-border);
+	background-color: var(--pos-table-header-bg);
+	color: var(--pos-text-primary);
 	position: sticky;
 	top: 0;
 	z-index: 3;
@@ -1245,12 +1213,6 @@ export default {
 	box-sizing: border-box;
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(th),
-:deep(.v-theme--dark) .pos-table :deep(th) {
-	background-color: #2d3748;
-	color: #e2e8f0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 /* Header text wrapper is now handled in the improved stable section above */
 
@@ -1265,9 +1227,9 @@ export default {
 
 .pos-table :deep(th:hover) {
 	/* Smooth background transition without layout changes */
-	background-color: rgba(25, 118, 210, 0.08);
+	background-color: var(--pos-hover-bg);
 	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+	box-shadow: 0 4px 12px var(--pos-shadow);
 	z-index: 2;
 }
 
@@ -1292,29 +1254,22 @@ export default {
 
 .pos-table :deep(th:hover .v-data-table-header__content) {
 	/* Enhanced text on hover without disrupting layout */
-	color: rgba(25, 118, 210, 0.9);
+	color: var(--pos-primary);
 	font-weight: 600;
 	letter-spacing: 0.02em;
-	text-shadow: 0 1px 2px rgba(25, 118, 210, 0.1);
+	text-shadow: 0 1px 2px var(--pos-shadow-light);
 }
 
 /* Table row styling */
 .pos-table :deep(tr) {
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+	border-bottom: 1px solid var(--pos-border-light);
 }
 
 .pos-table :deep(tr:hover) {
-	background-color: rgba(0, 0, 0, 0.02);
+	background-color: var(--pos-table-row-hover);
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(tr) {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-:deep([data-theme="dark"]) .pos-table :deep(tr:hover) {
-	background-color: rgba(255, 255, 255, 0.03);
-}
 
 /* Table cell styling */
 .pos-table :deep(td) {
@@ -1322,7 +1277,7 @@ export default {
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
-	color: #374151;
+	color: var(--pos-text-primary);
 	position: relative;
 }
 
@@ -1336,10 +1291,6 @@ export default {
 	box-sizing: border-box;
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(td),
-:deep(.v-theme--dark) .pos-table :deep(td) {
-	color: #e5e7eb;
-}
 
 /* =================================================================
    EXPANDED CONTENT - CLEAN STRUCTURE
@@ -1362,9 +1313,9 @@ export default {
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box;
-	background: #f8f9fa;
+	background: var(--pos-card-bg);
 	border-radius: 0 0 8px 8px;
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--pos-border);
 	border-top: none;
 	animation: expandIn 0.3s ease forwards;
 	
@@ -1378,12 +1329,6 @@ export default {
 	overflow: visible;
 }
 
-/* Dark theme */
-:deep([data-theme="dark"]) .expanded-content,
-:deep(.v-theme--dark) .expanded-content {
-	background: #2d3748;
-	border-color: rgba(255, 255, 255, 0.1);
-}
 
 @keyframes expandIn {
 	from {
@@ -1432,7 +1377,7 @@ export default {
 	height: 44px !important;
 	border-radius: 12px !important;
 	transition: all 0.3s ease;
-	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1) !important;
+	box-shadow: 0 3px 8px var(--pos-shadow) !important;
 	position: relative;
 	overflow: hidden;
 	display: flex;
@@ -1459,7 +1404,7 @@ export default {
 
 .item-action-btn:hover {
 	transform: translateY(-2px);
-	box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15) !important;
+	box-shadow: 0 5px 12px var(--pos-shadow-dark) !important;
 }
 
 .item-action-btn .v-icon {
@@ -1468,69 +1413,43 @@ export default {
 	z-index: 2;
 }
 
-/* Light theme button styles with enhanced gradients */
+/* Theme-aware button styles */
 .item-action-btn.delete-btn {
-	background: linear-gradient(145deg, #ffebee, #ffcdd2) !important;
+	background: var(--pos-button-error-bg) !important;
+	color: var(--pos-button-error-text) !important;
+	border: 1px solid var(--pos-button-error-border) !important;
 }
 
 .item-action-btn.delete-btn:hover {
-	background: linear-gradient(145deg, #ffcdd2, #ef9a9a) !important;
+	background: var(--pos-button-error-hover-bg) !important;
+	color: var(--pos-button-error-hover-text) !important;
 }
 
 .item-action-btn.minus-btn {
-	background: linear-gradient(145deg, #fff8e1, #ffecb3) !important;
+	background: var(--pos-button-warning-bg) !important;
+	color: var(--pos-button-warning-text) !important;
+	border: 1px solid var(--pos-button-warning-border) !important;
 }
 
 .item-action-btn.minus-btn:hover {
-	background: linear-gradient(145deg, #ffecb3, #ffe082) !important;
+	background: var(--pos-button-warning-hover-bg) !important;
+	color: var(--pos-button-warning-hover-text) !important;
 }
 
 .item-action-btn.plus-btn {
-	background: linear-gradient(145deg, #e8f5e9, #c8e6c9) !important;
+	background: var(--pos-button-success-bg) !important;
+	color: var(--pos-button-success-text) !important;
+	border: 1px solid var(--pos-button-success-border) !important;
 }
 
 .item-action-btn.plus-btn:hover {
-	background: linear-gradient(145deg, #c8e6c9, #a5d6a7) !important;
+	background: var(--pos-button-success-hover-bg) !important;
+	color: var(--pos-button-success-hover-text) !important;
 }
 
-/* Dark theme button styles */
-:deep([data-theme="dark"]) .item-action-btn.delete-btn,
-:deep(.v-theme--dark) .item-action-btn.delete-btn {
-	background: linear-gradient(145deg, #4a1515, #3a1010) !important;
-	color: #ff8a80 !important;
-}
 
-:deep([data-theme="dark"]) .item-action-btn.delete-btn:hover,
-:deep(.v-theme--dark) .item-action-btn.delete-btn:hover {
-	background: linear-gradient(145deg, #5a1a1a, #4a1515) !important;
-}
 
-:deep([data-theme="dark"]) .item-action-btn.minus-btn,
-:deep(.v-theme--dark) .item-action-btn.minus-btn {
-	background: linear-gradient(145deg, #4a3c10, #3a2e0c) !important;
-	color: #ffe082 !important;
-}
 
-:deep([data-theme="dark"]) .item-action-btn.minus-btn:hover,
-:deep(.v-theme--dark) .item-action-btn.minus-btn:hover {
-	background: linear-gradient(145deg, #5a4a14, #4a3c10) !important;
-}
-
-:deep([data-theme="dark"]) .item-action-btn.plus-btn,
-:deep(.v-theme--dark) .item-action-btn.plus-btn {
-	background: linear-gradient(145deg, #1b4620, #133419) !important;
-	color: #a5d6a7 !important;
-}
-
-:deep([data-theme="dark"]) .item-action-btn.plus-btn:hover,
-:deep(.v-theme--dark) .item-action-btn.plus-btn:hover {
-	background: linear-gradient(145deg, #235828, #1b4620) !important;
-}
-
-:deep([data-theme="dark"]) .item-action-btn .v-icon,
-:deep(.v-theme--dark) .item-action-btn .v-icon {
-	opacity: 0.9;
-}
 
 /* =================================================================
    FORM LAYOUT - SINGLE COLUMN OPTIMIZED
@@ -1550,17 +1469,17 @@ export default {
 	padding: 24px;
 	box-sizing: border-box;
 	
-	background: #ffffff;
+	background: var(--pos-card-bg);
 	border-radius: 12px;
-	border: 1px solid rgba(0, 0, 0, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	border: 1px solid var(--pos-border);
+	box-shadow: 0 2px 8px var(--pos-shadow);
 	
 	/* Smooth transitions */
 	transition: all 0.3s ease;
 }
 
 .form-section:hover {
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 4px 16px var(--pos-shadow-dark);
 	transform: translateY(-2px);
 }
 
@@ -1571,7 +1490,7 @@ export default {
 	gap: 12px;
 	margin-bottom: 20px;
 	padding-bottom: 16px;
-	border-bottom: 2px solid #1976d2;
+	border-bottom: 2px solid var(--pos-primary);
 	position: relative;
 }
 
@@ -1582,13 +1501,13 @@ export default {
 	left: 0;
 	width: 60px;
 	height: 2px;
-	background: linear-gradient(90deg, #1976d2, rgba(25, 118, 210, 0.3));
+	background: linear-gradient(90deg, var(--pos-primary), var(--pos-primary-container));
 	border-radius: 1px;
 }
 
 .section-icon {
-	color: #1976d2;
-	background: rgba(25, 118, 210, 0.1);
+	color: var(--pos-primary);
+	background: var(--pos-primary-container);
 	padding: 8px;
 	border-radius: 10px;
 }
@@ -1598,7 +1517,7 @@ export default {
 	font-size: 0.9rem;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
-	color: var(--text-primary);
+	color: var(--pos-text-primary);
 }
 
 /* Form rows - flexible and responsive */
@@ -1623,22 +1542,6 @@ export default {
 }
 
 /* Dark theme */
-:deep([data-theme="dark"]) .form-section,
-:deep(.v-theme--dark) .form-section {
-	background: #1a202c;
-	border-color: rgba(255, 255, 255, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-:deep([data-theme="dark"]) .form-section:hover,
-:deep(.v-theme--dark) .form-section:hover {
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-:deep([data-theme="dark"]) .section-icon,
-:deep(.v-theme--dark) .section-icon {
-	background: rgba(144, 202, 249, 0.15);
-}
 
 /* =================================================================
    RESPONSIVE DESIGN - CONTAINER QUERIES
@@ -1754,7 +1657,7 @@ html[dir="rtl"] .section-header::after,
 body[dir="rtl"] .section-header::after {
 	right: 0 !important;
 	left: auto !important;
-	background: linear-gradient(-90deg, #1976d2, rgba(25, 118, 210, 0.3)) !important;
+	background: linear-gradient(-90deg, var(--pos-primary), var(--pos-primary-container)) !important;
 }
 
 [dir="rtl"] .section-title,
@@ -2182,7 +2085,7 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 		padding: 0;
 		width: 100%;
 		max-width: 100%;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 20px var(--pos-shadow);
 	}
 
 	.pos-table :deep(th) {
@@ -2284,16 +2187,16 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 
 .change-price-btn:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+	box-shadow: 0 4px 8px var(--pos-shadow) !important;
 }
 
 /* Enhanced form field styling with context awareness */
 .form-field :deep(.v-field) {
 	border-radius: clamp(6px, 2vw, 12px) !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	background: rgba(255, 255, 255, 0.8) !important;
+	background: var(--pos-input-bg) !important;
 	backdrop-filter: blur(10px) !important;
-	border: 1px solid rgba(0, 0, 0, 0.06) !important;
+	border: 1px solid var(--pos-border-light) !important;
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box !important;
@@ -2321,35 +2224,18 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 
 
 .form-field :deep(.v-field:hover) {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+	box-shadow: 0 4px 12px var(--pos-shadow) !important;
 	transform: translateY(-1px);
-	border-color: rgba(37, 99, 235, 0.2) !important;
+	border-color: var(--pos-primary-variant) !important;
 }
 
 .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 20px rgba(37, 99, 235, 0.15) !important;
+	box-shadow: 0 0 0 3px var(--pos-primary-container), 0 4px 20px var(--pos-shadow) !important;
 	transform: translateY(-1px);
-	border-color: rgba(37, 99, 235, 0.4) !important;
-	background: rgba(255, 255, 255, 0.95) !important;
+	border-color: var(--pos-primary) !important;
+	background: var(--pos-input-bg) !important;
 }
 
-:deep([data-theme="dark"]) .form-field :deep(.v-field),
-:deep(.v-theme--dark) .form-field :deep(.v-field) {
-	background: rgba(30, 30, 30, 0.8) !important;
-	border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-:deep([data-theme="dark"]) .form-field :deep(.v-field:hover),
-:deep(.v-theme--dark) .form-field :deep(.v-field:hover) {
-	border-color: rgba(59, 130, 246, 0.3) !important;
-}
-
-:deep([data-theme="dark"]) .form-field :deep(.v-field--focused),
-:deep(.v-theme--dark) .form-field :deep(.v-field--focused) {
-	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 20px rgba(59, 130, 246, 0.25) !important;
-	border-color: rgba(59, 130, 246, 0.5) !important;
-	background: rgba(30, 30, 30, 0.95) !important;
-}
 
 /* Currency and amount display with enhanced Arabic number support */
 .currency-display {
@@ -2440,7 +2326,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* Enhanced negative number styling for Arabic context */
 .negative-number {
-	color: #d32f2f !important;
+	color: var(--pos-error) !important;
 	font-weight: 600;
 	/* Same enhanced font stack for negative numbers */
 	font-family:
@@ -2542,8 +2428,8 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* Specific header styling for Price List Rate */
 .pos-table :deep(th[data-column-key="price_list_rate"]) {
-	background: linear-gradient(135deg, var(--table-header-bg) 0%, rgba(25, 118, 210, 0.02) 100%);
-	border-right: 1px solid rgba(25, 118, 210, 0.1);
+	background: linear-gradient(135deg, var(--pos-table-header-bg) 0%, var(--pos-primary-container) 100%);
+	border-right: 1px solid var(--pos-primary-variant);
 }
 
 /* Advanced header tooltip for truncated text */
@@ -2567,7 +2453,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 	letter-spacing: normal;
 	white-space: nowrap;
 	z-index: 100;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 4px 12px var(--pos-shadow-dark);
 	pointer-events: none;
 	opacity: 0;
 	visibility: hidden;
@@ -2610,37 +2496,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	transition-delay: 0.5s;
 }
 
-/* Dark theme support for header hover and tooltips */
-:deep([data-theme="dark"]) .pos-table :deep(th),
-:deep(.v-theme--dark) .pos-table :deep(th) {
-	background-color: #2d3748;
-	color: #e2e8f0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-:deep([data-theme="dark"]) .pos-table :deep(th:hover),
-:deep(.v-theme--dark) .pos-table :deep(th:hover) {
-	background-color: rgba(144, 202, 249, 0.15);
-	box-shadow: 0 4px 12px rgba(144, 202, 249, 0.25);
-}
-
-:deep([data-theme="dark"]) .pos-table :deep(th:hover .v-data-table-header__content),
-:deep(.v-theme--dark) .pos-table :deep(th:hover .v-data-table-header__content) {
-	color: rgba(144, 202, 249, 0.95);
-	text-shadow: 0 1px 2px rgba(144, 202, 249, 0.15);
-}
-
-:deep([data-theme="dark"]) .pos-table :deep(th.has-tooltip::after),
-:deep(.v-theme--dark) .pos-table :deep(th.has-tooltip::after) {
-	background: rgba(15, 15, 15, 0.95);
-	color: #e2e8f0;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-:deep([data-theme="dark"]) .pos-table :deep(th.has-tooltip::before),
-:deep(.v-theme--dark) .pos-table :deep(th.has-tooltip::before) {
-	border-bottom-color: rgba(15, 15, 15, 0.95);
-}
 
 /* Additional header stability and interaction improvements */
 .pos-table :deep(th:active) {
@@ -2649,14 +2504,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .pos-table :deep(th:focus) {
-	outline: 2px solid rgba(25, 118, 210, 0.3);
+	outline: 2px solid var(--pos-primary-container);
 	outline-offset: -2px;
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(th:focus),
-:deep(.v-theme--dark) .pos-table :deep(th:focus) {
-	outline-color: rgba(144, 202, 249, 0.4);
-}
 
 /* Prevent text selection and improve cursor feedback */
 .pos-table :deep(th),
@@ -2685,22 +2536,13 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* Enhanced header border for better visual stability */
 .pos-table :deep(th) {
-	border-right: 1px solid rgba(0, 0, 0, 0.05);
+	border-right: 1px solid var(--pos-border-light);
 }
 
 .pos-table :deep(th:last-child) {
 	border-right: none;
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(th),
-:deep(.v-theme--dark) .pos-table :deep(th) {
-	border-right: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-:deep([data-theme="dark"]) .pos-table :deep(th:last-child),
-:deep(.v-theme--dark) .pos-table :deep(th:last-child) {
-	border-right: none;
-}
 
 /* =================================================================
    ELIMINATE UNWANTED VUETIFY TABLE SPACERS AND EMPTY ROWS
@@ -2945,13 +2787,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .draggable-row:hover {
-	background-color: rgba(0, 0, 0, 0.02);
+	background-color: var(--pos-table-row-hover);
 }
 
-:deep([data-theme="dark"]) .draggable-row:hover,
-:deep(.v-theme--dark) .draggable-row:hover {
-	background-color: rgba(255, 255, 255, 0.05);
-}
 
 .drag-handle-cell {
 	width: 40px;
@@ -2975,12 +2813,12 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 .drag-source {
 	opacity: 0.5;
-	background-color: rgba(25, 118, 210, 0.1) !important;
+	background-color: var(--pos-primary-container) !important;
 }
 
 .drag-over {
-	background-color: rgba(25, 118, 210, 0.2) !important;
-	border-top: 2px solid #1976d2;
+	background-color: var(--pos-selected-bg) !important;
+	border-top: 2px solid var(--pos-primary);
 	transform: translateY(-1px);
 }
 
@@ -2989,16 +2827,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 /* Dark theme drag styles */
-:deep([data-theme="dark"]) .drag-source,
-:deep(.v-theme--dark) .drag-source {
-	background-color: rgba(144, 202, 249, 0.1) !important;
-}
-
-:deep([data-theme="dark"]) .drag-over,
-:deep(.v-theme--dark) .drag-over {
-	background-color: rgba(144, 202, 249, 0.2) !important;
-	border-top: 2px solid #90caf9;
-}
 
 /* Expanded row styling */
 .expanded-row {
@@ -3012,7 +2840,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 	min-width: 32px !important;
 	border-radius: 8px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+	box-shadow: 0 2px 8px var(--pos-shadow-light), 0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
 	position: relative !important;
@@ -3027,7 +2855,7 @@ body[dir="rtl"] .amount-value.right-aligned {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(255, 255, 255, 0.2);
+	background: var(--pos-hover-bg);
 	transition: transform 0.3s ease;
 	transform: translateX(-100%);
 	z-index: 0;
@@ -3053,10 +2881,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 	max-width: 180px;
 	width: auto;
 	height: auto;
-	background: rgba(255, 255, 255, 0.6);
+	background: var(--pos-surface-variant);
 	border-radius: 12px;
 	backdrop-filter: blur(10px);
-	border: 1px solid rgba(0, 0, 0, 0.04);
+	border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
 	margin: 0 auto;
 	/* Allow container to grow with content */
@@ -3065,22 +2893,11 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .pos-table__qty-counter:hover {
-	background: rgba(255, 255, 255, 0.8);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+	background: var(--pos-hover-bg);
+	box-shadow: 0 4px 16px var(--pos-shadow);
 	transform: translateY(-1px);
 }
 
-:deep([data-theme="dark"]) .pos-table__qty-counter,
-:deep(.v-theme--dark) .pos-table__qty-counter {
-	background: rgba(30, 30, 30, 0.6);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-:deep([data-theme="dark"]) .pos-table__qty-counter:hover,
-:deep(.v-theme--dark) .pos-table__qty-counter:hover {
-	background: rgba(30, 30, 30, 0.8);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
 
 /* RTL support for quantity counter - Enhanced with multiple selectors */
 /* HTML order: - | qty | + */
@@ -3163,8 +2980,8 @@ body[dir="rtl"] .number-field-rtl {
 	font-weight: 600;
 	padding: 6px 4px;
 	border-radius: 6px;
-	background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.08) 100%);
-	border: 1px solid rgba(37, 99, 235, 0.1);
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-primary-variant);
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -3173,10 +2990,10 @@ body[dir="rtl"] .number-field-rtl {
 		"tnum" 1,
 		"lnum" 1,
 		"kern" 1;
-	color: #1e40af;
+	color: var(--pos-primary);
 	font-size: 0.8rem;
 	transition: all 0.2s ease;
-	box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -3190,11 +3007,6 @@ body[dir="rtl"] .number-field-rtl {
 	word-spacing: -0.1em;
 }
 
-:deep([data-theme="dark"]) .pos-table__qty-display,
-:deep(.v-theme--dark) .pos-table__qty-display {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-}
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
@@ -3207,17 +3019,11 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Special handling for negative numbers */
 .pos-table__qty-display.negative-number {
-	color: #dc2626;
-	background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(239, 68, 68, 0.08) 100%);
-	border-color: rgba(220, 38, 38, 0.15);
+	color: var(--pos-error);
+	background: var(--pos-error-container);
+	border-color: var(--pos-error);
 }
 
-:deep([data-theme="dark"]) .pos-table__qty-display.negative-number,
-:deep(.v-theme--dark) .pos-table__qty-display.negative-number {
-	color: #ff8a80;
-	background: rgba(255, 138, 128, 0.1);
-	border-color: rgba(255, 138, 128, 0.2);
-}
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
@@ -3254,45 +3060,36 @@ body[dir="rtl"] .number-field-rtl {
 
 .qty-control-btn:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
+	box-shadow: 0 2px 6px var(--pos-shadow) !important;
 }
 
 .qty-control-btn.minus-btn {
-	background: linear-gradient(145deg, #fef3c7, #fbbf24) !important;
-	color: #92400e !important;
-	border: 2px solid rgba(251, 191, 36, 0.3) !important;
+	background: var(--pos-button-warning-bg) !important;
+	color: var(--pos-button-warning-text) !important;
+	border: 2px solid var(--pos-button-warning-border) !important;
 }
 
 .qty-control-btn.minus-btn:hover {
-	background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
-	box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	background: var(--pos-button-warning-hover-bg) !important;
+	color: var(--pos-button-warning-hover-text) !important;
+	box-shadow: 0 6px 20px var(--pos-shadow), 0 4px 8px var(--pos-shadow-light) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
 
 .qty-control-btn.plus-btn {
-	background: linear-gradient(145deg, #d1fae5, #34d399) !important;
-	color: #065f46 !important;
-	border: 2px solid rgba(52, 211, 153, 0.3) !important;
+	background: var(--pos-button-success-bg) !important;
+	color: var(--pos-button-success-text) !important;
+	border: 2px solid var(--pos-button-success-border) !important;
 }
 
 .qty-control-btn.plus-btn:hover {
-	background: linear-gradient(145deg, #34d399, #10b981) !important;
-	box-shadow: 0 6px 20px rgba(52, 211, 153, 0.25), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	background: var(--pos-button-success-hover-bg) !important;
+	color: var(--pos-button-success-hover-text) !important;
+	box-shadow: 0 6px 20px var(--pos-shadow), 0 4px 8px var(--pos-shadow-light) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
 
 
-:deep([data-theme="dark"]) .qty-control-btn.minus-btn,
-:deep(.v-theme--dark) .qty-control-btn.minus-btn {
-	background: linear-gradient(145deg, #4a3c10, #3a2e0c) !important;
-	color: #ffb74d !important;
-}
-
-:deep([data-theme="dark"]) .qty-control-btn.plus-btn,
-:deep(.v-theme--dark) .qty-control-btn.plus-btn {
-	background: linear-gradient(145deg, #1b4620, #133419) !important;
-	color: #81c784 !important;
-}
 
 
 /* Delete action button styling */
@@ -3301,11 +3098,11 @@ body[dir="rtl"] .number-field-rtl {
 	height: 44px !important;
 	border-radius: 12px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+	box-shadow: 0 4px 12px var(--pos-shadow), 0 2px 4px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
-	background: linear-gradient(145deg, #fef2f2, #fecaca) !important;
-	color: #dc2626 !important;
-	border: 2px solid rgba(239, 68, 68, 0.2) !important;
+	background: var(--pos-button-error-bg) !important;
+	color: var(--pos-button-error-text) !important;
+	border: 2px solid var(--pos-button-error-border) !important;
 	position: relative !important;
 	overflow: hidden !important;
 }
@@ -3317,7 +3114,7 @@ body[dir="rtl"] .number-field-rtl {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: linear-gradient(45deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15));
+	background: var(--pos-hover-bg);
 	transition: transform 0.3s ease;
 	transform: translateX(-100%);
 	z-index: 0;
@@ -3329,8 +3126,9 @@ body[dir="rtl"] .number-field-rtl {
 
 .delete-action-btn:hover {
 	transform: translateY(-2px) scale(1.05);
-	box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-	background: linear-gradient(145deg, #fecaca, #f87171) !important;
+	box-shadow: 0 8px 24px var(--pos-shadow-dark), 0 4px 8px var(--pos-shadow) !important;
+	background: var(--pos-button-error-hover-bg) !important;
+	color: var(--pos-button-error-hover-text) !important;
 }
 
 .delete-action-btn .v-icon {
@@ -3343,15 +3141,5 @@ body[dir="rtl"] .number-field-rtl {
 	animation: pulse 0.6s ease-in-out;
 }
 
-:deep([data-theme="dark"]) .delete-action-btn,
-:deep(.v-theme--dark) .delete-action-btn {
-	background: linear-gradient(145deg, #4a1515, #3a1010) !important;
-	color: #ff8a80 !important;
-}
-
-:deep([data-theme="dark"]) .delete-action-btn:hover,
-:deep(.v-theme--dark) .delete-action-btn:hover {
-	background: linear-gradient(145deg, #5a1a1a, #4a1515) !important;
-}
 
 </style>
