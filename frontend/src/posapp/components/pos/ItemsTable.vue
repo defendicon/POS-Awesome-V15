@@ -176,20 +176,6 @@
 			<template v-slot:item.actions="{ item }">
 				<v-btn
 					:disabled="!!item.posa_is_replace"
-					size="default"
-					color="error"
-					variant="tonal"
-					class="delete-action-btn"
-					@click.stop="removeItem(item)"
-				>
-					<v-icon size="small">mdi-delete-outline</v-icon>
-				</v-btn>
-			</template>
-
-			<!-- Actions column -->
-			<template v-slot:item.actions="{ item }">
-				<v-btn
-					:disabled="!!item.posa_is_replace"
 					size="small"
 					variant="flat"
 					class="pos-table__delete-btn"
