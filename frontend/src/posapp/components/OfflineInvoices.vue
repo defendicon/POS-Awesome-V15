@@ -8,13 +8,17 @@
 						<div class="header-main-content">
 							<div class="header-icon-wrapper-revamped">
 								<div class="icon-background">
-									<v-icon class="header-icon-revamped" size="32">mdi-file-document-multiple-outline</v-icon>
+									<v-icon class="header-icon-revamped" size="32"
+										>mdi-file-document-multiple-outline</v-icon
+									>
 								</div>
 								<div class="icon-glow"></div>
 							</div>
 							<div class="header-text-revamped">
 								<h2 class="header-title-revamped">{{ __("Offline Invoices") }}</h2>
-								<p class="header-subtitle-revamped">{{ __("Manage and synchronize your offline transactions") }}</p>
+								<p class="header-subtitle-revamped">
+									{{ __("Manage and synchronize your offline transactions") }}
+								</p>
 								<div class="header-stats-revamped">
 									<v-chip
 										v-if="invoices.length > 0"
@@ -166,7 +170,9 @@
 						</v-btn>
 						<div v-else class="sync-status-indicator">
 							<v-icon color="success" size="20" class="mr-2">mdi-check-circle</v-icon>
-							<span class="text-success font-weight-medium">{{ __("All invoices are synchronized") }}</span>
+							<span class="text-success font-weight-medium">{{
+								__("All invoices are synchronized")
+							}}</span>
 						</div>
 					</div>
 					<div class="actions-right-section">
@@ -370,8 +376,15 @@ export default {
 }
 
 @keyframes iconPulse {
-	0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-	50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+	0%,
+	100% {
+		opacity: 0.3;
+		transform: translate(-50%, -50%) scale(1);
+	}
+	50% {
+		opacity: 0.6;
+		transform: translate(-50%, -50%) scale(1.1);
+	}
 }
 
 .header-icon-revamped {

@@ -3,7 +3,11 @@
 		app
 		flat
 		height="56"
-		:class="['navbar-enhanced elevation-2 px-2 pb-1 pos-themed-card pos-theme-immediate', rtlClasses, isRtl ? 'rtl-app-bar' : 'ltr-app-bar']"
+		:class="[
+			'navbar-enhanced elevation-2 px-2 pb-1 pos-themed-card pos-theme-immediate',
+			rtlClasses,
+			isRtl ? 'rtl-app-bar' : 'ltr-app-bar',
+		]"
 		:style="[rtlStyles, { flexDirection: isRtl ? 'row-reverse' : 'row' }]"
 	>
 		<!-- Brand Section (left in LTR, right in RTL) -->
@@ -178,7 +182,11 @@ export default {
 <style scoped>
 /* Enhanced Navbar Styling */
 .navbar-enhanced {
-	background-image: linear-gradient(135deg, var(--pos-bg-primary) 0%, var(--pos-bg-secondary) 100%) !important;
+	background-image: linear-gradient(
+		135deg,
+		var(--pos-bg-primary) 0%,
+		var(--pos-bg-secondary) 100%
+	) !important;
 	background-color: var(--pos-bg-primary) !important;
 	border-bottom: 2px solid var(--pos-border) !important;
 	backdrop-filter: blur(10px);
@@ -602,7 +610,6 @@ export default {
 		box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
 	}
 }
-
 
 /* ===== GLASS MORPHISM LOADING BAR ===== */
 .loading-container {

@@ -159,8 +159,7 @@ export default {
 		},
 	},
 
-	computed: {
-	},
+	computed: {},
 
 	created: function () {
 		this.eventBus.on("open_ClosingDialog", (data) => {

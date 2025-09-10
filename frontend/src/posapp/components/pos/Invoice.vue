@@ -13,11 +13,7 @@
 				resize: 'vertical',
 				overflow: 'auto',
 			}"
-			:class="[
-				'cards my-0 py-0 mt-3 resizable',
-				'pos-themed-card',
-				{ 'return-mode': isReturnInvoice },
-			]"
+			:class="['cards my-0 py-0 mt-3 resizable', 'pos-themed-card', { 'return-mode': isReturnInvoice }]"
 			@mouseup="saveInvoiceHeight"
 			@touchend="saveInvoiceHeight"
 		>
@@ -432,7 +428,13 @@ export default {
 				{ title: __("Name"), align: "start", sortable: true, key: "item_name", required: true },
 				{ title: __("QTY"), key: "qty", align: "center", required: true },
 				{ title: __("UOM"), key: "uom", align: "center", required: false },
-				{ title: __("Price List Rate"), key: "price_list_rate", align: "end", required: false, width: "120px" },
+				{
+					title: __("Price List Rate"),
+					key: "price_list_rate",
+					align: "end",
+					required: false,
+					width: "120px",
+				},
 				{ title: __("Discount %"), key: "discount_value", align: "end", required: false },
 				{ title: __("Discount Amount"), key: "discount_amount", align: "end", required: false },
 				{ title: __("Rate"), key: "rate", align: "center", required: true },

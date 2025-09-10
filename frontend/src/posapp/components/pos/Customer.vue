@@ -13,7 +13,7 @@
 			:items="filteredCustomers"
 			item-title="customer_name"
 			item-value="name"
-				:no-data-text="
+			:no-data-text="
 				isCustomerBackgroundLoading ? __('Loading customer data...') : __('Customers not found')
 			"
 			hide-details
@@ -216,7 +216,6 @@ export default {
 	},
 
 	computed: {
-
 		filteredCustomers() {
 			return this.isCustomerBackgroundLoading ? [] : this.customers;
 		},

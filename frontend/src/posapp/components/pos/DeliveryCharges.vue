@@ -64,8 +64,7 @@ export default {
 			internal_selected_delivery_charge: this.selected_delivery_charge,
 		};
 	},
-	computed: {
-	},
+	computed: {},
 	watch: {
 		selected_delivery_charge(val) {
 			this.internal_selected_delivery_charge = val;

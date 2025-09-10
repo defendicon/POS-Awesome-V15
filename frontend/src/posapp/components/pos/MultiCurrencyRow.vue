@@ -60,8 +60,7 @@ export default {
 			internal_conversion_rate: this.conversion_rate,
 		};
 	},
-	computed: {
-	},
+	computed: {},
 	watch: {
 		selected_currency(val) {
 			this.internal_selected_currency = val;

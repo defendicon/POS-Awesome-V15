@@ -18,8 +18,8 @@ if (typeof window !== "undefined" && !window.Dexie) {
 }
 
 // Ensure frappe is available
-if (typeof frappe === 'undefined') {
-	console.error('Frappe is not defined');
+if (typeof frappe === "undefined") {
+	console.error("Frappe is not defined");
 } else {
 	frappe.provide("frappe.PosApp");
 }

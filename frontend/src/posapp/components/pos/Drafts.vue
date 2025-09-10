@@ -91,8 +91,7 @@ export default {
 			},
 		],
 	}),
-	computed: {
-	},
+	computed: {},
 	watch: {},
 	methods: {
 		close_dialog() {

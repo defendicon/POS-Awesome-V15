@@ -77,8 +77,7 @@ export default {
 		address: {},
 		customer: "",
 	}),
-	computed: {
-	},
+	computed: {},
 
 	methods: {
 		close_dialog() {

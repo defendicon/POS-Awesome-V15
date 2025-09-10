@@ -100,7 +100,9 @@
 		>
 			{{ snackText }}
 			<template v-slot:actions>
-				<v-btn class="pos-themed-button" variant="text" @click="snack = false">{{ __("Close") }}</v-btn>
+				<v-btn class="pos-themed-button" variant="text" @click="snack = false">{{
+					__("Close")
+				}}</v-btn>
 			</template>
 		</v-snackbar>
 	</nav>
@@ -381,5 +383,4 @@ nav {
 :deep(.v-snackbar) {
 	z-index: 9999;
 }
-
 </style>
