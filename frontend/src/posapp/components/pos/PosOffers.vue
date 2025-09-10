@@ -1,10 +1,6 @@
 <template>
 	<div>
-		<v-card
-			:class="['selection mx-auto mt-3', isDarkTheme ? '' : 'bg-grey-lighten-5']"
-			:style="isDarkTheme ? 'background-color:#1E1E1E' : ''"
-			style="max-height: 80vh; height: 80vh"
-		>
+		<v-card class="selection mx-auto mt-3 pos-themed-card" style="max-height: 80vh; height: 80vh">
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Offers") }}</span>
 			</v-card-title>
@@ -121,9 +117,6 @@ export default {
 		},
 		appliedOffersCount() {
 			return this.pos_offers.filter((el) => !!el.offer_applied).length;
-		},
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
 		},
 	},
 

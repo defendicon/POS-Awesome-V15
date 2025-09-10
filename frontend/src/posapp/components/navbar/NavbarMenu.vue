@@ -1,15 +1,15 @@
 <template>
 	<v-menu :min-width="240" :close-on-content-click="true" location="bottom end" :offset="[0, 4]">
 		<template #activator="{ props }">
-			<v-btn v-bind="props" color="primary" variant="elevated" class="menu-btn-compact">
+			<v-btn v-bind="props" variant="elevated" class="menu-btn-compact pos-themed-button">
 				{{ __("Menu") }}
-				<v-icon end size="16" class="ml-1">mdi-menu-down</v-icon>
+				<v-icon end size="16" class="ml-1 pos-text-primary">mdi-menu-down</v-icon>
 			</v-btn>
 		</template>
-		<v-card class="menu-card-compact" elevation="12">
+		<v-card class="menu-card-compact pos-themed-card" elevation="12">
 			<div class="menu-header-compact">
-				<v-icon color="primary" size="20">mdi-menu</v-icon>
-				<span class="menu-header-text-compact">{{ __("Actions") }}</span>
+				<v-icon class="pos-text-primary" size="20">mdi-menu</v-icon>
+				<span class="menu-header-text-compact pos-text-primary">{{ __("Actions") }}</span>
 			</div>
 			<v-list density="compact" class="menu-list-compact">
 				<v-list-item
@@ -149,13 +149,13 @@
 					<template v-slot:prepend>
 						<div class="menu-icon-wrapper-compact info-icon">
 							<v-icon color="white" size="16">{{
-								isDark ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
+								$theme.isDark ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
 							}}</v-icon>
 						</div>
 					</template>
 					<div class="menu-content-compact">
 						<v-list-item-title class="menu-item-title-compact">{{
-							isDark ? __("Light Mode") : __("Dark Mode")
+							$theme.isDark ? __("Light Mode") : __("Dark Mode")
 						}}</v-list-item-title>
 						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
 							__("Switch theme appearance")
@@ -299,7 +299,6 @@ export default {
 		manualOffline: Boolean,
 		networkOnline: Boolean,
 		serverOnline: Boolean,
-		isDark: Boolean,
 	},
 	data() {
 		return {
@@ -485,59 +484,84 @@ export default {
 </script>
 
 <style scoped>
-/* Compact Menu Button - Better Navbar Integration */
+/* Elite Menu Button - Refined Navbar Integration */
 .menu-btn-compact {
 	margin-left: 8px;
 	margin-right: 4px;
 	padding: 6px 16px;
 	border-radius: 20px;
-	font-weight: 600;
+	font-weight: 500;
 	text-transform: none;
 	font-size: 13px;
-	letter-spacing: 0.3px;
-	box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+	letter-spacing: 0.5px;
+	box-shadow: none;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	background: rgba(25, 118, 210, 0.08) !important;
+	border: 1px solid rgba(25, 118, 210, 0.12);
+	backdrop-filter: blur(8px);
 	min-width: 90px;
 	height: 36px;
+	color: #1976d2 !important;
+}
+
+/* Elite menu button text and icon colors */
+.menu-btn-compact .v-btn__content {
+	color: #1976d2 !important;
+	font-weight: 500;
+}
+
+.menu-btn-compact .pos-text-primary,
+.menu-btn-compact .v-icon {
+	color: #1976d2 !important;
+	transition: color 0.25s ease;
 }
 
 .menu-btn-compact:hover {
-	transform: translateY(-1px) scale(1.02);
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-	background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+	background: rgba(25, 118, 210, 0.12) !important;
+	border-color: rgba(25, 118, 210, 0.2);
 }
 
-/* Compact Menu Card - Smaller and Better Positioned */
+.menu-btn-compact:hover .v-btn__content,
+.menu-btn-compact:hover .pos-text-primary,
+.menu-btn-compact:hover .v-icon {
+	color: #1565c0 !important;
+}
+
+/* Elite Menu Card - Glass Morphism Design */
 .menu-card-compact {
-	border-radius: 16px;
+	border-radius: 20px;
 	overflow: hidden;
-	background: #ffffff;
-	border: none;
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.2);
 	box-shadow:
-		0 8px 24px rgba(0, 0, 0, 0.12),
-		0 2px 6px rgba(0, 0, 0, 0.08);
-	backdrop-filter: blur(8px);
+		0 20px 40px rgba(0, 0, 0, 0.08),
+		0 8px 16px rgba(0, 0, 0, 0.04),
+		0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+	backdrop-filter: blur(20px) saturate(1.2);
 	min-width: 260px;
 	max-width: 280px;
 	margin-top: 2px;
 }
 
-/* Compact Menu Header */
+/* Elite Menu Header */
 .menu-header-compact {
-	padding: 12px 16px 10px;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+	padding: 16px 20px 12px;
+	background: rgba(248, 249, 250, 0.6);
+	backdrop-filter: blur(8px);
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	border-bottom: 1px solid rgba(25, 118, 210, 0.06);
+	border-bottom: 1px solid rgba(25, 118, 210, 0.08);
 }
 
 .menu-header-text-compact {
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 500;
 	color: #1976d2;
-	letter-spacing: 0.3px;
+	letter-spacing: 0.5px;
+	opacity: 0.9;
 }
 
 /* Compact Menu List */
@@ -649,7 +673,7 @@ export default {
 
 .menu-item-subtitle-compact {
 	font-size: 11px;
-	color: #666666;
+	color: var(--pos-text-secondary, #666666);
 	line-height: 1.3;
 	font-weight: 400;
 }
@@ -827,7 +851,7 @@ export default {
 
 :deep([data-theme="dark"]) .menu-item-subtitle-compact,
 :deep(.v-theme--dark) .menu-item-subtitle-compact {
-	color: var(--text-secondary, #b0b0b0) !important;
+	color: var(--pos-text-secondary, #e0e0e0) !important;
 }
 
 :deep([data-theme="dark"]) .menu-section-divider-compact,

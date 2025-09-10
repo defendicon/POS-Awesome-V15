@@ -1,7 +1,7 @@
 <template>
 	<v-card
-		:class="['cards mb-0 mt-3 py-2 px-3 rounded-lg resizable', isDarkTheme ? '' : 'bg-grey-lighten-4']"
-		:style="(isDarkTheme ? 'background-color:#1E1E1E;' : '') + 'resize: vertical; overflow: auto;'"
+		class="cards mb-0 mt-3 py-2 px-3 rounded-lg resizable pos-themed-card"
+		style="resize: vertical; overflow: auto"
 	>
 		<v-row dense>
 			<!-- Summary Info -->
@@ -232,9 +232,6 @@ export default {
 		"show-payment",
 	],
 	computed: {
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
 		hide_qty_decimals() {
 			try {
 				const saved = localStorage.getItem("posawesome_item_selector_settings");

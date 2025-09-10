@@ -10,15 +10,10 @@
 			:style="{
 				height: invoiceHeight || 'var(--container-height)',
 				maxHeight: invoiceHeight || 'var(--container-height)',
-				backgroundColor: isDarkTheme ? '#121212' : '',
 				resize: 'vertical',
 				overflow: 'auto',
 			}"
-			:class="[
-				'cards my-0 py-0 mt-3 resizable',
-				isDarkTheme ? '' : 'bg-grey-lighten-5',
-				{ 'return-mode': isReturnInvoice },
-			]"
+			:class="['cards my-0 py-0 mt-3 resizable', 'pos-themed-card', { 'return-mode': isReturnInvoice }]"
 			@mouseup="saveInvoiceHeight"
 			@touchend="saveInvoiceHeight"
 		>
@@ -45,8 +40,7 @@
 							hide-details
 							variant="solo"
 							color="primary"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-							class="dark-field sleek-field"
+							class="dark-field sleek-field pos-themed-input"
 							:items="invoiceTypes"
 							:label="frappe._('Type')"
 							v-model="invoiceType"
@@ -422,9 +416,6 @@ export default {
 	},
 	computed: {
 		...invoiceComputed,
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
 	},
 
 	methods: {

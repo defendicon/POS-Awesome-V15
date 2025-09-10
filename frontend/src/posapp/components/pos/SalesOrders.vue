@@ -14,12 +14,11 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Order ID')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 								hide-details
 								v-model="order_name"
 								density="compact"
 								clearable
-								class="mx-4"
+								class="mx-4 pos-themed-input"
 							></v-text-field>
 							<v-btn
 								variant="text"
@@ -111,11 +110,7 @@ export default {
 			},
 		],
 	}),
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-	},
+	computed: {},
 	watch: {},
 	methods: {
 		close_dialog() {

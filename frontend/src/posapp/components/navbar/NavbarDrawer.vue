@@ -158,14 +158,14 @@ export default {
 	flex: 1;
 	font-weight: 500;
 	font-size: 1rem;
-	color: var(--text-primary, #333);
+	color: #0097a7;
 	font-family: "Roboto", sans-serif;
 }
 
 /* Styling for icons within the navigation drawer list items */
 .drawer-icon {
 	font-size: 24px;
-	color: var(--primary-start, #1976d2);
+	color: var(--pos-primary);
 }
 
 /* Styling for the title text of navigation drawer list items */
@@ -173,7 +173,7 @@ export default {
 	margin-left: 8px;
 	font-weight: 500;
 	font-size: 0.95rem;
-	color: #000000 !important;
+	color: var(--pos-text-primary) !important;
 	font-family: "Roboto", sans-serif;
 }
 
@@ -205,7 +205,7 @@ export default {
 
 :deep([data-theme="dark"]) .drawer-item-title,
 :deep(.v-theme--dark) .drawer-item-title {
-	color: #000000 !important;
+	color: var(--pos-text-primary) !important;
 	font-weight: 500;
 	font-size: 0.95rem;
 	font-family: "Roboto", sans-serif;
@@ -221,7 +221,7 @@ export default {
 
 :deep([data-theme="dark"]) .drawer-icon,
 :deep(.v-theme--dark) .drawer-icon {
-	color: var(--primary-light, #90caf9) !important;
+	color: var(--pos-primary) !important;
 	font-size: 24px;
 }
 

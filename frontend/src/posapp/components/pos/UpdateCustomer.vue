@@ -23,9 +23,8 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Customer Name') + ' *'"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 									hide-details
-									class="dark-field"
+									class="pos-themed-input"
 									v-model="customer_name"
 								></v-text-field>
 							</v-col>
@@ -34,8 +33,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Tax ID')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="tax_id"
 								></v-text-field>
@@ -45,8 +43,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Mobile No')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="mobile_no"
 								></v-text-field>
@@ -56,9 +53,8 @@
 									density="compact"
 									color="primary"
 									:label="__('Address Line 1')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 									hide-details
-									class="dark-field"
+									class="pos-themed-input"
 									v-model="address_line1"
 								></v-text-field>
 							</v-col>
@@ -69,8 +65,7 @@
 									variant="outlined"
 									density="compact"
 									:label="__('City')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 								></v-text-field>
 							</v-col>
 
@@ -81,8 +76,7 @@
 									variant="outlined"
 									density="compact"
 									:label="__('Country')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 								></v-select>
 							</v-col>
 
@@ -91,8 +85,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Email Id')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="email_id"
 								></v-text-field>
@@ -103,8 +96,7 @@
 									label="Gender"
 									:items="genders"
 									v-model="gender"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 								></v-select>
 							</v-col>
 							<v-col cols="6">
@@ -112,8 +104,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Referral Code')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="referral_code"
 								></v-text-field>
@@ -128,8 +119,7 @@
 									color="primary"
 									placeholder="DD-MM-YYYY"
 									@update:model-value="formatBirthdayOnInput"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 								></v-text-field>
 							</v-col>
 							<v-col cols="6" v-if="!hideNonEssential">
@@ -141,8 +131,7 @@
 									:label="frappe._('Customer Group') + ' *'"
 									v-model="group"
 									:items="groups"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									:no-data-text="__('Group not found')"
 									hide-details
 									required
@@ -158,8 +147,7 @@
 									:label="frappe._('Territory') + ' *'"
 									v-model="territory"
 									:items="territorys"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									:no-data-text="__('Territory not found')"
 									hide-details
 									required
@@ -173,8 +161,7 @@
 									density="compact"
 									readonly
 									hide-details
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 								></v-text-field>
 							</v-col>
 							<v-col cols="6" v-if="loyalty_points">
@@ -184,8 +171,7 @@
 									density="compact"
 									readonly
 									hide-details
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 								></v-text-field>
 							</v-col>
 						</v-row>
@@ -349,11 +335,7 @@ export default {
 			}
 		},
 	},
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-	},
+	computed: {},
 	methods: {
 		// Add a new method to update calendar date
 		updateCalendarDate(day, month, year) {

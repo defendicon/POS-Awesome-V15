@@ -5,6 +5,7 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "../../../posawesome/public/css/rtl.css";
 import "../style.css";
+import "./styles/theme.css";
 import eventBus from "./bus";
 import themePlugin from "./plugins/theme.js";
 import * as components from "vuetify/components";
@@ -16,12 +17,17 @@ if (typeof window !== "undefined" && !window.Dexie) {
 	window.Dexie = Dexie;
 }
 
-frappe.provide("frappe.PosApp");
+// Ensure frappe is available
+if (typeof frappe === "undefined") {
+	console.error("Frappe is not defined");
+} else {
+	frappe.provide("frappe.PosApp");
+}
 
 frappe.PosApp.posapp = class {
 	constructor({ parent }) {
 		this.$parent = $(document);
-		this.page = parent.page;
+		this.page = parent?.page || parent;
 		this.make_body();
 	}
 	make_body() {
@@ -40,7 +46,7 @@ frappe.PosApp.posapp = class {
 							background: "#FFFFFF",
 							primary: "#0097A7",
 							secondary: "#00BCD4",
-							accent: "#9575CD",
+							accent: "#FF6B35",
 							success: "#66BB6A",
 							info: "#2196F3",
 							warning: "#FF9800",
@@ -56,10 +62,10 @@ frappe.PosApp.posapp = class {
 						colors: {
 							background: "#121212",
 							surface: "#1E1E1E",
-							primary: "#BB86FC",
-							primaryVariant: "#985EFF",
+							primary: "#00D4FF",
+							primaryVariant: "#00A0CC",
 							secondary: "#03DAC6",
-							accent: "#9575CD",
+							accent: "#FF6B35",
 							success: "#66BB6A",
 							info: "#2196F3",
 							warning: "#FF9800",

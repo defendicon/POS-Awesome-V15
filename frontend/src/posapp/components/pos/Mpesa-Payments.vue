@@ -10,22 +10,20 @@
 						<v-text-field
 							color="primary"
 							:label="frappe._('Full Name')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+							class="pos-themed-input mx-4"
 							hide-details
 							v-model="full_name"
 							density="compact"
 							clearable
-							class="mx-4"
 						></v-text-field>
 						<v-text-field
 							color="primary"
 							:label="frappe._('Mobile No')"
-							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+							class="pos-themed-input mx-4"
 							hide-details
 							v-model="mobile_no"
 							density="compact"
 							clearable
-							class="mx-4"
 						></v-text-field>
 						<v-btn variant="text" class="ml-2" color="primary" theme="dark" @click="search">{{
 							__("Search")
@@ -105,11 +103,7 @@ export default {
 			},
 		],
 	}),
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-	},
+	computed: {},
 	watch: {},
 	methods: {
 		close_dialog() {

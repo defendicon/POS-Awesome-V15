@@ -11,15 +11,15 @@
 .pos-table {
 	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 8px var(--pos-shadow);
+	border: 1px solid var(--pos-border);
 	height: 100%;
 	width: 100%;
 	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
-	background: #ffffff;
+	background: var(--pos-card-bg);
 	margin: 0;
 	padding: 0;
 }
@@ -92,9 +92,9 @@
 	text-transform: uppercase;
 	letter-spacing: 0.3px;
 	padding: 12px;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	background-color: #f8f9fa;
-	color: #495057;
+	border-bottom: 1px solid var(--pos-border);
+	background-color: var(--pos-table-header-bg);
+	color: var(--pos-text-primary);
 	position: sticky;
 	top: 0;
 	z-index: 3;
@@ -116,7 +116,7 @@
 	border: none;
 	outline: none;
 	box-sizing: border-box;
-	border-right: 1px solid rgba(0, 0, 0, 0.05);
+	border-right: 1px solid var(--pos-border-light);
 	contain: layout style;
 }
 
@@ -126,9 +126,9 @@
 
 /* Header hover effects */
 .pos-table :deep(th:hover) {
-	background-color: rgba(25, 118, 210, 0.08);
+	background-color: var(--pos-hover-bg);
 	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+	box-shadow: 0 4px 12px var(--pos-shadow);
 	z-index: 2;
 }
 
@@ -152,10 +152,10 @@
 }
 
 .pos-table :deep(th:hover .v-data-table-header__content) {
-	color: rgba(25, 118, 210, 0.9);
+	color: var(--pos-primary);
 	font-weight: 600;
 	letter-spacing: 0.02em;
-	text-shadow: 0 1px 2px rgba(25, 118, 210, 0.1);
+	text-shadow: 0 1px 2px var(--pos-shadow-light);
 }
 
 /* Table rows */
@@ -170,7 +170,7 @@
 }
 
 .pos-table :deep(tr:hover) {
-	background-color: rgba(0, 0, 0, 0.02);
+	background-color: var(--pos-hover-bg);
 }
 
 /* Table cells */
@@ -179,7 +179,7 @@
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
-	color: #374151;
+	color: var(--pos-text-primary);
 	position: relative;
 }
 
@@ -206,10 +206,10 @@
 	max-width: 180px;
 	width: auto;
 	height: auto;
-	background: rgba(255, 255, 255, 0.6);
+	background: var(--pos-input-bg);
 	border-radius: 12px;
 	backdrop-filter: blur(10px);
-	border: 1px solid rgba(0, 0, 0, 0.04);
+	border: 1px solid var(--pos-border);
 	transition: all 0.3s ease;
 	margin: 0 auto;
 	flex-shrink: 0;
@@ -217,8 +217,8 @@
 }
 
 .pos-table__qty-counter:hover {
-	background: rgba(255, 255, 255, 0.8);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+	background: var(--pos-hover-bg);
+	box-shadow: 0 4px 16px var(--pos-shadow);
 	transform: translateY(-1px);
 }
 
@@ -229,8 +229,8 @@
 	border-radius: 8px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
-		0 2px 8px rgba(0, 0, 0, 0.06),
-		0 1px 3px rgba(0, 0, 0, 0.04) !important;
+		0 2px 8px var(--pos-shadow),
+		0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
 	position: relative !important;
@@ -245,7 +245,7 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(255, 255, 255, 0.2);
+	background: var(--pos-pressed-bg);
 	transition: transform 0.3s ease;
 	transform: translateX(-100%);
 	z-index: 0;
@@ -261,17 +261,29 @@
 }
 
 .pos-table__qty-btn--minus {
-	background: linear-gradient(145deg, #fef3c7, #fbbf24) !important;
-	color: #92400e !important;
-	border: 2px solid rgba(251, 191, 36, 0.3) !important;
+	background: var(--pos-warning-container) !important;
+	color: var(--pos-warning) !important;
+	border: 2px solid var(--pos-warning) !important;
+}
+
+.pos-table__qty-btn--minus .v-icon {
+	color: var(--pos-warning) !important;
+	position: relative;
+	z-index: 2;
+	transition: color 0.3s ease;
 }
 
 .pos-table__qty-btn--minus:hover {
-	background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
+	background: var(--pos-warning) !important;
+	color: white !important;
 	box-shadow:
-		0 6px 20px rgba(251, 191, 36, 0.25),
-		0 4px 8px rgba(0, 0, 0, 0.08) !important;
+		0 6px 20px var(--pos-shadow),
+		0 4px 8px var(--pos-shadow-light) !important;
 	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.pos-table__qty-btn--minus:hover .v-icon {
+	color: white !important;
 }
 
 .pos-table__qty-btn--plus {
@@ -280,12 +292,79 @@
 	border: 2px solid rgba(52, 211, 153, 0.3) !important;
 }
 
+.pos-table__qty-btn--plus .v-icon {
+	color: #065f46 !important;
+	position: relative;
+	z-index: 2;
+	transition: color 0.3s ease;
+}
+
 .pos-table__qty-btn--plus:hover {
 	background: linear-gradient(145deg, #34d399, #10b981) !important;
+	color: white !important;
 	box-shadow:
 		0 6px 20px rgba(52, 211, 153, 0.25),
 		0 4px 8px rgba(0, 0, 0, 0.08) !important;
 	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.pos-table__qty-btn--plus:hover .v-icon {
+	color: white !important;
+}
+
+/* Delete button styling */
+.pos-table__delete-btn {
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	border-radius: 8px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow:
+		0 2px 8px var(--pos-shadow),
+		0 1px 3px var(--pos-shadow-light) !important;
+	font-weight: 600 !important;
+	backdrop-filter: blur(10px) !important;
+	position: relative !important;
+	overflow: hidden !important;
+	flex-shrink: 0;
+	background: linear-gradient(145deg, #fecaca, #f87171) !important;
+	color: #7f1d1d !important;
+	border: 2px solid rgba(248, 113, 113, 0.3) !important;
+}
+
+.pos-table__delete-btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--pos-pressed-bg);
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.pos-table__delete-btn:hover::before {
+	transform: translateX(0);
+}
+
+.pos-table__delete-btn .v-icon {
+	position: relative;
+	z-index: 1;
+	color: #7f1d1d !important;
+}
+
+.pos-table__delete-btn:hover {
+	background: linear-gradient(145deg, #f87171, #ef4444) !important;
+	box-shadow:
+		0 6px 20px rgba(248, 113, 113, 0.25),
+		0 4px 8px rgba(0, 0, 0, 0.08) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.pos-table__delete-btn:hover .v-icon {
+	color: white !important;
 }
 
 .pos-table__qty-display {
@@ -297,8 +376,8 @@
 	font-weight: 600;
 	padding: 6px 4px;
 	border-radius: 6px;
-	background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.08) 100%);
-	border: 1px solid rgba(37, 99, 235, 0.1);
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-border);
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -307,10 +386,10 @@
 		"tnum" 1,
 		"lnum" 1,
 		"kern" 1;
-	color: #1e40af;
+	color: var(--pos-primary);
 	font-size: 0.8rem;
 	transition: all 0.2s ease;
-	box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -324,9 +403,9 @@
 }
 
 .pos-table__qty-display--negative {
-	color: #dc2626;
-	background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(239, 68, 68, 0.08) 100%);
-	border-color: rgba(220, 38, 38, 0.15);
+	color: var(--pos-error);
+	background: var(--pos-error-container);
+	border-color: var(--pos-error);
 }
 
 .pos-table__qty-display--large {
@@ -474,47 +553,127 @@
 }
 
 /* =================================================================
-   DARK THEME SUPPORT
+   DYNAMIC THEME SUPPORT - All styling via CSS custom properties
+   ================================================================= */
+/* All theme styles are automatically applied via CSS custom properties
+   defined in /src/posapp/styles/theme.css - no hardcoded dark mode overrides needed */
+
+/* =================================================================
+   IMPROVED BUTTON TEXT VISIBILITY FOR DARK/LIGHT THEMES
    ================================================================= */
 
-:deep([data-theme="dark"]) .pos-table,
-:deep(.v-theme--dark) .pos-table {
-	background: #1a202c;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+/* Enhanced text visibility for minus button */
+[data-theme="dark"] .pos-table__qty-btn--minus,
+.v-theme--dark .pos-table__qty-btn--minus {
+	background: rgba(251, 191, 36, 0.2) !important;
+	color: #fbbf24 !important;
+	border: 2px solid #fbbf24 !important;
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(th),
-:deep(.v-theme--dark) .pos-table :deep(th) {
-	background-color: #2d3748;
-	color: #e2e8f0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	border-right: 1px solid rgba(255, 255, 255, 0.05);
+[data-theme="dark"] .pos-table__qty-btn--minus .v-icon,
+.v-theme--dark .pos-table__qty-btn--minus .v-icon {
+	color: #fbbf24 !important;
 }
 
-:deep([data-theme="dark"]) .pos-table :deep(th:hover),
-:deep(.v-theme--dark) .pos-table :deep(th:hover) {
-	background-color: rgba(144, 202, 249, 0.15);
-	box-shadow: 0 4px 12px rgba(144, 202, 249, 0.25);
+[data-theme="dark"] .pos-table__qty-btn--minus:hover,
+.v-theme--dark .pos-table__qty-btn--minus:hover {
+	background: #fbbf24 !important;
+	color: #1f2937 !important;
 }
 
-:deep([data-theme="dark"]) .pos-table__qty-counter,
-:deep(.v-theme--dark) .pos-table__qty-counter {
-	background: rgba(30, 30, 30, 0.6);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+[data-theme="dark"] .pos-table__qty-btn--minus:hover .v-icon,
+.v-theme--dark .pos-table__qty-btn--minus:hover .v-icon {
+	color: #1f2937 !important;
 }
 
-:deep([data-theme="dark"]) .pos-table__qty-display,
-:deep(.v-theme--dark) .pos-table__qty-display {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.12);
+/* Enhanced text visibility for plus button in dark mode */
+[data-theme="dark"] .pos-table__qty-btn--plus,
+.v-theme--dark .pos-table__qty-btn--plus {
+	background: rgba(34, 197, 94, 0.2) !important;
+	color: #22c55e !important;
+	border: 2px solid #22c55e !important;
 }
 
-:deep([data-theme="dark"]) .pos-table__qty-display--negative,
-:deep(.v-theme--dark) .pos-table__qty-display--negative {
-	color: #ff8a80;
-	background: rgba(255, 138, 128, 0.1);
-	border-color: rgba(255, 138, 128, 0.2);
+[data-theme="dark"] .pos-table__qty-btn--plus .v-icon,
+.v-theme--dark .pos-table__qty-btn--plus .v-icon {
+	color: #22c55e !important;
+}
+
+[data-theme="dark"] .pos-table__qty-btn--plus:hover,
+.v-theme--dark .pos-table__qty-btn--plus:hover {
+	background: #22c55e !important;
+	color: #1f2937 !important;
+}
+
+[data-theme="dark"] .pos-table__qty-btn--plus:hover .v-icon,
+.v-theme--dark .pos-table__qty-btn--plus:hover .v-icon {
+	color: #1f2937 !important;
+}
+
+/* Ensure disabled buttons maintain proper contrast */
+.pos-table__qty-btn:disabled {
+	opacity: 0.5 !important;
+	cursor: not-allowed !important;
+}
+
+.pos-table__qty-btn:disabled .v-icon {
+	color: var(--pos-text-disabled) !important;
+}
+
+/* Vuetify table wrapper elements - using CSS custom properties */
+:deep(.v-table__wrapper) {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+:deep(.v-data-table__wrapper) {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+:deep(.v-data-table),
+:deep(.v-data-table-virtual) {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+/* Vuetify table body cells - dynamic theming */
+:deep(.v-data-table tbody td) {
+	background: transparent !important;
+	color: var(--pos-text-primary) !important;
+	border-bottom-color: var(--pos-border) !important;
+}
+
+/* Vuetify table rows - dynamic theming */
+:deep(.v-data-table tbody tr) {
+	background: transparent !important;
+}
+
+:deep(.v-data-table tbody tr:hover) {
+	background: var(--pos-table-row-hover) !important;
+}
+
+/* Expanded rows - dynamic theming */
+:deep(.v-data-table__expanded-row) {
+	background: var(--pos-surface-variant) !important;
+}
+
+:deep(.v-data-table__expanded-row td) {
+	background: var(--pos-surface-variant) !important;
+	color: var(--pos-text-primary) !important;
+	border-color: var(--pos-border) !important;
+}
+
+/* Table footer/pagination - dynamic theming */
+:deep(.v-data-table-footer) {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
+	border-color: var(--pos-border) !important;
+}
+
+/* No data text - dynamic theming */
+:deep(.v-data-table__empty-wrapper) {
+	color: var(--pos-text-secondary) !important;
 }
 
 /* =================================================================

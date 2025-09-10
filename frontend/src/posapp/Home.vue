@@ -12,7 +12,6 @@
 				:is-ip-host="isIpHost"
 				:sync-totals="syncTotals"
 				:manual-offline="manualOffline"
-				:is-dark="isDark"
 				:cache-usage="cacheUsage"
 				:cache-usage-loading="cacheUsageLoading"
 				:cache-usage-details="cacheUsageDetails"
@@ -116,7 +115,7 @@ export default {
 	},
 	computed: {
 		isDark() {
-			return this.$theme?.current === "dark";
+			return this.$theme?.isDark || false;
 		},
 		loadingProgress() {
 			return loadingState.progress;

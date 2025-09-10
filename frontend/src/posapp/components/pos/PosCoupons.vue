@@ -1,10 +1,6 @@
 <template>
 	<div>
-		<v-card
-			:class="['selection mx-auto mt-3', isDarkTheme ? '' : 'bg-grey-lighten-5']"
-			:style="isDarkTheme ? 'background-color:#1E1E1E' : ''"
-			style="max-height: 80vh; height: 80vh"
-		>
+		<v-card class="selection mx-auto mt-3 pos-themed-card" style="max-height: 80vh; height: 80vh">
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Coupons") }}</span>
 			</v-card-title>
@@ -17,10 +13,9 @@
 						variant="outlined"
 						color="primary"
 						:label="frappe._('Coupon')"
-						:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+						class="pos-themed-input coupon-input"
 						hide-details
 						v-model="new_coupon"
-						class="coupon-input"
 						@keydown.enter="add_coupon(new_coupon)"
 					>
 					</v-text-field>
@@ -103,9 +98,6 @@ export default {
 		},
 		appliedCouponsCount() {
 			return this.posa_coupons.filter((el) => !!el.applied).length;
-		},
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
 		},
 	},
 

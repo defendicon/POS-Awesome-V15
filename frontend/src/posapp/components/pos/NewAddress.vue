@@ -13,8 +13,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Address Name')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="address.name"
 								></v-text-field>
@@ -24,8 +23,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Address Line 1')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="address.address_line1"
 								></v-text-field>
@@ -35,8 +33,7 @@
 									density="compact"
 									color="primary"
 									:label="frappe._('Address Line 2')"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="address.address_line2"
 								></v-text-field>
@@ -46,8 +43,7 @@
 									label="City"
 									density="compact"
 									color="primary"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="address.city"
 								></v-text-field>
@@ -56,8 +52,7 @@
 								<v-text-field
 									label="State"
 									density="compact"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									class="dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="address.state"
 								></v-text-field>
@@ -82,11 +77,7 @@ export default {
 		address: {},
 		customer: "",
 	}),
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-	},
+	computed: {},
 
 	methods: {
 		close_dialog() {

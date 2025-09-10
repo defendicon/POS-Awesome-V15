@@ -7,8 +7,7 @@
 				format="dd-MM-yyyy"
 				auto-apply
 				:placeholder="frappe._('Posting Date')"
-				:dark="isDarkTheme"
-				class="dark-field sleek-field posting-date-input"
+				class="dark-field sleek-field posting-date-input pos-themed-input"
 				@update:model-value="onUpdate"
 			/>
 		</v-col>
@@ -64,11 +63,7 @@ export default {
 			internal_price_list: this.priceList,
 		};
 	},
-	computed: {
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
-	},
+	computed: {},
 	watch: {
 		posting_date_display(val) {
 			this.internal_posting_date_display = val;

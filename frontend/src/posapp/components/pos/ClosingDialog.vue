@@ -52,8 +52,7 @@
 											density="compact"
 											variant="outlined"
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:prefix="currencySymbol(pos_profile.currency)"
 										></v-text-field>
@@ -160,11 +159,7 @@ export default {
 		},
 	},
 
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-	},
+	computed: {},
 
 	created: function () {
 		this.eventBus.on("open_ClosingDialog", (data) => {

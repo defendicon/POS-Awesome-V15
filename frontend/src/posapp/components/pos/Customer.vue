@@ -5,7 +5,7 @@
 		<v-autocomplete
 			v-else
 			ref="customerDropdown"
-			class="customer-autocomplete sleek-field"
+			class="customer-autocomplete sleek-field pos-themed-input"
 			density="compact"
 			clearable
 			variant="solo"
@@ -15,7 +15,6 @@
 			:items="filteredCustomers"
 			item-title="customer_name"
 			item-value="name"
-			:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 			:no-data-text="
 				isCustomerBackgroundLoading ? __('Loading customer data...') : __('Customers not found')
 			"
@@ -214,10 +213,6 @@ export default {
 	},
 
 	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-
 		filteredCustomers() {
 			return this.isCustomerBackgroundLoading ? [] : this.customers;
 		},
