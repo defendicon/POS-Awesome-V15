@@ -1,0 +1,44 @@
+name: "🐞 Bug report"
+description: Report a reproducible problem
+labels: [bug, needs-triage]
+body:
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Node, Browser versions
+      placeholder: "Ubuntu 22.04, Node 20.x, Chrome 139"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps + minimal sample
+      placeholder: "1) ... 2) ... 3) ..."
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / logs
+      description: Include screenshots and **full** error text
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit checks
+      options:
+        - label: I searched existing issues
+          required: true
+        - label: I can reproduce on the latest release
+          required: true

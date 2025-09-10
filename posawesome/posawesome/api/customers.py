@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
 from frappe.utils.caching import redis_cache
+from .utils import get_active_pos_profile
 
 
 def get_customer_groups(pos_profile):
@@ -19,10 +20,7 @@ def get_customer_groups(pos_profile):
         # Get items based on the item groups defined in the POS profile
         for data in pos_profile.get("customer_groups"):
             customer_groups.extend(
-                [
-                    "%s" % frappe.db.escape(d.get("name"))
-                    for d in get_child_nodes("Customer Group", data.get("customer_group"))
-                ]
+                [d.get("name") for d in get_child_nodes("Customer Group", data.get("customer_group"))]
             )
 
     return list(set(customer_groups))
@@ -42,9 +40,10 @@ def get_customer_group_condition(pos_profile):
     cond = "disabled = 0"
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
-        cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
+        escaped_groups = [frappe.db.escape(g) for g in customer_groups]
+        cond = " customer_group in ({})".format(", ".join(escaped_groups))
 
-    return cond % tuple(customer_groups)
+    return cond
 
 
 @frappe.whitelist()
@@ -404,9 +403,18 @@ def get_sales_person_names():
 
     print("Fetching sales persons...")
     try:
+        profile = get_active_pos_profile()
+        allowed = []
+        if profile:
+            allowed = [
+                d.get("sales_person") for d in profile.get("posa_sales_persons", []) if d.get("sales_person")
+            ]
+        filters = {"enabled": 1}
+        if allowed:
+            filters["name"] = ["in", allowed]
         sales_persons = frappe.get_list(
             "Sales Person",
-            filters={"enabled": 1},
+            filters=filters,
             fields=["name", "sales_person_name"],
             limit_page_length=100000,
         )

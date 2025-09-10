@@ -12,7 +12,7 @@ import os
 import psutil
 import functools
 
-from .utils import get_item_groups
+from .utils import get_item_groups, get_active_pos_profile
 
 
 def get_version():
@@ -137,7 +137,6 @@ def get_selling_price_lists():
     )
 
 
-@frappe.whitelist()
 def get_app_info() -> Dict[str, List[Dict[str, str]]]:
     """
     Return a list of installed apps and their versions.
@@ -172,9 +171,18 @@ def get_sales_person_names():
 
     print("Fetching sales persons...")
     try:
+        profile = get_active_pos_profile()
+        allowed = []
+        if profile:
+            allowed = [
+                d.get("sales_person") for d in profile.get("posa_sales_persons", []) if d.get("sales_person")
+            ]
+        filters = {"enabled": 1}
+        if allowed:
+            filters["name"] = ["in", allowed]
         sales_persons = frappe.get_list(
             "Sales Person",
-            filters={"enabled": 1},
+            filters=filters,
             fields=["name", "sales_person_name"],
             limit_page_length=100000,
         )

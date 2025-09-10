@@ -1,4 +1,6 @@
+/* global __ */
 import { reactive } from "vue";
+import { start as startGlobalLoading, stop as stopGlobalLoading } from "../composables/useLoading.js";
 
 // Loading state variables
 let sourceCount = 0;
@@ -36,20 +38,19 @@ export function initLoadingSources(list) {
 
 	loadingState.progress = 0;
 	loadingState.active = true;
-
-	// Start the fallback timeout
-	startLoadingTimeout();
+	startGlobalLoading();
 }
 
 export function setSourceProgress(name, value) {
 	// Safety checks
 	if (!(name in loadingState.sources) || isCompleting || sourceCount === 0) return;
 
-	// Clamp value between 0 and 100
-	value = Math.max(0, Math.min(100, value));
-
+	// Clamp value between 0 and 100 and prevent regressions
+	const clampedValue = Math.max(0, Math.min(100, value));
 	const oldValue = loadingState.sources[name];
-	loadingState.sources[name] = value;
+	const newValue = Math.max(oldValue, clampedValue);
+
+	loadingState.sources[name] = newValue;
 
 	// Update message only if it changed
 	const newMessage = loadingState.sourceMessages[name] || __(`Loading ${name}...`);
@@ -57,17 +58,19 @@ export function setSourceProgress(name, value) {
 		loadingState.message = newMessage;
 	}
 
-	// Optimized progress calculation with safety check
-	completedSum += value - oldValue;
-	const newProgress = Math.round(completedSum / sourceCount);
+	// Only update totals when progress increases
+	if (newValue > oldValue) {
+		completedSum += newValue - oldValue;
+		const newProgress = Math.round(completedSum / sourceCount);
 
-	// Only animate if progress actually changed
-	if (newProgress !== loadingState.progress && newProgress <= 100) {
-		animateProgress(loadingState.progress, newProgress);
-	}
+		// Only animate if progress actually changed
+		if (newProgress !== loadingState.progress && newProgress <= 100) {
+			animateProgress(loadingState.progress, newProgress);
+		}
 
-	if (newProgress >= 100 && !isCompleting) {
-		completeLoading();
+		if (newProgress >= 100 && !isCompleting) {
+			completeLoading();
+		}
 	}
 }
 
@@ -101,8 +104,6 @@ function completeLoading() {
 	if (isCompleting) return;
 	isCompleting = true;
 
-	clearLoadingTimeout(); // Clear the fallback timeout
-
 	loadingState.progress = 100;
 	loadingState.message = __("Setup complete!");
 
@@ -115,36 +116,13 @@ function completeLoading() {
 		setTimeout(() => {
 			loadingState.active = false;
 			loadingState.message = __("Loading app data...");
+			stopGlobalLoading();
 			// Reset for next use
 			sourceCount = 0;
 			completedSum = 0;
 			isCompleting = false;
 		}, 600);
 	}, 400);
-}
-
-// Add fallback timeout to ensure loading bar disappears
-let loadingTimeout = null;
-
-export function startLoadingTimeout() {
-	// Clear any existing timeout
-	if (loadingTimeout) {
-		clearTimeout(loadingTimeout);
-	}
-
-	// Set a maximum loading time of 30 seconds
-	loadingTimeout = setTimeout(() => {
-		console.warn("Loading timeout reached, forcing loading state to complete");
-		loadingState.message = __("Taking longer than expected...");
-		completeLoading();
-	}, 30000);
-}
-
-export function clearLoadingTimeout() {
-	if (loadingTimeout) {
-		clearTimeout(loadingTimeout);
-		loadingTimeout = null;
-	}
 }
 
 export function markSourceLoaded(name) {
@@ -154,7 +132,6 @@ export function markSourceLoaded(name) {
 
 // Utility function to manually reset loading state
 export function resetLoadingState() {
-	clearLoadingTimeout();
 	loadingState.active = false;
 	loadingState.progress = 0;
 	loadingState.message = __("Loading app data...");
@@ -162,6 +139,7 @@ export function resetLoadingState() {
 	sourceCount = 0;
 	completedSum = 0;
 	isCompleting = false;
+	stopGlobalLoading();
 }
 
 // Get current loading status for debugging

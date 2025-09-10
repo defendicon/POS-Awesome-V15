@@ -20,11 +20,6 @@
 				location="top"
 				color="info"
 			></v-progress-linear>
-			<LoadingOverlay
-				:loading="loading || isBackgroundLoading"
-				:message="__('Loading item data...')"
-				:progress="loadProgress"
-			/>
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
@@ -190,7 +185,11 @@
 				<v-row class="items">
 					<v-col cols="12" class="pt-0 mt-0">
 						<div v-if="items_view == 'card'" class="items-card-container">
+							<div v-if="loading" class="items-card-grid">
+								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
+							</div>
 							<div
+								v-else
 								class="items-card-grid"
 								ref="itemsContainer"
 								@scroll.passive="onCardScroll"
@@ -200,7 +199,7 @@
 									v-for="item in filtered_items"
 									:key="item.item_code"
 									class="card-item-card"
-									@click="add_item(item)"
+									@click="select_item($event, item)"
 									:draggable="true"
 									@dragstart="onDragStart($event, item)"
 									@dragend="onDragEnd"
@@ -240,11 +239,13 @@
 													<span class="price-amount">
 														{{
 															format_currency(
-																item.base_price_list_rate || item.rate,
+																item.base_price_list_rate ?? item.rate ?? 0,
 																item.original_currency ||
 																	pos_profile.currency,
 																ratePrecision(
-																	item.base_price_list_rate || item.rate,
+																	item.base_price_list_rate ??
+																		item.rate ??
+																		0,
 																),
 															)
 														}}
@@ -317,9 +318,11 @@
 											}}
 											{{
 												format_currency(
-													item.base_price_list_rate || item.rate,
+													item.base_price_list_rate ?? item.rate ?? 0,
 													item.original_currency || pos_profile.currency,
-													ratePrecision(item.base_price_list_rate || item.rate),
+													ratePrecision(
+														item.base_price_list_rate ?? item.rate ?? 0,
+													),
 												)
 											}}
 										</div>
@@ -457,19 +460,21 @@ import {
 } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
+import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import placeholderImage from "./placeholder-image.png";
-import LoadingOverlay from "./LoadingOverlay.vue";
+import Skeleton from "../ui/Skeleton.vue";
 
 export default {
 	mixins: [format],
 	setup() {
 		const responsive = useResponsive();
 		const rtl = useRtl();
-		return { ...responsive, ...rtl };
+		const { fly } = useFlyAnimation();
+		return { ...responsive, ...rtl, fly };
 	},
 	components: {
 		CameraScanner,
-		LoadingOverlay,
+		Skeleton,
 	},
 	data: () => ({
 		pos_profile: {},
@@ -502,6 +507,7 @@ export default {
 		exchange_rate: 1,
 		prePopulateInProgress: false,
 		itemWorker: null,
+		flyConfig: { speed: 0.6, easing: "ease-in-out" },
 		storageAvailable: true,
 		localStorageAvailable: true,
 		items_request_token: 0,
@@ -635,8 +641,13 @@ export default {
 					this.items.forEach((it) => {
 						const ci = map[it.item_code];
 						if (ci) {
-							it.rate = ci.rate;
-							it.price_list_rate = ci.price_list_rate || ci.rate;
+							const force =
+								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = ci.price_list_rate ?? ci.rate ?? 0;
+							if (force || price) {
+								it.rate = price;
+								it.price_list_rate = price;
+							}
 						}
 					});
 					this.eventBus.emit("set_all_items", this.items);
@@ -1057,9 +1068,11 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
-							upd.rate = det.rate;
-							upd.price_list_rate = det.price_list_rate || det.rate;
+						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+						const price = det.price_list_rate ?? det.rate ?? 0;
+						if (force || price) {
+							upd.rate = price;
+							upd.price_list_rate = price;
 						}
 					}
 					if (det.currency) {
@@ -1091,9 +1104,11 @@ export default {
 							saveItemUOMs(item.item_code, updItem.item_uoms);
 						}
 						if (updItem.rate !== undefined) {
-							if (updItem.rate !== 0 || !item.rate) {
-								upd.rate = updItem.rate;
-								upd.price_list_rate = updItem.price_list_rate || updItem.rate;
+							const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = updItem.price_list_rate ?? updItem.rate ?? 0;
+							if (force || price) {
+								upd.rate = price;
+								upd.price_list_rate = price;
 							}
 						}
 						if (updItem.currency) {
@@ -1344,6 +1359,8 @@ export default {
 					}
 				}
 
+				await savePriceListItems(vm.customer_price_list || vm.pos_profile.selling_price_list, items);
+
 				if (hasMore) {
 					const last = items[items.length - 1]?.item_name || null;
 					console.log("[ItemsSelector] more items available, starting background load", {
@@ -1482,7 +1499,7 @@ export default {
 						this.itemWorker.postMessage({
 							type: "parse_and_cache",
 							json: text,
-							priceList: this.customer_price_list || "",
+							priceList: this.active_price_list || "",
 						});
 					});
 					if (this.items_request_token !== requestToken) {
@@ -1681,7 +1698,31 @@ export default {
 
 			return items_headers;
 		},
+		select_item(event, item) {
+			const targets = document.querySelectorAll(".items-table-container");
+			const target = targets[targets.length - 1];
+			const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
+			if (target && source && this.fly) {
+				this.fly(source, target, this.flyConfig);
+			}
+			this.add_item(item);
+		},
 		async click_item_row(event, { item }) {
+			const targets = document.querySelectorAll(".items-table-container");
+			const target = targets[targets.length - 1];
+			if (target && this.fly) {
+				const placeholder = document.createElement("div");
+				placeholder.style.width = "40px";
+				placeholder.style.height = "40px";
+				placeholder.style.background = "#ccc";
+				placeholder.style.borderRadius = "50%";
+				placeholder.style.position = "fixed";
+				placeholder.style.top = `${event.clientY - 20}px`;
+				placeholder.style.left = `${event.clientX - 20}px`;
+				document.body.appendChild(placeholder);
+				this.fly(placeholder, target, this.flyConfig);
+				placeholder.remove();
+			}
 			await this.add_item(item);
 		},
 		async add_item(item) {
@@ -1952,9 +1993,11 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
-							item.rate = det.rate;
-							item.price_list_rate = det.price_list_rate || det.rate;
+						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+						const price = det.price_list_rate ?? det.rate ?? 0;
+						if (force || price) {
+							item.rate = price;
+							item.price_list_rate = price;
 						}
 					}
 					if (det.currency) {

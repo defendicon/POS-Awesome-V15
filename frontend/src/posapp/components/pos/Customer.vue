@@ -1,7 +1,9 @@
 <template>
 	<!-- ? Disable dropdown if either readonly or loadingCustomers is true -->
 	<div class="customer-input-wrapper">
+		<Skeleton v-if="loadingCustomers" height="48" class="w-100" />
 		<v-autocomplete
+			v-else
 			ref="customerDropdown"
 			class="customer-autocomplete sleek-field pos-themed-input"
 			density="compact"
@@ -85,11 +87,6 @@
 		<div class="mt-4">
 			<UpdateCustomer />
 		</div>
-		<LoadingOverlay
-			:loading="loadingCustomers || isCustomerBackgroundLoading"
-			:message="__('Loading customer data...')"
-			:progress="loadProgress"
-		/>
 	</div>
 </template>
 
@@ -165,7 +162,7 @@
 <script>
 /* global frappe __ */
 import UpdateCustomer from "./UpdateCustomer.vue";
-import LoadingOverlay from "./LoadingOverlay.vue";
+import Skeleton from "../ui/Skeleton.vue";
 import {
 	db,
 	checkDbHealth,
@@ -212,7 +209,7 @@ export default {
 
 	components: {
 		UpdateCustomer,
-		LoadingOverlay,
+		Skeleton,
 	},
 
 	computed: {

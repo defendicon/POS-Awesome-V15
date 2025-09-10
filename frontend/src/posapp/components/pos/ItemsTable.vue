@@ -159,13 +159,31 @@
 				</div>
 			</template>
 
-			<!-- Offer checkbox column -->
+			<!-- Offer toggle button column -->
 			<template v-slot:item.posa_is_offer="{ item }">
-				<v-checkbox-btn
-					v-model="item.posa_is_offer"
-					class="center"
-					@change="toggleOffer(item)"
-				></v-checkbox-btn>
+				<v-btn
+					size="x-small"
+					color="primary"
+					variant="tonal"
+					class="ma-0 pa-0"
+					@click.stop="toggleOffer(item)"
+				>
+					{{ item.posa_offer_applied ? __("Remove Offer") : __("Apply Offer") }}
+				</v-btn>
+			</template>
+
+			<!-- Actions column -->
+			<template v-slot:item.actions="{ item }">
+				<v-btn
+					:disabled="!!item.posa_is_replace"
+					size="default"
+					color="error"
+					variant="tonal"
+					class="delete-action-btn"
+					@click.stop="removeItem(item)"
+				>
+					<v-icon size="small">mdi-delete-outline</v-icon>
+				</v-btn>
 			</template>
 
 			<!-- Actions column -->
@@ -356,7 +374,7 @@
 											:label="frappe._('Price List Rate')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatCurrency(item.price_list_rate || 0)"
+											:model-value="formatCurrency(item.price_list_rate ?? 0)"
 											:disabled="!pos_profile.posa_allow_price_list_rate_change"
 											prepend-inner-icon="mdi-format-list-numbered"
 											:prefix="currencySymbol(pos_profile.currency)"
@@ -1552,6 +1570,7 @@ export default {
 
 /* Dark theme */
 
+
 /* =================================================================
    RESPONSIVE DESIGN - CONTAINER QUERIES
    ================================================================= */
@@ -1598,6 +1617,79 @@ export default {
 
 	.form-section {
 		padding: 20px;
+	}
+
+	.pos-table :deep(th[data-column-key="item_name"]) {
+		min-width: 120px;
+		max-width: 150px;
+	}
+
+	.pos-table :deep(th[data-column-key="qty"]) {
+		min-width: 100px;
+		max-width: 120px;
+	}
+
+	.pos-table :deep(th[data-column-key="rate"]),
+	.pos-table :deep(th[data-column-key="amount"]) {
+		min-width: 70px;
+		max-width: 90px;
+	}
+
+	.pos-table__qty-counter {
+		min-width: 110px;
+		width: 110px;
+		height: auto;
+		gap: 4px;
+		padding: 2px;
+	}
+
+	.qty-control-btn {
+		width: 28px !important;
+		height: 28px !important;
+		min-width: 28px !important;
+		border-radius: 6px !important;
+	}
+
+	.pos-table__qty-display {
+		min-width: 35px;
+		max-width: 70px;
+		padding: 4px 3px;
+		font-size: 0.75rem;
+		height: 28px;
+		letter-spacing: -0.03em;
+	}
+
+	.action-button-group {
+		flex-direction: column;
+		gap: 6px;
+		width: 100%;
+	}
+
+	.item-action-btn {
+		width: 100% !important;
+		min-width: 100% !important;
+		height: 40px !important;
+		justify-content: center;
+	}
+
+	.item-action-btn .action-label {
+		display: inline-block !important;
+	}
+
+	.expanded-content {
+		padding: 16px;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.action-panel {
+		padding: 12px;
+		gap: 8px;
+	}
+
+	.action-panel-content {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
 	}
 }
 

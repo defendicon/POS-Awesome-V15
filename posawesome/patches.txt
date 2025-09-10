@@ -4,3 +4,4 @@ posawesome.patches.add_item_fulltext_index
 posawesome.patches.add_pos_invoice_toggle_in_pos_profile
 posawesome.patches.add_pos_opening_shift_to_pos_invoice
 posawesome.patches.add_pos_invoice_field_to_sales_invoice_reference
+posawesome.patches.add_sales_person_filter_to_pos_profile

@@ -13,6 +13,7 @@
     "@vitejs/plugin-vue": "^5.2.3",
     "@vuepic/vue-datepicker": "11.0.2",
     "@vueuse/core": "^13.4.0",
+    "axios": "1.7.4",
     "dexie": "^4.0.11",
     "lodash": "^4.17.21",
     "mitt": "^3.0.1",
