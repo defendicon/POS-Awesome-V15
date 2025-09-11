@@ -163,12 +163,18 @@ def _auto_set_return_batches(invoice_doc):
 
 
 @frappe.whitelist()
-def validate_cart_items(items, pos_profile=None):
+def validate_cart_items(items, pos_profile=None, doctype=None):
     """Validate cart items for available stock.
 
     Returns a list of item dicts where requested quantity exceeds availability.
     This can be used on the front-end for pre-submission checks.
     """
+
+    if doctype and doctype.lower() == "sales order":
+        frappe.logger("posawesome").debug(
+            "Skipping stock validation for doctype %s", doctype
+        )
+        return []
 
     if isinstance(items, str):
         items = json.loads(items)

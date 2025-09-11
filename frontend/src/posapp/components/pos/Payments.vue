@@ -1217,14 +1217,17 @@ export default {
 				return;
 			}
 			// Validate stock availability before submitting
-			if (!isOffline()) {
-				try {
-					const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
-					const stockCheck = await frappe.call({
-						method: "posawesome.posawesome.api.invoices.validate_cart_items",
-						args: { items: JSON.stringify(itemsToCheck) },
-					});
-					if (stockCheck.message && stockCheck.message.length) {
+                        if (!isOffline() && this.invoice_doc.doctype !== "Sales Order") {
+                                try {
+                                        const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
+                                        const stockCheck = await frappe.call({
+                                                method: "posawesome.posawesome.api.invoices.validate_cart_items",
+                                                args: {
+                                                        items: JSON.stringify(itemsToCheck),
+                                                        doctype: this.invoice_doc.doctype,
+                                                },
+                                        });
+                                        if (stockCheck.message && stockCheck.message.length) {
 						const msg = stockCheck.message
 							.map(
 								(e) =>
