@@ -63,8 +63,7 @@ export default {
 			internal_price_list: this.priceList,
 		};
 	},
-	computed: {
-	},
+	computed: {},
 	watch: {
 		posting_date_display(val) {
 			this.internal_posting_date_display = val;

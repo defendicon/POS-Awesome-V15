@@ -353,7 +353,7 @@ export default {
 				this.useWesternNumerals = false;
 			}
 			this.originalWesternNumerals = this.useWesternNumerals;
-			
+
 			// Force reactivity update
 			this.$nextTick(() => {
 				this.$forceUpdate();

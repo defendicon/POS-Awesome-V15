@@ -335,8 +335,7 @@ export default {
 			}
 		},
 	},
-	computed: {
-	},
+	computed: {},
 	methods: {
 		// Add a new method to update calendar date
 		updateCalendarDate(day, month, year) {

@@ -6,14 +6,14 @@ export default {
 		if (vuetify) {
 			setVuetifyInstance(vuetify);
 		}
-		
+
 		// Initialize the global theme composable
 		const globalTheme = useTheme();
-		
+
 		// Make theme available globally via $theme (backwards compatibility)
 		app.config.globalProperties.$theme = globalTheme;
-		
+
 		// Provide theme to all components
-		app.provide('theme', globalTheme);
+		app.provide("theme", globalTheme);
 	},
 };

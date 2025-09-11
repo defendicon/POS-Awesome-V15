@@ -3050,7 +3050,9 @@ export default {
 	/* Performance optimizations for theme switching */
 	contain: layout style;
 	will-change: background-color;
-	transition: background-color 0.15s ease, border-color 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
 }
 
 [data-theme="dark"] .sticky-header {
@@ -3079,7 +3081,9 @@ export default {
 }
 
 .dynamic-item-card {
-	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+	transition:
+		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.2s ease;
 	background-color: var(--surface-secondary);
 	display: flex;
 	flex-direction: column;
@@ -3210,7 +3214,10 @@ export default {
 	border-radius: 12px;
 	border: 1px solid rgba(0, 0, 0, 0.08);
 	overflow: hidden;
-	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+	transition:
+		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.2s ease,
+		border-color 0.2s ease;
 	cursor: pointer;
 	display: flex;
 	flex-direction: column;
@@ -3680,7 +3687,7 @@ export default {
 [data-theme] .sticky-header {
 	/* Minimize reflow during theme changes */
 	will-change: background-color, border-color, color;
-	transition: 
+	transition:
 		background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
 		border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
 		color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3715,7 +3722,7 @@ export default {
 	.dynamic-item-card:hover,
 	.card-item-card:hover {
 		/* Use GPU-accelerated transforms only */
-		transition: 
+		transition:
 			transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
 			box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	}

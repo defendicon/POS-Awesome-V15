@@ -14,7 +14,11 @@ def clear_custom_fields_and_properties():
             if filters:
                 for filter_condition in filters:
                     # Extract the list of names from the filter condition
-                    if len(filter_condition) >= 3 and filter_condition[0] == "name" and filter_condition[1] == "in":
+                    if (
+                        len(filter_condition) >= 3
+                        and filter_condition[0] == "name"
+                        and filter_condition[1] == "in"
+                    ):
                         names = filter_condition[2]
                         for name in names:
                             try:
@@ -22,13 +26,17 @@ def clear_custom_fields_and_properties():
                                 print("Deleted Custom Field: ", name)
                             except Exception as e:
                                 print(f"Error deleting Custom Field {name}: {e}")
-        
+
         if fixture.get("doctype") == "Property Setter":
             filters = fixture.get("filters")
             if filters:
                 for filter_condition in filters:
                     # Extract the list of names from the filter condition
-                    if len(filter_condition) >= 3 and filter_condition[0] == "name" and filter_condition[1] == "in":
+                    if (
+                        len(filter_condition) >= 3
+                        and filter_condition[0] == "name"
+                        and filter_condition[1] == "in"
+                    ):
                         names = filter_condition[2]
                         for name in names:
                             try:

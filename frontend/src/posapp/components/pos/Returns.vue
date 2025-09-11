@@ -288,8 +288,7 @@ export default {
 			},
 		],
 	}),
-	computed: {
-	},
+	computed: {},
 	watch: {
 		from_date() {
 			this.formatFromDate();

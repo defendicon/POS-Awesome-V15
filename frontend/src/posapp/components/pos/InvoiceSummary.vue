@@ -1,7 +1,7 @@
 <template>
 	<v-card
 		class="cards mb-0 mt-3 py-2 px-3 rounded-lg resizable pos-themed-card"
-		style="resize: vertical; overflow: auto;"
+		style="resize: vertical; overflow: auto"
 	>
 		<v-row dense>
 			<!-- Summary Info -->

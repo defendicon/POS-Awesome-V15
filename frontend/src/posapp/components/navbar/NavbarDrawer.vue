@@ -158,7 +158,7 @@ export default {
 	flex: 1;
 	font-weight: 500;
 	font-size: 1rem;
-	color: #0097A7;
+	color: #0097a7;
 	font-family: "Roboto", sans-serif;
 }
 
