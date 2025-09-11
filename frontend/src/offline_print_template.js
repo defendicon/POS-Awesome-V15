@@ -71,6 +71,8 @@ function defaultOfflineHTML(invoice, terms = "") {
 		? `<div class="terms"><strong>Terms & Conditions</strong><div>${terms}</div></div>`
 		: "";
 
+	const paidAmount = invoice.is_credit_sale ? 0 : (invoice.paid_amount ?? invoice.grand_total ?? 0);
+
 	return `<!DOCTYPE html>
 <html>
 <head>
@@ -124,7 +126,7 @@ function defaultOfflineHTML(invoice, terms = "") {
             </tr>
             <tr>
                 <td style="width:60%">Paid</td>
-                <td style="width:40%; text-align:right;">${invoice.paid_amount}</td>
+                <td style="width:40%; text-align:right;">${paidAmount}</td>
             </tr>
             ${changeRow}
         </tbody>
@@ -147,6 +149,8 @@ export default async function renderOfflineInvoiceHTML(invoice) {
 		terms: invoice.terms || terms,
 		terms_and_conditions: invoice.terms_and_conditions || terms,
 	};
+
+	doc.paid_amount = doc.is_credit_sale ? 0 : (doc.paid_amount ?? doc.grand_total ?? 0);
 	attachFormatter(doc);
 	(doc.items || []).forEach(attachFormatter);
 	(doc.taxes || []).forEach(attachFormatter);
