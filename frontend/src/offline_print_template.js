@@ -21,6 +21,28 @@ function attachFormatter(obj) {
 	};
 }
 
+function computePaidAmount(doc) {
+	if (!doc) return 0;
+
+	const paymentsTotal = (doc.payments || []).reduce(
+		(sum, p) => sum + Math.abs(parseFloat(p.amount) || 0),
+		0,
+	);
+
+	const creditSale =
+		doc.is_credit_sale === true ||
+		doc.is_credit_sale === 1 ||
+		doc.is_credit_sale === "1" ||
+		String(doc.is_credit_sale).toLowerCase() === "yes";
+
+	if (creditSale || paymentsTotal === 0) {
+		return 0;
+	}
+
+	const base = doc.paid_amount ?? doc.grand_total ?? 0;
+	return paymentsTotal || base;
+}
+
 function defaultOfflineHTML(invoice, terms = "") {
 	if (!invoice) return "";
 
@@ -71,7 +93,7 @@ function defaultOfflineHTML(invoice, terms = "") {
 		? `<div class="terms"><strong>Terms & Conditions</strong><div>${terms}</div></div>`
 		: "";
 
-	const paidAmount = invoice.is_credit_sale ? 0 : (invoice.paid_amount ?? invoice.grand_total ?? 0);
+	const paidAmount = computePaidAmount(invoice);
 
 	return `<!DOCTYPE html>
 <html>
@@ -150,7 +172,7 @@ export default async function renderOfflineInvoiceHTML(invoice) {
 		terms_and_conditions: invoice.terms_and_conditions || terms,
 	};
 
-	doc.paid_amount = doc.is_credit_sale ? 0 : (doc.paid_amount ?? doc.grand_total ?? 0);
+	doc.paid_amount = computePaidAmount(doc);
 	attachFormatter(doc);
 	(doc.items || []).forEach(attachFormatter);
 	(doc.taxes || []).forEach(attachFormatter);
