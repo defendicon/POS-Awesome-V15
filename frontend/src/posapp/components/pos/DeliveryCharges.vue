@@ -40,7 +40,7 @@
 				class="pos-themed-input sleek-field"
 				hide-details
 				:model-value="formatCurrency(delivery_charges_rate)"
-				:prefix="currencySymbol(pos_profile.currency)"
+				:prefix="currencySymbol()"
 				disabled
 			></v-text-field>
 		</v-col>
