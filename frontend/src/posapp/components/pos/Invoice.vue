@@ -371,6 +371,7 @@ export default {
 			available_stock_cache: {},
 			brand_cache: {},
 			delivery_charges: [], // List of delivery charges
+			base_delivery_charges_rate: 0, // Delivery charge in company currency
 			delivery_charges_rate: 0, // Selected delivery charge rate
 			selected_delivery_charge: "", // Selected delivery charge object
 			invoice_posting_date: false, // Posting date dialog
@@ -617,10 +618,12 @@ export default {
 			var vm = this;
 			if (!this.pos_profile || !this.customer || !this.pos_profile.posa_use_delivery_charges) {
 				this.delivery_charges = [];
+				this.base_delivery_charges_rate = 0;
 				this.delivery_charges_rate = 0;
 				this.selected_delivery_charge = "";
 				return;
 			}
+			this.base_delivery_charges_rate = 0;
 			this.delivery_charges_rate = 0;
 			this.selected_delivery_charge = "";
 			try {
@@ -649,7 +652,18 @@ export default {
 		},
 		update_delivery_charges() {
 			if (this.selected_delivery_charge) {
-				this.delivery_charges_rate = this.selected_delivery_charge.rate;
+				this.base_delivery_charges_rate = this.selected_delivery_charge.rate;
+			} else {
+				this.base_delivery_charges_rate = 0;
+			}
+			this.update_delivery_charges_rate();
+		},
+		update_delivery_charges_rate() {
+			if (this.base_delivery_charges_rate) {
+				this.delivery_charges_rate = this.flt(
+					this.base_delivery_charges_rate / (this.conversion_rate || 1),
+					this.currency_precision,
+				);
 			} else {
 				this.delivery_charges_rate = 0;
 			}
@@ -1070,6 +1084,7 @@ export default {
 			});
 
 			this.update_item_rates();
+			this.update_delivery_charges_rate();
 		},
 
 		// Add new rounding function

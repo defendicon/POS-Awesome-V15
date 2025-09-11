@@ -196,6 +196,11 @@ def calc_delivery_charges(doc):
         charges_profile = next((i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None)
         if charges_profile:
             doc.posa_delivery_charges_rate = charges_profile.rate
+        conversion_rate = doc.conversion_rate or 1
+        doc.posa_delivery_charges_rate = flt(
+            doc.posa_delivery_charges_rate / conversion_rate,
+            doc.precision("posa_delivery_charges_rate"),
+        )
 
     if old_doc and old_doc.posa_delivery_charges:
         old_charges = next(
