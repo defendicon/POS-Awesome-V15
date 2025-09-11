@@ -4,14 +4,14 @@
 		flat
 		height="56"
 		:class="[
-			'navbar-enhanced elevation-2 px-2 pb-1 pos-themed-card pos-theme-immediate',
+			'pos-navbar-enhanced elevation-2 px-2 pb-1 pos-themed-card pos-theme-immediate',
 			rtlClasses,
 			isRtl ? 'rtl-app-bar' : 'ltr-app-bar',
 		]"
 		:style="[rtlStyles, { flexDirection: isRtl ? 'row-reverse' : 'row' }]"
 	>
 		<!-- Brand Section (left in LTR, right in RTL) -->
-		<div :class="['navbar-brand-section', isRtl ? 'rtl-brand-section' : 'ltr-brand-section']">
+		<div :class="['pos-navbar-brand-section', isRtl ? 'rtl-brand-section' : 'ltr-brand-section']">
 			<v-app-bar-nav-icon
 				ref="navIcon"
 				@click="$emit('nav-click')"
@@ -22,26 +22,26 @@
 				:src="posLogo"
 				alt="POS Awesome"
 				max-width="32"
-				:class="['navbar-logo', isRtl ? 'rtl-logo' : 'ltr-logo']"
+				:class="['pos-navbar-logo', isRtl ? 'rtl-logo' : 'ltr-logo']"
 			/>
 
 			<v-toolbar-title
 				@click="$emit('go-desk')"
 				:class="[
-					'text-h6 font-weight-bold text-primary navbar-title',
+					'text-h6 font-weight-bold text-primary pos-navbar-title',
 					isRtl ? 'rtl-title' : 'ltr-title',
 				]"
 				style="cursor: pointer; text-decoration: none"
 			>
-				<span class="font-weight-light navbar-title-light">{{ __("POS") }}</span
-				><span class="navbar-title-bold">{{ __("Awesome") }}</span>
+				<span class="font-weight-light pos-navbar-title-light">{{ __("POS") }}</span
+				><span class="pos-navbar-title-bold">{{ __("Awesome") }}</span>
 			</v-toolbar-title>
 		</div>
 
 		<v-spacer />
 
 		<!-- Actions Section (right in LTR, left in RTL) -->
-		<div :class="['navbar-actions-section', isRtl ? 'rtl-actions-section' : 'ltr-actions-section']">
+		<div :class="['pos-navbar-actions-section', isRtl ? 'rtl-actions-section' : 'ltr-actions-section']">
 			<!-- Enhanced connectivity status indicator - Always visible -->
 			<slot name="status-indicator"></slot>
 
@@ -181,7 +181,7 @@ export default {
 
 <style scoped>
 /* Enhanced Navbar Styling */
-.navbar-enhanced {
+.pos-navbar-enhanced {
 	background-image: linear-gradient(
 		135deg,
 		var(--pos-bg-primary) 0%,
@@ -206,7 +206,7 @@ export default {
 }
 
 /* Brand Section Styling */
-.navbar-brand-section {
+.pos-navbar-brand-section {
 	display: flex;
 	align-items: center;
 	gap: 12px;
@@ -226,7 +226,7 @@ export default {
 }
 
 /* Actions Section Styling */
-.navbar-actions-section {
+.pos-navbar-actions-section {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -314,12 +314,12 @@ export default {
 	order: 0 !important;
 }
 
-.navbar-enhanced:hover {
+.pos-navbar-enhanced:hover {
 	box-shadow: 0 4px 20px var(--pos-shadow) !important;
 }
 
 /* Logo Styling */
-.navbar-logo {
+.pos-navbar-logo {
 	transition: transform 0.3s ease;
 }
 
@@ -334,12 +334,12 @@ export default {
 	order: 0;
 }
 
-.navbar-logo:hover {
+.pos-navbar-logo:hover {
 	transform: scale(1.05);
 }
 
 /* Brand Title Styling */
-.navbar-title {
+.pos-navbar-title {
 	text-decoration: none !important;
 	border-bottom: none !important;
 	transition: color 0.3s ease;
@@ -353,7 +353,7 @@ export default {
 	color: #1976d2 !important;
 }
 
-.navbar-title:hover {
+.pos-navbar-title:hover {
 	text-decoration: none !important;
 	opacity: 0.8;
 }
@@ -373,7 +373,7 @@ export default {
 }
 
 /* Title Text Styling */
-.navbar-title-light {
+.pos-navbar-title-light {
 	font-weight: 300 !important;
 	letter-spacing: 0.5px;
 	margin-right: 2px;
@@ -381,7 +381,7 @@ export default {
 	white-space: nowrap;
 }
 
-.navbar-title-bold {
+.pos-navbar-title-bold {
 	font-weight: 700 !important;
 	letter-spacing: 0.25px;
 	display: inline-block;
@@ -389,12 +389,12 @@ export default {
 }
 
 /* RTL Title Spacing */
-.rtl-title .navbar-title-light {
+.rtl-title .pos-navbar-title-light {
 	margin-left: 2px;
 	margin-right: 0;
 }
 
-.rtl-title .navbar-title-bold {
+.rtl-title .pos-navbar-title-bold {
 	margin-right: 2px;
 	margin-left: 0;
 }
@@ -548,7 +548,7 @@ export default {
 }
 
 /* Elite styling for navbar text and icons */
-.navbar-enhanced .pos-text-primary {
+.pos-navbar-enhanced .pos-text-primary {
 	color: #1976d2 !important;
 }
 
@@ -561,14 +561,14 @@ export default {
 }
 
 /* Navbar icons with refined styling */
-.navbar-enhanced .v-icon.pos-text-primary,
-.navbar-enhanced .mdi-menu-down,
-.navbar-enhanced .v-icon--end.pos-text-primary {
+.pos-navbar-enhanced .v-icon.pos-text-primary,
+.pos-navbar-enhanced .mdi-menu-down,
+.pos-navbar-enhanced .v-icon--end.pos-text-primary {
 	color: #1976d2 !important;
 	transition: color 0.25s ease;
 }
 
-.navbar-enhanced .v-icon.pos-text-primary:hover {
+.pos-navbar-enhanced .v-icon.pos-text-primary:hover {
 	color: #1565c0 !important;
 }
 
@@ -729,24 +729,24 @@ export default {
 	}
 
 	/* Mobile title adjustments */
-	.navbar-title {
+	.pos-navbar-title {
 		font-size: 1.1rem !important;
 		min-width: max-content !important;
 		flex-shrink: 0 !important;
 	}
 
-	.navbar-title-light {
+	.pos-navbar-title-light {
 		font-weight: 300 !important;
 		letter-spacing: 0.3px;
 		margin-right: 1px;
 	}
 
-	.navbar-title-bold {
+	.pos-navbar-title-bold {
 		font-weight: 600 !important;
 		letter-spacing: 0.2px;
 	}
 
-	.navbar-brand-section {
+	.pos-navbar-brand-section {
 		flex-shrink: 0 !important;
 		min-width: auto !important;
 		gap: 8px;

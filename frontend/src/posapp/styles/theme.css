@@ -220,105 +220,138 @@
 	}
 }
 
-/* Utility Classes for Theme Colors */
-.pos-bg-primary {
+/* Utility Classes for Theme Colors - Scoped to POSApp */
+.posapp .pos-bg-primary {
 	background-color: var(--pos-bg-primary) !important;
 }
-.pos-bg-secondary {
+.posapp .pos-bg-secondary {
 	background-color: var(--pos-bg-secondary) !important;
 }
-.pos-bg-surface {
+.posapp .pos-bg-surface {
 	background-color: var(--pos-surface) !important;
 }
-.pos-bg-card {
+.posapp .pos-bg-card {
 	background-color: var(--pos-card-bg) !important;
 }
 
-.pos-text-primary {
+.posapp .pos-text-primary {
 	color: var(--pos-text-primary) !important;
 }
-.pos-text-secondary {
+.posapp .pos-text-secondary {
 	color: var(--pos-text-secondary) !important;
 }
 
-.pos-border {
+.posapp .pos-border {
 	border-color: var(--pos-border) !important;
 }
-.pos-border-light {
+.posapp .pos-border-light {
 	border-color: var(--pos-border-light) !important;
 }
 
-/* Theme-aware component base styles */
-.pos-themed-card {
+/* Theme-aware component base styles - Scoped to POSApp */
+.posapp .pos-themed-card {
 	background-color: var(--pos-card-bg);
 	color: var(--pos-text-primary);
 	border-color: var(--pos-border);
 	box-shadow: 0 2px 8px var(--pos-shadow);
 }
 
-.pos-themed-input {
+.posapp .pos-themed-input {
 	background-color: var(--pos-input-bg);
 	color: var(--pos-text-primary);
 	border-color: var(--pos-border);
 }
 
-.pos-themed-button {
+/* Fix for Frappe navbar collapse elements being hidden by POSAwesome CSS */
+/* This overrides the problematic .collapse { visibility: collapse; } rule */
+.navbar-collapse,
+.navbar-collapse.collapsing,
+.navbar-collapse.show,
+.navbar-collapse.collapse.show {
+	visibility: visible !important;
+}
+
+/* Ensure Bootstrap collapse behavior works correctly */
+.collapse:not(.show) {
+	display: none;
+}
+
+.collapsing {
+	height: 0;
+	overflow: hidden;
+	transition: height 0.35s ease;
+}
+
+/* Specific fix for Frappe's awesome bar and navbar elements */
+#navbar-breadcrumbs,
+.navbar-right,
+.awesome-bar,
+.navbar-user-image {
+	visibility: visible !important;
+	display: block !important;
+}
+
+.posapp .pos-themed-button {
 	background-color: var(--pos-button-bg);
 	color: var(--pos-text-primary);
 	border-color: var(--pos-border);
 }
 
-.pos-themed-button:hover {
+.posapp .pos-themed-button:hover {
 	background-color: var(--pos-hover-bg);
 }
 
-.pos-themed-menu {
+.posapp .pos-themed-menu {
 	background-color: var(--pos-menu-bg);
 	color: var(--pos-text-primary);
 	border-color: var(--pos-border);
 }
 
-/* Optimized fast theme transitions - minimal overlays */
-*,
-*::before,
-*::after {
+/* Optimized fast theme transitions - scoped to POSApp only */
+.posapp .pos-themed-card *,
+.posapp .pos-themed-card *::before,
+.posapp .pos-themed-card *::after,
+.posapp .pos-themed-input *,
+.posapp .pos-themed-button *,
+.posapp .pos-text-primary,
+.posapp .pos-text-secondary {
 	transition-property: background-color, color, border-color;
 	transition-duration: 0.05s;
 	transition-timing-function: ease-out;
 }
 
-/* Ultra-fast immediate update for critical elements */
-.pos-themed-card,
-.pos-themed-button,
-.pos-themed-input,
-.pos-text-primary,
-.pos-text-secondary,
-nav,
-.v-app-bar,
-.v-btn,
-.v-icon,
-.v-chip {
+/* Ultra-fast immediate update for critical elements - Scoped to POSApp */
+.posapp .pos-themed-card,
+.posapp .pos-themed-button,
+.posapp .pos-themed-input,
+.posapp .pos-text-primary,
+.posapp .pos-text-secondary,
+.posapp nav.pos-themed-card,
+.posapp .v-app-bar,
+.posapp .v-btn,
+.posapp .v-icon,
+.posapp .v-chip {
 	transition:
 		background-color 0.02s linear,
 		color 0.02s linear,
 		border-color 0.02s linear !important;
 }
 
-/* Prevent animation on theme change for specific elements that shouldn't animate */
-.pos-no-theme-transition,
-.pos-no-theme-transition * {
+/* Prevent animation on theme change for specific elements that shouldn't animate - Scoped to POSApp */
+.posapp .pos-no-theme-transition,
+.posapp .pos-no-theme-transition * {
 	transition: none !important;
 }
 
-/* Immediate theme update class for critical UI elements */
-.pos-theme-immediate {
+/* Immediate theme update class for critical UI elements - Scoped to POSApp */
+.posapp .pos-theme-immediate {
 	transition:
 		background-color 0.01s linear,
 		color 0.01s linear,
 		border-color 0.01s linear !important;
 }
 
-.pos-theme-immediate * {
+.posapp .pos-theme-immediate * {
 	transition:
 		background-color 0.01s linear,
 		color 0.01s linear,

@@ -373,14 +373,14 @@ export default {
 </script>
 
 <style scoped>
-/* Main navigation container styles */
-nav {
+/* Main navigation container styles - scoped to POSApp */
+.posapp nav {
 	position: relative;
 	z-index: 1000;
 }
 
-/* Snackbar positioning */
-:deep(.v-snackbar) {
+/* Snackbar positioning - scoped to POSApp */
+.posapp :deep(.v-snackbar) {
 	z-index: 9999;
 }
 </style>
