@@ -86,7 +86,7 @@ def check_opening_shift(user):
         "POS Opening Shift",
         filters={
             "user": user,
-            "pos_closing_shift": ["in", ["", None]],
+            "pos_closing_shift": ["is", "not set"],
             "docstatus": 1,
             "status": "Open",
         },
