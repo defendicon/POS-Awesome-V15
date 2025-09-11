@@ -777,6 +777,9 @@ export default {
 		displayCurrency() {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
 		},
+		blockSaleBeyondAvailableQty() {
+			return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
+		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {
 			let total = 0;
@@ -1232,8 +1235,7 @@ export default {
 							)
 							.join("\n");
 						const blocking =
-							!this.stock_settings.allow_negative_stock ||
-							this.pos_profile.posa_block_sale_beyond_available_qty;
+							!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
 						this.eventBus.emit("show_message", {
 							title: blocking
 								? __("Insufficient stock:\n{0}", [msg])

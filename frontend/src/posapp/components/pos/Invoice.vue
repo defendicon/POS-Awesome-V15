@@ -681,8 +681,7 @@ export default {
 			// Enforce available stock limits
 			if (item.max_qty !== undefined && this.flt(item[field_name]) > this.flt(item.max_qty)) {
 				const blockSale =
-					!this.stock_settings.allow_negative_stock ||
-					this.pos_profile.posa_block_sale_beyond_available_qty;
+					!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
 				if (blockSale) {
 					item[field_name] = item.max_qty;
 					parsedValue = item.max_qty;
@@ -1112,8 +1111,7 @@ export default {
 			} else {
 				const proposed = item.qty + 1;
 				const blockSale =
-					!this.stock_settings.allow_negative_stock ||
-					this.pos_profile.posa_block_sale_beyond_available_qty;
+					!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
 				if (blockSale && item.max_qty !== undefined && proposed > item.max_qty) {
 					item.qty = item.max_qty;
 					this.calc_stock_qty(item, item.qty);
