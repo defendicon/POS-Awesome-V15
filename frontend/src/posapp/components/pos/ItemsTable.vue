@@ -171,20 +171,6 @@
 					{{ item.posa_offer_applied ? __("Remove Offer") : __("Apply Offer") }}
 				</v-btn>
 			</template>
-
-			<!-- Actions column -->
-			<template v-slot:item.actions="{ item }">
-				<v-btn
-					:disabled="!!item.posa_is_replace"
-					size="small"
-					variant="flat"
-					class="pos-table__delete-btn"
-					@click.stop="removeItem(item)"
-				>
-					<v-icon size="small">mdi-delete-outline</v-icon>
-				</v-btn>
-			</template>
-
 			<!-- Actions column -->
 			<template v-slot:item.actions="{ item }">
 				<v-btn
