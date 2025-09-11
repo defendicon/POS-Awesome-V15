@@ -21,91 +21,142 @@ function attachFormatter(obj) {
 	};
 }
 
+function computePaidAmount(doc) {
+	if (!doc) return 0;
+
+	const paymentsTotal = (doc.payments || []).reduce(
+		(sum, p) => sum + Math.abs(parseFloat(p.amount) || 0),
+		0,
+	);
+
+	const creditSale =
+		doc.is_credit_sale === true ||
+		doc.is_credit_sale === 1 ||
+		doc.is_credit_sale === "1" ||
+		String(doc.is_credit_sale).toLowerCase() === "yes";
+
+	if (creditSale || paymentsTotal === 0) {
+		return 0;
+	}
+
+	const base = doc.paid_amount ?? doc.grand_total ?? 0;
+	return paymentsTotal || base;
+}
+
 function defaultOfflineHTML(invoice, terms = "") {
 	if (!invoice) return "";
 
 	const itemsRows = (invoice.items || [])
 		.map((it) => {
-			const sn = it.serial_no ? `<br><b>SR.No:</b><br>${it.serial_no.replace(/\n/g, ", ")}` : "";
+			const sn = it.serial_no
+				? `<div class="serial">SR.No: ${it.serial_no.replace(/\n/g, ", ")}</div>`
+				: "";
 			const marker =
 				invoice.posa_show_custom_name_marker_on_print && it.name_overridden ? " (custom)" : "";
 			return `<tr>
-        <td>${it.item_code}${
-			it.item_name && it.item_name !== it.item_code ? `<br>${it.item_name}${marker}` : ""
-		}${sn}</td>
-        <td style="text-align:right">${it.qty} ${it.uom || ""}<br>@ ${it.rate}</td>
-        <td style="text-align:right">${it.amount}</td>
-      </tr>`;
+                <td>${it.item_code}${
+					it.item_name && it.item_name !== it.item_code
+						? `<div class="item-name">${it.item_name}${marker}</div>`
+						: ""
+				}${sn}</td>
+                <td class="qty">${it.qty} ${it.uom || ""}</td>
+                <td class="rate">${it.rate}</td>
+                <td class="amount">${it.amount}</td>
+            </tr>`;
 		})
 		.join("");
 
 	const taxesRows = (invoice.taxes || [])
 		.map(
 			(row) => `<tr>
-      <td class="text-right" style="width:70%">${row.description}@${row.rate}%</td>
-      <td class="text-right">${row.tax_amount}</td>
-    </tr>`,
+                <td style="width:60%">${row.description}@${row.rate}%</td>
+                <td style="width:40%; text-align:right;">${row.tax_amount}</td>
+            </tr>`,
 		)
 		.join("");
 
 	const discountRow = invoice.discount_amount
 		? `<tr>
-      <td class="text-right" style="width:75%">Discount</td>
-      <td class="text-right">${invoice.discount_amount}</td>
-    </tr>`
+                <td style="width:60%">Discount</td>
+                <td style="width:40%; text-align:right;">${invoice.discount_amount}</td>
+            </tr>`
 		: "";
 
 	const changeRow = invoice.change_amount
 		? `<tr>
-      <td class="text-right" style="width:75%">Change Amount</td>
-      <td class="text-right">${invoice.change_amount}</td>
-    </tr>`
+                <td style="width:60%">Change Amount</td>
+                <td style="width:40%; text-align:right;">${invoice.change_amount}</td>
+            </tr>`
 		: "";
 
-	const termsSection = terms ? `<div style="margin-top:5px;">${terms}</div>` : "";
+	const termsSection = terms
+		? `<div class="terms"><strong>Terms & Conditions</strong><div>${terms}</div></div>`
+		: "";
+
+	const paidAmount = computePaidAmount(invoice);
 
 	return `<!DOCTYPE html>
-  <html>
-  <head>
+<html>
+<head>
     <meta charset="utf-8">
     <title>Invoice ${invoice.name || ""}</title>
     <style>
-      table, tr, td, div, p { line-height:120%; vertical-align:middle; font-size:10px; }
-      .print-format { width:3.5in; padding:0.1in; min-height:7in; }
-      .text-right { text-align:right; }
+        body { font-family: Arial, sans-serif; width: 80mm; margin: 0 auto; padding: 5mm; }
+        .header { text-align: center; }
+        .header h2 { margin: 0; }
+        .info { margin-bottom: 4px; }
+        .info div { font-size: 12px; line-height: 1.2; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #ccc; }
+        th { text-align: left; }
+        td.qty, td.rate, td.amount { text-align: right; }
+        table.totals td { border-bottom: none; }
+        .terms { margin-top: 8px; font-size: 10px; }
+        .footer { text-align: center; margin-top: 8px; font-size: 11px; }
     </style>
-  </head>
-  <body class="print-format">
-    <div style="text-align:center; margin-bottom:0"><h5 style="margin:0; font-size:11px;">${invoice.is_duplicate ? "Duplicate" : "Original"}</h5></div>
-    <p style="margin-top:0">
-      <b>Invoice Status:</b> ${invoice.status || ""}<br>
-      <b>Receipt No:</b> ${invoice.name || ""}<br>
-      <b>Customer:</b> ${invoice.customer_name || invoice.customer || ""}<br>
-      <b>Mobile:</b> ${invoice.contact_mobile || ""}<br>
-      <b>Date:</b> ${invoice.posting_date || ""}
-      <b>Time:</b> ${invoice.posting_time || ""}<br>
-    </p>
-    <p style="margin-top:3px;"><b>Additional Note:</b> <strong>${invoice.posa_notes || ""}</strong></p>
-    <table cellpadding="0" cellspacing="0" style="width:100%">
-      <thead>
-        <tr><th width="50%"><b>Item</b></th><th width="25%" class="text-right"><b>Qty</b></th><th width="25%" class="text-right"><b>Amount</b></th></tr>
-      </thead>
-      <tbody>${itemsRows}</tbody>
+</head>
+<body>
+    <div class="header">
+        <h2>${invoice.company || "Invoice"}</h2>
+        <p><strong>${invoice.is_duplicate ? "Duplicate" : "Original"}</strong></p>
+    </div>
+    <div class="info">
+        <div><strong>Invoice:</strong> ${invoice.name || ""}</div>
+        <div><strong>Date:</strong> ${invoice.posting_date || ""} ${invoice.posting_time || ""}</div>
+        <div><strong>Customer:</strong> ${invoice.customer_name || invoice.customer || ""}</div>
+        <div><strong>Mobile:</strong> ${invoice.contact_mobile || ""}</div>
+        <div><strong>Additional Note:</strong> ${invoice.posa_notes || ""}</div>
+    </div>
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width:40%">Item</th>
+                <th style="width:20%; text-align:right;">Qty</th>
+                <th style="width:20%; text-align:right;">Rate</th>
+                <th style="width:20%; text-align:right;">Amt</th>
+            </tr>
+        </thead>
+        <tbody>${itemsRows}</tbody>
     </table>
-    <table cellpadding="0" cellspacing="0" style="width:100%">
-      <tbody>
-        <tr><td class="text-right" style="width:70%"><b>Total</b></td><td class="text-right">${invoice.total}</td></tr>
-        ${taxesRows}
-        ${discountRow}
-        <tr><td class="text-right" style="width:70%"><b>Grand Total</b></td><td class="text-right">${invoice.grand_total}</td></tr>
-        <tr><td class="text-right" style="width:75%"><b>Paid Amount</b></td><td class="text-right">${invoice.paid_amount}</td></tr>
-        ${changeRow}
-      </tbody>
+    <table class="totals">
+        <tbody>
+            ${taxesRows}
+            ${discountRow}
+            <tr>
+                <td style="width:60%"><strong>Total</strong></td>
+                <td style="width:40%; text-align:right;">${invoice.grand_total}</td>
+            </tr>
+            <tr>
+                <td style="width:60%">Paid</td>
+                <td style="width:40%; text-align:right;">${paidAmount}</td>
+            </tr>
+            ${changeRow}
+        </tbody>
     </table>
     ${termsSection}
-    <p class="text-center" style="margin-top:3px;">Thank you, please visit again.</p>
-  </body>
-  </html>`;
+    <div class="footer">Thank you, please visit again.</div>
+</body>
+</html>`;
 }
 
 export default async function renderOfflineInvoiceHTML(invoice) {
@@ -120,6 +171,8 @@ export default async function renderOfflineInvoiceHTML(invoice) {
 		terms: invoice.terms || terms,
 		terms_and_conditions: invoice.terms_and_conditions || terms,
 	};
+
+	doc.paid_amount = computePaidAmount(doc);
 	attachFormatter(doc);
 	(doc.items || []).forEach(attachFormatter);
 	(doc.taxes || []).forEach(attachFormatter);
