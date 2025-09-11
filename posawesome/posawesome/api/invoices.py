@@ -117,6 +117,9 @@ def _should_block(pos_profile):
 
 
 def _validate_stock_on_invoice(invoice_doc):
+    if invoice_doc.doctype == "Sales Invoice" and not cint(getattr(invoice_doc, "update_stock", 0)):
+        frappe.logger().debug("Skipping stock validation for Sales Invoice without stock update")
+        return
     items_to_check = [d.as_dict() for d in invoice_doc.items if d.get("is_stock_item")]
     if hasattr(invoice_doc, "packed_items"):
         items_to_check.extend([d.as_dict() for d in invoice_doc.packed_items])

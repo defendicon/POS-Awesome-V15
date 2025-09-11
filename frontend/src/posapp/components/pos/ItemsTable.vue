@@ -82,8 +82,7 @@
 					<v-btn
 						:disabled="
 							!!item.posa_is_replace ||
-							((!stock_settings.allow_negative_stock ||
-								pos_profile.posa_block_sale_beyond_available_qty) &&
+							((!stock_settings.allow_negative_stock || blockSaleBeyondAvailableQty) &&
 								item.max_qty !== undefined &&
 								item.qty >= item.max_qty)
 						"
@@ -651,6 +650,7 @@
 </template>
 
 <script>
+/* global process */
 import _ from "lodash";
 export default {
 	name: "ItemsTable",
@@ -739,6 +739,10 @@ export default {
 				[`expanded-${this.breakpoint}`]: true,
 				"compact-expanded": this.containerWidth < 600,
 			};
+		},
+
+		blockSaleBeyondAvailableQty() {
+			return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
 		},
 
 		// Responsive headers based on container size
