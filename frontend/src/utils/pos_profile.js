@@ -5,21 +5,10 @@ async function cachePrintTemplateAndTerms(profile) {
 	if (!profile || typeof frappe === "undefined" || !navigator.onLine) return;
 
 	try {
-		if (profile.print_format) {
-			const pf = await frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					doctype: "Print Format",
-					fieldname: "html",
-					filters: { name: profile.print_format },
-				},
-			});
-			if (pf.message && pf.message.html) {
-				setPrintTemplate(pf.message.html);
-			}
-		}
+		// always use built-in offline template instead of cached print formats
+		setPrintTemplate("");
 	} catch (e) {
-		console.error("Failed to fetch print format", e);
+		console.error("Failed to reset print template", e);
 	}
 
 	try {

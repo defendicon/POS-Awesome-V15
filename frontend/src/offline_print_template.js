@@ -67,7 +67,9 @@ function defaultOfflineHTML(invoice, terms = "") {
             </tr>`
 		: "";
 
-	const termsSection = terms ? `<div class="terms">${terms}</div>` : "";
+	const termsSection = terms
+		? `<div class="terms"><strong>Terms & Conditions</strong><div>${terms}</div></div>`
+		: "";
 
 	return `<!DOCTYPE html>
 <html>
@@ -75,10 +77,11 @@ function defaultOfflineHTML(invoice, terms = "") {
     <meta charset="utf-8">
     <title>Invoice ${invoice.name || ""}</title>
     <style>
-        body { font-family: Arial, sans-serif; width: 80mm; margin: 0; padding: 5mm; }
+        body { font-family: Arial, sans-serif; width: 80mm; margin: 0 auto; padding: 5mm; }
         .header { text-align: center; }
         .header h2 { margin: 0; }
-        .info div { font-size: 12px; }
+        .info { margin-bottom: 4px; }
+        .info div { font-size: 12px; line-height: 1.2; }
         table { width: 100%; border-collapse: collapse; }
         th, td { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #ccc; }
         th { text-align: left; }
@@ -90,7 +93,7 @@ function defaultOfflineHTML(invoice, terms = "") {
 </head>
 <body>
     <div class="header">
-        <h2>${invoice.company || ""}</h2>
+        <h2>${invoice.company || "Invoice"}</h2>
         <p><strong>${invoice.is_duplicate ? "Duplicate" : "Original"}</strong></p>
     </div>
     <div class="info">
