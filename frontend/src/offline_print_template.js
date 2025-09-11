@@ -129,40 +129,38 @@ export default async function renderOfflineInvoiceHTML(invoice) {
 		return defaultOfflineHTML(doc, doc.terms_and_conditions);
 	}
 
-        try {
-                const env = nunjucks.configure({ autoescape: false });
-                env.addFilter("format_currency", (value, currency) => {
-                        const number = typeof value === "number" ? value : parseFloat(value);
-                        if (Number.isNaN(number)) return value;
-                        try {
-                                return new Intl.NumberFormat(undefined, {
-                                        style: currency ? "currency" : "decimal",
-                                        currency: currency || undefined,
-                                }).format(number);
-                        } catch {
-                                return currency ? `${currency} ${number}` : String(number);
-                        }
-                });
-                env.addFilter("currency", (value, currency) =>
-                        env.filters.format_currency(value, currency),
-                );
-                env.getFilter = function (name) {
-                        return this.filters[name] || ((v) => v);
-                };
+	try {
+		const env = nunjucks.configure({ autoescape: false });
+		env.addFilter("format_currency", (value, currency) => {
+			const number = typeof value === "number" ? value : parseFloat(value);
+			if (Number.isNaN(number)) return value;
+			try {
+				return new Intl.NumberFormat(undefined, {
+					style: currency ? "currency" : "decimal",
+					currency: currency || undefined,
+				}).format(number);
+			} catch {
+				return currency ? `${currency} ${number}` : String(number);
+			}
+		});
+		env.addFilter("currency", (value, currency) => env.filters.format_currency(value, currency));
+		env.getFilter = function (name) {
+			return this.filters[name] || ((v) => v);
+		};
 
-                const context = {
-                        doc,
-                        terms: doc.terms,
-                        terms_and_conditions: doc.terms_and_conditions,
-                        _: frappe?._ ? frappe._ : (t) => t,
-                        frappe: {
-                                db: { get_value: () => "", sql: () => [] },
-                                get_list: () => [],
-                        },
-                };
-                return env.renderString(template, context);
-        } catch (e) {
-                console.error("Failed to render offline invoice", e);
-                return defaultOfflineHTML(doc, doc.terms_and_conditions);
-        }
+		const context = {
+			doc,
+			terms: doc.terms,
+			terms_and_conditions: doc.terms_and_conditions,
+			_: frappe?._ ? frappe._ : (t) => t,
+			frappe: {
+				db: { get_value: () => "", sql: () => [] },
+				get_list: () => [],
+			},
+		};
+		return env.renderString(template, context);
+	} catch (e) {
+		console.error("Failed to render offline invoice", e);
+		return defaultOfflineHTML(doc, doc.terms_and_conditions);
+	}
 }
