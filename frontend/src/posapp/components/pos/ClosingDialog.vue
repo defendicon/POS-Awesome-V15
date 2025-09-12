@@ -313,43 +313,22 @@ export default {
 	transform: none;
 }
 
-/* Dark theme overrides */
-:deep([data-theme="dark"]) .closing-dialog-card,
-:deep(.v-theme--dark) .closing-dialog-card,
-::v-deep([data-theme="dark"]) .closing-dialog-card,
-::v-deep(.v-theme--dark) .closing-dialog-card {
-	background: #1e1e1e !important;
+/* Theme-aware dialog styling */
+.closing-dialog-card,
+.closing-header,
+.white-background,
+.white-table,
+.dialog-actions-container {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .closing-header,
-:deep(.v-theme--dark) .closing-header,
-::v-deep([data-theme="dark"]) .closing-header,
-::v-deep(.v-theme--dark) .closing-header {
-	background: #1e1e1e !important;
-	color: #fff !important;
-	border-bottom: 1px solid #373737;
+.closing-header {
+	border-bottom: 1px solid var(--pos-border);
 }
 
-:deep([data-theme="dark"]) .white-background,
-:deep(.v-theme--dark) .white-background,
-::v-deep([data-theme="dark"]) .white-background,
-::v-deep(.v-theme--dark) .white-background {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .white-table,
-:deep(.v-theme--dark) .white-table,
-::v-deep([data-theme="dark"]) .white-table,
-::v-deep(.v-theme--dark) .white-table {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .dialog-actions-container,
-:deep(.v-theme--dark) .dialog-actions-container,
-::v-deep([data-theme="dark"]) .dialog-actions-container,
-::v-deep(.v-theme--dark) .dialog-actions-container {
-	background: #1e1e1e !important;
-	border-top: 1px solid #373737;
+.dialog-actions-container {
+	border-top: 1px solid var(--pos-border);
 }
 
 /* And the responsive section: */

@@ -188,19 +188,16 @@ export default {
 	border-right: 3px solid #1976d2;
 }
 
-/* Dark Theme Adjustments */
-:deep([data-theme="dark"]) .drawer-custom,
-:deep(.v-theme--dark) .drawer-custom {
-	background-color: var(--surface-primary, #1e1e1e) !important;
-	color: var(--text-primary, #ffffff) !important;
+/* Theme-aware drawer styling */
+.drawer-custom {
+	background-color: var(--pos-navbar-bg) !important;
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .drawer-header,
-:deep([data-theme="dark"]) .drawer-header-mini,
-:deep(.v-theme--dark) .drawer-header,
-:deep(.v-theme--dark) .drawer-header-mini {
-	background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+.drawer-header,
+.drawer-header-mini {
+	background: var(--pos-navbar-bg) !important;
+	border-bottom: 1px solid var(--pos-border);
 }
 
 :deep([data-theme="dark"]) .drawer-item-title,
@@ -269,9 +266,8 @@ export default {
 }
 
 @media (max-width: 1024px) {
-	:deep([data-theme="dark"]) .drawer-custom.drawer-visible,
-	:deep(.v-theme--dark) .drawer-custom.drawer-visible {
-		background-color: var(--surface-primary, #1e1e1e) !important;
+	.drawer-custom.drawer-visible {
+		background-color: var(--pos-navbar-bg) !important;
 	}
 }
 </style>

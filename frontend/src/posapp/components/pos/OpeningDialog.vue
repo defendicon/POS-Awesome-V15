@@ -664,35 +664,20 @@ export default {
 	transform: none;
 }
 
-/* Dark theme overrides */
-:deep([data-theme="dark"]) .opening-dialog-card,
-:deep(.v-theme--dark) .opening-dialog-card,
-::v-deep([data-theme="dark"]) .opening-dialog-card,
-::v-deep(.v-theme--dark) .opening-dialog-card {
-	background: #1e1e1e !important;
+/* Theme-aware dialog styling */
+.opening-dialog-card,
+.opening-dialog-header,
+.opening-dialog-content,
+.dialog-actions-container {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .opening-dialog-header,
-:deep(.v-theme--dark) .opening-dialog-header,
-::v-deep([data-theme="dark"]) .opening-dialog-header,
-::v-deep(.v-theme--dark) .opening-dialog-header {
-	background: #1e1e1e !important;
-	color: #fff !important;
-	border-bottom: 1px solid #373737;
+.opening-dialog-header {
+	border-bottom: 1px solid var(--pos-border);
 }
 
-:deep([data-theme="dark"]) .opening-dialog-content,
-:deep(.v-theme--dark) .opening-dialog-content,
-::v-deep([data-theme="dark"]) .opening-dialog-content,
-::v-deep(.v-theme--dark) .opening-dialog-content {
-	background: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .dialog-actions-container,
-:deep(.v-theme--dark) .dialog-actions-container,
-::v-deep([data-theme="dark"]) .dialog-actions-container,
-::v-deep(.v-theme--dark) .dialog-actions-container {
-	background: #1e1e1e !important;
-	border-top: 1px solid #373737;
+.dialog-actions-container {
+	border-top: 1px solid var(--pos-border);
 }
 </style>

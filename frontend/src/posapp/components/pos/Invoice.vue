@@ -40,7 +40,7 @@
 							hide-details
 							variant="solo"
 							color="primary"
-							class="dark-field sleek-field pos-themed-input"
+							class="sleek-field pos-themed-input"
 							:items="invoiceTypes"
 							:label="frappe._('Type')"
 							v-model="invoiceType"
@@ -1486,9 +1486,8 @@ export default {
 	transform: translateY(-100%);
 }
 
-:deep([data-theme="dark"]) .column-selector-container,
-:deep(.v-theme--dark) .column-selector-container {
-	background-color: #1e1e1e;
+.column-selector-container {
+	background-color: var(--pos-card-bg);
 }
 
 .column-selector-btn {

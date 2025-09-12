@@ -262,6 +262,17 @@
 	border-color: var(--pos-border);
 }
 
+/* Ensure inputs adapt to the active theme without per-component overrides */
+.posapp .pos-themed-input :deep(.v-field__input),
+.posapp .pos-themed-input :deep(input),
+.posapp .pos-themed-input :deep(.v-label) {
+	color: var(--pos-text-primary) !important;
+}
+
+.posapp .pos-themed-input :deep(.v-field__overlay) {
+	background-color: var(--pos-input-bg) !important;
+}
+
 /* Fix for Frappe navbar collapse elements being hidden by POSAwesome CSS */
 /* This overrides the problematic .collapse { visibility: collapse; } rule */
 .navbar-collapse,

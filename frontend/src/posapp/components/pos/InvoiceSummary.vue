@@ -323,31 +323,16 @@ export default {
 
 <style scoped>
 .cards {
-	background-color: #f5f5f5 !important;
+	background-color: var(--pos-card-bg) !important;
 	transition: all 0.3s ease;
 }
 
-:deep([data-theme="dark"]) .cards,
-:deep([data-theme="dark"]) .cards .v-card__underlay,
-:deep(.v-theme--dark) .cards,
-:deep(.v-theme--dark) .cards .v-card__underlay,
-:deep(.cards.v-theme--dark),
-:deep(.cards.v-theme--dark) .v-card__underlay,
-::v-deep([data-theme="dark"]) .cards,
-::v-deep([data-theme="dark"]) .cards .v-card__underlay,
-::v-deep(.v-theme--dark) .cards,
-::v-deep(.v-theme--dark) .cards .v-card__underlay,
-::v-deep(.cards.v-theme--dark),
-::v-deep(.cards.v-theme--dark) .v-card__underlay {
-	background-color: #1e1e1e !important;
-}
-
 .white-text-btn {
-	color: white !important;
+	color: var(--pos-text-primary) !important;
 }
 
 .white-text-btn :deep(.v-btn__content) {
-	color: white !important;
+	color: var(--pos-text-primary) !important;
 }
 
 /* Enhanced button styling with better performance */
