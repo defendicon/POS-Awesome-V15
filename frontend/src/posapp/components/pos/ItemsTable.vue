@@ -596,7 +596,10 @@
 							<!-- Delivery Date Section -->
 							<div
 								class="form-section"
-								v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'"
+								v-if="
+									pos_profile.posa_allow_sales_order &&
+									['Order', 'Quotation'].includes(invoiceType)
+								"
 							>
 								<div class="section-header">
 									<v-icon size="small" class="section-icon">mdi-calendar-check</v-icon>
@@ -742,7 +745,10 @@ export default {
 		},
 
 		blockSaleBeyondAvailableQty() {
-			return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
+			return (
+				!["Order", "Quotation"].includes(this.invoiceType) &&
+				this.pos_profile.posa_block_sale_beyond_available_qty
+			);
 		},
 
 		// Responsive headers based on container size

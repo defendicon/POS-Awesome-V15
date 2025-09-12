@@ -431,7 +431,7 @@ export function useItemAddition() {
 
 		context.eventBus.emit("set_customer_readonly", false);
 		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-		context.invoiceTypes = ["Invoice", "Order"];
+		context.invoiceTypes = ["Invoice", "Order", "Quotation"];
 	};
 
 	// Add this utility for grouping logic, matching ItemsTable.vue

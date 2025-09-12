@@ -89,7 +89,10 @@ export default {
 		return this.invoiceType === "Return" || (this.invoice_doc && this.invoice_doc.is_return);
 	},
 	blockSaleBeyondAvailableQty() {
-		return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
+		return (
+			!["Order", "Quotation"].includes(this.invoiceType) &&
+			this.pos_profile.posa_block_sale_beyond_available_qty
+		);
 	},
 	// Table headers for item table (for another table if needed)
 	itemTableHeaders() {
