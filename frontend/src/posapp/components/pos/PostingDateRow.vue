@@ -102,8 +102,14 @@ export default {
 }
 
 :deep(.dp__menu) {
-	background-color: var(--pos-card-bg) !important;
-	color: var(--pos-text-primary) !important;
+        background-color: var(--pos-card-bg) !important;
+        color: var(--pos-text-primary) !important;
+}
+
+/* Ensure calendar numbers remain visible across themes */
+.posting-date-input :deep(.dp__calendar_header_item),
+.posting-date-input :deep(.dp__cell_inner) {
+        color: var(--pos-text-primary) !important;
 }
 
 /* Sleek design for VueDatePicker */

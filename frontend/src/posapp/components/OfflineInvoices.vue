@@ -277,11 +277,11 @@ export default {
 
 /* Main Card Styling */
 .offline-invoices-card {
-	border-radius: 20px !important;
-	overflow: hidden;
-	background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%) !important;
-	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-	border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px !important;
+        overflow: hidden;
+        background-color: var(--pos-card-bg) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+        border: 1px solid var(--pos-border);
 }
 
 /* ========== REVAMPED HEADER SECTION ========== */
@@ -494,13 +494,14 @@ export default {
 }
 
 /* Content containers */
+
 .white-background {
-	background: var(--surface-primary);
+        background: var(--pos-card-bg);
 }
 
 .empty-state {
-	padding: var(--dynamic-xl) var(--dynamic-md);
-	background: var(--surface-primary);
+        padding: var(--dynamic-xl) var(--dynamic-md);
+        background: var(--pos-card-bg);
 }
 
 .empty-icon-wrapper {
@@ -514,50 +515,59 @@ export default {
 	filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.3));
 }
 
+
 .table-container {
-	background: var(--surface-primary);
+        background: var(--pos-card-bg);
 }
+
 
 .table-header {
-	padding: 0 var(--dynamic-xs);
-	color: var(--text-secondary);
+        padding: 0 var(--dynamic-xs);
+        color: var(--pos-text-secondary);
 }
 
+
 .white-table {
-	background: var(--surface-primary);
-	border: 1px solid var(--field-border);
-	border-radius: var(--border-radius-lg);
-	overflow: hidden;
+        background: var(--pos-card-bg);
+        border: 1px solid var(--pos-border);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
 }
+
 
 .white-table :deep(th),
 .white-table :deep(td) {
-	border-bottom: 1px solid var(--field-border);
+        border-bottom: 1px solid var(--pos-border);
 }
+
 
 :deep(.v-data-table-header) {
-	background: var(--table-header-bg);
-	border-bottom: 2px solid var(--field-border);
+        background: var(--pos-table-header-bg);
+        border-bottom: 2px solid var(--pos-border);
 }
+
 
 :deep(.v-data-table-header th) {
-	font-weight: 600;
-	color: var(--table-header-text);
-	font-size: 0.875rem;
-	padding: var(--dynamic-md);
+        font-weight: 600;
+        color: var(--pos-text-primary);
+        font-size: 0.875rem;
+        padding: var(--dynamic-md);
 }
+
 
 :deep(.v-data-table__tr) {
-	border-bottom: 1px solid var(--field-border);
+        border-bottom: 1px solid var(--pos-border);
 }
+
 
 :deep(.v-data-table__tr:hover) {
-	background-color: var(--table-row-hover);
+        background-color: var(--pos-table-row-hover);
 }
 
+
 :deep(.v-data-table__td) {
-	padding: var(--dynamic-md);
-	border-bottom: 1px solid var(--field-border);
+        padding: var(--dynamic-md);
+        border-bottom: 1px solid var(--pos-border);
 }
 
 /* Enhanced Cell Styling */
@@ -673,17 +683,17 @@ export default {
 
 /* ========== REVAMPED FOOTER ACTIONS ========== */
 .dialog-actions-container-revamped {
-	background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
-	border-top: 1px solid rgba(25, 118, 210, 0.1) !important;
-	padding: 24px 32px !important;
-	display: flex !important;
-	align-items: center !important;
-	justify-content: space-between !important;
-	gap: 24px !important;
-	min-height: 80px !important;
-	width: 100% !important;
-	visibility: visible !important;
-	opacity: 1 !important;
+        background-color: var(--pos-card-bg) !important;
+        border-top: 1px solid var(--pos-border) !important;
+        padding: 24px 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 24px !important;
+        min-height: 80px !important;
+        width: 100% !important;
+        visibility: visible !important;
+        opacity: 1 !important;
 }
 
 .actions-left-section {
@@ -727,12 +737,12 @@ export default {
 
 /* Close Button - Neutral with Red Text and Icon */
 .close-action-btn-revamped {
-	background: white !important;
-	color: #f44336 !important;
-	border: 2px solid #f44336 !important;
-	border-radius: 14px !important;
-	text-transform: none !important;
-	font-weight: 600 !important;
+        background: var(--pos-button-bg) !important;
+        color: #f44336 !important;
+        border: 2px solid #f44336 !important;
+        border-radius: 14px !important;
+        text-transform: none !important;
+        font-weight: 600 !important;
 	padding: 12px 24px !important;
 	min-width: 120px !important;
 	height: 48px !important;
