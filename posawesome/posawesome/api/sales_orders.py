@@ -6,6 +6,9 @@ import json
 import frappe
 from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from erpnext.selling.doctype.quotation.quotation import (
+    make_sales_order as quotation_to_sales_order,
+)
 from frappe.utils import getdate, nowdate
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
@@ -124,7 +127,14 @@ def submit_sales_order(order):
     """Submit sales order and create payment entries."""
     order = json.loads(order)
     _map_delivery_dates(order)
-    if order.get("name") and frappe.db.exists("Sales Order", order.get("name")):
+    if order.get("doctype") == "Quotation" and order.get("name"):
+        q_doc = frappe.get_doc("Quotation", order.get("name"))
+        q_doc.update(order)
+        q_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        q_doc.save()
+        so_doc = frappe.get_doc(quotation_to_sales_order(q_doc.name))
+    elif order.get("name") and frappe.db.exists("Sales Order", order.get("name")):
         so_doc = frappe.get_doc("Sales Order", order.get("name"))
         so_doc.update(order)
     else:
@@ -136,6 +146,8 @@ def submit_sales_order(order):
     frappe.flags.ignore_account_permission = True
     so_doc.save()
     so_doc.submit()
+    if order.get("doctype") == "Quotation" and order.get("name"):
+        frappe.db.set_value("Quotation", order.get("name"), "status", "Ordered")
 
     if payments:
         frappe.enqueue(

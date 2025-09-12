@@ -1313,7 +1313,9 @@ export default {
 			}
 			frappe.call({
                                 method:
-                                        this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+                                        this.invoiceType === "Order" &&
+                                        (this.pos_profile.posa_create_only_sales_order ||
+                                                this.invoice_doc.doctype === "Quotation")
                                                 ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
                                                 : this.invoiceType === "Quotation"
                                                 ? "posawesome.posawesome.api.quotations.submit_quotation"

@@ -6,6 +6,9 @@ import json
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from erpnext.selling.doctype.quotation.quotation import (
+    make_sales_order as quotation_to_sales_order,
+)
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import (
     get_batch_no,
@@ -430,6 +433,26 @@ def update_invoice(data):
 def submit_invoice(invoice, data):
     data = json.loads(data)
     invoice = json.loads(invoice)
+    if invoice.get("doctype") == "Quotation" and invoice.get("name"):
+        q_doc = frappe.get_doc("Quotation", invoice.get("name"))
+        q_doc.update(invoice)
+        q_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        q_doc.save()
+        so_doc = frappe.get_doc(quotation_to_sales_order(q_doc.name))
+        so_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        so_doc.save()
+        so_doc.submit()
+        si_doc = frappe.get_doc(make_sales_invoice(so_doc.name))
+        si_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        si_doc.update_stock = 1
+        si_doc.save()
+        frappe.db.set_value("Quotation", q_doc.name, "status", "Ordered")
+        result = submit_invoice(si_doc.as_json(), json.dumps(data))
+        frappe.db.set_value("Sales Order", so_doc.name, "status", "Completed")
+        return result
     pos_profile = invoice.get("pos_profile")
     doctype = "Sales Invoice"
     if pos_profile and frappe.db.get_value(

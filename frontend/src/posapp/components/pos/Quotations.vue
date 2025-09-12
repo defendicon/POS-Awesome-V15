@@ -17,6 +17,33 @@
                                                                 clearable
                                                                 class="mx-4 pos-themed-input"
                                                         ></v-text-field>
+                                                        <v-text-field
+                                                                color="primary"
+                                                                :label="frappe._('Customer')"
+                                                                hide-details
+                                                                v-model="customer"
+                                                                density="compact"
+                                                                clearable
+                                                                class="mx-4 pos-themed-input"
+                                                        ></v-text-field>
+                                                        <v-text-field
+                                                                type="date"
+                                                                color="primary"
+                                                                :label="frappe._('From Date')"
+                                                                hide-details
+                                                                v-model="from_date"
+                                                                density="compact"
+                                                                class="mx-4 pos-themed-input"
+                                                        ></v-text-field>
+                                                        <v-text-field
+                                                                type="date"
+                                                                color="primary"
+                                                                :label="frappe._('To Date')"
+                                                                hide-details
+                                                                v-model="to_date"
+                                                                density="compact"
+                                                                class="mx-4 pos-themed-input"
+                                                        ></v-text-field>
                                                         <v-btn
                                                                 variant="text"
                                                                 class="ml-2"
@@ -70,6 +97,9 @@ export default {
                 selected: [],
                 dialog_data: {},
                 quotation_name: "",
+                customer: "",
+                from_date: "",
+                to_date: "",
                 headers: [
                         {
                                 title: __("Customer"),
@@ -109,6 +139,9 @@ export default {
                                 method: "posawesome.posawesome.api.quotations.search_quotations",
                                 args: {
                                         quotation_name: this.quotation_name,
+                                        customer: this.customer,
+                                        from_date: this.from_date,
+                                        to_date: this.to_date,
                                         company: this.pos_profile.company,
                                         currency: this.pos_profile.currency,
                                 },
@@ -133,6 +166,9 @@ export default {
                         this.draftsDialog = true;
                         this.dialog_data = data;
                         this.quotation_name = "";
+                        this.customer = "";
+                        this.from_date = "";
+                        this.to_date = "";
                 });
         },
         mounted() {

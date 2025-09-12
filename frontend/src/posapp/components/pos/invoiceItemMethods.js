@@ -311,6 +311,10 @@ export default {
                         if (data.doctype === "Quotation") {
                                 this.invoiceType = "Quotation";
                                 this.invoiceTypes = ["Quotation"];
+                                if (this.pos_profile.posa_allow_sales_order) {
+                                        this.invoiceTypes.push("Order");
+                                }
+                                this.invoiceTypes.push("Invoice");
                         }
                         this.update_items_details(this.items);
                         this.posa_offers = data.posa_offers || [];
@@ -322,7 +326,7 @@ export default {
 					this.set_batch_qty(item, item.batch_no);
 				}
 			});
-                        this.customer = data.customer;
+                        this.customer = data.customer || data.customer_name || data.party_name;
                         this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
                         this.discount_amount = data.discount_amount;
                         this.additional_discount_percentage = data.additional_discount_percentage;

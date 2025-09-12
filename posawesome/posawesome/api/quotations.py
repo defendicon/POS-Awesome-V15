@@ -7,7 +7,14 @@ import frappe
 
 
 @frappe.whitelist()
-def search_quotations(company, currency, quotation_name=None):
+def search_quotations(
+    company,
+    currency,
+    quotation_name=None,
+    customer=None,
+    from_date=None,
+    to_date=None,
+):
     filters = {
         "docstatus": 1,
         "company": company,
@@ -15,12 +22,20 @@ def search_quotations(company, currency, quotation_name=None):
     }
     if quotation_name:
         filters["name"] = ["like", f"%{quotation_name}%"]
+    if customer:
+        filters["customer_name"] = ["like", f"%{customer}%"]
+    if from_date and to_date:
+        filters["transaction_date"] = ["between", [from_date, to_date]]
+    elif from_date:
+        filters["transaction_date"] = [">=", from_date]
+    elif to_date:
+        filters["transaction_date"] = ["<=", to_date]
     quotations = frappe.get_list(
         "Quotation",
         filters=filters,
         fields=["name"],
         limit_page_length=0,
-        order_by="customer_name",
+        order_by="transaction_date desc, name desc",
     )
     data = []
     for q in quotations:
