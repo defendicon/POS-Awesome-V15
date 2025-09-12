@@ -20,7 +20,7 @@ def search_quotations(company, currency, quotation_name=None):
         filters=filters,
         fields=["name"],
         limit_page_length=0,
-        order_by="customer",
+        order_by="customer_name",
     )
     data = []
     for q in quotations:
