@@ -38,7 +38,7 @@
 									variant="outlined"
 									hide-details
 									clearable
-									class="dark-field pos-themed-input"
+									class="pos-themed-input"
 									v-model="pos_profile_search"
 									:items="pos_profiles_list"
 									item-value="name"
@@ -172,7 +172,7 @@
 									variant="outlined"
 									color="primary"
 									:label="frappe._('Search by Name')"
-									class="pos-themed-input dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="mpesa_search_name"
 									clearable
@@ -184,7 +184,7 @@
 									variant="outlined"
 									color="primary"
 									:label="frappe._('Search by Mobile')"
-									class="pos-themed-input dark-field"
+									class="pos-themed-input"
 									hide-details
 									v-model="mpesa_search_mobile"
 									clearable
@@ -235,7 +235,7 @@
 							</v-col>
 							<v-col md="5">
 								<v-text-field
-									class="p-0 m-0 dark-field pos-themed-input"
+									class="p-0 m-0 pos-themed-input"
 									density="compact"
 									color="primary"
 									hide-details
@@ -256,7 +256,7 @@
 							>
 							<v-col md="5">
 								<v-text-field
-									class="p-0 m-0 dark-field pos-themed-input"
+									class="p-0 m-0 pos-themed-input"
 									density="compact"
 									color="primary"
 									hide-details
@@ -274,7 +274,7 @@
 							>
 							<v-col md="5">
 								<v-text-field
-									class="p-0 m-0 dark-field pos-themed-input"
+									class="p-0 m-0 pos-themed-input"
 									density="compact"
 									color="primary"
 									hide-details
@@ -303,7 +303,7 @@
 											{{ currencySymbol(pos_profile.currency) }}
 										</div>
 										<v-text-field
-											class="p-0 m-0 dark-field pos-themed-input"
+											class="p-0 m-0 pos-themed-input"
 											density="compact"
 											color="primary"
 											hide-details
@@ -324,7 +324,7 @@
 							</v-col>
 							<v-col md="5">
 								<v-text-field
-									class="p-0 m-0 dark-field pos-themed-input"
+									class="p-0 m-0 pos-themed-input"
 									density="compact"
 									color="primary"
 									hide-details
@@ -1215,36 +1215,6 @@ export default {
 </script>
 
 <style>
-/* Dark mode input styling */
-:deep([data-theme="dark"]) .dark-field,
-:deep(.v-theme--dark) .dark-field,
-::v-deep([data-theme="dark"]) .dark-field,
-::v-deep(.v-theme--dark) .dark-field {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__input),
-:deep([data-theme="dark"]) .dark-field :deep(input),
-:deep(.v-theme--dark) .dark-field :deep(input),
-:deep([data-theme="dark"]) .dark-field :deep(.v-label),
-:deep(.v-theme--dark) .dark-field :deep(.v-label),
-::v-deep([data-theme="dark"]) .dark-field .v-field__input,
-::v-deep(.v-theme--dark) .dark-field .v-field__input,
-::v-deep([data-theme="dark"]) .dark-field input,
-::v-deep(.v-theme--dark) .dark-field input,
-::v-deep([data-theme="dark"]) .dark-field .v-label,
-::v-deep(.v-theme--dark) .dark-field .v-label {
-	color: #fff !important;
-}
-
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
-::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
-	background-color: #1e1e1e !important;
-}
-
 input[total_of_diff] {
 	text-align: right;
 }

@@ -108,42 +108,22 @@
 	border-radius: 12px;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 	transition: box-shadow 0.3s ease;
-	background-color: #fff;
+	background-color: var(--pos-input-bg);
 }
 
 .customer-autocomplete:hover {
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Dark mode styling */
-:deep([data-theme="dark"]) .customer-autocomplete,
-:deep(.v-theme--dark) .customer-autocomplete,
-::v-deep([data-theme="dark"]) .customer-autocomplete,
-::v-deep(.v-theme--dark) .customer-autocomplete {
-	/* Use surface color for dark mode */
-	background-color: #1e1e1e !important;
+/* Theme-aware internal field colors */
+.customer-autocomplete :deep(.v-field__input),
+.customer-autocomplete :deep(input),
+.customer-autocomplete :deep(.v-label) {
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-field__input),
-:deep(.v-theme--dark) .customer-autocomplete :deep(.v-field__input),
-:deep([data-theme="dark"]) .customer-autocomplete :deep(input),
-:deep(.v-theme--dark) .customer-autocomplete :deep(input),
-:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-label),
-:deep(.v-theme--dark) .customer-autocomplete :deep(.v-label),
-::v-deep([data-theme="dark"]) .customer-autocomplete .v-field__input,
-::v-deep(.v-theme--dark) .customer-autocomplete .v-field__input,
-::v-deep([data-theme="dark"]) .customer-autocomplete input,
-::v-deep(.v-theme--dark) .customer-autocomplete input,
-::v-deep([data-theme="dark"]) .customer-autocomplete .v-label,
-::v-deep(.v-theme--dark) .customer-autocomplete .v-label {
-	color: #fff !important;
-}
-
-:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-field__overlay),
-:deep(.v-theme--dark) .customer-autocomplete :deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) .customer-autocomplete .v-field__overlay,
-::v-deep(.v-theme--dark) .customer-autocomplete .v-field__overlay {
-	background-color: #1e1e1e !important;
+.customer-autocomplete :deep(.v-field__overlay) {
+	background-color: var(--pos-input-bg) !important;
 }
 
 .icon-button {

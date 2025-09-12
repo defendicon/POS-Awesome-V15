@@ -163,7 +163,7 @@
 												color="primary"
 												hide-details
 												:label="__('Items per page')"
-												class="mb-2 dark-field pos-themed-input"
+												class="mb-2 pos-themed-input"
 											>
 											</v-text-field>
 										</v-card-text>
@@ -3098,9 +3098,9 @@ export default {
 		border-color 0.15s ease;
 }
 
-[data-theme="dark"] .sticky-header {
-	background-color: var(--surface-primary, #1e1e1e);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.sticky-header {
+	background-color: var(--pos-card-bg);
+	border-bottom: 1px solid var(--pos-border);
 }
 
 .dynamic-scroll {

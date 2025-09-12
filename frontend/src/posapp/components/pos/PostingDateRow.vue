@@ -7,7 +7,7 @@
 				format="dd-MM-yyyy"
 				auto-apply
 				:placeholder="frappe._('Posting Date')"
-				class="dark-field sleek-field posting-date-input pos-themed-input"
+				class="sleek-field posting-date-input pos-themed-input"
 				@update:model-value="onUpdate"
 			/>
 		</v-col>
@@ -84,54 +84,32 @@ export default {
 </script>
 
 <style scoped>
-/* Dark mode styling for input wrapper */
-:deep([data-theme="dark"]) .dark-field,
-:deep(.v-theme--dark) .dark-field,
-::v-deep([data-theme="dark"]) .dark-field,
-::v-deep(.v-theme--dark) .dark-field {
-	background-color: #1e1e1e !important;
+/* Theme-aware input styling */
+.posting-date-input :deep(.v-field__input),
+.posting-date-input :deep(input),
+.posting-date-input :deep(.v-label) {
+	color: var(--pos-text-primary) !important;
 }
 
-/* Ensure input text and label are readable */
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__input),
-:deep([data-theme="dark"]) .dark-field :deep(input),
-:deep(.v-theme--dark) .dark-field :deep(input),
-:deep([data-theme="dark"]) .dark-field :deep(.v-label),
-:deep(.v-theme--dark) .dark-field :deep(.v-label),
-::v-deep([data-theme="dark"]) .dark-field .v-field__input,
-::v-deep(.v-theme--dark) .dark-field .v-field__input,
-::v-deep([data-theme="dark"]) .dark-field input,
-::v-deep(.v-theme--dark) .dark-field input,
-::v-deep([data-theme="dark"]) .dark-field .v-label,
-::v-deep(.v-theme--dark) .dark-field .v-label {
-	color: #fff !important;
+.posting-date-input :deep(.v-field__overlay) {
+	background-color: var(--pos-input-bg) !important;
 }
 
-/* Overlay background in dark mode */
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
-::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
-	background-color: #1e1e1e !important;
+/* Theme-aware date picker elements */
+:deep(.dp__input) {
+	background-color: var(--pos-input-bg) !important;
+	color: var(--pos-text-primary) !important;
 }
 
-/* Dark mode styling for date picker input */
-:deep([data-theme="dark"]) .dp__input,
-:deep(.v-theme--dark) .dp__input,
-::v-deep([data-theme="dark"]) .dp__input,
-::v-deep(.v-theme--dark) .dp__input {
-	background-color: #1e1e1e !important;
-	color: #fff !important;
+:deep(.dp__menu) {
+        background-color: var(--pos-card-bg) !important;
+        color: var(--pos-text-primary) !important;
 }
 
-/* Dark mode styling for date picker calendar dropdown */
-:deep([data-theme="dark"]) .dp__menu,
-:deep(.v-theme--dark) .dp__menu,
-::v-deep([data-theme="dark"]) .dp__menu,
-::v-deep(.v-theme--dark) .dp__menu {
-	background-color: #1e1e1e !important;
-	color: #fff !important;
+/* Ensure calendar numbers remain visible across themes */
+.posting-date-input :deep(.dp__calendar_header_item),
+.posting-date-input :deep(.dp__cell_inner) {
+        color: var(--pos-text-primary) !important;
 }
 
 /* Sleek design for VueDatePicker */
