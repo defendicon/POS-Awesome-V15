@@ -113,7 +113,7 @@ export default {
 	async cancel_invoice() {
 		const doc = this.get_invoice_doc();
 		this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-		this.invoiceTypes = ["Invoice", "Order"];
+		this.invoiceTypes = ["Invoice", "Order", "Quotation"];
 		this.posting_date = frappe.datetime.nowdate();
 		var vm = this;
 		if (doc.name && this.pos_profile.posa_allow_delete) {
@@ -280,7 +280,7 @@ export default {
 			this.discount_amount = 0;
 			this.additional_discount_percentage = 0;
 			this.invoiceType = "Invoice";
-			this.invoiceTypes = ["Invoice", "Order"];
+			this.invoiceTypes = ["Invoice", "Order", "Quotation"];
 		} else {
 			if (data.is_return) {
 				// For return without invoice case, check if there's a return_against
@@ -334,7 +334,9 @@ export default {
 		}
 
 		// Always set these fields first
-		if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
+		if (this.invoiceType === "Quotation") {
+			doc.doctype = "Quotation";
+		} else if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
 			doc.doctype = "Sales Order";
 		} else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
 			doc.doctype = "POS Invoice";
@@ -841,7 +843,9 @@ export default {
 			method:
 				doc.doctype === "Sales Order" && this.pos_profile.posa_create_only_sales_order
 					? "posawesome.posawesome.api.sales_orders.update_sales_order"
-					: "posawesome.posawesome.api.invoices.update_invoice",
+					: doc.doctype === "Quotation"
+						? "posawesome.posawesome.api.quotations.update_quotation"
+						: "posawesome.posawesome.api.invoices.update_invoice",
 			args: {
 				data: doc,
 			},

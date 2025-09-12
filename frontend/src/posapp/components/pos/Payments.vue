@@ -778,7 +778,10 @@ export default {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
 		},
 		blockSaleBeyondAvailableQty() {
-			return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
+			return (
+				!["Order", "Quotation"].includes(this.invoiceType) &&
+				this.pos_profile.posa_block_sale_beyond_available_qty
+			);
 		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {
@@ -1315,7 +1318,9 @@ export default {
 				method:
 					this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
 						? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-						: "posawesome.posawesome.api.invoices.submit_invoice",
+						: this.invoiceType === "Quotation"
+							? "posawesome.posawesome.api.quotations.submit_quotation"
+							: "posawesome.posawesome.api.invoices.submit_invoice",
 				args: {
 					data: data,
 					invoice: this.invoice_doc,
@@ -1375,7 +1380,9 @@ export default {
 						title:
 							vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
 								? __("Sales Order {0} is Submitted", [r.message.name])
-								: __("Invoice {0} is Submitted", [r.message.name]),
+								: vm.invoiceType === "Quotation"
+									? __("Quotation {0} is Submitted", [r.message.name])
+									: __("Invoice {0} is Submitted", [r.message.name]),
 						color: "success",
 					});
 					frappe.utils.play_sound("submit");
