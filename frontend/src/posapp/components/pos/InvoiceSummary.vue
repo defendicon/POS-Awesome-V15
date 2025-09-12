@@ -119,22 +119,35 @@
 							{{ __("Load Drafts") }}
 						</v-btn>
 					</v-col>
-					<v-col cols="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
-						<v-btn
-							block
-							color="info"
-							theme="dark"
-							prepend-icon="mdi-book-search"
-							@click="handleSelectOrder"
-							class="summary-btn"
-							:loading="selectOrderLoading"
-						>
-							{{ __("Select S.O") }}
-						</v-btn>
-					</v-col>
-					<v-col cols="6">
-						<v-btn
-							block
+                                        <v-col cols="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
+                                                <v-btn
+                                                        block
+                                                        color="info"
+                                                        theme="dark"
+                                                        prepend-icon="mdi-book-search"
+                                                        @click="handleSelectOrder"
+                                                        class="summary-btn"
+                                                        :loading="selectOrderLoading"
+                                                >
+                                                        {{ __("Select S.O") }}
+                                                </v-btn>
+                                        </v-col>
+                                        <v-col cols="6" v-if="pos_profile.custom_allow_select_quotation == 1">
+                                                <v-btn
+                                                        block
+                                                        color="info"
+                                                        theme="dark"
+                                                        prepend-icon="mdi-book-search"
+                                                        @click="handleSelectQuotation"
+                                                        class="summary-btn"
+                                                        :loading="selectQuotationLoading"
+                                                >
+                                                        {{ __("Select Quotation") }}
+                                                </v-btn>
+                                        </v-col>
+                                        <v-col cols="6">
+                                                <v-btn
+                                                        block
 							color="error"
 							theme="dark"
 							prepend-icon="mdi-close-circle"
@@ -210,13 +223,14 @@ export default {
 	data() {
 		return {
 			// Loading states for better UX
-			saveLoading: false,
-			loadDraftsLoading: false,
-			selectOrderLoading: false,
-			cancelLoading: false,
-			returnsLoading: false,
-			printLoading: false,
-			paymentLoading: false,
+                        saveLoading: false,
+                        loadDraftsLoading: false,
+                        selectOrderLoading: false,
+                        selectQuotationLoading: false,
+                        cancelLoading: false,
+                        returnsLoading: false,
+                        printLoading: false,
+                        paymentLoading: false,
 		};
 	},
 	emits: [
@@ -224,9 +238,10 @@ export default {
 		"update:additional_discount_percentage",
 		"update_discount_umount",
 		"save-and-clear",
-		"load-drafts",
-		"select-order",
-		"cancel-sale",
+                "load-drafts",
+                "select-order",
+                "select-quotation",
+                "cancel-sale",
 		"open-returns",
 		"print-draft",
 		"show-payment",
@@ -264,23 +279,32 @@ export default {
 			}
 		},
 
-		async handleLoadDrafts() {
-			this.loadDraftsLoading = true;
-			try {
-				await this.$emit("load-drafts");
-			} finally {
-				this.loadDraftsLoading = false;
-			}
-		},
+                async handleLoadDrafts() {
+                        this.loadDraftsLoading = true;
+                        try {
+                                await this.$emit("load-drafts");
+                        } finally {
+                                this.loadDraftsLoading = false;
+                        }
+                },
 
-		async handleSelectOrder() {
-			this.selectOrderLoading = true;
-			try {
-				await this.$emit("select-order");
-			} finally {
-				this.selectOrderLoading = false;
-			}
-		},
+                async handleSelectOrder() {
+                        this.selectOrderLoading = true;
+                        try {
+                                await this.$emit("select-order");
+                        } finally {
+                                this.selectOrderLoading = false;
+                        }
+                },
+
+                async handleSelectQuotation() {
+                        this.selectQuotationLoading = true;
+                        try {
+                                await this.$emit("select-quotation");
+                        } finally {
+                                this.selectQuotationLoading = false;
+                        }
+                },
 
 		async handleCancelSale() {
 			this.cancelLoading = true;

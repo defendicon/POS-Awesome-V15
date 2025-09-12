@@ -778,7 +778,7 @@ export default {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
 		},
 		blockSaleBeyondAvailableQty() {
-			return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
+                    return this.invoiceType !== "Order" && this.invoiceType !== "Quotation" && this.pos_profile.posa_block_sale_beyond_available_qty;
 		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {
@@ -1312,10 +1312,12 @@ export default {
 				}
 			}
 			frappe.call({
-				method:
-					this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-						? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-						: "posawesome.posawesome.api.invoices.submit_invoice",
+                                method:
+                                        this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+                                                ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
+                                                : this.invoiceType === "Quotation"
+                                                ? "posawesome.posawesome.api.quotations.submit_quotation"
+                                                : "posawesome.posawesome.api.invoices.submit_invoice",
 				args: {
 					data: data,
 					invoice: this.invoice_doc,

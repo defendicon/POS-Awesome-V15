@@ -112,8 +112,14 @@ export default {
 	// Cancel the current invoice, optionally delete from backend
 	async cancel_invoice() {
 		const doc = this.get_invoice_doc();
-		this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-		this.invoiceTypes = ["Invoice", "Order"];
+                this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
+                this.invoiceTypes = ["Invoice"];
+                if (this.pos_profile.posa_allow_sales_order) {
+                        this.invoiceTypes.push("Order");
+                }
+                if (this.pos_profile.posa_allow_quotation) {
+                        this.invoiceTypes.push("Quotation");
+                }
 		this.posting_date = frappe.datetime.nowdate();
 		var vm = this;
 		if (doc.name && this.pos_profile.posa_allow_delete) {
@@ -274,30 +280,40 @@ export default {
 		this.posa_coupons = [];
 		this.return_doc = "";
 		if (!data.name && !data.is_return) {
-			this.items = [];
-			this.customer = this.pos_profile.customer;
-			this.invoice_doc = "";
-			this.discount_amount = 0;
-			this.additional_discount_percentage = 0;
-			this.invoiceType = "Invoice";
-			this.invoiceTypes = ["Invoice", "Order"];
+                        this.items = [];
+                        this.customer = this.pos_profile.customer;
+                        this.invoice_doc = "";
+                        this.discount_amount = 0;
+                        this.additional_discount_percentage = 0;
+                        this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
+                        this.invoiceTypes = ["Invoice"];
+                        if (this.pos_profile.posa_allow_sales_order) {
+                                this.invoiceTypes.push("Order");
+                        }
+                        if (this.pos_profile.posa_allow_quotation) {
+                                this.invoiceTypes.push("Quotation");
+                        }
 		} else {
-			if (data.is_return) {
-				// For return without invoice case, check if there's a return_against
-				// Only set customer readonly if this is a return with reference to an invoice
-				if (data.return_against) {
-					this.eventBus.emit("set_customer_readonly", true);
-				} else {
+                        if (data.is_return) {
+                                // For return without invoice case, check if there's a return_against
+                                // Only set customer readonly if this is a return with reference to an invoice
+                                if (data.return_against) {
+                                        this.eventBus.emit("set_customer_readonly", true);
+                                } else {
 					// Allow customer selection for returns without invoice
 					this.eventBus.emit("set_customer_readonly", false);
 				}
 				this.invoiceType = "Return";
 				this.invoiceTypes = ["Return"];
-			}
-			this.invoice_doc = data;
-			this.items = data.items;
-			this.update_items_details(this.items);
-			this.posa_offers = data.posa_offers || [];
+                        }
+                        this.invoice_doc = data;
+                        this.items = data.items;
+                        if (data.doctype === "Quotation") {
+                                this.invoiceType = "Quotation";
+                                this.invoiceTypes = ["Quotation"];
+                        }
+                        this.update_items_details(this.items);
+                        this.posa_offers = data.posa_offers || [];
 			this.items.forEach((item) => {
 				if (!item.posa_row_id) {
 					item.posa_row_id = this.makeid(20);
@@ -306,10 +322,10 @@ export default {
 					this.set_batch_qty(item, item.batch_no);
 				}
 			});
-			this.customer = data.customer;
-			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-			this.discount_amount = data.discount_amount;
-			this.additional_discount_percentage = data.additional_discount_percentage;
+                        this.customer = data.customer;
+                        this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
+                        this.discount_amount = data.discount_amount;
+                        this.additional_discount_percentage = data.additional_discount_percentage;
 			this.items.forEach((item) => {
 				if (item.serial_no) {
 					item.serial_no_selected = [];
@@ -323,8 +339,8 @@ export default {
 				}
 			});
 		}
-		return old_invoice;
-	},
+                return old_invoice;
+        },
 
 	// Build the invoice document object for backend submission
 	get_invoice_doc() {
@@ -334,13 +350,15 @@ export default {
 		}
 
 		// Always set these fields first
-		if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
-			doc.doctype = "Sales Order";
-		} else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
-			doc.doctype = "POS Invoice";
-		} else {
-			doc.doctype = "Sales Invoice";
-		}
+                if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
+                        doc.doctype = "Sales Order";
+                } else if (this.invoiceType === "Quotation") {
+                        doc.doctype = "Quotation";
+                } else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
+                        doc.doctype = "POS Invoice";
+                } else {
+                        doc.doctype = "Sales Invoice";
+                }
 		doc.is_pos = 1;
 		doc.ignore_pricing_rule = 1;
 		doc.company = doc.company || this.pos_profile.company;
@@ -837,14 +855,16 @@ export default {
 			vm.invoice_doc = Object.assign({}, vm.invoice_doc || {}, doc);
 			return vm.invoice_doc;
 		}
-		frappe.call({
-			method:
-				doc.doctype === "Sales Order" && this.pos_profile.posa_create_only_sales_order
-					? "posawesome.posawesome.api.sales_orders.update_sales_order"
-					: "posawesome.posawesome.api.invoices.update_invoice",
-			args: {
-				data: doc,
-			},
+                frappe.call({
+                        method:
+                                doc.doctype === "Sales Order" && this.pos_profile.posa_create_only_sales_order
+                                        ? "posawesome.posawesome.api.sales_orders.update_sales_order"
+                                        : doc.doctype === "Quotation"
+                                        ? "posawesome.posawesome.api.quotations.update_quotation"
+                                        : "posawesome.posawesome.api.invoices.update_invoice",
+                        args: {
+                                data: doc,
+                        },
 			async: false,
 			callback: function (r) {
 				if (r.message) {
@@ -1261,22 +1281,40 @@ export default {
 	},
 
 	// Get draft orders from backend
-	get_draft_orders() {
-		var vm = this;
-		frappe.call({
-			method: "posawesome.posawesome.api.sales_orders.search_orders",
-			args: {
-				company: this.pos_profile.company,
-				currency: this.pos_profile.currency,
-			},
-			async: false,
-			callback: function (r) {
-				if (r.message) {
-					vm.eventBus.emit("open_orders", r.message);
-				}
-			},
-		});
-	},
+        get_draft_orders() {
+                var vm = this;
+                frappe.call({
+                        method: "posawesome.posawesome.api.sales_orders.search_orders",
+                        args: {
+                                company: this.pos_profile.company,
+                                currency: this.pos_profile.currency,
+                        },
+                        async: false,
+                        callback: function (r) {
+                                if (r.message) {
+                                        vm.eventBus.emit("open_orders", r.message);
+                                }
+                        },
+                });
+        },
+
+        // Get draft quotations from backend
+        get_draft_quotations() {
+                var vm = this;
+                frappe.call({
+                        method: "posawesome.posawesome.api.quotations.search_quotations",
+                        args: {
+                                company: this.pos_profile.company,
+                                currency: this.pos_profile.currency,
+                        },
+                        async: false,
+                        callback: function (r) {
+                                if (r.message) {
+                                        vm.eventBus.emit("open_quotations", r.message);
+                                }
+                        },
+                });
+        },
 
 	// Open returns dialog
 	open_returns() {

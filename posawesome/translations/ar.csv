@@ -411,6 +411,10 @@ Select Columns to Display,اختر الأعمدة لعرضها
 Select Payment,اختر الدفع
 Select Return Invoice,اختر فاتورة الإرجاع
 Select Sales Orders,اختر أوامر المبيعات
+Allow Create Quotation,السماح بإنشاء عرض سعر
+Allow Select Quotation,السماح باختيار عرض سعر
+Select Quotation,اختر عرض سعر
+Select Quotations,اختر عروض الأسعار
 Serial Numbers,الأرقام التسلسلية
 Server CPU Usage,استخدام المعالج للخادم
 Server Health,صحة الخادم

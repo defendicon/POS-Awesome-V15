@@ -741,9 +741,9 @@ export default {
 			};
 		},
 
-		blockSaleBeyondAvailableQty() {
-			return this.invoiceType !== "Order" && this.pos_profile.posa_block_sale_beyond_available_qty;
-		},
+                blockSaleBeyondAvailableQty() {
+                        return this.invoiceType !== "Order" && this.invoiceType !== "Quotation" && this.pos_profile.posa_block_sale_beyond_available_qty;
+                },
 
 		// Responsive headers based on container size
 		responsiveHeaders() {

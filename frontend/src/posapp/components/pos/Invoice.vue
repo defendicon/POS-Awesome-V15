@@ -29,12 +29,12 @@
 				</v-alert>
 				<!-- Top Row: Customer Selection and Invoice Type -->
 				<v-row align="center" class="items px-3 py-2">
-					<v-col :cols="pos_profile.posa_allow_sales_order ? 9 : 12" class="pb-0 pr-0">
+                                        <v-col :cols="(pos_profile.posa_allow_sales_order || pos_profile.posa_allow_quotation) ? 9 : 12" class="pb-0 pr-0">
 						<!-- Customer selection component -->
 						<Customer />
 					</v-col>
 					<!-- Invoice Type Selection (Only shown if sales orders are allowed) -->
-					<v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-4">
+                                        <v-col v-if="pos_profile.posa_allow_sales_order || pos_profile.posa_allow_quotation" cols="3" class="pb-4">
 						<v-select
 							density="compact"
 							hide-details
@@ -305,9 +305,10 @@
 			@update:additional_discount_percentage="(val) => (additional_discount_percentage = val)"
 			@update_discount_umount="update_discount_umount"
 			@save-and-clear="save_and_clear_invoice"
-			@load-drafts="get_draft_invoices"
-			@select-order="get_draft_orders"
-			@cancel-sale="cancel_dialog = true"
+                        @load-drafts="get_draft_invoices"
+                        @select-order="get_draft_orders"
+                        @select-quotation="get_draft_quotations"
+                        @cancel-sale="cancel_dialog = true"
 			@open-returns="open_returns"
 			@print-draft="print_draft_invoice"
 			@show-payment="show_payment"
@@ -359,8 +360,8 @@ export default {
 			isApplyingOffer: false, // Flag to prevent offer watcher loops
 			allItems: [], // All items for offer logic
 			discount_percentage_offer_name: null, // Track which offer is applied
-			invoiceTypes: ["Invoice", "Order"], // Types of invoices
-			invoiceType: "Invoice", // Current invoice type
+                        invoiceTypes: ["Invoice"], // Types of invoices
+                        invoiceType: "Invoice", // Current invoice type
 			itemsPerPage: 1000, // Items per page in table
 			expanded: [], // Array of expanded row IDs
 			singleExpand: true, // Only one row expanded at a time
@@ -1218,8 +1219,15 @@ export default {
 				this.float_precision = prec;
 				this.currency_precision = prec;
 			}
-			this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-			this.initializeItemsHeaders();
+                        this.invoiceTypes = ["Invoice"];
+                        if (this.pos_profile.posa_allow_sales_order) {
+                                this.invoiceTypes.push("Order");
+                        }
+                        if (this.pos_profile.posa_allow_quotation) {
+                                this.invoiceTypes.push("Quotation");
+                        }
+                        this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : this.invoiceTypes[0];
+                        this.initializeItemsHeaders();
 
 			// Add this block to handle currency initialization
 			if (this.pos_profile.posa_allow_multi_currency) {
@@ -1257,13 +1265,16 @@ export default {
 		this.eventBus.on("load_invoice", (data) => {
 			this.load_invoice(data);
 		});
-		this.eventBus.on("load_order", (data) => {
-			this.new_order(data);
-			// this.eventBus.emit("set_pos_coupons", data.posa_coupons);
-		});
-		this.eventBus.on("set_offers", (data) => {
-			this.posOffers = data;
-		});
+                this.eventBus.on("load_order", (data) => {
+                        this.new_order(data);
+                        // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
+                });
+                this.eventBus.on("load_quotation", (data) => {
+                        this.new_order(data);
+                });
+                this.eventBus.on("set_offers", (data) => {
+                        this.posOffers = data;
+                });
 		this.eventBus.on("update_invoice_offers", (data) => {
 			this.updateInvoiceOffers(data);
 		});
@@ -1339,9 +1350,10 @@ export default {
 		this.eventBus.off("add_item");
 		this.eventBus.off("update_customer");
 		this.eventBus.off("fetch_customer_details");
-		this.eventBus.off("clear_invoice");
-		// Cleanup reset_posting_date listener
-		this.eventBus.off("reset_posting_date");
+                this.eventBus.off("clear_invoice");
+                this.eventBus.off("load_quotation");
+                // Cleanup reset_posting_date listener
+                this.eventBus.off("reset_posting_date");
 	},
 	// Register global keyboard shortcuts when component is created
 	created() {

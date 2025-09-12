@@ -217,6 +217,8 @@ fixtures = [
                     "POS Profile-posa_allow_sales_order",
                     "POS Profile-custom_allow_select_sales_order",
                     "POS Profile-posa_create_only_sales_order",
+                    "POS Profile-posa_allow_quotation",
+                    "POS Profile-custom_allow_select_quotation",
                     "POS Profile-posa_column_break_112",
                     "POS Profile-posa_show_template_items",
                     "POS Profile-posa_hide_variants_items",

@@ -6,7 +6,8 @@
 	>
 		<ClosingDialog></ClosingDialog>
 		<Drafts></Drafts>
-		<SalesOrders></SalesOrders>
+                <SalesOrders></SalesOrders>
+                <Quotations></Quotations>
 		<Returns></Returns>
 		<NewAddress></NewAddress>
 		<MpesaPayments></MpesaPayments>
@@ -50,6 +51,7 @@ import PosOffers from "./PosOffers.vue";
 import PosCoupons from "./PosCoupons.vue";
 import Drafts from "./Drafts.vue";
 import SalesOrders from "./SalesOrders.vue";
+import Quotations from "./Quotations.vue";
 import ClosingDialog from "./ClosingDialog.vue";
 import NewAddress from "./NewAddress.vue";
 import Variants from "./Variants.vue";
@@ -110,7 +112,8 @@ export default {
 		NewAddress,
 		Variants,
 		MpesaPayments,
-		SalesOrders,
+                SalesOrders,
+                Quotations,
 	},
 
 	methods: {

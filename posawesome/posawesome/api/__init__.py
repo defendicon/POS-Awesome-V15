@@ -44,6 +44,11 @@ from .sales_orders import (
     submit_sales_order,
     update_sales_order,
 )
+from .quotations import (
+    search_quotations,
+    submit_quotation,
+    update_quotation,
+)
 from .shifts import (
     check_opening_shift,
     create_opening_voucher,

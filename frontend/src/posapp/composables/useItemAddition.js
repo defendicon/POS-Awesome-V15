@@ -430,8 +430,14 @@ export function useItemAddition() {
 		context.customer = context.pos_profile.customer;
 
 		context.eventBus.emit("set_customer_readonly", false);
-		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-		context.invoiceTypes = ["Invoice", "Order"];
+                context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
+                context.invoiceTypes = ["Invoice"];
+                if (context.pos_profile.posa_allow_sales_order) {
+                        context.invoiceTypes.push("Order");
+                }
+                if (context.pos_profile.posa_allow_quotation) {
+                        context.invoiceTypes.push("Quotation");
+                }
 	};
 
 	// Add this utility for grouping logic, matching ItemsTable.vue
