@@ -1044,7 +1044,7 @@ export default {
 			this.eventBus.emit("show_payment", "false");
 			this.eventBus.emit("set_customer_readonly", false);
 		},
-		// Highlight and focus the submit button when payment screen opens
+		// Highlight the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
 				this.$nextTick(() => {
@@ -1053,7 +1053,6 @@ export default {
 						const el = btn && btn.$el ? btn.$el : btn;
 						if (el) {
 							el.scrollIntoView({ behavior: "smooth", block: "center" });
-							el.focus();
 							this.highlightSubmit = true;
 						}
 					}, 100);
