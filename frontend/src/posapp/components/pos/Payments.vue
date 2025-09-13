@@ -607,6 +607,7 @@
 						size="large"
 						color="primary"
 						theme="dark"
+						style="--v-hover-opacity: 0"
 						@click="submit"
 						:loading="loading"
 						:disabled="loading || vaildatPayment"
