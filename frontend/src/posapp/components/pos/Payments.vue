@@ -610,7 +610,7 @@
 						@click="submit"
 						:loading="loading"
 						:disabled="loading || vaildatPayment"
-						:class="{ 'submit-highlight': highlightSubmit }"
+						:class="['submit-button', { 'submit-highlight': highlightSubmit }]"
 					>
 						{{ __("Submit") }}
 					</v-btn>
@@ -2061,8 +2061,23 @@ export default {
 	background-color: var(--surface-secondary) !important;
 }
 
+.submit-button:focus,
+.submit-button:focus-visible,
+.submit-button:hover,
+.submit-button:active {
+	outline: none;
+	box-shadow: none;
+}
+
+.submit-button:focus::before,
+.submit-button:focus-visible::before,
+.submit-button:hover::before,
+.submit-button:active::before {
+	opacity: 0;
+}
+
 .submit-highlight {
-	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
+	box-shadow: 0 0 0 4px transparent;
 	transition: box-shadow 0.3s ease-in-out;
 }
 </style>
