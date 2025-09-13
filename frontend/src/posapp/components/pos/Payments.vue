@@ -610,7 +610,6 @@
 						@click="submit"
 						:loading="loading"
 						:disabled="loading || vaildatPayment"
-						:class="{ 'submit-highlight': highlightSubmit }"
 					>
 						{{ __("Submit") }}
 					</v-btn>
@@ -763,7 +762,6 @@ export default {
 			sales_person: "", // Selected sales person
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
-			highlightSubmit: false, // Highlight state for submit button
 		};
 	},
 	computed: {
@@ -1053,12 +1051,9 @@ export default {
 						const el = btn && btn.$el ? btn.$el : btn;
 						if (el) {
 							el.scrollIntoView({ behavior: "smooth", block: "center" });
-							this.highlightSubmit = true;
 						}
 					}, 100);
 				});
-			} else {
-				this.highlightSubmit = false;
 			}
 		},
 		// Reset all cash payments to zero
@@ -2058,10 +2053,5 @@ export default {
 
 .cards {
 	background-color: var(--surface-secondary) !important;
-}
-
-.submit-highlight {
-	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
-	transition: box-shadow 0.3s ease-in-out;
 }
 </style>
