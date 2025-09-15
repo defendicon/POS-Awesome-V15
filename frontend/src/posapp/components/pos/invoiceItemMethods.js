@@ -1313,9 +1313,10 @@ export default {
 					const updated_item = response.message.find(
 						(element) => element.posa_row_id == item.posa_row_id,
 					);
-					if (updated_item) {
-						item.actual_qty = updated_item.actual_qty;
-						item.item_uoms = updated_item.item_uoms;
+                                        if (updated_item) {
+                                                item.actual_qty = updated_item.actual_qty;
+                                                item.available_qty = updated_item.actual_qty;
+                                                item.item_uoms = updated_item.item_uoms;
 						item.has_batch_no = updated_item.has_batch_no;
 						item.has_serial_no = updated_item.has_serial_no;
 						item.batch_no_data = updated_item.batch_no_data;
@@ -1544,8 +1545,9 @@ export default {
 					item.projected_qty = data.projected_qty;
 					item.reserved_qty = data.reserved_qty;
 					item.conversion_factor = data.conversion_factor;
-					item.stock_qty = data.stock_qty;
-					item.actual_qty = data.actual_qty;
+                                        item.stock_qty = data.stock_qty;
+                                        item.actual_qty = data.actual_qty;
+                                        item.available_qty = data.actual_qty;
 					item.stock_uom = data.stock_uom;
 					item.has_serial_no = data.has_serial_no;
 					item.has_batch_no = data.has_batch_no;
@@ -1566,7 +1568,11 @@ export default {
 					});
 
 					// Force update UI immediately
-					vm.$forceUpdate();
+                                        if (vm.update_qty_limits) {
+                                                vm.update_qty_limits(item);
+                                        }
+
+                                        vm.$forceUpdate();
 				}
 			},
 		});
@@ -1849,6 +1855,7 @@ export default {
                         const qty = r.message && r.message.length ? flt(r.message[0].available_qty) : 0;
                         this.available_stock_cache[key] = { qty, ts: now };
                         item.available_qty = qty;
+                        item.actual_qty = qty;
                         this.update_qty_limits(item);
                         updateLocalStockCache([{ item_code: item.item_code, actual_qty: qty }]);
                         this.eventBus?.emit("update_item_stock", {

@@ -230,16 +230,16 @@
 											:disabled="!!item.posa_is_replace"
 											prepend-inner-icon="mdi-numeric"
 										></v-text-field>
-										<div v-if="item.max_qty !== undefined" class="text-caption mt-1">
-											{{
-												__("In stock: {0}", [
-													formatFloat(
-														item.max_qty,
-														hide_qty_decimals ? 0 : undefined,
-													),
-												])
-											}}
-										</div>
+                                                                        <div v-if="hasInStockValue(item)" class="text-caption mt-1">
+                                                                                {{
+                                                                                        __("In stock: {0}", [
+                                                                                                formatFloat(
+                                                                                                        getDisplayInStockQty(item),
+                                                                                                        hide_qty_decimals ? 0 : undefined,
+                                                                                                ),
+                                                                                        ])
+                                                                                }}
+                                                                        </div>
 									</div>
 									<div class="form-field">
 										<v-select
@@ -939,11 +939,11 @@ export default {
 			return Math.max(config.min, Math.min(config.max, calculatedWidth));
 		},
 
-		calculateMinColumnWidth(header) {
-			const minWidths = {
-				item_name: 120,
-				qty: 100,
-				rate: 80,
+                calculateMinColumnWidth(header) {
+                        const minWidths = {
+                                item_name: 120,
+                                qty: 100,
+                                rate: 80,
 				amount: 80,
 				discount_value: 70,
 				discount_amount: 80,
@@ -952,14 +952,39 @@ export default {
 				posa_is_offer: 50,
 			};
 
-			return minWidths[header.key] || 60;
-		},
+                        return minWidths[header.key] || 60;
+                },
 
-		setupResizeObserver() {
-			if (typeof ResizeObserver !== "undefined") {
-				// Debounced resize handler for better performance
-				const debouncedResizeHandler = _.debounce((entries) => {
-					for (let entry of entries) {
+                hasInStockValue(item) {
+                        if (!item) return false;
+
+                        const sources = ["actual_qty", "available_qty", "max_qty"];
+                        return sources.some((key) => item[key] !== undefined && item[key] !== null);
+                },
+
+                getDisplayInStockQty(item) {
+                        if (!item) return 0;
+
+                        if (item.actual_qty !== undefined && item.actual_qty !== null) {
+                                return item.actual_qty;
+                        }
+
+                        if (item.available_qty !== undefined && item.available_qty !== null) {
+                                return item.available_qty;
+                        }
+
+                        if (item.max_qty !== undefined && item.max_qty !== null) {
+                                return item.max_qty;
+                        }
+
+                        return 0;
+                },
+
+                setupResizeObserver() {
+                        if (typeof ResizeObserver !== "undefined") {
+                                // Debounced resize handler for better performance
+                                const debouncedResizeHandler = _.debounce((entries) => {
+                                        for (let entry of entries) {
 						const { width, height } = entry.contentRect;
 
 						// Only update if dimensions actually changed
