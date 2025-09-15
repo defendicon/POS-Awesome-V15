@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Youssef Restom and contributors
 # For license information, please see license.txt
 
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, add_days
-from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from frappe.utils import add_days, flt
+
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
+from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 
 
 def validate(doc, method):
@@ -34,7 +33,7 @@ def before_cancel(doc, method):
 
 
 def add_loyalty_point(invoice_doc):
-    for offer in invoice_doc.posa_offers:
+    for offer in getattr(invoice_doc, "posa_offers", []):
         if offer.offer == "Loyalty Point":
             original_offer = frappe.get_doc("POS Offer", offer.offer_name)
             if original_offer.loyalty_points > 0:
@@ -60,22 +59,22 @@ def add_loyalty_point(invoice_doc):
 
 def create_sales_order(doc):
     if (
-        doc.posa_pos_opening_shift
+        getattr(doc, "posa_pos_opening_shift", None)
         and doc.pos_profile
         and doc.is_pos
-        and doc.posa_delivery_date
+        and getattr(doc, "posa_delivery_date", None)
         and not doc.update_stock
         and frappe.get_value("POS Profile", doc.pos_profile, "posa_allow_sales_order")
     ):
         sales_order_doc = make_sales_order(doc.name)
         if sales_order_doc:
-            sales_order_doc.posa_notes = doc.posa_notes
+            sales_order_doc.posa_notes = getattr(doc, "posa_notes", None)
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
             sales_order_doc.save()
             sales_order_doc.submit()
             url = frappe.utils.get_url_to_form(sales_order_doc.doctype, sales_order_doc.name)
-            msgprint = "Sales Order Created at <a href='{0}'>{1}</a>".format(url, sales_order_doc.name)
+            msgprint = f"Sales Order Created at <a href='{url}'>{sales_order_doc.name}</a>"
             frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green", alert=True)
             i = 0
             for item in sales_order_doc.items:
@@ -93,7 +92,9 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
     def update_item(obj, target, source_parent):
         target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
-        target.delivery_date = obj.posa_delivery_date or source_parent.posa_delivery_date
+        target.delivery_date = getattr(obj, "posa_delivery_date", None) or getattr(
+            source_parent, "posa_delivery_date", None
+        )
 
     doclist = get_mapped_doc(
         "Sales Invoice",
@@ -128,7 +129,7 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
 
 def update_coupon(doc, transaction_type):
-    for coupon in doc.posa_coupons:
+    for coupon in getattr(doc, "posa_coupons", []):
         if not coupon.applied:
             continue
         update_coupon_code_count(coupon.coupon, transaction_type)
