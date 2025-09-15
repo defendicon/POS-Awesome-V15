@@ -607,6 +607,7 @@
 						size="large"
 						color="primary"
 						theme="dark"
+						class="submit-btn"
 						@click="submit"
 						:loading="loading"
 						:disabled="loading || vaildatPayment"
@@ -2059,6 +2060,12 @@ export default {
 
 .cards {
 	background-color: var(--surface-secondary) !important;
+}
+
+.submit-btn:focus,
+.submit-highlight {
+	background-color: rgb(var(--v-theme-primary)) !important;
+	color: rgb(var(--v-theme-on-primary)) !important;
 }
 
 .submit-highlight {
