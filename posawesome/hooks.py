@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from . import __version__ as app_version
 
 app_name = "posawesome"
@@ -254,6 +252,8 @@ fixtures = [
                     "Address-posa_delivery_charges",
                     "Sales Invoice-posa_delivery_charges",
                     "Sales Invoice-posa_delivery_charges_rate",
+                    "POS Invoice-posa_delivery_charges",
+                    "POS Invoice-posa_delivery_charges_rate",
                     "POS Profile-posa_auto_set_delivery_charges",
                     "POS Profile-posa_use_delivery_charges",
                     "POS Profile-hide_expected_amount",
