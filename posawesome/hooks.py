@@ -102,6 +102,11 @@ doc_events = {
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
     },
+    "POS Invoice": {
+        "validate": "posawesome.posawesome.api.invoice.validate",
+        "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+        "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
+    },
     "Customer": {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
@@ -148,9 +153,10 @@ doc_events = {
 # 	"Task": "posawesome.task.get_dashboard_data"
 # }
 
-# override_doctype_class = {
-# "doctype": "method",
-# }
+# Override standard DocTypes with custom classes
+override_doctype_class = {
+    "POS Invoice": "posawesome.posawesome.overrides.pos_invoice.CustomPOSInvoice",
+}
 
 # exempt linked doctypes from being automatically cancelled
 #
