@@ -1,13 +1,14 @@
 /* global __, frappe, flt */
 import {
-	isOffline,
-	saveCustomerBalance,
-	getCachedCustomerBalance,
-	getCachedPriceListItems,
-	getCustomerStorage,
-	getOfflineCustomers,
-	getTaxTemplate,
-	getTaxInclusiveSetting,
+        isOffline,
+        saveCustomerBalance,
+        getCachedCustomerBalance,
+        getCachedPriceListItems,
+        getCustomerStorage,
+        getOfflineCustomers,
+        getTaxTemplate,
+        getTaxInclusiveSetting,
+        updateLocalStockCache,
 } from "../../../offline/index.js";
 
 // Import composables
@@ -1845,14 +1846,19 @@ export default {
 					]),
 				},
 			});
-			const qty = r.message && r.message.length ? flt(r.message[0].available_qty) : 0;
-			this.available_stock_cache[key] = { qty, ts: now };
-			item.available_qty = qty;
-			this.update_qty_limits(item);
-		} catch (e) {
-			console.error("Failed to fetch available qty", e);
-		}
-	},
+                        const qty = r.message && r.message.length ? flt(r.message[0].available_qty) : 0;
+                        this.available_stock_cache[key] = { qty, ts: now };
+                        item.available_qty = qty;
+                        this.update_qty_limits(item);
+                        updateLocalStockCache([{ item_code: item.item_code, actual_qty: qty }]);
+                        this.eventBus?.emit("update_item_stock", {
+                                item_code: item.item_code,
+                                actual_qty: qty,
+                        });
+                } catch (e) {
+                        console.error("Failed to fetch available qty", e);
+                }
+        },
 
 	// Set serial numbers for an item (and update qty)
 	set_serial_no(item) {

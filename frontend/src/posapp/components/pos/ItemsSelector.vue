@@ -2907,9 +2907,16 @@ export default {
 		this.eventBus.on("update_customer_price_list", (data) => {
 			this.customer_price_list = data;
 		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
-		});
+                this.eventBus.on("update_customer", (data) => {
+                        this.customer = data;
+                });
+
+                this.eventBus.on("update_item_stock", ({ item_code, actual_qty }) => {
+                        const item = this.items.find((it) => it.item_code === item_code);
+                        if (item) {
+                                item.actual_qty = actual_qty;
+                        }
+                });
 
 		// Manually trigger a full item reload when requested
 		this.eventBus.on("force_reload_items", async () => {
@@ -3066,12 +3073,13 @@ export default {
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
-		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
-		this.eventBus.off("force_reload_items");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
-	},
+                this.eventBus.off("update_coupons_counters");
+                this.eventBus.off("update_customer_price_list");
+                this.eventBus.off("update_customer");
+                this.eventBus.off("update_item_stock");
+                this.eventBus.off("force_reload_items");
+                window.removeEventListener("resize", this.checkItemContainerOverflow);
+        },
 };
 </script>
 
