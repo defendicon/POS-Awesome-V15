@@ -1903,27 +1903,41 @@ export default {
 						: null;
 				const requestedQty = Math.abs(new_item.qty || 1);
 
-				if (
-					availableQty !== null &&
-					availableQty < requestedQty &&
-					(this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0)
-				) {
-					const formattedAvailable = this.format_number
-						? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
-						: availableQty;
-					const formattedRequested = this.format_number
-						? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
-						: requestedQty;
-					this.showScanError({
-						message: this.__("Quantity not available for {0}", [new_item.item_name || scannedCodeForDisplay]),
-						code: scannedCodeForDisplay,
-						details: this.__("Available: {0}. Requested: {1}.", [
-							formattedAvailable,
-							formattedRequested,
-						]),
-					});
-					return;
-				}
+                                if (availableQty !== null && availableQty < requestedQty) {
+                                        const negativeStockEnabled = this.isNegativeStockEnabled();
+                                        const shouldBlock =
+                                                !negativeStockEnabled &&
+                                                (this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
+
+                                        if (shouldBlock || negativeStockEnabled) {
+                                                const formattedAvailable = this.format_number
+                                                        ? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
+                                                        : availableQty;
+                                                const formattedRequested = this.format_number
+                                                        ? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
+                                                        : requestedQty;
+
+                                                if (shouldBlock) {
+                                                        this.showScanError({
+                                                                message: this.__("Quantity not available for {0}", [new_item.item_name || scannedCodeForDisplay]),
+                                                                code: scannedCodeForDisplay,
+                                                                details: this.__("Available: {0}. Requested: {1}.", [
+                                                                        formattedAvailable,
+                                                                        formattedRequested,
+                                                                ]),
+                                                        });
+                                                        return;
+                                                }
+
+                                                this.eventBus.emit("show_message", {
+                                                        title: this.__(
+                                                                "Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
+                                                                [formattedAvailable, formattedRequested],
+                                                        ),
+                                                        color: "warning",
+                                                });
+                                        }
+                                }
 
 				if (fromScanner) {
 					this.awaitingScanResult = true;
