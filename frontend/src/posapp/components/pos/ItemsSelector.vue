@@ -512,6 +512,7 @@ export default {
 	},
 	data: () => ({
 		pos_profile: {},
+		stock_settings: {},
 		flags: {},
 		items_view: "list",
 		item_group: "ALL",
@@ -2708,34 +2709,49 @@ export default {
 					? qtyFromBarcode
 					: newItem.qty ?? 1;
 			const requestedQty = Math.abs(requestedQtyRaw || 1);
-			const availableQty =
-				typeof newItem.available_qty === "number"
-					? newItem.available_qty
-					: typeof newItem.actual_qty === "number"
-					? newItem.actual_qty
-					: null;
+                        const availableQty =
+                                typeof newItem.available_qty === "number"
+                                        ? newItem.available_qty
+                                        : typeof newItem.actual_qty === "number"
+                                        ? newItem.actual_qty
+                                        : null;
 
-			if (
-				availableQty !== null &&
-				availableQty < requestedQty &&
-				(this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0)
-			) {
-				const formattedAvailable = this.format_number
-					? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: availableQty;
-				const formattedRequested = this.format_number
-					? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: requestedQty;
-				this.showScanError({
-					message: this.__("Quantity not available for {0}", [newItem.item_name || scannedCode]),
-					code: scannedCode,
-					details: this.__("Available: {0}. Requested: {1}.", [
-						formattedAvailable,
-						formattedRequested,
-					]),
-				});
-				return;
-			}
+                        if (availableQty !== null && availableQty < requestedQty) {
+                                const formattedAvailable = this.format_number
+                                        ? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
+                                        : availableQty;
+                                const formattedRequested = this.format_number
+                                        ? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
+                                        : requestedQty;
+                                const negativeStockEnabled = this.isNegativeStockEnabled();
+                                const shouldBlock =
+                                        !negativeStockEnabled &&
+                                        (this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
+
+                                if (shouldBlock) {
+                                        this.showScanError({
+                                                message: this.__("Quantity not available for {0}", [
+                                                        newItem.item_name || scannedCode,
+                                                ]),
+                                                code: scannedCode,
+                                                details: this.__("Available: {0}. Requested: {1}.", [
+                                                        formattedAvailable,
+                                                        formattedRequested,
+                                                ]),
+                                        });
+                                        return;
+                                }
+
+                                if (negativeStockEnabled) {
+                                        this.eventBus.emit("show_message", {
+                                                title: this.__(
+                                                        "Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
+                                                        [formattedAvailable, formattedRequested],
+                                                ),
+                                                color: "warning",
+                                        });
+                                }
+                        }
 
 			this.awaitingScanResult = true;
 
@@ -2759,13 +2775,24 @@ export default {
 				// Clear search after successful addition and refocus input
 				this.clearSearch();
 				this.$refs.debounce_search && this.$refs.debounce_search.focus();
-			} finally {
-				this.awaitingScanResult = false;
-			}
-		},
-		showMultipleItemsDialog(items, scannedCode) {
-			// Create a dialog to let user choose from multiple matches
-			const dialog = new frappe.ui.Dialog({
+                        } finally {
+                                this.awaitingScanResult = false;
+                        }
+                },
+                isNegativeStockEnabled() {
+                        const setting = this.stock_settings?.allow_negative_stock;
+                        if (setting === undefined || setting === null) {
+                                return false;
+                        }
+                        if (typeof setting === "string") {
+                                const normalized = setting.toLowerCase();
+                                return normalized === "1" || normalized === "true" || normalized === "yes";
+                        }
+                        return Boolean(setting);
+                },
+                showMultipleItemsDialog(items, scannedCode) {
+                        // Create a dialog to let user choose from multiple matches
+                        const dialog = new frappe.ui.Dialog({
 				title: __("Multiple Items Found"),
 				fields: [
 					{
@@ -3133,12 +3160,13 @@ export default {
 		});
 
 		// Event listeners
-		this.eventBus.on("register_pos_profile", async (data) => {
-			this.pos_profile = data.pos_profile;
-			this.get_items_groups();
-			await this.initializeItems();
-			this.items_view = this.pos_profile.posa_default_card_view ? "card" : "list";
-		});
+                this.eventBus.on("register_pos_profile", async (data) => {
+                        this.pos_profile = data.pos_profile;
+                        this.stock_settings = data.stock_settings || {};
+                        this.get_items_groups();
+                        await this.initializeItems();
+                        this.items_view = this.pos_profile.posa_default_card_view ? "card" : "list";
+                });
 		this.eventBus.on("update_cur_items_details", () => {
 			this.update_cur_items_details();
 		});
