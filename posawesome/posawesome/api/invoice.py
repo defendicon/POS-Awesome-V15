@@ -15,7 +15,6 @@ from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_co
 
 
 def validate(doc, method):
-    rebalance_consolidated_return_payments(doc)
     validate_shift(doc)
     set_patient(doc)
     auto_set_delivery_charges(doc)
@@ -31,76 +30,6 @@ def before_submit(doc, method):
 
 def before_cancel(doc, method):
     update_coupon(doc, "cancelled")
-
-
-def rebalance_consolidated_return_payments(doc):
-    """Ensure consolidated POS credit notes never overstate cash paid out."""
-
-    if doc.doctype != "Sales Invoice" or not getattr(doc, "is_return", 0):
-        return
-
-    # Consolidated credit notes are generated during shift closing.
-    if not getattr(doc, "is_consolidated", 0):
-        return
-
-    payments = doc.get("payments", [])
-    target_total = flt(doc.rounded_total or doc.grand_total)
-    write_off = flt(getattr(doc, "write_off_amount", 0))
-    paid_total = sum(flt(p.amount or 0) for p in payments)
-
-    precision = doc.precision("grand_total") or 2
-    tolerance = 1 / (10 ** (precision + 1))
-
-    difference = paid_total + write_off - target_total
-    if abs(difference) <= tolerance:
-        return
-
-    sortable_payments = sorted(
-        (p for p in payments if flt(p.amount)),
-        key=lambda row: abs(flt(row.amount)),
-        reverse=True,
-    )
-
-    if not sortable_payments:
-        doc.write_off_amount = target_total - paid_total
-        if hasattr(doc, "base_write_off_amount"):
-            doc.base_write_off_amount = flt(
-                doc.write_off_amount * (doc.conversion_rate or 1)
-            )
-        return
-
-    remaining = difference
-    for pay in sortable_payments:
-        if abs(remaining) <= tolerance:
-            break
-
-        amount = flt(pay.amount or 0)
-        if not amount:
-            continue
-
-        adjust = min(abs(amount), abs(remaining))
-        adjust *= 1 if remaining > 0 else -1
-        pay.amount = amount - adjust
-        remaining -= adjust
-
-    if abs(remaining) > tolerance:
-        anchor = sortable_payments[0]
-        anchor.amount = flt(anchor.amount or 0) - remaining
-        remaining = 0
-
-    if hasattr(doc, "set_paid_amount"):
-        if not getattr(doc, "conversion_rate", None):
-            doc.conversion_rate = 1
-        doc.set_paid_amount()
-
-    new_paid_total = sum(flt(p.amount or 0) for p in doc.get("payments", []))
-    residual = new_paid_total + flt(getattr(doc, "write_off_amount", 0)) - target_total
-    if abs(residual) > tolerance:
-        doc.write_off_amount = target_total - new_paid_total
-        if hasattr(doc, "base_write_off_amount"):
-            doc.base_write_off_amount = flt(
-                doc.write_off_amount * (doc.conversion_rate or 1)
-            )
 
 
 def add_loyalty_point(invoice_doc):
