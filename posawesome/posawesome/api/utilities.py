@@ -404,6 +404,51 @@ _LANGUAGE_CACHE = {
     "cache_duration": 300,  # 5 minutes
 }
 
+
+def _set_active_session_language(lang_code: str) -> None:
+    """Ensure the current request session reflects the selected language."""
+
+    # Update thread-local language used by Frappe during the request
+    try:
+        frappe.local.lang = lang_code
+    except Exception:
+        pass
+
+    # Update session dictionaries so subsequent requests use the new language
+    for session_obj in (
+        getattr(frappe.local, "session", None),
+        getattr(frappe.session, "data", None),
+    ):
+        if not session_obj:
+            continue
+        try:
+            session_obj["lang"] = lang_code
+            session_obj["language"] = lang_code
+        except Exception:
+            pass
+
+    # Some code paths read frappe.session.lang directly
+    try:
+        frappe.session.lang = lang_code
+    except Exception:
+        pass
+
+    # Keep boot info in sync so the UI gets the updated language immediately
+    boot = getattr(frappe.local, "boot", None)
+    if boot:
+        boot.lang = lang_code
+        sysdefaults = boot.get("sysdefaults")
+        if isinstance(sysdefaults, dict):
+            sysdefaults["language"] = lang_code
+
+    # Update preferred language cookie when available
+    cookie_manager = getattr(frappe.local, "cookie_manager", None)
+    if cookie_manager:
+        try:
+            cookie_manager.set_cookie("preferred_language", lang_code)
+        except Exception:
+            pass
+
 # Language display names mapping (moved to module level for reuse)
 LANGUAGE_NAMES = {
     "en": "English",
@@ -518,6 +563,7 @@ def get_current_user_language():
             }
 
         user_language = _get_user_language_cached(user)
+        _set_active_session_language(user_language)
         available_languages = get_available_languages()
 
         # Find current language details
@@ -567,6 +613,7 @@ def set_current_user_language(lang_code):
         # Clear specific caches
         frappe.clear_cache(user=user)
         _get_user_language_cached.cache_clear()
+        _set_active_session_language(lang_code)
 
         return {
             "success": True,
