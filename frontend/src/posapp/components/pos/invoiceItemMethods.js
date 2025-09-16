@@ -26,19 +26,96 @@ export default {
 		return removeItem(item, this);
 	},
 
-	async add_item(item) {
-		const res = await addItem(item, this);
-		const target = this.items.find(
-			(it) =>
-				it.item_code === item.item_code &&
-				it.uom === (item.uom || it.uom) &&
-				(!it.batch_no || it.batch_no === item.batch_no),
-		);
-		if (target && this.fetch_available_qty) {
-			this.fetch_available_qty(target);
-		}
-		return res;
-	},
+        async add_item(item) {
+                const findMatchingItem = (candidate) => {
+                        if (!candidate) {
+                                return null;
+                        }
+
+                        const candidateUom = candidate.uom || null;
+                        const candidateBatch = candidate.batch_no || candidate.to_set_batch_no || "";
+
+                        return this.items.find((invoiceItem) => {
+                                if (!invoiceItem || invoiceItem.posa_is_offer || invoiceItem.posa_is_replace) {
+                                        return false;
+                                }
+                                if (invoiceItem.item_code !== candidate.item_code) {
+                                        return false;
+                                }
+
+                                if (candidateUom && invoiceItem.uom !== candidateUom) {
+                                        return false;
+                                }
+
+                                if (this.pos_profile?.posa_auto_set_batch && candidate.has_batch_no) {
+                                        return true;
+                                }
+
+                                const invoiceBatch = invoiceItem.batch_no || "";
+                                if (candidateBatch && invoiceBatch) {
+                                        return invoiceBatch === candidateBatch;
+                                }
+
+                                return !candidateBatch && !invoiceBatch;
+                        });
+                };
+
+                const toNumber = (value) => {
+                        if (value === undefined || value === null || value === "") {
+                                return null;
+                        }
+                        const numeric = parseFloat(value);
+                        return Number.isNaN(numeric) ? null : numeric;
+                };
+
+                const previousMatch = findMatchingItem(item);
+                const previousQty = previousMatch ? toNumber(previousMatch.qty) : null;
+                const previousAbsQty = previousQty !== null ? Math.abs(previousQty) : null;
+                const previousLength = this.items.length;
+
+                const response = await addItem(item, this);
+
+                const target = findMatchingItem(item);
+                const newQty = target ? toNumber(target.qty) : null;
+                const newAbsQty = newQty !== null ? Math.abs(newQty) : null;
+                const addedNewLine = this.items.length > previousLength && Boolean(target);
+
+                let success = false;
+                if (target) {
+                        if (!previousMatch || addedNewLine) {
+                                success = newAbsQty !== null && newAbsQty > 0;
+                        } else if (newAbsQty !== null) {
+                                success = previousAbsQty === null ? newAbsQty > 0 : newAbsQty > previousAbsQty;
+                        }
+                }
+
+                let reason = null;
+                if (!success) {
+                        if (!target) {
+                                reason = "not_added";
+                        } else if (
+                                target.max_qty !== undefined &&
+                                target.max_qty !== null &&
+                                flt(target.max_qty) <= 0
+                        ) {
+                                reason = "no_stock";
+                        } else if (previousAbsQty !== null && newAbsQty === previousAbsQty) {
+                                reason = "unchanged";
+                        } else if (!newAbsQty) {
+                                reason = "no_qty";
+                        }
+                }
+
+                return {
+                        success,
+                        target,
+                        previousQty,
+                        newQty,
+                        reason,
+                        addedNewLine,
+                        response,
+                };
+        },
 
 	// Create a new item object with default and calculated fields
 	get_new_item(item) {
@@ -1758,33 +1835,66 @@ export default {
 	},
 
 	// Update UOM (unit of measure) for an item and recalculate prices
-	calc_uom(item, value) {
-		return calcUom(item, value, this);
-	},
+        calc_uom(item, value) {
+                return calcUom(item, value, this);
+        },
 
-	// Calculate stock quantity for an item with stock validation
-	calc_stock_qty(item, value) {
-		calcStockQty(item, value, this);
-		if (this.update_qty_limits) {
-			this.update_qty_limits(item);
-		}
-		if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
-			const blockSale = !this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-			if (blockSale) {
-				item.qty = item.max_qty;
-				calcStockQty(item, item.qty, this);
-				this.$forceUpdate();
-				this.eventBus.emit("show_message", {
-					title: __(`Maximum available quantity is {0}. Quantity adjusted to match stock.`, [
-						this.formatFloat(item.max_qty),
-					]),
-					color: "error",
-				});
-			} else {
-				this.eventBus.emit("show_message", {
-					title: __("Stock is lower than requested. Proceeding may create negative stock."),
-					color: "warning",
-				});
+        notify_quantity_issue(item, limitedQty) {
+                const qtyValue =
+                        limitedQty !== undefined && limitedQty !== null ? flt(limitedQty) : 0;
+                const isOutOfStock = qtyValue <= 0;
+                const itemLabel =
+                        (item && (item.item_name || item.item_code)) || __("Item");
+                const formattedQty =
+                        typeof this.formatFloat === "function" ? this.formatFloat(qtyValue) : qtyValue;
+                const message = isOutOfStock
+                        ? __(`Quantity not available for {0}.`, [itemLabel])
+                        : __(`Maximum available quantity is {0}. Quantity adjusted to match stock.`, [
+                                  formattedQty,
+                          ]);
+
+                this.eventBus.emit("show_message", {
+                        title: message,
+                        color: "error",
+                });
+
+                if (typeof frappe !== "undefined" && typeof frappe.show_alert === "function") {
+                        frappe.show_alert(
+                                {
+                                        message,
+                                        indicator: isOutOfStock ? "red" : "orange",
+                                },
+                                5,
+                        );
+                }
+
+                if (
+                        typeof frappe !== "undefined" &&
+                        frappe.utils &&
+                        typeof frappe.utils.play_sound === "function"
+                ) {
+                        frappe.utils.play_sound("error");
+                }
+        },
+
+        // Calculate stock quantity for an item with stock validation
+        calc_stock_qty(item, value) {
+                calcStockQty(item, value, this);
+                if (this.update_qty_limits) {
+                        this.update_qty_limits(item);
+                }
+                if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
+                        const blockSale = !this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
+                        if (blockSale) {
+                                item.qty = item.max_qty;
+                                calcStockQty(item, item.qty, this);
+                                this.$forceUpdate();
+                                this.notify_quantity_issue(item, item.max_qty);
+                        } else {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Stock is lower than requested. Proceeding may create negative stock."),
+                                        color: "warning",
+                                });
 			}
 		}
 	},
@@ -1794,24 +1904,19 @@ export default {
 		if (item && item.available_qty !== undefined) {
 			item.max_qty = flt(item.available_qty / (item.conversion_factor || 1));
 
-			if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
-				const blockSale =
-					!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-				if (blockSale) {
-					item.qty = item.max_qty;
-					calcStockQty(item, item.qty, this);
-					this.$forceUpdate();
-					this.eventBus.emit("show_message", {
-						title: __(`Maximum available quantity is {0}. Quantity adjusted to match stock.`, [
-							this.formatFloat(item.max_qty),
-						]),
-						color: "error",
-					});
-				} else {
-					this.eventBus.emit("show_message", {
-						title: __("Stock is lower than requested. Proceeding may create negative stock."),
-						color: "warning",
-					});
+                        if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
+                                const blockSale =
+                                        !this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
+                                if (blockSale) {
+                                        item.qty = item.max_qty;
+                                        calcStockQty(item, item.qty, this);
+                                        this.$forceUpdate();
+                                        this.notify_quantity_issue(item, item.max_qty);
+                                } else {
+                                        this.eventBus.emit("show_message", {
+                                                title: __("Stock is lower than requested. Proceeding may create negative stock."),
+                                                color: "warning",
+                                        });
 				}
 			}
 

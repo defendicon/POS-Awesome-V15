@@ -1801,12 +1801,29 @@ export default {
 					}
 					item.qty = qtyVal;
 				}
-				const payload = { ...item };
-				delete payload._barcode_qty;
-				this.eventBus.emit("add_item", payload);
-				this.qty = 1;
-			}
-		},
+                                const payload = { ...item };
+                                delete payload._barcode_qty;
+                                this.qty = 1;
+
+                                return await new Promise((resolve) => {
+                                        let settled = false;
+                                        const finalize = (result) => {
+                                                if (!settled) {
+                                                        settled = true;
+                                                        resolve(result);
+                                                }
+                                        };
+
+                                        this.eventBus.emit("add_item", {
+                                                item: payload,
+                                                meta: {
+                                                        source: this.search_from_scanner ? "scanner" : "selector",
+                                                        onResult: finalize,
+                                                },
+                                        });
+                                });
+                        }
+                },
 		async enter_event() {
 			if (!this.filtered_items.length || !this.first_search) {
 				return;
@@ -2416,26 +2433,40 @@ export default {
 					return;
 				}
 
-				frappe.show_alert(
-					{
-						message: `${this.__("Item not found")}: ${scannedCode}`,
-						indicator: "red",
-					},
-					5,
-				);
-				return;
-			} catch (e) {
-				console.error("Error fetching item from barcode:", e);
-				frappe.show_alert(
-					{
-						message: `${this.__("Item not found")}: ${scannedCode}`,
-						indicator: "red",
-					},
-					5,
-				);
-				return;
-			}
-		},
+                                frappe.show_alert(
+                                        {
+                                                message: `${this.__("Item not found")}: ${scannedCode}`,
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                                if (
+                                        typeof frappe !== "undefined" &&
+                                        frappe.utils &&
+                                        typeof frappe.utils.play_sound === "function"
+                                ) {
+                                        frappe.utils.play_sound("error");
+                                }
+                                return;
+                        } catch (e) {
+                                console.error("Error fetching item from barcode:", e);
+                                frappe.show_alert(
+                                        {
+                                                message: `${this.__("Item not found")}: ${scannedCode}`,
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                                if (
+                                        typeof frappe !== "undefined" &&
+                                        frappe.utils &&
+                                        typeof frappe.utils.play_sound === "function"
+                                ) {
+                                        frappe.utils.play_sound("error");
+                                }
+                                return;
+                        }
+                },
 		searchItemsByCode(code) {
 			return this.items.filter((item) => {
 				const searchTerm = code.toLowerCase();
@@ -2497,22 +2528,41 @@ export default {
 				newItem._barcode_qty = true;
 			}
 
-			// Use existing add_item method with enhanced feedback
-			await this.add_item(newItem);
+                        // Use existing add_item method with enhanced feedback
+                        const additionResult = await this.add_item(newItem);
 
-			// Show success message
-			frappe.show_alert(
-				{
-					message: `Added: ${item.item_name}`,
-					indicator: "green",
-				},
-				3,
-			);
+                        if (!additionResult || !additionResult.success) {
+                                const reason = additionResult?.reason;
+                                if (!reason || (reason !== "no_stock" && reason !== "unchanged")) {
+                                        frappe.show_alert(
+                                                {
+                                                        message: this.__(
+                                                                "Unable to add item to invoice. Please try again.",
+                                                        ),
+                                                        indicator: "red",
+                                                },
+                                                5,
+                                        );
+                                }
 
-			// Clear search after successful addition and refocus input
-			this.clearSearch();
-			this.$refs.debounce_search && this.$refs.debounce_search.focus();
-		},
+                                this.clearSearch();
+                                this.$refs.debounce_search && this.$refs.debounce_search.focus();
+                                return;
+                        }
+
+                        // Show success message
+                        frappe.show_alert(
+                                {
+                                        message: `Added: ${item.item_name}`,
+                                        indicator: "green",
+                                },
+                                3,
+                        );
+
+                        // Clear search after successful addition and refocus input
+                        this.clearSearch();
+                        this.$refs.debounce_search && this.$refs.debounce_search.focus();
+                },
 		showMultipleItemsDialog(items, scannedCode) {
 			// Create a dialog to let user choose from multiple matches
 			const dialog = new frappe.ui.Dialog({

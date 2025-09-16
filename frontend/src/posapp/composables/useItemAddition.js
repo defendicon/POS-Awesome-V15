@@ -193,9 +193,9 @@ export function useItemAddition() {
 				// Skip recalculation to preserve the manually set rate
 				if (context.update_item_detail) context.update_item_detail(new_item, false);
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(new_item);
-				}
+                                if (context.fetch_available_qty) {
+                                        await context.fetch_available_qty(new_item);
+                                }
 
 				if (
 					context.isReturnInvoice &&
@@ -275,9 +275,9 @@ export function useItemAddition() {
 					await context.calc_uom(cur_item, cur_item.uom);
 				}
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(cur_item);
-				}
+                                if (context.fetch_available_qty) {
+                                        await context.fetch_available_qty(cur_item);
+                                }
 				if (cur_item.qty > previousQty) {
 					moveItemToTop(context, cur_item);
 				}
@@ -320,9 +320,9 @@ export function useItemAddition() {
 				await context.calc_uom(cur_item, cur_item.uom);
 			}
 
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(cur_item);
-			}
+                        if (context.fetch_available_qty) {
+                                await context.fetch_available_qty(cur_item);
+                        }
 			if (cur_item.qty > previousQty) {
 				moveItemToTop(context, cur_item);
 			}

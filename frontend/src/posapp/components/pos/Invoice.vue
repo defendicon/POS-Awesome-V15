@@ -1242,9 +1242,24 @@ export default {
 			this.fetch_price_lists();
 			this.update_price_list();
 		});
-		this.eventBus.on("add_item", (item) => {
-			this.add_item(item);
-		});
+                this.eventBus.on("add_item", (payload) => {
+                        const hasMeta = payload && typeof payload === "object" && "item" in payload;
+                        const item = hasMeta ? payload.item : payload;
+                        const meta = hasMeta ? payload.meta : null;
+
+                        const result = this.add_item(item);
+
+                        if (meta && typeof meta.onResult === "function") {
+                                Promise.resolve(result)
+                                        .then((response) => {
+                                                meta.onResult(response);
+                                        })
+                                        .catch((error) => {
+                                                console.error("Failed to add item from event bus:", error);
+                                                meta.onResult({ success: false, error });
+                                        });
+                        }
+                });
 		this.eventBus.on("update_customer", (customer) => {
 			this.customer = customer;
 		});
