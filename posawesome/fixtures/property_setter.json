@@ -43,9 +43,26 @@
   "is_system_generated": 0,
   "modified": "2024-01-01 00:00:00",
   "module": null,
-  "name": "Sales Invoice Reference-sales_invoice-reqd",
-  "property": "reqd",
-  "property_type": "Check",
+ "name": "Sales Invoice Reference-sales_invoice-reqd",
+ "property": "reqd",
+ "property_type": "Check",
+ "row_name": null,
+ "value": "0"
+}
+,
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "update_outstanding_for_self",
+  "is_system_generated": 0,
+  "modified": "2024-05-15 00:00:00",
+  "module": null,
+  "name": "Sales Invoice-update_outstanding_for_self-default",
+  "property": "default",
+  "property_type": "Text",
   "row_name": null,
   "value": "0"
  }
