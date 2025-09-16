@@ -1,16 +1,21 @@
 <template>
 	<div :style="responsiveStyles">
-		<v-dialog
-			v-model="scanErrorDialog"
-			persistent
-			max-width="420"
-			content-class="scan-error-dialog"
-		>
-			<v-card>
-				<v-card-title class="d-flex align-center text-error text-h6">
-					<v-icon color="error" class="mr-2">mdi-alert-octagon</v-icon>
-					{{ __("Scan Error") }}
-				</v-card-title>
+                <v-dialog
+                        v-model="scanErrorDialog"
+                        persistent
+                        max-width="420"
+                        content-class="scan-error-dialog"
+                >
+                        <v-card>
+                                <v-card-title
+                                        class="d-flex align-center text-h6"
+                                        :class="scanDialogConfig.titleClass"
+                                >
+                                        <v-icon :color="scanDialogConfig.color" class="mr-2">
+                                                {{ scanDialogConfig.icon }}
+                                        </v-icon>
+                                        {{ scanDialogConfig.title }}
+                                </v-card-title>
 				<v-divider></v-divider>
 				<v-card-text>
 					<p class="scan-error-message">{{ scanErrorMessage }}</p>
@@ -583,10 +588,11 @@ export default {
 		loadProgress: 0,
 		totalItemCount: 0,
 		scanErrorDialog: false,
-		scanErrorMessage: "",
-		scanErrorDetails: "",
-		scanErrorCode: "",
-		scannerLocked: false,
+                scanErrorMessage: "",
+                scanErrorDetails: "",
+                scanErrorCode: "",
+                scanFeedbackType: "error",
+                scannerLocked: false,
 		scanAudioContext: null,
 		pendingScanCode: "",
 		awaitingScanResult: false,
@@ -2385,15 +2391,16 @@ export default {
 
 			this.$nextTick(() => {
 				if (this.filtered_items.length == 0) {
-					this.eventBus.emit("show_message", {
-						title: `No Item has this barcode "${sCode}"`,
-						color: "error",
-					});
-					this.showScanError({
-						message: `${this.__("Item not found")}: ${sCode}`,
-						code: sCode,
-						details: this.__("Please verify the barcode or search manually."),
-					});
+                                        this.eventBus.emit("show_message", {
+                                                title: `No Item has this barcode "${sCode}"`,
+                                                color: "warning",
+                                        });
+                                        this.showScanError({
+                                                message: `${this.__("Item not found")}: ${sCode}`,
+                                                code: sCode,
+                                                details: this.__("Please verify the barcode or search manually."),
+                                                type: "not-found",
+                                        });
 				} else {
 					this.enter_event();
 				}
@@ -2471,67 +2478,84 @@ export default {
 			}
 			return this.scanAudioContext;
 		},
-		playScanTone(type = "success") {
-			if (typeof window === "undefined") {
-				return;
-			}
-			try {
-				const ctx = this.ensureScanAudioContext();
-				if (!ctx) {
-					if (frappe?.utils?.play_sound) {
-						frappe.utils.play_sound(type === "success" ? "submit" : "error");
-					}
-					return;
-				}
-				const now = ctx.currentTime;
-				const duration = type === "success" ? 0.16 : 0.35;
-				const oscillator = ctx.createOscillator();
-				const gainNode = ctx.createGain();
-				oscillator.type = "sine";
-				oscillator.frequency.value = type === "success" ? 880 : 220;
-				gainNode.gain.setValueAtTime(type === "success" ? 0.18 : 0.28, now);
-				gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
-				oscillator.connect(gainNode);
-				gainNode.connect(ctx.destination);
-				oscillator.start(now);
-				oscillator.stop(now + duration);
-			} catch (error) {
-				console.warn("Scan tone playback failed:", error);
-				if (frappe?.utils?.play_sound) {
-					frappe.utils.play_sound(type === "success" ? "submit" : "error");
-				}
-			}
-		},
-		showScanError({ message, code = "", details = "" } = {}) {
-			this.scanErrorMessage = message || this.__("Unable to add scanned item.");
-			this.scanErrorCode = code;
-			this.scanErrorDetails = details;
-			if (code) {
-				this.pendingScanCode = code;
-			}
-			this.awaitingScanResult = false;
-			this.search_from_scanner = false;
-			this.scanErrorDialog = true;
-			this.scannerLocked = true;
-			this.playScanTone("error");
-			if (frappe?.show_alert) {
-				frappe.show_alert(
-					{
-						message: this.scanErrorMessage,
-						indicator: "red",
-					},
-					5,
-				);
-			}
-		},
-		acknowledgeScanError() {
-			this.scanErrorDialog = false;
-			this.scannerLocked = false;
-			this.scanErrorMessage = "";
-			this.scanErrorCode = "";
-			this.scanErrorDetails = "";
-			this.pendingScanCode = "";
-			this.awaitingScanResult = false;
+                playScanTone(type = "success") {
+                        if (typeof window === "undefined") {
+                                return;
+                        }
+                        const tonePresets = {
+                                success: { duration: 0.16, frequency: 880, gain: 0.18, fallback: "submit" },
+                                warning: { duration: 0.24, frequency: 520, gain: 0.22, fallback: "submit" },
+                                error: { duration: 0.35, frequency: 220, gain: 0.28, fallback: "error" },
+                        };
+                        const settings = tonePresets[type] || tonePresets.success;
+                        try {
+                                const ctx = this.ensureScanAudioContext();
+                                if (!ctx) {
+                                        if (frappe?.utils?.play_sound) {
+                                                frappe.utils.play_sound(settings.fallback);
+                                        }
+                                        return;
+                                }
+                                const now = ctx.currentTime;
+                                const oscillator = ctx.createOscillator();
+                                const gainNode = ctx.createGain();
+                                oscillator.type = "sine";
+                                oscillator.frequency.value = settings.frequency;
+                                gainNode.gain.setValueAtTime(settings.gain, now);
+                                gainNode.gain.exponentialRampToValueAtTime(0.001, now + settings.duration);
+                                oscillator.connect(gainNode);
+                                gainNode.connect(ctx.destination);
+                                oscillator.start(now);
+                                oscillator.stop(now + settings.duration);
+                        } catch (error) {
+                                console.warn("Scan tone playback failed:", error);
+                                if (frappe?.utils?.play_sound) {
+                                        frappe.utils.play_sound(settings.fallback);
+                                }
+                        }
+                },
+                showScanError({ message, code = "", details = "", type = "error" } = {}) {
+                        const normalizedType = type === "not-found" ? "warning" : type;
+                        this.scanFeedbackType = normalizedType === "warning" ? "warning" : "error";
+                        const defaultMessage =
+                                this.scanFeedbackType === "warning"
+                                        ? this.__("Item not found.")
+                                        : this.__("Unable to add scanned item.");
+                        this.scanErrorMessage = message || defaultMessage;
+                        this.scanErrorCode = code;
+                        this.scanErrorDetails = details;
+                        if (code) {
+                                if (this.scanFeedbackType === "warning") {
+                                        this.pendingScanCode = "";
+                                } else {
+                                        this.pendingScanCode = code;
+                                }
+                        }
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        const isWarning = this.scanFeedbackType === "warning";
+                        this.scanErrorDialog = !isWarning;
+                        this.scannerLocked = !isWarning;
+                        this.playScanTone(this.scanFeedbackType === "warning" ? "warning" : "error");
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: this.scanErrorMessage,
+                                                indicator: this.scanFeedbackType === "warning" ? "orange" : "red",
+                                        },
+                                        5,
+                                );
+                        }
+                },
+                acknowledgeScanError() {
+                        this.scanErrorDialog = false;
+                        this.scannerLocked = false;
+                        this.scanErrorMessage = "";
+                        this.scanErrorCode = "";
+                        this.scanErrorDetails = "";
+                        this.scanFeedbackType = "error";
+                        this.pendingScanCode = "";
+                        this.awaitingScanResult = false;
 			this.$nextTick(() => {
 				if (this.$refs.debounce_search) {
 					this.$refs.debounce_search.focus();
@@ -2639,21 +2663,22 @@ export default {
 
 				this.first_search = scannedCode;
 				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("Please verify the barcode or check the item's availability."),
-				});
+                                this.showScanError({
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        code: scannedCode,
+                                        details: this.__("Please verify the barcode or check the item's availability."),
+                                        type: "not-found",
+                                });
 				return;
 			} catch (e) {
 				console.error("Error fetching item from barcode:", e);
 				this.first_search = scannedCode;
 				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("The system could not retrieve the item details. Please try again."),
-				});
+                                this.showScanError({
+                                        message: `${this.__("Unable to fetch item details")}: ${scannedCode}`,
+                                        code: scannedCode,
+                                        details: this.__("The system could not retrieve the item details. Please try again."),
+                                });
 				return;
 			}
 		},
@@ -2860,12 +2885,13 @@ export default {
 
 			this.first_search = scannedCode;
 			this.search = scannedCode;
-			this.showScanError({
-				message: `${this.__("Item not found")}: ${scannedCode}`,
-				code: scannedCode,
-				details: this.__("This barcode could not be matched to any item."),
-			});
-		},
+                        this.showScanError({
+                                message: `${this.__("Item not found")}: ${scannedCode}`,
+                                code: scannedCode,
+                                details: this.__("This barcode could not be matched to any item."),
+                                type: "not-found",
+                        });
+                },
 
 		currencySymbol(currency) {
 			return get_currency_symbol(currency);
@@ -3021,10 +3047,19 @@ export default {
 		},
 	},
 
-	computed: {
-		headers() {
-			return this.getItemsHeaders();
-		},
+        computed: {
+                scanDialogConfig() {
+                        const isError = this.scanFeedbackType === "error";
+                        return {
+                                title: isError ? this.__("Scan Error") : this.__("Item not found"),
+                                icon: isError ? "mdi-alert-octagon" : "mdi-magnify-remove-outline",
+                                color: isError ? "error" : "warning",
+                                titleClass: isError ? "text-error" : "text-warning",
+                        };
+                },
+                headers() {
+                        return this.getItemsHeaders();
+                },
 		filtered_items() {
 			if (!this.items || this.items.length === 0) {
 				return [];
