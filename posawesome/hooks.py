@@ -305,6 +305,7 @@ fixtures = [
                     "Sales Invoice-posa_pos_opening_shift-no_copy",
                     "POS Invoice-posa_pos_opening_shift-no_copy",
                     "Sales Invoice Reference-sales_invoice-reqd",
+                    "Sales Invoice-update_outstanding_for_self-default",
                 ),
             ]
         ],
