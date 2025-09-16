@@ -210,9 +210,9 @@ export default {
 	},
 
 	methods: {
-		// Called when dropdown opens or closes
-		onCustomerMenuToggle(isOpen) {
-			this.isMenuOpen = isOpen;
+                // Called when dropdown opens or closes
+                onCustomerMenuToggle(isOpen) {
+                        this.isMenuOpen = isOpen;
 
 			if (isOpen) {
 				this.internalCustomer = null;
@@ -254,8 +254,24 @@ export default {
 			}
 		},
 
-		// Called when a customer is selected
-		onCustomerChange(val) {
+                closeCustomerMenu() {
+                        const dropdown = this.$refs.customerDropdown;
+                        if (dropdown) {
+                                try {
+                                        dropdown.menu = false;
+                                } catch (e) {
+                                        dropdown.$emit?.("update:menu", false);
+                                }
+                                const inputEl = dropdown.$el?.querySelector("input");
+                                if (inputEl) {
+                                        inputEl.blur();
+                                }
+                        }
+                        this.isMenuOpen = false;
+                },
+
+                // Called when a customer is selected
+                onCustomerChange(val) {
 			// if user selects the same customer again, show a meaningful error
 			if (val && val === this.customer) {
 				// keep the current selection and notify the user
@@ -267,12 +283,14 @@ export default {
 				return;
 			}
 
-			this.tempSelectedCustomer = val;
+                        this.tempSelectedCustomer = val;
 
-			if (!this.isMenuOpen && val) {
-				this.customer = val;
-				this.eventBus.emit("update_customer", val);
-			}
+                        if (this.isMenuOpen && val) {
+                                this.closeCustomerMenu();
+                        } else if (!this.isMenuOpen && val) {
+                                this.customer = val;
+                                this.eventBus.emit("update_customer", val);
+                        }
 		},
 
 		onCustomerSearch(val) {
@@ -294,39 +312,53 @@ export default {
 				);
 			});
 
-			if (matched) {
-				this.tempSelectedCustomer = matched.name;
-				this.internalCustomer = matched.name;
-				this.customer = matched.name;
-				this.eventBus.emit("update_customer", matched.name);
-				this.isMenuOpen = false;
+                        if (matched) {
+                                this.tempSelectedCustomer = matched.name;
+                                this.internalCustomer = matched.name;
+                                this.customer = matched.name;
+                                this.eventBus.emit("update_customer", matched.name);
+                                this.closeCustomerMenu();
+                                if (event?.target?.blur) {
+                                        event.target.blur();
+                                }
+                        }
+                },
 
-				event.target.blur();
-			}
-		},
+                async searchCustomers(term, append = false) {
+                        try {
+                                await checkDbHealth();
+                                if (!db.isOpen()) await db.open();
+                                let collection = db.table("customers");
+                                const normalizedTerm = typeof term === "string" ? term.trim().toLowerCase() : "";
+                                if (normalizedTerm) {
+                                        const searchParts = normalizedTerm.split(/\s+/).filter(Boolean);
+                                        collection = collection.filter((customer) => {
+                                                if (!customer) {
+                                                        return false;
+                                                }
 
-		async searchCustomers(term, append = false) {
-			try {
-				await checkDbHealth();
-				if (!db.isOpen()) await db.open();
-				let collection = db.table("customers");
-				if (term) {
-					collection = db
-						.table("customers")
-						.where("customer_name")
-						.startsWithIgnoreCase(term)
-						.or("mobile_no")
-						.startsWithIgnoreCase(term)
-						.or("email_id")
-						.startsWithIgnoreCase(term)
-						.or("tax_id")
-						.startsWithIgnoreCase(term)
-						.or("name")
-						.startsWithIgnoreCase(term);
-				}
-				const results = await collection
-					.offset(this.page * this.pageSize)
-					.limit(this.pageSize)
+                                                const values = [
+                                                        customer.customer_name,
+                                                        customer.name,
+                                                        customer.mobile_no,
+                                                        customer.email_id,
+                                                        customer.tax_id,
+                                                ]
+                                                        .filter((value) => value !== null && value !== undefined)
+                                                        .map((value) => String(value).toLowerCase());
+
+                                                if (!searchParts.length) {
+                                                        return true;
+                                                }
+
+                                                return searchParts.every((part) =>
+                                                        values.some((value) => value.includes(part)),
+                                                );
+                                        });
+                                }
+                                const results = await collection
+                                        .offset(this.page * this.pageSize)
+                                        .limit(this.pageSize)
 					.toArray();
 				if (append) {
 					this.customers.push(...results);
