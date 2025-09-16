@@ -1758,14 +1758,15 @@ export default {
 				// Ensure attributes meta is always an object
 				attrsMeta = attrsMeta || {};
 				this.eventBus.emit("open_variants_model", item, variants, this.pos_profile, attrsMeta);
+				return { status: "variant_required" };
 			} else {
 				if (item.actual_qty === 0 && this.pos_profile.posa_display_items_in_stock) {
 					this.eventBus.emit("show_message", {
-						title: `No stock available for ${item.item_name}`,
+						title: __("Quantity not available for {0}", [item.item_name]),
 						color: "warning",
 					});
 					await this.update_items_details([item]);
-					return;
+					return { status: "out_of_stock" };
 				}
 
 				// Ensure UOMs are initialized before adding the item
@@ -1805,6 +1806,7 @@ export default {
 				delete payload._barcode_qty;
 				this.eventBus.emit("add_item", payload);
 				this.qty = 1;
+				return { status: "success" };
 			}
 		},
 		async enter_event() {
@@ -1850,13 +1852,15 @@ export default {
 			}
 
 			if (match) {
-				await this.add_item(new_item);
-				this.flags.serial_no = null;
-				this.flags.batch_no = null;
-				this.qty = 1;
-				// Clear search field after successfully adding an item
-				this.clearSearch();
-				this.$refs.debounce_search.focus();
+				const addResult = await this.add_item(new_item);
+				if (addResult?.status === "success") {
+					this.flags.serial_no = null;
+					this.flags.batch_no = null;
+					this.qty = 1;
+					// Clear search field after successfully adding an item
+					this.clearSearch();
+					this.$refs.debounce_search.focus();
+				}
 			}
 		},
 		search_onchange: _.debounce(async function (newSearchTerm) {
@@ -2423,6 +2427,9 @@ export default {
 					},
 					5,
 				);
+				if (frappe?.utils?.play_sound) {
+					frappe.utils.play_sound("error");
+				}
 				return;
 			} catch (e) {
 				console.error("Error fetching item from barcode:", e);
@@ -2433,6 +2440,9 @@ export default {
 					},
 					5,
 				);
+				if (frappe?.utils?.play_sound) {
+					frappe.utils.play_sound("error");
+				}
 				return;
 			}
 		},
@@ -2498,20 +2508,27 @@ export default {
 			}
 
 			// Use existing add_item method with enhanced feedback
-			await this.add_item(newItem);
+			const addResult = await this.add_item(newItem);
 
-			// Show success message
-			frappe.show_alert(
-				{
-					message: `Added: ${item.item_name}`,
-					indicator: "green",
-				},
-				3,
-			);
+			if (addResult?.status === "success") {
+				if (frappe?.utils?.play_sound) {
+					frappe.utils.play_sound("submit");
+				}
+				// Show success message
+				frappe.show_alert(
+					{
+						message: `Added: ${item.item_name}`,
+						indicator: "green",
+					},
+					3,
+				);
 
-			// Clear search after successful addition and refocus input
-			this.clearSearch();
-			this.$refs.debounce_search && this.$refs.debounce_search.focus();
+				// Clear search after successful addition and refocus input
+				this.clearSearch();
+				this.$refs.debounce_search && this.$refs.debounce_search.focus();
+			} else {
+				this.handleScanFailure(addResult, newItem, scannedCode);
+			}
 		},
 		showMultipleItemsDialog(items, scannedCode) {
 			// Create a dialog to let user choose from multiple matches
@@ -2564,6 +2581,43 @@ export default {
 			html += "</div>";
 			return html;
 		},
+		handleScanFailure(result, item, scannedCode) {
+			const status = result?.status;
+			const itemLabel = item?.item_name || item?.item_code || scannedCode;
+			let message;
+			let indicator = "red";
+
+			if (status === "out_of_stock") {
+				message = `${this.__("Quantity not available")}: ${itemLabel}`;
+				indicator = "orange";
+			} else if (status === "variant_required") {
+				message = this.__("Select a variant before adding {0}.", [itemLabel]);
+				indicator = "orange";
+			} else {
+				const fallbackLabel = scannedCode || itemLabel;
+				message = fallbackLabel
+					? `${this.__("Unable to add item")}: ${fallbackLabel}`
+					: this.__("Unable to add item");
+			}
+
+			frappe.show_alert(
+				{
+					message,
+					indicator,
+				},
+				5,
+			);
+
+			if (frappe?.utils?.play_sound) {
+				frappe.utils.play_sound("error");
+			}
+
+			if (this.$refs.debounce_search) {
+				this.$nextTick(() => {
+					this.$refs.debounce_search.focus();
+				});
+			}
+		},
 		handleItemNotFound(scannedCode) {
 			console.warn("Item not found for scanned code:", scannedCode);
 
@@ -2575,6 +2629,10 @@ export default {
 				},
 				5,
 			);
+
+			if (frappe?.utils?.play_sound) {
+				frappe.utils.play_sound("error");
+			}
 
 			// Keep the search term for manual search
 			this.trigger_onscan(scannedCode);
