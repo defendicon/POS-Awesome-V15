@@ -24,11 +24,12 @@
 			:density="tableDensity"
 			hide-default-footer
 			:single-expand="true"
-			:header-props="dynamicHeaderProps"
-			:no-data-text="__('No items in cart')"
-			@update:expanded="handleExpandedUpdate"
-			:search="itemSearch"
-		>
+                        :header-props="dynamicHeaderProps"
+                        :no-data-text="__('No items in cart')"
+                        @update:expanded="handleExpandedUpdate"
+                        :search="itemSearch"
+                        :custom-filter="customItemFilter"
+                >
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
 				<div class="d-flex align-center">
@@ -895,11 +896,69 @@ export default {
 			return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
 		},
 	},
-	methods: {
-		// Container awareness methods
-		updateContainerDimensions() {
-			if (this.$refs.tableContainer) {
-				const rect = this.$refs.tableContainer.getBoundingClientRect();
+        methods: {
+                customItemFilter(value, search, item) {
+                        if (search == null) {
+                                return true;
+                        }
+
+                        const normalized = String(search).toLowerCase().trim();
+                        if (!normalized) {
+                                return true;
+                        }
+
+                        const terms = normalized.split(/\s+/).filter(Boolean);
+                        if (!terms.length) {
+                                return true;
+                        }
+
+                        const haystacks = [];
+                        const collect = (input) => {
+                                if (input == null) {
+                                        return;
+                                }
+
+                                if (Array.isArray(input)) {
+                                        input.forEach(collect);
+                                        return;
+                                }
+
+                                if (typeof input === "object") {
+                                        if (Object.prototype.hasOwnProperty.call(input, "barcode")) {
+                                                collect(input.barcode);
+                                                return;
+                                        }
+
+                                        Object.values(input).forEach(collect);
+                                        return;
+                                }
+
+                                haystacks.push(String(input).toLowerCase());
+                        };
+
+                        collect(value);
+                        const raw = item?.raw ?? item;
+                        collect(raw?.item_name);
+                        collect(raw?.item_code);
+                        collect(raw?.description);
+                        collect(raw?.barcode);
+                        collect(raw?.serial_no);
+                        collect(raw?.batch_no);
+                        collect(raw?.uom);
+                        collect(raw?.item_barcode);
+                        collect(raw?.barcodes);
+
+                        if (!haystacks.length) {
+                                return false;
+                        }
+
+                        return terms.every((term) => haystacks.some((text) => text.includes(term)));
+                },
+
+                // Container awareness methods
+                updateContainerDimensions() {
+                        if (this.$refs.tableContainer) {
+                                const rect = this.$refs.tableContainer.getBoundingClientRect();
 				this.containerWidth = rect.width;
 				this.containerHeight = rect.height;
 				this.updateBreakpoint();
