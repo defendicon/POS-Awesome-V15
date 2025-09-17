@@ -2067,14 +2067,34 @@ export default {
 	background-color: var(--surface-secondary) !important;
 }
 
+.submit-btn {
+        position: relative;
+}
+
+.submit-btn:hover,
 .submit-btn:focus,
-.submit-highlight {
-	background-color: rgb(var(--v-theme-primary)) !important;
-	color: rgb(var(--v-theme-on-primary)) !important;
+.submit-btn:focus-visible,
+.submit-btn:active {
+        background-color: rgb(var(--v-theme-primary)) !important;
+        color: rgb(var(--v-theme-on-primary)) !important;
+        box-shadow: none;
+}
+
+.submit-btn:focus-visible {
+        outline: 2px solid rgb(var(--v-theme-primary));
+        outline-offset: 2px;
+}
+
+.submit-btn::before,
+.submit-btn:hover::before,
+.submit-btn:focus::before,
+.submit-btn:focus-visible::before,
+.submit-btn:active::before {
+        opacity: 0 !important;
 }
 
 .submit-highlight {
-	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
-	transition: box-shadow 0.3s ease-in-out;
+        box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
+        transition: box-shadow 0.3s ease-in-out;
 }
 </style>
