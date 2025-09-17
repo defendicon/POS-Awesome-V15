@@ -446,10 +446,14 @@ export function useItemAddition() {
 		// Always reset to default customer after invoice
 		context.customer = context.pos_profile.customer;
 
-		context.eventBus.emit("set_customer_readonly", false);
-		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-		context.invoiceTypes = ["Invoice", "Order", "Quotation"];
-	};
+                context.eventBus.emit("set_customer_readonly", false);
+                context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
+                context.invoiceTypes = ["Invoice", "Order", "Quotation"];
+
+                if (Object.prototype.hasOwnProperty.call(context, "itemSearch")) {
+                        context.itemSearch = "";
+                }
+        };
 
 	// Add this utility for grouping logic, matching ItemsTable.vue
 	function groupAndAddItem(items, newItem) {

@@ -119,11 +119,23 @@
 				<!-- Items Table Section (Main items list for invoice) -->
 				<div class="items-table-wrapper">
 					<!-- Column selector button moved outside the table -->
-					<div class="column-selector-container">
-						<v-btn
-							density="compact"
-							variant="text"
-							color="primary"
+                                        <div class="column-selector-container">
+                                                <v-text-field
+                                                        v-model="itemSearch"
+                                                        density="compact"
+                                                        variant="solo"
+                                                        color="primary"
+                                                        class="item-search-field pos-themed-input"
+                                                        :label="__('Search items or barcode')"
+                                                        prepend-inner-icon="mdi-magnify"
+                                                        hide-details
+                                                        clearable
+                                                        autocomplete="off"
+                                                ></v-text-field>
+                                                <v-btn
+                                                        density="compact"
+                                                        variant="text"
+                                                        color="primary"
 							prepend-icon="mdi-cog-outline"
 							@click="toggleColumnSelection"
 							class="column-selector-btn"
@@ -349,20 +361,21 @@ export default {
 			additional_discount: 0,
 			additional_discount_percentage: 0,
 			total_tax: 0,
-			items: [], // List of invoice items
-			packed_items: [], // Packed items for bundles
-			packed_dialog_items: [], // Packed items displayed in dialog
-			show_packed_dialog: false, // Packing list dialog visibility
+                        items: [], // List of invoice items
+                        packed_items: [], // Packed items for bundles
+                        packed_dialog_items: [], // Packed items displayed in dialog
+                        show_packed_dialog: false, // Packing list dialog visibility
 			posOffers: [], // All available offers
 			posa_offers: [], // Offers applied to this invoice
 			posa_coupons: [], // Coupons applied
 			isApplyingOffer: false, // Flag to prevent offer watcher loops
 			allItems: [], // All items for offer logic
 			discount_percentage_offer_name: null, // Track which offer is applied
-			invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
-			invoiceType: "Invoice", // Current invoice type
-			itemsPerPage: 1000, // Items per page in table
-			expanded: [], // Array of expanded row IDs
+                        invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
+                        invoiceType: "Invoice", // Current invoice type
+                        itemsPerPage: 1000, // Items per page in table
+                        itemSearch: "", // Search query for added items
+                        expanded: [], // Array of expanded row IDs
 			singleExpand: true, // Only one row expanded at a time
 			cancel_dialog: false, // Cancel dialog visibility
 			float_precision: 6, // Float precision for calculations
@@ -1430,10 +1443,10 @@ export default {
 
 /* Responsive breakpoints */
 @media (max-width: 768px) {
-	.dynamic-padding {
-		/* Smaller uniform padding on tablets */
-		padding: var(--dynamic-xs);
-	}
+        .dynamic-padding {
+                /* Smaller uniform padding on tablets */
+                padding: var(--dynamic-xs);
+        }
 
 	.dynamic-padding .v-row {
 		margin: 0 -2px;
@@ -1443,18 +1456,22 @@ export default {
 		padding: 2px 4px;
 	}
 
-	.items-table-wrapper {
-		/* Adjust for smaller padding on tablets */
-		margin-left: calc(-1 * var(--dynamic-xs));
-		margin-right: calc(-1 * var(--dynamic-xs));
-		width: calc(100% + 2 * var(--dynamic-xs));
-		max-width: calc(100% + 2 * var(--dynamic-xs));
-	}
+        .items-table-wrapper {
+                /* Adjust for smaller padding on tablets */
+                margin-left: calc(-1 * var(--dynamic-xs));
+                margin-right: calc(-1 * var(--dynamic-xs));
+                width: calc(100% + 2 * var(--dynamic-xs));
+                max-width: calc(100% + 2 * var(--dynamic-xs));
+        }
+
+        .item-search-field {
+                max-width: 100%;
+        }
 }
 
 @media (max-width: 480px) {
-	.dynamic-padding {
-		padding: var(--dynamic-xs);
+        .dynamic-padding {
+                padding: var(--dynamic-xs);
 	}
 
 	.dynamic-padding .v-row {
@@ -1465,29 +1482,43 @@ export default {
 		padding: 1px 2px;
 	}
 
-	.items-table-wrapper {
-		/* Adjust for smallest screens */
-		margin-left: calc(-1 * var(--dynamic-xs));
-		margin-right: calc(-1 * var(--dynamic-xs));
-		width: calc(100% + 2 * var(--dynamic-xs));
-		max-width: calc(100% + 2 * var(--dynamic-xs));
-	}
+        .items-table-wrapper {
+                /* Adjust for smallest screens */
+                margin-left: calc(-1 * var(--dynamic-xs));
+                margin-right: calc(-1 * var(--dynamic-xs));
+                width: calc(100% + 2 * var(--dynamic-xs));
+                max-width: calc(100% + 2 * var(--dynamic-xs));
+        }
+
+        .item-search-field {
+                flex-basis: 100%;
+                max-width: 100%;
+                margin-right: 0;
+        }
 }
 
 .column-selector-container {
-	display: flex;
-	justify-content: flex-end;
-	padding: 8px 16px;
-	background-color: var(--surface-secondary);
-	border-radius: 8px 8px 0 0;
-	position: absolute;
-	top: 0;
-	right: 0;
-	transform: translateY(-100%);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 16px;
+        background-color: var(--pos-card-bg);
+        border-radius: 8px 8px 0 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        transform: translateY(-100%);
+        box-sizing: border-box;
 }
 
-.column-selector-container {
-	background-color: var(--pos-card-bg);
+.item-search-field {
+        width: 100%;
+        max-width: 320px;
+        flex: 1 1 240px;
+        margin-right: auto;
 }
 
 .column-selector-btn {
