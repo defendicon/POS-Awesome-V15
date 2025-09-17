@@ -1506,12 +1506,8 @@ export default {
         padding: 8px 16px;
         background-color: var(--pos-card-bg);
         border-radius: 8px 8px 0 0;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        transform: translateY(-100%);
         box-sizing: border-box;
+        margin-bottom: 8px;
 }
 
 .item-search-field {
@@ -1526,14 +1522,14 @@ export default {
 }
 
 .items-table-wrapper {
-	position: relative;
-	margin-top: var(--dynamic-xl);
-	/* Override parent padding to make table full-width */
-	margin-left: calc(-1 * var(--dynamic-sm));
-	margin-right: calc(-1 * var(--dynamic-sm));
-	width: calc(100% + 2 * var(--dynamic-sm));
-	max-width: calc(100% + 2 * var(--dynamic-sm));
-	box-sizing: border-box;
+        position: relative;
+        margin-top: var(--dynamic-sm);
+        /* Override parent padding to make table full-width */
+        margin-left: calc(-1 * var(--dynamic-sm));
+        margin-right: calc(-1 * var(--dynamic-sm));
+        width: calc(100% + 2 * var(--dynamic-sm));
+        max-width: calc(100% + 2 * var(--dynamic-sm));
+        box-sizing: border-box;
 }
 
 /* New styles for improved column switches */
