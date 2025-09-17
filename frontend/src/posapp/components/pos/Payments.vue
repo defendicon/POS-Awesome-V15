@@ -2068,13 +2068,21 @@ export default {
 }
 
 .submit-btn:focus,
-.submit-highlight {
-	background-color: rgb(var(--v-theme-primary)) !important;
-	color: rgb(var(--v-theme-on-primary)) !important;
+.submit-btn:focus-visible {
+        background-color: transparent !important;
+        color: inherit !important;
+        box-shadow: none;
+}
+
+.submit-btn:focus-visible {
+        outline: 2px solid rgb(var(--v-theme-primary));
+        outline-offset: 2px;
 }
 
 .submit-highlight {
-	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
-	transition: box-shadow 0.3s ease-in-out;
+        background-color: rgb(var(--v-theme-primary)) !important;
+        color: rgb(var(--v-theme-on-primary)) !important;
+        box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
+        transition: box-shadow 0.3s ease-in-out;
 }
 </style>
