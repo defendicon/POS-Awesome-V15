@@ -1269,10 +1269,20 @@ export default {
 				console.error("Error checking item count:", err);
 			}
 		},
-		async get_items(force_server = false) {
-			console.log("[ItemsSelector] get_items called", {
-				force_server,
-				first_search: this.first_search,
+               async get_items(force_server = false) {
+                       if (this.isBackgroundLoading) {
+                               if (this.pendingGetItems) {
+                                       this.pendingGetItems.force_server =
+                                               this.pendingGetItems.force_server || force_server;
+                               } else {
+                                       this.pendingGetItems = { force_server };
+                               }
+                               return;
+                       }
+
+                       console.log("[ItemsSelector] get_items called", {
+                               force_server,
+                               first_search: this.first_search,
 				item_group: this.item_group,
 			});
 			// Ensure POS profile is available
@@ -1420,17 +1430,25 @@ export default {
 				console.log("[ItemsSelector] get_items finished");
 			}
 		},
-		finishBackgroundLoad() {
-			this.isBackgroundLoading = false;
-			if (this.pendingItemSearch) {
-				const pending = this.pendingItemSearch;
-				this.pendingItemSearch = null;
-				this.search_onchange(pending);
-				if (this.search_onchange.flush) {
-					this.search_onchange.flush();
-				}
-			}
-		},
+               finishBackgroundLoad() {
+                       this.isBackgroundLoading = false;
+
+                       const pendingSearch = this.pendingItemSearch;
+                       this.pendingItemSearch = null;
+                       if (pendingSearch) {
+                               this.search_onchange(pendingSearch);
+                               if (this.search_onchange.flush) {
+                                       this.search_onchange.flush();
+                               }
+                               return;
+                       }
+
+                       if (this.pendingGetItems) {
+                               const { force_server: forceServer } = this.pendingGetItems;
+                               this.pendingGetItems = null;
+                               this.get_items(!!forceServer);
+                       }
+               },
 		async backgroundLoadItems(startAfter, syncSince, clearBefore = false, requestToken, loaded = 0) {
 			this.isBackgroundLoading = true;
 			console.log("[ItemsSelector] backgroundLoadItems called", {
@@ -2427,15 +2445,35 @@ export default {
 
 			return combinations;
 		},
-		clearSearch() {
-			this.search_backup = this.first_search;
-			this.first_search = "";
-			this.search = "";
-			// Reset the visible items to the full list
-			this.loadVisibleItems(true);
-			// Refresh items from the server if needed
-			this.get_items();
-		},
+               clearSearch() {
+                       this.search_backup = this.first_search;
+                       this.first_search = "";
+                       this.search = "";
+
+                       if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                               this.loadVisibleItems(true);
+                               if (!this.isBackgroundLoading) {
+                                       this.verifyServerItemCount();
+                               }
+                               return;
+                       }
+
+                       if (this.isBackgroundLoading) {
+                               if (this.pendingGetItems) {
+                                       this.pendingGetItems.force_server =
+                                               this.pendingGetItems.force_server || false;
+                               } else {
+                                       this.pendingGetItems = { force_server: false };
+                               }
+                               return;
+                       }
+
+                       if (!this.items_loaded || !this.items.length) {
+                               this.get_items(true);
+                       } else {
+                               this.eventBus.emit("set_all_items", this.items);
+                       }
+               },
 
 		restoreSearch() {
 			if (this.first_search === "") {
