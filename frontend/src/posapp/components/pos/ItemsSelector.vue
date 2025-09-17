@@ -2444,12 +2444,21 @@ export default {
 				// No need to reload items when focus is lost
 			}
 		},
-		handleItemSearchFocus() {
-			this.first_search = "";
-			this.search = "";
-			// Optionally, you might want to also clear search_backup if the behaviour should be a full reset on focus
-			// this.search_backup = "";
-		},
+                handleItemSearchFocus() {
+                        this.first_search = "";
+                        this.search = "";
+                        // Optionally, you might want to also clear search_backup if the behaviour should be a full reset on focus
+                        // this.search_backup = "";
+                },
+
+                focusItemSearch() {
+                        this.$nextTick(() => {
+                                const input = this.$refs.debounce_search;
+                                if (input && typeof input.focus === "function") {
+                                        input.focus();
+                                }
+                        });
+                },
 
 		clearQty() {
 			this.qty = null;
@@ -3195,13 +3204,17 @@ export default {
 		this.eventBus.on("update_customer_price_list", (data) => {
 			this.customer_price_list = data;
 		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
-		});
+                this.eventBus.on("update_customer", (data) => {
+                        this.customer = data;
+                });
 
-		// Manually trigger a full item reload when requested
-		this.eventBus.on("force_reload_items", async () => {
-			await this.ensureStorageHealth();
+                this.eventBus.on("focus_item_search", () => {
+                        this.focusItemSearch();
+                });
+
+                // Manually trigger a full item reload when requested
+                this.eventBus.on("force_reload_items", async () => {
+                        await this.ensureStorageHealth();
 			this.items_loaded = false;
 			if (!isOffline()) {
 				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
@@ -3363,12 +3376,13 @@ export default {
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
-		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
-		this.eventBus.off("force_reload_items");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
-	},
+                this.eventBus.off("update_coupons_counters");
+                this.eventBus.off("update_customer_price_list");
+                this.eventBus.off("update_customer");
+                this.eventBus.off("force_reload_items");
+                this.eventBus.off("focus_item_search");
+                window.removeEventListener("resize", this.checkItemContainerOverflow);
+        },
 };
 </script>
 

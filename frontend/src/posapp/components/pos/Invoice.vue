@@ -1264,9 +1264,10 @@ export default {
 		this.eventBus.on("fetch_customer_details", () => {
 			this.fetch_customer_details();
 		});
-		this.eventBus.on("clear_invoice", () => {
-			this.clear_invoice();
-		});
+                this.eventBus.on("clear_invoice", () => {
+                        this.clear_invoice();
+                        this.eventBus.emit("focus_item_search");
+                });
 		this.eventBus.on("load_invoice", (data) => {
 			this.load_invoice(data);
 		});

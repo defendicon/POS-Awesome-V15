@@ -116,11 +116,11 @@ export default {
 		this.invoiceTypes = ["Invoice", "Order", "Quotation"];
 		this.posting_date = frappe.datetime.nowdate();
 		var vm = this;
-		if (doc.name && this.pos_profile.posa_allow_delete) {
-			await frappe.call({
-				method: "posawesome.posawesome.api.invoices.delete_invoice",
-				args: { invoice: doc.name },
-				async: true,
+                if (doc.name && this.pos_profile.posa_allow_delete) {
+                        await frappe.call({
+                                method: "posawesome.posawesome.api.invoices.delete_invoice",
+                                args: { invoice: doc.name },
+                                async: true,
 				callback: function (r) {
 					if (r.message) {
 						vm.eventBus.emit("show_message", {
@@ -129,11 +129,12 @@ export default {
 						});
 					}
 				},
-			});
-		}
-		this.clear_invoice();
-		this.cancel_dialog = false;
-	},
+                        });
+                }
+                this.clear_invoice();
+                this.eventBus.emit("focus_item_search");
+                this.cancel_dialog = false;
+        },
 
 	// Load an invoice (or return invoice) from data, set all fields accordingly
 	async load_invoice(data = {}) {
@@ -253,16 +254,17 @@ export default {
 				});
 			}
 		}
-		if (!old_invoice) {
-			this.eventBus.emit("show_message", {
-				title: `Error saving the current invoice`,
-				color: "error",
-			});
-		} else {
-			this.clear_invoice();
-			return old_invoice;
-		}
-	},
+                if (!old_invoice) {
+                        this.eventBus.emit("show_message", {
+                                title: `Error saving the current invoice`,
+                                color: "error",
+                        });
+                } else {
+                        this.clear_invoice();
+                        this.eventBus.emit("focus_item_search");
+                        return old_invoice;
+                }
+        },
 
 	// Start a new order (or return order) with provided data
 	async new_order(data = {}) {

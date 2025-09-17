@@ -1041,10 +1041,13 @@ export default {
 	},
 	methods: {
 		// Go back to invoice view and reset customer readonly
-		back_to_invoice() {
-			this.eventBus.emit("show_payment", "false");
-			this.eventBus.emit("set_customer_readonly", false);
-		},
+                back_to_invoice() {
+                        this.eventBus.emit("show_payment", "false");
+                        this.eventBus.emit("set_customer_readonly", false);
+                        this.$nextTick(() => {
+                                this.eventBus.emit("focus_item_search");
+                        });
+                },
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
@@ -1298,15 +1301,16 @@ export default {
 						title: __("Invoice saved offline"),
 						color: "warning",
 					});
-					if (print) {
-						this.print_offline_invoice(this.invoice_doc);
-					}
-					vm.eventBus.emit("clear_invoice");
-					vm.eventBus.emit("reset_posting_date");
-					vm.back_to_invoice();
-					vm.loading = false;
-					return;
-				} catch (error) {
+                                        if (print) {
+                                                this.print_offline_invoice(this.invoice_doc);
+                                        }
+                                        vm.eventBus.emit("clear_invoice");
+                                        vm.eventBus.emit("focus_item_search");
+                                        vm.eventBus.emit("reset_posting_date");
+                                        vm.back_to_invoice();
+                                        vm.loading = false;
+                                        return;
+                                } catch (error) {
 					vm.eventBus.emit("show_message", {
 						title: __("Cannot Save Offline Invoice: ") + (error.message || __("Unknown error")),
 						color: "error",
@@ -1389,14 +1393,15 @@ export default {
 					frappe.utils.play_sound("submit");
 					// Update local stock quantities immediately after successful
 					// invoice submission so item availability reflects changes
-					updateLocalStock(vm.invoice_doc.items || []);
-					vm.addresses = [];
-					vm.eventBus.emit("clear_invoice");
-					vm.eventBus.emit("reset_posting_date");
-					vm.back_to_invoice();
-					vm.loading = false;
-				},
-			});
+                                        updateLocalStock(vm.invoice_doc.items || []);
+                                        vm.addresses = [];
+                                        vm.eventBus.emit("clear_invoice");
+                                        vm.eventBus.emit("focus_item_search");
+                                        vm.eventBus.emit("reset_posting_date");
+                                        vm.back_to_invoice();
+                                        vm.loading = false;
+                                },
+                        });
 		},
 		// Set full amount for a payment method (or negative for returns)
 		set_full_amount(idx) {
