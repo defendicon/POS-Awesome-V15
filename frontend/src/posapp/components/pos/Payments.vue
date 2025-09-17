@@ -2067,14 +2067,15 @@ export default {
 	background-color: var(--surface-secondary) !important;
 }
 
-.submit-btn:focus,
-.submit-highlight {
-	background-color: rgb(var(--v-theme-primary)) !important;
-	color: rgb(var(--v-theme-on-primary)) !important;
+.submit-btn:focus {
+        background-color: transparent !important;
+        color: inherit !important;
 }
 
 .submit-highlight {
-	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
-	transition: box-shadow 0.3s ease-in-out;
+        background-color: rgb(var(--v-theme-primary)) !important;
+        color: rgb(var(--v-theme-on-primary)) !important;
+        box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
+        transition: box-shadow 0.3s ease-in-out;
 }
 </style>
