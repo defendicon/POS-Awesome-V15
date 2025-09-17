@@ -1041,10 +1041,13 @@ export default {
 	},
 	methods: {
 		// Go back to invoice view and reset customer readonly
-		back_to_invoice() {
-			this.eventBus.emit("show_payment", "false");
-			this.eventBus.emit("set_customer_readonly", false);
-		},
+                back_to_invoice() {
+                        this.eventBus.emit("show_payment", "false");
+                        this.eventBus.emit("set_customer_readonly", false);
+                        this.$nextTick(() => {
+                                this.eventBus.emit("focus_item_search");
+                        });
+                },
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
