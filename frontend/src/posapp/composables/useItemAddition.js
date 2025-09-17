@@ -271,9 +271,14 @@ export function useItemAddition() {
 
 				if (context.setSerialNo) context.setSerialNo(cur_item);
 
-				if (context.calc_uom && cur_item.uom) {
-					await context.calc_uom(cur_item, cur_item.uom);
-				}
+                                if (context.calc_uom && cur_item.uom) {
+                                        // Preserve manually fetched UOM prices when the same item is scanned again.
+                                        // Only trigger a fresh UOM calculation when the rate hasn't been overridden.
+                                        const shouldRecalculate = !cur_item._manual_rate_set;
+                                        if (shouldRecalculate) {
+                                                await context.calc_uom(cur_item, cur_item.uom);
+                                        }
+                                }
 
 				if (context.fetch_available_qty) {
 					context.fetch_available_qty(cur_item);
