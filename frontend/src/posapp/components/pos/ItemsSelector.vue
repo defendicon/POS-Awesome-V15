@@ -2389,40 +2389,41 @@ export default {
 				console.warn("Scanner initialization error:", error.message);
 			}
 		},
-		trigger_onscan(sCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			// indicate this search came from a scanner
-			this.search_from_scanner = true;
-			// apply scanned code as search term
-			this.first_search = sCode;
-			this.search = sCode;
-			this.pendingScanCode = sCode;
+               trigger_onscan(sCode) {
+                       if (this.scannerLocked || this.awaitingScanResult) {
+                               this.playScanTone("error");
+                               return;
+                       }
 
-			this.$nextTick(() => {
-				if (this.filtered_items.length == 0) {
-					this.eventBus.emit("show_message", {
-						title: `No Item has this barcode "${sCode}"`,
-						color: "error",
-					});
-					this.showScanError({
-						message: `${this.__("Item not found")}: ${sCode}`,
-						code: sCode,
-						details: this.__("Please verify the barcode or search manually."),
-					});
-				} else {
-					this.enter_event();
-				}
+                       console.log("Hardware scanner code:", sCode);
+                       this.pendingScanCode = sCode;
 
-				// clear search field for next scan and refocus input
-				if (!this.scanErrorDialog) {
-					this.clearSearch();
-					this.$refs.debounce_search && this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                       // mark this search as coming from a scanner
+                       this.search_from_scanner = true;
+
+                       // Clear any previous search and apply the scanned code
+                       this.search = "";
+                       this.first_search = "";
+                       this.first_search = sCode;
+                       this.search = sCode;
+
+                       // keep focus on the search field for subsequent scans
+                       if (this.$refs.debounce_search) {
+                               this.$refs.debounce_search.focus();
+                       }
+
+                       if (frappe?.show_alert) {
+                               frappe.show_alert(
+                                       {
+                                               message: `Scanning for: ${sCode}`,
+                                               indicator: "blue",
+                                       },
+                                       2,
+                               );
+                       }
+
+                       this.processScannedItem(sCode);
+               },
 		generateWordCombinations(inputString) {
 			const words = inputString.split(" ");
 			const wordCount = words.length;
