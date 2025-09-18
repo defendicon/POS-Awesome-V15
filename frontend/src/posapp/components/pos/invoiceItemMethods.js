@@ -1766,11 +1766,11 @@ export default {
 	},
 
 	// Calculate stock quantity for an item with stock validation
-	calc_stock_qty(item, value) {
-		calcStockQty(item, value, this);
-		if (this.update_qty_limits) {
-			this.update_qty_limits(item);
-		}
+        calc_stock_qty(item, value) {
+                calcStockQty(item, value, this);
+                if (this.update_qty_limits) {
+                        this.update_qty_limits(item);
+                }
 		if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
 			const blockSale = !this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
 			if (blockSale) {
@@ -1784,13 +1784,17 @@ export default {
 					color: "error",
 				});
 			} else {
-				this.eventBus.emit("show_message", {
-					title: __("Stock is lower than requested. Proceeding may create negative stock."),
-					color: "warning",
-				});
-			}
-		}
-	},
+                                this.eventBus.emit("show_message", {
+                                        title: __("Stock is lower than requested. Proceeding may create negative stock."),
+                                        color: "warning",
+                                });
+                        }
+                }
+
+                if (this.queueOfferRecalculation) {
+                        this.queueOfferRecalculation(item);
+                }
+        },
 
 	// Update quantity limits based on available stock
 	update_qty_limits(item) {

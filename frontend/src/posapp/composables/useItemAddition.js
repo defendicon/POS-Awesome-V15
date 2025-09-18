@@ -6,17 +6,21 @@ import { useBundles } from "./useBundles.js";
 
 export function useItemAddition() {
 	// Remove item from invoice
-	const removeItem = (item, context) => {
-		const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
-		if (index >= 0) {
-			context.items.splice(index, 1);
-		}
-		if (item.is_bundle) {
-			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
-		}
-		// Remove from expanded if present
-		context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
-	};
+        const removeItem = (item, context) => {
+                const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
+                if (index >= 0) {
+                        context.items.splice(index, 1);
+                }
+                if (item.is_bundle) {
+                        context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
+                }
+                // Remove from expanded if present
+                context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
+
+                if (context.queueOfferRecalculation) {
+                        context.queueOfferRecalculation(null, { forceFull: true });
+                }
+        };
 
 	const { getBundleComponents } = useBundles();
 
@@ -238,19 +242,23 @@ export function useItemAddition() {
 				}
 
 				// Expand new item if it has batch or serial number
-				if (
-					(!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
-					new_item.has_serial_no
-				) {
-					nextTick(() => {
-						context.expanded = [new_item.posa_row_id];
-					});
-				}
-			} else {
-				const cur_item = context.items[index];
-				const previousQty = cur_item.qty;
-				if (context.update_items_details) context.update_items_details([cur_item]);
-				// Merge serial numbers if any
+                                if (
+                                        (!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
+                                        new_item.has_serial_no
+                                ) {
+                                        nextTick(() => {
+                                                context.expanded = [new_item.posa_row_id];
+                                        });
+                                }
+
+                                if (context.queueOfferRecalculation) {
+                                        context.queueOfferRecalculation(new_item);
+                                }
+                        } else {
+                                const cur_item = context.items[index];
+                                const previousQty = cur_item.qty;
+                                if (context.update_items_details) context.update_items_details([cur_item]);
+                                // Merge serial numbers if any
 				if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
 					new_item.serial_no_selected.forEach((sn) => {
 						if (!cur_item.serial_no_selected.includes(sn)) {
@@ -275,16 +283,20 @@ export function useItemAddition() {
 					await context.calc_uom(cur_item, cur_item.uom);
 				}
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(cur_item);
-				}
-				if (cur_item.qty > previousQty) {
-					moveItemToTop(context, cur_item);
-				}
-			}
-		} else {
-			const cur_item = context.items[index];
-			const previousQty = cur_item.qty;
+                                if (context.fetch_available_qty) {
+                                        context.fetch_available_qty(cur_item);
+                                }
+                                if (cur_item.qty > previousQty) {
+                                        moveItemToTop(context, cur_item);
+                                }
+
+                                if (context.queueOfferRecalculation) {
+                                        context.queueOfferRecalculation(cur_item);
+                                }
+                        }
+                } else {
+                        const cur_item = context.items[index];
+                        const previousQty = cur_item.qty;
 			if (context.update_items_details) context.update_items_details([cur_item]);
 			// Serial number logic for existing item
 			if (item.has_serial_no && item.to_set_serial_no) {
@@ -320,23 +332,28 @@ export function useItemAddition() {
 				await context.calc_uom(cur_item, cur_item.uom);
 			}
 
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(cur_item);
-			}
-			if (cur_item.qty > previousQty) {
-				moveItemToTop(context, cur_item);
-			}
-		}
-		if (context.forceUpdate) context.forceUpdate();
+                        if (context.fetch_available_qty) {
+                                context.fetch_available_qty(cur_item);
+                        }
+                        if (cur_item.qty > previousQty) {
+                                moveItemToTop(context, cur_item);
+                        }
 
-		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
-			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
-		) {
-			context.expanded = [new_item.posa_row_id];
-		}
-	};
+                        if (context.queueOfferRecalculation) {
+                                context.queueOfferRecalculation(cur_item);
+                        }
+                }
+                if (context.forceUpdate) context.forceUpdate();
+
+                // Only try to expand if new_item exists and should be expanded
+                if (
+                        new_item &&
+                        ((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
+                ) {
+                        context.expanded = [new_item.posa_row_id];
+                }
+
+        };
 
 	// Create a new item object with default and calculated fields
 	const getNewItem = (item, context) => {

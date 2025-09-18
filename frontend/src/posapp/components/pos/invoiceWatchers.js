@@ -30,25 +30,15 @@ export default {
 			value: this.discount_percentage_offer_name,
 		});
 	},
-	// Watch for items array changes (deep) and re-handle offers
-	items: {
-		deep: true,
-		handler() {
-			this.close_payments();
-			if (this.isApplyingOffer) return;
-			this.handelOffers();
-			this.$forceUpdate();
-		},
-	},
-	packed_items: {
-		deep: true,
-		handler() {
-			this.close_payments();
-			if (this.isApplyingOffer) return;
-			this.handelOffers();
-			this.$forceUpdate();
-		},
-	},
+        // Watch for structural changes in the cart collections
+        items() {
+                this.close_payments();
+                this.queueOfferRecalculation(null, { forceFull: true });
+        },
+        packed_items() {
+                this.close_payments();
+                this.queueOfferRecalculation(null, { forceFull: true });
+        },
 	// Watch for invoice type change and emit
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);

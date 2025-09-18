@@ -1281,10 +1281,10 @@ export default {
 		this.eventBus.on("update_invoice_offers", (data) => {
 			this.updateInvoiceOffers(data);
 		});
-		this.eventBus.on("update_invoice_coupons", (data) => {
-			this.posa_coupons = data;
-			this.handelOffers();
-		});
+                this.eventBus.on("update_invoice_coupons", (data) => {
+                        this.posa_coupons = data;
+                        this.queueOfferRecalculation(null, { forceFull: true });
+                });
 		this.eventBus.on("set_all_items", (data) => {
 			this.allItems = data;
 			this.items.forEach((item) => {
