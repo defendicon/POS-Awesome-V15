@@ -60,7 +60,7 @@ def get_offers(profile):
         (pos_profile is NULL OR pos_profile  = '' OR  pos_profile = %(pos_profile)s) AND
         (warehouse is NULL OR warehouse  = '' OR  warehouse = %(warehouse)s) AND
         (valid_from is NULL OR valid_from  = '' OR  valid_from <= %(valid_from)s) AND
-        (valid_upto is NULL OR valid_from  = '' OR  valid_upto >= %(valid_upto)s)
+        (valid_upto is NULL OR valid_upto  = '' OR  valid_upto >= %(valid_upto)s)
     """,
         values=values,
         as_dict=1,
