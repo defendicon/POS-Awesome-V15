@@ -2372,15 +2372,13 @@ export default {
 						oEvent.preventDefault();
 						return onScan.decodeKeyEvent(oEvent);
 					},
-					onScan: function (sCode) {
-						if (vm.scannerLocked) {
-							vm.playScanTone("error");
-							return;
-						}
-						setTimeout(() => {
-							vm.trigger_onscan(sCode);
-						}, 300);
-					},
+                                        onScan: function (sCode) {
+                                                if (vm.scannerLocked) {
+                                                        vm.playScanTone("error");
+                                                        return;
+                                                }
+                                                vm.trigger_onscan(sCode);
+                                        },
 				});
 
 				// Mark document as having scanner attached
@@ -2623,11 +2621,9 @@ export default {
 				2,
 			);
 
-			// Enhanced item search and submission logic
-			setTimeout(() => {
-				this.processScannedItem(scannedCode);
-			}, 300);
-		},
+                        // Enhanced item search and submission logic
+                        this.processScannedItem(scannedCode);
+                },
 		async processScannedItem(scannedCode) {
 			this.pendingScanCode = scannedCode;
 			// Handle scale barcodes by extracting the item code and quantity
