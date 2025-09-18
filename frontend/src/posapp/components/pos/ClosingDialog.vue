@@ -44,7 +44,7 @@
 									<template v-slot:item.closing_amount="props">
 										<v-text-field
 											v-model="props.item.closing_amount"
-											:rules="[max25chars]"
+											:rules="[closingAmountRule]"
 											:label="frappe._('Edit')"
 											single-line
 											counter
@@ -137,7 +137,30 @@ export default {
 				sortable: true,
 			},
 		],
-		max25chars: (v) => v.length <= 20 || "Input too long!", // TODO : should validate as number
+		closingAmountRule: (v) => {
+			if (v === "" || v === null || v === undefined) {
+				return true;
+			}
+
+			const value = typeof v === "number" ? v : Number(String(v).trim());
+
+			if (!Number.isFinite(value)) {
+				return "Please enter a valid number";
+			}
+
+			const stringValue = String(v);
+			const [integerPart, fractionalPart] = stringValue.split(".");
+
+			if (integerPart.replace(/^-/, "").length > 20) {
+				return "Number is too large";
+			}
+
+			if (fractionalPart && fractionalPart.length > 2) {
+				return "Maximum of 2 decimal places";
+			}
+
+			return true;
+		},
 		pagination: {},
 	}),
 	watch: {},
