@@ -3,7 +3,6 @@
 export default {
 	// Calculate total quantity of all items
 	total_qty() {
-		this.close_payments();
 		let qty = 0;
 		this.items.forEach((item) => {
 			qty += flt(item.qty);
@@ -23,7 +22,6 @@ export default {
 	},
 	// Calculate subtotal after discounts and delivery charges
 	subtotal() {
-		this.close_payments();
 		let sum = 0;
 		this.items.forEach((item) => {
 			// For returns, use absolute value for correct calculation

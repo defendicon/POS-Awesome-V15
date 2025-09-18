@@ -34,6 +34,7 @@ export default {
 	items: {
 		deep: true,
 		handler() {
+			this.close_payments();
 			if (this.isApplyingOffer) return;
 			this.handelOffers();
 			this.$forceUpdate();
@@ -42,6 +43,7 @@ export default {
 	packed_items: {
 		deep: true,
 		handler() {
+			this.close_payments();
 			if (this.isApplyingOffer) return;
 			this.handelOffers();
 			this.$forceUpdate();

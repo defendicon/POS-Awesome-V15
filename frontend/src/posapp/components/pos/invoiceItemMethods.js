@@ -47,6 +47,7 @@ export default {
 
 	// Reset all invoice fields to default/empty values
 	clear_invoice() {
+		this.close_payments();
 		return clearInvoice(this);
 	},
 
