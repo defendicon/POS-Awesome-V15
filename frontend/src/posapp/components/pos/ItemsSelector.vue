@@ -2401,11 +2401,9 @@ export default {
                        // mark this search as coming from a scanner
                        this.search_from_scanner = true;
 
-                       // Clear any previous search and apply the scanned code
-                       this.search = "";
+                       // ensure the search box remains empty so the item grid isn't filtered
                        this.first_search = "";
-                       this.first_search = sCode;
-                       this.search = sCode;
+                       this.search = "";
 
                        // keep focus on the search field for subsequent scans
                        if (this.$refs.debounce_search) {
@@ -2595,37 +2593,38 @@ export default {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			console.log("Barcode scanned:", scannedCode);
-			this.pendingScanCode = scannedCode;
+               onBarcodeScanned(scannedCode) {
+                       if (this.scannerLocked) {
+                               this.playScanTone("error");
+                               return;
+                       }
+                       console.log("Barcode scanned:", scannedCode);
+                       this.pendingScanCode = scannedCode;
 
-			// mark this search as coming from a scanner
-			this.search_from_scanner = true;
+                       // mark this search as coming from a scanner
+                       this.search_from_scanner = true;
 
-			// Clear any previous search
-			this.search = "";
-			this.first_search = "";
+                       // Clear any previous search so the list isn't filtered
+                       this.first_search = "";
+                       this.search = "";
 
-			// Set the scanned code as search term
-			this.first_search = scannedCode;
-			this.search = scannedCode;
+                       // keep focus for hardware scanners that emulate keyboard input
+                       if (this.$refs.debounce_search) {
+                               this.$refs.debounce_search.focus();
+                       }
 
-			// Show scanning feedback
-			frappe.show_alert(
-				{
-					message: `Scanning for: ${scannedCode}`,
-					indicator: "blue",
-				},
-				2,
-			);
+                       // Show scanning feedback
+                       frappe.show_alert(
+                               {
+                                       message: `Scanning for: ${scannedCode}`,
+                                       indicator: "blue",
+                               },
+                               2,
+                       );
 
-			// Enhanced item search and submission logic
-			this.processScannedItem(scannedCode);
-		},
+                       // Enhanced item search and submission logic
+                       this.processScannedItem(scannedCode);
+               },
 		async processScannedItem(scannedCode) {
 			this.pendingScanCode = scannedCode;
 			// Handle scale barcodes by extracting the item code and quantity
@@ -2682,21 +2681,17 @@ export default {
 					return;
 				}
 
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("Please verify the barcode or check the item's availability."),
-				});
-				return;
-			} catch (e) {
-				console.error("Error fetching item from barcode:", e);
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
+                               this.showScanError({
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        code: scannedCode,
+                                        details: this.__("Please verify the barcode or check the item's availability."),
+                                });
+                                return;
+                        } catch (e) {
+                                console.error("Error fetching item from barcode:", e);
+                                this.showScanError({
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        code: scannedCode,
 					details: this.__("The system could not retrieve the item details. Please try again."),
 				});
 				return;
