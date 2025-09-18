@@ -31,13 +31,15 @@ export default {
 		});
 	},
         // Watch for structural changes in the cart collections
-        items() {
-                this.close_payments();
-                this.queueOfferRecalculation(null, { forceFull: true });
+        items(newItems) {
+                if (!Array.isArray(newItems) || newItems.length === 0) {
+                        this.close_payments();
+                }
         },
-        packed_items() {
-                this.close_payments();
-                this.queueOfferRecalculation(null, { forceFull: true });
+        packed_items(newPackedItems) {
+                if (!Array.isArray(newPackedItems) || newPackedItems.length === 0) {
+                        this.close_payments();
+                }
         },
 	// Watch for invoice type change and emit
 	invoiceType() {

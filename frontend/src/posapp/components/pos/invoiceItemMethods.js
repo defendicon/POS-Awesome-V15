@@ -45,11 +45,15 @@ export default {
 		return getNewItem(item, this);
 	},
 
-	// Reset all invoice fields to default/empty values
-	clear_invoice() {
-		this.close_payments();
-		return clearInvoice(this);
-	},
+        // Reset all invoice fields to default/empty values
+        clear_invoice() {
+                this.close_payments();
+                const result = clearInvoice(this);
+                if (this.queueOfferRecalculation) {
+                        this.queueOfferRecalculation(null, { forceFull: true });
+                }
+                return result;
+        },
 
 	// Fetch customer balance from backend or cache
 	async fetch_customer_balance() {
@@ -225,16 +229,21 @@ export default {
 			});
 		}
 
-		if (data.is_return) {
-			this.return_doc = data;
-		} else {
-			this.eventBus.emit("set_pos_coupons", data.posa_coupons);
-		}
+                if (data.is_return) {
+                        this.return_doc = data;
+                } else {
+                        this.eventBus.emit("set_pos_coupons", data.posa_coupons);
+                }
 
-		console.log("load_invoice completed, invoice state:", {
-			invoiceType: this.invoiceType,
-			is_return: this.invoice_doc.is_return,
-			items: this.items.length,
+                if (this.queueOfferRecalculation) {
+                        this.queueOfferRecalculation(null, { forceFull: true });
+                }
+                this.close_payments();
+
+                console.log("load_invoice completed, invoice state:", {
+                        invoiceType: this.invoiceType,
+                        is_return: this.invoice_doc.is_return,
+                        items: this.items.length,
 			customer: this.customer,
 		});
 	},
@@ -276,11 +285,11 @@ export default {
 		this.eventBus.emit("set_pos_coupons", []);
 		this.posa_coupons = [];
 		this.return_doc = "";
-		if (!data.name && !data.is_return) {
-			this.items = [];
-			this.customer = this.pos_profile.customer;
-			this.invoice_doc = "";
-			this.discount_amount = 0;
+                if (!data.name && !data.is_return) {
+                        this.items = [];
+                        this.customer = this.pos_profile.customer;
+                        this.invoice_doc = "";
+                        this.discount_amount = 0;
 			this.additional_discount_percentage = 0;
 			this.invoiceType = "Invoice";
 			this.invoiceTypes = ["Invoice", "Order", "Quotation"];
@@ -311,23 +320,28 @@ export default {
 			});
 			this.customer = data.customer;
 			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-			this.discount_amount = data.discount_amount;
-			this.additional_discount_percentage = data.additional_discount_percentage;
-			this.items.forEach((item) => {
-				if (item.serial_no) {
-					item.serial_no_selected = [];
-					const serial_list = item.serial_no.split("\n");
-					serial_list.forEach((element) => {
-						if (element.length) {
-							item.serial_no_selected.push(element);
-						}
-					});
-					item.serial_no_selected_count = item.serial_no_selected.length;
-				}
-			});
-		}
-		return old_invoice;
-	},
+                        this.discount_amount = data.discount_amount;
+                        this.additional_discount_percentage = data.additional_discount_percentage;
+                        this.items.forEach((item) => {
+                                if (item.serial_no) {
+                                        item.serial_no_selected = [];
+                                        const serial_list = item.serial_no.split("\n");
+                                        serial_list.forEach((element) => {
+                                                if (element.length) {
+                                                        item.serial_no_selected.push(element);
+                                                }
+                                        });
+                                        item.serial_no_selected_count = item.serial_no_selected.length;
+                                }
+                        });
+                }
+
+                if (this.queueOfferRecalculation) {
+                        this.queueOfferRecalculation(null, { forceFull: true });
+                }
+                this.close_payments();
+                return old_invoice;
+        },
 
 	// Build the invoice document object for backend submission
 	get_invoice_doc() {
