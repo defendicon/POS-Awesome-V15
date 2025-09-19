@@ -2689,6 +2689,39 @@ export default {
                                                 continue;
                                         }
 
+                                        const normalizedBatch = this.normalizeHardwareScanPayload(nextScan.code);
+                                        if (
+                                                !nextScan.__normalized &&
+                                                Array.isArray(normalizedBatch) &&
+                                                normalizedBatch.length
+                                        ) {
+                                                const sanitizedBatch = normalizedBatch
+                                                        .map((part) => (typeof part === "string" ? part.trim() : ""))
+                                                        .filter(Boolean);
+                                                const originalTrimmed = typeof nextScan.code === "string" ? nextScan.code.trim() : "";
+                                                const isComposite =
+                                                        sanitizedBatch.length > 1 ||
+                                                        (sanitizedBatch.length === 1 && sanitizedBatch[0] !== originalTrimmed);
+
+                                                if (isComposite) {
+                                                        for (let index = sanitizedBatch.length - 1; index >= 0; index -= 1) {
+                                                                const part = sanitizedBatch[index];
+                                                                this.hardwareScanQueue.unshift({
+                                                                        ...nextScan,
+                                                                        code: part,
+                                                                        __normalized: true,
+                                                                });
+                                                        }
+                                                        continue;
+                                                }
+
+                                                if (sanitizedBatch.length === 1 && sanitizedBatch[0] !== originalTrimmed) {
+                                                        nextScan.code = sanitizedBatch[0];
+                                                }
+                                        }
+
+                                        nextScan.__normalized = true;
+
                                         const activeCode = nextScan.code;
                                         const shouldLockScanner = nextScan.fromScanner !== false;
                                         this.currentHardwareScan = { ...nextScan };
