@@ -2881,8 +2881,13 @@ export default {
                         const segments = trimmed.split(/\s+/).filter(Boolean);
                         const queue = segments.length ? segments : [trimmed];
 
-                        const applyProgressiveSplit = () => {
-                                const progressive = this.splitSegmentByProgressiveBarcodeTypes(trimmed);
+                        const applyProgressiveSplit = (segment = trimmed) => {
+                                const target =
+                                        typeof segment === "string" && segment.trim()
+                                                ? segment.trim()
+                                                : trimmed;
+
+                                const progressive = this.splitSegmentByProgressiveBarcodeTypes(target);
                                 if (!progressive.attempted) {
                                         return null;
                                 }
@@ -2923,6 +2928,11 @@ export default {
                                 if (hintedSplit && hintedSplit.length > 1) {
                                         return hintedSplit;
                                 }
+
+                                const progressiveSplit = applyProgressiveSplit();
+                                if (Array.isArray(progressiveSplit)) {
+                                        return progressiveSplit;
+                                }
                         }
 
                         if (!codes.length) {
@@ -2938,9 +2948,121 @@ export default {
                                 if (hintedSplit && hintedSplit.length) {
                                         return hintedSplit;
                                 }
+
+                                const progressiveSplit = applyProgressiveSplit();
+                                if (Array.isArray(progressiveSplit)) {
+                                        return progressiveSplit;
+                                }
                         }
 
                         return codes;
+                },
+                splitSegmentByProgressiveBarcodeTypes(segment) {
+                        const outcome = {
+                                attempted: false,
+                                success: false,
+                                codes: [],
+                        };
+
+                        if (typeof segment !== "string") {
+                                return outcome;
+                        }
+
+                        const trimmedSegment = segment.trim();
+                        if (!trimmedSegment || trimmedSegment.length < 8) {
+                                return outcome;
+                        }
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        if (!knownCodes.size) {
+                                return outcome;
+                        }
+
+                        const normalizedKnown = new Map();
+                        knownCodes.forEach((code) => {
+                                if (code === null || code === undefined) {
+                                        return;
+                                }
+
+                                const rawValue = typeof code === "string" ? code : String(code);
+                                const trimmedValue = rawValue.trim();
+                                if (!trimmedValue) {
+                                        return;
+                                }
+
+                                const normalizedValue = this.normalizeScanCode(trimmedValue);
+                                if (!normalizedValue) {
+                                        return;
+                                }
+
+                                if (!normalizedKnown.has(normalizedValue)) {
+                                        normalizedKnown.set(normalizedValue, new Set());
+                                }
+                                normalizedKnown.get(normalizedValue).add(trimmedValue);
+                        });
+
+                        if (!normalizedKnown.size) {
+                                return outcome;
+                        }
+
+                        const numericPattern = /^\d+$/;
+                        const lengths = [14, 13, 12, 11, 10, 9, 8];
+                        const results = [];
+                        const segmentLength = trimmedSegment.length;
+
+                        outcome.attempted = true;
+
+                        let index = 0;
+                        while (index <= segmentLength - 8) {
+                                let matched = false;
+
+                                for (const length of lengths) {
+                                        if (!Number.isFinite(length) || length < 8) {
+                                                continue;
+                                        }
+
+                                        const end = index + length;
+                                        if (end > segmentLength) {
+                                                continue;
+                                        }
+
+                                        const chunk = trimmedSegment.slice(index, end);
+                                        if (!chunk || !numericPattern.test(chunk)) {
+                                                continue;
+                                        }
+
+                                        const normalizedChunk = this.normalizeScanCode(chunk);
+                                        if (!normalizedKnown.has(normalizedChunk)) {
+                                                continue;
+                                        }
+
+                                        const candidates = normalizedKnown.get(normalizedChunk);
+                                        let resolved = chunk;
+                                        if (candidates && candidates.size) {
+                                                const candidateList = Array.from(candidates);
+                                                const exactLengthMatch = candidateList.find(
+                                                        (candidate) => candidate.length === chunk.length,
+                                                );
+                                                resolved = exactLengthMatch || candidateList[0] || chunk;
+                                        }
+
+                                        results.push(resolved);
+                                        index = end;
+                                        matched = true;
+                                        break;
+                                }
+
+                                if (!matched) {
+                                        index += 1;
+                                }
+                        }
+
+                        if (results.length) {
+                                outcome.success = true;
+                                outcome.codes = results;
+                        }
+
+                        return outcome;
                 },
                 splitRepeatedScanSegment(segment) {
                         if (!segment) {
