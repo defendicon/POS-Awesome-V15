@@ -574,18 +574,19 @@ export default {
 		isOverflowing: false,
 		// Track background loading state and pending searches
 		isBackgroundLoading: false,
-		pendingItemSearch: null,
-		loadProgress: 0,
-		totalItemCount: 0,
-		scanErrorDialog: false,
-		scanErrorMessage: "",
-		scanErrorDetails: "",
-		scanErrorCode: "",
-		scannerLocked: false,
-		scanAudioContext: null,
-		pendingScanCode: "",
-		awaitingScanResult: false,
-	}),
+                pendingItemSearch: null,
+                loadProgress: 0,
+                totalItemCount: 0,
+                scanErrorDialog: false,
+                scanErrorMessage: "",
+                scanErrorDetails: "",
+                scanErrorCode: "",
+                scannerLocked: false,
+                scanAudioContext: null,
+                pendingScanCode: "",
+                awaitingScanResult: false,
+                lastItemDetailsSignature: null,
+        }),
 
 	watch: {
 		customer: _.debounce(function () {
@@ -671,28 +672,29 @@ export default {
 			// Apply cached rates if available for immediate update
 			if (this.items_loaded && this.items && this.items.length > 0) {
 				const cached = await getCachedPriceListItems(this.customer_price_list);
-				if (cached && cached.length) {
-					const map = {};
-					cached.forEach((ci) => {
-						map[ci.item_code] = ci;
-					});
-					this.items.forEach((it) => {
-						const ci = map[it.item_code];
-						if (ci) {
-							const force =
-								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-							const price = ci.price_list_rate ?? ci.rate ?? 0;
-							if (force || price) {
-								it.rate = price;
-								it.price_list_rate = price;
-							}
-						}
-					});
-					this.eventBus.emit("set_all_items", this.items);
-					this.update_items_details(this.items);
-					return;
-				}
-			}
+                                        if (cached && cached.length) {
+                                                const map = {};
+                                                cached.forEach((ci) => {
+                                                        map[ci.item_code] = ci;
+                                                });
+                                                this.items.forEach((it) => {
+                                                        const ci = map[it.item_code];
+                                                        if (ci) {
+                                                                const force =
+                                                                        this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                                const price = ci.price_list_rate ?? ci.rate ?? 0;
+                                                                if (force || price) {
+                                                                        it.rate = price;
+                                                                        it.price_list_rate = price;
+                                                                }
+                                                        }
+                                                });
+                                                this.eventBus.emit("set_all_items", this.items);
+                                                this.lastItemDetailsSignature = null;
+                                                this.update_items_details(this.items);
+                                                return;
+                                        }
+                                }
 			// No cache found - force a reload so prices are updated
 			this.items_loaded = false;
 			if (!isOffline()) {
@@ -948,16 +950,17 @@ export default {
 			}
 			return dbHealthy;
 		},
-		async loadVisibleItems(reset = false) {
-			this.loadProgress = 0;
-			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
-			await initPromise;
-			await this.ensureStorageHealth();
-			if (reset) {
-				this.currentPage = 0;
-				this.items = [];
-			}
-			const search = this.get_search(this.first_search);
+                async loadVisibleItems(reset = false) {
+                        this.loadProgress = 0;
+                        this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+                        await initPromise;
+                        await this.ensureStorageHealth();
+                        if (reset) {
+                                this.currentPage = 0;
+                                this.items = [];
+                                this.lastItemDetailsSignature = null;
+                        }
+                        const search = this.get_search(this.first_search);
 			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
 			const pageItems = await searchStoredItems({
 				search,
@@ -1121,11 +1124,16 @@ export default {
 			});
 
 			if (cacheResult.missing.length === 0) {
-				vm.$nextTick(() => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(cacheResult.cached);
-					vm.loading = false;
-				});
+                                vm.$nextTick(() => {
+                                        updates.forEach(({ item, upd }) => {
+                                                Object.assign(item, upd);
+                                                if (upd.batch_no_data || upd.serial_no_data) {
+                                                        vm.invalidateItemSearchMeta(item);
+                                                }
+                                        });
+                                        updateLocalStockCache(cacheResult.cached);
+                                        vm.loading = false;
+                                });
 				return;
 			}
 
@@ -1162,10 +1170,15 @@ export default {
 					}
 				});
 
-				vm.$nextTick(async () => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(details);
-					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
+                                vm.$nextTick(async () => {
+                                        updates.forEach(({ item, upd }) => {
+                                                Object.assign(item, upd);
+                                                if (upd.batch_no_data || upd.serial_no_data) {
+                                                        vm.invalidateItemSearchMeta(item);
+                                                }
+                                        });
+                                        updateLocalStockCache(details);
+                                        saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
 					if (
 						vm.pos_profile &&
 						vm.pos_profile.posa_local_storage &&
@@ -1208,20 +1221,21 @@ export default {
 			}
 			await this.get_items(true);
 		},
-		async forceReloadItems() {
-			console.log("[ItemsSelector] forceReloadItems called");
-			// Clear cached price list items so the reload always
-			// fetches the latest data from the server
-			await clearPriceListCache();
-			console.log("[ItemsSelector] price list cache cleared");
-			await this.ensureStorageHealth();
-			console.log("[ItemsSelector] storage health ensured");
-			this.items_loaded = false;
+                async forceReloadItems() {
+                        console.log("[ItemsSelector] forceReloadItems called");
+                        // Clear cached price list items so the reload always
+                        // fetches the latest data from the server
+                        await clearPriceListCache();
+                        console.log("[ItemsSelector] price list cache cleared");
+                        await this.ensureStorageHealth();
+                        console.log("[ItemsSelector] storage health ensured");
+                        this.items_loaded = false;
+                        this.lastItemDetailsSignature = null;
 
-			// When no search term is entered, reset the search so
-			// we fetch the entire item list from the server.
-			if (!this.first_search || !this.first_search.trim()) {
-				console.log("[ItemsSelector] resetting empty search before reload");
+                        // When no search term is entered, reset the search so
+                        // we fetch the entire item list from the server.
+                        if (!this.first_search || !this.first_search.trim()) {
+                                console.log("[ItemsSelector] resetting empty search before reload");
 				this.first_search = "";
 				this.search = "";
 			}
@@ -1373,11 +1387,12 @@ export default {
 					if (item.actual_qty === undefined) {
 						item.actual_qty = 0;
 					}
-				});
+                                });
 
-				vm.items = items;
-				vm.items_loaded = true;
-				vm.eventBus.emit("set_all_items", vm.items);
+                                vm.items = items;
+                                vm.lastItemDetailsSignature = null;
+                                vm.items_loaded = true;
+                                vm.eventBus.emit("set_all_items", vm.items);
 				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
 
 				const hasMore = !vm.pos_profile.pose_use_limit_search && items.length === vm.itemsPageLimit;
@@ -2079,73 +2094,163 @@ export default {
 			}
 			return scal_qty;
 		},
-		get_search(first_search) {
-			if (!first_search) return "";
-			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
-			if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-				return first_search;
-			}
-			// Calculate item code length from total barcode length
-			const item_code_len = first_search.length - prefix_len - 6;
-			return first_search.substr(0, prefix_len + item_code_len);
-		},
-		esc_event() {
-			this.search = null;
-			this.first_search = null;
-			this.search_backup = null;
-			this.qty = 1;
+                get_search(first_search) {
+                        if (!first_search) return "";
+                        const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
+                        if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+                                return first_search;
+                        }
+                        // Calculate item code length from total barcode length
+                        const item_code_len = first_search.length - prefix_len - 6;
+                        return first_search.substr(0, prefix_len + item_code_len);
+                },
+                computeItemsSignature(items) {
+                        if (!Array.isArray(items) || items.length === 0) {
+                                return null;
+                        }
+
+                        const codes = items
+                                .map((it) => it && it.item_code)
+                                .filter((code) => typeof code === "string" && code.length > 0);
+
+                        if (!codes.length) {
+                                return `len:${items.length}`;
+                        }
+
+                        const uniqueCodes = Array.from(new Set(codes)).sort();
+                        return `${items.length}:${uniqueCodes.join("|")}`;
+                },
+                getItemSearchMeta(item) {
+                        if (!item) {
+                                return { fields: [], item_group: "" };
+                        }
+
+                        if (item.__searchMeta && !item.__searchMeta.dirty) {
+                                return item.__searchMeta;
+                        }
+
+                        const barcodeList = [];
+                        if (Array.isArray(item.item_barcode)) {
+                                barcodeList.push(
+                                        ...item.item_barcode
+                                                .map((b) => (b && b.barcode != null ? String(b.barcode) : ""))
+                                                .filter(Boolean),
+                                );
+                        } else if (item.item_barcode) {
+                                barcodeList.push(String(item.item_barcode));
+                        }
+                        if (Array.isArray(item.barcodes)) {
+                                barcodeList.push(
+                                        ...item.barcodes.map((b) => (b != null ? String(b) : "")).filter(Boolean),
+                                );
+                        }
+
+                        const serials =
+                                this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
+                                        ? item.serial_no_data
+                                                .map((s) => (s && s.serial_no != null ? String(s.serial_no) : ""))
+                                                .filter(Boolean)
+                                        : [];
+                        const batches =
+                                this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
+                                        ? item.batch_no_data
+                                                .map((b) => (b && b.batch_no != null ? String(b.batch_no) : ""))
+                                                .filter(Boolean)
+                                        : [];
+
+                        const fields = [
+                                item.item_code,
+                                item.item_name,
+                                item.barcode,
+                                item.description,
+                                ...barcodeList,
+                                ...serials,
+                                ...batches,
+                        ]
+                                .filter((field) => field != null)
+                                .map((field) => String(field).toLowerCase());
+
+                        const meta = {
+                                fields,
+                                item_group: typeof item.item_group === "string" ? item.item_group.toLowerCase() : "",
+                        };
+
+                        item.__searchMeta = meta;
+                        return meta;
+                },
+                invalidateItemSearchMeta(item) {
+                        if (item && item.__searchMeta) {
+                                item.__searchMeta = { fields: [], item_group: "", dirty: true };
+                        }
+                },
+                esc_event() {
+                        this.search = null;
+                        this.first_search = null;
+                        this.search_backup = null;
+                        this.qty = 1;
 			this.$refs.debounce_search.focus();
 		},
-		async update_items_details(items) {
-			const vm = this;
-			if (!items || !items.length) return;
+                async update_items_details(items) {
+                        const vm = this;
+                        if (!items || !items.length) return;
 
-			// reset any pending retry timer
-			if (vm.itemDetailsRetryTimeout) {
-				clearTimeout(vm.itemDetailsRetryTimeout);
-				vm.itemDetailsRetryTimeout = null;
-			}
+                        const signature = vm.computeItemsSignature(items);
+                        if (
+                                items.length > 1 &&
+                                signature &&
+                                vm.lastItemDetailsSignature === signature &&
+                                vm.itemDetailsRetryCount === 0
+                        ) {
+                                return;
+                        }
 
-			const itemCodes = items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
-			cacheResult.cached.forEach((det) => {
-				const item = items.find((it) => it.item_code === det.item_code);
-				if (item) {
-					Object.assign(item, {
-						actual_qty: det.actual_qty,
-						has_batch_no: det.has_batch_no,
-						has_serial_no: det.has_serial_no,
-					});
-					if (det.item_uoms && det.item_uoms.length > 0) {
-						item.item_uoms = det.item_uoms;
-						saveItemUOMs(item.item_code, det.item_uoms);
-					}
-					if (det.rate !== undefined) {
-						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
-						const price = det.price_list_rate ?? det.rate ?? 0;
-						if (force || price) {
-							item.rate = price;
-							item.price_list_rate = price;
-						}
-					}
-					if (det.currency) {
-						item.currency = det.currency;
-					}
+                        // reset any pending retry timer
+                        if (vm.itemDetailsRetryTimeout) {
+                                clearTimeout(vm.itemDetailsRetryTimeout);
+                                vm.itemDetailsRetryTimeout = null;
+                        }
 
-					if (!item.original_rate) {
-						item.original_rate = item.rate;
-						item.original_currency = item.currency || vm.pos_profile.currency;
-					}
+                        const itemCodes = items.map((it) => it.item_code);
+                        const cacheResult = await getCachedItemDetails(
+                                vm.pos_profile.name,
+                                vm.active_price_list,
+                                itemCodes,
+                        );
+                        cacheResult.cached.forEach((det) => {
+                                const item = items.find((it) => it.item_code === det.item_code);
+                                if (item) {
+                                        Object.assign(item, {
+                                                actual_qty: det.actual_qty,
+                                                has_batch_no: det.has_batch_no,
+                                                has_serial_no: det.has_serial_no,
+                                        });
+                                        if (det.item_uoms && det.item_uoms.length > 0) {
+                                                item.item_uoms = det.item_uoms;
+                                                saveItemUOMs(item.item_code, det.item_uoms);
+                                        }
+                                        if (det.rate !== undefined) {
+                                                const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                const price = det.price_list_rate ?? det.rate ?? 0;
+                                                if (force || price) {
+                                                        item.rate = price;
+                                                        item.price_list_rate = price;
+                                                }
+                                        }
+                                        if (det.currency) {
+                                                item.currency = det.currency;
+                                        }
 
-					vm.applyCurrencyConversionToItem(item);
-				}
-			});
+                                        if (!item.original_rate) {
+                                                item.original_rate = item.rate;
+                                                item.original_currency = item.currency || vm.pos_profile.currency;
+                                        }
 
-			let allCached = cacheResult.missing.length === 0;
+                                        vm.invalidateItemSearchMeta(item);
+                                        vm.applyCurrencyConversionToItem(item);
+                                }
+                        });
+
+                        let allCached = cacheResult.missing.length === 0;
 			items.forEach((item) => {
 				const localQty = getLocalStock(item.item_code);
 				if (localQty !== null) {
@@ -2154,89 +2259,101 @@ export default {
 					allCached = false;
 				}
 
-				if (!item.item_uoms || item.item_uoms.length === 0) {
-					const cachedUoms = getItemUOMs(item.item_code);
-					if (cachedUoms.length > 0) {
-						item.item_uoms = cachedUoms;
-					} else if (isOffline()) {
-						item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-					} else {
-						allCached = false;
-					}
-				}
-			});
+                                if (!item.item_uoms || item.item_uoms.length === 0) {
+                                        const cachedUoms = getItemUOMs(item.item_code);
+                                        if (cachedUoms.length > 0) {
+                                                item.item_uoms = cachedUoms;
+                                        } else if (isOffline()) {
+                                                item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
+                                        } else {
+                                                allCached = false;
+                                        }
+                                }
+                        });
 
-			// When offline or everything is cached, skip server call
-			if (isOffline() || allCached) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        // When offline or everything is cached, skip server call
+                        if (isOffline() && cacheResult.missing.length > 0) {
+                                vm.itemDetailsRetryCount = 0;
+                                return;
+                        }
 
-			const itemsToFetch = items.filter(
-				(it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
-			);
+                        if (allCached) {
+                                vm.itemDetailsRetryCount = 0;
+                                if (signature) {
+                                        vm.lastItemDetailsSignature = signature;
+                                }
+                                return;
+                        }
 
-			if (itemsToFetch.length === 0) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        const itemsToFetch = items.filter(
+                                (it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
+                        );
 
-			try {
-				const details = await vm.fetchItemDetails(itemsToFetch);
-				if (details && details.length) {
-					vm.itemDetailsRetryCount = 0;
-					let qtyChanged = false;
-					let updatedItems = [];
+                        if (itemsToFetch.length === 0) {
+                                vm.itemDetailsRetryCount = 0;
+                                if (signature) {
+                                        vm.lastItemDetailsSignature = signature;
+                                }
+                                return;
+                        }
 
-					items.forEach((item) => {
-						const updated_item = details.find((element) => element.item_code == item.item_code);
-						if (updated_item) {
-							const prev_qty = item.actual_qty;
+                        try {
+                                const details = await vm.fetchItemDetails(itemsToFetch);
+                                if (details && details.length) {
+                                        vm.itemDetailsRetryCount = 0;
+                                        let qtyChanged = false;
+                                        let updatedItems = [];
 
-							updatedItems.push({
-								item: item,
-								updates: {
-									actual_qty: updated_item.actual_qty,
-									has_batch_no: updated_item.has_batch_no,
-									has_serial_no: updated_item.has_serial_no,
-									batch_no_data:
-										updated_item.batch_no_data && updated_item.batch_no_data.length > 0
-											? updated_item.batch_no_data
-											: item.batch_no_data,
-									serial_no_data:
-										updated_item.serial_no_data && updated_item.serial_no_data.length > 0
-											? updated_item.serial_no_data
-											: item.serial_no_data,
-									item_uoms:
-										updated_item.item_uoms && updated_item.item_uoms.length > 0
-											? updated_item.item_uoms
-											: item.item_uoms,
-									rate: updated_item.rate !== undefined ? updated_item.rate : item.rate,
-									price_list_rate:
-										updated_item.price_list_rate !== undefined
-											? updated_item.price_list_rate
-											: item.price_list_rate,
-									currency: updated_item.currency || item.currency,
-								},
-							});
+                                        items.forEach((item) => {
+                                                const updated_item = details.find((element) => element.item_code == item.item_code);
+                                                if (updated_item) {
+                                                        const prev_qty = item.actual_qty;
 
-							if (prev_qty > 0 && updated_item.actual_qty === 0) {
-								qtyChanged = true;
-							}
+                                                        updatedItems.push({
+                                                                item: item,
+                                                                updates: {
+                                                                        actual_qty: updated_item.actual_qty,
+                                                                        has_batch_no: updated_item.has_batch_no,
+                                                                        has_serial_no: updated_item.has_serial_no,
+                                                                        batch_no_data:
+                                                                                updated_item.batch_no_data && updated_item.batch_no_data.length > 0
+                                                                                        ? updated_item.batch_no_data
+                                                                                        : item.batch_no_data,
+                                                                        serial_no_data:
+                                                                                updated_item.serial_no_data && updated_item.serial_no_data.length > 0
+                                                                                        ? updated_item.serial_no_data
+                                                                                        : item.serial_no_data,
+                                                                        item_uoms:
+                                                                                updated_item.item_uoms && updated_item.item_uoms.length > 0
+                                                                                        ? updated_item.item_uoms
+                                                                                        : item.item_uoms,
+                                                                        rate: updated_item.rate !== undefined ? updated_item.rate : item.rate,
+                                                                        price_list_rate:
+                                                                                updated_item.price_list_rate !== undefined
+                                                                                        ? updated_item.price_list_rate
+                                                                                        : item.price_list_rate,
+                                                                        currency: updated_item.currency || item.currency,
+                                                                },
+                                                        });
 
-							if (updated_item.item_uoms && updated_item.item_uoms.length > 0) {
-								saveItemUOMs(item.item_code, updated_item.item_uoms);
-							}
-						}
-					});
+                                                        if (prev_qty > 0 && updated_item.actual_qty === 0) {
+                                                                qtyChanged = true;
+                                                        }
 
-					updatedItems.forEach(({ item, updates }) => {
-						Object.assign(item, updates);
-						vm.applyCurrencyConversionToItem(item);
-					});
+                                                        if (updated_item.item_uoms && updated_item.item_uoms.length > 0) {
+                                                                saveItemUOMs(item.item_code, updated_item.item_uoms);
+                                                        }
+                                                }
+                                        });
 
-					updateLocalStockCache(details);
-					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
+                                        updatedItems.forEach(({ item, updates }) => {
+                                                Object.assign(item, updates);
+                                                vm.invalidateItemSearchMeta(item);
+                                                vm.applyCurrencyConversionToItem(item);
+                                        });
+
+                                        updateLocalStockCache(details);
+                                        saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
 
 					if (
 						vm.pos_profile &&
@@ -2252,15 +2369,19 @@ export default {
 						}
 					}
 
-					if (qtyChanged) {
-						vm.$forceUpdate();
-					}
-				}
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-					items.forEach((item) => {
-						const localQty = getLocalStock(item.item_code);
+                                        if (qtyChanged) {
+                                                vm.$forceUpdate();
+                                        }
+                                }
+
+                                if (signature) {
+                                        vm.lastItemDetailsSignature = signature;
+                                }
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                        items.forEach((item) => {
+                                                const localQty = getLocalStock(item.item_code);
 						if (localQty !== null) {
 							item.actual_qty = localQty;
 						}
@@ -2272,15 +2393,15 @@ export default {
 						}
 					});
 
-					if (!isOffline()) {
-						vm.itemDetailsRetryCount += 1;
-						const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
-						vm.itemDetailsRetryTimeout = setTimeout(() => {
-							vm.update_items_details(items);
-						}, delay);
-					}
-				}
-			}
+                                        if (!isOffline()) {
+                                                vm.itemDetailsRetryCount += 1;
+                                                const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
+                                                vm.itemDetailsRetryTimeout = setTimeout(() => {
+                                                        vm.update_items_details(items);
+                                                }, delay);
+                                        }
+                                }
+                        }
 
 			// Cleanup on component destroy
 			this.cleanupBeforeDestroy = () => {
@@ -2289,11 +2410,12 @@ export default {
 				}
 			};
 		},
-		update_cur_items_details() {
-			if (this.filtered_items && this.filtered_items.length > 0) {
-				this.update_items_details(this.filtered_items);
-			}
-		},
+                update_cur_items_details() {
+                        if (this.filtered_items && this.filtered_items.length > 0) {
+                                this.lastItemDetailsSignature = null;
+                                this.update_items_details(this.filtered_items);
+                        }
+                },
 		async prePopulateStockCache(items) {
 			if (this.prePopulateInProgress) {
 				return;
@@ -3067,78 +3189,65 @@ export default {
 		headers() {
 			return this.getItemsHeaders();
 		},
-		filtered_items() {
-			if (!this.items || this.items.length === 0) {
-				return [];
-			}
+                filtered_items() {
+                        if (!this.items || this.items.length === 0) {
+                                return [];
+                        }
 
-			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-			let filteredItems = [...this.items];
+                        const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
+                        const shouldSearch = searchTerm.length >= 3;
+                        const groupFilter = this.item_group !== "ALL" ? this.item_group.toLowerCase() : null;
+                        const hideVariants = this.pos_profile?.posa_hide_variants_items;
 
-			// Apply search filter only for queries with at least three characters
-			if (searchTerm.length >= 3) {
-				filteredItems = filteredItems.filter((item) => {
-					const barcodeList = [];
-					if (Array.isArray(item.item_barcode)) {
-						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
-					} else if (item.item_barcode) {
-						barcodeList.push(String(item.item_barcode));
-					}
-					if (Array.isArray(item.barcodes)) {
-						barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
-					}
+                        const limitConfig = this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage;
+                        const numericLimit = Number(limitConfig);
+                        const hasPositiveLimit = Number.isFinite(numericLimit) && numericLimit > 0;
+                        const limit = hasPositiveLimit ? Math.floor(numericLimit) : 0;
 
-					const searchFields = [
-						item.item_code,
-						item.item_name,
-						item.barcode,
-						item.description,
-						...barcodeList,
-						...(this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
-							? item.serial_no_data.map((s) => s.serial_no)
-							: []),
-						...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
-							? item.batch_no_data.map((b) => b.batch_no)
-							: []),
-					]
-						.filter(Boolean)
-						.map((field) => field.toLowerCase());
+                        if (!hasPositiveLimit) {
+                                return [];
+                        }
 
-					return searchFields.some((field) => field.includes(searchTerm));
-				});
-			}
+                        const maxResults = Math.max(limit * 2, limit);
+                        const filteredItems = [];
 
-			// Apply item group filter
-			if (this.item_group !== "ALL") {
-				filteredItems = filteredItems.filter(
-					(item) =>
-						item.item_group && item.item_group.toLowerCase() === this.item_group.toLowerCase(),
-				);
-			}
+                        for (let index = 0; index < this.items.length && filteredItems.length < maxResults; index += 1) {
+                                const item = this.items[index];
+                                const needsMeta = shouldSearch || !!groupFilter;
+                                const meta = needsMeta ? this.getItemSearchMeta(item) : null;
 
-			// Apply zero rate filter
-			if (this.hide_zero_rate_items) {
-				filteredItems = filteredItems.filter((item) => parseFloat(item.rate || 0) > 0);
-			}
+                                if (shouldSearch) {
+                                        const fields = meta?.fields || [];
+                                        if (!fields.some((field) => field.includes(searchTerm))) {
+                                                continue;
+                                        }
+                                }
 
-			// Apply template/variant filter
-			if (this.pos_profile?.posa_hide_variants_items) {
-				filteredItems = filteredItems.filter((item) => !item.variant_of);
-			}
+                                if (groupFilter) {
+                                        const groupValue = meta?.item_group ??
+                                                (typeof item.item_group === "string" ? item.item_group.toLowerCase() : "");
+                                        if (groupValue !== groupFilter) {
+                                                continue;
+                                        }
+                                }
 
-			// Apply pagination
-			const limit = this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage;
-			filteredItems = filteredItems.slice(0, limit);
+                                if (this.hide_zero_rate_items && !(parseFloat(item.rate || 0) > 0)) {
+                                        continue;
+                                }
 
-			// Ensure quantities are defined
-			filteredItems.forEach((item) => {
-				if (item.actual_qty === undefined || item.actual_qty === null) {
-					item.actual_qty = 0;
-				}
-			});
+                                if (hideVariants && item.variant_of) {
+                                        continue;
+                                }
 
-			return filteredItems;
-		},
+                                if (item.actual_qty === undefined || item.actual_qty === null) {
+                                        item.actual_qty = 0;
+                                }
+
+                                filteredItems.push(item);
+                        }
+
+                        return filteredItems.slice(0, limit);
+                },
 		debounce_search: {
 			get() {
 				return this.first_search;
@@ -3234,12 +3343,14 @@ export default {
 			this.couponsCount = data.couponsCount;
 			this.appliedCouponsCount = data.appliedCouponsCount;
 		});
-		this.eventBus.on("update_customer_price_list", (data) => {
-			this.customer_price_list = data;
-		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
-		});
+                this.eventBus.on("update_customer_price_list", (data) => {
+                        this.customer_price_list = data;
+                        this.lastItemDetailsSignature = null;
+                });
+                this.eventBus.on("update_customer", (data) => {
+                        this.customer = data;
+                        this.lastItemDetailsSignature = null;
+                });
 
 		this.eventBus.on("focus_item_search", () => {
 			this.focusItemSearch();
@@ -3265,11 +3376,12 @@ export default {
 		});
 
 		// Refresh item quantities when connection to server is restored
-		this.eventBus.on("server-online", async () => {
-			if (this.items && this.items.length > 0) {
-				await this.update_items_details(this.items);
-			}
-		});
+                this.eventBus.on("server-online", async () => {
+                        if (this.items && this.items.length > 0) {
+                                this.lastItemDetailsSignature = null;
+                                await this.update_items_details(this.items);
+                        }
+                });
 
 		if (typeof Worker !== "undefined") {
 			try {
