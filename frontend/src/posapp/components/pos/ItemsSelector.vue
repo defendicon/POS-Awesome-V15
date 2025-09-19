@@ -2843,12 +2843,20 @@ export default {
                                 if (knownSplit && knownSplit.length > 1) {
                                         return knownSplit;
                                 }
+                                const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
+                                if (hintedSplit && hintedSplit.length > 1) {
+                                        return hintedSplit;
+                                }
                         }
 
                         if (!codes.length) {
                                 const knownSplit = this.splitSegmentByKnownCodes(trimmed);
                                 if (knownSplit && knownSplit.length) {
                                         return knownSplit;
+                                }
+                                const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
+                                if (hintedSplit && hintedSplit.length) {
+                                        return hintedSplit;
                                 }
                         }
 
@@ -3061,6 +3069,85 @@ export default {
                         };
 
                         if (dfs(0) && path.length) {
+                                return path.slice();
+                        }
+
+                        return null;
+                },
+                splitSegmentByHintedLengths(segment) {
+                        if (typeof segment !== "string") {
+                                return null;
+                        }
+
+                        const normalized = segment.trim();
+                        if (!normalized) {
+                                return null;
+                        }
+
+                        const hintedLengths = this.collectScanLengthHints();
+                        const combinedLengths = new Set();
+
+                        if (hintedLengths && hintedLengths.size) {
+                                hintedLengths.forEach((length) => {
+                                        if (typeof length === "number") {
+                                                combinedLengths.add(length);
+                                        }
+                                });
+                        }
+
+                        const commonBarcodeLengths = [14, 13, 12, 11, 10, 9, 8];
+                        commonBarcodeLengths.forEach((length) => combinedLengths.add(length));
+
+                        const lengths = Array.from(combinedLengths)
+                                .map((length) => Number(length))
+                                .filter(
+                                        (length) =>
+                                                Number.isFinite(length) &&
+                                                length >= 4 &&
+                                                length < normalized.length,
+                                )
+                                .sort((a, b) => b - a);
+
+                        if (!lengths.length) {
+                                return null;
+                        }
+
+                        const memo = new Map();
+                        const path = [];
+
+                        const dfs = (index) => {
+                                if (index === normalized.length) {
+                                        return true;
+                                }
+
+                                if (memo.has(index)) {
+                                        return memo.get(index);
+                                }
+
+                                for (const length of lengths) {
+                                        const nextIndex = index + length;
+                                        if (nextIndex > normalized.length) {
+                                                continue;
+                                        }
+
+                                        const chunk = normalized.slice(index, nextIndex);
+                                        if (!chunk) {
+                                                continue;
+                                        }
+
+                                        path.push(chunk);
+                                        if (dfs(nextIndex)) {
+                                                memo.set(index, true);
+                                                return true;
+                                        }
+                                        path.pop();
+                                }
+
+                                memo.set(index, false);
+                                return false;
+                        };
+
+                        if (dfs(0) && path.length > 1) {
                                 return path.slice();
                         }
 
