@@ -1959,7 +1959,7 @@ export default {
                         }
 
                         // Derive the searchable code and detect scale barcode
-                        const search = this.get_search(rawSearchInput);
+                        let search = this.get_search(rawSearchInput);
                         const isScaleBarcode =
                                 this.pos_profile?.posa_scale_barcode_start &&
                                 rawSearchInput.startsWith(this.pos_profile.posa_scale_barcode_start);
@@ -1970,31 +1970,82 @@ export default {
                         if (!sourceItem) {
                                 return;
                         }
-                        const new_item = { ...sourceItem };
+
+                        const trimmedSearchInput =
+                                typeof rawSearchInput === "string" ? rawSearchInput.trim() : "";
+                        const scannedCodeCandidate =
+                                typeof context.scannedCode === "string"
+                                        ? context.scannedCode
+                                        : this.pendingScanCode;
+                        const trimmedScannedCode =
+                                typeof scannedCodeCandidate === "string" ? scannedCodeCandidate.trim() : "";
+
+                        let new_item = { ...sourceItem };
                         new_item.qty = flt(qty);
                         if (isScaleBarcode) {
                                 new_item._barcode_qty = true;
                         }
 
-                        
                         const scannedCodeForDisplay =
                                 (context.scannedCode ?? this.pendingScanCode) || rawSearchInput || search;
 
-                        let match = false;
-                        if (Array.isArray(new_item.item_barcode)) {
-                                new_item.item_barcode.forEach((element) => {
-                                        if (search === element.barcode) {
-                                                new_item.uom = element.posa_uom || element.uom || new_item.uom;
+                        let match = this.applyBarcodeMatchToItem(new_item, search).matched;
+
+                        if (!match && trimmedSearchInput) {
+                                const normalizedInput = this.normalizeScanCode(trimmedSearchInput);
+                                if (normalizedInput && normalizedInput !== this.normalizeScanCode(search)) {
+                                        const alternativeMatch = this.applyBarcodeMatchToItem(
+                                                new_item,
+                                                trimmedSearchInput,
+                                        );
+                                        if (alternativeMatch.matched) {
                                                 match = true;
+                                                search = trimmedSearchInput;
+                                                this.search = search;
                                         }
-                                });
-			}
-			if (!match && new_item.barcode === search) {
-				match = true;
-			}
-			if (!match && Array.isArray(new_item.barcodes)) {
-				match = new_item.barcodes.some((bc) => String(bc) === search);
-			}
+                                }
+                        }
+
+                        if (!match && trimmedScannedCode) {
+                                const normalizedScan = this.normalizeScanCode(trimmedScannedCode);
+                                if (normalizedScan && normalizedScan !== this.normalizeScanCode(search)) {
+                                        const alternativeMatch = this.applyBarcodeMatchToItem(
+                                                new_item,
+                                                trimmedScannedCode,
+                                        );
+                                        if (alternativeMatch.matched) {
+                                                match = true;
+                                                search = trimmedScannedCode;
+                                                this.search = search;
+                                        }
+                                }
+                        }
+
+                        if (!match) {
+                                const candidateCodes = [search, trimmedSearchInput, trimmedScannedCode];
+                                const fallbackMatch = this.findMatchingItemForCodes(
+                                        filteredItems,
+                                        candidateCodes,
+                                );
+                                if (fallbackMatch && fallbackMatch.item) {
+                                        new_item = { ...fallbackMatch.item };
+                                        new_item.qty = flt(qty);
+                                        if (isScaleBarcode) {
+                                                new_item._barcode_qty = true;
+                                        }
+                                        const fallbackMatchInfo = this.applyBarcodeMatchToItem(
+                                                new_item,
+                                                fallbackMatch.code,
+                                        );
+                                        if (fallbackMatchInfo.matched) {
+                                                match = true;
+                                                search = fallbackMatch.code;
+                                                if (search) {
+                                                        this.search = search;
+                                                }
+                                        }
+                                }
+                        }
 
 			if (this.flags.serial_no) {
 				new_item.to_set_serial_no = this.flags.serial_no;
@@ -3182,6 +3233,96 @@ export default {
                         }
 
                         return { items: [], searchCode };
+                },
+                normalizeScanCode(value) {
+                        if (value === null || value === undefined) {
+                                return "";
+                        }
+                        const str = typeof value === "string" ? value.trim() : String(value).trim();
+                        return str ? str.toLowerCase() : "";
+                },
+                getItemBarcodeMatch(item, code) {
+                        const normalizedCode = this.normalizeScanCode(code);
+                        if (!item || !normalizedCode) {
+                                return { matched: false, normalizedCode };
+                        }
+
+                        const compare = (value) => this.normalizeScanCode(value) === normalizedCode;
+
+                        if (Array.isArray(item.item_barcode)) {
+                                for (const entry of item.item_barcode) {
+                                        if (entry && compare(entry.barcode)) {
+                                                return {
+                                                        matched: true,
+                                                        normalizedCode,
+                                                        entry,
+                                                        source: "item_barcode",
+                                                };
+                                        }
+                                }
+                        }
+
+                        if (compare(item.barcode)) {
+                                return { matched: true, normalizedCode, source: "barcode" };
+                        }
+
+                        if (Array.isArray(item.barcodes)) {
+                                for (const barcode of item.barcodes) {
+                                        if (compare(barcode)) {
+                                                return { matched: true, normalizedCode, source: "barcodes" };
+                                        }
+                                }
+                        }
+
+                        if (compare(item.item_code)) {
+                                return { matched: true, normalizedCode, source: "item_code" };
+                        }
+
+                        return { matched: false, normalizedCode };
+                },
+                applyBarcodeMatchToItem(item, code) {
+                        const matchInfo = this.getItemBarcodeMatch(item, code);
+                        if (matchInfo.matched && matchInfo.entry) {
+                                const barcodeUom = matchInfo.entry.posa_uom || matchInfo.entry.uom;
+                                if (barcodeUom) {
+                                        item.uom = barcodeUom;
+                                }
+                        }
+                        return matchInfo;
+                },
+                findMatchingItemForCodes(items, candidateCodes = []) {
+                        if (!Array.isArray(items) || !items.length || !Array.isArray(candidateCodes)) {
+                                return null;
+                        }
+
+                        const seenCodes = new Set();
+                        for (const rawCode of candidateCodes) {
+                                const normalizedCode = this.normalizeScanCode(rawCode);
+                                if (!normalizedCode || seenCodes.has(normalizedCode)) {
+                                        continue;
+                                }
+                                seenCodes.add(normalizedCode);
+
+                                for (const item of items) {
+                                        if (!item) {
+                                                continue;
+                                        }
+
+                                        const matchInfo = this.getItemBarcodeMatch(item, rawCode);
+                                        if (matchInfo.matched) {
+                                                const trimmedCode =
+                                                        typeof rawCode === "string"
+                                                                ? rawCode.trim()
+                                                                : rawCode != null
+                                                                        ? String(rawCode).trim()
+                                                                        : "";
+                                                const effectiveCode = trimmedCode || normalizedCode;
+                                                return { item, code: effectiveCode };
+                                        }
+                                }
+                        }
+
+                        return null;
                 },
                 findItemsMatchingScanCodes(collection, codesToCheck) {
                         if (!Array.isArray(collection) || !collection.length || !codesToCheck || !codesToCheck.size) {
