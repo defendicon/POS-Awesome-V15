@@ -217,113 +217,128 @@
 							<div v-if="loading" class="items-card-grid">
 								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
 							</div>
-							<div
-								v-else
-								class="items-card-grid"
-								ref="itemsContainer"
-								@scroll.passive="onCardScroll"
-								:class="{ 'item-container': isOverflowing }"
-							>
-								<div
-									v-for="item in filtered_items"
-									:key="item.item_code"
-									class="card-item-card"
-									@click="select_item($event, item)"
-									:draggable="true"
-									@dragstart="onDragStart($event, item)"
-									@dragend="onDragEnd"
-								>
-									<div class="card-item-image-container">
-										<v-img
-											:src="item.image || placeholderImage"
-											class="card-item-image"
-											aspect-ratio="1"
-											:alt="item.item_name"
-										>
-											<template v-slot:placeholder>
-												<div class="image-placeholder">
-													<v-icon size="40" color="grey-lighten-2"
-														>mdi-image</v-icon
-													>
-												</div>
-											</template>
-										</v-img>
-									</div>
-									<div class="card-item-content">
-										<div class="card-item-header">
-											<h4 class="card-item-name">{{ item.item_name }}</h4>
-											<span class="card-item-code">{{ item.item_code }}</span>
-										</div>
-										<div class="card-item-details">
-											<div class="card-item-price">
-												<div class="primary-price">
-													<span class="currency-symbol">
-														{{
-															currencySymbol(
-																item.original_currency ||
-																	pos_profile.currency,
-															)
-														}}
-													</span>
-													<span class="price-amount">
-														{{
-															format_currency(
-																item.base_price_list_rate ?? item.rate ?? 0,
-																item.original_currency ||
-																	pos_profile.currency,
-																ratePrecision(
-																	item.base_price_list_rate ??
-																		item.rate ??
-																		0,
-																),
-															)
-														}}
-													</span>
-												</div>
-												<div
-													v-if="
-														pos_profile.posa_allow_multi_currency &&
-														selected_currency !== pos_profile.currency
-													"
-													class="secondary-price"
-												>
-													<span class="currency-symbol">{{
-														currencySymbol(selected_currency)
-													}}</span>
-													<span class="price-amount">
-														{{
-															format_currency(
-																item.rate,
-																selected_currency,
-																ratePrecision(item.rate),
-															)
-														}}
-													</span>
-												</div>
-											</div>
-											<div class="card-item-stock">
-												<v-icon size="small" class="stock-icon"
-													>mdi-package-variant</v-icon
-												>
-												<span
-													class="stock-amount"
-													:class="{
-														'negative-number': isNegative(item.actual_qty),
-													}"
-												>
-													{{
-														format_number(
-															item.actual_qty,
-															hide_qty_decimals ? 0 : 4,
-														) || 0
-													}}
-												</span>
-												<span class="stock-uom">{{ item.stock_uom || "" }}</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
+                                                        <DynamicScroller
+                                                                v-else
+                                                                :items="filtered_items"
+                                                                :key-field="'item_code'"
+                                                                :buffer="renderBuffer"
+                                                                ref="itemsContainer"
+                                                                @scroll.passive="onCardScroll"
+                                                                :class="['items-card-grid', { 'item-container': isOverflowing }]"
+                                                        >
+                                                                <template #default="{ item, index, active }">
+                                                                        <DynamicScrollerItem
+                                                                                :item="item"
+                                                                                :active="active"
+                                                                                :index="index"
+                                                                                :size-dependencies="[
+                                                                                        item.actual_qty,
+                                                                                        item.rate,
+                                                                                        item.image,
+                                                                                        selected_currency,
+                                                                                ]"
+                                                                                :key="item.item_code"
+                                                                        >
+                                                                                <div
+                                                                                        class="card-item-card"
+                                                                                        @click="select_item($event, item)"
+                                                                                        :draggable="true"
+                                                                                        @dragstart="onDragStart($event, item)"
+                                                                                        @dragend="onDragEnd"
+                                                                                >
+                                                                                        <div class="card-item-image-container">
+                                                                                                <v-img
+                                                                                                        :src="item.image || placeholderImage"
+                                                                                                        class="card-item-image"
+                                                                                                        aspect-ratio="1"
+                                                                                                        :alt="item.item_name"
+                                                                                                >
+                                                                                                        <template v-slot:placeholder>
+                                                                                                                <div class="image-placeholder">
+                                                                                                                        <v-icon size="40" color="grey-lighten-2"
+                                                                                                                                >mdi-image</v-icon
+                                                                                                                        >
+                                                                                                                </div>
+                                                                                                        </template>
+                                                                                                </v-img>
+                                                                                        </div>
+                                                                                        <div class="card-item-content">
+                                                                                                <div class="card-item-header">
+                                                                                                        <h4 class="card-item-name">{{ item.item_name }}</h4>
+                                                                                                        <span class="card-item-code">{{ item.item_code }}</span>
+                                                                                                </div>
+                                                                                                <div class="card-item-details">
+                                                                                                        <div class="card-item-price">
+                                                                                                                <div class="primary-price">
+                                                                                                                        <span class="currency-symbol">
+                                                                                                                                {{
+                                                                                                                                        currencySymbol(
+                                                                                                                                                item.original_currency ||
+                                                                                                                                                        pos_profile.currency,
+                                                                                                                                        )
+                                                                                                                                }}
+                                                                                                                        </span>
+                                                                                                                        <span class="price-amount">
+                                                                                                                                {{
+                                                                                                                                        format_currency(
+                                                                                                                                                item.base_price_list_rate ?? item.rate ?? 0,
+                                                                                                                                                item.original_currency ||
+                                                                                                                                                        pos_profile.currency,
+                                                                                                                                                ratePrecision(
+                                                                                                                                                        item.base_price_list_rate ??
+                                                                                                                                                                item.rate ??
+                                                                                                                                                                        0,
+                                                                                                                                                ),
+                                                                                                                                        )
+                                                                                                                                }}
+                                                                                                                        </span>
+                                                                                                                </div>
+                                                                                                                <div
+                                                                                                                        v-if="
+                                                                                                                                pos_profile.posa_allow_multi_currency &&
+                                                                                                                                selected_currency !== pos_profile.currency
+                                                                                                                        "
+                                                                                                                        class="secondary-price"
+                                                                                                                >
+                                                                                                                        <span class="currency-symbol">{{
+                                                                                                                                currencySymbol(selected_currency)
+                                                                                                                        }}</span>
+                                                                                                                        <span class="price-amount">
+                                                                                                                                {{
+                                                                                                                                        format_currency(
+                                                                                                                                                item.rate,
+                                                                                                                                                selected_currency,
+                                                                                                                                                ratePrecision(item.rate),
+                                                                                                                                        )
+                                                                                                                                }}
+                                                                                                                        </span>
+                                                                                                                </div>
+                                                                                                        </div>
+                                                                                                        <div class="card-item-stock">
+                                                                                                                <v-icon size="small" class="stock-icon"
+                                                                                                                        >mdi-package-variant</v-icon
+                                                                                                                >
+                                                                                                                <span
+                                                                                                                        class="stock-amount"
+                                                                                                                        :class="{
+                                                                                                                                'negative-number': isNegative(item.actual_qty),
+                                                                                                                        }"
+                                                                                                                >
+                                                                                                                        {{
+                                                                                                                                format_number(
+                                                                                                                                        item.actual_qty,
+                                                                                                                                        hide_qty_decimals ? 0 : 4,
+                                                                                                                                ) || 0
+                                                                                                                        }}
+                                                                                                                </span>
+                                                                                                                <span class="stock-uom">{{ item.stock_uom || "" }}</span>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                </div>
+                                                                        </DynamicScrollerItem>
+                                                                </template>
+                                                        </DynamicScroller>
 						</div>
 						<div v-else class="items-table-container">
 							<v-data-table-virtual
@@ -457,6 +472,7 @@
 import format from "../../format";
 import _ from "lodash";
 import CameraScanner from "./CameraScanner.vue";
+import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import {
 	saveItemUOMs,
@@ -501,10 +517,12 @@ export default {
 		const { fly } = useFlyAnimation();
 		return { ...responsive, ...rtl, fly };
 	},
-	components: {
-		CameraScanner,
-		Skeleton,
-	},
+        components: {
+                CameraScanner,
+                Skeleton,
+                DynamicScroller,
+                DynamicScrollerItem,
+        },
 	data: () => ({
 		pos_profile: {},
 		stock_settings: {},
@@ -724,17 +742,23 @@ export default {
 				}
 			}
 		},
-		filtered_items(new_value, old_value) {
-			// Update item details if items changed
-			if (
-				this.pos_profile &&
-				!this.pos_profile.pose_use_limit_search &&
-				new_value.length !== old_value.length
-			) {
-				this.update_items_details(new_value);
-			}
-			this.$nextTick(this.checkItemContainerOverflow);
-		},
+                filtered_items(new_value, old_value) {
+                        // Update item details if items changed
+                        if (
+                                this.pos_profile &&
+                                !this.pos_profile.pose_use_limit_search &&
+                                new_value.length !== old_value.length
+                        ) {
+                                this.update_items_details(new_value);
+                        }
+                        this.$nextTick(() => {
+                                const scroller = this.$refs.itemsContainer;
+                                if (scroller && typeof scroller.forceUpdate === "function") {
+                                        scroller.forceUpdate(false);
+                                }
+                                this.checkItemContainerOverflow();
+                        });
+                },
 		// Automatically search when the query has at least 3 characters
 		first_search: _.debounce(function (val, oldVal) {
 			const newLen = (val || "").trim().length;
@@ -771,13 +795,17 @@ export default {
 				this.eventBus.emit("data-loaded", "items");
 			}
 		},
-		items_view() {
-			this.$nextTick(() => {
-				if (this.items_view === "card") {
-					this.checkItemContainerOverflow();
-				} else {
-					this.isOverflowing = false;
-				}
+                items_view() {
+                        this.$nextTick(() => {
+                                if (this.items_view === "card") {
+                                        const scroller = this.$refs.itemsContainer;
+                                        if (scroller && typeof scroller.forceUpdate === "function") {
+                                                scroller.forceUpdate(true);
+                                        }
+                                        this.checkItemContainerOverflow();
+                                } else {
+                                        this.isOverflowing = false;
+                                }
 			});
 		},
 	},
@@ -920,33 +948,46 @@ export default {
 			}
 		},
 
-		// Optimized scroll handler with throttling
-		onCardScroll() {
-			if (this.scrollThrottle) return;
+                getItemsContainerElement() {
+                        const container = this.$refs.itemsContainer;
+                        if (!container) {
+                                return null;
+                        }
 
-			this.scrollThrottle = requestAnimationFrame(() => {
-				try {
-					const el = this.$refs.itemsContainer;
-					if (!el) return;
+                        if (container.$el) {
+                                return container.$el;
+                        }
 
-					const scrollTop = el.scrollTop;
-					const clientHeight = el.clientHeight;
-					const scrollHeight = el.scrollHeight;
+                        return container instanceof HTMLElement ? container : null;
+                },
 
-					// Only trigger load more if we're near the bottom
-					if (scrollTop + clientHeight >= scrollHeight - 50) {
-						this.currentPage += 1;
-						this.loadVisibleItems();
-					}
+                // Optimized scroll handler with throttling
+                onCardScroll() {
+                        if (this.scrollThrottle) return;
 
-					this.lastScrollTop = scrollTop;
-				} catch (error) {
-					console.error("Error in card scroll handler:", error);
-				} finally {
-					this.scrollThrottle = null;
-				}
-			});
-		},
+                        this.scrollThrottle = requestAnimationFrame(() => {
+                                try {
+                                        const el = this.getItemsContainerElement();
+                                        if (!el) return;
+
+                                        const scrollTop = el.scrollTop;
+                                        const clientHeight = el.clientHeight;
+                                        const scrollHeight = el.scrollHeight;
+
+                                        // Only trigger load more if we're near the bottom
+                                        if (scrollTop + clientHeight >= scrollHeight - 50) {
+                                                this.currentPage += 1;
+                                                this.loadVisibleItems();
+                                        }
+
+                                        this.lastScrollTop = scrollTop;
+                                } catch (error) {
+                                        console.error("Error in card scroll handler:", error);
+                                } finally {
+                                        this.scrollThrottle = null;
+                                }
+                        });
+                },
 		markStorageUnavailable(localOnly = false) {
 			if (localOnly) {
 				this.localStorageAvailable = false;
@@ -1056,11 +1097,11 @@ export default {
 			});
 		},
 
-		checkItemContainerOverflow() {
-			const el = this.$refs.itemsContainer;
-			if (!el) {
-				this.isOverflowing = false;
-				return;
+                checkItemContainerOverflow() {
+                        const el = this.getItemsContainerElement();
+                        if (!el) {
+                                this.isOverflowing = false;
+                                return;
 			}
 
 			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
