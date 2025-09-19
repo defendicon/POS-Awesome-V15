@@ -2763,7 +2763,9 @@ export default {
 
                         const hints = this.collectScanLengthHints();
                         for (const length of hints) {
-                                const attempt = this.splitSegmentByLength(segment, length);
+                                const attempt = this.splitSegmentByLength(segment, length, {
+                                        requireUniformChunks: false,
+                                });
                                 if (attempt) {
                                         return attempt;
                                 }
@@ -2771,7 +2773,9 @@ export default {
 
                         const startLength = Math.floor(segment.length / 2);
                         for (let length = startLength; length >= 2; length -= 1) {
-                                const attempt = this.splitSegmentByLength(segment, length);
+                                const attempt = this.splitSegmentByLength(segment, length, {
+                                        requireUniformChunks: true,
+                                });
                                 if (attempt) {
                                         return attempt;
                                 }
@@ -2799,11 +2803,79 @@ export default {
                                 });
                         }
 
+                        if (!lengths.size) {
+                                this.getKnownBarcodeLengths(40).forEach((len) => lengths.add(len));
+                        }
+
                         const ordered = Array.from(lengths).filter((len) => Number.isFinite(len) && len > 0);
                         ordered.sort((a, b) => b - a);
                         return ordered;
                 },
-                splitSegmentByLength(segment, length) {
+                getKnownBarcodeLengths(limit = 50) {
+                        if (!Array.isArray(this.items) || !this.items.length) {
+                                return [];
+                        }
+
+                        const lengths = new Set();
+                        const maxItems = Math.min(this.items.length, 200);
+
+                        for (let index = 0; index < maxItems && lengths.size < limit; index += 1) {
+                                this.collectBarcodeLengthsForItem(this.items[index], lengths, limit);
+                        }
+
+                        return Array.from(lengths).filter((len) => Number.isFinite(len) && len > 0);
+                },
+                collectBarcodeLengthsForItem(item, targetSet, limit) {
+                        if (!item || !targetSet || targetSet.size >= limit) {
+                                return;
+                        }
+
+                        const addLength = (value) => {
+                                if (targetSet.size >= limit) {
+                                        return;
+                                }
+                                if (value === null || value === undefined) {
+                                        return;
+                                }
+                                const stringValue = typeof value === "string" ? value : String(value);
+                                const normalized = stringValue.trim();
+                                if (!normalized) {
+                                        return;
+                                }
+                                const length = normalized.length;
+                                if (length >= 4 && length <= 64) {
+                                        targetSet.add(length);
+                                }
+                        };
+
+                        addLength(item.item_code);
+                        addLength(item.barcode);
+
+                        if (Array.isArray(item.item_barcode)) {
+                                item.item_barcode.forEach((entry) => {
+                                        addLength(entry?.barcode);
+                                });
+                        }
+
+                        if (Array.isArray(item.barcodes)) {
+                                item.barcodes.forEach((barcode) => {
+                                        addLength(barcode);
+                                });
+                        }
+
+                        if (Array.isArray(item.serial_no_data)) {
+                                item.serial_no_data.forEach((serial) => {
+                                        addLength(serial);
+                                });
+                        }
+
+                        if (Array.isArray(item.batch_no_data)) {
+                                item.batch_no_data.forEach((batch) => {
+                                        addLength(batch);
+                                });
+                        }
+                },
+                splitSegmentByLength(segment, length, { requireUniformChunks = true } = {}) {
                         if (!length || length <= 0) {
                                 return null;
                         }
@@ -2821,17 +2893,23 @@ export default {
                         if (!chunk) {
                                 return null;
                         }
-
                         const repeats = segment.length / length;
+                        const parts = [chunk];
+
                         for (let index = 1; index < repeats; index += 1) {
                                 const start = index * length;
                                 const end = start + length;
-                                if (segment.slice(start, end) !== chunk) {
+                                const nextChunk = segment.slice(start, end);
+                                if (!nextChunk) {
                                         return null;
                                 }
+                                if (requireUniformChunks && nextChunk !== chunk) {
+                                        return null;
+                                }
+                                parts.push(nextChunk);
                         }
 
-                        return Array.from({ length: repeats }, () => chunk);
+                        return parts;
                 },
                 async handleHardwareScan({ code, fromScanner = true }) {
                         const scannedCode = code;
