@@ -156,12 +156,12 @@ export default {
 		this.initializeData();
 		this.setupNetworkListeners();
 		this.setupEventListeners();
-		this.handleRefreshCacheUsage();
-	},
-	methods: {
-		setupNetworkListeners,
-		checkNetworkConnectivity,
-		detectHostType,
+                this.scheduleInitialCacheUsageEstimate();
+        },
+        methods: {
+                setupNetworkListeners,
+                checkNetworkConnectivity,
+                detectHostType,
 		performConnectivityChecks,
 		checkFrappePing,
 		checkCurrentOrigin,
@@ -191,15 +191,7 @@ export default {
 			}
 
 			this.pendingInvoices = getPendingOfflineInvoiceCount();
-			this.syncTotals = getLastSyncTotals();
-
-			getCacheUsageEstimate()
-				.then((usage) => {
-					if (usage.percentage > 90) {
-						alert("Local cache nearing capacity. Consider going online to sync.");
-					}
-				})
-				.catch(() => {});
+                        this.syncTotals = getLastSyncTotals();
 
 			// Check if running on IP host
 			this.isIpHost = /^\d+\.\d+\.\d+\.\d+/.test(window.location.hostname);
@@ -407,17 +399,57 @@ export default {
 			});
 		},
 
-		handleRefreshCacheUsage() {
-			this.cacheUsageLoading = true;
-			getCacheUsageEstimate()
-				.then((usage) => {
-					this.cacheUsage = usage.percentage || 0;
-					this.cacheUsageDetails = {
-						total: usage.total || 0,
-						indexedDB: usage.indexedDB || 0,
-						localStorage: usage.localStorage || 0,
-					};
-				})
+                scheduleInitialCacheUsageEstimate() {
+                        if (this.isWarmNavigation()) {
+                                return;
+                        }
+
+                        const runEstimate = () => {
+                                this.handleRefreshCacheUsage({ initial: true });
+                        };
+
+                        if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+                                window.requestIdleCallback(runEstimate, { timeout: 2000 });
+                        } else {
+                                window.setTimeout(runEstimate, 0);
+                        }
+                },
+
+                isWarmNavigation() {
+                        const hasPerformance = typeof performance !== "undefined";
+                        const navigationEntries = hasPerformance && performance.getEntriesByType
+                                ? performance.getEntriesByType("navigation")
+                                : [];
+                        if (navigationEntries && navigationEntries.length > 0) {
+                                return navigationEntries[0].type === "back_forward";
+                        }
+
+                        if (hasPerformance && performance.navigation) {
+                                return performance.navigation.type === performance.navigation.TYPE_BACK_FORWARD;
+                        }
+
+                        return false;
+                },
+
+                handleRefreshCacheUsage(options = {}) {
+                        let initial = false;
+                        if (options && typeof options === "object" && !("target" in options)) {
+                                ({ initial = false } = options);
+                        }
+
+                        this.cacheUsageLoading = true;
+                        getCacheUsageEstimate()
+                                .then((usage) => {
+                                        this.cacheUsage = usage.percentage || 0;
+                                        this.cacheUsageDetails = {
+                                                total: usage.total || 0,
+                                                indexedDB: usage.indexedDB || 0,
+                                                localStorage: usage.localStorage || 0,
+                                        };
+                                        if (initial && usage.percentage > 90) {
+                                                alert("Local cache nearing capacity. Consider going online to sync.");
+                                        }
+                                })
 				.catch((e) => {
 					console.error("Failed to refresh cache usage", e);
 				})

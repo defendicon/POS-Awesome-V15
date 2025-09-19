@@ -6,7 +6,6 @@ import {
 	initPersistWorker,
 	tableForKey,
 } from "./core.js";
-import { getAllByCursor } from "./db-utils.js";
 import { clearPriceListCache } from "./items.js";
 import Dexie from "dexie/dist/dexie.mjs";
 import { prepareItemsForStorage } from "./item-utils.js";
@@ -572,12 +571,53 @@ export async function forceClearAllCache() {
  * Estimates the current cache usage size in bytes and percentage
  * @returns {Promise<Object>} Object containing total, localStorage, and indexedDB sizes in bytes, and usage percentage
  */
+const TABLE_SAMPLE_LIMIT = 25;
+
+function estimateSerializedSize(value) {
+        try {
+                const serialized = JSON.stringify(value);
+                return serialized ? serialized.length * 2 : 0;
+        } catch (e) {
+                console.warn("Failed to serialize value while estimating size", e);
+                return 0;
+        }
+}
+
+async function estimateTableUsage(table) {
+        try {
+                const totalCount = await table.count();
+                if (!totalCount) {
+                        return 0;
+                }
+
+                const sampleSize = Math.min(totalCount, TABLE_SAMPLE_LIMIT);
+                const sample = await table
+                        .toCollection()
+                        .limit(sampleSize)
+                        .toArray();
+
+                if (!sample.length) {
+                        return 0;
+                }
+
+                const totalSampleBytes = sample.reduce((size, item) => {
+                        return size + estimateSerializedSize(item);
+                }, 0);
+
+                const averageItemSize = totalSampleBytes / sample.length;
+                return Math.round(averageItemSize * totalCount);
+        } catch (e) {
+                        console.error(`Failed to estimate usage for table ${table.name}`, e);
+                return 0;
+        }
+}
+
 export async function getCacheUsageEstimate() {
-	try {
-		await checkDbHealth();
-		// Calculate localStorage size
-		let localStorageSize = 0;
-		if (typeof localStorage !== "undefined") {
+        try {
+                await checkDbHealth();
+                // Calculate localStorage size
+                let localStorageSize = 0;
+                if (typeof localStorage !== "undefined") {
 			for (let i = 0; i < localStorage.length; i++) {
 				const key = localStorage.key(i);
 				if (key && key.startsWith("posa_")) {
@@ -587,21 +627,17 @@ export async function getCacheUsageEstimate() {
 			}
 		}
 
-		// Estimate IndexedDB size using cursor to avoid loading everything in memory
-		let indexedDBSize = 0;
-		try {
-			if (db.isOpen()) {
-				for (const table of db.tables) {
-					const entries = await getAllByCursor(table.name);
-					indexedDBSize += entries.reduce((size, item) => {
-						const itemSize = JSON.stringify(item).length * 2; // UTF-16 characters
-						return size + itemSize;
-					}, 0);
-				}
-			}
-		} catch (e) {
-			console.error("Failed to calculate IndexedDB size", e);
-		}
+                // Estimate IndexedDB size using record counts with sampled averages
+                let indexedDBSize = 0;
+                try {
+                        if (db.isOpen()) {
+                                for (const table of db.tables) {
+                                        indexedDBSize += await estimateTableUsage(table);
+                                }
+                        }
+                } catch (e) {
+                        console.error("Failed to calculate IndexedDB size", e);
+                }
 
 		const totalSize = localStorageSize + indexedDBSize;
 		const maxSize = 50 * 1024 * 1024; // Assume 50MB as max size
