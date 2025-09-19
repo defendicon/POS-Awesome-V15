@@ -656,7 +656,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
             return []
         return frappe.get_all(
             "Item Barcode",
-            fields=["parent", "barcode", "posa_uom"],
+            fields=["parent", "barcode", "barcode_type", "posa_uom"],
             filters={"parent": ["in", item_codes]},
         )
 
@@ -765,7 +765,9 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 
     barcode_map = {}
     for d in barcode_rows:
-        barcode_map.setdefault(d.parent, []).append({"barcode": d.barcode, "posa_uom": d.posa_uom})
+        barcode_map.setdefault(d.parent, []).append(
+            {"barcode": d.barcode, "barcode_type": d.barcode_type, "posa_uom": d.posa_uom}
+        )
 
     batch_map = {}
     for d in batch_rows:
