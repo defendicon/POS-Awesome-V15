@@ -39,9 +39,7 @@
 
 <script>
 /* global frappe, $ */
-import Navbar from "./components/Navbar.vue";
-import POS from "./components/pos/Pos.vue";
-import Payments from "./components/payments/Pay.vue";
+import { defineAsyncComponent } from "vue";
 import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
 import { useLoading } from "./composables/useLoading.js";
 import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "./utils/loading.js";
@@ -142,12 +140,18 @@ export default {
 			}
 		},
 	},
-	components: {
-		Navbar,
-		POS,
-		Payments,
-		AppLoadingOverlay,
-	},
+        components: {
+                Navbar: defineAsyncComponent(() =>
+                        import(/* webpackChunkName: "posapp-navbar" */ "./components/Navbar.vue")
+                ),
+                POS: defineAsyncComponent(() =>
+                        import(/* webpackChunkName: "posapp-pos" */ "./components/pos/Pos.vue")
+                ),
+                Payments: defineAsyncComponent(() =>
+                        import(/* webpackChunkName: "posapp-payments" */ "./components/payments/Pay.vue")
+                ),
+                AppLoadingOverlay,
+        },
 	mounted() {
 		this.remove_frappe_nav();
 		// Initialize cache ready state early from stored value
