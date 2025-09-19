@@ -3074,6 +3074,7 @@ export default {
 
                         return null;
                 },
+
                 splitSegmentByHintedLengths(segment) {
                         if (typeof segment !== "string") {
                                 return null;
@@ -3085,18 +3086,21 @@ export default {
                         }
 
                         const hintedLengths = this.collectScanLengthHints();
-                        const combinedLengths = new Set();
-
+                        const hintLengthSet = new Set();
                         if (hintedLengths && hintedLengths.size) {
                                 hintedLengths.forEach((length) => {
                                         if (typeof length === "number") {
-                                                combinedLengths.add(length);
+                                                hintLengthSet.add(length);
                                         }
                                 });
                         }
 
-                        const commonBarcodeLengths = [14, 13, 12, 11, 10, 9, 8];
-                        commonBarcodeLengths.forEach((length) => combinedLengths.add(length));
+                        const fallbackLengths = [14, 13, 12, 11, 10, 9, 8];
+                        const fallbackLengthSet = new Set(fallbackLengths);
+                        const combinedLengths = new Set();
+
+                        hintLengthSet.forEach((length) => combinedLengths.add(length));
+                        fallbackLengths.forEach((length) => combinedLengths.add(length));
 
                         const lengths = Array.from(combinedLengths)
                                 .map((length) => Number(length))
@@ -3112,16 +3116,106 @@ export default {
                                 return null;
                         }
 
-                        const memo = new Map();
-                        const path = [];
+                        const knownCodes = this.getKnownScannableCodes();
+                        const knownNormalizedCodes = new Set();
+                        knownCodes.forEach((code) => {
+                                if (code === null || code === undefined) {
+                                        return;
+                                }
+                                const stringValue = typeof code === "string" ? code : String(code);
+                                const trimmed = stringValue.trim();
+                                if (!trimmed) {
+                                        return;
+                                }
+                                knownNormalizedCodes.add(this.normalizeScanCode(trimmed));
+                        });
 
-                        const dfs = (index) => {
-                                if (index === normalized.length) {
-                                        return true;
+                        const numericPattern = /^\d+$/;
+                        const evaluateChunk = (chunk, length) => {
+                                const trimmed = chunk.trim();
+                                if (!trimmed) {
+                                        return { allowed: false };
                                 }
 
-                                if (memo.has(index)) {
-                                        return memo.get(index);
+                                const normalizedChunk = this.normalizeScanCode(trimmed);
+                                let score = 0;
+                                let knownMatches = 0;
+                                let validMatches = 0;
+                                let invalidMatches = 0;
+
+                                if (knownNormalizedCodes.has(normalizedChunk)) {
+                                        score += 15;
+                                        knownMatches += 1;
+                                }
+
+                                if (hintLengthSet.has(length)) {
+                                        score += 3;
+                                } else if (fallbackLengthSet.has(length)) {
+                                        score += 1;
+                                }
+
+                                if (numericPattern.test(trimmed)) {
+                                        const gtinValidity = this.validateGtinCode(trimmed);
+                                        if (gtinValidity === true) {
+                                                score += 5;
+                                                validMatches += 1;
+                                        } else if (gtinValidity === false) {
+                                                score -= 4;
+                                                invalidMatches += 1;
+                                        }
+                                }
+
+                                return {
+                                        allowed: true,
+                                        chunk: trimmed,
+                                        normalizedChunk,
+                                        score,
+                                        knownMatches,
+                                        validMatches,
+                                        invalidMatches,
+                                };
+                        };
+
+                        const results = [];
+                        const bestStatsAtIndex = new Map();
+
+                        const shouldPrune = (index, stats) => {
+                                const existing = bestStatsAtIndex.get(index);
+                                if (!existing) {
+                                        bestStatsAtIndex.set(index, { ...stats });
+                                        return false;
+                                }
+
+                                const betterScore = stats.score > existing.score;
+                                const equalScore = stats.score === existing.score;
+                                const betterKnown = stats.knownMatches > existing.knownMatches;
+                                const equalKnown = stats.knownMatches === existing.knownMatches;
+                                const fewerInvalid = stats.invalidMatches < existing.invalidMatches;
+
+                                if (betterScore || (equalScore && betterKnown) || (equalScore && equalKnown && fewerInvalid)) {
+                                        bestStatsAtIndex.set(index, { ...stats });
+                                        return false;
+                                }
+
+                                return true;
+                        };
+
+                        const dfs = (index, path, stats) => {
+                                if (index === normalized.length) {
+                                        if (path.length > 1) {
+                                                results.push({
+                                                        chunks: path.slice(),
+                                                        score: stats.score,
+                                                        knownMatches: stats.knownMatches,
+                                                        validMatches: stats.validMatches,
+                                                        invalidMatches: stats.invalidMatches,
+                                                });
+                                        }
+                                        return;
+                                }
+
+                                if (shouldPrune(index, stats)) {
+                                        return;
                                 }
 
                                 for (const length of lengths) {
@@ -3135,24 +3229,99 @@ export default {
                                                 continue;
                                         }
 
-                                        path.push(chunk);
-                                        if (dfs(nextIndex)) {
-                                                memo.set(index, true);
-                                                return true;
+                                        const evaluation = evaluateChunk(chunk, length);
+                                        if (!evaluation.allowed) {
+                                                continue;
                                         }
+
+                                        path.push(evaluation.chunk);
+                                        dfs(nextIndex, path, {
+                                                score: stats.score + evaluation.score,
+                                                knownMatches: stats.knownMatches + evaluation.knownMatches,
+                                                validMatches: stats.validMatches + evaluation.validMatches,
+                                                invalidMatches: stats.invalidMatches + evaluation.invalidMatches,
+                                        });
                                         path.pop();
                                 }
-
-                                memo.set(index, false);
-                                return false;
                         };
 
-                        if (dfs(0) && path.length > 1) {
-                                return path.slice();
+                        dfs(0, [], { score: 0, knownMatches: 0, validMatches: 0, invalidMatches: 0 });
+
+                        if (!results.length) {
+                                return null;
+                        }
+
+                        results.sort((a, b) => {
+                                if (b.knownMatches !== a.knownMatches) {
+                                        return b.knownMatches - a.knownMatches;
+                                }
+                                if (b.validMatches !== a.validMatches) {
+                                        return b.validMatches - a.validMatches;
+                                }
+                                if (a.invalidMatches !== b.invalidMatches) {
+                                        return a.invalidMatches - b.invalidMatches;
+                                }
+                                if (b.score !== a.score) {
+                                        return b.score - a.score;
+                                }
+                                return a.chunks.length - b.chunks.length;
+                        });
+
+                        const best = results[0];
+                        if (best && Array.isArray(best.chunks) && best.chunks.length > 1) {
+                                return best.chunks;
                         }
 
                         return null;
                 },
+
+                computeGtinCheckDigit(payload) {
+                        if (typeof payload !== "string" || !payload || /\D/.test(payload)) {
+                                return null;
+                        }
+
+                        let sum = 0;
+                        const reversed = payload.split("").reverse();
+                        reversed.forEach((digit, index) => {
+                                const numeric = Number(digit);
+                                if (!Number.isFinite(numeric)) {
+                                        return;
+                                }
+                                sum += index % 2 === 0 ? numeric * 3 : numeric;
+                        });
+
+                        const mod = sum % 10;
+                        return mod === 0 ? 0 : 10 - mod;
+                },
+                validateGtinCode(value) {
+                        if (typeof value !== "string") {
+                                return null;
+                        }
+
+                        const trimmed = value.trim();
+                        if (!trimmed || /\D/.test(trimmed)) {
+                                return null;
+                        }
+
+                        const length = trimmed.length;
+                        if (![8, 12, 13, 14].includes(length)) {
+                                return null;
+                        }
+
+                        const body = trimmed.slice(0, -1);
+                        const checkDigit = Number(trimmed.slice(-1));
+                        if (!Number.isFinite(checkDigit)) {
+                                return null;
+                        }
+
+                        const expected = this.computeGtinCheckDigit(body);
+                        if (expected === null) {
+                                return null;
+                        }
+
+                        return expected === checkDigit;
+                },
+
                 getKnownScannableCodes(limit = 500) {
                         if (!Array.isArray(this.items) || !this.items.length) {
                                 return new Set();
