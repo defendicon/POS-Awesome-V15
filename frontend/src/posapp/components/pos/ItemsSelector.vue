@@ -1984,10 +1984,10 @@ export default {
                         if (Array.isArray(new_item.item_barcode)) {
                                 new_item.item_barcode.forEach((element) => {
                                         if (search === element.barcode) {
-                                                new_item.uom = element.posa_uom;
-						match = true;
-					}
-				});
+                                                new_item.uom = element.posa_uom || element.uom || new_item.uom;
+                                                match = true;
+                                        }
+                                });
 			}
 			if (!match && new_item.barcode === search) {
 				match = true;
@@ -3690,8 +3690,9 @@ export default {
                                 // If the scanned barcode has a specific UOM, apply it
                                 if (Array.isArray(newItem.item_barcode)) {
                                         const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-                                        if (barcodeMatch && barcodeMatch.posa_uom) {
-                                                newItem.uom = barcodeMatch.posa_uom;
+                                        if (barcodeMatch && (barcodeMatch.posa_uom || barcodeMatch.uom)) {
+                                                const barcodeUom = barcodeMatch.posa_uom || barcodeMatch.uom;
+                                                newItem.uom = barcodeUom;
 
                                                 // Try fetching the rate for this UOM from the active price list
                                                 try {
@@ -3700,7 +3701,7 @@ export default {
                                                                 args: {
                                                                         item_code: newItem.item_code,
                                                                         price_list: this.active_price_list,
-                                                                        uom: barcodeMatch.posa_uom,
+                                                                        uom: barcodeUom,
                                                                 },
                                                         });
                                                         if (res.message) {
