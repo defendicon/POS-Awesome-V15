@@ -10,6 +10,159 @@ import { clearPriceListCache } from "./items.js";
 import Dexie from "dexie/dist/dexie.mjs";
 import { prepareItemsForStorage } from "./item-utils.js";
 
+const IMMEDIATE_HYDRATION_KEYS = [
+        "cache_version",
+        "cache_ready",
+        "manual_offline",
+        "tax_inclusive",
+        "offline_invoices",
+        "offline_customers",
+        "offline_payments",
+        "pos_last_sync_totals",
+        "pos_opening_storage",
+        "opening_dialog_storage",
+        "sales_persons_storage",
+        "customer_balance_cache",
+        "customer_storage",
+        "items_last_sync",
+        "customers_last_sync",
+        "tax_template_cache",
+        "print_template",
+        "terms_and_conditions",
+        "item_groups_cache",
+];
+
+const POST_UI_HYDRATION_KEYS = ["uom_cache", "item_details_cache", "coupons_cache"];
+
+const BACKGROUND_HYDRATION_KEYS = [
+        "local_stock_cache",
+        "stock_cache_ready",
+        "offers_cache",
+        "translation_cache",
+];
+
+function runAfterFirstPaint(callback) {
+        if (typeof window === "undefined") {
+                callback();
+                return;
+        }
+
+        const raf = window.requestAnimationFrame?.bind(window);
+        if (typeof raf === "function") {
+                raf(() => raf(() => callback()));
+        } else {
+                setTimeout(callback, 16);
+        }
+}
+
+function runWhenIdle(callback, timeout = 2000) {
+        if (typeof window === "undefined") {
+                callback();
+                return;
+        }
+
+        const ric = window.requestIdleCallback?.bind(window);
+        if (typeof ric === "function") {
+                ric(callback, { timeout });
+        } else {
+                setTimeout(callback, timeout);
+        }
+}
+
+function resolveFeatureFlag(flagName) {
+        if (typeof window === "undefined") {
+                return undefined;
+        }
+
+        const globalFlags = window.posawesomeFeatureFlags || window.posawesomeFeatures;
+        if (globalFlags && Object.prototype.hasOwnProperty.call(globalFlags, flagName)) {
+                return !!globalFlags[flagName];
+        }
+
+        const bootFlags = window.frappe?.boot?.posawesome_features;
+        if (bootFlags && Object.prototype.hasOwnProperty.call(bootFlags, flagName)) {
+                return !!bootFlags[flagName];
+        }
+
+        return undefined;
+}
+
+function shouldHydrateOptionalCache(key) {
+        switch (key) {
+                case "offers_cache": {
+                        const explicit = resolveFeatureFlag("offersCache");
+                        if (typeof explicit === "boolean") {
+                                return explicit;
+                        }
+                        const profile = typeof window !== "undefined" ? window.frappe?.boot?.pos_profile : null;
+                        if (profile && Object.prototype.hasOwnProperty.call(profile, "posa_enable_offers")) {
+                                return !!profile.posa_enable_offers;
+                        }
+                        return true;
+                }
+                case "translation_cache": {
+                        const explicit = resolveFeatureFlag("translationCache");
+                        if (typeof explicit === "boolean") {
+                                return explicit;
+                        }
+                        const lang = typeof window !== "undefined" ? window.frappe?.boot?.lang : null;
+                        return !!(lang && lang !== "en");
+                }
+                default:
+                        return true;
+        }
+}
+
+async function hydrateKeys(keys, { guard } = {}) {
+        if (!Array.isArray(keys) || keys.length === 0) {
+                return;
+        }
+
+        let dbReady = false;
+        try {
+                await checkDbHealth();
+                if (!db.isOpen()) {
+                        await db.open();
+                }
+                dbReady = true;
+        } catch (err) {
+                console.error("Failed to prepare IndexedDB for hydration", err);
+        }
+
+        for (const key of keys) {
+                if (guard && guard(key) === false) {
+                        continue;
+                }
+
+                let loaded = false;
+
+                if (dbReady) {
+                        try {
+                                const stored = await db.table(tableForKey(key)).get(key);
+                                if (stored && stored.value !== undefined) {
+                                        memory[key] = stored.value;
+                                        loaded = true;
+                                }
+                        } catch (err) {
+                                console.error(`Failed to hydrate ${key} from IndexedDB`, err);
+                        }
+                }
+
+                if (!loaded && typeof localStorage !== "undefined") {
+                        try {
+                                const raw = localStorage.getItem(`posa_${key}`);
+                                if (raw) {
+                                        memory[key] = JSON.parse(raw);
+                                        loaded = true;
+                                }
+                        } catch (err) {
+                                console.error(`Failed to hydrate ${key} from localStorage`, err);
+                        }
+                }
+
+        }
+}
+
 // Increment this number whenever the cache data structure changes
 export const CACHE_VERSION = 1;
 
@@ -17,10 +170,10 @@ export const MAX_QUEUE_ITEMS = 1000;
 
 // Memory cache object
 export const memory = {
-	offline_invoices: [],
-	offline_customers: [],
-	offline_payments: [],
-	pos_last_sync_totals: { pending: 0, synced: 0, drafted: 0 },
+        offline_invoices: [],
+        offline_customers: [],
+        offline_payments: [],
+        pos_last_sync_totals: { pending: 0, synced: 0, drafted: 0 },
 	uom_cache: {},
 	offers_cache: [],
 	customer_balance_cache: {},
@@ -42,56 +195,64 @@ export const memory = {
 	cache_ready: false,
 	tax_inclusive: false,
 	manual_offline: false,
-	print_template: "",
-	terms_and_conditions: "",
+        print_template: "",
+        terms_and_conditions: "",
 };
+
+const ALL_HYDRATION_KEYS = new Set([
+        ...IMMEDIATE_HYDRATION_KEYS,
+        ...POST_UI_HYDRATION_KEYS,
+        ...BACKGROUND_HYDRATION_KEYS,
+]);
+
+for (const key of Object.keys(memory)) {
+        if (!ALL_HYDRATION_KEYS.has(key)) {
+                IMMEDIATE_HYDRATION_KEYS.push(key);
+                ALL_HYDRATION_KEYS.add(key);
+        }
+}
 
 // Initialize memory from IndexedDB and expose a promise for consumers
 export const memoryInitPromise = (async () => {
-	try {
-		await checkDbHealth();
-		for (const key of Object.keys(memory)) {
-			const stored = await db.table(tableForKey(key)).get(key);
-			if (stored && stored.value !== undefined) {
-				memory[key] = stored.value;
-				continue;
-			}
-			if (typeof localStorage !== "undefined") {
-				const ls = localStorage.getItem(`posa_${key}`);
-				if (ls) {
-					try {
-						memory[key] = JSON.parse(ls);
-						continue;
-					} catch (err) {
-						console.error("Failed to parse localStorage for", key, err);
-					}
-				}
-			}
-		}
+        try {
+                await hydrateKeys(IMMEDIATE_HYDRATION_KEYS);
 
-		// Verify cache version and clear outdated caches
-		const versionEntry = await db.table(tableForKey("cache_version")).get("cache_version");
-		let storedVersion = versionEntry ? versionEntry.value : null;
-		if (!storedVersion && typeof localStorage !== "undefined") {
-			const v = localStorage.getItem("posa_cache_version");
-			if (v) storedVersion = parseInt(v, 10);
-		}
-		if (storedVersion !== CACHE_VERSION) {
-			await forceClearAllCache();
-			memory.cache_version = CACHE_VERSION;
-			if (typeof localStorage !== "undefined") {
-				localStorage.setItem("posa_cache_version", CACHE_VERSION);
-			}
-			persist("cache_version", CACHE_VERSION);
-		} else {
-			memory.cache_version = storedVersion || CACHE_VERSION;
-		}
-		// Mark caches initialized
-		memory.cache_ready = true;
-		persist("cache_ready", true);
-	} catch (e) {
-		console.error("Failed to initialize memory from DB", e);
-	}
+                let storedVersion = memory.cache_version;
+                if ((storedVersion === undefined || storedVersion === null) && typeof localStorage !== "undefined") {
+                        const v = localStorage.getItem("posa_cache_version");
+                        if (v) {
+                                storedVersion = parseInt(v, 10);
+                        }
+                }
+
+                if (storedVersion !== CACHE_VERSION) {
+                        await forceClearAllCache();
+                        memory.cache_version = CACHE_VERSION;
+                        if (typeof localStorage !== "undefined") {
+                                localStorage.setItem("posa_cache_version", CACHE_VERSION);
+                        }
+                        persist("cache_version", CACHE_VERSION);
+                } else {
+                        memory.cache_version = storedVersion || CACHE_VERSION;
+                }
+
+                memory.cache_ready = true;
+                persist("cache_ready", true);
+
+                runAfterFirstPaint(() => {
+                        hydrateKeys(POST_UI_HYDRATION_KEYS).catch((err) => {
+                                console.error("Failed to hydrate post-UI caches", err);
+                        });
+                });
+
+                runWhenIdle(() => {
+                        hydrateKeys(BACKGROUND_HYDRATION_KEYS, { guard: shouldHydrateOptionalCache }).catch((err) => {
+                                console.error("Failed to hydrate background caches", err);
+                        });
+                });
+        } catch (e) {
+                console.error("Failed to initialize memory from DB", e);
+        }
 })();
 
 // Reset cached invoices and customers after syncing
