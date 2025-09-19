@@ -1937,6 +1937,22 @@ export default {
                                 typeof context.firstSearch === "string" && context.firstSearch.length
                                         ? context.firstSearch
                                         : this.first_search;
+                        const fromScanner = context.fromScanner ?? this.search_from_scanner;
+
+                        if (!fromScanner && typeof rawSearchInput === "string") {
+                                const trimmedInput = rawSearchInput.trim();
+                                if (trimmedInput) {
+                                        const normalizedBatch = this.normalizeHardwareScanPayload(trimmedInput);
+                                        const isCompositeInput =
+                                                normalizedBatch.length > 1 ||
+                                                (normalizedBatch.length === 1 &&
+                                                        normalizedBatch[0] !== trimmedInput);
+
+                                        if (isCompositeInput && this.queueManualScanBatch(normalizedBatch)) {
+                                                return;
+                                        }
+                                }
+                        }
 
                         if (!filteredItems.length || !rawSearchInput) {
                                 return;
@@ -1960,7 +1976,7 @@ export default {
                                 new_item._barcode_qty = true;
                         }
 
-                        const fromScanner = context.fromScanner ?? this.search_from_scanner;
+                        
                         const scannedCodeForDisplay =
                                 (context.scannedCode ?? this.pendingScanCode) || rawSearchInput || search;
 
@@ -2619,13 +2635,45 @@ export default {
 
                         normalizedCodes.forEach((code) => {
                                 if (code) {
-                                        this.hardwareScanQueue.push({ code });
+                                        this.hardwareScanQueue.push({ code, fromScanner: true });
                                 }
                         });
 
                         if (this.hardwareScanQueue.length) {
                                 this.processHardwareScanQueue();
                         }
+                },
+                queueManualScanBatch(codes) {
+                        if (!Array.isArray(codes) || !codes.length) {
+                                return false;
+                        }
+
+                        const entries = codes
+                                .map((code) => (typeof code === "string" ? code.trim() : ""))
+                                .filter(Boolean);
+
+                        if (!entries.length) {
+                                return false;
+                        }
+
+                        entries.forEach((code) => {
+                                this.hardwareScanQueue.push({ code, fromScanner: false, source: "manual-batch" });
+                        });
+
+                        this.pendingScanCode = "";
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        this.first_search = "";
+                        this.search = "";
+
+                        this.$nextTick(() => {
+                                if (this.$refs.debounce_search) {
+                                        this.$refs.debounce_search.focus();
+                                }
+                        });
+
+                        this.processHardwareScanQueue();
+                        return true;
                 },
                 async processHardwareScanQueue() {
                         if (this.processingHardwareScan || this.scanErrorDialog) {
@@ -2642,8 +2690,9 @@ export default {
                                         }
 
                                         const activeCode = nextScan.code;
+                                        const shouldLockScanner = nextScan.fromScanner !== false;
                                         this.currentHardwareScan = { ...nextScan };
-                                        this.scannerLocked = true;
+                                        this.scannerLocked = shouldLockScanner;
 
                                         try {
                                                 await this.handleHardwareScan(nextScan);
@@ -2784,9 +2833,10 @@ export default {
 
                         return Array.from({ length: repeats }, () => chunk);
                 },
-                async handleHardwareScan({ code }) {
+                async handleHardwareScan({ code, fromScanner = true }) {
                         const scannedCode = code;
-                        this.search_from_scanner = true;
+                        const isScanner = fromScanner !== false;
+                        this.search_from_scanner = isScanner;
                         this.pendingScanCode = scannedCode;
                         this.first_search = scannedCode;
                         this.search = scannedCode;
@@ -2807,7 +2857,7 @@ export default {
                                 firstSearch: scannedCode,
                                 scannedCode,
                                 filteredItems,
-                                fromScanner: true,
+                                fromScanner: isScanner,
                         });
                 },
                 notifyHardwareScanFailure(scannedCode, { message, details } = {}) {
