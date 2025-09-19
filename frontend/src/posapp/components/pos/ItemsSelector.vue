@@ -587,6 +587,11 @@ export default {
                 scanErrorMessage: "",
                 scanErrorDetails: "",
                 scanErrorCode: "",
+                lastCompositeNormalization: {
+                        attempted: false,
+                        success: false,
+                        reason: "",
+                },
                 scannerLocked: false,
                 scanAudioContext: null,
                 pendingScanCode: "",
@@ -1943,6 +1948,25 @@ export default {
                                 const trimmedInput = rawSearchInput.trim();
                                 if (trimmedInput) {
                                         const normalizedBatch = this.normalizeHardwareScanPayload(trimmedInput);
+                                        const normalizationMeta = this.lastCompositeNormalization || {};
+
+                                        if (
+                                                normalizationMeta.attempted &&
+                                                normalizationMeta.reason === "progressive-lengths"
+                                        ) {
+                                                if (normalizationMeta.success) {
+                                                        if (this.queueManualScanBatch(normalizedBatch)) {
+                                                                return;
+                                                        }
+                                                } else {
+                                                        this.notifyHardwareScanFailure(trimmedInput, {
+                                                                message: this.__("Item not found"),
+                                                                details: this.getCompositeBarcodeLengthFailureDetails(),
+                                                        });
+                                                        return;
+                                                }
+                                        }
+
                                         const isCompositeInput =
                                                 normalizedBatch.length > 1 ||
                                                 (normalizedBatch.length === 1 &&
@@ -1959,7 +1983,7 @@ export default {
                         }
 
                         // Derive the searchable code and detect scale barcode
-                        const search = this.get_search(rawSearchInput);
+                        let search = this.get_search(rawSearchInput);
                         const isScaleBarcode =
                                 this.pos_profile?.posa_scale_barcode_start &&
                                 rawSearchInput.startsWith(this.pos_profile.posa_scale_barcode_start);
@@ -1970,31 +1994,82 @@ export default {
                         if (!sourceItem) {
                                 return;
                         }
-                        const new_item = { ...sourceItem };
+
+                        const trimmedSearchInput =
+                                typeof rawSearchInput === "string" ? rawSearchInput.trim() : "";
+                        const scannedCodeCandidate =
+                                typeof context.scannedCode === "string"
+                                        ? context.scannedCode
+                                        : this.pendingScanCode;
+                        const trimmedScannedCode =
+                                typeof scannedCodeCandidate === "string" ? scannedCodeCandidate.trim() : "";
+
+                        let new_item = { ...sourceItem };
                         new_item.qty = flt(qty);
                         if (isScaleBarcode) {
                                 new_item._barcode_qty = true;
                         }
 
-                        
                         const scannedCodeForDisplay =
                                 (context.scannedCode ?? this.pendingScanCode) || rawSearchInput || search;
 
-                        let match = false;
-                        if (Array.isArray(new_item.item_barcode)) {
-                                new_item.item_barcode.forEach((element) => {
-                                        if (search === element.barcode) {
-                                                new_item.uom = element.posa_uom;
-						match = true;
-					}
-				});
-			}
-			if (!match && new_item.barcode === search) {
-				match = true;
-			}
-			if (!match && Array.isArray(new_item.barcodes)) {
-				match = new_item.barcodes.some((bc) => String(bc) === search);
-			}
+                        let match = this.applyBarcodeMatchToItem(new_item, search).matched;
+
+                        if (!match && trimmedSearchInput) {
+                                const normalizedInput = this.normalizeScanCode(trimmedSearchInput);
+                                if (normalizedInput && normalizedInput !== this.normalizeScanCode(search)) {
+                                        const alternativeMatch = this.applyBarcodeMatchToItem(
+                                                new_item,
+                                                trimmedSearchInput,
+                                        );
+                                        if (alternativeMatch.matched) {
+                                                match = true;
+                                                search = trimmedSearchInput;
+                                                this.search = search;
+                                        }
+                                }
+                        }
+
+                        if (!match && trimmedScannedCode) {
+                                const normalizedScan = this.normalizeScanCode(trimmedScannedCode);
+                                if (normalizedScan && normalizedScan !== this.normalizeScanCode(search)) {
+                                        const alternativeMatch = this.applyBarcodeMatchToItem(
+                                                new_item,
+                                                trimmedScannedCode,
+                                        );
+                                        if (alternativeMatch.matched) {
+                                                match = true;
+                                                search = trimmedScannedCode;
+                                                this.search = search;
+                                        }
+                                }
+                        }
+
+                        if (!match) {
+                                const candidateCodes = [search, trimmedSearchInput, trimmedScannedCode];
+                                const fallbackMatch = this.findMatchingItemForCodes(
+                                        filteredItems,
+                                        candidateCodes,
+                                );
+                                if (fallbackMatch && fallbackMatch.item) {
+                                        new_item = { ...fallbackMatch.item };
+                                        new_item.qty = flt(qty);
+                                        if (isScaleBarcode) {
+                                                new_item._barcode_qty = true;
+                                        }
+                                        const fallbackMatchInfo = this.applyBarcodeMatchToItem(
+                                                new_item,
+                                                fallbackMatch.code,
+                                        );
+                                        if (fallbackMatchInfo.matched) {
+                                                match = true;
+                                                search = fallbackMatch.code;
+                                                if (search) {
+                                                        this.search = search;
+                                                }
+                                        }
+                                }
+                        }
 
 			if (this.flags.serial_no) {
 				new_item.to_set_serial_no = this.flags.serial_no;
@@ -2621,6 +2696,7 @@ export default {
                                 trimmed.length > this.currentHardwareScan.code.length;
 
                         let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
+                        const normalizationMeta = this.lastCompositeNormalization || {};
 
                         if (shouldStripActivePrefix && normalizedCodes.length) {
                                 const activeCode = this.currentHardwareScan.code;
@@ -2630,6 +2706,16 @@ export default {
                         }
 
                         if (!normalizedCodes.length) {
+                                if (
+                                        normalizationMeta.attempted &&
+                                        !normalizationMeta.success &&
+                                        normalizationMeta.reason === "progressive-lengths"
+                                ) {
+                                        this.notifyHardwareScanFailure(trimmed, {
+                                                message: this.__("Item not found"),
+                                                details: this.getCompositeBarcodeLengthFailureDetails(),
+                                        });
+                                }
                                 return;
                         }
 
@@ -2761,6 +2847,28 @@ export default {
                 },
                 normalizeHardwareScanPayload(rawCode) {
                         const codes = [];
+                        if (!this.lastCompositeNormalization) {
+                                this.lastCompositeNormalization = {
+                                        attempted: false,
+                                        success: false,
+                                        reason: "",
+                                };
+                        } else {
+                                this.lastCompositeNormalization.attempted = false;
+                                this.lastCompositeNormalization.success = false;
+                                this.lastCompositeNormalization.reason = "";
+                        }
+
+                        const markCompositeNormalization = (attempted, success, reason = "") => {
+                                if (!this.lastCompositeNormalization) {
+                                        this.lastCompositeNormalization = { attempted, success, reason };
+                                        return;
+                                }
+                                this.lastCompositeNormalization.attempted = attempted;
+                                this.lastCompositeNormalization.success = success;
+                                this.lastCompositeNormalization.reason = reason;
+                        };
+
                         if (typeof rawCode !== "string") {
                                 return codes;
                         }
@@ -2772,6 +2880,21 @@ export default {
 
                         const segments = trimmed.split(/\s+/).filter(Boolean);
                         const queue = segments.length ? segments : [trimmed];
+
+                        const applyProgressiveSplit = () => {
+                                const progressive = this.splitSegmentByProgressiveBarcodeTypes(trimmed);
+                                if (!progressive.attempted) {
+                                        return null;
+                                }
+
+                                if (progressive.success && progressive.codes.length) {
+                                        markCompositeNormalization(true, true, "progressive-lengths");
+                                        return progressive.codes.slice();
+                                }
+
+                                markCompositeNormalization(true, false, "progressive-lengths");
+                                return [];
+                        };
 
                         queue.forEach((segment) => {
                                 const candidate = segment.trim();
@@ -2788,16 +2911,32 @@ export default {
                         });
 
                         if (codes.length === 1 && codes[0] === trimmed) {
+                                const sequentialSplit = this.splitSegmentBySequentialStandardLengths(trimmed);
+                                if (sequentialSplit && sequentialSplit.length > 1) {
+                                        return sequentialSplit;
+                                }
                                 const knownSplit = this.splitSegmentByKnownCodes(trimmed);
                                 if (knownSplit && knownSplit.length > 1) {
                                         return knownSplit;
                                 }
+                                const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
+                                if (hintedSplit && hintedSplit.length > 1) {
+                                        return hintedSplit;
+                                }
                         }
 
                         if (!codes.length) {
+                                const sequentialSplit = this.splitSegmentBySequentialStandardLengths(trimmed);
+                                if (sequentialSplit && sequentialSplit.length) {
+                                        return sequentialSplit;
+                                }
                                 const knownSplit = this.splitSegmentByKnownCodes(trimmed);
                                 if (knownSplit && knownSplit.length) {
                                         return knownSplit;
+                                }
+                                const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
+                                if (hintedSplit && hintedSplit.length) {
+                                        return hintedSplit;
                                 }
                         }
 
@@ -3015,6 +3154,331 @@ export default {
 
                         return null;
                 },
+
+                splitSegmentBySequentialStandardLengths(segment, lengthSequence = [8, 12, 13]) {
+                        if (typeof segment !== "string") {
+                                return null;
+                        }
+
+                        const normalized = segment.trim();
+                        if (!normalized || !/^\d+$/.test(normalized)) {
+                                return null;
+                        }
+
+                        const lengths = Array.isArray(lengthSequence) && lengthSequence.length
+                                ? lengthSequence
+                                : [8, 12, 13];
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        if (!knownCodes.size) {
+                                return null;
+                        }
+
+                        const normalizedKnownCodes = new Set();
+                        knownCodes.forEach((code) => {
+                                if (code === null || code === undefined) {
+                                        return;
+                                }
+                                const strValue = typeof code === "string" ? code : String(code);
+                                const trimmed = strValue.trim();
+                                if (!trimmed) {
+                                        return;
+                                }
+                                const normalizedCode = this.normalizeScanCode(trimmed);
+                                if (normalizedCode) {
+                                        normalizedKnownCodes.add(normalizedCode);
+                                }
+                        });
+
+                        if (!normalizedKnownCodes.size) {
+                                return null;
+                        }
+
+                        const results = [];
+                        let index = 0;
+
+                        while (index < normalized.length) {
+                                let matched = false;
+
+                                for (const length of lengths) {
+                                        if (!Number.isFinite(length) || length <= 0) {
+                                                continue;
+                                        }
+
+                                        const nextIndex = index + length;
+                                        if (nextIndex > normalized.length) {
+                                                continue;
+                                        }
+
+                                        const chunk = normalized.slice(index, nextIndex);
+                                        const normalizedChunk = this.normalizeScanCode(chunk);
+                                        if (!normalizedChunk) {
+                                                continue;
+                                        }
+
+                                        if (normalizedKnownCodes.has(normalizedChunk)) {
+                                                results.push(chunk);
+                                                index = nextIndex;
+                                                matched = true;
+                                                break;
+                                        }
+                                }
+
+                                if (!matched) {
+                                        return null;
+                                }
+                        }
+
+                        return results.length ? results : null;
+                },
+
+                splitSegmentByHintedLengths(segment) {
+                        if (typeof segment !== "string") {
+                                return null;
+                        }
+
+                        const normalized = segment.trim();
+                        if (!normalized) {
+                                return null;
+                        }
+
+                        const hintedLengths = this.collectScanLengthHints();
+                        const hintLengthSet = new Set();
+                        if (Array.isArray(hintedLengths) && hintedLengths.length) {
+                                hintedLengths.forEach((length) => {
+                                        if (typeof length === "number") {
+                                                hintLengthSet.add(length);
+                                        }
+                                });
+                        }
+
+                        const fallbackLengths = [14, 13, 12, 11, 10, 9, 8];
+                        const fallbackLengthSet = new Set(fallbackLengths);
+                        const combinedLengths = new Set();
+
+                        hintLengthSet.forEach((length) => combinedLengths.add(length));
+                        fallbackLengths.forEach((length) => combinedLengths.add(length));
+
+                        const lengths = Array.from(combinedLengths)
+                                .map((length) => Number(length))
+                                .filter(
+                                        (length) =>
+                                                Number.isFinite(length) &&
+                                                length >= 4 &&
+                                                length < normalized.length,
+                                )
+                                .sort((a, b) => b - a);
+
+                        if (!lengths.length) {
+                                return null;
+                        }
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        const knownNormalizedCodes = new Set();
+                        knownCodes.forEach((code) => {
+                                if (code === null || code === undefined) {
+                                        return;
+                                }
+                                const stringValue = typeof code === "string" ? code : String(code);
+                                const trimmed = stringValue.trim();
+                                if (!trimmed) {
+                                        return;
+                                }
+                                knownNormalizedCodes.add(this.normalizeScanCode(trimmed));
+                        });
+
+                        const numericPattern = /^\d+$/;
+                        const evaluateChunk = (chunk, length) => {
+                                const trimmed = chunk.trim();
+                                if (!trimmed) {
+                                        return { allowed: false };
+                                }
+
+                                const normalizedChunk = this.normalizeScanCode(trimmed);
+                                let score = 0;
+                                let knownMatches = 0;
+                                let validMatches = 0;
+                                let invalidMatches = 0;
+
+                                if (knownNormalizedCodes.has(normalizedChunk)) {
+                                        score += 15;
+                                        knownMatches += 1;
+                                }
+
+                                if (hintLengthSet.has(length)) {
+                                        score += 3;
+                                } else if (fallbackLengthSet.has(length)) {
+                                        score += 1;
+                                }
+
+                                if (numericPattern.test(trimmed)) {
+                                        const gtinValidity = this.validateGtinCode(trimmed);
+                                        if (gtinValidity === true) {
+                                                score += 5;
+                                                validMatches += 1;
+                                        } else if (gtinValidity === false) {
+                                                score -= 4;
+                                                invalidMatches += 1;
+                                        }
+                                }
+
+                                return {
+                                        allowed: true,
+                                        chunk: trimmed,
+                                        normalizedChunk,
+                                        score,
+                                        knownMatches,
+                                        validMatches,
+                                        invalidMatches,
+                                };
+                        };
+
+                        const results = [];
+                        const bestStatsAtIndex = new Map();
+
+                        const shouldPrune = (index, stats) => {
+                                const existing = bestStatsAtIndex.get(index);
+                                if (!existing) {
+                                        bestStatsAtIndex.set(index, { ...stats });
+                                        return false;
+                                }
+
+                                const betterScore = stats.score > existing.score;
+                                const equalScore = stats.score === existing.score;
+                                const betterKnown = stats.knownMatches > existing.knownMatches;
+                                const equalKnown = stats.knownMatches === existing.knownMatches;
+                                const fewerInvalid = stats.invalidMatches < existing.invalidMatches;
+
+                                if (betterScore || (equalScore && betterKnown) || (equalScore && equalKnown && fewerInvalid)) {
+                                        bestStatsAtIndex.set(index, { ...stats });
+                                        return false;
+                                }
+
+                                return true;
+                        };
+
+                        const dfs = (index, path, stats) => {
+                                if (index === normalized.length) {
+                                        if (path.length > 1) {
+                                                results.push({
+                                                        chunks: path.slice(),
+                                                        score: stats.score,
+                                                        knownMatches: stats.knownMatches,
+                                                        validMatches: stats.validMatches,
+                                                        invalidMatches: stats.invalidMatches,
+                                                });
+                                        }
+                                        return;
+                                }
+
+                                if (shouldPrune(index, stats)) {
+                                        return;
+                                }
+
+                                for (const length of lengths) {
+                                        const nextIndex = index + length;
+                                        if (nextIndex > normalized.length) {
+                                                continue;
+                                        }
+
+                                        const chunk = normalized.slice(index, nextIndex);
+                                        if (!chunk) {
+                                                continue;
+                                        }
+
+                                        const evaluation = evaluateChunk(chunk, length);
+                                        if (!evaluation.allowed) {
+                                                continue;
+                                        }
+
+                                        path.push(evaluation.chunk);
+                                        dfs(nextIndex, path, {
+                                                score: stats.score + evaluation.score,
+                                                knownMatches: stats.knownMatches + evaluation.knownMatches,
+                                                validMatches: stats.validMatches + evaluation.validMatches,
+                                                invalidMatches: stats.invalidMatches + evaluation.invalidMatches,
+                                        });
+                                        path.pop();
+                                }
+                        };
+
+                        dfs(0, [], { score: 0, knownMatches: 0, validMatches: 0, invalidMatches: 0 });
+
+                        if (!results.length) {
+                                return null;
+                        }
+
+                        results.sort((a, b) => {
+                                if (b.knownMatches !== a.knownMatches) {
+                                        return b.knownMatches - a.knownMatches;
+                                }
+                                if (b.validMatches !== a.validMatches) {
+                                        return b.validMatches - a.validMatches;
+                                }
+                                if (a.invalidMatches !== b.invalidMatches) {
+                                        return a.invalidMatches - b.invalidMatches;
+                                }
+                                if (b.score !== a.score) {
+                                        return b.score - a.score;
+                                }
+                                return a.chunks.length - b.chunks.length;
+                        });
+
+                        const best = results[0];
+                        if (best && Array.isArray(best.chunks) && best.chunks.length > 1) {
+                                return best.chunks;
+                        }
+
+                        return null;
+                },
+
+                computeGtinCheckDigit(payload) {
+                        if (typeof payload !== "string" || !payload || /\D/.test(payload)) {
+                                return null;
+                        }
+
+                        let sum = 0;
+                        const reversed = payload.split("").reverse();
+                        reversed.forEach((digit, index) => {
+                                const numeric = Number(digit);
+                                if (!Number.isFinite(numeric)) {
+                                        return;
+                                }
+                                sum += index % 2 === 0 ? numeric * 3 : numeric;
+                        });
+
+                        const mod = sum % 10;
+                        return mod === 0 ? 0 : 10 - mod;
+                },
+                validateGtinCode(value) {
+                        if (typeof value !== "string") {
+                                return null;
+                        }
+
+                        const trimmed = value.trim();
+                        if (!trimmed || /\D/.test(trimmed)) {
+                                return null;
+                        }
+
+                        const length = trimmed.length;
+                        if (![8, 12, 13, 14].includes(length)) {
+                                return null;
+                        }
+
+                        const body = trimmed.slice(0, -1);
+                        const checkDigit = Number(trimmed.slice(-1));
+                        if (!Number.isFinite(checkDigit)) {
+                                return null;
+                        }
+
+                        const expected = this.computeGtinCheckDigit(body);
+                        if (expected === null) {
+                                return null;
+                        }
+
+                        return expected === checkDigit;
+                },
+
                 getKnownScannableCodes(limit = 500) {
                         if (!Array.isArray(this.items) || !this.items.length) {
                                 return new Set();
@@ -3182,6 +3646,96 @@ export default {
                         }
 
                         return { items: [], searchCode };
+                },
+                normalizeScanCode(value) {
+                        if (value === null || value === undefined) {
+                                return "";
+                        }
+                        const str = typeof value === "string" ? value.trim() : String(value).trim();
+                        return str ? str.toLowerCase() : "";
+                },
+                getItemBarcodeMatch(item, code) {
+                        const normalizedCode = this.normalizeScanCode(code);
+                        if (!item || !normalizedCode) {
+                                return { matched: false, normalizedCode };
+                        }
+
+                        const compare = (value) => this.normalizeScanCode(value) === normalizedCode;
+
+                        if (Array.isArray(item.item_barcode)) {
+                                for (const entry of item.item_barcode) {
+                                        if (entry && compare(entry.barcode)) {
+                                                return {
+                                                        matched: true,
+                                                        normalizedCode,
+                                                        entry,
+                                                        source: "item_barcode",
+                                                };
+                                        }
+                                }
+                        }
+
+                        if (compare(item.barcode)) {
+                                return { matched: true, normalizedCode, source: "barcode" };
+                        }
+
+                        if (Array.isArray(item.barcodes)) {
+                                for (const barcode of item.barcodes) {
+                                        if (compare(barcode)) {
+                                                return { matched: true, normalizedCode, source: "barcodes" };
+                                        }
+                                }
+                        }
+
+                        if (compare(item.item_code)) {
+                                return { matched: true, normalizedCode, source: "item_code" };
+                        }
+
+                        return { matched: false, normalizedCode };
+                },
+                applyBarcodeMatchToItem(item, code) {
+                        const matchInfo = this.getItemBarcodeMatch(item, code);
+                        if (matchInfo.matched && matchInfo.entry) {
+                                const barcodeUom = matchInfo.entry.posa_uom || matchInfo.entry.uom;
+                                if (barcodeUom) {
+                                        item.uom = barcodeUom;
+                                }
+                        }
+                        return matchInfo;
+                },
+                findMatchingItemForCodes(items, candidateCodes = []) {
+                        if (!Array.isArray(items) || !items.length || !Array.isArray(candidateCodes)) {
+                                return null;
+                        }
+
+                        const seenCodes = new Set();
+                        for (const rawCode of candidateCodes) {
+                                const normalizedCode = this.normalizeScanCode(rawCode);
+                                if (!normalizedCode || seenCodes.has(normalizedCode)) {
+                                        continue;
+                                }
+                                seenCodes.add(normalizedCode);
+
+                                for (const item of items) {
+                                        if (!item) {
+                                                continue;
+                                        }
+
+                                        const matchInfo = this.getItemBarcodeMatch(item, rawCode);
+                                        if (matchInfo.matched) {
+                                                const trimmedCode =
+                                                        typeof rawCode === "string"
+                                                                ? rawCode.trim()
+                                                                : rawCode != null
+                                                                        ? String(rawCode).trim()
+                                                                        : "";
+                                                const effectiveCode = trimmedCode || normalizedCode;
+                                                return { item, code: effectiveCode };
+                                        }
+                                }
+                        }
+
+                        return null;
                 },
                 findItemsMatchingScanCodes(collection, codesToCheck) {
                         if (!Array.isArray(collection) || !collection.length || !codesToCheck || !codesToCheck.size) {
@@ -3690,8 +4244,9 @@ export default {
                                 // If the scanned barcode has a specific UOM, apply it
                                 if (Array.isArray(newItem.item_barcode)) {
                                         const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-                                        if (barcodeMatch && barcodeMatch.posa_uom) {
-                                                newItem.uom = barcodeMatch.posa_uom;
+                                        if (barcodeMatch && (barcodeMatch.posa_uom || barcodeMatch.uom)) {
+                                                const barcodeUom = barcodeMatch.posa_uom || barcodeMatch.uom;
+                                                newItem.uom = barcodeUom;
 
                                                 // Try fetching the rate for this UOM from the active price list
                                                 try {
@@ -3700,7 +4255,7 @@ export default {
                                                                 args: {
                                                                         item_code: newItem.item_code,
                                                                         price_list: this.active_price_list,
-                                                                        uom: barcodeMatch.posa_uom,
+                                                                        uom: barcodeUom,
                                                                 },
                                                         });
                                                         if (res.message) {

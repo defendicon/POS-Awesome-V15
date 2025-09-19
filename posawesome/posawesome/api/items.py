@@ -656,7 +656,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
             return []
         return frappe.get_all(
             "Item Barcode",
-            fields=["parent", "barcode", "posa_uom"],
+            fields=["parent", "barcode", "barcode_type", "uom", "posa_uom"],
             filters={"parent": ["in", item_codes]},
         )
 
@@ -765,7 +765,14 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 
     barcode_map = {}
     for d in barcode_rows:
-        barcode_map.setdefault(d.parent, []).append({"barcode": d.barcode, "posa_uom": d.posa_uom})
+        barcode_map.setdefault(d.parent, []).append(
+            {
+                "barcode": d.barcode,
+                "barcode_type": d.barcode_type,
+                "uom": d.uom,
+                "posa_uom": d.posa_uom,
+            }
+        )
 
     batch_map = {}
     for d in batch_rows:
@@ -959,7 +966,7 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
     search_item = frappe.db.get_value(
         "Item Barcode",
         {"barcode": barcode},
-        ["parent as item_code", "posa_uom"],
+        ["parent as item_code", "barcode_type", "uom", "posa_uom"],
         as_dict=1,
     )
     if search_item:
@@ -978,8 +985,9 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
             "item_code": item_doc.name,
             "item_name": item_doc.item_name,
             "barcode": barcode,
+            "barcode_type": search_item.barcode_type,
             "rate": item_price or 0,
-            "uom": search_item.posa_uom or item_doc.stock_uom,
+            "uom": search_item.posa_uom or search_item.uom or item_doc.stock_uom,
             "currency": currency,
         }
     return None
