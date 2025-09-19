@@ -596,6 +596,7 @@ export default {
                 hardwareScanQueue: [],
                 processingHardwareScan: false,
                 currentHardwareScan: null,
+                lastProcessedScanLength: 0,
                 isClearingSearch: false,
                 suppressSearchWatcher: false,
                 suppressSearchWatcherTimeout: null,
@@ -2588,13 +2589,43 @@ export default {
                                 return;
                         }
 
-                        const code = typeof sCode === "string" ? sCode.trim() : "";
-                        if (!code) {
+                        const raw = typeof sCode === "string" ? sCode : "";
+                        const trimmed = raw.trim();
+                        if (!trimmed) {
                                 return;
                         }
 
-                        this.hardwareScanQueue.push({ code });
-                        this.processHardwareScanQueue();
+                        const hasActiveScan =
+                                this.processingHardwareScan &&
+                                this.currentHardwareScan &&
+                                typeof this.currentHardwareScan.code === "string";
+                        const shouldStripActivePrefix =
+                                hasActiveScan &&
+                                trimmed.startsWith(this.currentHardwareScan.code) &&
+                                trimmed.length > this.currentHardwareScan.code.length;
+
+                        let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
+
+                        if (shouldStripActivePrefix && normalizedCodes.length) {
+                                const activeCode = this.currentHardwareScan.code;
+                                if (normalizedCodes[0] === activeCode) {
+                                        normalizedCodes = normalizedCodes.slice(1);
+                                }
+                        }
+
+                        if (!normalizedCodes.length) {
+                                return;
+                        }
+
+                        normalizedCodes.forEach((code) => {
+                                if (code) {
+                                        this.hardwareScanQueue.push({ code });
+                                }
+                        });
+
+                        if (this.hardwareScanQueue.length) {
+                                this.processHardwareScanQueue();
+                        }
                 },
                 async processHardwareScanQueue() {
                         if (this.processingHardwareScan || this.scanErrorDialog) {
@@ -2610,6 +2641,7 @@ export default {
                                                 continue;
                                         }
 
+                                        const activeCode = nextScan.code;
                                         this.currentHardwareScan = { ...nextScan };
                                         this.scannerLocked = true;
 
@@ -2628,6 +2660,9 @@ export default {
                                                 this.pendingScanCode = "";
                                                 this.scannerLocked = false;
                                                 this.lastScanCompletedAt = Date.now();
+                                                if (activeCode) {
+                                                        this.lastProcessedScanLength = activeCode.length;
+                                                }
 
                                                 if (!this.scanErrorDialog) {
                                                         this.clearSearch();
@@ -2641,6 +2676,113 @@ export default {
                                         this.processHardwareScanQueue();
                                 }
                         }
+                },
+                normalizeHardwareScanPayload(rawCode) {
+                        const codes = [];
+                        if (typeof rawCode !== "string") {
+                                return codes;
+                        }
+
+                        const trimmed = rawCode.trim();
+                        if (!trimmed) {
+                                return codes;
+                        }
+
+                        const segments = trimmed.split(/\s+/).filter(Boolean);
+                        const queue = segments.length ? segments : [trimmed];
+
+                        queue.forEach((segment) => {
+                                const candidate = segment.trim();
+                                if (!candidate) {
+                                        return;
+                                }
+
+                                const parts = this.splitRepeatedScanSegment(candidate);
+                                parts.forEach((part) => {
+                                        if (part) {
+                                                codes.push(part);
+                                        }
+                                });
+                        });
+
+                        return codes;
+                },
+                splitRepeatedScanSegment(segment) {
+                        if (!segment) {
+                                return [];
+                        }
+
+                        const hints = this.collectScanLengthHints();
+                        for (const length of hints) {
+                                const attempt = this.splitSegmentByLength(segment, length);
+                                if (attempt) {
+                                        return attempt;
+                                }
+                        }
+
+                        const startLength = Math.floor(segment.length / 2);
+                        for (let length = startLength; length >= 2; length -= 1) {
+                                const attempt = this.splitSegmentByLength(segment, length);
+                                if (attempt) {
+                                        return attempt;
+                                }
+                        }
+
+                        return [segment];
+                },
+                collectScanLengthHints() {
+                        const lengths = new Set();
+
+                        if (this.currentHardwareScan?.code) {
+                                lengths.add(this.currentHardwareScan.code.length);
+                        }
+                        if (this.lastProcessedScanLength) {
+                                lengths.add(this.lastProcessedScanLength);
+                        }
+                        if (this.pendingScanCode) {
+                                lengths.add(this.pendingScanCode.length);
+                        }
+                        if (Array.isArray(this.hardwareScanQueue)) {
+                                this.hardwareScanQueue.forEach((entry) => {
+                                        if (entry?.code) {
+                                                lengths.add(entry.code.length);
+                                        }
+                                });
+                        }
+
+                        const ordered = Array.from(lengths).filter((len) => Number.isFinite(len) && len > 0);
+                        ordered.sort((a, b) => b - a);
+                        return ordered;
+                },
+                splitSegmentByLength(segment, length) {
+                        if (!length || length <= 0) {
+                                return null;
+                        }
+                        if (length >= segment.length) {
+                                return null;
+                        }
+                        if (segment.length % length !== 0) {
+                                return null;
+                        }
+                        if (length < 2) {
+                                return null;
+                        }
+
+                        const chunk = segment.slice(0, length);
+                        if (!chunk) {
+                                return null;
+                        }
+
+                        const repeats = segment.length / length;
+                        for (let index = 1; index < repeats; index += 1) {
+                                const start = index * length;
+                                const end = start + length;
+                                if (segment.slice(start, end) !== chunk) {
+                                        return null;
+                                }
+                        }
+
+                        return Array.from({ length: repeats }, () => chunk);
                 },
                 async handleHardwareScan({ code }) {
                         const scannedCode = code;
