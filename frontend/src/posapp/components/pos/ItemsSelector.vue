@@ -529,7 +529,13 @@ export default {
 		qty: 1,
 		refresh_interval: null,
 		abortController: null,
-		itemDetailsRequestCache: { key: null, promise: null, result: null },
+                itemDetailsRequestCache: {
+                        lastKey: null,
+                        lastPromise: null,
+                        lastResult: null,
+                        responses: new Map(),
+                        inflight: new Map(),
+                },
 		itemDetailsRetryCount: 0,
 		itemDetailsRetryTimeout: null,
 		items_loaded: false,
@@ -591,8 +597,9 @@ export default {
         }),
 
 	watch: {
-		customer: _.debounce(function () {
-			if (this.pos_profile.posa_force_reload_items) {
+                customer: _.debounce(function () {
+                        this.resetItemDetailsRequestCache();
+                        if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
@@ -644,8 +651,9 @@ export default {
 				}
 			}
 		}, 300),
-		customer_price_list: _.debounce(async function () {
-			if (this.pos_profile.posa_force_reload_items) {
+                customer_price_list: _.debounce(async function () {
+                        this.resetItemDetailsRequestCache();
+                        if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
@@ -961,6 +969,7 @@ export default {
                                 this.currentPage = 0;
                                 this.items = [];
                                 this.lastItemDetailsSignature = null;
+                                this.resetItemDetailsRequestCache();
                         }
                         const search = this.get_search(this.first_search);
 			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
@@ -1022,72 +1031,102 @@ export default {
 			this.isOverflowing = el.scrollHeight > availableHeight;
 		},
 
-		async fetchItemDetails(items) {
-			if (!items || items.length === 0) {
-				return [];
-			}
+                buildItemDetailsCacheKey(items) {
+                        const profile = this.pos_profile?.name || "";
+                        const priceList = this.active_price_list || "";
+                        const codes = Array.isArray(items)
+                                ? items
+                                          .map((it) => [it.item_code || "", it.uom || ""])
+                                          .filter((pair) => pair[0])
+                                          .sort((a, b) =>
+                                                  a[0] === b[0] ? a[1].localeCompare(b[1]) : a[0].localeCompare(b[0]),
+                                          )
+                                : [];
+                        return [profile, priceList, JSON.stringify(codes)].join("::");
+                },
+                async fetchItemDetails(items) {
+                        if (!items || items.length === 0) {
+                                return [];
+                        }
 
-			const key = [
-				this.pos_profile.name,
-				this.active_price_list,
-				items.map((i) => i.item_code).join(","),
-			].join(":");
+                        const key = this.buildItemDetailsCacheKey(items);
 
-			if (this.itemDetailsRequestCache.key === key && this.itemDetailsRequestCache.result) {
-				return this.itemDetailsRequestCache.result;
-			}
+                        if (this.itemDetailsRequestCache.responses.has(key)) {
+                                return this.itemDetailsRequestCache.responses.get(key);
+                        }
 
-			if (this.itemDetailsRequestCache.key === key && this.itemDetailsRequestCache.promise) {
-				return this.itemDetailsRequestCache.promise;
-			}
+                        if (this.itemDetailsRequestCache.inflight.has(key)) {
+                                return this.itemDetailsRequestCache.inflight.get(key).promise;
+                        }
 
-			this.cancelItemDetailsRequest();
-			this.itemDetailsRequestCache.key = key;
+                        const controller = new AbortController();
+                        this.abortController = controller;
 
-			this.abortController = new AbortController();
-			const requestPromise = frappe.call({
-				method: "posawesome.posawesome.api.items.get_items_details",
-				args: {
-					pos_profile: JSON.stringify(this.pos_profile),
-					items_data: JSON.stringify(items),
-					price_list: this.active_price_list,
-				},
-				freeze: false,
-				signal: this.abortController.signal,
-			});
+                        const requestPromise = frappe.call({
+                                method: "posawesome.posawesome.api.items.get_items_details",
+                                args: {
+                                        pos_profile: JSON.stringify(this.pos_profile),
+                                        items_data: JSON.stringify(items),
+                                        price_list: this.active_price_list,
+                                },
+                                freeze: false,
+                                signal: controller.signal,
+                        });
 
-			this.itemDetailsRequestCache.promise = requestPromise;
+                        this.itemDetailsRequestCache.inflight.set(key, {
+                                promise: requestPromise,
+                                controller,
+                        });
+                        this.itemDetailsRequestCache.lastKey = key;
+                        this.itemDetailsRequestCache.lastPromise = requestPromise;
 
-			try {
-				const r = await requestPromise;
-				const msg = (r && r.message) || [];
-				if (this.itemDetailsRequestCache.key === key) {
-					this.itemDetailsRequestCache.result = msg;
-				}
-				return msg;
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-				}
-				throw err;
-			} finally {
-				if (this.itemDetailsRequestCache.key === key) {
-					this.itemDetailsRequestCache.promise = null;
-				}
-				this.abortController = null;
-			}
-		},
-		cancelItemDetailsRequest() {
-			if (this.abortController) {
-				this.abortController.abort();
-				this.abortController = null;
-			}
-			if (this.itemDetailsRequestCache) {
-				this.itemDetailsRequestCache.key = null;
-				this.itemDetailsRequestCache.promise = null;
-				this.itemDetailsRequestCache.result = null;
-			}
-		},
+                        try {
+                                const r = await requestPromise;
+                                const msg = (r && r.message) || [];
+                                this.itemDetailsRequestCache.responses.set(key, msg);
+                                this.itemDetailsRequestCache.lastResult = msg;
+                                return msg;
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                }
+                                throw err;
+                        } finally {
+                                this.itemDetailsRequestCache.inflight.delete(key);
+                                if (this.abortController === controller) {
+                                        this.abortController = null;
+                                }
+                        }
+                },
+                cancelItemDetailsRequest() {
+                        if (!this.itemDetailsRequestCache) {
+                                return;
+                        }
+
+                        this.itemDetailsRequestCache.inflight.forEach(({ controller }) => {
+                                if (controller) {
+                                        try {
+                                                controller.abort();
+                                        } catch (err) {
+                                                console.warn("Failed to abort item details request", err);
+                                        }
+                                }
+                        });
+                        this.itemDetailsRequestCache.inflight.clear();
+                        this.itemDetailsRequestCache.lastKey = null;
+                        this.itemDetailsRequestCache.lastPromise = null;
+                        this.itemDetailsRequestCache.lastResult = null;
+                        this.abortController = null;
+                },
+                resetItemDetailsRequestCache() {
+                        if (!this.itemDetailsRequestCache) {
+                                return;
+                        }
+                        this.cancelItemDetailsRequest();
+                        if (this.itemDetailsRequestCache.responses) {
+                                this.itemDetailsRequestCache.responses.clear();
+                        }
+                },
 		async refreshPricesForVisibleItems() {
 			const vm = this;
 			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
@@ -1233,6 +1272,7 @@ export default {
                         console.log("[ItemsSelector] storage health ensured");
                         this.items_loaded = false;
                         this.lastItemDetailsSignature = null;
+                        this.resetItemDetailsRequestCache();
 
                         // When no search term is entered, reset the search so
                         // we fetch the entire item list from the server.
@@ -2405,12 +2445,10 @@ export default {
                                 }
                         }
 
-			// Cleanup on component destroy
-			this.cleanupBeforeDestroy = () => {
-				if (vm.abortController) {
-					vm.abortController.abort();
-				}
-			};
+                        // Cleanup on component destroy
+                        this.cleanupBeforeDestroy = () => {
+                                vm.resetItemDetailsRequestCache();
+                        };
 		},
                 update_cur_items_details() {
                         if (this.filtered_items && this.filtered_items.length > 0) {

@@ -192,6 +192,7 @@ def get_items(
             search_limit = pos_profile.get("posa_search_limit") or 500
 
         result = []
+        details_cache = {}
 
         # Build ORM filters
         filters = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
@@ -314,12 +315,33 @@ def get_items(
             if not items_data:
                 break
 
-            details = get_items_details(
-                json.dumps(pos_profile),
-                json.dumps(items_data),
-                price_list=price_list,
-                customer=customer,
+            signature = tuple(
+                sorted(
+                    (
+                        item.get("item_code"),
+                        item.get("uom") or "",
+                    )
+                    for item in items_data
+                    if item.get("item_code")
+                )
             )
+            cache_key = (
+                pos_profile.get("name") or "",
+                price_list or "",
+                customer or "",
+                pos_profile.get("warehouse") or "",
+                signature,
+            )
+
+            details = details_cache.get(cache_key)
+            if details is None:
+                details = get_items_details(
+                    json.dumps(pos_profile),
+                    json.dumps(items_data),
+                    price_list=price_list,
+                    customer=customer,
+                )
+                details_cache[cache_key] = details
             detail_map = {d["item_code"]: d for d in details}
 
             for item in items_data:
