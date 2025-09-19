@@ -1,4 +1,5 @@
 import Dexie from "dexie/dist/dexie.mjs";
+import { prepareItemsForStorage } from "./offline/item-utils.js";
 
 // --- Dexie initialization ---------------------------------------------------
 const db = new Dexie("posawesome_offline");
@@ -992,39 +993,88 @@ export async function getStoredItems() {
 }
 
 export async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0 } = {}) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		let collection = db.table("items");
-		if (itemGroup && itemGroup.toLowerCase() !== "all") {
-			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
-		}
-		if (search) {
-			const term = search.toLowerCase();
-			collection = collection.filter((it) => {
-				const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
-				const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
-				const barcodeMatch = Array.isArray(it.item_barcode)
-					? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
-					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
-				return nameMatch || codeMatch || barcodeMatch;
-			});
-		}
-		return await collection.offset(offset).limit(limit).toArray();
-	} catch (e) {
-		console.error("Failed to query stored items", e);
-		return [];
-	}
+        try {
+                await checkDbHealth();
+                if (!db.isOpen()) await db.open();
+                const term = search ? search.trim().toLowerCase() : "";
+                const hasGroupFilter = itemGroup && itemGroup.toLowerCase() !== "all";
+                const groupTerm = hasGroupFilter ? itemGroup.toLowerCase() : "";
+                const safeLower = (value) => (value != null ? String(value).toLowerCase() : "");
+                const matchesGroup = (item) => {
+                        if (!hasGroupFilter) {
+                                return true;
+                        }
+                        const group = item.item_group_lower || safeLower(item.item_group);
+                        return group === groupTerm;
+                };
+
+                if (term) {
+                        const matchesTerm = (item) => {
+                                const nameLower = item.item_name_lower || safeLower(item.item_name);
+                                const codeLower = item.item_code_lower || safeLower(item.item_code);
+                                const barcodeMatch = Array.isArray(item.barcodes)
+                                        ? item.barcodes.some((bc) => safeLower(bc).includes(term))
+                                        : false;
+                                const keywordMatch = Array.isArray(item.name_keywords)
+                                        ? item.name_keywords.some((kw) => safeLower(kw).includes(term))
+                                        : false;
+                                return (
+                                        (nameLower && nameLower.includes(term)) ||
+                                        (codeLower && codeLower.includes(term)) ||
+                                        barcodeMatch ||
+                                        keywordMatch
+                                );
+                        };
+
+                        let collection = db
+                                .table("items")
+                                .where("item_code_lower")
+                                .startsWith(term)
+                                .or("item_name_lower")
+                                .startsWith(term)
+                                .or("barcodes")
+                                .equals(term)
+                                .or("name_keywords")
+                                .startsWith(term)
+                                .filter(matchesGroup);
+                        let results = await collection.toArray();
+                        if (!results.length) {
+                                results = await db
+                                        .table("items")
+                                        .filter((item) => matchesGroup(item) && matchesTerm(item))
+                                        .toArray();
+                        }
+                        const map = new Map();
+                        results.forEach((item) => {
+                                if (!map.has(item.item_code)) {
+                                        map.set(item.item_code, item);
+                                }
+                        });
+                        const unique = Array.from(map.values());
+                        return unique.slice(offset, offset + limit);
+                }
+
+                return await db
+                        .table("items")
+                        .filter(matchesGroup)
+                        .offset(offset)
+                        .limit(limit)
+                        .toArray();
+        } catch (e) {
+                console.error("Failed to query stored items", e);
+                return [];
+        }
 }
 
 export async function saveItems(items) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		await db.table("items").bulkPut(items);
-	} catch (e) {
-		console.error("Failed to save items", e);
-	}
+        try {
+                await checkDbHealth();
+                if (!db.isOpen()) await db.open();
+                const normalized = Array.isArray(items) ? prepareItemsForStorage(items) : [];
+                await db.table("items").bulkPut(normalized);
+        } catch (e) {
+                console.error("Failed to save items", e);
+        }
 }
 
 export async function clearStoredItems() {

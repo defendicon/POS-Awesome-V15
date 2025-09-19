@@ -529,7 +529,13 @@ export default {
 		qty: 1,
 		refresh_interval: null,
 		abortController: null,
-		itemDetailsRequestCache: { key: null, promise: null, result: null },
+                itemDetailsRequestCache: {
+                        lastKey: null,
+                        lastPromise: null,
+                        lastResult: null,
+                        responses: new Map(),
+                        inflight: new Map(),
+                },
 		itemDetailsRetryCount: 0,
 		itemDetailsRetryTimeout: null,
 		items_loaded: false,
@@ -574,22 +580,33 @@ export default {
 		isOverflowing: false,
 		// Track background loading state and pending searches
 		isBackgroundLoading: false,
-		pendingItemSearch: null,
-		loadProgress: 0,
-		totalItemCount: 0,
-		scanErrorDialog: false,
-		scanErrorMessage: "",
-		scanErrorDetails: "",
-		scanErrorCode: "",
-		scannerLocked: false,
-		scanAudioContext: null,
-		pendingScanCode: "",
-		awaitingScanResult: false,
-	}),
+                pendingItemSearch: null,
+                loadProgress: 0,
+                totalItemCount: 0,
+                scanErrorDialog: false,
+                scanErrorMessage: "",
+                scanErrorDetails: "",
+                scanErrorCode: "",
+                scannerLocked: false,
+                scanAudioContext: null,
+                pendingScanCode: "",
+                awaitingScanResult: false,
+                lastScanCompletedAt: 0,
+                scanCooldownMs: 600,
+                hardwareScanQueue: [],
+                processingHardwareScan: false,
+                currentHardwareScan: null,
+                lastProcessedScanLength: 0,
+                isClearingSearch: false,
+                suppressSearchWatcher: false,
+                suppressSearchWatcherTimeout: null,
+                lastItemDetailsSignature: null,
+        }),
 
 	watch: {
-		customer: _.debounce(function () {
-			if (this.pos_profile.posa_force_reload_items) {
+                customer: _.debounce(function () {
+                        this.resetItemDetailsRequestCache();
+                        if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
@@ -641,8 +658,9 @@ export default {
 				}
 			}
 		}, 300),
-		customer_price_list: _.debounce(async function () {
-			if (this.pos_profile.posa_force_reload_items) {
+                customer_price_list: _.debounce(async function () {
+                        this.resetItemDetailsRequestCache();
+                        if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
@@ -671,28 +689,29 @@ export default {
 			// Apply cached rates if available for immediate update
 			if (this.items_loaded && this.items && this.items.length > 0) {
 				const cached = await getCachedPriceListItems(this.customer_price_list);
-				if (cached && cached.length) {
-					const map = {};
-					cached.forEach((ci) => {
-						map[ci.item_code] = ci;
-					});
-					this.items.forEach((it) => {
-						const ci = map[it.item_code];
-						if (ci) {
-							const force =
-								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-							const price = ci.price_list_rate ?? ci.rate ?? 0;
-							if (force || price) {
-								it.rate = price;
-								it.price_list_rate = price;
-							}
-						}
-					});
-					this.eventBus.emit("set_all_items", this.items);
-					this.update_items_details(this.items);
-					return;
-				}
-			}
+                                        if (cached && cached.length) {
+                                                const map = {};
+                                                cached.forEach((ci) => {
+                                                        map[ci.item_code] = ci;
+                                                });
+                                                this.items.forEach((it) => {
+                                                        const ci = map[it.item_code];
+                                                        if (ci) {
+                                                                const force =
+                                                                        this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                                const price = ci.price_list_rate ?? ci.rate ?? 0;
+                                                                if (force || price) {
+                                                                        it.rate = price;
+                                                                        it.price_list_rate = price;
+                                                                }
+                                                        }
+                                                });
+                                                this.eventBus.emit("set_all_items", this.items);
+                                                this.lastItemDetailsSignature = null;
+                                                this.update_items_details(this.items);
+                                                return;
+                                        }
+                                }
 			// No cache found - force a reload so prices are updated
 			this.items_loaded = false;
 			if (!isOffline()) {
@@ -735,17 +754,19 @@ export default {
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
-		first_search: _.debounce(function (val, oldVal) {
-			const newLen = (val || "").trim().length;
-			const oldLen = (oldVal || "").trim().length;
-			if (newLen >= 3) {
-				// Call without arguments so search_onchange treats it like an Enter key
-				this.search_onchange();
-			} else if (oldLen >= 3 && newLen === 0) {
-				// Reset items only when search is fully cleared
-				this.clearSearch();
-			}
-		}, 300),
+                first_search: _.debounce(function (val, oldVal) {
+                        const newLen = (val || "").trim().length;
+                        const oldLen = (oldVal || "").trim().length;
+                        if (newLen >= 3) {
+                                // Call without arguments so search_onchange treats it like an Enter key
+                                this.search_onchange();
+                        } else if (oldLen >= 3 && newLen === 0) {
+                                // Reset items only when search is fully cleared
+                                if (!this.suppressSearchWatcher) {
+                                        this.clearSearch();
+                                }
+                        }
+                }, 300),
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
@@ -948,16 +969,18 @@ export default {
 			}
 			return dbHealthy;
 		},
-		async loadVisibleItems(reset = false) {
-			this.loadProgress = 0;
-			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
-			await initPromise;
-			await this.ensureStorageHealth();
-			if (reset) {
-				this.currentPage = 0;
-				this.items = [];
-			}
-			const search = this.get_search(this.first_search);
+                async loadVisibleItems(reset = false) {
+                        this.loadProgress = 0;
+                        this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+                        await initPromise;
+                        await this.ensureStorageHealth();
+                        if (reset) {
+                                this.currentPage = 0;
+                                this.items = [];
+                                this.lastItemDetailsSignature = null;
+                                this.resetItemDetailsRequestCache();
+                        }
+                        const search = this.get_search(this.first_search);
 			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
 			const pageItems = await searchStoredItems({
 				search,
@@ -1017,72 +1040,102 @@ export default {
 			this.isOverflowing = el.scrollHeight > availableHeight;
 		},
 
-		async fetchItemDetails(items) {
-			if (!items || items.length === 0) {
-				return [];
-			}
+                buildItemDetailsCacheKey(items) {
+                        const profile = this.pos_profile?.name || "";
+                        const priceList = this.active_price_list || "";
+                        const codes = Array.isArray(items)
+                                ? items
+                                          .map((it) => [it.item_code || "", it.uom || ""])
+                                          .filter((pair) => pair[0])
+                                          .sort((a, b) =>
+                                                  a[0] === b[0] ? a[1].localeCompare(b[1]) : a[0].localeCompare(b[0]),
+                                          )
+                                : [];
+                        return [profile, priceList, JSON.stringify(codes)].join("::");
+                },
+                async fetchItemDetails(items) {
+                        if (!items || items.length === 0) {
+                                return [];
+                        }
 
-			const key = [
-				this.pos_profile.name,
-				this.active_price_list,
-				items.map((i) => i.item_code).join(","),
-			].join(":");
+                        const key = this.buildItemDetailsCacheKey(items);
 
-			if (this.itemDetailsRequestCache.key === key && this.itemDetailsRequestCache.result) {
-				return this.itemDetailsRequestCache.result;
-			}
+                        if (this.itemDetailsRequestCache.responses.has(key)) {
+                                return this.itemDetailsRequestCache.responses.get(key);
+                        }
 
-			if (this.itemDetailsRequestCache.key === key && this.itemDetailsRequestCache.promise) {
-				return this.itemDetailsRequestCache.promise;
-			}
+                        if (this.itemDetailsRequestCache.inflight.has(key)) {
+                                return this.itemDetailsRequestCache.inflight.get(key).promise;
+                        }
 
-			this.cancelItemDetailsRequest();
-			this.itemDetailsRequestCache.key = key;
+                        const controller = new AbortController();
+                        this.abortController = controller;
 
-			this.abortController = new AbortController();
-			const requestPromise = frappe.call({
-				method: "posawesome.posawesome.api.items.get_items_details",
-				args: {
-					pos_profile: JSON.stringify(this.pos_profile),
-					items_data: JSON.stringify(items),
-					price_list: this.active_price_list,
-				},
-				freeze: false,
-				signal: this.abortController.signal,
-			});
+                        const requestPromise = frappe.call({
+                                method: "posawesome.posawesome.api.items.get_items_details",
+                                args: {
+                                        pos_profile: JSON.stringify(this.pos_profile),
+                                        items_data: JSON.stringify(items),
+                                        price_list: this.active_price_list,
+                                },
+                                freeze: false,
+                                signal: controller.signal,
+                        });
 
-			this.itemDetailsRequestCache.promise = requestPromise;
+                        this.itemDetailsRequestCache.inflight.set(key, {
+                                promise: requestPromise,
+                                controller,
+                        });
+                        this.itemDetailsRequestCache.lastKey = key;
+                        this.itemDetailsRequestCache.lastPromise = requestPromise;
 
-			try {
-				const r = await requestPromise;
-				const msg = (r && r.message) || [];
-				if (this.itemDetailsRequestCache.key === key) {
-					this.itemDetailsRequestCache.result = msg;
-				}
-				return msg;
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-				}
-				throw err;
-			} finally {
-				if (this.itemDetailsRequestCache.key === key) {
-					this.itemDetailsRequestCache.promise = null;
-				}
-				this.abortController = null;
-			}
-		},
-		cancelItemDetailsRequest() {
-			if (this.abortController) {
-				this.abortController.abort();
-				this.abortController = null;
-			}
-			if (this.itemDetailsRequestCache) {
-				this.itemDetailsRequestCache.key = null;
-				this.itemDetailsRequestCache.promise = null;
-				this.itemDetailsRequestCache.result = null;
-			}
-		},
+                        try {
+                                const r = await requestPromise;
+                                const msg = (r && r.message) || [];
+                                this.itemDetailsRequestCache.responses.set(key, msg);
+                                this.itemDetailsRequestCache.lastResult = msg;
+                                return msg;
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                }
+                                throw err;
+                        } finally {
+                                this.itemDetailsRequestCache.inflight.delete(key);
+                                if (this.abortController === controller) {
+                                        this.abortController = null;
+                                }
+                        }
+                },
+                cancelItemDetailsRequest() {
+                        if (!this.itemDetailsRequestCache) {
+                                return;
+                        }
+
+                        this.itemDetailsRequestCache.inflight.forEach(({ controller }) => {
+                                if (controller) {
+                                        try {
+                                                controller.abort();
+                                        } catch (err) {
+                                                console.warn("Failed to abort item details request", err);
+                                        }
+                                }
+                        });
+                        this.itemDetailsRequestCache.inflight.clear();
+                        this.itemDetailsRequestCache.lastKey = null;
+                        this.itemDetailsRequestCache.lastPromise = null;
+                        this.itemDetailsRequestCache.lastResult = null;
+                        this.abortController = null;
+                },
+                resetItemDetailsRequestCache() {
+                        if (!this.itemDetailsRequestCache) {
+                                return;
+                        }
+                        this.cancelItemDetailsRequest();
+                        if (this.itemDetailsRequestCache.responses) {
+                                this.itemDetailsRequestCache.responses.clear();
+                        }
+                },
 		async refreshPricesForVisibleItems() {
 			const vm = this;
 			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
@@ -1121,11 +1174,16 @@ export default {
 			});
 
 			if (cacheResult.missing.length === 0) {
-				vm.$nextTick(() => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(cacheResult.cached);
-					vm.loading = false;
-				});
+                                vm.$nextTick(() => {
+                                        updates.forEach(({ item, upd }) => {
+                                                Object.assign(item, upd);
+                                                if (upd.batch_no_data || upd.serial_no_data) {
+                                                        vm.invalidateItemSearchMeta(item);
+                                                }
+                                        });
+                                        updateLocalStockCache(cacheResult.cached);
+                                        vm.loading = false;
+                                });
 				return;
 			}
 
@@ -1162,10 +1220,15 @@ export default {
 					}
 				});
 
-				vm.$nextTick(async () => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(details);
-					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
+                                vm.$nextTick(async () => {
+                                        updates.forEach(({ item, upd }) => {
+                                                Object.assign(item, upd);
+                                                if (upd.batch_no_data || upd.serial_no_data) {
+                                                        vm.invalidateItemSearchMeta(item);
+                                                }
+                                        });
+                                        updateLocalStockCache(details);
+                                        saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
 					if (
 						vm.pos_profile &&
 						vm.pos_profile.posa_local_storage &&
@@ -1208,20 +1271,22 @@ export default {
 			}
 			await this.get_items(true);
 		},
-		async forceReloadItems() {
-			console.log("[ItemsSelector] forceReloadItems called");
-			// Clear cached price list items so the reload always
-			// fetches the latest data from the server
-			await clearPriceListCache();
-			console.log("[ItemsSelector] price list cache cleared");
-			await this.ensureStorageHealth();
-			console.log("[ItemsSelector] storage health ensured");
-			this.items_loaded = false;
+                async forceReloadItems() {
+                        console.log("[ItemsSelector] forceReloadItems called");
+                        // Clear cached price list items so the reload always
+                        // fetches the latest data from the server
+                        await clearPriceListCache();
+                        console.log("[ItemsSelector] price list cache cleared");
+                        await this.ensureStorageHealth();
+                        console.log("[ItemsSelector] storage health ensured");
+                        this.items_loaded = false;
+                        this.lastItemDetailsSignature = null;
+                        this.resetItemDetailsRequestCache();
 
-			// When no search term is entered, reset the search so
-			// we fetch the entire item list from the server.
-			if (!this.first_search || !this.first_search.trim()) {
-				console.log("[ItemsSelector] resetting empty search before reload");
+                        // When no search term is entered, reset the search so
+                        // we fetch the entire item list from the server.
+                        if (!this.first_search || !this.first_search.trim()) {
+                                console.log("[ItemsSelector] resetting empty search before reload");
 				this.first_search = "";
 				this.search = "";
 			}
@@ -1373,11 +1438,12 @@ export default {
 					if (item.actual_qty === undefined) {
 						item.actual_qty = 0;
 					}
-				});
+                                });
 
-				vm.items = items;
-				vm.items_loaded = true;
-				vm.eventBus.emit("set_all_items", vm.items);
+                                vm.items = items;
+                                vm.lastItemDetailsSignature = null;
+                                vm.items_loaded = true;
+                                vm.eventBus.emit("set_all_items", vm.items);
 				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
 
 				const hasMore = !vm.pos_profile.pose_use_limit_search && items.length === vm.itemsPageLimit;
@@ -1862,30 +1928,63 @@ export default {
 				this.qty = 1;
 			}
 		},
-		async enter_event() {
-			if (!this.filtered_items.length || !this.first_search) {
-				return;
-			}
+                async enter_event(scanContext = null) {
+                        const context = scanContext || {};
+                        const filteredItems = Array.isArray(context.filteredItems)
+                                ? context.filteredItems
+                                : this.filtered_items;
+                        const rawSearchInput =
+                                typeof context.firstSearch === "string" && context.firstSearch.length
+                                        ? context.firstSearch
+                                        : this.first_search;
+                        const fromScanner = context.fromScanner ?? this.search_from_scanner;
 
-			// Derive the searchable code and detect scale barcode
-			const search = this.get_search(this.first_search);
-			const isScaleBarcode =
-				this.pos_profile?.posa_scale_barcode_start &&
-				this.first_search.startsWith(this.pos_profile.posa_scale_barcode_start);
-			this.search = search;
+                        if (!fromScanner && typeof rawSearchInput === "string") {
+                                const trimmedInput = rawSearchInput.trim();
+                                if (trimmedInput) {
+                                        const normalizedBatch = this.normalizeHardwareScanPayload(trimmedInput);
+                                        const isCompositeInput =
+                                                normalizedBatch.length > 1 ||
+                                                (normalizedBatch.length === 1 &&
+                                                        normalizedBatch[0] !== trimmedInput);
 
-			const qty = parseFloat(this.get_item_qty(this.first_search));
-			const new_item = { ...this.filtered_items[0] };
-			new_item.qty = flt(qty);
-			if (isScaleBarcode) {
-				new_item._barcode_qty = true;
-			}
+                                        if (isCompositeInput && this.queueManualScanBatch(normalizedBatch)) {
+                                                return;
+                                        }
+                                }
+                        }
 
-			let match = false;
-			if (Array.isArray(new_item.item_barcode)) {
-				new_item.item_barcode.forEach((element) => {
-					if (search === element.barcode) {
-						new_item.uom = element.posa_uom;
+                        if (!filteredItems.length || !rawSearchInput) {
+                                return;
+                        }
+
+                        // Derive the searchable code and detect scale barcode
+                        const search = this.get_search(rawSearchInput);
+                        const isScaleBarcode =
+                                this.pos_profile?.posa_scale_barcode_start &&
+                                rawSearchInput.startsWith(this.pos_profile.posa_scale_barcode_start);
+                        this.search = search;
+
+                        const qty = parseFloat(this.get_item_qty(rawSearchInput));
+                        const sourceItem = context.item || filteredItems[0];
+                        if (!sourceItem) {
+                                return;
+                        }
+                        const new_item = { ...sourceItem };
+                        new_item.qty = flt(qty);
+                        if (isScaleBarcode) {
+                                new_item._barcode_qty = true;
+                        }
+
+                        
+                        const scannedCodeForDisplay =
+                                (context.scannedCode ?? this.pendingScanCode) || rawSearchInput || search;
+
+                        let match = false;
+                        if (Array.isArray(new_item.item_barcode)) {
+                                new_item.item_barcode.forEach((element) => {
+                                        if (search === element.barcode) {
+                                                new_item.uom = element.posa_uom;
 						match = true;
 					}
 				});
@@ -1904,14 +2003,12 @@ export default {
 				new_item.to_set_batch_no = this.flags.batch_no;
 			}
 
-			if (match) {
-				const fromScanner = this.search_from_scanner;
-				const scannedCodeForDisplay = this.pendingScanCode || this.first_search || search;
-				const availableQty =
-					typeof new_item.available_qty === "number"
-						? new_item.available_qty
-						: typeof new_item.actual_qty === "number"
-							? new_item.actual_qty
+                        if (match) {
+                                const availableQty =
+                                        typeof new_item.available_qty === "number"
+                                                ? new_item.available_qty
+                                                : typeof new_item.actual_qty === "number"
+                                                        ? new_item.actual_qty
 							: null;
 				const requestedQty = Math.abs(new_item.qty || 1);
 
@@ -1959,38 +2056,38 @@ export default {
 					}
 				}
 
-				if (fromScanner) {
-					this.awaitingScanResult = true;
-				}
+                                if (fromScanner) {
+                                        this.awaitingScanResult = true;
+                                }
 
-				try {
-					await this.add_item(new_item);
-					if (fromScanner) {
-						this.playScanTone("success");
-						this.scannerLocked = false;
-						this.pendingScanCode = "";
-					}
-				} finally {
-					if (fromScanner) {
-						this.awaitingScanResult = false;
-					}
-				}
+                                try {
+                                        await this.add_item(new_item);
+                                        if (fromScanner) {
+                                                this.playScanTone("success");
+                                                this.scannerLocked = false;
+                                                this.pendingScanCode = "";
+                                        }
+                                } finally {
+                                        if (fromScanner) {
+                                                this.awaitingScanResult = false;
+                                        }
+                                }
 
-				this.flags.serial_no = null;
-				this.flags.batch_no = null;
-				this.qty = 1;
+                                this.flags.serial_no = null;
+                                this.flags.batch_no = null;
+                                this.qty = 1;
 
-				if (fromScanner) {
-					this.search_from_scanner = false;
-				}
+                                if (fromScanner) {
+                                        this.search_from_scanner = false;
+                                }
 
-				if (!this.scanErrorDialog) {
-					// Clear search field after successfully adding an item
-					this.clearSearch();
-					this.$refs.debounce_search.focus();
-				}
-			}
-		},
+                                if (!this.scanErrorDialog) {
+                                        // Clear search field after successfully adding an item
+                                        this.clearSearch();
+                                        this.$refs.debounce_search.focus();
+                                }
+                        }
+                },
 		search_onchange: _.debounce(async function (newSearchTerm) {
 			const vm = this;
 
@@ -2079,73 +2176,163 @@ export default {
 			}
 			return scal_qty;
 		},
-		get_search(first_search) {
-			if (!first_search) return "";
-			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
-			if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-				return first_search;
-			}
-			// Calculate item code length from total barcode length
-			const item_code_len = first_search.length - prefix_len - 6;
-			return first_search.substr(0, prefix_len + item_code_len);
-		},
-		esc_event() {
-			this.search = null;
-			this.first_search = null;
-			this.search_backup = null;
-			this.qty = 1;
+                get_search(first_search) {
+                        if (!first_search) return "";
+                        const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
+                        if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+                                return first_search;
+                        }
+                        // Calculate item code length from total barcode length
+                        const item_code_len = first_search.length - prefix_len - 6;
+                        return first_search.substr(0, prefix_len + item_code_len);
+                },
+                computeItemsSignature(items) {
+                        if (!Array.isArray(items) || items.length === 0) {
+                                return null;
+                        }
+
+                        const codes = items
+                                .map((it) => it && it.item_code)
+                                .filter((code) => typeof code === "string" && code.length > 0);
+
+                        if (!codes.length) {
+                                return `len:${items.length}`;
+                        }
+
+                        const uniqueCodes = Array.from(new Set(codes)).sort();
+                        return `${items.length}:${uniqueCodes.join("|")}`;
+                },
+                getItemSearchMeta(item) {
+                        if (!item) {
+                                return { fields: [], item_group: "" };
+                        }
+
+                        if (item.__searchMeta && !item.__searchMeta.dirty) {
+                                return item.__searchMeta;
+                        }
+
+                        const barcodeList = [];
+                        if (Array.isArray(item.item_barcode)) {
+                                barcodeList.push(
+                                        ...item.item_barcode
+                                                .map((b) => (b && b.barcode != null ? String(b.barcode) : ""))
+                                                .filter(Boolean),
+                                );
+                        } else if (item.item_barcode) {
+                                barcodeList.push(String(item.item_barcode));
+                        }
+                        if (Array.isArray(item.barcodes)) {
+                                barcodeList.push(
+                                        ...item.barcodes.map((b) => (b != null ? String(b) : "")).filter(Boolean),
+                                );
+                        }
+
+                        const serials =
+                                this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
+                                        ? item.serial_no_data
+                                                .map((s) => (s && s.serial_no != null ? String(s.serial_no) : ""))
+                                                .filter(Boolean)
+                                        : [];
+                        const batches =
+                                this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
+                                        ? item.batch_no_data
+                                                .map((b) => (b && b.batch_no != null ? String(b.batch_no) : ""))
+                                                .filter(Boolean)
+                                        : [];
+
+                        const fields = [
+                                item.item_code,
+                                item.item_name,
+                                item.barcode,
+                                item.description,
+                                ...barcodeList,
+                                ...serials,
+                                ...batches,
+                        ]
+                                .filter((field) => field != null)
+                                .map((field) => String(field).toLowerCase());
+
+                        const meta = {
+                                fields,
+                                item_group: typeof item.item_group === "string" ? item.item_group.toLowerCase() : "",
+                        };
+
+                        item.__searchMeta = meta;
+                        return meta;
+                },
+                invalidateItemSearchMeta(item) {
+                        if (item && item.__searchMeta) {
+                                item.__searchMeta = { fields: [], item_group: "", dirty: true };
+                        }
+                },
+                esc_event() {
+                        this.search = null;
+                        this.first_search = null;
+                        this.search_backup = null;
+                        this.qty = 1;
 			this.$refs.debounce_search.focus();
 		},
-		async update_items_details(items) {
-			const vm = this;
-			if (!items || !items.length) return;
+                async update_items_details(items) {
+                        const vm = this;
+                        if (!items || !items.length) return;
 
-			// reset any pending retry timer
-			if (vm.itemDetailsRetryTimeout) {
-				clearTimeout(vm.itemDetailsRetryTimeout);
-				vm.itemDetailsRetryTimeout = null;
-			}
+                        const signature = vm.computeItemsSignature(items);
+                        if (
+                                items.length > 1 &&
+                                signature &&
+                                vm.lastItemDetailsSignature === signature &&
+                                vm.itemDetailsRetryCount === 0
+                        ) {
+                                return;
+                        }
 
-			const itemCodes = items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
-			cacheResult.cached.forEach((det) => {
-				const item = items.find((it) => it.item_code === det.item_code);
-				if (item) {
-					Object.assign(item, {
-						actual_qty: det.actual_qty,
-						has_batch_no: det.has_batch_no,
-						has_serial_no: det.has_serial_no,
-					});
-					if (det.item_uoms && det.item_uoms.length > 0) {
-						item.item_uoms = det.item_uoms;
-						saveItemUOMs(item.item_code, det.item_uoms);
-					}
-					if (det.rate !== undefined) {
-						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
-						const price = det.price_list_rate ?? det.rate ?? 0;
-						if (force || price) {
-							item.rate = price;
-							item.price_list_rate = price;
-						}
-					}
-					if (det.currency) {
-						item.currency = det.currency;
-					}
+                        // reset any pending retry timer
+                        if (vm.itemDetailsRetryTimeout) {
+                                clearTimeout(vm.itemDetailsRetryTimeout);
+                                vm.itemDetailsRetryTimeout = null;
+                        }
 
-					if (!item.original_rate) {
-						item.original_rate = item.rate;
-						item.original_currency = item.currency || vm.pos_profile.currency;
-					}
+                        const itemCodes = items.map((it) => it.item_code);
+                        const cacheResult = await getCachedItemDetails(
+                                vm.pos_profile.name,
+                                vm.active_price_list,
+                                itemCodes,
+                        );
+                        cacheResult.cached.forEach((det) => {
+                                const item = items.find((it) => it.item_code === det.item_code);
+                                if (item) {
+                                        Object.assign(item, {
+                                                actual_qty: det.actual_qty,
+                                                has_batch_no: det.has_batch_no,
+                                                has_serial_no: det.has_serial_no,
+                                        });
+                                        if (det.item_uoms && det.item_uoms.length > 0) {
+                                                item.item_uoms = det.item_uoms;
+                                                saveItemUOMs(item.item_code, det.item_uoms);
+                                        }
+                                        if (det.rate !== undefined) {
+                                                const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                const price = det.price_list_rate ?? det.rate ?? 0;
+                                                if (force || price) {
+                                                        item.rate = price;
+                                                        item.price_list_rate = price;
+                                                }
+                                        }
+                                        if (det.currency) {
+                                                item.currency = det.currency;
+                                        }
 
-					vm.applyCurrencyConversionToItem(item);
-				}
-			});
+                                        if (!item.original_rate) {
+                                                item.original_rate = item.rate;
+                                                item.original_currency = item.currency || vm.pos_profile.currency;
+                                        }
 
-			let allCached = cacheResult.missing.length === 0;
+                                        vm.invalidateItemSearchMeta(item);
+                                        vm.applyCurrencyConversionToItem(item);
+                                }
+                        });
+
+                        let allCached = cacheResult.missing.length === 0;
 			items.forEach((item) => {
 				const localQty = getLocalStock(item.item_code);
 				if (localQty !== null) {
@@ -2154,89 +2341,101 @@ export default {
 					allCached = false;
 				}
 
-				if (!item.item_uoms || item.item_uoms.length === 0) {
-					const cachedUoms = getItemUOMs(item.item_code);
-					if (cachedUoms.length > 0) {
-						item.item_uoms = cachedUoms;
-					} else if (isOffline()) {
-						item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-					} else {
-						allCached = false;
-					}
-				}
-			});
+                                if (!item.item_uoms || item.item_uoms.length === 0) {
+                                        const cachedUoms = getItemUOMs(item.item_code);
+                                        if (cachedUoms.length > 0) {
+                                                item.item_uoms = cachedUoms;
+                                        } else if (isOffline()) {
+                                                item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
+                                        } else {
+                                                allCached = false;
+                                        }
+                                }
+                        });
 
-			// When offline or everything is cached, skip server call
-			if (isOffline() || allCached) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        // When offline or everything is cached, skip server call
+                        if (isOffline() && cacheResult.missing.length > 0) {
+                                vm.itemDetailsRetryCount = 0;
+                                return;
+                        }
 
-			const itemsToFetch = items.filter(
-				(it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
-			);
+                        if (allCached) {
+                                vm.itemDetailsRetryCount = 0;
+                                if (signature) {
+                                        vm.lastItemDetailsSignature = signature;
+                                }
+                                return;
+                        }
 
-			if (itemsToFetch.length === 0) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        const itemsToFetch = items.filter(
+                                (it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
+                        );
 
-			try {
-				const details = await vm.fetchItemDetails(itemsToFetch);
-				if (details && details.length) {
-					vm.itemDetailsRetryCount = 0;
-					let qtyChanged = false;
-					let updatedItems = [];
+                        if (itemsToFetch.length === 0) {
+                                vm.itemDetailsRetryCount = 0;
+                                if (signature) {
+                                        vm.lastItemDetailsSignature = signature;
+                                }
+                                return;
+                        }
 
-					items.forEach((item) => {
-						const updated_item = details.find((element) => element.item_code == item.item_code);
-						if (updated_item) {
-							const prev_qty = item.actual_qty;
+                        try {
+                                const details = await vm.fetchItemDetails(itemsToFetch);
+                                if (details && details.length) {
+                                        vm.itemDetailsRetryCount = 0;
+                                        let qtyChanged = false;
+                                        let updatedItems = [];
 
-							updatedItems.push({
-								item: item,
-								updates: {
-									actual_qty: updated_item.actual_qty,
-									has_batch_no: updated_item.has_batch_no,
-									has_serial_no: updated_item.has_serial_no,
-									batch_no_data:
-										updated_item.batch_no_data && updated_item.batch_no_data.length > 0
-											? updated_item.batch_no_data
-											: item.batch_no_data,
-									serial_no_data:
-										updated_item.serial_no_data && updated_item.serial_no_data.length > 0
-											? updated_item.serial_no_data
-											: item.serial_no_data,
-									item_uoms:
-										updated_item.item_uoms && updated_item.item_uoms.length > 0
-											? updated_item.item_uoms
-											: item.item_uoms,
-									rate: updated_item.rate !== undefined ? updated_item.rate : item.rate,
-									price_list_rate:
-										updated_item.price_list_rate !== undefined
-											? updated_item.price_list_rate
-											: item.price_list_rate,
-									currency: updated_item.currency || item.currency,
-								},
-							});
+                                        items.forEach((item) => {
+                                                const updated_item = details.find((element) => element.item_code == item.item_code);
+                                                if (updated_item) {
+                                                        const prev_qty = item.actual_qty;
 
-							if (prev_qty > 0 && updated_item.actual_qty === 0) {
-								qtyChanged = true;
-							}
+                                                        updatedItems.push({
+                                                                item: item,
+                                                                updates: {
+                                                                        actual_qty: updated_item.actual_qty,
+                                                                        has_batch_no: updated_item.has_batch_no,
+                                                                        has_serial_no: updated_item.has_serial_no,
+                                                                        batch_no_data:
+                                                                                updated_item.batch_no_data && updated_item.batch_no_data.length > 0
+                                                                                        ? updated_item.batch_no_data
+                                                                                        : item.batch_no_data,
+                                                                        serial_no_data:
+                                                                                updated_item.serial_no_data && updated_item.serial_no_data.length > 0
+                                                                                        ? updated_item.serial_no_data
+                                                                                        : item.serial_no_data,
+                                                                        item_uoms:
+                                                                                updated_item.item_uoms && updated_item.item_uoms.length > 0
+                                                                                        ? updated_item.item_uoms
+                                                                                        : item.item_uoms,
+                                                                        rate: updated_item.rate !== undefined ? updated_item.rate : item.rate,
+                                                                        price_list_rate:
+                                                                                updated_item.price_list_rate !== undefined
+                                                                                        ? updated_item.price_list_rate
+                                                                                        : item.price_list_rate,
+                                                                        currency: updated_item.currency || item.currency,
+                                                                },
+                                                        });
 
-							if (updated_item.item_uoms && updated_item.item_uoms.length > 0) {
-								saveItemUOMs(item.item_code, updated_item.item_uoms);
-							}
-						}
-					});
+                                                        if (prev_qty > 0 && updated_item.actual_qty === 0) {
+                                                                qtyChanged = true;
+                                                        }
 
-					updatedItems.forEach(({ item, updates }) => {
-						Object.assign(item, updates);
-						vm.applyCurrencyConversionToItem(item);
-					});
+                                                        if (updated_item.item_uoms && updated_item.item_uoms.length > 0) {
+                                                                saveItemUOMs(item.item_code, updated_item.item_uoms);
+                                                        }
+                                                }
+                                        });
 
-					updateLocalStockCache(details);
-					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
+                                        updatedItems.forEach(({ item, updates }) => {
+                                                Object.assign(item, updates);
+                                                vm.invalidateItemSearchMeta(item);
+                                                vm.applyCurrencyConversionToItem(item);
+                                        });
+
+                                        updateLocalStockCache(details);
+                                        saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
 
 					if (
 						vm.pos_profile &&
@@ -2252,15 +2451,19 @@ export default {
 						}
 					}
 
-					if (qtyChanged) {
-						vm.$forceUpdate();
-					}
-				}
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-					items.forEach((item) => {
-						const localQty = getLocalStock(item.item_code);
+                                        if (qtyChanged) {
+                                                vm.$forceUpdate();
+                                        }
+                                }
+
+                                if (signature) {
+                                        vm.lastItemDetailsSignature = signature;
+                                }
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                        items.forEach((item) => {
+                                                const localQty = getLocalStock(item.item_code);
 						if (localQty !== null) {
 							item.actual_qty = localQty;
 						}
@@ -2272,28 +2475,27 @@ export default {
 						}
 					});
 
-					if (!isOffline()) {
-						vm.itemDetailsRetryCount += 1;
-						const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
-						vm.itemDetailsRetryTimeout = setTimeout(() => {
-							vm.update_items_details(items);
-						}, delay);
-					}
-				}
-			}
+                                        if (!isOffline()) {
+                                                vm.itemDetailsRetryCount += 1;
+                                                const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
+                                                vm.itemDetailsRetryTimeout = setTimeout(() => {
+                                                        vm.update_items_details(items);
+                                                }, delay);
+                                        }
+                                }
+                        }
 
-			// Cleanup on component destroy
-			this.cleanupBeforeDestroy = () => {
-				if (vm.abortController) {
-					vm.abortController.abort();
-				}
-			};
+                        // Cleanup on component destroy
+                        this.cleanupBeforeDestroy = () => {
+                                vm.resetItemDetailsRequestCache();
+                        };
 		},
-		update_cur_items_details() {
-			if (this.filtered_items && this.filtered_items.length > 0) {
-				this.update_items_details(this.filtered_items);
-			}
-		},
+                update_cur_items_details() {
+                        if (this.filtered_items && this.filtered_items.length > 0) {
+                                this.lastItemDetailsSignature = null;
+                                this.update_items_details(this.filtered_items);
+                        }
+                },
 		async prePopulateStockCache(items) {
 			if (this.prePopulateInProgress) {
 				return;
@@ -2374,13 +2576,21 @@ export default {
 						oEvent.preventDefault();
 						return onScan.decodeKeyEvent(oEvent);
 					},
-					onScan: function (sCode) {
-						if (vm.scannerLocked) {
-							vm.playScanTone("error");
-							return;
-						}
-						vm.trigger_onscan(sCode);
-					},
+                                        onScan: function (sCode) {
+                                                if (vm.scanErrorDialog) {
+                                                        vm.playScanTone("error");
+                                                        return;
+                                                }
+                                                if (vm.processingHardwareScan) {
+                                                        vm.trigger_onscan(sCode);
+                                                        return;
+                                                }
+                                                if (vm.scannerLocked) {
+                                                        vm.playScanTone("error");
+                                                        return;
+                                                }
+                                                vm.trigger_onscan(sCode);
+                                        },
 				});
 
 				// Mark document as having scanner attached
@@ -2389,44 +2599,760 @@ export default {
 				console.warn("Scanner initialization error:", error.message);
 			}
 		},
-		trigger_onscan(sCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			// indicate this search came from a scanner
-			this.search_from_scanner = true;
-			// apply scanned code as search term
-			this.first_search = sCode;
-			this.search = sCode;
-			this.pendingScanCode = sCode;
+                trigger_onscan(sCode) {
+                        if (this.scanErrorDialog) {
+                                this.playScanTone("error");
+                                return;
+                        }
 
-			this.$nextTick(() => {
-				if (this.filtered_items.length == 0) {
-					this.eventBus.emit("show_message", {
-						title: `No Item has this barcode "${sCode}"`,
-						color: "error",
-					});
-					this.showScanError({
-						message: `${this.__("Item not found")}: ${sCode}`,
-						code: sCode,
-						details: this.__("Please verify the barcode or search manually."),
-					});
-				} else {
-					this.enter_event();
-				}
+                        const raw = typeof sCode === "string" ? sCode : "";
+                        const trimmed = raw.trim();
+                        if (!trimmed) {
+                                return;
+                        }
 
-				// clear search field for next scan and refocus input
-				if (!this.scanErrorDialog) {
-					this.clearSearch();
-					this.$refs.debounce_search && this.$refs.debounce_search.focus();
-				}
-			});
-		},
-		generateWordCombinations(inputString) {
-			const words = inputString.split(" ");
-			const wordCount = words.length;
-			const combinations = [];
+                        const hasActiveScan =
+                                this.processingHardwareScan &&
+                                this.currentHardwareScan &&
+                                typeof this.currentHardwareScan.code === "string";
+                        const shouldStripActivePrefix =
+                                hasActiveScan &&
+                                trimmed.startsWith(this.currentHardwareScan.code) &&
+                                trimmed.length > this.currentHardwareScan.code.length;
+
+                        let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
+
+                        if (shouldStripActivePrefix && normalizedCodes.length) {
+                                const activeCode = this.currentHardwareScan.code;
+                                if (normalizedCodes[0] === activeCode) {
+                                        normalizedCodes = normalizedCodes.slice(1);
+                                }
+                        }
+
+                        if (!normalizedCodes.length) {
+                                return;
+                        }
+
+                        normalizedCodes.forEach((code) => {
+                                if (code) {
+                                        this.hardwareScanQueue.push({ code, fromScanner: true });
+                                }
+                        });
+
+                        if (this.hardwareScanQueue.length) {
+                                this.processHardwareScanQueue();
+                        }
+                },
+                queueManualScanBatch(codes) {
+                        if (!Array.isArray(codes) || !codes.length) {
+                                return false;
+                        }
+
+                        const entries = codes
+                                .map((code) => (typeof code === "string" ? code.trim() : ""))
+                                .filter(Boolean);
+
+                        if (!entries.length) {
+                                return false;
+                        }
+
+                        entries.forEach((code) => {
+                                this.hardwareScanQueue.push({ code, fromScanner: false, source: "manual-batch" });
+                        });
+
+                        this.pendingScanCode = "";
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        this.first_search = "";
+                        this.search = "";
+
+                        this.$nextTick(() => {
+                                if (this.$refs.debounce_search) {
+                                        this.$refs.debounce_search.focus();
+                                }
+                        });
+
+                        this.processHardwareScanQueue();
+                        return true;
+                },
+                async processHardwareScanQueue() {
+                        if (this.processingHardwareScan || this.scanErrorDialog) {
+                                return;
+                        }
+
+                        this.processingHardwareScan = true;
+
+                        try {
+                                while (this.hardwareScanQueue.length) {
+                                        const nextScan = this.hardwareScanQueue.shift();
+                                        if (!nextScan || !nextScan.code) {
+                                                continue;
+                                        }
+
+                                        const normalizedBatch = this.normalizeHardwareScanPayload(nextScan.code);
+                                        if (
+                                                !nextScan.__normalized &&
+                                                Array.isArray(normalizedBatch) &&
+                                                normalizedBatch.length
+                                        ) {
+                                                const sanitizedBatch = normalizedBatch
+                                                        .map((part) => (typeof part === "string" ? part.trim() : ""))
+                                                        .filter(Boolean);
+                                                const originalTrimmed = typeof nextScan.code === "string" ? nextScan.code.trim() : "";
+                                                const isComposite =
+                                                        sanitizedBatch.length > 1 ||
+                                                        (sanitizedBatch.length === 1 && sanitizedBatch[0] !== originalTrimmed);
+
+                                                if (isComposite) {
+                                                        for (let index = sanitizedBatch.length - 1; index >= 0; index -= 1) {
+                                                                const part = sanitizedBatch[index];
+                                                                this.hardwareScanQueue.unshift({
+                                                                        ...nextScan,
+                                                                        code: part,
+                                                                        __normalized: true,
+                                                                });
+                                                        }
+                                                        continue;
+                                                }
+
+                                                if (sanitizedBatch.length === 1 && sanitizedBatch[0] !== originalTrimmed) {
+                                                        nextScan.code = sanitizedBatch[0];
+                                                }
+                                        }
+
+                                        nextScan.__normalized = true;
+
+                                        const activeCode = nextScan.code;
+                                        const shouldLockScanner = nextScan.fromScanner !== false;
+                                        this.currentHardwareScan = { ...nextScan };
+                                        this.scannerLocked = shouldLockScanner;
+
+                                        try {
+                                                await this.handleHardwareScan(nextScan);
+                                        } catch (error) {
+                                                console.error("Hardware scan processing failed", error);
+                                                this.notifyHardwareScanFailure(nextScan.code, {
+                                                        message: this.__("Unable to add scanned item."),
+                                                        details: error?.message,
+                                                });
+                                        } finally {
+                                                this.currentHardwareScan = null;
+                                                this.awaitingScanResult = false;
+                                                this.search_from_scanner = false;
+                                                this.pendingScanCode = "";
+                                                this.scannerLocked = false;
+                                                this.lastScanCompletedAt = Date.now();
+                                                if (activeCode) {
+                                                        this.lastProcessedScanLength = activeCode.length;
+                                                }
+
+                                                if (!this.scanErrorDialog) {
+                                                        this.clearSearch();
+                                                }
+                                        }
+                                }
+                        } finally {
+                                this.processingHardwareScan = false;
+                                this.scannerLocked = false;
+                                if (this.hardwareScanQueue.length && !this.scanErrorDialog) {
+                                        this.processHardwareScanQueue();
+                                }
+                        }
+                },
+                normalizeHardwareScanPayload(rawCode) {
+                        const codes = [];
+                        if (typeof rawCode !== "string") {
+                                return codes;
+                        }
+
+                        const trimmed = rawCode.trim();
+                        if (!trimmed) {
+                                return codes;
+                        }
+
+                        const segments = trimmed.split(/\s+/).filter(Boolean);
+                        const queue = segments.length ? segments : [trimmed];
+
+                        queue.forEach((segment) => {
+                                const candidate = segment.trim();
+                                if (!candidate) {
+                                        return;
+                                }
+
+                                const parts = this.splitRepeatedScanSegment(candidate);
+                                parts.forEach((part) => {
+                                        if (part) {
+                                                codes.push(part);
+                                        }
+                                });
+                        });
+
+                        if (codes.length === 1 && codes[0] === trimmed) {
+                                const knownSplit = this.splitSegmentByKnownCodes(trimmed);
+                                if (knownSplit && knownSplit.length > 1) {
+                                        return knownSplit;
+                                }
+                        }
+
+                        if (!codes.length) {
+                                const knownSplit = this.splitSegmentByKnownCodes(trimmed);
+                                if (knownSplit && knownSplit.length) {
+                                        return knownSplit;
+                                }
+                        }
+
+                        return codes;
+                },
+                splitRepeatedScanSegment(segment) {
+                        if (!segment) {
+                                return [];
+                        }
+
+                        const hints = this.collectScanLengthHints();
+                        for (const length of hints) {
+                                const attempt = this.splitSegmentByLength(segment, length, {
+                                        requireUniformChunks: false,
+                                });
+                                if (attempt) {
+                                        return attempt;
+                                }
+                        }
+
+                        const startLength = Math.floor(segment.length / 2);
+                        for (let length = startLength; length >= 2; length -= 1) {
+                                const attempt = this.splitSegmentByLength(segment, length, {
+                                        requireUniformChunks: true,
+                                });
+                                if (attempt) {
+                                        return attempt;
+                                }
+                        }
+
+                        return [segment];
+                },
+                collectScanLengthHints() {
+                        const lengths = new Set();
+
+                        if (this.currentHardwareScan?.code) {
+                                lengths.add(this.currentHardwareScan.code.length);
+                        }
+                        if (this.lastProcessedScanLength) {
+                                lengths.add(this.lastProcessedScanLength);
+                        }
+                        if (this.pendingScanCode) {
+                                lengths.add(this.pendingScanCode.length);
+                        }
+                        if (Array.isArray(this.hardwareScanQueue)) {
+                                this.hardwareScanQueue.forEach((entry) => {
+                                        if (entry?.code) {
+                                                lengths.add(entry.code.length);
+                                        }
+                                });
+                        }
+
+                        if (!lengths.size) {
+                                this.getKnownBarcodeLengths(40).forEach((len) => lengths.add(len));
+                        }
+
+                        const ordered = Array.from(lengths).filter((len) => Number.isFinite(len) && len > 0);
+                        ordered.sort((a, b) => b - a);
+                        return ordered;
+                },
+                getKnownBarcodeLengths(limit = 50) {
+                        if (!Array.isArray(this.items) || !this.items.length) {
+                                return [];
+                        }
+
+                        const lengths = new Set();
+                        const maxItems = Math.min(this.items.length, 200);
+
+                        for (let index = 0; index < maxItems && lengths.size < limit; index += 1) {
+                                this.collectBarcodeLengthsForItem(this.items[index], lengths, limit);
+                        }
+
+                        return Array.from(lengths).filter((len) => Number.isFinite(len) && len > 0);
+                },
+                collectBarcodeLengthsForItem(item, targetSet, limit) {
+                        if (!item || !targetSet || targetSet.size >= limit) {
+                                return;
+                        }
+
+                        const addLength = (value) => {
+                                if (targetSet.size >= limit) {
+                                        return;
+                                }
+                                if (value === null || value === undefined) {
+                                        return;
+                                }
+                                const stringValue = typeof value === "string" ? value : String(value);
+                                const normalized = stringValue.trim();
+                                if (!normalized) {
+                                        return;
+                                }
+                                const length = normalized.length;
+                                if (length >= 4 && length <= 64) {
+                                        targetSet.add(length);
+                                }
+                        };
+
+                        addLength(item.item_code);
+                        addLength(item.barcode);
+
+                        if (Array.isArray(item.item_barcode)) {
+                                item.item_barcode.forEach((entry) => {
+                                        addLength(entry?.barcode);
+                                });
+                        }
+
+                        if (Array.isArray(item.barcodes)) {
+                                item.barcodes.forEach((barcode) => {
+                                        addLength(barcode);
+                                });
+                        }
+
+                        if (Array.isArray(item.serial_no_data)) {
+                                item.serial_no_data.forEach((serial) => {
+                                        addLength(serial);
+                                });
+                        }
+
+                        if (Array.isArray(item.batch_no_data)) {
+                                item.batch_no_data.forEach((batch) => {
+                                        addLength(batch);
+                                });
+                        }
+                },
+                splitSegmentByLength(segment, length, { requireUniformChunks = true } = {}) {
+                        if (!length || length <= 0) {
+                                return null;
+                        }
+                        if (length >= segment.length) {
+                                return null;
+                        }
+                        if (segment.length % length !== 0) {
+                                return null;
+                        }
+                        if (length < 2) {
+                                return null;
+                        }
+
+                        const chunk = segment.slice(0, length);
+                        if (!chunk) {
+                                return null;
+                        }
+                        const repeats = segment.length / length;
+                        const parts = [chunk];
+
+                        for (let index = 1; index < repeats; index += 1) {
+                                const start = index * length;
+                                const end = start + length;
+                                const nextChunk = segment.slice(start, end);
+                                if (!nextChunk) {
+                                        return null;
+                                }
+                                if (requireUniformChunks && nextChunk !== chunk) {
+                                        return null;
+                                }
+                                parts.push(nextChunk);
+                        }
+
+                        return parts;
+                },
+                splitSegmentByKnownCodes(segment) {
+                        if (typeof segment !== "string" || !segment.length) {
+                                return null;
+                        }
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        if (!knownCodes.size) {
+                                return null;
+                        }
+
+                        const lengths = Array.from(
+                                new Set(Array.from(knownCodes, (code) => code.length).filter((len) => len > 0)),
+                        ).sort((a, b) => a - b);
+
+                        const segmentLength = segment.length;
+                        const path = [];
+                        const memo = new Map();
+
+                        const dfs = (index) => {
+                                if (index === segmentLength) {
+                                        return true;
+                                }
+
+                                if (memo.has(index)) {
+                                        return memo.get(index);
+                                }
+
+                                for (let i = 0; i < lengths.length; i += 1) {
+                                        const length = lengths[i];
+                                        const nextIndex = index + length;
+                                        if (nextIndex > segmentLength) {
+                                                break;
+                                        }
+
+                                        const candidate = segment.slice(index, nextIndex);
+                                        if (!knownCodes.has(candidate)) {
+                                                continue;
+                                        }
+
+                                        path.push(candidate);
+                                        if (dfs(nextIndex)) {
+                                                memo.set(index, true);
+                                                return true;
+                                        }
+                                        path.pop();
+                                }
+
+                                memo.set(index, false);
+                                return false;
+                        };
+
+                        if (dfs(0) && path.length) {
+                                return path.slice();
+                        }
+
+                        return null;
+                },
+                getKnownScannableCodes(limit = 500) {
+                        if (!Array.isArray(this.items) || !this.items.length) {
+                                return new Set();
+                        }
+
+                        const codes = new Set();
+
+                        const addCode = (value) => {
+                                if (!value || codes.size >= limit) {
+                                        return;
+                                }
+                                const normalized = typeof value === "string" ? value.trim() : String(value).trim();
+                                if (normalized) {
+                                        codes.add(normalized);
+                                }
+                        };
+
+                        for (let index = 0; index < this.items.length && codes.size < limit; index += 1) {
+                                const item = this.items[index];
+                                if (!item) {
+                                        continue;
+                                }
+
+                                addCode(item.item_code);
+                                addCode(item.barcode);
+
+                                if (Array.isArray(item.item_barcode)) {
+                                        item.item_barcode.forEach((entry) => addCode(entry?.barcode));
+                                }
+
+                                if (Array.isArray(item.barcodes)) {
+                                        item.barcodes.forEach((barcode) => addCode(barcode));
+                                }
+
+                                if (Array.isArray(item.serial_no_data)) {
+                                        item.serial_no_data.forEach((serial) => addCode(serial));
+                                }
+
+                                if (Array.isArray(item.batch_no_data)) {
+                                        item.batch_no_data.forEach((batch) => addCode(batch));
+                                }
+                        }
+
+                        return codes;
+                },
+                async handleHardwareScan({ code, fromScanner = true }) {
+                        const scannedCode = code;
+                        const isScanner = fromScanner !== false;
+                        this.search_from_scanner = isScanner;
+                        this.pendingScanCode = scannedCode;
+                        this.first_search = scannedCode;
+                        this.search = scannedCode;
+
+                        await this.$nextTick();
+
+                        let filteredItems = this.filtered_items.slice();
+                        let resolvedSearchCode = null;
+
+                        if (!filteredItems.length) {
+                                const resolution = await this.resolveItemsForScan(scannedCode);
+                                filteredItems = Array.isArray(resolution?.items) ? resolution.items : [];
+                                resolvedSearchCode = resolution?.searchCode || null;
+                        }
+
+                        if (!filteredItems.length) {
+                                this.notifyHardwareScanFailure(scannedCode, {
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        details: this.__("Please verify the barcode or search manually."),
+                                });
+                                return;
+                        }
+
+                        const firstSearchValue = resolvedSearchCode || scannedCode;
+                        const selectedItem = filteredItems[0] || null;
+
+                        await this.enter_event({
+                                firstSearch: firstSearchValue,
+                                scannedCode,
+                                filteredItems,
+                                item: selectedItem,
+                                fromScanner: isScanner,
+                        });
+                },
+                async resolveItemsForScan(scannedCode) {
+                        const normalized = typeof scannedCode === "string" ? scannedCode.trim() : "";
+                        if (!normalized) {
+                                return { items: [], searchCode: "" };
+                        }
+
+                        const searchCode = this.get_search(normalized);
+                        const codesToCheck = new Set();
+                        const addCode = (value) => {
+                                if (value === null || value === undefined) {
+                                        return;
+                                }
+                                const trimmed = String(value).trim();
+                                if (trimmed) {
+                                        codesToCheck.add(trimmed.toLowerCase());
+                                }
+                        };
+
+                        addCode(normalized);
+                        addCode(searchCode);
+
+                        const collectMatches = (collection) =>
+                                this.findItemsMatchingScanCodes(collection, codesToCheck);
+
+                        let matches = collectMatches(this.items);
+                        if (matches.length) {
+                                return { items: matches, searchCode };
+                        }
+
+                        if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                const offlineCandidates = [];
+                                const lookupLimit = Math.max(this.itemsPerPage || this.items_per_page || 20, 20);
+                                for (const candidate of codesToCheck) {
+                                        try {
+                                                const results = await searchStoredItems({
+                                                        search: candidate,
+                                                        itemGroup: "",
+                                                        limit: lookupLimit,
+                                                        offset: 0,
+                                                });
+                                                if (Array.isArray(results) && results.length) {
+                                                        offlineCandidates.push(...results);
+                                                }
+                                        } catch (error) {
+                                                console.error("Offline scan lookup failed", error);
+                                        }
+                                }
+
+                                if (offlineCandidates.length) {
+                                        const offlineMatches = collectMatches(offlineCandidates);
+                                        if (offlineMatches.length) {
+                                                const merged = this.mergeScannedItemsIntoList(offlineMatches);
+                                                matches = merged.length ? merged : offlineMatches;
+                                                try {
+                                                        await this.update_items_details(matches);
+                                                } catch (error) {
+                                                        console.error("Failed to refresh offline scan item details", error);
+                                                }
+                                                return { items: matches, searchCode };
+                                        }
+                                }
+                        }
+
+                        const remoteItem = await this.fetchItemByBarcode(searchCode);
+                        if (remoteItem) {
+                                const merged = this.mergeScannedItemsIntoList([remoteItem]);
+                                const references = merged && merged.length ? merged : [remoteItem];
+                                try {
+                                        await this.update_items_details(references);
+                                } catch (error) {
+                                        console.error("Failed to refresh remote scan item details", error);
+                                }
+                                if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                        try {
+                                                await saveItems(references);
+                                                await savePriceListItems(this.active_price_list, references);
+                                        } catch (error) {
+                                                console.error("Failed to persist remote scan item", error);
+                                        }
+                                }
+                                return { items: references, searchCode };
+                        }
+
+                        return { items: [], searchCode };
+                },
+                findItemsMatchingScanCodes(collection, codesToCheck) {
+                        if (!Array.isArray(collection) || !collection.length || !codesToCheck || !codesToCheck.size) {
+                                return [];
+                        }
+
+                        const matches = [];
+                        collection.forEach((item) => {
+                                if (this.itemMatchesScanCodes(item, codesToCheck)) {
+                                        matches.push(item);
+                                }
+                        });
+                        return matches;
+                },
+                itemMatchesScanCodes(item, codesToCheck) {
+                        if (!item || !codesToCheck || !codesToCheck.size) {
+                                return false;
+                        }
+
+                        const values = new Set();
+                        const pushValue = (value) => {
+                                if (value === null || value === undefined) {
+                                        return;
+                                }
+                                const normalized = String(value).trim();
+                                if (normalized) {
+                                        values.add(normalized.toLowerCase());
+                                }
+                        };
+
+                        pushValue(item.item_code);
+                        pushValue(item.barcode);
+
+                        if (Array.isArray(item.item_barcode)) {
+                                item.item_barcode.forEach((entry) => pushValue(entry?.barcode));
+                        }
+
+                        if (Array.isArray(item.barcodes)) {
+                                item.barcodes.forEach((barcode) => pushValue(barcode));
+                        }
+
+                        if (Array.isArray(item.serial_no_data)) {
+                                item.serial_no_data.forEach((serial) => {
+                                        if (serial && typeof serial === "object") {
+                                                pushValue(serial.serial_no);
+                                        } else {
+                                                pushValue(serial);
+                                        }
+                                });
+                        }
+
+                        if (Array.isArray(item.batch_no_data)) {
+                                item.batch_no_data.forEach((batch) => {
+                                        if (batch && typeof batch === "object") {
+                                                pushValue(batch.batch_no);
+                                        } else {
+                                                pushValue(batch);
+                                        }
+                                });
+                        }
+
+                        for (const code of codesToCheck) {
+                                if (values.has(code)) {
+                                        return true;
+                                }
+                        }
+
+                        return false;
+                },
+                mergeScannedItemsIntoList(candidates) {
+                        if (!Array.isArray(candidates) || !candidates.length) {
+                                return [];
+                        }
+
+                        if (!Array.isArray(this.items)) {
+                                this.items = [];
+                        }
+
+                        const merged = [];
+
+                        candidates.forEach((candidate) => {
+                                if (!candidate || !candidate.item_code) {
+                                        return;
+                                }
+
+                                const normalized = { ...candidate };
+                                const existingIndex = this.items.findIndex(
+                                        (item) => item && item.item_code === normalized.item_code,
+                                );
+
+                                if (existingIndex >= 0) {
+                                        const updated = { ...this.items[existingIndex], ...normalized };
+                                        if (typeof this.$set === "function") {
+                                                this.$set(this.items, existingIndex, updated);
+                                        } else {
+                                                this.items.splice(existingIndex, 1, updated);
+                                        }
+                                        this.invalidateItemSearchMeta(updated);
+                                        merged.push(updated);
+                                } else {
+                                        this.items.push(normalized);
+                                        this.invalidateItemSearchMeta(normalized);
+                                        merged.push(normalized);
+                                }
+                        });
+
+                        if (merged.length) {
+                                this.eventBus.emit("set_all_items", this.items);
+                        }
+
+                        return merged;
+                },
+                async fetchItemByBarcode(searchCode) {
+                        const lookup = typeof searchCode === "string" ? searchCode.trim() : "";
+                        if (!lookup) {
+                                return null;
+                        }
+
+                        try {
+                                const response = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.get_items_from_barcode",
+                                        args: {
+                                                selling_price_list: this.active_price_list,
+                                                currency: this.pos_profile?.currency,
+                                                barcode: lookup,
+                                        },
+                                });
+
+                                if (response && response.message) {
+                                        return { ...response.message };
+                                }
+                        } catch (error) {
+                                console.error("Failed to fetch item for scanned barcode", error);
+                        }
+
+                        return null;
+                },
+                notifyHardwareScanFailure(scannedCode, { message, details } = {}) {
+                        const code = scannedCode || this.currentHardwareScan?.code || this.pendingScanCode;
+                        if (code) {
+                                this.pendingScanCode = code;
+                        }
+
+                        const fallbackMessage = message || this.__("Unable to add scanned item.");
+                        const detailsMessage = details || "";
+
+                        this.eventBus.emit("show_message", {
+                                title: `No Item has this barcode "${code}"`,
+                                color: "error",
+                        });
+
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: fallbackMessage,
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                        }
+
+                        this.scanErrorMessage = fallbackMessage;
+                        this.scanErrorCode = code;
+                        this.scanErrorDetails = detailsMessage;
+                        this.scanErrorDialog = false;
+                        this.playScanTone("error");
+                },
+                generateWordCombinations(inputString) {
+                        const words = inputString.split(" ");
+                        const wordCount = words.length;
+                        const combinations = [];
 
 			// Helper function to generate all permutations
 			function permute(arr, m = []) {
@@ -2445,34 +3371,54 @@ export default {
 
 			return combinations;
 		},
-		clearSearch() {
-			this.search_backup = this.first_search;
-			this.first_search = "";
-			this.search = "";
+                clearSearch() {
+                        if (this.isClearingSearch) {
+                                return;
+                        }
+                        this.isClearingSearch = true;
 
-			if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
-				this.loadVisibleItems(true);
-				if (!this.isBackgroundLoading) {
-					this.verifyServerItemCount();
-				}
-				return;
-			}
+                        if (this.suppressSearchWatcherTimeout) {
+                                clearTimeout(this.suppressSearchWatcherTimeout);
+                                this.suppressSearchWatcherTimeout = null;
+                        }
+                        this.suppressSearchWatcher = true;
+                        this.suppressSearchWatcherTimeout = setTimeout(() => {
+                                this.suppressSearchWatcher = false;
+                                this.suppressSearchWatcherTimeout = null;
+                        }, 500);
 
-			if (this.isBackgroundLoading) {
-				if (this.pendingGetItems) {
-					this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
-				} else {
-					this.pendingGetItems = { force_server: false };
-				}
-				return;
-			}
+                        this.search_backup = this.first_search;
+                        this.first_search = "";
+                        this.search = "";
 
-			if (!this.items_loaded || !this.items.length) {
-				this.get_items(true);
-			} else {
-				this.eventBus.emit("set_all_items", this.items);
-			}
-		},
+                        try {
+                                if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                        this.loadVisibleItems(true);
+                                        if (!this.isBackgroundLoading) {
+                                                this.verifyServerItemCount();
+                                        }
+                                        return;
+                                }
+
+                                if (this.isBackgroundLoading) {
+                                        if (this.pendingGetItems) {
+                                                this.pendingGetItems.force_server =
+                                                        this.pendingGetItems.force_server || false;
+                                        } else {
+                                                this.pendingGetItems = { force_server: false };
+                                        }
+                                        return;
+                                }
+
+                                if (!this.items_loaded || !this.items.length) {
+                                        this.get_items(true);
+                                } else {
+                                        this.eventBus.emit("set_all_items", this.items);
+                                }
+                        } finally {
+                                this.isClearingSearch = false;
+                        }
+                },
 
 		restoreSearch() {
 			if (this.first_search === "") {
@@ -2570,20 +3516,23 @@ export default {
 				);
 			}
 		},
-		acknowledgeScanError() {
-			this.scanErrorDialog = false;
-			this.scannerLocked = false;
-			this.scanErrorMessage = "";
-			this.scanErrorCode = "";
-			this.scanErrorDetails = "";
-			this.pendingScanCode = "";
-			this.awaitingScanResult = false;
-			this.$nextTick(() => {
-				if (this.$refs.debounce_search) {
-					this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                acknowledgeScanError() {
+                        this.scanErrorDialog = false;
+                        this.scannerLocked = false;
+                        this.scanErrorMessage = "";
+                        this.scanErrorCode = "";
+                        this.scanErrorDetails = "";
+                        this.pendingScanCode = "";
+                        this.awaitingScanResult = false;
+                        this.$nextTick(() => {
+                                if (this.$refs.debounce_search) {
+                                        this.$refs.debounce_search.focus();
+                                }
+                        });
+                        if (this.hardwareScanQueue.length) {
+                                this.processHardwareScanQueue();
+                        }
+                },
 
 		startCameraScanning() {
 			if (this.scannerLocked) {
@@ -2594,11 +3543,23 @@ export default {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
+                onBarcodeScanned(scannedCode) {
+                        if (this.awaitingScanResult) {
+                                this.playScanTone("error");
+                                return;
+                        }
+                        const now = Date.now();
+                        if (
+                                this.scanCooldownMs > 0 &&
+                                this.lastScanCompletedAt &&
+                                now - this.lastScanCompletedAt < this.scanCooldownMs
+                        ) {
+                                return;
+                        }
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
 			console.log("Barcode scanned:", scannedCode);
 			this.pendingScanCode = scannedCode;
 
@@ -2722,119 +3683,129 @@ export default {
 		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
 			console.log("Adding scanned item to invoice:", item, scannedCode);
 
-			// Clone the item to avoid mutating list data
-			const newItem = { ...item };
+                        try {
+                                // Clone the item to avoid mutating list data
+                                const newItem = { ...item };
 
-			// If the scanned barcode has a specific UOM, apply it
-			if (Array.isArray(newItem.item_barcode)) {
-				const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-				if (barcodeMatch && barcodeMatch.posa_uom) {
-					newItem.uom = barcodeMatch.posa_uom;
+                                // If the scanned barcode has a specific UOM, apply it
+                                if (Array.isArray(newItem.item_barcode)) {
+                                        const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
+                                        if (barcodeMatch && barcodeMatch.posa_uom) {
+                                                newItem.uom = barcodeMatch.posa_uom;
 
-					// Try fetching the rate for this UOM from the active price list
-					try {
-						const res = await frappe.call({
-							method: "posawesome.posawesome.api.items.get_price_for_uom",
-							args: {
-								item_code: newItem.item_code,
-								price_list: this.active_price_list,
-								uom: barcodeMatch.posa_uom,
-							},
-						});
-						if (res.message) {
-							const price = parseFloat(res.message);
-							newItem.rate = price;
-							newItem.price_list_rate = price;
-							newItem.base_rate = price;
-							newItem.base_price_list_rate = price;
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
-						}
-					} catch (e) {
-						console.error("Failed to fetch UOM price", e);
-					}
-				}
-			}
+                                                // Try fetching the rate for this UOM from the active price list
+                                                try {
+                                                        const res = await frappe.call({
+                                                                method: "posawesome.posawesome.api.items.get_price_for_uom",
+                                                                args: {
+                                                                        item_code: newItem.item_code,
+                                                                        price_list: this.active_price_list,
+                                                                        uom: barcodeMatch.posa_uom,
+                                                                },
+                                                        });
+                                                        if (res.message) {
+                                                                const price = parseFloat(res.message);
+                                                                newItem.rate = price;
+                                                                newItem.price_list_rate = price;
+                                                                newItem.base_rate = price;
+                                                                newItem.base_price_list_rate = price;
+                                                                newItem._manual_rate_set = true;
+                                                                newItem.skip_force_update = true;
+                                                        }
+                                                } catch (e) {
+                                                        console.error("Failed to fetch UOM price", e);
+                                                }
+                                        }
+                                }
 
-			// Apply quantity from scale barcode if available
-			if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
-				newItem.qty = qtyFromBarcode;
-				newItem._barcode_qty = true;
-			}
+                                // Apply quantity from scale barcode if available
+                                if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
+                                        newItem.qty = qtyFromBarcode;
+                                        newItem._barcode_qty = true;
+                                }
 
-			const requestedQtyRaw =
-				qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
-			const requestedQty = Math.abs(requestedQtyRaw || 1);
-			const availableQty =
-				typeof newItem.available_qty === "number"
-					? newItem.available_qty
-					: typeof newItem.actual_qty === "number"
-						? newItem.actual_qty
-						: null;
+                                const requestedQtyRaw =
+                                        qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
+                                const requestedQty = Math.abs(requestedQtyRaw || 1);
+                                const availableQty =
+                                        typeof newItem.available_qty === "number"
+                                                ? newItem.available_qty
+                                                : typeof newItem.actual_qty === "number"
+                                                        ? newItem.actual_qty
+                                                        : null;
 
-			if (availableQty !== null && availableQty < requestedQty) {
-				const formattedAvailable = this.format_number
-					? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: availableQty;
-				const formattedRequested = this.format_number
-					? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: requestedQty;
-				const negativeStockEnabled = this.isNegativeStockEnabled();
-				const shouldBlock =
-					!negativeStockEnabled &&
-					(this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
+                                if (availableQty !== null && availableQty < requestedQty) {
+                                        const formattedAvailable = this.format_number
+                                                ? this.format_number(
+                                                          availableQty,
+                                                          this.hide_qty_decimals ? 0 : this.float_precision,
+                                                  )
+                                                : availableQty;
+                                        const formattedRequested = this.format_number
+                                                ? this.format_number(
+                                                          requestedQty,
+                                                          this.hide_qty_decimals ? 0 : this.float_precision,
+                                                  )
+                                                : requestedQty;
+                                        const negativeStockEnabled = this.isNegativeStockEnabled();
+                                        const shouldBlock =
+                                                !negativeStockEnabled &&
+                                                (this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
 
-				if (shouldBlock) {
-					this.showScanError({
-						message: this.__("Quantity not available for {0}", [
-							newItem.item_name || scannedCode,
-						]),
-						code: scannedCode,
-						details: this.__("Available: {0}. Requested: {1}.", [
-							formattedAvailable,
-							formattedRequested,
-						]),
-					});
-					return;
-				}
+                                        if (shouldBlock) {
+                                                this.showScanError({
+                                                        message: this.__("Quantity not available for {0}", [
+                                                                newItem.item_name || scannedCode,
+                                                        ]),
+                                                        code: scannedCode,
+                                                        details: this.__("Available: {0}. Requested: {1}.", [
+                                                                formattedAvailable,
+                                                                formattedRequested,
+                                                        ]),
+                                                });
+                                                return;
+                                        }
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: this.__(
-							"Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
-							[formattedAvailable, formattedRequested],
-						),
-						color: "warning",
-					});
-				}
-			}
+                                        if (negativeStockEnabled) {
+                                                this.eventBus.emit("show_message", {
+                                                        title: this.__(
+                                                                "Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
+                                                                [formattedAvailable, formattedRequested],
+                                                        ),
+                                                        color: "warning",
+                                                });
+                                        }
+                                }
 
-			this.awaitingScanResult = true;
+                                this.awaitingScanResult = true;
 
-			try {
-				// Use existing add_item method with enhanced feedback
-				await this.add_item(newItem);
-				this.playScanTone("success");
-				this.scannerLocked = false;
-				this.search_from_scanner = false;
-				this.pendingScanCode = "";
+                                try {
+                                        // Use existing add_item method with enhanced feedback
+                                        await this.add_item(newItem);
+                                        this.playScanTone("success");
+                                        this.scannerLocked = false;
+                                        this.search_from_scanner = false;
+                                        this.pendingScanCode = "";
 
-				// Show success message
-				frappe.show_alert(
-					{
-						message: `Added: ${item.item_name}`,
-						indicator: "green",
-					},
-					3,
-				);
+                                        // Show success message
+                                        frappe.show_alert(
+                                                {
+                                                        message: `Added: ${item.item_name}`,
+                                                        indicator: "green",
+                                                },
+                                                3,
+                                        );
 
-				// Clear search after successful addition and refocus input
-				this.clearSearch();
-				this.$refs.debounce_search && this.$refs.debounce_search.focus();
-			} finally {
-				this.awaitingScanResult = false;
-			}
-		},
+                                        // Clear search after successful addition and refocus input
+                                        this.clearSearch();
+                                        this.$refs.debounce_search && this.$refs.debounce_search.focus();
+                                } finally {
+                                        this.awaitingScanResult = false;
+                                }
+                        } finally {
+                                this.lastScanCompletedAt = Date.now();
+                        }
+                },
 		isNegativeStockEnabled() {
 			const setting = this.stock_settings?.allow_negative_stock;
 			if (setting === undefined || setting === null) {
@@ -3067,78 +4038,65 @@ export default {
 		headers() {
 			return this.getItemsHeaders();
 		},
-		filtered_items() {
-			if (!this.items || this.items.length === 0) {
-				return [];
-			}
+                filtered_items() {
+                        if (!this.items || this.items.length === 0) {
+                                return [];
+                        }
 
-			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-			let filteredItems = [...this.items];
+                        const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
+                        const shouldSearch = searchTerm.length >= 3;
+                        const groupFilter = this.item_group !== "ALL" ? this.item_group.toLowerCase() : null;
+                        const hideVariants = this.pos_profile?.posa_hide_variants_items;
 
-			// Apply search filter only for queries with at least three characters
-			if (searchTerm.length >= 3) {
-				filteredItems = filteredItems.filter((item) => {
-					const barcodeList = [];
-					if (Array.isArray(item.item_barcode)) {
-						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
-					} else if (item.item_barcode) {
-						barcodeList.push(String(item.item_barcode));
-					}
-					if (Array.isArray(item.barcodes)) {
-						barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
-					}
+                        const limitConfig = this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage;
+                        const numericLimit = Number(limitConfig);
+                        const hasPositiveLimit = Number.isFinite(numericLimit) && numericLimit > 0;
+                        const limit = hasPositiveLimit ? Math.floor(numericLimit) : 0;
 
-					const searchFields = [
-						item.item_code,
-						item.item_name,
-						item.barcode,
-						item.description,
-						...barcodeList,
-						...(this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
-							? item.serial_no_data.map((s) => s.serial_no)
-							: []),
-						...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
-							? item.batch_no_data.map((b) => b.batch_no)
-							: []),
-					]
-						.filter(Boolean)
-						.map((field) => field.toLowerCase());
+                        if (!hasPositiveLimit) {
+                                return [];
+                        }
 
-					return searchFields.some((field) => field.includes(searchTerm));
-				});
-			}
+                        const maxResults = Math.max(limit * 2, limit);
+                        const filteredItems = [];
 
-			// Apply item group filter
-			if (this.item_group !== "ALL") {
-				filteredItems = filteredItems.filter(
-					(item) =>
-						item.item_group && item.item_group.toLowerCase() === this.item_group.toLowerCase(),
-				);
-			}
+                        for (let index = 0; index < this.items.length && filteredItems.length < maxResults; index += 1) {
+                                const item = this.items[index];
+                                const needsMeta = shouldSearch || !!groupFilter;
+                                const meta = needsMeta ? this.getItemSearchMeta(item) : null;
 
-			// Apply zero rate filter
-			if (this.hide_zero_rate_items) {
-				filteredItems = filteredItems.filter((item) => parseFloat(item.rate || 0) > 0);
-			}
+                                if (shouldSearch) {
+                                        const fields = meta?.fields || [];
+                                        if (!fields.some((field) => field.includes(searchTerm))) {
+                                                continue;
+                                        }
+                                }
 
-			// Apply template/variant filter
-			if (this.pos_profile?.posa_hide_variants_items) {
-				filteredItems = filteredItems.filter((item) => !item.variant_of);
-			}
+                                if (groupFilter) {
+                                        const groupValue = meta?.item_group ??
+                                                (typeof item.item_group === "string" ? item.item_group.toLowerCase() : "");
+                                        if (groupValue !== groupFilter) {
+                                                continue;
+                                        }
+                                }
 
-			// Apply pagination
-			const limit = this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage;
-			filteredItems = filteredItems.slice(0, limit);
+                                if (this.hide_zero_rate_items && !(parseFloat(item.rate || 0) > 0)) {
+                                        continue;
+                                }
 
-			// Ensure quantities are defined
-			filteredItems.forEach((item) => {
-				if (item.actual_qty === undefined || item.actual_qty === null) {
-					item.actual_qty = 0;
-				}
-			});
+                                if (hideVariants && item.variant_of) {
+                                        continue;
+                                }
 
-			return filteredItems;
-		},
+                                if (item.actual_qty === undefined || item.actual_qty === null) {
+                                        item.actual_qty = 0;
+                                }
+
+                                filteredItems.push(item);
+                        }
+
+                        return filteredItems.slice(0, limit);
+                },
 		debounce_search: {
 			get() {
 				return this.first_search;
@@ -3234,12 +4192,14 @@ export default {
 			this.couponsCount = data.couponsCount;
 			this.appliedCouponsCount = data.appliedCouponsCount;
 		});
-		this.eventBus.on("update_customer_price_list", (data) => {
-			this.customer_price_list = data;
-		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
-		});
+                this.eventBus.on("update_customer_price_list", (data) => {
+                        this.customer_price_list = data;
+                        this.lastItemDetailsSignature = null;
+                });
+                this.eventBus.on("update_customer", (data) => {
+                        this.customer = data;
+                        this.lastItemDetailsSignature = null;
+                });
 
 		this.eventBus.on("focus_item_search", () => {
 			this.focusItemSearch();
@@ -3265,11 +4225,12 @@ export default {
 		});
 
 		// Refresh item quantities when connection to server is restored
-		this.eventBus.on("server-online", async () => {
-			if (this.items && this.items.length > 0) {
-				await this.update_items_details(this.items);
-			}
-		});
+                this.eventBus.on("server-online", async () => {
+                        if (this.items && this.items.length > 0) {
+                                this.lastItemDetailsSignature = null;
+                                await this.update_items_details(this.items);
+                        }
+                });
 
 		if (typeof Worker !== "undefined") {
 			try {
@@ -3365,21 +4326,26 @@ export default {
 		this.$nextTick(this.checkItemContainerOverflow);
 	},
 
-	beforeUnmount() {
-		// Clear interval when component is destroyed
-		if (this.refresh_interval) {
-			clearInterval(this.refresh_interval);
-		}
+        beforeUnmount() {
+                // Clear interval when component is destroyed
+                if (this.refresh_interval) {
+                        clearInterval(this.refresh_interval);
+                }
 
-		if (this.itemDetailsRetryTimeout) {
-			clearTimeout(this.itemDetailsRetryTimeout);
-		}
-		this.itemDetailsRetryCount = 0;
+                if (this.itemDetailsRetryTimeout) {
+                        clearTimeout(this.itemDetailsRetryTimeout);
+                }
+                this.itemDetailsRetryCount = 0;
 
-		// Call cleanup function for abort controller
-		if (this.cleanupBeforeDestroy) {
-			this.cleanupBeforeDestroy();
-		}
+                if (this.suppressSearchWatcherTimeout) {
+                        clearTimeout(this.suppressSearchWatcherTimeout);
+                        this.suppressSearchWatcherTimeout = null;
+                }
+
+                // Call cleanup function for abort controller
+                if (this.cleanupBeforeDestroy) {
+                        this.cleanupBeforeDestroy();
+                }
 
 		// Detach scanner if it was attached
 		if (document._scannerAttached) {
