@@ -593,6 +593,9 @@ export default {
                 awaitingScanResult: false,
                 lastScanCompletedAt: 0,
                 scanCooldownMs: 600,
+                isClearingSearch: false,
+                suppressSearchWatcher: false,
+                suppressSearchWatcherTimeout: null,
                 lastItemDetailsSignature: null,
         }),
 
@@ -747,17 +750,19 @@ export default {
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
-		first_search: _.debounce(function (val, oldVal) {
-			const newLen = (val || "").trim().length;
-			const oldLen = (oldVal || "").trim().length;
-			if (newLen >= 3) {
-				// Call without arguments so search_onchange treats it like an Enter key
-				this.search_onchange();
-			} else if (oldLen >= 3 && newLen === 0) {
-				// Reset items only when search is fully cleared
-				this.clearSearch();
-			}
-		}, 300),
+                first_search: _.debounce(function (val, oldVal) {
+                        const newLen = (val || "").trim().length;
+                        const oldLen = (oldVal || "").trim().length;
+                        if (newLen >= 3) {
+                                // Call without arguments so search_onchange treats it like an Enter key
+                                this.search_onchange();
+                        } else if (oldLen >= 3 && newLen === 0) {
+                                // Reset items only when search is fully cleared
+                                if (!this.suppressSearchWatcher) {
+                                        this.clearSearch();
+                                }
+                        }
+                }, 300),
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
@@ -2607,34 +2612,54 @@ export default {
 
 			return combinations;
 		},
-		clearSearch() {
-			this.search_backup = this.first_search;
-			this.first_search = "";
-			this.search = "";
+                clearSearch() {
+                        if (this.isClearingSearch) {
+                                return;
+                        }
+                        this.isClearingSearch = true;
 
-			if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
-				this.loadVisibleItems(true);
-				if (!this.isBackgroundLoading) {
-					this.verifyServerItemCount();
-				}
-				return;
-			}
+                        if (this.suppressSearchWatcherTimeout) {
+                                clearTimeout(this.suppressSearchWatcherTimeout);
+                                this.suppressSearchWatcherTimeout = null;
+                        }
+                        this.suppressSearchWatcher = true;
+                        this.suppressSearchWatcherTimeout = setTimeout(() => {
+                                this.suppressSearchWatcher = false;
+                                this.suppressSearchWatcherTimeout = null;
+                        }, 500);
 
-			if (this.isBackgroundLoading) {
-				if (this.pendingGetItems) {
-					this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
-				} else {
-					this.pendingGetItems = { force_server: false };
-				}
-				return;
-			}
+                        this.search_backup = this.first_search;
+                        this.first_search = "";
+                        this.search = "";
 
-			if (!this.items_loaded || !this.items.length) {
-				this.get_items(true);
-			} else {
-				this.eventBus.emit("set_all_items", this.items);
-			}
-		},
+                        try {
+                                if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                        this.loadVisibleItems(true);
+                                        if (!this.isBackgroundLoading) {
+                                                this.verifyServerItemCount();
+                                        }
+                                        return;
+                                }
+
+                                if (this.isBackgroundLoading) {
+                                        if (this.pendingGetItems) {
+                                                this.pendingGetItems.force_server =
+                                                        this.pendingGetItems.force_server || false;
+                                        } else {
+                                                this.pendingGetItems = { force_server: false };
+                                        }
+                                        return;
+                                }
+
+                                if (!this.items_loaded || !this.items.length) {
+                                        this.get_items(true);
+                                } else {
+                                        this.eventBus.emit("set_all_items", this.items);
+                                }
+                        } finally {
+                                this.isClearingSearch = false;
+                        }
+                },
 
 		restoreSearch() {
 			if (this.first_search === "") {
@@ -3539,21 +3564,26 @@ export default {
 		this.$nextTick(this.checkItemContainerOverflow);
 	},
 
-	beforeUnmount() {
-		// Clear interval when component is destroyed
-		if (this.refresh_interval) {
-			clearInterval(this.refresh_interval);
-		}
+        beforeUnmount() {
+                // Clear interval when component is destroyed
+                if (this.refresh_interval) {
+                        clearInterval(this.refresh_interval);
+                }
 
-		if (this.itemDetailsRetryTimeout) {
-			clearTimeout(this.itemDetailsRetryTimeout);
-		}
-		this.itemDetailsRetryCount = 0;
+                if (this.itemDetailsRetryTimeout) {
+                        clearTimeout(this.itemDetailsRetryTimeout);
+                }
+                this.itemDetailsRetryCount = 0;
 
-		// Call cleanup function for abort controller
-		if (this.cleanupBeforeDestroy) {
-			this.cleanupBeforeDestroy();
-		}
+                if (this.suppressSearchWatcherTimeout) {
+                        clearTimeout(this.suppressSearchWatcherTimeout);
+                        this.suppressSearchWatcherTimeout = null;
+                }
+
+                // Call cleanup function for abort controller
+                if (this.cleanupBeforeDestroy) {
+                        this.cleanupBeforeDestroy();
+                }
 
 		// Detach scanner if it was attached
 		if (document._scannerAttached) {
