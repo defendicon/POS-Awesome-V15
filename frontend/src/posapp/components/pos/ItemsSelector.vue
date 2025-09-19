@@ -2754,6 +2754,20 @@ export default {
                                 });
                         });
 
+                        if (codes.length === 1 && codes[0] === trimmed) {
+                                const knownSplit = this.splitSegmentByKnownCodes(trimmed);
+                                if (knownSplit && knownSplit.length > 1) {
+                                        return knownSplit;
+                                }
+                        }
+
+                        if (!codes.length) {
+                                const knownSplit = this.splitSegmentByKnownCodes(trimmed);
+                                if (knownSplit && knownSplit.length) {
+                                        return knownSplit;
+                                }
+                        }
+
                         return codes;
                 },
                 splitRepeatedScanSegment(segment) {
@@ -2910,6 +2924,108 @@ export default {
                         }
 
                         return parts;
+                },
+                splitSegmentByKnownCodes(segment) {
+                        if (typeof segment !== "string" || !segment.length) {
+                                return null;
+                        }
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        if (!knownCodes.size) {
+                                return null;
+                        }
+
+                        const lengths = Array.from(
+                                new Set(Array.from(knownCodes, (code) => code.length).filter((len) => len > 0)),
+                        ).sort((a, b) => a - b);
+
+                        const segmentLength = segment.length;
+                        const path = [];
+                        const memo = new Map();
+
+                        const dfs = (index) => {
+                                if (index === segmentLength) {
+                                        return true;
+                                }
+
+                                if (memo.has(index)) {
+                                        return memo.get(index);
+                                }
+
+                                for (let i = 0; i < lengths.length; i += 1) {
+                                        const length = lengths[i];
+                                        const nextIndex = index + length;
+                                        if (nextIndex > segmentLength) {
+                                                break;
+                                        }
+
+                                        const candidate = segment.slice(index, nextIndex);
+                                        if (!knownCodes.has(candidate)) {
+                                                continue;
+                                        }
+
+                                        path.push(candidate);
+                                        if (dfs(nextIndex)) {
+                                                memo.set(index, true);
+                                                return true;
+                                        }
+                                        path.pop();
+                                }
+
+                                memo.set(index, false);
+                                return false;
+                        };
+
+                        if (dfs(0) && path.length) {
+                                return path.slice();
+                        }
+
+                        return null;
+                },
+                getKnownScannableCodes(limit = 500) {
+                        if (!Array.isArray(this.items) || !this.items.length) {
+                                return new Set();
+                        }
+
+                        const codes = new Set();
+
+                        const addCode = (value) => {
+                                if (!value || codes.size >= limit) {
+                                        return;
+                                }
+                                const normalized = typeof value === "string" ? value.trim() : String(value).trim();
+                                if (normalized) {
+                                        codes.add(normalized);
+                                }
+                        };
+
+                        for (let index = 0; index < this.items.length && codes.size < limit; index += 1) {
+                                const item = this.items[index];
+                                if (!item) {
+                                        continue;
+                                }
+
+                                addCode(item.item_code);
+                                addCode(item.barcode);
+
+                                if (Array.isArray(item.item_barcode)) {
+                                        item.item_barcode.forEach((entry) => addCode(entry?.barcode));
+                                }
+
+                                if (Array.isArray(item.barcodes)) {
+                                        item.barcodes.forEach((barcode) => addCode(barcode));
+                                }
+
+                                if (Array.isArray(item.serial_no_data)) {
+                                        item.serial_no_data.forEach((serial) => addCode(serial));
+                                }
+
+                                if (Array.isArray(item.batch_no_data)) {
+                                        item.batch_no_data.forEach((batch) => addCode(batch));
+                                }
+                        }
+
+                        return codes;
                 },
                 async handleHardwareScan({ code, fromScanner = true }) {
                         const scannedCode = code;
