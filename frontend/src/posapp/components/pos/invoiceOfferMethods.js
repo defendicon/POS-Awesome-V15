@@ -3,32 +3,107 @@ import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
 
 export default {
-	normalizeBrand(brand) {
-		return (brand || "").trim().toLowerCase();
-	},
-	getItemBrand(item) {
-		let brand = this.normalizeBrand(item.brand);
-		if (brand) {
-			item.brand = brand;
-			return brand;
-		}
-		if (this.brand_cache && this.brand_cache[item.item_code]) {
-			brand = this.brand_cache[item.item_code];
-		} else {
-			frappe.call({
-				method: "posawesome.posawesome.api.items.get_item_brand",
-				args: { item_code: item.item_code },
-				async: false,
-				callback: (r) => {
-					brand = this.normalizeBrand(r.message);
-				},
-			});
-			this.brand_cache = this.brand_cache || {};
-			this.brand_cache[item.item_code] = brand;
-		}
-		item.brand = brand;
-		return brand;
-	},
+        scheduleOffersRefresh() {
+                if (this.isApplyingOffer) {
+                        return;
+                }
+
+                if (!this._offerRefreshState) {
+                        this._offerRefreshState = {
+                                pending: false,
+                                rafId: null,
+                                timeoutId: null,
+                        };
+                }
+
+                const state = this._offerRefreshState;
+                if (state.pending) {
+                        return;
+                }
+
+                state.pending = true;
+
+                const run = () => {
+                        state.pending = false;
+                        state.rafId = null;
+                        state.timeoutId = null;
+
+                        if (this.isApplyingOffer) {
+                                return;
+                        }
+
+                        this.handelOffers();
+                };
+
+                if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+                        state.rafId = window.requestAnimationFrame(run);
+                } else {
+                        state.timeoutId = setTimeout(run, 16);
+                }
+        },
+        normalizeBrand(brand) {
+                return (brand || "").trim().toLowerCase();
+        },
+        getItemBrand(item) {
+                const directBrand = this.normalizeBrand(item.brand);
+                if (directBrand) {
+                        if (item.brand !== directBrand) {
+                                item.brand = directBrand;
+                        }
+                        return directBrand;
+                }
+
+                this.brand_cache = this.brand_cache || {};
+                const cachedBrand = this.brand_cache[item.item_code];
+                if (typeof cachedBrand === "string") {
+                        item.brand = cachedBrand;
+                        return cachedBrand;
+                }
+
+                if (!this._brandFetchCache) {
+                        this._brandFetchCache = {};
+                }
+
+                if (!this._brandFetchCache[item.item_code]) {
+                        this._brandFetchCache[item.item_code] = this.fetchAndCacheItemBrand(item);
+                }
+
+                return "";
+        },
+        fetchAndCacheItemBrand(item) {
+                return new Promise((resolve) => {
+                        frappe.call({
+                                method: "posawesome.posawesome.api.items.get_item_brand",
+                                args: { item_code: item.item_code },
+                                callback: (r) => {
+                                        const message = r && r.message;
+                                        resolve(this.normalizeBrand(message));
+                                },
+                                error: () => {
+                                        resolve("");
+                                },
+                        });
+                })
+                        .then((brand) => {
+                                this.brand_cache = this.brand_cache || {};
+                                this.brand_cache[item.item_code] = brand;
+
+                                if (!this.normalizeBrand(item.brand)) {
+                                        item.brand = brand;
+                                }
+
+                                if (typeof this.scheduleOffersRefresh === "function") {
+                                        this.scheduleOffersRefresh();
+                                }
+
+                                return brand;
+                        })
+                        .finally(() => {
+                                if (this._brandFetchCache) {
+                                        delete this._brandFetchCache[item.item_code];
+                                }
+                        });
+        },
 	checkOfferIsAppley(item, offer) {
 		let applied = false;
 		const item_offers = JSON.parse(item.posa_offers);
