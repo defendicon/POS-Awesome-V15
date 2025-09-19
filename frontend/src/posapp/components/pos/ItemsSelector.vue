@@ -2911,6 +2911,10 @@ export default {
                         });
 
                         if (codes.length === 1 && codes[0] === trimmed) {
+                                const sequentialSplit = this.splitSegmentBySequentialStandardLengths(trimmed);
+                                if (sequentialSplit && sequentialSplit.length > 1) {
+                                        return sequentialSplit;
+                                }
                                 const knownSplit = this.splitSegmentByKnownCodes(trimmed);
                                 if (knownSplit && knownSplit.length > 1) {
                                         return knownSplit;
@@ -2919,13 +2923,13 @@ export default {
                                 if (hintedSplit && hintedSplit.length > 1) {
                                         return hintedSplit;
                                 }
-                                const progressiveResult = applyProgressiveSplit();
-                                if (progressiveResult !== null) {
-                                        return progressiveResult;
-                                }
                         }
 
                         if (!codes.length) {
+                                const sequentialSplit = this.splitSegmentBySequentialStandardLengths(trimmed);
+                                if (sequentialSplit && sequentialSplit.length) {
+                                        return sequentialSplit;
+                                }
                                 const knownSplit = this.splitSegmentByKnownCodes(trimmed);
                                 if (knownSplit && knownSplit.length) {
                                         return knownSplit;
@@ -2933,10 +2937,6 @@ export default {
                                 const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
                                 if (hintedSplit && hintedSplit.length) {
                                         return hintedSplit;
-                                }
-                                const progressiveResult = applyProgressiveSplit();
-                                if (progressiveResult !== null) {
-                                        return progressiveResult;
                                 }
                         }
 
@@ -3155,110 +3155,81 @@ export default {
                         return null;
                 },
 
-                splitSegmentByProgressiveBarcodeTypes(segment) {
-                        const response = {
-                                attempted: false,
-                                success: false,
-                                codes: [],
-                        };
-
+                splitSegmentBySequentialStandardLengths(segment, lengthSequence = [8, 12, 13]) {
                         if (typeof segment !== "string") {
-                                return response;
+                                return null;
                         }
 
                         const normalized = segment.trim();
-                        if (!normalized) {
-                                return response;
+                        if (!normalized || !/^\d+$/.test(normalized)) {
+                                return null;
                         }
 
-                        if (!/^\d+$/.test(normalized)) {
-                                return response;
-                        }
-
-                        if (normalized.length <= 13) {
-                                return response;
-                        }
-
-                        const allowedLengths = [8, 12, 13];
-                        const maxLength = normalized.length;
-                        const dp = new Array(maxLength + 1).fill(false);
-                        dp[0] = true;
-
-                        for (let index = 1; index <= maxLength; index += 1) {
-                                for (const length of allowedLengths) {
-                                        if (index >= length && dp[index - length]) {
-                                                dp[index] = true;
-                                                break;
-                                        }
-                                }
-                        }
-
-                        if (!dp[maxLength]) {
-                                return response;
-                        }
-
-                        response.attempted = true;
+                        const lengths = Array.isArray(lengthSequence) && lengthSequence.length
+                                ? lengthSequence
+                                : [8, 12, 13];
 
                         const knownCodes = this.getKnownScannableCodes();
+                        if (!knownCodes.size) {
+                                return null;
+                        }
+
                         const normalizedKnownCodes = new Set();
                         knownCodes.forEach((code) => {
                                 if (code === null || code === undefined) {
                                         return;
                                 }
-                                const value = typeof code === "string" ? code : String(code);
-                                const trimmed = value.trim();
+                                const strValue = typeof code === "string" ? code : String(code);
+                                const trimmed = strValue.trim();
                                 if (!trimmed) {
                                         return;
                                 }
-                                normalizedKnownCodes.add(this.normalizeScanCode(trimmed));
+                                const normalizedCode = this.normalizeScanCode(trimmed);
+                                if (normalizedCode) {
+                                        normalizedKnownCodes.add(normalizedCode);
+                                }
                         });
 
+                        if (!normalizedKnownCodes.size) {
+                                return null;
+                        }
+
+                        const results = [];
                         let index = 0;
+
                         while (index < normalized.length) {
                                 let matched = false;
-                                for (const length of allowedLengths) {
-                                        const end = index + length;
-                                        if (end > normalized.length) {
+
+                                for (const length of lengths) {
+                                        if (!Number.isFinite(length) || length <= 0) {
                                                 continue;
                                         }
 
-                                        const chunk = normalized.slice(index, end);
-                                        if (!chunk) {
+                                        const nextIndex = index + length;
+                                        if (nextIndex > normalized.length) {
                                                 continue;
                                         }
 
+                                        const chunk = normalized.slice(index, nextIndex);
                                         const normalizedChunk = this.normalizeScanCode(chunk);
-                                        const knownMatch = normalizedKnownCodes.has(normalizedChunk);
-                                        const gtinCheck = this.validateGtinCode(chunk);
+                                        if (!normalizedChunk) {
+                                                continue;
+                                        }
 
-                                        if (knownMatch || gtinCheck === true) {
-                                                response.codes.push(chunk);
-                                                index = end;
+                                        if (normalizedKnownCodes.has(normalizedChunk)) {
+                                                results.push(chunk);
+                                                index = nextIndex;
                                                 matched = true;
                                                 break;
                                         }
                                 }
 
                                 if (!matched) {
-                                        response.codes = [];
-                                        return response;
+                                        return null;
                                 }
                         }
 
-                        const meaningfulSplit = response.codes.length > 1;
-                        response.success = meaningfulSplit && index === normalized.length;
-
-                        if (!response.success) {
-                                response.codes = [];
-                        }
-
-                        return response;
-                },
-
-                getCompositeBarcodeLengthFailureDetails() {
-                        return this.__(
-                                "Tried matching the combined barcode using EAN-8, UPC-A, and EAN-13 lengths.",
-                        );
+                        return results.length ? results : null;
                 },
 
                 splitSegmentByHintedLengths(segment) {
@@ -3273,7 +3244,7 @@ export default {
 
                         const hintedLengths = this.collectScanLengthHints();
                         const hintLengthSet = new Set();
-                        if (hintedLengths && hintedLengths.size) {
+                        if (Array.isArray(hintedLengths) && hintedLengths.length) {
                                 hintedLengths.forEach((length) => {
                                         if (typeof length === "number") {
                                                 hintLengthSet.add(length);
