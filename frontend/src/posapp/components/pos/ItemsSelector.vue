@@ -220,32 +220,34 @@
                                                        <DynamicScroller
                                                                v-else
                                                                ref="itemsContainer"
-                                                               class="items-card-grid"
+                                                               class="items-card-scroller"
                                                                :class="{ 'item-container': isOverflowing }"
-                                                               :items="filtered_items"
-                                                               key-field="item_code"
+                                                               :style="cardScrollerStyle"
+                                                               :items="cardRows"
+                                                               key-field="rowKey"
                                                                :min-item-size="cardItemMinSize"
                                                        >
-                                                               <template #default="{ item, index, active }">
+                                                               <template #default="{ item: row, index, active }">
                                                                        <DynamicScrollerItem
-                                                                               :key="item.item_code"
-                                                                               :item="item"
+                                                                               :key="row.rowKey"
+                                                                               :item="row"
                                                                                :active="active"
                                                                                :data-index="index"
-                                                                               :size-dependencies="[
-                                                                                       item.actual_qty,
-                                                                                       item.rate,
-                                                                                       selected_currency,
-                                                                                       hide_qty_decimals,
-                                                                               ]"
+                                                                               :size-dependencies="row.sizeDependencies"
                                                                        >
                                                                                <div
-                                                                                       class="card-item-card"
-                                                                                       @click="select_item($event, item)"
-                                                                                       :draggable="true"
-                                                                                       @dragstart="onDragStart($event, item)"
-                                                                                       @dragend="onDragEnd"
+                                                                                       class="items-card-row"
+                                                                                       :style="getCardRowStyle(index)"
                                                                                >
+                                                                                       <div
+                                                                                               v-for="item in row.items"
+                                                                                               :key="item.item_code"
+                                                                                               class="card-item-card"
+                                                                                               @click="select_item($event, item)"
+                                                                                               :draggable="true"
+                                                                                               @dragstart="onDragStart($event, item)"
+                                                                                               @dragend="onDragEnd"
+                                                                                       >
                                                                                        <div class="card-item-image-container">
                                                                                                <v-img
                                                                                                        :src="item.image || placeholderImage"
@@ -336,10 +338,11 @@
                                                                                                </div>
                                                                                        </div>
                                                                                </div>
+                                                                               </div>
                                                                        </DynamicScrollerItem>
                                                                </template>
                                                        </DynamicScroller>
-                                                </div>
+                                               </div>
                                                 <div v-else class="items-table-container">
 							<v-data-table-virtual
 								:headers="headers"
@@ -538,7 +541,8 @@ export default {
                 // Limit the displayed items to avoid overly large lists
                 itemsPerPage: 50,
                 cardItemMinSize: 180,
-		offersCount: 0,
+                cardSizeMeasureHandle: null,
+                offersCount: 0,
 		appliedOffersCount: 0,
 		couponsCount: 0,
 		appliedCouponsCount: 0,
@@ -768,6 +772,8 @@ export default {
                                 if (this.items_view === "card") {
                                         this.attachCardScrollListener();
                                         this.checkItemContainerOverflow();
+                                        this.refreshCardScroller();
+                                        this.scheduleCardMeasurement();
                                 }
                         });
                 },
@@ -785,22 +791,38 @@ export default {
 		}, 300),
 
 		// Refresh item prices whenever the user changes currency
-		selected_currency() {
-			this.applyCurrencyConversionToItems();
-		},
+                selected_currency() {
+                        this.applyCurrencyConversionToItems();
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
+                },
 
-		// Also react when exchange rate is adjusted manually
-		exchange_rate() {
-			this.applyCurrencyConversionToItems();
-		},
-		windowWidth() {
-			// Keep the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-		},
-		windowHeight() {
-			// Maintain the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-		},
+                // Also react when exchange rate is adjusted manually
+                exchange_rate() {
+                        this.applyCurrencyConversionToItems();
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
+                },
+                windowWidth() {
+                        // Keep the configured items per page on resize
+                        this.itemsPerPage = this.items_per_page;
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
+                },
+                windowHeight() {
+                        // Maintain the configured items per page on resize
+                        this.itemsPerPage = this.items_per_page;
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
+                },
 		items_loaded(val) {
 			if (val) {
 				this.eventBus.emit("items_loaded");
@@ -812,13 +834,27 @@ export default {
                                 if (this.items_view === "card") {
                                         this.attachCardScrollListener();
                                         this.checkItemContainerOverflow();
+                                        this.refreshCardScroller();
+                                        this.scheduleCardMeasurement();
                                 } else {
                                         this.detachCardScrollListener();
                                         this.isOverflowing = false;
                                 }
                         });
                 },
-	},
+                cardLayoutColumns() {
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
+                },
+                hide_qty_decimals() {
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
+                },
+        },
 
 	methods: {
 		// Performance optimization: Memoized search function
@@ -988,6 +1024,62 @@ export default {
                                 return null;
                         }
                         return ref.$el || ref;
+                },
+
+                getCardRowStyle(index) {
+                        const { columns, gap } = this.cardLayoutConfig;
+                        const style = {
+                                display: "grid",
+                                gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                                gap: `${gap}px`,
+                        };
+
+                        if (index === this.cardRows.length - 1) {
+                                style.marginBottom = "0px";
+                        } else {
+                                style.marginBottom = `${gap}px`;
+                        }
+
+                        return style;
+                },
+
+                refreshCardScroller() {
+                        this.$nextTick(() => {
+                                const scroller = this.$refs.itemsContainer;
+                                if (scroller && typeof scroller.forceUpdate === "function") {
+                                        scroller.forceUpdate(false);
+                                }
+                        });
+                },
+
+                scheduleCardMeasurement() {
+                        if (this.cardSizeMeasureHandle) {
+                                cancelAnimationFrame(this.cardSizeMeasureHandle);
+                                this.cardSizeMeasureHandle = null;
+                        }
+
+                        this.cardSizeMeasureHandle = requestAnimationFrame(() => {
+                                this.cardSizeMeasureHandle = null;
+                                this.measureCardRowSize();
+                        });
+                },
+
+                measureCardRowSize() {
+                        if (this.items_view !== "card" || this.loading) {
+                                return;
+                        }
+
+                        this.$nextTick(() => {
+                                const row = this.$el.querySelector(".items-card-row");
+                                if (!row) {
+                                        return;
+                                }
+
+                                const height = row.offsetHeight;
+                                if (height && Math.abs(height - this.cardItemMinSize) > 1) {
+                                        this.cardItemMinSize = height;
+                                }
+                        });
                 },
 
                 attachCardScrollListener() {
@@ -3310,10 +3402,58 @@ export default {
 
                         return limitedItems;
                 },
-		debounce_search: {
-			get() {
-				return this.first_search;
-			},
+                cardLayoutConfig() {
+                        if (this.windowWidth <= 768) {
+                                return { columns: 1, gap: 10, padding: 10 };
+                        }
+                        if (this.windowWidth <= 1200) {
+                                return { columns: 2, gap: 12, padding: 12 };
+                        }
+                        return { columns: 3, gap: 16, padding: 16 };
+                },
+                cardLayoutColumns() {
+                        return this.cardLayoutConfig.columns;
+                },
+                cardRows() {
+                        const items = Array.isArray(this.filtered_items) ? this.filtered_items : [];
+                        const columns = Math.max(this.cardLayoutColumns || 1, 1);
+                        const rows = [];
+
+                        for (let index = 0; index < items.length; index += columns) {
+                                const rowIndex = Math.floor(index / columns);
+                                const slice = items.slice(index, index + columns);
+                                const dependencies = slice.flatMap((card) => [
+                                        card.item_code,
+                                        card.item_name,
+                                        card.actual_qty,
+                                        card.rate,
+                                        card.image,
+                                        card.stock_uom,
+                                        this.selected_currency,
+                                        this.hide_qty_decimals,
+                                ]);
+
+                                rows.push({
+                                        rowKey: `row-${rowIndex}`,
+                                        items: slice,
+                                        sizeDependencies: dependencies,
+                                });
+                        }
+
+                        return rows;
+                },
+                cardScrollerStyle() {
+                        const padding = this.cardLayoutConfig.padding;
+                        return {
+                                height: "calc(100% - 80px)",
+                                overflowY: "auto",
+                                padding: `${padding}px`,
+                        };
+                },
+                debounce_search: {
+                        get() {
+                                return this.first_search;
+                        },
 			set: _.debounce(function (newValue) {
 				this.first_search = (newValue || "").trim();
 			}, 200),
@@ -3537,10 +3677,14 @@ export default {
                 this.$nextTick(() => {
                         this.attachCardScrollListener();
                         this.checkItemContainerOverflow();
+                        if (this.items_view === "card") {
+                                this.refreshCardScroller();
+                                this.scheduleCardMeasurement();
+                        }
                 });
-	},
+        },
 
-	beforeUnmount() {
+        beforeUnmount() {
 		// Clear interval when component is destroyed
 		if (this.refresh_interval) {
 			clearInterval(this.refresh_interval);
@@ -3591,6 +3735,10 @@ export default {
 		this.eventBus.off("focus_item_search");
                 window.removeEventListener("resize", this.checkItemContainerOverflow);
                 this.detachCardScrollListener();
+                if (this.cardSizeMeasureHandle) {
+                        cancelAnimationFrame(this.cardSizeMeasureHandle);
+                        this.cardSizeMeasureHandle = null;
+                }
         },
 };
 </script>
@@ -3783,31 +3931,47 @@ export default {
 
 /* Enhanced Card View Grid Layout - 3 items per row */
 .items-card-grid {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 16px;
-	padding: 16px;
-	height: calc(100% - 80px);
-	overflow-y: auto;
-	scrollbar-width: thin;
-	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-	/* Performance optimizations */
-	contain: layout style;
-	will-change: scroll-position;
-	transform: translate3d(0, 0, 0);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        padding: 16px;
+        height: calc(100% - 80px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        contain: layout style;
+        will-change: scroll-position;
+        transform: translate3d(0, 0, 0);
 }
 
-.items-card-grid::-webkit-scrollbar {
-	width: 8px;
+.items-card-scroller {
+        height: calc(100% - 80px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        contain: layout style;
+        will-change: scroll-position;
+        transform: translate3d(0, 0, 0);
 }
 
-.items-card-grid::-webkit-scrollbar-track {
-	background: transparent;
+.items-card-row {
+        width: 100%;
 }
 
-.items-card-grid::-webkit-scrollbar-thumb {
-	background-color: rgba(0, 0, 0, 0.2);
-	border-radius: 4px;
+.items-card-grid::-webkit-scrollbar,
+.items-card-scroller::-webkit-scrollbar {
+        width: 8px;
+}
+
+.items-card-grid::-webkit-scrollbar-track,
+.items-card-scroller::-webkit-scrollbar-track {
+        background: transparent;
+}
+
+.items-card-grid::-webkit-scrollbar-thumb,
+.items-card-scroller::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
 }
 
 .card-item-card {
@@ -4203,11 +4367,11 @@ export default {
 
 /* Responsive breakpoints */
 @media (max-width: 1200px) {
-	.items-card-grid {
-		grid-template-columns: repeat(2, 1fr);
-		gap: 12px;
-		padding: 12px;
-	}
+        .items-card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                padding: 12px;
+        }
 }
 
 @media (max-width: 768px) {
@@ -4225,11 +4389,11 @@ export default {
 		font-size: 0.875rem !important;
 	}
 
-	.items-card-grid {
-		grid-template-columns: 1fr;
-		gap: 10px;
-		padding: 10px;
-	}
+        .items-card-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 10px;
+        }
 
 	.card-item-image-container {
 		height: 100px;
