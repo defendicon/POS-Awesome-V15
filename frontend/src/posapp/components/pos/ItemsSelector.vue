@@ -3070,9 +3070,16 @@ export default {
 
                         await this.$nextTick();
 
-                        const filteredItems = this.filtered_items.slice();
-
+                        let filteredItems = this.filtered_items.slice();
                         if (!filteredItems.length) {
+                                filteredItems = await this.fetchItemsForScan({
+                                        scannedCode,
+                                        searchCode: search,
+                                        rawSearchInput,
+                                });
+                        }
+
+                        if (!Array.isArray(filteredItems) || !filteredItems.length) {
                                 this.notifyHardwareScanFailure(scannedCode, {
                                         message: `${this.__("Item not found")}: ${scannedCode}`,
                                         details: this.__("Please verify the barcode or search manually."),
@@ -3086,6 +3093,230 @@ export default {
                                 filteredItems,
                                 fromScanner: isScanner,
                         });
+                },
+                async fetchItemsForScan({ scannedCode, searchCode, rawSearchInput }) {
+                        const candidates = new Set();
+                        if (typeof searchCode === "string" && searchCode.trim()) {
+                                candidates.add(searchCode.trim());
+                        }
+                        if (typeof scannedCode === "string" && scannedCode.trim()) {
+                                candidates.add(scannedCode.trim());
+                        }
+                        if (typeof rawSearchInput === "string" && rawSearchInput.trim()) {
+                                candidates.add(rawSearchInput.trim());
+                        }
+
+                        if (!candidates.size) {
+                                return [];
+                        }
+
+                        const candidateList = Array.from(candidates);
+
+                        const directMatches = [];
+                        candidateList.some((code) => {
+                                const matches = this.items.filter((item) => this.itemMatchesScannedCode(item, code));
+                                if (matches.length) {
+                                        directMatches.push(...matches);
+                                        return true;
+                                }
+                                return false;
+                        });
+
+                        if (directMatches.length) {
+                                return directMatches;
+                        }
+
+                        if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                for (let index = 0; index < candidateList.length; index += 1) {
+                                        const code = candidateList[index];
+                                        try {
+                                                const storedResults = await searchStoredItems({
+                                                        search: code,
+                                                        itemGroup:
+                                                                this.item_group !== "ALL"
+                                                                        ? this.item_group.toLowerCase()
+                                                                        : "",
+                                                        limit: Math.max(this.itemsPerPage, 50),
+                                                        offset: 0,
+                                                });
+
+                                                const matchingStored = Array.isArray(storedResults)
+                                                        ? storedResults.filter((item) =>
+                                                                  this.itemMatchesScannedCode(item, code),
+                                                          )
+                                                        : [];
+
+                                                if (matchingStored.length) {
+                                                        return this.mergeScannedItems(matchingStored);
+                                                }
+                                        } catch (error) {
+                                                console.warn("Failed to search stored items for scan", error);
+                                        }
+                                }
+                        }
+
+                        for (let index = 0; index < candidateList.length; index += 1) {
+                                const code = candidateList[index];
+                                const remoteItem = await this.fetchRemoteItemForScan(code);
+                                if (remoteItem) {
+                                        return [remoteItem];
+                                }
+                        }
+
+                        return [];
+                },
+                itemMatchesScannedCode(item, code) {
+                        if (!item || !code) {
+                                return false;
+                        }
+
+                        const normalized = String(code).trim();
+                        if (!normalized) {
+                                return false;
+                        }
+
+                        const lower = normalized.toLowerCase();
+                        const compare = (value) => {
+                                if (value === null || value === undefined) {
+                                        return false;
+                                }
+                                const stringValue = String(value).trim();
+                                if (!stringValue) {
+                                        return false;
+                                }
+                                const lowerValue = stringValue.toLowerCase();
+                                return stringValue === normalized || lowerValue === lower;
+                        };
+
+                        if (compare(item.item_code) || compare(item.barcode)) {
+                                return true;
+                        }
+
+                        if (Array.isArray(item.item_barcode)) {
+                                if (item.item_barcode.some((entry) => compare(entry?.barcode))) {
+                                        return true;
+                                }
+                        }
+
+                        if (Array.isArray(item.barcodes)) {
+                                if (item.barcodes.some((barcode) => compare(barcode))) {
+                                        return true;
+                                }
+                        }
+
+                        if (Array.isArray(item.serial_no_data)) {
+                                if (
+                                        item.serial_no_data.some((serial) =>
+                                                compare(serial?.serial_no ?? serial),
+                                        )
+                                ) {
+                                        return true;
+                                }
+                        }
+
+                        if (Array.isArray(item.batch_no_data)) {
+                                if (
+                                        item.batch_no_data.some((batch) =>
+                                                compare(batch?.batch_no ?? batch),
+                                        )
+                                ) {
+                                        return true;
+                                }
+                        }
+
+                        return false;
+                },
+                mergeScannedItems(items) {
+                        if (!Array.isArray(items) || !items.length) {
+                                return [];
+                        }
+
+                        const merged = [];
+
+                        items.forEach((incoming) => {
+                                if (!incoming || !incoming.item_code) {
+                                        return;
+                                }
+
+                                const itemCode = incoming.item_code;
+                                const incomingUom = incoming.uom || "";
+
+                                const existingIndex = this.items.findIndex((existing) => {
+                                        if (!existing || existing.item_code !== itemCode) {
+                                                return false;
+                                        }
+                                        if (!incomingUom) {
+                                                return true;
+                                        }
+                                        return (existing.uom || "") === incomingUom;
+                                });
+
+                                if (existingIndex >= 0) {
+                                        const updated = { ...this.items[existingIndex], ...incoming };
+                                        this.items.splice(existingIndex, 1, updated);
+                                        this.invalidateItemSearchMeta(updated);
+                                        merged.push(updated);
+                                } else {
+                                        const cloned = { ...incoming };
+                                        this.items.unshift(cloned);
+                                        this.invalidateItemSearchMeta(cloned);
+                                        merged.push(cloned);
+                                }
+                        });
+
+                        if (merged.length) {
+                                this.eventBus.emit("set_all_items", this.items);
+                        }
+
+                        return merged;
+                },
+                async fetchRemoteItemForScan(code) {
+                        const normalized = typeof code === "string" ? code.trim() : "";
+                        if (!normalized) {
+                                return null;
+                        }
+
+                        try {
+                                const response = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.get_items_from_barcode",
+                                        args: {
+                                                selling_price_list: this.active_price_list,
+                                                currency: this.pos_profile?.currency,
+                                                barcode: normalized,
+                                        },
+                                });
+
+                                const item = response?.message;
+                                if (!item) {
+                                        return null;
+                                }
+
+                                const [merged] = this.mergeScannedItems([item]);
+
+                                if (this.searchCache) {
+                                        this.searchCache.clear();
+                                }
+
+                                try {
+                                        await saveItems(this.items);
+                                        await savePriceListItems(this.customer_price_list, this.items);
+                                } catch (error) {
+                                        console.warn("Failed to persist scanned item cache", error);
+                                }
+
+                                if (merged) {
+                                        try {
+                                                await this.update_items_details([merged]);
+                                        } catch (error) {
+                                                console.warn("Failed to hydrate scanned item details", error);
+                                        }
+                                }
+
+                                return merged || item;
+                        } catch (error) {
+                                console.error("Failed to fetch item for scanned code", error);
+                                return null;
+                        }
                 },
                 notifyHardwareScanFailure(scannedCode, { message, details } = {}) {
                         const code = scannedCode || this.currentHardwareScan?.code || this.pendingScanCode;
