@@ -585,6 +585,8 @@ export default {
                 scanAudioContext: null,
                 pendingScanCode: "",
                 awaitingScanResult: false,
+                lastScanCompletedAt: 0,
+                scanCooldownMs: 600,
                 lastItemDetailsSignature: null,
         }),
 
@@ -2716,11 +2718,23 @@ export default {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
+                onBarcodeScanned(scannedCode) {
+                        if (this.awaitingScanResult) {
+                                this.playScanTone("error");
+                                return;
+                        }
+                        const now = Date.now();
+                        if (
+                                this.scanCooldownMs > 0 &&
+                                this.lastScanCompletedAt &&
+                                now - this.lastScanCompletedAt < this.scanCooldownMs
+                        ) {
+                                return;
+                        }
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
 			console.log("Barcode scanned:", scannedCode);
 			this.pendingScanCode = scannedCode;
 
@@ -2844,119 +2858,129 @@ export default {
 		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
 			console.log("Adding scanned item to invoice:", item, scannedCode);
 
-			// Clone the item to avoid mutating list data
-			const newItem = { ...item };
+                        try {
+                                // Clone the item to avoid mutating list data
+                                const newItem = { ...item };
 
-			// If the scanned barcode has a specific UOM, apply it
-			if (Array.isArray(newItem.item_barcode)) {
-				const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-				if (barcodeMatch && barcodeMatch.posa_uom) {
-					newItem.uom = barcodeMatch.posa_uom;
+                                // If the scanned barcode has a specific UOM, apply it
+                                if (Array.isArray(newItem.item_barcode)) {
+                                        const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
+                                        if (barcodeMatch && barcodeMatch.posa_uom) {
+                                                newItem.uom = barcodeMatch.posa_uom;
 
-					// Try fetching the rate for this UOM from the active price list
-					try {
-						const res = await frappe.call({
-							method: "posawesome.posawesome.api.items.get_price_for_uom",
-							args: {
-								item_code: newItem.item_code,
-								price_list: this.active_price_list,
-								uom: barcodeMatch.posa_uom,
-							},
-						});
-						if (res.message) {
-							const price = parseFloat(res.message);
-							newItem.rate = price;
-							newItem.price_list_rate = price;
-							newItem.base_rate = price;
-							newItem.base_price_list_rate = price;
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
-						}
-					} catch (e) {
-						console.error("Failed to fetch UOM price", e);
-					}
-				}
-			}
+                                                // Try fetching the rate for this UOM from the active price list
+                                                try {
+                                                        const res = await frappe.call({
+                                                                method: "posawesome.posawesome.api.items.get_price_for_uom",
+                                                                args: {
+                                                                        item_code: newItem.item_code,
+                                                                        price_list: this.active_price_list,
+                                                                        uom: barcodeMatch.posa_uom,
+                                                                },
+                                                        });
+                                                        if (res.message) {
+                                                                const price = parseFloat(res.message);
+                                                                newItem.rate = price;
+                                                                newItem.price_list_rate = price;
+                                                                newItem.base_rate = price;
+                                                                newItem.base_price_list_rate = price;
+                                                                newItem._manual_rate_set = true;
+                                                                newItem.skip_force_update = true;
+                                                        }
+                                                } catch (e) {
+                                                        console.error("Failed to fetch UOM price", e);
+                                                }
+                                        }
+                                }
 
-			// Apply quantity from scale barcode if available
-			if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
-				newItem.qty = qtyFromBarcode;
-				newItem._barcode_qty = true;
-			}
+                                // Apply quantity from scale barcode if available
+                                if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
+                                        newItem.qty = qtyFromBarcode;
+                                        newItem._barcode_qty = true;
+                                }
 
-			const requestedQtyRaw =
-				qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
-			const requestedQty = Math.abs(requestedQtyRaw || 1);
-			const availableQty =
-				typeof newItem.available_qty === "number"
-					? newItem.available_qty
-					: typeof newItem.actual_qty === "number"
-						? newItem.actual_qty
-						: null;
+                                const requestedQtyRaw =
+                                        qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
+                                const requestedQty = Math.abs(requestedQtyRaw || 1);
+                                const availableQty =
+                                        typeof newItem.available_qty === "number"
+                                                ? newItem.available_qty
+                                                : typeof newItem.actual_qty === "number"
+                                                        ? newItem.actual_qty
+                                                        : null;
 
-			if (availableQty !== null && availableQty < requestedQty) {
-				const formattedAvailable = this.format_number
-					? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: availableQty;
-				const formattedRequested = this.format_number
-					? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: requestedQty;
-				const negativeStockEnabled = this.isNegativeStockEnabled();
-				const shouldBlock =
-					!negativeStockEnabled &&
-					(this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
+                                if (availableQty !== null && availableQty < requestedQty) {
+                                        const formattedAvailable = this.format_number
+                                                ? this.format_number(
+                                                          availableQty,
+                                                          this.hide_qty_decimals ? 0 : this.float_precision,
+                                                  )
+                                                : availableQty;
+                                        const formattedRequested = this.format_number
+                                                ? this.format_number(
+                                                          requestedQty,
+                                                          this.hide_qty_decimals ? 0 : this.float_precision,
+                                                  )
+                                                : requestedQty;
+                                        const negativeStockEnabled = this.isNegativeStockEnabled();
+                                        const shouldBlock =
+                                                !negativeStockEnabled &&
+                                                (this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
 
-				if (shouldBlock) {
-					this.showScanError({
-						message: this.__("Quantity not available for {0}", [
-							newItem.item_name || scannedCode,
-						]),
-						code: scannedCode,
-						details: this.__("Available: {0}. Requested: {1}.", [
-							formattedAvailable,
-							formattedRequested,
-						]),
-					});
-					return;
-				}
+                                        if (shouldBlock) {
+                                                this.showScanError({
+                                                        message: this.__("Quantity not available for {0}", [
+                                                                newItem.item_name || scannedCode,
+                                                        ]),
+                                                        code: scannedCode,
+                                                        details: this.__("Available: {0}. Requested: {1}.", [
+                                                                formattedAvailable,
+                                                                formattedRequested,
+                                                        ]),
+                                                });
+                                                return;
+                                        }
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: this.__(
-							"Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
-							[formattedAvailable, formattedRequested],
-						),
-						color: "warning",
-					});
-				}
-			}
+                                        if (negativeStockEnabled) {
+                                                this.eventBus.emit("show_message", {
+                                                        title: this.__(
+                                                                "Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
+                                                                [formattedAvailable, formattedRequested],
+                                                        ),
+                                                        color: "warning",
+                                                });
+                                        }
+                                }
 
-			this.awaitingScanResult = true;
+                                this.awaitingScanResult = true;
 
-			try {
-				// Use existing add_item method with enhanced feedback
-				await this.add_item(newItem);
-				this.playScanTone("success");
-				this.scannerLocked = false;
-				this.search_from_scanner = false;
-				this.pendingScanCode = "";
+                                try {
+                                        // Use existing add_item method with enhanced feedback
+                                        await this.add_item(newItem);
+                                        this.playScanTone("success");
+                                        this.scannerLocked = false;
+                                        this.search_from_scanner = false;
+                                        this.pendingScanCode = "";
 
-				// Show success message
-				frappe.show_alert(
-					{
-						message: `Added: ${item.item_name}`,
-						indicator: "green",
-					},
-					3,
-				);
+                                        // Show success message
+                                        frappe.show_alert(
+                                                {
+                                                        message: `Added: ${item.item_name}`,
+                                                        indicator: "green",
+                                                },
+                                                3,
+                                        );
 
-				// Clear search after successful addition and refocus input
-				this.clearSearch();
-				this.$refs.debounce_search && this.$refs.debounce_search.focus();
-			} finally {
-				this.awaitingScanResult = false;
-			}
-		},
+                                        // Clear search after successful addition and refocus input
+                                        this.clearSearch();
+                                        this.$refs.debounce_search && this.$refs.debounce_search.focus();
+                                } finally {
+                                        this.awaitingScanResult = false;
+                                }
+                        } finally {
+                                this.lastScanCompletedAt = Date.now();
+                        }
+                },
 		isNegativeStockEnabled() {
 			const setting = this.stock_settings?.allow_negative_stock;
 			if (setting === undefined || setting === null) {
