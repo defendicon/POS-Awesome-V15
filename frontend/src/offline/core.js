@@ -1,38 +1,26 @@
 import Dexie from "dexie/dist/dexie.mjs";
 import { withWriteLock } from "./db-utils.js";
+import { prepareItemForStorage } from "./item-utils.js";
 
 // --- Dexie initialization ---------------------------------------------------
 export const db = new Dexie("posawesome_offline");
-db.version(7)
-	.stores({
-		keyval: "&key",
-		queue: "&key",
-		cache: "&key",
-		items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
-		item_prices: "&[price_list+item_code],price_list,item_code",
-		customers: "&name,customer_name,mobile_no,email_id,tax_id",
-	})
-	.upgrade((tx) =>
-		tx
-			.table("items")
-			.toCollection()
-			.modify((item) => {
-				item.barcodes = Array.isArray(item.item_barcode)
-					? item.item_barcode.map((b) => b.barcode).filter(Boolean)
-					: item.item_barcode
-						? [String(item.item_barcode)]
-						: [];
-				item.name_keywords = item.item_name
-					? item.item_name.toLowerCase().split(/\s+/).filter(Boolean)
-					: [];
-				item.serials = Array.isArray(item.serial_no_data)
-					? item.serial_no_data.map((s) => s.serial_no).filter(Boolean)
-					: [];
-				item.batches = Array.isArray(item.batch_no_data)
-					? item.batch_no_data.map((b) => b.batch_no).filter(Boolean)
-					: [];
-			}),
-	);
+db.version(8)
+        .stores({
+                keyval: "&key",
+                queue: "&key",
+                cache: "&key",
+                items: "&item_code,item_name,item_group,item_code_lower,item_name_lower,item_group_lower,*barcodes,*name_keywords,*serials,*batches",
+                item_prices: "&[price_list+item_code],price_list,item_code",
+                customers: "&name,customer_name,mobile_no,email_id,tax_id",
+        })
+        .upgrade((tx) =>
+                tx
+                        .table("items")
+                        .toCollection()
+                        .modify((item) => {
+                                prepareItemForStorage(item);
+                        }),
+        );
 
 export const KEY_TABLE_MAP = {
 	offline_invoices: "queue",

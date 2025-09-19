@@ -9,6 +9,7 @@ import {
 import { getAllByCursor } from "./db-utils.js";
 import { clearPriceListCache } from "./items.js";
 import Dexie from "dexie/dist/dexie.mjs";
+import { prepareItemsForStorage } from "./item-utils.js";
 
 // Increment this number whenever the cache data structure changes
 export const CACHE_VERSION = 1;
@@ -163,7 +164,8 @@ export async function saveItems(items) {
 			console.error("Failed to serialize items", err);
 			cleanItems = [];
 		}
-		await db.table("items").bulkPut(cleanItems);
+                cleanItems = prepareItemsForStorage(cleanItems);
+                await db.table("items").bulkPut(cleanItems);
 	} catch (e) {
 		console.error("Failed to save items", e);
 	}
