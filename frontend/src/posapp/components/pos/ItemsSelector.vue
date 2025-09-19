@@ -587,6 +587,11 @@ export default {
                 scanErrorMessage: "",
                 scanErrorDetails: "",
                 scanErrorCode: "",
+                lastCompositeNormalization: {
+                        attempted: false,
+                        success: false,
+                        reason: "",
+                },
                 scannerLocked: false,
                 scanAudioContext: null,
                 pendingScanCode: "",
@@ -1943,6 +1948,25 @@ export default {
                                 const trimmedInput = rawSearchInput.trim();
                                 if (trimmedInput) {
                                         const normalizedBatch = this.normalizeHardwareScanPayload(trimmedInput);
+                                        const normalizationMeta = this.lastCompositeNormalization || {};
+
+                                        if (
+                                                normalizationMeta.attempted &&
+                                                normalizationMeta.reason === "progressive-lengths"
+                                        ) {
+                                                if (normalizationMeta.success) {
+                                                        if (this.queueManualScanBatch(normalizedBatch)) {
+                                                                return;
+                                                        }
+                                                } else {
+                                                        this.notifyHardwareScanFailure(trimmedInput, {
+                                                                message: this.__("Item not found"),
+                                                                details: this.getCompositeBarcodeLengthFailureDetails(),
+                                                        });
+                                                        return;
+                                                }
+                                        }
+
                                         const isCompositeInput =
                                                 normalizedBatch.length > 1 ||
                                                 (normalizedBatch.length === 1 &&
@@ -2672,6 +2696,7 @@ export default {
                                 trimmed.length > this.currentHardwareScan.code.length;
 
                         let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
+                        const normalizationMeta = this.lastCompositeNormalization || {};
 
                         if (shouldStripActivePrefix && normalizedCodes.length) {
                                 const activeCode = this.currentHardwareScan.code;
@@ -2681,6 +2706,16 @@ export default {
                         }
 
                         if (!normalizedCodes.length) {
+                                if (
+                                        normalizationMeta.attempted &&
+                                        !normalizationMeta.success &&
+                                        normalizationMeta.reason === "progressive-lengths"
+                                ) {
+                                        this.notifyHardwareScanFailure(trimmed, {
+                                                message: this.__("Item not found"),
+                                                details: this.getCompositeBarcodeLengthFailureDetails(),
+                                        });
+                                }
                                 return;
                         }
 
@@ -2812,6 +2847,28 @@ export default {
                 },
                 normalizeHardwareScanPayload(rawCode) {
                         const codes = [];
+                        if (!this.lastCompositeNormalization) {
+                                this.lastCompositeNormalization = {
+                                        attempted: false,
+                                        success: false,
+                                        reason: "",
+                                };
+                        } else {
+                                this.lastCompositeNormalization.attempted = false;
+                                this.lastCompositeNormalization.success = false;
+                                this.lastCompositeNormalization.reason = "";
+                        }
+
+                        const markCompositeNormalization = (attempted, success, reason = "") => {
+                                if (!this.lastCompositeNormalization) {
+                                        this.lastCompositeNormalization = { attempted, success, reason };
+                                        return;
+                                }
+                                this.lastCompositeNormalization.attempted = attempted;
+                                this.lastCompositeNormalization.success = success;
+                                this.lastCompositeNormalization.reason = reason;
+                        };
+
                         if (typeof rawCode !== "string") {
                                 return codes;
                         }
@@ -2823,6 +2880,21 @@ export default {
 
                         const segments = trimmed.split(/\s+/).filter(Boolean);
                         const queue = segments.length ? segments : [trimmed];
+
+                        const applyProgressiveSplit = () => {
+                                const progressive = this.splitSegmentByProgressiveBarcodeTypes(trimmed);
+                                if (!progressive.attempted) {
+                                        return null;
+                                }
+
+                                if (progressive.success && progressive.codes.length) {
+                                        markCompositeNormalization(true, true, "progressive-lengths");
+                                        return progressive.codes.slice();
+                                }
+
+                                markCompositeNormalization(true, false, "progressive-lengths");
+                                return [];
+                        };
 
                         queue.forEach((segment) => {
                                 const candidate = segment.trim();
@@ -2847,6 +2919,10 @@ export default {
                                 if (hintedSplit && hintedSplit.length > 1) {
                                         return hintedSplit;
                                 }
+                                const progressiveResult = applyProgressiveSplit();
+                                if (progressiveResult !== null) {
+                                        return progressiveResult;
+                                }
                         }
 
                         if (!codes.length) {
@@ -2857,6 +2933,10 @@ export default {
                                 const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
                                 if (hintedSplit && hintedSplit.length) {
                                         return hintedSplit;
+                                }
+                                const progressiveResult = applyProgressiveSplit();
+                                if (progressiveResult !== null) {
+                                        return progressiveResult;
                                 }
                         }
 
@@ -3073,6 +3153,112 @@ export default {
                         }
 
                         return null;
+                },
+
+                splitSegmentByProgressiveBarcodeTypes(segment) {
+                        const response = {
+                                attempted: false,
+                                success: false,
+                                codes: [],
+                        };
+
+                        if (typeof segment !== "string") {
+                                return response;
+                        }
+
+                        const normalized = segment.trim();
+                        if (!normalized) {
+                                return response;
+                        }
+
+                        if (!/^\d+$/.test(normalized)) {
+                                return response;
+                        }
+
+                        if (normalized.length <= 13) {
+                                return response;
+                        }
+
+                        const allowedLengths = [8, 12, 13];
+                        const maxLength = normalized.length;
+                        const dp = new Array(maxLength + 1).fill(false);
+                        dp[0] = true;
+
+                        for (let index = 1; index <= maxLength; index += 1) {
+                                for (const length of allowedLengths) {
+                                        if (index >= length && dp[index - length]) {
+                                                dp[index] = true;
+                                                break;
+                                        }
+                                }
+                        }
+
+                        if (!dp[maxLength]) {
+                                return response;
+                        }
+
+                        response.attempted = true;
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        const normalizedKnownCodes = new Set();
+                        knownCodes.forEach((code) => {
+                                if (code === null || code === undefined) {
+                                        return;
+                                }
+                                const value = typeof code === "string" ? code : String(code);
+                                const trimmed = value.trim();
+                                if (!trimmed) {
+                                        return;
+                                }
+                                normalizedKnownCodes.add(this.normalizeScanCode(trimmed));
+                        });
+
+                        let index = 0;
+                        while (index < normalized.length) {
+                                let matched = false;
+                                for (const length of allowedLengths) {
+                                        const end = index + length;
+                                        if (end > normalized.length) {
+                                                continue;
+                                        }
+
+                                        const chunk = normalized.slice(index, end);
+                                        if (!chunk) {
+                                                continue;
+                                        }
+
+                                        const normalizedChunk = this.normalizeScanCode(chunk);
+                                        const knownMatch = normalizedKnownCodes.has(normalizedChunk);
+                                        const gtinCheck = this.validateGtinCode(chunk);
+
+                                        if (knownMatch || gtinCheck === true) {
+                                                response.codes.push(chunk);
+                                                index = end;
+                                                matched = true;
+                                                break;
+                                        }
+                                }
+
+                                if (!matched) {
+                                        response.codes = [];
+                                        return response;
+                                }
+                        }
+
+                        const meaningfulSplit = response.codes.length > 1;
+                        response.success = meaningfulSplit && index === normalized.length;
+
+                        if (!response.success) {
+                                response.codes = [];
+                        }
+
+                        return response;
+                },
+
+                getCompositeBarcodeLengthFailureDetails() {
+                        return this.__(
+                                "Tried matching the combined barcode using EAN-8, UPC-A, and EAN-13 lengths.",
+                        );
                 },
 
                 splitSegmentByHintedLengths(segment) {
