@@ -1961,7 +1961,7 @@ export default {
 
                         const fromScanner = context.fromScanner ?? this.search_from_scanner;
                         const scannedCodeForDisplay =
-                                context.scannedCode ?? this.pendingScanCode || rawSearchInput || search;
+                                (context.scannedCode ?? this.pendingScanCode) || rawSearchInput || search;
 
                         let match = false;
                         if (Array.isArray(new_item.item_barcode)) {
