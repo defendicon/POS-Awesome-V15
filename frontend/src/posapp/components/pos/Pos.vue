@@ -161,15 +161,33 @@ export default {
                                 }
                         });
 			this.eventBus.on("show_offers", (data) => {
-				this.showOffers = data === "true";
-				this.payment = false;
-				this.coupons = false;
-			});
-			this.eventBus.on("show_coupons", (data) => {
-				this.coupons = data === "true";
-				this.showOffers = false;
-				this.payment = false;
-			});
+                                const isTrue = data === true || data === "true";
+                                const isFalse = data === false || data === "false";
+
+                                if (isTrue) {
+                                        this.showOffers = true;
+                                        this.payment = false;
+                                        this.coupons = false;
+                                } else if (isFalse) {
+                                        this.showOffers = false;
+                                        this.payment = false;
+                                        this.coupons = false;
+                                }
+                        });
+                        this.eventBus.on("show_coupons", (data) => {
+                                const isTrue = data === true || data === "true";
+                                const isFalse = data === false || data === "false";
+
+                                if (isTrue) {
+                                        this.coupons = true;
+                                        this.showOffers = false;
+                                        this.payment = false;
+                                } else if (isFalse) {
+                                        this.coupons = false;
+                                        this.showOffers = false;
+                                        this.payment = false;
+                                }
+                        });
 			this.eventBus.on("open_closing_dialog", () => {
 				this.get_closing_data();
 			});
