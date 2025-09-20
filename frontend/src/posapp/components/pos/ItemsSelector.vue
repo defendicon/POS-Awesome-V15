@@ -3007,34 +3007,52 @@ export default {
 
                         return [segment];
                 },
-                collectScanLengthHints() {
-                        const lengths = new Set();
+               collectScanLengthHints() {
+                       const MIN_LENGTH = 4;
+                       const MAX_LENGTH = 64;
+                       const lengths = new Set();
 
-                        if (this.currentHardwareScan?.code) {
-                                lengths.add(this.currentHardwareScan.code.length);
-                        }
-                        if (this.lastProcessedScanLength) {
-                                lengths.add(this.lastProcessedScanLength);
-                        }
-                        if (this.pendingScanCode) {
-                                lengths.add(this.pendingScanCode.length);
-                        }
-                        if (Array.isArray(this.hardwareScanQueue)) {
-                                this.hardwareScanQueue.forEach((entry) => {
-                                        if (entry?.code) {
-                                                lengths.add(entry.code.length);
-                                        }
-                                });
-                        }
+                       const addLength = (value) => {
+                               if (value === null || value === undefined) {
+                                       return;
+                               }
 
-                        if (!lengths.size) {
-                                this.getKnownBarcodeLengths(40).forEach((len) => lengths.add(len));
-                        }
+                               const numeric = Number(value);
+                               if (!Number.isFinite(numeric)) {
+                                       return;
+                               }
 
-                        const ordered = Array.from(lengths).filter((len) => Number.isFinite(len) && len > 0);
-                        ordered.sort((a, b) => b - a);
-                        return ordered;
-                },
+                               const rounded = Math.floor(numeric);
+                               if (rounded < MIN_LENGTH || rounded > MAX_LENGTH) {
+                                       return;
+                               }
+
+                               lengths.add(rounded);
+                       };
+
+                       if (this.currentHardwareScan?.code) {
+                               addLength(this.currentHardwareScan.code.length);
+                       }
+                       if (this.lastProcessedScanLength) {
+                               addLength(this.lastProcessedScanLength);
+                       }
+                       if (this.pendingScanCode) {
+                               addLength(this.pendingScanCode.length);
+                       }
+                       if (Array.isArray(this.hardwareScanQueue)) {
+                               this.hardwareScanQueue.forEach((entry) => {
+                                       if (entry?.code) {
+                                               addLength(entry.code.length);
+                                       }
+                               });
+                       }
+
+                       this.getKnownBarcodeLengths(40).forEach((length) => addLength(length));
+
+                       const ordered = Array.from(lengths);
+                       ordered.sort((a, b) => b - a);
+                       return ordered;
+               },
                 getKnownBarcodeLengths(limit = 50) {
                         if (!Array.isArray(this.items) || !this.items.length) {
                                 return [];
