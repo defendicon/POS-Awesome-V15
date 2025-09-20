@@ -3462,6 +3462,8 @@ export default {
                         });
 
                         const numericPattern = /^\d+$/;
+                        const GTIN_STANDARD_LENGTHS = new Set([8, 12, 13, 14]);
+
                         const evaluateChunk = (chunk, length) => {
                                 const trimmed = chunk.trim();
                                 if (!trimmed) {
@@ -3473,6 +3475,8 @@ export default {
                                 let knownMatches = 0;
                                 let validMatches = 0;
                                 let invalidMatches = 0;
+                                let hintMatches = 0;
+                                let fallbackMatches = 0;
 
                                 if (knownNormalizedCodes.has(normalizedChunk)) {
                                         score += 15;
@@ -3481,8 +3485,10 @@ export default {
 
                                 if (hintLengthSet.has(length)) {
                                         score += 3;
+                                        hintMatches += 1;
                                 } else if (fallbackLengthSet.has(length)) {
                                         score -= 1;
+                                        fallbackMatches += 1;
                                 }
 
                                 if (numericPattern.test(trimmed)) {
@@ -3492,6 +3498,13 @@ export default {
                                                 validMatches += 1;
                                         } else if (gtinValidity === false) {
                                                 score -= 4;
+                                                invalidMatches += 1;
+                                        } else if (
+                                                gtinValidity === null &&
+                                                !hintLengthSet.has(length) &&
+                                                !GTIN_STANDARD_LENGTHS.has(length)
+                                        ) {
+                                                score -= 2;
                                                 invalidMatches += 1;
                                         }
                                 }
@@ -3504,6 +3517,8 @@ export default {
                                         knownMatches,
                                         validMatches,
                                         invalidMatches,
+                                        hintMatches,
+                                        fallbackMatches,
                                 };
                         };
 
@@ -3521,9 +3536,19 @@ export default {
                                 const equalScore = stats.score === existing.score;
                                 const betterKnown = stats.knownMatches > existing.knownMatches;
                                 const equalKnown = stats.knownMatches === existing.knownMatches;
+                                const betterHints = stats.hintMatches > existing.hintMatches;
+                                const equalHints = stats.hintMatches === existing.hintMatches;
+                                const fewerFallback = stats.fallbackMatches < existing.fallbackMatches;
+                                const equalFallback = stats.fallbackMatches === existing.fallbackMatches;
                                 const fewerInvalid = stats.invalidMatches < existing.invalidMatches;
 
-                                if (betterScore || (equalScore && betterKnown) || (equalScore && equalKnown && fewerInvalid)) {
+                                if (
+                                        betterScore ||
+                                        (equalScore && betterKnown) ||
+                                        (equalScore && equalKnown && betterHints) ||
+                                        (equalScore && equalKnown && equalHints && fewerFallback) ||
+                                        (equalScore && equalKnown && equalHints && equalFallback && fewerInvalid)
+                                ) {
                                         bestStatsAtIndex.set(index, { ...stats });
                                         return false;
                                 }
@@ -3540,6 +3565,8 @@ export default {
                                                         knownMatches: stats.knownMatches,
                                                         validMatches: stats.validMatches,
                                                         invalidMatches: stats.invalidMatches,
+                                                        hintMatches: stats.hintMatches,
+                                                        fallbackMatches: stats.fallbackMatches,
                                                 });
                                         }
                                         return;
@@ -3571,12 +3598,21 @@ export default {
                                                 knownMatches: stats.knownMatches + evaluation.knownMatches,
                                                 validMatches: stats.validMatches + evaluation.validMatches,
                                                 invalidMatches: stats.invalidMatches + evaluation.invalidMatches,
+                                                hintMatches: stats.hintMatches + evaluation.hintMatches,
+                                                fallbackMatches: stats.fallbackMatches + evaluation.fallbackMatches,
                                         });
                                         path.pop();
                                 }
                         };
 
-                        dfs(0, [], { score: 0, knownMatches: 0, validMatches: 0, invalidMatches: 0 });
+                        dfs(0, [], {
+                                score: 0,
+                                knownMatches: 0,
+                                validMatches: 0,
+                                invalidMatches: 0,
+                                hintMatches: 0,
+                                fallbackMatches: 0,
+                        });
 
                         if (!results.length) {
                                 return null;
@@ -3585,6 +3621,12 @@ export default {
                         results.sort((a, b) => {
                                 if (b.knownMatches !== a.knownMatches) {
                                         return b.knownMatches - a.knownMatches;
+                                }
+                                if (b.hintMatches !== a.hintMatches) {
+                                        return b.hintMatches - a.hintMatches;
+                                }
+                                if (a.fallbackMatches !== b.fallbackMatches) {
+                                        return a.fallbackMatches - b.fallbackMatches;
                                 }
                                 if (b.validMatches !== a.validMatches) {
                                         return b.validMatches - a.validMatches;
