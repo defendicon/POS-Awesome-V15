@@ -24,6 +24,9 @@ const { calcUom, calcStockQty } = useStockUtils();
 export default {
         remove_item(item) {
                 const result = removeItem(item, this);
+                if (typeof this.close_payments === "function") {
+                        this.close_payments();
+                }
                 if (typeof this.refreshOfferSignatures === "function") {
                         this.refreshOfferSignatures();
                 }
@@ -32,6 +35,9 @@ export default {
 
         async add_item(item) {
                 const res = await addItem(item, this);
+                if (typeof this.close_payments === "function") {
+                        this.close_payments();
+                }
                 const target = this.items.find(
                         (it) =>
                                 it.item_code === item.item_code &&
@@ -55,6 +61,9 @@ export default {
 	// Reset all invoice fields to default/empty values
         clear_invoice() {
                 const result = clearInvoice(this);
+                if (typeof this.close_payments === "function") {
+                        this.close_payments();
+                }
                 if (typeof this.refreshOfferSignatures === "function") {
                         this.refreshOfferSignatures();
                 }

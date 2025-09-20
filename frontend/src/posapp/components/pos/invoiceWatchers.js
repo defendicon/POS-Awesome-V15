@@ -54,10 +54,13 @@ export default {
 
                 this.scheduleOffersRefresh();
         },
-	// Watch for invoice type change and emit
-	invoiceType() {
-		this.eventBus.emit("update_invoice_type", this.invoiceType);
-	},
+        // Watch for invoice type change and emit
+        invoiceType() {
+                if (typeof this.close_payments === "function") {
+                        this.close_payments();
+                }
+                this.eventBus.emit("update_invoice_type", this.invoiceType);
+        },
 	// Watch for additional discount and update percentage accordingly
 	additional_discount() {
 		if (!this.additional_discount || this.additional_discount == 0) {
