@@ -2881,19 +2881,33 @@ export default {
                         const segments = trimmed.split(/\s+/).filter(Boolean);
                         const queue = segments.length ? segments : [trimmed];
 
+                        let progressiveEvaluated = false;
+                        let progressiveResult = null;
+
                         const applyProgressiveSplit = () => {
+                                if (progressiveEvaluated) {
+                                        return progressiveResult;
+                                }
+                                progressiveEvaluated = true;
+
                                 const progressive = this.splitSegmentByProgressiveBarcodeTypes(trimmed);
-                                if (!progressive.attempted) {
-                                        return null;
+                                if (!progressive || !progressive.attempted) {
+                                        progressiveResult = null;
+                                        return progressiveResult;
                                 }
 
-                                if (progressive.success && progressive.codes.length) {
-                                        markCompositeNormalization(true, true, "progressive-lengths");
-                                        return progressive.codes.slice();
+                                const success = Boolean(progressive.success && Array.isArray(progressive.codes));
+                                const codes = success ? progressive.codes.slice() : [];
+
+                                markCompositeNormalization(true, success && codes.length > 0, "progressive-lengths");
+
+                                if (success && codes.length) {
+                                        progressiveResult = codes;
+                                        return progressiveResult;
                                 }
 
-                                markCompositeNormalization(true, false, "progressive-lengths");
-                                return [];
+                                progressiveResult = [];
+                                return progressiveResult;
                         };
 
                         queue.forEach((segment) => {
@@ -2923,6 +2937,13 @@ export default {
                                 if (hintedSplit && hintedSplit.length > 1) {
                                         return hintedSplit;
                                 }
+                                const progressiveSplit = applyProgressiveSplit();
+                                if (Array.isArray(progressiveSplit)) {
+                                        if (progressiveSplit.length) {
+                                                return progressiveSplit;
+                                        }
+                                        return progressiveSplit;
+                                }
                         }
 
                         if (!codes.length) {
@@ -2937,6 +2958,10 @@ export default {
                                 const hintedSplit = this.splitSegmentByHintedLengths(trimmed);
                                 if (hintedSplit && hintedSplit.length) {
                                         return hintedSplit;
+                                }
+                                const progressiveSplit = applyProgressiveSplit();
+                                if (Array.isArray(progressiveSplit)) {
+                                        return progressiveSplit;
                                 }
                         }
 
@@ -3096,6 +3121,124 @@ export default {
                         }
 
                         return parts;
+                },
+                splitSegmentByProgressiveBarcodeTypes(segment) {
+                        const outcome = { attempted: false, success: false, codes: [] };
+
+                        if (typeof segment !== "string") {
+                                return outcome;
+                        }
+
+                        const trimmed = segment.trim();
+                        if (!trimmed) {
+                                return outcome;
+                        }
+
+                        const sanitized = trimmed.replace(/\s+/g, "");
+                        if (!sanitized || sanitized.length < 8) {
+                                return outcome;
+                        }
+
+                        const numericPattern = /^\d+$/;
+                        if (!numericPattern.test(sanitized)) {
+                                return outcome;
+                        }
+
+                        const knownCodes = this.getKnownScannableCodes();
+                        if (!knownCodes.size) {
+                                return outcome;
+                        }
+
+                        const candidateSet = new Set();
+                        knownCodes.forEach((code) => {
+                                if (code === null || code === undefined) {
+                                        return;
+                                }
+                                const stringValue = typeof code === "string" ? code : String(code);
+                                const normalized = stringValue.trim();
+                                if (!normalized) {
+                                        return;
+                                }
+                                if (normalized.length < 8 || normalized.length > 14) {
+                                        return;
+                                }
+                                if (!numericPattern.test(normalized)) {
+                                        return;
+                                }
+                                const normalizedCode = this.normalizeScanCode(normalized);
+                                if (normalizedCode) {
+                                        candidateSet.add(normalizedCode);
+                                }
+                        });
+
+                        if (!candidateSet.size) {
+                                return outcome;
+                        }
+
+                        const minLength = 8;
+                        const maxLength = 14;
+                        const lengths = [];
+                        for (let length = maxLength; length >= minLength; length -= 1) {
+                                lengths.push(length);
+                        }
+
+                        const matches = [];
+                        let attempted = false;
+                        let index = 0;
+
+                        while (index <= sanitized.length - minLength) {
+                                let matched = false;
+
+                                for (let i = 0; i < lengths.length; i += 1) {
+                                        const length = lengths[i];
+                                        const end = index + length;
+                                        if (end > sanitized.length) {
+                                                continue;
+                                        }
+
+                                        const chunk = sanitized.slice(index, end);
+                                        if (!chunk || !numericPattern.test(chunk)) {
+                                                continue;
+                                        }
+
+                                        const normalizedChunk = this.normalizeScanCode(chunk);
+                                        if (!candidateSet.has(normalizedChunk)) {
+                                                continue;
+                                        }
+
+                                        matches.push({ chunk, start: index, end });
+                                        if (matches.length > 1) {
+                                                attempted = true;
+                                        }
+                                        index = end;
+                                        matched = true;
+                                        break;
+                                }
+
+                                if (!matched) {
+                                        attempted = true;
+                                        index += 1;
+                                }
+                        }
+
+                        if (!matches.length) {
+                                return { attempted, success: false, codes: [] };
+                        }
+
+                        const lastMatch = matches[matches.length - 1];
+                        if (lastMatch.end < sanitized.length) {
+                                attempted = true;
+                        }
+
+                        if (matches[0].start !== 0) {
+                                attempted = true;
+                        }
+
+                        return {
+                                attempted,
+                                success: true,
+                                codes: matches.map((entry) => entry.chunk),
+                        };
                 },
                 splitSegmentByKnownCodes(segment) {
                         if (typeof segment !== "string" || !segment.length) {
