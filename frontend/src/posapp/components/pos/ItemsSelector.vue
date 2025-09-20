@@ -1979,6 +1979,19 @@ export default {
                         }
 
                         if (!filteredItems.length || !rawSearchInput) {
+                                if (fromScanner && rawSearchInput) {
+                                        const scannedDisplay =
+                                                typeof context.scannedCode === "string" && context.scannedCode.trim()
+                                                        ? context.scannedCode.trim()
+                                                        : rawSearchInput;
+                                        this.showScanError({
+                                                message: `${this.__("Item not found")}: ${scannedDisplay}`,
+                                                code: scannedDisplay,
+                                                details: this.__(
+                                                        "Please verify the barcode or try searching manually.",
+                                                ),
+                                        });
+                                }
                                 return;
                         }
 
@@ -4191,28 +4204,36 @@ export default {
 				}
 			}
 		},
-		showScanError({ message, code = "", details = "" } = {}) {
-			this.scanErrorMessage = message || this.__("Unable to add scanned item.");
-			this.scanErrorCode = code;
-			this.scanErrorDetails = details;
-			if (code) {
-				this.pendingScanCode = code;
-			}
-			this.awaitingScanResult = false;
-			this.search_from_scanner = false;
-			this.scanErrorDialog = true;
-			this.scannerLocked = true;
-			this.playScanTone("error");
-			if (frappe?.show_alert) {
-				frappe.show_alert(
-					{
-						message: this.scanErrorMessage,
-						indicator: "red",
-					},
-					5,
-				);
-			}
-		},
+                showScanError({ message, code = "", details = "" } = {}) {
+                        this.scanErrorMessage = message || this.__("Unable to add scanned item.");
+                        this.scanErrorCode = code;
+                        this.scanErrorDetails = details;
+                        if (code) {
+                                this.pendingScanCode = code;
+                        }
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        this.scanErrorDialog = true;
+                        this.scannerLocked = true;
+                        this.playScanTone("error");
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: this.scanErrorMessage,
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                        }
+                        if (this.first_search || this.search) {
+                                this.clearSearch();
+                                this.$nextTick(() => {
+                                        if (this.$refs.debounce_search) {
+                                                this.$refs.debounce_search.focus();
+                                        }
+                                });
+                        }
+                },
                 acknowledgeScanError() {
                         this.scanErrorDialog = false;
                         this.scannerLocked = false;
