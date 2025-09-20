@@ -760,9 +760,15 @@ export default {
 		},
 		// Automatically search when the query has at least 3 characters
                 first_search: _.debounce(function (val, oldVal) {
-                        const newLen = (val || "").trim().length;
-                        const oldLen = (oldVal || "").trim().length;
-                        if (newLen >= 3) {
+                        const trimmedNew = (val || "").trim();
+                        const trimmedOld = (oldVal || "").trim();
+                        const newLen = trimmedNew.length;
+                        const oldLen = trimmedOld.length;
+                        const isNumericSearch = newLen > 0 && /^\d+$/.test(trimmedNew);
+                        const meetsAutoSearchThreshold =
+                                newLen >= 3 && (!isNumericSearch || newLen >= 8);
+
+                        if (meetsAutoSearchThreshold) {
                                 // Call without arguments so search_onchange treats it like an Enter key
                                 this.search_onchange();
                         } else if (oldLen >= 3 && newLen === 0) {
