@@ -1,10 +1,10 @@
 /* global flt, __, get_currency_symbol */
 
 export default {
-	// Calculate total quantity of all items
-	total_qty() {
-		this.close_payments();
-		let qty = 0;
+        // Calculate total quantity of all items
+        total_qty() {
+                this.close_payments();
+                let qty = 0;
 		this.items.forEach((item) => {
 			qty += flt(item.qty);
 		});
@@ -95,13 +95,13 @@ export default {
 		);
 	},
 	// Table headers for item table (for another table if needed)
-	itemTableHeaders() {
-		return [
-			{
-				text: __("Item"),
-				value: "item_name",
-				width: "35%",
-			},
+        itemTableHeaders() {
+                return [
+                        {
+                                text: __("Item"),
+                                value: "item_name",
+                                width: "35%",
+                        },
 			{
 				text: __("Qty"),
 				value: "qty",
@@ -122,7 +122,15 @@ export default {
 				value: "actions",
 				sortable: false,
 				width: "10%",
-			},
-		];
-	},
+                        },
+                ];
+        },
+
+        itemsOfferSignature() {
+                return this.buildOfferSignature(this.items);
+        },
+
+        packedItemsOfferSignature() {
+                return this.buildOfferSignature(this.packed_items);
+        },
 };

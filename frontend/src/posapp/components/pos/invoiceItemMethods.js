@@ -22,23 +22,30 @@ const { removeItem, addItem, getNewItem, clearInvoice } = useItemAddition();
 const { calcUom, calcStockQty } = useStockUtils();
 
 export default {
-	remove_item(item) {
-		return removeItem(item, this);
-	},
+        remove_item(item) {
+                const result = removeItem(item, this);
+                if (typeof this.refreshOfferSignatures === "function") {
+                        this.refreshOfferSignatures();
+                }
+                return result;
+        },
 
-	async add_item(item) {
-		const res = await addItem(item, this);
-		const target = this.items.find(
-			(it) =>
-				it.item_code === item.item_code &&
-				it.uom === (item.uom || it.uom) &&
-				(!it.batch_no || it.batch_no === item.batch_no),
-		);
-		if (target && this.fetch_available_qty) {
-			this.fetch_available_qty(target);
-		}
-		return res;
-	},
+        async add_item(item) {
+                const res = await addItem(item, this);
+                const target = this.items.find(
+                        (it) =>
+                                it.item_code === item.item_code &&
+                                it.uom === (item.uom || it.uom) &&
+                                (!it.batch_no || it.batch_no === item.batch_no),
+                );
+                if (target && this.fetch_available_qty) {
+                        this.fetch_available_qty(target);
+                }
+                if (typeof this.refreshOfferSignatures === "function") {
+                        this.refreshOfferSignatures();
+                }
+                return res;
+        },
 
 	// Create a new item object with default and calculated fields
 	get_new_item(item) {
@@ -46,9 +53,13 @@ export default {
 	},
 
 	// Reset all invoice fields to default/empty values
-	clear_invoice() {
-		return clearInvoice(this);
-	},
+        clear_invoice() {
+                const result = clearInvoice(this);
+                if (typeof this.refreshOfferSignatures === "function") {
+                        this.refreshOfferSignatures();
+                }
+                return result;
+        },
 
 	// Fetch customer balance from backend or cache
 	async fetch_customer_balance() {
@@ -194,16 +205,20 @@ export default {
 			console.log("Warning: No items in return invoice");
 		}
 
-		if (this.packed_items.length > 0) {
-			this.update_items_details(this.packed_items);
-			this.packed_items.forEach((pi) => {
-				if (!pi.posa_row_id) {
-					pi.posa_row_id = this.makeid(20);
-				}
-			});
-		}
+                if (this.packed_items.length > 0) {
+                        this.update_items_details(this.packed_items);
+                        this.packed_items.forEach((pi) => {
+                                if (!pi.posa_row_id) {
+                                        pi.posa_row_id = this.makeid(20);
+                                }
+                        });
+                }
 
-		this.customer = data.customer;
+                if (typeof this.refreshOfferSignatures === "function") {
+                        this.refreshOfferSignatures();
+                }
+
+                this.customer = data.customer;
 		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
 		this.discount_amount = data.discount_amount;
 		this.additional_discount_percentage = data.additional_discount_percentage;
@@ -312,21 +327,24 @@ export default {
 			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
 			this.discount_amount = data.discount_amount;
 			this.additional_discount_percentage = data.additional_discount_percentage;
-			this.items.forEach((item) => {
-				if (item.serial_no) {
-					item.serial_no_selected = [];
-					const serial_list = item.serial_no.split("\n");
-					serial_list.forEach((element) => {
-						if (element.length) {
-							item.serial_no_selected.push(element);
-						}
-					});
-					item.serial_no_selected_count = item.serial_no_selected.length;
-				}
-			});
-		}
-		return old_invoice;
-	},
+                        this.items.forEach((item) => {
+                                if (item.serial_no) {
+                                        item.serial_no_selected = [];
+                                        const serial_list = item.serial_no.split("\n");
+                                        serial_list.forEach((element) => {
+                                                if (element.length) {
+                                                        item.serial_no_selected.push(element);
+                                                }
+                                        });
+                                        item.serial_no_selected_count = item.serial_no_selected.length;
+                                }
+                        });
+                }
+                if (typeof this.refreshOfferSignatures === "function") {
+                        this.refreshOfferSignatures();
+                }
+                return old_invoice;
+        },
 
 	// Build the invoice document object for backend submission
 	get_invoice_doc() {
@@ -1892,19 +1910,22 @@ export default {
 						uom: item.uom,
 					},
 					callback(r) {
-						if (!r.exc) {
-							item.price_list_rate = rate;
-							item.base_price_list_rate = rate;
-							if (!item._manual_rate_set) {
-								item.rate = rate;
-								item.base_rate = rate;
-							}
-							vm.calc_item_price(item);
-							vm.eventBus.emit("show_message", {
-								title: r.message || __("Item price updated"),
-								color: "success",
-							});
-						}
+                                                if (!r.exc) {
+                                                        item.price_list_rate = rate;
+                                                        item.base_price_list_rate = rate;
+                                                        if (!item._manual_rate_set) {
+                                                                item.rate = rate;
+                                                                item.base_rate = rate;
+                                                        }
+                                                        vm.calc_item_price(item);
+                                                        if (typeof vm.refreshOfferSignatures === "function") {
+                                                                vm.refreshOfferSignatures();
+                                                        }
+                                                        vm.eventBus.emit("show_message", {
+                                                                title: r.message || __("Item price updated"),
+                                                                color: "success",
+                                                        });
+                                                }
 					},
 				});
 				d.hide();

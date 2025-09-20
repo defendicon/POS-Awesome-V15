@@ -6,17 +6,21 @@ import { useBundles } from "./useBundles.js";
 
 export function useItemAddition() {
 	// Remove item from invoice
-	const removeItem = (item, context) => {
-		const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
-		if (index >= 0) {
-			context.items.splice(index, 1);
-		}
-		if (item.is_bundle) {
-			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
-		}
-		// Remove from expanded if present
-		context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
-	};
+        const removeItem = (item, context) => {
+                const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
+                if (index >= 0) {
+                        context.items.splice(index, 1);
+                }
+                if (item.is_bundle) {
+                        context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
+                }
+                // Remove from expanded if present
+                context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
+
+                if (typeof context.refreshOfferSignatures === "function") {
+                        context.refreshOfferSignatures();
+                }
+        };
 
 	const { getBundleComponents } = useBundles();
 
@@ -33,8 +37,8 @@ export function useItemAddition() {
 		parent.bundle_id = context.makeid ? context.makeid(10) : Math.random().toString(36).substr(2, 10);
 		// Force reactivity so the bundle badge appears immediately
 		context.items = [...context.items];
-		for (const comp of components) {
-			const child = {
+                for (const comp of components) {
+                        const child = {
 				parent_item: parent.item_code,
 				bundle_id: parent.bundle_id,
 				item_code: comp.item_code,
@@ -58,11 +62,15 @@ export function useItemAddition() {
 				context.update_item_detail(child, false);
 				context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
 			}
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(child);
-			}
-		}
-	};
+                        if (context.fetch_available_qty) {
+                                context.fetch_available_qty(child);
+                        }
+                }
+
+                if (typeof context.refreshOfferSignatures === "function") {
+                        context.refreshOfferSignatures();
+                }
+        };
 
 	const moveItemToTop = (context, target) => {
 		if (!target) return;
@@ -327,16 +335,20 @@ export function useItemAddition() {
 				moveItemToTop(context, cur_item);
 			}
 		}
-		if (context.forceUpdate) context.forceUpdate();
+                if (context.forceUpdate) context.forceUpdate();
 
-		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
+                // Only try to expand if new_item exists and should be expanded
+                if (
+                        new_item &&
 			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
-		) {
-			context.expanded = [new_item.posa_row_id];
-		}
-	};
+                ) {
+                        context.expanded = [new_item.posa_row_id];
+                }
+
+                if (typeof context.refreshOfferSignatures === "function") {
+                        context.refreshOfferSignatures();
+                }
+        };
 
 	// Create a new item object with default and calculated fields
 	const getNewItem = (item, context) => {
@@ -423,9 +435,9 @@ export function useItemAddition() {
 	};
 
 	// Reset all invoice fields to default/empty values
-	const clearInvoice = (context) => {
-		context.items = [];
-		context.packed_items = [];
+        const clearInvoice = (context) => {
+                context.items = [];
+                context.packed_items = [];
 		context.posa_offers = [];
 		context.expanded = [];
 		context.eventBus.emit("set_pos_coupons", []);
@@ -450,10 +462,14 @@ export function useItemAddition() {
 		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
 		context.invoiceTypes = ["Invoice", "Order", "Quotation"];
 
-		if (Object.prototype.hasOwnProperty.call(context, "itemSearch")) {
-			context.itemSearch = "";
-		}
-	};
+                if (Object.prototype.hasOwnProperty.call(context, "itemSearch")) {
+                        context.itemSearch = "";
+                }
+
+                if (typeof context.refreshOfferSignatures === "function") {
+                        context.refreshOfferSignatures();
+                }
+        };
 
 	// Add this utility for grouping logic, matching ItemsTable.vue
 	function groupAndAddItem(items, newItem) {
