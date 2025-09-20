@@ -30,20 +30,29 @@ export default {
 			value: this.discount_percentage_offer_name,
 		});
 	},
-	// Watch for items array changes (deep) and re-handle offers
-        items: {
-                deep: true,
-                handler() {
-                        if (this.isApplyingOffer) return;
-                        this.scheduleOffersRefresh();
-                },
+        // Watch offer-relevant signature for main items
+        itemsOfferSignature(newSignature, oldSignature) {
+                if (newSignature === oldSignature) {
+                        return;
+                }
+
+                if (this.isApplyingOffer) {
+                        return;
+                }
+
+                this.scheduleOffersRefresh();
         },
-        packed_items: {
-                deep: true,
-                handler() {
-                        if (this.isApplyingOffer) return;
-                        this.scheduleOffersRefresh();
-                },
+        // Watch offer-relevant signature for packed items
+        packedItemsOfferSignature(newSignature, oldSignature) {
+                if (newSignature === oldSignature) {
+                        return;
+                }
+
+                if (this.isApplyingOffer) {
+                        return;
+                }
+
+                this.scheduleOffersRefresh();
         },
 	// Watch for invoice type change and emit
 	invoiceType() {

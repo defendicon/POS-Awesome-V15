@@ -145,14 +145,17 @@ export function useDiscounts() {
 				item.discount_percentage = 100;
 			}
 
-			// Update stock calculations and force UI update
-			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
-			if (context.forceUpdate) context.forceUpdate();
-		} catch (error) {
-			console.error("Error calculating prices:", error);
-			context.eventBus.emit("show_message", {
-				title: __("Error calculating prices"),
-				color: "error",
+                        // Update stock calculations and force UI update
+                        if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+                        if (context.forceUpdate) context.forceUpdate();
+                        if (typeof context.refreshOfferSignatures === "function") {
+                                context.refreshOfferSignatures();
+                        }
+                } catch (error) {
+                        console.error("Error calculating prices:", error);
+                        context.eventBus.emit("show_message", {
+                                title: __("Error calculating prices"),
+                                color: "error",
 			});
 		}
 	};
@@ -249,8 +252,11 @@ export function useDiscounts() {
 			item.base_amount = item.amount;
 		}
 
-		if (context.forceUpdate) context.forceUpdate();
-	};
+                if (context.forceUpdate) context.forceUpdate();
+                if (typeof context.refreshOfferSignatures === "function") {
+                        context.refreshOfferSignatures();
+                }
+        };
 
 	return {
 		updateDiscountAmount,

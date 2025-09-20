@@ -414,10 +414,14 @@ export default {
 			selected_columns: [], // Selected columns for items table
 			temp_selected_columns: [], // Temporary array for column selection
 			available_columns: [], // All available columns
-			show_column_selector: false, // Column selector dialog visibility
-			invoiceHeight: null,
-		};
-	},
+                        show_column_selector: false, // Column selector dialog visibility
+                        invoiceHeight: null,
+                        offerSignatureSnapshot: {
+                                items: "[]",
+                                packed: "[]",
+                        },
+                };
+        },
 
 	components: {
 		Customer,
@@ -432,13 +436,33 @@ export default {
 		...invoiceComputed,
 	},
 
-	methods: {
-		...shortcutMethods,
-		...offerMethods,
-		...invoiceItemMethods,
-		initializeItemsHeaders() {
-			// Define all available columns
-			this.available_columns = [
+        methods: {
+                ...shortcutMethods,
+                ...offerMethods,
+                ...invoiceItemMethods,
+                buildOfferSignature(collection) {
+                        if (!Array.isArray(collection) || collection.length === 0) {
+                                return "[]";
+                        }
+
+                        return JSON.stringify(
+                                collection.map((item) => [
+                                        item?.posa_row_id ?? item?.name ?? "",
+                                        Number(item?.qty) || 0,
+                                        Number(item?.rate) || 0,
+                                        Number(item?.discount_amount) || 0,
+                                ]),
+                        );
+                },
+                refreshOfferSignatures() {
+                        this.offerSignatureSnapshot = {
+                                items: this.itemsOfferSignature,
+                                packed: this.packedItemsOfferSignature,
+                        };
+                },
+                initializeItemsHeaders() {
+                        // Define all available columns
+                        this.available_columns = [
 				{ title: __("Name"), align: "start", sortable: true, key: "item_name", required: true },
 				{ title: __("QTY"), key: "qty", align: "center", required: true },
 				{ title: __("UOM"), key: "uom", align: "center", required: false },
@@ -720,16 +744,17 @@ export default {
 
 			// Recalculate stock quantity with the adjusted value
 			this.calc_stock_qty(item, item[field_name]);
-			if (field_name === "qty" && item.is_bundle) {
-				this.packed_items
-					.filter((it) => it.bundle_id === item.bundle_id)
-					.forEach((ch) => {
-						ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
-						this.calc_stock_qty(ch, ch.qty);
-					});
-			}
-			return parsedValue;
-		},
+                        if (field_name === "qty" && item.is_bundle) {
+                                this.packed_items
+                                        .filter((it) => it.bundle_id === item.bundle_id)
+                                        .forEach((ch) => {
+                                                ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
+                                                this.calc_stock_qty(ch, ch.qty);
+                                        });
+                        }
+                        this.refreshOfferSignatures();
+                        return parsedValue;
+                },
 		async fetch_available_currencies() {
 			try {
 				console.log("Fetching available currencies...");
@@ -1142,16 +1167,17 @@ export default {
 				this.remove_item(item);
 			}
 			this.calc_stock_qty(item, item.qty);
-			if (item.is_bundle) {
-				this.packed_items
-					.filter((it) => it.bundle_id === item.bundle_id)
-					.forEach((ch) => {
-						ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
-						this.calc_stock_qty(ch, ch.qty);
-					});
-			}
-			this.$forceUpdate();
-		},
+                        if (item.is_bundle) {
+                                this.packed_items
+                                        .filter((it) => it.bundle_id === item.bundle_id)
+                                        .forEach((ch) => {
+                                                ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
+                                                this.calc_stock_qty(ch, ch.qty);
+                                        });
+                        }
+                        this.$forceUpdate();
+                        this.refreshOfferSignatures();
+                },
 
 		// Decrease quantity of an item (handles return logic)
 		subtract_one(item) {
@@ -1165,16 +1191,17 @@ export default {
 				this.remove_item(item);
 			}
 			this.calc_stock_qty(item, item.qty);
-			if (item.is_bundle) {
-				this.packed_items
-					.filter((it) => it.bundle_id === item.bundle_id)
-					.forEach((ch) => {
-						ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
-						this.calc_stock_qty(ch, ch.qty);
-					});
-			}
-			this.$forceUpdate();
-		},
+                        if (item.is_bundle) {
+                                this.packed_items
+                                        .filter((it) => it.bundle_id === item.bundle_id)
+                                        .forEach((ch) => {
+                                                ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
+                                                this.calc_stock_qty(ch, ch.qty);
+                                        });
+                        }
+                        this.$forceUpdate();
+                        this.refreshOfferSignatures();
+                },
 
 		// Handle item reordering from drag and drop
 		handleItemReorder(reorderData) {
@@ -1191,10 +1218,14 @@ export default {
 			// Insert the item at its new position
 			newItems.splice(toIndex, 0, movedItem);
 
-			// Update the items array
-			this.items = newItems;
+                        // Update the items array
+                        this.items = newItems;
 
-			// Show success feedback
+                        if (typeof this.refreshOfferSignatures === "function") {
+                                this.refreshOfferSignatures();
+                        }
+
+                        // Show success feedback
 			this.eventBus.emit("show_message", {
 				title: __("Item order updated"),
 				color: "success",
@@ -1342,10 +1373,14 @@ export default {
 		this.eventBus.on("item-drag-start", () => {
 			this.showDropFeedback(true);
 		});
-		this.eventBus.on("item-drag-end", () => {
-			this.showDropFeedback(false);
-		});
-	},
+                this.eventBus.on("item-drag-end", () => {
+                        this.showDropFeedback(false);
+                });
+
+                if (typeof this.refreshOfferSignatures === "function") {
+                        this.refreshOfferSignatures();
+                }
+        },
 	// Cleanup event listeners before component is destroyed
 	beforeUnmount() {
 		// Existing cleanup

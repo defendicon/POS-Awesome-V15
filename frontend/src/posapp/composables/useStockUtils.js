@@ -283,10 +283,13 @@ export function useStockUtils() {
 			}
 		}
 
-		// Update item details
-		if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
-		if (context.forceUpdate) context.forceUpdate();
-	};
+                // Update item details
+                if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+                if (context.forceUpdate) context.forceUpdate();
+                if (typeof context.refreshOfferSignatures === "function") {
+                        context.refreshOfferSignatures();
+                }
+        };
 
 	// Calculate stock quantity for an item
 	const calcStockQty = (item, value) => {
