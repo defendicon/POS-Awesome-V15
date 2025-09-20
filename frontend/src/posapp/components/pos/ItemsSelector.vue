@@ -3482,7 +3482,7 @@ export default {
                                 if (hintLengthSet.has(length)) {
                                         score += 3;
                                 } else if (fallbackLengthSet.has(length)) {
-                                        score += 1;
+                                        score -= 1;
                                 }
 
                                 if (numericPattern.test(trimmed)) {
@@ -3592,10 +3592,14 @@ export default {
                                 if (a.invalidMatches !== b.invalidMatches) {
                                         return a.invalidMatches - b.invalidMatches;
                                 }
+                                const lengthDiff = a.chunks.length - b.chunks.length;
+                                if (lengthDiff !== 0) {
+                                        return lengthDiff;
+                                }
                                 if (b.score !== a.score) {
                                         return b.score - a.score;
                                 }
-                                return a.chunks.length - b.chunks.length;
+                                return 0;
                         });
 
                         const best = results[0];
