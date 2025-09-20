@@ -254,13 +254,16 @@ export default {
 			this.eventBus.emit("set_pos_coupons", data.posa_coupons);
 		}
 
-		console.log("load_invoice completed, invoice state:", {
-			invoiceType: this.invoiceType,
-			is_return: this.invoice_doc.is_return,
-			items: this.items.length,
-			customer: this.customer,
-		});
-	},
+                console.log("load_invoice completed, invoice state:", {
+                        invoiceType: this.invoiceType,
+                        is_return: this.invoice_doc.is_return,
+                        items: this.items.length,
+                        customer: this.customer,
+                });
+
+                await this.$nextTick();
+                this.eventBus.emit("focus_item_search");
+        },
 
 	// Save and clear the current invoice (draft logic)
 	save_and_clear_invoice() {
