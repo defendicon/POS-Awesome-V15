@@ -150,11 +150,16 @@ export default {
 					this.get_offers(data.pos_profile.name, data.pos_profile);
 				}
 			});
-			this.eventBus.on("show_payment", (data) => {
-				this.payment = data === "true";
-				this.showOffers = false;
-				this.coupons = false;
-			});
+                        this.eventBus.on("show_payment", (data) => {
+                                this.payment = data === "true";
+                                this.showOffers = false;
+                                this.coupons = false;
+                                if (data !== "true") {
+                                        this.$nextTick(() => {
+                                                this.eventBus.emit("focus_item_search");
+                                        });
+                                }
+                        });
 			this.eventBus.on("show_offers", (data) => {
 				this.showOffers = data === "true";
 				this.payment = false;

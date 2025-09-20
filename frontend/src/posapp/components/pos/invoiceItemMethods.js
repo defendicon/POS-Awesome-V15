@@ -254,13 +254,17 @@ export default {
 			this.eventBus.emit("set_pos_coupons", data.posa_coupons);
 		}
 
-		console.log("load_invoice completed, invoice state:", {
-			invoiceType: this.invoiceType,
-			is_return: this.invoice_doc.is_return,
-			items: this.items.length,
-			customer: this.customer,
-		});
-	},
+                console.log("load_invoice completed, invoice state:", {
+                        invoiceType: this.invoiceType,
+                        is_return: this.invoice_doc.is_return,
+                        items: this.items.length,
+                        customer: this.customer,
+                });
+
+                this.$nextTick(() => {
+                        this.eventBus.emit("focus_item_search");
+                });
+        },
 
 	// Save and clear the current invoice (draft logic)
 	save_and_clear_invoice() {
@@ -1317,9 +1321,12 @@ export default {
 	},
 
 	// Close payment dialog
-	close_payments() {
-		this.eventBus.emit("show_payment", "false");
-	},
+        close_payments() {
+                this.eventBus.emit("show_payment", "false");
+                this.$nextTick(() => {
+                        this.eventBus.emit("focus_item_search");
+                });
+        },
 
 	// Update details for all items (fetch from backend)
 	async update_items_details(items) {

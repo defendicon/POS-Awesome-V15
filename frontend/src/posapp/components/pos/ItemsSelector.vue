@@ -5064,15 +5064,16 @@ export default {
 		}
 
 		// Setup barcode scanner if enabled
-		if (this.pos_profile?.posa_enable_barcode_scanning) {
-			this.scan_barcoud();
-		}
+                if (this.pos_profile?.posa_enable_barcode_scanning) {
+                        this.scan_barcoud();
+                }
 
-		// Apply the configured items per page on mount
-		this.itemsPerPage = this.items_per_page;
-		window.addEventListener("resize", this.checkItemContainerOverflow);
-		this.$nextTick(this.checkItemContainerOverflow);
-	},
+                // Apply the configured items per page on mount
+                this.itemsPerPage = this.items_per_page;
+                window.addEventListener("resize", this.checkItemContainerOverflow);
+                this.$nextTick(this.checkItemContainerOverflow);
+                this.focusItemSearch();
+        },
 
         beforeUnmount() {
                 // Clear interval when component is destroyed
