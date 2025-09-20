@@ -3462,6 +3462,7 @@ export default {
                         });
 
                         const numericPattern = /^\d+$/;
+                        const gtinSpecLengths = new Set([8, 12, 13, 14]);
                         const evaluateChunk = (chunk, length) => {
                                 const trimmed = chunk.trim();
                                 if (!trimmed) {
@@ -3492,6 +3493,12 @@ export default {
                                                 validMatches += 1;
                                         } else if (gtinValidity === false) {
                                                 score -= 4;
+                                                invalidMatches += 1;
+                                        } else if (
+                                                !hintLengthSet.has(length) &&
+                                                !gtinSpecLengths.has(length)
+                                        ) {
+                                                score -= 3;
                                                 invalidMatches += 1;
                                         }
                                 }
