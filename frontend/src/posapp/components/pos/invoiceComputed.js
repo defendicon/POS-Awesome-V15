@@ -3,13 +3,12 @@
 export default {
         // Calculate total quantity of all items
         total_qty() {
-                this.close_payments();
                 let qty = 0;
-		this.items.forEach((item) => {
-			qty += flt(item.qty);
-		});
-		return this.flt(qty, this.float_precision);
-	},
+                this.items.forEach((item) => {
+                        qty += flt(item.qty);
+                });
+                return this.flt(qty, this.float_precision);
+        },
 	// Calculate total amount for all items (handles returns)
 	Total() {
 		let sum = 0;
@@ -21,14 +20,13 @@ export default {
 		});
 		return this.flt(sum, this.currency_precision);
 	},
-	// Calculate subtotal after discounts and delivery charges
-	subtotal() {
-		this.close_payments();
-		let sum = 0;
-		this.items.forEach((item) => {
-			// For returns, use absolute value for correct calculation
-			const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-			const rate = flt(item.rate);
+        // Calculate subtotal after discounts and delivery charges
+        subtotal() {
+                let sum = 0;
+                this.items.forEach((item) => {
+                        // For returns, use absolute value for correct calculation
+                        const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                        const rate = flt(item.rate);
 			sum += qty * rate;
 		});
 
