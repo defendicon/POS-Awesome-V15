@@ -18,8 +18,8 @@
 				></v-btn>
 			</v-card-title>
 
-			<v-card-text class="pa-0">
-				<div v-if="!cameraPermissionDenied">
+                        <v-card-text class="pa-0">
+                                <div v-if="!cameraPermissionDenied">
 					<!-- Scanner container -->
 					<div class="scanner-container" v-if="isScanning && scannerDialog">
 						<qrcode-stream
@@ -50,11 +50,11 @@
 					</div>
 
 					<!-- Status messages -->
-					<div class="status-messages pa-3">
-						<v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-2">
-							<v-icon>mdi-alert-circle</v-icon>
-							{{ errorMessage }}
-						</v-alert>
+                                        <div class="status-messages pa-3">
+                                                <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-2">
+                                                        <v-icon>mdi-alert-circle</v-icon>
+                                                        {{ errorMessage }}
+                                                </v-alert>
 
 						<v-alert v-if="scanResult" type="success" variant="tonal" class="mb-2">
 							{{ __("Successfully scanned:") }} <strong>{{ scanResult }}</strong> <br /><small
@@ -62,25 +62,69 @@
 							>
 						</v-alert>
 
-						<v-alert
-							v-if="!scanResult && !errorMessage && isScanning && scannerDialog"
-							type="info"
-							variant="tonal"
-						>
-							{{ __("Position the QR code or barcode within the scanning area") }}
-							<br /><small>{{ __("Detecting formats:") }} {{ readerFormats.join(", ") }}</small>
-						</v-alert>
-					</div>
-				</div>
+                                                <v-alert
+                                                        v-if="!scanResult && !errorMessage && isScanning && scannerDialog"
+                                                        type="info"
+                                                        variant="tonal"
+                                                >
+                                                        {{ __("Position the QR code or barcode within the scanning area") }}
+                                                        <br /><small>{{ __("Detecting formats:") }} {{ readerFormats.join(", ") }}</small>
+                                                </v-alert>
+                                        </div>
+                                </div>
 
-				<!-- Camera permission denied message -->
-				<div v-else class="pa-4 text-center">
-					<v-icon size="64" color="error">mdi-camera-off</v-icon>
-					<h3 class="mt-2">{{ __("Camera Access Required") }}</h3>
-					<p class="mt-2">{{ __("Please allow camera access to scan codes") }}</p>
-					<!-- Requesting permission is handled by the browser when QrcodeStream tries to access camera -->
-				</div>
-			</v-card-text>
+                                <!-- Camera permission denied message -->
+                                <div v-else class="pa-4 text-center">
+                                        <v-icon size="64" color="error">mdi-camera-off</v-icon>
+                                        <h3 class="mt-2">{{ __("Camera Access Required") }}</h3>
+                                        <p class="mt-2">{{ __("Please allow camera access to scan codes") }}</p>
+                                        <!-- Requesting permission is handled by the browser when QrcodeStream tries to access camera -->
+                                </div>
+                                <div
+                                        v-if="shouldShowManualEntry"
+                                        class="manual-entry pa-4 pt-0"
+                                        data-allow-scanner-input="true"
+                                >
+                                        <v-divider class="my-3"></v-divider>
+                                        <div class="text-subtitle-1 font-weight-medium mb-2">
+                                                {{ __("Manual Entry") }}
+                                        </div>
+                                        <v-alert
+                                                v-if="manualError"
+                                                type="warning"
+                                                variant="tonal"
+                                                density="comfortable"
+                                                class="mb-3"
+                                        >
+                                                <v-icon class="mr-2">mdi-alert</v-icon>
+                                                {{ manualError }}
+                                        </v-alert>
+                                        <v-text-field
+                                                ref="manualInput"
+                                                v-model="manualCode"
+                                                density="comfortable"
+                                                variant="outlined"
+                                                color="primary"
+                                                :label="__('Enter item code or barcode')"
+                                                :hint="__('Use your hardware scanner or keyboard to add items manually')"
+                                                persistent-hint
+                                                hide-details="auto"
+                                                clearable
+                                                @keydown.enter.prevent="submitManualCode"
+                                                @update:model-value="manualError = ''"
+                                                data-allow-scanner-input="true"
+                                        ></v-text-field>
+                                        <v-btn
+                                                class="mt-3"
+                                                color="primary"
+                                                block
+                                                :disabled="!manualCode"
+                                                @click="submitManualCode"
+                                        >
+                                                {{ __("Add Item") }}
+                                        </v-btn>
+                                </div>
+                        </v-card-text>
 
 			<!-- Action buttons -->
 			<v-card-actions class="justify-space-between pa-3">
@@ -209,6 +253,7 @@
 </style>
 
 <script>
+/* global frappe */
 import { QrcodeStream } from "vue-qrcode-reader";
 
 export default {
@@ -224,16 +269,18 @@ export default {
 	},
 
 	data() {
-		return {
-			scannerDialog: false,
-			scanResult: "",
-			scanFormat: "", // We might get this from the 'detect' event payload
-			errorMessage: "",
-			cameraPermissionDenied: false,
-			isScanning: false,
-			torchActive: false,
-			selectedDeviceId: null, // For camera switching
-			cameras: [], // To store available cameras
+                return {
+                        scannerDialog: false,
+                        scanResult: "",
+                        scanFormat: "", // We might get this from the 'detect' event payload
+                        errorMessage: "",
+                        cameraPermissionDenied: false,
+                        isScanning: false,
+                        torchActive: false,
+                        selectedDeviceId: null, // For camera switching
+                        cameras: [], // To store available cameras
+                        manualCode: "",
+                        manualError: "",
 			// Old properties to be removed or re-evaluated:
 			// qrScanner: null,
 			// flashlightSupported: false, // vue-qrcode-reader handles this via QrcodeStream's torch prop
@@ -247,11 +294,11 @@ export default {
 		};
 	},
 
-	computed: {
-		readerFormats() {
-			// Define the formats based on scanType prop or default to all common ones
-			// Ensure these format names are valid as per vue-qrcode-reader documentation
-			const availableFormats = [
+        computed: {
+                readerFormats() {
+                        // Define the formats based on scanType prop or default to all common ones
+                        // Ensure these format names are valid as per vue-qrcode-reader documentation
+                        const availableFormats = [
 				"qr_code",
 				"ean_13",
 				"ean_8",
@@ -265,31 +312,42 @@ export default {
 				// Add other formats if needed and supported by zxing-wasm
 			];
 
-			if (this.scanType === "QR Code") {
-				return ["qr_code"];
-			}
-			if (this.scanType === "Barcode") {
-				return availableFormats.filter((f) => f !== "qr_code");
-			}
-			return availableFormats; // 'Both'
-		},
-	},
+                        if (this.scanType === "QR Code") {
+                                return ["qr_code"];
+                        }
+                        if (this.scanType === "Barcode") {
+                                return availableFormats.filter((f) => f !== "qr_code");
+                        }
+                        return availableFormats; // 'Both'
+                },
+                isCameraAvailable() {
+                        return Array.isArray(this.cameras) && this.cameras.length > 0;
+                },
+                shouldShowManualEntry() {
+                        return this.cameraPermissionDenied || !this.isCameraAvailable;
+                },
+        },
 
 	methods: {
-		async startScanning() {
-			this.scannerDialog = true;
-			this.errorMessage = "";
-			this.scanResult = "";
-			this.scanFormat = "";
-			this.cameraPermissionDenied = false;
-			this.isScanning = true; // QrcodeStream will attempt to start camera automatically
-			// We might need to await this.$nextTick() if QrcodeStream is inside v-if controlled by scannerDialog
-			await this.$nextTick();
-			// Camera listing can be done here or in a dedicated method
-			// vue-qrcode-reader doesn't directly list cameras in QrcodeStream,
-			// but we can use navigator.mediaDevices.enumerateDevices()
-			await this.listCameras();
-		},
+                async startScanning() {
+                        this.scannerDialog = true;
+                        this.errorMessage = "";
+                        this.scanResult = "";
+                        this.scanFormat = "";
+                        this.cameraPermissionDenied = false;
+                        this.isScanning = true; // QrcodeStream will attempt to start camera automatically
+                        this.manualCode = "";
+                        this.manualError = "";
+                        // We might need to await this.$nextTick() if QrcodeStream is inside v-if controlled by scannerDialog
+                        await this.$nextTick();
+                        // Camera listing can be done here or in a dedicated method
+                        // vue-qrcode-reader doesn't directly list cameras in QrcodeStream,
+                        // but we can use navigator.mediaDevices.enumerateDevices()
+                        await this.listCameras();
+                        if (this.shouldShowManualEntry) {
+                                this.$nextTick(() => this.focusManualInput());
+                        }
+                },
 
 		async listCameras() {
 			try {
@@ -345,41 +403,68 @@ export default {
 			}
 		},
 
-		onError(error) {
-			this.errorMessage = error.name || "Unknown error";
-			if (error.name === "NotAllowedError") {
-				this.cameraPermissionDenied = true;
-				this.errorMessage = this.__(
-					"Camera permission denied. Please allow camera access in your browser settings.",
-				);
-			} else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
-				this.errorMessage = this.__("No camera found on this device.");
-			} else if (error.name === "NotSupportedError") {
-				this.errorMessage = this.__("Secure context (HTTPS) required for camera access.");
-			} else if (error.name === "AbortError") {
-				this.errorMessage = this.__("Camera access aborted.");
-			} else {
-				this.errorMessage = this.__("Error accessing camera:") + ` ${error.message}`;
-			}
-			console.error("Camera error:", error);
-			this.isScanning = false;
-		},
+                onError(error) {
+                        this.errorMessage = error.name || "Unknown error";
+                        if (error.name === "NotAllowedError") {
+                                this.cameraPermissionDenied = true;
+                                this.errorMessage = this.__(
+                                        "Camera permission denied. Please allow camera access in your browser settings.",
+                                );
+                        } else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
+                                this.errorMessage = this.__("No camera found on this device.");
+                        } else if (error.name === "NotSupportedError") {
+                                this.errorMessage = this.__("Secure context (HTTPS) required for camera access.");
+                        } else if (error.name === "AbortError") {
+                                this.errorMessage = this.__("Camera access aborted.");
+                        } else {
+                                this.errorMessage = this.__("Error accessing camera:") + ` ${error.message}`;
+                        }
+                        console.error("Camera error:", error);
+                        this.isScanning = false;
+                        if (this.shouldShowManualEntry) {
+                                this.$nextTick(() => this.focusManualInput());
+                        }
+                },
 
-		stopScanning() {
-			this.isScanning = false; // This should make QrcodeStream stop/hide
-			this.scannerDialog = false;
-			this.scanResult = "";
-			this.scanFormat = "";
-			this.errorMessage = "";
-			this.torchActive = false;
-			// selectedDeviceId and cameras can remain as they are for next scan
-			this.$emit("scanner-closed");
-		},
+                stopScanning() {
+                        this.isScanning = false; // This should make QrcodeStream stop/hide
+                        this.scannerDialog = false;
+                        this.scanResult = "";
+                        this.scanFormat = "";
+                        this.errorMessage = "";
+                        this.torchActive = false;
+                        this.manualCode = "";
+                        this.manualError = "";
+                        // selectedDeviceId and cameras can remain as they are for next scan
+                        this.$emit("scanner-closed");
+                },
 
-		async toggleTorch() {
-			this.torchActive = !this.torchActive;
-			// The QrcodeStream component has a :torch prop, binding this.torchActive to it should work.
-		},
+                submitManualCode() {
+                        const code = (this.manualCode || "").trim();
+
+                        if (!code) {
+                                this.manualError = this.__("Please enter a code before adding an item.");
+                                this.$nextTick(() => this.focusManualInput());
+                                return;
+                        }
+
+                        this.manualError = "";
+                        this.$emit("barcode-scanned", code);
+                        this.manualCode = "";
+                        this.$nextTick(() => this.focusManualInput());
+                },
+
+                focusManualInput() {
+                        const input = this.$refs.manualInput;
+                        if (input && typeof input.focus === "function") {
+                                input.focus();
+                        }
+                },
+
+                async toggleTorch() {
+                        this.torchActive = !this.torchActive;
+                        // The QrcodeStream component has a :torch prop, binding this.torchActive to it should work.
+                },
 
 		async switchCamera() {
 			if (this.cameras.length > 1) {
@@ -419,20 +504,28 @@ export default {
 		},
 	},
 
-	watch: {
-		scannerDialog(newVal) {
-			if (newVal) {
-				// When dialog opens, if no camera is selected, list them.
-				if (!this.selectedDeviceId && this.cameras.length === 0) {
-					this.listCameras();
-				}
-			} else {
-				// When dialog closes, ensure scanning is stopped.
-				this.isScanning = false;
-				this.torchActive = false;
-			}
-		},
-	},
+        watch: {
+                scannerDialog(newVal) {
+                        if (newVal) {
+                                // When dialog opens, if no camera is selected, list them.
+                                if (!this.selectedDeviceId && this.cameras.length === 0) {
+                                        this.listCameras();
+                                }
+                                if (this.shouldShowManualEntry) {
+                                        this.$nextTick(() => this.focusManualInput());
+                                }
+                        } else {
+                                // When dialog closes, ensure scanning is stopped.
+                                this.isScanning = false;
+                                this.torchActive = false;
+                        }
+                },
+                shouldShowManualEntry(value) {
+                        if (value) {
+                                this.$nextTick(() => this.focusManualInput());
+                        }
+                },
+        },
 
 	mounted() {
 		if (typeof document !== "undefined") {

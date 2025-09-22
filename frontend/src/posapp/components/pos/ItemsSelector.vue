@@ -2374,13 +2374,34 @@ export default {
 					return;
 				}
 
-				onScan.attachTo(document, {
-					suffixKeyCodes: [],
-					keyCodeMapper: function (oEvent) {
-						oEvent.stopImmediatePropagation();
-						oEvent.preventDefault();
-						return onScan.decodeKeyEvent(oEvent);
-					},
+                                onScan.attachTo(document, {
+                                        suffixKeyCodes: [],
+                                        keyCodeMapper: function (oEvent) {
+                                                const allowManualInput = (node) => {
+                                                        if (!node) {
+                                                                return false;
+                                                        }
+                                                        if (node.dataset?.allowScannerInput === "true") {
+                                                                return true;
+                                                        }
+                                                        if (typeof node.closest === "function") {
+                                                                return !!node.closest("[data-allow-scanner-input='true']");
+                                                        }
+                                                        return false;
+                                                };
+
+                                                const manualTarget =
+                                                        allowManualInput(oEvent.target) ||
+                                                        allowManualInput(document.activeElement);
+
+                                                if (manualTarget) {
+                                                        return null;
+                                                }
+
+                                                oEvent.stopImmediatePropagation();
+                                                oEvent.preventDefault();
+                                                return onScan.decodeKeyEvent(oEvent);
+                                        },
 					onScan: function (sCode) {
 						if (vm.scannerLocked) {
 							vm.playScanTone("error");
