@@ -2750,10 +2750,33 @@ export default {
                         let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
                         const normalizationMeta = this.lastCompositeNormalization || {};
 
-                        if (shouldStripActivePrefix && normalizedCodes.length) {
+                        if (shouldStripActivePrefix) {
                                 const activeCode = this.currentHardwareScan.code;
-                                if (normalizedCodes[0] === activeCode) {
-                                        normalizedCodes = normalizedCodes.slice(1);
+                                if (normalizedCodes.length) {
+                                        if (normalizedCodes[0] === activeCode) {
+                                                normalizedCodes = normalizedCodes.slice(1);
+                                        } else if (
+                                                normalizedCodes.length === 1 &&
+                                                normalizedCodes[0] === trimmed &&
+                                                trimmed.startsWith(activeCode)
+                                        ) {
+                                                const remainder = trimmed.slice(activeCode.length).trim();
+                                                if (remainder) {
+                                                        let fallbackCodes = this.normalizeHardwareScanPayload(remainder);
+                                                        if (!Array.isArray(fallbackCodes)) {
+                                                                fallbackCodes = [];
+                                                        }
+                                                        fallbackCodes = fallbackCodes
+                                                                .map((code) => (typeof code === "string" ? code.trim() : ""))
+                                                                .filter(Boolean);
+                                                        if (!fallbackCodes.length) {
+                                                                fallbackCodes = [remainder];
+                                                        }
+                                                        normalizedCodes = fallbackCodes;
+                                                } else {
+                                                        normalizedCodes = [];
+                                                }
+                                        }
                                 }
                         }
 
