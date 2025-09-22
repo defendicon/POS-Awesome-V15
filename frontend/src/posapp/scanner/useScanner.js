@@ -179,16 +179,17 @@ export function useScanner(profileSettings = {}) {
 			clearTimeout(idleTimer);
 			idleTimer = null;
 		}
-		if (frame && frame.events.length && reason !== "finalized") {
-			debug("Frame discarded", reason, frame.raw);
-		}
-		frame = null;
-		prefixBuffer = [];
-		pendingHistogram = [];
-		if (isScanning.value) {
-			isScanning.value = false;
-		}
-	}
+                if (frame && frame.events.length && reason !== "finalized") {
+                        debug("Frame discarded", reason, frame.raw);
+                }
+                frame = null;
+                prefixBuffer = [];
+                pendingHistogram = [];
+                lastEventEntry = null;
+                if (isScanning.value) {
+                        isScanning.value = false;
+                }
+        }
 
 	function ensureIdleTimer() {
 		if (!frame) {
@@ -281,17 +282,25 @@ export function useScanner(profileSettings = {}) {
 		}
 
 		const now = Date.now();
-		const hash = computeFrameHash(raw);
-		if (hash && hash === lastFrameHash && now - lastFrameTime < config.dedupCooldownMs) {
-			debug("Deduplicated scan", raw);
-			resetFrame("dedup");
-			return;
-		}
-		lastFrameHash = hash;
-		lastFrameTime = now;
+                const hash = computeFrameHash(raw);
+                const elapsed = frame.completedAt - frame.startedAt;
+                const suspiciousDuration =
+                        elapsed <= Math.max(Number(config.timeGapScannerMs) || 0, 10);
+                if (
+                        config.dedupCooldownMs > 0 &&
+                        hash &&
+                        hash === lastFrameHash &&
+                        now - lastFrameTime < config.dedupCooldownMs &&
+                        suspiciousDuration
+                ) {
+                        debug("Deduplicated scan", raw);
+                        resetFrame("dedup");
+                        return;
+                }
+                lastFrameHash = hash;
+                lastFrameTime = now;
 
-		const elapsed = frame.completedAt - frame.startedAt;
-		const symbology = guessSymbology(raw);
+                const symbology = guessSymbology(raw);
 		const gtinValid = config.enableChecksumValidation ? validateGtin(raw) : true;
 		const normalized =
 			config.normalizeUpcToEan13 && symbology === "UPC-A" ? normalizeUpcToEan13(raw) : raw;
@@ -321,20 +330,21 @@ export function useScanner(profileSettings = {}) {
 			histogram: pendingHistogram.slice(),
 		};
 
-		listeners.forEach((callback) => {
-			try {
-				callback(payload);
-			} catch (error) {
-				console.error("Scanner listener failed", error);
-			}
-		});
+                listeners.forEach((callback) => {
+                        try {
+                                callback(payload);
+                        } catch (error) {
+                                console.error("Scanner listener failed", error);
+                        }
+                });
 
-		debug("Frame emitted", payload);
-		frame = null;
-		prefixBuffer = [];
-		pendingHistogram = [];
-		isScanning.value = false;
-	}
+                debug("Frame emitted", payload);
+                frame = null;
+                prefixBuffer = [];
+                pendingHistogram = [];
+                lastEventEntry = null;
+                isScanning.value = false;
+        }
 
 	function startFrame(initialEntries = []) {
 		const timestamp = Date.now();
@@ -396,19 +406,19 @@ export function useScanner(profileSettings = {}) {
 			return;
 		}
 
-		if (frame) {
-			if (config.feedbackToasts) {
-				event.preventDefault();
-				event.stopPropagation();
-			}
-			addTokenToFrame(entry);
-			ensureIdleTimer();
-			if (Number.isFinite(delta)) {
-				pendingHistogram.push(delta);
-			}
-			lastEventEntry = entry;
-			return;
-		}
+                if (frame) {
+                        if (config.feedbackToasts) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                        }
+                        addTokenToFrame(entry);
+                        ensureIdleTimer();
+                        if (Number.isFinite(delta)) {
+                                pendingHistogram.push(delta);
+                        }
+                        lastEventEntry = frame ? entry : null;
+                        return;
+                }
 
 		if (handlePrefix(entry)) {
 			if (frame) {
