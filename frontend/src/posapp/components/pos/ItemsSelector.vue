@@ -735,12 +735,15 @@ export default {
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
-		first_search: _.debounce(function (val, oldVal) {
-			const newLen = (val || "").trim().length;
-			const oldLen = (oldVal || "").trim().length;
-			if (newLen >= 3) {
-				// Call without arguments so search_onchange treats it like an Enter key
-				this.search_onchange();
+               first_search: _.debounce(function (val, oldVal) {
+                       if (this.search_from_scanner) {
+                               return;
+                       }
+                       const newLen = (val || "").trim().length;
+                       const oldLen = (oldVal || "").trim().length;
+                       if (newLen >= 3) {
+                               // Call without arguments so search_onchange treats it like an Enter key
+                               this.search_onchange();
 			} else if (oldLen >= 3 && newLen === 0) {
 				// Reset items only when search is fully cleared
 				this.clearSearch();
@@ -1994,6 +1997,10 @@ export default {
 		search_onchange: _.debounce(async function (newSearchTerm) {
 			const vm = this;
 
+			if (vm.search_from_scanner) {
+				return;
+			}
+
 			vm.cancelItemDetailsRequest();
 
 			// Determine the actual query string and trim whitespace
@@ -2004,6 +2011,36 @@ export default {
 			if (!trimmedQuery || trimmedQuery.length < 3) {
 				vm.search_from_scanner = false;
 				return;
+			}
+
+			const numericLike = /^\d+$/.test(trimmedQuery);
+			const hasDigit = /\d/.test(trimmedQuery);
+			const longCodeLike =
+				trimmedQuery.length >= 8 && hasDigit && /^[A-Za-z0-9._-]+$/.test(trimmedQuery) && !/\s/.test(trimmedQuery);
+
+			if (!vm.search_from_scanner && (numericLike || longCodeLike)) {
+				vm.search_from_scanner = true;
+				try {
+					const handled = await vm.processScannedItem(trimmedQuery);
+					if (handled) {
+						return;
+					}
+					return;
+				} catch (error) {
+					console.error("Failed to process manual barcode entry:", error);
+					if (!vm.scanErrorDialog) {
+						vm.showScanError({
+							message: vm.__("Unable to add scanned item."),
+							code: trimmedQuery,
+							details: error?.message || "",
+						});
+					}
+					return;
+				} finally {
+					if (vm.search_from_scanner) {
+						vm.search_from_scanner = false;
+					}
+				}
 			}
 
 			// If background loading is in progress, defer the search without changing the active query
@@ -2367,13 +2404,34 @@ export default {
 					return;
 				}
 
-				onScan.attachTo(document, {
-					suffixKeyCodes: [],
-					keyCodeMapper: function (oEvent) {
-						oEvent.stopImmediatePropagation();
-						oEvent.preventDefault();
-						return onScan.decodeKeyEvent(oEvent);
-					},
+                                onScan.attachTo(document, {
+                                        suffixKeyCodes: [],
+                                        keyCodeMapper: function (oEvent) {
+                                                const allowManualInput = (node) => {
+                                                        if (!node) {
+                                                                return false;
+                                                        }
+                                                        if (node.dataset?.allowScannerInput === "true") {
+                                                                return true;
+                                                        }
+                                                        if (typeof node.closest === "function") {
+                                                                return !!node.closest("[data-allow-scanner-input='true']");
+                                                        }
+                                                        return false;
+                                                };
+
+                                                const manualTarget =
+                                                        allowManualInput(oEvent.target) ||
+                                                        allowManualInput(document.activeElement);
+
+                                                if (manualTarget) {
+                                                        return null;
+                                                }
+
+                                                oEvent.stopImmediatePropagation();
+                                                oEvent.preventDefault();
+                                                return onScan.decodeKeyEvent(oEvent);
+                                        },
 					onScan: function (sCode) {
 						if (vm.scannerLocked) {
 							vm.playScanTone("error");
@@ -2389,40 +2447,36 @@ export default {
 				console.warn("Scanner initialization error:", error.message);
 			}
 		},
-		trigger_onscan(sCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			// indicate this search came from a scanner
-			this.search_from_scanner = true;
-			// apply scanned code as search term
-			this.first_search = sCode;
-			this.search = sCode;
-			this.pendingScanCode = sCode;
+               async trigger_onscan(sCode) {
+                       if (this.scannerLocked) {
+                               this.playScanTone("error");
+                               return;
+                       }
 
-			this.$nextTick(() => {
-				if (this.filtered_items.length == 0) {
-					this.eventBus.emit("show_message", {
-						title: `No Item has this barcode "${sCode}"`,
-						color: "error",
-					});
-					this.showScanError({
-						message: `${this.__("Item not found")}: ${sCode}`,
-						code: sCode,
-						details: this.__("Please verify the barcode or search manually."),
-					});
-				} else {
-					this.enter_event();
-				}
+                       // Mark the upcoming search as originating from a scanner
+                       this.search_from_scanner = true;
+                       this.pendingScanCode = sCode;
+                       this.first_search = sCode;
+                       this.search = sCode;
 
-				// clear search field for next scan and refocus input
-				if (!this.scanErrorDialog) {
-					this.clearSearch();
-					this.$refs.debounce_search && this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                       try {
+                               await this.$nextTick();
+                               await this.processScannedItem(sCode);
+                       } catch (error) {
+                               console.error("Failed to process scanned item:", error);
+                               this.showScanError({
+                                       message: this.__("Unable to add scanned item."),
+                                       code: sCode,
+                                       details: error?.message || "",
+                               });
+                       } finally {
+                               this.$nextTick(() => {
+                                       if (!this.scanErrorDialog && this.$refs.debounce_search) {
+                                               this.$refs.debounce_search.focus();
+                                       }
+                               });
+                       }
+               },
 		generateWordCombinations(inputString) {
 			const words = inputString.split(" ");
 			const wordCount = words.length;
@@ -2639,7 +2693,7 @@ export default {
 			}
 
 			// First try to find exact match by processed code
-			let foundItem = this.items.find((item) => {
+			const foundItem = this.items.find((item) => {
 				const barcodeMatch =
 					item.barcode === searchCode ||
 					(Array.isArray(item.item_barcode) &&
@@ -2650,8 +2704,7 @@ export default {
 
 			if (foundItem) {
 				console.log("Found item by processed code:", foundItem);
-				await this.addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode);
-				return;
+				return await this.addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode);
 			}
 
 			// If not found locally, attempt to fetch from server using processed code
@@ -2677,8 +2730,7 @@ export default {
 					await savePriceListItems(this.customer_price_list, this.items);
 					this.eventBus.emit("set_all_items", this.items);
 					await this.update_items_details([newItem]);
-					await this.addScannedItemToInvoice(newItem, searchCode, qtyFromBarcode);
-					return;
+					return await this.addScannedItemToInvoice(newItem, searchCode, qtyFromBarcode);
 				}
 
 				this.first_search = scannedCode;
@@ -2688,7 +2740,7 @@ export default {
 					code: scannedCode,
 					details: this.__("Please verify the barcode or check the item's availability."),
 				});
-				return;
+				return false;
 			} catch (e) {
 				console.error("Error fetching item from barcode:", e);
 				this.first_search = scannedCode;
@@ -2698,7 +2750,7 @@ export default {
 					code: scannedCode,
 					details: this.__("The system could not retrieve the item details. Please try again."),
 				});
-				return;
+				return false;
 			}
 		},
 		searchItemsByCode(code) {
@@ -2795,7 +2847,7 @@ export default {
 							formattedRequested,
 						]),
 					});
-					return;
+					return false;
 				}
 
 				if (negativeStockEnabled) {
@@ -2811,9 +2863,12 @@ export default {
 
 			this.awaitingScanResult = true;
 
+			let addedSuccessfully = false;
+
 			try {
 				// Use existing add_item method with enhanced feedback
 				await this.add_item(newItem);
+				addedSuccessfully = true;
 				this.playScanTone("success");
 				this.scannerLocked = false;
 				this.search_from_scanner = false;
@@ -2831,7 +2886,15 @@ export default {
 				// Clear search after successful addition and refocus input
 				this.clearSearch();
 				this.$refs.debounce_search && this.$refs.debounce_search.focus();
+				return true;
+			} catch (error) {
+				console.error("Failed to add scanned item to invoice:", error);
+				throw error;
 			} finally {
+				if (!addedSuccessfully) {
+					this.scannerLocked = false;
+					this.search_from_scanner = false;
+				}
 				this.awaitingScanResult = false;
 			}
 		},
