@@ -152,23 +152,57 @@ instance.processingHardwareScan = true;
 instance.currentHardwareScan = { code: 'ABC123' };
 instance.lastCompositeNormalization = { attempted: false, success: false, reason: '' };
 
+const resetTracking = () => {
+  handledCodes.length = 0;
+  enqueuedCodes.length = 0;
+  failures.length = 0;
+};
+
+const logScenario = (label) => {
+  console.log(`\nScenario: ${label}`);
+  console.log('Enqueued codes:', [...enqueuedCodes]);
+  console.log('Handled codes:', [...handledCodes]);
+  console.log('Failures:', [...failures]);
+};
+
+resetTracking();
 instance.trigger_onscan('ABC123XYZ456');
 
 if (!enqueuedCodes.length) {
-  throw new Error('No codes were enqueued by trigger_onscan');
+  throw new Error('No codes were enqueued by trigger_onscan (single remainder)');
 }
 
-console.log('Enqueued codes:', enqueuedCodes);
-console.log('Handled codes:', handledCodes);
-console.log('Failures:', failures);
+logScenario('single remainder barcode');
 
 if (handledCodes.includes('ABC123XYZ456')) {
-  throw new Error('Combined payload was processed by handleHardwareScan');
+  throw new Error('Combined payload was processed by handleHardwareScan for single remainder');
 }
 
 if (!enqueuedCodes.includes('XYZ456')) {
-  throw new Error('Expected remainder barcode to be enqueued');
+  throw new Error('Expected remainder barcode to be enqueued for single remainder');
 }
 
-console.log('Merged scan fallback behaved as expected.');
+if (failures.length) {
+  throw new Error('Unexpected failure reported for single remainder');
+}
+
+resetTracking();
+
+instance.trigger_onscan('ABC123XYZ456 LMN789');
+
+if (handledCodes.includes('ABC123XYZ456 LMN789') || handledCodes.includes('ABC123XYZ456')) {
+  throw new Error('Merged payload should not reach handleHardwareScan for multi remainder');
+}
+
+logScenario('multiple remainder barcodes');
+
+if (!enqueuedCodes.includes('XYZ456') || !enqueuedCodes.includes('LMN789')) {
+  throw new Error('Expected both remainder barcodes to be enqueued for multi remainder');
+}
+
+if (failures.length) {
+  throw new Error('Unexpected failure reported for multi remainder');
+}
+
+console.log('\nMerged scan fallback behaved as expected for both scenarios.');
 

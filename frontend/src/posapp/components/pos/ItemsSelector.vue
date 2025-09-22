@@ -2747,38 +2747,86 @@ export default {
                                 trimmed.startsWith(this.currentHardwareScan.code) &&
                                 trimmed.length > this.currentHardwareScan.code.length;
 
-                        let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
-                        const normalizationMeta = this.lastCompositeNormalization || {};
+                       let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
+                       const normalizationMeta = this.lastCompositeNormalization || {};
 
-                        if (shouldStripActivePrefix) {
-                                const activeCode = this.currentHardwareScan.code;
-                                if (normalizedCodes.length) {
-                                        if (normalizedCodes[0] === activeCode) {
-                                                normalizedCodes = normalizedCodes.slice(1);
-                                        } else if (
-                                                normalizedCodes.length === 1 &&
-                                                normalizedCodes[0] === trimmed &&
-                                                trimmed.startsWith(activeCode)
-                                        ) {
-                                                const remainder = trimmed.slice(activeCode.length).trim();
-                                                if (remainder) {
-                                                        let fallbackCodes = this.normalizeHardwareScanPayload(remainder);
-                                                        if (!Array.isArray(fallbackCodes)) {
-                                                                fallbackCodes = [];
-                                                        }
-                                                        fallbackCodes = fallbackCodes
-                                                                .map((code) => (typeof code === "string" ? code.trim() : ""))
-                                                                .filter(Boolean);
-                                                        if (!fallbackCodes.length) {
-                                                                fallbackCodes = [remainder];
-                                                        }
-                                                        normalizedCodes = fallbackCodes;
-                                                } else {
-                                                        normalizedCodes = [];
-                                                }
-                                        }
-                                }
-                        }
+                       if (shouldStripActivePrefix) {
+                               const activeCode = this.currentHardwareScan.code;
+                               const coerceCode = (value) => (typeof value === "string" ? value.trim() : "");
+                               let workingCodes = Array.isArray(normalizedCodes)
+                                       ? normalizedCodes.map(coerceCode).filter(Boolean)
+                                       : [];
+
+                               while (workingCodes.length && workingCodes[0] === activeCode) {
+                                       workingCodes.shift();
+                               }
+
+                               const remainderFromTrimmed = trimmed.slice(activeCode.length).trim();
+                               const fallbackSources = [];
+
+                               if (workingCodes.length) {
+                                       const firstCandidate = workingCodes[0];
+                                       if (
+                                               typeof firstCandidate === "string" &&
+                                               firstCandidate.startsWith(activeCode) &&
+                                               firstCandidate.length > activeCode.length
+                                       ) {
+                                               const extractedRemainder = firstCandidate.slice(activeCode.length).trim();
+                                               if (extractedRemainder) {
+                                                       fallbackSources.push(extractedRemainder);
+                                               }
+                                               workingCodes.shift();
+                                       }
+                               } else if (remainderFromTrimmed) {
+                                       fallbackSources.push(remainderFromTrimmed);
+                               }
+
+                               if (workingCodes.length === 1 && workingCodes[0] === trimmed) {
+                                       workingCodes = [];
+                                       if (remainderFromTrimmed) {
+                                               fallbackSources.push(remainderFromTrimmed);
+                                       }
+                               }
+
+                               const sanitizedCodes = [];
+                               const seenFallbacks = new Set();
+
+                               fallbackSources.forEach((source) => {
+                                       const key = typeof source === "string" ? source : "";
+                                       if (!key || seenFallbacks.has(key)) {
+                                               return;
+                                       }
+                                       seenFallbacks.add(key);
+
+                                       let fallbackCodes = this.normalizeHardwareScanPayload(key);
+                                       if (!Array.isArray(fallbackCodes) || !fallbackCodes.length) {
+                                               fallbackCodes = [key];
+                                       }
+
+                                       const prepared = fallbackCodes
+                                               .map(coerceCode)
+                                               .filter(
+                                                       (code) =>
+                                                               code && code !== trimmed && code !== activeCode,
+                                               );
+
+                                       if (prepared.length) {
+                                               sanitizedCodes.push(...prepared);
+                                       }
+                               });
+
+                               const remaining = workingCodes.filter(
+                                       (code) => code !== trimmed && code !== activeCode,
+                               );
+
+                               normalizedCodes = [...sanitizedCodes, ...remaining];
+                       }
+
+                       normalizedCodes = Array.isArray(normalizedCodes)
+                               ? normalizedCodes
+                                        .map((code) => (typeof code === "string" ? code.trim() : ""))
+                                        .filter(Boolean)
+                               : [];
 
                         if (!normalizedCodes.length) {
                                 if (
