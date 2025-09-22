@@ -2417,17 +2417,29 @@ export default {
 				console.warn("Scanner initialization error:", error.message);
 			}
 		},
-               async trigger_onscan(sCode) {
+              async trigger_onscan(sCode, options = {}) {
                        if (this.scannerLocked) {
                                this.playScanTone("error");
                                return;
                        }
+
+                       const { showFeedback = false } = options;
 
                        // Mark the upcoming search as originating from a scanner
                        this.search_from_scanner = true;
                        this.pendingScanCode = sCode;
                        this.first_search = sCode;
                        this.search = sCode;
+
+                       if (showFeedback && frappe?.show_alert) {
+                               frappe.show_alert(
+                                       {
+                                               message: `Scanning for: ${sCode}`,
+                                               indicator: "blue",
+                                       },
+                                       2,
+                               );
+                       }
 
                        try {
                                await this.$nextTick();
@@ -2618,37 +2630,25 @@ export default {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			console.log("Barcode scanned:", scannedCode);
-			this.pendingScanCode = scannedCode;
+               async onBarcodeScanned(scannedCode) {
+                       if (this.scannerLocked) {
+                               this.playScanTone("error");
+                               return;
+                       }
 
-			// mark this search as coming from a scanner
-			this.search_from_scanner = true;
+                       console.log("Barcode scanned:", scannedCode);
 
-			// Clear any previous search
-			this.search = "";
-			this.first_search = "";
-
-			// Set the scanned code as search term
-			this.first_search = scannedCode;
-			this.search = scannedCode;
-
-			// Show scanning feedback
-			frappe.show_alert(
-				{
-					message: `Scanning for: ${scannedCode}`,
-					indicator: "blue",
-				},
-				2,
-			);
-
-			// Enhanced item search and submission logic
-			this.processScannedItem(scannedCode);
-		},
+                       try {
+                               await this.trigger_onscan(scannedCode, { showFeedback: true });
+                       } catch (error) {
+                               console.error("Barcode processing failed:", error);
+                               this.showScanError({
+                                       message: this.__("Unable to add scanned item."),
+                                       code: scannedCode,
+                                       details: error?.message || "",
+                               });
+                       }
+               },
 		async processScannedItem(scannedCode) {
 			this.pendingScanCode = scannedCode;
 			// Handle scale barcodes by extracting the item code and quantity
