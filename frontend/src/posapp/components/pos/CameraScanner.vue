@@ -20,11 +20,11 @@
 
                         <v-card-text class="pa-0">
                                 <div v-if="!cameraPermissionDenied">
-					<!-- Scanner container -->
-					<div class="scanner-container" v-if="isScanning && scannerDialog">
-						<qrcode-stream
-							:formats="readerFormats"
-							:torch="torchActive"
+                                        <!-- Scanner container -->
+                                        <div class="scanner-container" v-if="isScanning && scannerDialog">
+                                                <qrcode-stream
+                                                        :formats="readerFormats"
+                                                        :torch="torchActive"
 							:camera="
 								selectedDeviceId
 									? { deviceId: selectedDeviceId, exact: selectedDeviceId }
@@ -69,9 +69,9 @@
 						>
 							{{ __("Position the QR code or barcode within the scanning area") }}
 							<br /><small>{{ __("Detecting formats:") }} {{ readerFormats.join(", ") }}</small>
-						</v-alert>
-					</div>
-				</div>
+                                                </v-alert>
+                                        </div>
+                                </div>
 
                                 <!-- Camera permission denied message -->
                                 <div v-else class="pa-4 text-center">
@@ -81,7 +81,6 @@
                                         <!-- Requesting permission is handled by the browser when QrcodeStream tries to access camera -->
                                 </div>
 
-                                <!-- Manual / hardware scanner entry -->
                                 <div class="manual-entry pa-4 pt-0">
                                         <v-divider class="mb-4"></v-divider>
                                         <h3 class="text-subtitle-1 font-weight-medium mb-2">
@@ -265,18 +264,18 @@ export default {
 	},
 
 	data() {
-                return {
-                        scannerDialog: false,
-                        scanResult: "",
-                        scanFormat: "", // We might get this from the 'detect' event payload
-                        errorMessage: "",
-                        cameraPermissionDenied: false,
-                        isScanning: false,
-                        torchActive: false,
-                        selectedDeviceId: null, // For camera switching
+		return {
+			scannerDialog: false,
+			scanResult: "",
+			scanFormat: "", // We might get this from the 'detect' event payload
+			errorMessage: "",
+			cameraPermissionDenied: false,
+			isScanning: false,
+			torchActive: false,
+			selectedDeviceId: null, // For camera switching
                         cameras: [], // To store available cameras
                         manualScanValue: "",
-                        // Old properties to be removed or re-evaluated:
+			// Old properties to be removed or re-evaluated:
 			// qrScanner: null,
 			// flashlightSupported: false, // vue-qrcode-reader handles this via QrcodeStream's torch prop
 			// flashlightOn: false, // replaced by torchActive
@@ -325,14 +324,15 @@ export default {
                         this.scanFormat = "";
                         this.cameraPermissionDenied = false;
                         this.isScanning = true; // QrcodeStream will attempt to start camera automatically
+                        this.manualScanValue = "";
                         // We might need to await this.$nextTick() if QrcodeStream is inside v-if controlled by scannerDialog
                         await this.$nextTick();
                         this.focusManualInput();
                         // Camera listing can be done here or in a dedicated method
-			// vue-qrcode-reader doesn't directly list cameras in QrcodeStream,
-			// but we can use navigator.mediaDevices.enumerateDevices()
-			await this.listCameras();
-		},
+                        // vue-qrcode-reader doesn't directly list cameras in QrcodeStream,
+                        // but we can use navigator.mediaDevices.enumerateDevices()
+                        await this.listCameras();
+                },
 
 		async listCameras() {
 			try {
@@ -360,11 +360,11 @@ export default {
                         // detectedCodes is an array of objects, each with rawValue, format, etc.
                         if (detectedCodes && detectedCodes.length > 0) {
                                 const firstResult = detectedCodes[0];
-                                this.processDetectedValue(firstResult.rawValue, firstResult.format);
+                                this.handleScannedCode(firstResult.rawValue, firstResult.format);
                         }
                 },
 
-                processDetectedValue(rawValue, formatLabel = "", options = {}) {
+                handleScannedCode(rawValue, formatLabel = "") {
                         const code = (rawValue ?? "").toString().trim();
                         if (!code) {
                                 return;
@@ -387,21 +387,14 @@ export default {
                                 );
                         }
 
-                        const resumeCamera = options.resumeCamera !== undefined ? options.resumeCamera : true;
                         const wasScanning = this.isScanning;
-                        const shouldResumeCamera = resumeCamera && wasScanning;
+                        this.isScanning = false;
 
-                        if (shouldResumeCamera) {
-                                this.isScanning = false;
-                        }
-
+                        // Resume scanning after a short delay if the camera was already active
                         setTimeout(() => {
-                                if (!this.scannerDialog) {
-                                        return;
-                                }
                                 this.scanResult = "";
                                 this.scanFormat = "";
-                                if (shouldResumeCamera) {
+                                if (wasScanning) {
                                         this.isScanning = true;
                                 }
                         }, 1000);
@@ -413,14 +406,14 @@ export default {
                                 return;
                         }
 
-                        this.processDetectedValue(code, this.__("Manual Entry"));
+                        this.handleScannedCode(code, this.__("Manual Entry"));
                         this.manualScanValue = "";
                         this.$nextTick(() => {
                                 this.focusManualInput();
                         });
                 },
 
-                onError(error) {
+		onError(error) {
 			this.errorMessage = error.name || "Unknown error";
 			if (error.name === "NotAllowedError") {
 				this.cameraPermissionDenied = true;
@@ -495,13 +488,14 @@ export default {
                 },
 
                 focusManualInput() {
-                        if (this.$refs.manualScanInput && this.$refs.manualScanInput.focus) {
-                                this.$refs.manualScanInput.focus();
+                        const input = this.$refs.manualScanInput;
+                        if (input && typeof input.focus === "function") {
+                                input.focus();
                         }
                 },
         },
 
-        watch: {
+	watch: {
                 scannerDialog(newVal) {
                         if (newVal) {
                                 // When dialog opens, if no camera is selected, list them.
