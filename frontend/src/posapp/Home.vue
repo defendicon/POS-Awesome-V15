@@ -43,6 +43,7 @@ import Navbar from "./components/Navbar.vue";
 import POS from "./components/pos/Pos.vue";
 import Payments from "./components/payments/Pay.vue";
 import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
+import ScannerPlay from "./dev/ScannerPlay.vue";
 import { useLoading } from "./composables/useLoading.js";
 import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "./utils/loading.js";
 import {
@@ -142,12 +143,13 @@ export default {
 			}
 		},
 	},
-	components: {
-		Navbar,
-		POS,
-		Payments,
-		AppLoadingOverlay,
-	},
+        components: {
+                Navbar,
+                POS,
+                Payments,
+                AppLoadingOverlay,
+                ...(import.meta.env?.DEV ? { ScannerPlay } : {}),
+        },
 	mounted() {
 		this.remove_frappe_nav();
 		// Initialize cache ready state early from stored value

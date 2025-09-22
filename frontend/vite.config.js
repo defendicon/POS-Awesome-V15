@@ -7,9 +7,9 @@ import tailwindcss from "tailwindcss";
 import autoprefixer from "autoprefixer";
 
 export default defineConfig({
-	plugins: [
-		frappeVueStyle(),
-		vue(),
+        plugins: [
+                frappeVueStyle(),
+                vue(),
 		viteStaticCopy({
 			targets: [
 				{
@@ -64,8 +64,11 @@ export default defineConfig({
 			"@": resolve(__dirname, "src"),
 		},
 	},
-	define: {
-		"process.env.NODE_ENV": '"production"',
-		process: '{"env":{}}',
-	},
+        define: {
+                "process.env.NODE_ENV": '"production"',
+                process: '{"env":{}}',
+        },
+        test: {
+                environment: "node",
+        },
 });

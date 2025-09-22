@@ -191,15 +191,19 @@ export default {
 			default: "Loading app data...",
 		},
 	},
-	data() {
-		return {
-			drawer: false,
-			mini: true,
-			item: 0,
-			items: [
-				{ text: "POS", icon: "mdi-network-pos" },
-				{ text: "Payments", icon: "mdi-credit-card" },
-			],
+        data() {
+                const navItems = [
+                        { text: "POS", icon: "mdi-network-pos" },
+                        { text: "Payments", icon: "mdi-credit-card" },
+                ];
+                if (import.meta.env?.DEV) {
+                        navItems.push({ text: "ScannerPlay", icon: "mdi-barcode-scan" });
+                }
+                return {
+                        drawer: false,
+                        mini: true,
+                        item: 0,
+                        items: navItems,
 			company: "POS Awesome",
 			companyImg: posLogo,
 			showAboutDialog: false,
