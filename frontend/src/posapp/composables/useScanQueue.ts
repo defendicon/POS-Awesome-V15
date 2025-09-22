@@ -1,10 +1,10 @@
 import { nextTick, ref } from "vue";
 
-type ScanCallback = (scan: string) => void;
+type ScanCallback<T> = (scan: T) => void;
 
-export function useScanQueue() {
-        const queue: string[] = [];
-        const callbacks = new Set<ScanCallback>();
+export function useScanQueue<T = string>() {
+        const queue: T[] = [];
+        const callbacks = new Set<ScanCallback<T>>();
         const sizeRef = ref(0);
         let active = false;
         let processing = false;
@@ -42,7 +42,7 @@ export function useScanQueue() {
                 }
         }
 
-        function enqueue(scan: string) {
+        function enqueue(scan: T) {
                 queue.push(scan);
                 sizeRef.value = queue.length;
                 if (active) {
@@ -50,7 +50,7 @@ export function useScanQueue() {
                 }
         }
 
-        function onDequeue(callback: ScanCallback) {
+        function onDequeue(callback: ScanCallback<T>) {
                 callbacks.add(callback);
                 return () => {
                         callbacks.delete(callback);
