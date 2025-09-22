@@ -2655,45 +2655,78 @@ export default {
 			item.currency = this.selected_currency;
 			item.price_list_rate = item.rate;
 		},
-		scan_barcoud() {
-			const vm = this;
-			try {
-				// Check if scanner is already attached to document
-				if (document._scannerAttached) {
-					return;
-				}
+               scan_barcoud() {
+                       const vm = this;
+                       try {
+                               // Check if scanner is already attached to document
+                               if (document._scannerAttached) {
+                                       return;
+                               }
 
-				onScan.attachTo(document, {
-					suffixKeyCodes: [],
-					keyCodeMapper: function (oEvent) {
-						oEvent.stopImmediatePropagation();
-						oEvent.preventDefault();
-						return onScan.decodeKeyEvent(oEvent);
-					},
-                                        onScan: function (sCode) {
-                                                if (vm.scanErrorDialog) {
-                                                        vm.playScanTone("error");
-                                                        return;
-                                                }
-                                                if (vm.processingHardwareScan) {
-                                                        vm.trigger_onscan(sCode);
-                                                        return;
-                                                }
-                                                if (vm.scannerLocked) {
-                                                        vm.playScanTone("error");
-                                                        return;
-                                                }
-                                                vm.trigger_onscan(sCode);
-                                        },
-				});
+                               const suffixKeyCodes = vm.getScannerSuffixKeyCodes();
+                               const timeBeforeScanTest = vm.getScannerTimeBeforeScanTest(suffixKeyCodes);
 
-				// Mark document as having scanner attached
-				document._scannerAttached = true;
-			} catch (error) {
-				console.warn("Scanner initialization error:", error.message);
-			}
-		},
-                trigger_onscan(sCode) {
+                               onScan.attachTo(document, {
+                                       suffixKeyCodes,
+                                       timeBeforeScanTest,
+                                       keyCodeMapper: function (oEvent) {
+                                               oEvent.stopImmediatePropagation();
+                                               oEvent.preventDefault();
+                                               return onScan.decodeKeyEvent(oEvent);
+                                       },
+                                       onScan: function (sCode) {
+                                               if (vm.scanErrorDialog) {
+                                                       vm.playScanTone("error");
+                                                       return;
+                                               }
+                                               if (vm.processingHardwareScan) {
+                                                       vm.trigger_onscan(sCode);
+                                                       return;
+                                               }
+                                               if (vm.scannerLocked) {
+                                                       vm.playScanTone("error");
+                                                       return;
+                                               }
+                                               vm.trigger_onscan(sCode);
+                                       },
+                               });
+
+                               // Mark document as having scanner attached
+                               document._scannerAttached = true;
+                       } catch (error) {
+                               console.warn("Scanner initialization error:", error.message);
+                       }
+               },
+
+               getScannerSuffixKeyCodes() {
+                       const profile = this.pos_profile || {};
+
+                       if (Array.isArray(profile.posa_scanner_suffix_key_codes) && profile.posa_scanner_suffix_key_codes.length) {
+                               return profile.posa_scanner_suffix_key_codes
+                                       .map((code) => Number.parseInt(code, 10))
+                                       .filter((code) => Number.isInteger(code));
+                       }
+
+                       if (profile.posa_disable_scanner_suffix || profile.posa_scanner_without_suffix) {
+                               return [];
+                       }
+
+                       return [9, 13];
+               },
+
+               getScannerTimeBeforeScanTest(suffixKeyCodes) {
+                       if (Array.isArray(suffixKeyCodes) && suffixKeyCodes.length) {
+                               return 100;
+                       }
+
+                       const profile = this.pos_profile || {};
+                       if (typeof profile.posa_scanner_timeout === "number" && !Number.isNaN(profile.posa_scanner_timeout)) {
+                               return Math.max(0, profile.posa_scanner_timeout);
+                       }
+
+                       return 30;
+               },
+               trigger_onscan(sCode) {
                         if (this.scanErrorDialog) {
                                 this.playScanTone("error");
                                 return;
