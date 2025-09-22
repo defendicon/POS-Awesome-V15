@@ -31,6 +31,32 @@ function extractCheckDigit(value: string): number {
         return charCodeToDigit(value.charCodeAt(value.length - 1));
 }
 
+export type BarcodeSymbology = "EAN13" | "UPCA" | "EAN8";
+
+export type BarcodeParseResult = {
+        type: BarcodeSymbology | "RAW";
+        value: string;
+        valid: boolean;
+};
+
+type ParseCandidateOptions = {
+        tryOrder?: BarcodeSymbology[];
+};
+
+const DEFAULT_TRY_ORDER: BarcodeSymbology[] = ["EAN13", "UPCA", "EAN8"];
+
+const EXPECTED_LENGTH: Record<BarcodeSymbology, number> = {
+        EAN13: 13,
+        UPCA: 12,
+        EAN8: 8,
+};
+
+const VALIDATORS: Record<BarcodeSymbology, (value: string) => boolean> = {
+        EAN13: isValidEAN13,
+        UPCA: isValidUPCA,
+        EAN8: isValidEAN8,
+};
+
 export function isValidEAN13(value: string): boolean {
         if (!isDigits(value, 13)) {
                 return false;
@@ -53,4 +79,30 @@ export function isValidUPCA(value: string): boolean {
         }
         const expected = computeModulo10(value.slice(0, 11), (index) => (index % 2 === 0 ? 3 : 1));
         return expected === extractCheckDigit(value);
+}
+
+export function parseCandidate(
+        raw: string,
+        options: ParseCandidateOptions = {}
+): BarcodeParseResult {
+        const normalized = raw.trim();
+        const { tryOrder = DEFAULT_TRY_ORDER } = options;
+
+        if (!DIGIT_PATTERN.test(normalized)) {
+                return { type: "RAW", value: normalized, valid: false };
+        }
+
+        for (const type of tryOrder) {
+                const expectedLength = EXPECTED_LENGTH[type];
+                if (expectedLength === normalized.length) {
+                        const validator = VALIDATORS[type];
+                        return {
+                                type,
+                                value: normalized,
+                                valid: validator(normalized),
+                        };
+                }
+        }
+
+        return { type: "RAW", value: normalized, valid: false };
 }

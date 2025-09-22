@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isValidEAN13, isValidEAN8, isValidUPCA } from "@/utils/barcode";
+import { isValidEAN13, isValidEAN8, isValidUPCA, parseCandidate } from "@/utils/barcode";
 
 describe("barcode checksum validators", () => {
         describe("isValidEAN13", () => {
@@ -50,6 +50,42 @@ describe("barcode checksum validators", () => {
                         expect(isValidUPCA("03600029145")).toBe(false);
                         expect(isValidUPCA("0360002914520")).toBe(false);
                         expect(isValidUPCA("03600029145A")).toBe(false);
+                });
+        });
+});
+
+describe("parseCandidate", () => {
+        it("classifies known barcode types", () => {
+                expect(parseCandidate("4006381333931")).toEqual({
+                        type: "EAN13",
+                        value: "4006381333931",
+                        valid: true,
+                });
+                expect(parseCandidate("036000291452")).toEqual({
+                        type: "UPCA",
+                        value: "036000291452",
+                        valid: true,
+                });
+                expect(parseCandidate("55123457")).toEqual({
+                        type: "EAN8",
+                        value: "55123457",
+                        valid: true,
+                });
+        });
+
+        it("flags invalid checksum for matched symbology", () => {
+                expect(parseCandidate("036000291453")).toEqual({
+                        type: "UPCA",
+                        value: "036000291453",
+                        valid: false,
+                });
+        });
+
+        it("falls back to RAW for non-numeric input", () => {
+                expect(parseCandidate("ABC123")).toEqual({
+                        type: "RAW",
+                        value: "ABC123",
+                        valid: false,
                 });
         });
 });
