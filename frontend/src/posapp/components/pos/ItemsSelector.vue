@@ -1,10 +1,10 @@
 <template>
 	<div :style="responsiveStyles">
-		<v-dialog v-model="scanErrorDialog" persistent max-width="420" content-class="scan-error-dialog">
-			<v-card>
-				<v-card-title class="d-flex align-center text-error text-h6">
-					<v-icon color="error" class="mr-2">mdi-alert-octagon</v-icon>
-					{{ __("Scan Error") }}
+                <v-dialog v-model="scanErrorDialog" persistent max-width="420" content-class="scan-error-dialog">
+                        <v-card>
+                                <v-card-title class="d-flex align-center text-error text-h6">
+                                        <v-icon color="error" class="mr-2">mdi-alert-octagon</v-icon>
+                                        {{ __("Scan Error") }}
 				</v-card-title>
 				<v-divider></v-divider>
 				<v-card-text>
@@ -21,13 +21,20 @@
 					<v-btn color="primary" variant="tonal" autofocus @click="acknowledgeScanError">
 						{{ __("OK") }}
 					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
-		<v-card
-			:class="[
-				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
-				rtlClasses,
+                                </v-card-actions>
+                        </v-card>
+                </v-dialog>
+                <ScannerDevPanel
+                        v-if="isDevEnvironment"
+                        v-model="scanDevPanel"
+                        :diagnostics="scanDiagnostics"
+                        :config="scannerController?.config?.value || {}"
+                        @simulate="handleSyntheticScanRequest"
+                />
+                <v-card
+                        :class="[
+                                'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
+                                rtlClasses,
 			]"
 			:style="{
 				height: responsiveStyles['--container-height'],
@@ -123,19 +130,30 @@
 									{{ __("Settings") }}
 								</v-btn>
 								<v-spacer></v-spacer>
-								<v-btn
-									density="compact"
-									variant="text"
-									color="primary"
-									prepend-icon="mdi-refresh"
-									@click="forceReloadItems"
-									class="settings-btn"
-								>
-									{{ __("Reload Items") }}
-								</v-btn>
+                                                                <v-btn
+                                                                        density="compact"
+                                                                        variant="text"
+                                                                        color="primary"
+                                                                        prepend-icon="mdi-refresh"
+                                                                        @click="forceReloadItems"
+                                                                        class="settings-btn"
+                                                                >
+                                                                        {{ __("Reload Items") }}
+                                                                </v-btn>
+                                                                <v-btn
+                                                                        v-if="isDevEnvironment"
+                                                                        density="compact"
+                                                                        variant="text"
+                                                                        color="secondary"
+                                                                        prepend-icon="mdi-monitor-dashboard"
+                                                                        @click="toggleScanDevPanel(true)"
+                                                                        class="settings-btn"
+                                                                >
+                                                                        {{ __("Scanner Diagnostics (F1)") }}
+                                                                </v-btn>
 
-								<v-dialog v-model="show_item_settings" max-width="400px">
-									<v-card>
+                                                                <v-dialog v-model="show_item_settings" max-width="400px">
+                                                                        <v-card>
 										<v-card-title class="text-h6 pa-4 d-flex align-center">
 											<span>{{ __("Item Selector Settings") }}</span>
 											<v-spacer></v-spacer>
@@ -453,7 +471,7 @@
 
 <script type="module">
 /* eslint-disable no-unused-vars */
-/* global frappe, __, setLocalStockCache, flt, onScan, get_currency_symbol, current_items, wordCount */
+/* global frappe, __, setLocalStockCache, flt, get_currency_symbol, current_items, wordCount */
 import format from "../../format";
 import _ from "lodash";
 import CameraScanner from "./CameraScanner.vue";
@@ -490,21 +508,52 @@ import {
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
+import { useScanner } from "../../scanner/useScanner.js";
+import { useScanQueue } from "../../scanner/useScanQueue.js";
+import {
+        initScannerWorker,
+        seedScannerWorker,
+        configureScannerWorker,
+        parseFrameInWorker,
+        clearScannerWorker,
+} from "../../scanner/workerClient.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
+import ScannerDevPanel from "./scanner/ScannerDevPanel.vue";
+
+const IS_DEV_ENVIRONMENT = (() => {
+        try {
+                if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.MODE) {
+                        return import.meta.env.MODE !== "production";
+                }
+        } catch (error) {
+                // ignore
+        }
+        try {
+                if (typeof process !== "undefined" && process.env && process.env.NODE_ENV) {
+                        return process.env.NODE_ENV !== "production";
+                }
+        } catch (error) {
+                // ignore
+        }
+        return false;
+})();
 
 export default {
 	mixins: [format],
-	setup() {
-		const responsive = useResponsive();
-		const rtl = useRtl();
-		const { fly } = useFlyAnimation();
-		return { ...responsive, ...rtl, fly };
-	},
-	components: {
-		CameraScanner,
-		Skeleton,
-	},
+        setup() {
+                const responsive = useResponsive();
+                const rtl = useRtl();
+                const { fly } = useFlyAnimation();
+                const scannerController = useScanner();
+                const scanQueueController = useScanQueue();
+                return { ...responsive, ...rtl, fly, scannerController, scanQueueController };
+        },
+        components: {
+                CameraScanner,
+                Skeleton,
+                ScannerDevPanel,
+        },
 	data: () => ({
 		pos_profile: {},
 		stock_settings: {},
@@ -602,6 +651,25 @@ export default {
                 processingHardwareScan: false,
                 currentHardwareScan: null,
                 lastProcessedScanLength: 0,
+                scannerInitialized: false,
+                scannerDetach: null,
+                scanDiagnostics: {
+                        frame: null,
+                        worker: null,
+                        queueDepth: 0,
+                        histogram: [],
+                        decision: "",
+                        frameReason: "",
+                        symbology: "",
+                },
+                scanDevPanel: false,
+                isDevEnvironment: IS_DEV_ENVIRONMENT,
+                scannerDevKeyHandler: null,
+                scanOnlyMode: false,
+                scanOnlyModeExitTimer: null,
+                scanIdleExitMs: 2000,
+                scannerSeedTimeout: null,
+                scannerQueueWatcher: null,
                 isClearingSearch: false,
                 suppressSearchWatcher: false,
                 suppressSearchWatcherTimeout: null,
@@ -778,6 +846,9 @@ export default {
                                 }
                         }
                 }, 300),
+                items(newItems) {
+                        this.scheduleScannerSeed(newItems);
+                },
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
@@ -2157,6 +2228,9 @@ export default {
                                 try {
                                         await this.add_item(new_item);
                                         if (fromScanner) {
+                                                this.showScanSuccessToast(new_item, context.scanMetadata);
+                                        }
+                                        if (fromScanner) {
                                                 this.playScanTone("success");
                                                 this.scannerLocked = false;
                                                 this.pendingScanCode = "";
@@ -2655,47 +2729,296 @@ export default {
 			item.currency = this.selected_currency;
 			item.price_list_rate = item.rate;
 		},
-               scan_barcoud() {
-                       const vm = this;
-                       try {
-                               // Check if scanner is already attached to document
-                               if (document._scannerAttached) {
-                                       return;
-                               }
+               async scan_barcoud() {
+                       await this.initializeScanner();
+               },
 
-                               const suffixKeyCodes = vm.getScannerSuffixKeyCodes();
-                               const timeBeforeScanTest = vm.getScannerTimeBeforeScanTest(suffixKeyCodes);
-
-                               onScan.attachTo(document, {
-                                       suffixKeyCodes,
-                                       timeBeforeScanTest,
-                                       keyCodeMapper: function (oEvent) {
-                                               oEvent.stopImmediatePropagation();
-                                               oEvent.preventDefault();
-                                               return onScan.decodeKeyEvent(oEvent);
-                                       },
-                                       onScan: function (sCode) {
-                                               if (vm.scanErrorDialog) {
-                                                       vm.playScanTone("error");
-                                                       return;
-                                               }
-                                               if (vm.processingHardwareScan) {
-                                                       vm.trigger_onscan(sCode);
-                                                       return;
-                                               }
-                                               if (vm.scannerLocked) {
-                                                       vm.playScanTone("error");
-                                                       return;
-                                               }
-                                               vm.trigger_onscan(sCode);
-                                       },
-                               });
-
-                               // Mark document as having scanner attached
-                               document._scannerAttached = true;
-                       } catch (error) {
-                               console.warn("Scanner initialization error:", error.message);
+               async initializeScanner() {
+                       if (!this.scannerController || this.scannerInitialized) {
+                               return;
                        }
+
+                       try {
+                               await initScannerWorker();
+                       } catch (error) {
+                               console.error("Failed to start scanner worker", error);
+                       }
+
+                       if (typeof this.scanQueueController?.processWith === "function") {
+                               this.scanQueueController.processWith(async (frame) => {
+                                       await this.processScannerFrame(frame);
+                               });
+                       }
+
+                       if (!this.scannerQueueWatcher && this.scanQueueController?.depth) {
+                               this.scannerQueueWatcher = this.$watch(
+                                       () => this.scanQueueController.depth.value,
+                                       (depth) => {
+                                               this.scanDiagnostics.queueDepth = depth;
+                                               if (this.scannerController?.updateDiagnosticsQueueDepth) {
+                                                       this.scannerController.updateDiagnosticsQueueDepth(depth);
+                                               }
+                                       },
+                               );
+                       }
+
+                       const profileScannerConfig = this.pos_profile?.scanner || {};
+                       this.scannerController.configure({
+                               profile: profileScannerConfig,
+                               overrides: {
+                                       feedbackToasts:
+                                               profileScannerConfig.feedbackToasts !== undefined
+                                                       ? profileScannerConfig.feedbackToasts
+                                                       : true,
+                               },
+                       });
+
+                       try {
+                               await configureScannerWorker(this.scannerController?.config?.value || {});
+                       } catch (error) {
+                               console.warn("Failed to configure scanner worker", error);
+                       }
+
+                       if (typeof this.scannerController.onScan === "function") {
+                               this.scannerDetach = this.scannerController.onScan((frame) => {
+                                       this.enqueueScannerFrame(frame);
+                               });
+                       }
+
+                       if (typeof this.scannerController.start === "function") {
+                               this.scannerController.start();
+                       }
+
+                       this.scannerInitialized = true;
+                       this.scheduleScannerSeed(this.items);
+               },
+
+               enqueueScannerFrame(frame) {
+                       if (!frame) {
+                               return;
+                       }
+                       if (!Array.isArray(this.hardwareScanQueue)) {
+                               this.hardwareScanQueue = [];
+                       }
+                       this.hardwareScanQueue.push({
+                               code: frame.code,
+                               frameId: frame.id,
+                               startedAt: frame.startedAt,
+                               meta: frame.meta,
+                       });
+
+                       if (typeof this.scanQueueController?.enqueue === "function") {
+                               this.scanQueueController.enqueue(frame);
+                       }
+               },
+
+               removeFrameFromQueue(frameId) {
+                       if (!Array.isArray(this.hardwareScanQueue)) {
+                               return;
+                       }
+                       const index = this.hardwareScanQueue.findIndex((entry) => entry.frameId === frameId);
+                       if (index >= 0) {
+                               this.hardwareScanQueue.splice(index, 1);
+                       }
+               },
+
+               async processScannerFrame(frame) {
+                       if (!frame) {
+                               return;
+                       }
+                       this.processingHardwareScan = true;
+                       this.currentHardwareScan = { code: frame.code, frameId: frame.id };
+                       this.scannerLocked = true;
+                       this.awaitingScanResult = true;
+
+                       try {
+                               const config = this.scannerController?.config?.value || {};
+                               const workerResult = await parseFrameInWorker(frame, config);
+                               this.updateScannerDiagnostics(frame, workerResult);
+                               await this.applyScanResult(frame, workerResult);
+                       } catch (error) {
+                               console.error("Scanner frame processing failed", error);
+                               this.notifyHardwareScanFailure(frame.code, {
+                                       message: this.__("Unable to add scanned item."),
+                                       details: error?.message,
+                               });
+                       } finally {
+                               this.removeFrameFromQueue(frame.id);
+                               this.currentHardwareScan = null;
+                               this.processingHardwareScan = false;
+                               this.scannerLocked = false;
+                               this.awaitingScanResult = false;
+                               this.lastScanCompletedAt = Date.now();
+                               if (!this.scanErrorDialog) {
+                                       this.clearSearch();
+                               }
+                       }
+               },
+
+               async applyScanResult(frame, workerResult) {
+                       const resolved = Array.isArray(workerResult?.resolved) ? workerResult.resolved : [];
+                       if (!resolved.length) {
+                               this.notifyHardwareScanFailure(frame.code, {
+                                       message: this.__("Unknown barcode"),
+                                       details: frame.code,
+                               });
+                               return;
+                       }
+
+                       const topMatch = resolved[0];
+                       const candidateCode =
+                               topMatch?.barcode_entry?.barcode ||
+                               topMatch?.candidate?.value ||
+                               frame.code;
+
+                       await this.handleHardwareScan({
+                               code: candidateCode,
+                               fromScanner: true,
+                               metadata: {
+                                       frame,
+                                       workerResult,
+                                       match: topMatch,
+                               },
+                       });
+               },
+
+               updateScannerDiagnostics(frame, workerResult) {
+                       const depth = this.scanQueueController?.depth?.value ?? this.scanDiagnostics.queueDepth;
+                       const histogram = Array.isArray(frame?.meta?.events)
+                               ? frame.meta.events
+                                        .map((event) => event.delta)
+                                        .filter((value) => Number.isFinite(value))
+                               : [];
+                       this.scanDiagnostics = {
+                               frame,
+                               worker: workerResult,
+                               queueDepth: depth,
+                               histogram,
+                               decision: workerResult?.resolved?.length ? "resolved" : "unresolved",
+                               frameReason: frame?.meta?.reason || frame?.reason || "",
+                               symbology: frame?.meta?.symbology || workerResult?.candidates?.[0]?.symbology || "",
+                       };
+                       if (this.scannerController?.updateDiagnosticsQueueDepth) {
+                               this.scannerController.updateDiagnosticsQueueDepth(depth);
+                       }
+               },
+
+               async handleSyntheticScanRequest(options = {}) {
+                       if (!this.isDevEnvironment) {
+                               return;
+                       }
+                       try {
+                               await this.initializeScanner();
+                               if (typeof this.scannerController?.simulateText === "function") {
+                                       await this.scannerController.simulateText(options.input || "", {
+                                               msPerKey: options.msPerKey,
+                                               humanDelayMs: options.humanDelayMs,
+                                               includePrefix: options.includePrefix,
+                                               includeSuffix: options.includeSuffix,
+                                               initialDelayMs: options.initialDelayMs,
+                                       });
+                               }
+                       } catch (error) {
+                               console.error("Synthetic scan failed", error);
+                       }
+               },
+
+               toggleScanDevPanel(force) {
+                       if (!this.isDevEnvironment) {
+                               return;
+                       }
+                       if (typeof force === "boolean") {
+                               this.scanDevPanel = force;
+                               return;
+                       }
+                       this.scanDevPanel = !this.scanDevPanel;
+               },
+
+               scheduleScannerSeed(items) {
+                       if (this.scannerSeedTimeout) {
+                               clearTimeout(this.scannerSeedTimeout);
+                       }
+                       this.scannerSeedTimeout = setTimeout(() => {
+                               this.seedScannerIndex(items);
+                       }, 120);
+               },
+
+                async seedScannerIndex(items) {
+                        if (!Array.isArray(items) || !items.length) {
+                                return;
+                        }
+                        try {
+                                await seedScannerWorker(items.slice(0, 1000));
+                        } catch (error) {
+                                console.warn("Failed to seed scanner cache", error);
+                        }
+                },
+
+                showScanSuccessToast(item, metadata = {}) {
+                       const config = this.scannerController?.config?.value || {};
+                       if (config.feedbackToasts === false) {
+                               return;
+                       }
+
+                       const itemName = item?.item_name || item?.item_code || metadata?.match?.item_name;
+                       const uom = item?.uom || item?.stock_uom || metadata?.match?.uom || "";
+                       const quantityValue = item?.qty ?? 1;
+                       const formattedQty = this.format_number
+                               ? this.format_number(quantityValue, this.hide_qty_decimals ? 0 : this.float_precision)
+                               : quantityValue;
+
+                       const title = this.__("Added: {0}", [itemName || this.__("Item")]);
+                       const detail = uom ? `${uom} x${formattedQty}` : `x${formattedQty}`;
+
+                       this.eventBus.emit("show_message", {
+                               title: `${title} (${detail})`,
+                               color: "success",
+                       });
+
+                       if (frappe?.show_alert) {
+                               frappe.show_alert(
+                                       {
+                                               message: `${title} (${detail})`,
+                                               indicator: "green",
+                                       },
+                                       3,
+                               );
+                       }
+               },
+
+               destroyScanner() {
+                       if (this.scannerSeedTimeout) {
+                               clearTimeout(this.scannerSeedTimeout);
+                               this.scannerSeedTimeout = null;
+                       }
+                       if (typeof this.scannerDetach === "function") {
+                               try {
+                                       this.scannerDetach();
+                               } catch (error) {
+                                       console.warn("Scanner detach handler failed", error);
+                               }
+                               this.scannerDetach = null;
+                       }
+                       if (this.scannerQueueWatcher) {
+                               try {
+                                       this.scannerQueueWatcher();
+                               } catch (error) {
+                                       console.warn("Scanner queue watcher cleanup failed", error);
+                               }
+                               this.scannerQueueWatcher = null;
+                       }
+                       if (typeof this.scannerController?.stop === "function") {
+                               this.scannerController.stop();
+                       }
+                       try {
+                               clearScannerWorker();
+                       } catch (error) {
+                               console.warn("Failed to clear scanner worker", error);
+                       }
+                       if (Array.isArray(this.hardwareScanQueue)) {
+                                this.hardwareScanQueue.length = 0;
+                       }
+                       this.scannerInitialized = false;
                },
 
                getScannerSuffixKeyCodes() {
@@ -2726,61 +3049,6 @@ export default {
 
                        return 30;
                },
-               trigger_onscan(sCode) {
-                        if (this.scanErrorDialog) {
-                                this.playScanTone("error");
-                                return;
-                        }
-
-                        const raw = typeof sCode === "string" ? sCode : "";
-                        const trimmed = raw.trim();
-                        if (!trimmed) {
-                                return;
-                        }
-
-                        const hasActiveScan =
-                                this.processingHardwareScan &&
-                                this.currentHardwareScan &&
-                                typeof this.currentHardwareScan.code === "string";
-                        const shouldStripActivePrefix =
-                                hasActiveScan &&
-                                trimmed.startsWith(this.currentHardwareScan.code) &&
-                                trimmed.length > this.currentHardwareScan.code.length;
-
-                        let normalizedCodes = this.normalizeHardwareScanPayload(trimmed);
-                        const normalizationMeta = this.lastCompositeNormalization || {};
-
-                        if (shouldStripActivePrefix && normalizedCodes.length) {
-                                const activeCode = this.currentHardwareScan.code;
-                                if (normalizedCodes[0] === activeCode) {
-                                        normalizedCodes = normalizedCodes.slice(1);
-                                }
-                        }
-
-                        if (!normalizedCodes.length) {
-                                if (
-                                        normalizationMeta.attempted &&
-                                        !normalizationMeta.success &&
-                                        normalizationMeta.reason === "progressive-lengths"
-                                ) {
-                                        this.notifyHardwareScanFailure(trimmed, {
-                                                message: this.__("Item not found"),
-                                                details: this.getCompositeBarcodeLengthFailureDetails(),
-                                        });
-                                }
-                                return;
-                        }
-
-                        normalizedCodes.forEach((code) => {
-                                if (code) {
-                                        this.hardwareScanQueue.push({ code, fromScanner: true });
-                                }
-                        });
-
-                        if (this.hardwareScanQueue.length) {
-                                this.processHardwareScanQueue();
-                        }
-                },
                 queueManualScanBatch(codes) {
                         if (!Array.isArray(codes) || !codes.length) {
                                 return false;
@@ -2795,7 +3063,14 @@ export default {
                         }
 
                         entries.forEach((code) => {
-                                this.hardwareScanQueue.push({ code, fromScanner: false, source: "manual-batch" });
+                                const frame = {
+                                        id: `manual-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                                        code,
+                                        raw: code,
+                                        startedAt: Date.now(),
+                                        meta: { reason: "manual-batch" },
+                                };
+                                this.enqueueScannerFrame(frame);
                         });
 
                         this.pendingScanCode = "";
@@ -2810,92 +3085,7 @@ export default {
                                 }
                         });
 
-                        this.processHardwareScanQueue();
                         return true;
-                },
-                async processHardwareScanQueue() {
-                        if (this.processingHardwareScan || this.scanErrorDialog) {
-                                return;
-                        }
-
-                        this.processingHardwareScan = true;
-
-                        try {
-                                while (this.hardwareScanQueue.length) {
-                                        const nextScan = this.hardwareScanQueue.shift();
-                                        if (!nextScan || !nextScan.code) {
-                                                continue;
-                                        }
-
-                                        const normalizedBatch = this.normalizeHardwareScanPayload(nextScan.code);
-                                        if (
-                                                !nextScan.__normalized &&
-                                                Array.isArray(normalizedBatch) &&
-                                                normalizedBatch.length
-                                        ) {
-                                                const sanitizedBatch = normalizedBatch
-                                                        .map((part) => (typeof part === "string" ? part.trim() : ""))
-                                                        .filter(Boolean);
-                                                const originalTrimmed = typeof nextScan.code === "string" ? nextScan.code.trim() : "";
-                                                const isComposite =
-                                                        sanitizedBatch.length > 1 ||
-                                                        (sanitizedBatch.length === 1 && sanitizedBatch[0] !== originalTrimmed);
-
-                                                if (isComposite) {
-                                                        for (let index = sanitizedBatch.length - 1; index >= 0; index -= 1) {
-                                                                const part = sanitizedBatch[index];
-                                                                this.hardwareScanQueue.unshift({
-                                                                        ...nextScan,
-                                                                        code: part,
-                                                                        __normalized: true,
-                                                                });
-                                                        }
-                                                        continue;
-                                                }
-
-                                                if (sanitizedBatch.length === 1 && sanitizedBatch[0] !== originalTrimmed) {
-                                                        nextScan.code = sanitizedBatch[0];
-                                                }
-                                        }
-
-                                        nextScan.__normalized = true;
-
-                                        const activeCode = nextScan.code;
-                                        const shouldLockScanner = nextScan.fromScanner !== false;
-                                        this.currentHardwareScan = { ...nextScan };
-                                        this.scannerLocked = shouldLockScanner;
-
-                                        try {
-                                                await this.handleHardwareScan(nextScan);
-                                        } catch (error) {
-                                                console.error("Hardware scan processing failed", error);
-                                                this.notifyHardwareScanFailure(nextScan.code, {
-                                                        message: this.__("Unable to add scanned item."),
-                                                        details: error?.message,
-                                                });
-                                        } finally {
-                                                this.currentHardwareScan = null;
-                                                this.awaitingScanResult = false;
-                                                this.search_from_scanner = false;
-                                                this.pendingScanCode = "";
-                                                this.scannerLocked = false;
-                                                this.lastScanCompletedAt = Date.now();
-                                                if (activeCode) {
-                                                        this.lastProcessedScanLength = activeCode.length;
-                                                }
-
-                                                if (!this.scanErrorDialog) {
-                                                        this.clearSearch();
-                                                }
-                                        }
-                                }
-                        } finally {
-                                this.processingHardwareScan = false;
-                                this.scannerLocked = false;
-                                if (this.hardwareScanQueue.length && !this.scanErrorDialog) {
-                                        this.processHardwareScanQueue();
-                                }
-                        }
                 },
                 normalizeHardwareScanPayload(rawCode) {
                         const codes = [];
@@ -3748,10 +3938,10 @@ export default {
 
                         return codes;
                 },
-                async handleHardwareScan({ code, fromScanner = true }) {
-                        const scannedCode = code;
-                        const isScanner = fromScanner !== false;
-                        this.search_from_scanner = isScanner;
+               async handleHardwareScan({ code, fromScanner = true, metadata = {} }) {
+                       const scannedCode = code;
+                       const isScanner = fromScanner !== false;
+                       this.search_from_scanner = isScanner;
                         this.pendingScanCode = scannedCode;
                         this.first_search = scannedCode;
                         this.search = scannedCode;
@@ -3778,14 +3968,15 @@ export default {
                         const firstSearchValue = resolvedSearchCode || scannedCode;
                         const selectedItem = filteredItems[0] || null;
 
-                        await this.enter_event({
+                       await this.enter_event({
                                 firstSearch: firstSearchValue,
                                 scannedCode,
                                 filteredItems,
                                 item: selectedItem,
                                 fromScanner: isScanner,
+                                scanMetadata: metadata,
                         });
-                },
+               },
                 async resolveItemsForScan(scannedCode) {
                         const normalized = typeof scannedCode === "string" ? scannedCode.trim() : "";
                         if (!normalized) {
@@ -4918,18 +5109,31 @@ export default {
 		console.log("ItemsSelector created - starting initialization");
 
 		// Setup search debounce
-		this.searchDebounce = _.debounce(() => {
-			this.get_items();
-		}, 300);
+                this.searchDebounce = _.debounce(() => {
+                        this.get_items();
+                }, 300);
 
-		// Load settings
-		this.loadItemSettings();
+                // Load settings
+                this.loadItemSettings();
 
-		// Initialize after memory is ready
-		memoryInitPromise.then(async () => {
-			try {
-				// Ensure POS profile is available
-				if (!this.pos_profile || !this.pos_profile.name) {
+                if (this.isDevEnvironment) {
+                        this.scannerDevKeyHandler = (event) => {
+                                if (event.key === "F1") {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        if (!event.repeat) {
+                                                this.toggleScanDevPanel();
+                                        }
+                                }
+                        };
+                        window.addEventListener("keydown", this.scannerDevKeyHandler, true);
+                }
+
+                // Initialize after memory is ready
+                memoryInitPromise.then(async () => {
+                        try {
+                                // Ensure POS profile is available
+                                if (!this.pos_profile || !this.pos_profile.name) {
 					// Try to get POS profile from boot or current route
 					if (frappe.boot && frappe.boot.pos_profile) {
 						this.pos_profile = frappe.boot.pos_profile;
@@ -4961,13 +5165,17 @@ export default {
 		});
 
 		// Event listeners
-		this.eventBus.on("register_pos_profile", async (data) => {
-			this.pos_profile = data.pos_profile;
-			this.stock_settings = data.stock_settings || {};
-			this.get_items_groups();
-			await this.initializeItems();
-			this.items_view = this.pos_profile.posa_default_card_view ? "card" : "list";
-		});
+                this.eventBus.on("register_pos_profile", async (data) => {
+                        this.pos_profile = data.pos_profile;
+                        this.stock_settings = data.stock_settings || {};
+                        this.get_items_groups();
+                        await this.initializeItems();
+                        this.items_view = this.pos_profile.posa_default_card_view ? "card" : "list";
+                        this.destroyScanner();
+                        if (this.pos_profile?.posa_enable_barcode_scanning) {
+                                this.scan_barcoud();
+                        }
+                });
 		this.eventBus.on("update_cur_items_details", () => {
 			this.update_cur_items_details();
 		});
@@ -5135,31 +5343,32 @@ export default {
                         this.cleanupBeforeDestroy();
                 }
 
-		// Detach scanner if it was attached
-		if (document._scannerAttached) {
-			try {
-				onScan.detachFrom(document);
-				document._scannerAttached = false;
-			} catch (error) {
-				console.warn("Scanner detach error:", error.message);
-			}
-		}
+                this.destroyScanner();
 
 		if (this.itemWorker) {
 			this.itemWorker.terminate();
 		}
 
-		if (this.scanAudioContext) {
-			try {
-				this.scanAudioContext.close();
-			} catch (error) {
-				console.warn("Scan audio context close failed:", error);
-			}
-			this.scanAudioContext = null;
-		}
+                if (this.scanAudioContext) {
+                        try {
+                                this.scanAudioContext.close();
+                        } catch (error) {
+                                console.warn("Scan audio context close failed:", error);
+                        }
+                        this.scanAudioContext = null;
+                }
 
-		this.eventBus.off("update_currency");
-		this.eventBus.off("server-online");
+                if (this.scannerDevKeyHandler) {
+                        try {
+                                window.removeEventListener("keydown", this.scannerDevKeyHandler, true);
+                        } catch (error) {
+                                console.warn("Failed to remove scanner dev key handler", error);
+                        }
+                        this.scannerDevKeyHandler = null;
+                }
+
+                this.eventBus.off("update_currency");
+                this.eventBus.off("server-online");
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
