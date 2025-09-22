@@ -583,8 +583,11 @@ export default {
 		scannerLocked: false,
 		scanAudioContext: null,
 		pendingScanCode: "",
-		awaitingScanResult: false,
-	}),
+                awaitingScanResult: false,
+                scannerSearchCooldownUntil: 0,
+                firstSearchWatcherDebounce: null,
+                searchInputDebounce: null,
+        }),
 
 	watch: {
 		customer: _.debounce(function () {
@@ -734,20 +737,17 @@ export default {
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
-               first_search: _.debounce(function (val, oldVal) {
-                       if (this.search_from_scanner) {
-                               return;
-                       }
-                       const newLen = (val || "").trim().length;
-                       const oldLen = (oldVal || "").trim().length;
-                       if (newLen >= 3) {
-                               // Call without arguments so search_onchange treats it like an Enter key
-                               this.search_onchange();
-			} else if (oldLen >= 3 && newLen === 0) {
-				// Reset items only when search is fully cleared
-				this.clearSearch();
-			}
-		}, 300),
+                first_search(val, oldVal) {
+                        if (!this.firstSearchWatcherDebounce) {
+                                return;
+                        }
+
+                        if (this.shouldSkipDebouncedSearch()) {
+                                return;
+                        }
+
+                        this.firstSearchWatcherDebounce(val, oldVal);
+                },
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
@@ -1993,69 +1993,112 @@ export default {
 				}
 			}
 		},
-               search_onchange: _.debounce(async function (newSearchTerm) {
-                       const vm = this;
+                search_onchange(newSearchTerm) {
+                        if (this.shouldSkipDebouncedSearch()) {
+                                return;
+                        }
 
-                       if (vm.search_from_scanner) {
-                               return;
-                       }
+                        if (this.searchInputDebounce) {
+                                return this.searchInputDebounce(newSearchTerm);
+                        }
 
-                       vm.cancelItemDetailsRequest();
+                        return this.handleManualSearchOnChange(newSearchTerm);
+                },
 
-                       // Determine the actual query string and trim whitespace
-                       const query = typeof newSearchTerm === "string" ? newSearchTerm : vm.first_search;
-                       const trimmedQuery = (query || "").trim();
+                async handleManualSearchOnChange(newSearchTerm) {
+                        if (this.search_from_scanner) {
+                                return;
+                        }
 
-                       // Require a minimum of three characters before running a search
-                       if (!trimmedQuery || trimmedQuery.length < 3) {
-                               vm.search_from_scanner = false;
-                               return;
-                       }
+                        this.cancelItemDetailsRequest();
 
-			// If background loading is in progress, defer the search without changing the active query
-			if (vm.isBackgroundLoading) {
-				vm.pendingItemSearch = trimmedQuery;
-				return;
-			}
+                        const query = typeof newSearchTerm === "string" ? newSearchTerm : this.first_search;
+                        const trimmedQuery = (query || "").trim();
 
-			vm.search = trimmedQuery;
+                        if (!trimmedQuery || trimmedQuery.length < 3) {
+                                this.search_from_scanner = false;
+                                return;
+                        }
 
-			const fromScanner = vm.search_from_scanner;
+                        if (this.isBackgroundLoading) {
+                                this.pendingItemSearch = trimmedQuery;
+                                return;
+                        }
 
-			if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
-				if (vm.pos_profile && (!vm.pos_profile.posa_local_storage || !vm.storageAvailable)) {
-					vm.get_items(true);
-				} else {
-					vm.get_items();
-				}
-			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
-				if (vm.storageAvailable) {
-					await vm.loadVisibleItems(true);
-					vm.enter_event();
-				} else {
-					vm.get_items(true);
-				}
-			} else {
-				// When local storage is disabled, always fetch items
-				// from the server so searches aren't limited to the
-				// initially loaded set.
-				await vm.get_items(true);
-				vm.enter_event();
+                        this.search = trimmedQuery;
 
-				if (vm.filtered_items && vm.filtered_items.length > 0) {
-					setTimeout(() => {
-						vm.update_items_details(vm.filtered_items);
-					}, 300);
-				}
-			}
+                        const fromScanner = this.search_from_scanner;
 
-			// Clear the input only when triggered via scanner
-			if (fromScanner) {
-				vm.clearSearch();
-				vm.$refs.debounce_search && vm.$refs.debounce_search.focus();
-				vm.search_from_scanner = false;
-			}
-		}, 300),
+                        if (this.pos_profile && this.pos_profile.pose_use_limit_search) {
+                                if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
+                                        this.get_items(true);
+                                } else {
+                                        this.get_items();
+                                }
+                        } else if (this.pos_profile && this.pos_profile.posa_local_storage) {
+                                if (this.storageAvailable) {
+                                        await this.loadVisibleItems(true);
+                                        this.enter_event();
+                                } else {
+                                        this.get_items(true);
+                                }
+                        } else {
+                                await this.get_items(true);
+                                this.enter_event();
+
+                                if (this.filtered_items && this.filtered_items.length > 0) {
+                                        setTimeout(() => {
+                                                this.update_items_details(this.filtered_items);
+                                        }, 300);
+                                }
+                        }
+
+                        if (fromScanner) {
+                                this.clearSearch();
+                                if (this.$refs.debounce_search) {
+                                        this.$refs.debounce_search.focus();
+                                }
+                                this.search_from_scanner = false;
+                        }
+                },
+
+                handleManualFirstSearch(val, oldVal) {
+                        const newLen = (val || "").trim().length;
+                        const oldLen = (oldVal || "").trim().length;
+
+                        if (newLen >= 3) {
+                                this.search_onchange();
+                        } else if (oldLen >= 3 && newLen === 0) {
+                                this.clearSearch();
+                        }
+                },
+
+                shouldSkipDebouncedSearch() {
+                        if (this.search_from_scanner || this.awaitingScanResult) {
+                                return true;
+                        }
+
+                        if (!this.scannerSearchCooldownUntil) {
+                                return false;
+                        }
+
+                        return Date.now() < this.scannerSearchCooldownUntil;
+                },
+
+                activateScannerSearchGuard() {
+                        const cooldownWindow = 400;
+                        this.scannerSearchCooldownUntil = Date.now() + cooldownWindow;
+
+                        if (this.firstSearchWatcherDebounce?.cancel) {
+                                this.firstSearchWatcherDebounce.cancel();
+                        }
+
+                        if (this.searchInputDebounce?.cancel) {
+                                this.searchInputDebounce.cancel();
+                        }
+
+                        this.pendingItemSearch = null;
+                },
 		get_item_qty(first_search) {
 			const qtyVal = this.qty != null ? this.qty : 1;
 			let scal_qty = Math.abs(qtyVal);
@@ -2433,6 +2476,8 @@ export default {
                                return;
                        }
 
+                       this.activateScannerSearchGuard();
+
                        // Mark the upcoming search as originating from a scanner
                        this.search_from_scanner = true;
                        this.pendingScanCode = sCode;
@@ -2628,16 +2673,17 @@ export default {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			console.log("Barcode scanned:", scannedCode);
-			this.pendingScanCode = scannedCode;
+                onBarcodeScanned(scannedCode) {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
+                        console.log("Barcode scanned:", scannedCode);
+                        this.activateScannerSearchGuard();
+                        this.pendingScanCode = scannedCode;
 
-			// mark this search as coming from a scanner
-			this.search_from_scanner = true;
+                        // mark this search as coming from a scanner
+                        this.search_from_scanner = true;
 
 			// Clear any previous search
 			this.search = "";
@@ -3209,9 +3255,29 @@ export default {
 		console.log("ItemsSelector created - starting initialization");
 
 		// Setup search debounce
-		this.searchDebounce = _.debounce(() => {
-			this.get_items();
-		}, 300);
+                this.searchDebounce = _.debounce(() => {
+                        this.get_items();
+                }, 300);
+
+                this.firstSearchWatcherDebounce = _.debounce((val, oldVal) => {
+                        this.handleManualFirstSearch(val, oldVal);
+                }, 300);
+
+                this.searchInputDebounce = _.debounce(async (newSearchTerm) => {
+                        await this.handleManualSearchOnChange(newSearchTerm);
+                }, 300);
+
+                this.search_onchange.flush = () => {
+                        if (this.searchInputDebounce?.flush) {
+                                this.searchInputDebounce.flush();
+                        }
+                };
+
+                this.search_onchange.cancel = () => {
+                        if (this.searchInputDebounce?.cancel) {
+                                this.searchInputDebounce.cancel();
+                        }
+                };
 
 		// Load settings
 		this.loadItemSettings();
