@@ -50,23 +50,24 @@
 				<div class="sticky-header">
 					<v-row class="items">
 						<v-col class="pb-0">
-							<v-text-field
-								density="compact"
-								clearable
-								autofocus
-								variant="solo"
-								color="primary"
+                                                        <v-text-field
+                                                                density="compact"
+                                                                clearable
+                                                                autofocus
+                                                                variant="solo"
+                                                                color="primary"
 								:label="frappe._('Search Items')"
 								hint="Search by item code, serial number, batch no or barcode"
 								hide-details
-								v-model="debounce_search"
-								@keydown.esc="esc_event"
-								@keydown.enter="search_onchange"
-								@click:clear="clearSearch"
-								prepend-inner-icon="mdi-magnify"
-								@focus="handleItemSearchFocus"
-								ref="debounce_search"
-							>
+                                                                v-model="debounce_search"
+                                                                @keydown.esc="esc_event"
+                                                                @keydown.enter.prevent="handleSearchEnter"
+                                                                @click:clear="clearSearch"
+                                                                prepend-inner-icon="mdi-magnify"
+                                                                @focus="handleItemSearchFocus"
+                                                                @paste="handleSearchPaste"
+                                                                ref="debounce_search"
+                                                        >
 								<!-- Add camera scan button if enabled -->
 								<template v-slot:append-inner v-if="pos_profile.posa_enable_camera_scanning">
 									<v-btn
@@ -2530,6 +2531,120 @@ export default {
                         }
 
                         this.scannerEnabled = false;
+                },
+                handleSearchEnter(event) {
+                        if (event && typeof event.preventDefault === "function") {
+                                event.preventDefault();
+                        }
+
+                        const currentValue = (this.first_search || "").trim();
+
+                        if (!currentValue) {
+                                this.search_from_scanner = false;
+                                this.search_onchange();
+                                if (this.search_onchange && typeof this.search_onchange.flush === "function") {
+                                        this.search_onchange.flush();
+                                }
+                                return;
+                        }
+
+                        const payload = this.determineImmediateScanPayload(currentValue);
+                        if (!payload) {
+                                this.search_from_scanner = false;
+                                this.search_onchange(currentValue);
+                                if (this.search_onchange && typeof this.search_onchange.flush === "function") {
+                                        this.search_onchange.flush();
+                                }
+                                return;
+                        }
+
+                        this.dispatchImmediateScanPayload(payload);
+                },
+                handleSearchPaste(event) {
+                        const clipboardData =
+                                event?.clipboardData ||
+                                (typeof window !== "undefined" ? window.clipboardData : null);
+                        const pastedText = clipboardData?.getData?.("text") || "";
+                        const normalized = typeof pastedText === "string" ? pastedText.trim() : "";
+
+                        if (!normalized) {
+                                return;
+                        }
+
+                        const payload = this.determineImmediateScanPayload(normalized);
+                        if (!payload) {
+                                return;
+                        }
+
+                        if (event && typeof event.preventDefault === "function") {
+                                event.preventDefault();
+                        }
+
+                        this.dispatchImmediateScanPayload(payload);
+                },
+                determineImmediateScanPayload(value) {
+                        if (!value) {
+                                return null;
+                        }
+
+                        const scanningActive = !!(
+                                this.scannerEnabled ||
+                                this._usingLegacyScanner ||
+                                this.pos_profile?.posa_enable_barcode_scanning
+                        );
+
+                        if (!scanningActive) {
+                                return null;
+                        }
+
+                        const parsed = parseCandidate(value);
+                        let resolution;
+                        try {
+                                resolution = memoryResolver.resolve(parsed);
+                        } catch (error) {
+                                console.warn("Immediate scan resolution failed", error);
+                                resolution = { found: false, reason: "NOT_FOUND" };
+                        }
+
+                        if (!resolution.found && resolution.reason === "NOT_NUMERIC") {
+                                return null;
+                        }
+
+                        return { raw: value, parsed, receivedAt: Date.now() };
+                },
+                dispatchImmediateScanPayload(payload) {
+                        if (!payload) {
+                                return;
+                        }
+
+                        this.search_from_scanner = true;
+                        this.pendingScanCode = payload.raw;
+
+                        if (this.search_onchange && typeof this.search_onchange.cancel === "function") {
+                                this.search_onchange.cancel();
+                        }
+
+                        const hasQueueListener = typeof this._scanQueueDispose === "function";
+                        if (this.scanQueue && hasQueueListener) {
+                                if (typeof this.scanQueue.start === "function") {
+                                        this.scanQueue.start();
+                                }
+                                this.scanQueue.enqueue(payload);
+                                if (typeof this.scanQueue.size === "function") {
+                                        this.scannerQueueSize = this.scanQueue.size();
+                                }
+                        } else {
+                                this.processQueuedScan(payload);
+                        }
+
+                        this.first_search = "";
+                        this.search = "";
+
+                        this.$nextTick(() => {
+                                if (this.$refs.debounce_search && typeof this.$refs.debounce_search.focus === "function") {
+                                        this.$refs.debounce_search.focus();
+                                }
+                        });
                 },
                 handleScannerInput(rawText) {
                         if (this.scannerLocked) {
