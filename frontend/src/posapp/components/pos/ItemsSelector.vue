@@ -1957,12 +1957,15 @@ export default {
 				new_item._barcode_qty = true;
 			}
 
-			let match = false;
-			if (Array.isArray(new_item.item_barcode)) {
-				new_item.item_barcode.forEach((element) => {
-					if (search === element.barcode) {
-						new_item.uom = element.posa_uom;
-						match = true;
+                        const fromScanner = this.search_from_scanner;
+                        const scannedCodeForDisplay = this.pendingScanCode || this.first_search || search;
+
+                        let match = false;
+                        if (Array.isArray(new_item.item_barcode)) {
+                                new_item.item_barcode.forEach((element) => {
+                                        if (search === element.barcode) {
+                                                new_item.uom = element.posa_uom;
+                                                match = true;
 					}
 				});
 			}
@@ -1980,14 +1983,23 @@ export default {
 				new_item.to_set_batch_no = this.flags.batch_no;
 			}
 
-			if (match) {
-				const fromScanner = this.search_from_scanner;
-				const scannedCodeForDisplay = this.pendingScanCode || this.first_search || search;
-				const availableQty =
-					typeof new_item.available_qty === "number"
-						? new_item.available_qty
-						: typeof new_item.actual_qty === "number"
-							? new_item.actual_qty
+                        if (!match) {
+                                if (fromScanner) {
+                                        this.showScanError({
+                                                message: `${this.__("Item not found")}: ${scannedCodeForDisplay}`,
+                                                code: scannedCodeForDisplay,
+                                                details: this.__("Please verify the barcode or search manually."),
+                                        });
+                                }
+                                return;
+                        }
+
+                        if (match) {
+                                const availableQty =
+                                        typeof new_item.available_qty === "number"
+                                                ? new_item.available_qty
+                                                : typeof new_item.actual_qty === "number"
+                                                        ? new_item.actual_qty
 							: null;
 				const requestedQty = Math.abs(new_item.qty || 1);
 
@@ -2035,22 +2047,23 @@ export default {
 					}
 				}
 
-				if (fromScanner) {
-					this.awaitingScanResult = true;
-				}
+                                if (fromScanner) {
+                                        this.awaitingScanResult = true;
+                                        this.scannerLocked = true;
+                                }
 
-				try {
-					await this.add_item(new_item);
-					if (fromScanner) {
-						this.playScanTone("success");
-						this.scannerLocked = false;
-						this.pendingScanCode = "";
-					}
-				} finally {
-					if (fromScanner) {
-						this.awaitingScanResult = false;
-					}
-				}
+                                try {
+                                        await this.add_item(new_item);
+                                        if (fromScanner) {
+                                                this.playScanTone("success");
+                                                this.pendingScanCode = "";
+                                        }
+                                } finally {
+                                        if (fromScanner) {
+                                                this.awaitingScanResult = false;
+                                                this.scannerLocked = false;
+                                        }
+                                }
 
 				this.flags.serial_no = null;
 				this.flags.batch_no = null;
@@ -2846,28 +2859,32 @@ export default {
 				}
 			}
 		},
-		showScanError({ message, code = "", details = "" } = {}) {
-			this.scanErrorMessage = message || this.__("Unable to add scanned item.");
-			this.scanErrorCode = code;
-			this.scanErrorDetails = details;
-			if (code) {
-				this.pendingScanCode = code;
-			}
-			this.awaitingScanResult = false;
-			this.search_from_scanner = false;
-			this.scanErrorDialog = true;
-			this.scannerLocked = true;
-			this.playScanTone("error");
-			if (frappe?.show_alert) {
-				frappe.show_alert(
-					{
-						message: this.scanErrorMessage,
-						indicator: "red",
-					},
-					5,
-				);
-			}
-		},
+                showScanError({ message, code = "", details = "" } = {}) {
+                        const fromScanner = this.search_from_scanner;
+                        this.scanErrorMessage = message || this.__("Unable to add scanned item.");
+                        this.scanErrorCode = code;
+                        this.scanErrorDetails = details;
+                        if (code) {
+                                this.pendingScanCode = code;
+                        }
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        this.scanErrorDialog = true;
+                        this.scannerLocked = true;
+                        this.playScanTone("error");
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: this.scanErrorMessage,
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                        }
+                        if (fromScanner) {
+                                this.clearSearch();
+                        }
+                },
 		acknowledgeScanError() {
 			this.scanErrorDialog = false;
 			this.scannerLocked = false;
