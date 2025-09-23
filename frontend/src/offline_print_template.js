@@ -149,7 +149,7 @@ function defaultOfflineHTML(invoice) {
                     <td>${item.item_name || ""}</td>
                     <td style="text-align: center;">${item.qty || 0}</td>
                     <td style="text-align: center;">${(item.rate || 0)}</td>
-                    <td style="text-align: right;">${(item.amount || 0)}</td>
+                    <td style="text-align: right;">${(item.amount || 0).toFixed(2)}</td>
                 </tr>`
             )
             .join("");
@@ -157,21 +157,19 @@ function defaultOfflineHTML(invoice) {
     const paid_amount = invoice.payments && invoice.payments.reduce((sum, p) => sum + p.amount, 0);
     // Format items into table rows.
     const payments = (invoice.payments || [])
+        .filter(item => item.amount !== 0)
         .map(
-            (item) => {
-                if (item.amount !== 0) {
-                    return `
-                        <tr>
-                            <td>${item.mode_of_payment}</td>
-                            <td style="text-align: right;">${item.amount}</td>
-                        </tr>`
-                }}
+            (item) => `
+                <tr>
+                    <td>${item.mode_of_payment}</td>
+                    <td style="text-align: right;">${item.amount.toFixed(2)}</td>
+                </tr>`
+                
             )
             .join("");
     
     // Calculate change amount, ensuring it's not negative.
-    const change = (paid_amount || 0) - (invoice.grand_total || 0);
-    const changeAmount = (change > 0 ? change : 0.0);
+    const changeAmount = Math.max((paid_amount || 0) - (invoice.grand_total || 0), 0).toFixed(2);
 
     // The main HTML structure, built using a template literal.
     return `<!DOCTYPE html>
@@ -274,17 +272,17 @@ function defaultOfflineHTML(invoice) {
                         <tr>
                             <td>Total w/o VAT</td>
                             <td style="text-align: center;">المجموع غير شامل الضريبة</td>
-                            <td style="text-align: right;">${(invoice.net_total || 0)}</td>
+                            <td style="text-align: right;">${(invoice.net_total || 0).toFixed(2)}</td>
                         </tr>
                         <tr>
                             <td>VAT</td>
                             <td style="text-align: center;">الضريبة</td>
-                            <td style="text-align: right;">${(invoice.total_taxes_and_charges || 0)}</td>
+                            <td style="text-align: right;">${(invoice.total_taxes_and_charges || 0).toFixed(2)}</td>
                         </tr>
                         <tr>
                             <td>Total with VAT</td>
                             <td style="text-align: center;">المجموع شامل الضريبة</td>
-                            <td style="text-align: right;">${(invoice.grand_total || 0)}</td>
+                            <td style="text-align: right;">${(invoice.grand_total || 0).toFixed(2)}</td>
                         </tr>
                     </table>
 
@@ -293,14 +291,15 @@ function defaultOfflineHTML(invoice) {
                     <table width="100%" style="font-size: 12px;">
                         <tr>
                             <td><strong>Total | المجموع AED</strong></td>
-                            <td style="text-align: right;"><strong>${(invoice.grand_total || 0)}</strong></td>
+                            <td style="text-align: right;"><strong>${(invoice.grand_total || 0).toFixed(2)}</strong></td>
                         </tr>
-                        ${payments}
-                        ${paid_amount < invoice.grand_total && 
+                        ${payments ? payments : "" }
+                        ${(paid_amount < invoice.grand_total) ? 
                             `<tr>
                                 <td>Credit</td>
-                                <td style="text-align: right;">${(invoice.grand_total - paid_amount || 0)}</td>
+                                <td style="text-align: right;">${(invoice.grand_total - paid_amount || 0).toFixed(2)}</td>
                             </tr>`
+                            : ""
                         }
                         <tr>
                             <td>Change</td>
@@ -320,10 +319,6 @@ function defaultOfflineHTML(invoice) {
                     <p style="text-align: center; margin-top: 6px; font-size: 11px;">
                         Thank you for shopping with <br><strong>${invoice.company || ""}</strong><br>
                     </p>
-
-                    <div style="text-align: center; margin-top: 10px;">
-                        <img src="/files/nesto_qr.png" width="80">
-                    </div>
                 </div>
             </body>
         </html>`;
