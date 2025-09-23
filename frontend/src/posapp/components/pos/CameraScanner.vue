@@ -264,17 +264,18 @@ export default {
 	},
 
 	data() {
-		return {
-			scannerDialog: false,
-			scanResult: "",
-			scanFormat: "", // We might get this from the 'detect' event payload
-			errorMessage: "",
-			cameraPermissionDenied: false,
-			isScanning: false,
-			torchActive: false,
-			selectedDeviceId: null, // For camera switching
+                return {
+                        scannerDialog: false,
+                        scanResult: "",
+                        scanFormat: "", // We might get this from the 'detect' event payload
+                        errorMessage: "",
+                        cameraPermissionDenied: false,
+                        isScanning: false,
+                        torchActive: false,
+                        selectedDeviceId: null, // For camera switching
                         cameras: [], // To store available cameras
                         manualScanValue: "",
+                        scanResetTimeoutId: null,
 			// Old properties to be removed or re-evaluated:
 			// qrScanner: null,
 			// flashlightSupported: false, // vue-qrcode-reader handles this via QrcodeStream's torch prop
@@ -364,7 +365,8 @@ export default {
                         }
                 },
 
-                handleScannedCode(rawValue, formatLabel = "") {
+                handleScannedCode(rawValue, formatLabel = "", options = {}) {
+                        const { pauseCamera = true, resetDelay = 1000 } = options;
                         const code = (rawValue ?? "").toString().trim();
                         if (!code) {
                                 return;
@@ -387,17 +389,24 @@ export default {
                                 );
                         }
 
-                        const wasScanning = this.isScanning;
-                        this.isScanning = false;
+                        const shouldPauseCamera = pauseCamera && this.isScanning;
+                        if (shouldPauseCamera) {
+                                this.isScanning = false;
+                        }
 
-                        // Resume scanning after a short delay if the camera was already active
-                        setTimeout(() => {
+                        if (this.scanResetTimeoutId) {
+                                clearTimeout(this.scanResetTimeoutId);
+                                this.scanResetTimeoutId = null;
+                        }
+
+                        this.scanResetTimeoutId = setTimeout(() => {
                                 this.scanResult = "";
                                 this.scanFormat = "";
-                                if (wasScanning) {
+                                if (shouldPauseCamera && this.scannerDialog) {
                                         this.isScanning = true;
                                 }
-                        }, 1000);
+                                this.scanResetTimeoutId = null;
+                        }, Math.max(0, resetDelay));
                 },
 
                 submitManualScan() {
@@ -406,7 +415,9 @@ export default {
                                 return;
                         }
 
-                        this.handleScannedCode(code, this.__("Manual Entry"));
+                        this.handleScannedCode(code, this.__("Manual Entry"), {
+                                pauseCamera: false,
+                        });
                         this.manualScanValue = "";
                         this.$nextTick(() => {
                                 this.focusManualInput();
@@ -434,6 +445,10 @@ export default {
 		},
 
                 stopScanning() {
+                        if (this.scanResetTimeoutId) {
+                                clearTimeout(this.scanResetTimeoutId);
+                                this.scanResetTimeoutId = null;
+                        }
                         this.isScanning = false; // This should make QrcodeStream stop/hide
                         this.scannerDialog = false;
                         this.scanResult = "";
@@ -520,11 +535,11 @@ export default {
 		}
 	},
 
-	beforeUnmount() {
-		if (typeof document !== "undefined") {
-			document.removeEventListener("keydown", this.handleEscKey);
-		}
-		this.stopScanning(); // Ensure scanner stops when component is unmounted
-	},
+        beforeUnmount() {
+                if (typeof document !== "undefined") {
+                        document.removeEventListener("keydown", this.handleEscKey);
+                }
+                this.stopScanning(); // Ensure scanner stops when component is unmounted
+        },
 };
 </script>
