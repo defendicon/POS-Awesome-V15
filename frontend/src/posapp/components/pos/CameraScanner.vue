@@ -263,7 +263,7 @@ export default {
                 },
                 autoCloseOnScan: {
                         type: Boolean,
-                        default: true,
+                        default: false,
                 },
         },
 
@@ -447,6 +447,7 @@ export default {
 
                         this.handleScannedCode(code, this.__("Manual Entry"), {
                                 pauseCamera: false,
+                                closeDialog: false,
                                 closeDelay: 0,
                         });
                         this.manualScanValue = "";
