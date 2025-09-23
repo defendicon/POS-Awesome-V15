@@ -2564,22 +2564,25 @@ export default {
 				}
 			}
 		},
-		showScanError({ message, code = "", details = "" } = {}) {
-			this.scanErrorMessage = message || this.__("Unable to add scanned item.");
-			this.scanErrorCode = code;
-			this.scanErrorDetails = details;
-			if (code) {
-				this.pendingScanCode = code;
-			}
-			this.awaitingScanResult = false;
-			this.search_from_scanner = false;
-			this.scanErrorDialog = true;
-			this.scannerLocked = true;
-			this.playScanTone("error");
-			if (frappe?.show_alert) {
-				frappe.show_alert(
-					{
-						message: this.scanErrorMessage,
+                showScanError({ message, code = "", details = "" } = {}) {
+                        this.scanErrorMessage = message || this.__("Unable to add scanned item.");
+                        this.scanErrorCode = code;
+                        this.scanErrorDetails = details;
+                        if (code) {
+                                this.pendingScanCode = code;
+                        }
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        this.scanErrorDialog = true;
+                        this.scannerLocked = true;
+                        if (this.$refs.cameraScanner?.pauseForExternalLock) {
+                                this.$refs.cameraScanner.pauseForExternalLock();
+                        }
+                        this.playScanTone("error");
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: this.scanErrorMessage,
 						indicator: "red",
 					},
 					5,
@@ -2594,6 +2597,9 @@ export default {
                         this.scanErrorDetails = "";
                         this.pendingScanCode = "";
                         this.awaitingScanResult = false;
+                        if (this.$refs.cameraScanner?.resumeFromExternalLock) {
+                                this.$refs.cameraScanner.resumeFromExternalLock();
+                        }
                         this.focusItemSearch();
                 },
 

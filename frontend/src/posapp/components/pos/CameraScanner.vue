@@ -296,6 +296,7 @@ export default {
                         manualScanValue: "",
                         scanResetTimeoutId: null,
                         dialogCloseTimeoutId: null,
+                        scannerLockedExternally: false,
 			// Old properties to be removed or re-evaluated:
 			// qrScanner: null,
 			// flashlightSupported: false, // vue-qrcode-reader handles this via QrcodeStream's torch prop
@@ -339,6 +340,7 @@ export default {
 
 	methods: {
                 async startScanning() {
+                        this.scannerLockedExternally = false;
                         this.scannerDialog = true;
                         this.errorMessage = "";
                         this.scanResult = "";
@@ -447,7 +449,7 @@ export default {
                         this.scanResetTimeoutId = setTimeout(() => {
                                 this.scanResult = "";
                                 this.scanFormat = "";
-                                if (shouldPauseCamera && this.scannerDialog) {
+                                if (shouldPauseCamera && this.scannerDialog && !this.scannerLockedExternally) {
                                         this.isScanning = true;
                                 }
                                 this.scanResetTimeoutId = null;
@@ -492,6 +494,7 @@ export default {
 		},
 
                 stopScanning() {
+                        this.scannerLockedExternally = false;
                         if (this.scanResetTimeoutId) {
                                 clearTimeout(this.scanResetTimeoutId);
                                 this.scanResetTimeoutId = null;
@@ -572,6 +575,39 @@ export default {
                                         this.focusManualInput();
                                 });
                         });
+                },
+
+                pauseForExternalLock() {
+                        this.scannerLockedExternally = true;
+                        if (this.scanResetTimeoutId) {
+                                clearTimeout(this.scanResetTimeoutId);
+                                this.scanResetTimeoutId = null;
+                        }
+                        if (this.dialogCloseTimeoutId) {
+                                clearTimeout(this.dialogCloseTimeoutId);
+                                this.dialogCloseTimeoutId = null;
+                        }
+                        if (this.isScanning) {
+                                this.isScanning = false;
+                        }
+                },
+
+                resumeFromExternalLock() {
+                        if (!this.scannerDialog) {
+                                this.scannerLockedExternally = false;
+                                return;
+                        }
+                        this.scannerLockedExternally = false;
+                        if (!this.isScanning) {
+                                this.$nextTick(() => {
+                                        if (this.scannerDialog && !this.isScanning) {
+                                                this.isScanning = true;
+                                                this.queueManualInputFocus();
+                                        }
+                                });
+                        } else {
+                                this.queueManualInputFocus();
+                        }
                 },
         },
 
