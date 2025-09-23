@@ -109,6 +109,7 @@
                                                 @click:clear="manualScanValue = ''"
                                                 autocomplete="off"
                                                 ref="manualScanInput"
+                                                :autofocus="scannerDialog"
                                                 prepend-inner-icon="mdi-barcode-scan"
                                         >
                                                 <template #append-inner>
@@ -347,7 +348,7 @@ export default {
                         this.manualScanValue = "";
                         // We might need to await this.$nextTick() if QrcodeStream is inside v-if controlled by scannerDialog
                         await this.$nextTick();
-                        this.focusManualInput();
+                        this.queueManualInputFocus();
                         // Camera listing can be done here or in a dedicated method
                         // vue-qrcode-reader doesn't directly list cameras in QrcodeStream,
                         // but we can use navigator.mediaDevices.enumerateDevices()
@@ -450,7 +451,9 @@ export default {
                                         this.isScanning = true;
                                 }
                                 this.scanResetTimeoutId = null;
+                                this.queueManualInputFocus();
                         }, Math.max(0, resetDelay));
+                        this.queueManualInputFocus();
                 },
 
                 submitManualScan() {
@@ -465,9 +468,7 @@ export default {
                                 closeDelay: 0,
                         });
                         this.manualScanValue = "";
-                        this.$nextTick(() => {
-                                this.focusManualInput();
-                        });
+                        this.queueManualInputFocus();
                 },
 
 		onError(error) {
@@ -558,6 +559,21 @@ export default {
                                 input.focus();
                         }
                 },
+
+                queueManualInputFocus() {
+                        if (!this.scannerDialog) {
+                                return;
+                        }
+                        this.$nextTick(() => {
+                                const scheduler =
+                                        typeof requestAnimationFrame === "function"
+                                                ? requestAnimationFrame
+                                                : (cb) => setTimeout(cb, 16);
+                                scheduler(() => {
+                                        this.focusManualInput();
+                                });
+                        });
+                },
         },
 
 	watch: {
@@ -567,9 +583,7 @@ export default {
                                 if (!this.selectedDeviceId && this.cameras.length === 0) {
                                         this.listCameras();
                                 }
-                                this.$nextTick(() => {
-                                        this.focusManualInput();
-                                });
+                                this.queueManualInputFocus();
                         } else {
                                 // When dialog closes, ensure scanning is stopped.
                                 this.isScanning = false;
