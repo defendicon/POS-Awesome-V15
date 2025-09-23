@@ -137,6 +137,7 @@ def get_selling_price_lists():
     )
 
 
+@frappe.whitelist()
 def get_app_info() -> Dict[str, List[Dict[str, str]]]:
     """
     Return a list of installed apps and their versions.
