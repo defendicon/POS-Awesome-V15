@@ -508,7 +508,6 @@ export default {
                         this.torchActive = false;
                         this.manualScanValue = "";
                         // selectedDeviceId and cameras can remain as they are for next scan
-                        this.$emit("scanner-closed");
                 },
 
 		async toggleTorch() {
@@ -576,7 +575,7 @@ export default {
                 },
         },
 
-	watch: {
+        watch: {
                 scannerDialog(newVal) {
                         if (newVal) {
                                 // When dialog opens, if no camera is selected, list them.
@@ -584,11 +583,13 @@ export default {
                                         this.listCameras();
                                 }
                                 this.queueManualInputFocus();
+                                this.$emit("scanner-opened");
                         } else {
                                 // When dialog closes, ensure scanning is stopped.
                                 this.isScanning = false;
                                 this.torchActive = false;
                                 this.manualScanValue = "";
+                                this.$emit("scanner-closed");
                         }
                 },
         },

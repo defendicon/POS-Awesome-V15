@@ -442,12 +442,14 @@
 		</v-card>
 
 		<!-- Camera Scanner Component -->
-		<CameraScanner
-			v-if="pos_profile.posa_enable_camera_scanning"
-			ref="cameraScanner"
-			:scan-type="pos_profile.posa_camera_scan_type || 'Both'"
-			@barcode-scanned="onBarcodeScanned"
-		/>
+                <CameraScanner
+                        v-if="pos_profile.posa_enable_camera_scanning"
+                        ref="cameraScanner"
+                        :scan-type="pos_profile.posa_camera_scan_type || 'Both'"
+                        @barcode-scanned="onBarcodeScanned"
+                        @scanner-opened="onScannerOpened"
+                        @scanner-closed="onScannerClosed"
+                />
 	</div>
 </template>
 
@@ -579,10 +581,11 @@ export default {
 		totalItemCount: 0,
 		scanErrorDialog: false,
 		scanErrorMessage: "",
-		scanErrorDetails: "",
-		scanErrorCode: "",
-		scannerLocked: false,
-		scanAudioContext: null,
+                scanErrorDetails: "",
+                scanErrorCode: "",
+                scannerLocked: false,
+                cameraScannerActive: false,
+                scanAudioContext: null,
 		pendingScanCode: "",
 		awaitingScanResult: false,
 	}),
@@ -1984,11 +1987,11 @@ export default {
 					this.search_from_scanner = false;
 				}
 
-				if (!this.scanErrorDialog) {
-					// Clear search field after successfully adding an item
-					this.clearSearch();
-					this.$refs.debounce_search.focus();
-				}
+                                if (!this.scanErrorDialog) {
+                                        // Clear search field after successfully adding an item
+                                        this.clearSearch();
+                                        this.focusItemSearch();
+                                }
 			}
 		},
 		search_onchange: _.debounce(async function (newSearchTerm) {
@@ -2044,11 +2047,11 @@ export default {
 			}
 
 			// Clear the input only when triggered via scanner
-			if (fromScanner) {
-				vm.clearSearch();
-				vm.$refs.debounce_search && vm.$refs.debounce_search.focus();
-				vm.search_from_scanner = false;
-			}
+                        if (fromScanner) {
+                                vm.clearSearch();
+                                vm.focusItemSearch();
+                                vm.search_from_scanner = false;
+                        }
 		}, 300),
 		get_item_qty(first_search) {
 			const qtyVal = this.qty != null ? this.qty : 1;
@@ -2089,13 +2092,13 @@ export default {
 			const item_code_len = first_search.length - prefix_len - 6;
 			return first_search.substr(0, prefix_len + item_code_len);
 		},
-		esc_event() {
-			this.search = null;
-			this.first_search = null;
-			this.search_backup = null;
-			this.qty = 1;
-			this.$refs.debounce_search.focus();
-		},
+                esc_event() {
+                        this.search = null;
+                        this.first_search = null;
+                        this.search_backup = null;
+                        this.qty = 1;
+                        this.focusItemSearch();
+                },
 		async update_items_details(items) {
 			const vm = this;
 			if (!items || !items.length) return;
@@ -2416,13 +2419,13 @@ export default {
 					this.enter_event();
 				}
 
-				// clear search field for next scan and refocus input
-				if (!this.scanErrorDialog) {
-					this.clearSearch();
-					this.$refs.debounce_search && this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                                // clear search field for next scan and refocus input
+                                if (!this.scanErrorDialog) {
+                                        this.clearSearch();
+                                        this.focusItemSearch();
+                                }
+                        });
+                },
 		generateWordCombinations(inputString) {
 			const words = inputString.split(" ");
 			const wordCount = words.length;
@@ -2488,14 +2491,27 @@ export default {
 			// this.search_backup = "";
 		},
 
-		focusItemSearch() {
-			this.$nextTick(() => {
-				const input = this.$refs.debounce_search;
-				if (input && typeof input.focus === "function") {
-					input.focus();
-				}
-			});
-		},
+                focusItemSearch() {
+                        if (this.cameraScannerActive) {
+                                return;
+                        }
+                        this.$nextTick(() => {
+                                if (this.cameraScannerActive) {
+                                        return;
+                                }
+                                const input = this.$refs.debounce_search;
+                                if (input && typeof input.focus === "function") {
+                                        input.focus();
+                                }
+                        });
+                },
+
+                blurItemSearch() {
+                        const input = this.$refs.debounce_search;
+                        if (input && typeof input.blur === "function") {
+                                input.blur();
+                        }
+                },
 
 		clearQty() {
 			this.qty = null;
@@ -2570,24 +2586,30 @@ export default {
 				);
 			}
 		},
-		acknowledgeScanError() {
-			this.scanErrorDialog = false;
-			this.scannerLocked = false;
-			this.scanErrorMessage = "";
-			this.scanErrorCode = "";
-			this.scanErrorDetails = "";
-			this.pendingScanCode = "";
-			this.awaitingScanResult = false;
-			this.$nextTick(() => {
-				if (this.$refs.debounce_search) {
-					this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                acknowledgeScanError() {
+                        this.scanErrorDialog = false;
+                        this.scannerLocked = false;
+                        this.scanErrorMessage = "";
+                        this.scanErrorCode = "";
+                        this.scanErrorDetails = "";
+                        this.pendingScanCode = "";
+                        this.awaitingScanResult = false;
+                        this.focusItemSearch();
+                },
 
-		startCameraScanning() {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
+                onScannerOpened() {
+                        this.cameraScannerActive = true;
+                        this.blurItemSearch();
+                },
+
+                onScannerClosed() {
+                        this.cameraScannerActive = false;
+                        this.focusItemSearch();
+                },
+
+                startCameraScanning() {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
 				return;
 			}
 			if (this.$refs.cameraScanner) {
@@ -2828,13 +2850,13 @@ export default {
 					3,
 				);
 
-				// Clear search after successful addition and refocus input
-				this.clearSearch();
-				this.$refs.debounce_search && this.$refs.debounce_search.focus();
-			} finally {
-				this.awaitingScanResult = false;
-			}
-		},
+                                // Clear search after successful addition and refocus input
+                                this.clearSearch();
+                                this.focusItemSearch();
+                        } finally {
+                                this.awaitingScanResult = false;
+                        }
+                },
 		isNegativeStockEnabled() {
 			const setting = this.stock_settings?.allow_negative_stock;
 			if (setting === undefined || setting === null) {
