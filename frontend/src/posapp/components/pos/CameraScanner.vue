@@ -256,14 +256,18 @@ export default {
 	components: {
 		QrcodeStream,
 	},
-	props: {
-		scanType: {
-			type: String,
-			default: "Both", // 'QR Code', 'Barcode', 'Both'. Note: vue-qrcode-reader uses a 'formats' prop.
-		},
-	},
+        props: {
+                scanType: {
+                        type: String,
+                        default: "Both", // 'QR Code', 'Barcode', 'Both'. Note: vue-qrcode-reader uses a 'formats' prop.
+                },
+                autoCloseOnScan: {
+                        type: Boolean,
+                        default: true,
+                },
+        },
 
-	data() {
+        data() {
                 return {
                         scannerDialog: false,
                         scanResult: "",
@@ -276,6 +280,7 @@ export default {
                         cameras: [], // To store available cameras
                         manualScanValue: "",
                         scanResetTimeoutId: null,
+                        dialogCloseTimeoutId: null,
 			// Old properties to be removed or re-evaluated:
 			// qrScanner: null,
 			// flashlightSupported: false, // vue-qrcode-reader handles this via QrcodeStream's torch prop
@@ -366,7 +371,12 @@ export default {
                 },
 
                 handleScannedCode(rawValue, formatLabel = "", options = {}) {
-                        const { pauseCamera = true, resetDelay = 1000 } = options;
+                        const {
+                                pauseCamera = true,
+                                resetDelay = 1000,
+                                closeDialog = this.autoCloseOnScan,
+                                closeDelay,
+                        } = options;
                         const code = (rawValue ?? "").toString().trim();
                         if (!code) {
                                 return;
@@ -399,6 +409,26 @@ export default {
                                 this.scanResetTimeoutId = null;
                         }
 
+                        if (this.dialogCloseTimeoutId) {
+                                clearTimeout(this.dialogCloseTimeoutId);
+                                this.dialogCloseTimeoutId = null;
+                        }
+
+                        if (closeDialog) {
+                                const effectiveDelay = Math.max(
+                                        0,
+                                        typeof closeDelay === "number"
+                                                ? closeDelay
+                                                : Math.min(resetDelay, 250),
+                                );
+
+                                this.dialogCloseTimeoutId = setTimeout(() => {
+                                        this.dialogCloseTimeoutId = null;
+                                        this.stopScanning();
+                                }, effectiveDelay);
+                                return;
+                        }
+
                         this.scanResetTimeoutId = setTimeout(() => {
                                 this.scanResult = "";
                                 this.scanFormat = "";
@@ -417,6 +447,7 @@ export default {
 
                         this.handleScannedCode(code, this.__("Manual Entry"), {
                                 pauseCamera: false,
+                                closeDelay: 0,
                         });
                         this.manualScanValue = "";
                         this.$nextTick(() => {
@@ -448,6 +479,10 @@ export default {
                         if (this.scanResetTimeoutId) {
                                 clearTimeout(this.scanResetTimeoutId);
                                 this.scanResetTimeoutId = null;
+                        }
+                        if (this.dialogCloseTimeoutId) {
+                                clearTimeout(this.dialogCloseTimeoutId);
+                                this.dialogCloseTimeoutId = null;
                         }
                         this.isScanning = false; // This should make QrcodeStream stop/hide
                         this.scannerDialog = false;
