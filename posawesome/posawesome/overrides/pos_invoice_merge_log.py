@@ -89,16 +89,37 @@ class CustomPOSInvoiceMergeLog(ERPNextPOSInvoiceMergeLog):
             abs(flt(invoice.paid_amount)) + abs(flt(invoice.write_off_amount)) - invoice_total_abs
         )
         if remaining_diff > tolerance and invoice.payments:
+            # Force the final payment row to absorb any rounding residue to keep
+            # the absolute totals aligned with the credit note's value.
+            total_except_last = sum(
+                abs(flt(p.amount)) for p in invoice.payments[:-1]
+            )
+            target_abs = invoice_total_abs - total_except_last - abs(flt(invoice.write_off_amount))
+
+            if target_abs < 0:
+                target_abs = 0
+
             last_payment = invoice.payments[-1]
-            current_abs = abs(flt(last_payment.amount))
-            adjustment = min(current_abs, remaining_diff)
-            new_abs = current_abs - adjustment
+            last_payment.amount = invoice_sign * flt(target_abs, precision_paid)
+            last_payment.base_amount = invoice_sign * flt(
+                abs(flt(last_payment.amount)) * conversion_rate,
+                precision_base_paid,
+            )
 
-            new_amount = invoice_sign * flt(new_abs, precision_paid)
-            if abs(flt(new_amount)) >= current_abs - tolerance and min_unit and current_abs > min_unit:
-                new_amount = invoice_sign * flt(current_abs - min_unit, precision_paid)
+            self._cleanup_zero_amount_payments(invoice, tolerance, precision_base_paid)
+            invoice.set_paid_amount()
 
-            last_payment.amount = new_amount
+        # Perform one last adjustment if rounding still leaves a minor residue.
+        residual = (
+            abs(flt(invoice.paid_amount)) + abs(flt(invoice.write_off_amount)) - invoice_total_abs
+        )
+        if residual > tolerance and invoice.payments:
+            last_payment = invoice.payments[-1]
+            new_abs = max(
+                0,
+                abs(flt(last_payment.amount)) - residual,
+            )
+            last_payment.amount = invoice_sign * flt(new_abs, precision_paid)
             last_payment.base_amount = invoice_sign * flt(
                 abs(flt(last_payment.amount)) * conversion_rate,
                 precision_base_paid,
