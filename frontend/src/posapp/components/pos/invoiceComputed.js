@@ -1,62 +1,38 @@
 /* global flt, __, get_currency_symbol */
 
 export default {
-        // Aggregate frequently used totals in a single computed property so
-        // large invoices only trigger one pass over the items collection.
-        aggregatedTotals() {
-                const totals = {
-                        totalQty: 0,
-                        totalAmount: 0,
-                        totalDiscount: 0,
-                };
-
-                const items = Array.isArray(this.items) ? this.items : [];
-                const isReturn = this.isReturnInvoice;
-
-                for (const item of items) {
-                        const qty = flt(item.qty);
-                        const absQty = isReturn ? Math.abs(qty) : qty;
-                        const rate = flt(item.rate);
-
-                        totals.totalQty += absQty;
-                        totals.totalAmount += absQty * rate;
-
-                        const discountQty = isReturn ? Math.abs(qty) : qty;
-                        const discountAmount = flt(item.discount_amount);
-                        totals.totalDiscount += discountQty * discountAmount;
-                }
-
-                totals.totalQty = this.flt(totals.totalQty, this.float_precision);
-                totals.totalAmount = this.flt(totals.totalAmount, this.currency_precision);
-                totals.totalDiscount = this.flt(totals.totalDiscount, this.float_precision);
-
-                return totals;
-        },
         // Calculate total quantity of all items
         total_qty() {
-                return this.aggregatedTotals.totalQty;
+                const totals = this.invoice_totals || {};
+                const qty = totals.qty ?? 0;
+                return this.flt ? this.flt(qty, this.float_precision) : qty;
         },
         // Calculate total amount for all items (handles returns)
         Total() {
-                return this.aggregatedTotals.totalAmount;
+                const totals = this.invoice_totals || {};
+                const amount = totals.amount ?? 0;
+                return this.flt ? this.flt(amount, this.currency_precision) : amount;
         },
         // Calculate subtotal after discounts and delivery charges
         subtotal() {
-                let sum = this.aggregatedTotals.totalAmount;
+                const totals = this.invoice_totals || {};
+                let sum = totals.amount ?? 0;
 
                 // Subtract additional discount
                 const additional_discount = this.flt(this.additional_discount);
                 sum -= additional_discount;
 
-		// Add delivery charges
-		const delivery_charges = this.flt(this.delivery_charges_rate);
-		sum += delivery_charges;
+                // Add delivery charges
+                const delivery_charges = this.flt(this.delivery_charges_rate);
+                sum += delivery_charges;
 
-		return this.flt(sum, this.currency_precision);
+                return this.flt(sum, this.currency_precision);
         },
         // Calculate total discount amount for all items
         total_items_discount_amount() {
-                return this.aggregatedTotals.totalDiscount;
+                const totals = this.invoice_totals || {};
+                const discount = totals.discount ?? 0;
+                return this.flt ? this.flt(discount, this.float_precision) : discount;
         },
 	// Format posting_date for display as DD-MM-YYYY
 	formatted_posting_date: {

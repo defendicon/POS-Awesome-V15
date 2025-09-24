@@ -21,16 +21,157 @@ const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
 const { removeItem, addItem, getNewItem, clearInvoice } = useItemAddition();
 const { calcUom, calcStockQty } = useStockUtils();
 
-export default {
-	remove_item(item) {
-		return removeItem(item, this);
-	},
+const hasWindow = typeof window !== "undefined";
+const frameScheduler =
+        hasWindow && typeof window.requestAnimationFrame === "function"
+                ? (callback) => window.requestAnimationFrame(callback)
+                : (callback) => setTimeout(callback, 16);
+const frameCanceller =
+        hasWindow && typeof window.cancelAnimationFrame === "function"
+                ? (handle) => window.cancelAnimationFrame(handle)
+                : (handle) => clearTimeout(handle);
 
-	async add_item(item) {
-		const res = await addItem(item, this);
-		const target = this.items.find(
-			(it) =>
-				it.item_code === item.item_code &&
+export default {
+        reset_invoice_totals() {
+                this.invoice_totals = {
+                        qty: 0,
+                        amount: 0,
+                        discount: 0,
+                };
+        },
+
+        queue_invoice_totals_recalculation(immediate = false) {
+                if (immediate) {
+                        if (this._totalsRecalcHandle) {
+                                frameCanceller(this._totalsRecalcHandle);
+                                this._totalsRecalcHandle = null;
+                        }
+                        this.recalculate_invoice_totals();
+                        return;
+                }
+
+                if (this._totalsRecalcHandle) {
+                        return;
+                }
+
+                this._totalsRecalcHandle = frameScheduler(() => {
+                        this._totalsRecalcHandle = null;
+                        this.recalculate_invoice_totals();
+                });
+        },
+
+        recalculate_invoice_totals() {
+                const totals = { qty: 0, amount: 0, discount: 0 };
+                const items = Array.isArray(this.items) ? this.items : [];
+                const isReturn = this.isReturnInvoice;
+
+                for (const item of items) {
+                        const qty = this.flt ? this.flt(item.qty) : parseFloat(item.qty) || 0;
+                        const absQty = isReturn ? Math.abs(qty) : qty;
+                        const rate = this.flt ? this.flt(item.rate) : parseFloat(item.rate) || 0;
+
+                        totals.qty += absQty;
+                        totals.amount += absQty * rate;
+
+                        const discount_amount = this.flt
+                                ? this.flt(item.discount_amount)
+                                : parseFloat(item.discount_amount) || 0;
+                        totals.discount += absQty * discount_amount;
+                }
+
+                totals.qty = this.flt ? this.flt(totals.qty, this.float_precision) : totals.qty;
+                totals.amount = this.flt
+                        ? this.flt(totals.amount, this.currency_precision)
+                        : totals.amount;
+                totals.discount = this.flt
+                        ? this.flt(totals.discount, this.float_precision)
+                        : totals.discount;
+
+                this.invoice_totals = totals;
+        },
+
+        schedule_offer_recalculation() {
+                if (this._offersHandle) {
+                        return;
+                }
+
+                this._offersHandle = frameScheduler(() => {
+                        this._offersHandle = null;
+                        if (!this.isApplyingOffer) {
+                                this.handelOffers();
+                        }
+                });
+        },
+
+        schedule_table_refresh() {
+                if (this._forceUpdateHandle) {
+                        return;
+                }
+
+                this._forceUpdateHandle = frameScheduler(() => {
+                        this._forceUpdateHandle = null;
+                        this.$forceUpdate();
+                });
+        },
+
+        defer_close_payments(immediate = false) {
+                if (immediate) {
+                        if (this._closePaymentsHandle) {
+                                frameCanceller(this._closePaymentsHandle);
+                                this._closePaymentsHandle = null;
+                        }
+                        this.close_payments();
+                        return;
+                }
+
+                if (this._closePaymentsHandle) {
+                        return;
+                }
+
+                this._closePaymentsHandle = frameScheduler(() => {
+                        this._closePaymentsHandle = null;
+                        this.close_payments();
+                });
+        },
+
+        cancel_scheduled_jobs() {
+                if (this._totalsRecalcHandle) {
+                        frameCanceller(this._totalsRecalcHandle);
+                        this._totalsRecalcHandle = null;
+                }
+
+                if (this._forceUpdateHandle) {
+                        frameCanceller(this._forceUpdateHandle);
+                        this._forceUpdateHandle = null;
+                }
+
+                if (this._offersHandle) {
+                        frameCanceller(this._offersHandle);
+                        this._offersHandle = null;
+                }
+
+                if (this._closePaymentsHandle) {
+                        frameCanceller(this._closePaymentsHandle);
+                        this._closePaymentsHandle = null;
+                }
+        },
+
+        remove_item(item) {
+                const result = removeItem(item, this);
+                this.queue_invoice_totals_recalculation();
+                this.schedule_table_refresh();
+                this.defer_close_payments();
+                return result;
+        },
+
+        async add_item(item) {
+                const res = await addItem(item, this);
+                this.queue_invoice_totals_recalculation();
+                this.schedule_table_refresh();
+                this.defer_close_payments();
+                const target = this.items.find(
+                        (it) =>
+                                it.item_code === item.item_code &&
 				it.uom === (item.uom || it.uom) &&
 				(!it.batch_no || it.batch_no === item.batch_no),
 		);
@@ -45,10 +186,14 @@ export default {
 		return getNewItem(item, this);
 	},
 
-	// Reset all invoice fields to default/empty values
-	clear_invoice() {
-		return clearInvoice(this);
-	},
+        // Reset all invoice fields to default/empty values
+        clear_invoice() {
+                const result = clearInvoice(this);
+                this.reset_invoice_totals();
+                this.schedule_table_refresh();
+                this.defer_close_payments(true);
+                return result;
+        },
 
 	// Fetch customer balance from backend or cache
 	async fetch_customer_balance() {
@@ -224,17 +369,20 @@ export default {
 			});
 		}
 
-		if (data.is_return) {
-			this.return_doc = data;
-		} else {
-			this.eventBus.emit("set_pos_coupons", data.posa_coupons);
-		}
+                if (data.is_return) {
+                        this.return_doc = data;
+                } else {
+                        this.eventBus.emit("set_pos_coupons", data.posa_coupons);
+                }
 
-		console.log("load_invoice completed, invoice state:", {
-			invoiceType: this.invoiceType,
-			is_return: this.invoice_doc.is_return,
-			items: this.items.length,
-			customer: this.customer,
+                this.queue_invoice_totals_recalculation(true);
+                this.defer_close_payments(true);
+
+                console.log("load_invoice completed, invoice state:", {
+                        invoiceType: this.invoiceType,
+                        is_return: this.invoice_doc.is_return,
+                        items: this.items.length,
+                        customer: this.customer,
 		});
 	},
 
@@ -1566,8 +1714,10 @@ export default {
 						default_currency: vm.pos_profile.currency,
 					});
 
-					// Force update UI immediately
-					vm.$forceUpdate();
+                                        // Refresh UI and totals after item detail updates
+                                        vm.schedule_table_refresh();
+                                        vm.queue_invoice_totals_recalculation();
+                                        vm.defer_close_payments();
 				}
 			},
 		});

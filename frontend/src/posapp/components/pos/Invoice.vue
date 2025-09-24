@@ -361,11 +361,20 @@ export default {
 			additional_discount: 0,
 			additional_discount_percentage: 0,
 			total_tax: 0,
-			items: [], // List of invoice items
-			packed_items: [], // Packed items for bundles
-			packed_dialog_items: [], // Packed items displayed in dialog
-			show_packed_dialog: false, // Packing list dialog visibility
-			posOffers: [], // All available offers
+                        items: [], // List of invoice items
+                        packed_items: [], // Packed items for bundles
+                        packed_dialog_items: [], // Packed items displayed in dialog
+                        show_packed_dialog: false, // Packing list dialog visibility
+                        invoice_totals: {
+                                qty: 0,
+                                amount: 0,
+                                discount: 0,
+                        },
+                        _totalsRecalcHandle: null,
+                        _forceUpdateHandle: null,
+                        _offersHandle: null,
+                        _closePaymentsHandle: null,
+                        posOffers: [], // All available offers
 			posa_offers: [], // Offers applied to this invoice
 			posa_coupons: [], // Coupons applied
 			isApplyingOffer: false, // Flag to prevent offer watcher loops
@@ -1365,12 +1374,13 @@ export default {
 		document.addEventListener("keydown", this.shortSelectDiscount.bind(this));
 	},
 	// Remove global keyboard shortcuts when component is unmounted
-	unmounted() {
-		document.removeEventListener("keydown", this.shortOpenPayment);
-		document.removeEventListener("keydown", this.shortDeleteFirstItem);
-		document.removeEventListener("keydown", this.shortOpenFirstItem);
-		document.removeEventListener("keydown", this.shortSelectDiscount);
-	},
+        unmounted() {
+                document.removeEventListener("keydown", this.shortOpenPayment);
+                document.removeEventListener("keydown", this.shortDeleteFirstItem);
+                document.removeEventListener("keydown", this.shortOpenFirstItem);
+                document.removeEventListener("keydown", this.shortSelectDiscount);
+                this.cancel_scheduled_jobs();
+        },
 	watch: invoiceWatchers,
 };
 </script>

@@ -2,9 +2,9 @@ import { clearPriceListCache } from "../../../offline/index.js";
 /* global frappe */
 
 export default {
-	// Watch for customer change and update related data
+        // Watch for customer change and update related data
         customer() {
-                this.close_payments();
+                this.defer_close_payments(true);
                 this.eventBus.emit("set_customer", this.customer);
                 this.fetch_customer_details();
                 this.fetch_customer_balance();
@@ -34,19 +34,21 @@ export default {
         items: {
                 deep: true,
                 handler() {
-                        this.close_payments();
+                        this.queue_invoice_totals_recalculation();
+                        this.defer_close_payments();
                         if (this.isApplyingOffer) return;
-                        this.handelOffers();
-                        this.$forceUpdate();
+                        this.schedule_offer_recalculation();
+                        this.schedule_table_refresh();
                 },
         },
         packed_items: {
                 deep: true,
                 handler() {
-                        this.close_payments();
+                        this.queue_invoice_totals_recalculation();
+                        this.defer_close_payments();
                         if (this.isApplyingOffer) return;
-                        this.handelOffers();
-                        this.$forceUpdate();
+                        this.schedule_offer_recalculation();
+                        this.schedule_table_refresh();
                 },
         },
 	// Watch for invoice type change and emit
@@ -55,7 +57,7 @@ export default {
 	},
 	// Watch for additional discount and update percentage accordingly
         additional_discount() {
-                this.close_payments();
+                this.defer_close_payments();
                 if (!this.additional_discount || this.additional_discount == 0) {
                         this.additional_discount_percentage = 0;
                 } else if (this.pos_profile.posa_use_percentage_discount) {
@@ -70,7 +72,7 @@ export default {
                 }
         },
         delivery_charges_rate() {
-                this.close_payments();
+                this.defer_close_payments();
         },
 	// Keep display date in sync with posting_date
 	posting_date: {
