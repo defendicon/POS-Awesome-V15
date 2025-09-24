@@ -14,7 +14,6 @@ import {
     formatNegativeStockWarning,
     formatStockShortageError,
 } from '../utils/stock.js';
-
 export function useCartValidation() {
     const isValidating = ref(false);
     const validationError = ref(null);

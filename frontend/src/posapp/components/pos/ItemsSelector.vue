@@ -1870,7 +1870,6 @@ export default {
 			// Ensure UOMs are initialized
 			if (!item.item_uoms || item.item_uoms.length === 0) {
 				await this.update_items_details([item]);
-
 				if (!item.item_uoms || item.item_uoms.length === 0) {
 					item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
 				}
