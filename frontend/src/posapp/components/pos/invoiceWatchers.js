@@ -31,25 +31,43 @@ export default {
 		});
 	},
 	// Watch for items array changes (deep) and re-handle offers
-        items: {
-                deep: true,
-                handler() {
-                        this.queue_invoice_totals_recalculation();
-                        this.defer_close_payments();
-                        if (this.isApplyingOffer) return;
+        itemsMutationVersion(newVal) {
+                if (this._pendingMutationPayload) {
+                        this.flush_mutation_payload();
+                        this._lastHandledItemsVersion = newVal;
+                        return;
+                }
+
+                if (this._lastHandledItemsVersion === newVal) {
+                        return;
+                }
+
+                this._lastHandledItemsVersion = newVal;
+                this.queue_invoice_totals_recalculation();
+                this.defer_close_payments();
+                if (!this.isApplyingOffer) {
                         this.schedule_offer_recalculation();
-                        this.schedule_table_refresh();
-                },
+                }
+                this.schedule_table_refresh();
         },
-        packed_items: {
-                deep: true,
-                handler() {
-                        this.queue_invoice_totals_recalculation();
-                        this.defer_close_payments();
-                        if (this.isApplyingOffer) return;
+        packedItemsMutationVersion(newVal) {
+                if (this._pendingMutationPayload) {
+                        this.flush_mutation_payload();
+                        this._lastHandledPackedVersion = newVal;
+                        return;
+                }
+
+                if (this._lastHandledPackedVersion === newVal) {
+                        return;
+                }
+
+                this._lastHandledPackedVersion = newVal;
+                this.queue_invoice_totals_recalculation();
+                this.defer_close_payments();
+                if (!this.isApplyingOffer) {
                         this.schedule_offer_recalculation();
-                        this.schedule_table_refresh();
-                },
+                }
+                this.schedule_table_refresh();
         },
 	// Watch for invoice type change and emit
 	invoiceType() {

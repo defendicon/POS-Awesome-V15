@@ -68,18 +68,18 @@ export function useItemAddition() {
 
                 const isAttached = Array.isArray(context?.items) && context.items.includes(item);
 
-                if (isAttached && context?.queue_invoice_totals_recalculation) {
-                        context.queue_invoice_totals_recalculation();
-                }
-
-                if (isAttached && context?.schedule_table_refresh) {
-                        context.schedule_table_refresh();
-                } else if (isAttached && context?.forceUpdate) {
-                        context.forceUpdate();
-                }
-
-                if (isAttached && context?.defer_close_payments) {
-                        context.defer_close_payments();
+                if (isAttached) {
+                        if (context?.notify_invoice_change) {
+                                context.notify_invoice_change();
+                        } else {
+                                context.queue_invoice_totals_recalculation?.();
+                                if (context?.schedule_table_refresh) {
+                                        context.schedule_table_refresh();
+                                } else {
+                                        context.forceUpdate?.();
+                                }
+                                context.defer_close_payments?.();
+                        }
                 }
         };
 
@@ -197,11 +197,11 @@ export function useItemAddition() {
 		if (!components || !components.length) {
 			return;
 		}
-		parent.is_bundle = 1;
-		parent.is_bundle_parent = 1;
-		parent.is_stock_item = 0;
-		parent.warehouse = null;
-		parent.stock_qty = 0;
+                parent.is_bundle = 1;
+                parent.is_bundle_parent = 1;
+                parent.is_stock_item = 0;
+                parent.warehouse = null;
+                parent.stock_qty = 0;
 		parent.bundle_id = context.makeid ? context.makeid(10) : Math.random().toString(36).substr(2, 10);
 		// Force reactivity so the bundle badge appears immediately
 		context.items = [...context.items];
@@ -230,11 +230,21 @@ export function useItemAddition() {
 				context.update_item_detail(child, false);
 				context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
 			}
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(child);
-			}
-		}
-	};
+                        if (context.fetch_available_qty) {
+                                context.fetch_available_qty(child);
+                        }
+                }
+
+                if (context?.notify_invoice_change) {
+                        context.notify_invoice_change({
+                                totals: false,
+                                refresh: true,
+                                closePayments: false,
+                                offers: false,
+                                packed: true,
+                        });
+                }
+        };
 
 	const moveItemToTop = (context, target) => {
 		if (!target) return;
@@ -469,12 +479,16 @@ export function useItemAddition() {
                                 moveItemToTop(context, cur_item);
                         }
                 }
-		if (context.forceUpdate) context.forceUpdate();
+                if (context.notify_invoice_change) {
+                        context.notify_invoice_change();
+                } else if (context.forceUpdate) {
+                        context.forceUpdate();
+                }
 
-		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
-			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
+                // Only try to expand if new_item exists and should be expanded
+                if (
+                        new_item &&
+                        ((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
 		) {
 			context.expanded = [new_item.posa_row_id];
 		}

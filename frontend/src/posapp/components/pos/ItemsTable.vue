@@ -884,17 +884,8 @@ export default {
 			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
 			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
 
-			console.log("RTL Detection:", {
-				htmlDir,
-				bodyDir,
-				computedDir,
-				lang,
-				isRTLLanguage,
-				result: htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage,
-			});
-
-			return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
-		},
+                        return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
+                },
 	},
 	methods: {
 		customItemFilter(value, search, item) {
@@ -1184,23 +1175,8 @@ export default {
 		this.$nextTick(() => {
 			this.updateContainerDimensions();
 
-			// Log performance metrics in development
-			if (process.env.NODE_ENV === "development") {
-				console.log("ItemsTable Performance Optimizations Active:", {
-					virtualScrolling: true,
-					memoizedQtyCalculations: true,
-					debouncedResizing: true,
-					lazyExpandedContent: true,
-					cacheManagement: true,
-					itemCount: this.items?.length || 0,
-					containerDimensions: {
-						width: this.containerWidth,
-						height: this.containerHeight,
-					},
-				});
-			}
-		});
-	},
+                });
+        },
 
 	beforeUnmount() {
 		this.cleanupResizeObserver();

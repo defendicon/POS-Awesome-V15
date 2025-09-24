@@ -810,8 +810,8 @@ export default {
 					item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 					item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
-					item.posa_offer_applied = 1;
-					this.$forceUpdate();
+                                        item.posa_offer_applied = 1;
+                                        this.notify_invoice_change({ packed: this.packed_items.includes(item) });
 				}
 			}
 		});

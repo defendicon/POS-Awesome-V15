@@ -181,14 +181,8 @@ export default {
 			item.base_rate = item.base_rate || item.base_price_list_rate;
 			item.rate = item.price_list_rate ?? item.rate ?? 0;
 			item.currency = item.currency || (this.pos_profile && this.pos_profile.currency);
-			console.log("after currency conversion", {
-				code: item.item_code,
-				rate: item.rate,
-				currency: item.currency,
-			});
 		},
 		async fetchVariants(code, profile) {
-			console.log("fetchVariants called with", code, profile);
 			try {
 				const res = await frappe.call({
 					method: "posawesome.posawesome.api.items.get_item_variants",
@@ -197,13 +191,11 @@ export default {
 						parent_item_code: code,
 					},
 				});
-				console.log("variants API result", res);
 				if (res.message) {
 					const variants = res.message.variants || res.message;
 					this.attributes_meta = res.message.attributes_meta || this.attributes_meta;
 					const existingCodes = new Set((this.items || []).map((it) => it.item_code));
 					const newItems = variants.filter((it) => !existingCodes.has(it.item_code));
-					console.log("new variant items", newItems);
 					await Promise.all(newItems.map((it) => this.fetchVariantRate(it)));
 					this.items = (this.items || []).concat(newItems);
 				}
@@ -256,10 +248,6 @@ export default {
 						}
 					});
 				}
-				console.log(
-					"filtered items",
-					this.filterdItems.map((it) => it.item_code),
-				);
 				this.displayCount = 100;
 			});
 		}, 200),
@@ -292,7 +280,6 @@ export default {
 					console.error("Failed to fetch default warehouse", e);
 				}
 			}
-			console.log("fetchVariantRate called for", item.item_code);
 			try {
 				const res = await frappe.call({
 					method: "posawesome.posawesome.api.items.get_item_detail",
@@ -311,7 +298,6 @@ export default {
 						}),
 					},
 				});
-				console.log("variant rate result", res);
 				if (res.message) {
 					const data = res.message;
 					item.rate = data.price_list_rate;
@@ -320,23 +306,14 @@ export default {
 					item.base_price_list_rate = data.price_list_rate;
 					item.currency = data.currency || data.price_list_currency || this.pos_profile.currency;
 					this.applyCurrencyConversionToItem(item);
-					console.log("rate applied", {
-						code: item.item_code,
-						rate: item.rate,
-					});
 				}
 			} catch (e) {
 				console.error("Failed to fetch variant rate", e);
 			}
 		},
 		async add_item(item) {
-			console.log("add_item called", item.item_code);
 			await this.fetchVariantRate(item);
 			const payload = { ...item, code: item.item_code };
-			console.log("emitting add_item", {
-				code: payload.code,
-				rate: payload.rate,
-			});
 			this.eventBus.emit("add_item", payload);
 			this.close_dialog();
 		},
@@ -344,7 +321,6 @@ export default {
 
 	created: function () {
 		this.eventBus.on("open_variants_model", async (item, items, profile, attrsMeta) => {
-			console.log("open_variants_model", { item, items, profile, attrsMeta });
 			this.varaintsDialog = true;
 			this.parentItem = item || null;
 			this.items = Array.isArray(items) ? items : [];
@@ -376,7 +352,6 @@ export default {
 		});
 	},
 	beforeUnmount() {
-		console.log("variants dialog destroyed");
 		this.eventBus.off("open_variants_model");
 	},
 };

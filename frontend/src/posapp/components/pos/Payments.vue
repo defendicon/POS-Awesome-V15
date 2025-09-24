@@ -997,10 +997,8 @@ export default {
 						allocated_percentage: 100,
 					},
 				];
-				console.log("Updated sales_team with sales_person:", newVal);
 			} else {
 				this.invoice_doc.sales_team = [];
-				console.log("Cleared sales_team");
 			}
 		},
 		// Watch is_credit_sale to reset cash payments
@@ -1351,7 +1349,6 @@ export default {
 								}
 							});
 							// Retry submission once
-							console.log("Retrying submission with fixed payment amounts");
 							setTimeout(() => {
 								vm.submit_invoice(print);
 							}, 500);
@@ -1408,8 +1405,6 @@ export default {
 			const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
 			let totalAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
 
-			console.log("Setting full amount for payment method idx:", idx);
-			console.log("Current payments:", JSON.stringify(this.invoice_doc.payments));
 
 			// Reset all payment amounts first
 			this.invoice_doc.payments.forEach((payment) => {
@@ -1421,7 +1416,6 @@ export default {
 
 			// Get the clicked payment method's name from the button text
 			const clickedButton = event?.target?.textContent?.trim();
-			console.log("Clicked button text:", clickedButton);
 
 			// Set amount only for clicked payment method
 			const clickedPayment = this.invoice_doc.payments.find(
@@ -1429,15 +1423,12 @@ export default {
 			);
 
 			if (clickedPayment) {
-				console.log("Found clicked payment:", clickedPayment.mode_of_payment);
 				let amount = isReturn ? -Math.abs(totalAmount) : totalAmount;
 				clickedPayment.amount = amount;
 				if (clickedPayment.base_amount !== undefined) {
 					clickedPayment.base_amount = isReturn ? -Math.abs(amount) : amount;
 				}
-				console.log("Set amount for payment:", clickedPayment.mode_of_payment, "amount:", amount);
 			} else {
-				console.log("No payment found for button text:", clickedButton);
 			}
 
 			// Force Vue to update the view

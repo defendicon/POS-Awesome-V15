@@ -6,22 +6,18 @@ export default {
 				e.stopPropagation();
 
 				if (!this.items || this.items.length === 0) {
-					console.log("No items to expand/collapse");
 					return;
 				}
 
 				const firstItem = this.items[0];
-				console.log("Processing first item:", firstItem.item_code);
 
 				// Check if first item is currently expanded using its ID
 				const isExpanded = this.expanded.includes(firstItem.posa_row_id);
 
 				// Toggle expanded state using item ID
 				if (isExpanded) {
-					console.log("Collapsing item:", firstItem.item_code);
 					this.expanded = [];
 				} else {
-					console.log("Expanding item:", firstItem.item_code);
 					this.expanded = [firstItem.posa_row_id];
 					// Update item details when expanding
 					this.$nextTick(() => {
@@ -39,7 +35,6 @@ export default {
 	},
 
 	handleExpandedUpdate(newExpanded) {
-		console.log("Expanded state updated:", newExpanded);
 		this.expanded = newExpanded;
 
 		// Update item details for newly expanded items
@@ -71,16 +66,12 @@ export default {
 	},
 
 	shortSelectDiscount(e) {
-		console.log("Shortcut pressed:", e.key, e.ctrlKey);
 		if (e.key.toLowerCase() === "e" && (e.ctrlKey || e.metaKey)) {
-			console.log("Focusing discount field");
 			e.preventDefault();
 			e.stopPropagation();
 			if (this.$refs.discount) {
 				this.$refs.discount.focus();
-				console.log("Discount field focused");
 			} else {
-				console.log("Discount field ref not found");
 			}
 		}
 	},

@@ -370,6 +370,11 @@ export default {
                                 amount: 0,
                                 discount: 0,
                         },
+                        itemsMutationVersion: 0,
+                        packedItemsMutationVersion: 0,
+                        _pendingMutationPayload: null,
+                        _lastHandledItemsVersion: 0,
+                        _lastHandledPackedVersion: 0,
                         _totalsRecalcHandle: null,
                         _forceUpdateHandle: null,
                         _offersHandle: null,
@@ -486,13 +491,11 @@ export default {
 			this.updateHeadersFromSelection();
 		},
 		// Handle item dropped from ItemsSelector to ItemsTable
-		handleItemDrop(item) {
-			console.log("Item dropped:", item);
+                handleItemDrop(item) {
+                        // Use the existing add_item method to add the dropped item
+                        this.add_item(item);
 
-			// Use the existing add_item method to add the dropped item
-			this.add_item(item);
-
-			// Show success feedback
+                        // Show success feedback
 			this.eventBus.emit("show_message", {
 				title: __(`Item {0} added to invoice`, [item.item_name]),
 				color: "success",
@@ -657,18 +660,16 @@ export default {
 						customer: this.customer,
 					},
 				});
-				if (r.message && r.message.length) {
-					console.log(r.message);
-					vm.delivery_charges = r.message;
-				}
+                                if (r.message && r.message.length) {
+                                        vm.delivery_charges = r.message;
+                                }
 			} catch (error) {
 				console.error("Failed to fetch delivery charges", error);
 			}
 		},
 		deliveryChargesFilter(itemText, queryText, itemRow) {
 			const item = itemRow.raw;
-			console.log("dl charges", item);
-			const textOne = item.name.toLowerCase();
+                        const textOne = item.name.toLowerCase();
 			const searchText = queryText.toLowerCase();
 			return textOne.indexOf(searchText) > -1;
 		},
@@ -729,25 +730,24 @@ export default {
 
 			// Recalculate stock quantity with the adjusted value
 			this.calc_stock_qty(item, item[field_name]);
-			if (field_name === "qty" && item.is_bundle) {
-				this.packed_items
-					.filter((it) => it.bundle_id === item.bundle_id)
-					.forEach((ch) => {
-						ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
-						this.calc_stock_qty(ch, ch.qty);
-					});
-			}
-			return parsedValue;
-		},
-		async fetch_available_currencies() {
-			try {
-				console.log("Fetching available currencies...");
-				const r = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.get_available_currencies",
-				});
+                        if (field_name === "qty" && item.is_bundle) {
+                                this.packed_items
+                                        .filter((it) => it.bundle_id === item.bundle_id)
+                                        .forEach((ch) => {
+                                                ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
+                                                this.calc_stock_qty(ch, ch.qty);
+                                        });
+                        }
+                        this.notify_invoice_change({ packed: field_name === "qty" && !!item.is_bundle });
+                        return parsedValue;
+                },
+                async fetch_available_currencies() {
+                        try {
+                                const r = await frappe.call({
+                                        method: "posawesome.posawesome.api.invoices.get_available_currencies",
+                                });
 
-				if (r.message) {
-					console.log("Received currencies:", r.message);
+                                if (r.message) {
 
 					// Get base currency for reference
 					const baseCurrency = this.pos_profile.currency;
@@ -857,18 +857,15 @@ export default {
 			this.sync_exchange_rate();
 		},
 
-		update_item_rates() {
-			console.log("Updating item rates with exchange rate:", this.exchange_rate);
+                update_item_rates() {
+                        this.items.forEach((item) => {
+                                // Set skip flag to avoid double calculations
+                                item._skip_calc = true;
 
-			this.items.forEach((item) => {
-				// Set skip flag to avoid double calculations
-				item._skip_calc = true;
-
-				// First ensure base rates exist for all items
-				if (!item.base_rate) {
-					console.log(`Setting base rates for ${item.item_code} for the first time`);
-					const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-					if (this.selected_currency === baseCurrency) {
+                                // First ensure base rates exist for all items
+                                if (!item.base_rate) {
+                                        const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                                        if (this.selected_currency === baseCurrency) {
 						// When in base currency, base rates = displayed rates
 						item.base_rate = item.rate;
 						item.base_price_list_rate = item.price_list_rate;
@@ -885,25 +882,22 @@ export default {
 				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
 				if (this.selected_currency === baseCurrency) {
 					// When switching back to default currency, restore from base rates
-					console.log(`Restoring rates for ${item.item_code} from base rates`);
-					item.price_list_rate = item.base_price_list_rate;
-					item.rate = item.base_rate;
-					item.discount_amount = item.base_discount_amount;
-				} else if (item.original_currency === this.selected_currency) {
-					// When selected currency matches the price list currency,
-					// no conversion should be applied
-					console.log(`Using original currency rates for ${item.item_code}`);
-					item.price_list_rate = item.base_price_list_rate;
-					item.rate = item.base_rate;
-					item.discount_amount = item.base_discount_amount;
-				} else {
-					// When switching to another currency, convert from base rates
-					console.log(`Converting rates for ${item.item_code} to ${this.selected_currency}`);
+                                        item.price_list_rate = item.base_price_list_rate;
+                                        item.rate = item.base_rate;
+                                        item.discount_amount = item.base_discount_amount;
+                                } else if (item.original_currency === this.selected_currency) {
+                                        // When selected currency matches the price list currency,
+                                        // no conversion should be applied
+                                        item.price_list_rate = item.base_price_list_rate;
+                                        item.rate = item.base_rate;
+                                        item.discount_amount = item.base_discount_amount;
+                                } else {
+                                        // When switching to another currency, convert from base rates
 
-					// Convert base currency values to the selected currency
-					const converted_price = this.flt(
-						item.base_price_list_rate * this.exchange_rate,
-						this.currency_precision,
+                                        // Convert base currency values to the selected currency
+                                        const converted_price = this.flt(
+                                                item.base_price_list_rate * this.exchange_rate,
+                                                this.currency_precision,
 					);
 					const converted_rate = this.flt(
 						item.base_rate * this.exchange_rate,
@@ -924,20 +918,9 @@ export default {
 				item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 				item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
-				console.log(`Updated rates for ${item.item_code}:`, {
-					price_list_rate: item.price_list_rate,
-					base_price_list_rate: item.base_price_list_rate,
-					rate: item.rate,
-					base_rate: item.base_rate,
-					discount: item.discount_amount,
-					base_discount: item.base_discount_amount,
-					amount: item.amount,
-					base_amount: item.base_amount,
-				});
-
-				// Apply any other pricing rules if needed
-				this.calc_item_price(item);
-			});
+                                // Apply any other pricing rules if needed
+                                this.calc_item_price(item);
+                        });
 
 			// Force UI update after all calculations
 			this.$forceUpdate();
@@ -1151,16 +1134,16 @@ export default {
 				this.remove_item(item);
 			}
 			this.calc_stock_qty(item, item.qty);
-			if (item.is_bundle) {
-				this.packed_items
-					.filter((it) => it.bundle_id === item.bundle_id)
-					.forEach((ch) => {
-						ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
-						this.calc_stock_qty(ch, ch.qty);
-					});
-			}
-			this.$forceUpdate();
-		},
+                        if (item.is_bundle) {
+                                this.packed_items
+                                        .filter((it) => it.bundle_id === item.bundle_id)
+                                        .forEach((ch) => {
+                                                ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
+                                                this.calc_stock_qty(ch, ch.qty);
+                                        });
+                        }
+                        this.notify_invoice_change({ packed: !!item.is_bundle });
+                },
 
 		// Decrease quantity of an item (handles return logic)
 		subtract_one(item) {
@@ -1174,16 +1157,16 @@ export default {
 				this.remove_item(item);
 			}
 			this.calc_stock_qty(item, item.qty);
-			if (item.is_bundle) {
-				this.packed_items
-					.filter((it) => it.bundle_id === item.bundle_id)
-					.forEach((ch) => {
-						ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
-						this.calc_stock_qty(ch, ch.qty);
-					});
-			}
-			this.$forceUpdate();
-		},
+                        if (item.is_bundle) {
+                                this.packed_items
+                                        .filter((it) => it.bundle_id === item.bundle_id)
+                                        .forEach((ch) => {
+                                                ch.qty = item.qty * (ch.child_qty_per_bundle || 1);
+                                                this.calc_stock_qty(ch, ch.qty);
+                                        });
+                        }
+                        this.notify_invoice_change({ packed: !!item.is_bundle });
+                },
 
 		// Handle item reordering from drag and drop
 		handleItemReorder(reorderData) {
@@ -1300,10 +1283,9 @@ export default {
 				this.update_item_detail(item);
 			});
 		});
-		this.eventBus.on("load_return_invoice", (data) => {
-			// Handle loading of return invoice and set all related fields
-			console.log("Invoice component received load_return_invoice event with data:", data);
-			this.load_invoice(data.invoice_doc);
+                this.eventBus.on("load_return_invoice", (data) => {
+                        // Handle loading of return invoice and set all related fields
+                        this.load_invoice(data.invoice_doc);
 			// Explicitly mark as return invoice
 			this.invoiceType = "Return";
 			this.invoiceTypes = ["Return"];
@@ -1316,27 +1298,19 @@ export default {
 					if (item.stock_qty > 0) item.stock_qty = -Math.abs(item.stock_qty);
 				});
 			}
-			if (data.return_doc) {
-				console.log("Return against existing invoice:", data.return_doc.name);
-				this.discount_amount = data.return_doc.discount_amount || 0;
-				this.additional_discount = data.return_doc.discount_amount || 0;
-				this.return_doc = data.return_doc;
-				// Set return_against reference
-				this.invoice_doc.return_against = data.return_doc.name;
-			} else {
-				console.log("Return without invoice reference");
-				// For return without invoice, reset discount values
-				this.discount_amount = 0;
-				this.additional_discount = 0;
-				this.additional_discount_percentage = 0;
-			}
-			console.log("Invoice state after loading return:", {
-				invoiceType: this.invoiceType,
-				is_return: this.invoice_doc.is_return,
-				items: this.items.length,
-				customer: this.customer,
-			});
-		});
+                        if (data.return_doc) {
+                                this.discount_amount = data.return_doc.discount_amount || 0;
+                                this.additional_discount = data.return_doc.discount_amount || 0;
+                                this.return_doc = data.return_doc;
+                                // Set return_against reference
+                                this.invoice_doc.return_against = data.return_doc.name;
+                        } else {
+                                // For return without invoice, reset discount values
+                                this.discount_amount = 0;
+                                this.additional_discount = 0;
+                                this.additional_discount_percentage = 0;
+                        }
+                });
 		this.eventBus.on("set_new_line", (data) => {
 			this.new_line = data;
 		});
