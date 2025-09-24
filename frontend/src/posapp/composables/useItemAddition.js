@@ -1,15 +1,187 @@
 import { nextTick } from "vue";
 import _ from "lodash";
 import { useBundles } from "./useBundles.js";
+import { isOffline } from "../../offline/index.js";
 
 /* global frappe, __ */
 
 export function useItemAddition() {
-	// Remove item from invoice
-	const removeItem = (item, context) => {
-		const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
-		if (index >= 0) {
-			context.items.splice(index, 1);
+        const ensurePriceCache = (context) => {
+                if (!context._uomRateCache) {
+                        context._uomRateCache = new Map();
+                }
+                return context._uomRateCache;
+        };
+
+        const ensureInflightMap = (context) => {
+                if (!context._uomRateInflight) {
+                        context._uomRateInflight = new Map();
+                }
+                return context._uomRateInflight;
+        };
+
+        const getPriceCacheKey = (item, priceList) => {
+                const itemCode = item?.item_code || "";
+                const uom = item?.uom || item?.stock_uom || "";
+                return `${itemCode}::${priceList || ""}::${uom}`;
+        };
+
+        const toNumber = (value) => {
+                const numeric = typeof value === "string" ? parseFloat(value) : value;
+                return Number.isFinite(numeric) ? numeric : null;
+        };
+
+        const applyBaseRate = (item, baseRate, context) => {
+                if (!item || baseRate === null || baseRate === undefined) {
+                        return;
+                }
+
+                const precision = context?.currency_precision;
+                const baseCurrency = context?.price_list_currency || context?.pos_profile?.currency;
+                const selectedCurrency = context?.selected_currency || baseCurrency;
+                const exchangeRate = context?.exchange_rate || 1;
+                let convertedRate = baseRate;
+
+                if (
+                        context?.pos_profile?.posa_allow_multi_currency &&
+                        selectedCurrency &&
+                        baseCurrency &&
+                        selectedCurrency !== baseCurrency
+                ) {
+                        convertedRate = baseRate * exchangeRate;
+                }
+
+                const flt = context?.flt || ((val) => val);
+
+                item.base_price_list_rate = baseRate;
+                item.base_rate = baseRate;
+                item.price_list_rate = flt(convertedRate, precision);
+                item.rate = flt(convertedRate, precision);
+                item.discount_amount = item.discount_amount || 0;
+                item.base_discount_amount = item.base_discount_amount || 0;
+                item._manual_rate_set = true;
+                item.skip_force_update = true;
+
+                if (context?.calc_stock_qty) {
+                        context.calc_stock_qty(item, item.qty);
+                }
+
+                const isAttached = Array.isArray(context?.items) && context.items.includes(item);
+
+                if (isAttached && context?.queue_invoice_totals_recalculation) {
+                        context.queue_invoice_totals_recalculation();
+                }
+
+                if (isAttached && context?.schedule_table_refresh) {
+                        context.schedule_table_refresh();
+                } else if (isAttached && context?.forceUpdate) {
+                        context.forceUpdate();
+                }
+
+                if (isAttached && context?.defer_close_payments) {
+                        context.defer_close_payments();
+                }
+        };
+
+        const resolveCachedPrice = (item, context) => {
+                const priceList = context?.get_price_list ? context.get_price_list() : null;
+                if (!priceList) {
+                        return null;
+                }
+
+                if (context?.getCachedPriceListItems) {
+                        const cached = context.getCachedPriceListItems(priceList) || [];
+                        const match = cached.find(
+                                (row) =>
+                                        row.item_code === item.item_code &&
+                                        (row.uom || item.stock_uom) === (item.uom || item.stock_uom),
+                        );
+
+                        if (match) {
+                                const cachedRate = toNumber(match.price_list_rate ?? match.rate ?? 0);
+                                if (cachedRate !== null) {
+                                        return cachedRate;
+                                }
+                        }
+                }
+
+                const cache = ensurePriceCache(context);
+                const cacheKey = getPriceCacheKey(item, priceList);
+                if (cache.has(cacheKey)) {
+                        return cache.get(cacheKey);
+                }
+
+                return null;
+        };
+
+        const ensureItemPrice = (item, context) => {
+                if (!item) return;
+
+                const priceList = context?.get_price_list ? context.get_price_list() : null;
+                if (!priceList) {
+                        return;
+                }
+
+                const cachedRate = resolveCachedPrice(item, context);
+                if (cachedRate !== null) {
+                        const cache = ensurePriceCache(context);
+                        cache.set(getPriceCacheKey(item, priceList), cachedRate);
+                        applyBaseRate(item, cachedRate, context);
+                        return;
+                }
+
+                if (typeof isOffline === "function" && isOffline()) {
+                        return;
+                }
+
+                const cache = ensurePriceCache(context);
+                const inflight = ensureInflightMap(context);
+                const cacheKey = getPriceCacheKey(item, priceList);
+
+                if (inflight.has(cacheKey)) {
+                        inflight.get(cacheKey).then((rate) => {
+                                if (rate !== null && rate !== undefined) {
+                                        applyBaseRate(item, rate, context);
+                                }
+                        });
+                        return;
+                }
+
+                const request = frappe
+                        .call({
+                                method: "posawesome.posawesome.api.items.get_price_for_uom",
+                                args: {
+                                        item_code: item.item_code,
+                                        price_list: priceList,
+                                        uom: item.uom || item.stock_uom,
+                                },
+                        })
+                        .then((r) => {
+                                const message = r?.message;
+                                const fetchedRate = toNumber(message);
+                                if (fetchedRate !== null) {
+                                        cache.set(cacheKey, fetchedRate);
+                                        applyBaseRate(item, fetchedRate, context);
+                                        return fetchedRate;
+                                }
+                                return null;
+                        })
+                        .catch((error) => {
+                                console.warn("UOM price fetch failed", error);
+                                return null;
+                        })
+                        .finally(() => {
+                                inflight.delete(cacheKey);
+                        });
+
+                inflight.set(cacheKey, request);
+        };
+
+        // Remove item from invoice
+        const removeItem = (item, context) => {
+                const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
+                if (index >= 0) {
+                        context.items.splice(index, 1);
 		}
 		if (item.is_bundle) {
 			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
@@ -123,46 +295,14 @@ export function useItemAddition() {
 				new_item.qty = -Math.abs(new_item.qty || 1);
 			}
 			// Apply UOM conversion immediately if barcode specifies a different UOM
-			if (context.calc_uom && new_item.uom) {
-				await context.calc_uom(new_item, new_item.uom);
-			}
+                        if (context.calc_uom && new_item.uom) {
+                                const maybePromise = context.calc_uom(new_item, new_item.uom);
+                                if (maybePromise && typeof maybePromise.catch === "function") {
+                                        maybePromise.catch((error) => console.error("calc_uom failed", error));
+                                }
+                        }
 
-			// Attempt to fetch an explicit rate for this UOM from the active price list
-			try {
-				const r = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_price_for_uom",
-					args: {
-						item_code: new_item.item_code,
-						price_list: context.get_price_list ? context.get_price_list() : null,
-						uom: new_item.uom,
-					},
-				});
-				if (r.message) {
-					const price = parseFloat(r.message);
-					const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-
-					// Convert price to selected currency when multi-currency is enabled
-					let converted_price = price;
-					if (
-						context.pos_profile.posa_allow_multi_currency &&
-						context.selected_currency &&
-						context.selected_currency !== baseCurrency
-					) {
-						converted_price = price * (context.exchange_rate || 1);
-					}
-
-					Object.assign(new_item, {
-						rate: converted_price,
-						price_list_rate: converted_price,
-						base_rate: price,
-						base_price_list_rate: price,
-						_manual_rate_set: true,
-						skip_force_update: true,
-					});
-				}
-			} catch (e) {
-				console.warn("UOM price fetch failed", e);
-			}
+                        ensureItemPrice(new_item, context);
 
 			// Check again in case the item was added while awaiting price fetch
 			if (!context.new_line) {
@@ -275,14 +415,15 @@ export function useItemAddition() {
 					await context.calc_uom(cur_item, cur_item.uom);
 				}
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(cur_item);
-				}
-				if (cur_item.qty > previousQty) {
-					moveItemToTop(context, cur_item);
-				}
-			}
-		} else {
+                        if (context.fetch_available_qty) {
+                                context.fetch_available_qty(cur_item);
+                        }
+                        ensureItemPrice(cur_item, context);
+                        if (cur_item.qty > previousQty) {
+                                moveItemToTop(context, cur_item);
+                        }
+                }
+        } else {
 			const cur_item = context.items[index];
 			const previousQty = cur_item.qty;
 			if (context.update_items_details) context.update_items_details([cur_item]);
@@ -320,13 +461,14 @@ export function useItemAddition() {
 				await context.calc_uom(cur_item, cur_item.uom);
 			}
 
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(cur_item);
-			}
-			if (cur_item.qty > previousQty) {
-				moveItemToTop(context, cur_item);
-			}
-		}
+                        if (context.fetch_available_qty) {
+                                context.fetch_available_qty(cur_item);
+                        }
+                        ensureItemPrice(cur_item, context);
+                        if (cur_item.qty > previousQty) {
+                                moveItemToTop(context, cur_item);
+                        }
+                }
 		if (context.forceUpdate) context.forceUpdate();
 
 		// Only try to expand if new_item exists and should be expanded
