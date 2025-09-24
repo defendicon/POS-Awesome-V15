@@ -89,41 +89,6 @@
                                         <!-- Requesting permission is handled by the browser when QrcodeStream tries to access camera -->
                                 </div>
 
-                                <div class="manual-entry pa-4 pt-0">
-                                        <v-divider class="mb-4"></v-divider>
-                                        <h3 class="text-subtitle-1 font-weight-medium mb-2">
-                                                {{ __("Manual or Hardware Scanner Input") }}
-                                        </h3>
-                                        <p class="text-body-2 mb-3">
-                                                {{ __("Scan with a hardware scanner or type the code, then press Enter.") }}
-                                        </p>
-                                        <v-text-field
-                                                density="comfortable"
-                                                variant="outlined"
-                                                color="primary"
-                                                clearable
-                                                hide-details
-                                                :label="__('Enter Code Manually')"
-                                                v-model="manualScanValue"
-                                                @keydown.enter.prevent="submitManualScan"
-                                                @click:clear="manualScanValue = ''"
-                                                autocomplete="off"
-                                                ref="manualScanInput"
-                                                :autofocus="scannerDialog"
-                                                prepend-inner-icon="mdi-barcode-scan"
-                                        >
-                                                <template #append-inner>
-                                                        <v-btn
-                                                                icon="mdi-check"
-                                                                variant="tonal"
-                                                                color="primary"
-                                                                size="small"
-                                                                @click="submitManualScan"
-                                                                :title="__('Submit Code')"
-                                                        ></v-btn>
-                                                </template>
-                                        </v-text-field>
-                                </div>
                         </v-card-text>
 
 			<!-- Action buttons -->
@@ -251,11 +216,6 @@
         background: rgba(255, 255, 255, 0.95);
 }
 
-.manual-entry {
-        background: rgba(255, 255, 255, 0.95);
-        border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
 .camera-scanner-dialog {
         align-self: flex-start;
         justify-self: flex-end;
@@ -264,6 +224,7 @@
 </style>
 
 <script>
+/* global frappe */
 import { QrcodeStream } from "vue-qrcode-reader";
 
 export default {
@@ -293,7 +254,6 @@ export default {
                         torchActive: false,
                         selectedDeviceId: null, // For camera switching
                         cameras: [], // To store available cameras
-                        manualScanValue: "",
                         scanResetTimeoutId: null,
                         dialogCloseTimeoutId: null,
                         scannerLockedExternally: false,
@@ -347,10 +307,8 @@ export default {
                         this.scanFormat = "";
                         this.cameraPermissionDenied = false;
                         this.isScanning = true; // QrcodeStream will attempt to start camera automatically
-                        this.manualScanValue = "";
                         // We might need to await this.$nextTick() if QrcodeStream is inside v-if controlled by scannerDialog
                         await this.$nextTick();
-                        this.queueManualInputFocus();
                         // Camera listing can be done here or in a dedicated method
                         // vue-qrcode-reader doesn't directly list cameras in QrcodeStream,
                         // but we can use navigator.mediaDevices.enumerateDevices()
@@ -453,27 +411,10 @@ export default {
                                         this.isScanning = true;
                                 }
                                 this.scanResetTimeoutId = null;
-                                this.queueManualInputFocus();
                         }, Math.max(0, resetDelay));
-                        this.queueManualInputFocus();
                 },
 
-                submitManualScan() {
-                        const code = (this.manualScanValue ?? "").toString().trim();
-                        if (!code) {
-                                return;
-                        }
-
-                        this.handleScannedCode(code, this.__("Manual Entry"), {
-                                pauseCamera: false,
-                                closeDialog: false,
-                                closeDelay: 0,
-                        });
-                        this.manualScanValue = "";
-                        this.queueManualInputFocus();
-                },
-
-		onError(error) {
+                onError(error) {
 			this.errorMessage = error.name || "Unknown error";
 			if (error.name === "NotAllowedError") {
 				this.cameraPermissionDenied = true;
@@ -509,7 +450,6 @@ export default {
                         this.scanFormat = "";
                         this.errorMessage = "";
                         this.torchActive = false;
-                        this.manualScanValue = "";
                         // selectedDeviceId and cameras can remain as they are for next scan
                 },
 
@@ -555,28 +495,6 @@ export default {
                         }
                 },
 
-                focusManualInput() {
-                        const input = this.$refs.manualScanInput;
-                        if (input && typeof input.focus === "function") {
-                                input.focus();
-                        }
-                },
-
-                queueManualInputFocus() {
-                        if (!this.scannerDialog) {
-                                return;
-                        }
-                        this.$nextTick(() => {
-                                const scheduler =
-                                        typeof requestAnimationFrame === "function"
-                                                ? requestAnimationFrame
-                                                : (cb) => setTimeout(cb, 16);
-                                scheduler(() => {
-                                        this.focusManualInput();
-                                });
-                        });
-                },
-
                 pauseForExternalLock() {
                         this.scannerLockedExternally = true;
                         if (this.scanResetTimeoutId) {
@@ -602,11 +520,8 @@ export default {
                                 this.$nextTick(() => {
                                         if (this.scannerDialog && !this.isScanning) {
                                                 this.isScanning = true;
-                                                this.queueManualInputFocus();
                                         }
                                 });
-                        } else {
-                                this.queueManualInputFocus();
                         }
                 },
         },
@@ -618,13 +533,11 @@ export default {
                                 if (!this.selectedDeviceId && this.cameras.length === 0) {
                                         this.listCameras();
                                 }
-                                this.queueManualInputFocus();
                                 this.$emit("scanner-opened");
                         } else {
                                 // When dialog closes, ensure scanning is stopped.
                                 this.isScanning = false;
                                 this.torchActive = false;
-                                this.manualScanValue = "";
                                 this.$emit("scanner-closed");
                         }
                 },

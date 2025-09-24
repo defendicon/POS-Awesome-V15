@@ -66,26 +66,84 @@
 								prepend-inner-icon="mdi-magnify"
 								@focus="handleItemSearchFocus"
 								ref="debounce_search"
-							>
-								<!-- Add camera scan button if enabled -->
-								<template v-slot:append-inner v-if="pos_profile.posa_enable_camera_scanning">
-									<v-btn
-										icon="mdi-camera"
-										size="small"
-										color="primary"
-										variant="text"
-										:disabled="scannerLocked"
-										@click="startCameraScanning"
-										:title="
-											scannerLocked
-												? __('Acknowledge the error to resume scanning')
-												: __('Scan with Camera')
-										"
-									>
-									</v-btn>
-								</template>
-							</v-text-field>
-						</v-col>
+                                                        >
+                                                                <template v-slot:append-inner>
+                                                                        <v-btn
+                                                                                :icon="
+                                                                                        showManualScanInput
+                                                                                                ? 'mdi-barcode-off'
+                                                                                                : 'mdi-barcode-scan'
+                                                                                "
+                                                                                size="small"
+                                                                                color="primary"
+                                                                                :variant="showManualScanInput ? 'tonal' : 'text'"
+                                                                                class="mr-1"
+                                                                                @click.stop="toggleManualScanInput"
+                                                                                :title="
+                                                                                        showManualScanInput
+                                                                                                ? __('Hide Manual Entry')
+                                                                                                : __('Show Manual Entry')
+                                                                                "
+                                                                        >
+                                                                        </v-btn>
+                                                                        <v-btn
+                                                                                v-if="pos_profile.posa_enable_camera_scanning"
+                                                                                icon="mdi-camera"
+                                                                                size="small"
+                                                                                color="primary"
+                                                                                variant="text"
+                                                                                :disabled="scannerLocked"
+                                                                                @click="startCameraScanning"
+                                                                                :title="
+                                                                                        scannerLocked
+                                                                                                ? __('Acknowledge the error to resume scanning')
+                                                                                                : __('Scan with Camera')
+                                                                                "
+                                                                        >
+                                                                        </v-btn>
+                                                                </template>
+                                                        </v-text-field>
+                                                        <v-expand-transition>
+                                                                <div
+                                                                        v-if="showManualScanInput"
+                                                                        class="manual-scan-container mt-2"
+                                                                >
+                                                                        <div class="manual-scan-text mb-3">
+                                                                                <div class="text-subtitle-2 font-weight-medium">
+                                                                                        {{ __("Manual or Hardware Scanner Input") }}
+                                                                                </div>
+                                                                                <div class="text-body-2 text-medium-emphasis">
+                                                                                        {{ __("Scan with a hardware scanner or type the code, then press Enter.") }}
+                                                                                </div>
+                                                                        </div>
+                                                                        <v-text-field
+                                                                                density="comfortable"
+                                                                                variant="outlined"
+                                                                                color="primary"
+                                                                                clearable
+                                                                                hide-details
+                                                                                :label="__('Enter Code Manually')"
+                                                                                v-model="manualScanValue"
+                                                                                @keydown.enter.prevent="submitManualScan"
+                                                                                @click:clear="manualScanValue = ''"
+                                                                                autocomplete="off"
+                                                                                ref="manualScanInput"
+                                                                                prepend-inner-icon="mdi-barcode-scan"
+                                                                        >
+                                                                                <template #append-inner>
+                                                                                        <v-btn
+                                                                                                icon="mdi-check"
+                                                                                                variant="tonal"
+                                                                                                color="primary"
+                                                                                                size="small"
+                                                                                                @click="submitManualScan"
+                                                                                                :title="__('Submit Code')"
+                                                                                        ></v-btn>
+                                                                                </template>
+                                                                        </v-text-field>
+                                                                </div>
+                                                        </v-expand-transition>
+                                                </v-col>
 						<v-col cols="3" class="pb-0" v-if="pos_profile.posa_input_qty">
 							<v-text-field
 								density="compact"
@@ -585,13 +643,25 @@ export default {
                 scanErrorCode: "",
                 scannerLocked: false,
                 cameraScannerActive: false,
+                showManualScanInput: false,
+                manualScanValue: "",
                 scanAudioContext: null,
-		pendingScanCode: "",
-		awaitingScanResult: false,
+                pendingScanCode: "",
+                awaitingScanResult: false,
 	}),
 
-	watch: {
-		customer: _.debounce(function () {
+        watch: {
+                showManualScanInput(newVal) {
+                        if (newVal) {
+                                this.queueManualScanFocus();
+                        } else {
+                                this.manualScanValue = "";
+                                if (!this.cameraScannerActive) {
+                                        this.$nextTick(() => this.focusItemSearch());
+                                }
+                        }
+                },
+                customer: _.debounce(function () {
 			if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
@@ -2603,8 +2673,53 @@ export default {
                         this.focusItemSearch();
                 },
 
+                toggleManualScanInput() {
+                        this.showManualScanInput = !this.showManualScanInput;
+                        if (this.showManualScanInput) {
+                                this.queueManualScanFocus();
+                        } else {
+                                this.focusItemSearch();
+                        }
+                },
+
+                submitManualScan() {
+                        const code = (this.manualScanValue ?? "").toString().trim();
+                        if (!code) {
+                                return;
+                        }
+                        if (this.scannerLocked) {
+                                this.onBarcodeScanned(code);
+                                this.queueManualScanFocus();
+                                return;
+                        }
+                        this.manualScanValue = "";
+                        this.onBarcodeScanned(code);
+                        this.queueManualScanFocus();
+                },
+
+                focusManualScanInput() {
+                        const input = this.$refs.manualScanInput;
+                        if (input && typeof input.focus === "function") {
+                                input.focus();
+                        }
+                },
+
+                queueManualScanFocus() {
+                        this.$nextTick(() => {
+                                const scheduler =
+                                        typeof requestAnimationFrame === "function"
+                                                ? requestAnimationFrame
+                                                : (cb) => setTimeout(cb, 16);
+                                scheduler(() => {
+                                        this.focusManualScanInput();
+                                });
+                        });
+                },
+
                 onScannerOpened() {
                         this.cameraScannerActive = true;
+                        this.showManualScanInput = false;
+                        this.manualScanValue = "";
                         this.blurItemSearch();
                 },
 
@@ -2616,17 +2731,26 @@ export default {
                 startCameraScanning() {
                         if (this.scannerLocked) {
                                 this.playScanTone("error");
-				return;
-			}
+                                return;
+                        }
 			if (this.$refs.cameraScanner) {
 				this.$refs.cameraScanner.startScanning();
 			}
-		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
+                },
+                onBarcodeScanned(scannedCode) {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                if (frappe?.show_alert) {
+                                        frappe.show_alert(
+                                                {
+                                                        message: this.__("Acknowledge the error to resume scanning."),
+                                                        indicator: "red",
+                                                },
+                                                3,
+                                        );
+                                }
+                                return;
+                        }
 			console.log("Barcode scanned:", scannedCode);
 			this.pendingScanCode = scannedCode;
 
@@ -3450,12 +3574,35 @@ export default {
 <style scoped>
 /* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
 .dynamic-padding {
-	/* Equal spacing on all sides for consistent alignment */
-	padding: var(--dynamic-sm);
+        /* Equal spacing on all sides for consistent alignment */
+        padding: var(--dynamic-sm);
+}
+
+.manual-scan-container {
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--pos-border, rgba(0, 0, 0, 0.08));
+        background-color: var(--pos-card-bg, rgba(255, 255, 255, 0.96));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.manual-scan-text .text-body-2 {
+        color: rgba(0, 0, 0, 0.6);
+}
+
+:deep(.v-theme--dark) .manual-scan-container {
+        background-color: rgba(30, 30, 30, 0.92);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:deep(.v-theme--dark) .manual-scan-text .text-body-2 {
+        color: rgba(255, 255, 255, 0.7);
 }
 
 .scan-error-dialog {
-	border-radius: 16px;
+        border-radius: 16px;
 }
 
 .scan-error-dialog .scan-error-message {
