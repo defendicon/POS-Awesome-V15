@@ -2569,6 +2569,10 @@ export default {
                                 if (this.cameraScannerActive) {
                                         return;
                                 }
+                                if (this.showManualScanInput) {
+                                        this.queueManualScanFocus();
+                                        return;
+                                }
                                 const input = this.$refs.debounce_search;
                                 if (input && typeof input.focus === "function") {
                                         input.focus();
