@@ -66,26 +66,84 @@
 								prepend-inner-icon="mdi-magnify"
 								@focus="handleItemSearchFocus"
 								ref="debounce_search"
-							>
-								<!-- Add camera scan button if enabled -->
-								<template v-slot:append-inner v-if="pos_profile.posa_enable_camera_scanning">
-									<v-btn
-										icon="mdi-camera"
-										size="small"
-										color="primary"
-										variant="text"
-										:disabled="scannerLocked"
-										@click="startCameraScanning"
-										:title="
-											scannerLocked
-												? __('Acknowledge the error to resume scanning')
-												: __('Scan with Camera')
-										"
-									>
-									</v-btn>
-								</template>
-							</v-text-field>
-						</v-col>
+                                                        >
+                                                                <template v-slot:append-inner>
+                                                                        <v-btn
+                                                                                :icon="
+                                                                                        showManualScanInput
+                                                                                                ? 'mdi-barcode-off'
+                                                                                                : 'mdi-barcode-scan'
+                                                                                "
+                                                                                size="small"
+                                                                                color="primary"
+                                                                                :variant="showManualScanInput ? 'tonal' : 'text'"
+                                                                                class="mr-1"
+                                                                                @click.stop="toggleManualScanInput"
+                                                                                :title="
+                                                                                        showManualScanInput
+                                                                                                ? __('Hide Manual Entry')
+                                                                                                : __('Show Manual Entry')
+                                                                                "
+                                                                        >
+                                                                        </v-btn>
+                                                                        <v-btn
+                                                                                v-if="pos_profile.posa_enable_camera_scanning"
+                                                                                icon="mdi-camera"
+                                                                                size="small"
+                                                                                color="primary"
+                                                                                variant="text"
+                                                                                :disabled="scannerLocked"
+                                                                                @click="startCameraScanning"
+                                                                                :title="
+                                                                                        scannerLocked
+                                                                                                ? __('Acknowledge the error to resume scanning')
+                                                                                                : __('Scan with Camera')
+                                                                                "
+                                                                        >
+                                                                        </v-btn>
+                                                                </template>
+                                                        </v-text-field>
+                                                        <v-expand-transition>
+                                                                <div
+                                                                        v-if="showManualScanInput"
+                                                                        class="manual-scan-container mt-2"
+                                                                >
+                                                                        <div class="manual-scan-text mb-3">
+                                                                                <div class="text-subtitle-2 font-weight-medium">
+                                                                                        {{ __("Manual or Hardware Scanner Input") }}
+                                                                                </div>
+                                                                                <div class="text-body-2 text-medium-emphasis">
+                                                                                        {{ __("Scan with a hardware scanner or type the code, then press Enter.") }}
+                                                                                </div>
+                                                                        </div>
+                                                                        <v-text-field
+                                                                                density="comfortable"
+                                                                                variant="outlined"
+                                                                                color="primary"
+                                                                                clearable
+                                                                                hide-details
+                                                                                :label="__('Enter Code Manually')"
+                                                                                v-model="manualScanValue"
+                                                                                @keydown.enter.prevent="submitManualScan"
+                                                                                @click:clear="manualScanValue = ''"
+                                                                                autocomplete="off"
+                                                                                ref="manualScanInput"
+                                                                                prepend-inner-icon="mdi-barcode-scan"
+                                                                        >
+                                                                                <template #append-inner>
+                                                                                        <v-btn
+                                                                                                icon="mdi-check"
+                                                                                                variant="tonal"
+                                                                                                color="primary"
+                                                                                                size="small"
+                                                                                                @click="submitManualScan"
+                                                                                                :title="__('Submit Code')"
+                                                                                        ></v-btn>
+                                                                                </template>
+                                                                        </v-text-field>
+                                                                </div>
+                                                        </v-expand-transition>
+                                                </v-col>
 						<v-col cols="3" class="pb-0" v-if="pos_profile.posa_input_qty">
 							<v-text-field
 								density="compact"
@@ -442,12 +500,14 @@
 		</v-card>
 
 		<!-- Camera Scanner Component -->
-		<CameraScanner
-			v-if="pos_profile.posa_enable_camera_scanning"
-			ref="cameraScanner"
-			:scan-type="pos_profile.posa_camera_scan_type || 'Both'"
-			@barcode-scanned="onBarcodeScanned"
-		/>
+                <CameraScanner
+                        v-if="pos_profile.posa_enable_camera_scanning"
+                        ref="cameraScanner"
+                        :scan-type="pos_profile.posa_camera_scan_type || 'Both'"
+                        @barcode-scanned="onBarcodeScanned"
+                        @scanner-opened="onScannerOpened"
+                        @scanner-closed="onScannerClosed"
+                />
 	</div>
 </template>
 
@@ -490,11 +550,12 @@ import {
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
+import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import {
-	parseBooleanSetting,
-	formatNegativeStockWarning,
-	formatStockShortageError,
+  parseBooleanSetting,
+  formatNegativeStockWarning,
+  formatStockShortageError,
 } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
@@ -562,9 +623,10 @@ export default {
 		items_per_page: 50,
 		temp_items_per_page: 50,
 		temp_force_server_items: false,
-		// Performance optimizations
-		searchCache: new Map(),
-		itemCache: new Map(),
+                // Performance optimizations
+                searchCache: new Map(),
+                barcodeIndex: new Map(),
+                itemCache: new Map(),
 		virtualScrollEnabled: true,
 		renderBuffer: 10,
 		lastScrollTop: 0,
@@ -586,16 +648,33 @@ export default {
 		totalItemCount: 0,
 		scanErrorDialog: false,
 		scanErrorMessage: "",
-		scanErrorDetails: "",
-		scanErrorCode: "",
-		scannerLocked: false,
-		scanAudioContext: null,
-		pendingScanCode: "",
-		awaitingScanResult: false,
-	}),
+                scanErrorDetails: "",
+                scanErrorCode: "",
+                scannerLocked: false,
+                cameraScannerActive: false,
+                showManualScanInput: false,
+                manualScanValue: "",
+                scanAudioContext: null,
+                pendingScanCode: "",
+                awaitingScanResult: false,
+                scanDebounceId: null,
+                scanQueuedCode: "",
+                refreshInFlight: false,
+                clearingSearch: false,
+        }),
 
-	watch: {
-		customer: _.debounce(function () {
+        watch: {
+                showManualScanInput(newVal) {
+                        if (newVal) {
+                                this.queueManualScanFocus();
+                        } else {
+                                this.manualScanValue = "";
+                                if (!this.cameraScannerActive) {
+                                        this.$nextTick(() => this.focusItemSearch());
+                                }
+                        }
+                },
+                customer: _.debounce(function () {
 			if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
@@ -742,12 +821,15 @@ export default {
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
-		first_search: _.debounce(function (val, oldVal) {
-			const newLen = (val || "").trim().length;
-			const oldLen = (oldVal || "").trim().length;
-			if (newLen >= 3) {
-				// Call without arguments so search_onchange treats it like an Enter key
-				this.search_onchange();
+                first_search: _.debounce(function (val, oldVal) {
+                        if (this.clearingSearch) {
+                                return;
+                        }
+                        const newLen = (val || "").trim().length;
+                        const oldLen = (oldVal || "").trim().length;
+                        if (newLen >= 3) {
+                                // Call without arguments so search_onchange treats it like an Enter key
+                                this.search_onchange();
 			} else if (oldLen >= 3 && newLen === 0) {
 				// Reset items only when search is fully cleared
 				this.clearSearch();
@@ -790,8 +872,8 @@ export default {
 
 	methods: {
 		// Performance optimization: Memoized search function
-		memoizedSearch(searchTerm, itemGroup) {
-			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
+                memoizedSearch(searchTerm, itemGroup) {
+                        const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
 
 			// Check if we have a cached result
 			if (this.searchCache && this.searchCache.has(cacheKey)) {
@@ -800,7 +882,7 @@ export default {
 			}
 
 			// Perform the search
-			const result = this.performSearch(searchTerm, itemGroup);
+                        const result = this.performSearch(searchTerm, itemGroup);
 
 			// Cache the result
 			if (this.searchCache) {
@@ -810,10 +892,12 @@ export default {
 			return result;
 		},
 
-		performSearch(searchTerm, itemGroup) {
-			if (!this.items || !this.items.length) {
-				return [];
-			}
+                performSearch(searchTerm, itemGroup) {
+                        const mark = perfMarkStart("pos:search-filter");
+                        if (!this.items || !this.items.length) {
+                                perfMarkEnd("pos:search-filter", mark);
+                                return [];
+                        }
 
 			let filtered = this.items;
 
@@ -826,8 +910,8 @@ export default {
 			}
 
 			// Filter by search term only if it exists and is long enough
-			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
+                        if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
+                                const term = searchTerm.toLowerCase();
 				filtered = filtered.filter((item) => {
 					const barcodeMatch =
 						(Array.isArray(item.item_barcode) &&
@@ -846,8 +930,9 @@ export default {
 				});
 			}
 
-			return filtered;
-		},
+                        perfMarkEnd("pos:search-filter", mark);
+                        return filtered;
+                },
 
 		async fetchServerItemsTimestamp() {
 			try {
@@ -960,10 +1045,11 @@ export default {
 			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
 			await initPromise;
 			await this.ensureStorageHealth();
-			if (reset) {
-				this.currentPage = 0;
-				this.items = [];
-			}
+                        if (reset) {
+                                this.currentPage = 0;
+                                this.items = [];
+                                this.resetBarcodeIndex();
+                        }
 			const search = this.get_search(this.first_search);
 			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
 			const pageItems = await searchStoredItems({
@@ -974,7 +1060,8 @@ export default {
 			});
 			const total = pageItems.length || 1;
 			pageItems.forEach((it, idx) => {
-				this.items.push(it);
+                                this.items.push(it);
+                                this.indexItem(it);
 				const progress = Math.round(((idx + 1) / total) * 100);
 				this.loadProgress = progress;
 				this.eventBus.emit("data-load-progress", {
@@ -1090,59 +1177,76 @@ export default {
 				this.itemDetailsRequestCache.result = null;
 			}
 		},
-		async refreshPricesForVisibleItems() {
-			const vm = this;
-			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
+                async refreshPricesForVisibleItems() {
+                        const vm = this;
+                        if (!vm.filtered_items || vm.filtered_items.length === 0) return;
 
-			vm.loading = true;
+                        if (vm.refreshInFlight) {
+                                return;
+                        }
 
-			const itemCodes = vm.filtered_items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
-			const updates = [];
+                        vm.refreshInFlight = true;
+                        const wasLoading = vm.loading;
+                        if (!wasLoading) {
+                                vm.loading = true;
+                        }
+                        const releaseLoading = () => {
+                                if (!wasLoading) {
+                                        vm.loading = false;
+                                }
+                        };
 
-			cacheResult.cached.forEach((det) => {
-				const item = vm.filtered_items.find((it) => it.item_code === det.item_code);
-				if (item) {
-					const upd = { actual_qty: det.actual_qty };
-					if (det.item_uoms && det.item_uoms.length > 0) {
-						upd.item_uoms = det.item_uoms;
-						saveItemUOMs(item.item_code, det.item_uoms);
-					}
-					if (det.rate !== undefined) {
-						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
-						const price = det.price_list_rate ?? det.rate ?? 0;
-						if (force || price) {
-							upd.rate = price;
-							upd.price_list_rate = price;
-						}
-					}
-					if (det.currency) {
-						upd.currency = det.currency;
-					}
-					updates.push({ item, upd });
-				}
-			});
+                        try {
+                                const itemCodes = vm.filtered_items.map((it) => it.item_code);
+                                const cacheResult = await getCachedItemDetails(
+                                vm.pos_profile.name,
+                                vm.active_price_list,
+                                itemCodes,
+                                );
+                                const updates = [];
 
-			if (cacheResult.missing.length === 0) {
-				vm.$nextTick(() => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(cacheResult.cached);
-					vm.loading = false;
-				});
-				return;
-			}
+                                cacheResult.cached.forEach((det) => {
+                                        const item = vm.filtered_items.find((it) => it.item_code === det.item_code);
+                                        if (item) {
+                                                const upd = { actual_qty: det.actual_qty };
+                                                if (det.item_uoms && det.item_uoms.length > 0) {
+                                                        upd.item_uoms = det.item_uoms;
+                                                        saveItemUOMs(item.item_code, det.item_uoms);
+                                                }
+                                                if (det.rate !== undefined) {
+                                                        const force =
+                                                                vm.pos_profile?.posa_force_price_from_customer_price_list !==
+                                                                false;
+                                                        const price = det.price_list_rate ?? det.rate ?? 0;
+                                                        if (force || price) {
+                                                                upd.rate = price;
+                                                                upd.price_list_rate = price;
+                                                        }
+                                                }
+                                                if (det.currency) {
+                                                        upd.currency = det.currency;
+                                                }
+                                                updates.push({ item, upd });
+                                        }
+                                });
 
-			const itemsToFetch = vm.filtered_items.filter((it) => cacheResult.missing.includes(it.item_code));
+                                if (cacheResult.missing.length === 0) {
+                                        vm.$nextTick(() => {
+                                                updates.forEach(({ item, upd }) => Object.assign(item, upd));
+                                                updateLocalStockCache(cacheResult.cached);
+                                                releaseLoading();
+                                        });
+                                        return;
+                                }
 
-			try {
-				const details = await vm.fetchItemDetails(itemsToFetch);
-				details.forEach((updItem) => {
-					const item = vm.filtered_items.find((it) => it.item_code === updItem.item_code);
-					if (item) {
+                                const itemsToFetch = vm.filtered_items.filter((it) =>
+                                        cacheResult.missing.includes(it.item_code),
+                                );
+
+                                const details = await vm.fetchItemDetails(itemsToFetch);
+                                details.forEach((updItem) => {
+                                        const item = vm.filtered_items.find((it) => it.item_code === updItem.item_code);
+                                        if (item) {
 						const upd = { actual_qty: updItem.actual_qty };
 						if (updItem.item_uoms && updItem.item_uoms.length > 0) {
 							upd.item_uoms = updItem.item_uoms;
@@ -1183,18 +1287,21 @@ export default {
 							await saveItemsBulk(details);
 						} catch (e) {
 							console.error("Failed to persist item details", e);
-							vm.markStorageUnavailable && vm.markStorageUnavailable();
-						}
-					}
-					vm.loading = false;
-				});
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-					vm.loading = false;
-				}
-			}
-		},
+                                                        vm.markStorageUnavailable && vm.markStorageUnavailable();
+                                                }
+                                        }
+                                        releaseLoading();
+                                });
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                        releaseLoading();
+                                }
+                        } finally {
+                                vm.refreshInFlight = false;
+                                releaseLoading();
+                        }
+                },
 
 		show_offers() {
 			this.eventBus.emit("show_offers", "true");
@@ -1382,8 +1489,9 @@ export default {
 					}
 				});
 
-				vm.items = items;
-				vm.items_loaded = true;
+                                vm.items = items;
+                                vm.replaceBarcodeIndex(vm.items);
+                                vm.items_loaded = true;
 				vm.eventBus.emit("set_all_items", vm.items);
 				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
 
@@ -1521,12 +1629,18 @@ export default {
 								return;
 							}
 							if (ev.data.type === "parsed") {
-								const newItems = ev.data.items || [];
-								newItems.forEach((it) => {
-									const existing = this.items.find((i) => i.item_code === it.item_code);
-									if (existing) Object.assign(existing, it);
-									else this.items.push(it);
-								});
+                                                                const newItems = ev.data.items || [];
+                                                                newItems.forEach((it) => {
+                                                                        const existing = this.items.find((i) => i.item_code === it.item_code);
+                                                                        let target = existing;
+                                                                        if (existing) {
+                                                                                Object.assign(existing, it);
+                                                                        } else {
+                                                                                target = it;
+                                                                                this.items.push(target);
+                                                                        }
+                                                                        this.indexItem(target);
+                                                                });
 								lastItemName = newItems[newItems.length - 1]?.item_name || null;
 								this.eventBus.emit("set_all_items", this.items);
 								console.log("[ItemsSelector] background load set_all_items emitted", {
@@ -1633,11 +1747,17 @@ export default {
 						}
 						const rows = r.message || [];
 						console.log("[ItemsSelector] background load callback items", { count: rows.length });
-						rows.forEach((it) => {
-							const existing = this.items.find((i) => i.item_code === it.item_code);
-							if (existing) Object.assign(existing, it);
-							else this.items.push(it);
-						});
+                                                rows.forEach((it) => {
+                                                        const existing = this.items.find((i) => i.item_code === it.item_code);
+                                                        let target = existing;
+                                                        if (existing) {
+                                                                Object.assign(existing, it);
+                                                        } else {
+                                                                target = it;
+                                                                this.items.push(target);
+                                                        }
+                                                        this.indexItem(target);
+                                                });
 						this.eventBus.emit("set_all_items", this.items);
 						console.log("[ItemsSelector] background load set_all_items emitted", {
 							length: this.items.length,
@@ -2019,17 +2139,18 @@ export default {
 					this.search_from_scanner = false;
 				}
 
-				if (!this.scanErrorDialog) {
-					// Clear search field after successfully adding an item
-					this.clearSearch();
-					this.$refs.debounce_search.focus();
-				}
+                                if (!this.scanErrorDialog) {
+                                        // Clear search field after successfully adding an item
+                                        this.clearSearch();
+                                        this.focusItemSearch();
+                                }
 			}
 		},
-		search_onchange: _.debounce(async function (newSearchTerm) {
-			const vm = this;
+                search_onchange: _.debounce(
+                        withPerf("pos:search-trigger", async function (newSearchTerm) {
+                                const vm = this;
 
-			vm.cancelItemDetailsRequest();
+                                vm.cancelItemDetailsRequest();
 
 			// Determine the actual query string and trim whitespace
 			const query = typeof newSearchTerm === "string" ? newSearchTerm : vm.first_search;
@@ -2078,13 +2199,15 @@ export default {
 				}
 			}
 
-			// Clear the input only when triggered via scanner
-			if (fromScanner) {
-				vm.clearSearch();
-				vm.$refs.debounce_search && vm.$refs.debounce_search.focus();
-				vm.search_from_scanner = false;
-			}
-		}, 300),
+                        // Clear the input only when triggered via scanner
+                        if (fromScanner) {
+                                vm.clearSearch();
+                                vm.focusItemSearch();
+                                vm.search_from_scanner = false;
+                        }
+                        }),
+                        300,
+                ),
 		get_item_qty(first_search) {
 			const qtyVal = this.qty != null ? this.qty : 1;
 			let scal_qty = Math.abs(qtyVal);
@@ -2124,13 +2247,13 @@ export default {
 			const item_code_len = first_search.length - prefix_len - 6;
 			return first_search.substr(0, prefix_len + item_code_len);
 		},
-		esc_event() {
-			this.search = null;
-			this.first_search = null;
-			this.search_backup = null;
-			this.qty = 1;
-			this.$refs.debounce_search.focus();
-		},
+                esc_event() {
+                        this.search = null;
+                        this.first_search = null;
+                        this.search_backup = null;
+                        this.qty = 1;
+                        this.focusItemSearch();
+                },
 		async update_items_details(items) {
 			const vm = this;
 			if (!items || !items.length) return;
@@ -2171,14 +2294,15 @@ export default {
 						item.currency = det.currency;
 					}
 
-					if (!item.original_rate) {
-						item.original_rate = item.rate;
-						item.original_currency = item.currency || vm.pos_profile.currency;
-					}
+                                        if (!item.original_rate) {
+                                                item.original_rate = item.rate;
+                                                item.original_currency = item.currency || vm.pos_profile.currency;
+                                        }
 
-					vm.applyCurrencyConversionToItem(item);
-				}
-			});
+                                        vm.indexItem(item);
+                                        vm.applyCurrencyConversionToItem(item);
+                                }
+                        });
 
 			let allCached = cacheResult.missing.length === 0;
 			items.forEach((item) => {
@@ -2265,10 +2389,11 @@ export default {
 						}
 					});
 
-					updatedItems.forEach(({ item, updates }) => {
-						Object.assign(item, updates);
-						vm.applyCurrencyConversionToItem(item);
-					});
+                                        updatedItems.forEach(({ item, updates }) => {
+                                                Object.assign(item, updates);
+                                                vm.indexItem(item);
+                                                vm.applyCurrencyConversionToItem(item);
+                                        });
 
 					updateLocalStockCache(details);
 					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
@@ -2451,13 +2576,13 @@ export default {
 					this.enter_event();
 				}
 
-				// clear search field for next scan and refocus input
-				if (!this.scanErrorDialog) {
-					this.clearSearch();
-					this.$refs.debounce_search && this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                                // clear search field for next scan and refocus input
+                                if (!this.scanErrorDialog) {
+                                        this.clearSearch();
+                                        this.focusItemSearch();
+                                }
+                        });
+                },
 		generateWordCombinations(inputString) {
 			const words = inputString.split(" ");
 			const wordCount = words.length;
@@ -2480,34 +2605,61 @@ export default {
 
 			return combinations;
 		},
-		clearSearch() {
-			this.search_backup = this.first_search;
-			this.first_search = "";
-			this.search = "";
+                clearSearch() {
+                        if (this.clearingSearch) {
+                                return;
+                        }
 
-			if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
-				this.loadVisibleItems(true);
-				if (!this.isBackgroundLoading) {
-					this.verifyServerItemCount();
-				}
-				return;
-			}
+                        const hadQuery = Boolean(
+                                (this.first_search && this.first_search.trim()) ||
+                                        (this.search && this.search.trim()),
+                        );
+                        const shouldReload =
+                                hadQuery || !this.items_loaded || !this.items.length;
 
-			if (this.isBackgroundLoading) {
-				if (this.pendingGetItems) {
-					this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
-				} else {
-					this.pendingGetItems = { force_server: false };
-				}
-				return;
-			}
+                        this.search_backup = this.first_search;
+                        this.clearingSearch = true;
+                        this.first_search = "";
+                        this.search = "";
 
-			if (!this.items_loaded || !this.items.length) {
-				this.get_items(true);
-			} else {
-				this.eventBus.emit("set_all_items", this.items);
-			}
-		},
+                        const release = () => {
+                                this.$nextTick(() => {
+                                        this.clearingSearch = false;
+                                });
+                        };
+
+                        if (!shouldReload) {
+                                release();
+                                return;
+                        }
+
+                        if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                this.loadVisibleItems(true);
+                                if (!this.isBackgroundLoading) {
+                                        this.verifyServerItemCount();
+                                }
+                                release();
+                                return;
+                        }
+
+                        if (this.isBackgroundLoading) {
+                                if (this.pendingGetItems) {
+                                        this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
+                                } else {
+                                        this.pendingGetItems = { force_server: false };
+                                }
+                                release();
+                                return;
+                        }
+
+                        if (!this.items_loaded || !this.items.length) {
+                                this.get_items(true);
+                        } else {
+                                this.eventBus.emit("set_all_items", this.items);
+                        }
+
+                        release();
+                },
 
 		restoreSearch() {
 			if (this.first_search === "") {
@@ -2523,14 +2675,31 @@ export default {
 			// this.search_backup = "";
 		},
 
-		focusItemSearch() {
-			this.$nextTick(() => {
-				const input = this.$refs.debounce_search;
-				if (input && typeof input.focus === "function") {
-					input.focus();
-				}
-			});
-		},
+                focusItemSearch() {
+                        if (this.cameraScannerActive) {
+                                return;
+                        }
+                        this.$nextTick(() => {
+                                if (this.cameraScannerActive) {
+                                        return;
+                                }
+                                if (this.showManualScanInput) {
+                                        this.queueManualScanFocus();
+                                        return;
+                                }
+                                const input = this.$refs.debounce_search;
+                                if (input && typeof input.focus === "function") {
+                                        input.focus();
+                                }
+                        });
+                },
+
+                blurItemSearch() {
+                        const input = this.$refs.debounce_search;
+                        if (input && typeof input.blur === "function") {
+                                input.blur();
+                        }
+                },
 
 		clearQty() {
 			this.qty = null;
@@ -2583,85 +2752,195 @@ export default {
 				}
 			}
 		},
-		showScanError({ message, code = "", details = "" } = {}) {
-			this.scanErrorMessage = message || this.__("Unable to add scanned item.");
-			this.scanErrorCode = code;
-			this.scanErrorDetails = details;
-			if (code) {
-				this.pendingScanCode = code;
-			}
-			this.awaitingScanResult = false;
-			this.search_from_scanner = false;
-			this.scanErrorDialog = true;
-			this.scannerLocked = true;
-			this.playScanTone("error");
-			if (frappe?.show_alert) {
-				frappe.show_alert(
-					{
-						message: this.scanErrorMessage,
-						indicator: "red",
-					},
-					5,
-				);
-			}
-		},
-		acknowledgeScanError() {
-			this.scanErrorDialog = false;
-			this.scannerLocked = false;
-			this.scanErrorMessage = "";
-			this.scanErrorCode = "";
-			this.scanErrorDetails = "";
-			this.pendingScanCode = "";
-			this.awaitingScanResult = false;
-			this.$nextTick(() => {
-				if (this.$refs.debounce_search) {
-					this.$refs.debounce_search.focus();
-				}
-			});
-		},
+                showScanError({ message, code = "", details = "" } = {}) {
+                        this.scanErrorMessage = message || this.__("Unable to add scanned item.");
+                        this.scanErrorCode = code;
+                        this.scanErrorDetails = details;
+                        if (code) {
+                                this.pendingScanCode = code;
+                        }
+                        this.awaitingScanResult = false;
+                        this.search_from_scanner = false;
+                        this.scanErrorDialog = true;
+                        this.scannerLocked = true;
+                        if (this.$refs.cameraScanner?.pauseForExternalLock) {
+                                this.$refs.cameraScanner.pauseForExternalLock();
+                        }
+                        this.playScanTone("error");
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: this.scanErrorMessage,
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                        }
+                },
+                handleScanPipelineError(error, code = "") {
+                        const normalizedCode = code || this.pendingScanCode || "";
+                        console.error("Unexpected barcode processing error:", error);
+                        const details =
+                                error && typeof error.message === "string" && error.message.trim()
+                                        ? error.message
+                                        : this.__("Please try again or enter the item manually.");
+                        this.showScanError({
+                                message: this.__("Unable to add scanned item."),
+                                code: normalizedCode,
+                                details,
+                        });
+                },
+                acknowledgeScanError() {
+                        this.scanErrorDialog = false;
+                        this.scannerLocked = false;
+                        this.scanErrorMessage = "";
+                        this.scanErrorCode = "";
+                        this.scanErrorDetails = "";
+                        this.pendingScanCode = "";
+                        this.awaitingScanResult = false;
+                        if (this.$refs.cameraScanner?.resumeFromExternalLock) {
+                                this.$refs.cameraScanner.resumeFromExternalLock();
+                        }
+                        this.focusItemSearch();
+                },
 
-		startCameraScanning() {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
+                toggleManualScanInput() {
+                        this.showManualScanInput = !this.showManualScanInput;
+                        if (this.showManualScanInput) {
+                                this.queueManualScanFocus();
+                        } else {
+                                this.focusItemSearch();
+                        }
+                },
+
+                submitManualScan() {
+                        const code = (this.manualScanValue ?? "").toString().trim();
+                        if (!code) {
+                                return;
+                        }
+                        if (this.scannerLocked) {
+                                this.onBarcodeScanned(code);
+                                this.queueManualScanFocus();
+                                return;
+                        }
+                        this.manualScanValue = "";
+                        this.onBarcodeScanned(code);
+                        this.queueManualScanFocus();
+                },
+
+                focusManualScanInput() {
+                        const input = this.$refs.manualScanInput;
+                        if (input && typeof input.focus === "function") {
+                                input.focus();
+                        }
+                },
+
+                queueManualScanFocus() {
+                        this.$nextTick(() => {
+                                const scheduler =
+                                        typeof requestAnimationFrame === "function"
+                                                ? requestAnimationFrame
+                                                : (cb) => setTimeout(cb, 16);
+                                scheduler(() => {
+                                        this.focusManualScanInput();
+                                });
+                        });
+                },
+
+                onScannerOpened() {
+                        this.cameraScannerActive = true;
+                        this.showManualScanInput = false;
+                        this.manualScanValue = "";
+                        this.blurItemSearch();
+                },
+
+                onScannerClosed() {
+                        this.cameraScannerActive = false;
+                        this.focusItemSearch();
+                },
+
+                startCameraScanning() {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
 			if (this.$refs.cameraScanner) {
 				this.$refs.cameraScanner.startScanning();
 			}
-		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			console.log("Barcode scanned:", scannedCode);
-			this.pendingScanCode = scannedCode;
+                },
+                onBarcodeScanned(scannedCode) {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                if (frappe?.show_alert) {
+                                        frappe.show_alert(
+                                                {
+                                                        message: this.__("Acknowledge the error to resume scanning."),
+                                                        indicator: "red",
+                                                },
+                                                3,
+                                        );
+                                }
+                                return;
+                        }
 
-			// mark this search as coming from a scanner
-			this.search_from_scanner = true;
+                        const runScanPipeline = async (code) => {
+                                const mark = perfMarkStart("pos:scan-handler");
+                                try {
+                                        console.log("Barcode scanned:", code);
+                                        this.pendingScanCode = code;
 
-			// Clear any previous search
-			this.search = "";
-			this.first_search = "";
+                                        // mark this search as coming from a scanner
+                                        this.search_from_scanner = true;
 
-			// Set the scanned code as search term
-			this.first_search = scannedCode;
-			this.search = scannedCode;
+                                        // Clear any previous search
+                                        this.search = "";
+                                        this.first_search = "";
 
-			// Show scanning feedback
-			frappe.show_alert(
-				{
-					message: `Scanning for: ${scannedCode}`,
-					indicator: "blue",
-				},
-				2,
-			);
+                                        // Set the scanned code as search term
+                                        this.first_search = code;
+                                        this.search = code;
 
-			// Enhanced item search and submission logic
-			this.processScannedItem(scannedCode);
-		},
-		async processScannedItem(scannedCode) {
-			this.pendingScanCode = scannedCode;
+                                        // Show scanning feedback
+                                        if (frappe?.show_alert) {
+                                                frappe.show_alert(
+                                                        {
+                                                                message: `Scanning for: ${code}`,
+                                                                indicator: "blue",
+                                                        },
+                                                        2,
+                                                );
+                                        }
+
+                                        // Enhanced item search and submission logic
+                                        await this.processScannedItem(code);
+                                } catch (error) {
+                                        this.handleScanPipelineError(error, code);
+                                } finally {
+                                        perfMarkEnd("pos:scan-handler", mark);
+                                }
+                        };
+
+                        if (this.scanDebounceId) {
+                                clearTimeout(this.scanDebounceId);
+                        }
+                        this.scanQueuedCode = scannedCode;
+                        this.scanDebounceId = setTimeout(() => {
+                                this.scanDebounceId = null;
+                                const code = this.scanQueuedCode || scannedCode;
+                                this.scanQueuedCode = "";
+                                scheduleFrame(() => {
+                                        const maybePromise = runScanPipeline(code);
+                                        if (maybePromise && typeof maybePromise.catch === "function") {
+                                                maybePromise.catch((error) => {
+                                                        this.handleScanPipelineError(error, code);
+                                                });
+                                        }
+                                });
+                        }, 12);
+                },
+                async processScannedItem(scannedCode) {
+                        const mark = perfMarkStart("pos:scan-process");
+                        this.pendingScanCode = scannedCode;
 			// Handle scale barcodes by extracting the item code and quantity
 			let searchCode = scannedCode;
 			let qtyFromBarcode = null;
@@ -2673,15 +2952,23 @@ export default {
 				qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
 			}
 
-			// First try to find exact match by processed code
-			let foundItem = this.items.find((item) => {
-				const barcodeMatch =
-					item.barcode === searchCode ||
-					(Array.isArray(item.item_barcode) &&
-						item.item_barcode.some((b) => b.barcode === searchCode)) ||
-					(Array.isArray(item.barcodes) && item.barcodes.some((bc) => String(bc) === searchCode));
-				return barcodeMatch || item.item_code === searchCode;
-			});
+                        // First try to find exact match by processed code using the pre-built index
+                        const barcodeIndex = this.ensureBarcodeIndex();
+                        let foundItem = this.lookupItemByBarcode(searchCode);
+
+                        if (!foundItem && barcodeIndex.size === 0) {
+                                // Index not populated yet, build it and fall back to a direct scan once
+                                this.replaceBarcodeIndex(this.items);
+                                foundItem = this.items.find((item) => {
+                                        const barcodeMatch =
+                                                item.barcode === searchCode ||
+                                                (Array.isArray(item.item_barcode) &&
+                                                        item.item_barcode.some((b) => b.barcode === searchCode)) ||
+                                                (Array.isArray(item.barcodes) &&
+                                                        item.barcodes.some((bc) => String(bc) === searchCode));
+                                        return barcodeMatch || item.item_code === searchCode;
+                                });
+                        }
 
 			if (foundItem) {
 				console.log("Found item by processed code:", foundItem);
@@ -2690,8 +2977,8 @@ export default {
 			}
 
 			// If not found locally, attempt to fetch from server using processed code
-			try {
-				const res = await frappe.call({
+                        try {
+                                const res = await frappe.call({
 					method: "posawesome.posawesome.api.items.get_items_from_barcode",
 					args: {
 						selling_price_list: this.active_price_list,
@@ -2700,13 +2987,14 @@ export default {
 					},
 				});
 
-				if (res && res.message) {
-					const newItem = res.message;
-					this.items.push(newItem);
+                                if (res && res.message) {
+                                        const newItem = res.message;
+                                        this.items.push(newItem);
+                                        this.indexItem(newItem);
 
-					if (this.searchCache) {
-						this.searchCache.clear();
-					}
+                                        if (this.searchCache) {
+                                                this.searchCache.clear();
+                                        }
 
 					await saveItems(this.items);
 					await savePriceListItems(this.customer_price_list, this.items);
@@ -2724,36 +3012,100 @@ export default {
 					details: this.__("Please verify the barcode or check the item's availability."),
 				});
 				return;
-			} catch (e) {
-				console.error("Error fetching item from barcode:", e);
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("The system could not retrieve the item details. Please try again."),
-				});
-				return;
-			}
-		},
-		searchItemsByCode(code) {
-			return this.items.filter((item) => {
-				const searchTerm = code.toLowerCase();
-				const barcodeMatch =
-					(item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
+                        } catch (e) {
+                                console.error("Error fetching item from barcode:", e);
+                                this.first_search = scannedCode;
+                                this.search = scannedCode;
+                                this.showScanError({
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        code: scannedCode,
+                                        details: this.__("The system could not retrieve the item details. Please try again."),
+                                });
+                                return;
+                        } finally {
+                                perfMarkEnd("pos:scan-process", mark);
+                        }
+                },
+                searchItemsByCode(code) {
+                        return this.items.filter((item) => {
+                                const searchTerm = code.toLowerCase();
+                                const barcodeMatch =
+                                        (item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
 					(Array.isArray(item.barcodes) &&
 						item.barcodes.some((bc) => String(bc).toLowerCase().includes(searchTerm))) ||
 					(Array.isArray(item.item_barcode) &&
 						item.item_barcode.some(
 							(b) => b.barcode && b.barcode.toLowerCase().includes(searchTerm),
 						));
-				return (
-					item.item_code.toLowerCase().includes(searchTerm) ||
-					item.item_name.toLowerCase().includes(searchTerm) ||
-					barcodeMatch
-				);
-			});
-		},
+                                return (
+                                        item.item_code.toLowerCase().includes(searchTerm) ||
+                                        item.item_name.toLowerCase().includes(searchTerm) ||
+                                        barcodeMatch
+                                );
+                        });
+                },
+                // PERF: maintain a barcode index so unfound scans do not walk the full list
+                ensureBarcodeIndex() {
+                        if (!this.barcodeIndex || typeof this.barcodeIndex.set !== "function") {
+                                this.barcodeIndex = new Map();
+                        }
+                        return this.barcodeIndex;
+                },
+                resetBarcodeIndex() {
+                        const index = this.ensureBarcodeIndex();
+                        index.clear();
+                },
+                indexItem(item) {
+                        if (!item) {
+                                return;
+                        }
+                        const index = this.ensureBarcodeIndex();
+                        const register = (code) => {
+                                if (code === undefined || code === null) {
+                                        return;
+                                }
+                                const normalized = String(code).trim();
+                                if (!normalized) {
+                                        return;
+                                }
+                                if (!index.has(normalized)) {
+                                        index.set(normalized, item);
+                                }
+                                const lower = normalized.toLowerCase();
+                                if (!index.has(lower)) {
+                                        index.set(lower, item);
+                                }
+                        };
+                        register(item.item_code);
+                        register(item.barcode);
+                        if (Array.isArray(item.item_barcode)) {
+                                item.item_barcode.forEach((barcode) => register(barcode?.barcode));
+                        }
+                        if (Array.isArray(item.barcodes)) {
+                                item.barcodes.forEach((barcode) => register(barcode));
+                        }
+                        if (Array.isArray(item.serial_no_data)) {
+                                item.serial_no_data.forEach((serial) => register(serial?.serial_no));
+                        }
+                        if (Array.isArray(item.batch_no_data)) {
+                                item.batch_no_data.forEach((batch) => register(batch?.batch_no));
+                        }
+                },
+                replaceBarcodeIndex(items = this.items) {
+                        this.resetBarcodeIndex();
+                        items.forEach((item) => this.indexItem(item));
+                },
+                lookupItemByBarcode(code) {
+                        if (code === undefined || code === null) {
+                                return null;
+                        }
+                        const index = this.ensureBarcodeIndex();
+                        const normalized = String(code).trim();
+                        if (!normalized) {
+                                return null;
+                        }
+                        return index.get(normalized) || index.get(normalized.toLowerCase()) || null;
+                },
 		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
 			console.log("Adding scanned item to invoice:", item, scannedCode);
 
@@ -2863,13 +3215,13 @@ export default {
 					3,
 				);
 
-				// Clear search after successful addition and refocus input
-				this.clearSearch();
-				this.$refs.debounce_search && this.$refs.debounce_search.focus();
-			} finally {
-				this.awaitingScanResult = false;
-			}
-		},
+                                // Clear search after successful addition and refocus input
+                                this.clearSearch();
+                                this.focusItemSearch();
+                        } finally {
+                                this.awaitingScanResult = false;
+                        }
+                },
 		isNegativeStockEnabled() {
 			return parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 		},
@@ -3202,11 +3554,13 @@ export default {
 		},
 	},
 
-	created() {
-		console.log("ItemsSelector created - starting initialization");
+        created() {
+                console.log("ItemsSelector created - starting initialization");
 
-		// Setup search debounce
-		this.searchDebounce = _.debounce(() => {
+                this.replaceBarcodeIndex(this.items || []);
+
+                // Setup search debounce
+                this.searchDebounce = _.debounce(() => {
 			this.get_items();
 		}, 300);
 
@@ -3455,12 +3809,35 @@ export default {
 <style scoped>
 /* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
 .dynamic-padding {
-	/* Equal spacing on all sides for consistent alignment */
-	padding: var(--dynamic-sm);
+        /* Equal spacing on all sides for consistent alignment */
+        padding: var(--dynamic-sm);
+}
+
+.manual-scan-container {
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--pos-border, rgba(0, 0, 0, 0.08));
+        background-color: var(--pos-card-bg, rgba(255, 255, 255, 0.96));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.manual-scan-text .text-body-2 {
+        color: rgba(0, 0, 0, 0.6);
+}
+
+:deep(.v-theme--dark) .manual-scan-container {
+        background-color: rgba(30, 30, 30, 0.92);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:deep(.v-theme--dark) .manual-scan-text .text-body-2 {
+        color: rgba(255, 255, 255, 0.7);
 }
 
 .scan-error-dialog {
-	border-radius: 16px;
+        border-radius: 16px;
 }
 
 .scan-error-dialog .scan-error-message {
