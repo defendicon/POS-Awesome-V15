@@ -1,34 +1,42 @@
 /* global flt, __, get_currency_symbol */
+import { perfMarkStart, perfMarkEnd } from "../../utils/perf.js";
 
 export default {
-	// Calculate total quantity of all items
-	total_qty() {
-		this.close_payments();
-		let qty = 0;
-		this.items.forEach((item) => {
-			qty += flt(item.qty);
-		});
-		return this.flt(qty, this.float_precision);
-	},
-	// Calculate total amount for all items (handles returns)
-	Total() {
-		let sum = 0;
-		this.items.forEach((item) => {
-			// For returns, use absolute value for correct calculation
-			const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-			const rate = flt(item.rate);
-			sum += qty * rate;
-		});
-		return this.flt(sum, this.currency_precision);
-	},
-	// Calculate subtotal after discounts and delivery charges
-	subtotal() {
-		this.close_payments();
-		let sum = 0;
-		this.items.forEach((item) => {
-			// For returns, use absolute value for correct calculation
-			const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-			const rate = flt(item.rate);
+        // Calculate total quantity of all items
+        total_qty() {
+                const mark = perfMarkStart("pos:totals-total_qty");
+                this.close_payments();
+                let qty = 0;
+                this.items.forEach((item) => {
+                        qty += flt(item.qty);
+                });
+                const result = this.flt(qty, this.float_precision);
+                perfMarkEnd("pos:totals-total_qty", mark);
+                return result;
+        },
+        // Calculate total amount for all items (handles returns)
+        Total() {
+                const mark = perfMarkStart("pos:totals-gross");
+                let sum = 0;
+                this.items.forEach((item) => {
+                        // For returns, use absolute value for correct calculation
+                        const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                        const rate = flt(item.rate);
+                        sum += qty * rate;
+                });
+                const result = this.flt(sum, this.currency_precision);
+                perfMarkEnd("pos:totals-gross", mark);
+                return result;
+        },
+        // Calculate subtotal after discounts and delivery charges
+        subtotal() {
+                const mark = perfMarkStart("pos:totals-subtotal");
+                this.close_payments();
+                let sum = 0;
+                this.items.forEach((item) => {
+                        // For returns, use absolute value for correct calculation
+                        const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                        const rate = flt(item.rate);
 			sum += qty * rate;
 		});
 
@@ -40,21 +48,26 @@ export default {
 		const delivery_charges = this.flt(this.delivery_charges_rate);
 		sum += delivery_charges;
 
-		return this.flt(sum, this.currency_precision);
-	},
-	// Calculate total discount amount for all items
-	total_items_discount_amount() {
-		let sum = 0;
-		this.items.forEach((item) => {
-			// For returns, use absolute value for correct calculation
-			if (this.isReturnInvoice) {
-				sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
+                const result = this.flt(sum, this.currency_precision);
+                perfMarkEnd("pos:totals-subtotal", mark);
+                return result;
+        },
+        // Calculate total discount amount for all items
+        total_items_discount_amount() {
+                const mark = perfMarkStart("pos:totals-discount");
+                let sum = 0;
+                this.items.forEach((item) => {
+                        // For returns, use absolute value for correct calculation
+                        if (this.isReturnInvoice) {
+                                sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
 			} else {
 				sum += flt(item.qty) * flt(item.discount_amount);
 			}
 		});
-		return this.flt(sum, this.float_precision);
-	},
+                const result = this.flt(sum, this.float_precision);
+                perfMarkEnd("pos:totals-discount", mark);
+                return result;
+        },
 	// Format posting_date for display as DD-MM-YYYY
 	formatted_posting_date: {
 		get() {

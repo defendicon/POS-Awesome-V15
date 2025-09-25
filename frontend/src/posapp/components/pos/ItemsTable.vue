@@ -656,6 +656,7 @@
 <script>
 /* global process */
 import _ from "lodash";
+import { logComponentRender } from "../../utils/perf.js";
 export default {
 	name: "ItemsTable",
 	props: {
@@ -1177,12 +1178,15 @@ export default {
 		},
 	},
 
-	mounted() {
-		this.setupResizeObserver();
+        mounted() {
+                logComponentRender(this, "ItemsTable", "mounted", {
+                        rows: this.items?.length || 0,
+                });
+                this.setupResizeObserver();
 
-		// Performance optimization: defer non-critical initialization
-		this.$nextTick(() => {
-			this.updateContainerDimensions();
+                // Performance optimization: defer non-critical initialization
+                this.$nextTick(() => {
+                        this.updateContainerDimensions();
 
 			// Log performance metrics in development
 			if (process.env.NODE_ENV === "development") {
@@ -1199,8 +1203,14 @@ export default {
 					},
 				});
 			}
-		});
-	},
+                });
+        },
+
+        updated() {
+                logComponentRender(this, "ItemsTable", "updated", {
+                        rows: this.items?.length || 0,
+                });
+        },
 
 	beforeUnmount() {
 		this.cleanupResizeObserver();
