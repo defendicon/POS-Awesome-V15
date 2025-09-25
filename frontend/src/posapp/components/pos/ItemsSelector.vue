@@ -551,6 +551,12 @@ import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
+import { useCartValidation } from "../../composables/useCartValidation.js";
+import {
+  parseBooleanSetting,
+  formatNegativeStockWarning,
+  formatStockShortageError,
+} from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 
@@ -560,7 +566,8 @@ export default {
 		const responsive = useResponsive();
 		const rtl = useRtl();
 		const { fly } = useFlyAnimation();
-		return { ...responsive, ...rtl, fly };
+		const cartValidation = useCartValidation();
+		return { ...responsive, ...rtl, fly, cartValidation };
 	},
 	components: {
 		CameraScanner,
@@ -1900,89 +1907,114 @@ export default {
 			}
 			await this.add_item(item);
 		},
-		async add_item(item) {
+		async add_item(item, options = {}) {
+			const { suppressNegativeWarning = false } = options;
 			item = { ...item };
+
+			// Handle variant items
 			if (item.has_variants) {
-				let variants = this.items.filter((it) => it.variant_of == item.item_code);
-				let attrsMeta = {};
-				if (!variants.length) {
-					try {
-						const res = await frappe.call({
-							method: "posawesome.posawesome.api.items.get_item_variants",
-							args: {
-								pos_profile: JSON.stringify(this.pos_profile),
-								parent_item_code: item.item_code,
-								price_list: this.active_price_list,
-								customer: this.customer,
-							},
-						});
-                                                        if (res.message) {
-                                                                variants = res.message.variants || res.message;
-                                                                attrsMeta = res.message.attributes_meta || {};
-                                                                variants.forEach((variant) => {
-                                                                        this.items.push(variant);
-                                                                        this.indexItem(variant);
-                                                                });
-                                                        }
-					} catch (e) {
-						console.error("Failed to fetch variants", e);
-					}
-				}
-				this.eventBus.emit("show_message", {
-					title: __("This is an item template. Please choose a variant."),
-					color: "warning",
-				});
-				console.log("sending profile", this.pos_profile);
-				// Ensure attributes meta is always an object
-				attrsMeta = attrsMeta || {};
-				this.eventBus.emit("open_variants_model", item, variants, this.pos_profile, attrsMeta);
-			} else {
-				if (item.actual_qty === 0 && this.pos_profile.posa_display_items_in_stock) {
-					this.eventBus.emit("show_message", {
-						title: `No stock available for ${item.item_name}`,
-						color: "warning",
+				await this.handleVariantItem(item);
+				return;
+			}
+
+			// Validate item before adding to cart
+			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
+			const isValid = await this.cartValidation.validateCartItem(
+				item,
+				requestedQty,
+				this.pos_profile,
+				this.stock_settings,
+				this.eventBus,
+				this.blockSaleBeyondAvailableQty,
+				!suppressNegativeWarning
+			);
+
+			if (!isValid) {
+				// Validation failed, error message already shown by validator
+				return;
+			}
+
+			// Prepare item for cart
+			await this.prepareItemForCart(item, requestedQty);
+
+			// Add item to cart
+			const payload = { ...item };
+			delete payload._barcode_qty;
+			this.eventBus.emit("add_item", payload);
+			this.qty = 1;
+		},
+
+		/**
+		 * Handle variant item selection
+		 */
+		async handleVariantItem(item) {
+			let variants = this.items.filter((it) => it.variant_of == item.item_code);
+			let attrsMeta = {};
+
+			// Fetch variants if not already loaded
+			if (!variants.length) {
+				try {
+					const res = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_item_variants",
+						args: {
+							pos_profile: JSON.stringify(this.pos_profile),
+							parent_item_code: item.item_code,
+							price_list: this.active_price_list,
+							customer: this.customer,
+						},
 					});
-					await this.update_items_details([item]);
-					return;
+					if (res.message) {
+						variants = res.message.variants || res.message;
+						attrsMeta = res.message.attributes_meta || {};
+						this.items.push(...variants);
+					}
+				} catch (e) {
+					console.error("Failed to fetch variants", e);
 				}
+			}
 
-				// Ensure UOMs are initialized before adding the item
+			// Show variant selection dialog
+			this.eventBus.emit("show_message", {
+				title: __("This is an item template. Please choose a variant."),
+				color: "warning",
+			});
+
+			attrsMeta = attrsMeta || {};
+			this.eventBus.emit("open_variants_model", item, variants, this.pos_profile, attrsMeta);
+		},
+
+		/**
+		 * Prepare item for adding to cart (UOMs, currency conversion, etc.)
+		 */
+		async prepareItemForCart(item, requestedQty) {
+			// Ensure UOMs are initialized
+			if (!item.item_uoms || item.item_uoms.length === 0) {
+				await this.update_items_details([item]);
 				if (!item.item_uoms || item.item_uoms.length === 0) {
-					// If UOMs are not available, fetch them first
-					await this.update_items_details([item]);
-
-					// Add stock UOM as fallback
-					if (!item.item_uoms || item.item_uoms.length === 0) {
-						item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-					}
+					item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
 				}
+			}
 
-				// Ensure correct rate based on selected currency
-				if (this.pos_profile.posa_allow_multi_currency) {
-					this.applyCurrencyConversionToItem(item);
+			// Handle multi-currency conversion
+			if (this.pos_profile.posa_allow_multi_currency) {
+				this.applyCurrencyConversionToItem(item);
 
-					// Compute base rates from original values
-					const base_rate =
-						item.original_currency === this.pos_profile.currency
-							? item.original_rate
-							: item.original_rate * (item.plc_conversion_rate || this.exchange_rate);
-					item.base_rate = base_rate;
-					item.base_price_list_rate = base_rate;
+				const base_rate = item.original_currency === this.pos_profile.currency
+					? item.original_rate
+					: item.original_rate * (item.plc_conversion_rate || this.exchange_rate);
+
+				item.base_rate = base_rate;
+				item.base_price_list_rate = base_rate;
+			}
+
+			// Set final quantity
+			const hasBarcodeQty = item._barcode_qty;
+			if (!item.qty || (item.qty === 1 && !hasBarcodeQty)) {
+				let qtyVal = requestedQty;
+				if (this.hide_qty_decimals) {
+					qtyVal = Math.trunc(qtyVal);
 				}
-
-				const hasBarcodeQty = item._barcode_qty;
-				if (!item.qty || (item.qty === 1 && !hasBarcodeQty)) {
-					let qtyVal = this.qty != null ? this.qty : 1;
-					qtyVal = Math.abs(qtyVal);
-					if (this.hide_qty_decimals) {
-						qtyVal = Math.trunc(qtyVal);
-					}
-					item.qty = qtyVal;
-				}
-				const payload = { ...item };
-				delete payload._barcode_qty;
-				this.eventBus.emit("add_item", payload);
-				this.qty = 1;
+				item.qty = qtyVal;
 			}
 		},
 		async enter_event() {
@@ -2042,7 +2074,7 @@ export default {
 					const negativeStockEnabled = this.isNegativeStockEnabled();
 					const shouldBlock =
 						!negativeStockEnabled &&
-						(this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
+						(this.blockSaleBeyondAvailableQty || availableQty <= 0);
 
 					if (shouldBlock || negativeStockEnabled) {
 						const formattedAvailable = this.format_number
@@ -2058,27 +2090,27 @@ export default {
 								)
 							: requestedQty;
 
-						if (shouldBlock) {
-							this.showScanError({
-								message: this.__("Quantity not available for {0}", [
-									new_item.item_name || scannedCodeForDisplay,
-								]),
-								code: scannedCodeForDisplay,
-								details: this.__("Available: {0}. Requested: {1}.", [
-									formattedAvailable,
-									formattedRequested,
-								]),
-							});
-							return;
-						}
-
-						this.eventBus.emit("show_message", {
-							title: this.__(
-								"Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
-								[formattedAvailable, formattedRequested],
+					if (shouldBlock) {
+						this.showScanError({
+							message: formatStockShortageError(
+								new_item.item_name || new_item.item_code || scannedCodeForDisplay,
+								availableQty,
+								requestedQty
 							),
-							color: "warning",
+							code: scannedCodeForDisplay,
+							details: this.__("Adjust the quantity or enable negative stock to continue."),
 						});
+						return;
+					}
+
+					this.eventBus.emit("show_message", {
+						title: formatNegativeStockWarning(
+							new_item.item_name || new_item.item_code || scannedCodeForDisplay,
+							availableQty,
+							requestedQty
+						),
+						color: "warning",
+					});
 					}
 				}
 
@@ -2087,7 +2119,7 @@ export default {
 				}
 
 				try {
-					await this.add_item(new_item);
+					await this.add_item(new_item, { suppressNegativeWarning: true });
 					if (fromScanner) {
 						this.playScanTone("success");
 						this.scannerLocked = false;
@@ -3137,27 +3169,27 @@ export default {
 				const negativeStockEnabled = this.isNegativeStockEnabled();
 				const shouldBlock =
 					!negativeStockEnabled &&
-					(this.pos_profile?.posa_block_sale_beyond_available_qty || availableQty <= 0);
+					(this.blockSaleBeyondAvailableQty || availableQty <= 0);
 
 				if (shouldBlock) {
 					this.showScanError({
-						message: this.__("Quantity not available for {0}", [
-							newItem.item_name || scannedCode,
-						]),
+						message: formatStockShortageError(
+							newItem.item_name || newItem.item_code || scannedCode,
+							availableQty,
+							requestedQty
+						),
 						code: scannedCode,
-						details: this.__("Available: {0}. Requested: {1}.", [
-							formattedAvailable,
-							formattedRequested,
-						]),
+						details: this.__("Adjust the quantity or enable negative stock to continue."),
 					});
 					return;
 				}
 
 				if (negativeStockEnabled) {
 					this.eventBus.emit("show_message", {
-						title: this.__(
-							"Available stock {0} is less than requested {1}. Negative stock setting allows continuing.",
-							[formattedAvailable, formattedRequested],
+						title: formatNegativeStockWarning(
+							newItem.item_name || newItem.item_code || scannedCode,
+							availableQty,
+							requestedQty
 						),
 						color: "warning",
 					});
@@ -3168,7 +3200,7 @@ export default {
 
 			try {
 				// Use existing add_item method with enhanced feedback
-				await this.add_item(newItem);
+					await this.add_item(newItem, { suppressNegativeWarning: true });
 				this.playScanTone("success");
 				this.scannerLocked = false;
 				this.search_from_scanner = false;
@@ -3191,15 +3223,7 @@ export default {
                         }
                 },
 		isNegativeStockEnabled() {
-			const setting = this.stock_settings?.allow_negative_stock;
-			if (setting === undefined || setting === null) {
-				return false;
-			}
-			if (typeof setting === "string") {
-				const normalized = setting.toLowerCase();
-				return normalized === "1" || normalized === "true" || normalized === "yes";
-			}
-			return Boolean(setting);
+			return parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 		},
 		showMultipleItemsDialog(items, scannedCode) {
 			// Create a dialog to let user choose from multiple matches
@@ -3419,6 +3443,12 @@ export default {
 	},
 
 	computed: {
+		blockSaleBeyondAvailableQty() {
+			return (
+				Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty) &&
+				!this.isNegativeStockEnabled()
+			);
+		},
 		headers() {
 			return this.getItemsHeaders();
 		},

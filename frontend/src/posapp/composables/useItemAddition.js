@@ -81,14 +81,17 @@ export function useItemAddition() {
                 }
 		let index = -1;
 		if (!context.new_line) {
-			// For auto_set_batch enabled, we should check if the item code and UOM match only
+			// For normal additions (not returns), only merge with existing positive quantity lines
+			// This ensures that negative quantities (returns) are kept separate from positive sales
 			if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
 				index = context.items.findIndex(
 					(el) =>
 						el.item_code === item.item_code &&
 						el.uom === item.uom &&
 						!el.posa_is_offer &&
-						!el.posa_is_replace,
+						!el.posa_is_replace &&
+						// Only merge with positive quantity lines for normal additions
+						el.qty > 0,
 				);
 			} else {
 				index = context.items.findIndex(
@@ -98,7 +101,9 @@ export function useItemAddition() {
 						!el.posa_is_offer &&
 						!el.posa_is_replace &&
 						((el.batch_no && item.batch_no && el.batch_no === item.batch_no) ||
-							(!el.batch_no && !item.batch_no)),
+							(!el.batch_no && !item.batch_no)) &&
+						// Only merge with positive quantity lines for normal additions
+						el.qty > 0,
 				);
 			}
 		}
@@ -167,13 +172,16 @@ export function useItemAddition() {
 
 			// Check again in case the item was added while awaiting price fetch
 			if (!context.new_line) {
+				// Apply same logic - only merge with positive quantity lines for normal additions
 				if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
 					index = context.items.findIndex(
 						(el) =>
 							el.item_code === item.item_code &&
 							el.uom === item.uom &&
 							!el.posa_is_offer &&
-							!el.posa_is_replace,
+							!el.posa_is_replace &&
+							// Only merge with positive quantity lines for normal additions
+							el.qty > 0,
 					);
 				} else {
 					index = context.items.findIndex(
@@ -183,7 +191,9 @@ export function useItemAddition() {
 							!el.posa_is_offer &&
 							!el.posa_is_replace &&
 							((el.batch_no && item.batch_no && el.batch_no === item.batch_no) ||
-								(!el.batch_no && !item.batch_no)),
+								(!el.batch_no && !item.batch_no)) &&
+							// Only merge with positive quantity lines for normal additions
+							el.qty > 0,
 					);
 				}
 			}
@@ -352,6 +362,11 @@ export function useItemAddition() {
                 }
 		if (!item.qty) {
 			item.qty = 1;
+		}
+
+		// Ensure normal additions are always positive (unless it's a return invoice)
+		if (!context.isReturnInvoice && item.qty < 0) {
+			item.qty = Math.abs(item.qty);
 		}
 		if (!item.posa_is_offer) {
 			item.posa_is_offer = 0;

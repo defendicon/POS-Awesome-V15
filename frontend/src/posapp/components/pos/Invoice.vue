@@ -1125,7 +1125,8 @@ export default {
 				const proposed = item.qty + 1;
 				const blockSale =
 					!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-				if (blockSale && item.max_qty !== undefined && proposed > item.max_qty) {
+				const exceedsAvailable = item.max_qty !== undefined && proposed > item.max_qty;
+				if (blockSale && exceedsAvailable) {
 					item.qty = item.max_qty;
 					this.calc_stock_qty(item, item.qty);
 					this.eventBus.emit("show_message", {
@@ -1135,6 +1136,14 @@ export default {
 						color: "error",
 					});
 					return;
+				}
+				if (!blockSale && exceedsAvailable) {
+					this.eventBus.emit("show_message", {
+						title: __(`{0}: requested quantity exceeds available stock. Negative stock is allowed—proceed carefully.`, [
+							item.item_name || item.item_code,
+						]),
+						color: "warning",
+					});
 				}
 				item.qty = proposed;
 			}

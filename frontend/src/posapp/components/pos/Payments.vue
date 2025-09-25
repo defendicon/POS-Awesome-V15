@@ -714,6 +714,7 @@
 /* global frappe, __, get_currency_symbol */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
+import { parseBooleanSetting } from "../../utils/stock.js";
 import {
 	saveOfflineInvoice,
 	syncOfflineInvoices,
@@ -779,10 +780,11 @@ export default {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
 		},
 		blockSaleBeyondAvailableQty() {
-			return (
-				!["Order", "Quotation"].includes(this.invoiceType) &&
-				this.pos_profile.posa_block_sale_beyond_available_qty
-			);
+			if (["Order", "Quotation"].includes(this.invoiceType)) {
+				return false;
+			}
+			const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
+			return !allowNegative && Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {

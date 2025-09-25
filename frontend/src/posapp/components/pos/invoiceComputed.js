@@ -1,6 +1,8 @@
 /* global flt, __, get_currency_symbol */
 import { perfMarkStart, perfMarkEnd } from "../../utils/perf.js";
 
+import { parseBooleanSetting } from '../../utils/stock.js';
+
 export default {
         // Calculate total quantity of all items
         total_qty() {
@@ -102,9 +104,13 @@ export default {
 		return this.invoiceType === "Return" || (this.invoice_doc && this.invoice_doc.is_return);
 	},
 	blockSaleBeyondAvailableQty() {
+		if (["Order", "Quotation"].includes(this.invoiceType)) {
+			return false;
+		}
+		const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 		return (
-			!["Order", "Quotation"].includes(this.invoiceType) &&
-			this.pos_profile.posa_block_sale_beyond_available_qty
+			!allowNegative &&
+			Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty)
 		);
 	},
 	// Table headers for item table (for another table if needed)

@@ -1759,59 +1759,25 @@ export default {
 		return calcUom(item, value, this);
 	},
 
-	// Calculate stock quantity for an item with stock validation
+	// Calculate stock quantity for an item (simplified - validation handled centrally)
 	calc_stock_qty(item, value) {
 		calcStockQty(item, value, this);
 		if (this.update_qty_limits) {
 			this.update_qty_limits(item);
 		}
-		if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
-			const blockSale = !this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-			if (blockSale) {
-				item.qty = item.max_qty;
-				calcStockQty(item, item.qty, this);
-				this.$forceUpdate();
-				this.eventBus.emit("show_message", {
-					title: __(`Maximum available quantity is {0}. Quantity adjusted to match stock.`, [
-						this.formatFloat(item.max_qty),
-					]),
-					color: "error",
-				});
-			} else {
-				this.eventBus.emit("show_message", {
-					title: __("Stock is lower than requested. Proceeding may create negative stock."),
-					color: "warning",
-				});
-			}
+
+		if (flt(item.qty) === 0) {
+			this.remove_item(item);
+			this.$forceUpdate();
 		}
 	},
 
-	// Update quantity limits based on available stock
+	// Update quantity limits based on available stock (simplified - validation handled centrally)
 	update_qty_limits(item) {
 		if (item && item.available_qty !== undefined) {
 			item.max_qty = flt(item.available_qty / (item.conversion_factor || 1));
 
-			if (item.max_qty !== undefined && flt(item.qty) > flt(item.max_qty)) {
-				const blockSale =
-					!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-				if (blockSale) {
-					item.qty = item.max_qty;
-					calcStockQty(item, item.qty, this);
-					this.$forceUpdate();
-					this.eventBus.emit("show_message", {
-						title: __(`Maximum available quantity is {0}. Quantity adjusted to match stock.`, [
-							this.formatFloat(item.max_qty),
-						]),
-						color: "error",
-					});
-				} else {
-					this.eventBus.emit("show_message", {
-						title: __("Stock is lower than requested. Proceeding may create negative stock."),
-						color: "warning",
-					});
-				}
-			}
-
+			// Set increment disable flag based on stock limits
 			item.disable_increment =
 				(!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty) &&
 				item.qty >= item.max_qty;

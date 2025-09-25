@@ -299,7 +299,18 @@
 .awesome-bar,
 .navbar-user-image {
 	visibility: visible !important;
-	display: block !important;
+}
+
+/* Restore horizontal layout for Frappe breadcrumbs */
+#navbar-breadcrumbs {
+	display: flex !important;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+
+#navbar-breadcrumbs .breadcrumb {
+	margin-bottom: 0;
+	flex-wrap: nowrap;
 }
 
 .posapp .pos-themed-button {

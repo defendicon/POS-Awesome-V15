@@ -59,6 +59,9 @@ export default defineConfig({
 			],
 		},
 	},
+	worker: {
+		format: "es",
+	},
 	resolve: {
 		alias: {
 			"@": resolve(__dirname, "src"),

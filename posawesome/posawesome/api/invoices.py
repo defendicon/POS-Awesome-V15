@@ -87,7 +87,7 @@ def _collect_stock_errors(items):
                     "available_qty": available,
                 }
             )
-        return errors
+    return errors
 
 
 def _merge_duplicate_taxes(invoice_doc):
@@ -109,11 +109,20 @@ def _merge_duplicate_taxes(invoice_doc):
 
 
 def _should_block(pos_profile):
-    block_sale = cint(
-        frappe.db.get_value("POS Profile", pos_profile, "posa_block_sale_beyond_available_qty") or 1
-    )
-    allow_negative = cint(frappe.get_value("Stock Settings", None, "allow_negative_stock"))
-    return block_sale and not allow_negative
+    allow_negative = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)
+    if allow_negative:
+        return False
+
+    block_sale = 1
+    if pos_profile:
+        block_sale = cint(
+            frappe.db.get_value(
+                "POS Profile", pos_profile, "posa_block_sale_beyond_available_qty"
+            )
+            or 1
+        )
+
+    return bool(block_sale)
 
 
 def _validate_stock_on_invoice(invoice_doc):
@@ -175,7 +184,18 @@ def validate_cart_items(items, pos_profile=None):
 
     if isinstance(items, str):
         items = json.loads(items)
-    return _collect_stock_errors(items)
+
+    if pos_profile and not frappe.db.exists("POS Profile", pos_profile):
+        pos_profile = None
+
+    if not _should_block(pos_profile):
+        return []
+
+    errors = _collect_stock_errors(items)
+    if not errors:
+        return []
+
+    return errors
 
 
 def get_latest_rate(from_currency: str, to_currency: str):
