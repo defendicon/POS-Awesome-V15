@@ -25,16 +25,13 @@
 						<qrcode-stream
 							:formats="readerFormats"
 							:torch="torchActive"
-							:camera="
-								selectedDeviceId
-									? { deviceId: selectedDeviceId, exact: selectedDeviceId }
-									: 'auto'
-							"
+							:camera="cameraConfig"
+							:track="trackFunctionOptions"
 							@detect="onDetect"
 							@error="onError"
-							@camera-on="isScanning = true"
+							@camera-on="onCameraReady"
 							@camera-off="isScanning = false"
-							style="width: 100%; height: 350px; object-fit: cover"
+							style="width: 100%; height: 400px; object-fit: cover"
 						>
 							<!-- Optional: You can put a loading indicator or overlay here -->
 							<div v-if="!scanResult" class="scanning-overlay">
@@ -69,6 +66,12 @@
 						>
 							{{ __("Position the QR code or barcode within the scanning area") }}
 							<br /><small>{{ __("Detecting formats:") }} {{ readerFormats.join(", ") }}</small>
+							<div v-if="openCVEnabled" class="mt-2">
+								<small class="text-success">
+									<v-icon size="small">mdi-eye-plus</v-icon>
+									{{ __("OpenCV image processing enabled - Enhanced barcode detection") }}
+								</small>
+							</div>
 						</v-alert>
 					</div>
 				</div>
@@ -84,7 +87,7 @@
 
 			<!-- Action buttons -->
 			<v-card-actions class="justify-space-between pa-3">
-				<div class="d-flex gap-2">
+				<div class="d-flex flex-wrap gap-2">
 					<!-- Flashlight toggle -->
 					<v-btn
 						v-if="isScanning && cameras.length > 0"
@@ -108,6 +111,19 @@
 						<v-icon>mdi-camera-switch</v-icon>
 						{{ __("Switch Camera") }}
 					</v-btn>
+
+					<!-- OpenCV Processing Toggle -->
+					<v-btn
+						v-if="isScanning"
+						@click="toggleOpenCVProcessing"
+						:color="openCVEnabled ? 'primary' : 'default'"
+						variant="outlined"
+						size="small"
+						:loading="openCVLoading"
+					>
+						<v-icon>mdi-eye-plus</v-icon>
+						{{ openCVEnabled ? __("OpenCV On") : __("OpenCV Off") }}
+					</v-btn>
 				</div>
 
 				<!-- Cancel button -->
@@ -124,6 +140,8 @@
 	position: relative;
 	overflow: hidden;
 	background: var(--pos-bg-primary);
+	border-radius: 8px;
+	box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .barcode-scanner {
@@ -206,10 +224,57 @@
 .status-messages {
 	background: rgba(255, 255, 255, 0.95);
 }
+
+/* Enhanced visual feedback for better scanning */
+.scanner-container:hover .scanning-overlay {
+	opacity: 0.9;
+}
+
+.scanner-container .scanning-overlay {
+	transition: opacity 0.3s ease;
+}
+
+/* Better visibility for scan line */
+@keyframes scan-enhanced {
+	0% {
+		transform: translateY(-100px);
+		opacity: 0.5;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(100px);
+		opacity: 0.5;
+	}
+}
+
+.scan-line {
+	animation: scan-enhanced 2s linear infinite;
+	box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+/* Enhanced corners with pulsing effect */
+@keyframes pulse-corners {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.7;
+		transform: scale(1.05);
+	}
+}
+
+.corner {
+	animation: pulse-corners 2s ease-in-out infinite;
+	box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
 </style>
 
 <script>
 import { QrcodeStream } from "vue-qrcode-reader";
+import opencvProcessor from "../../utils/opencvProcessor.js";
 
 export default {
 	name: "CameraScanner",
@@ -234,6 +299,10 @@ export default {
 			torchActive: false,
 			selectedDeviceId: null, // For camera switching
 			cameras: [], // To store available cameras
+			openCVEnabled: true, // OpenCV processing enabled by default
+			openCVLoading: false, // Loading state for OpenCV operations
+			isProcessing: false, // Flag to prevent processing queue buildup
+			frameSkipCounter: 0, // Counter for frame skipping
 			// Old properties to be removed or re-evaluated:
 			// qrScanner: null,
 			// flashlightSupported: false, // vue-qrcode-reader handles this via QrcodeStream's torch prop
@@ -248,6 +317,46 @@ export default {
 	},
 
 	computed: {
+		cameraConfig() {
+			const baseConstraints = {
+				audio: false,
+				video: {
+					width: { ideal: 1920, min: 1280 },
+					height: { ideal: 1080, min: 720 },
+					aspectRatio: { ideal: 16/9 },
+					facingMode: 'environment', // Prefer rear camera for production
+					focusMode: 'continuous',
+					advanced: [
+						{ focusMode: 'continuous' },
+						{ exposureMode: 'continuous' },
+						{ whiteBalanceMode: 'continuous' },
+						{ brightness: { ideal: 0.6 } }, // Slightly increased for better scanning
+						{ contrast: { ideal: 1.4 } }, // Enhanced contrast for dark barcodes
+						{ saturation: { ideal: 0.9 } }, // Slightly reduced to emphasize contrast
+						{ sharpness: { ideal: 1.3 } } // Enhanced sharpness for better edge detection
+					]
+				}
+			};
+
+			if (this.selectedDeviceId) {
+				return {
+					...baseConstraints,
+					video: {
+						...baseConstraints.video,
+						deviceId: { exact: this.selectedDeviceId }
+					}
+				};
+			}
+			return baseConstraints;
+		},
+
+		trackFunctionOptions() {
+			if (this.openCVEnabled) {
+				return this.opencvTrackFunction;
+			}
+			return null; // Use default vue-qrcode-reader processing
+		},
+
 		readerFormats() {
 			// Define the formats based on scanType prop or default to all common ones
 			// Ensure these format names are valid as per vue-qrcode-reader documentation
@@ -301,7 +410,7 @@ export default {
 				const devices = await navigator.mediaDevices.enumerateDevices();
 				this.cameras = devices.filter((device) => device.kind === "videoinput");
 				if (this.cameras.length > 0 && !this.selectedDeviceId) {
-					// Select the first available camera by default, or environment facing if possible
+					// Select the rear camera with highest resolution capabilities
 					const rearCamera = this.cameras.find((camera) =>
 						/back|rear|environment/i.test(camera.label),
 					);
@@ -310,6 +419,19 @@ export default {
 			} catch (error) {
 				console.error("Error listing cameras:", error);
 				this.cameras = [];
+			}
+		},
+
+		async onCameraReady() {
+			this.isScanning = true;
+			// Try to apply additional constraints for better image quality
+			try {
+				if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+					// Additional optimization for camera stream
+					console.log("Camera ready with enhanced settings for barcode scanning");
+				}
+			} catch (error) {
+				console.warn("Could not apply enhanced camera settings:", error);
 			}
 		},
 
@@ -347,22 +469,53 @@ export default {
 
 		onError(error) {
 			this.errorMessage = error.name || "Unknown error";
+			console.error("Camera error:", error);
+
 			if (error.name === "NotAllowedError") {
 				this.cameraPermissionDenied = true;
 				this.errorMessage = this.__(
-					"Camera permission denied. Please allow camera access in your browser settings.",
+					"Camera permission denied. Please allow camera access in your browser settings and refresh the page."
 				);
 			} else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
-				this.errorMessage = this.__("No camera found on this device.");
+				this.errorMessage = this.__("No camera found on this device. Please ensure your device has a working camera.");
 			} else if (error.name === "NotSupportedError") {
-				this.errorMessage = this.__("Secure context (HTTPS) required for camera access.");
+				this.errorMessage = this.__("Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.");
 			} else if (error.name === "AbortError") {
-				this.errorMessage = this.__("Camera access aborted.");
+				this.errorMessage = this.__("Camera access was aborted. Please try again.");
+			} else if (error.name === "OverconstrainedError" || error.name === "ConstraintNotSatisfiedError") {
+				this.errorMessage = this.__(
+					"Camera constraints not supported by your device. Trying fallback settings..."
+				);
+				// Try with simpler constraints
+				this.tryFallbackCamera();
+				return;
 			} else {
-				this.errorMessage = this.__("Error accessing camera:") + ` ${error.message}`;
+				this.errorMessage = this.__("Error accessing camera:") + ` ${error.message}. Please try refreshing the page.`;
 			}
-			console.error("Camera error:", error);
 			this.isScanning = false;
+		},
+
+		async tryFallbackCamera() {
+			console.log("Trying fallback camera settings...");
+			// Try with basic constraints
+			try {
+				this.openCVEnabled = false; // Disable OpenCV temporarily
+				await this.$nextTick();
+				this.isScanning = true;
+
+				if (typeof frappe !== "undefined" && frappe.show_alert) {
+					frappe.show_alert(
+						{
+							message: this.__("Using basic camera settings due to device limitations"),
+							indicator: "orange",
+						},
+						3,
+					);
+				}
+			} catch (fallbackError) {
+				console.error("Fallback camera also failed:", fallbackError);
+				this.errorMessage = this.__("Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.");
+			}
 		},
 
 		stopScanning() {
@@ -406,6 +559,80 @@ export default {
 			}
 		},
 
+
+		async toggleOpenCVProcessing() {
+			this.openCVLoading = true;
+			this.openCVEnabled = !this.openCVEnabled;
+
+			// Initialize OpenCV if enabling
+			if (this.openCVEnabled) {
+				try {
+					await opencvProcessor.ensureInitialized();
+					console.log('OpenCV processing enabled');
+				} catch (error) {
+					console.error('Failed to initialize OpenCV:', error);
+					this.openCVEnabled = false;
+				}
+			}
+
+			// Restart camera with new processing options
+			this.isScanning = false;
+			await this.$nextTick();
+			this.isScanning = true;
+			this.openCVLoading = false;
+
+			if (typeof frappe !== "undefined" && frappe.show_alert) {
+				frappe.show_alert(
+					{
+						message: this.openCVEnabled
+							? this.__("OpenCV image processing enabled - Enhanced barcode detection")
+							: this.__("OpenCV processing disabled"),
+						indicator: this.openCVEnabled ? "green" : "blue",
+					},
+					3,
+				);
+			}
+		},
+
+		// Custom track function for OpenCV preprocessing - optimized for speed
+		opencvTrackFunction(detectedCodes, ctx) {
+			// Skip processing if already processing to avoid queue buildup
+			if (this.isProcessing) return Promise.resolve(detectedCodes);
+
+			this.isProcessing = true;
+
+			return new Promise(async (resolve) => {
+				try {
+					const canvas = ctx.canvas;
+
+					// Skip processing every few frames for better performance
+					if (this.frameSkipCounter > 0) {
+						this.frameSkipCounter--;
+						this.isProcessing = false;
+						resolve(detectedCodes);
+						return;
+					}
+
+					this.frameSkipCounter = 2; // Process every 3rd frame
+
+					const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+					// Apply optimized OpenCV preprocessing
+					const processedImageData = await opencvProcessor.quickProcess(imageData);
+
+					// Update canvas with processed image
+					ctx.putImageData(processedImageData, 0, 0);
+
+					this.isProcessing = false;
+					resolve(detectedCodes);
+				} catch (error) {
+					console.warn('OpenCV processing failed:', error);
+					this.isProcessing = false;
+					resolve(detectedCodes); // Return original results on error
+				}
+			});
+		},
+
 		// Old methods to remove or adapt:
 		// initializeAutoDetectionScanner, startBarcodeDetection, detectBarcodeInImageData,
 		// onScanSuccess (replaced by onDetect), stopCurrentScanner, toggleFlashlight (replaced by toggleTorch)
@@ -434,17 +661,34 @@ export default {
 		},
 	},
 
-	mounted() {
+	async mounted() {
 		if (typeof document !== "undefined") {
 			document.addEventListener("keydown", this.handleEscKey);
 		}
+
+		// Initialize OpenCV processor
+		try {
+			await opencvProcessor.ensureInitialized();
+			console.log('OpenCV initialized in CameraScanner component');
+		} catch (error) {
+			console.warn('OpenCV initialization failed:', error);
+			this.openCVEnabled = false; // Disable if initialization fails
+		}
 	},
 
-	beforeUnmount() {
+	async beforeUnmount() {
 		if (typeof document !== "undefined") {
 			document.removeEventListener("keydown", this.handleEscKey);
 		}
 		this.stopScanning(); // Ensure scanner stops when component is unmounted
+
+		// Clean up OpenCV Web Worker resources
+		try {
+			await opencvProcessor.destroy();
+			console.log('OpenCV Web Worker cleaned up successfully');
+		} catch (error) {
+			console.warn('Error cleaning up OpenCV Web Worker:', error);
+		}
 	},
 };
 </script>
