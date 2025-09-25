@@ -652,6 +652,7 @@ export default {
                 scanDebounceId: null,
                 scanQueuedCode: "",
                 refreshInFlight: false,
+                clearingSearch: false,
         }),
 
         watch: {
@@ -812,12 +813,15 @@ export default {
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
-		first_search: _.debounce(function (val, oldVal) {
-			const newLen = (val || "").trim().length;
-			const oldLen = (oldVal || "").trim().length;
-			if (newLen >= 3) {
-				// Call without arguments so search_onchange treats it like an Enter key
-				this.search_onchange();
+                first_search: _.debounce(function (val, oldVal) {
+                        if (this.clearingSearch) {
+                                return;
+                        }
+                        const newLen = (val || "").trim().length;
+                        const oldLen = (oldVal || "").trim().length;
+                        if (newLen >= 3) {
+                                // Call without arguments so search_onchange treats it like an Enter key
+                                this.search_onchange();
 			} else if (oldLen >= 3 && newLen === 0) {
 				// Reset items only when search is fully cleared
 				this.clearSearch();
@@ -2548,34 +2552,61 @@ export default {
 
 			return combinations;
 		},
-		clearSearch() {
-			this.search_backup = this.first_search;
-			this.first_search = "";
-			this.search = "";
+                clearSearch() {
+                        if (this.clearingSearch) {
+                                return;
+                        }
 
-			if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
-				this.loadVisibleItems(true);
-				if (!this.isBackgroundLoading) {
-					this.verifyServerItemCount();
-				}
-				return;
-			}
+                        const hadQuery = Boolean(
+                                (this.first_search && this.first_search.trim()) ||
+                                        (this.search && this.search.trim()),
+                        );
+                        const shouldReload =
+                                hadQuery || !this.items_loaded || !this.items.length;
 
-			if (this.isBackgroundLoading) {
-				if (this.pendingGetItems) {
-					this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
-				} else {
-					this.pendingGetItems = { force_server: false };
-				}
-				return;
-			}
+                        this.search_backup = this.first_search;
+                        this.clearingSearch = true;
+                        this.first_search = "";
+                        this.search = "";
 
-			if (!this.items_loaded || !this.items.length) {
-				this.get_items(true);
-			} else {
-				this.eventBus.emit("set_all_items", this.items);
-			}
-		},
+                        const release = () => {
+                                this.$nextTick(() => {
+                                        this.clearingSearch = false;
+                                });
+                        };
+
+                        if (!shouldReload) {
+                                release();
+                                return;
+                        }
+
+                        if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+                                this.loadVisibleItems(true);
+                                if (!this.isBackgroundLoading) {
+                                        this.verifyServerItemCount();
+                                }
+                                release();
+                                return;
+                        }
+
+                        if (this.isBackgroundLoading) {
+                                if (this.pendingGetItems) {
+                                        this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
+                                } else {
+                                        this.pendingGetItems = { force_server: false };
+                                }
+                                release();
+                                return;
+                        }
+
+                        if (!this.items_loaded || !this.items.length) {
+                                this.get_items(true);
+                        } else {
+                                this.eventBus.emit("set_all_items", this.items);
+                        }
+
+                        release();
+                },
 
 		restoreSearch() {
 			if (this.first_search === "") {
