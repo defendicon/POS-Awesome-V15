@@ -550,6 +550,7 @@ import {
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
+import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 
@@ -648,7 +649,9 @@ export default {
                 scanAudioContext: null,
                 pendingScanCode: "",
                 awaitingScanResult: false,
-	}),
+                scanDebounceId: null,
+                scanQueuedCode: "",
+        }),
 
         watch: {
                 showManualScanInput(newVal) {
@@ -856,8 +859,8 @@ export default {
 
 	methods: {
 		// Performance optimization: Memoized search function
-		memoizedSearch(searchTerm, itemGroup) {
-			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
+                memoizedSearch(searchTerm, itemGroup) {
+                        const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
 
 			// Check if we have a cached result
 			if (this.searchCache && this.searchCache.has(cacheKey)) {
@@ -866,7 +869,7 @@ export default {
 			}
 
 			// Perform the search
-			const result = this.performSearch(searchTerm, itemGroup);
+                        const result = this.performSearch(searchTerm, itemGroup);
 
 			// Cache the result
 			if (this.searchCache) {
@@ -876,10 +879,12 @@ export default {
 			return result;
 		},
 
-		performSearch(searchTerm, itemGroup) {
-			if (!this.items || !this.items.length) {
-				return [];
-			}
+                performSearch(searchTerm, itemGroup) {
+                        const mark = perfMarkStart("pos:search-filter");
+                        if (!this.items || !this.items.length) {
+                                perfMarkEnd("pos:search-filter", mark);
+                                return [];
+                        }
 
 			let filtered = this.items;
 
@@ -892,8 +897,8 @@ export default {
 			}
 
 			// Filter by search term only if it exists and is long enough
-			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
+                        if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
+                                const term = searchTerm.toLowerCase();
 				filtered = filtered.filter((item) => {
 					const barcodeMatch =
 						(Array.isArray(item.item_barcode) &&
@@ -912,8 +917,9 @@ export default {
 				});
 			}
 
-			return filtered;
-		},
+                        perfMarkEnd("pos:search-filter", mark);
+                        return filtered;
+                },
 
 		async fetchServerItemsTimestamp() {
 			try {
@@ -2064,10 +2070,11 @@ export default {
                                 }
 			}
 		},
-		search_onchange: _.debounce(async function (newSearchTerm) {
-			const vm = this;
+                search_onchange: _.debounce(
+                        withPerf("pos:search-trigger", async function (newSearchTerm) {
+                                const vm = this;
 
-			vm.cancelItemDetailsRequest();
+                                vm.cancelItemDetailsRequest();
 
 			// Determine the actual query string and trim whitespace
 			const query = typeof newSearchTerm === "string" ? newSearchTerm : vm.first_search;
@@ -2116,13 +2123,15 @@ export default {
 				}
 			}
 
-			// Clear the input only when triggered via scanner
+                        // Clear the input only when triggered via scanner
                         if (fromScanner) {
                                 vm.clearSearch();
                                 vm.focusItemSearch();
                                 vm.search_from_scanner = false;
                         }
-		}, 300),
+                        }),
+                        300,
+                ),
 		get_item_qty(first_search) {
 			const qtyVal = this.qty != null ? this.qty : 1;
 			let scal_qty = Math.abs(qtyVal);
@@ -2755,34 +2764,56 @@ export default {
                                 }
                                 return;
                         }
-			console.log("Barcode scanned:", scannedCode);
-			this.pendingScanCode = scannedCode;
 
-			// mark this search as coming from a scanner
-			this.search_from_scanner = true;
+                        const scheduleScan = (code) => {
+                                const mark = perfMarkStart("pos:scan-handler");
+                                scheduleFrame(() => {
+                                        try {
+                                                console.log("Barcode scanned:", code);
+                                                this.pendingScanCode = code;
 
-			// Clear any previous search
-			this.search = "";
-			this.first_search = "";
+                                                // mark this search as coming from a scanner
+                                                this.search_from_scanner = true;
 
-			// Set the scanned code as search term
-			this.first_search = scannedCode;
-			this.search = scannedCode;
+                                                // Clear any previous search
+                                                this.search = "";
+                                                this.first_search = "";
 
-			// Show scanning feedback
-			frappe.show_alert(
-				{
-					message: `Scanning for: ${scannedCode}`,
-					indicator: "blue",
-				},
-				2,
-			);
+                                                // Set the scanned code as search term
+                                                this.first_search = code;
+                                                this.search = code;
 
-			// Enhanced item search and submission logic
-			this.processScannedItem(scannedCode);
-		},
-		async processScannedItem(scannedCode) {
-			this.pendingScanCode = scannedCode;
+                                                // Show scanning feedback
+                                                frappe.show_alert(
+                                                        {
+                                                                message: `Scanning for: ${code}`,
+                                                                indicator: "blue",
+                                                        },
+                                                        2,
+                                                );
+
+                                                // Enhanced item search and submission logic
+                                                this.processScannedItem(code);
+                                        } finally {
+                                                perfMarkEnd("pos:scan-handler", mark);
+                                        }
+                                });
+                        };
+
+                        if (this.scanDebounceId) {
+                                clearTimeout(this.scanDebounceId);
+                        }
+                        this.scanQueuedCode = scannedCode;
+                        this.scanDebounceId = setTimeout(() => {
+                                this.scanDebounceId = null;
+                                const code = this.scanQueuedCode || scannedCode;
+                                this.scanQueuedCode = "";
+                                scheduleScan(code);
+                        }, 12);
+                },
+                async processScannedItem(scannedCode) {
+                        const mark = perfMarkStart("pos:scan-process");
+                        this.pendingScanCode = scannedCode;
 			// Handle scale barcodes by extracting the item code and quantity
 			let searchCode = scannedCode;
 			let qtyFromBarcode = null;
@@ -2811,8 +2842,8 @@ export default {
 			}
 
 			// If not found locally, attempt to fetch from server using processed code
-			try {
-				const res = await frappe.call({
+                        try {
+                                const res = await frappe.call({
 					method: "posawesome.posawesome.api.items.get_items_from_barcode",
 					args: {
 						selling_price_list: this.active_price_list,
@@ -2845,18 +2876,20 @@ export default {
 					details: this.__("Please verify the barcode or check the item's availability."),
 				});
 				return;
-			} catch (e) {
-				console.error("Error fetching item from barcode:", e);
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("The system could not retrieve the item details. Please try again."),
-				});
-				return;
-			}
-		},
+                        } catch (e) {
+                                console.error("Error fetching item from barcode:", e);
+                                this.first_search = scannedCode;
+                                this.search = scannedCode;
+                                this.showScanError({
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        code: scannedCode,
+                                        details: this.__("The system could not retrieve the item details. Please try again."),
+                                });
+                                return;
+                        } finally {
+                                perfMarkEnd("pos:scan-process", mark);
+                        }
+                },
 		searchItemsByCode(code) {
 			return this.items.filter((item) => {
 				const searchTerm = code.toLowerCase();
