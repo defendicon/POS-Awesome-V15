@@ -71,6 +71,18 @@
 									<v-icon size="small">mdi-eye-plus</v-icon>
 									{{ __("OpenCV image processing enabled - Enhanced barcode detection") }}
 								</small>
+								<div v-if="lastQualityAssessment" class="mt-1">
+									<small class="text-info">
+										<v-icon size="small">mdi-information</v-icon>
+										{{ __("Image quality:") }} {{ __(lastQualityAssessment.level) }}
+										<span v-if="lastQualityAssessment.estimatedBarcodeSize !== 'unknown'">
+											| {{ __("Barcode size:") }} {{ __(lastQualityAssessment.estimatedBarcodeSize) }}
+										</span>
+										<span v-if="lastQualityAssessment.needsMagnification" class="text-warning">
+											| <v-icon size="small">mdi-magnify</v-icon> {{ __("Auto-magnification active") }}
+										</span>
+									</small>
+								</div>
 							</div>
 						</v-alert>
 					</div>
@@ -124,6 +136,36 @@
 						<v-icon>mdi-eye-plus</v-icon>
 						{{ openCVEnabled ? __("OpenCV On") : __("OpenCV Off") }}
 					</v-btn>
+
+					<!-- Processing Mode Selector -->
+					<v-menu v-if="isScanning && openCVEnabled" offset-y>
+						<template v-slot:activator="{ props }">
+							<v-btn
+								v-bind="props"
+								variant="outlined"
+								size="small"
+								color="primary"
+							>
+								<v-icon>mdi-cog</v-icon>
+								{{ processingModeLabel }}
+								<v-icon>mdi-chevron-down</v-icon>
+							</v-btn>
+						</template>
+						<v-list>
+							<v-list-item
+								v-for="mode in processingModes"
+								:key="mode.value"
+								@click="setProcessingMode(mode.value)"
+								:class="{ 'v-list-item--active': processingMode === mode.value }"
+							>
+								<v-list-item-title>
+									<v-icon class="mr-2">{{ mode.icon }}</v-icon>
+									{{ __(mode.label) }}
+								</v-list-item-title>
+								<v-list-item-subtitle>{{ __(mode.description) }}</v-list-item-subtitle>
+							</v-list-item>
+						</v-list>
+					</v-menu>
 				</div>
 
 				<!-- Cancel button -->
@@ -356,10 +398,53 @@ export default {
 			const labels = {
 				intelligent: this.__("Smart Auto"),
 				quick: this.__("Quick"),
-				full: this.__("Full"),
-				extreme: this.__("Extreme")
+				full: this.__("Enhanced"),
+				extreme: this.__("Maximum"),
+				magnification: this.__("Magnify"),
+				multiscale: this.__("Multi-Scale")
 			};
 			return labels[this.processingMode] || this.__("Smart Auto");
+		},
+
+		processingModes() {
+			return [
+				{
+					value: 'intelligent',
+					label: 'Smart Auto',
+					description: 'Automatically detects barcode size and applies optimal processing',
+					icon: 'mdi-auto-fix'
+				},
+				{
+					value: 'magnification',
+					label: 'Smart Magnify',
+					description: 'Force magnification processing for small barcodes',
+					icon: 'mdi-magnify-plus'
+				},
+				{
+					value: 'multiscale',
+					label: 'Multi-Scale',
+					description: 'Process at multiple scales for challenging barcodes',
+					icon: 'mdi-resize'
+				},
+				{
+					value: 'quick',
+					label: 'Quick Mode',
+					description: 'Fast processing for clear, well-lit barcodes',
+					icon: 'mdi-flash'
+				},
+				{
+					value: 'full',
+					label: 'Enhanced Mode',
+					description: 'Full processing for poor quality images',
+					icon: 'mdi-tune'
+				},
+				{
+					value: 'extreme',
+					label: 'Maximum Mode',
+					description: 'Extreme processing for very difficult barcodes',
+					icon: 'mdi-rocket'
+				}
+			];
 		},
 
 		readerFormats() {
@@ -634,6 +719,15 @@ export default {
 					case 'extreme':
 						processedImageData = await opencvProcessor.extremeProcess(imageData);
 						break;
+					case 'magnification':
+						// Force magnification processing for small barcodes
+						const quality = opencvProcessor.assessImageQuality(imageData);
+						processedImageData = await opencvProcessor.smartMagnificationProcess(imageData, quality);
+						this.lastQualityAssessment = quality;
+						break;
+					case 'multiscale':
+						processedImageData = await opencvProcessor.multiScaleProcess(imageData);
+						break;
 					case 'intelligent':
 					default:
 						processedImageData = await opencvProcessor.intelligentProcess(imageData);
@@ -667,14 +761,16 @@ export default {
 			console.log('Processing mode set to:', mode);
 			if (typeof frappe !== "undefined" && frappe.show_alert) {
 				const modeMessages = {
-					intelligent: this.__("Smart Auto mode - Automatically adjusts processing based on image quality"),
-					quick: this.__("Quick mode - Fast processing for good quality images"),
-					full: this.__("Full mode - Enhanced processing for poor quality images"),
-					extreme: this.__("Extreme mode - Maximum enhancement for very poor quality images")
+					intelligent: this.__("Smart Auto mode - Automatically detects barcode size and applies optimal processing"),
+					magnification: this.__("Smart Magnify mode - Enhanced processing with automatic magnification for small barcodes"),
+					multiscale: this.__("Multi-Scale mode - Processes at multiple resolutions for challenging barcodes"),
+					quick: this.__("Quick mode - Fast processing for clear, well-lit barcodes"),
+					full: this.__("Enhanced mode - Full processing for poor quality images"),
+					extreme: this.__("Maximum mode - Extreme enhancement for very poor quality images")
 				};
 				frappe.show_alert(
 					{
-						message: modeMessages[mode],
+						message: modeMessages[mode] || this.__("Processing mode changed"),
 						indicator: "blue",
 					},
 					3,

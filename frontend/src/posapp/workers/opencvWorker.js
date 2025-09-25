@@ -392,7 +392,7 @@ async function processVeryPoorImage(imageData) {
     }
 }
 
-// Advanced processing pipeline for poor quality images
+// Advanced processing pipeline for poor quality images with magnification support
 async function processImageData(imageData, options = {}) {
     if (!initialized || !cv) {
         throw new Error('OpenCV not initialized');
@@ -406,19 +406,73 @@ async function processImageData(imageData, options = {}) {
         useDeblur = true,
         useNoiseReduction = true,
         useEdgeEnhancement = true,
-        qualityLevel = 'high' // 'low', 'medium', 'high'
+        qualityLevel = 'high', // 'low', 'medium', 'high'
+        useMagnification = false,
+        magnificationFactor = 2.0,
+        useMultiScale = false,
+        scales = [1.0, 1.5, 2.0],
+        useROIProcessing = false,
+        barcodePattern = false
     } = options;
 
     let src = imageDataToMat(imageData);
     let processed = src.clone();
 
-    console.log('Processing image with advanced algorithms for poor quality:', {
+    console.log('Processing image with advanced algorithms:', {
         width: imageData.width,
         height: imageData.height,
-        qualityLevel
+        qualityLevel,
+        useMagnification,
+        magnificationFactor,
+        useMultiScale,
+        useROIProcessing,
+        barcodePattern
     });
 
     try {
+        // Apply magnification first if requested for small barcodes
+        if (useMagnification && magnificationFactor > 1.0) {
+            console.log(`Applying ${magnificationFactor}x magnification for small barcode enhancement`);
+            const magnified = new cv.Mat();
+            const newSize = new cv.Size(
+                Math.floor(processed.cols * magnificationFactor),
+                Math.floor(processed.rows * magnificationFactor)
+            );
+
+            // Use INTER_CUBIC for better quality when upscaling
+            cv.resize(processed, magnified, newSize, 0, 0, cv.INTER_CUBIC);
+            processed.delete();
+            processed = magnified;
+        }
+
+        // Multi-scale processing for challenging barcodes
+        if (useMultiScale && scales.length > 1) {
+            console.log('Applying multi-scale processing with scales:', scales);
+            const results = [];
+
+            for (const scale of scales) {
+                if (scale === 1.0) {
+                    results.push(processed.clone());
+                } else {
+                    const scaled = new cv.Mat();
+                    const scaledSize = new cv.Size(
+                        Math.floor(processed.cols * scale),
+                        Math.floor(processed.rows * scale)
+                    );
+                    cv.resize(processed, scaled, scaledSize, 0, 0, cv.INTER_CUBIC);
+                    results.push(scaled);
+                }
+            }
+
+            // Process the best scale (largest for detail preservation)
+            const bestResult = results[results.length - 1];
+            results.forEach((result, idx) => {
+                if (idx !== results.length - 1) result.delete();
+            });
+            processed.delete();
+            processed = bestResult;
+        }
+
         // Convert to grayscale with better color space conversion
         if (processed.channels() > 1) {
             const gray = new cv.Mat();
@@ -540,41 +594,64 @@ async function processImageData(imageData, options = {}) {
             processed = combined;
         }
 
-        // Step 4: Advanced morphological operations for barcode cleanup
+        // Step 4: Enhanced morphological operations for barcode cleanup
         if (useMorphological) {
             const temp1 = new cv.Mat();
             const temp2 = new cv.Mat();
+            const temp3 = new cv.Mat();
             const morphed = new cv.Mat();
 
-            // Horizontal kernel for barcode enhancement
+            // Adaptive kernel sizes based on image dimensions and magnification
+            const baseKernelSize = useMagnification ?
+                Math.max(3, Math.floor(processed.cols / 400)) :
+                Math.max(2, Math.floor(processed.cols / 600));
+
+            // Enhanced horizontal kernel for barcode pattern enhancement
             const horizontalKernel = cv.getStructuringElement(
                 cv.MORPH_RECT,
-                new cv.Size(9, 1)
+                new cv.Size(Math.max(7, baseKernelSize * 3), 1)
             );
 
-            // Vertical kernel for noise removal
+            // Vertical kernel for noise removal - smaller for precision
             const verticalKernel = cv.getStructuringElement(
                 cv.MORPH_RECT,
-                new cv.Size(1, 3)
+                new cv.Size(1, Math.max(2, baseKernelSize))
             );
 
-            // Close horizontal gaps (typical for barcodes)
-            cv.morphologyEx(processed, temp1, cv.MORPH_CLOSE, horizontalKernel, new cv.Point(-1, -1), 1);
+            // Step 4a: Close horizontal gaps (crucial for barcodes)
+            const iterations = barcodePattern ? 2 : 1;
+            cv.morphologyEx(processed, temp1, cv.MORPH_CLOSE, horizontalKernel, new cv.Point(-1, -1), iterations);
 
-            // Remove vertical noise
+            // Step 4b: Remove small vertical artifacts that interfere with barcode reading
             cv.morphologyEx(temp1, temp2, cv.MORPH_OPEN, verticalKernel, new cv.Point(-1, -1), 1);
 
-            // Final cleanup with rectangular kernel
-            const cleanupKernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
-            cv.morphologyEx(temp2, morphed, cv.MORPH_CLOSE, cleanupKernel, new cv.Point(-1, -1), 1);
+            // Step 4c: If magnified, apply additional barcode-specific morphology
+            if (useMagnification) {
+                // Extra wide horizontal kernel for magnified barcodes
+                const wideHorizontalKernel = cv.getStructuringElement(
+                    cv.MORPH_RECT,
+                    new cv.Size(Math.floor(baseKernelSize * 4), 1)
+                );
+                cv.morphologyEx(temp2, temp3, cv.MORPH_CLOSE, wideHorizontalKernel, new cv.Point(-1, -1), 1);
+                wideHorizontalKernel.delete();
+                temp2.delete();
+                processed.delete();
+                processed = temp3;
+            } else {
+                // Final cleanup with small rectangular kernel
+                const cleanupKernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
+                cv.morphologyEx(temp2, morphed, cv.MORPH_CLOSE, cleanupKernel, new cv.Point(-1, -1), 1);
+                cleanupKernel.delete();
+                temp2.delete();
+                processed.delete();
+                processed = morphed;
+            }
 
             horizontalKernel.delete();
             verticalKernel.delete();
-            cleanupKernel.delete();
             temp1.delete();
-            temp2.delete();
-            processed.delete();
-            processed = morphed;
+            if (temp3 && !temp3.isDeleted()) temp3.delete();
+            if (!processed.isDeleted() && morphed && !morphed.isDeleted() && processed !== morphed) morphed.delete();
         }
 
         // Step 5: Final edge enhancement for barcode detection

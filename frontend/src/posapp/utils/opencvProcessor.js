@@ -120,7 +120,7 @@ class OpenCVProcessor {
     }
 
     /**
-     * Intelligent processing that automatically detects quality level
+     * Intelligent processing with automatic magnification detection
      */
     async intelligentProcess(imageData) {
         if (!await this.ensureInitialized() || this.fallbackMode) {
@@ -131,13 +131,17 @@ class OpenCVProcessor {
         }
 
         try {
-            // Simple quality assessment - check for low contrast/blur
+            // Enhanced quality assessment with barcode size detection
             const quality = this.assessImageQuality(imageData);
             this.lastQualityAssessment = quality;
 
-            console.log('Image quality assessment:', quality);
+            console.log('Enhanced image quality assessment:', quality);
 
-            if (quality.level === 'very_poor') {
+            // Apply smart processing based on barcode size and quality
+            if (quality.needsMagnification) {
+                console.log(`Small barcode detected (${quality.estimatedBarcodeSize}), applying magnification processing`);
+                return await this.smartMagnificationProcess(imageData, quality);
+            } else if (quality.level === 'very_poor') {
                 console.log('Using extreme processing for very poor quality image');
                 return await this.extremeProcess(imageData);
             } else if (quality.level === 'poor') {
@@ -154,19 +158,106 @@ class OpenCVProcessor {
     }
 
     /**
-     * Simple image quality assessment
+     * Smart magnification processing for small barcodes
+     */
+    async smartMagnificationProcess(imageData, qualityAssessment) {
+        if (!await this.ensureInitialized() || this.fallbackMode) {
+            console.warn('📷 OpenCV Worker not available, returning original image');
+            return imageData;
+        }
+
+        try {
+            console.log('Applying smart magnification processing for small barcodes');
+
+            // Determine magnification factor based on estimated barcode size
+            let magnificationFactor = 2.0; // Default
+            if (qualityAssessment.estimatedBarcodeSize === 'small') {
+                magnificationFactor = 3.0; // Higher magnification for very small barcodes
+            } else if (qualityAssessment.estimatedBarcodeSize === 'medium') {
+                magnificationFactor = 2.0; // Moderate magnification
+            }
+
+            // Create processing options for magnified processing
+            const magnificationOptions = {
+                useMagnification: true,
+                magnificationFactor: magnificationFactor,
+                useAdaptiveThreshold: true,
+                useMorphological: true,
+                useUnsharpMask: true,
+                useCLAHE: true,
+                useDeblur: qualityAssessment.level === 'poor' || qualityAssessment.level === 'very_poor',
+                useNoiseReduction: qualityAssessment.level === 'poor' || qualityAssessment.level === 'very_poor',
+                useEdgeEnhancement: true,
+                qualityLevel: 'high',
+                // Region of Interest processing if we have barcode location hints
+                useROIProcessing: qualityAssessment.potentialBarcodeCount > 0,
+                barcodePattern: qualityAssessment.barcodePattern
+            };
+
+            console.log(`Applying ${magnificationFactor}x magnification with enhanced processing`);
+            const processedImageData = await this.workerManager.processImage(imageData, magnificationOptions);
+            return processedImageData;
+        } catch (error) {
+            console.error('Error in smart magnification processing:', error);
+            // Fallback to regular full processing
+            return await this.fullProcess(imageData);
+        }
+    }
+
+    /**
+     * Multi-scale processing for challenging barcodes
+     */
+    async multiScaleProcess(imageData) {
+        if (!await this.ensureInitialized() || this.fallbackMode) {
+            console.warn('📷 OpenCV Worker not available, returning original image');
+            return imageData;
+        }
+
+        try {
+            console.log('Applying multi-scale processing for challenging barcode detection');
+
+            const multiScaleOptions = {
+                useMultiScale: true,
+                scales: [1.0, 1.5, 2.0, 2.5], // Multiple processing scales
+                useAdaptiveThreshold: true,
+                useMorphological: true,
+                useUnsharpMask: true,
+                useCLAHE: true,
+                useDeblur: true,
+                useNoiseReduction: true,
+                useEdgeEnhancement: true,
+                qualityLevel: 'extreme'
+            };
+
+            const processedImageData = await this.workerManager.processImage(imageData, multiScaleOptions);
+            return processedImageData;
+        } catch (error) {
+            console.error('Error in multi-scale processing:', error);
+            return await this.extremeProcess(imageData);
+        }
+    }
+
+    /**
+     * Enhanced image quality assessment with barcode size detection
      */
     assessImageQuality(imageData) {
-        const { data, width } = imageData;
+        const { data, width, height } = imageData;
 
         // Calculate basic statistics
         let sum = 0;
         let sumSquares = 0;
         let edgePixels = 0;
+        let horizontalEdges = 0;
+        let verticalEdges = 0;
 
         // Sample pixels (every 4th pixel for performance)
         const sampleRate = 4;
         let samples = 0;
+
+        // Detect potential barcode regions
+        const barcodeRegions = [];
+        const minBarcodeWidth = 50; // Minimum pixels for a detectable barcode
+        const minBarcodeHeight = 20;
 
         for (let i = 0; i < data.length; i += 4 * sampleRate) {
             // Convert to grayscale
@@ -175,11 +266,29 @@ class OpenCVProcessor {
             sumSquares += gray * gray;
             samples++;
 
-            // Simple edge detection (check difference with neighboring pixels)
+            const x = (i / 4) % width;
+            const y = Math.floor((i / 4) / width);
+
+            // Horizontal edge detection (for barcode patterns)
             if (i + 4 * width < data.length) {
                 const neighborGray = data[i + 4 * width] * 0.299 + data[i + 4 * width + 1] * 0.587 + data[i + 4 * width + 2] * 0.114;
-                if (Math.abs(gray - neighborGray) > 30) {
+                const edgeDiff = Math.abs(gray - neighborGray);
+                if (edgeDiff > 30) {
                     edgePixels++;
+                    horizontalEdges++;
+                }
+            }
+
+            // Vertical edge detection (for barcode patterns)
+            if (i + 4 < data.length && x < width - 1) {
+                const rightGray = data[i + 4] * 0.299 + data[i + 5] * 0.587 + data[i + 6] * 0.114;
+                const edgeDiff = Math.abs(gray - rightGray);
+                if (edgeDiff > 40) {
+                    verticalEdges++;
+                    // Potential barcode region detection
+                    if (edgeDiff > 60) {
+                        barcodeRegions.push({ x, y, intensity: edgeDiff });
+                    }
                 }
             }
         }
@@ -188,8 +297,38 @@ class OpenCVProcessor {
         const variance = (sumSquares / samples) - (mean * mean);
         const contrast = Math.sqrt(variance) / 255; // Normalized contrast
         const edgeRatio = edgePixels / samples;
+        const horizontalRatio = horizontalEdges / samples;
+        const verticalRatio = verticalEdges / samples;
 
-        // Quality assessment
+        // Barcode pattern detection
+        const barcodePattern = verticalRatio > horizontalRatio * 2; // More vertical than horizontal edges
+        const potentialBarcodeCount = barcodeRegions.length;
+
+        // Estimate barcode size if detected
+        let estimatedBarcodeSize = 'unknown';
+        let needsMagnification = false;
+
+        if (barcodeRegions.length > 5) {
+            // Cluster barcode regions to estimate size
+            const clusteredRegions = this.clusterBarcodeRegions(barcodeRegions, width, height);
+            if (clusteredRegions.length > 0) {
+                const largestCluster = clusteredRegions.reduce((max, cluster) =>
+                    cluster.width * cluster.height > max.width * max.height ? cluster : max
+                );
+
+                if (largestCluster.width < minBarcodeWidth || largestCluster.height < minBarcodeHeight) {
+                    estimatedBarcodeSize = 'small';
+                    needsMagnification = true;
+                } else if (largestCluster.width < minBarcodeWidth * 1.5 || largestCluster.height < minBarcodeHeight * 1.5) {
+                    estimatedBarcodeSize = 'medium';
+                    needsMagnification = largestCluster.width < minBarcodeWidth * 1.2;
+                } else {
+                    estimatedBarcodeSize = 'large';
+                }
+            }
+        }
+
+        // Enhanced quality assessment
         let level = 'good';
         if (contrast < 0.15 && edgeRatio < 0.05) {
             level = 'very_poor';
@@ -199,14 +338,81 @@ class OpenCVProcessor {
             level = 'fair';
         }
 
+        // Adjust recommendation based on barcode size
+        let recommendation = level === 'very_poor' ? 'Use extreme processing' :
+                           level === 'poor' ? 'Use full processing' : 'Use quick processing';
+
+        if (needsMagnification) {
+            recommendation = 'Use magnification + ' + recommendation.toLowerCase();
+        }
+
         return {
             level,
             contrast: contrast.toFixed(3),
             edgeRatio: edgeRatio.toFixed(3),
+            horizontalRatio: horizontalRatio.toFixed(3),
+            verticalRatio: verticalRatio.toFixed(3),
             mean: mean.toFixed(1),
-            recommendation: level === 'very_poor' ? 'Use extreme processing' :
-                           level === 'poor' ? 'Use full processing' : 'Use quick processing'
+            barcodePattern,
+            estimatedBarcodeSize,
+            needsMagnification,
+            potentialBarcodeCount,
+            recommendation
         };
+    }
+
+    /**
+     * Cluster nearby barcode regions to estimate barcode dimensions
+     */
+    clusterBarcodeRegions(regions, imageWidth, imageHeight) {
+        if (regions.length === 0) return [];
+
+        const clusters = [];
+        const visited = new Set();
+        // Adaptive cluster distance based on image size
+        const clusterDistance = Math.max(20, Math.min(imageWidth, imageHeight) * 0.05);
+
+        for (let i = 0; i < regions.length; i++) {
+            if (visited.has(i)) continue;
+
+            const cluster = {
+                regions: [regions[i]],
+                minX: regions[i].x,
+                maxX: regions[i].x,
+                minY: regions[i].y,
+                maxY: regions[i].y
+            };
+            visited.add(i);
+
+            // Find nearby regions
+            for (let j = i + 1; j < regions.length; j++) {
+                if (visited.has(j)) continue;
+
+                const distance = Math.sqrt(
+                    Math.pow(regions[i].x - regions[j].x, 2) +
+                    Math.pow(regions[i].y - regions[j].y, 2)
+                );
+
+                if (distance <= clusterDistance) {
+                    cluster.regions.push(regions[j]);
+                    cluster.minX = Math.min(cluster.minX, regions[j].x);
+                    cluster.maxX = Math.max(cluster.maxX, regions[j].x);
+                    cluster.minY = Math.min(cluster.minY, regions[j].y);
+                    cluster.maxY = Math.max(cluster.maxY, regions[j].y);
+                    visited.add(j);
+                }
+            }
+
+            cluster.width = cluster.maxX - cluster.minX;
+            cluster.height = cluster.maxY - cluster.minY;
+            cluster.centerX = (cluster.minX + cluster.maxX) / 2;
+            cluster.centerY = (cluster.minY + cluster.maxY) / 2;
+            cluster.density = cluster.regions.length / ((cluster.width || 1) * (cluster.height || 1));
+
+            clusters.push(cluster);
+        }
+
+        return clusters.filter(cluster => cluster.regions.length >= 3); // Minimum regions for valid cluster
     }
 
     /**
