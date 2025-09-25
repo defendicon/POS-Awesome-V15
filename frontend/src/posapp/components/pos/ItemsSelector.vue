@@ -616,9 +616,10 @@ export default {
 		items_per_page: 50,
 		temp_items_per_page: 50,
 		temp_force_server_items: false,
-		// Performance optimizations
-		searchCache: new Map(),
-		itemCache: new Map(),
+                // Performance optimizations
+                searchCache: new Map(),
+                barcodeIndex: new Map(),
+                itemCache: new Map(),
 		virtualScrollEnabled: true,
 		renderBuffer: 10,
 		lastScrollTop: 0,
@@ -1037,10 +1038,11 @@ export default {
 			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
 			await initPromise;
 			await this.ensureStorageHealth();
-			if (reset) {
-				this.currentPage = 0;
-				this.items = [];
-			}
+                        if (reset) {
+                                this.currentPage = 0;
+                                this.items = [];
+                                this.resetBarcodeIndex();
+                        }
 			const search = this.get_search(this.first_search);
 			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
 			const pageItems = await searchStoredItems({
@@ -1051,7 +1053,8 @@ export default {
 			});
 			const total = pageItems.length || 1;
 			pageItems.forEach((it, idx) => {
-				this.items.push(it);
+                                this.items.push(it);
+                                this.indexItem(it);
 				const progress = Math.round(((idx + 1) / total) * 100);
 				this.loadProgress = progress;
 				this.eventBus.emit("data-load-progress", {
@@ -1479,8 +1482,9 @@ export default {
 					}
 				});
 
-				vm.items = items;
-				vm.items_loaded = true;
+                                vm.items = items;
+                                vm.replaceBarcodeIndex(vm.items);
+                                vm.items_loaded = true;
 				vm.eventBus.emit("set_all_items", vm.items);
 				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
 
@@ -1618,12 +1622,18 @@ export default {
 								return;
 							}
 							if (ev.data.type === "parsed") {
-								const newItems = ev.data.items || [];
-								newItems.forEach((it) => {
-									const existing = this.items.find((i) => i.item_code === it.item_code);
-									if (existing) Object.assign(existing, it);
-									else this.items.push(it);
-								});
+                                                                const newItems = ev.data.items || [];
+                                                                newItems.forEach((it) => {
+                                                                        const existing = this.items.find((i) => i.item_code === it.item_code);
+                                                                        let target = existing;
+                                                                        if (existing) {
+                                                                                Object.assign(existing, it);
+                                                                        } else {
+                                                                                target = it;
+                                                                                this.items.push(target);
+                                                                        }
+                                                                        this.indexItem(target);
+                                                                });
 								lastItemName = newItems[newItems.length - 1]?.item_name || null;
 								this.eventBus.emit("set_all_items", this.items);
 								console.log("[ItemsSelector] background load set_all_items emitted", {
@@ -1730,11 +1740,17 @@ export default {
 						}
 						const rows = r.message || [];
 						console.log("[ItemsSelector] background load callback items", { count: rows.length });
-						rows.forEach((it) => {
-							const existing = this.items.find((i) => i.item_code === it.item_code);
-							if (existing) Object.assign(existing, it);
-							else this.items.push(it);
-						});
+                                                rows.forEach((it) => {
+                                                        const existing = this.items.find((i) => i.item_code === it.item_code);
+                                                        let target = existing;
+                                                        if (existing) {
+                                                                Object.assign(existing, it);
+                                                        } else {
+                                                                target = it;
+                                                                this.items.push(target);
+                                                        }
+                                                        this.indexItem(target);
+                                                });
 						this.eventBus.emit("set_all_items", this.items);
 						console.log("[ItemsSelector] background load set_all_items emitted", {
 							length: this.items.length,
@@ -1900,11 +1916,14 @@ export default {
 								customer: this.customer,
 							},
 						});
-						if (res.message) {
-							variants = res.message.variants || res.message;
-							attrsMeta = res.message.attributes_meta || {};
-							this.items.push(...variants);
-						}
+                                                        if (res.message) {
+                                                                variants = res.message.variants || res.message;
+                                                                attrsMeta = res.message.attributes_meta || {};
+                                                                variants.forEach((variant) => {
+                                                                        this.items.push(variant);
+                                                                        this.indexItem(variant);
+                                                                });
+                                                        }
 					} catch (e) {
 						console.error("Failed to fetch variants", e);
 					}
@@ -2243,14 +2262,15 @@ export default {
 						item.currency = det.currency;
 					}
 
-					if (!item.original_rate) {
-						item.original_rate = item.rate;
-						item.original_currency = item.currency || vm.pos_profile.currency;
-					}
+                                        if (!item.original_rate) {
+                                                item.original_rate = item.rate;
+                                                item.original_currency = item.currency || vm.pos_profile.currency;
+                                        }
 
-					vm.applyCurrencyConversionToItem(item);
-				}
-			});
+                                        vm.indexItem(item);
+                                        vm.applyCurrencyConversionToItem(item);
+                                }
+                        });
 
 			let allCached = cacheResult.missing.length === 0;
 			items.forEach((item) => {
@@ -2337,10 +2357,11 @@ export default {
 						}
 					});
 
-					updatedItems.forEach(({ item, updates }) => {
-						Object.assign(item, updates);
-						vm.applyCurrencyConversionToItem(item);
-					});
+                                        updatedItems.forEach(({ item, updates }) => {
+                                                Object.assign(item, updates);
+                                                vm.indexItem(item);
+                                                vm.applyCurrencyConversionToItem(item);
+                                        });
 
 					updateLocalStockCache(details);
 					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
@@ -2899,15 +2920,23 @@ export default {
 				qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
 			}
 
-			// First try to find exact match by processed code
-			let foundItem = this.items.find((item) => {
-				const barcodeMatch =
-					item.barcode === searchCode ||
-					(Array.isArray(item.item_barcode) &&
-						item.item_barcode.some((b) => b.barcode === searchCode)) ||
-					(Array.isArray(item.barcodes) && item.barcodes.some((bc) => String(bc) === searchCode));
-				return barcodeMatch || item.item_code === searchCode;
-			});
+                        // First try to find exact match by processed code using the pre-built index
+                        const barcodeIndex = this.ensureBarcodeIndex();
+                        let foundItem = this.lookupItemByBarcode(searchCode);
+
+                        if (!foundItem && barcodeIndex.size === 0) {
+                                // Index not populated yet, build it and fall back to a direct scan once
+                                this.replaceBarcodeIndex(this.items);
+                                foundItem = this.items.find((item) => {
+                                        const barcodeMatch =
+                                                item.barcode === searchCode ||
+                                                (Array.isArray(item.item_barcode) &&
+                                                        item.item_barcode.some((b) => b.barcode === searchCode)) ||
+                                                (Array.isArray(item.barcodes) &&
+                                                        item.barcodes.some((bc) => String(bc) === searchCode));
+                                        return barcodeMatch || item.item_code === searchCode;
+                                });
+                        }
 
 			if (foundItem) {
 				console.log("Found item by processed code:", foundItem);
@@ -2926,13 +2955,14 @@ export default {
 					},
 				});
 
-				if (res && res.message) {
-					const newItem = res.message;
-					this.items.push(newItem);
+                                if (res && res.message) {
+                                        const newItem = res.message;
+                                        this.items.push(newItem);
+                                        this.indexItem(newItem);
 
-					if (this.searchCache) {
-						this.searchCache.clear();
-					}
+                                        if (this.searchCache) {
+                                                this.searchCache.clear();
+                                        }
 
 					await saveItems(this.items);
 					await savePriceListItems(this.customer_price_list, this.items);
@@ -2964,24 +2994,86 @@ export default {
                                 perfMarkEnd("pos:scan-process", mark);
                         }
                 },
-		searchItemsByCode(code) {
-			return this.items.filter((item) => {
-				const searchTerm = code.toLowerCase();
-				const barcodeMatch =
-					(item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
+                searchItemsByCode(code) {
+                        return this.items.filter((item) => {
+                                const searchTerm = code.toLowerCase();
+                                const barcodeMatch =
+                                        (item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
 					(Array.isArray(item.barcodes) &&
 						item.barcodes.some((bc) => String(bc).toLowerCase().includes(searchTerm))) ||
 					(Array.isArray(item.item_barcode) &&
 						item.item_barcode.some(
 							(b) => b.barcode && b.barcode.toLowerCase().includes(searchTerm),
 						));
-				return (
-					item.item_code.toLowerCase().includes(searchTerm) ||
-					item.item_name.toLowerCase().includes(searchTerm) ||
-					barcodeMatch
-				);
-			});
-		},
+                                return (
+                                        item.item_code.toLowerCase().includes(searchTerm) ||
+                                        item.item_name.toLowerCase().includes(searchTerm) ||
+                                        barcodeMatch
+                                );
+                        });
+                },
+                // PERF: maintain a barcode index so unfound scans do not walk the full list
+                ensureBarcodeIndex() {
+                        if (!this.barcodeIndex || typeof this.barcodeIndex.set !== "function") {
+                                this.barcodeIndex = new Map();
+                        }
+                        return this.barcodeIndex;
+                },
+                resetBarcodeIndex() {
+                        const index = this.ensureBarcodeIndex();
+                        index.clear();
+                },
+                indexItem(item) {
+                        if (!item) {
+                                return;
+                        }
+                        const index = this.ensureBarcodeIndex();
+                        const register = (code) => {
+                                if (code === undefined || code === null) {
+                                        return;
+                                }
+                                const normalized = String(code).trim();
+                                if (!normalized) {
+                                        return;
+                                }
+                                if (!index.has(normalized)) {
+                                        index.set(normalized, item);
+                                }
+                                const lower = normalized.toLowerCase();
+                                if (!index.has(lower)) {
+                                        index.set(lower, item);
+                                }
+                        };
+                        register(item.item_code);
+                        register(item.barcode);
+                        if (Array.isArray(item.item_barcode)) {
+                                item.item_barcode.forEach((barcode) => register(barcode?.barcode));
+                        }
+                        if (Array.isArray(item.barcodes)) {
+                                item.barcodes.forEach((barcode) => register(barcode));
+                        }
+                        if (Array.isArray(item.serial_no_data)) {
+                                item.serial_no_data.forEach((serial) => register(serial?.serial_no));
+                        }
+                        if (Array.isArray(item.batch_no_data)) {
+                                item.batch_no_data.forEach((batch) => register(batch?.batch_no));
+                        }
+                },
+                replaceBarcodeIndex(items = this.items) {
+                        this.resetBarcodeIndex();
+                        items.forEach((item) => this.indexItem(item));
+                },
+                lookupItemByBarcode(code) {
+                        if (code === undefined || code === null) {
+                                return null;
+                        }
+                        const index = this.ensureBarcodeIndex();
+                        const normalized = String(code).trim();
+                        if (!normalized) {
+                                return null;
+                        }
+                        return index.get(normalized) || index.get(normalized.toLowerCase()) || null;
+                },
 		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
 			console.log("Adding scanned item to invoice:", item, scannedCode);
 
@@ -3432,11 +3524,13 @@ export default {
 		},
 	},
 
-	created() {
-		console.log("ItemsSelector created - starting initialization");
+        created() {
+                console.log("ItemsSelector created - starting initialization");
 
-		// Setup search debounce
-		this.searchDebounce = _.debounce(() => {
+                this.replaceBarcodeIndex(this.items || []);
+
+                // Setup search debounce
+                this.searchDebounce = _.debounce(() => {
 			this.get_items();
 		}, 300);
 
