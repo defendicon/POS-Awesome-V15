@@ -2718,12 +2718,25 @@ export default {
                                 frappe.show_alert(
                                         {
                                                 message: this.scanErrorMessage,
-						indicator: "red",
-					},
-					5,
-				);
-			}
-		},
+                                                indicator: "red",
+                                        },
+                                        5,
+                                );
+                        }
+                },
+                handleScanPipelineError(error, code = "") {
+                        const normalizedCode = code || this.pendingScanCode || "";
+                        console.error("Unexpected barcode processing error:", error);
+                        const details =
+                                error && typeof error.message === "string" && error.message.trim()
+                                        ? error.message
+                                        : this.__("Please try again or enter the item manually.");
+                        this.showScanError({
+                                message: this.__("Unable to add scanned item."),
+                                code: normalizedCode,
+                                details,
+                        });
+                },
                 acknowledgeScanError() {
                         this.scanErrorDialog = false;
                         this.scannerLocked = false;
@@ -2817,25 +2830,25 @@ export default {
                                 return;
                         }
 
-                        const scheduleScan = (code) => {
+                        const runScanPipeline = async (code) => {
                                 const mark = perfMarkStart("pos:scan-handler");
-                                scheduleFrame(() => {
-                                        try {
-                                                console.log("Barcode scanned:", code);
-                                                this.pendingScanCode = code;
+                                try {
+                                        console.log("Barcode scanned:", code);
+                                        this.pendingScanCode = code;
 
-                                                // mark this search as coming from a scanner
-                                                this.search_from_scanner = true;
+                                        // mark this search as coming from a scanner
+                                        this.search_from_scanner = true;
 
-                                                // Clear any previous search
-                                                this.search = "";
-                                                this.first_search = "";
+                                        // Clear any previous search
+                                        this.search = "";
+                                        this.first_search = "";
 
-                                                // Set the scanned code as search term
-                                                this.first_search = code;
-                                                this.search = code;
+                                        // Set the scanned code as search term
+                                        this.first_search = code;
+                                        this.search = code;
 
-                                                // Show scanning feedback
+                                        // Show scanning feedback
+                                        if (frappe?.show_alert) {
                                                 frappe.show_alert(
                                                         {
                                                                 message: `Scanning for: ${code}`,
@@ -2843,13 +2856,15 @@ export default {
                                                         },
                                                         2,
                                                 );
-
-                                                // Enhanced item search and submission logic
-                                                this.processScannedItem(code);
-                                        } finally {
-                                                perfMarkEnd("pos:scan-handler", mark);
                                         }
-                                });
+
+                                        // Enhanced item search and submission logic
+                                        await this.processScannedItem(code);
+                                } catch (error) {
+                                        this.handleScanPipelineError(error, code);
+                                } finally {
+                                        perfMarkEnd("pos:scan-handler", mark);
+                                }
                         };
 
                         if (this.scanDebounceId) {
@@ -2860,7 +2875,14 @@ export default {
                                 this.scanDebounceId = null;
                                 const code = this.scanQueuedCode || scannedCode;
                                 this.scanQueuedCode = "";
-                                scheduleScan(code);
+                                scheduleFrame(() => {
+                                        const maybePromise = runScanPipeline(code);
+                                        if (maybePromise && typeof maybePromise.catch === "function") {
+                                                maybePromise.catch((error) => {
+                                                        this.handleScanPipelineError(error, code);
+                                                });
+                                        }
+                                });
                         }, 12);
                 },
                 async processScannedItem(scannedCode) {
