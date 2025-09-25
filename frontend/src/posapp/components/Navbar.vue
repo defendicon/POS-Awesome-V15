@@ -110,6 +110,7 @@
 
 <script>
 /* global frappe */
+import { defineAsyncComponent } from "vue";
 import NavbarAppBar from "./navbar/NavbarAppBar.vue";
 import NavbarDrawer from "./navbar/NavbarDrawer.vue";
 import NavbarMenu from "./navbar/NavbarMenu.vue";
@@ -117,13 +118,16 @@ import StatusIndicator from "./navbar/StatusIndicator.vue";
 import CacheUsageMeter from "./navbar/CacheUsageMeter.vue";
 import AboutDialog from "./navbar/AboutDialog.vue";
 import OfflineInvoices from "./OfflineInvoices.vue";
-import ServerUsageGadget from "./navbar/ServerUsageGadget.vue";
-import DatabaseUsageGadget from "./navbar/DatabaseUsageGadget.vue";
 import posLogo from "./pos/pos.png";
 import { forceClearAllCache } from "../../offline/cache.js";
 import { clearAllCaches } from "../../utils/clearAllCaches.js";
 import { isOffline } from "../../offline/index.js";
 import { useRtl } from "../composables/useRtl.js";
+
+const ServerUsageGadget = defineAsyncComponent(() => import("./navbar/ServerUsageGadget.vue"));
+const DatabaseUsageGadget = defineAsyncComponent(() =>
+	import("./navbar/DatabaseUsageGadget.vue"),
+);
 
 export default {
 	name: "NavBar",
@@ -211,7 +215,20 @@ export default {
 			snackText: "",
 			snackColor: "success",
 			snackTimeout: 3000,
+			clearingCache: false,
+			initialCacheRefreshRequested: false,
 		};
+	},
+	watch: {
+		cacheReady: {
+			handler(newVal) {
+				if (newVal && !this.initialCacheRefreshRequested) {
+					this.initialCacheRefreshRequested = true;
+					this.refreshCacheUsage();
+				}
+			},
+			immediate: true,
+		},
 	},
 	computed: {
 		appBarColor() {
@@ -220,13 +237,12 @@ export default {
 	},
 	mounted() {
 		this.initializeNavbar();
+		this.setupEventListeners();
+	},
 
-		if (this.eventBus) {
-			this.eventBus.on("show_message", this.showMessage);
-			this.eventBus.on("freeze", this.handleFreeze);
-			this.eventBus.on("unfreeze", this.handleUnfreeze);
-			this.eventBus.on("set_company", this.handleSetCompany);
-		}
+	created() {
+		// Initialize early to prevent reactivity issues
+		this.preInitialize();
 	},
 	unmounted() {
 		if (this.eventBus) {
@@ -237,25 +253,84 @@ export default {
 		}
 	},
 	methods: {
+		preInitialize() {
+			// Early initialization to prevent cache-related element destruction
+			// Use reactive assignment instead of direct property modification
+			if (typeof frappe !== 'undefined' && frappe.boot) {
+				// Set company reactively
+				if (frappe.boot.sysdefaults && frappe.boot.sysdefaults.company) {
+					this.$set ? this.$set(this, 'company', frappe.boot.sysdefaults.company) :
+						(this.company = frappe.boot.sysdefaults.company);
+				}
+
+				// Set company logo reactively - prioritize app_logo over banner_image
+				if (frappe.boot.website_settings) {
+					const logo = frappe.boot.website_settings.app_logo ||
+								 frappe.boot.website_settings.banner_image;
+					if (logo) {
+						this.$set ? this.$set(this, 'companyImg', logo) :
+							(this.companyImg = logo);
+					}
+				}
+			}
+		},
+
 		initializeNavbar() {
-			// Initialize company info from Frappe boot data
-			if (frappe.boot && frappe.boot.sysdefaults && frappe.boot.sysdefaults.company) {
-				this.company = frappe.boot.sysdefaults.company;
-			}
+			// Enhanced initialization with better reactivity handling
+			const updateCompanyInfo = () => {
+				let updated = false;
 
-			// Try multiple sources for company logo
-			if (frappe.boot && frappe.boot.website_settings && frappe.boot.website_settings.app_logo) {
-				this.companyImg = frappe.boot.website_settings.app_logo;
-			} else if (
-				frappe.boot &&
-				frappe.boot.website_settings &&
-				frappe.boot.website_settings.banner_image
-			) {
-				this.companyImg = frappe.boot.website_settings.banner_image;
-			}
+				// Update company if not already set or changed
+				if (frappe.boot && frappe.boot.sysdefaults && frappe.boot.sysdefaults.company) {
+					if (this.company !== frappe.boot.sysdefaults.company) {
+						this.company = frappe.boot.sysdefaults.company;
+						updated = true;
+					}
+				}
 
-			// Force reactivity update
-			this.$forceUpdate();
+				// Update logo if not already set or changed
+				if (frappe.boot && frappe.boot.website_settings) {
+					const newLogo = frappe.boot.website_settings.app_logo ||
+								   frappe.boot.website_settings.banner_image;
+					if (newLogo && this.companyImg !== newLogo) {
+						this.companyImg = newLogo;
+						updated = true;
+					}
+				}
+
+				// Only force update if something actually changed
+				if (updated) {
+					this.$nextTick(() => {
+						// Emit event to parent components if needed
+						this.$emit('navbar-updated');
+					});
+				}
+			};
+
+			// Check if frappe is available
+			if (typeof frappe !== 'undefined') {
+				updateCompanyInfo();
+			} else {
+				// Wait for frappe to become available
+				const checkFrappe = setInterval(() => {
+					if (typeof frappe !== 'undefined') {
+						clearInterval(checkFrappe);
+						updateCompanyInfo();
+					}
+				}, 100);
+
+				// Clear interval after 5 seconds to prevent infinite checking
+				setTimeout(() => clearInterval(checkFrappe), 5000);
+			}
+		},
+
+		setupEventListeners() {
+			if (this.eventBus) {
+				this.eventBus.on("show_message", this.showMessage);
+				this.eventBus.on("freeze", this.handleFreeze);
+				this.eventBus.on("unfreeze", this.handleUnfreeze);
+				this.eventBus.on("set_company", this.handleSetCompany);
+			}
 		},
 		handleNavClick() {
 			this.drawer = !this.drawer;
@@ -280,6 +355,9 @@ export default {
 			this.$emit("toggle-offline");
 		},
 		async clearCache() {
+			if (this.clearingCache) {
+				return;
+			}
 			if (isOffline()) {
 				this.showMessage({
 					color: "warning",
@@ -287,7 +365,13 @@ export default {
 				});
 				return;
 			}
+			let shouldReload = false;
 			try {
+				this.clearingCache = true;
+				this.showMessage({
+					color: "info",
+					title: this.__("Clearing local cache..."),
+				});
 				let westernPref = null;
 				if (typeof localStorage !== "undefined") {
 					westernPref = localStorage.getItem("use_western_numerals");
@@ -301,6 +385,7 @@ export default {
 					color: "success",
 					title: this.__("Cache cleared successfully"),
 				});
+				shouldReload = true;
 			} catch (e) {
 				console.error("Failed to clear cache", e);
 				this.showMessage({
@@ -308,7 +393,10 @@ export default {
 					title: this.__("Failed to clear cache"),
 				});
 			} finally {
-				setTimeout(() => location.reload(), 1000);
+				this.clearingCache = false;
+				if (shouldReload) {
+					setTimeout(() => location.reload(), 1000);
+				}
 			}
 		},
 		toggleTheme() {
@@ -368,6 +456,7 @@ export default {
 		"logout",
 		"refresh-cache-usage",
 		"update-after-delete",
+		"navbar-updated",
 	],
 };
 </script>

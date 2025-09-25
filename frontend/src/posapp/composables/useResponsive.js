@@ -52,9 +52,19 @@ export function useResponsive() {
 		};
 	});
 
+	let resizeRafId = null;
+
 	const handleResize = () => {
-		windowWidth.value = window.innerWidth;
-		windowHeight.value = window.innerHeight;
+		// Debounce with requestAnimationFrame for better performance
+		if (resizeRafId) {
+			cancelAnimationFrame(resizeRafId);
+		}
+
+		resizeRafId = requestAnimationFrame(() => {
+			windowWidth.value = window.innerWidth;
+			windowHeight.value = window.innerHeight;
+			resizeRafId = null;
+		});
 	};
 
 	onMounted(() => {
@@ -64,6 +74,10 @@ export function useResponsive() {
 
 	onBeforeUnmount(() => {
 		window.removeEventListener("resize", handleResize);
+		if (resizeRafId) {
+			cancelAnimationFrame(resizeRafId);
+			resizeRafId = null;
+		}
 	});
 
 	return {
