@@ -651,6 +651,7 @@ export default {
                 awaitingScanResult: false,
                 scanDebounceId: null,
                 scanQueuedCode: "",
+                refreshInFlight: false,
         }),
 
         watch: {
@@ -1162,59 +1163,76 @@ export default {
 				this.itemDetailsRequestCache.result = null;
 			}
 		},
-		async refreshPricesForVisibleItems() {
-			const vm = this;
-			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
+                async refreshPricesForVisibleItems() {
+                        const vm = this;
+                        if (!vm.filtered_items || vm.filtered_items.length === 0) return;
 
-			vm.loading = true;
+                        if (vm.refreshInFlight) {
+                                return;
+                        }
 
-			const itemCodes = vm.filtered_items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
-			const updates = [];
+                        vm.refreshInFlight = true;
+                        const wasLoading = vm.loading;
+                        if (!wasLoading) {
+                                vm.loading = true;
+                        }
+                        const releaseLoading = () => {
+                                if (!wasLoading) {
+                                        vm.loading = false;
+                                }
+                        };
 
-			cacheResult.cached.forEach((det) => {
-				const item = vm.filtered_items.find((it) => it.item_code === det.item_code);
-				if (item) {
-					const upd = { actual_qty: det.actual_qty };
-					if (det.item_uoms && det.item_uoms.length > 0) {
-						upd.item_uoms = det.item_uoms;
-						saveItemUOMs(item.item_code, det.item_uoms);
-					}
-					if (det.rate !== undefined) {
-						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
-						const price = det.price_list_rate ?? det.rate ?? 0;
-						if (force || price) {
-							upd.rate = price;
-							upd.price_list_rate = price;
-						}
-					}
-					if (det.currency) {
-						upd.currency = det.currency;
-					}
-					updates.push({ item, upd });
-				}
-			});
+                        try {
+                                const itemCodes = vm.filtered_items.map((it) => it.item_code);
+                                const cacheResult = await getCachedItemDetails(
+                                vm.pos_profile.name,
+                                vm.active_price_list,
+                                itemCodes,
+                                );
+                                const updates = [];
 
-			if (cacheResult.missing.length === 0) {
-				vm.$nextTick(() => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(cacheResult.cached);
-					vm.loading = false;
-				});
-				return;
-			}
+                                cacheResult.cached.forEach((det) => {
+                                        const item = vm.filtered_items.find((it) => it.item_code === det.item_code);
+                                        if (item) {
+                                                const upd = { actual_qty: det.actual_qty };
+                                                if (det.item_uoms && det.item_uoms.length > 0) {
+                                                        upd.item_uoms = det.item_uoms;
+                                                        saveItemUOMs(item.item_code, det.item_uoms);
+                                                }
+                                                if (det.rate !== undefined) {
+                                                        const force =
+                                                                vm.pos_profile?.posa_force_price_from_customer_price_list !==
+                                                                false;
+                                                        const price = det.price_list_rate ?? det.rate ?? 0;
+                                                        if (force || price) {
+                                                                upd.rate = price;
+                                                                upd.price_list_rate = price;
+                                                        }
+                                                }
+                                                if (det.currency) {
+                                                        upd.currency = det.currency;
+                                                }
+                                                updates.push({ item, upd });
+                                        }
+                                });
 
-			const itemsToFetch = vm.filtered_items.filter((it) => cacheResult.missing.includes(it.item_code));
+                                if (cacheResult.missing.length === 0) {
+                                        vm.$nextTick(() => {
+                                                updates.forEach(({ item, upd }) => Object.assign(item, upd));
+                                                updateLocalStockCache(cacheResult.cached);
+                                                releaseLoading();
+                                        });
+                                        return;
+                                }
 
-			try {
-				const details = await vm.fetchItemDetails(itemsToFetch);
-				details.forEach((updItem) => {
-					const item = vm.filtered_items.find((it) => it.item_code === updItem.item_code);
-					if (item) {
+                                const itemsToFetch = vm.filtered_items.filter((it) =>
+                                        cacheResult.missing.includes(it.item_code),
+                                );
+
+                                const details = await vm.fetchItemDetails(itemsToFetch);
+                                details.forEach((updItem) => {
+                                        const item = vm.filtered_items.find((it) => it.item_code === updItem.item_code);
+                                        if (item) {
 						const upd = { actual_qty: updItem.actual_qty };
 						if (updItem.item_uoms && updItem.item_uoms.length > 0) {
 							upd.item_uoms = updItem.item_uoms;
@@ -1255,18 +1273,21 @@ export default {
 							await saveItemsBulk(details);
 						} catch (e) {
 							console.error("Failed to persist item details", e);
-							vm.markStorageUnavailable && vm.markStorageUnavailable();
-						}
-					}
-					vm.loading = false;
-				});
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-					vm.loading = false;
-				}
-			}
-		},
+                                                        vm.markStorageUnavailable && vm.markStorageUnavailable();
+                                                }
+                                        }
+                                        releaseLoading();
+                                });
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                        releaseLoading();
+                                }
+                        } finally {
+                                vm.refreshInFlight = false;
+                                releaseLoading();
+                        }
+                },
 
 		show_offers() {
 			this.eventBus.emit("show_offers", "true");

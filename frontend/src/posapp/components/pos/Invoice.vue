@@ -1285,12 +1285,14 @@ export default {
 			this.posa_coupons = data;
 			this.handelOffers();
 		});
-		this.eventBus.on("set_all_items", (data) => {
-			this.allItems = data;
-			this.items.forEach((item) => {
-				this.update_item_detail(item);
-			});
-		});
+                this.eventBus.on("set_all_items", (data) => {
+                        this.allItems = data;
+                        this.items.forEach((item) => {
+                                if (item._detailSynced !== true) {
+                                        this.update_item_detail(item);
+                                }
+                        });
+                });
 		this.eventBus.on("load_return_invoice", (data) => {
 			// Handle loading of return invoice and set all related fields
 			console.log("Invoice component received load_return_invoice event with data:", data);

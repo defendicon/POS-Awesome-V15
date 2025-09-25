@@ -88,21 +88,32 @@ export default {
 		this.apply_cached_price_list(applied);
 
 		// If multi-currency is enabled, sync currency with the price list currency
-		if (this.pos_profile.posa_allow_multi_currency && applied) {
-			frappe.call({
-				method: "posawesome.posawesome.api.invoices.get_price_list_currency",
-				args: { price_list: applied },
-				callback: (r) => {
-					if (r.message) {
-						// Store price list currency for later use
-						this.price_list_currency = r.message;
-						// Sync invoice currency with price list currency
-						this.update_currency(r.message);
-					}
-				},
-			});
-		}
-	},
+                if (this.pos_profile.posa_allow_multi_currency && applied) {
+                        frappe.call({
+                                method: "posawesome.posawesome.api.invoices.get_price_list_currency",
+                                args: { price_list: applied },
+                                callback: (r) => {
+                                        if (r.message) {
+                                                // Store price list currency for later use
+                                                this.price_list_currency = r.message;
+                                                // Sync invoice currency with price list currency
+                                                this.update_currency(r.message);
+                                        }
+                                },
+                        });
+                }
+
+                if (Array.isArray(this.items)) {
+                        this.items.forEach((item) => {
+                                item._detailSynced = false;
+                        });
+                }
+                if (Array.isArray(this.packed_items)) {
+                        this.packed_items.forEach((item) => {
+                                item._detailSynced = false;
+                        });
+                }
+        },
 
 	// Reactively update item prices when currency changes
 	selected_currency() {

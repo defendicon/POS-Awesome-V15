@@ -341,12 +341,15 @@ export function useItemAddition() {
 
         // Create a new item object with default and calculated fields
         const getNewItem = (item, context) => {
-		const new_item = { ...item };
-		new_item.original_item_name = new_item.item_name;
-		new_item.name_overridden = 0;
-		if (!new_item.warehouse) {
-			new_item.warehouse = context.pos_profile.warehouse;
-		}
+                const new_item = { ...item };
+                new_item.original_item_name = new_item.item_name;
+                new_item.name_overridden = 0;
+                // Mark server detail state so invoice can avoid redundant refreshes
+                new_item._detailSynced = false;
+                new_item._detailInFlight = false;
+                if (!new_item.warehouse) {
+                        new_item.warehouse = context.pos_profile.warehouse;
+                }
 		if (!item.qty) {
 			item.qty = 1;
 		}
