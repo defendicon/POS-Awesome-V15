@@ -99,12 +99,16 @@
 			:location="isRtl ? 'top left' : 'top right'"
 		>
 			{{ snackText }}
-			<template v-slot:actions>
-				<v-btn class="pos-themed-button" variant="text" @click="snack = false">{{
-					__("Close")
-				}}</v-btn>
-			</template>
-		</v-snackbar>
+                        <template v-slot:actions>
+                                <v-btn
+                                        class="pos-themed-button"
+                                        variant="text"
+                                        @click="dismissActiveNotification(true)"
+                                >
+                                        {{ __("Close") }}
+                                </v-btn>
+                        </template>
+                </v-snackbar>
 	</nav>
 </template>
 
@@ -126,8 +130,9 @@ import { useRtl } from "../composables/useRtl.js";
 
 const ServerUsageGadget = defineAsyncComponent(() => import("./navbar/ServerUsageGadget.vue"));
 const DatabaseUsageGadget = defineAsyncComponent(() =>
-	import("./navbar/DatabaseUsageGadget.vue"),
+        import("./navbar/DatabaseUsageGadget.vue"),
 );
+const DEFAULT_SNACK_TIMEOUT = 3000;
 
 export default {
 	name: "NavBar",
@@ -196,40 +201,48 @@ export default {
 		},
 	},
 	data() {
-		return {
-			drawer: false,
-			mini: true,
-			item: 0,
-			items: [
-				{ text: "POS", icon: "mdi-network-pos" },
-				{ text: "Payments", icon: "mdi-credit-card" },
-			],
-			company: "POS Awesome",
-			companyImg: posLogo,
-			showAboutDialog: false,
-			showOfflineInvoices: false,
-			freeze: false,
-			freezeTitle: "",
-			freezeMsg: "",
-			snack: false,
-			snackText: "",
-			snackColor: "success",
-			snackTimeout: 3000,
-			clearingCache: false,
-			initialCacheRefreshRequested: false,
-		};
-	},
-	watch: {
-		cacheReady: {
-			handler(newVal) {
-				if (newVal && !this.initialCacheRefreshRequested) {
+                return {
+                        drawer: false,
+                        mini: true,
+                        item: 0,
+                        items: [
+                                { text: "POS", icon: "mdi-network-pos" },
+                                { text: "Payments", icon: "mdi-credit-card" },
+                        ],
+                        company: "POS Awesome",
+                        companyImg: posLogo,
+                        showAboutDialog: false,
+                        showOfflineInvoices: false,
+                        freeze: false,
+                        freezeTitle: "",
+                        freezeMsg: "",
+                        snack: false,
+                        snackText: "",
+                        snackColor: "success",
+                        snackTimeout: DEFAULT_SNACK_TIMEOUT,
+                        notificationQueue: [],
+                        currentNotification: null,
+                        clearQueuedOnClose: false,
+                        clearingCache: false,
+                        initialCacheRefreshRequested: false,
+                };
+        },
+        watch: {
+                cacheReady: {
+                        handler(newVal) {
+                                if (newVal && !this.initialCacheRefreshRequested) {
 					this.initialCacheRefreshRequested = true;
 					this.refreshCacheUsage();
 				}
-			},
-			immediate: true,
-		},
-	},
+                        },
+                        immediate: true,
+                },
+                snack(newVal, oldVal) {
+                        if (!newVal && oldVal) {
+                                this.handleSnackbarClosed();
+                        }
+                },
+        },
 	computed: {
 		appBarColor() {
 			return this.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
@@ -411,16 +424,139 @@ export default {
 		updateAfterDelete() {
 			this.$emit("update-after-delete");
 		},
-		showMessage(data) {
-			this.snackText = data.title;
-			this.snackColor = data.color || "success";
-			this.snack = true;
-		},
-		handleFreeze(data) {
-			this.freezeTitle = data?.title || "";
-			this.freezeMsg = data?.message || "";
-			this.freeze = true;
-		},
+                showMessage(data) {
+                        const notification = this.normalizeNotification(data);
+
+                        if (!notification.title) {
+                                return;
+                        }
+
+                        if (this.currentNotification && this.currentNotification.key === notification.key) {
+                                this.mergeNotifications(this.currentNotification, notification);
+                                this.updateActiveNotification();
+                                return;
+                        }
+
+                        const existingQueued = this.notificationQueue.find(
+                                (item) => item.key === notification.key,
+                        );
+
+                        if (existingQueued) {
+                                this.mergeNotifications(existingQueued, notification);
+                        } else {
+                                this.notificationQueue.push({ ...notification });
+                        }
+
+                        if (!this.currentNotification && !this.snack) {
+                                this.processNextNotification();
+                        }
+                },
+                normalizeNotification(data = {}) {
+                        const title = typeof data.title === "string" ? data.title.trim() : "";
+                        const color = data.color || "success";
+                        const timeout = typeof data.timeout === "number" && data.timeout >= 0
+                                ? data.timeout
+                                : DEFAULT_SNACK_TIMEOUT;
+                        const summary = typeof data.summary === "string" ? data.summary.trim() : "";
+                        const detail = typeof data.detail === "string" ? data.detail.trim() : "";
+                        const count = Number.isFinite(data.count) && data.count > 0
+                                ? Math.floor(data.count)
+                                : 1;
+                        const providedKey =
+                                (typeof data.groupId === "string" && data.groupId.trim()) ||
+                                (typeof data.groupKey === "string" && data.groupKey.trim()) ||
+                                "";
+
+                        const baseKey = providedKey || `${color}::${summary || title}`;
+
+                        return {
+                                title,
+                                color,
+                                timeout,
+                                count,
+                                key: baseKey,
+                                summary,
+                                latestDetail: detail,
+                        };
+                },
+                mergeNotifications(target, incoming) {
+                        target.count += incoming.count;
+                        target.timeout = Math.max(target.timeout, incoming.timeout);
+                        if (incoming.title) {
+                                target.title = incoming.title;
+                        }
+                        if (incoming.summary) {
+                                target.summary = incoming.summary;
+                        }
+                        if (incoming.latestDetail) {
+                                target.latestDetail = incoming.latestDetail;
+                        }
+                },
+                processNextNotification() {
+                        if (!this.notificationQueue.length) {
+                                this.currentNotification = null;
+                                return;
+                        }
+
+                        const nextNotification = this.notificationQueue.shift();
+                        this.currentNotification = { ...nextNotification };
+                        this.updateActiveNotification();
+                },
+                updateActiveNotification() {
+                        if (!this.currentNotification) {
+                                return;
+                        }
+
+                        this.snackColor = this.currentNotification.color;
+                        this.snackTimeout = this.currentNotification.timeout;
+                        this.snackText = this.formatNotificationMessage(this.currentNotification);
+
+                        if (!this.snack) {
+                                this.snack = true;
+                        }
+                },
+                formatNotificationMessage(notification) {
+                        if (!notification) {
+                                return "";
+                        }
+
+                        const baseText = notification.summary || notification.title;
+
+                        if (!baseText) {
+                                return notification.title || "";
+                        }
+
+                        const multiplier = notification.count > 1 ? ` (${notification.count}×)` : "";
+                        const detail = notification.latestDetail;
+
+                        if (notification.summary && detail) {
+                                return `${baseText}${multiplier} – ${detail}`;
+                        }
+
+                        return `${baseText}${multiplier}`;
+                },
+                dismissActiveNotification(clearQueue = false) {
+                        if (clearQueue) {
+                                this.clearQueuedOnClose = true;
+                        }
+                        this.snack = false;
+                },
+                handleSnackbarClosed() {
+                        if (this.clearQueuedOnClose) {
+                                this.notificationQueue = [];
+                        }
+                        this.clearQueuedOnClose = false;
+                        this.currentNotification = null;
+
+                        if (this.notificationQueue.length) {
+                                this.$nextTick(() => this.processNextNotification());
+                        }
+                },
+                handleFreeze(data) {
+                        this.freezeTitle = data?.title || "";
+                        this.freezeMsg = data?.message || "";
+                        this.freeze = true;
+                },
 		handleUnfreeze() {
 			this.freeze = false;
 			this.freezeTitle = "";

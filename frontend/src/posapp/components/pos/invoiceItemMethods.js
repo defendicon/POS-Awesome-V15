@@ -26,19 +26,44 @@ export default {
 		return removeItem(item, this);
 	},
 
-	async add_item(item) {
-		const res = await addItem(item, this);
-		const target = this.items.find(
-			(it) =>
-				it.item_code === item.item_code &&
-				it.uom === (item.uom || it.uom) &&
-				(!it.batch_no || it.batch_no === item.batch_no),
-		);
-		if (target && this.fetch_available_qty) {
-			this.fetch_available_qty(target);
-		}
-		return res;
-	},
+        async add_item(item) {
+                const matchItem = (candidate) =>
+                        candidate.item_code === item.item_code &&
+                        candidate.uom === (item.uom || candidate.uom) &&
+                        (!candidate.batch_no || candidate.batch_no === item.batch_no);
+
+                const existing = this.items.find(matchItem);
+                const previousQty = typeof existing?.qty === "number" ? existing.qty : 0;
+
+                const res = await addItem(item, this);
+
+                const target = this.items.find(matchItem);
+
+                if (target) {
+                        if (this.fetch_available_qty) {
+                                this.fetch_available_qty(target);
+                        }
+
+                        const updatedQty = typeof target.qty === "number" ? target.qty : previousQty;
+                        const deltaQty = Math.abs(updatedQty - previousQty);
+
+                        if (this.eventBus?.emit && deltaQty > 0) {
+                                const itemName = target.item_name || item.item_name || target.item_code || item.item_code;
+                                const eventCount = Math.max(1, Math.round(deltaQty) || 1);
+
+                                this.eventBus.emit("show_message", {
+                                        title: __(`Item {0} added to invoice`, [itemName]),
+                                        summary: __("Items added to invoice"),
+                                        detail: itemName,
+                                        color: "success",
+                                        groupId: "invoice-item-added",
+                                        count: eventCount,
+                                });
+                        }
+                }
+
+                return res;
+        },
 
 	// Create a new item object with default and calculated fields
 	get_new_item(item) {
