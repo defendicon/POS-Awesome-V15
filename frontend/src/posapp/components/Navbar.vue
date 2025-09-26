@@ -432,11 +432,7 @@ export default {
                         }
 
                         if (this.currentNotification && this.currentNotification.key === notification.key) {
-                                this.currentNotification.count += notification.count;
-                                this.currentNotification.timeout = Math.max(
-                                        this.currentNotification.timeout,
-                                        notification.timeout,
-                                );
+                                this.mergeNotifications(this.currentNotification, notification);
                                 this.updateActiveNotification();
                                 return;
                         }
@@ -446,13 +442,9 @@ export default {
                         );
 
                         if (existingQueued) {
-                                existingQueued.count += notification.count;
-                                existingQueued.timeout = Math.max(
-                                        existingQueued.timeout,
-                                        notification.timeout,
-                                );
+                                this.mergeNotifications(existingQueued, notification);
                         } else {
-                                this.notificationQueue.push(notification);
+                                this.notificationQueue.push({ ...notification });
                         }
 
                         if (!this.currentNotification && !this.snack) {
@@ -465,14 +457,40 @@ export default {
                         const timeout = typeof data.timeout === "number" && data.timeout >= 0
                                 ? data.timeout
                                 : DEFAULT_SNACK_TIMEOUT;
+                        const summary = typeof data.summary === "string" ? data.summary.trim() : "";
+                        const detail = typeof data.detail === "string" ? data.detail.trim() : "";
+                        const count = Number.isFinite(data.count) && data.count > 0
+                                ? Math.floor(data.count)
+                                : 1;
+                        const providedKey =
+                                (typeof data.groupId === "string" && data.groupId.trim()) ||
+                                (typeof data.groupKey === "string" && data.groupKey.trim()) ||
+                                "";
+
+                        const baseKey = providedKey || `${color}::${summary || title}`;
 
                         return {
                                 title,
                                 color,
                                 timeout,
-                                count: 1,
-                                key: `${color}::${title}`,
+                                count,
+                                key: baseKey,
+                                summary,
+                                latestDetail: detail,
                         };
+                },
+                mergeNotifications(target, incoming) {
+                        target.count += incoming.count;
+                        target.timeout = Math.max(target.timeout, incoming.timeout);
+                        if (incoming.title) {
+                                target.title = incoming.title;
+                        }
+                        if (incoming.summary) {
+                                target.summary = incoming.summary;
+                        }
+                        if (incoming.latestDetail) {
+                                target.latestDetail = incoming.latestDetail;
+                        }
                 },
                 processNextNotification() {
                         if (!this.notificationQueue.length) {
@@ -502,9 +520,20 @@ export default {
                                 return "";
                         }
 
-                        return notification.count > 1
-                                ? `${notification.title} (${notification.count}×)`
-                                : notification.title;
+                        const baseText = notification.summary || notification.title;
+
+                        if (!baseText) {
+                                return notification.title || "";
+                        }
+
+                        const multiplier = notification.count > 1 ? ` (${notification.count}×)` : "";
+                        const detail = notification.latestDetail;
+
+                        if (notification.summary && detail) {
+                                return `${baseText}${multiplier} – ${detail}`;
+                        }
+
+                        return `${baseText}${multiplier}`;
                 },
                 dismissActiveNotification(clearQueue = false) {
                         if (clearQueue) {

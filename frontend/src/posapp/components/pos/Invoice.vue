@@ -484,11 +484,14 @@ export default {
 			this.add_item(item);
 
 			// Show success feedback
-			this.eventBus.emit("show_message", {
-				title: __(`Item {0} added to invoice`, [item.item_name]),
-				color: "success",
-			});
-		},
+                        this.eventBus.emit("show_message", {
+                                title: __(`Item {0} added to invoice`, [item.item_name]),
+                                summary: __("Items added to invoice"),
+                                detail: item.item_name,
+                                color: "success",
+                                groupId: "invoice-item-added",
+                        });
+                },
 
 		// Show visual feedback when item is being dragged over drop zone
 		showDropFeedback(isDragging) {

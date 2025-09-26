@@ -2929,7 +2929,16 @@ export default {
                                         this.search = code;
 
                                         // Show scanning feedback
-                                        if (frappe?.show_alert) {
+                                        if (this.eventBus?.emit) {
+                                                this.eventBus.emit("show_message", {
+                                                        title: this.__("Scanning for: {0}", [code]),
+                                                        summary: this.__("Scanning items"),
+                                                        detail: code,
+                                                        color: "info",
+                                                        timeout: 2000,
+                                                        groupId: "scanner-progress",
+                                                });
+                                        } else if (frappe?.show_alert) {
                                                 frappe.show_alert(
                                                         {
                                                                 message: `Scanning for: ${code}`,
