@@ -61,7 +61,7 @@
 								hide-details
 								v-model="debounce_search"
 								@keydown.esc="esc_event"
-								@keydown.enter="search_onchange"
+                                                                @keydown.enter.prevent="handleSearchEnter"
 								@click:clear="clearSearch"
 								prepend-inner-icon="mdi-magnify"
 								@focus="handleItemSearchFocus"
@@ -794,17 +794,13 @@ export default {
 		new_line() {
 			this.eventBus.emit("set_new_line", this.new_line);
 		},
-		item_group(newValue, oldValue) {
-			if (this.pos_profile && this.pos_profile.pose_use_limit_search && newValue !== oldValue) {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					this.get_items(true);
-				} else {
-					this.get_items();
-				}
-			} else if (this.pos_profile && this.pos_profile.posa_local_storage && newValue !== oldValue) {
-				if (this.storageAvailable) {
-					this.loadVisibleItems(true);
-				} else {
+                item_group(newValue, oldValue) {
+                        if (this.pos_profile && this.pos_profile.pose_use_limit_search && newValue !== oldValue) {
+                                this.get_items(true);
+                        } else if (this.pos_profile && this.pos_profile.posa_local_storage && newValue !== oldValue) {
+                                if (this.storageAvailable) {
+                                        this.loadVisibleItems(true);
+                                } else {
 					this.get_items(true);
 				}
 			}
@@ -1309,12 +1305,17 @@ export default {
 		show_coupons() {
 			this.eventBus.emit("show_coupons", "true");
 		},
-		async initializeItems() {
-			await this.ensureStorageHealth();
-			if (this.pos_profile && this.pos_profile.posa_local_storage && this.storageAvailable) {
-				const localCount = await getStoredItemsCount();
-				if (localCount > 0) {
-					await this.loadVisibleItems(true);
+                async initializeItems() {
+                        await this.ensureStorageHealth();
+                        if (
+                                this.pos_profile &&
+                                !this.pos_profile.pose_use_limit_search &&
+                                this.pos_profile.posa_local_storage &&
+                                this.storageAvailable
+                        ) {
+                                const localCount = await getStoredItemsCount();
+                                if (localCount > 0) {
+                                        await this.loadVisibleItems(true);
 					this.items_loaded = true;
 					await this.verifyServerItemCount();
 					return;
@@ -2146,6 +2147,16 @@ export default {
                                 }
 			}
 		},
+                handleSearchEnter(event) {
+                        const value = event?.target?.value ?? this.first_search ?? "";
+                        if (this.search_onchange.cancel) {
+                                this.search_onchange.cancel();
+                        }
+                        this.search_onchange(value);
+                        if (this.search_onchange.flush) {
+                                this.search_onchange.flush();
+                        }
+                },
                 search_onchange: _.debounce(
                         withPerf("pos:search-trigger", async function (newSearchTerm) {
                                 const vm = this;
@@ -2172,16 +2183,13 @@ export default {
 
 			const fromScanner = vm.search_from_scanner;
 
-			if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
-				if (vm.pos_profile && (!vm.pos_profile.posa_local_storage || !vm.storageAvailable)) {
-					vm.get_items(true);
-				} else {
-					vm.get_items();
-				}
-			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
-				if (vm.storageAvailable) {
-					await vm.loadVisibleItems(true);
-					vm.enter_event();
+                        if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
+                                await vm.get_items(true);
+                                vm.enter_event();
+                        } else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
+                                if (vm.storageAvailable) {
+                                        await vm.loadVisibleItems(true);
+                                        vm.enter_event();
 				} else {
 					vm.get_items(true);
 				}
