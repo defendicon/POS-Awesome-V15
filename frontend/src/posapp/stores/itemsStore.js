@@ -159,6 +159,7 @@ export const useItemsStore = defineStore('items', () => {
 
         const startTime = performance.now();
         const currentRequestToken = ++requestToken.value;
+        let cacheKey;
 
         try {
             isLoading.value = true;
@@ -170,7 +171,7 @@ export const useItemsStore = defineStore('items', () => {
                     : 'ALL';
 
             // Generate cache key
-            const cacheKey = generateCacheKey(searchValue, normalizedGroup, priceList);
+            cacheKey = generateCacheKey(searchValue, normalizedGroup, priceList);
 
             // Check cache first unless forced to server
             if (!forceServer) {
@@ -235,7 +236,9 @@ export const useItemsStore = defineStore('items', () => {
             }
         } finally {
             isLoading.value = false;
-            abortControllers.value.delete(cacheKey);
+            if (cacheKey) {
+                abortControllers.value.delete(cacheKey);
+            }
         }
     };
 
@@ -645,7 +648,10 @@ export const useItemsStore = defineStore('items', () => {
 
     const loadCachedItems = async () => {
         try {
-            const cached = await searchStoredItems('', itemGroup.value);
+            const cached = await searchStoredItems({
+                search: '',
+                itemGroup: itemGroup.value
+            });
             if (cached && cached.length > 0) {
                 setItems(cached);
                 itemsLoaded.value = true;
