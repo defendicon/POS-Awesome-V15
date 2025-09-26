@@ -1,6 +1,7 @@
 import { nextTick } from "vue";
 import _ from "lodash";
 import { useBundles } from "./useBundles.js";
+import { withPerf } from "../utils/perf.js";
 
 /* global frappe, __ */
 
@@ -74,20 +75,23 @@ export function useItemAddition() {
 	};
 
 	// Add item to invoice
-	const addItem = async (item, context) => {
-		if (!item.uom) {
-			item.uom = item.stock_uom;
-		}
+        const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
+                if (!item.uom) {
+                        item.uom = item.stock_uom;
+                }
 		let index = -1;
 		if (!context.new_line) {
-			// For auto_set_batch enabled, we should check if the item code and UOM match only
+			// For normal additions (not returns), only merge with existing positive quantity lines
+			// This ensures that negative quantities (returns) are kept separate from positive sales
 			if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
 				index = context.items.findIndex(
 					(el) =>
 						el.item_code === item.item_code &&
 						el.uom === item.uom &&
 						!el.posa_is_offer &&
-						!el.posa_is_replace,
+						!el.posa_is_replace &&
+						// Only merge with positive quantity lines for normal additions
+						el.qty > 0,
 				);
 			} else {
 				index = context.items.findIndex(
@@ -97,7 +101,9 @@ export function useItemAddition() {
 						!el.posa_is_offer &&
 						!el.posa_is_replace &&
 						((el.batch_no && item.batch_no && el.batch_no === item.batch_no) ||
-							(!el.batch_no && !item.batch_no)),
+							(!el.batch_no && !item.batch_no)) &&
+						// Only merge with positive quantity lines for normal additions
+						el.qty > 0,
 				);
 			}
 		}
@@ -166,13 +172,16 @@ export function useItemAddition() {
 
 			// Check again in case the item was added while awaiting price fetch
 			if (!context.new_line) {
+				// Apply same logic - only merge with positive quantity lines for normal additions
 				if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
 					index = context.items.findIndex(
 						(el) =>
 							el.item_code === item.item_code &&
 							el.uom === item.uom &&
 							!el.posa_is_offer &&
-							!el.posa_is_replace,
+							!el.posa_is_replace &&
+							// Only merge with positive quantity lines for normal additions
+							el.qty > 0,
 					);
 				} else {
 					index = context.items.findIndex(
@@ -182,7 +191,9 @@ export function useItemAddition() {
 							!el.posa_is_offer &&
 							!el.posa_is_replace &&
 							((el.batch_no && item.batch_no && el.batch_no === item.batch_no) ||
-								(!el.batch_no && !item.batch_no)),
+								(!el.batch_no && !item.batch_no)) &&
+							// Only merge with positive quantity lines for normal additions
+							el.qty > 0,
 					);
 				}
 			}
@@ -226,11 +237,11 @@ export function useItemAddition() {
 								dialog.hide();
 							},
 						});
-						dialog.onhide = () => {
-							if (!new_item.batch_no) {
-								context.setBatchQty(new_item, null, false);
-							}
-						};
+                                                dialog.onhide = () => {
+                                                        if (!new_item.batch_no) {
+                                                                context.setBatchQty(new_item, null, false);
+                                                        }
+                                                };
 						dialog.show();
 					} else {
 						context.setBatchQty(new_item, null, false);
@@ -336,18 +347,26 @@ export function useItemAddition() {
 		) {
 			context.expanded = [new_item.posa_row_id];
 		}
-	};
+        });
 
-	// Create a new item object with default and calculated fields
-	const getNewItem = (item, context) => {
-		const new_item = { ...item };
-		new_item.original_item_name = new_item.item_name;
-		new_item.name_overridden = 0;
-		if (!new_item.warehouse) {
-			new_item.warehouse = context.pos_profile.warehouse;
-		}
+        // Create a new item object with default and calculated fields
+        const getNewItem = (item, context) => {
+                const new_item = { ...item };
+                new_item.original_item_name = new_item.item_name;
+                new_item.name_overridden = 0;
+                // Mark server detail state so invoice can avoid redundant refreshes
+                new_item._detailSynced = false;
+                new_item._detailInFlight = false;
+                if (!new_item.warehouse) {
+                        new_item.warehouse = context.pos_profile.warehouse;
+                }
 		if (!item.qty) {
 			item.qty = 1;
+		}
+
+		// Ensure normal additions are always positive (unless it's a return invoice)
+		if (!context.isReturnInvoice && item.qty < 0) {
+			item.qty = Math.abs(item.qty);
 		}
 		if (!item.posa_is_offer) {
 			item.posa_is_offer = 0;

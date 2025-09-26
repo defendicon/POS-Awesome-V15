@@ -11,6 +11,9 @@ import themePlugin from "./plugins/theme.js";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import Home from "./Home.vue";
+import { attachProfilerHelpers, initLongTaskObserver, isPerfEnabled } from "./utils/perf.js";
+
+attachProfilerHelpers();
 
 // Expose Dexie globally for libraries that expect a global Dexie instance
 if (typeof window !== "undefined" && !window.Dexie) {
@@ -84,10 +87,14 @@ frappe.PosApp.posapp = class {
 		});
 		const app = createApp(Home);
 		app.component("VueDatePicker", VueDatePicker);
-		app.use(eventBus);
-		app.use(vuetify);
-		app.use(themePlugin, { vuetify });
-		app.mount(this.$el[0]);
+                app.use(eventBus);
+                app.use(vuetify);
+                app.use(themePlugin, { vuetify });
+                app.mount(this.$el[0]);
+
+                if (isPerfEnabled()) {
+                        initLongTaskObserver("posapp");
+                }
 
 		if (!document.querySelector('link[rel="manifest"]')) {
 			const link = document.createElement("link");
