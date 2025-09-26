@@ -2549,39 +2549,19 @@ export default {
 				console.warn("Scanner initialization error:", error.message);
 			}
 		},
-		trigger_onscan(sCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			// indicate this search came from a scanner
-			this.search_from_scanner = true;
-			// apply scanned code as search term
-			this.first_search = sCode;
-			this.search = sCode;
-			this.pendingScanCode = sCode;
+                trigger_onscan(sCode) {
+                        const code = (sCode ?? "").toString();
+                        if (!code) {
+                                return;
+                        }
 
-			this.$nextTick(() => {
-				if (this.filtered_items.length == 0) {
-					this.eventBus.emit("show_message", {
-						title: `No Item has this barcode "${sCode}"`,
-						color: "error",
-					});
-					this.showScanError({
-						message: `${this.__("Item not found")}: ${sCode}`,
-						code: sCode,
-						details: this.__("Please verify the barcode or search manually."),
-					});
-				} else {
-					this.enter_event();
-				}
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
 
-                                // clear search field for next scan and refocus input
-                                if (!this.scanErrorDialog) {
-                                        this.clearSearch();
-                                        this.focusItemSearch();
-                                }
-                        });
+                        // Delegate to the unified barcode processing pipeline used by the camera scanner
+                        this.onBarcodeScanned(code);
                 },
 		generateWordCombinations(inputString) {
 			const words = inputString.split(" ");
