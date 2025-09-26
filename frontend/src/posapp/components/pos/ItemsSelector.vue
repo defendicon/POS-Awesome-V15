@@ -552,6 +552,7 @@ import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
+import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import {
   parseBooleanSetting,
   formatNegativeStockWarning,
@@ -567,7 +568,20 @@ export default {
 		const rtl = useRtl();
 		const { fly } = useFlyAnimation();
 		const cartValidation = useCartValidation();
-		return { ...responsive, ...rtl, fly, cartValidation };
+
+		// Initialize Pinia store integration
+		const itemsIntegration = useItemsIntegration({
+			enableDebounce: true,
+			debounceDelay: 300
+		});
+
+		return {
+			...responsive,
+			...rtl,
+			fly,
+			cartValidation,
+			...itemsIntegration
+		};
 	},
 	components: {
 		CameraScanner,
@@ -3582,12 +3596,25 @@ export default {
 		},
 	},
 
-        created() {
-                console.log("ItemsSelector created - starting initialization");
+        async created() {
+                console.log("ItemsSelector created - starting initialization with Pinia store");
 
+                // Initialize the Pinia store with existing POS profile data
+                if (this.pos_profile && this.pos_profile.name) {
+                    await this.initializeStore(
+                        this.pos_profile,
+                        this.customer,
+                        this.customer_price_list
+                    );
+                    console.log("Pinia store initialized successfully");
+                } else {
+                    console.warn("No POS Profile available for store initialization");
+                }
+
+                // Keep legacy initialization for backward compatibility
                 this.replaceBarcodeIndex(this.items || []);
 
-                // Setup search debounce
+                // Setup search debounce (now handled by store, but keeping for compatibility)
                 this.searchDebounce = _.debounce(() => {
 			this.get_items();
 		}, 300);
@@ -3615,12 +3642,22 @@ export default {
 					if (!this.pos_profile || !this.pos_profile.name) {
 						this.pos_profile = await ensurePosProfile();
 					}
+
+					// Initialize store with fallback profile
+					if (this.pos_profile && this.pos_profile.name) {
+						await this.initializeStore(
+							this.pos_profile,
+							this.customer,
+							this.customer_price_list
+						);
+					}
 				}
 
-				// Load initial items if we have a profile
+				// Load initial items if we have a profile (now handled by store)
 				if (this.pos_profile && this.pos_profile.name) {
 					console.log("Loading items with POS Profile:", this.pos_profile.name);
 					this.get_items_groups();
+					// Store handles item loading automatically, but keep legacy method for compatibility
 					await this.initializeItems();
 				} else {
 					console.warn("No POS Profile available during initialization");
