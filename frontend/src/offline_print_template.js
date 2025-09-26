@@ -224,7 +224,6 @@ function defaultOfflineHTML(invoice) {
                         <strong>${invoice.company || ""}</strong><br>
                         ${company.registration_details || ""}<br>
                         Ph: ${company.phone_no || ""}<br>
-                        ${company.website || ""}<br>
                         TRN: ${company.tax_id || "N/A"}<br>
                     </div>
 
@@ -310,15 +309,14 @@ function defaultOfflineHTML(invoice) {
                     <p style="margin-top: 6px; font-size: 12px;">
                         Number of Items: ${(invoice.items || []).length}
                     </p>
-
-                    <p style="font-size: 10px; margin-top: 8px;text-align: center">
-                        ** For more information on the Terms and Conditions, please visit our website **
-                    </p>
-
+                    
                     <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-                    <p style="text-align: center; margin-top: 6px; font-size: 11px;">
-                        Thank you for shopping with <br><strong>${invoice.company || ""}</strong><br>
+                    <p style="font-size: 12px; margin-top: 8px;text-align: center">
+                        Exchange within 7 days with original bill and original packing. No exchange on under garments.
                     </p>
+                    <p style="text-align: center; margin-top: 6px; font-size: 12px;">
+                        Thank you. Come again. / شكراً لزيارتكم 
+                    </p> 
                 </div>
             </body>
         </html>`;
