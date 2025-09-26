@@ -164,8 +164,13 @@ export const useItemsStore = defineStore('items', () => {
             isLoading.value = true;
             performanceMetrics.value.totalRequests++;
 
+            const normalizedGroup =
+                typeof groupFilter === 'string' && groupFilter.length > 0
+                    ? groupFilter
+                    : 'ALL';
+
             // Generate cache key
-            const cacheKey = generateCacheKey(searchValue, groupFilter, priceList);
+            const cacheKey = generateCacheKey(searchValue, normalizedGroup, priceList);
 
             // Check cache first unless forced to server
             if (!forceServer) {
@@ -188,7 +193,10 @@ export const useItemsStore = defineStore('items', () => {
                 args: {
                     pos_profile: JSON.stringify(posProfile.value),
                     price_list: priceList || activePriceList.value,
-                    item_group: groupFilter !== 'ALL' ? groupFilter.toLowerCase() : '',
+                    item_group:
+                        normalizedGroup !== 'ALL'
+                            ? normalizedGroup.toLowerCase()
+                            : '',
                     search_value: searchValue || '',
                     customer: customer.value,
                     limit: 200,
@@ -763,6 +771,7 @@ export const useItemsStore = defineStore('items', () => {
         // Actions
         initialize,
         loadItems,
+        loadItemGroups,
         searchItems,
         filterByGroup,
         updatePriceList,
