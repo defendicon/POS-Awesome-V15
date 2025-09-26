@@ -8,6 +8,7 @@ import "../style.css";
 import "./styles/theme.css";
 import eventBus from "./bus";
 import themePlugin from "./plugins/theme.js";
+import { pinia } from "./stores/index.js";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import Home from "./Home.vue";
@@ -87,6 +88,7 @@ frappe.PosApp.posapp = class {
 		});
 		const app = createApp(Home);
 		app.component("VueDatePicker", VueDatePicker);
+                app.use(pinia);
                 app.use(eventBus);
                 app.use(vuetify);
                 app.use(themePlugin, { vuetify });
