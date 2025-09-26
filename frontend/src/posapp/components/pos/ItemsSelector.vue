@@ -827,14 +827,24 @@ export default {
                         }
                         const newLen = (val || "").trim().length;
                         const oldLen = (oldVal || "").trim().length;
+
+                        // When limit search is enabled, wait for an explicit Enter key press
+                        if (this.pos_profile?.pose_use_limit_search) {
+                                if (oldLen >= 3 && newLen === 0) {
+                                        // Reset items only when search is fully cleared
+                                        this.clearSearch();
+                                }
+                                return;
+                        }
+
                         if (newLen >= 3) {
                                 // Call without arguments so search_onchange treats it like an Enter key
                                 this.search_onchange();
-			} else if (oldLen >= 3 && newLen === 0) {
-				// Reset items only when search is fully cleared
-				this.clearSearch();
-			}
-		}, 300),
+                        } else if (oldLen >= 3 && newLen === 0) {
+                                // Reset items only when search is fully cleared
+                                this.clearSearch();
+                        }
+                }, 300),
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
