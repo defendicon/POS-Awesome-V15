@@ -827,14 +827,24 @@ export default {
                         }
                         const newLen = (val || "").trim().length;
                         const oldLen = (oldVal || "").trim().length;
+
+                        // When limit search is enabled, wait for an explicit Enter key press
+                        if (this.pos_profile?.pose_use_limit_search) {
+                                if (oldLen >= 3 && newLen === 0) {
+                                        // Reset items only when search is fully cleared
+                                        this.clearSearch();
+                                }
+                                return;
+                        }
+
                         if (newLen >= 3) {
                                 // Call without arguments so search_onchange treats it like an Enter key
                                 this.search_onchange();
-			} else if (oldLen >= 3 && newLen === 0) {
-				// Reset items only when search is fully cleared
-				this.clearSearch();
-			}
-		}, 300),
+                        } else if (oldLen >= 3 && newLen === 0) {
+                                // Reset items only when search is fully cleared
+                                this.clearSearch();
+                        }
+                }, 300),
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
@@ -1311,7 +1321,12 @@ export default {
 		},
 		async initializeItems() {
 			await this.ensureStorageHealth();
-			if (this.pos_profile && this.pos_profile.posa_local_storage && this.storageAvailable) {
+                        if (
+                                this.pos_profile &&
+                                this.pos_profile.posa_local_storage &&
+                                this.storageAvailable &&
+                                !this.pos_profile.pose_use_limit_search
+                        ) {
 				const localCount = await getStoredItemsCount();
 				if (localCount > 0) {
 					await this.loadVisibleItems(true);
@@ -1414,23 +1429,36 @@ export default {
 
 			const vm = this;
 
-			// Respect POS profile search limit when limit search is enabled
-			if (vm.pos_profile?.pose_use_limit_search) {
-				vm.itemsPageLimit = parseInt(vm.pos_profile.posa_search_limit) || vm.itemsPageLimit;
-			}
+                        // Respect POS profile search limit when limit search is enabled
+                        const usingLimitSearch = !!vm.pos_profile?.pose_use_limit_search;
+                        if (usingLimitSearch) {
+                                vm.itemsPageLimit = parseInt(vm.pos_profile.posa_search_limit) || vm.itemsPageLimit;
+                        }
 
-			const search = this.get_search(this.first_search);
-			const gr = vm.item_group !== "ALL" ? vm.item_group.toLowerCase() : "";
-			const sr = search || "";
-			const profileGroups = (vm.pos_profile?.item_groups || []).map((g) => g.item_group);
-			console.log("[ItemsSelector] prepared fetch params", { search: sr, item_group: gr });
+                        const search = this.get_search(this.first_search);
+                        const gr = vm.item_group !== "ALL" ? vm.item_group.toLowerCase() : "";
+                        const sr = search || "";
+                        const profileGroups = (vm.pos_profile?.item_groups || []).map((g) => g.item_group);
+                        console.log("[ItemsSelector] prepared fetch params", { search: sr, item_group: gr });
 
-			// Skip if already loading the same data
-			if (!force_server && this.items_loaded && this.items.length > 0) {
-				console.log("[ItemsSelector] items already loaded, skipping fetch");
-				this.loading = false;
-				return;
-			}
+                        const requestKey = JSON.stringify({ search: sr, item_group: gr, limit: vm.itemsPageLimit });
+
+                        // Skip if already loading the same data
+                        if (!force_server && this.items_loaded && this.items.length > 0) {
+                                if (usingLimitSearch) {
+                                        if (this.lastGetItemsKey === requestKey) {
+                                                console.log("[ItemsSelector] limit search request already satisfied, skipping");
+                                                this.loading = false;
+                                                return;
+                                        }
+                                } else {
+                                        console.log("[ItemsSelector] items already loaded, skipping fetch");
+                                        this.loading = false;
+                                        return;
+                                }
+                        }
+
+                        this.lastGetItemsKey = requestKey;
 
 			this.loading = true;
 			const requestToken = ++this.items_request_token;
@@ -2172,12 +2200,12 @@ export default {
 
 			const fromScanner = vm.search_from_scanner;
 
-			if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
-				if (vm.pos_profile && (!vm.pos_profile.posa_local_storage || !vm.storageAvailable)) {
-					vm.get_items(true);
-				} else {
-					vm.get_items();
-				}
+                        if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
+                                const shouldForceServer =
+                                        !vm.pos_profile.posa_local_storage ||
+                                        !vm.storageAvailable ||
+                                        !isOffline();
+                                await vm.get_items(shouldForceServer);
 			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
 				if (vm.storageAvailable) {
 					await vm.loadVisibleItems(true);
