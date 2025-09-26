@@ -2549,39 +2549,45 @@ export default {
 				console.warn("Scanner initialization error:", error.message);
 			}
 		},
-		trigger_onscan(sCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			// indicate this search came from a scanner
-			this.search_from_scanner = true;
-			// apply scanned code as search term
-			this.first_search = sCode;
-			this.search = sCode;
-			this.pendingScanCode = sCode;
+                trigger_onscan(sCode) {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
 
-			this.$nextTick(() => {
-				if (this.filtered_items.length == 0) {
-					this.eventBus.emit("show_message", {
-						title: `No Item has this barcode "${sCode}"`,
-						color: "error",
-					});
-					this.showScanError({
-						message: `${this.__("Item not found")}: ${sCode}`,
-						code: sCode,
-						details: this.__("Please verify the barcode or search manually."),
-					});
-				} else {
-					this.enter_event();
-				}
+                        const mark = perfMarkStart("pos:scan-handler");
 
-                                // clear search field for next scan and refocus input
+                        // indicate this search came from a scanner
+                        this.search_from_scanner = true;
+                        // apply scanned code as search term for visual feedback
+                        this.first_search = sCode;
+                        this.search = sCode;
+                        this.pendingScanCode = sCode;
+
+                        if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: `Scanning for: ${sCode}`,
+                                                indicator: "blue",
+                                        },
+                                        2,
+                                );
+                        }
+
+                        const finalize = () => {
                                 if (!this.scanErrorDialog) {
                                         this.clearSearch();
                                         this.focusItemSearch();
                                 }
-                        });
+                                perfMarkEnd("pos:scan-handler", mark);
+                        };
+
+                        Promise.resolve()
+                                .then(() => this.processScannedItem(sCode))
+                                .catch((error) => {
+                                        this.handleScanPipelineError(error, sCode);
+                                })
+                                .finally(finalize);
                 },
 		generateWordCombinations(inputString) {
 			const words = inputString.split(" ");
@@ -3452,17 +3458,26 @@ export default {
 		headers() {
 			return this.getItemsHeaders();
 		},
-		filtered_items() {
-			if (!this.items || this.items.length === 0) {
-				return [];
-			}
+                filtered_items() {
+                        if (!this.items || this.items.length === 0) {
+                                return [];
+                        }
 
-			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-			let filteredItems = [...this.items];
+                        const rawSearch = this.get_search(this.first_search).trim();
+                        const searchTerm = rawSearch.toLowerCase();
+                        let filteredItems = [...this.items];
 
-			// Apply search filter only for queries with at least three characters
-			if (searchTerm.length >= 3) {
-				filteredItems = filteredItems.filter((item) => {
+                        // When the query is long enough try a direct barcode index lookup first
+                        if (rawSearch && rawSearch.length >= 3) {
+                                const indexedMatch = this.lookupItemByBarcode(rawSearch);
+                                if (indexedMatch) {
+                                        return [indexedMatch];
+                                }
+                        }
+
+                        // Apply search filter only for queries with at least three characters
+                        if (searchTerm.length >= 3) {
+                                filteredItems = filteredItems.filter((item) => {
 					const barcodeList = [];
 					if (Array.isArray(item.item_barcode)) {
 						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
