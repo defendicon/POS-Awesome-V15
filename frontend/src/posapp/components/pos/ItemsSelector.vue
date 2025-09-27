@@ -1329,24 +1329,33 @@ export default {
 		show_coupons() {
 			this.eventBus.emit("show_coupons", "true");
 		},
-		async initializeItems() {
-			await this.ensureStorageHealth();
+                async initializeItems() {
+                        await this.ensureStorageHealth();
                         if (
                                 this.pos_profile &&
                                 this.pos_profile.posa_local_storage &&
                                 this.storageAvailable &&
                                 !this.usesLimitSearch
                         ) {
-				const localCount = await getStoredItemsCount();
-				if (localCount > 0) {
-					await this.loadVisibleItems(true);
-					this.items_loaded = true;
-					await this.verifyServerItemCount();
-					return;
-				}
-			}
-			await this.get_items(true);
-		},
+                                const localCount = await getStoredItemsCount();
+                                if (localCount > 0) {
+                                        await this.loadVisibleItems(true);
+                                        this.items_loaded = true;
+                                        await this.verifyServerItemCount();
+                                        return;
+                                }
+                        }
+                        await this.get_items(true);
+
+                        if (
+                                this.pos_profile &&
+                                this.pos_profile.posa_local_storage &&
+                                this.storageAvailable &&
+                                !this.usesLimitSearch
+                        ) {
+                                await this.verifyServerItemCount();
+                        }
+                },
 		async forceReloadItems() {
 			console.log("[ItemsSelector] forceReloadItems called");
 			// Clear cached price list items so the reload always
@@ -1369,40 +1378,75 @@ export default {
 			await this.get_items(true);
 			console.log("[ItemsSelector] forceReloadItems finished");
 		},
-		async verifyServerItemCount() {
-			if (isOffline()) {
-				console.log("[ItemsSelector] offline, skipping server item count check");
-				return;
-			}
-			try {
-				const localCount = await getStoredItemsCount();
-				console.log("[ItemsSelector] verifying server item count", { localCount });
-				const profileGroups = (this.pos_profile?.item_groups || []).map((g) => g.item_group);
-				const res = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_items_count",
-					args: {
-						pos_profile: JSON.stringify(this.pos_profile),
-						item_groups: profileGroups,
-					},
-				});
-				const serverCount = res.message || 0;
-				console.log("[ItemsSelector] server item count result", { serverCount });
-				if (typeof serverCount === "number") {
-					this.totalItemCount = serverCount;
-					this.loadProgress = serverCount ? Math.round((localCount / serverCount) * 100) : 0;
-					if (serverCount > localCount) {
-						const lastSync = getItemsLastSync();
-						const requestToken = ++this.items_request_token;
-						await this.backgroundLoadItems(null, lastSync, false, requestToken, localCount);
-					} else if (serverCount < localCount) {
-						console.log("[ItemsSelector] local cache has extra items, forcing reload");
-						await this.forceReloadItems();
-					}
-				}
-			} catch (err) {
-				console.error("Error checking item count:", err);
-			}
-		},
+                async verifyServerItemCount() {
+                        if (this.usesLimitSearch) {
+                                console.log("[ItemsSelector] limit search enabled, skipping background reconciliation");
+                                return;
+                        }
+                        if (
+                                !this.pos_profile ||
+                                !this.pos_profile.posa_local_storage ||
+                                !this.storageAvailable
+                        ) {
+                                console.log("[ItemsSelector] local caching disabled, skipping background reconciliation");
+                                return;
+                        }
+                        if (this.isBackgroundLoading) {
+                                console.log("[ItemsSelector] background load already in progress, skipping reconciliation");
+                                return;
+                        }
+                        if (isOffline()) {
+                                console.log("[ItemsSelector] offline, skipping server item count check");
+                                return;
+                        }
+                        try {
+                                const localCount = await getStoredItemsCount();
+                                console.log("[ItemsSelector] verifying server item count", { localCount });
+                                const profileGroups = (this.pos_profile?.item_groups || []).map((g) => g.item_group);
+                                const res = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.get_items_count",
+                                        args: {
+                                                pos_profile: JSON.stringify(this.pos_profile),
+                                                item_groups: profileGroups,
+                                        },
+                                });
+                                const serverCount = res.message || 0;
+                                console.log("[ItemsSelector] server item count result", { serverCount });
+                                if (typeof serverCount === "number") {
+                                        this.totalItemCount = serverCount;
+                                        if (serverCount <= localCount) {
+                                                this.loadProgress = serverCount
+                                                        ? Math.min(100, Math.round((localCount / serverCount) * 100))
+                                                        : 100;
+                                                this.eventBus.emit("data-load-progress", {
+                                                        name: "items",
+                                                        progress: this.loadProgress,
+                                                });
+                                                if (serverCount < localCount) {
+                                                        console.log(
+                                                                "[ItemsSelector] local cache has extra items, forcing reload"
+                                                        );
+                                                        await this.forceReloadItems();
+                                                }
+                                                return;
+                                        }
+
+                                        this.loadProgress = serverCount
+                                                ? Math.round((localCount / serverCount) * 100)
+                                                : 0;
+                                        this.eventBus.emit("data-load-progress", {
+                                                name: "items",
+                                                progress: this.loadProgress,
+                                        });
+
+                                        const lastSync = getItemsLastSync();
+                                        const requestToken = ++this.items_request_token;
+                                        await this.backgroundLoadItems(null, lastSync, false, requestToken, localCount);
+                                }
+                        } catch (err) {
+                                console.error("Error checking item count:", err);
+                        }
+                },
 		async get_items(force_server = false) {
 			if (this.isBackgroundLoading) {
 				if (this.pendingGetItems) {
@@ -1546,9 +1590,9 @@ export default {
                                         vm.storageAvailable &&
                                         !vm.usesLimitSearch
                                 ) {
-					try {
-						if (force_server) {
-							console.log("[ItemsSelector] clearing local items before save");
+                                        try {
+                                                if (force_server) {
+                                                        console.log("[ItemsSelector] clearing local items before save");
 							await clearStoredItems();
 						}
 						await saveItemsBulk(items);
@@ -1561,14 +1605,21 @@ export default {
 
 				await savePriceListItems(vm.customer_price_list || vm.pos_profile.selling_price_list, items);
 
-				if (hasMore) {
-					const last = items[items.length - 1]?.item_name || null;
-					console.log("[ItemsSelector] more items available, starting background load", {
-						last,
-						requestToken,
-					});
-					this.backgroundLoadItems(last, null, false, requestToken, items.length);
-				}
+                                if (hasMore) {
+                                        const last = items[items.length - 1]?.item_name || null;
+                                        console.log("[ItemsSelector] more items available, starting background load", {
+                                                last,
+                                                requestToken,
+                                        });
+                                        this.backgroundLoadItems(last, null, false, requestToken, items.length);
+                                } else if (
+                                        vm.pos_profile &&
+                                        vm.pos_profile.posa_local_storage &&
+                                        vm.storageAvailable &&
+                                        !vm.usesLimitSearch
+                                ) {
+                                        await vm.verifyServerItemCount();
+                                }
 			} catch (error) {
 				console.error("Failed to load items:", error);
 				frappe.msgprint(__("Failed to load items. Please try again."));

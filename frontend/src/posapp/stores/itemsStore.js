@@ -10,8 +10,9 @@ import {
     clearPriceListCache,
     saveItemDetailsCache,
     isStockCacheReady,
-    searchStoredItems,
-    getItemsLastSync
+    getItemsLastSync,
+    getAllStoredItems,
+    getStoredItemsCount
 } from '../../offline/index.js';
 
 export const useItemsStore = defineStore('items', () => {
@@ -648,13 +649,20 @@ export const useItemsStore = defineStore('items', () => {
 
     const loadCachedItems = async () => {
         try {
-            const cached = await searchStoredItems({
-                search: '',
-                itemGroup: itemGroup.value
-            });
-            if (cached && cached.length > 0) {
-                setItems(cached);
+            const [cached, cachedCount] = await Promise.all([
+                getAllStoredItems().catch(() => []),
+                getStoredItemsCount().catch(() => 0)
+            ]);
+
+            const itemsFromCache = Array.isArray(cached) ? cached : [];
+            if (itemsFromCache.length > 0) {
+                setItems(itemsFromCache);
                 itemsLoaded.value = true;
+            }
+
+            const resolvedCount = Number.isFinite(cachedCount) ? cachedCount : itemsFromCache.length;
+            if (resolvedCount > 0) {
+                totalItemCount.value = resolvedCount;
             }
         } catch (error) {
             console.warn('Failed to load cached items:', error);
