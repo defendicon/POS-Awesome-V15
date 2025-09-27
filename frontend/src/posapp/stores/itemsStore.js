@@ -158,6 +158,10 @@ export const useItemsStore = defineStore('items', () => {
     });
 
     const shouldUseIndexedSearch = () => {
+        if (limitSearchEnabled.value) {
+            return false;
+        }
+
         return Boolean(posProfile.value?.posa_local_storage);
     };
 
@@ -279,7 +283,7 @@ export const useItemsStore = defineStore('items', () => {
                 : (limitSearchEnabled.value ? resolveLimitSearchSize() : null);
 
             // Check cache first unless forced to server or limit search requires fresh data
-            const canReadFromCache = !forceServer && (!limitSearchEnabled.value || Boolean(searchValue));
+            const canReadFromCache = !forceServer && !limitSearchEnabled.value;
 
             if (canReadFromCache) {
                 const cachedResult = await getCachedItems(cacheKey);
@@ -334,8 +338,10 @@ export const useItemsStore = defineStore('items', () => {
             setItems(fetchedItems, { replace: true });
             itemsLoaded.value = true;
 
-            // Cache the results
-            await cacheItems(cacheKey, fetchedItems);
+            // Cache the results unless limit search requires fresh server lookups
+            if (!limitSearchEnabled.value) {
+                await cacheItems(cacheKey, fetchedItems);
+            }
 
             // Background load additional data
             if (fetchedItems.length > 0) {
@@ -372,6 +378,26 @@ export const useItemsStore = defineStore('items', () => {
                 filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
             }
             return;
+        }
+
+        if (limitSearchEnabled.value) {
+            try {
+                await loadItems({
+                    searchValue: term,
+                    groupFilter: itemGroup.value,
+                    forceServer: true
+                });
+
+                const serverResults = filterItemsByGroup(items.value, itemGroup.value);
+                filteredItems.value = serverResults;
+                performanceMetrics.value.searchMisses++;
+
+                return serverResults;
+            } catch (error) {
+                console.error('Search failed:', error);
+                performanceMetrics.value.searchMisses++;
+                return [];
+            }
         }
 
         // Check memory cache first
