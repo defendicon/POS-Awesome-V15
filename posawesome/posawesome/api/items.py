@@ -244,7 +244,8 @@ def get_items(
 
         search_limit = 0
         if use_limit_search:
-            search_limit = pos_profile.get("posa_search_limit") or 500
+            raw_search_limit = pos_profile.get("posa_search_limit")
+            search_limit = _to_positive_int(raw_search_limit) or 500
 
         result = []
 
@@ -306,18 +307,19 @@ def get_items(
         limit_start = None
         order_by = "item_name asc"
 
-        # When a specific search term is provided, fetch all matching
-        # items. Applying a limit in this scenario can truncate results
-        # and prevent relevant items from appearing in the item selector.
-        if not search_value:
-            if limit is not None:
-                limit_page_length = limit
-                if offset and not start_after:
-                    limit_start = offset
-            elif use_limit_search:
-                limit_page_length = search_limit
-                if pos_profile.get("posa_force_reload_items"):
-                    limit_page_length = None
+        if limit is not None:
+            limit_page_length = limit
+            if offset and not start_after:
+                limit_start = offset
+        elif use_limit_search and not pos_profile.get("posa_force_reload_items"):
+            limit_page_length = search_limit
+
+        # When not using limit search and no explicit limit is supplied,
+        # allow searches to return the full matching catalog. Limit-search
+        # profiles continue to honour the configured cap so Enter queries
+        # only hydrate the requested subset of items.
+        if search_value and not use_limit_search and limit is None:
+            limit_page_length = None
 
         fields = [
             "name",

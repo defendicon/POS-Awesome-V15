@@ -2469,6 +2469,15 @@ export default {
                                 });
                         };
 
+                        if (this.usesLimitSearch) {
+                                this.clearLimitSearchResults();
+                                this.resetBarcodeIndex();
+                                this.eventBus.emit("set_all_items", []);
+                                this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+                                release();
+                                return;
+                        }
+
                         if (!shouldReload) {
                                 release();
                                 return;

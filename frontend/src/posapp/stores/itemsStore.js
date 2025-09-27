@@ -369,6 +369,11 @@ export const useItemsStore = defineStore('items', () => {
         lastSearch.value = term;
 
         if (!term || term.length < 2) {
+            if (limitSearchEnabled.value) {
+                clearLimitSearchResults();
+                return [];
+            }
+
             // Reset to all items if search is too short
             if (!cachedPagination.value.enabled) {
                 filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
@@ -615,6 +620,29 @@ export const useItemsStore = defineStore('items', () => {
         if (!searchTerm.value) {
             filteredItems.value = filterItemsByGroup(items.value, normalizedGroup);
         }
+    };
+
+    const clearLimitSearchResults = () => {
+        if (!limitSearchEnabled.value) {
+            return;
+        }
+
+        searchTerm.value = '';
+        lastSearch.value = '';
+        cachedPagination.value.enabled = false;
+        cachedPagination.value.offset = 0;
+        cachedPagination.value.total = 0;
+        cachedPagination.value.loading = false;
+        cachedPagination.value.search = '';
+        cachedPagination.value.group =
+            typeof itemGroup.value === 'string' && itemGroup.value.length > 0
+                ? itemGroup.value
+                : 'ALL';
+
+        clearSearchCache();
+        setItems([], { replace: true, totalCount: 0 });
+        itemsLoaded.value = false;
+        loadProgress.value = 0;
     };
 
     const updateIndexes = (itemList) => {
@@ -1133,6 +1161,7 @@ export const useItemsStore = defineStore('items', () => {
         getItemByCode,
         getItemByBarcode,
         addScannedItem,
+        clearLimitSearchResults,
         clearAllCaches,
         clearSearchCache,
         assessCacheHealth
