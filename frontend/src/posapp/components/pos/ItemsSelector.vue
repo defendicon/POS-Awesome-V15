@@ -808,13 +808,13 @@ export default {
 		new_line() {
 			this.eventBus.emit("set_new_line", this.new_line);
 		},
-		item_group(newValue, oldValue) {
-			if (this.pos_profile && this.pos_profile.pose_use_limit_search && newValue !== oldValue) {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					this.get_items(true);
-				} else {
-					this.get_items();
-				}
+                item_group(newValue, oldValue) {
+                        if (this.usesLimitSearch && newValue !== oldValue) {
+                                if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
+                                        this.get_items(true);
+                                } else {
+                                        this.get_items();
+                                }
 			} else if (this.pos_profile && this.pos_profile.posa_local_storage && newValue !== oldValue) {
 				if (this.storageAvailable) {
 					this.loadVisibleItems(true);
@@ -825,13 +825,9 @@ export default {
 		},
 		filtered_items(new_value, old_value) {
 			// Update item details if items changed
-			if (
-				this.pos_profile &&
-				!this.pos_profile.pose_use_limit_search &&
-				new_value.length !== old_value.length
-			) {
-				this.update_items_details(new_value);
-			}
+                        if (!this.usesLimitSearch && new_value.length !== old_value.length) {
+                                this.update_items_details(new_value);
+                        }
 			this.$nextTick(this.checkItemContainerOverflow);
 		},
 		// Automatically search when the query has at least 3 characters
@@ -843,7 +839,7 @@ export default {
                         const oldLen = (oldVal || "").trim().length;
 
                         // When limit search is enabled, wait for an explicit Enter key press
-                        if (this.pos_profile?.pose_use_limit_search) {
+                        if (this.usesLimitSearch) {
                                 if (oldLen >= 3 && newLen === 0) {
                                         // Reset items only when search is fully cleared
                                         this.clearSearch();
@@ -1301,12 +1297,12 @@ export default {
 					updates.forEach(({ item, upd }) => Object.assign(item, upd));
 					updateLocalStockCache(details);
 					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
-					if (
-						vm.pos_profile &&
-						vm.pos_profile.posa_local_storage &&
-						vm.storageAvailable &&
-						!vm.pos_profile.pose_use_limit_search
-					) {
+                                        if (
+                                                vm.pos_profile &&
+                                                vm.pos_profile.posa_local_storage &&
+                                                vm.storageAvailable &&
+                                                !vm.usesLimitSearch
+                                        ) {
 						try {
 							await saveItemsBulk(details);
 						} catch (e) {
@@ -1339,7 +1335,7 @@ export default {
                                 this.pos_profile &&
                                 this.pos_profile.posa_local_storage &&
                                 this.storageAvailable &&
-                                !this.pos_profile.pose_use_limit_search
+                                !this.usesLimitSearch
                         ) {
 				const localCount = await getStoredItemsCount();
 				if (localCount > 0) {
@@ -1444,7 +1440,7 @@ export default {
 			const vm = this;
 
                         // Respect POS profile search limit when limit search is enabled
-                        const usingLimitSearch = !!vm.pos_profile?.pose_use_limit_search;
+                        const usingLimitSearch = vm.usesLimitSearch;
                         if (usingLimitSearch) {
                                 vm.itemsPageLimit = parseInt(vm.pos_profile.posa_search_limit) || vm.itemsPageLimit;
                         }
@@ -1537,19 +1533,19 @@ export default {
 				vm.eventBus.emit("set_all_items", vm.items);
 				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
 
-				const hasMore = !vm.pos_profile.pose_use_limit_search && items.length === vm.itemsPageLimit;
+                                const hasMore = !vm.usesLimitSearch && items.length === vm.itemsPageLimit;
 				vm.loadProgress = vm.totalItemCount
 					? Math.round((items.length / vm.totalItemCount) * 100)
 					: 100;
 				vm.eventBus.emit("data-load-progress", { name: "items", progress: vm.loadProgress });
 				console.log("[ItemsSelector] data-load-progress emitted", { progress: vm.loadProgress });
 
-				if (
-					vm.pos_profile &&
-					vm.pos_profile.posa_local_storage &&
-					vm.storageAvailable &&
-					!vm.pos_profile.pose_use_limit_search
-				) {
+                                if (
+                                        vm.pos_profile &&
+                                        vm.pos_profile.posa_local_storage &&
+                                        vm.storageAvailable &&
+                                        !vm.usesLimitSearch
+                                ) {
 					try {
 						if (force_server) {
 							console.log("[ItemsSelector] clearing local items before save");
@@ -1688,12 +1684,12 @@ export default {
 								console.log("[ItemsSelector] background load set_all_items emitted", {
 									length: this.items.length,
 								});
-								if (
-									this.pos_profile &&
-									this.pos_profile.posa_local_storage &&
-									this.storageAvailable &&
-									!this.pos_profile.pose_use_limit_search
-								) {
+                                                                if (
+                                                                        this.pos_profile &&
+                                                                        this.pos_profile.posa_local_storage &&
+                                                                        this.storageAvailable &&
+                                                                        !this.usesLimitSearch
+                                                                ) {
 									try {
 										if (clearBefore) {
 											await clearStoredItems();
@@ -1804,12 +1800,12 @@ export default {
 						console.log("[ItemsSelector] background load set_all_items emitted", {
 							length: this.items.length,
 						});
-						if (
-							this.pos_profile &&
-							this.pos_profile.posa_local_storage &&
-							this.storageAvailable &&
-							!this.pos_profile.pose_use_limit_search
-						) {
+                                                if (
+                                                        this.pos_profile &&
+                                                        this.pos_profile.posa_local_storage &&
+                                                        this.storageAvailable &&
+                                                        !this.usesLimitSearch
+                                                ) {
 							try {
 								if (clearBefore) {
 									await clearStoredItems();
@@ -2214,7 +2210,7 @@ export default {
 
 			const fromScanner = vm.search_from_scanner;
 
-                        if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
+                        if (vm.usesLimitSearch) {
                                 const shouldForceServer =
                                         !vm.pos_profile.posa_local_storage ||
                                         !vm.storageAvailable ||
@@ -2440,12 +2436,12 @@ export default {
 					updateLocalStockCache(details);
 					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
 
-					if (
-						vm.pos_profile &&
-						vm.pos_profile.posa_local_storage &&
-						vm.storageAvailable &&
-						!vm.pos_profile.pose_use_limit_search
-					) {
+                                        if (
+                                                vm.pos_profile &&
+                                                vm.pos_profile.posa_local_storage &&
+                                                vm.storageAvailable &&
+                                                !vm.usesLimitSearch
+                                        ) {
 						try {
 							await saveItemsBulk(details);
 						} catch (e) {
@@ -3516,12 +3512,28 @@ export default {
 		},
 	},
 
-	computed: {
-		blockSaleBeyondAvailableQty() {
-			return (
-				Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty) &&
-				!this.isNegativeStockEnabled()
-			);
+        computed: {
+                usesLimitSearch() {
+                        const rawValue =
+                                this.pos_profile?.pose_use_limit_search ??
+                                this.pos_profile?.posa_use_limit_search;
+
+                        if (typeof rawValue === "string") {
+                                const normalized = rawValue.trim().toLowerCase();
+                                return normalized === "1" || normalized === "true" || normalized === "yes";
+                        }
+
+                        if (typeof rawValue === "number") {
+                                return rawValue === 1;
+                        }
+
+                        return Boolean(rawValue);
+                },
+                blockSaleBeyondAvailableQty() {
+                        return (
+                                Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty) &&
+                                !this.isNegativeStockEnabled()
+                        );
 		},
 		headers() {
 			return this.getItemsHeaders();
