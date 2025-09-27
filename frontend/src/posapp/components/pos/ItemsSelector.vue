@@ -1131,6 +1131,7 @@ export default {
                                 await this.loadItems({
                                         searchValue: this.get_search(this.first_search),
                                         groupFilter: this.item_group,
+                                        limit: this.usesLimitSearch ? this.limitSearchCap : undefined,
                                 });
                         }
 
@@ -1552,6 +1553,7 @@ export default {
                                         searchValue,
                                         groupFilter: normalizedGroup,
                                         priceList: this.customer_price_list,
+                                        limit: this.usesLimitSearch ? this.limitSearchCap : undefined,
                                 });
 
                                 const resolvedItems = Array.isArray(result) && result.length ? result : this.items;
@@ -3319,6 +3321,20 @@ export default {
                         }
 
                         return Boolean(rawValue);
+                },
+                limitSearchCap() {
+                        if (!this.usesLimitSearch) {
+                                return null;
+                        }
+
+                        const rawLimit = this.pos_profile?.posa_search_limit;
+                        const parsed = parseInt(rawLimit, 10);
+
+                        if (Number.isFinite(parsed) && parsed > 0) {
+                                return parsed;
+                        }
+
+                        return 500;
                 },
                 blockSaleBeyondAvailableQty() {
                         return (

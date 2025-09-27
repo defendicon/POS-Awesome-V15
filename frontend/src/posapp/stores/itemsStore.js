@@ -18,6 +18,7 @@ import {
 
 const DEFAULT_PAGE_SIZE = 200;
 const LARGE_CATALOG_THRESHOLD = 5000;
+const LIMIT_SEARCH_FALLBACK = 500;
 
 export const useItemsStore = defineStore('items', () => {
     // Core state
@@ -43,6 +44,47 @@ export const useItemsStore = defineStore('items', () => {
     const posProfile = ref(null);
     const customer = ref(null);
     const customerPriceList = ref(null);
+
+    const normalizeBooleanSetting = (value) => {
+        if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            return normalized === '1' || normalized === 'true' || normalized === 'yes';
+        }
+
+        if (typeof value === 'number') {
+            return value === 1;
+        }
+
+        return Boolean(value);
+    };
+
+    const limitSearchEnabled = computed(() => {
+        const rawValue = posProfile.value?.posa_use_limit_search ?? posProfile.value?.pose_use_limit_search;
+        return normalizeBooleanSetting(rawValue);
+    });
+
+    const resolveLimitSearchSize = () => {
+        if (!limitSearchEnabled.value) {
+            return DEFAULT_PAGE_SIZE;
+        }
+
+        const rawLimit = posProfile.value?.posa_search_limit;
+        const parsedLimit = Number.parseInt(rawLimit, 10);
+
+        if (Number.isFinite(parsedLimit) && parsedLimit > 0) {
+            return parsedLimit;
+        }
+
+        return LIMIT_SEARCH_FALLBACK;
+    };
+
+    const resolvePageSize = (pageSize = DEFAULT_PAGE_SIZE) => {
+        if (limitSearchEnabled.value) {
+            return resolveLimitSearchSize();
+        }
+
+        return pageSize;
+    };
 
     // Cache management
     const cacheHealth = ref({
@@ -89,7 +131,7 @@ export const useItemsStore = defineStore('items', () => {
 
     const cachedPagination = ref({
         enabled: false,
-        pageSize: DEFAULT_PAGE_SIZE,
+        pageSize: resolvePageSize(DEFAULT_PAGE_SIZE),
         offset: 0,
         total: 0,
         loading: false,
@@ -126,9 +168,11 @@ export const useItemsStore = defineStore('items', () => {
             pageSize = DEFAULT_PAGE_SIZE
         } = options;
 
+        const resolvedPageSize = resolvePageSize(pageSize);
+
         cachedPagination.value.enabled = enabled;
         cachedPagination.value.total = Number.isFinite(total) ? total : 0;
-        cachedPagination.value.pageSize = Number.isFinite(pageSize) && pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
+        cachedPagination.value.pageSize = resolvedPageSize;
         cachedPagination.value.offset = 0;
         cachedPagination.value.loading = false;
         cachedPagination.value.search = '';
@@ -230,8 +274,14 @@ export const useItemsStore = defineStore('items', () => {
             // Generate cache key
             cacheKey = generateCacheKey(searchValue, normalizedGroup, priceList);
 
-            // Check cache first unless forced to server
-            if (!forceServer) {
+            const resolvedLimit = Number.isFinite(limit) && limit > 0
+                ? limit
+                : (limitSearchEnabled.value ? resolveLimitSearchSize() : null);
+
+            // Check cache first unless forced to server or limit search requires fresh data
+            const canReadFromCache = !forceServer && (!limitSearchEnabled.value || Boolean(searchValue));
+
+            if (canReadFromCache) {
                 const cachedResult = await getCachedItems(cacheKey);
                 if (cachedResult) {
                     setItems(cachedResult);
@@ -259,8 +309,8 @@ export const useItemsStore = defineStore('items', () => {
                 item_groups: posProfile.value?.item_groups?.map(g => g.item_group) || []
             };
 
-            if (Number.isFinite(limit) && limit > 0) {
-                args.limit = limit;
+            if (Number.isFinite(resolvedLimit) && resolvedLimit > 0) {
+                args.limit = resolvedLimit;
             }
 
             const response = await frappe.call({
@@ -794,6 +844,13 @@ export const useItemsStore = defineStore('items', () => {
 
     const loadCachedItems = async () => {
         try {
+            if (limitSearchEnabled.value) {
+                resetCachedPagination({ enabled: false, total: 0 });
+                setItems([], { replace: true, totalCount: 0 });
+                itemsLoaded.value = false;
+                return;
+            }
+
             const cachedCount = await getStoredItemsCount().catch(() => 0);
             const resolvedCount = Number.isFinite(cachedCount) ? cachedCount : 0;
 
@@ -843,6 +900,10 @@ export const useItemsStore = defineStore('items', () => {
     };
 
     const appendCachedItemsPage = async () => {
+        if (limitSearchEnabled.value) {
+            return [];
+        }
+
         if (!cachedPagination.value.enabled || cachedPagination.value.loading) {
             return [];
         }
@@ -895,7 +956,7 @@ export const useItemsStore = defineStore('items', () => {
     };
 
     const resetCachedItemsForGroup = async (group) => {
-        if (!cachedPagination.value.enabled || !shouldUseIndexedSearch()) {
+        if (limitSearchEnabled.value || !cachedPagination.value.enabled || !shouldUseIndexedSearch()) {
             filteredItems.value = filterItemsByGroup(items.value, group);
             return;
         }
