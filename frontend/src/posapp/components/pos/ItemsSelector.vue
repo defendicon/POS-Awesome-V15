@@ -1983,14 +1983,24 @@ export default {
 
                                 vm.cancelItemDetailsRequest();
 
-			// Determine the actual query string and trim whitespace
-			const query = typeof newSearchTerm === "string" ? newSearchTerm : vm.first_search;
-			const trimmedQuery = (query || "").trim();
+                        // Determine the actual query string and trim whitespace
+                        let query;
+                        if (typeof newSearchTerm === "string") {
+                                query = newSearchTerm;
+                        } else if (newSearchTerm && newSearchTerm.target) {
+                                query = newSearchTerm.target?.value ?? "";
+                        } else {
+                                query = vm.first_search;
+                        }
+                        const trimmedQuery = (query || "").trim();
 
-			// Require a minimum of three characters before running a search
-			if (!trimmedQuery || trimmedQuery.length < 3) {
-				vm.search_from_scanner = false;
-				return;
+                        // Keep first_search in sync with the value we are about to search for
+                        vm.first_search = trimmedQuery;
+
+                        // Require a minimum of three characters before running a search
+                        if (!trimmedQuery || trimmedQuery.length < 3) {
+                                vm.search_from_scanner = false;
+                                return;
 			}
 
 			// If background loading is in progress, defer the search without changing the active query
