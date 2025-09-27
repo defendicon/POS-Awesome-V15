@@ -299,92 +299,95 @@
                                                                                 @dragstart="onDragStart($event, item)"
                                                                                 @dragend="onDragEnd"
                                                                         >
-                                                                            <div class="card-item-image-container">
-                                                                                <v-img
-                                                                                        :src="item.image || placeholderImage"
-											class="card-item-image"
-											aspect-ratio="1"
-											:alt="item.item_name"
-										>
-											<template v-slot:placeholder>
-												<div class="image-placeholder">
-													<v-icon size="40" color="grey-lighten-2"
-														>mdi-image</v-icon
-													>
-												</div>
-											</template>
-										</v-img>
-									</div>
-									<div class="card-item-content">
-										<div class="card-item-header">
-											<h4 class="card-item-name">{{ item.item_name }}</h4>
-											<span class="card-item-code">{{ item.item_code }}</span>
-										</div>
-										<div class="card-item-details">
-											<div class="card-item-price">
-												<div class="primary-price">
-													<span class="currency-symbol">
-														{{
-															currencySymbol(
-																item.original_currency ||
-																	pos_profile.currency,
-															)
-														}}
-													</span>
-													<span class="price-amount">
-														{{
-															format_currency(
-																item.base_price_list_rate ?? item.rate ?? 0,
-																item.original_currency ||
-																	pos_profile.currency,
-																ratePrecision(
-																	item.base_price_list_rate ??
-																		item.rate ??
-																		0,
-																),
-															)
-														}}
-													</span>
-												</div>
-												<div
-													v-if="
-														pos_profile.posa_allow_multi_currency &&
-														selected_currency !== pos_profile.currency
-													"
-													class="secondary-price"
-												>
-													<span class="currency-symbol">{{
-														currencySymbol(selected_currency)
-													}}</span>
-													<span class="price-amount">
-														{{
-															format_currency(
-																item.rate,
-																selected_currency,
-																ratePrecision(item.rate),
-															)
-														}}
-													</span>
-												</div>
-											</div>
-											<div class="card-item-stock">
-												<v-icon size="small" class="stock-icon"
-													>mdi-package-variant</v-icon
-												>
-												<span
-													class="stock-amount"
-													:class="{
-														'negative-number': isNegative(item.actual_qty),
-													}"
-												>
-													{{
-														format_number(
-															item.actual_qty,
-															hide_qty_decimals ? 0 : 4,
-														) || 0
-													}}
-												</span>
-												<span class="stock-uom">{{ item.stock_uom || "" }}</span>
+                                                                                <div class="card-item-image-container">
+                                                                                        <v-img
+                                                                                                :src="item.image || placeholderImage"
+                                                                                                class="card-item-image"
+                                                                                                aspect-ratio="1"
+                                                                                                :alt="item.item_name"
+                                                                                        >
+                                                                                                <template v-slot:placeholder>
+                                                                                                        <div class="image-placeholder">
+                                                                                                                <v-icon size="40" color="grey-lighten-2"
+                                                                                                                        >mdi-image</v-icon
+                                                                                                                >
+                                                                                                        </div>
+                                                                                                </template>
+                                                                                        </v-img>
+                                                                                </div>
+                                                                                <div class="card-item-content">
+                                                                                        <div class="card-item-header">
+                                                                                                <h4 class="card-item-name">{{ item.item_name }}</h4>
+                                                                                                <span class="card-item-code">{{ item.item_code }}</span>
+                                                                                        </div>
+                                                                                        <div class="card-item-details">
+                                                                                                <div class="card-item-price">
+                                                                                                        <div class="primary-price">
+                                                                                                                <span class="currency-symbol">
+                                                                                                                        {{
+                                                                                                                                currencySymbol(
+                                                                                                                                        item.original_currency ||
+                                                                                                                                        pos_profile.currency,
+                                                                                                                                )
+                                                                                                                        }}
+                                                                                                                </span>
+                                                                                                                <span class="price-amount">
+                                                                                                                        {{
+                                                                                                                                format_currency(
+                                                                                                                                        item.base_price_list_rate ?? item.rate ?? 0,
+                                                                                                                                        item.original_currency ||
+                                                                                                                                        pos_profile.currency,
+                                                                                                                                        ratePrecision(
+                                                                                                                                                item.base_price_list_rate ??
+                                                                                                                                                item.rate ??
+                                                                                                                                                0,
+                                                                                                                                        ),
+                                                                                                                                )
+                                                                                                                        }}
+                                                                                                                </span>
+                                                                                                        </div>
+                                                                                                        <div
+                                                                                                                v-if="
+                                                                                                                        pos_profile.posa_allow_multi_currency &&
+                                                                                                                        selected_currency !== pos_profile.currency
+                                                                                                                "
+                                                                                                                class="secondary-price"
+                                                                                                        >
+                                                                                                                <span class="currency-symbol">{{
+                                                                                                                        currencySymbol(selected_currency)
+                                                                                                                }}</span>
+                                                                                                                <span class="price-amount">
+                                                                                                                        {{
+                                                                                                                                format_currency(
+                                                                                                                                        item.rate,
+                                                                                                                                        selected_currency,
+                                                                                                                                        ratePrecision(item.rate),
+                                                                                                                                )
+                                                                                                                        }}
+                                                                                                                </span>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                                <div class="card-item-stock">
+                                                                                                        <v-icon size="small" class="stock-icon"
+                                                                                                                >mdi-package-variant</v-icon
+                                                                                                        >
+                                                                                                        <span
+                                                                                                                class="stock-amount"
+                                                                                                                :class="{
+                                                                                                                        'negative-number': isNegative(item.actual_qty),
+                                                                                                                }"
+                                                                                                        >
+                                                                                                                {{
+                                                                                                                        format_number(
+                                                                                                                                item.actual_qty,
+                                                                                                                                hide_qty_decimals ? 0 : 4,
+                                                                                                                        ) || 0
+                                                                                                                }}
+                                                                                                        </span>
+                                                                                                        <span class="stock-uom">{{ item.stock_uom || "" }}</span>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                </div>
                                                                         </div>
                                                                 </template>
                                                         </RecycleScroller>
