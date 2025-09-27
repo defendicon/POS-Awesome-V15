@@ -992,20 +992,22 @@ export async function getStoredItems() {
 }
 
 export async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0 } = {}) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		let collection = db.table("items");
-		if (itemGroup && itemGroup.toLowerCase() !== "all") {
-			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
-		}
-		if (search) {
-			const term = search.toLowerCase();
-			collection = collection.filter((it) => {
-				const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
-				const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
-				const barcodeMatch = Array.isArray(it.item_barcode)
-					? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
+        try {
+                await checkDbHealth();
+                if (!db.isOpen()) await db.open();
+                const normalizedGroup = typeof itemGroup === "string" ? itemGroup.trim() : "";
+                let collection = db.table("items");
+                if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
+                        collection = collection.where("item_group").equalsIgnoreCase(normalizedGroup);
+                }
+                const normalizedSearch = typeof search === "string" ? search.trim() : "";
+                if (normalizedSearch) {
+                        const term = normalizedSearch.toLowerCase();
+                        collection = collection.filter((it) => {
+                                const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
+                                const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
+                                const barcodeMatch = Array.isArray(it.item_barcode)
+                                        ? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
 					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
 				return nameMatch || codeMatch || barcodeMatch;
 			});
