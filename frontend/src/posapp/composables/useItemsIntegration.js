@@ -24,6 +24,7 @@ export function useItemsIntegration(options = {}) {
         isLoading,
         isBackgroundLoading,
         loadProgress,
+        cachedPagination,
         totalItemCount,
         itemsLoaded,
         searchTerm,
@@ -80,6 +81,14 @@ export function useItemsIntegration(options = {}) {
             forceServer,
             searchValue: searchTerm.value,
             groupFilter: itemGroup.value
+        });
+    };
+
+    const append_cached_items_page = async (options = {}) => {
+        const { search = searchTerm.value, group = itemGroup.value } = options;
+        return await itemsStore.appendCachedItemsPage({
+            search,
+            group
         });
     };
 
@@ -231,6 +240,7 @@ export function useItemsIntegration(options = {}) {
         isLoading,
         isBackgroundLoading,
         loadProgress,
+        cachedPagination,
         totalItemCount,
         itemsLoaded,
         searchTerm,
@@ -271,6 +281,7 @@ export function useItemsIntegration(options = {}) {
         search_onchange,
         update_items_details,
         memoizedSearch,
+        append_cached_items_page,
 
         // Helper methods
         findItemByCode,

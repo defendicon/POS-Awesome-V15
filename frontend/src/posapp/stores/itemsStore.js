@@ -10,9 +10,16 @@ import {
     clearPriceListCache,
     saveItemDetailsCache,
     isStockCacheReady,
-    searchStoredItems,
-    getItemsLastSync
+    getItemsLastSync,
+    getAllStoredItems,
+    getStoredItemsCount,
+    searchStoredItems
 } from '../../offline/index.js';
+
+const LAZY_CACHE_THRESHOLD = 2000;
+const CACHE_PAGE_SIZE = 200;
+const SEARCH_PAGE_SIZE = 200;
+const MIN_SEARCH_LENGTH = 2;
 
 export const useItemsStore = defineStore('items', () => {
     // Core state
@@ -61,6 +68,23 @@ export const useItemsStore = defineStore('items', () => {
     // Request management
     const requestToken = ref(0);
     const abortControllers = ref(new Map());
+    const cachedPagination = ref({
+        enabled: false,
+        pageSize: CACHE_PAGE_SIZE,
+        pagesLoaded: 0,
+        totalCount: 0,
+        loading: false
+    });
+
+    const resetCachedPagination = () => {
+        cachedPagination.value = {
+            enabled: false,
+            pageSize: CACHE_PAGE_SIZE,
+            pagesLoaded: 0,
+            totalCount: 0,
+            loading: false
+        };
+    };
 
     // Multi-layer cache system
     const cache = ref({
@@ -116,6 +140,7 @@ export const useItemsStore = defineStore('items', () => {
         await assessCacheHealth();
 
         // Load cached items if available
+        resetCachedPagination();
         await loadCachedItems();
     };
 
@@ -154,18 +179,25 @@ export const useItemsStore = defineStore('items', () => {
             forceServer = false,
             searchValue = '',
             groupFilter = 'ALL',
-            priceList = null
+            priceList = null,
+            limit = null
         } = options;
 
         const startTime = performance.now();
         const currentRequestToken = ++requestToken.value;
+        let cacheKey;
 
         try {
             isLoading.value = true;
             performanceMetrics.value.totalRequests++;
 
+            const normalizedGroup =
+                typeof groupFilter === 'string' && groupFilter.length > 0
+                    ? groupFilter
+                    : 'ALL';
+
             // Generate cache key
-            const cacheKey = generateCacheKey(searchValue, groupFilter, priceList);
+            cacheKey = generateCacheKey(searchValue, normalizedGroup, priceList);
 
             // Check cache first unless forced to server
             if (!forceServer) {
@@ -183,18 +215,26 @@ export const useItemsStore = defineStore('items', () => {
             abortControllers.value.set(cacheKey, abortController);
 
             // Fetch from server
+            const args = {
+                pos_profile: JSON.stringify(posProfile.value),
+                price_list: priceList || activePriceList.value,
+                item_group:
+                    normalizedGroup !== 'ALL'
+                        ? normalizedGroup.toLowerCase()
+                        : '',
+                search_value: searchValue || '',
+                customer: customer.value,
+                include_image: 1,
+                item_groups: posProfile.value?.item_groups?.map(g => g.item_group) || []
+            };
+
+            if (Number.isFinite(limit) && limit > 0) {
+                args.limit = limit;
+            }
+
             const response = await frappe.call({
                 method: 'posawesome.posawesome.api.items.get_items',
-                args: {
-                    pos_profile: JSON.stringify(posProfile.value),
-                    price_list: priceList || activePriceList.value,
-                    item_group: groupFilter !== 'ALL' ? groupFilter.toLowerCase() : '',
-                    search_value: searchValue || '',
-                    customer: customer.value,
-                    limit: 200,
-                    include_image: 1,
-                    item_groups: posProfile.value?.item_groups?.map(g => g.item_group) || []
-                },
+                args,
                 signal: abortController.signal
             });
 
@@ -206,7 +246,7 @@ export const useItemsStore = defineStore('items', () => {
             const fetchedItems = response.message || [];
 
             // Update state
-            setItems(fetchedItems);
+            setItems(fetchedItems, { updateTotal: true });
             itemsLoaded.value = true;
 
             // Cache the results
@@ -227,22 +267,33 @@ export const useItemsStore = defineStore('items', () => {
             }
         } finally {
             isLoading.value = false;
-            abortControllers.value.delete(cacheKey);
+            if (cacheKey) {
+                abortControllers.value.delete(cacheKey);
+            }
         }
     };
 
-    const searchItems = async (term) => {
+    const searchItems = async (term, options = {}) => {
+        const { groupOverride = itemGroup.value } = options;
+
         searchTerm.value = term;
         lastSearch.value = term;
 
-        if (!term || term.length < 2) {
+        const normalizedGroup =
+            typeof groupOverride === 'string' && groupOverride.length > 0
+                ? groupOverride
+                : 'ALL';
+
+        if (!term || term.length < MIN_SEARCH_LENGTH) {
             // Reset to all items if search is too short
-            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
-            return;
+            filteredItems.value = applyFilters(items.value, {
+                group: normalizedGroup,
+                search: term
+            });
+            return filteredItems.value;
         }
 
-        // Check memory cache first
-        const cacheKey = `search_${term}_${itemGroup.value}`;
+        const cacheKey = `search_${term}_${normalizedGroup}`;
         const cached = getCachedSearchResult(cacheKey);
         if (cached) {
             filteredItems.value = cached;
@@ -250,22 +301,44 @@ export const useItemsStore = defineStore('items', () => {
             return cached;
         }
 
+        const useIndexedSearch = Boolean(
+            posProfile.value?.posa_local_storage &&
+            (cachedPagination.value.enabled || totalItemCount.value > 0)
+        );
+
+        if (useIndexedSearch) {
+            try {
+                const offlineResults = await searchStoredItems({
+                    search: term,
+                    itemGroup: normalizedGroup,
+                    limit: SEARCH_PAGE_SIZE,
+                    offset: 0
+                });
+
+                if (offlineResults.length > 0) {
+                    setCachedSearchResult(cacheKey, offlineResults);
+                    filteredItems.value = offlineResults;
+                    performanceMetrics.value.searchMisses++;
+                    return offlineResults;
+                }
+            } catch (error) {
+                console.warn('Indexed search failed:', error);
+            }
+        }
+
         try {
             // Search in current items first
-            let searchResults = performLocalSearch(term, items.value);
+            let searchResults = performLocalSearch(term, applyFilters(items.value, { group: normalizedGroup, search: '' }));
 
             // If no results and term is specific enough, search server
             if (searchResults.length === 0 && term.length >= 3) {
                 await loadItems({
                     searchValue: term,
-                    groupFilter: itemGroup.value,
+                    groupFilter: normalizedGroup,
                     forceServer: true
                 });
-                searchResults = performLocalSearch(term, items.value);
+                searchResults = performLocalSearch(term, applyFilters(items.value, { group: normalizedGroup, search: '' }));
             }
-
-            // Apply group filter
-            searchResults = filterItemsByGroup(searchResults, itemGroup.value);
 
             // Cache the search result
             setCachedSearchResult(cacheKey, searchResults);
@@ -285,12 +358,12 @@ export const useItemsStore = defineStore('items', () => {
     const filterByGroup = (group) => {
         itemGroup.value = group;
 
-        if (searchTerm.value) {
+        if (searchTerm.value && searchTerm.value.length >= MIN_SEARCH_LENGTH) {
             // Re-run search with new group filter
-            searchItems(searchTerm.value);
+            searchItems(searchTerm.value, { groupOverride: group });
         } else {
             // Just filter current items
-            filteredItems.value = filterItemsByGroup(items.value, group);
+            filteredItems.value = applyFilters(items.value, { group });
         }
     };
 
@@ -374,7 +447,7 @@ export const useItemsStore = defineStore('items', () => {
                 if (searchTerm.value) {
                     await searchItems(searchTerm.value);
                 } else {
-                    filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+                    filteredItems.value = applyFilters(items.value);
                 }
 
                 // Clear search cache to force refresh
@@ -392,45 +465,125 @@ export const useItemsStore = defineStore('items', () => {
     };
 
     // Helper functions
-    const setItems = (newItems) => {
-        items.value = newItems;
-        totalItemCount.value = newItems.length;
-        updateIndexes(newItems);
+    const clearIndexes = () => {
+        itemsMap.value.clear();
+        barcodeIndex.value.clear();
+    };
 
-        // Update filtered items based on current filters
-        if (searchTerm.value) {
-            filteredItems.value = performLocalSearch(searchTerm.value, newItems);
-        } else {
-            filteredItems.value = filterItemsByGroup(newItems, itemGroup.value);
+    const setItems = (newItems, { append = false, updateTotal = false } = {}) => {
+        const incomingItems = Array.isArray(newItems)
+            ? newItems.filter(item => item && item.item_code)
+            : [];
+
+        let combinedItems = incomingItems;
+
+        if (append && items.value.length) {
+            const merged = [...items.value];
+            const indexByCode = new Map();
+            merged.forEach((item, idx) => {
+                indexByCode.set(item.item_code, idx);
+            });
+
+            incomingItems.forEach(item => {
+                const existingIndex = indexByCode.get(item.item_code);
+                if (typeof existingIndex === 'number') {
+                    merged[existingIndex] = { ...merged[existingIndex], ...item };
+                } else {
+                    indexByCode.set(item.item_code, merged.length);
+                    merged.push(item);
+                }
+            });
+
+            combinedItems = merged;
         }
+
+        if (!append) {
+            items.value = combinedItems;
+        } else {
+            items.value = combinedItems;
+        }
+
+        clearIndexes();
+        updateIndexes(items.value);
+
+        if (updateTotal) {
+            totalItemCount.value = items.value.length;
+        } else if (!append) {
+            totalItemCount.value = Math.max(totalItemCount.value, items.value.length);
+        }
+
+        filteredItems.value = applyFilters(items.value);
     };
 
     const updateIndexes = (itemList) => {
         itemList.forEach(item => {
+            if (!item || !item.item_code) {
+                return;
+            }
+
             itemsMap.value.set(item.item_code, item);
-            if (item.barcode) {
-                barcodeIndex.value.set(item.barcode, item);
+
+            const registerBarcode = (code) => {
+                if (!code) return;
+                barcodeIndex.value.set(String(code), item);
+            };
+
+            registerBarcode(item.barcode);
+
+            if (Array.isArray(item.barcodes)) {
+                item.barcodes.forEach(registerBarcode);
+            }
+
+            if (Array.isArray(item.item_barcode)) {
+                item.item_barcode.forEach(entry => registerBarcode(entry?.barcode));
             }
         });
     };
 
     const performLocalSearch = (term, itemList) => {
-        const searchTerm = term.toLowerCase();
+        const loweredTerm = term.toLowerCase();
         return itemList.filter(item => {
-            return (
-                item.item_code.toLowerCase().includes(searchTerm) ||
-                item.item_name.toLowerCase().includes(searchTerm) ||
-                (item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
-                (item.description && item.description.toLowerCase().includes(searchTerm))
-            );
+            const codeMatch = item.item_code?.toLowerCase().includes(loweredTerm);
+            const nameMatch = item.item_name?.toLowerCase().includes(loweredTerm);
+            const descriptionMatch = item.description?.toLowerCase().includes(loweredTerm);
+
+            let barcodeMatch = false;
+            if (item.barcode) {
+                barcodeMatch = item.barcode.toLowerCase().includes(loweredTerm);
+            }
+
+            if (!barcodeMatch && Array.isArray(item.barcodes)) {
+                barcodeMatch = item.barcodes.some(code => String(code).toLowerCase().includes(loweredTerm));
+            }
+
+            if (!barcodeMatch && Array.isArray(item.item_barcode)) {
+                barcodeMatch = item.item_barcode.some(entry => entry?.barcode?.toLowerCase().includes(loweredTerm));
+            }
+
+            return codeMatch || nameMatch || descriptionMatch || barcodeMatch;
         });
     };
 
     const filterItemsByGroup = (itemList, group) => {
-        if (group === 'ALL') {
+        if (!group || group === 'ALL') {
             return itemList;
         }
-        return itemList.filter(item => item.item_group === group);
+
+        const normalizedGroup = group.toLowerCase();
+        return itemList.filter(item => (item.item_group || '').toLowerCase() === normalizedGroup);
+    };
+
+    const applyFilters = (sourceItems, { search = null, group = null } = {}) => {
+        const activeGroup = group ?? itemGroup.value;
+        const activeSearch = search ?? searchTerm.value;
+
+        let filtered = filterItemsByGroup(sourceItems, activeGroup);
+
+        if (activeSearch && activeSearch.length >= MIN_SEARCH_LENGTH) {
+            filtered = performLocalSearch(activeSearch, filtered);
+        }
+
+        return filtered;
     };
 
     const generateCacheKey = (search, group, priceList) => {
@@ -536,11 +689,7 @@ export const useItemsStore = defineStore('items', () => {
         });
 
         // Update filtered items
-        if (searchTerm.value) {
-            filteredItems.value = performLocalSearch(searchTerm.value, items.value);
-        } else {
-            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
-        }
+        filteredItems.value = applyFilters(items.value);
     };
 
     const backgroundLoadItemDetails = async (itemList) => {
@@ -637,13 +786,101 @@ export const useItemsStore = defineStore('items', () => {
 
     const loadCachedItems = async () => {
         try {
-            const cached = await searchStoredItems('', itemGroup.value);
-            if (cached && cached.length > 0) {
-                setItems(cached);
+            const cachedCount = await getStoredItemsCount().catch(() => 0);
+            const resolvedCount = Number.isFinite(cachedCount) ? cachedCount : 0;
+
+            totalItemCount.value = resolvedCount;
+
+            if (resolvedCount === 0) {
+                resetCachedPagination();
+                filteredItems.value = applyFilters(items.value);
+                return;
+            }
+
+            const shouldLazyLoad = resolvedCount > LAZY_CACHE_THRESHOLD;
+            const pageSize = CACHE_PAGE_SIZE;
+
+            cachedPagination.value = {
+                enabled: shouldLazyLoad,
+                pageSize,
+                pagesLoaded: 0,
+                totalCount: resolvedCount,
+                loading: false
+            };
+
+            let initialItems = [];
+
+            if (shouldLazyLoad) {
+                initialItems = await searchStoredItems({
+                    limit: pageSize,
+                    offset: 0
+                }).catch(() => []);
+                if (initialItems.length > 0) {
+                    cachedPagination.value.pagesLoaded = 1;
+                }
+            } else {
+                initialItems = await getAllStoredItems().catch(() => []);
+                cachedPagination.value.enabled = false;
+                cachedPagination.value.pagesLoaded = initialItems.length > 0 ? 1 : 0;
+            }
+
+            if (initialItems.length > 0) {
+                setItems(initialItems, { updateTotal: !shouldLazyLoad });
                 itemsLoaded.value = true;
+            } else {
+                itemsLoaded.value = false;
+                filteredItems.value = applyFilters(items.value);
             }
         } catch (error) {
             console.warn('Failed to load cached items:', error);
+            resetCachedPagination();
+        }
+    };
+
+    const appendCachedItemsPage = async ({ search = '', group = 'ALL' } = {}) => {
+        const pagination = cachedPagination.value;
+
+        if (!pagination.enabled || pagination.loading) {
+            return [];
+        }
+
+        if (items.value.length >= pagination.totalCount) {
+            pagination.enabled = false;
+            return [];
+        }
+
+        pagination.loading = true;
+
+        try {
+            const offset = pagination.pagesLoaded * pagination.pageSize;
+            const normalizedGroup = typeof group === 'string' && group.length > 0 ? group : 'ALL';
+            const normalizedSearch = typeof search === 'string' ? search : '';
+
+            const nextItems = await searchStoredItems({
+                search: normalizedSearch,
+                itemGroup: normalizedGroup,
+                limit: pagination.pageSize,
+                offset
+            }).catch(() => []);
+
+            if (nextItems.length > 0) {
+                setItems(nextItems, { append: true });
+                pagination.pagesLoaded += 1;
+
+                if (items.value.length >= pagination.totalCount) {
+                    pagination.enabled = false;
+                }
+            } else {
+                pagination.enabled = false;
+            }
+
+            return nextItems;
+        } catch (error) {
+            console.warn('Failed to append cached items page:', error);
+            pagination.enabled = false;
+            return [];
+        } finally {
+            pagination.loading = false;
         }
     };
 
@@ -665,6 +902,8 @@ export const useItemsStore = defineStore('items', () => {
 
         // Clear persistent cache
         await clearPriceListCache();
+
+        resetCachedPagination();
     };
 
     const clearSearchCache = () => {
@@ -744,6 +983,7 @@ export const useItemsStore = defineStore('items', () => {
         isLoading,
         isBackgroundLoading,
         loadProgress,
+        cachedPagination,
         totalItemCount,
         itemsLoaded,
         searchTerm,
@@ -763,6 +1003,7 @@ export const useItemsStore = defineStore('items', () => {
         // Actions
         initialize,
         loadItems,
+        loadItemGroups,
         searchItems,
         filterByGroup,
         updatePriceList,
@@ -772,7 +1013,8 @@ export const useItemsStore = defineStore('items', () => {
         addScannedItem,
         clearAllCaches,
         clearSearchCache,
-        assessCacheHealth
+        assessCacheHealth,
+        appendCachedItemsPage
     };
 });
 
