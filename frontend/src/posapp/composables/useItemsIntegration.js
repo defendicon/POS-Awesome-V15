@@ -33,9 +33,11 @@ export function useItemsIntegration(options = {}) {
         customerPriceList,
         cacheHealth,
         performanceMetrics,
+        cachedPagesState,
         activePriceList,
         itemStats,
-        cacheStats
+        cacheStats,
+        shouldUseIndexedSearch
     } = storeToRefs(itemsStore);
 
     // Legacy compatibility computed properties
@@ -243,6 +245,8 @@ export function useItemsIntegration(options = {}) {
         activePriceList,
         itemStats,
         cacheStats,
+        cachedPagesState,
+        shouldUseIndexedSearch,
 
         // Legacy compatibility properties
         items_group,
@@ -263,6 +267,7 @@ export function useItemsIntegration(options = {}) {
         getItemByCode: itemsStore.getItemByCode,
         getItemByBarcode: itemsStore.getItemByBarcode,
         addScannedItem: itemsStore.addScannedItem,
+        appendCachedItemsPage: itemsStore.appendCachedItemsPage,
 
         // Legacy method adapters
         get_items,
