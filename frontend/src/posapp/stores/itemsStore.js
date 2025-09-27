@@ -12,8 +12,12 @@ import {
     isStockCacheReady,
     getItemsLastSync,
     getAllStoredItems,
-    getStoredItemsCount
+    getStoredItemsCount,
+    searchStoredItems
 } from '../../offline/index.js';
+
+const DEFAULT_PAGE_SIZE = 200;
+const LARGE_CATALOG_THRESHOLD = 5000;
 
 export const useItemsStore = defineStore('items', () => {
     // Core state
@@ -82,6 +86,57 @@ export const useItemsStore = defineStore('items', () => {
     const activePriceList = computed(() => {
         return customerPriceList.value || posProfile.value?.selling_price_list;
     });
+
+    const cachedPagination = ref({
+        enabled: false,
+        pageSize: DEFAULT_PAGE_SIZE,
+        offset: 0,
+        total: 0,
+        loading: false,
+        search: '',
+        group: 'ALL'
+    });
+
+    const hasMoreCachedItems = computed(() => {
+        if (!cachedPagination.value.enabled) {
+            return false;
+        }
+
+        if (cachedPagination.value.loading) {
+            return true;
+        }
+
+        if (searchTerm.value) {
+            // When searching we always fetch on demand based on term, so pagination
+            // availability is governed by the most recent fetch size
+            return cachedPagination.value.offset < cachedPagination.value.total;
+        }
+
+        return cachedPagination.value.offset < cachedPagination.value.total;
+    });
+
+    const shouldUseIndexedSearch = () => {
+        return Boolean(posProfile.value?.posa_local_storage);
+    };
+
+    const resetCachedPagination = (options = {}) => {
+        const {
+            enabled = false,
+            total = 0,
+            pageSize = DEFAULT_PAGE_SIZE
+        } = options;
+
+        cachedPagination.value.enabled = enabled;
+        cachedPagination.value.total = Number.isFinite(total) ? total : 0;
+        cachedPagination.value.pageSize = Number.isFinite(pageSize) && pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
+        cachedPagination.value.offset = 0;
+        cachedPagination.value.loading = false;
+        cachedPagination.value.search = '';
+        cachedPagination.value.group =
+            typeof itemGroup.value === 'string' && itemGroup.value.length > 0
+                ? itemGroup.value
+                : 'ALL';
+    };
 
     const itemStats = computed(() => {
         return {
@@ -155,7 +210,8 @@ export const useItemsStore = defineStore('items', () => {
             forceServer = false,
             searchValue = '',
             groupFilter = 'ALL',
-            priceList = null
+            priceList = null,
+            limit = null
         } = options;
 
         const startTime = performance.now();
@@ -190,21 +246,26 @@ export const useItemsStore = defineStore('items', () => {
             abortControllers.value.set(cacheKey, abortController);
 
             // Fetch from server
+            const args = {
+                pos_profile: JSON.stringify(posProfile.value),
+                price_list: priceList || activePriceList.value,
+                item_group:
+                    normalizedGroup !== 'ALL'
+                        ? normalizedGroup.toLowerCase()
+                        : '',
+                search_value: searchValue || '',
+                customer: customer.value,
+                include_image: 1,
+                item_groups: posProfile.value?.item_groups?.map(g => g.item_group) || []
+            };
+
+            if (Number.isFinite(limit) && limit > 0) {
+                args.limit = limit;
+            }
+
             const response = await frappe.call({
                 method: 'posawesome.posawesome.api.items.get_items',
-                args: {
-                    pos_profile: JSON.stringify(posProfile.value),
-                    price_list: priceList || activePriceList.value,
-                    item_group:
-                        normalizedGroup !== 'ALL'
-                            ? normalizedGroup.toLowerCase()
-                            : '',
-                    search_value: searchValue || '',
-                    customer: customer.value,
-                    limit: 200,
-                    include_image: 1,
-                    item_groups: posProfile.value?.item_groups?.map(g => g.item_group) || []
-                },
+                args,
                 signal: abortController.signal
             });
 
@@ -216,7 +277,11 @@ export const useItemsStore = defineStore('items', () => {
             const fetchedItems = response.message || [];
 
             // Update state
-            setItems(fetchedItems);
+            cachedPagination.value.enabled = false;
+            cachedPagination.value.offset = fetchedItems.length;
+            cachedPagination.value.total = fetchedItems.length;
+            cachedPagination.value.loading = false;
+            setItems(fetchedItems, { replace: true });
             itemsLoaded.value = true;
 
             // Cache the results
@@ -249,7 +314,13 @@ export const useItemsStore = defineStore('items', () => {
 
         if (!term || term.length < 2) {
             // Reset to all items if search is too short
-            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            if (!cachedPagination.value.enabled) {
+                filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            } else {
+                cachedPagination.value.search = '';
+                cachedPagination.value.offset = Math.min(cachedPagination.value.offset, items.value.length);
+                filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            }
             return;
         }
 
@@ -263,27 +334,52 @@ export const useItemsStore = defineStore('items', () => {
         }
 
         try {
-            // Search in current items first
-            let searchResults = performLocalSearch(term, items.value);
+            const shouldUseIndexed = shouldUseIndexedSearch();
+            let searchResults = [];
 
-            // If no results and term is specific enough, search server
-            if (searchResults.length === 0 && term.length >= 3) {
-                await loadItems({
-                    searchValue: term,
-                    groupFilter: itemGroup.value,
-                    forceServer: true
+            if (shouldUseIndexed) {
+                const normalizedGroup =
+                    typeof itemGroup.value === 'string' && itemGroup.value.length > 0
+                        ? itemGroup.value
+                        : 'ALL';
+                const results = await searchStoredItems({
+                    search: term,
+                    itemGroup: normalizedGroup,
+                    limit: cachedPagination.value.pageSize,
+                    offset: 0
                 });
-                searchResults = performLocalSearch(term, items.value);
-            }
 
-            // Apply group filter
-            searchResults = filterItemsByGroup(searchResults, itemGroup.value);
+                searchResults = Array.isArray(results) ? results : [];
+                cachedPagination.value.search = term;
+                cachedPagination.value.offset = searchResults.length;
+                cachedPagination.value.total = Math.max(cachedPagination.value.total, searchResults.length);
+            } else {
+                // Search in current items first
+                searchResults = performLocalSearch(term, items.value);
+
+                // If no results and term is specific enough, search server
+                if (searchResults.length === 0 && term.length >= 3) {
+                    await loadItems({
+                        searchValue: term,
+                        groupFilter: itemGroup.value,
+                        forceServer: true
+                    });
+                    searchResults = performLocalSearch(term, items.value);
+                }
+
+                // Apply group filter
+                searchResults = filterItemsByGroup(searchResults, itemGroup.value);
+            }
 
             // Cache the search result
             setCachedSearchResult(cacheKey, searchResults);
 
             filteredItems.value = searchResults;
             performanceMetrics.value.searchMisses++;
+
+            if (shouldUseIndexed) {
+                updateIndexes(searchResults);
+            }
 
             return searchResults;
 
@@ -294,15 +390,19 @@ export const useItemsStore = defineStore('items', () => {
         }
     };
 
-    const filterByGroup = (group) => {
+    const filterByGroup = async (group) => {
         itemGroup.value = group;
 
         if (searchTerm.value) {
             // Re-run search with new group filter
-            searchItems(searchTerm.value);
+            await searchItems(searchTerm.value);
         } else {
-            // Just filter current items
-            filteredItems.value = filterItemsByGroup(items.value, group);
+            if (cachedPagination.value.enabled && shouldUseIndexedSearch()) {
+                await resetCachedItemsForGroup(group);
+            } else {
+                // Just filter current items
+                filteredItems.value = filterItemsByGroup(items.value, group);
+            }
         }
     };
 
@@ -346,6 +446,7 @@ export const useItemsStore = defineStore('items', () => {
     const refreshItems = async () => {
         await clearAllCaches();
         itemsLoaded.value = false;
+        resetCachedPagination();
         await loadItems({ forceServer: true });
     };
 
@@ -404,26 +505,70 @@ export const useItemsStore = defineStore('items', () => {
     };
 
     // Helper functions
-    const setItems = (newItems) => {
-        items.value = newItems;
-        totalItemCount.value = newItems.length;
-        updateIndexes(newItems);
+    const setItems = (newItems, { append = false, totalCount: totalOverride } = {}) => {
+        const normalizedGroup =
+            typeof itemGroup.value === 'string' && itemGroup.value.length > 0
+                ? itemGroup.value
+                : 'ALL';
 
-        // Update filtered items based on current filters
-        if (searchTerm.value) {
-            filteredItems.value = performLocalSearch(searchTerm.value, newItems);
-        } else {
-            filteredItems.value = filterItemsByGroup(newItems, itemGroup.value);
+        if (!append) {
+            items.value = Array.isArray(newItems) ? [...newItems] : [];
+            resetIndexes();
+            updateIndexes(items.value);
+        } else if (Array.isArray(newItems) && newItems.length) {
+            const additions = [];
+            newItems.forEach(item => {
+                if (!item || !item.item_code || itemsMap.value.has(item.item_code)) {
+                    return;
+                }
+                additions.push(item);
+            });
+
+            if (additions.length) {
+                items.value = [...items.value, ...additions];
+                updateIndexes(additions);
+            }
+        }
+
+        if (Number.isFinite(totalOverride)) {
+            totalItemCount.value = totalOverride;
+        } else if (!append) {
+            totalItemCount.value = items.value.length;
+        }
+
+        if (!searchTerm.value) {
+            filteredItems.value = filterItemsByGroup(items.value, normalizedGroup);
         }
     };
 
     const updateIndexes = (itemList) => {
+        if (!Array.isArray(itemList)) {
+            return;
+        }
+
         itemList.forEach(item => {
+            if (!item || !item.item_code) {
+                return;
+            }
             itemsMap.value.set(item.item_code, item);
+
+            if (Array.isArray(item.item_barcode)) {
+                item.item_barcode.forEach(entry => {
+                    if (entry?.barcode) {
+                        barcodeIndex.value.set(String(entry.barcode), item);
+                    }
+                });
+            }
+
             if (item.barcode) {
-                barcodeIndex.value.set(item.barcode, item);
+                barcodeIndex.value.set(String(item.barcode), item);
             }
         });
+    };
+
+    const resetIndexes = () => {
+        itemsMap.value.clear();
+        barcodeIndex.value.clear();
     };
 
     const performLocalSearch = (term, itemList) => {
@@ -649,24 +794,127 @@ export const useItemsStore = defineStore('items', () => {
 
     const loadCachedItems = async () => {
         try {
-            const [cached, cachedCount] = await Promise.all([
-                getAllStoredItems().catch(() => []),
-                getStoredItemsCount().catch(() => 0)
-            ]);
+            const cachedCount = await getStoredItemsCount().catch(() => 0);
+            const resolvedCount = Number.isFinite(cachedCount) ? cachedCount : 0;
 
-            const itemsFromCache = Array.isArray(cached) ? cached : [];
-            if (itemsFromCache.length > 0) {
-                setItems(itemsFromCache);
-                itemsLoaded.value = true;
+            totalItemCount.value = resolvedCount;
+
+            if (resolvedCount === 0) {
+                itemsLoaded.value = false;
+                resetCachedPagination();
+                return;
             }
 
-            const resolvedCount = Number.isFinite(cachedCount) ? cachedCount : itemsFromCache.length;
-            if (resolvedCount > 0) {
-                totalItemCount.value = resolvedCount;
+            const shouldPaginate = resolvedCount > LARGE_CATALOG_THRESHOLD;
+            resetCachedPagination({
+                enabled: shouldPaginate,
+                total: resolvedCount
+            });
+
+            if (!shouldPaginate) {
+                const cachedItems = await getAllStoredItems().catch(() => []);
+                if (Array.isArray(cachedItems) && cachedItems.length) {
+                    setItems(cachedItems, { replace: true, totalCount: resolvedCount });
+                    cachedPagination.value.offset = cachedItems.length;
+                    itemsLoaded.value = true;
+                }
+                return;
             }
+
+            const initialItems = await searchStoredItems({
+                search: '',
+                itemGroup: itemGroup.value,
+                limit: cachedPagination.value.pageSize,
+                offset: 0
+            });
+
+            const safeInitial = Array.isArray(initialItems) ? initialItems : [];
+            setItems(safeInitial, { replace: true, totalCount: resolvedCount });
+            cachedPagination.value.offset = safeInitial.length;
+            cachedPagination.value.search = '';
+            cachedPagination.value.group =
+                typeof itemGroup.value === 'string' && itemGroup.value.length > 0
+                    ? itemGroup.value
+                    : 'ALL';
+            itemsLoaded.value = true;
         } catch (error) {
             console.warn('Failed to load cached items:', error);
         }
+    };
+
+    const appendCachedItemsPage = async () => {
+        if (!cachedPagination.value.enabled || cachedPagination.value.loading) {
+            return [];
+        }
+
+        if (searchTerm.value && searchTerm.value.length >= 2) {
+            // Searches fetch a fresh page via searchItems, no incremental append required
+            return [];
+        }
+
+        if (cachedPagination.value.offset >= cachedPagination.value.total) {
+            return [];
+        }
+
+        cachedPagination.value.loading = true;
+
+        try {
+            const nextPage = await searchStoredItems({
+                search: cachedPagination.value.search || '',
+                itemGroup: cachedPagination.value.group,
+                limit: cachedPagination.value.pageSize,
+                offset: cachedPagination.value.offset
+            });
+
+            const safePage = Array.isArray(nextPage) ? nextPage : [];
+
+            if (safePage.length === 0) {
+                cachedPagination.value.offset = cachedPagination.value.total;
+                return [];
+            }
+
+            setItems(safePage, {
+                append: true,
+                totalCount: cachedPagination.value.total
+            });
+            cachedPagination.value.offset += safePage.length;
+
+            if (safePage.length < cachedPagination.value.pageSize) {
+                cachedPagination.value.offset = cachedPagination.value.total;
+            }
+
+            backgroundLoadItemDetails(safePage);
+
+            return safePage;
+        } catch (error) {
+            console.warn('Failed to append cached items:', error);
+            return [];
+        } finally {
+            cachedPagination.value.loading = false;
+        }
+    };
+
+    const resetCachedItemsForGroup = async (group) => {
+        if (!cachedPagination.value.enabled || !shouldUseIndexedSearch()) {
+            filteredItems.value = filterItemsByGroup(items.value, group);
+            return;
+        }
+
+        const normalizedGroup = typeof group === 'string' && group.length > 0 ? group : 'ALL';
+        cachedPagination.value.group = normalizedGroup;
+        cachedPagination.value.offset = 0;
+        cachedPagination.value.search = '';
+
+        const firstPage = await searchStoredItems({
+            search: '',
+            itemGroup: normalizedGroup,
+            limit: cachedPagination.value.pageSize,
+            offset: 0
+        });
+
+        const safePage = Array.isArray(firstPage) ? firstPage : [];
+        setItems(safePage, { replace: true, totalCount: cachedPagination.value.total });
+        cachedPagination.value.offset = safePage.length;
     };
 
     const clearAllCaches = async () => {
@@ -776,6 +1024,8 @@ export const useItemsStore = defineStore('items', () => {
         customerPriceList,
         cacheHealth,
         performanceMetrics,
+        cachedPagination,
+        hasMoreCachedItems,
 
         // Computed
         activePriceList,
@@ -786,10 +1036,13 @@ export const useItemsStore = defineStore('items', () => {
         initialize,
         loadItems,
         loadItemGroups,
+        loadCachedItems,
         searchItems,
         filterByGroup,
         updatePriceList,
         refreshItems,
+        appendCachedItemsPage,
+        resetCachedItemsForGroup,
         getItemByCode,
         getItemByBarcode,
         addScannedItem,
