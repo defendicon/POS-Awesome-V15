@@ -560,6 +560,9 @@ import {
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 
+const FIRST_SEARCH_DEBOUNCE = 300;
+const CLEAR_SEARCH_GUARD_BUFFER = 50;
+
 export default {
 	mixins: [format],
 	setup() {
@@ -661,6 +664,9 @@ export default {
                 scanQueuedCode: "",
                 refreshInFlight: false,
                 clearingSearch: false,
+                clearSearchGuardTimer: null,
+                firstSearchWatcherDelay: FIRST_SEARCH_DEBOUNCE,
+                clearSearchGuardDelay: FIRST_SEARCH_DEBOUNCE + CLEAR_SEARCH_GUARD_BUFFER,
         }),
 
         watch: {
@@ -844,7 +850,7 @@ export default {
                                 // Reset items only when search is fully cleared
                                 this.clearSearch();
                         }
-                }, 300),
+                }, FIRST_SEARCH_DEBOUNCE),
 
 		// Refresh item prices whenever the user changes currency
 		selected_currency() {
@@ -2645,15 +2651,25 @@ export default {
                         const shouldReload =
                                 hadQuery || !this.items_loaded || !this.items.length;
 
+                        if (this.clearSearchGuardTimer) {
+                                clearTimeout(this.clearSearchGuardTimer);
+                                this.clearSearchGuardTimer = null;
+                        }
+
                         this.search_backup = this.first_search;
                         this.clearingSearch = true;
                         this.first_search = "";
                         this.search = "";
 
                         const release = () => {
-                                this.$nextTick(() => {
+                                if (this.clearSearchGuardTimer) {
+                                        clearTimeout(this.clearSearchGuardTimer);
+                                }
+                                const guardDelay = this.clearSearchGuardDelay ?? this.firstSearchWatcherDelay;
+                                this.clearSearchGuardTimer = setTimeout(() => {
                                         this.clearingSearch = false;
-                                });
+                                        this.clearSearchGuardTimer = null;
+                                }, guardDelay);
                         };
 
                         if (!shouldReload) {
