@@ -2,7 +2,12 @@ import { setActivePinia } from "pinia";
 import { pinia, useUpdateStore } from "./posapp/stores/index.js";
 
 const VERSION_ENDPOINT = "/assets/posawesome/dist/js/version.json";
-const SERVICE_WORKER_SCOPE = "/assets/posawesome/sw.js";
+const SERVICE_WORKER_SCOPE = "/assets/posawesome/dist/www/sw.js";
+const VERSION_CACHE_TTL = 30 * 1000;
+
+let cachedVersionInfo = null;
+let cachedVersionTimestamp = 0;
+let pendingVersionRequest = null;
 
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 	setActivePinia(pinia);
@@ -70,7 +75,7 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 
 	async function checkWaitingWorker(registration) {
 		if (registration.waiting) {
-			await announceAvailableUpdate();
+			await announceAvailableUpdate(true);
 		}
 	}
 
@@ -80,14 +85,14 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 			if (!newWorker) return;
 			newWorker.addEventListener("statechange", async () => {
 				if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-					await announceAvailableUpdate();
+					await announceAvailableUpdate(true);
 				}
 			});
 		});
 	}
 
-	async function announceAvailableUpdate() {
-		const info = await fetchBuildInfo();
+	async function announceAvailableUpdate(force = false) {
+		const info = await fetchBuildInfo(force);
 		if (!info || !info.version) {
 			return;
 		}
@@ -95,35 +100,57 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 		lastKnownActiveVersion = lastKnownActiveVersion || info.version;
 	}
 
-	async function fetchBuildInfo() {
-		try {
-			const response = await fetch(VERSION_ENDPOINT, {
-				cache: "no-store",
-				headers: {
-					"Cache-Control": "no-cache",
-					Pragma: "no-cache",
-					Expires: "0",
-				},
-			});
-
-			if (!response.ok) {
-				return null;
-			}
-			const data = await response.json();
-			const version = data.version || data.buildVersion || null;
-			const timestamp = Number(data.timestamp || data.buildTimestamp);
-			return {
-				version,
-				timestamp: Number.isNaN(timestamp) ? null : timestamp,
-			};
-		} catch (err) {
-			console.warn("Failed to fetch build info", err);
-			return null;
+	async function fetchBuildInfo(force = false) {
+		if (pendingVersionRequest) {
+			return pendingVersionRequest;
 		}
+		const now = Date.now();
+		if (!force && cachedVersionInfo && (now - cachedVersionTimestamp) < VERSION_CACHE_TTL) {
+			return cachedVersionInfo;
+		}
+		pendingVersionRequest = (async () => {
+			try {
+				const response = await fetch(VERSION_ENDPOINT, {
+					cache: "no-store",
+					headers: {
+						"Cache-Control": "no-cache",
+						Pragma: "no-cache",
+						Expires: "0",
+					},
+				});
+
+				if (!response.ok) {
+					return null;
+				}
+				const data = await response.json();
+				const version = data.version || data.buildVersion || null;
+				const timestamp = Number(data.timestamp || data.buildTimestamp);
+				const parsed = {
+					version,
+					timestamp: Number.isNaN(timestamp) ? null : timestamp,
+				};
+				cachedVersionInfo = parsed;
+				cachedVersionTimestamp = Date.now();
+				return parsed;
+			} catch (err) {
+				console.warn("Failed to fetch build info", err);
+				return null;
+			} finally {
+				pendingVersionRequest = null;
+			}
+		})();
+		return pendingVersionRequest;
 	}
 
 	function handleActiveVersion(version, timestamp) {
 		if (!version) return;
+		if (timestamp) {
+			cachedVersionInfo = {
+				version,
+				timestamp,
+			};
+			cachedVersionTimestamp = Date.now();
+		}
 		if (!lastKnownActiveVersion) {
 			lastKnownActiveVersion = version;
 			updateStore.setCurrentVersion(version, timestamp || null);

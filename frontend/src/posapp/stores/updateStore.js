@@ -3,6 +3,63 @@ import { defineStore } from "pinia";
 const VERSION_STORAGE_KEY = "posawesome_version";
 const SNOOZE_STORAGE_KEY = "posawesome_update_snooze_until";
 const DEFAULT_SNOOZE_MINUTES = 10;
+const hasBrowserContext = typeof window !== "undefined";
+
+let cachedDateFormatter = null;
+
+function getDateFormatter() {
+	if (cachedDateFormatter !== null) {
+		return cachedDateFormatter;
+	}
+	try {
+		cachedDateFormatter = new Intl.DateTimeFormat(undefined, {
+			year: "numeric",
+			month: "short",
+			day: "2-digit",
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		});
+	} catch (err) {
+		cachedDateFormatter = undefined;
+	}
+	return cachedDateFormatter;
+}
+
+function safeNumber(value) {
+	const numeric = Number(value);
+	return Number.isFinite(numeric) ? numeric : null;
+}
+
+function safeStorageGet(storage, key) {
+	if (!hasBrowserContext || !storage) return null;
+	try {
+		return storage.getItem(key);
+	} catch (err) {
+		console.warn(`Failed to read ${key} from storage`, err);
+		return null;
+	}
+}
+
+function safeStorageSet(storage, key, value) {
+	if (!hasBrowserContext || !storage) return false;
+	try {
+		storage.setItem(key, value);
+		return true;
+	} catch (err) {
+		console.warn(`Failed to persist ${key} in storage`, err);
+		return false;
+	}
+}
+
+function safeStorageRemove(storage, key) {
+	if (!hasBrowserContext || !storage) return;
+	try {
+		storage.removeItem(key);
+	} catch (err) {
+		console.warn(`Failed to remove ${key} from storage`, err);
+	}
+}
 
 function parseTimestamp(version) {
 	if (!version) return null;
@@ -22,17 +79,14 @@ function formatTimestamp(timestamp) {
 		return null;
 	}
 	try {
-		return new Intl.DateTimeFormat(undefined, {
-			year: "numeric",
-			month: "short",
-			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-		}).format(date);
+		const formatter = getDateFormatter();
+		if (formatter) {
+			return formatter.format(date);
+		}
 	} catch (err) {
-		return date.toISOString();
+		// Swallow and fall back
 	}
+	return date.toISOString();
 }
 
 export const useUpdateStore = defineStore("update", {
@@ -64,76 +118,129 @@ export const useUpdateStore = defineStore("update", {
 	},
 	actions: {
 		initializeFromStorage() {
-			if (typeof window === "undefined") return;
-			const storedVersion = window.localStorage?.getItem(VERSION_STORAGE_KEY);
+			if (!hasBrowserContext) return;
+			const storedVersion = safeStorageGet(window.localStorage, VERSION_STORAGE_KEY);
 			if (storedVersion) {
-				this.currentVersion = storedVersion;
+				this.$patch({
+					currentVersion: storedVersion,
+					availableVersion: this.availableVersion || storedVersion,
+					availableTimestamp: this.availableTimestamp || parseTimestamp(storedVersion),
+				});
 			}
-			const snoozeUntil = window.sessionStorage?.getItem(SNOOZE_STORAGE_KEY);
-			if (snoozeUntil) {
-				const numeric = Number(snoozeUntil);
-				if (!Number.isNaN(numeric)) {
-					this.dismissedUntil = numeric;
-				}
+			const snoozeUntil = safeNumber(safeStorageGet(window.sessionStorage, SNOOZE_STORAGE_KEY));
+			if (snoozeUntil && (!this.dismissedUntil || snoozeUntil > this.dismissedUntil)) {
+				this.dismissedUntil = snoozeUntil;
 			}
 		},
 		setCurrentVersion(version, explicitTimestamp) {
 			if (!version) return;
-			this.currentVersion = String(version);
-			try {
-				window.localStorage?.setItem(VERSION_STORAGE_KEY, this.currentVersion);
-			} catch (err) {
-				console.warn("Failed to persist current version", err);
+			const normalized = String(version);
+			const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+			const { currentVersion, availableVersion, availableTimestamp } = this;
+			const updates = {};
+			const versionChanged = currentVersion !== normalized;
+			if (versionChanged) {
+				updates.currentVersion = normalized;
 			}
-			if (!this.availableVersion) {
-				this.availableVersion = this.currentVersion;
-				this.availableTimestamp = explicitTimestamp || parseTimestamp(this.currentVersion);
+			const shouldSyncAvailable = !availableVersion || availableVersion === currentVersion;
+			if (shouldSyncAvailable) {
+				if (availableVersion !== normalized) {
+					updates.availableVersion = normalized;
+				}
+				if ((timestamp ?? null) !== (availableTimestamp ?? null)) {
+					updates.availableTimestamp = timestamp ?? null;
+				}
+			}
+			if (Object.keys(updates).length) {
+				this.$patch(updates);
+			}
+			if (versionChanged && hasBrowserContext) {
+				safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
 			}
 		},
 		setAvailableVersion(version, explicitTimestamp) {
 			if (!version) return;
-			this.availableVersion = String(version);
-			this.availableTimestamp = explicitTimestamp || parseTimestamp(version);
-			if (!this.currentVersion) {
-				this.setCurrentVersion(version, this.availableTimestamp);
+			const normalized = String(version);
+			const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+			const { availableVersion, availableTimestamp, currentVersion } = this;
+			const updates = {};
+			const versionChanged = availableVersion !== normalized;
+			const timestampChanged = (timestamp ?? null) !== (availableTimestamp ?? null);
+			if (!versionChanged && !timestampChanged) {
+				if (!currentVersion) {
+					this.setCurrentVersion(normalized, timestamp ?? null);
+				}
+				return;
+			}
+			if (versionChanged) {
+				updates.availableVersion = normalized;
+			}
+			if (timestampChanged) {
+				updates.availableTimestamp = timestamp ?? null;
+			}
+			if (!currentVersion) {
+				updates.currentVersion = normalized;
+			}
+			if (Object.keys(updates).length) {
+				this.$patch(updates);
+			}
+			if (!currentVersion && hasBrowserContext) {
+				safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
 			}
 		},
 		markUpdateApplied(version, explicitTimestamp) {
+			const updates = {
+				reloading: false,
+				dismissedUntil: null,
+			};
 			if (version) {
-				this.setCurrentVersion(version, explicitTimestamp);
+				const normalized = String(version);
+				const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+				updates.currentVersion = normalized;
+				updates.availableVersion = normalized;
+				updates.availableTimestamp = timestamp ?? null;
+				if (hasBrowserContext) {
+					safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
+				}
+			} else if (this.currentVersion) {
+				const normalized = this.currentVersion;
+				const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+				updates.availableVersion = normalized;
+				updates.availableTimestamp = timestamp ?? null;
 			}
-			this.reloading = false;
-			this.availableVersion = this.currentVersion;
-			this.availableTimestamp = explicitTimestamp || parseTimestamp(this.currentVersion);
-			this.dismissedUntil = null;
-			if (typeof window !== "undefined") {
-				window.sessionStorage?.removeItem(SNOOZE_STORAGE_KEY);
+			this.$patch(updates);
+			if (hasBrowserContext) {
+				safeStorageRemove(window.sessionStorage, SNOOZE_STORAGE_KEY);
 			}
 		},
 		setReloadAction(action) {
+			if (this.reloadAction === action) return;
 			this.reloadAction = action;
 		},
 		reloadNow() {
-			if (typeof this.reloadAction === "function") {
-				this.reloading = true;
-				this.reloadAction();
+			if (typeof this.reloadAction !== "function" || this.reloading) {
+				return;
 			}
+			this.reloading = true;
+			this.reloadAction();
 		},
 		snooze(minutes = DEFAULT_SNOOZE_MINUTES) {
 			const until = Date.now() + minutes * 60 * 1000;
+			if (this.dismissedUntil === until) {
+				return;
+			}
 			this.dismissedUntil = until;
-			if (typeof window !== "undefined") {
-				try {
-					window.sessionStorage?.setItem(SNOOZE_STORAGE_KEY, String(until));
-				} catch (err) {
-					console.warn("Failed to persist snooze state", err);
-				}
+			if (hasBrowserContext) {
+				safeStorageSet(window.sessionStorage, SNOOZE_STORAGE_KEY, String(until));
 			}
 		},
 		resetSnooze() {
+			if (this.dismissedUntil === null) {
+				return;
+			}
 			this.dismissedUntil = null;
-			if (typeof window !== "undefined") {
-				window.sessionStorage?.removeItem(SNOOZE_STORAGE_KEY);
+			if (hasBrowserContext) {
+				safeStorageRemove(window.sessionStorage, SNOOZE_STORAGE_KEY);
 			}
 		},
 	},
