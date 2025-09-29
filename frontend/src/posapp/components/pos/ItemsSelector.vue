@@ -1584,46 +1584,27 @@ export default {
                         }
                 },
                 kickoffBackgroundSync() {
-                        if (this.isBackgroundLoading || !this.hasMoreCachedItems) {
+                        if (this.isBackgroundLoading || this.usesLimitSearch) {
                                 return Promise.resolve([]);
                         }
 
+                        const normalizedSearch = this.get_search(this.first_search || "").trim();
+
                         this.isBackgroundLoading = true;
 
-                        return new Promise((resolve) => {
-                                const appended = [];
-
-                                const step = async () => {
-                                        if (!this.hasMoreCachedItems) {
-                                                this.finishBackgroundLoad();
-                                                resolve(appended);
-                                                return;
+                        return this.backgroundSyncItems({
+                                groupFilter: this.item_group,
+                                searchValue: normalizedSearch
+                        })
+                                .then((appended) => {
+                                        if (Array.isArray(appended) && appended.length) {
+                                                this.eventBus.emit("set_all_items", this.items);
                                         }
-
-                                        try {
-                                                const page = await this.appendCachedItemsPage();
-
-                                                if (Array.isArray(page) && page.length) {
-                                                        appended.push(...page);
-                                                        this.eventBus.emit("set_all_items", this.items);
-
-                                                        if (this.hasMoreCachedItems) {
-                                                                requestAnimationFrame(step);
-                                                                return;
-                                                        }
-                                                }
-
-                                                this.finishBackgroundLoad();
-                                                resolve(appended);
-                                        } catch (error) {
-                                                console.error("Failed to append cached items:", error);
-                                                this.finishBackgroundLoad();
-                                                resolve(appended);
-                                        }
-                                };
-
-                                step();
-                        });
+                                        return appended;
+                                })
+                                .finally(() => {
+                                        this.finishBackgroundLoad();
+                                });
                 },
                 finishBackgroundLoad() {
                         this.isBackgroundLoading = false;
@@ -1645,7 +1626,6 @@ export default {
 			}
 		},
                 async backgroundLoadItems() {
-                        console.log("[ItemsSelector] backgroundLoadItems delegated to store pagination");
                         return this.kickoffBackgroundSync();
                 },
 

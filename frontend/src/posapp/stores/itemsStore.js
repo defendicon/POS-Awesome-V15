@@ -13,7 +13,10 @@ import {
     getItemsLastSync,
     getAllStoredItems,
     getStoredItemsCount,
-    searchStoredItems
+    searchStoredItems,
+    saveItemsBulk,
+    clearStoredItems,
+    setItemsLastSync
 } from '../../offline/index.js';
 
 const DEFAULT_PAGE_SIZE = 200;
@@ -108,6 +111,10 @@ export const useItemsStore = defineStore('items', () => {
     // Request management
     const requestToken = ref(0);
     const abortControllers = ref(new Map());
+    const backgroundSyncState = ref({
+        running: false,
+        token: 0
+    });
 
     // Multi-layer cache system
     const cache = ref({
@@ -158,6 +165,14 @@ export const useItemsStore = defineStore('items', () => {
     });
 
     const shouldUseIndexedSearch = () => {
+        if (limitSearchEnabled.value) {
+            return false;
+        }
+
+        return Boolean(posProfile.value?.posa_local_storage);
+    };
+
+    const shouldPersistItems = () => {
         if (limitSearchEnabled.value) {
             return false;
         }
@@ -341,6 +356,16 @@ export const useItemsStore = defineStore('items', () => {
             // Cache the results unless limit search requires fresh server lookups
             if (!limitSearchEnabled.value) {
                 await cacheItems(cacheKey, fetchedItems);
+            }
+
+            // Persist to IndexedDB and kick off background sync when appropriate
+            if (!searchValue && shouldPersistItems()) {
+                await persistItemsToStorage(fetchedItems, { replaceExisting: forceServer });
+                triggerBackgroundSync({
+                    groupFilter: normalizedGroup,
+                    initialBatch: fetchedItems,
+                    reset: false
+                });
             }
 
             // Background load additional data
@@ -626,6 +651,8 @@ export const useItemsStore = defineStore('items', () => {
             return filteredItems.value;
         }
 
+        cancelBackgroundSync();
+
         searchTerm.value = '';
         lastSearch.value = '';
         cachedPagination.value.enabled = false;
@@ -811,6 +838,179 @@ export const useItemsStore = defineStore('items', () => {
 
         // Cleanup old cache entries
         cleanupMemoryCache();
+    };
+
+    const persistItemsToStorage = async (itemsBatch, { replaceExisting = false } = {}) => {
+        if (!shouldPersistItems()) {
+            return;
+        }
+
+        if (!Array.isArray(itemsBatch) || itemsBatch.length === 0) {
+            return;
+        }
+
+        try {
+            if (replaceExisting) {
+                await clearStoredItems();
+            }
+
+            await saveItemsBulk(itemsBatch);
+            await updateCachedPaginationFromStorage();
+        } catch (error) {
+            console.error('Failed to persist items batch:', error);
+        }
+    };
+
+    const updateCachedPaginationFromStorage = async () => {
+        if (!shouldUseIndexedSearch()) {
+            cachedPagination.value.enabled = false;
+            cachedPagination.value.total = items.value.length;
+            cachedPagination.value.offset = items.value.length;
+            return;
+        }
+
+        try {
+            const storedCount = await getStoredItemsCount().catch(() => 0);
+            const resolvedCount = Number.isFinite(storedCount) ? storedCount : 0;
+
+            const shouldPaginate = resolvedCount > LARGE_CATALOG_THRESHOLD;
+            cachedPagination.value.enabled = shouldPaginate;
+            cachedPagination.value.total = resolvedCount;
+            cachedPagination.value.pageSize = resolvePageSize(DEFAULT_PAGE_SIZE);
+            cachedPagination.value.offset = Math.min(resolvedCount, items.value.length);
+            totalItemCount.value = Math.max(totalItemCount.value, resolvedCount);
+        } catch (error) {
+            console.warn('Failed to update cached pagination state:', error);
+        }
+    };
+
+    const cancelBackgroundSync = () => {
+        backgroundSyncState.value.token += 1;
+        backgroundSyncState.value.running = false;
+        isBackgroundLoading.value = false;
+    };
+
+    const backgroundSyncItems = async (options = {}) => {
+        const {
+            reset = false,
+            groupFilter = itemGroup.value,
+            searchValue = searchTerm.value,
+            initialBatch = []
+        } = options;
+
+        if (!shouldPersistItems()) {
+            return [];
+        }
+
+        if (searchValue && searchValue.trim().length > 0) {
+            return [];
+        }
+
+        const normalizedGroup = typeof groupFilter === 'string' && groupFilter.length > 0
+            ? groupFilter
+            : 'ALL';
+
+        const token = ++backgroundSyncState.value.token;
+        backgroundSyncState.value.running = true;
+        isBackgroundLoading.value = true;
+
+        const appended = [];
+
+        try {
+            if (reset) {
+                await clearStoredItems();
+                if (Array.isArray(initialBatch) && initialBatch.length) {
+                    await saveItemsBulk(initialBatch);
+                    await updateCachedPaginationFromStorage();
+                }
+            }
+
+            let loaded = items.value.length;
+            let lastItemName = items.value.length
+                ? items.value[items.value.length - 1]?.item_name || null
+                : null;
+
+            const limit = resolvePageSize(DEFAULT_PAGE_SIZE);
+            const profileGroups = posProfile.value?.item_groups?.map(g => g.item_group) || [];
+
+            while (backgroundSyncState.value.token === token && shouldPersistItems()) {
+                const response = await frappe.call({
+                    method: 'posawesome.posawesome.api.items.get_items',
+                    args: {
+                        pos_profile: JSON.stringify(posProfile.value),
+                        price_list: activePriceList.value,
+                        item_group:
+                            normalizedGroup !== 'ALL'
+                                ? normalizedGroup.toLowerCase()
+                                : '',
+                        search_value: '',
+                        customer: customer.value,
+                        include_image: 1,
+                        item_groups: profileGroups,
+                        start_after: lastItemName,
+                        limit
+                    }
+                });
+
+                if (backgroundSyncState.value.token !== token) {
+                    break;
+                }
+
+                const batch = Array.isArray(response.message) ? response.message : [];
+                if (batch.length === 0) {
+                    break;
+                }
+
+                await saveItemsBulk(batch);
+                setItems(batch, { append: true });
+                appended.push(...batch);
+                loaded += batch.length;
+                lastItemName = batch[batch.length - 1]?.item_name || lastItemName;
+
+                await updateCachedPaginationFromStorage();
+
+                if (totalItemCount.value > 0) {
+                    loadProgress.value = Math.min(99, Math.round((loaded / totalItemCount.value) * 100));
+                } else if (loaded > 0) {
+                    loadProgress.value = Math.min(99, Math.round((loaded / (loaded + limit)) * 100));
+                }
+
+                if (batch.length < limit) {
+                    break;
+                }
+            }
+
+            if (backgroundSyncState.value.token === token) {
+                loadProgress.value = 100;
+                itemsLoaded.value = true;
+                await updateCachedPaginationFromStorage();
+                setItemsLastSync(new Date().toISOString());
+            }
+
+            return appended;
+        } catch (error) {
+            console.error('Background item sync failed:', error);
+            return appended;
+        } finally {
+            if (backgroundSyncState.value.token === token) {
+                backgroundSyncState.value.running = false;
+                isBackgroundLoading.value = false;
+            }
+        }
+    };
+
+    const triggerBackgroundSync = (options = {}) => {
+        if (!shouldPersistItems()) {
+            return;
+        }
+
+        if (backgroundSyncState.value.running) {
+            return;
+        }
+
+        backgroundSyncItems(options).catch(error => {
+            console.error('Failed to trigger background sync:', error);
+        });
     };
 
     const getCachedSearchResult = (cacheKey) => {
@@ -1220,6 +1420,7 @@ export const useItemsStore = defineStore('items', () => {
         refreshItems,
         appendCachedItemsPage,
         resetCachedItemsForGroup,
+        backgroundSyncItems,
         getItemByCode,
         getItemByBarcode,
         addScannedItem,
