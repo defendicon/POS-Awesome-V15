@@ -13,7 +13,10 @@ import {
     getItemsLastSync,
     getAllStoredItems,
     getStoredItemsCount,
-    searchStoredItems
+    searchStoredItems,
+    saveItemsBulk,
+    clearStoredItems,
+    setItemsLastSync
 } from '../../offline/index.js';
 
 const DEFAULT_PAGE_SIZE = 200;
@@ -108,6 +111,10 @@ export const useItemsStore = defineStore('items', () => {
     // Request management
     const requestToken = ref(0);
     const abortControllers = ref(new Map());
+    const backgroundSyncState = ref({
+        running: false,
+        token: 0
+    });
 
     // Multi-layer cache system
     const cache = ref({
@@ -158,6 +165,14 @@ export const useItemsStore = defineStore('items', () => {
     });
 
     const shouldUseIndexedSearch = () => {
+        if (limitSearchEnabled.value) {
+            return false;
+        }
+
+        return Boolean(posProfile.value?.posa_local_storage);
+    };
+
+    const shouldPersistItems = () => {
         if (limitSearchEnabled.value) {
             return false;
         }
@@ -343,6 +358,16 @@ export const useItemsStore = defineStore('items', () => {
                 await cacheItems(cacheKey, fetchedItems);
             }
 
+            // Persist to IndexedDB and kick off background sync when appropriate
+            if (!searchValue && shouldPersistItems()) {
+                await persistItemsToStorage(fetchedItems, { replaceExisting: forceServer });
+                triggerBackgroundSync({
+                    groupFilter: normalizedGroup,
+                    initialBatch: fetchedItems,
+                    reset: false
+                });
+            }
+
             // Background load additional data
             if (fetchedItems.length > 0) {
                 backgroundLoadItemDetails(fetchedItems);
@@ -370,8 +395,7 @@ export const useItemsStore = defineStore('items', () => {
 
         if (!term || term.length < 2) {
             if (limitSearchEnabled.value) {
-                clearLimitSearchResults();
-                return [];
+                return clearLimitSearchResults({ preserveItems: true });
             }
 
             // Reset to all items if search is too short
@@ -382,7 +406,7 @@ export const useItemsStore = defineStore('items', () => {
                 cachedPagination.value.offset = Math.min(cachedPagination.value.offset, items.value.length);
                 filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
             }
-            return;
+            return filteredItems.value;
         }
 
         if (limitSearchEnabled.value) {
@@ -622,10 +646,12 @@ export const useItemsStore = defineStore('items', () => {
         }
     };
 
-    const clearLimitSearchResults = () => {
+    const clearLimitSearchResults = ({ preserveItems = false } = {}) => {
         if (!limitSearchEnabled.value) {
-            return;
+            return filteredItems.value;
         }
+
+        cancelBackgroundSync();
 
         searchTerm.value = '';
         lastSearch.value = '';
@@ -640,9 +666,15 @@ export const useItemsStore = defineStore('items', () => {
                 : 'ALL';
 
         clearSearchCache();
+        if (preserveItems) {
+            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            return filteredItems.value;
+        }
+
         setItems([], { replace: true, totalCount: 0 });
         itemsLoaded.value = false;
         loadProgress.value = 0;
+        return filteredItems.value;
     };
 
     const updateIndexes = (itemList) => {
@@ -676,14 +708,71 @@ export const useItemsStore = defineStore('items', () => {
     };
 
     const performLocalSearch = (term, itemList) => {
+        if (!term) {
+            return filterItemsByGroup(itemList, itemGroup.value);
+        }
+
         const searchTerm = term.toLowerCase();
+        const includeSerial = normalizeBooleanSetting(posProfile.value?.posa_search_serial_no);
+        const includeBatch = normalizeBooleanSetting(posProfile.value?.posa_search_batch_no);
+
         return itemList.filter(item => {
-            return (
-                item.item_code.toLowerCase().includes(searchTerm) ||
-                item.item_name.toLowerCase().includes(searchTerm) ||
-                (item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
-                (item.description && item.description.toLowerCase().includes(searchTerm))
-            );
+            if (!item) {
+                return false;
+            }
+
+            const fields = [];
+
+            if (item.item_code) {
+                fields.push(item.item_code);
+            }
+            if (item.item_name) {
+                fields.push(item.item_name);
+            }
+            if (item.barcode) {
+                fields.push(item.barcode);
+            }
+            if (item.description) {
+                fields.push(item.description);
+            }
+
+            if (Array.isArray(item.item_barcode)) {
+                item.item_barcode.forEach(entry => {
+                    if (entry?.barcode) {
+                        fields.push(entry.barcode);
+                    }
+                });
+            } else if (item.item_barcode) {
+                fields.push(String(item.item_barcode));
+            }
+
+            if (Array.isArray(item.barcodes)) {
+                item.barcodes.forEach(code => {
+                    if (code) {
+                        fields.push(String(code));
+                    }
+                });
+            }
+
+            if (includeSerial && Array.isArray(item.serial_no_data)) {
+                item.serial_no_data.forEach(serial => {
+                    if (serial?.serial_no) {
+                        fields.push(serial.serial_no);
+                    }
+                });
+            }
+
+            if (includeBatch && Array.isArray(item.batch_no_data)) {
+                item.batch_no_data.forEach(batch => {
+                    if (batch?.batch_no) {
+                        fields.push(batch.batch_no);
+                    }
+                });
+            }
+
+            return fields
+                .filter(Boolean)
+                .some(field => field.toLowerCase().includes(searchTerm));
         });
     };
 
@@ -749,6 +838,179 @@ export const useItemsStore = defineStore('items', () => {
 
         // Cleanup old cache entries
         cleanupMemoryCache();
+    };
+
+    const persistItemsToStorage = async (itemsBatch, { replaceExisting = false } = {}) => {
+        if (!shouldPersistItems()) {
+            return;
+        }
+
+        if (!Array.isArray(itemsBatch) || itemsBatch.length === 0) {
+            return;
+        }
+
+        try {
+            if (replaceExisting) {
+                await clearStoredItems();
+            }
+
+            await saveItemsBulk(itemsBatch);
+            await updateCachedPaginationFromStorage();
+        } catch (error) {
+            console.error('Failed to persist items batch:', error);
+        }
+    };
+
+    const updateCachedPaginationFromStorage = async () => {
+        if (!shouldUseIndexedSearch()) {
+            cachedPagination.value.enabled = false;
+            cachedPagination.value.total = items.value.length;
+            cachedPagination.value.offset = items.value.length;
+            return;
+        }
+
+        try {
+            const storedCount = await getStoredItemsCount().catch(() => 0);
+            const resolvedCount = Number.isFinite(storedCount) ? storedCount : 0;
+
+            const shouldPaginate = resolvedCount > LARGE_CATALOG_THRESHOLD;
+            cachedPagination.value.enabled = shouldPaginate;
+            cachedPagination.value.total = resolvedCount;
+            cachedPagination.value.pageSize = resolvePageSize(DEFAULT_PAGE_SIZE);
+            cachedPagination.value.offset = Math.min(resolvedCount, items.value.length);
+            totalItemCount.value = Math.max(totalItemCount.value, resolvedCount);
+        } catch (error) {
+            console.warn('Failed to update cached pagination state:', error);
+        }
+    };
+
+    const cancelBackgroundSync = () => {
+        backgroundSyncState.value.token += 1;
+        backgroundSyncState.value.running = false;
+        isBackgroundLoading.value = false;
+    };
+
+    const backgroundSyncItems = async (options = {}) => {
+        const {
+            reset = false,
+            groupFilter = itemGroup.value,
+            searchValue = searchTerm.value,
+            initialBatch = []
+        } = options;
+
+        if (!shouldPersistItems()) {
+            return [];
+        }
+
+        if (searchValue && searchValue.trim().length > 0) {
+            return [];
+        }
+
+        const normalizedGroup = typeof groupFilter === 'string' && groupFilter.length > 0
+            ? groupFilter
+            : 'ALL';
+
+        const token = ++backgroundSyncState.value.token;
+        backgroundSyncState.value.running = true;
+        isBackgroundLoading.value = true;
+
+        const appended = [];
+
+        try {
+            if (reset) {
+                await clearStoredItems();
+                if (Array.isArray(initialBatch) && initialBatch.length) {
+                    await saveItemsBulk(initialBatch);
+                    await updateCachedPaginationFromStorage();
+                }
+            }
+
+            let loaded = items.value.length;
+            let lastItemName = items.value.length
+                ? items.value[items.value.length - 1]?.item_name || null
+                : null;
+
+            const limit = resolvePageSize(DEFAULT_PAGE_SIZE);
+            const profileGroups = posProfile.value?.item_groups?.map(g => g.item_group) || [];
+
+            while (backgroundSyncState.value.token === token && shouldPersistItems()) {
+                const response = await frappe.call({
+                    method: 'posawesome.posawesome.api.items.get_items',
+                    args: {
+                        pos_profile: JSON.stringify(posProfile.value),
+                        price_list: activePriceList.value,
+                        item_group:
+                            normalizedGroup !== 'ALL'
+                                ? normalizedGroup.toLowerCase()
+                                : '',
+                        search_value: '',
+                        customer: customer.value,
+                        include_image: 1,
+                        item_groups: profileGroups,
+                        start_after: lastItemName,
+                        limit
+                    }
+                });
+
+                if (backgroundSyncState.value.token !== token) {
+                    break;
+                }
+
+                const batch = Array.isArray(response.message) ? response.message : [];
+                if (batch.length === 0) {
+                    break;
+                }
+
+                await saveItemsBulk(batch);
+                setItems(batch, { append: true });
+                appended.push(...batch);
+                loaded += batch.length;
+                lastItemName = batch[batch.length - 1]?.item_name || lastItemName;
+
+                await updateCachedPaginationFromStorage();
+
+                if (totalItemCount.value > 0) {
+                    loadProgress.value = Math.min(99, Math.round((loaded / totalItemCount.value) * 100));
+                } else if (loaded > 0) {
+                    loadProgress.value = Math.min(99, Math.round((loaded / (loaded + limit)) * 100));
+                }
+
+                if (batch.length < limit) {
+                    break;
+                }
+            }
+
+            if (backgroundSyncState.value.token === token) {
+                loadProgress.value = 100;
+                itemsLoaded.value = true;
+                await updateCachedPaginationFromStorage();
+                setItemsLastSync(new Date().toISOString());
+            }
+
+            return appended;
+        } catch (error) {
+            console.error('Background item sync failed:', error);
+            return appended;
+        } finally {
+            if (backgroundSyncState.value.token === token) {
+                backgroundSyncState.value.running = false;
+                isBackgroundLoading.value = false;
+            }
+        }
+    };
+
+    const triggerBackgroundSync = (options = {}) => {
+        if (!shouldPersistItems()) {
+            return;
+        }
+
+        if (backgroundSyncState.value.running) {
+            return;
+        }
+
+        backgroundSyncItems(options).catch(error => {
+            console.error('Failed to trigger background sync:', error);
+        });
     };
 
     const getCachedSearchResult = (cacheKey) => {
@@ -1158,6 +1420,7 @@ export const useItemsStore = defineStore('items', () => {
         refreshItems,
         appendCachedItemsPage,
         resetCachedItemsForGroup,
+        backgroundSyncItems,
         getItemByCode,
         getItemByBarcode,
         addScannedItem,
