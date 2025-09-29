@@ -909,7 +909,7 @@ export default {
                                 return [];
                         }
 
-                        let filtered = this.items;
+			let filtered = this.items;
 
 			// Filter by item group
 			if (itemGroup !== "ALL") {
@@ -922,69 +922,26 @@ export default {
 			// Filter by search term only if it exists and is long enough
                         if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
                                 const term = searchTerm.toLowerCase();
-                                const tokens = term.split(/\s+/).filter(Boolean);
-                                filtered = filtered.filter((item) => {
-                                        const searchFields = this.buildSearchFieldList(item);
+				filtered = filtered.filter((item) => {
+					const barcodeMatch =
+						(Array.isArray(item.item_barcode) &&
+							item.item_barcode.some(
+								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
+							)) ||
+						(Array.isArray(item.barcodes) &&
+							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
+						(item.barcode && String(item.barcode).toLowerCase().includes(term));
 
-                                        if (!tokens.length) {
-                                                return searchFields.some((field) => field.includes(term));
-                                        }
-
-                                        return tokens.every((token) =>
-                                                searchFields.some((field) => field.includes(token)),
-                                        );
-                                });
-                        }
+					return (
+						item.item_code.toLowerCase().includes(term) ||
+						item.item_name.toLowerCase().includes(term) ||
+						barcodeMatch
+					);
+				});
+			}
 
                         perfMarkEnd("pos:search-filter", mark);
                         return filtered;
-                },
-
-                buildSearchFieldList(item) {
-                        const barcodeList = [];
-
-                        if (Array.isArray(item.item_barcode)) {
-                                barcodeList.push(
-                                        ...item.item_barcode
-                                                .map((b) => (b && b.barcode ? b.barcode : null))
-                                                .filter(Boolean),
-                                );
-                        } else if (item.item_barcode) {
-                                barcodeList.push(String(item.item_barcode));
-                        }
-
-                        if (Array.isArray(item.barcodes)) {
-                                barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
-                        }
-
-                        const extraFields = [];
-
-                        if (this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)) {
-                                extraFields.push(
-                                        ...item.serial_no_data
-                                                .map((s) => (s && s.serial_no ? s.serial_no : null))
-                                                .filter(Boolean),
-                                );
-                        }
-
-                        if (this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)) {
-                                extraFields.push(
-                                        ...item.batch_no_data
-                                                .map((b) => (b && b.batch_no ? b.batch_no : null))
-                                                .filter(Boolean),
-                                );
-                        }
-
-                        return [
-                                item.item_code,
-                                item.item_name,
-                                item.barcode,
-                                item.description,
-                                ...barcodeList,
-                                ...extraFields,
-                        ]
-                                .filter(Boolean)
-                                .map((field) => String(field).toLowerCase());
                 },
 
 		async fetchServerItemsTimestamp() {
@@ -3532,21 +3489,37 @@ export default {
 			let filteredItems = [...this.items];
 
 			// Apply search filter only for queries with at least three characters
-                        if (searchTerm.length >= 3) {
-                                const tokens = searchTerm.split(/\s+/).filter(Boolean);
+			if (searchTerm.length >= 3) {
+				filteredItems = filteredItems.filter((item) => {
+					const barcodeList = [];
+					if (Array.isArray(item.item_barcode)) {
+						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
+					} else if (item.item_barcode) {
+						barcodeList.push(String(item.item_barcode));
+					}
+					if (Array.isArray(item.barcodes)) {
+						barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
+					}
 
-                                filteredItems = filteredItems.filter((item) => {
-                                        const searchFields = this.buildSearchFieldList(item);
+					const searchFields = [
+						item.item_code,
+						item.item_name,
+						item.barcode,
+						item.description,
+						...barcodeList,
+						...(this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
+							? item.serial_no_data.map((s) => s.serial_no)
+							: []),
+						...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
+							? item.batch_no_data.map((b) => b.batch_no)
+							: []),
+					]
+						.filter(Boolean)
+						.map((field) => field.toLowerCase());
 
-                                        if (!tokens.length) {
-                                                return searchFields.some((field) => field.includes(searchTerm));
-                                        }
-
-                                        return tokens.every((token) =>
-                                                searchFields.some((field) => field.includes(token)),
-                                        );
-                                });
-                        }
+					return searchFields.some((field) => field.includes(searchTerm));
+				});
+			}
 
 			// Apply item group filter
 			if (this.item_group !== "ALL") {
