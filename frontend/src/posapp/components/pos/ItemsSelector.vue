@@ -979,13 +979,84 @@ export default {
                                         }
 
                                         return tokens.every((token) =>
-                                                allValues.some((value) => value.includes(token)),
+                                                allValues.some((value) => this.tokenMatchesValue(value, token)),
                                         );
                                 });
                         }
 
                         perfMarkEnd("pos:search-filter", mark);
                         return filtered;
+                },
+
+                tokenMatchesValue(value, token) {
+                        if (!value || !token) {
+                                return false;
+                        }
+
+                        if (value.includes(token) || token.includes(value)) {
+                                return true;
+                        }
+
+                        const valueTokens = value.split(/[^a-z0-9]+/i).filter(Boolean);
+
+                        return valueTokens.some((candidate) => {
+                                if (!candidate) {
+                                        return false;
+                                }
+
+                                if (candidate.includes(token) || token.includes(candidate)) {
+                                        return true;
+                                }
+
+                                const distance = this.levenshteinDistance(candidate, token);
+                                const maxLength = Math.max(candidate.length, token.length);
+
+                                if (maxLength <= 2) {
+                                        return distance === 0;
+                                }
+
+                                const threshold = Math.max(1, Math.floor(maxLength / 3));
+                                return distance <= threshold;
+                        });
+                },
+
+                levenshteinDistance(a, b) {
+                        const aLength = a.length;
+                        const bLength = b.length;
+
+                        if (aLength === 0) {
+                                return bLength;
+                        }
+
+                        if (bLength === 0) {
+                                return aLength;
+                        }
+
+                        const matrix = Array.from({ length: bLength + 1 }, () => new Array(aLength + 1).fill(0));
+
+                        for (let i = 0; i <= aLength; i += 1) {
+                                matrix[0][i] = i;
+                        }
+
+                        for (let j = 0; j <= bLength; j += 1) {
+                                matrix[j][0] = j;
+                        }
+
+                        for (let j = 1; j <= bLength; j += 1) {
+                                for (let i = 1; i <= aLength; i += 1) {
+                                        if (b[j - 1] === a[i - 1]) {
+                                                matrix[j][i] = matrix[j - 1][i - 1];
+                                        } else {
+                                                matrix[j][i] = Math.min(
+                                                        matrix[j - 1][i] + 1,
+                                                        matrix[j][i - 1] + 1,
+                                                        matrix[j - 1][i - 1] + 1,
+                                                );
+                                        }
+                                }
+                        }
+
+                        return matrix[bLength][aLength];
                 },
 
 		async fetchServerItemsTimestamp() {
