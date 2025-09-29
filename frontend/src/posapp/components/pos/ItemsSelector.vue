@@ -2470,10 +2470,27 @@ export default {
                         };
 
                         if (this.usesLimitSearch) {
-                                this.clearLimitSearchResults();
+                                const preservedItems =
+                                        this.clearLimitSearchResults({ preserveItems: true }) ||
+                                        this.items ||
+                                        [];
                                 this.resetBarcodeIndex();
-                                this.eventBus.emit("set_all_items", []);
-                                this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+
+                                if (Array.isArray(preservedItems) && preservedItems.length) {
+                                        this.eventBus.emit("set_all_items", preservedItems);
+                                } else if (Array.isArray(this.items) && this.items.length) {
+                                        this.eventBus.emit("set_all_items", this.items);
+                                }
+
+                                if (shouldReload) {
+                                        this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+                                        const reloadPromise = this.get_items(true);
+                                        if (reloadPromise && typeof reloadPromise.finally === "function") {
+                                                reloadPromise.finally(release);
+                                                return reloadPromise;
+                                        }
+                                }
+
                                 release();
                                 return;
                         }

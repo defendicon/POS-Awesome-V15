@@ -370,8 +370,7 @@ export const useItemsStore = defineStore('items', () => {
 
         if (!term || term.length < 2) {
             if (limitSearchEnabled.value) {
-                clearLimitSearchResults();
-                return [];
+                return clearLimitSearchResults({ preserveItems: true });
             }
 
             // Reset to all items if search is too short
@@ -382,7 +381,7 @@ export const useItemsStore = defineStore('items', () => {
                 cachedPagination.value.offset = Math.min(cachedPagination.value.offset, items.value.length);
                 filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
             }
-            return;
+            return filteredItems.value;
         }
 
         if (limitSearchEnabled.value) {
@@ -622,9 +621,9 @@ export const useItemsStore = defineStore('items', () => {
         }
     };
 
-    const clearLimitSearchResults = () => {
+    const clearLimitSearchResults = ({ preserveItems = false } = {}) => {
         if (!limitSearchEnabled.value) {
-            return;
+            return filteredItems.value;
         }
 
         searchTerm.value = '';
@@ -640,9 +639,15 @@ export const useItemsStore = defineStore('items', () => {
                 : 'ALL';
 
         clearSearchCache();
+        if (preserveItems) {
+            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            return filteredItems.value;
+        }
+
         setItems([], { replace: true, totalCount: 0 });
         itemsLoaded.value = false;
         loadProgress.value = 0;
+        return filteredItems.value;
     };
 
     const updateIndexes = (itemList) => {
@@ -676,14 +681,71 @@ export const useItemsStore = defineStore('items', () => {
     };
 
     const performLocalSearch = (term, itemList) => {
+        if (!term) {
+            return filterItemsByGroup(itemList, itemGroup.value);
+        }
+
         const searchTerm = term.toLowerCase();
+        const includeSerial = normalizeBooleanSetting(posProfile.value?.posa_search_serial_no);
+        const includeBatch = normalizeBooleanSetting(posProfile.value?.posa_search_batch_no);
+
         return itemList.filter(item => {
-            return (
-                item.item_code.toLowerCase().includes(searchTerm) ||
-                item.item_name.toLowerCase().includes(searchTerm) ||
-                (item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
-                (item.description && item.description.toLowerCase().includes(searchTerm))
-            );
+            if (!item) {
+                return false;
+            }
+
+            const fields = [];
+
+            if (item.item_code) {
+                fields.push(item.item_code);
+            }
+            if (item.item_name) {
+                fields.push(item.item_name);
+            }
+            if (item.barcode) {
+                fields.push(item.barcode);
+            }
+            if (item.description) {
+                fields.push(item.description);
+            }
+
+            if (Array.isArray(item.item_barcode)) {
+                item.item_barcode.forEach(entry => {
+                    if (entry?.barcode) {
+                        fields.push(entry.barcode);
+                    }
+                });
+            } else if (item.item_barcode) {
+                fields.push(String(item.item_barcode));
+            }
+
+            if (Array.isArray(item.barcodes)) {
+                item.barcodes.forEach(code => {
+                    if (code) {
+                        fields.push(String(code));
+                    }
+                });
+            }
+
+            if (includeSerial && Array.isArray(item.serial_no_data)) {
+                item.serial_no_data.forEach(serial => {
+                    if (serial?.serial_no) {
+                        fields.push(serial.serial_no);
+                    }
+                });
+            }
+
+            if (includeBatch && Array.isArray(item.batch_no_data)) {
+                item.batch_no_data.forEach(batch => {
+                    if (batch?.batch_no) {
+                        fields.push(batch.batch_no);
+                    }
+                });
+            }
+
+            return fields
+                .filter(Boolean)
+                .some(field => field.toLowerCase().includes(searchTerm));
         });
     };
 
