@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from typing import Iterable, List
 
 import frappe
 from erpnext.stock.doctype.batch.batch import (
@@ -15,6 +16,45 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import redis_cache
 
 from .utils import HAS_VARIANTS_EXCLUSION, get_item_groups, expand_item_groups
+
+
+def _dict_to_filters_list(filters_dict: dict) -> List[List[object]]:
+    """Convert frappe.get_all-style filter dicts into list-based filters."""
+
+    filters_list: List[List[object]] = []
+    for field, condition in (filters_dict or {}).items():
+        if isinstance(condition, (list, tuple)):
+            if len(condition) == 0:
+                continue
+            if len(condition) == 1:
+                filters_list.append([field, "=", condition[0]])
+            elif len(condition) == 2:
+                filters_list.append([field, condition[0], condition[1]])
+            else:
+                filters_list.append(list(condition))
+        else:
+            filters_list.append([field, "=", condition])
+    return filters_list
+
+
+def _build_search_term_filters(search_terms: Iterable[str]) -> List[List[object]]:
+    """Return filters that ensure all search terms are matched order-agnostically."""
+
+    term_filters: List[List[object]] = []
+    for raw_term in search_terms:
+        term = cstr(raw_term).strip()
+        if not term:
+            continue
+        like_term = f"%{frappe.db.escape_like(term)}%"
+        term_filters.append(
+            [
+                "or",
+                ["name", "like", like_term],
+                ["item_name", "like", like_term],
+                ["item_code", "like", like_term],
+            ]
+        )
+    return term_filters
 
 
 def normalize_brand(brand: str) -> str:
@@ -193,6 +233,18 @@ def get_items(
 
         result = []
 
+        search_terms: List[str] = []
+        if search_value:
+            normalized_value = " ".join(cstr(search_value).split())
+            if normalized_value:
+                seen_terms = set()
+                for term in normalized_value.split(" "):
+                    lowered = term.lower()
+                    if lowered in seen_terms:
+                        continue
+                    seen_terms.add(lowered)
+                    search_terms.append(term)
+
         # Build ORM filters
         filters = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
         if start_after:
@@ -246,6 +298,11 @@ def get_items(
         if pos_profile.get("posa_hide_variants_items"):
             filters["variant_of"] = ["is", "not set"]
 
+        term_filters = _build_search_term_filters(search_terms)
+        filters_for_query = _dict_to_filters_list(filters)
+        if term_filters:
+            filters_for_query.extend(term_filters)
+
         # Determine limit
         limit_page_length = None
         limit_start = None
@@ -288,7 +345,7 @@ def get_items(
         while True:
             items_data = frappe.get_all(
                 "Item",
-                filters=filters,
+                filters=filters_for_query,
                 or_filters=or_filters if or_filters else None,
                 fields=fields,
                 limit_start=page_start,
@@ -299,7 +356,7 @@ def get_items(
             if not items_data and item_code_for_search and page_start == (limit_start or 0):
                 items_data = frappe.get_all(
                     "Item",
-                    filters=filters,
+                    filters=filters_for_query,
                     or_filters=[
                         ["name", "like", f"%{item_code_for_search}%"],
                         ["item_name", "like", f"%{item_code_for_search}%"],
