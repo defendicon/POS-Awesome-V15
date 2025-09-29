@@ -1514,7 +1514,7 @@ export default {
 			}
 		},
 		// Print invoice using a more detailed offline template
-		async print_offline_invoice(invoice) {
+		async print_offline_invoiceOld(invoice) {
 			if (!invoice) return;
 			const html = await renderOfflineInvoiceHTML(invoice);
 			const win = window.open("", "_blank");
@@ -1523,6 +1523,32 @@ export default {
 			win.focus();
 			win.print();
 		},
+
+		async print_offline_invoice(invoice) {
+			if (!invoice) return;
+			const html = await renderOfflineInvoiceHTML(invoice);
+			const printWindow = window.open('', 'PRINT', 'height=600,width=800');
+
+			if (printWindow) {
+				printWindow.document.body.innerHTML = html;
+				printWindow.document.close();
+				printWindow.focus();
+
+				// Close the popup automatically after printing
+				printWindow.onafterprint = () => {
+					printWindow.close();
+				};
+
+				printWindow.print();
+
+				setTimeout(() => {
+					if (!printWindow.closed) {
+						printWindow.close();
+					}
+				}, 1000);
+			}
+		},
+
 		// Validate due date (should not be in the past)
 		validate_due_date() {
 			const today = frappe.datetime.now_date();
