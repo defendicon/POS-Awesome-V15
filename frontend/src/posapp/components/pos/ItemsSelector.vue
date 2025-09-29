@@ -921,24 +921,68 @@ export default {
 
 			// Filter by search term only if it exists and is long enough
                         if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-                                const term = searchTerm.toLowerCase();
-				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+                                const rawTerm = searchTerm.toLowerCase().trim();
+                                const tokens = rawTerm.split(/\s+/).filter(Boolean);
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
-				});
-			}
+                                filtered = filtered.filter((item) => {
+                                        if (!item) {
+                                                return false;
+                                        }
+
+                                        const fields = [
+                                                item.item_code,
+                                                item.item_name,
+                                                item.description,
+                                                item.item_group,
+                                        ]
+                                                .filter((value) => typeof value === "string" && value)
+                                                .map((value) => value.toLowerCase());
+
+                                        const barcodeValues = [];
+
+                                        if (item.barcode) {
+                                                barcodeValues.push(String(item.barcode).toLowerCase());
+                                        }
+
+                                        if (Array.isArray(item.item_barcode)) {
+                                                item.item_barcode.forEach((b) => {
+                                                        if (b?.barcode) {
+                                                                barcodeValues.push(String(b.barcode).toLowerCase());
+                                                        }
+                                                });
+                                        }
+
+                                        if (Array.isArray(item.barcodes)) {
+                                                item.barcodes.forEach((bc) => {
+                                                        if (bc) {
+                                                                barcodeValues.push(String(bc).toLowerCase());
+                                                        }
+                                                });
+                                        }
+
+                                        if (Array.isArray(item.attributes)) {
+                                                item.attributes.forEach((attr) => {
+                                                        if (attr?.attribute_value) {
+                                                                fields.push(String(attr.attribute_value).toLowerCase());
+                                                        }
+                                                });
+                                        }
+
+                                        if (item.brand) {
+                                                fields.push(String(item.brand).toLowerCase());
+                                        }
+
+                                        const allValues = fields.concat(barcodeValues);
+
+                                        if (!allValues.length) {
+                                                return false;
+                                        }
+
+                                        return tokens.every((token) =>
+                                                allValues.some((value) => value.includes(token)),
+                                        );
+                                });
+                        }
 
                         perfMarkEnd("pos:search-filter", mark);
                         return filtered;
