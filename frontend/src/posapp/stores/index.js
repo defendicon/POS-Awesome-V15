@@ -9,5 +9,6 @@ export const pinia = createPinia();
 
 // Export stores
 export { useItemsStore } from './itemsStore.js';
+export { useUpdateStore, formatBuildVersion } from './updateStore.js';
 
 export default pinia;
