@@ -1573,6 +1573,21 @@ export default {
                         const search = this.get_search(this.first_search);
                         const gr = vm.item_group !== "ALL" ? vm.item_group.toLowerCase() : "";
                         const sr = search || "";
+                        const normalizedSearchTerm = sr.trim().toLowerCase();
+                        const normalizedGroupKey = ((vm.item_group || "ALL").trim() || "ALL").toLowerCase();
+                        let localFuzzyMatches = [];
+
+                        if (
+                                normalizedSearchTerm.length >= 3 &&
+                                Array.isArray(vm.items) &&
+                                vm.items.length > 0
+                        ) {
+                                const cachedLocalMatches = vm.memoizedSearch(search, vm.item_group);
+                                if (Array.isArray(cachedLocalMatches) && cachedLocalMatches.length > 0) {
+                                        localFuzzyMatches = cachedLocalMatches.slice();
+                                }
+                        }
+
                         const profileGroups = (vm.pos_profile?.item_groups || []).map((g) => g.item_group);
                         console.log("[ItemsSelector] prepared fetch params", { search: sr, item_group: gr });
 
@@ -1635,7 +1650,24 @@ export default {
 				});
 				console.log("[ItemsSelector] server responded", { count: response.message?.length });
 
-				const items = response.message || [];
+				let items = Array.isArray(response.message) ? [...response.message] : [];
+
+				if (localFuzzyMatches.length) {
+					const seenItemCodes = new Set(
+						items
+							.map((item) => item && item.item_code)
+							.filter((code) => typeof code === "string" && code)
+					);
+
+					localFuzzyMatches.forEach((item) => {
+						if (item && !seenItemCodes.has(item.item_code)) {
+							items.push(item);
+							if (item.item_code) {
+								seenItemCodes.add(item.item_code);
+							}
+						}
+					});
+				}
 
 				// Process items
 				items.forEach((item) => {
@@ -1657,6 +1689,12 @@ export default {
                                 vm.items_loaded = true;
 				vm.eventBus.emit("set_all_items", vm.items);
 				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
+
+				if (normalizedSearchTerm.length >= 3 && vm.searchCache) {
+					const cacheKey = `${normalizedSearchTerm}_${normalizedGroupKey}`;
+					const refreshedResults = vm.performSearch(search, vm.item_group);
+					vm.searchCache.set(cacheKey, refreshedResults);
+				}
 
 				const hasMore = !vm.pos_profile.pose_use_limit_search && items.length === vm.itemsPageLimit;
 				vm.loadProgress = vm.totalItemCount
