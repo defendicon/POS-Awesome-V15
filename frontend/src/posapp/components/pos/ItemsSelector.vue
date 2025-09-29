@@ -64,7 +64,8 @@
 								@keydown.enter="search_onchange"
 								@click:clear="clearSearch"
 								prepend-inner-icon="mdi-magnify"
-								@focus="handleItemSearchFocus"
+                                                                @focus="handleItemSearchFocus"
+                                                                @blur="handleItemSearchBlur"
 								ref="debounce_search"
                                                         >
                                                                 <template v-slot:append-inner>
@@ -661,6 +662,8 @@ export default {
                 scanQueuedCode: "",
                 refreshInFlight: false,
                 clearingSearch: false,
+                searchFieldFocused: false,
+                suppressSearchWatcherOnFocus: false,
         }),
 
         watch: {
@@ -822,7 +825,7 @@ export default {
 		},
 		// Automatically search when the query has at least 3 characters
                 first_search: _.debounce(function (val, oldVal) {
-                        if (this.clearingSearch) {
+                        if (this.clearingSearch || this.suppressSearchWatcherOnFocus) {
                                 return;
                         }
                         const newLen = (val || "").trim().length;
@@ -2702,12 +2705,16 @@ export default {
 				// No need to reload items when focus is lost
 			}
 		},
-		handleItemSearchFocus() {
-			this.first_search = "";
-			this.search = "";
-			// Optionally, you might want to also clear search_backup if the behaviour should be a full reset on focus
-			// this.search_backup = "";
-		},
+                handleItemSearchFocus() {
+                        this.searchFieldFocused = true;
+                        this.suppressSearchWatcherOnFocus = true;
+                        this.$nextTick(() => {
+                                this.suppressSearchWatcherOnFocus = false;
+                        });
+                },
+                handleItemSearchBlur() {
+                        this.searchFieldFocused = false;
+                },
 
                 focusItemSearch() {
                         if (this.cameraScannerActive) {
