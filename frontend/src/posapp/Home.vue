@@ -1,6 +1,7 @@
 <template>
 	<v-app class="container1" :class="rtlClasses">
 		<AppLoadingOverlay :visible="globalLoading" />
+		<UpdatePrompt />
 		<v-main class="main-content">
 			<Navbar
 				:pos-profile="posProfile"
@@ -43,6 +44,7 @@ import Navbar from "./components/Navbar.vue";
 import POS from "./components/pos/Pos.vue";
 import Payments from "./components/payments/Pay.vue";
 import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
+import UpdatePrompt from "./components/ui/UpdatePrompt.vue";
 import { useLoading } from "./composables/useLoading.js";
 import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "./utils/loading.js";
 import {
@@ -147,6 +149,7 @@ export default {
 		POS,
 		Payments,
 		AppLoadingOverlay,
+		UpdatePrompt,
 	},
 	mounted() {
 		this.remove_frappe_nav();
