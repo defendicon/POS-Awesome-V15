@@ -16,7 +16,8 @@ import {
     searchStoredItems,
     saveItemsBulk,
     clearStoredItems,
-    setItemsLastSync
+    setItemsLastSync,
+    isOffline
 } from '../../offline/index.js';
 
 const DEFAULT_PAGE_SIZE = 200;
@@ -310,6 +311,19 @@ export const useItemsStore = defineStore('items', () => {
                 }
             }
 
+            const navigatorOffline = typeof navigator !== 'undefined' && navigator && !navigator.onLine;
+            if (navigatorOffline || isOffline()) {
+                const offlineResults = await loadItemsFromOfflineStorage({
+                    searchValue,
+                    normalizedGroup,
+                    limit: resolvedLimit
+                });
+
+                performanceMetrics.value.cachedRequests++;
+                updatePerformanceMetrics(startTime);
+                return offlineResults;
+            }
+
             // Create abort controller
             const abortController = new AbortController();
             abortControllers.value.set(cacheKey, abortController);
@@ -377,10 +391,25 @@ export const useItemsStore = defineStore('items', () => {
             return fetchedItems;
 
         } catch (error) {
-            if (error.name !== 'AbortError') {
-                console.error('Failed to load items:', error);
-                throw error;
+            if (error.name === 'AbortError') {
+                return;
             }
+
+            console.error('Failed to load items:', error);
+
+            const offlineResults = await loadItemsFromOfflineStorage({
+                searchValue,
+                normalizedGroup,
+                limit: resolvedLimit
+            });
+
+            if (Array.isArray(offlineResults) && offlineResults.length) {
+                performanceMetrics.value.cachedRequests++;
+                updatePerformanceMetrics(startTime);
+                return offlineResults;
+            }
+
+            throw error;
         } finally {
             isLoading.value = false;
             if (cacheKey) {
@@ -1354,6 +1383,49 @@ export const useItemsStore = defineStore('items', () => {
         const { cachedRequests, totalRequests: total } = performanceMetrics.value;
         performanceMetrics.value.cacheHitRate = total > 0 ? (cachedRequests / total) * 100 : 0;
     };
+
+    async function loadItemsFromOfflineStorage({ searchValue, normalizedGroup, limit }) {
+        const trimmedSearch = (searchValue || '').trim();
+
+        try {
+            if (!trimmedSearch) {
+                await updateCachedPaginationFromStorage();
+                itemsLoaded.value = items.value.length > 0;
+                filteredItems.value = filterItemsByGroup(items.value, normalizedGroup);
+                cachedPagination.value.loading = false;
+                return items.value;
+            }
+
+            const effectiveLimit = Number.isFinite(limit) && limit > 0
+                ? limit
+                : resolvePageSize(DEFAULT_PAGE_SIZE);
+
+            const storedResults = await searchStoredItems({
+                search: trimmedSearch,
+                itemGroup: normalizedGroup,
+                limit: effectiveLimit,
+                offset: 0
+            });
+
+            const safeResults = Array.isArray(storedResults) ? storedResults : [];
+
+            setItems(safeResults, { replace: true, totalCount: safeResults.length });
+            filteredItems.value = safeResults;
+
+            cachedPagination.value.enabled = false;
+            cachedPagination.value.loading = false;
+            cachedPagination.value.offset = safeResults.length;
+            cachedPagination.value.total = safeResults.length;
+            cachedPagination.value.search = trimmedSearch;
+            cachedPagination.value.group = normalizedGroup;
+
+            itemsLoaded.value = true;
+            return safeResults;
+        } catch (error) {
+            console.warn('Failed to load items from offline storage:', error);
+            return [];
+        }
+    }
 
     const getEstimatedMemoryUsage = () => {
         try {
