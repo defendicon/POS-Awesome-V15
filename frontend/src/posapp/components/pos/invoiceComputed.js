@@ -1,17 +1,26 @@
 /* global flt, __, get_currency_symbol */
 import { perfMarkStart, perfMarkEnd } from "../../utils/perf.js";
 
-import { parseBooleanSetting } from '../../utils/stock.js';
+import { parseBooleanSetting } from "../../utils/stock.js";
 
 export default {
         // Calculate total quantity of all items
         total_qty() {
                 const mark = perfMarkStart("pos:totals-total_qty");
                 this.close_payments();
-                let qty = 0;
-                this.items.forEach((item) => {
-                        qty += flt(item.qty);
-                });
+                const store = this.invoiceStore;
+                const storeValue = store?.totalQty?.value ?? store?.totalQty;
+                let qty;
+
+                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
+                        qty = storeValue;
+                } else {
+                        qty = 0;
+                        this.items.forEach((item) => {
+                                qty += flt(item.qty);
+                        });
+                }
+
                 const result = this.flt(qty, this.float_precision);
                 perfMarkEnd("pos:totals-total_qty", mark);
                 return result;
@@ -19,13 +28,22 @@ export default {
         // Calculate total amount for all items (handles returns)
         Total() {
                 const mark = perfMarkStart("pos:totals-gross");
-                let sum = 0;
-                this.items.forEach((item) => {
-                        // For returns, use absolute value for correct calculation
-                        const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-                        const rate = flt(item.rate);
-                        sum += qty * rate;
-                });
+                const store = this.invoiceStore;
+                const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
+                let sum;
+
+                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
+                        sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
+                } else {
+                        sum = 0;
+                        this.items.forEach((item) => {
+                                // For returns, use absolute value for correct calculation
+                                const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                                const rate = flt(item.rate);
+                                sum += qty * rate;
+                        });
+                }
+
                 const result = this.flt(sum, this.currency_precision);
                 perfMarkEnd("pos:totals-gross", mark);
                 return result;
@@ -34,17 +52,24 @@ export default {
         subtotal() {
                 const mark = perfMarkStart("pos:totals-subtotal");
                 this.close_payments();
-                let sum = 0;
-                this.items.forEach((item) => {
-                        // For returns, use absolute value for correct calculation
-                        const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-                        const rate = flt(item.rate);
-			sum += qty * rate;
-		});
+                const store = this.invoiceStore;
+                const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
+                let sum = typeof storeValue === "number" && !Number.isNaN(storeValue) ? storeValue : 0;
 
-		// Subtract additional discount
-		const additional_discount = this.flt(this.additional_discount);
-		sum -= additional_discount;
+                if (!(typeof storeValue === "number" && !Number.isNaN(storeValue))) {
+                        this.items.forEach((item) => {
+                                // For returns, use absolute value for correct calculation
+                                const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                                const rate = flt(item.rate);
+                                sum += qty * rate;
+                        });
+                } else if (this.isReturnInvoice) {
+                        sum = Math.abs(sum);
+                }
+
+                // Subtract additional discount
+                const additional_discount = this.flt(this.additional_discount);
+                sum -= additional_discount;
 
 		// Add delivery charges
 		const delivery_charges = this.flt(this.delivery_charges_rate);
@@ -57,15 +82,24 @@ export default {
         // Calculate total discount amount for all items
         total_items_discount_amount() {
                 const mark = perfMarkStart("pos:totals-discount");
-                let sum = 0;
-                this.items.forEach((item) => {
-                        // For returns, use absolute value for correct calculation
-                        if (this.isReturnInvoice) {
-                                sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
-			} else {
-				sum += flt(item.qty) * flt(item.discount_amount);
-			}
-		});
+                const store = this.invoiceStore;
+                const storeValue = store?.discountTotal?.value ?? store?.discountTotal;
+                let sum;
+
+                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
+                        sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
+                } else {
+                        sum = 0;
+                        this.items.forEach((item) => {
+                                // For returns, use absolute value for correct calculation
+                                if (this.isReturnInvoice) {
+                                        sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
+                                } else {
+                                        sum += flt(item.qty) * flt(item.discount_amount);
+                                }
+                        });
+                }
+
                 const result = this.flt(sum, this.float_precision);
                 perfMarkEnd("pos:totals-discount", mark);
                 return result;

@@ -654,18 +654,21 @@
 import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 export default {
-	name: "ItemsTable",
-	props: {
-		headers: Array,
-		items: Array,
-		expanded: Array,
-		itemsPerPage: Number,
-		itemSearch: String,
-		pos_profile: Object,
-		invoice_doc: Object,
-		invoiceType: String,
-		stock_settings: Object,
+        name: "ItemsTable",
+        setup() {
+                const invoiceStore = useInvoiceStore();
+                return { invoiceStore };
+        },
+        props: {
+                headers: Array,
+                expanded: Array,
+                itemsPerPage: Number,
+                itemSearch: String,
+                pos_profile: Object,
+                invoiceType: String,
+                stock_settings: Object,
 		displayCurrency: String,
 		formatFloat: Function,
 		formatCurrency: Function,
@@ -708,9 +711,15 @@ export default {
 			lastUpdateTime: 0,
 		};
 	},
-	computed: {
-		// Dynamic container styles based on parent
-		containerStyles() {
+        computed: {
+                items() {
+                        return this.invoiceStore.items;
+                },
+                invoice_doc() {
+                        return this.invoiceStore.invoiceDoc || {};
+                },
+                // Dynamic container styles based on parent
+                containerStyles() {
 			return {
 				height: "calc(100% - 80px)",
 				maxHeight: "calc(100% - 80px)",

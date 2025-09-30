@@ -356,11 +356,13 @@ export default {
 	},
 
 	// Build the invoice document object for backend submission
-	get_invoice_doc() {
-		let doc = {};
-		if (this.invoice_doc.name) {
-			doc = { ...this.invoice_doc };
-		}
+        get_invoice_doc() {
+                let doc = {};
+                const sourceDoc = this.invoice_doc || {};
+
+                if (sourceDoc.name) {
+                        doc = { ...sourceDoc };
+                }
 
 		// Always set these fields first
 		if (this.invoiceType === "Quotation") {
@@ -379,16 +381,16 @@ export default {
 		doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
 
 		// Currency related fields
-		doc.currency = this.selected_currency || this.pos_profile.currency;
-		doc.conversion_rate =
-			(this.invoice_doc && this.invoice_doc.conversion_rate) || this.conversion_rate || 1;
+                doc.currency = this.selected_currency || this.pos_profile.currency;
+                doc.conversion_rate =
+                        (sourceDoc && sourceDoc.conversion_rate) || this.conversion_rate || 1;
 
-		// Use actual price list currency if available
-		doc.price_list_currency = this.price_list_currency || doc.currency;
+                // Use actual price list currency if available
+                doc.price_list_currency = this.price_list_currency || doc.currency;
 
-		doc.plc_conversion_rate =
-			(this.invoice_doc && this.invoice_doc.plc_conversion_rate) ||
-			(doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
+                doc.plc_conversion_rate =
+                        (sourceDoc && sourceDoc.plc_conversion_rate) ||
+                        (doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
 
 		// Other fields
 		doc.campaign = doc.campaign || this.pos_profile.campaign;
@@ -1010,16 +1012,20 @@ export default {
 				return;
 			}
 
-			let invoice_doc;
-			if (
-				this.invoiceType === "Order" &&
-				this.pos_profile.posa_create_only_sales_order &&
-				!this.new_delivery_date &&
-				!this.invoice_doc.posa_delivery_date
-			) {
+                        let invoice_doc;
+                        if (
+                                this.invoiceType === "Order" &&
+                                this.pos_profile.posa_create_only_sales_order &&
+                                !this.new_delivery_date &&
+                                !(this.invoice_doc && this.invoice_doc.posa_delivery_date)
+                        ) {
 				console.log("Building local Sales Order doc for payment");
 				invoice_doc = this.get_invoice_doc();
-			} else if (this.invoice_doc.doctype == "Sales Order" && this.invoiceType === "Invoice") {
+                        } else if (
+                                this.invoice_doc &&
+                                this.invoice_doc.doctype === "Sales Order" &&
+                                this.invoiceType === "Invoice"
+                        ) {
 				console.log("Processing Sales Order payment");
 				invoice_doc = await this.process_invoice_from_order();
 			} else {
@@ -1162,7 +1168,8 @@ export default {
 		}
 
 		// For return with reference to existing invoice
-		if (this.invoice_doc.is_return && this.invoice_doc.return_against) {
+                const currentInvoice = this.invoice_doc;
+                if (currentInvoice && currentInvoice.is_return && currentInvoice.return_against) {
 			console.log("Return doc:", this.invoice_doc);
 			console.log("Current items:", this.items);
 
@@ -1172,10 +1179,10 @@ export default {
 					frappe.call({
 						method: "frappe.client.get",
 						args: {
-							doctype: this.pos_profile.create_pos_invoice_instead_of_sales_invoice
-								? "POS Invoice"
-								: "Sales Invoice",
-							name: this.invoice_doc.return_against,
+                                                        doctype: this.pos_profile.create_pos_invoice_instead_of_sales_invoice
+                                                                ? "POS Invoice"
+                                                                : "Sales Invoice",
+                                                        name: currentInvoice.return_against,
 						},
 						callback: (r) => {
 							if (r.message) {

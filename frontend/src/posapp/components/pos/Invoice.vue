@@ -196,12 +196,10 @@
 					<ItemsTable
 						ref="itemsTable"
 						:headers="items_headers"
-						:items="items"
 						v-model:expanded="expanded"
 						:itemsPerPage="itemsPerPage"
 						:itemSearch="itemSearch"
 						:pos_profile="pos_profile"
-						:invoice_doc="invoice_doc"
 						:invoiceType="invoiceType"
 						:stock_settings="stock_settings"
 						:displayCurrency="displayCurrency"
@@ -342,18 +340,22 @@ import invoiceComputed from "./invoiceComputed";
 import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 
 export default {
-	name: "POSInvoice",
-	mixins: [format],
-	data() {
-		return {
-			// POS profile settings
-			pos_profile: "",
-			pos_opening_shift: "",
-			stock_settings: "",
-			invoice_doc: "",
-			return_doc: "",
+        name: "POSInvoice",
+        mixins: [format],
+        setup() {
+                const invoiceStore = useInvoiceStore();
+                return { invoiceStore };
+        },
+        data() {
+                return {
+                        // POS profile settings
+                        pos_profile: "",
+                        pos_opening_shift: "",
+                        stock_settings: "",
+                        return_doc: "",
 			customer: "",
 			customer_info: "",
 			customer_balance: 0,
@@ -361,9 +363,7 @@ export default {
 			additional_discount: 0,
 			additional_discount_percentage: 0,
 			total_tax: 0,
-			items: [], // List of invoice items
-			packed_items: [], // Packed items for bundles
-			packed_dialog_items: [], // Packed items displayed in dialog
+                        packed_dialog_items: [], // Packed items displayed in dialog
 			show_packed_dialog: false, // Packing list dialog visibility
 			posOffers: [], // All available offers
 			posa_offers: [], // Offers applied to this invoice
@@ -428,9 +428,33 @@ export default {
 		CancelSaleDialog,
 		ItemsTable,
 	},
-	computed: {
-		...invoiceComputed,
-	},
+        computed: {
+                items: {
+                        get() {
+                                return this.invoiceStore.items;
+                        },
+                        set(value) {
+                                this.invoiceStore.setItems(value);
+                        },
+                },
+                invoice_doc: {
+                        get() {
+                                return this.invoiceStore.invoiceDoc;
+                        },
+                        set(value) {
+                                this.invoiceStore.setInvoiceDoc(value);
+                        },
+                },
+                packed_items: {
+                        get() {
+                                return this.invoiceStore.packedItems;
+                        },
+                        set(value) {
+                                this.invoiceStore.setPackedItems(value);
+                        },
+                },
+                ...invoiceComputed,
+        },
 
 	methods: {
 		...shortcutMethods,
@@ -1363,13 +1387,14 @@ export default {
 		// Cleanup reset_posting_date listener
 		this.eventBus.off("reset_posting_date");
 	},
-	// Register global keyboard shortcuts when component is created
-	created() {
-		document.addEventListener("keydown", this.shortOpenPayment.bind(this));
-		document.addEventListener("keydown", this.shortDeleteFirstItem.bind(this));
-		document.addEventListener("keydown", this.shortOpenFirstItem.bind(this));
-		document.addEventListener("keydown", this.shortSelectDiscount.bind(this));
-	},
+        // Register global keyboard shortcuts when component is created
+        created() {
+                this.invoiceStore.clear();
+                document.addEventListener("keydown", this.shortOpenPayment.bind(this));
+                document.addEventListener("keydown", this.shortDeleteFirstItem.bind(this));
+                document.addEventListener("keydown", this.shortOpenFirstItem.bind(this));
+                document.addEventListener("keydown", this.shortSelectDiscount.bind(this));
+        },
 	// Remove global keyboard shortcuts when component is unmounted
 	unmounted() {
 		document.removeEventListener("keydown", this.shortOpenPayment);

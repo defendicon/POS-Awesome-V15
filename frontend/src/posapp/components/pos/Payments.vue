@@ -45,7 +45,7 @@
 					</v-col>
 
 					<!-- Paid Change (if applicable) -->
-					<v-col cols="7" v-if="credit_change > 0 && !invoice_doc.is_return">
+                                        <v-col cols="7" v-if="invoice_doc && credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -62,7 +62,7 @@
 					</v-col>
 
 					<!-- Credit Change (if applicable) -->
-					<v-col cols="5" v-if="credit_change > 0 && !invoice_doc.is_return">
+                                        <v-col cols="5" v-if="invoice_doc && credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -82,9 +82,11 @@
 
 				<v-divider></v-divider>
 
-				<!-- Payment Inputs (All Payment Methods) -->
-				<div v-if="is_cashback">
-					<v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
+                                <!-- Payment Inputs (All Payment Methods) -->
+                                <div
+                                        v-if="is_cashback && invoice_doc && Array.isArray(invoice_doc.payments)"
+                                >
+                                        <v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
 						<v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
 							<v-text-field
 								density="compact"
@@ -220,11 +222,11 @@
 
 				<v-divider></v-divider>
 
-				<!-- Invoice Totals (Net, Tax, Total, Discount, Grand, Rounded) -->
-				<v-row class="pa-1">
-					<v-col cols="6">
-						<v-text-field
-							density="compact"
+                                <!-- Invoice Totals (Net, Tax, Total, Discount, Grand, Rounded) -->
+                                <v-row v-if="invoice_doc" class="pa-1">
+                                        <v-col cols="6">
+                                                <v-text-field
+                                                        density="compact"
 							variant="solo"
 							color="primary"
 							:label="frappe._('Net Total')"
@@ -307,7 +309,7 @@
 							persistent-placeholder
 						></v-text-field>
 					</v-col>
-					<v-col v-if="invoice_doc.rounded_total" cols="6">
+                                        <v-col v-if="invoice_doc && invoice_doc.rounded_total" cols="6">
 						<v-text-field
 							density="compact"
 							variant="solo"
@@ -335,7 +337,7 @@
 						/>
 					</v-col>
 					<!-- Shipping Address Selection (if delivery date is set) -->
-					<v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+                                        <v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
 						<v-autocomplete
 							density="compact"
 							clearable
@@ -444,14 +446,15 @@
 
 				<!-- Switches for Write Off and Credit Sale -->
 				<v-row class="pa-1" align="start" no-gutters>
-					<v-col
-						cols="6"
-						v-if="
-							pos_profile.posa_allow_write_off_change &&
-							credit_change > 0 &&
-							!invoice_doc.is_return
-						"
-					>
+                                        <v-col
+                                                cols="6"
+                                                v-if="
+                                                        invoice_doc &&
+                                                        pos_profile.posa_allow_write_off_change &&
+                                                        credit_change > 0 &&
+                                                        !invoice_doc.is_return
+                                                "
+                                        >
 						<v-switch
 							v-model="is_write_off_change"
 							flat
@@ -459,10 +462,13 @@
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return">
+                                        <v-col
+                                                cols="6"
+                                                v-if="invoice_doc && pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
+                                        >
 						<v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="invoice_doc.is_return && pos_profile.use_cashback">
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
 						<v-switch
 							v-model="is_cashback"
 							flat
@@ -470,7 +476,7 @@
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="invoice_doc.is_return">
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return">
 						<v-switch
 							v-model="is_credit_return"
 							flat
@@ -514,7 +520,7 @@
 							</v-chip>
 						</div>
 					</v-col>
-					<v-col cols="6" v-if="!invoice_doc.is_return && pos_profile.use_customer_credit">
+                                        <v-col cols="6" v-if="invoice_doc && !invoice_doc.is_return && pos_profile.use_customer_credit">
 						<v-switch
 							v-model="redeem_customer_credit"
 							flat
@@ -716,8 +722,8 @@
 import format, { formatUtils } from "../../format";
 import { parseBooleanSetting } from "../../utils/stock.js";
 import {
-	saveOfflineInvoice,
-	syncOfflineInvoices,
+        saveOfflineInvoice,
+        syncOfflineInvoices,
 	getPendingOfflineInvoiceCount,
 	isOffline,
 	getSalesPersonsStorage,
@@ -727,17 +733,21 @@ import {
 
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 
 export default {
-	// Using format mixin for shared formatting methods
-	mixins: [format],
-	data() {
-		return {
-			loading: false, // UI loading state
-			pos_profile: "", // POS profile settings
-			pos_settings: "", // POS settings
-			invoice_doc: "", // Current invoice document
-			stock_settings: "", // Stock settings
+        // Using format mixin for shared formatting methods
+        mixins: [format],
+        setup() {
+                const invoiceStore = useInvoiceStore();
+                return { invoiceStore };
+        },
+        data() {
+                return {
+                        loading: false, // UI loading state
+                        pos_profile: "", // POS profile settings
+                        pos_settings: "", // POS settings
+                        stock_settings: "", // Stock settings
 			invoiceType: "Invoice", // Type of invoice
 			is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
@@ -767,14 +777,23 @@ export default {
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 		};
-	},
-	computed: {
-		// Get currency symbol for given or current currency
-		currencySymbol() {
-			return (currency) => {
-				return get_currency_symbol(currency || this.invoice_doc.currency);
-			};
-		},
+        },
+        computed: {
+                invoice_doc: {
+                        get() {
+                                return this.invoiceStore.invoiceDoc;
+                        },
+                        set(value) {
+                                this.invoiceStore.setInvoiceDoc(value);
+                        },
+                },
+                // Get currency symbol for given or current currency
+                currencySymbol() {
+                        return (currency) => {
+                                const fallbackCurrency = this.invoice_doc ? this.invoice_doc.currency : undefined;
+                                return get_currency_symbol(currency || fallbackCurrency);
+                        };
+                },
 		// Display currency for invoice
 		displayCurrency() {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
@@ -797,30 +816,32 @@ export default {
 			}
 
 			// Add loyalty amount (convert if needed)
-			if (this.loyalty_amount) {
-				// Loyalty points are stored in base currency (PKR)
-				if (this.invoice_doc.currency !== this.pos_profile.currency) {
-					// Convert to selected currency (e.g. USD) by dividing
-					total += this.flt(
-						this.loyalty_amount / (this.invoice_doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				} else {
-					total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
-				}
-			}
+                        const doc = this.invoice_doc;
 
-			// Add redeemed customer credit (convert if needed)
-			if (this.redeemed_customer_credit) {
-				// Customer credit is stored in base currency (PKR)
-				if (this.invoice_doc.currency !== this.pos_profile.currency) {
-					// Convert to selected currency (e.g. USD) by dividing
-					total += this.flt(
-						this.redeemed_customer_credit / (this.invoice_doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				} else {
-					total +=
+                        if (this.loyalty_amount && doc) {
+                                // Loyalty points are stored in base currency (PKR)
+                                if (doc.currency && doc.currency !== this.pos_profile.currency) {
+                                        // Convert to selected currency (e.g. USD) by dividing
+                                        total += this.flt(
+                                                this.loyalty_amount / (doc.conversion_rate || 1),
+                                                this.currency_precision,
+                                        );
+                                } else {
+                                        total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
+                                }
+                        }
+
+                        // Add redeemed customer credit (convert if needed)
+                        if (this.redeemed_customer_credit && doc) {
+                                // Customer credit is stored in base currency (PKR)
+                                if (doc.currency && doc.currency !== this.pos_profile.currency) {
+                                        // Convert to selected currency (e.g. USD) by dividing
+                                        total += this.flt(
+                                                this.redeemed_customer_credit / (doc.conversion_rate || 1),
+                                                this.currency_precision,
+                                        );
+                                } else {
+                                        total +=
 						parseFloat(formatUtils.fromArabicNumerals(String(this.redeemed_customer_credit))) ||
 						0;
 				}
@@ -858,13 +879,17 @@ export default {
 			return diff >= 0 ? diff : 0;
 		},
 
-		// Calculate change to be given back to customer
-		credit_change() {
-			// For multi-currency, use grand_total instead of rounded_total
-			let invoice_total;
-			if (
-				this.pos_profile.posa_allow_multi_currency &&
-				this.invoice_doc.currency !== this.pos_profile.currency
+                // Calculate change to be given back to customer
+                credit_change() {
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
+
+                        // For multi-currency, use grand_total instead of rounded_total
+                        let invoice_total;
+                        if (
+                                this.pos_profile.posa_allow_multi_currency &&
+                                this.invoice_doc.currency !== this.pos_profile.currency
 			) {
 				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
 			} else {
@@ -878,8 +903,8 @@ export default {
 			let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
 
 			// Ensure change is not negative
-			return change > 0 ? change : 0;
-		},
+                        return change > 0 ? change : 0;
+                },
 
 		// Label for the difference field (To Be Paid/Change)
 		diff_label() {
@@ -896,21 +921,23 @@ export default {
 			return this.formatCurrency(this.diff_payment, this.displayCurrency);
 		},
 		// Calculate available loyalty points amount in selected currency
-		available_points_amount() {
-			let amount = 0;
-			if (this.customer_info.loyalty_points) {
-				// Convert loyalty points to amount in base currency (PKR)
-				amount = this.customer_info.loyalty_points * this.customer_info.conversion_factor;
+                available_points_amount() {
+                        let amount = 0;
+                        const doc = this.invoice_doc;
 
-				// Convert to selected currency if needed
-				if (this.invoice_doc.currency !== this.pos_profile.currency) {
-					// Convert PKR to USD by dividing
-					amount = this.flt(
-						amount / (this.invoice_doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				}
-			}
+                        if (this.customer_info.loyalty_points && doc) {
+                                // Convert loyalty points to amount in base currency (PKR)
+                                amount = this.customer_info.loyalty_points * this.customer_info.conversion_factor;
+
+                                // Convert to selected currency if needed
+                                if (doc.currency !== this.pos_profile.currency) {
+                                        // Convert PKR to USD by dividing
+                                        amount = this.flt(
+                                                amount / (doc.conversion_rate || 1),
+                                                this.currency_precision,
+                                        );
+                                }
+                        }
 			return amount;
 		},
 		// Calculate total available customer credit
@@ -918,14 +945,18 @@ export default {
 			return this.customer_credit_dict.reduce((total, row) => total + this.flt(row.total_credit), 0);
 		},
 		// Validate if payment can be submitted
-		vaildatPayment() {
-			if (this.pos_profile.posa_allow_sales_order) {
-				if (this.invoiceType === "Order" && !this.invoice_doc.posa_delivery_date) {
-					return true;
-				}
-			}
-			return false;
-		},
+                vaildatPayment() {
+                        if (!this.pos_profile.posa_allow_sales_order) {
+                                return false;
+                        }
+
+                        if (this.invoiceType !== "Order") {
+                                return false;
+                        }
+
+                        const doc = this.invoice_doc;
+                        return !doc || !doc.posa_delivery_date;
+                },
 		// Should request payment field be shown?
 		request_payment_field() {
 			return (
@@ -954,10 +985,13 @@ export default {
 				this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
 			}
 		},
-		// Watch loyalty_amount to handle loyalty points redemption
-		loyalty_amount(value) {
-			if (value > this.available_points_amount) {
-				this.invoice_doc.loyalty_amount = 0;
+                // Watch loyalty_amount to handle loyalty points redemption
+                loyalty_amount(value) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (value > this.available_points_amount) {
+                                this.invoice_doc.loyalty_amount = 0;
 				this.invoice_doc.redeem_loyalty_points = 0;
 				this.invoice_doc.loyalty_points = 0;
 				this.loyalty_amount = 0;
@@ -990,10 +1024,13 @@ export default {
 			},
 			deep: true,
 		},
-		// Watch sales_person to update sales_team
-		sales_person(newVal) {
-			if (newVal) {
-				this.invoice_doc.sales_team = [
+                // Watch sales_person to update sales_team
+                sales_person(newVal) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (newVal) {
+                                this.invoice_doc.sales_team = [
 					{
 						sales_person: newVal,
 						allocated_percentage: 100,
@@ -1005,10 +1042,13 @@ export default {
 				console.log("Cleared sales_team");
 			}
 		},
-		// Watch is_credit_sale to reset cash payments
-		is_credit_sale(newVal) {
-			if (newVal) {
-				// If credit sale is enabled, set cash payment to 0
+                // Watch is_credit_sale to reset cash payments
+                is_credit_sale(newVal) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (newVal) {
+                                // If credit sale is enabled, set cash payment to 0
 				this.invoice_doc.payments.forEach((payment) => {
 					if (payment.mode_of_payment.toLowerCase() === "cash") {
 						payment.amount = 0;
@@ -1023,10 +1063,13 @@ export default {
 				});
 			}
 		},
-		// Watch is_credit_return to toggle cashback payments
-		is_credit_return(newVal) {
-			if (newVal) {
-				this.is_cashback = false;
+                // Watch is_credit_return to toggle cashback payments
+                is_credit_return(newVal) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (newVal) {
+                                this.is_cashback = false;
 				// Clear any payment amounts
 				this.invoice_doc.payments.forEach((payment) => {
 					payment.amount = 0;
