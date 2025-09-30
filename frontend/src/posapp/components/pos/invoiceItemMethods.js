@@ -356,11 +356,13 @@ export default {
 	},
 
 	// Build the invoice document object for backend submission
-	get_invoice_doc() {
-		let doc = {};
-		if (this.invoice_doc.name) {
-			doc = { ...this.invoice_doc };
-		}
+        get_invoice_doc() {
+                let doc = {};
+                const sourceDoc = this.invoice_doc || {};
+
+                if (sourceDoc.name) {
+                        doc = { ...sourceDoc };
+                }
 
 		// Always set these fields first
 		if (this.invoiceType === "Quotation") {
@@ -379,16 +381,16 @@ export default {
 		doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
 
 		// Currency related fields
-		doc.currency = this.selected_currency || this.pos_profile.currency;
-		doc.conversion_rate =
-			(this.invoice_doc && this.invoice_doc.conversion_rate) || this.conversion_rate || 1;
+                doc.currency = this.selected_currency || this.pos_profile.currency;
+                doc.conversion_rate =
+                        (sourceDoc && sourceDoc.conversion_rate) || this.conversion_rate || 1;
 
-		// Use actual price list currency if available
-		doc.price_list_currency = this.price_list_currency || doc.currency;
+                // Use actual price list currency if available
+                doc.price_list_currency = this.price_list_currency || doc.currency;
 
-		doc.plc_conversion_rate =
-			(this.invoice_doc && this.invoice_doc.plc_conversion_rate) ||
-			(doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
+                doc.plc_conversion_rate =
+                        (sourceDoc && sourceDoc.plc_conversion_rate) ||
+                        (doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
 
 		// Other fields
 		doc.campaign = doc.campaign || this.pos_profile.campaign;
