@@ -867,41 +867,36 @@ export default {
 				return isExpanded;
 			};
 		},
-		hide_qty_decimals() {
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					return !!opts.hide_qty_decimals;
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
-			}
-			return false;
-		},
-		isRTL() {
-			// Multiple RTL detection methods
-			const htmlDir = document.documentElement.getAttribute("dir");
-			const bodyDir = document.body.getAttribute("dir");
-			const computedDir = window.getComputedStyle(document.documentElement).direction;
-			const lang = document.documentElement.getAttribute("lang") || navigator.language;
+                hide_qty_decimals() {
+                        try {
+                                const saved = localStorage.getItem("posawesome_item_selector_settings");
+                                if (saved) {
+                                        const opts = JSON.parse(saved);
+                                        return !!opts.hide_qty_decimals;
+                                }
+                        } catch (e) {
+                                console.error("Failed to load item selector settings:", e);
+                        }
+                        return false;
+                },
+                isRTL() {
+                        if (this._rtlComputed !== undefined) {
+                                return this._rtlComputed;
+                        }
 
-			// Check if current language is RTL
-			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
-			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
+                        const htmlDir = document.documentElement.getAttribute("dir");
+                        const bodyDir = document.body.getAttribute("dir");
+                        const computedDir = window.getComputedStyle(document.documentElement).direction;
+                        const lang = document.documentElement.getAttribute("lang") || navigator.language;
+                        const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
+                        const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
 
-			console.log("RTL Detection:", {
-				htmlDir,
-				bodyDir,
-				computedDir,
-				lang,
-				isRTLLanguage,
-				result: htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage,
-			});
+                        this._rtlComputed =
+                                htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
 
-			return htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
-		},
-	},
+                        return this._rtlComputed;
+                },
+        },
 	methods: {
 		customItemFilter(value, search, item) {
 			if (search == null) {
