@@ -17,7 +17,9 @@ import {
     saveItemsBulk,
     clearStoredItems,
     setItemsLastSync,
-    isOffline
+    isOffline,
+    initPromise,
+    memoryInitPromise
 } from '../../offline/index.js';
 
 const DEFAULT_PAGE_SIZE = 200;
@@ -223,6 +225,30 @@ export const useItemsStore = defineStore('items', () => {
         };
     });
 
+    // Offline initialization guard
+    let offlineReady = false;
+    const ensureOfflineReady = async () => {
+        if (offlineReady) {
+            return true;
+        }
+
+        try {
+            await memoryInitPromise;
+        } catch (error) {
+            console.warn('Offline memory cache failed to initialize:', error);
+            return false;
+        }
+
+        try {
+            await initPromise;
+            offlineReady = true;
+            return true;
+        } catch (error) {
+            console.warn('IndexedDB failed to initialize:', error);
+            return false;
+        }
+    };
+
     // Actions
     const initialize = async (profile, cust = null, priceList = null) => {
         posProfile.value = profile;
@@ -236,6 +262,7 @@ export const useItemsStore = defineStore('items', () => {
         await assessCacheHealth();
 
         // Load cached items if available
+        await ensureOfflineReady();
         await loadCachedItems();
     };
 
@@ -874,6 +901,11 @@ export const useItemsStore = defineStore('items', () => {
             return;
         }
 
+        const ready = await ensureOfflineReady();
+        if (!ready) {
+            return;
+        }
+
         if (!Array.isArray(itemsBatch) || itemsBatch.length === 0) {
             return;
         }
@@ -899,6 +931,11 @@ export const useItemsStore = defineStore('items', () => {
         }
 
         try {
+            const ready = await ensureOfflineReady();
+            if (!ready) {
+                return;
+            }
+
             const storedCount = await getStoredItemsCount().catch(() => 0);
             const resolvedCount = Number.isFinite(storedCount) ? storedCount : 0;
 
@@ -932,6 +969,11 @@ export const useItemsStore = defineStore('items', () => {
         }
 
         if (searchValue && searchValue.trim().length > 0) {
+            return [];
+        }
+
+        const ready = await ensureOfflineReady();
+        if (!ready) {
             return [];
         }
 
@@ -1196,6 +1238,12 @@ export const useItemsStore = defineStore('items', () => {
                 return;
             }
 
+            const ready = await ensureOfflineReady();
+            if (!ready) {
+                itemsLoaded.value = items.value.length > 0;
+                return;
+            }
+
             const cachedCount = await getStoredItemsCount().catch(() => 0);
             const resolvedCount = Number.isFinite(cachedCount) ? cachedCount : 0;
 
@@ -1253,6 +1301,11 @@ export const useItemsStore = defineStore('items', () => {
             return [];
         }
 
+        const ready = await ensureOfflineReady();
+        if (!ready) {
+            return [];
+        }
+
         if (searchTerm.value && searchTerm.value.length >= 2) {
             // Searches fetch a fresh page via searchItems, no incremental append required
             return [];
@@ -1302,6 +1355,12 @@ export const useItemsStore = defineStore('items', () => {
 
     const resetCachedItemsForGroup = async (group) => {
         if (limitSearchEnabled.value || !cachedPagination.value.enabled || !shouldUseIndexedSearch()) {
+            filteredItems.value = filterItemsByGroup(items.value, group);
+            return;
+        }
+
+        const ready = await ensureOfflineReady();
+        if (!ready) {
             filteredItems.value = filterItemsByGroup(items.value, group);
             return;
         }
@@ -1388,6 +1447,13 @@ export const useItemsStore = defineStore('items', () => {
         const trimmedSearch = (searchValue || '').trim();
 
         try {
+            const ready = await ensureOfflineReady();
+            if (!ready) {
+                const fallback = filterItemsByGroup(items.value, normalizedGroup);
+                filteredItems.value = fallback;
+                return fallback;
+            }
+
             if (!trimmedSearch) {
                 if (!itemsLoaded.value || items.value.length === 0) {
                     await loadCachedItems();
