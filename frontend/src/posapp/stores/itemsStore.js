@@ -1389,11 +1389,17 @@ export const useItemsStore = defineStore('items', () => {
 
         try {
             if (!trimmedSearch) {
-                await updateCachedPaginationFromStorage();
-                itemsLoaded.value = items.value.length > 0;
-                filteredItems.value = filterItemsByGroup(items.value, normalizedGroup);
+                if (!itemsLoaded.value || items.value.length === 0) {
+                    await loadCachedItems();
+                } else {
+                    await updateCachedPaginationFromStorage();
+                }
+
+                const offlineItems = filterItemsByGroup(items.value, normalizedGroup);
+                filteredItems.value = offlineItems;
+                itemsLoaded.value = offlineItems.length > 0 || itemsLoaded.value;
                 cachedPagination.value.loading = false;
-                return items.value;
+                return offlineItems;
             }
 
             const effectiveLimit = Number.isFinite(limit) && limit > 0
