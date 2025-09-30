@@ -106,18 +106,27 @@ frappe.PosApp.posapp = class {
 			document.head.appendChild(link);
 		}
 
-		if (
-			("serviceWorker" in navigator && window.location.protocol === "https:") ||
-			window.location.hostname === "localhost" ||
-			window.location.hostname === "127.0.0.1"
-		) {
-			navigator.serviceWorker
-				.register("/assets/posawesome/dist/www/sw.js")
-				.then((registration) => {
-					console.log("SW registered successfully", registration);
-				})
-				.catch((err) => console.error("SW registration failed", err));
-		}
-	}
-	setup_header() {}
+                if (
+                        ("serviceWorker" in navigator && window.location.protocol === "https:") ||
+                        window.location.hostname === "localhost" ||
+                        window.location.hostname === "127.0.0.1"
+                ) {
+                        const swUrl = "/assets/posawesome/dist/www/sw.js";
+                        const registerWithScope = async () => {
+                                try {
+                                        const registration = await navigator.serviceWorker.register(swUrl, { scope: "/" });
+                                        console.log("SW registered successfully", registration);
+                                        return registration;
+                                } catch (err) {
+                                        console.warn("SW root scope registration failed, retrying with default scope", err);
+                                        const registration = await navigator.serviceWorker.register(swUrl);
+                                        console.log("SW registered successfully with default scope", registration);
+                                        return registration;
+                                }
+                        };
+
+                        registerWithScope().catch((err) => console.error("SW registration failed", err));
+                }
+        }
+        setup_header() {}
 };
