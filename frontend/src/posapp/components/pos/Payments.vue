@@ -222,11 +222,11 @@
 
 				<v-divider></v-divider>
 
-				<!-- Invoice Totals (Net, Tax, Total, Discount, Grand, Rounded) -->
-				<v-row class="pa-1">
-					<v-col cols="6">
-						<v-text-field
-							density="compact"
+                                <!-- Invoice Totals (Net, Tax, Total, Discount, Grand, Rounded) -->
+                                <v-row v-if="invoice_doc" class="pa-1">
+                                        <v-col cols="6">
+                                                <v-text-field
+                                                        density="compact"
 							variant="solo"
 							color="primary"
 							:label="frappe._('Net Total')"
