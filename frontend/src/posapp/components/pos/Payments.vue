@@ -337,7 +337,7 @@
 						/>
 					</v-col>
 					<!-- Shipping Address Selection (if delivery date is set) -->
-					<v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+                                        <v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
 						<v-autocomplete
 							density="compact"
 							clearable
@@ -945,14 +945,18 @@ export default {
 			return this.customer_credit_dict.reduce((total, row) => total + this.flt(row.total_credit), 0);
 		},
 		// Validate if payment can be submitted
-		vaildatPayment() {
-			if (this.pos_profile.posa_allow_sales_order) {
-				if (this.invoiceType === "Order" && !this.invoice_doc.posa_delivery_date) {
-					return true;
-				}
-			}
-			return false;
-		},
+                vaildatPayment() {
+                        if (!this.pos_profile.posa_allow_sales_order) {
+                                return false;
+                        }
+
+                        if (this.invoiceType !== "Order") {
+                                return false;
+                        }
+
+                        const doc = this.invoice_doc;
+                        return !doc || !doc.posa_delivery_date;
+                },
 		// Should request payment field be shown?
 		request_payment_field() {
 			return (

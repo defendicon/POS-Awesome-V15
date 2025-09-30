@@ -1011,12 +1011,12 @@ export default {
 			}
 
 			let invoice_doc;
-			if (
-				this.invoiceType === "Order" &&
-				this.pos_profile.posa_create_only_sales_order &&
-				!this.new_delivery_date &&
-				!this.invoice_doc.posa_delivery_date
-			) {
+                        if (
+                                this.invoiceType === "Order" &&
+                                this.pos_profile.posa_create_only_sales_order &&
+                                !this.new_delivery_date &&
+                                !(this.invoice_doc && this.invoice_doc.posa_delivery_date)
+                        ) {
 				console.log("Building local Sales Order doc for payment");
 				invoice_doc = this.get_invoice_doc();
 			} else if (this.invoice_doc.doctype == "Sales Order" && this.invoiceType === "Invoice") {
