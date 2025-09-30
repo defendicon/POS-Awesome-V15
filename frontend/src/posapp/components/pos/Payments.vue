@@ -716,8 +716,8 @@
 import format, { formatUtils } from "../../format";
 import { parseBooleanSetting } from "../../utils/stock.js";
 import {
-	saveOfflineInvoice,
-	syncOfflineInvoices,
+        saveOfflineInvoice,
+        syncOfflineInvoices,
 	getPendingOfflineInvoiceCount,
 	isOffline,
 	getSalesPersonsStorage,
@@ -727,17 +727,21 @@ import {
 
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 
 export default {
-	// Using format mixin for shared formatting methods
-	mixins: [format],
-	data() {
-		return {
-			loading: false, // UI loading state
-			pos_profile: "", // POS profile settings
-			pos_settings: "", // POS settings
-			invoice_doc: "", // Current invoice document
-			stock_settings: "", // Stock settings
+        // Using format mixin for shared formatting methods
+        mixins: [format],
+        setup() {
+                const invoiceStore = useInvoiceStore();
+                return { invoiceStore };
+        },
+        data() {
+                return {
+                        loading: false, // UI loading state
+                        pos_profile: "", // POS profile settings
+                        pos_settings: "", // POS settings
+                        stock_settings: "", // Stock settings
 			invoiceType: "Invoice", // Type of invoice
 			is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
@@ -767,14 +771,23 @@ export default {
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 		};
-	},
-	computed: {
-		// Get currency symbol for given or current currency
-		currencySymbol() {
-			return (currency) => {
-				return get_currency_symbol(currency || this.invoice_doc.currency);
-			};
-		},
+        },
+        computed: {
+                invoice_doc: {
+                        get() {
+                                return this.invoiceStore.invoiceDoc;
+                        },
+                        set(value) {
+                                this.invoiceStore.setInvoiceDoc(value);
+                        },
+                },
+                // Get currency symbol for given or current currency
+                currencySymbol() {
+                        return (currency) => {
+                                const fallbackCurrency = this.invoice_doc ? this.invoice_doc.currency : undefined;
+                                return get_currency_symbol(currency || fallbackCurrency);
+                        };
+                },
 		// Display currency for invoice
 		displayCurrency() {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
@@ -797,30 +810,32 @@ export default {
 			}
 
 			// Add loyalty amount (convert if needed)
-			if (this.loyalty_amount) {
-				// Loyalty points are stored in base currency (PKR)
-				if (this.invoice_doc.currency !== this.pos_profile.currency) {
-					// Convert to selected currency (e.g. USD) by dividing
-					total += this.flt(
-						this.loyalty_amount / (this.invoice_doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				} else {
-					total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
-				}
-			}
+                        const doc = this.invoice_doc;
 
-			// Add redeemed customer credit (convert if needed)
-			if (this.redeemed_customer_credit) {
-				// Customer credit is stored in base currency (PKR)
-				if (this.invoice_doc.currency !== this.pos_profile.currency) {
-					// Convert to selected currency (e.g. USD) by dividing
-					total += this.flt(
-						this.redeemed_customer_credit / (this.invoice_doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				} else {
-					total +=
+                        if (this.loyalty_amount && doc) {
+                                // Loyalty points are stored in base currency (PKR)
+                                if (doc.currency && doc.currency !== this.pos_profile.currency) {
+                                        // Convert to selected currency (e.g. USD) by dividing
+                                        total += this.flt(
+                                                this.loyalty_amount / (doc.conversion_rate || 1),
+                                                this.currency_precision,
+                                        );
+                                } else {
+                                        total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
+                                }
+                        }
+
+                        // Add redeemed customer credit (convert if needed)
+                        if (this.redeemed_customer_credit && doc) {
+                                // Customer credit is stored in base currency (PKR)
+                                if (doc.currency && doc.currency !== this.pos_profile.currency) {
+                                        // Convert to selected currency (e.g. USD) by dividing
+                                        total += this.flt(
+                                                this.redeemed_customer_credit / (doc.conversion_rate || 1),
+                                                this.currency_precision,
+                                        );
+                                } else {
+                                        total +=
 						parseFloat(formatUtils.fromArabicNumerals(String(this.redeemed_customer_credit))) ||
 						0;
 				}
@@ -954,10 +969,13 @@ export default {
 				this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
 			}
 		},
-		// Watch loyalty_amount to handle loyalty points redemption
-		loyalty_amount(value) {
-			if (value > this.available_points_amount) {
-				this.invoice_doc.loyalty_amount = 0;
+                // Watch loyalty_amount to handle loyalty points redemption
+                loyalty_amount(value) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (value > this.available_points_amount) {
+                                this.invoice_doc.loyalty_amount = 0;
 				this.invoice_doc.redeem_loyalty_points = 0;
 				this.invoice_doc.loyalty_points = 0;
 				this.loyalty_amount = 0;
@@ -990,10 +1008,13 @@ export default {
 			},
 			deep: true,
 		},
-		// Watch sales_person to update sales_team
-		sales_person(newVal) {
-			if (newVal) {
-				this.invoice_doc.sales_team = [
+                // Watch sales_person to update sales_team
+                sales_person(newVal) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (newVal) {
+                                this.invoice_doc.sales_team = [
 					{
 						sales_person: newVal,
 						allocated_percentage: 100,
@@ -1005,10 +1026,13 @@ export default {
 				console.log("Cleared sales_team");
 			}
 		},
-		// Watch is_credit_sale to reset cash payments
-		is_credit_sale(newVal) {
-			if (newVal) {
-				// If credit sale is enabled, set cash payment to 0
+                // Watch is_credit_sale to reset cash payments
+                is_credit_sale(newVal) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (newVal) {
+                                // If credit sale is enabled, set cash payment to 0
 				this.invoice_doc.payments.forEach((payment) => {
 					if (payment.mode_of_payment.toLowerCase() === "cash") {
 						payment.amount = 0;
@@ -1023,10 +1047,13 @@ export default {
 				});
 			}
 		},
-		// Watch is_credit_return to toggle cashback payments
-		is_credit_return(newVal) {
-			if (newVal) {
-				this.is_cashback = false;
+                // Watch is_credit_return to toggle cashback payments
+                is_credit_return(newVal) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
+                        if (newVal) {
+                                this.is_cashback = false;
 				// Clear any payment amounts
 				this.invoice_doc.payments.forEach((payment) => {
 					payment.amount = 0;
