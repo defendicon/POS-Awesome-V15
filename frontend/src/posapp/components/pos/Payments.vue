@@ -45,7 +45,7 @@
 					</v-col>
 
 					<!-- Paid Change (if applicable) -->
-					<v-col cols="7" v-if="credit_change > 0 && !invoice_doc.is_return">
+                                        <v-col cols="7" v-if="invoice_doc && credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -62,7 +62,7 @@
 					</v-col>
 
 					<!-- Credit Change (if applicable) -->
-					<v-col cols="5" v-if="credit_change > 0 && !invoice_doc.is_return">
+                                        <v-col cols="5" v-if="invoice_doc && credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -309,7 +309,7 @@
 							persistent-placeholder
 						></v-text-field>
 					</v-col>
-					<v-col v-if="invoice_doc.rounded_total" cols="6">
+                                        <v-col v-if="invoice_doc && invoice_doc.rounded_total" cols="6">
 						<v-text-field
 							density="compact"
 							variant="solo"
@@ -446,14 +446,15 @@
 
 				<!-- Switches for Write Off and Credit Sale -->
 				<v-row class="pa-1" align="start" no-gutters>
-					<v-col
-						cols="6"
-						v-if="
-							pos_profile.posa_allow_write_off_change &&
-							credit_change > 0 &&
-							!invoice_doc.is_return
-						"
-					>
+                                        <v-col
+                                                cols="6"
+                                                v-if="
+                                                        invoice_doc &&
+                                                        pos_profile.posa_allow_write_off_change &&
+                                                        credit_change > 0 &&
+                                                        !invoice_doc.is_return
+                                                "
+                                        >
 						<v-switch
 							v-model="is_write_off_change"
 							flat
@@ -461,10 +462,13 @@
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return">
+                                        <v-col
+                                                cols="6"
+                                                v-if="invoice_doc && pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
+                                        >
 						<v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="invoice_doc.is_return && pos_profile.use_cashback">
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
 						<v-switch
 							v-model="is_cashback"
 							flat
@@ -472,7 +476,7 @@
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="invoice_doc.is_return">
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return">
 						<v-switch
 							v-model="is_credit_return"
 							flat
@@ -516,7 +520,7 @@
 							</v-chip>
 						</div>
 					</v-col>
-					<v-col cols="6" v-if="!invoice_doc.is_return && pos_profile.use_customer_credit">
+                                        <v-col cols="6" v-if="invoice_doc && !invoice_doc.is_return && pos_profile.use_customer_credit">
 						<v-switch
 							v-model="redeem_customer_credit"
 							flat
@@ -875,13 +879,17 @@ export default {
 			return diff >= 0 ? diff : 0;
 		},
 
-		// Calculate change to be given back to customer
-		credit_change() {
-			// For multi-currency, use grand_total instead of rounded_total
-			let invoice_total;
-			if (
-				this.pos_profile.posa_allow_multi_currency &&
-				this.invoice_doc.currency !== this.pos_profile.currency
+                // Calculate change to be given back to customer
+                credit_change() {
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
+
+                        // For multi-currency, use grand_total instead of rounded_total
+                        let invoice_total;
+                        if (
+                                this.pos_profile.posa_allow_multi_currency &&
+                                this.invoice_doc.currency !== this.pos_profile.currency
 			) {
 				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
 			} else {
@@ -895,8 +903,8 @@ export default {
 			let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
 
 			// Ensure change is not negative
-			return change > 0 ? change : 0;
-		},
+                        return change > 0 ? change : 0;
+                },
 
 		// Label for the difference field (To Be Paid/Change)
 		diff_label() {
@@ -913,21 +921,23 @@ export default {
 			return this.formatCurrency(this.diff_payment, this.displayCurrency);
 		},
 		// Calculate available loyalty points amount in selected currency
-		available_points_amount() {
-			let amount = 0;
-			if (this.customer_info.loyalty_points) {
-				// Convert loyalty points to amount in base currency (PKR)
-				amount = this.customer_info.loyalty_points * this.customer_info.conversion_factor;
+                available_points_amount() {
+                        let amount = 0;
+                        const doc = this.invoice_doc;
 
-				// Convert to selected currency if needed
-				if (this.invoice_doc.currency !== this.pos_profile.currency) {
-					// Convert PKR to USD by dividing
-					amount = this.flt(
-						amount / (this.invoice_doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				}
-			}
+                        if (this.customer_info.loyalty_points && doc) {
+                                // Convert loyalty points to amount in base currency (PKR)
+                                amount = this.customer_info.loyalty_points * this.customer_info.conversion_factor;
+
+                                // Convert to selected currency if needed
+                                if (doc.currency !== this.pos_profile.currency) {
+                                        // Convert PKR to USD by dividing
+                                        amount = this.flt(
+                                                amount / (doc.conversion_rate || 1),
+                                                this.currency_precision,
+                                        );
+                                }
+                        }
 			return amount;
 		},
 		// Calculate total available customer credit
