@@ -1012,7 +1012,7 @@ export default {
 				return;
 			}
 
-			let invoice_doc;
+                        let invoice_doc;
                         if (
                                 this.invoiceType === "Order" &&
                                 this.pos_profile.posa_create_only_sales_order &&
@@ -1021,7 +1021,11 @@ export default {
                         ) {
 				console.log("Building local Sales Order doc for payment");
 				invoice_doc = this.get_invoice_doc();
-			} else if (this.invoice_doc.doctype == "Sales Order" && this.invoiceType === "Invoice") {
+                        } else if (
+                                this.invoice_doc &&
+                                this.invoice_doc.doctype === "Sales Order" &&
+                                this.invoiceType === "Invoice"
+                        ) {
 				console.log("Processing Sales Order payment");
 				invoice_doc = await this.process_invoice_from_order();
 			} else {
@@ -1164,7 +1168,8 @@ export default {
 		}
 
 		// For return with reference to existing invoice
-		if (this.invoice_doc.is_return && this.invoice_doc.return_against) {
+                const currentInvoice = this.invoice_doc;
+                if (currentInvoice && currentInvoice.is_return && currentInvoice.return_against) {
 			console.log("Return doc:", this.invoice_doc);
 			console.log("Current items:", this.items);
 
@@ -1174,10 +1179,10 @@ export default {
 					frappe.call({
 						method: "frappe.client.get",
 						args: {
-							doctype: this.pos_profile.create_pos_invoice_instead_of_sales_invoice
-								? "POS Invoice"
-								: "Sales Invoice",
-							name: this.invoice_doc.return_against,
+                                                        doctype: this.pos_profile.create_pos_invoice_instead_of_sales_invoice
+                                                                ? "POS Invoice"
+                                                                : "Sales Invoice",
+                                                        name: currentInvoice.return_against,
 						},
 						callback: (r) => {
 							if (r.message) {
