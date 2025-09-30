@@ -11,14 +11,32 @@
 								<thead>
 								</thead>
 								<tbody>
-									<tr>
-										<td class="text-left font-bold">{{ _('Grand Total') }}</td>
-										<td class='text-right'> {{ frappe.utils.fmt_money(data.grand_total or '', currency=currency) }}</td>
-									</tr>
-									<tr>
-										<td class="text-left font-bold">{{ _('Net Total') }}</td>
-										<td class='text-right'> {{ frappe.utils.fmt_money(data.net_total or '', currency=currency) }}</td>
-									</tr>
+                                                                        <tr>
+                                                                                <td class="text-left font-bold">{{ _('Grand Total') }}</td>
+                                                                                <td class='text-right'>
+                                                                                        {{ frappe.utils.fmt_money(data.grand_total or '', currency=company_currency or currency) }}
+                                                                                        {% if sales_currency_breakdown %}
+                                                                                        <div class="text-muted small">
+                                                                                                {% for row in sales_currency_breakdown %}
+                                                                                                        {{ frappe.utils.fmt_money(row.amount, currency=row.currency) }}{% if not loop.last %}<br>{% endif %}
+                                                                                                {% endfor %}
+                                                                                        </div>
+                                                                                        {% endif %}
+                                                                                </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                                <td class="text-left font-bold">{{ _('Net Total') }}</td>
+                                                                                <td class='text-right'>
+                                                                                        {{ frappe.utils.fmt_money(data.net_total or '', currency=company_currency or currency) }}
+                                                                                        {% if net_currency_breakdown %}
+                                                                                        <div class="text-muted small">
+                                                                                                {% for row in net_currency_breakdown %}
+                                                                                                        {{ frappe.utils.fmt_money(row.amount, currency=row.currency) }}{% if not loop.last %}<br>{% endif %}
+                                                                                                {% endfor %}
+                                                                                        </div>
+                                                                                        {% endif %}
+                                                                                </td>
+                                                                        </tr>
 									<tr>
 										<td class="text-left font-bold">{{ _('Total Quantity') }}</td>
 										<td class='text-right'>{{ data.total_quantity or '' }}</td>
@@ -42,12 +60,24 @@
 									</tr>
 								</thead>
 								<tbody>
-								{% for d in data.payment_reconciliation %}
-									<tr>
-										<td class="text-left">{{ d.mode_of_payment }}</td>
-										<td class='text-right'> {{ frappe.utils.fmt_money(d.expected_amount - d.opening_amount, currency=currency) }}</td>
-									</tr>
-								{% endfor %}
+                                                                {% set summaries = mode_summaries if mode_summaries else data.payment_reconciliation %}
+                                                                {% for d in summaries %}
+                                                                        <tr>
+                                                                                <td class="text-left">{{ d.mode_of_payment }}</td>
+                                                                                <td class='text-right'>
+                                                                                        {% set base_amount = d.base_amount if d.base_amount is not none else d.expected_amount - d.opening_amount %}
+                                                                                        {{ frappe.utils.fmt_money(base_amount, currency=company_currency or currency) }}
+                                                                                        {% set breakdown = d.currency_breakdown if d.currency_breakdown is defined else [] %}
+                                                                                        {% if breakdown %}
+                                                                                        <div class="text-muted small">
+                                                                                                {% for row in breakdown %}
+                                                                                                        {{ frappe.utils.fmt_money(row.amount, currency=row.currency) }}{% if not loop.last %}<br>{% endif %}
+                                                                                                {% endfor %}
+                                                                                        </div>
+                                                                                        {% endif %}
+                                                                                </td>
+                                                                        </tr>
+                                                                {% endfor %}
 							</tbody>
 						</table>
 					</div>

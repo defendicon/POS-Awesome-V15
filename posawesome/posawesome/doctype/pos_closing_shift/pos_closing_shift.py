@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from collections import defaultdict
 
 import frappe
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
@@ -209,10 +210,163 @@ class POSClosingShift(Document):
 
     @frappe.whitelist()
     def get_payment_reconciliation_details(self):
-        currency = frappe.get_cached_value("Company", self.company, "default_currency")
+        company_currency = frappe.get_cached_value(
+            "Company", self.company, "default_currency"
+        )
+
+        sales_breakdown = defaultdict(float)
+        net_breakdown = defaultdict(float)
+        payment_breakdown = {}
+
+        def update_payment_breakdown(mode_of_payment, base_amount=0, currency=None, amount=0):
+            if not mode_of_payment:
+                return
+
+            row = payment_breakdown.setdefault(
+                mode_of_payment,
+                {"base": 0.0, "currencies": defaultdict(float)},
+            )
+            row["base"] += flt(base_amount)
+            if currency:
+                row["currencies"][currency] += flt(amount)
+
+        cash_mode_of_payment = (
+            frappe.db.get_value(
+                "POS Profile", self.pos_profile, "posa_cash_mode_of_payment"
+            )
+            or "Cash"
+        )
+
+        for row in self.get("pos_transactions", []):
+            invoice = row.get("sales_invoice") or row.get("pos_invoice")
+            if not invoice:
+                continue
+
+            doctype = "Sales Invoice" if row.get("sales_invoice") else "POS Invoice"
+            if not frappe.db.exists(doctype, invoice):
+                continue
+
+            invoice_doc = frappe.get_cached_doc(doctype, invoice)
+            currency = invoice_doc.get("currency") or company_currency
+            conversion_rate = (
+                invoice_doc.get("conversion_rate")
+                or invoice_doc.get("exchange_rate")
+                or invoice_doc.get("target_exchange_rate")
+                or invoice_doc.get("plc_conversion_rate")
+                or 1
+            )
+
+            sales_breakdown[currency] += flt(invoice_doc.get("grand_total") or 0)
+            net_breakdown[currency] += flt(invoice_doc.get("net_total") or 0)
+
+            for payment in invoice_doc.get("payments", []):
+                update_payment_breakdown(
+                    payment.mode_of_payment,
+                    get_base_value(payment, "amount", "base_amount", conversion_rate),
+                    currency,
+                    payment.amount,
+                )
+
+            change_amount = invoice_doc.get("change_amount") or 0
+            if change_amount:
+                update_payment_breakdown(
+                    cash_mode_of_payment,
+                    -get_base_value(
+                        invoice_doc,
+                        "change_amount",
+                        "base_change_amount",
+                        conversion_rate,
+                    ),
+                    currency,
+                    -change_amount,
+                )
+
+        for row in self.get("pos_payments", []):
+            payment_entry = row.get("payment_entry")
+            if not payment_entry or not frappe.db.exists("Payment Entry", payment_entry):
+                continue
+
+            payment_doc = frappe.get_cached_doc("Payment Entry", payment_entry)
+            currency = (
+                payment_doc.get("paid_from_account_currency")
+                or payment_doc.get("paid_to_account_currency")
+                or payment_doc.get("party_account_currency")
+                or payment_doc.get("currency")
+                or company_currency
+            )
+            base_amount = flt(payment_doc.get("base_paid_amount") or 0)
+            paid_amount = flt(payment_doc.get("paid_amount") or 0)
+            mode_of_payment = row.get("mode_of_payment") or payment_doc.get("mode_of_payment")
+
+            update_payment_breakdown(mode_of_payment, base_amount, currency, paid_amount)
+
+        mode_summaries = []
+        payment_breakdown_copy = payment_breakdown.copy()
+        for detail in self.get("payment_reconciliation", []):
+            mop = detail.mode_of_payment
+            breakdown = payment_breakdown_copy.pop(mop, None)
+            currencies = []
+            base_total = 0
+            if breakdown:
+                base_total = breakdown["base"]
+                currencies = [
+                    frappe._dict({"currency": currency, "amount": amount})
+                    for currency, amount in sorted(breakdown["currencies"].items())
+                    if amount
+                ]
+
+            mode_summaries.append(
+                frappe._dict(
+                    {
+                        "mode_of_payment": mop,
+                        "base_amount": base_total,
+                        "opening_amount": flt(detail.opening_amount),
+                        "expected_amount": flt(detail.expected_amount),
+                        "difference": flt(detail.difference),
+                        "currency_breakdown": currencies,
+                    }
+                )
+            )
+
+        for mop, breakdown in payment_breakdown_copy.items():
+            mode_summaries.append(
+                frappe._dict(
+                    {
+                        "mode_of_payment": mop,
+                        "base_amount": breakdown["base"],
+                        "opening_amount": 0,
+                        "expected_amount": breakdown["base"],
+                        "difference": 0,
+                        "currency_breakdown": [
+                            frappe._dict({"currency": currency, "amount": amount})
+                            for currency, amount in sorted(breakdown["currencies"].items())
+                            if amount
+                        ],
+                    }
+                )
+            )
+
+        sales_currency_breakdown = [
+            frappe._dict({"currency": currency, "amount": amount})
+            for currency, amount in sorted(sales_breakdown.items())
+            if amount
+        ]
+        net_currency_breakdown = [
+            frappe._dict({"currency": currency, "amount": amount})
+            for currency, amount in sorted(net_breakdown.items())
+            if amount
+        ]
+
         return frappe.render_template(
             "posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html",
-            {"data": self, "currency": currency},
+            {
+                "data": self,
+                "currency": company_currency,
+                "company_currency": company_currency,
+                "mode_summaries": mode_summaries,
+                "sales_currency_breakdown": sales_currency_breakdown,
+                "net_currency_breakdown": net_currency_breakdown,
+            },
         )
 
 
@@ -301,6 +455,10 @@ def make_closing_shift_from_opening(opening_shift):
     closing_shift.net_total = 0
     closing_shift.total_quantity = 0
 
+    company_currency = frappe.get_cached_value(
+        "Company", closing_shift.company, "default_currency"
+    )
+
     invoices = get_pos_invoices(opening_shift.get("name"), doctype)
 
     pos_transactions = []
@@ -321,18 +479,25 @@ def make_closing_shift_from_opening(opening_shift):
     invoice_field = "pos_invoice" if doctype == "POS Invoice" else "sales_invoice"
 
     for d in invoices:
+        conversion_rate = d.get("conversion_rate")
         pos_transactions.append(
             frappe._dict(
                 {
                     invoice_field: d.name,
                     "posting_date": d.posting_date,
-                    "grand_total": d.grand_total,
+                    "grand_total": get_base_value(
+                        d, "grand_total", "base_grand_total", conversion_rate
+                    ),
+                    "transaction_currency": d.get("currency") or company_currency,
+                    "transaction_amount": flt(d.get("grand_total")),
                     "customer": d.customer,
                 }
             )
         )
-        base_grand_total = get_base_value(d, "grand_total", "base_grand_total")
-        base_net_total = get_base_value(d, "net_total", "base_net_total")
+        base_grand_total = get_base_value(
+            d, "grand_total", "base_grand_total", conversion_rate
+        )
+        base_net_total = get_base_value(d, "net_total", "base_net_total", conversion_rate)
         closing_shift.grand_total += base_grand_total
         closing_shift.net_total += base_net_total
         closing_shift.total_quantity += flt(d.total_qty)
