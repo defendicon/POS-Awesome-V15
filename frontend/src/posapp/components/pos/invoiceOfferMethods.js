@@ -3,9 +3,60 @@ import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
 
 export default {
-	normalizeBrand(brand) {
-		return (brand || "").trim().toLowerCase();
-	},
+        queueOfferRecalculation() {
+                if (this.isApplyingOffer) {
+                        return;
+                }
+
+                const hasWindow = typeof window !== "undefined";
+                const requestFrame = hasWindow && window.requestAnimationFrame
+                        ? window.requestAnimationFrame.bind(window)
+                        : (cb) => setTimeout(cb, 16);
+                const cancelFrame = hasWindow && window.cancelAnimationFrame
+                        ? window.cancelAnimationFrame.bind(window)
+                        : clearTimeout;
+
+                if (this._offerRecalculationHandle) {
+                        cancelFrame(this._offerRecalculationHandle);
+                        this._offerRecalculationHandle = null;
+                }
+
+                this._offerRecalculationHandle = requestFrame(() => {
+                        this._offerRecalculationHandle = null;
+
+                        if (this.isApplyingOffer) {
+                                return;
+                        }
+
+                        this.handelOffers();
+
+                        if (typeof this.$nextTick === "function") {
+                                this.$nextTick(() => {
+                                        if (typeof this.$forceUpdate === "function") {
+                                                this.$forceUpdate();
+                                        }
+                                });
+                        } else if (typeof this.$forceUpdate === "function") {
+                                this.$forceUpdate();
+                        }
+                });
+        },
+
+        cancelOfferRecalculation() {
+                const hasWindow = typeof window !== "undefined";
+                const cancelFrame = hasWindow && window.cancelAnimationFrame
+                        ? window.cancelAnimationFrame.bind(window)
+                        : clearTimeout;
+
+                if (this._offerRecalculationHandle) {
+                                cancelFrame(this._offerRecalculationHandle);
+                                this._offerRecalculationHandle = null;
+                }
+        },
+
+        normalizeBrand(brand) {
+                return (brand || "").trim().toLowerCase();
+        },
 	getItemBrand(item) {
 		let brand = this.normalizeBrand(item.brand);
 		if (brand) {
