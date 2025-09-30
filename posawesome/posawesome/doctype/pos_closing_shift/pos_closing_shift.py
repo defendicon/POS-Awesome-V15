@@ -12,6 +12,31 @@ from frappe.model.document import Document
 from frappe.utils import flt
 
 
+def get_base_value(doc, fieldname, base_fieldname=None, conversion_rate=None):
+    """Return the value for a field in company currency."""
+
+    base_fieldname = base_fieldname or f"base_{fieldname}"
+    base_value = doc.get(base_fieldname)
+
+    if base_value not in (None, ""):
+        return flt(base_value)
+
+    value = doc.get(fieldname)
+    if value in (None, ""):
+        return 0
+
+    if conversion_rate is None:
+        conversion_rate = (
+            doc.get("conversion_rate")
+            or doc.get("exchange_rate")
+            or doc.get("target_exchange_rate")
+            or doc.get("plc_conversion_rate")
+            or 1
+        )
+
+    return flt(value) * flt(conversion_rate or 1)
+
+
 class POSClosingShift(Document):
     def validate(self):
         user = frappe.get_all(
@@ -238,6 +263,8 @@ def get_payments_entries(pos_opening_shift):
             "name",
             "mode_of_payment",
             "paid_amount",
+            "base_paid_amount",
+            "target_exchange_rate",
             "reference_no",
             "posting_date",
             "party",
@@ -296,21 +323,29 @@ def make_closing_shift_from_opening(opening_shift):
                 }
             )
         )
-        closing_shift.grand_total += flt(d.grand_total)
-        closing_shift.net_total += flt(d.net_total)
+        base_grand_total = get_base_value(d, "grand_total", "base_grand_total")
+        base_net_total = get_base_value(d, "net_total", "base_net_total")
+        closing_shift.grand_total += base_grand_total
+        closing_shift.net_total += base_net_total
         closing_shift.total_quantity += flt(d.total_qty)
 
         for t in d.taxes:
-            existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
+            existing_tax = [
+                tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate
+            ]
             if existing_tax:
-                existing_tax[0].amount += flt(t.tax_amount)
+                existing_tax[0].amount += get_base_value(
+                    t, "tax_amount", "base_tax_amount", d.get("conversion_rate")
+                )
             else:
                 taxes.append(
                     frappe._dict(
                         {
                             "account_head": t.account_head,
                             "rate": t.rate,
-                            "amount": t.tax_amount,
+                            "amount": get_base_value(
+                                t, "tax_amount", "base_tax_amount", d.get("conversion_rate")
+                            ),
                         }
                     )
                 )
@@ -325,10 +360,15 @@ def make_closing_shift_from_opening(opening_shift):
                 )
                 if not cash_mode_of_payment:
                     cash_mode_of_payment = "Cash"
+                conversion_rate = d.get("conversion_rate")
                 if existing_pay[0].mode_of_payment == cash_mode_of_payment:
-                    amount = p.amount - d.change_amount
+                    amount = get_base_value(p, "amount", "base_amount", conversion_rate) - get_base_value(
+                        d, "change_amount", "base_change_amount", conversion_rate
+                    )
                 else:
-                    amount = p.amount
+                    amount = get_base_value(
+                        p, "amount", "base_amount", conversion_rate
+                    )
                 existing_pay[0].expected_amount += flt(amount)
             else:
                 payments.append(
@@ -336,7 +376,9 @@ def make_closing_shift_from_opening(opening_shift):
                         {
                             "mode_of_payment": p.mode_of_payment,
                             "opening_amount": 0,
-                            "expected_amount": p.amount,
+                            "expected_amount": get_base_value(
+                                p, "amount", "base_amount", d.get("conversion_rate")
+                            ),
                         }
                     )
                 )
@@ -357,14 +399,18 @@ def make_closing_shift_from_opening(opening_shift):
         )
         existing_pay = [pay for pay in payments if pay.mode_of_payment == py.mode_of_payment]
         if existing_pay:
-            existing_pay[0].expected_amount += flt(py.paid_amount)
+            existing_pay[0].expected_amount += get_base_value(
+                py, "paid_amount", "base_paid_amount"
+            )
         else:
             payments.append(
                 frappe._dict(
                     {
                         "mode_of_payment": py.mode_of_payment,
                         "opening_amount": 0,
-                        "expected_amount": py.paid_amount,
+                        "expected_amount": get_base_value(
+                            py, "paid_amount", "base_paid_amount"
+                        ),
                     }
                 )
             )
