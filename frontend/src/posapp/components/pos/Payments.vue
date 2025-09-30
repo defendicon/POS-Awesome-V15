@@ -82,9 +82,11 @@
 
 				<v-divider></v-divider>
 
-				<!-- Payment Inputs (All Payment Methods) -->
-				<div v-if="is_cashback">
-					<v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
+                                <!-- Payment Inputs (All Payment Methods) -->
+                                <div
+                                        v-if="is_cashback && invoice_doc && Array.isArray(invoice_doc.payments)"
+                                >
+                                        <v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
 						<v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
 							<v-text-field
 								density="compact"
