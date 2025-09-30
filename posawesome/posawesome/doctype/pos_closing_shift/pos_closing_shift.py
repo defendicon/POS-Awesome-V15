@@ -87,8 +87,9 @@ class POSClosingShift(Document):
             self.pos_profile,
             "create_pos_invoice_instead_of_sales_invoice",
         ):
-            pos_invoices = [
-                frappe._dict(
+            pos_invoices = []
+            for d in self.pos_transactions:
+                invoice_details = frappe._dict(
                     frappe.db.get_value(
                         "POS Invoice",
                         d.pos_invoice,
@@ -97,14 +98,21 @@ class POSClosingShift(Document):
                             "customer",
                             "is_return",
                             "return_against",
+                            "currency",
                         ],
                         as_dict=True,
                     )
                 )
-                for d in self.pos_transactions
-            ]
+                if invoice_details:
+                    pos_invoices.append(invoice_details)
+
             if pos_invoices:
-                consolidate_pos_invoices(pos_invoices=pos_invoices)
+                invoices_by_currency = {}
+                for invoice in pos_invoices:
+                    invoices_by_currency.setdefault(invoice.currency, []).append(invoice)
+
+                for invoices in invoices_by_currency.values():
+                    consolidate_pos_invoices(pos_invoices=invoices)
 
     def on_cancel(self):
         if frappe.db.exists("POS Opening Shift", self.pos_opening_shift):
