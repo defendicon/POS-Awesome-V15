@@ -7,16 +7,24 @@ import { withPerf } from "../utils/perf.js";
 
 export function useItemAddition() {
         const runAsyncTask = (task, contextLabel) => {
-                try {
-                        const result = typeof task === "function" ? task() : null;
-                        if (result && typeof result.then === "function") {
-                                result.catch((error) => {
-                                        console.error(`Async task failed${contextLabel ? ` (${contextLabel})` : ""}:`, error);
-                                });
+                Promise.resolve().then(() => {
+                        try {
+                                const result = typeof task === "function" ? task() : null;
+                                if (result && typeof result.then === "function") {
+                                        result.catch((error) => {
+                                                console.error(
+                                                        `Async task failed${contextLabel ? ` (${contextLabel})` : ""}:`,
+                                                        error,
+                                                );
+                                        });
+                                }
+                        } catch (error) {
+                                console.error(
+                                        `Async task threw synchronously${contextLabel ? ` (${contextLabel})` : ""}:`,
+                                        error,
+                                );
                         }
-                } catch (error) {
-                        console.error(`Async task threw synchronously${contextLabel ? ` (${contextLabel})` : ""}:`, error);
-                }
+                });
         };
 
         // Remove item from invoice
@@ -68,13 +76,13 @@ export function useItemAddition() {
 				posa_is_offer: 0,
 			};
 			context.packed_items.push(child);
-			if (context.update_item_detail) {
-				context.update_item_detail(child, false);
-				context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
-			}
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(child);
-			}
+                        if (context.update_item_detail) {
+                                runAsyncTask(() => context.update_item_detail(child, false), "update_item_detail:bundle_child");
+                                context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
+                        }
+                        if (context.fetch_available_qty) {
+                                runAsyncTask(() => context.fetch_available_qty(child), "fetch_available_qty:bundle_child");
+                        }
 		}
 	};
 
@@ -142,7 +150,11 @@ export function useItemAddition() {
 				new_item.qty = -Math.abs(new_item.qty || 1);
 			}
 			// Apply UOM conversion immediately if barcode specifies a different UOM
-                        if (context.calc_uom && new_item.uom) {
+                        if (
+                                context.calc_uom &&
+                                new_item.uom &&
+                                (!new_item.stock_uom || new_item.uom !== new_item.stock_uom)
+                        ) {
                                 runAsyncTask(
                                         () => context.calc_uom(new_item, new_item.uom),
                                         "calc_uom:new_item",
@@ -178,14 +190,22 @@ export function useItemAddition() {
 			}
 
 			if (index === -1 || context.new_line) {
-				context.items.unshift(new_item);
-				await expandBundle(new_item, context);
-				// Skip recalculation to preserve the manually set rate
-				if (context.update_item_detail) context.update_item_detail(new_item, false);
+                                context.items.unshift(new_item);
+                                runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
+                                // Skip recalculation to preserve the manually set rate
+                                if (context.update_item_detail) {
+                                        runAsyncTask(
+                                                () => context.update_item_detail(new_item, false),
+                                                "update_item_detail:new",
+                                        );
+                                }
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(new_item);
-				}
+                                if (context.fetch_available_qty) {
+                                        runAsyncTask(
+                                                () => context.fetch_available_qty(new_item),
+                                                "fetch_available_qty:new",
+                                        );
+                                }
 
 				if (
 					context.isReturnInvoice &&
@@ -239,7 +259,12 @@ export function useItemAddition() {
 			} else {
 				const cur_item = context.items[index];
 				const previousQty = cur_item.qty;
-				if (context.update_items_details) context.update_items_details([cur_item]);
+                                if (context.update_items_details) {
+                                        runAsyncTask(
+                                                () => context.update_items_details([cur_item]),
+                                                "update_items_details:merge_new",
+                                        );
+                                }
 				// Merge serial numbers if any
 				if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
 					new_item.serial_no_selected.forEach((sn) => {
@@ -261,7 +286,11 @@ export function useItemAddition() {
 
 				if (context.setSerialNo) context.setSerialNo(cur_item);
 
-                                if (context.calc_uom && cur_item.uom) {
+                                if (
+                                        context.calc_uom &&
+                                        cur_item.uom &&
+                                        (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
+                                ) {
                                         runAsyncTask(
                                                 () => context.calc_uom(cur_item, cur_item.uom),
                                                 "calc_uom:merge_new_item",
@@ -269,7 +298,10 @@ export function useItemAddition() {
                                 }
 
                                 if (context.fetch_available_qty) {
-                                        context.fetch_available_qty(cur_item);
+                                        runAsyncTask(
+                                                () => context.fetch_available_qty(cur_item),
+                                                "fetch_available_qty:merge_new",
+                                        );
                                 }
                                 if (cur_item.qty > previousQty) {
 					moveItemToTop(context, cur_item);
@@ -278,7 +310,12 @@ export function useItemAddition() {
 		} else {
 			const cur_item = context.items[index];
 			const previousQty = cur_item.qty;
-			if (context.update_items_details) context.update_items_details([cur_item]);
+                        if (context.update_items_details) {
+                                runAsyncTask(
+                                        () => context.update_items_details([cur_item]),
+                                        "update_items_details:existing",
+                                );
+                        }
 			// Serial number logic for existing item
 			if (item.has_serial_no && item.to_set_serial_no) {
 				if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
@@ -309,7 +346,11 @@ export function useItemAddition() {
 			if (context.setSerialNo) context.setSerialNo(cur_item);
 
 			// Recalculate rates if UOM differs from stock UOM
-                        if (context.calc_uom && cur_item.uom) {
+                        if (
+                                context.calc_uom &&
+                                cur_item.uom &&
+                                (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
+                        ) {
                                 runAsyncTask(
                                         () => context.calc_uom(cur_item, cur_item.uom),
                                         "calc_uom:merge_existing",
@@ -317,13 +358,18 @@ export function useItemAddition() {
                         }
 
                         if (context.fetch_available_qty) {
-                                context.fetch_available_qty(cur_item);
+                                runAsyncTask(
+                                        () => context.fetch_available_qty(cur_item),
+                                        "fetch_available_qty:existing",
+                                );
                         }
 			if (cur_item.qty > previousQty) {
 				moveItemToTop(context, cur_item);
 			}
 		}
-		if (context.forceUpdate) context.forceUpdate();
+                if (context.forceUpdate) {
+                        runAsyncTask(() => context.forceUpdate(), "force_update");
+                }
 
 		// Only try to expand if new_item exists and should be expanded
 		if (
