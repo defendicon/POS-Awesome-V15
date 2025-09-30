@@ -28,16 +28,6 @@ export default {
 
         async add_item(item, options = {}) {
                 const res = await addItem(item, this);
-                const target = this.items.find(
-                        (it) =>
-                                it.item_code === item.item_code &&
-                                it.uom === (item.uom || it.uom) &&
-                                (!it.batch_no || it.batch_no === item.batch_no),
-                );
-                if (target && this.fetch_available_qty) {
-                        this.fetch_available_qty(target);
-                }
-
                 if (!options?.skipNotification && this.eventBus?.emit) {
                         const rawQty = typeof item?.qty === "number" ? item.qty : parseFloat(item?.qty);
                         const shouldAnnounce = Number.isFinite(rawQty) ? rawQty > 0 : true;

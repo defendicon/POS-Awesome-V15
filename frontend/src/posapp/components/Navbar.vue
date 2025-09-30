@@ -225,6 +225,8 @@ export default {
                         clearQueuedOnClose: false,
                         clearingCache: false,
                         initialCacheRefreshRequested: false,
+                        notificationUpdateHandle: null,
+                        notificationUpdateUsesTimeout: false,
                 };
         },
         watch: {
@@ -257,12 +259,23 @@ export default {
 		// Initialize early to prevent reactivity issues
 		this.preInitialize();
 	},
-	unmounted() {
-		if (this.eventBus) {
-			this.eventBus.off("show_message", this.showMessage);
-			this.eventBus.off("freeze", this.handleFreeze);
-			this.eventBus.off("unfreeze", this.handleUnfreeze);
-			this.eventBus.off("set_company", this.handleSetCompany);
+        unmounted() {
+                if (this.notificationUpdateHandle !== null) {
+                        if (this.notificationUpdateUsesTimeout) {
+                                clearTimeout(this.notificationUpdateHandle);
+                        } else if (
+                                typeof window !== "undefined" &&
+                                typeof window.cancelAnimationFrame === "function"
+                        ) {
+                                window.cancelAnimationFrame(this.notificationUpdateHandle);
+                        }
+                        this.notificationUpdateHandle = null;
+                }
+                if (this.eventBus) {
+                        this.eventBus.off("show_message", this.showMessage);
+                        this.eventBus.off("freeze", this.handleFreeze);
+                        this.eventBus.off("unfreeze", this.handleUnfreeze);
+                        this.eventBus.off("set_company", this.handleSetCompany);
 		}
 	},
 	methods: {
@@ -503,6 +516,33 @@ export default {
                         this.updateActiveNotification();
                 },
                 updateActiveNotification() {
+                        if (!this.currentNotification) {
+                                return;
+                        }
+
+                        if (this.notificationUpdateHandle !== null) {
+                                return;
+                        }
+
+                        const hasWindow = typeof window !== "undefined";
+                        const scheduleWithRaf =
+                                hasWindow && typeof window.requestAnimationFrame === "function";
+
+                        if (scheduleWithRaf) {
+                                this.notificationUpdateUsesTimeout = false;
+                                this.notificationUpdateHandle = window.requestAnimationFrame(() => {
+                                        this.notificationUpdateHandle = null;
+                                        this.applyNotificationState();
+                                });
+                        } else {
+                                this.notificationUpdateUsesTimeout = true;
+                                this.notificationUpdateHandle = setTimeout(() => {
+                                        this.notificationUpdateHandle = null;
+                                        this.applyNotificationState();
+                                }, 16);
+                        }
+                },
+                applyNotificationState() {
                         if (!this.currentNotification) {
                                 return;
                         }

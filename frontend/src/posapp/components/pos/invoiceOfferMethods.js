@@ -3,9 +3,54 @@ import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
 
 export default {
-	normalizeBrand(brand) {
-		return (brand || "").trim().toLowerCase();
-	},
+        scheduleOfferRefresh() {
+                if (this.isApplyingOffer) {
+                        return;
+                }
+
+                if (this._offerRefreshPending) {
+                        return;
+                }
+
+                this._offerRefreshPending = true;
+
+                const schedule =
+                        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+                                ? window.requestAnimationFrame.bind(window)
+                                : (cb) => setTimeout(cb, 16);
+
+                this._offerRefreshHandle = schedule(() => {
+                        this._offerRefreshHandle = null;
+                        this._offerRefreshPending = false;
+
+                        if (this.isApplyingOffer) {
+                                return;
+                        }
+
+                        this.handelOffers();
+
+                        if (typeof this.$forceUpdate === "function") {
+                                this.$forceUpdate();
+                        }
+                });
+        },
+        cancelScheduledOfferRefresh() {
+                if (this._offerRefreshHandle != null) {
+                        if (
+                                typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function"
+                        ) {
+                                window.cancelAnimationFrame(this._offerRefreshHandle);
+                        } else {
+                                clearTimeout(this._offerRefreshHandle);
+                        }
+                        this._offerRefreshHandle = null;
+                }
+
+                this._offerRefreshPending = false;
+        },
+        normalizeBrand(brand) {
+                return (brand || "").trim().toLowerCase();
+        },
 	getItemBrand(item) {
 		let brand = this.normalizeBrand(item.brand);
 		if (brand) {

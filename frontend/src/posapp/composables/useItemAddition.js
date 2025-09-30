@@ -6,11 +6,32 @@ import { withPerf } from "../utils/perf.js";
 /* global frappe, __ */
 
 export function useItemAddition() {
-	// Remove item from invoice
-	const removeItem = (item, context) => {
-		const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
-		if (index >= 0) {
-			context.items.splice(index, 1);
+        const runAsyncTask = (task, contextLabel) => {
+                Promise.resolve().then(() => {
+                        try {
+                                const result = typeof task === "function" ? task() : null;
+                                if (result && typeof result.then === "function") {
+                                        result.catch((error) => {
+                                                console.error(
+                                                        `Async task failed${contextLabel ? ` (${contextLabel})` : ""}:`,
+                                                        error,
+                                                );
+                                        });
+                                }
+                        } catch (error) {
+                                console.error(
+                                        `Async task threw synchronously${contextLabel ? ` (${contextLabel})` : ""}:`,
+                                        error,
+                                );
+                        }
+                });
+        };
+
+        // Remove item from invoice
+        const removeItem = (item, context) => {
+                const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
+                if (index >= 0) {
+                        context.items.splice(index, 1);
 		}
 		if (item.is_bundle) {
 			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
@@ -55,13 +76,13 @@ export function useItemAddition() {
 				posa_is_offer: 0,
 			};
 			context.packed_items.push(child);
-			if (context.update_item_detail) {
-				context.update_item_detail(child, false);
-				context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
-			}
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(child);
-			}
+                        if (context.update_item_detail) {
+                                runAsyncTask(() => context.update_item_detail(child, false), "update_item_detail:bundle_child");
+                                context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
+                        }
+                        if (context.fetch_available_qty) {
+                                runAsyncTask(() => context.fetch_available_qty(child), "fetch_available_qty:bundle_child");
+                        }
 		}
 	};
 
@@ -129,51 +150,21 @@ export function useItemAddition() {
 				new_item.qty = -Math.abs(new_item.qty || 1);
 			}
 			// Apply UOM conversion immediately if barcode specifies a different UOM
-			if (context.calc_uom && new_item.uom) {
-				await context.calc_uom(new_item, new_item.uom);
-			}
+                        if (
+                                context.calc_uom &&
+                                new_item.uom &&
+                                (!new_item.stock_uom || new_item.uom !== new_item.stock_uom)
+                        ) {
+                                runAsyncTask(
+                                        () => context.calc_uom(new_item, new_item.uom),
+                                        "calc_uom:new_item",
+                                );
+                        }
 
-			// Attempt to fetch an explicit rate for this UOM from the active price list
-			try {
-				const r = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_price_for_uom",
-					args: {
-						item_code: new_item.item_code,
-						price_list: context.get_price_list ? context.get_price_list() : null,
-						uom: new_item.uom,
-					},
-				});
-				if (r.message) {
-					const price = parseFloat(r.message);
-					const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-
-					// Convert price to selected currency when multi-currency is enabled
-					let converted_price = price;
-					if (
-						context.pos_profile.posa_allow_multi_currency &&
-						context.selected_currency &&
-						context.selected_currency !== baseCurrency
-					) {
-						converted_price = price * (context.exchange_rate || 1);
-					}
-
-					Object.assign(new_item, {
-						rate: converted_price,
-						price_list_rate: converted_price,
-						base_rate: price,
-						base_price_list_rate: price,
-						_manual_rate_set: true,
-						skip_force_update: true,
-					});
-				}
-			} catch (e) {
-				console.warn("UOM price fetch failed", e);
-			}
-
-			// Check again in case the item was added while awaiting price fetch
-			if (!context.new_line) {
-				// Apply same logic - only merge with positive quantity lines for normal additions
-				if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
+                        // Re-check in case other async updates modified the cart meanwhile
+                        if (!context.new_line) {
+                                // Apply same logic - only merge with positive quantity lines for normal additions
+                                if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
 					index = context.items.findIndex(
 						(el) =>
 							el.item_code === item.item_code &&
@@ -199,14 +190,22 @@ export function useItemAddition() {
 			}
 
 			if (index === -1 || context.new_line) {
-				context.items.unshift(new_item);
-				await expandBundle(new_item, context);
-				// Skip recalculation to preserve the manually set rate
-				if (context.update_item_detail) context.update_item_detail(new_item, false);
+                                context.items.unshift(new_item);
+                                runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
+                                // Skip recalculation to preserve the manually set rate
+                                if (context.update_item_detail) {
+                                        runAsyncTask(
+                                                () => context.update_item_detail(new_item, false),
+                                                "update_item_detail:new",
+                                        );
+                                }
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(new_item);
-				}
+                                if (context.fetch_available_qty) {
+                                        runAsyncTask(
+                                                () => context.fetch_available_qty(new_item),
+                                                "fetch_available_qty:new",
+                                        );
+                                }
 
 				if (
 					context.isReturnInvoice &&
@@ -260,7 +259,12 @@ export function useItemAddition() {
 			} else {
 				const cur_item = context.items[index];
 				const previousQty = cur_item.qty;
-				if (context.update_items_details) context.update_items_details([cur_item]);
+                                if (context.update_items_details) {
+                                        runAsyncTask(
+                                                () => context.update_items_details([cur_item]),
+                                                "update_items_details:merge_new",
+                                        );
+                                }
 				// Merge serial numbers if any
 				if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
 					new_item.serial_no_selected.forEach((sn) => {
@@ -282,21 +286,36 @@ export function useItemAddition() {
 
 				if (context.setSerialNo) context.setSerialNo(cur_item);
 
-				if (context.calc_uom && cur_item.uom) {
-					await context.calc_uom(cur_item, cur_item.uom);
-				}
+                                if (
+                                        context.calc_uom &&
+                                        cur_item.uom &&
+                                        (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
+                                ) {
+                                        runAsyncTask(
+                                                () => context.calc_uom(cur_item, cur_item.uom),
+                                                "calc_uom:merge_new_item",
+                                        );
+                                }
 
-				if (context.fetch_available_qty) {
-					context.fetch_available_qty(cur_item);
-				}
-				if (cur_item.qty > previousQty) {
+                                if (context.fetch_available_qty) {
+                                        runAsyncTask(
+                                                () => context.fetch_available_qty(cur_item),
+                                                "fetch_available_qty:merge_new",
+                                        );
+                                }
+                                if (cur_item.qty > previousQty) {
 					moveItemToTop(context, cur_item);
 				}
 			}
 		} else {
 			const cur_item = context.items[index];
 			const previousQty = cur_item.qty;
-			if (context.update_items_details) context.update_items_details([cur_item]);
+                        if (context.update_items_details) {
+                                runAsyncTask(
+                                        () => context.update_items_details([cur_item]),
+                                        "update_items_details:existing",
+                                );
+                        }
 			// Serial number logic for existing item
 			if (item.has_serial_no && item.to_set_serial_no) {
 				if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
@@ -327,18 +346,30 @@ export function useItemAddition() {
 			if (context.setSerialNo) context.setSerialNo(cur_item);
 
 			// Recalculate rates if UOM differs from stock UOM
-			if (context.calc_uom && cur_item.uom) {
-				await context.calc_uom(cur_item, cur_item.uom);
-			}
+                        if (
+                                context.calc_uom &&
+                                cur_item.uom &&
+                                (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
+                        ) {
+                                runAsyncTask(
+                                        () => context.calc_uom(cur_item, cur_item.uom),
+                                        "calc_uom:merge_existing",
+                                );
+                        }
 
-			if (context.fetch_available_qty) {
-				context.fetch_available_qty(cur_item);
-			}
+                        if (context.fetch_available_qty) {
+                                runAsyncTask(
+                                        () => context.fetch_available_qty(cur_item),
+                                        "fetch_available_qty:existing",
+                                );
+                        }
 			if (cur_item.qty > previousQty) {
 				moveItemToTop(context, cur_item);
 			}
 		}
-		if (context.forceUpdate) context.forceUpdate();
+                if (context.forceUpdate) {
+                        runAsyncTask(() => context.forceUpdate(), "force_update");
+                }
 
 		// Only try to expand if new_item exists and should be expanded
 		if (

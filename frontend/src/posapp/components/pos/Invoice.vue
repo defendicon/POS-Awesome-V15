@@ -1377,16 +1377,19 @@ export default {
 		});
 	},
 	// Cleanup event listeners before component is destroyed
-	beforeUnmount() {
-		// Existing cleanup
-		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("add_item");
-		this.eventBus.off("update_customer");
-		this.eventBus.off("fetch_customer_details");
-		this.eventBus.off("clear_invoice");
-		// Cleanup reset_posting_date listener
-		this.eventBus.off("reset_posting_date");
-	},
+        beforeUnmount() {
+                // Existing cleanup
+                this.eventBus.off("register_pos_profile");
+                this.eventBus.off("add_item");
+                this.eventBus.off("update_customer");
+                this.eventBus.off("fetch_customer_details");
+                this.eventBus.off("clear_invoice");
+                // Cleanup reset_posting_date listener
+                this.eventBus.off("reset_posting_date");
+                if (typeof this.cancelScheduledOfferRefresh === "function") {
+                        this.cancelScheduledOfferRefresh();
+                }
+        },
         // Register global keyboard shortcuts when component is created
         created() {
                 this.invoiceStore.clear();
