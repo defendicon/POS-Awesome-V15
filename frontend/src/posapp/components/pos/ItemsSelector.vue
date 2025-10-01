@@ -2718,13 +2718,9 @@ export default {
                                         // mark this search as coming from a scanner
                                         this.search_from_scanner = true;
 
-                                        // Clear any previous search
+                                        // Clear any previous search so the input is ready for the next scan
                                         this.search = "";
                                         this.first_search = "";
-
-                                        // Set the scanned code as search term
-                                        this.first_search = code;
-                                        this.search = code;
 
                                         // Show scanning feedback
                                         if (this.eventBus?.emit) {
@@ -2839,18 +2835,14 @@ export default {
 					return;
 				}
 
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("Please verify the barcode or check the item's availability."),
-				});
+                                this.showScanError({
+                                        message: `${this.__("Item not found")}: ${scannedCode}`,
+                                        code: scannedCode,
+                                        details: this.__("Please verify the barcode or check the item's availability."),
+                                });
 				return;
                         } catch (e) {
                                 console.error("Error fetching item from barcode:", e);
-                                this.first_search = scannedCode;
-                                this.search = scannedCode;
                                 this.showScanError({
                                         message: `${this.__("Item not found")}: ${scannedCode}`,
                                         code: scannedCode,
@@ -3137,13 +3129,11 @@ export default {
 		handleItemNotFound(scannedCode) {
 			console.warn("Item not found for scanned code:", scannedCode);
 
-			this.first_search = scannedCode;
-			this.search = scannedCode;
-			this.showScanError({
-				message: `${this.__("Item not found")}: ${scannedCode}`,
-				code: scannedCode,
-				details: this.__("This barcode could not be matched to any item."),
-			});
+                        this.showScanError({
+                                message: `${this.__("Item not found")}: ${scannedCode}`,
+                                code: scannedCode,
+                                details: this.__("This barcode could not be matched to any item."),
+                        });
 		},
 
 		currencySymbol(currency) {
