@@ -61,7 +61,7 @@
 								hide-details
 								v-model="debounce_search"
 								@keydown.esc="esc_event"
-								@keydown.enter="search_onchange"
+                                                                @keydown.enter.prevent="handleItemSearchEnter"
 								@click:clear="clearSearch"
 								prepend-inner-icon="mdi-magnify"
 								@focus="handleItemSearchFocus"
@@ -2639,6 +2639,27 @@ export default {
                         }
                 },
 
+                async handleItemSearchEnter(event) {
+                        const rawValue =
+                                (event && event.target && typeof event.target.value === "string"
+                                        ? event.target.value
+                                        : this.first_search) || "";
+                        const query = rawValue.toString().trim();
+
+                        if (!query) {
+                                return;
+                        }
+
+                        if (this.shouldHandleSearchAsBarcode(query)) {
+                                const handled = await this.onBarcodeScanned(query);
+                                if (handled) {
+                                        return;
+                                }
+                        }
+
+                        this.search_onchange(event);
+                },
+
                 submitManualScan() {
                         const code = (this.manualScanValue ?? "").toString().trim();
                         if (!code) {
@@ -2671,6 +2692,66 @@ export default {
                                         this.focusManualScanInput();
                                 });
                         });
+                },
+
+                shouldHandleSearchAsBarcode(value) {
+                        if (!this.pos_profile?.posa_enable_barcode_scanning) {
+                                return false;
+                        }
+
+                        const trimmed = (value || "").toString().trim();
+                        if (!trimmed) {
+                                return false;
+                        }
+
+                        const scalePrefix = this.pos_profile?.posa_scale_barcode_start;
+                        if (scalePrefix && trimmed.startsWith(scalePrefix)) {
+                                return true;
+                        }
+
+                        const indexedMatch = this.lookupItemByBarcode(trimmed);
+                        if (indexedMatch) {
+                                return true;
+                        }
+
+                        if (this.items && this.items.length && (!this.barcodeIndex || this.barcodeIndex.size === 0)) {
+                                return this.items.some((item) => {
+                                        if (!item) {
+                                                return false;
+                                        }
+
+                                        if (item.item_code && String(item.item_code).trim() === trimmed) {
+                                                return true;
+                                        }
+
+                                        if (item.barcode && String(item.barcode).trim() === trimmed) {
+                                                return true;
+                                        }
+
+                                        if (Array.isArray(item.item_barcode)) {
+                                                const match = item.item_barcode.some((barcode) => {
+                                                        const code = barcode?.barcode;
+                                                        return code && String(code).trim() === trimmed;
+                                                });
+                                                if (match) {
+                                                        return true;
+                                                }
+                                        }
+
+                                        if (Array.isArray(item.barcodes)) {
+                                                const match = item.barcodes.some((barcode) => {
+                                                        return barcode && String(barcode).trim() === trimmed;
+                                                });
+                                                if (match) {
+                                                        return true;
+                                                }
+                                        }
+
+                                        return false;
+                                });
+                        }
+
+                        return false;
                 },
 
                 onScannerOpened() {
@@ -2706,10 +2787,15 @@ export default {
                                                 3,
                                         );
                                 }
-                                return;
+                                return Promise.resolve(false);
                         }
 
-                        const runScanPipeline = async (code) => {
+                        const runScanPipeline = async (rawCode) => {
+                                const code = typeof rawCode === "string" ? rawCode.trim() : "";
+                                if (!code) {
+                                        return false;
+                                }
+
                                 const mark = perfMarkStart("pos:scan-handler");
                                 try {
                                         console.log("Barcode scanned:", code);
@@ -2743,9 +2829,11 @@ export default {
                                         }
 
                                         // Enhanced item search and submission logic
-                                        await this.processScannedItem(code);
+                                        const result = await this.processScannedItem(code);
+                                        return result !== false;
                                 } catch (error) {
                                         this.handleScanPipelineError(error, code);
+                                        return false;
                                 } finally {
                                         perfMarkEnd("pos:scan-handler", mark);
                                 }
@@ -2755,100 +2843,115 @@ export default {
                                 clearTimeout(this.scanDebounceId);
                         }
                         this.scanQueuedCode = scannedCode;
-                        this.scanDebounceId = setTimeout(() => {
-                                this.scanDebounceId = null;
-                                const code = this.scanQueuedCode || scannedCode;
-                                this.scanQueuedCode = "";
-                                scheduleFrame(() => {
-                                        const maybePromise = runScanPipeline(code);
-                                        if (maybePromise && typeof maybePromise.catch === "function") {
-                                                maybePromise.catch((error) => {
-                                                        this.handleScanPipelineError(error, code);
-                                                });
-                                        }
-                                });
-                        }, 12);
+
+                        return new Promise((resolve) => {
+                                this.scanDebounceId = setTimeout(() => {
+                                        this.scanDebounceId = null;
+                                        const queued = this.scanQueuedCode || scannedCode;
+                                        this.scanQueuedCode = "";
+                                        scheduleFrame(() => {
+                                                Promise.resolve(runScanPipeline(queued))
+                                                        .then((result) => resolve(result !== false))
+                                                        .catch((error) => {
+                                                                const normalized =
+                                                                        typeof queued === "string" ? queued.trim() : "";
+                                                                this.handleScanPipelineError(error, normalized);
+                                                                resolve(false);
+                                                        });
+                                        });
+                                }, 12);
+                        });
                 },
                 async processScannedItem(scannedCode) {
                         const mark = perfMarkStart("pos:scan-process");
-                        this.pendingScanCode = scannedCode;
-			// Handle scale barcodes by extracting the item code and quantity
-			let searchCode = scannedCode;
-			let qtyFromBarcode = null;
-			if (
-				this.pos_profile?.posa_scale_barcode_start &&
-				scannedCode.startsWith(this.pos_profile.posa_scale_barcode_start)
-			) {
-				searchCode = this.get_search(scannedCode);
-				qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
-			}
-
-                        // First try to find exact match by processed code using the pre-built index
-                        const barcodeIndex = this.ensureBarcodeIndex();
-                        let foundItem = this.lookupItemByBarcode(searchCode);
-
-                        if (!foundItem && barcodeIndex.size === 0) {
-                                // Index not populated yet, build it and fall back to a direct scan once
-                                this.replaceBarcodeIndex(this.items);
-                                foundItem = this.items.find((item) => {
-                                        const barcodeMatch =
-                                                item.barcode === searchCode ||
-                                                (Array.isArray(item.item_barcode) &&
-                                                        item.item_barcode.some((b) => b.barcode === searchCode)) ||
-                                                (Array.isArray(item.barcodes) &&
-                                                        item.barcodes.some((bc) => String(bc) === searchCode));
-                                        return barcodeMatch || item.item_code === searchCode;
-                                });
-                        }
-
-			if (foundItem) {
-				console.log("Found item by processed code:", foundItem);
-				await this.addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode);
-				return;
-			}
-
-			// If not found locally, attempt to fetch from server using processed code
                         try {
-                                const res = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_items_from_barcode",
-					args: {
-						selling_price_list: this.active_price_list,
-						currency: this.pos_profile.currency,
-						barcode: searchCode,
-					},
-				});
+                                this.pendingScanCode = scannedCode;
+                                // Handle scale barcodes by extracting the item code and quantity
+                                let searchCode = scannedCode;
+                                let qtyFromBarcode = null;
+                                if (
+                                        this.pos_profile?.posa_scale_barcode_start &&
+                                        scannedCode.startsWith(this.pos_profile.posa_scale_barcode_start)
+                                ) {
+                                        searchCode = this.get_search(scannedCode);
+                                        qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
+                                }
 
-                                if (res && res.message) {
-                                        const newItem = res.message;
-                                        this.items.push(newItem);
-                                        this.indexItem(newItem);
+                                // First try to find exact match by processed code using the pre-built index
+                                const barcodeIndex = this.ensureBarcodeIndex();
+                                let foundItem = this.lookupItemByBarcode(searchCode);
 
-                                        if (this.searchCache) {
-                                                this.searchCache.clear();
+                                if (!foundItem && barcodeIndex.size === 0) {
+                                        // Index not populated yet, build it and fall back to a direct scan once
+                                        this.replaceBarcodeIndex(this.items);
+                                        foundItem = this.items.find((item) => {
+                                                const barcodeMatch =
+                                                        item.barcode === searchCode ||
+                                                        (Array.isArray(item.item_barcode) &&
+                                                                item.item_barcode.some((b) => b.barcode === searchCode)) ||
+                                                        (Array.isArray(item.barcodes) &&
+                                                                item.barcodes.some((bc) => String(bc) === searchCode));
+                                                return barcodeMatch || item.item_code === searchCode;
+                                        });
+                                }
+
+                                if (foundItem) {
+                                        console.log("Found item by processed code:", foundItem);
+                                        return (await this.addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode)) !== false;
+                                }
+
+                                // If not found locally, attempt to fetch from server using processed code
+                                try {
+                                        const res = await frappe.call({
+                                                method: "posawesome.posawesome.api.items.get_items_from_barcode",
+                                                args: {
+                                                        selling_price_list: this.active_price_list,
+                                                        currency: this.pos_profile.currency,
+                                                        barcode: searchCode,
+                                                },
+                                        });
+
+                                        if (res && res.message) {
+                                                const newItem = res.message;
+                                                this.items.push(newItem);
+                                                this.indexItem(newItem);
+
+                                                if (this.searchCache) {
+                                                        this.searchCache.clear();
+                                                }
+
+                                                await saveItems(this.items);
+                                                await savePriceListItems(this.customer_price_list, this.items);
+                                                this.eventBus.emit("set_all_items", this.items);
+                                                await this.update_items_details([newItem]);
+                                                return (
+                                                        (await this.addScannedItemToInvoice(
+                                                                newItem,
+                                                                searchCode,
+                                                                qtyFromBarcode,
+                                                        )) !== false
+                                                );
                                         }
 
-					await saveItems(this.items);
-					await savePriceListItems(this.customer_price_list, this.items);
-					this.eventBus.emit("set_all_items", this.items);
-					await this.update_items_details([newItem]);
-					await this.addScannedItemToInvoice(newItem, searchCode, qtyFromBarcode);
-					return;
-				}
-
-                                this.showScanError({
-                                        message: `${this.__("Item not found")}: ${scannedCode}`,
-                                        code: scannedCode,
-                                        details: this.__("Please verify the barcode or check the item's availability."),
-                                });
-				return;
-                        } catch (e) {
-                                console.error("Error fetching item from barcode:", e);
-                                this.showScanError({
-                                        message: `${this.__("Item not found")}: ${scannedCode}`,
-                                        code: scannedCode,
-                                        details: this.__("The system could not retrieve the item details. Please try again."),
-                                });
-                                return;
+                                        this.showScanError({
+                                                message: `${this.__("Item not found")}: ${scannedCode}`,
+                                                code: scannedCode,
+                                                details: this.__(
+                                                        "Please verify the barcode or check the item's availability.",
+                                                ),
+                                        });
+                                        return false;
+                                } catch (e) {
+                                        console.error("Error fetching item from barcode:", e);
+                                        this.showScanError({
+                                                message: `${this.__("Item not found")}: ${scannedCode}`,
+                                                code: scannedCode,
+                                                details: this.__(
+                                                        "The system could not retrieve the item details. Please try again.",
+                                                ),
+                                        });
+                                        return false;
+                                }
                         } finally {
                                 perfMarkEnd("pos:scan-process", mark);
                         }
@@ -2933,11 +3036,11 @@ export default {
                         }
                         return index.get(normalized) || index.get(normalized.toLowerCase()) || null;
                 },
-		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
-			console.log("Adding scanned item to invoice:", item, scannedCode);
+                async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
+                        console.log("Adding scanned item to invoice:", item, scannedCode);
 
-			// Clone the item to avoid mutating list data
-			const newItem = { ...item };
+                        // Clone the item to avoid mutating list data
+                        const newItem = { ...item };
 
 			// If the scanned barcode has a specific UOM, apply it
 			if (Array.isArray(newItem.item_barcode)) {
@@ -2998,32 +3101,33 @@ export default {
 					!negativeStockEnabled &&
 					(this.blockSaleBeyondAvailableQty || availableQty <= 0);
 
-				if (shouldBlock) {
-					this.showScanError({
-						message: formatStockShortageError(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						code: scannedCode,
-						details: this.__("Adjust the quantity or enable negative stock to continue."),
-					});
-					return;
-				}
+                                if (shouldBlock) {
+                                        this.showScanError({
+                                                message: formatStockShortageError(
+                                                        newItem.item_name || newItem.item_code || scannedCode,
+                                                        availableQty,
+                                                        requestedQty
+                                                ),
+                                                code: scannedCode,
+                                                details: this.__("Adjust the quantity or enable negative stock to continue."),
+                                        });
+                                        return false;
+                                }
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-				}
-			}
+                                if (negativeStockEnabled) {
+                                        this.eventBus.emit("show_message", {
+                                                title: formatNegativeStockWarning(
+                                                        newItem.item_name || newItem.item_code || scannedCode,
+                                                        availableQty,
+                                                        requestedQty
+                                                ),
+                                                color: "warning",
+                                        });
+                                }
+                        }
 
-			this.awaitingScanResult = true;
+                        this.awaitingScanResult = true;
+                        let success = false;
 
                         try {
                                 // Use existing add_item method with enhanced feedback
@@ -3068,9 +3172,12 @@ export default {
                                 // Clear search after successful addition and refocus input
                                 this.clearSearch();
                                 this.focusItemSearch();
+                                success = true;
                         } finally {
                                 this.awaitingScanResult = false;
                         }
+
+                        return success;
                 },
 		isNegativeStockEnabled() {
 			return parseBooleanSetting(this.stock_settings?.allow_negative_stock);
