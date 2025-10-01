@@ -3422,14 +3422,18 @@ export default {
                         const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
                         let filteredItems = baseItems;
 
-			// Apply search filter only for queries with at least three characters
-			if (searchTerm.length >= 3) {
-				filteredItems = filteredItems.filter((item) => {
-					const barcodeList = [];
-					if (Array.isArray(item.item_barcode)) {
-						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
-					} else if (item.item_barcode) {
-						barcodeList.push(String(item.item_barcode));
+                        // Apply search filter only for queries with at least three characters
+                        if (searchTerm.length >= 3) {
+                                const searchTerms = Array.from(
+                                        new Set(searchTerm.split(/\s+/).filter(Boolean)),
+                                );
+
+                                filteredItems = filteredItems.filter((item) => {
+                                        const barcodeList = [];
+                                        if (Array.isArray(item.item_barcode)) {
+                                                barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
+                                        } else if (item.item_barcode) {
+                                                barcodeList.push(String(item.item_barcode));
 					}
 					if (Array.isArray(item.barcodes)) {
 						barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
@@ -3446,14 +3450,20 @@ export default {
 							: []),
 						...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
 							? item.batch_no_data.map((b) => b.batch_no)
-							: []),
-					]
-						.filter(Boolean)
-						.map((field) => field.toLowerCase());
+                                                        : []),
+                                        ]
+                                                .filter(Boolean)
+                                                .map((field) => field.toLowerCase());
 
-					return searchFields.some((field) => field.includes(searchTerm));
-				});
-			}
+                                        if (!searchTerms.length) {
+                                                return true;
+                                        }
+
+                                        return searchTerms.every((term) =>
+                                                searchFields.some((field) => field.includes(term)),
+                                        );
+                                });
+                        }
 
 			// Apply item group filter
 			if (this.item_group !== "ALL") {
