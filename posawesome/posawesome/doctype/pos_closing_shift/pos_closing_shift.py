@@ -306,14 +306,14 @@ class POSClosingShift(Document):
             mop = detail.mode_of_payment
             breakdown = payment_breakdown_copy.pop(mop, None)
             currencies = []
-            base_total = 0
             if breakdown:
-                base_total = breakdown["base"]
                 currencies = [
                     frappe._dict({"currency": currency, "amount": amount})
                     for currency, amount in sorted(breakdown["currencies"].items())
                     if amount
                 ]
+
+            base_total = flt(detail.expected_amount) - flt(detail.opening_amount)
 
             mode_summaries.append(
                 frappe._dict(
