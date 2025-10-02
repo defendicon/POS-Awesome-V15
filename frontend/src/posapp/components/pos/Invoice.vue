@@ -341,13 +341,23 @@ import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
         name: "POSInvoice",
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                const { selectedCustomer, customerRefreshKey, customerInfo } = storeToRefs(customersStore);
+                return {
+                        invoiceStore,
+                        customersStore,
+                        selectedCustomer,
+                        customerRefreshKey,
+                        storeCustomerInfo: customerInfo,
+                };
         },
         data() {
                 return {
@@ -1283,15 +1293,9 @@ export default {
 			this.fetch_price_lists();
 			this.update_price_list();
 		});
-		this.eventBus.on("add_item", (item) => {
-			this.add_item(item);
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			this.customer = customer;
-		});
-		this.eventBus.on("fetch_customer_details", () => {
-			this.fetch_customer_details();
-		});
+                this.eventBus.on("add_item", (item) => {
+                        this.add_item(item);
+                });
 		this.eventBus.on("clear_invoice", () => {
 			this.clear_invoice();
 			this.eventBus.emit("focus_item_search");
@@ -1381,8 +1385,6 @@ export default {
                 // Existing cleanup
                 this.eventBus.off("register_pos_profile");
                 this.eventBus.off("add_item");
-                this.eventBus.off("update_customer");
-                this.eventBus.off("fetch_customer_details");
                 this.eventBus.off("clear_invoice");
                 // Cleanup reset_posting_date listener
                 this.eventBus.off("reset_posting_date");
@@ -1405,7 +1407,28 @@ export default {
 		document.removeEventListener("keydown", this.shortOpenFirstItem);
 		document.removeEventListener("keydown", this.shortSelectDiscount);
 	},
-	watch: invoiceWatchers,
+        watch: {
+                ...invoiceWatchers,
+                selectedCustomer(val) {
+                        if (val !== this.customer) {
+                                this.customer = val || "";
+                        }
+                },
+                storeCustomerInfo(val) {
+                        if (val && typeof val === "object") {
+                                if (val !== this.customer_info) {
+                                        this.customer_info = { ...val };
+                                }
+                        } else if (!val && Object.keys(this.customer_info || {}).length) {
+                                this.customer_info = {};
+                        }
+                },
+                customerRefreshKey() {
+                        if (this.customer) {
+                                this.fetch_customer_details();
+                        }
+                },
+        },
 };
 </script>
 

@@ -70,20 +70,24 @@ import { useOffers } from "../../composables/useOffers.js";
 import { clearExpiredCustomerBalances } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
 	setup() {
 		const instance = getCurrentInstance();
-		const responsive = useResponsive();
-		const rtl = useRtl();
-		const shift = usePosShift(() => {
-			if (instance && instance.proxy) {
-				instance.proxy.dialog = true;
-			}
-		});
-		const offers = useOffers();
-		return { ...responsive, ...rtl, ...shift, ...offers };
-	},
+                const responsive = useResponsive();
+                const rtl = useRtl();
+                const shift = usePosShift(() => {
+                        if (instance && instance.proxy) {
+                                instance.proxy.dialog = true;
+                        }
+                });
+                const offers = useOffers();
+                const customersStore = useCustomersStore();
+                const { customersLoaded } = storeToRefs(customersStore);
+                return { ...responsive, ...rtl, ...shift, ...offers, customersStore, customersLoadedRef: customersLoaded };
+        },
 	data: function () {
 		return {
 			dialog: false,
@@ -172,28 +176,37 @@ export default {
 				this.submit_closing_pos(data);
 			});
 
-			this.eventBus.on("items_loaded", () => {
-				this.itemsLoaded = true;
-				this.checkLoadingComplete();
-			});
-			this.eventBus.on("customers_loaded", () => {
-				this.customersLoaded = true;
-				this.checkLoadingComplete();
-			});
-		});
-	},
-	beforeUnmount() {
-		this.eventBus.off("close_opening_dialog");
-		this.eventBus.off("register_pos_data");
-		this.eventBus.off("register_pos_profile");
+                        this.eventBus.on("items_loaded", () => {
+                                this.itemsLoaded = true;
+                                this.checkLoadingComplete();
+                        });
+                });
+                this.unwatchCustomers = this.$watch(
+                        () => this.customersLoadedRef,
+                        (val) => {
+                                this.customersLoaded = !!val;
+                                if (val) {
+                                        this.checkLoadingComplete();
+                                }
+                        },
+                        { immediate: true },
+                );
+        },
+        beforeUnmount() {
+                this.eventBus.off("close_opening_dialog");
+                this.eventBus.off("register_pos_data");
+                this.eventBus.off("register_pos_profile");
 		this.eventBus.off("LoadPosProfile");
 		this.eventBus.off("show_offers");
 		this.eventBus.off("show_coupons");
 		this.eventBus.off("open_closing_dialog");
 		this.eventBus.off("submit_closing_pos");
-		this.eventBus.off("items_loaded");
-		this.eventBus.off("customers_loaded");
-	},
+                this.eventBus.off("items_loaded");
+                if (typeof this.unwatchCustomers === "function") {
+                        this.unwatchCustomers();
+                        this.unwatchCustomers = null;
+                }
+        },
 	// In the created() or mounted() lifecycle hook
 	created() {
 		// Clean up expired customer balance cache on POS load

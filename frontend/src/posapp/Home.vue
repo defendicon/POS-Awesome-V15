@@ -65,28 +65,35 @@ import {
 } from "../offline/index.js";
 import { silentPrint } from "./plugins/print.js";
 import {
-	setupNetworkListeners,
-	checkNetworkConnectivity,
-	detectHostType,
-	performConnectivityChecks,
-	checkFrappePing,
-	checkCurrentOrigin,
-	checkExternalConnectivity,
-	checkWebSocketConnectivity,
+        setupNetworkListeners,
+        checkNetworkConnectivity,
+        detectHostType,
+        performConnectivityChecks,
+        checkFrappePing,
+        checkCurrentOrigin,
+        checkExternalConnectivity,
+        checkWebSocketConnectivity,
 } from "./composables/useNetwork.js";
 import { useRtl } from "./composables/useRtl.js";
+import { useCustomersStore } from "./stores/customersStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
-	setup() {
-		const { isRtl, rtlStyles, rtlClasses } = useRtl();
-		const { overlayVisible } = useLoading();
-		return {
-			isRtl,
-			rtlStyles,
-			rtlClasses,
-			globalLoading: overlayVisible,
-		};
-	},
+        setup() {
+                const { isRtl, rtlStyles, rtlClasses } = useRtl();
+                const { overlayVisible } = useLoading();
+                const customersStore = useCustomersStore();
+                const { loadProgress: customerLoadProgress, customersLoaded } = storeToRefs(customersStore);
+                return {
+                        isRtl,
+                        rtlStyles,
+                        rtlClasses,
+                        globalLoading: overlayVisible,
+                        customersStore,
+                        customerLoadProgress,
+                        customersLoaded,
+                };
+        },
 	data: function () {
 		return {
 			page: "POS",
@@ -156,11 +163,31 @@ export default {
 		// Initialize cache ready state early from stored value
 		this.cacheReady = isCacheReady();
 		initLoadingSources(["init", "items", "customers"]);
-		this.initializeData();
-		this.setupNetworkListeners();
-		this.setupEventListeners();
-		this.handleRefreshCacheUsage();
-	},
+                this.initializeData();
+                this.setupNetworkListeners();
+                this.setupEventListeners();
+                this.handleRefreshCacheUsage();
+                this.unwatchCustomerProgress = this.$watch(
+                        () => this.customerLoadProgress,
+                        (val) => {
+                                if (typeof val === "number") {
+                                        setSourceProgress("customers", val);
+                                }
+                        },
+                );
+                this.unwatchCustomerLoaded = this.$watch(
+                        () => this.customersLoaded,
+                        (val) => {
+                                if (val) {
+                                        markSourceLoaded("customers");
+                                }
+                        },
+                        { immediate: true },
+                );
+                if (typeof this.customerLoadProgress === "number") {
+                        setSourceProgress("customers", this.customerLoadProgress);
+                }
+        },
 	methods: {
 		setupNetworkListeners,
 		checkNetworkConnectivity,
@@ -242,12 +269,16 @@ export default {
 					this.lastInvoiceId = invoiceId;
 				});
 
-				this.eventBus.on("data-loaded", (name) => {
-					markSourceLoaded(name);
-				});
-				this.eventBus.on("data-load-progress", ({ name, progress }) => {
-					setSourceProgress(name, progress);
-				});
+                                this.eventBus.on("data-loaded", (name) => {
+                                        if (name !== "customers") {
+                                                markSourceLoaded(name);
+                                        }
+                                });
+                                this.eventBus.on("data-load-progress", ({ name, progress }) => {
+                                        if (name !== "customers") {
+                                                setSourceProgress(name, progress);
+                                        }
+                                });
 
 				// Allow other components to trigger printing
 				this.eventBus.on("print_last_invoice", () => {
@@ -471,12 +502,20 @@ export default {
 			});
 		},
 	},
-	beforeUnmount() {
-		if (this.eventBus) {
-			this.eventBus.off("pending_invoices_changed");
-			this.eventBus.off("data-loaded");
-		}
-	},
+        beforeUnmount() {
+                if (this.eventBus) {
+                        this.eventBus.off("pending_invoices_changed");
+                        this.eventBus.off("data-loaded");
+                }
+                if (typeof this.unwatchCustomerProgress === "function") {
+                        this.unwatchCustomerProgress();
+                        this.unwatchCustomerProgress = null;
+                }
+                if (typeof this.unwatchCustomerLoaded === "function") {
+                        this.unwatchCustomerLoaded();
+                        this.unwatchCustomerLoaded = null;
+                }
+        },
 	created: function () {
 		setTimeout(() => {
 			this.remove_frappe_nav();

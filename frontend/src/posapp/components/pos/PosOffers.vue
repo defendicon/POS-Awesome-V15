@@ -91,16 +91,24 @@
 <script>
 /* global __, frappe */
 import format from "../../format";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 export default {
-	mixins: [format],
-	data: () => ({
-		loading: false,
-		pos_profile: "",
-		pos_offers: [],
-		allItems: [],
-		groupItemCache: {},
-		discount_percentage_offer_name: null,
-		itemsPerPage: 1000,
+        mixins: [format],
+        setup() {
+                const customersStore = useCustomersStore();
+                const { selectedCustomer } = storeToRefs(customersStore);
+                return { customersStore, selectedCustomer };
+        },
+        data: () => ({
+                loading: false,
+                pos_profile: "",
+                pos_offers: [],
+                allItems: [],
+                groupItemCache: {},
+                discount_percentage_offer_name: null,
+                customer: "",
+                itemsPerPage: 1000,
 		expanded: [],
 		singleExpand: true,
 		items_headers: [
@@ -302,16 +310,21 @@ export default {
 		},
 	},
 
-	watch: {
-		pos_offers: {
-			deep: true,
-			handler() {
-				this.handelOffers();
-				this.updateCounters();
-				this.updatePosCoupuns();
-			},
-		},
-	},
+        watch: {
+                pos_offers: {
+                        deep: true,
+                        handler() {
+                                this.handelOffers();
+                                this.updateCounters();
+                                this.updatePosCoupuns();
+                        },
+                },
+                selectedCustomer(newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                                this.offers = [];
+                        }
+                },
+        },
 
 	created: function () {
 		this.$nextTick(function () {
@@ -319,14 +332,9 @@ export default {
 				this.pos_profile = data.pos_profile;
 			});
 		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				this.offers = [];
-			}
-		});
-		this.eventBus.on("update_pos_offers", (data) => {
-			this.updatePosOffers(data);
-		});
+                this.eventBus.on("update_pos_offers", (data) => {
+                        this.updatePosOffers(data);
+                });
 		this.eventBus.on("update_discount_percentage_offer_name", (data) => {
 			this.discount_percentage_offer_name = data.value;
 		});

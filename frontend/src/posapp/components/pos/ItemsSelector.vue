@@ -560,6 +560,8 @@ import {
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
@@ -580,18 +582,23 @@ export default {
                 const cartValidation = useCartValidation();
 
 		// Initialize Pinia store integration
-		const itemsIntegration = useItemsIntegration({
-			enableDebounce: true,
-			debounceDelay: 300
-		});
+                const itemsIntegration = useItemsIntegration({
+                        enableDebounce: true,
+                        debounceDelay: 300
+                });
+                const customersStore = useCustomersStore();
+                const { selectedCustomer, customerRefreshKey } = storeToRefs(customersStore);
 
-		return {
-			...responsive,
-			...rtl,
-			fly,
-			cartValidation,
-			...itemsIntegration
-		};
+                return {
+                        ...responsive,
+                        ...rtl,
+                        fly,
+                        cartValidation,
+                        ...itemsIntegration,
+                        customersStore,
+                        selectedCustomer,
+                        customerRefreshKey
+                };
         },
         components: {
                 CameraScanner,
@@ -685,6 +692,16 @@ export default {
         }),
 
         watch: {
+                selectedCustomer(newVal, oldVal) {
+                        if (newVal !== oldVal && newVal !== this.customer) {
+                                this.customer = newVal || "";
+                        }
+                },
+                customerRefreshKey() {
+                        if (typeof this.refreshPricesForVisibleItems === "function") {
+                                this.refreshPricesForVisibleItems();
+                        }
+                },
                 showManualScanInput(newVal) {
                         if (newVal) {
                                 this.queueManualScanFocus();
@@ -3616,12 +3633,9 @@ export default {
 			this.couponsCount = data.couponsCount;
 			this.appliedCouponsCount = data.appliedCouponsCount;
 		});
-		this.eventBus.on("update_customer_price_list", (data) => {
-			this.customer_price_list = data;
-		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
-		});
+                this.eventBus.on("update_customer_price_list", (data) => {
+                        this.customer_price_list = data;
+                });
 
 		this.eventBus.on("focus_item_search", () => {
 			this.focusItemSearch();
@@ -3793,9 +3807,8 @@ export default {
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
-		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
+                this.eventBus.off("update_coupons_counters");
+                this.eventBus.off("update_customer_price_list");
                 this.eventBus.off("force_reload_items");
                 this.eventBus.off("focus_item_search");
                 window.removeEventListener("resize", this.checkItemContainerOverflow);

@@ -794,13 +794,23 @@ import {
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
         // Using format mixin for shared formatting methods
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                const { selectedCustomer, customerRefreshKey, customerInfo } = storeToRefs(customersStore);
+                return {
+                        invoiceStore,
+                        customersStore,
+                        selectedCustomer,
+                        customerRefreshKey,
+                        storeCustomerInfo: customerInfo,
+                };
         },
         data() {
                 return {
@@ -1026,12 +1036,41 @@ export default {
 			);
 		},
 	},
-	watch: {
-		// Watch diff_payment to update paid_change
-		diff_payment(newVal) {
-			if (!this.is_user_editing_paid_change) {
-				this.paid_change = -newVal;
-			}
+        watch: {
+                selectedCustomer(newVal, oldVal) {
+                        if (!newVal || newVal === oldVal) {
+                                return;
+                        }
+                        if (this.invoice_doc && this.invoice_doc.customer !== newVal) {
+                                this.customer_credit_dict = [];
+                                this.redeem_customer_credit = false;
+                                this.is_cashback = true;
+                                this.is_credit_return = false;
+                        }
+                        this.clear_all(true);
+                        this.customer_name = newVal;
+                        this.fetch_customer_details();
+                        this.get_outstanding_invoices();
+                        this.get_unallocated_payments();
+                        this.get_draft_mpesa_payments_register();
+                },
+                customerRefreshKey() {
+                        if (this.selectedCustomer) {
+                                this.fetch_customer_details();
+                        }
+                },
+                storeCustomerInfo(val) {
+                        if (val && typeof val === "object") {
+                                this.customer_info = { ...val };
+                        } else if (!val) {
+                                this.customer_info = {};
+                        }
+                },
+                // Watch diff_payment to update paid_change
+                diff_payment(newVal) {
+                        if (!this.is_user_editing_paid_change) {
+                                this.paid_change = -newVal;
+                        }
 		},
 		// Watch paid_change to validate and update credit_change
 		paid_change(newVal) {
@@ -2176,20 +2215,9 @@ export default {
 					this.is_credit_return = false;
 				}
 			});
-			this.eventBus.on("update_customer", (customer) => {
-				if (this.customer !== customer) {
-					this.customer_credit_dict = [];
-					this.redeem_customer_credit = false;
-					this.is_cashback = true;
-					this.is_credit_return = false;
-				}
-			});
-			this.eventBus.on("set_pos_settings", (data) => {
-				this.pos_settings = data;
-			});
-			this.eventBus.on("set_customer_info_to_edit", (data) => {
-				this.customer_info = data;
-			});
+                        this.eventBus.on("set_pos_settings", (data) => {
+                                this.pos_settings = data;
+                        });
 			this.eventBus.on("set_mpesa_payment", (data) => {
 				this.set_mpesa_payment(data);
 			});
@@ -2210,9 +2238,7 @@ export default {
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("add_the_new_address");
 		this.eventBus.off("update_invoice_type");
-		this.eventBus.off("update_customer");
 		this.eventBus.off("set_pos_settings");
-		this.eventBus.off("set_customer_info_to_edit");
 		this.eventBus.off("set_mpesa_payment");
 		this.eventBus.off("clear_invoice");
 		this.eventBus.off("network-online", this.syncPendingInvoices);
