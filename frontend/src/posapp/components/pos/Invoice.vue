@@ -341,13 +341,15 @@ import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
         name: "POSInvoice",
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                return { invoiceStore, customersStore };
         },
         data() {
                 return {
@@ -356,8 +358,6 @@ export default {
                         pos_opening_shift: "",
                         stock_settings: "",
                         return_doc: "",
-			customer: "",
-			customer_info: "",
 			customer_balance: 0,
 			discount_amount: 0,
 			additional_discount: 0,
@@ -451,6 +451,22 @@ export default {
                         },
                         set(value) {
                                 this.invoiceStore.setPackedItems(value);
+                        },
+                },
+                customer: {
+                        get() {
+                                return this.customersStore.selectedCustomer;
+                        },
+                        set(value) {
+                                this.customersStore.setSelectedCustomer(value);
+                        },
+                },
+                customer_info: {
+                        get() {
+                                return this.customersStore.customerInfo;
+                        },
+                        set(value) {
+                                this.customersStore.setCustomerInfo(value);
                         },
                 },
                 ...invoiceComputed,
@@ -1248,12 +1264,12 @@ export default {
 		});
 
 		// Register event listeners for POS profile, items, customer, offers, etc.
-		this.eventBus.on("register_pos_profile", (data) => {
-			this.pos_profile = data.pos_profile;
-			this.company = data.company || null;
-			this.customer = data.pos_profile.customer;
-			this.pos_opening_shift = data.pos_opening_shift;
-			this.stock_settings = data.stock_settings;
+                this.eventBus.on("register_pos_profile", (data) => {
+                        this.pos_profile = data.pos_profile;
+                        this.company = data.company || null;
+                        this.customersStore.setSelectedCustomer(data.pos_profile.customer);
+                        this.pos_opening_shift = data.pos_opening_shift;
+                        this.stock_settings = data.stock_settings;
 			const prec = parseInt(data.pos_profile.posa_decimal_precision);
 			if (!isNaN(prec)) {
 				this.float_precision = prec;
@@ -1285,12 +1301,6 @@ export default {
 		});
 		this.eventBus.on("add_item", (item) => {
 			this.add_item(item);
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			this.customer = customer;
-		});
-		this.eventBus.on("fetch_customer_details", () => {
-			this.fetch_customer_details();
 		});
 		this.eventBus.on("clear_invoice", () => {
 			this.clear_invoice();
@@ -1381,8 +1391,6 @@ export default {
                 // Existing cleanup
                 this.eventBus.off("register_pos_profile");
                 this.eventBus.off("add_item");
-                this.eventBus.off("update_customer");
-                this.eventBus.off("fetch_customer_details");
                 this.eventBus.off("clear_invoice");
                 // Cleanup reset_posting_date listener
                 this.eventBus.off("reset_posting_date");

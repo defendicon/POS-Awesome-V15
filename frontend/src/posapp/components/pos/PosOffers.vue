@@ -91,9 +91,14 @@
 <script>
 /* global __, frappe */
 import format from "../../format";
+import { useCustomersStore } from "../../stores/customersStore.js";
 export default {
-	mixins: [format],
-	data: () => ({
+        mixins: [format],
+        setup() {
+                const customersStore = useCustomersStore();
+                return { customersStore };
+        },
+        data: () => ({
 		loading: false,
 		pos_profile: "",
 		pos_offers: [],
@@ -111,14 +116,17 @@ export default {
 		],
 	}),
 
-	computed: {
-		offersCount() {
-			return this.pos_offers.length;
-		},
-		appliedOffersCount() {
-			return this.pos_offers.filter((el) => !!el.offer_applied).length;
-		},
-	},
+        computed: {
+                offersCount() {
+                        return this.pos_offers.length;
+                },
+                appliedOffersCount() {
+                        return this.pos_offers.filter((el) => !!el.offer_applied).length;
+                },
+                customer() {
+                        return this.customersStore.selectedCustomer;
+                },
+        },
 
 	methods: {
 		back_to_invoice() {
@@ -302,11 +310,16 @@ export default {
 		},
 	},
 
-	watch: {
-		pos_offers: {
-			deep: true,
-			handler() {
-				this.handelOffers();
+        watch: {
+                customer(newCustomer, oldCustomer) {
+                        if (newCustomer !== oldCustomer) {
+                                this.pos_offers = [];
+                        }
+                },
+                pos_offers: {
+                        deep: true,
+                        handler() {
+                                this.handelOffers();
 				this.updateCounters();
 				this.updatePosCoupuns();
 			},
@@ -319,14 +332,9 @@ export default {
 				this.pos_profile = data.pos_profile;
 			});
 		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				this.offers = [];
-			}
-		});
-		this.eventBus.on("update_pos_offers", (data) => {
-			this.updatePosOffers(data);
-		});
+                this.eventBus.on("update_pos_offers", (data) => {
+                        this.updatePosOffers(data);
+                });
 		this.eventBus.on("update_discount_percentage_offer_name", (data) => {
 			this.discount_percentage_offer_name = data.value;
 		});

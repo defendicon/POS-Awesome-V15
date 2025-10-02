@@ -390,24 +390,26 @@ import {
 } from "../../../offline/index.js";
 import { silentPrint } from "../../plugins/print.js";
 import { useRtl } from "../../composables/useRtl.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
 	mixins: [format],
-	setup() {
-		const { isRtl, rtlStyles, rtlClasses } = useRtl();
-		return {
-			isRtl,
-			rtlStyles,
-			rtlClasses,
-		};
-	},
+        setup() {
+                const { isRtl, rtlStyles, rtlClasses } = useRtl();
+                const customersStore = useCustomersStore();
+                return {
+                        isRtl,
+                        rtlStyles,
+                        rtlClasses,
+                        customersStore,
+                };
+        },
 	data: function () {
-		return {
-			dialog: false,
-			pos_profile: "",
-			pos_opening_shift: "",
-			customer_name: "",
-			customer_info: "",
+                return {
+                        dialog: false,
+                        pos_profile: "",
+                        pos_opening_shift: "",
+                        customer_info: "",
 			company: "",
 			singleSelect: true,
 			invoices_loading: false,
@@ -665,20 +667,20 @@ export default {
 					const cached = (list || []).find(
 						(c) => c.name === vm.customer_name || c.customer_name === vm.customer_name,
 					);
-					if (cached) {
-						vm.customer_info = { ...cached };
-						vm.set_mpesa_search_params();
-						vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
-						return;
-					}
+                                        if (cached) {
+                                                vm.customer_info = { ...cached };
+                                                vm.set_mpesa_search_params();
+                                                vm.customersStore.setCustomerInfo(vm.customer_info);
+                                                return;
+                                        }
 					const queued = (getOfflineCustomers() || [])
 						.map((e) => e.args)
 						.find((c) => c.customer_name === vm.customer_name);
-					if (queued) {
-						vm.customer_info = { ...queued, name: queued.customer_name };
-						vm.set_mpesa_search_params();
-						vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
-					}
+                                        if (queued) {
+                                                vm.customer_info = { ...queued, name: queued.customer_name };
+                                                vm.set_mpesa_search_params();
+                                                vm.customersStore.setCustomerInfo(vm.customer_info);
+                                        }
 				} catch (error) {
 					console.error("Failed to fetch cached customer", error);
 				}
@@ -694,24 +696,24 @@ export default {
 				});
 				const message = r.message;
 				if (!r.exc) {
-					vm.customer_info = {
-						...message,
-					};
-					vm.set_mpesa_search_params();
-					vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
+                                        vm.customer_info = {
+                                                ...message,
+                                        };
+                                        vm.set_mpesa_search_params();
+                                        vm.customersStore.setCustomerInfo(vm.customer_info);
 				}
 			} catch (error) {
 				console.error("Failed to fetch customer details", error);
 			}
 		},
-		onInvoiceSelected(event) {
-			if (event && event.item && event.item.customer) {
-				this.eventBus.emit("set_customer", event.item.customer);
-				// Force UI to update total calculations
-				this.$nextTick(() => {
-					this.$forceUpdate();
-				});
-			}
+                onInvoiceSelected(event) {
+                        if (event && event.item && event.item.customer) {
+                                this.customersStore.setSelectedCustomer(event.item.customer);
+                                // Force UI to update total calculations
+                                this.$nextTick(() => {
+                                        this.$forceUpdate();
+                                });
+                        }
 		},
 		get_outstanding_invoices() {
 			this.invoices_loading = true;
@@ -1059,12 +1061,12 @@ export default {
 					(i) => i.voucher_no !== item.voucher_no,
 				);
 			} else {
-				// Add this invoice to selection - support multiple selection
-				this.selected_invoices.push(item);
+                                // Add this invoice to selection - support multiple selection
+                                this.selected_invoices.push(item);
 
-				if (item.customer && !this.customer_name) {
-					this.eventBus.emit("set_customer", item.customer);
-				}
+                                if (item.customer && !this.customer_name) {
+                                        this.customersStore.setSelectedCustomer(item.customer);
+                                }
 			}
 
 			// Force UI update
@@ -1122,9 +1124,17 @@ export default {
 		},
 	},
 
-	computed: {
-		total_outstanding_amount() {
-			if (!this.outstanding_invoices || !this.outstanding_invoices.length) return 0;
+        computed: {
+                customer_name: {
+                        get() {
+                                return this.customersStore.selectedCustomer;
+                        },
+                        set(value) {
+                                this.customersStore.setSelectedCustomer(value);
+                        },
+                },
+                total_outstanding_amount() {
+                        if (!this.outstanding_invoices || !this.outstanding_invoices.length) return 0;
 			return this.outstanding_invoices.reduce((acc, cur) => acc + flt(cur?.outstanding_amount || 0), 0);
 		},
 		total_unallocated_amount() {
@@ -1163,13 +1173,13 @@ export default {
 			console.log("Payment methods total:", total, "from", this.payment_methods);
 			return total;
 		},
-		total_of_diff() {
-			// Calculate difference between invoice total and payment total
-			const invoiceTotal = this.total_selected_invoices || 0;
-			const paymentTotal =
-				(this.total_selected_payments || 0) +
-				(this.total_selected_mpesa_payments || 0) +
-				(this.total_payment_methods || 0);
+                total_of_diff() {
+                        // Calculate difference between invoice total and payment total
+                        const invoiceTotal = this.total_selected_invoices || 0;
+                        const paymentTotal =
+                                (this.total_selected_payments || 0) +
+                                (this.total_selected_mpesa_payments || 0) +
+                                (this.total_payment_methods || 0);
 
 			console.log("Difference calculation:", {
 				invoiceTotal,
@@ -1179,9 +1189,26 @@ export default {
 				methodPayments: this.total_payment_methods,
 			});
 
-			return flt(invoiceTotal - paymentTotal);
-		},
-	},
+                        return flt(invoiceTotal - paymentTotal);
+                },
+        },
+
+        watch: {
+                customer_name(newName, oldName) {
+                        if (newName === oldName) {
+                                return;
+                        }
+                        this.clear_all(true);
+                        if (newName) {
+                                this.fetch_customer_details();
+                                this.get_outstanding_invoices();
+                                this.get_unallocated_payments();
+                                this.get_draft_mpesa_payments_register();
+                        } else {
+                                this.customer_info = "";
+                        }
+                },
+        },
 
 	created() {
 		this.syncPendingPayments();
@@ -1190,27 +1217,14 @@ export default {
 	},
 
 	mounted: function () {
-		this.$nextTick(function () {
-			this.check_opening_entry();
-			this.eventBus.on("update_customer", (customer_name) => {
-				this.clear_all(true);
-				this.customer_name = customer_name;
-				this.fetch_customer_details();
-				this.get_outstanding_invoices();
-				this.get_unallocated_payments();
-				this.get_draft_mpesa_payments_register();
-			});
-			this.eventBus.on("fetch_customer_details", () => {
-				this.fetch_customer_details();
-			});
-		});
-	},
-	beforeUnmount() {
-		this.eventBus.off("update_customer");
-		this.eventBus.off("fetch_customer_details");
-		this.eventBus.off("network-online", this.syncPendingPayments);
-		this.eventBus.off("server-online", this.syncPendingPayments);
-	},
+                this.$nextTick(function () {
+                        this.check_opening_entry();
+                });
+        },
+        beforeUnmount() {
+                this.eventBus.off("network-online", this.syncPendingPayments);
+                this.eventBus.off("server-online", this.syncPendingPayments);
+        },
 };
 </script>
 

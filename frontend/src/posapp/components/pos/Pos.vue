@@ -66,24 +66,26 @@ import {
 import { getCurrentInstance } from "vue";
 import { usePosShift } from "../../composables/usePosShift.js";
 import { useOffers } from "../../composables/useOffers.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 // Import the cache cleanup function
 import { clearExpiredCustomerBalances } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 
 export default {
-	setup() {
-		const instance = getCurrentInstance();
-		const responsive = useResponsive();
-		const rtl = useRtl();
-		const shift = usePosShift(() => {
-			if (instance && instance.proxy) {
-				instance.proxy.dialog = true;
-			}
-		});
-		const offers = useOffers();
-		return { ...responsive, ...rtl, ...shift, ...offers };
-	},
+        setup() {
+                const instance = getCurrentInstance();
+                const responsive = useResponsive();
+                const rtl = useRtl();
+                const shift = usePosShift(() => {
+                        if (instance && instance.proxy) {
+                                instance.proxy.dialog = true;
+                        }
+                });
+                const offers = useOffers();
+                const customersStore = useCustomersStore();
+                return { ...responsive, ...rtl, ...shift, ...offers, customersStore };
+        },
 	data: function () {
 		return {
 			dialog: false,
@@ -176,12 +178,18 @@ export default {
 				this.itemsLoaded = true;
 				this.checkLoadingComplete();
 			});
-			this.eventBus.on("customers_loaded", () => {
-				this.customersLoaded = true;
-				this.checkLoadingComplete();
-			});
-		});
-	},
+                        this.$watch(
+                                () => this.customersStore.customersLoaded,
+                                (value) => {
+                                        this.customersLoaded = value;
+                                        if (value) {
+                                                this.checkLoadingComplete();
+                                        }
+                                },
+                                { immediate: true }
+                        );
+                });
+        },
 	beforeUnmount() {
 		this.eventBus.off("close_opening_dialog");
 		this.eventBus.off("register_pos_data");
@@ -192,8 +200,7 @@ export default {
 		this.eventBus.off("open_closing_dialog");
 		this.eventBus.off("submit_closing_pos");
 		this.eventBus.off("items_loaded");
-		this.eventBus.off("customers_loaded");
-	},
+        },
 	// In the created() or mounted() lifecycle hook
 	created() {
 		// Clean up expired customer balance cache on POS load

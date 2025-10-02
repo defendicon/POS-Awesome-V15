@@ -2,18 +2,19 @@ import { clearPriceListCache } from "../../../offline/index.js";
 /* global frappe */
 
 export default {
-	// Watch for customer change and update related data
-	customer() {
-		this.close_payments();
-		this.eventBus.emit("set_customer", this.customer);
-		this.fetch_customer_details();
-		this.fetch_customer_balance();
-		this.set_delivery_charges();
-	},
-	// Watch for customer_info change and emit to edit form
-	customer_info() {
-		this.eventBus.emit("set_customer_info_to_edit", this.customer_info);
-	},
+        // Watch for customer change and update related data
+        customer() {
+                this.close_payments();
+                this.fetch_customer_details();
+                this.fetch_customer_balance();
+                this.set_delivery_charges();
+        },
+        // Watch for customer_info change and emit to edit form
+        customer_info() {
+                if (this.customersStore) {
+                        this.customersStore.setCustomerInfo(this.customer_info);
+                }
+        },
 	// Watch for expanded row change and update item detail
 	expanded(data_value) {
 		if (data_value.length > 0) {

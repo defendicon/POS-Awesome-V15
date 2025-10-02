@@ -563,6 +563,7 @@ import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 import {
   parseBooleanSetting,
   formatNegativeStockWarning,
@@ -579,19 +580,22 @@ export default {
                 const { fly } = useFlyAnimation();
                 const cartValidation = useCartValidation();
 
-		// Initialize Pinia store integration
-		const itemsIntegration = useItemsIntegration({
-			enableDebounce: true,
-			debounceDelay: 300
-		});
+                // Initialize Pinia store integration
+                const itemsIntegration = useItemsIntegration({
+                        enableDebounce: true,
+                        debounceDelay: 300
+                });
 
-		return {
-			...responsive,
-			...rtl,
-			fly,
-			cartValidation,
-			...itemsIntegration
-		};
+                const customersStore = useCustomersStore();
+
+                return {
+                        ...responsive,
+                        ...rtl,
+                        fly,
+                        cartValidation,
+                        ...itemsIntegration,
+                        customersStore
+                };
         },
         components: {
                 CameraScanner,
@@ -696,8 +700,11 @@ export default {
                         }
                 },
                 customer: _.debounce(function () {
-			if (this.pos_profile.posa_force_reload_items) {
-				if (this.pos_profile.posa_smart_reload_mode) {
+                        if (this.customersStore && this.customersStore.selectedCustomer !== this.customer) {
+                                this.customersStore.setSelectedCustomer(this.customer);
+                        }
+                        if (this.pos_profile.posa_force_reload_items) {
+                                if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
 					if (!this.itemsLoaded || !this.displayedItems.length) {
@@ -3552,9 +3559,9 @@ export default {
 		// Load settings
 		this.loadItemSettings();
 
-		// Initialize after memory is ready
-		memoryInitPromise.then(async () => {
-			try {
+                // Initialize after memory is ready
+                memoryInitPromise.then(async () => {
+                        try {
 				// Ensure POS profile is available
 				if (!this.pos_profile || !this.pos_profile.name) {
 					// Try to get POS profile from boot or current route
@@ -3595,9 +3602,19 @@ export default {
 			} catch (error) {
 				console.error("Error during initialization:", error);
 			}
-		});
+                });
 
-		// Event listeners
+                this.$watch(
+                        () => this.customersStore.selectedCustomer,
+                        (value) => {
+                                if (value !== this.customer) {
+                                        this.customer = value;
+                                }
+                        },
+                        { immediate: true }
+                );
+
+                // Event listeners
 		this.eventBus.on("register_pos_profile", async (data) => {
 			this.pos_profile = data.pos_profile;
 			this.stock_settings = data.stock_settings || {};
@@ -3618,9 +3635,6 @@ export default {
 		});
 		this.eventBus.on("update_customer_price_list", (data) => {
 			this.customer_price_list = data;
-		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
 		});
 
 		this.eventBus.on("focus_item_search", () => {
@@ -3793,9 +3807,8 @@ export default {
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
-		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
+                this.eventBus.off("update_coupons_counters");
+                this.eventBus.off("update_customer_price_list");
                 this.eventBus.off("force_reload_items");
                 this.eventBus.off("focus_item_search");
                 window.removeEventListener("resize", this.checkItemContainerOverflow);

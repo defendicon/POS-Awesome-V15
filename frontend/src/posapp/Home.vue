@@ -46,6 +46,7 @@ import Payments from "./components/payments/Pay.vue";
 import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "./components/ui/UpdatePrompt.vue";
 import { useLoading } from "./composables/useLoading.js";
+import { useCustomersStore } from "./stores/customersStore.js";
 import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "./utils/loading.js";
 import {
 	getOpeningStorage,
@@ -77,16 +78,18 @@ import {
 import { useRtl } from "./composables/useRtl.js";
 
 export default {
-	setup() {
-		const { isRtl, rtlStyles, rtlClasses } = useRtl();
-		const { overlayVisible } = useLoading();
-		return {
-			isRtl,
-			rtlStyles,
-			rtlClasses,
-			globalLoading: overlayVisible,
-		};
-	},
+        setup() {
+                const { isRtl, rtlStyles, rtlClasses } = useRtl();
+                const { overlayVisible } = useLoading();
+                const customersStore = useCustomersStore();
+                return {
+                        isRtl,
+                        rtlStyles,
+                        rtlClasses,
+                        globalLoading: overlayVisible,
+                        customersStore,
+                };
+        },
 	data: function () {
 		return {
 			page: "POS",
@@ -156,11 +159,29 @@ export default {
 		// Initialize cache ready state early from stored value
 		this.cacheReady = isCacheReady();
 		initLoadingSources(["init", "items", "customers"]);
-		this.initializeData();
-		this.setupNetworkListeners();
-		this.setupEventListeners();
-		this.handleRefreshCacheUsage();
-	},
+                this.initializeData();
+                this.setupNetworkListeners();
+                this.setupEventListeners();
+                this.handleRefreshCacheUsage();
+                this.$watch(
+                        () => this.customersStore.customersLoaded,
+                        (value) => {
+                                if (value) {
+                                        markSourceLoaded("customers");
+                                }
+                        },
+                        { immediate: true }
+                );
+                this.$watch(
+                        () => this.customersStore.loadProgress,
+                        (progress) => {
+                                if (typeof progress === "number") {
+                                        setSourceProgress("customers", progress);
+                                }
+                        },
+                        { immediate: true }
+                );
+        },
 	methods: {
 		setupNetworkListeners,
 		checkNetworkConnectivity,

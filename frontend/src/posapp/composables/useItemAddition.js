@@ -2,6 +2,7 @@ import { nextTick } from "vue";
 import _ from "lodash";
 import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
+import { useCustomersStore } from "../stores/customersStore.js";
 
 /* global frappe, __ */
 
@@ -496,7 +497,8 @@ export function useItemAddition() {
 		// Always reset to default customer after invoice
 		context.customer = context.pos_profile.customer;
 
-		context.eventBus.emit("set_customer_readonly", false);
+                const customersStore = useCustomersStore();
+                customersStore.setReadonly(false);
 		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
 		context.invoiceTypes = ["Invoice", "Order", "Quotation"];
 

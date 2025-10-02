@@ -167,14 +167,14 @@ export default {
 			console.log("Processing return invoice");
 			// For return without invoice case, check if there's a return_against
 			// Only set customer readonly if this is a return with reference to an invoice
-			if (data.return_against) {
-				console.log("Return has reference to invoice:", data.return_against);
-				this.eventBus.emit("set_customer_readonly", true);
-			} else {
-				console.log("Return without invoice reference, customer can be selected");
-				// Allow customer selection for returns without invoice
-				this.eventBus.emit("set_customer_readonly", false);
-			}
+                        if (data.return_against) {
+                                console.log("Return has reference to invoice:", data.return_against);
+                                this.customersStore?.setReadonly(true);
+                        } else {
+                                console.log("Return without invoice reference, customer can be selected");
+                                // Allow customer selection for returns without invoice
+                                this.customersStore?.setReadonly(false);
+                        }
 			this.invoiceType = "Return";
 			this.invoiceTypes = ["Return"];
 		}
@@ -286,7 +286,7 @@ export default {
 	// Start a new order (or return order) with provided data
 	async new_order(data = {}) {
 		let old_invoice = null;
-		this.eventBus.emit("set_customer_readonly", false);
+                this.customersStore?.setReadonly(false);
 		this.expanded = [];
 		this.posa_offers = [];
 		this.eventBus.emit("set_pos_coupons", []);
@@ -304,12 +304,12 @@ export default {
 			if (data.is_return) {
 				// For return without invoice case, check if there's a return_against
 				// Only set customer readonly if this is a return with reference to an invoice
-				if (data.return_against) {
-					this.eventBus.emit("set_customer_readonly", true);
-				} else {
-					// Allow customer selection for returns without invoice
-					this.eventBus.emit("set_customer_readonly", false);
-				}
+                                if (data.return_against) {
+                                        this.customersStore?.setReadonly(true);
+                                } else {
+                                        // Allow customer selection for returns without invoice
+                                        this.customersStore?.setReadonly(false);
+                                }
 				this.invoiceType = "Return";
 				this.invoiceTypes = ["Return"];
 			}

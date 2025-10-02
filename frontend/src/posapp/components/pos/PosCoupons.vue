@@ -75,36 +75,49 @@
 
 <script>
 /* global __, frappe */
+import { useCustomersStore } from "../../stores/customersStore.js";
+
 export default {
-	data: () => ({
-		loading: false,
-		pos_profile: "",
-		customer: "",
-		posa_coupons: [],
-		new_coupon: null,
-		itemsPerPage: 1000,
-		singleExpand: true,
-		items_headers: [
-			{ title: __("Coupon"), value: "coupon_code", align: "start" },
-			{ title: __("Type"), value: "type", align: "start" },
-			{ title: __("Offer"), value: "pos_offer", align: "start" },
-			{ title: __("Applied"), value: "applied", align: "start" },
-		],
-	}),
+        setup() {
+                const customersStore = useCustomersStore();
+                return { customersStore };
+        },
+        data: () => ({
+                loading: false,
+                pos_profile: "",
+                posa_coupons: [],
+                new_coupon: null,
+                itemsPerPage: 1000,
+                singleExpand: true,
+                items_headers: [
+                        { title: __("Coupon"), value: "coupon_code", align: "start" },
+                        { title: __("Type"), value: "type", align: "start" },
+                        { title: __("Offer"), value: "pos_offer", align: "start" },
+                        { title: __("Applied"), value: "applied", align: "start" },
+                ],
+        }),
 
-	computed: {
-		couponsCount() {
-			return this.posa_coupons.length;
-		},
-		appliedCouponsCount() {
-			return this.posa_coupons.filter((el) => !!el.applied).length;
-		},
-	},
+        computed: {
+                customer: {
+                        get() {
+                                return this.customersStore.selectedCustomer;
+                        },
+                        set(value) {
+                                this.customersStore.setSelectedCustomer(value);
+                        },
+                },
+                couponsCount() {
+                        return this.posa_coupons.length;
+                },
+                appliedCouponsCount() {
+                        return this.posa_coupons.filter((el) => !!el.applied).length;
+                },
+        },
 
-	methods: {
-		back_to_invoice() {
-			this.eventBus.emit("show_coupons", "false");
-		},
+        methods: {
+                back_to_invoice() {
+                        this.eventBus.emit("show_coupons", "false");
+                },
 		add_coupon(new_coupon) {
 			if (!this.customer || !new_coupon) {
 				this.eventBus.emit("show_message", {
@@ -196,48 +209,49 @@ export default {
 				appliedCouponsCount: this.appliedCouponsCount,
 			});
 		},
-	},
+        },
 
-	watch: {
-		posa_coupons: {
-			deep: true,
-			handler() {
-				this.updateInvoice();
-				this.updateCounters();
+        watch: {
+                customer(newCustomer, oldCustomer) {
+                        if (newCustomer === oldCustomer) {
+                                return;
+                        }
+                        const to_remove = [];
+                        this.posa_coupons.forEach((el) => {
+                                if (el.type === "Promotional") {
+                                        el.customer = newCustomer;
+                                } else {
+                                        to_remove.push(el.coupon);
+                                }
+                        });
+                        if (to_remove.length) {
+                                this.removeCoupon(to_remove);
+                        }
+                        this.setActiveGiftCoupons();
+                },
+                posa_coupons: {
+                        deep: true,
+                        handler() {
+                                this.updateInvoice();
+                                this.updateCounters();
 			},
 		},
 	},
 
-	created: function () {
-		this.$nextTick(function () {
-			this.eventBus.on("register_pos_profile", (data) => {
-				this.pos_profile = data.pos_profile;
-			});
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				const to_remove = [];
-				this.posa_coupons.forEach((el) => {
-					if (el.type == "Promotional") {
-						el.customer = customer;
-					} else {
-						to_remove.push(el.coupon);
-					}
-				});
-				this.customer = customer;
-				if (to_remove.length) {
-					this.removeCoupon(to_remove);
-				}
-			}
-			this.setActiveGiftCoupons();
-		});
-		this.eventBus.on("update_pos_coupons", (data) => {
-			this.updatePosCoupons(data);
-		});
-		this.eventBus.on("set_pos_coupons", (data) => {
-			this.posa_coupons = data;
-		});
-	},
+        created: function () {
+                this.$nextTick(function () {
+                        this.eventBus.on("register_pos_profile", (data) => {
+                                this.pos_profile = data.pos_profile;
+                        });
+                });
+                this.setActiveGiftCoupons();
+                this.eventBus.on("update_pos_coupons", (data) => {
+                        this.updatePosCoupons(data);
+                });
+                this.eventBus.on("set_pos_coupons", (data) => {
+                        this.posa_coupons = data;
+                });
+        },
 };
 </script>
 

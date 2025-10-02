@@ -210,9 +210,14 @@
 
 <script>
 import { isOffline, saveOfflineCustomer } from "../../../offline/index.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
-	data: () => ({
+        setup() {
+                const customersStore = useCustomersStore();
+                return { customersStore };
+        },
+        data: () => ({
 		customerDialog: false,
 		confirmDialog: false,
 		pos_profile: "",
@@ -560,15 +565,16 @@ export default {
 				method: this.customer_id ? "update" : "create",
 			};
 
-			if (isOffline()) {
-				saveOfflineCustomer({ args: apiArgs });
-				vm.eventBus.emit("show_message", { title: __("Customer saved offline"), color: "warning" });
-				args.name = this.customer_name;
-				vm.eventBus.emit("add_customer_to_list", args);
-				vm.eventBus.emit("set_customer", args.name);
-				vm.close_dialog();
-				return;
-			}
+                        if (isOffline()) {
+                                saveOfflineCustomer({ args: apiArgs });
+                                vm.eventBus.emit("show_message", { title: __("Customer saved offline"), color: "warning" });
+                                args.name = this.customer_name;
+                                vm.customersStore.addOrUpdateCustomer(args);
+                                vm.customersStore.setSelectedCustomer(args.name);
+                                vm.customersStore.setCustomerInfo(args);
+                                vm.close_dialog();
+                                return;
+                        }
 
 			frappe.call({
 				method: "posawesome.posawesome.api.customers.create_customer",
@@ -583,12 +589,13 @@ export default {
 							title: text,
 							color: "success",
 						});
-						args.name = r.message.name;
-						frappe.utils.play_sound("submit");
-						vm.eventBus.emit("add_customer_to_list", args);
-						vm.eventBus.emit("set_customer", r.message.name);
-						vm.eventBus.emit("fetch_customer_details");
-						vm.close_dialog();
+                                                args.name = r.message.name;
+                                                frappe.utils.play_sound("submit");
+                                                vm.customersStore.addOrUpdateCustomer(args);
+                                                vm.customersStore.setSelectedCustomer(r.message.name);
+                                                vm.customersStore.setCustomerInfo(args);
+                                                vm.customersStore.get_customer_names();
+                                                vm.close_dialog();
 					} else {
 						frappe.utils.play_sound("error");
 						vm.eventBus.emit("show_message", {

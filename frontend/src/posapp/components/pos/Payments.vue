@@ -794,13 +794,15 @@ import {
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
         // Using format mixin for shared formatting methods
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                return { invoiceStore, customersStore };
         },
         data() {
                 return {
@@ -829,7 +831,6 @@ export default {
 			new_credit_due_date: null, // New credit due date value
 			credit_due_days: null, // Number of days until due
 			credit_due_presets: [7, 14, 30], // Preset options for due days
-			customer_info: "", // Customer info
 			mpesa_modes: [], // List of available M-Pesa modes
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
@@ -845,6 +846,19 @@ export default {
                         },
                         set(value) {
                                 this.invoiceStore.setInvoiceDoc(value);
+                        },
+                },
+                customer: {
+                        get() {
+                                return this.customersStore.selectedCustomer;
+                        },
+                },
+                customer_info: {
+                        get() {
+                                return this.customersStore.customerInfo;
+                        },
+                        set(value) {
+                                this.customersStore.setCustomerInfo(value);
                         },
                 },
                 // Get currency symbol for given or current currency
@@ -1025,13 +1039,21 @@ export default {
 				) || false
 			);
 		},
-	},
-	watch: {
-		// Watch diff_payment to update paid_change
-		diff_payment(newVal) {
-			if (!this.is_user_editing_paid_change) {
-				this.paid_change = -newVal;
-			}
+        },
+        watch: {
+                customer(newCustomer, oldCustomer) {
+                        if (newCustomer !== oldCustomer) {
+                                this.customer_credit_dict = [];
+                                this.redeem_customer_credit = false;
+                                this.is_cashback = true;
+                                this.is_credit_return = false;
+                        }
+                },
+                // Watch diff_payment to update paid_change
+                diff_payment(newVal) {
+                        if (!this.is_user_editing_paid_change) {
+                                this.paid_change = -newVal;
+                        }
 		},
 		// Watch paid_change to validate and update credit_change
 		paid_change(newVal) {
@@ -1165,13 +1187,13 @@ export default {
         },
         methods: {
 		// Go back to invoice view and reset customer readonly
-		back_to_invoice() {
-			this.eventBus.emit("show_payment", "false");
-			this.eventBus.emit("set_customer_readonly", false);
-			this.$nextTick(() => {
-				this.eventBus.emit("focus_item_search");
-			});
-		},
+                back_to_invoice() {
+                        this.eventBus.emit("show_payment", "false");
+                        this.customersStore.setReadonly(false);
+                        this.$nextTick(() => {
+                                this.eventBus.emit("focus_item_search");
+                        });
+                },
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
@@ -2176,20 +2198,9 @@ export default {
 					this.is_credit_return = false;
 				}
 			});
-			this.eventBus.on("update_customer", (customer) => {
-				if (this.customer !== customer) {
-					this.customer_credit_dict = [];
-					this.redeem_customer_credit = false;
-					this.is_cashback = true;
-					this.is_credit_return = false;
-				}
-			});
-			this.eventBus.on("set_pos_settings", (data) => {
-				this.pos_settings = data;
-			});
-			this.eventBus.on("set_customer_info_to_edit", (data) => {
-				this.customer_info = data;
-			});
+                        this.eventBus.on("set_pos_settings", (data) => {
+                                this.pos_settings = data;
+                        });
 			this.eventBus.on("set_mpesa_payment", (data) => {
 				this.set_mpesa_payment(data);
 			});
@@ -2207,13 +2218,11 @@ export default {
 	beforeUnmount() {
 		// Remove all event listeners
 		this.eventBus.off("send_invoice_doc_payment");
-		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("add_the_new_address");
-		this.eventBus.off("update_invoice_type");
-		this.eventBus.off("update_customer");
-		this.eventBus.off("set_pos_settings");
-		this.eventBus.off("set_customer_info_to_edit");
-		this.eventBus.off("set_mpesa_payment");
+                this.eventBus.off("register_pos_profile");
+                this.eventBus.off("add_the_new_address");
+                this.eventBus.off("update_invoice_type");
+                this.eventBus.off("set_pos_settings");
+                this.eventBus.off("set_mpesa_payment");
 		this.eventBus.off("clear_invoice");
 		this.eventBus.off("network-online", this.syncPendingInvoices);
 		this.eventBus.off("server-online", this.syncPendingInvoices);
