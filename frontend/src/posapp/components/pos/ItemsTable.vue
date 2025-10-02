@@ -1200,23 +1200,36 @@ export default {
 				console.error("Error parsing drag data:", error);
 			}
 		},
-		addItem(newItem) {
-			// Find a matching item (by item_code, uom, and rate)
-			const match = this.items.find(
-				(item) =>
-					item.item_code === newItem.item_code &&
-					item.uom === newItem.uom &&
-					item.rate === newItem.rate,
-			);
-			if (match) {
-				// If found, increment quantity
-				match.qty += newItem.qty || 1;
-				match.amount = match.qty * match.rate;
-				this.$forceUpdate();
-			} else {
-				this.items.push({ ...newItem });
-			}
-		},
+                addItem(newItem) {
+                        const matchIndex = this.items.findIndex(
+                                (item) =>
+                                        item.item_code === newItem.item_code &&
+                                        item.uom === newItem.uom &&
+                                        item.rate === newItem.rate,
+                        );
+
+                        if (matchIndex !== -1) {
+                                const existingItem = this.items[matchIndex];
+                                const incrementBy = Number.isFinite(Number(newItem.qty))
+                                        ? Number(newItem.qty)
+                                        : 1;
+                                const currentQty = Number.isFinite(Number(existingItem.qty))
+                                        ? Number(existingItem.qty)
+                                        : 0;
+                                const updatedQty = currentQty + incrementBy;
+                                const updatedItem = {
+                                        ...existingItem,
+                                        qty: updatedQty,
+                                        amount: updatedQty * (existingItem.rate || newItem.rate || 0),
+                                };
+
+                                this.invoiceStore.replaceItemAt(matchIndex, updatedItem);
+                                return this.invoiceStore.items[matchIndex];
+                        }
+
+                        this.invoiceStore.upsertItem({ ...newItem });
+                        return this.invoiceStore.items[this.invoiceStore.items.length - 1] || null;
+                },
 		addItemDebounced: _.debounce(function (item) {
 			this.addItem(item);
 		}, 50),
