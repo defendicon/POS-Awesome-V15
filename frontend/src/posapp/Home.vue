@@ -78,6 +78,7 @@ import {
 	checkWebSocketConnectivity,
 } from "./composables/useNetwork.js";
 import { useRtl } from "./composables/useRtl.js";
+import { initManagerMode } from "./utils/useManagerMode.js";
 
 export default {
 	setup() {
@@ -159,6 +160,7 @@ export default {
 		this.setupNetworkListeners();
 		this.setupEventListeners();
 		this.handleRefreshCacheUsage();
+		initManagerMode(); // Initialize manager mode state
 	},
 	methods: {
 		setupNetworkListeners,

@@ -132,7 +132,7 @@
 							{{ __("Select S.O") }}
 						</v-btn>
 					</v-col>
-					<v-col cols="6">
+					<v-col cols="6" v-if="isManagerMode">
 						<v-btn
 							block
 							color="error"
@@ -192,6 +192,8 @@
 </template>
 
 <script>
+import { isManagerMode } from "../../utils/useManagerMode.js";
+
 export default {
 	props: {
 		pos_profile: Object,
@@ -246,6 +248,9 @@ export default {
 				console.error("Failed to load item selector settings:", e);
 			}
 			return false;
+		},
+		isManagerMode() {
+			return isManagerMode.value;
 		},
 	},
 	methods: {

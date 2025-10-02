@@ -163,6 +163,25 @@
 					</div>
 				</v-list-item>
 
+				<!-- Manager Login menu item -->
+				<v-list-item @click="handleManagerLogin"  class="menu-item-compact info-action" v-if="isSessionUserNotManager">
+					<template v-slot:prepend>
+						<div class="menu-icon-wrapper-compact warning-icon">
+							<v-icon color="white" size="16">{{
+								isManagerMode ? "mdi-logout" : "mdi-login"
+							}}</v-icon>
+						</div>
+					</template>
+					<div class="menu-content-compact">
+						<v-list-item-title class="menu-item-title-compact">{{
+							isManagerMode ? __("Manager Logout") : __("Manager Login")
+						}}</v-list-item-title>
+						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+							__("Only managers can continue")
+						}}</v-list-item-subtitle>
+					</div>
+				</v-list-item>
+
 				<v-list-item @click="$emit('logout')" class="menu-item-compact danger-action">
 					<template v-slot:prepend>
 						<div class="menu-icon-wrapper-compact danger-icon">
@@ -279,6 +298,61 @@
 			</v-btn>
 		</template>
 	</v-snackbar>
+
+	<!-- Manager Login Dialog -->
+	<v-dialog v-model="showManagerLoginDialog" max-width="400" persistent>
+		<v-card>
+			<v-card-title class="text-h6 d-flex align-center">
+				{{ __("Login As Manager") }}
+			</v-card-title>
+
+			<v-card-text>
+				<div class="text-body-2 mb-3">
+					{{ __("Only managers can continue") }}
+				</div>
+
+				<v-text-field
+					density="compact"
+					variant="outlined"
+					color="primary"
+					:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+					class="dark-field"
+					v-model="username"
+					label="Email or Username"
+					placeholder="jane@example.com"
+					prepend-inner-icon="mdi-account"
+				></v-text-field>
+
+				<v-text-field
+					density="compact"
+					variant="outlined"
+					color="primary"
+					:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+					class="dark-field"
+					v-model="password"
+					:label="frappe._('Password')"
+					placeholder="•••••"
+					:type="showPassword ? 'text' : 'password'"
+					prepend-inner-icon="mdi-lock"
+					:append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+					@click:append-inner="togglePassword"
+				></v-text-field>
+			</v-card-text>
+
+			<v-card-actions class="pa-4 pt-0">
+				<v-btn color="grey" variant="text" @click="showManagerLoginDialog= false">
+					{{ __("Cancel") }}
+				</v-btn>
+				<v-btn
+					color="primary"
+					:loading="changing"
+					@click="submitManagerLogin"
+				>
+					{{ __("Login") }}
+				</v-btn>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
 </template>
 
 <script>
@@ -289,6 +363,8 @@ const FALLBACK_LANGUAGES = [
 	{ code: "es", name: "Español", native_name: "Español" },
 	{ code: "pt", name: "Português", native_name: "Português" },
 ];
+
+import { isManagerMode, setManagerMode, isSessionUserManager } from "../../utils/useManagerMode.js";
 
 export default {
 	name: "NavbarMenu",
@@ -303,6 +379,7 @@ export default {
 	data() {
 		return {
 			showLanguageDialog: false,
+			showManagerLoginDialog: false,
 			selectedLanguage: "en",
 			currentLanguage: "en",
 			availableLanguages: FALLBACK_LANGUAGES,
@@ -316,6 +393,9 @@ export default {
 				type: "info",
 				timeout: 3000,
 			},
+			username: "",
+			password: "",
+			showPassword: false,
 		};
 	},
 	computed: {
@@ -330,6 +410,13 @@ export default {
 			const lang = this.availableLanguages.find((l) => l.code === this.selectedLanguage);
 			return lang?.name || this.selectedLanguage.toUpperCase();
 		},
+		isManagerMode() {
+			return isManagerMode.value;
+		},
+		isSessionUserNotManager() {
+			return !isSessionUserManager.value;
+		},
+
 	},
 	async mounted() {
 		await this.initializeLanguage();
@@ -459,6 +546,52 @@ export default {
 
 		hideNotification() {
 			this.notification.show = false;
+		},
+
+		togglePassword() {
+			this.showPassword = !this.showPassword
+		},
+
+		handleManagerLogin() {
+			if (this.isManagerMode) {
+				// If already in manager mode, log out
+				setManagerMode(false);
+				this.showNotification("Manager logged out", "info");
+			} else {
+				// Show login dialog
+				this.showManagerLoginDialog = true;
+			}
+		},
+
+		async submitManagerLogin() {
+			if (!this.username || !this.password) {
+				frappe.show_alert({ message: 'Please fill in both fields', indicator: 'red' })
+				return
+			}
+
+			this.loading = true
+			try {
+				const res = await frappe.call({
+				method: "mondayposhyper.pos.api.validate_manager",
+				args: {
+					username: this.username,
+					password: this.password
+				}
+				})
+
+				if (res.message.success) {
+					this.showNotification(`Manager ${this.username} logged in...`, "success");
+					setManagerMode(true)
+					this.showManagerLoginDialog = false
+				} else {
+					frappe.show_alert({ message: res.message.error || "Invalid credentials", indicator: 'red' })
+				}
+
+			} catch (err) {
+				frappe.show_alert({ message: err.message || "Login failed", indicator: 'red' })
+			} finally {
+				this.loading = false
+			}
 		},
 
 		__(text) {

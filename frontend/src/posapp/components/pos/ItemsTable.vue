@@ -147,7 +147,7 @@
 							<div class="action-panel-content">
                                                                 <div class="action-button-group">
                                                                         <v-btn
-                                                                                :disabled="!!item.posa_is_replace"
+                                                                                :disabled="!!item.posa_is_replace || isRemoveDisabled"
                                                                                 size="large"
                                                                                 color="error"
                                                                                 variant="tonal"
@@ -173,7 +173,7 @@
 
 								<div class="action-button-group">
 									<v-btn
-										:disabled="!!item.posa_is_replace"
+										:disabled="!!item.posa_is_replace || isDecreaseDisabled(item)"
 										size="large"
 										color="warning"
 										variant="tonal"
@@ -677,6 +677,8 @@
 
 <script>
 import _ from "lodash";
+import { isManagerMode } from "../../utils/useManagerMode.js";
+
 export default {
 	name: "ItemsTable",
 	props: {
@@ -739,6 +741,9 @@ export default {
 				console.error("Failed to load item selector settings:", e);
 			}
 			return false;
+		},
+		isRemoveDisabled (){
+			return !isManagerMode.value // Remember to use .value with refs in script
 		},
 	},
 	methods: {
@@ -824,6 +829,18 @@ export default {
 			if (this.editNameTarget === item) {
 				this.editedName = item.item_name;
 			}
+		},
+		isDecreaseDisabled (item){
+			// Condition 2: A regular cashier trying to decrease quantity below 1
+			const isQuantityAtMinimum = item.qty <= 1
+			const isNotInManagerMode = !isManagerMode.value // Remember to use .value with refs in script
+
+			if (isQuantityAtMinimum && isNotInManagerMode) {
+				return true
+			}
+
+			// If neither of the above conditions are met, the button is enabled
+			return false
 		},
 	},
 };
