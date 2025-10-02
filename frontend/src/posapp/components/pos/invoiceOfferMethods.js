@@ -1,3 +1,4 @@
+import debounce from "lodash/debounce";
 import { silentPrint } from "../../plugins/print.js";
 import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
@@ -27,11 +28,23 @@ export default {
                                 return;
                         }
 
-                        this.handelOffers();
+                        if (!this._debouncedOfferHandler) {
+                                this._debouncedOfferHandler = debounce(() => {
+                                        if (this.isApplyingOffer) {
+                                                return;
+                                        }
 
-                        if (typeof this.$forceUpdate === "function") {
-                                this.$forceUpdate();
+                                        this.handelOffers();
+
+                                        if (typeof this.$forceUpdate === "function") {
+                                                this.$forceUpdate();
+                                        }
+
+                                        this._lastOfferStateSignature = this._offerStateSignature();
+                                }, 100);
                         }
+
+                        this._debouncedOfferHandler();
                 });
         },
         cancelScheduledOfferRefresh() {
@@ -47,6 +60,75 @@ export default {
                 }
 
                 this._offerRefreshPending = false;
+
+                if (this._debouncedOfferHandler && typeof this._debouncedOfferHandler.cancel === "function") {
+                        this._debouncedOfferHandler.cancel();
+                }
+        },
+        handleOfferStateChange() {
+                const signature = this._offerStateSignature();
+
+                if (signature === this._lastOfferStateSignature) {
+                        return;
+                }
+
+                this._lastOfferStateSignature = signature;
+                this.scheduleOfferRefresh();
+        },
+        _offerStateSignature() {
+                const toNumber = (value) => {
+                        if (value == null || value === "") {
+                                return 0;
+                        }
+
+                        const num = Number(value);
+                        return Number.isFinite(num) ? num : 0;
+                };
+
+                const toBool = (value) => (value ? 1 : 0);
+                const toString = (value) => (value == null ? "" : String(value));
+
+                const encodeItem = (item) => {
+                        if (!item) {
+                                return "";
+                        }
+
+                        const parts = [
+                                toString(item.posa_row_id || item.name || item.item_code || ""),
+                                toString(item.item_code || ""),
+                                toString(item.item_group || ""),
+                                toString(item.brand || ""),
+                                toNumber(item.qty),
+                                toNumber(item.stock_qty),
+                                toNumber(item.price_list_rate),
+                                toNumber(item.original_price_list_rate),
+                                toNumber(item.discount_percentage),
+                                toNumber(item.discount_amount),
+                                toNumber(item.base_discount_amount),
+                                toNumber(item.discount_amount_per_item),
+                                toBool(item.posa_offer_applied),
+                                toBool(item.posa_is_offer),
+                                toBool(item.posa_is_replace),
+                                toBool(item.apply_discount_on_rate),
+                                toBool(item.disable_discounts),
+                                toString(item.posa_offers || ""),
+                        ];
+
+                        return parts.join("|");
+                };
+
+                const encodeList = (list) => {
+                        if (!Array.isArray(list)) {
+                                return "";
+                        }
+
+                        return list.map(encodeItem).join(";");
+                };
+
+                const itemsSignature = encodeList(this.items);
+                const packedSignature = encodeList(this.packed_items);
+
+                return `${itemsSignature}#${packedSignature}`;
         },
         normalizeBrand(brand) {
                 return (brand || "").trim().toLowerCase();
@@ -89,12 +171,12 @@ export default {
 
 	handelOffers() {
 		const offers = [];
-		this.posOffers.forEach((offer) => {
-			if (offer.apply_on === "Item Code") {
-				const itemOffer = this.getItemOffer(offer);
-				if (itemOffer) {
-					offers.push(itemOffer);
-				}
+                this.posOffers.forEach((offer) => {
+                        if (offer.apply_on === "Item Code") {
+                                const itemOffer = this.getItemOffer(offer);
+                                if (itemOffer) {
+                                        offers.push(itemOffer);
+                                }
 			} else if (offer.apply_on === "Item Group") {
 				const groupOffer = this.getGroupOffer(offer);
 				if (groupOffer) {
@@ -111,11 +193,13 @@ export default {
 					offers.push(transactionOffer);
 				}
 			}
-		});
+                });
 
-		this.setItemGiveOffer(offers);
-		this.updatePosOffers(offers);
-	},
+                this.setItemGiveOffer(offers);
+                this.updatePosOffers(offers);
+
+                this._lastOfferStateSignature = this._offerStateSignature();
+        },
 
 	setItemGiveOffer(offers) {
 		// Set item give offer for replace
