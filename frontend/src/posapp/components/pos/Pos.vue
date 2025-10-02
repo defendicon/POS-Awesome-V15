@@ -66,6 +66,7 @@ import {
 import { getCurrentInstance } from "vue";
 import { usePosShift } from "../../composables/usePosShift.js";
 import { useOffers } from "../../composables/useOffers.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 // Import the cache cleanup function
 import { clearExpiredCustomerBalances } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive.js";
@@ -85,15 +86,16 @@ export default {
 		return { ...responsive, ...rtl, ...shift, ...offers };
 	},
 	data: function () {
-		return {
-			dialog: false,
+                return {
+                        dialog: false,
 
-			payment: false,
-			showOffers: false,
-			coupons: false,
-			itemsLoaded: false,
-			customersLoaded: false,
-		};
+                        payment: false,
+                        showOffers: false,
+                        coupons: false,
+                        itemsLoaded: false,
+                        customersStore: useCustomersStore(),
+                        unsubscribeCustomersLoaded: null,
+                };
 	},
 
 	components: {
@@ -122,11 +124,11 @@ export default {
 				this.eventBus.emit("set_pos_settings", doc);
 			});
 		},
-		checkLoadingComplete() {
-			if (this.itemsLoaded && this.customersLoaded) {
-				console.info("Loading completed");
-			}
-		},
+                checkLoadingComplete() {
+                        if (this.itemsLoaded && this.customersStore.customersLoaded) {
+                                console.info("Loading completed");
+                        }
+                },
 	},
 
 	mounted: function () {
@@ -172,28 +174,36 @@ export default {
 				this.submit_closing_pos(data);
 			});
 
-			this.eventBus.on("items_loaded", () => {
-				this.itemsLoaded = true;
-				this.checkLoadingComplete();
-			});
-			this.eventBus.on("customers_loaded", () => {
-				this.customersLoaded = true;
-				this.checkLoadingComplete();
-			});
-		});
-	},
-	beforeUnmount() {
-		this.eventBus.off("close_opening_dialog");
-		this.eventBus.off("register_pos_data");
-		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("LoadPosProfile");
-		this.eventBus.off("show_offers");
-		this.eventBus.off("show_coupons");
-		this.eventBus.off("open_closing_dialog");
-		this.eventBus.off("submit_closing_pos");
-		this.eventBus.off("items_loaded");
-		this.eventBus.off("customers_loaded");
-	},
+                        this.eventBus.on("items_loaded", () => {
+                                this.itemsLoaded = true;
+                                this.checkLoadingComplete();
+                        });
+                });
+                this.unsubscribeCustomersLoaded = this.$watch(
+                        () => this.customersStore.customersLoaded,
+                        (loaded) => {
+                                if (loaded) {
+                                        this.checkLoadingComplete();
+                                }
+                        },
+                        { immediate: true },
+                );
+        },
+        beforeUnmount() {
+                this.eventBus.off("close_opening_dialog");
+                this.eventBus.off("register_pos_data");
+                this.eventBus.off("register_pos_profile");
+                this.eventBus.off("LoadPosProfile");
+                this.eventBus.off("show_offers");
+                this.eventBus.off("show_coupons");
+                this.eventBus.off("open_closing_dialog");
+                this.eventBus.off("submit_closing_pos");
+                this.eventBus.off("items_loaded");
+                if (this.unsubscribeCustomersLoaded) {
+                        this.unsubscribeCustomersLoaded();
+                        this.unsubscribeCustomersLoaded = null;
+                }
+        },
 	// In the created() or mounted() lifecycle hook
 	created() {
 		// Clean up expired customer balance cache on POS load

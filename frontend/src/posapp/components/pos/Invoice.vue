@@ -341,13 +341,15 @@ import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
         name: "POSInvoice",
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                return { invoiceStore, customersStore };
         },
         data() {
                 return {
@@ -370,12 +372,13 @@ export default {
 			posa_coupons: [], // Coupons applied
 			isApplyingOffer: false, // Flag to prevent offer watcher loops
 			allItems: [], // All items for offer logic
-			discount_percentage_offer_name: null, // Track which offer is applied
-			invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
-			invoiceType: "Invoice", // Current invoice type
-			itemsPerPage: 1000, // Items per page in table
-			itemSearch: "", // Search query for added items
-			expanded: [], // Array of expanded row IDs
+                        discount_percentage_offer_name: null, // Track which offer is applied
+                        invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
+                        invoiceType: "Invoice", // Current invoice type
+                        itemsPerPage: 1000, // Items per page in table
+                        itemSearch: "", // Search query for added items
+                        expanded: [], // Array of expanded row IDs
+                        unsubscribeCustomerSelection: null,
 			singleExpand: true, // Only one row expanded at a time
 			cancel_dialog: false, // Cancel dialog visibility
 			float_precision: 6, // Float precision for calculations
@@ -1283,19 +1286,13 @@ export default {
 			this.fetch_price_lists();
 			this.update_price_list();
 		});
-		this.eventBus.on("add_item", (item) => {
-			this.add_item(item);
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			this.customer = customer;
-		});
-		this.eventBus.on("fetch_customer_details", () => {
-			this.fetch_customer_details();
-		});
-		this.eventBus.on("clear_invoice", () => {
-			this.clear_invoice();
-			this.eventBus.emit("focus_item_search");
-		});
+                this.eventBus.on("add_item", (item) => {
+                        this.add_item(item);
+                });
+                this.eventBus.on("clear_invoice", () => {
+                        this.clear_invoice();
+                        this.eventBus.emit("focus_item_search");
+                });
 		this.eventBus.on("load_invoice", (data) => {
 			this.load_invoice(data);
 		});
@@ -1358,12 +1355,22 @@ export default {
 				customer: this.customer,
 			});
 		});
-		this.eventBus.on("set_new_line", (data) => {
-			this.new_line = data;
-		});
-		if (this.pos_profile.posa_allow_multi_currency) {
-			this.fetch_available_currencies();
-		}
+                this.eventBus.on("set_new_line", (data) => {
+                        this.new_line = data;
+                });
+                this.unsubscribeCustomerSelection = this.$watch(
+                        () => this.customersStore.selectedCustomer,
+                        (customer) => {
+                                const normalized = customer || "";
+                                if (normalized !== this.customer) {
+                                        this.customer = normalized;
+                                }
+                        },
+                        { immediate: true },
+                );
+                if (this.pos_profile.posa_allow_multi_currency) {
+                        this.fetch_available_currencies();
+                }
 		// Listen for reset_posting_date to reset posting date after invoice submission
 		this.eventBus.on("reset_posting_date", () => {
 			this.posting_date = frappe.datetime.nowdate();
@@ -1381,13 +1388,15 @@ export default {
                 // Existing cleanup
                 this.eventBus.off("register_pos_profile");
                 this.eventBus.off("add_item");
-                this.eventBus.off("update_customer");
-                this.eventBus.off("fetch_customer_details");
                 this.eventBus.off("clear_invoice");
                 // Cleanup reset_posting_date listener
                 this.eventBus.off("reset_posting_date");
                 if (typeof this.cancelScheduledOfferRefresh === "function") {
                         this.cancelScheduledOfferRefresh();
+                }
+                if (this.unsubscribeCustomerSelection) {
+                        this.unsubscribeCustomerSelection();
+                        this.unsubscribeCustomerSelection = null;
                 }
         },
         // Register global keyboard shortcuts when component is created

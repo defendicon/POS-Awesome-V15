@@ -91,18 +91,21 @@
 <script>
 /* global __, frappe */
 import format from "../../format";
+import { useCustomersStore } from "../../stores/customersStore.js";
 export default {
-	mixins: [format],
-	data: () => ({
-		loading: false,
+        mixins: [format],
+        data: () => ({
+                customersStore: useCustomersStore(),
+                loading: false,
+                customer: null,
 		pos_profile: "",
 		pos_offers: [],
 		allItems: [],
 		groupItemCache: {},
 		discount_percentage_offer_name: null,
 		itemsPerPage: 1000,
-		expanded: [],
-		singleExpand: true,
+                expanded: [],
+                singleExpand: true,
 		items_headers: [
 			{ title: __("Name"), value: "name", align: "start" },
 			{ title: __("Apply On"), value: "apply_on", align: "start" },
@@ -313,26 +316,37 @@ export default {
 		},
 	},
 
-	created: function () {
-		this.$nextTick(function () {
-			this.eventBus.on("register_pos_profile", (data) => {
-				this.pos_profile = data.pos_profile;
-			});
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				this.offers = [];
-			}
-		});
-		this.eventBus.on("update_pos_offers", (data) => {
-			this.updatePosOffers(data);
-		});
+        created: function () {
+                this.$nextTick(function () {
+                        this.eventBus.on("register_pos_profile", (data) => {
+                                this.pos_profile = data.pos_profile;
+                        });
+                });
+                this.unsubscribeCustomerSelection = this.$watch(
+                        () => this.customersStore.selectedCustomer,
+                        (customer) => {
+                                if (this.customer !== customer) {
+                                        this.offers = [];
+                                        this.customer = customer;
+                                }
+                        },
+                        { immediate: true },
+                );
+                this.eventBus.on("update_pos_offers", (data) => {
+                        this.updatePosOffers(data);
+                });
 		this.eventBus.on("update_discount_percentage_offer_name", (data) => {
 			this.discount_percentage_offer_name = data.value;
 		});
-		this.eventBus.on("set_all_items", (data) => {
-			this.allItems = data;
-		});
-	},
+                this.eventBus.on("set_all_items", (data) => {
+                        this.allItems = data;
+                });
+        },
+        beforeUnmount() {
+                if (this.unsubscribeCustomerSelection) {
+                        this.unsubscribeCustomerSelection();
+                        this.unsubscribeCustomerSelection = null;
+                }
+        },
 };
 </script>

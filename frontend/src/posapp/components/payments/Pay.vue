@@ -391,6 +391,8 @@ import {
 import { silentPrint } from "../../plugins/print.js";
 import { useRtl } from "../../composables/useRtl.js";
 
+import { useCustomersStore } from "../../stores/customersStore.js";
+
 export default {
 	mixins: [format],
 	setup() {
@@ -403,6 +405,8 @@ export default {
 	},
 	data: function () {
 		return {
+			customersStore: useCustomersStore(),
+			unsubscribeCustomerSelection: null,
 			dialog: false,
 			pos_profile: "",
 			pos_opening_shift: "",
@@ -1192,22 +1196,29 @@ export default {
 	mounted: function () {
 		this.$nextTick(function () {
 			this.check_opening_entry();
-			this.eventBus.on("update_customer", (customer_name) => {
-				this.clear_all(true);
-				this.customer_name = customer_name;
-				this.fetch_customer_details();
-				this.get_outstanding_invoices();
-				this.get_unallocated_payments();
-				this.get_draft_mpesa_payments_register();
-			});
-			this.eventBus.on("fetch_customer_details", () => {
-				this.fetch_customer_details();
-			});
+			this.unsubscribeCustomerSelection = this.$watch(
+				() => this.customersStore.selectedCustomer,
+				(customer_name, previous) => {
+					if (customer_name !== previous) {
+						this.clear_all(true);
+						this.customer_name = customer_name || "";
+						if (customer_name) {
+							this.fetch_customer_details();
+							this.get_outstanding_invoices();
+							this.get_unallocated_payments();
+							this.get_draft_mpesa_payments_register();
+						}
+					}
+				},
+				{ immediate: true },
+			);
 		});
 	},
 	beforeUnmount() {
-		this.eventBus.off("update_customer");
-		this.eventBus.off("fetch_customer_details");
+		if (this.unsubscribeCustomerSelection) {
+			this.unsubscribeCustomerSelection();
+			this.unsubscribeCustomerSelection = null;
+		}
 		this.eventBus.off("network-online", this.syncPendingPayments);
 		this.eventBus.off("server-online", this.syncPendingPayments);
 	},

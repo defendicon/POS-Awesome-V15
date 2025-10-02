@@ -210,10 +210,12 @@
 
 <script>
 import { isOffline, saveOfflineCustomer } from "../../../offline/index.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
-	data: () => ({
-		customerDialog: false,
+        data: () => ({
+                customersStore: useCustomersStore(),
+                customerDialog: false,
 		confirmDialog: false,
 		pos_profile: "",
 		customer_id: "",
@@ -467,12 +469,12 @@ export default {
 				}
 			}
 		},
-		submit_dialog() {
-			const vm = this;
-			if (!this.customer_name) {
-				frappe.throw(__("Customer Name is required"));
-				return;
-			}
+                async submit_dialog() {
+                        const vm = this;
+                        if (!this.customer_name) {
+                                frappe.throw(__("Customer Name is required"));
+                                return;
+                        }
 
 			if (!this.group) {
 				frappe.throw(__("Customer group is required"));
@@ -560,15 +562,15 @@ export default {
 				method: this.customer_id ? "update" : "create",
 			};
 
-			if (isOffline()) {
-				saveOfflineCustomer({ args: apiArgs });
-				vm.eventBus.emit("show_message", { title: __("Customer saved offline"), color: "warning" });
-				args.name = this.customer_name;
-				vm.eventBus.emit("add_customer_to_list", args);
-				vm.eventBus.emit("set_customer", args.name);
-				vm.close_dialog();
-				return;
-			}
+                        if (isOffline()) {
+                                saveOfflineCustomer({ args: apiArgs });
+                                vm.eventBus.emit("show_message", { title: __("Customer saved offline"), color: "warning" });
+                                args.name = this.customer_name;
+                                await vm.customersStore.addOrUpdateCustomer(args);
+                                vm.customersStore.setSelectedCustomer(args.name);
+                                vm.close_dialog();
+                                return;
+                        }
 
 			frappe.call({
 				method: "posawesome.posawesome.api.customers.create_customer",
@@ -583,13 +585,13 @@ export default {
 							title: text,
 							color: "success",
 						});
-						args.name = r.message.name;
-						frappe.utils.play_sound("submit");
-						vm.eventBus.emit("add_customer_to_list", args);
-						vm.eventBus.emit("set_customer", r.message.name);
-						vm.eventBus.emit("fetch_customer_details");
-						vm.close_dialog();
-					} else {
+                                                args.name = r.message.name;
+                                                frappe.utils.play_sound("submit");
+                                                await vm.customersStore.addOrUpdateCustomer(args);
+                                                vm.customersStore.setSelectedCustomer(r.message.name);
+                                                await vm.customersStore.refreshCustomers();
+                                                vm.close_dialog();
+                                        } else {
 						frappe.utils.play_sound("error");
 						vm.eventBus.emit("show_message", {
 							title: __("Customer creation failed."),

@@ -75,9 +75,14 @@
 
 <script>
 /* global __, frappe */
+import { useCustomersStore } from "../../stores/customersStore.js";
+
 export default {
-	data: () => ({
-		loading: false,
+        data: () => ({
+                customersStore: useCustomersStore(),
+                loading: false,
+                customer: null,
+                unsubscribeCustomerSelection: null,
 		pos_profile: "",
 		customer: "",
 		posa_coupons: [],
@@ -208,36 +213,46 @@ export default {
 		},
 	},
 
-	created: function () {
-		this.$nextTick(function () {
-			this.eventBus.on("register_pos_profile", (data) => {
-				this.pos_profile = data.pos_profile;
-			});
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				const to_remove = [];
-				this.posa_coupons.forEach((el) => {
-					if (el.type == "Promotional") {
-						el.customer = customer;
-					} else {
-						to_remove.push(el.coupon);
-					}
-				});
-				this.customer = customer;
-				if (to_remove.length) {
-					this.removeCoupon(to_remove);
-				}
-			}
-			this.setActiveGiftCoupons();
-		});
-		this.eventBus.on("update_pos_coupons", (data) => {
-			this.updatePosCoupons(data);
-		});
-		this.eventBus.on("set_pos_coupons", (data) => {
-			this.posa_coupons = data;
-		});
-	},
+        created: function () {
+                this.$nextTick(function () {
+                        this.eventBus.on("register_pos_profile", (data) => {
+                                this.pos_profile = data.pos_profile;
+                        });
+                });
+                this.unsubscribeCustomerSelection = this.$watch(
+                        () => this.customersStore.selectedCustomer,
+                        (customer) => {
+                                if (this.customer !== customer) {
+                                        const to_remove = [];
+                                        this.posa_coupons.forEach((el) => {
+                                                if (el.type === "Promotional") {
+                                                        el.customer = customer;
+                                                } else {
+                                                        to_remove.push(el.coupon);
+                                                }
+                                        });
+                                        this.customer = customer;
+                                        if (to_remove.length) {
+                                                this.removeCoupon(to_remove);
+                                        }
+                                }
+                                this.setActiveGiftCoupons();
+                        },
+                        { immediate: true },
+                );
+                this.eventBus.on("update_pos_coupons", (data) => {
+                        this.updatePosCoupons(data);
+                });
+                this.eventBus.on("set_pos_coupons", (data) => {
+                        this.posa_coupons = data;
+                });
+        },
+        beforeUnmount() {
+                if (this.unsubscribeCustomerSelection) {
+                        this.unsubscribeCustomerSelection();
+                        this.unsubscribeCustomerSelection = null;
+                }
+        },
 };
 </script>
 

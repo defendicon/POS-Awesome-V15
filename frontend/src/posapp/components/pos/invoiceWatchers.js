@@ -3,13 +3,15 @@ import { clearPriceListCache } from "../../../offline/index.js";
 
 export default {
 	// Watch for customer change and update related data
-	customer() {
-		this.close_payments();
-		this.eventBus.emit("set_customer", this.customer);
-		this.fetch_customer_details();
-		this.fetch_customer_balance();
-		this.set_delivery_charges();
-	},
+        customer() {
+                this.close_payments();
+                if (this.customersStore) {
+                        this.customersStore.setSelectedCustomer(this.customer || "");
+                }
+                this.fetch_customer_details();
+                this.fetch_customer_balance();
+                this.set_delivery_charges();
+        },
 	// Watch for customer_info change and emit to edit form
 	customer_info() {
 		this.eventBus.emit("set_customer_info_to_edit", this.customer_info);

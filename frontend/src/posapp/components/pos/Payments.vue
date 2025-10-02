@@ -794,13 +794,15 @@ import {
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
         // Using format mixin for shared formatting methods
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                return { invoiceStore, customersStore };
         },
         data() {
                 return {
@@ -835,8 +837,10 @@ export default {
 			sales_person: "", // Selected sales person
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
-			highlightSubmit: false, // Highlight state for submit button
-		};
+                        highlightSubmit: false, // Highlight state for submit button
+                        lastCustomerName: null,
+                        unsubscribeCustomerSelection: null,
+                };
         },
         computed: {
                 invoice_doc: {
@@ -1165,13 +1169,13 @@ export default {
         },
         methods: {
 		// Go back to invoice view and reset customer readonly
-		back_to_invoice() {
-			this.eventBus.emit("show_payment", "false");
-			this.eventBus.emit("set_customer_readonly", false);
-			this.$nextTick(() => {
-				this.eventBus.emit("focus_item_search");
-			});
-		},
+                back_to_invoice() {
+                        this.eventBus.emit("show_payment", "false");
+                        this.customersStore.setReadonlyState(false);
+                        this.$nextTick(() => {
+                                this.eventBus.emit("focus_item_search");
+                        });
+                },
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
@@ -2176,17 +2180,9 @@ export default {
 					this.is_credit_return = false;
 				}
 			});
-			this.eventBus.on("update_customer", (customer) => {
-				if (this.customer !== customer) {
-					this.customer_credit_dict = [];
-					this.redeem_customer_credit = false;
-					this.is_cashback = true;
-					this.is_credit_return = false;
-				}
-			});
-			this.eventBus.on("set_pos_settings", (data) => {
-				this.pos_settings = data;
-			});
+                        this.eventBus.on("set_pos_settings", (data) => {
+                                this.pos_settings = data;
+                        });
 			this.eventBus.on("set_customer_info_to_edit", (data) => {
 				this.customer_info = data;
 			});
@@ -2199,26 +2195,42 @@ export default {
 				this.is_return = false;
 				this.is_credit_return = false;
 			});
-			// Scroll to top when payment view is shown
-			this.eventBus.on("show_payment", this.handleShowPayment);
-		});
-	},
-	// Lifecycle hook: beforeUnmount
-	beforeUnmount() {
-		// Remove all event listeners
-		this.eventBus.off("send_invoice_doc_payment");
+                        // Scroll to top when payment view is shown
+                        this.eventBus.on("show_payment", this.handleShowPayment);
+                });
+                this.unsubscribeCustomerSelection = this.$watch(
+                        () => this.customersStore.selectedCustomer,
+                        (customer) => {
+                                if (customer !== this.lastCustomerName) {
+                                        this.customer_credit_dict = [];
+                                        this.redeem_customer_credit = false;
+                                        this.is_cashback = true;
+                                        this.is_credit_return = false;
+                                }
+                                this.lastCustomerName = customer || null;
+                        },
+                        { immediate: true },
+                );
+        },
+        // Lifecycle hook: beforeUnmount
+        beforeUnmount() {
+                // Remove all event listeners
+                this.eventBus.off("send_invoice_doc_payment");
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("add_the_new_address");
 		this.eventBus.off("update_invoice_type");
-		this.eventBus.off("update_customer");
-		this.eventBus.off("set_pos_settings");
-		this.eventBus.off("set_customer_info_to_edit");
-		this.eventBus.off("set_mpesa_payment");
-		this.eventBus.off("clear_invoice");
-		this.eventBus.off("network-online", this.syncPendingInvoices);
-		this.eventBus.off("server-online", this.syncPendingInvoices);
-		this.eventBus.off("show_payment", this.handleShowPayment);
-	},
+                this.eventBus.off("set_pos_settings");
+                this.eventBus.off("set_customer_info_to_edit");
+                this.eventBus.off("set_mpesa_payment");
+                this.eventBus.off("clear_invoice");
+                this.eventBus.off("network-online", this.syncPendingInvoices);
+                this.eventBus.off("server-online", this.syncPendingInvoices);
+                this.eventBus.off("show_payment", this.handleShowPayment);
+                if (this.unsubscribeCustomerSelection) {
+                        this.unsubscribeCustomerSelection();
+                        this.unsubscribeCustomerSelection = null;
+                }
+        },
 	// Lifecycle hook: unmounted
 	unmounted() {
 		// Remove keyboard shortcut listener

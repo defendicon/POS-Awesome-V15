@@ -76,6 +76,8 @@ import {
 } from "./composables/useNetwork.js";
 import { useRtl } from "./composables/useRtl.js";
 
+import { useCustomersStore } from "./stores/customersStore.js";
+
 export default {
 	setup() {
 		const { isRtl, rtlStyles, rtlClasses } = useRtl();
@@ -89,6 +91,9 @@ export default {
 	},
 	data: function () {
 		return {
+			customersStore: useCustomersStore(),
+			unsubscribeCustomerProgress: null,
+			unsubscribeCustomerLoaded: null,
 			page: "POS",
 			// POS Profile data
 			posProfile: {},
@@ -476,8 +481,32 @@ export default {
 			this.eventBus.off("pending_invoices_changed");
 			this.eventBus.off("data-loaded");
 		}
+		if (this.unsubscribeCustomerProgress) {
+			this.unsubscribeCustomerProgress();
+			this.unsubscribeCustomerProgress = null;
+		}
+		if (this.unsubscribeCustomerLoaded) {
+			this.unsubscribeCustomerLoaded();
+			this.unsubscribeCustomerLoaded = null;
+		}
 	},
 	created: function () {
+		this.unsubscribeCustomerProgress = this.$watch(
+			() => this.customersStore.loadProgress,
+			(progress) => {
+				setSourceProgress("customers", progress || 0);
+			},
+			{ immediate: true },
+		);
+		this.unsubscribeCustomerLoaded = this.$watch(
+			() => this.customersStore.customersLoaded,
+			(loaded) => {
+				if (loaded) {
+					markSourceLoaded("customers");
+				}
+			},
+			{ immediate: true },
+		);
 		setTimeout(() => {
 			this.remove_frappe_nav();
 		}, 1000);

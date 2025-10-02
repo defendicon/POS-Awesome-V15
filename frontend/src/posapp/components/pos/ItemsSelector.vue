@@ -570,6 +570,7 @@ import {
 } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
 	mixins: [format],
@@ -682,6 +683,9 @@ export default {
                 scanQueuedCode: "",
                 refreshInFlight: false,
                 clearingSearch: false,
+                customersStore: useCustomersStore(),
+                customer: null,
+                unsubscribeCustomerSelection: null,
         }),
 
         watch: {
@@ -3619,9 +3623,13 @@ export default {
 		this.eventBus.on("update_customer_price_list", (data) => {
 			this.customer_price_list = data;
 		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
-		});
+		this.unsubscribeCustomerSelection = this.$watch(
+			() => this.customersStore.selectedCustomer,
+			(customer) => {
+				this.customer = customer || null;
+			},
+			{ immediate: true },
+		);
 
 		this.eventBus.on("focus_item_search", () => {
 			this.focusItemSearch();
@@ -3795,7 +3803,10 @@ export default {
 		this.eventBus.off("update_offers_counters");
 		this.eventBus.off("update_coupons_counters");
 		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
+		if (this.unsubscribeCustomerSelection) {
+			this.unsubscribeCustomerSelection();
+			this.unsubscribeCustomerSelection = null;
+		}
                 this.eventBus.off("force_reload_items");
                 this.eventBus.off("focus_item_search");
                 window.removeEventListener("resize", this.checkItemContainerOverflow);
