@@ -9,6 +9,8 @@
 
 import { ref } from 'vue';
 
+import { isOffline } from '../../offline/index.js';
+
 import {
     parseBooleanSetting,
     formatNegativeStockWarning,
@@ -72,10 +74,11 @@ export function useCartValidation() {
             // Allow negative stock items when Allow Negative Stock is enabled
             // This overrides POS Profile's block setting when negative stock is explicitly allowed
             const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
-            const exceedsAvailable = typeof item.actual_qty === 'number' && requestedQty > item.actual_qty;
-            const blockSale = !allowNegativeStock && exceedsAvailable;
+            const availableQty = typeof item.actual_qty === 'number' ? item.actual_qty : null;
+            const exceedsAvailable = availableQty !== null && requestedQty > availableQty;
+            const enforceStockLimit = blockSaleBeyondAvailableQty && !allowNegativeStock;
 
-            if (blockSale) {
+            if (enforceStockLimit && exceedsAvailable) {
                 if (eventBus) {
                     eventBus.emit("show_message", {
                         title: formatStockShortageError(
@@ -89,24 +92,28 @@ export function useCartValidation() {
                 return false;
             }
 
-            // Step 5: Server-side stock validation
-            const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
+            // Step 5: Server-side stock validation (only when enforcing limits and online)
+            const shouldValidateOnServer = enforceStockLimit && !isOffline() && availableQty === null;
 
-            if (!stockValidationResult.isValid) {
-                if (eventBus) {
-                    eventBus.emit("show_message", {
-                        title: formatStockShortageError(
-                            stockValidationResult.data?.item_name || item.item_name || item.item_code,
-                            stockValidationResult.data?.available_qty ?? item.actual_qty,
-                            stockValidationResult.data?.requested_qty ?? requestedQty
-                        ),
-                        color: "error",
-                    });
+            if (shouldValidateOnServer) {
+                const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
+
+                if (!stockValidationResult.isValid) {
+                    if (eventBus) {
+                        eventBus.emit("show_message", {
+                            title: formatStockShortageError(
+                                stockValidationResult.data?.item_name || item.item_name || item.item_code,
+                                stockValidationResult.data?.available_qty ?? item.actual_qty,
+                                stockValidationResult.data?.requested_qty ?? requestedQty
+                            ),
+                            color: "error",
+                        });
+                    }
+                    return false;
                 }
-                return false;
             }
 
-            if (allowNegativeStock && exceedsAvailable && eventBus && showNegativeStockWarning) {
+            if (!enforceStockLimit && exceedsAvailable && eventBus && showNegativeStockWarning) {
                 eventBus.emit("show_message", {
                     title: formatNegativeStockWarning(
                         item.item_name || item.item_code,
@@ -210,9 +217,12 @@ export function useCartValidation() {
 
         // Allow negative stock items when Allow Negative Stock is enabled
         const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
+        const availableQty = typeof item.actual_qty === 'number' ? item.actual_qty : null;
+        const exceedsAvailable = availableQty !== null && requestedQty > availableQty;
+        const enforceStockLimit = blockSaleBeyondAvailableQty && !allowNegativeStock;
 
         // Simple negative stock check - only block if negative stock is not allowed
-        if (item.actual_qty < 0 && !allowNegativeStock) {
+        if (availableQty !== null && availableQty < 0 && enforceStockLimit) {
             if (eventBus) {
                 eventBus.emit("show_message", {
                     title: formatStockShortageError(
@@ -226,10 +236,7 @@ export function useCartValidation() {
             return false;
         }
 
-        // Check if requested quantity exceeds available stock
-        const exceedsAvailable = typeof item.actual_qty === 'number' && requestedQty > item.actual_qty;
-        const blockSale = !allowNegativeStock && exceedsAvailable;
-        if (blockSale) {
+        if (enforceStockLimit && exceedsAvailable) {
             if (eventBus) {
                 eventBus.emit("show_message", {
                     title: formatStockShortageError(
@@ -243,7 +250,7 @@ export function useCartValidation() {
             return false;
         }
 
-        if (allowNegativeStock && exceedsAvailable && eventBus && showNegativeStockWarning) {
+        if (!enforceStockLimit && exceedsAvailable && eventBus && showNegativeStockWarning) {
             eventBus.emit("show_message", {
                 title: formatNegativeStockWarning(
                     item.item_name || item.item_code,
