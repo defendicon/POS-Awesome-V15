@@ -622,9 +622,13 @@ export default {
                 qty: 1,
 		refresh_interval: null,
 		abortController: null,
-		itemDetailsRequestCache: { key: null, promise: null, result: null },
-		itemDetailsRetryCount: 0,
-		itemDetailsRetryTimeout: null,
+                itemDetailsRequestCache: new Map(),
+                itemDetailsRetryCount: 0,
+                itemDetailsRetryTimeout: null,
+                pendingDetailItems: new Map(),
+                pendingDetailResolvers: [],
+                pendingDetailFrame: null,
+                detailBatchInFlight: false,
                 selected_currency: "",
                 exchange_rate: 1,
 		prePopulateInProgress: false,
@@ -1202,72 +1206,79 @@ export default {
                         this.scheduleCardMetricsUpdate();
                 },
 
-		async fetchItemDetails(items) {
-			if (!items || items.length === 0) {
-				return [];
-			}
+                async fetchItemDetails(items) {
+                        if (!items || items.length === 0) {
+                                return [];
+                        }
 
-			const key = [
-				this.pos_profile.name,
-				this.active_price_list,
-				items.map((i) => i.item_code).join(","),
-			].join(":");
+                        const key = [
+                                this.pos_profile.name,
+                                this.active_price_list,
+                                items
+                                        .map((i) => i.item_code)
+                                        .filter(Boolean)
+                                        .sort()
+                                        .join(","),
+                        ].join(":");
 
-			if (this.itemDetailsRequestCache.key === key && this.itemDetailsRequestCache.result) {
-				return this.itemDetailsRequestCache.result;
-			}
+                        const cachedEntry = this.itemDetailsRequestCache.get(key);
+                        if (cachedEntry?.result) {
+                                return cachedEntry.result;
+                        }
 
-			if (this.itemDetailsRequestCache.key === key && this.itemDetailsRequestCache.promise) {
-				return this.itemDetailsRequestCache.promise;
-			}
+                        if (cachedEntry?.promise) {
+                                return cachedEntry.promise;
+                        }
 
-			this.cancelItemDetailsRequest();
-			this.itemDetailsRequestCache.key = key;
+                        this.cancelItemDetailsRequest();
 
-			this.abortController = new AbortController();
-			const requestPromise = frappe.call({
-				method: "posawesome.posawesome.api.items.get_items_details",
-				args: {
-					pos_profile: JSON.stringify(this.pos_profile),
-					items_data: JSON.stringify(items),
-					price_list: this.active_price_list,
-				},
-				freeze: false,
-				signal: this.abortController.signal,
-			});
+                        this.abortController = new AbortController();
+                        const requestPromise = frappe.call({
+                                method: "posawesome.posawesome.api.items.get_items_details",
+                                args: {
+                                        pos_profile: JSON.stringify(this.pos_profile),
+                                        items_data: JSON.stringify(items),
+                                        price_list: this.active_price_list,
+                                },
+                                freeze: false,
+                                signal: this.abortController.signal,
+                        });
 
-			this.itemDetailsRequestCache.promise = requestPromise;
+                        this.itemDetailsRequestCache.set(key, { promise: requestPromise, result: null });
 
-			try {
-				const r = await requestPromise;
-				const msg = (r && r.message) || [];
-				if (this.itemDetailsRequestCache.key === key) {
-					this.itemDetailsRequestCache.result = msg;
-				}
-				return msg;
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-				}
-				throw err;
-			} finally {
-				if (this.itemDetailsRequestCache.key === key) {
-					this.itemDetailsRequestCache.promise = null;
-				}
-				this.abortController = null;
-			}
-		},
-		cancelItemDetailsRequest() {
-			if (this.abortController) {
-				this.abortController.abort();
-				this.abortController = null;
-			}
-			if (this.itemDetailsRequestCache) {
-				this.itemDetailsRequestCache.key = null;
-				this.itemDetailsRequestCache.promise = null;
-				this.itemDetailsRequestCache.result = null;
-			}
-		},
+                        try {
+                                const r = await requestPromise;
+                                const msg = (r && r.message) || [];
+                                const entry = this.itemDetailsRequestCache.get(key);
+                                if (entry) {
+                                        entry.result = msg;
+                                        entry.promise = null;
+                                        this.itemDetailsRequestCache.set(key, entry);
+                                }
+                                return msg;
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                }
+                                throw err;
+                        } finally {
+                                const entry = this.itemDetailsRequestCache.get(key);
+                                if (entry && !entry.result) {
+                                        entry.promise = null;
+                                        this.itemDetailsRequestCache.set(key, entry);
+                                }
+                                this.abortController = null;
+                        }
+                },
+                cancelItemDetailsRequest() {
+                        if (this.abortController) {
+                                this.abortController.abort();
+                                this.abortController = null;
+                        }
+                        if (this.itemDetailsRequestCache) {
+                                this.itemDetailsRequestCache.clear();
+                        }
+                },
                 async refreshPricesForVisibleItems() {
                         const vm = this;
                         if (!vm.displayedItems || vm.displayedItems.length === 0) return;
@@ -2155,45 +2166,199 @@ export default {
                         this.qty = 1;
                         this.focusItemSearch();
                 },
-		async update_items_details(items) {
-			const vm = this;
-			if (!items || !items.length) return;
+                async update_items_details(items) {
+                        if (!items || !items.length) return;
 
-			// reset any pending retry timer
-			if (vm.itemDetailsRetryTimeout) {
-				clearTimeout(vm.itemDetailsRetryTimeout);
-				vm.itemDetailsRetryTimeout = null;
-			}
+                        // reset any pending retry timer
+                        if (this.itemDetailsRetryTimeout) {
+                                clearTimeout(this.itemDetailsRetryTimeout);
+                                this.itemDetailsRetryTimeout = null;
+                        }
 
-			const itemCodes = items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
-			cacheResult.cached.forEach((det) => {
-				const item = items.find((it) => it.item_code === det.item_code);
-				if (item) {
-					Object.assign(item, {
-						actual_qty: det.actual_qty,
-						has_batch_no: det.has_batch_no,
-						has_serial_no: det.has_serial_no,
-					});
-					if (det.item_uoms && det.item_uoms.length > 0) {
-						item.item_uoms = det.item_uoms;
-						saveItemUOMs(item.item_code, det.item_uoms);
-					}
-					if (det.rate !== undefined) {
-						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
-						const price = det.price_list_rate ?? det.rate ?? 0;
-						if (force || price) {
-							item.rate = price;
-							item.price_list_rate = price;
-						}
-					}
-					if (det.currency) {
-						item.currency = det.currency;
-					}
+                        const validItems = items.filter((item) => item && item.item_code);
+                        if (!validItems.length) {
+                                return;
+                        }
+
+                        validItems.forEach((item) => this.primeItemFromLocalCache(item));
+
+                        validItems.forEach((item) => {
+                                if (!this.pendingDetailItems.has(item.item_code)) {
+                                        this.pendingDetailItems.set(item.item_code, new Set());
+                                }
+                                this.pendingDetailItems.get(item.item_code).add(item);
+                        });
+
+                        this.schedulePendingDetailFlush();
+
+                        return new Promise((resolve, reject) => {
+                                this.pendingDetailResolvers.push({ resolve, reject });
+                        });
+                },
+                schedulePendingDetailFlush() {
+                        if (this.pendingDetailFrame) {
+                                return;
+                        }
+
+                        const callback = () => {
+                                this.pendingDetailFrame = null;
+                                this.flushPendingItemDetails();
+                        };
+
+                        if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+                                const id = window.requestAnimationFrame(callback);
+                                this.pendingDetailFrame = { type: "raf", id };
+                        } else {
+                                const id = setTimeout(callback, 16);
+                                this.pendingDetailFrame = { type: "timeout", id };
+                        }
+                },
+                clearPendingDetailFrame() {
+                        if (!this.pendingDetailFrame) {
+                                return;
+                        }
+
+                        const { type, id } = this.pendingDetailFrame;
+                        if (type === "raf" && typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+                                window.cancelAnimationFrame(id);
+                        } else if (type === "timeout") {
+                                clearTimeout(id);
+                        }
+                        this.pendingDetailFrame = null;
+                },
+                async flushPendingItemDetails() {
+                        if (this.detailBatchInFlight) {
+                                this.schedulePendingDetailFlush();
+                                return;
+                        }
+
+                        const pendingMap = this.pendingDetailItems;
+                        const resolvers = this.pendingDetailResolvers;
+
+                        if (!pendingMap || pendingMap.size === 0) {
+                                while (resolvers.length) {
+                                        const resolver = resolvers.shift();
+                                        if (resolver?.resolve) {
+                                                resolver.resolve();
+                                        }
+                                }
+                                return;
+                        }
+
+                        this.pendingDetailItems = new Map();
+                        this.pendingDetailResolvers = [];
+
+                        const items = [];
+                        pendingMap.forEach((set) => {
+                                set.forEach((item) => {
+                                        if (item && item.item_code) {
+                                                items.push(item);
+                                        }
+                                });
+                        });
+
+                        if (!items.length) {
+                                while (resolvers.length) {
+                                        const resolver = resolvers.shift();
+                                        if (resolver?.resolve) {
+                                                resolver.resolve();
+                                        }
+                                }
+                                return;
+                        }
+
+                        const start = typeof performance !== "undefined" && performance?.now
+                                ? performance.now()
+                                : Date.now();
+
+                        this.detailBatchInFlight = true;
+
+                        const batchPromise = this.processItemDetailsBatch(items)
+                                .then(() => {
+                                        resolvers.forEach((resolver) => resolver?.resolve && resolver.resolve());
+                                })
+                                .catch((error) => {
+                                        resolvers.forEach((resolver) => resolver?.reject && resolver.reject(error));
+                                        return Promise.reject(error);
+                                })
+                                .finally(() => {
+                                        const end = typeof performance !== "undefined" && performance?.now
+                                                ? performance.now()
+                                                : Date.now();
+                                        const duration = Math.round((end - start) * 10) / 10;
+                                        console.info(
+                                                `[ItemsSelector] item details batch (${items.length} item${
+                                                        items.length === 1 ? "" : "s"
+                                                }) completed in ${duration}ms`,
+                                        );
+                                        this.detailBatchInFlight = false;
+                                        if (this.pendingDetailItems.size > 0) {
+                                                this.schedulePendingDetailFlush();
+                                        }
+                                });
+
+                        try {
+                                await batchPromise;
+                        } catch (error) {
+                                console.debug("Item detail batch failed", error);
+                        }
+                },
+                async processItemDetailsBatch(items) {
+                        const vm = this;
+                        if (!items || !items.length) return;
+
+                        const itemsByCode = new Map();
+                        const uniqueItems = [];
+
+                        items.forEach((item) => {
+                                if (!item || !item.item_code) {
+                                        return;
+                                }
+                                if (!itemsByCode.has(item.item_code)) {
+                                        itemsByCode.set(item.item_code, new Set());
+                                        uniqueItems.push(item);
+                                }
+                                itemsByCode.get(item.item_code).add(item);
+                        });
+
+                        if (!uniqueItems.length) {
+                                return;
+                        }
+
+                        const itemCodes = uniqueItems.map((it) => it.item_code);
+                        const cacheResult = await getCachedItemDetails(
+                                vm.pos_profile.name,
+                                vm.active_price_list,
+                                itemCodes,
+                        );
+
+                        cacheResult.cached.forEach((det) => {
+                                const targets = itemsByCode.get(det.item_code);
+                                if (!targets || targets.size === 0) {
+                                        return;
+                                }
+
+                                targets.forEach((item) => {
+                                        Object.assign(item, {
+                                                actual_qty: det.actual_qty,
+                                                has_batch_no: det.has_batch_no,
+                                                has_serial_no: det.has_serial_no,
+                                        });
+                                        if (det.item_uoms && det.item_uoms.length > 0) {
+                                                item.item_uoms = det.item_uoms;
+                                                saveItemUOMs(item.item_code, det.item_uoms);
+                                        }
+                                        if (det.rate !== undefined) {
+                                                const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                const price = det.price_list_rate ?? det.rate ?? 0;
+                                                if (force || price) {
+                                                        item.rate = price;
+                                                        item.price_list_rate = price;
+                                                }
+                                        }
+                                        if (det.currency) {
+                                                item.currency = det.currency;
+                                        }
 
                                         if (!item.original_rate) {
                                                 item.original_rate = item.rate;
@@ -2202,102 +2367,130 @@ export default {
 
                                         vm.indexItem(item);
                                         vm.applyCurrencyConversionToItem(item);
+                                });
+                        });
+
+                        let allCached = cacheResult.missing.length === 0;
+                        uniqueItems.forEach((item) => {
+                                const targets = itemsByCode.get(item.item_code);
+                                if (!targets || targets.size === 0) {
+                                        return;
+                                }
+
+                                const localQty = getLocalStock(item.item_code);
+                                if (localQty !== null) {
+                                        targets.forEach((target) => {
+                                                target.actual_qty = localQty;
+                                        });
+                                } else {
+                                        allCached = false;
+                                }
+
+                                const needsUom = Array.from(targets).some(
+                                        (target) => !target.item_uoms || target.item_uoms.length === 0,
+                                );
+                                if (needsUom) {
+                                        const cachedUoms = getItemUOMs(item.item_code);
+                                        if (cachedUoms.length > 0) {
+                                                targets.forEach((target) => {
+                                                        target.item_uoms = cachedUoms;
+                                                });
+                                        } else if (isOffline()) {
+                                                targets.forEach((target) => {
+                                                        if (!target.item_uoms || target.item_uoms.length === 0) {
+                                                                target.item_uoms = [
+                                                                        { uom: target.stock_uom, conversion_factor: 1.0 },
+                                                                ];
+                                                        }
+                                                });
+                                        } else {
+                                                allCached = false;
+                                        }
                                 }
                         });
 
-			let allCached = cacheResult.missing.length === 0;
-			items.forEach((item) => {
-				const localQty = getLocalStock(item.item_code);
-				if (localQty !== null) {
-					item.actual_qty = localQty;
-				} else {
-					allCached = false;
-				}
+                        if (isOffline() || allCached) {
+                                vm.itemDetailsRetryCount = 0;
+                                return;
+                        }
 
-				if (!item.item_uoms || item.item_uoms.length === 0) {
-					const cachedUoms = getItemUOMs(item.item_code);
-					if (cachedUoms.length > 0) {
-						item.item_uoms = cachedUoms;
-					} else if (isOffline()) {
-						item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-					} else {
-						allCached = false;
-					}
-				}
-			});
+                        const itemsToFetch = uniqueItems.filter(
+                                (it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
+                        );
 
-			// When offline or everything is cached, skip server call
-			if (isOffline() || allCached) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        if (itemsToFetch.length === 0) {
+                                vm.itemDetailsRetryCount = 0;
+                                return;
+                        }
 
-			const itemsToFetch = items.filter(
-				(it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
-			);
+                        try {
+                                const details = await vm.fetchItemDetails(itemsToFetch);
+                                if (details && details.length) {
+                                        vm.itemDetailsRetryCount = 0;
+                                        let qtyChanged = false;
+                                        const updatesByCode = new Map();
 
-			if (itemsToFetch.length === 0) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                                        details.forEach((updated_item) => {
+                                                const targets = itemsByCode.get(updated_item.item_code);
+                                                if (!targets || targets.size === 0) {
+                                                        return;
+                                                }
 
-			try {
-				const details = await vm.fetchItemDetails(itemsToFetch);
-				if (details && details.length) {
-					vm.itemDetailsRetryCount = 0;
-					let qtyChanged = false;
-					let updatedItems = [];
+                                                const firstTarget = targets.values().next().value;
+                                                const prev_qty = firstTarget?.actual_qty ?? 0;
 
-					items.forEach((item) => {
-						const updated_item = details.find((element) => element.item_code == item.item_code);
-						if (updated_item) {
-							const prev_qty = item.actual_qty;
+                                                const updates = {
+                                                        actual_qty: updated_item.actual_qty,
+                                                        has_batch_no: updated_item.has_batch_no,
+                                                        has_serial_no: updated_item.has_serial_no,
+                                                        batch_no_data:
+                                                                updated_item.batch_no_data && updated_item.batch_no_data.length > 0
+                                                                        ? updated_item.batch_no_data
+                                                                        : firstTarget.batch_no_data,
+                                                        serial_no_data:
+                                                                updated_item.serial_no_data && updated_item.serial_no_data.length > 0
+                                                                        ? updated_item.serial_no_data
+                                                                        : firstTarget.serial_no_data,
+                                                        item_uoms:
+                                                                updated_item.item_uoms && updated_item.item_uoms.length > 0
+                                                                        ? updated_item.item_uoms
+                                                                        : firstTarget.item_uoms,
+                                                        rate:
+                                                                updated_item.rate !== undefined
+                                                                        ? updated_item.rate
+                                                                        : firstTarget.rate,
+                                                        price_list_rate:
+                                                                updated_item.price_list_rate !== undefined
+                                                                        ? updated_item.price_list_rate
+                                                                        : firstTarget.price_list_rate,
+                                                        currency: updated_item.currency || firstTarget.currency,
+                                                };
 
-							updatedItems.push({
-								item: item,
-								updates: {
-									actual_qty: updated_item.actual_qty,
-									has_batch_no: updated_item.has_batch_no,
-									has_serial_no: updated_item.has_serial_no,
-									batch_no_data:
-										updated_item.batch_no_data && updated_item.batch_no_data.length > 0
-											? updated_item.batch_no_data
-											: item.batch_no_data,
-									serial_no_data:
-										updated_item.serial_no_data && updated_item.serial_no_data.length > 0
-											? updated_item.serial_no_data
-											: item.serial_no_data,
-									item_uoms:
-										updated_item.item_uoms && updated_item.item_uoms.length > 0
-											? updated_item.item_uoms
-											: item.item_uoms,
-									rate: updated_item.rate !== undefined ? updated_item.rate : item.rate,
-									price_list_rate:
-										updated_item.price_list_rate !== undefined
-											? updated_item.price_list_rate
-											: item.price_list_rate,
-									currency: updated_item.currency || item.currency,
-								},
-							});
+                                                if (prev_qty > 0 && updated_item.actual_qty === 0) {
+                                                        qtyChanged = true;
+                                                }
 
-							if (prev_qty > 0 && updated_item.actual_qty === 0) {
-								qtyChanged = true;
-							}
+                                                if (updated_item.item_uoms && updated_item.item_uoms.length > 0) {
+                                                        saveItemUOMs(updated_item.item_code, updated_item.item_uoms);
+                                                }
 
-							if (updated_item.item_uoms && updated_item.item_uoms.length > 0) {
-								saveItemUOMs(item.item_code, updated_item.item_uoms);
-							}
-						}
-					});
-
-                                        updatedItems.forEach(({ item, updates }) => {
-                                                Object.assign(item, updates);
-                                                vm.indexItem(item);
-                                                vm.applyCurrencyConversionToItem(item);
+                                                updatesByCode.set(updated_item.item_code, updates);
                                         });
 
-					updateLocalStockCache(details);
-					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
+                                        updatesByCode.forEach((updates, code) => {
+                                                const targets = itemsByCode.get(code);
+                                                if (!targets) {
+                                                        return;
+                                                }
+                                                targets.forEach((item) => {
+                                                        Object.assign(item, updates);
+                                                        vm.indexItem(item);
+                                                        vm.applyCurrencyConversionToItem(item);
+                                                });
+                                        });
+
+                                        updateLocalStockCache(details);
+                                        saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
 
                                         if (
                                                 vm.pos_profile &&
@@ -2305,54 +2498,80 @@ export default {
                                                 vm.storageAvailable &&
                                                 !vm.usesLimitSearch
                                         ) {
-						try {
-							await saveItemsBulk(details);
-						} catch (e) {
-							console.error("Failed to persist item details", e);
-							vm.markStorageUnavailable && vm.markStorageUnavailable();
-						}
-					}
+                                                try {
+                                                        await saveItemsBulk(details);
+                                                } catch (e) {
+                                                        console.error("Failed to persist item details", e);
+                                                        vm.markStorageUnavailable && vm.markStorageUnavailable();
+                                                }
+                                        }
 
-					if (qtyChanged) {
-						vm.$forceUpdate();
-					}
-				}
-			} catch (err) {
-				if (err.name !== "AbortError") {
-					console.error("Error fetching item details:", err);
-					items.forEach((item) => {
-						const localQty = getLocalStock(item.item_code);
-						if (localQty !== null) {
-							item.actual_qty = localQty;
-						}
-						if (!item.item_uoms || item.item_uoms.length === 0) {
-							const cached = getItemUOMs(item.item_code);
-							if (cached.length > 0) {
-								item.item_uoms = cached;
-							}
-						}
-					});
+                                        if (qtyChanged) {
+                                                vm.$forceUpdate();
+                                        }
+                                }
+                        } catch (err) {
+                                if (err.name !== "AbortError") {
+                                        console.error("Error fetching item details:", err);
+                                        itemsByCode.forEach((targets, code) => {
+                                                const localQty = getLocalStock(code);
+                                                if (localQty !== null) {
+                                                        targets.forEach((item) => {
+                                                                item.actual_qty = localQty;
+                                                        });
+                                                }
+                                                targets.forEach((item) => {
+                                                        if (!item.item_uoms || item.item_uoms.length === 0) {
+                                                                const cached = getItemUOMs(code);
+                                                                if (cached.length > 0) {
+                                                                        item.item_uoms = cached;
+                                                                }
+                                                        }
+                                                });
+                                        });
 
-					if (!isOffline()) {
-						vm.itemDetailsRetryCount += 1;
-						const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
-						vm.itemDetailsRetryTimeout = setTimeout(() => {
-							vm.update_items_details(items);
-						}, delay);
-					}
-				}
-			}
+                                        if (!isOffline()) {
+                                                vm.itemDetailsRetryCount += 1;
+                                                const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
+                                                vm.itemDetailsRetryTimeout = setTimeout(() => {
+                                                        const retryItems = Array.from(itemsByCode.values()).reduce(
+                                                                (acc, set) => acc.concat(Array.from(set)),
+                                                                [],
+                                                        );
+                                                        vm.update_items_details(retryItems);
+                                                }, delay);
+                                        }
+                                }
+                        }
 
-			// Cleanup on component destroy
-			this.cleanupBeforeDestroy = () => {
-				if (vm.abortController) {
-					vm.abortController.abort();
-				}
-			};
-		},
-		update_cur_items_details() {
-			if (this.displayedItems && this.displayedItems.length > 0) {
-				this.update_items_details(this.displayedItems);
+                        vm.cleanupBeforeDestroy = () => {
+                                if (vm.abortController) {
+                                        vm.abortController.abort();
+                                }
+                        };
+                },
+                primeItemFromLocalCache(item) {
+                        if (!item || !item.item_code) {
+                                return;
+                        }
+
+                        const localQty = getLocalStock(item.item_code);
+                        if (localQty !== null) {
+                                item.actual_qty = localQty;
+                        }
+
+                        if (!item.item_uoms || item.item_uoms.length === 0) {
+                                const cachedUoms = getItemUOMs(item.item_code);
+                                if (cachedUoms.length > 0) {
+                                        item.item_uoms = cachedUoms;
+                                } else if (isOffline()) {
+                                        item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
+                                }
+                        }
+                },
+                update_cur_items_details() {
+                        if (this.displayedItems && this.displayedItems.length > 0) {
+                                this.update_items_details(this.displayedItems);
 			}
 		},
 		async prePopulateStockCache(items) {
@@ -3893,15 +4112,21 @@ export default {
 			clearInterval(this.refresh_interval);
 		}
 
-		if (this.itemDetailsRetryTimeout) {
-			clearTimeout(this.itemDetailsRetryTimeout);
-		}
-		this.itemDetailsRetryCount = 0;
+                if (this.itemDetailsRetryTimeout) {
+                        clearTimeout(this.itemDetailsRetryTimeout);
+                }
+                this.itemDetailsRetryCount = 0;
 
-		// Call cleanup function for abort controller
-		if (this.cleanupBeforeDestroy) {
-			this.cleanupBeforeDestroy();
-		}
+                this.clearPendingDetailFrame();
+                if (this.pendingDetailItems) {
+                        this.pendingDetailItems.clear();
+                }
+                this.pendingDetailResolvers = [];
+
+                // Call cleanup function for abort controller
+                if (this.cleanupBeforeDestroy) {
+                        this.cleanupBeforeDestroy();
+                }
 
 		// Detach scanner if it was attached
 		if (document._scannerAttached) {
