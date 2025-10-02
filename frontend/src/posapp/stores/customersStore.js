@@ -21,23 +21,74 @@ function normalizeSearchTerm(term) {
         return term.trim();
 }
 
-function resolveProfileName(profile) {
+function normalizeProfile(profile) {
         if (!profile) {
                 return null;
         }
+
+        let resolved = profile;
+
+        if (profile.pos_profile) {
+                resolved = profile.pos_profile;
+        }
+
+        if (typeof resolved === 'string') {
+                const trimmed = resolved.trim();
+                if (!trimmed) {
+                        return null;
+                }
+
+                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                        try {
+                                return JSON.parse(trimmed);
+                        } catch (err) {
+                                console.error('Failed to parse POS profile JSON', err);
+                                return null;
+                        }
+                }
+
+                return { name: trimmed };
+        }
+
+        return resolved;
+}
+
+function getSerializedProfile(profile) {
+        if (!profile) {
+                return null;
+        }
+
         if (typeof profile === 'string') {
-                return profile;
+                const trimmed = profile.trim();
+                if (!trimmed) {
+                        return null;
+                }
+                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                        return trimmed;
+                }
+                return JSON.stringify({ name: trimmed });
         }
-        if (typeof profile.pos_profile === 'string') {
-                return profile.pos_profile;
+
+        let fallbackName = null;
+        if (typeof profile === 'object' && profile !== null) {
+                if (typeof profile.name === 'string') {
+                        fallbackName = profile.name;
+                } else if (typeof profile.pos_profile === 'string') {
+                        fallbackName = profile.pos_profile;
+                } else if (profile.pos_profile?.name) {
+                        fallbackName = profile.pos_profile.name;
+                }
         }
-        if (profile.pos_profile?.name) {
-                return profile.pos_profile.name;
+
+        try {
+                return JSON.stringify(profile);
+        } catch (err) {
+                console.error('Failed to serialize POS profile', err);
+                if (fallbackName) {
+                        return JSON.stringify({ name: fallbackName });
+                }
+                return null;
         }
-        if (profile.name) {
-                return profile.name;
-        }
-        return null;
 }
 
 export const useCustomersStore = defineStore('customers', () => {
@@ -81,11 +132,7 @@ export const useCustomersStore = defineStore('customers', () => {
         }
 
         function setPosProfile(profile) {
-                if (profile && profile.pos_profile) {
-                        posProfile.value = profile.pos_profile;
-                        return;
-                }
-                posProfile.value = profile || null;
+                posProfile.value = normalizeProfile(profile);
         }
 
         function setSelectedCustomer(name) {
@@ -188,16 +235,16 @@ export const useCustomersStore = defineStore('customers', () => {
         }
 
         function fetchCustomerPage(startAfter, modifiedAfter, limit) {
-                const profileName = resolveProfileName(posProfile.value);
+                const serializedProfile = getSerializedProfile(posProfile.value);
                 return new Promise((resolve, reject) => {
-                        if (!profileName) {
+                        if (!serializedProfile) {
                                 resolve([]);
                                 return;
                         }
                         frappe.call({
                                 method: 'posawesome.posawesome.api.customers.get_customer_names',
                                 args: {
-                                        pos_profile: profileName,
+                                        pos_profile: serializedProfile,
                                         modified_after: modifiedAfter,
                                         limit,
                                         start_after: startAfter,
@@ -213,6 +260,10 @@ export const useCustomersStore = defineStore('customers', () => {
 
         async function backgroundLoadCustomers(startAfter, syncSince) {
                 if (!posProfile.value || isOffline()) {
+                        return;
+                }
+                const serializedProfile = getSerializedProfile(posProfile.value);
+                if (!serializedProfile) {
                         return;
                 }
                 const limit = PAGE_SIZE;
@@ -265,9 +316,13 @@ export const useCustomersStore = defineStore('customers', () => {
                 }
                 try {
                         const localCount = await getCustomerStorageCount();
+                        const serializedProfile = getSerializedProfile(posProfile.value);
+                        if (!serializedProfile) {
+                                return;
+                        }
                         const response = await frappe.call({
                                 method: 'posawesome.posawesome.api.customers.get_customers_count',
-                                args: { pos_profile: resolveProfileName(posProfile.value) },
+                                args: { pos_profile: serializedProfile },
                         });
                         const serverCount = response.message || 0;
                         totalCustomerCount.value = serverCount;
@@ -318,6 +373,10 @@ export const useCustomersStore = defineStore('customers', () => {
                 if (!posProfile.value) {
                         return;
                 }
+                const serializedProfile = getSerializedProfile(posProfile.value);
+                if (!serializedProfile) {
+                        return;
+                }
                 const localCount = await getCustomerStorageCount();
                 if (localCount > 0) {
                         customersLoaded.value = true;
@@ -333,7 +392,7 @@ export const useCustomersStore = defineStore('customers', () => {
                         try {
                                 const countResponse = await frappe.call({
                                         method: 'posawesome.posawesome.api.customers.get_customers_count',
-                                        args: { pos_profile: resolveProfileName(posProfile.value) },
+                                        args: { pos_profile: serializedProfile },
                                 });
                                 totalCustomerCount.value = countResponse.message || 0;
                         } catch (err) {
