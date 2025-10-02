@@ -571,6 +571,7 @@ import {
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { storeToRefs } from "pinia";
 
 export default {
@@ -588,7 +589,9 @@ export default {
                 });
 
                 const customersStore = useCustomersStore();
+                const invoiceStore = useInvoiceStore();
                 const { selectedCustomer } = storeToRefs(customersStore);
+                const { items: invoiceItems } = storeToRefs(invoiceStore);
 
                 return {
                         ...responsive,
@@ -596,7 +599,8 @@ export default {
                         fly,
                         cartValidation,
                         ...itemsIntegration,
-                        selectedCustomer
+                        selectedCustomer,
+                        invoiceItems
                 };
         },
         components: {
@@ -1698,20 +1702,77 @@ export default {
 
 			return items_headers;
 		},
-		select_item(event, item) {
-			const targets = document.querySelectorAll(".items-table-container");
-			const target = targets[targets.length - 1];
-			const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
-			if (target && source && this.fly) {
-				this.fly(source, target, this.flyConfig);
-			}
-			this.add_item(item);
-		},
-		async click_item_row(event, { item }) {
-			const targets = document.querySelectorAll(".items-table-container");
-			const target = targets[targets.length - 1];
-			if (target && this.fly) {
-				const placeholder = document.createElement("div");
+                select_item(event, item) {
+                        const targets = document.querySelectorAll(".items-table-container");
+                        const target = targets[targets.length - 1];
+                        const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
+                        if (target && source && this.fly) {
+                                this.fly(source, target, this.flyConfig);
+                        }
+                        this.add_item(item);
+                },
+                getExistingCartQty(item) {
+                        if (!item) {
+                                return 0;
+                        }
+
+                        const cartItems = Array.isArray(this.invoiceItems)
+                                ? this.invoiceItems
+                                : Array.isArray(this.invoiceItems?.value)
+                                        ? this.invoiceItems.value
+                                        : null;
+
+                        if (!cartItems || !cartItems.length) {
+                                return 0;
+                        }
+
+                        const targetUom = item.uom || item.stock_uom || null;
+                        const targetBatch = item.batch_no || item.to_set_batch_no || null;
+                        const targetSerials = Array.isArray(item.serial_no_selected)
+                                ? item.serial_no_selected.join(",")
+                                : item.serial_no || null;
+
+                        const match = cartItems.find((cartItem) => {
+                                if (!cartItem || cartItem.posa_is_offer || cartItem.posa_is_replace) {
+                                        return false;
+                                }
+
+                                if (cartItem.item_code !== item.item_code) {
+                                        return false;
+                                }
+
+                                const cartUom = cartItem.uom || cartItem.stock_uom || null;
+                                if (targetUom && cartUom && cartUom !== targetUom) {
+                                        return false;
+                                }
+
+                                const cartBatch = cartItem.batch_no || null;
+                                if ((cartBatch || targetBatch) && cartBatch !== targetBatch) {
+                                        return false;
+                                }
+
+                                const cartSerials = Array.isArray(cartItem.serial_no_selected)
+                                        ? cartItem.serial_no_selected.join(",")
+                                        : cartItem.serial_no || null;
+                                if ((cartSerials || targetSerials) && cartSerials !== targetSerials) {
+                                        return false;
+                                }
+
+                                return true;
+                        });
+
+                        if (!match) {
+                                return 0;
+                        }
+
+                        const rawQty = typeof match.qty === "number" ? match.qty : parseFloat(match.qty);
+                        return Number.isFinite(rawQty) ? Math.abs(rawQty) : 0;
+                },
+                async click_item_row(event, { item }) {
+                        const targets = document.querySelectorAll(".items-table-container");
+                        const target = targets[targets.length - 1];
+                        if (target && this.fly) {
+                                const placeholder = document.createElement("div");
 				placeholder.style.width = "40px";
 				placeholder.style.height = "40px";
 				placeholder.style.background = "#ccc";
@@ -1736,29 +1797,34 @@ export default {
 			}
 
 			// Validate item before adding to cart
-			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
-			const isValid = await this.cartValidation.validateCartItem(
-				item,
-				requestedQty,
-				this.pos_profile,
-				this.stock_settings,
-				this.eventBus,
-				this.blockSaleBeyondAvailableQty,
-				!suppressNegativeWarning
-			);
+                        const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
+                        const existingQty = this.getExistingCartQty(item);
+                        const isValid = await this.cartValidation.validateCartItem(
+                                item,
+                                requestedQty,
+                                this.pos_profile,
+                                this.stock_settings,
+                                this.eventBus,
+                                this.blockSaleBeyondAvailableQty,
+                                !suppressNegativeWarning,
+                                existingQty
+                        );
 
-			if (!isValid) {
-				// Validation failed, error message already shown by validator
-				return;
+                        if (!isValid) {
+                                // Validation failed, error message already shown by validator
+                                return;
 			}
 
 			// Prepare item for cart
-			await this.prepareItemForCart(item, requestedQty);
+                        await this.prepareItemForCart(item, requestedQty);
+                        const normalizedQty =
+                                typeof item.qty === "number" ? item.qty : parseFloat(item.qty);
+                        item.qty = Number.isFinite(normalizedQty) ? normalizedQty : requestedQty;
 
-			// Add item to cart
-			const payload = { ...item };
-			delete payload._barcode_qty;
-			this.eventBus.emit("add_item", payload);
+                        // Add item to cart
+                        const payload = { ...item };
+                        delete payload._barcode_qty;
+                        this.eventBus.emit("add_item", payload);
 			this.qty = 1;
 		},
 
