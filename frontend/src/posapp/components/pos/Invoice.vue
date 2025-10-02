@@ -341,13 +341,17 @@ import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
         name: "POSInvoice",
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                return { invoiceStore };
+                const customersStore = useCustomersStore();
+                const { selectedCustomer, refreshToken } = storeToRefs(customersStore);
+                return { invoiceStore, selectedCustomer, customerRefreshToken: refreshToken };
         },
         data() {
                 return {
@@ -1286,16 +1290,10 @@ export default {
 		this.eventBus.on("add_item", (item) => {
 			this.add_item(item);
 		});
-		this.eventBus.on("update_customer", (customer) => {
-			this.customer = customer;
-		});
-		this.eventBus.on("fetch_customer_details", () => {
-			this.fetch_customer_details();
-		});
-		this.eventBus.on("clear_invoice", () => {
-			this.clear_invoice();
-			this.eventBus.emit("focus_item_search");
-		});
+                this.eventBus.on("clear_invoice", () => {
+                        this.clear_invoice();
+                        this.eventBus.emit("focus_item_search");
+                });
 		this.eventBus.on("load_invoice", (data) => {
 			this.load_invoice(data);
 		});
@@ -1381,8 +1379,6 @@ export default {
                 // Existing cleanup
                 this.eventBus.off("register_pos_profile");
                 this.eventBus.off("add_item");
-                this.eventBus.off("update_customer");
-                this.eventBus.off("fetch_customer_details");
                 this.eventBus.off("clear_invoice");
                 // Cleanup reset_posting_date listener
                 this.eventBus.off("reset_posting_date");
@@ -1393,6 +1389,27 @@ export default {
         // Register global keyboard shortcuts when component is created
         created() {
                 this.invoiceStore.clear();
+                this.$watch(
+                        () => this.selectedCustomer,
+                        (newCustomer) => {
+                                if (newCustomer) {
+                                        if (this.customer !== newCustomer) {
+                                                this.customer = newCustomer;
+                                        }
+                                } else if (this.customer) {
+                                        this.customer = "";
+                                }
+                        },
+                        { immediate: true },
+                );
+                this.$watch(
+                        () => this.customerRefreshToken,
+                        () => {
+                                if (this.customer) {
+                                        this.fetch_customer_details();
+                                }
+                        },
+                );
                 document.addEventListener("keydown", this.shortOpenPayment.bind(this));
                 document.addEventListener("keydown", this.shortDeleteFirstItem.bind(this));
                 document.addEventListener("keydown", this.shortOpenFirstItem.bind(this));

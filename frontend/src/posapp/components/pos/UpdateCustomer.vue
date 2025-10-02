@@ -210,6 +210,7 @@
 
 <script>
 import { isOffline, saveOfflineCustomer } from "../../../offline/index.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
 	data: () => ({
@@ -467,8 +468,8 @@ export default {
 				}
 			}
 		},
-		submit_dialog() {
-			const vm = this;
+                async submit_dialog() {
+                        const vm = this;
 			if (!this.customer_name) {
 				frappe.throw(__("Customer Name is required"));
 				return;
@@ -553,46 +554,59 @@ export default {
 				customer_type: this.customer_type,
 				gender: this.gender,
 			};
-			const apiArgs = {
-				...args,
-				company: vm.pos_profile.company,
-				pos_profile_doc: JSON.stringify(vm.pos_profile),
-				method: this.customer_id ? "update" : "create",
-			};
+                        const apiArgs = {
+                                ...args,
+                                company: vm.pos_profile.company,
+                                pos_profile_doc: JSON.stringify(vm.pos_profile),
+                                method: this.customer_id ? "update" : "create",
+                        };
 
-			if (isOffline()) {
-				saveOfflineCustomer({ args: apiArgs });
-				vm.eventBus.emit("show_message", { title: __("Customer saved offline"), color: "warning" });
-				args.name = this.customer_name;
-				vm.eventBus.emit("add_customer_to_list", args);
-				vm.eventBus.emit("set_customer", args.name);
-				vm.close_dialog();
-				return;
-			}
+                        const customersStore = useCustomersStore();
+
+                        if (isOffline()) {
+                                saveOfflineCustomer({ args: apiArgs });
+                                vm.eventBus.emit("show_message", { title: __("Customer saved offline"), color: "warning" });
+                                args.name = this.customer_name;
+                                await customersStore.addOrUpdateCustomer({
+                                        name: args.name,
+                                        customer_name: args.customer_name,
+                                        mobile_no: args.mobile_no,
+                                        email_id: args.email_id,
+                                        tax_id: args.tax_id,
+                                        primary_address: args.address_line1,
+                                });
+                                vm.close_dialog();
+                                return;
+                        }
 
 			frappe.call({
 				method: "posawesome.posawesome.api.customers.create_customer",
 				args: apiArgs,
-				callback: (r) => {
-					if (!r.exc && r.message.name) {
-						let text = __("Customer created successfully.");
-						if (vm.customer_id) {
-							text = __("Customer updated successfully.");
-						}
-						vm.eventBus.emit("show_message", {
-							title: text,
-							color: "success",
-						});
-						args.name = r.message.name;
-						frappe.utils.play_sound("submit");
-						vm.eventBus.emit("add_customer_to_list", args);
-						vm.eventBus.emit("set_customer", r.message.name);
-						vm.eventBus.emit("fetch_customer_details");
-						vm.close_dialog();
-					} else {
-						frappe.utils.play_sound("error");
-						vm.eventBus.emit("show_message", {
-							title: __("Customer creation failed."),
+                                callback: async (r) => {
+                                        if (!r.exc && r.message.name) {
+                                                let text = __("Customer created successfully.");
+                                                if (vm.customer_id) {
+                                                        text = __("Customer updated successfully.");
+                                                }
+                                                vm.eventBus.emit("show_message", {
+                                                        title: text,
+                                                        color: "success",
+                                                });
+                                                args.name = r.message.name;
+                                                frappe.utils.play_sound("submit");
+                                                await customersStore.addOrUpdateCustomer({
+                                                        name: args.name,
+                                                        customer_name: args.customer_name,
+                                                        mobile_no: args.mobile_no,
+                                                        email_id: args.email_id,
+                                                        tax_id: args.tax_id,
+                                                        primary_address: args.address_line1,
+                                                });
+                                                vm.close_dialog();
+                                        } else {
+                                                frappe.utils.play_sound("error");
+                                                vm.eventBus.emit("show_message", {
+                                                        title: __("Customer creation failed."),
 							color: "error",
 						});
 					}
