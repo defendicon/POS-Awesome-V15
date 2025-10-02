@@ -8,7 +8,6 @@ import { createPinia } from 'pinia';
 export const pinia = createPinia();
 
 // Export stores
-export { useCustomersStore } from './customersStore.js';
 export { useItemsStore } from './itemsStore.js';
 export { useInvoiceStore } from './invoiceStore.js';
 export { useUpdateStore, formatBuildVersion } from './updateStore.js';

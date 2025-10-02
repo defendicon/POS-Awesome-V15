@@ -70,8 +70,6 @@ import { useOffers } from "../../composables/useOffers.js";
 import { clearExpiredCustomerBalances } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { storeToRefs } from "pinia";
 
 export default {
 	setup() {
@@ -178,8 +176,12 @@ export default {
 				this.itemsLoaded = true;
 				this.checkLoadingComplete();
 			});
-                });
-        },
+			this.eventBus.on("customers_loaded", () => {
+				this.customersLoaded = true;
+				this.checkLoadingComplete();
+			});
+		});
+	},
 	beforeUnmount() {
 		this.eventBus.off("close_opening_dialog");
 		this.eventBus.off("register_pos_data");
@@ -190,24 +192,13 @@ export default {
 		this.eventBus.off("open_closing_dialog");
 		this.eventBus.off("submit_closing_pos");
 		this.eventBus.off("items_loaded");
-        },
+		this.eventBus.off("customers_loaded");
+	},
 	// In the created() or mounted() lifecycle hook
-        created() {
-                // Clean up expired customer balance cache on POS load
-                clearExpiredCustomerBalances();
-                const customersStore = useCustomersStore();
-                const { customersLoaded } = storeToRefs(customersStore);
-                this.$watch(
-                        () => customersLoaded.value,
-                        (value) => {
-                                if (value) {
-                                        this.customersLoaded = true;
-                                        this.checkLoadingComplete();
-                                }
-                        },
-                        { immediate: true },
-                );
-        },
+	created() {
+		// Clean up expired customer balance cache on POS load
+		clearExpiredCustomerBalances();
+	},
 };
 </script>
 

@@ -75,17 +75,9 @@
 
 <script>
 /* global __, frappe */
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { storeToRefs } from "pinia";
-
 export default {
-        setup() {
-                const customersStore = useCustomersStore();
-                const { selectedCustomer } = storeToRefs(customersStore);
-                return { selectedCustomer };
-        },
-        data: () => ({
-                loading: false,
+	data: () => ({
+		loading: false,
 		pos_profile: "",
 		customer: "",
 		posa_coupons: [],
@@ -206,47 +198,42 @@ export default {
 		},
 	},
 
-        watch: {
-                posa_coupons: {
-                        deep: true,
-                        handler() {
-                                this.updateInvoice();
-                                this.updateCounters();
-                        },
-                },
-                selectedCustomer(newCustomer, oldCustomer) {
-                        if (newCustomer === oldCustomer && newCustomer === this.customer) {
-                                this.setActiveGiftCoupons();
-                                return;
-                        }
-                        const normalized = newCustomer || "";
-                        if (this.customer !== normalized) {
-                                const to_remove = [];
-                                this.posa_coupons.forEach((el) => {
-                                        if (el.type == "Promotional") {
-                                                el.customer = normalized;
-                                        } else {
-                                                to_remove.push(el.coupon);
-                                        }
-                                });
-                                this.customer = normalized;
-                                if (to_remove.length) {
-                                        this.removeCoupon(to_remove);
-                                }
-                        }
-                        this.setActiveGiftCoupons();
-                },
-        },
+	watch: {
+		posa_coupons: {
+			deep: true,
+			handler() {
+				this.updateInvoice();
+				this.updateCounters();
+			},
+		},
+	},
 
-        created: function () {
-                this.$nextTick(function () {
-                        this.eventBus.on("register_pos_profile", (data) => {
-                                this.pos_profile = data.pos_profile;
-                        });
-                });
-                this.eventBus.on("update_pos_coupons", (data) => {
-                        this.updatePosCoupons(data);
-                });
+	created: function () {
+		this.$nextTick(function () {
+			this.eventBus.on("register_pos_profile", (data) => {
+				this.pos_profile = data.pos_profile;
+			});
+		});
+		this.eventBus.on("update_customer", (customer) => {
+			if (this.customer != customer) {
+				const to_remove = [];
+				this.posa_coupons.forEach((el) => {
+					if (el.type == "Promotional") {
+						el.customer = customer;
+					} else {
+						to_remove.push(el.coupon);
+					}
+				});
+				this.customer = customer;
+				if (to_remove.length) {
+					this.removeCoupon(to_remove);
+				}
+			}
+			this.setActiveGiftCoupons();
+		});
+		this.eventBus.on("update_pos_coupons", (data) => {
+			this.updatePosCoupons(data);
+		});
 		this.eventBus.on("set_pos_coupons", (data) => {
 			this.posa_coupons = data;
 		});
