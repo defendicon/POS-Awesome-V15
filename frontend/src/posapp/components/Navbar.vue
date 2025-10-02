@@ -45,21 +45,23 @@
 
 			<!-- Slot for menu -->
 			<template #menu>
-				<NavbarMenu
-					:pos-profile="posProfile"
-					:last-invoice-id="lastInvoiceId"
-					:manual-offline="manualOffline"
-					:network-online="networkOnline"
-					:server-online="serverOnline"
-					@close-shift="openCloseShift"
-					@print-last-invoice="printLastInvoice"
-					@sync-invoices="syncPendingInvoices"
-					@toggle-offline="toggleManualOffline"
-					@clear-cache="clearCache"
-					@show-about="showAboutDialog = true"
-					@toggle-theme="toggleTheme"
-					@logout="logOut"
-				/>
+                                <NavbarMenu
+                                        :pos-profile="posProfile"
+                                        :last-invoice-id="lastInvoiceId"
+                                        :manual-offline="manualOffline"
+                                        :network-online="networkOnline"
+                                        :server-online="serverOnline"
+                                        :suppress-notifications="suppressNotifications"
+                                        @close-shift="openCloseShift"
+                                        @print-last-invoice="printLastInvoice"
+                                        @sync-invoices="syncPendingInvoices"
+                                        @toggle-offline="toggleManualOffline"
+                                        @clear-cache="clearCache"
+                                        @show-about="showAboutDialog = true"
+                                        @toggle-theme="toggleTheme"
+                                        @logout="logOut"
+                                        @update:suppress-notifications="handleSuppressToggle"
+                                />
 			</template>
 		</NavbarAppBar>
 
@@ -186,21 +188,25 @@ export default {
 			type: Object,
 			default: () => ({ total: 0, indexedDB: 0, localStorage: 0 }),
 		},
-		cacheReady: Boolean,
-		loadingProgress: {
-			type: Number,
-			default: 0,
-		},
-		loadingActive: {
-			type: Boolean,
-			default: false,
-		},
-		loadingMessage: {
-			type: String,
-			default: "Loading app data...",
-		},
-	},
-	data() {
+                cacheReady: Boolean,
+                loadingProgress: {
+                        type: Number,
+                        default: 0,
+                },
+                loadingActive: {
+                        type: Boolean,
+                        default: false,
+                },
+                loadingMessage: {
+                        type: String,
+                        default: "Loading app data...",
+                },
+                suppressNotifications: {
+                        type: Boolean,
+                        default: false,
+                },
+        },
+        data() {
                 return {
                         drawer: false,
                         mini: true,
@@ -233,9 +239,20 @@ export default {
                 cacheReady: {
                         handler(newVal) {
                                 if (newVal && !this.initialCacheRefreshRequested) {
-					this.initialCacheRefreshRequested = true;
-					this.refreshCacheUsage();
-				}
+                                        this.initialCacheRefreshRequested = true;
+                                        this.refreshCacheUsage();
+                                }
+                        },
+                        immediate: true,
+                },
+                suppressNotifications: {
+                        handler(enabled) {
+                                if (enabled) {
+                                        this.notificationQueue = [];
+                                        this.currentNotification = null;
+                                        this.clearQueuedOnClose = false;
+                                        this.snack = false;
+                                }
                         },
                         immediate: true,
                 },
@@ -440,7 +457,7 @@ export default {
                 showMessage(data) {
                         const notification = this.normalizeNotification(data);
 
-                        if (!notification.title) {
+                        if (!notification.title || this.suppressNotifications) {
                                 return;
                         }
 
@@ -460,7 +477,7 @@ export default {
                                 this.notificationQueue.push({ ...notification });
                         }
 
-                        if (!this.currentNotification && !this.snack) {
+                        if (!this.currentNotification && !this.snack && !this.suppressNotifications) {
                                 this.processNextNotification();
                         }
                 },
@@ -506,7 +523,7 @@ export default {
                         }
                 },
                 processNextNotification() {
-                        if (!this.notificationQueue.length) {
+                        if (!this.notificationQueue.length || this.suppressNotifications) {
                                 this.currentNotification = null;
                                 return;
                         }
@@ -516,7 +533,7 @@ export default {
                         this.updateActiveNotification();
                 },
                 updateActiveNotification() {
-                        if (!this.currentNotification) {
+                        if (!this.currentNotification || this.suppressNotifications) {
                                 return;
                         }
 
@@ -581,6 +598,9 @@ export default {
                         }
                         this.snack = false;
                 },
+                handleSuppressToggle(value) {
+                        this.$emit("update:suppress-notifications", Boolean(value));
+                },
                 handleSnackbarClosed() {
                         if (this.clearQueuedOnClose) {
                                 this.notificationQueue = [];
@@ -628,12 +648,13 @@ export default {
 		"print-last-invoice",
 		"sync-invoices",
 		"toggle-offline",
-		"toggle-theme",
-		"logout",
-		"refresh-cache-usage",
-		"update-after-delete",
-		"navbar-updated",
-	],
+                "toggle-theme",
+                "logout",
+                "refresh-cache-usage",
+                "update-after-delete",
+                "navbar-updated",
+                "update:suppress-notifications",
+        ],
 };
 </script>
 

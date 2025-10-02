@@ -26,10 +26,24 @@
 			</v-btn>
 		</template>
 		<v-card class="menu-card-compact pos-themed-card" elevation="12">
-			<div class="menu-header-compact">
-				<v-icon class="pos-text-primary" size="20">mdi-menu</v-icon>
-				<span class="menu-header-text-compact pos-text-primary">{{ __("Actions") }}</span>
-			</div>
+                        <div class="menu-header-compact">
+                                <div class="menu-header-title">
+                                        <v-icon class="pos-text-primary" size="20">mdi-menu</v-icon>
+                                        <span class="menu-header-text-compact pos-text-primary">{{ __("Actions") }}</span>
+                                </div>
+                                <div class="menu-header-toggle" @click.stop @mousedown.stop>
+                                        <v-switch
+                                                class="suppress-switch"
+                                                :model-value="localSuppress"
+                                                :label="__('Suppress Notifications')"
+                                                hide-details
+                                                density="compact"
+                                                inset
+                                                color="primary"
+                                                @update:modelValue="onToggleSuppress"
+                                        ></v-switch>
+                                </div>
+                        </div>
 
 			<!-- Mobile-only: Show hidden items first -->
 			<template v-if="isMobile">
@@ -346,16 +360,20 @@ const FALLBACK_LANGUAGES = [
 
 export default {
 	name: "NavbarMenu",
-	props: {
-		posProfile: { type: Object, default: () => ({}) },
-		lastInvoiceId: String,
-		manualOffline: Boolean,
-		networkOnline: Boolean,
-		serverOnline: Boolean,
-	},
-	data() {
-		return {
-			showLanguageDialog: false,
+        props: {
+                posProfile: { type: Object, default: () => ({}) },
+                lastInvoiceId: String,
+                manualOffline: Boolean,
+                networkOnline: Boolean,
+                serverOnline: Boolean,
+                suppressNotifications: {
+                        type: Boolean,
+                        default: false,
+                },
+        },
+        data() {
+                return {
+                        showLanguageDialog: false,
 			selectedLanguage: "en",
 			currentLanguage: "en",
 			availableLanguages: FALLBACK_LANGUAGES,
@@ -364,33 +382,27 @@ export default {
 			useWesternNumerals: false,
 			originalWesternNumerals: false,
 			windowWidth: window.innerWidth,
-			notification: {
-				show: false,
-				message: "",
-				type: "info",
-				timeout: 3000,
-			},
-		};
-	},
-	mounted() {
-		// Add window resize listener for responsive behavior
-		this.handleResize = () => {
-			this.windowWidth = window.innerWidth;
-		};
-		window.addEventListener("resize", this.handleResize);
-	},
-	beforeUnmount() {
-		// Clean up the event listener
-		window.removeEventListener("resize", this.handleResize);
-	},
-	computed: {
-		canChangeLanguage() {
-			return (
-				(this.selectedLanguage !== this.currentLanguage ||
-					this.useWesternNumerals !== this.originalWesternNumerals) &&
-				!this.changing
-			);
-		},
+                        notification: {
+                                show: false,
+                                message: "",
+                                type: "info",
+                                timeout: 3000,
+                        },
+                        localSuppress: this.suppressNotifications,
+                };
+        },
+        beforeUnmount() {
+                // Clean up the event listener
+                window.removeEventListener("resize", this.handleResize);
+        },
+        computed: {
+                canChangeLanguage() {
+                        return (
+                                (this.selectedLanguage !== this.currentLanguage ||
+                                        this.useWesternNumerals !== this.originalWesternNumerals) &&
+                                !this.changing
+                        );
+                },
 		selectedLanguageName() {
 			const lang = this.availableLanguages.find((l) => l.code === this.selectedLanguage);
 			return lang?.name || this.selectedLanguage.toUpperCase();
@@ -406,7 +418,7 @@ export default {
 			return this.windowWidth >= 1024;
 		},
 		// Display name for mobile menu
-		displayUserName() {
+                displayUserName() {
 			// Show POS profile name if available, otherwise show user name
 			if (this.posProfile && this.posProfile.name) {
 				return this.posProfile.name;
@@ -423,14 +435,27 @@ export default {
 			}
 
 			return "User";
-		},
-	},
-	async mounted() {
-		// Add window resize listener for responsive behavior (already added above)
-		await this.initializeLanguage();
-		this.initializeWesternNumerals();
-	},
-	methods: {
+                },
+        },
+        watch: {
+                suppressNotifications(newVal) {
+                        this.localSuppress = Boolean(newVal);
+                        if (newVal) {
+                                this.hideNotification();
+                        }
+                },
+        },
+        async mounted() {
+                // Add window resize listener for responsive behavior
+                this.handleResize = () => {
+                        this.windowWidth = window.innerWidth;
+                };
+                window.addEventListener("resize", this.handleResize);
+
+                await this.initializeLanguage();
+                this.initializeWesternNumerals();
+        },
+        methods: {
 		initializeWesternNumerals() {
 			try {
 				const stored = localStorage.getItem("use_western_numerals");
@@ -548,34 +573,46 @@ export default {
 			this.originalWesternNumerals = this.useWesternNumerals;
 		},
 
-		showNotification(message, type = "info", timeout = 3000) {
-			Object.assign(this.notification, {
-				show: true,
-				message: this.__(message),
-				type,
-				timeout,
+                showNotification(message, type = "info", timeout = 3000) {
+                        if (this.suppressNotifications) {
+                                return;
+                        }
+                        Object.assign(this.notification, {
+                                show: true,
+                                message: this.__(message),
+                                type,
+                                timeout,
 			});
 		},
 
-		hideNotification() {
-			this.notification.show = false;
-		},
+                hideNotification() {
+                        this.notification.show = false;
+                },
 
-		__(text) {
-			return window.__ ? window.__(text) : text;
-		},
-	},
-	emits: [
+                onToggleSuppress(value) {
+                        this.localSuppress = Boolean(value);
+                        this.$emit("update:suppress-notifications", this.localSuppress);
+                        if (this.localSuppress) {
+                                this.hideNotification();
+                        }
+                },
+
+                __(text) {
+                        return window.__ ? window.__(text) : text;
+                },
+        },
+        emits: [
 		"close-shift",
 		"print-last-invoice",
 		"sync-invoices",
 		"toggle-offline",
 		"clear-cache",
 		"show-about",
-		"toggle-theme",
-		"logout",
-		"refresh-cache-usage",
-	],
+                "toggle-theme",
+                "logout",
+                "refresh-cache-usage",
+                "update:suppress-notifications",
+        ],
 };
 </script>
 
@@ -667,13 +704,51 @@ export default {
 
 /* Elite Menu Header */
 .menu-header-compact {
-	padding: 16px 20px 12px;
-	background: rgba(248, 249, 250, 0.6);
-	backdrop-filter: blur(8px);
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	border-bottom: 1px solid rgba(25, 118, 210, 0.08);
+        padding: 16px 20px 12px;
+        background: rgba(248, 249, 250, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border-bottom: 1px solid rgba(25, 118, 210, 0.08);
+}
+
+.menu-header-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+}
+
+.menu-header-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-left: auto;
+        padding-left: 12px;
+}
+
+.suppress-switch {
+        margin: 0;
+        padding: 0;
+        min-width: unset;
+}
+
+.suppress-switch :deep(.v-label) {
+        font-size: 12px;
+        color: #1976d2;
+        opacity: 0.85;
+        white-space: nowrap;
+}
+
+.suppress-switch :deep(.v-switch__track) {
+        height: 20px;
+}
+
+.suppress-switch :deep(.v-switch__thumb) {
+        height: 14px;
+        width: 14px;
 }
 
 .menu-header-text-compact {

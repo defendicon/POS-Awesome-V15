@@ -3,34 +3,36 @@
 		<AppLoadingOverlay :visible="globalLoading" />
 		<UpdatePrompt />
 		<v-main class="main-content">
-			<Navbar
-				:pos-profile="posProfile"
-				:pending-invoices="pendingInvoices"
-				:last-invoice-id="lastInvoiceId"
-				:network-online="networkOnline"
-				:server-online="serverOnline"
+                        <Navbar
+                                :pos-profile="posProfile"
+                                :pending-invoices="pendingInvoices"
+                                :last-invoice-id="lastInvoiceId"
+                                :network-online="networkOnline"
+                                :server-online="serverOnline"
 				:server-connecting="serverConnecting"
 				:is-ip-host="isIpHost"
 				:sync-totals="syncTotals"
-				:manual-offline="manualOffline"
-				:cache-usage="cacheUsage"
-				:cache-usage-loading="cacheUsageLoading"
-				:cache-usage-details="cacheUsageDetails"
-				:cache-ready="cacheReady"
-				:loading-progress="loadingProgress"
-				:loading-active="loadingActive"
-				:loading-message="loadingMessage"
-				@change-page="setPage($event)"
-				@nav-click="handleNavClick"
-				@close-shift="handleCloseShift"
-				@print-last-invoice="handlePrintLastInvoice"
-				@sync-invoices="handleSyncInvoices"
-				@toggle-offline="handleToggleOffline"
-				@toggle-theme="handleToggleTheme"
-				@logout="handleLogout"
-				@refresh-cache-usage="handleRefreshCacheUsage"
-				@update-after-delete="handleUpdateAfterDelete"
-			/>
+                                :manual-offline="manualOffline"
+                                :cache-usage="cacheUsage"
+                                :cache-usage-loading="cacheUsageLoading"
+                                :cache-usage-details="cacheUsageDetails"
+                                :cache-ready="cacheReady"
+                                :loading-progress="loadingProgress"
+                                :loading-active="loadingActive"
+                                :loading-message="loadingMessage"
+                                :suppress-notifications="suppressNotifications"
+                                @change-page="setPage($event)"
+                                @nav-click="handleNavClick"
+                                @close-shift="handleCloseShift"
+                                @print-last-invoice="handlePrintLastInvoice"
+                                @sync-invoices="handleSyncInvoices"
+                                @toggle-offline="handleToggleOffline"
+                                @toggle-theme="handleToggleTheme"
+                                @logout="handleLogout"
+                                @refresh-cache-usage="handleRefreshCacheUsage"
+                                @update-after-delete="handleUpdateAfterDelete"
+                                @update:suppress-notifications="handleSuppressNotifications"
+                        />
 			<div class="page-content">
 				<component v-bind:is="page" class="mx-4 md-4"></component>
 			</div>
@@ -77,6 +79,11 @@ import {
 	checkWebSocketConnectivity,
 } from "./composables/useNetwork.js";
 import { useRtl } from "./composables/useRtl.js";
+import {
+        getStoredNotificationSuppression,
+        initializeNotificationSuppression,
+        setNotificationSuppression,
+} from "./utils/notificationControl.js";
 
 export default {
 	setup() {
@@ -112,12 +119,15 @@ export default {
 			cacheUsage: 0,
 			cacheUsageLoading: false,
 			cacheUsageDetails: { total: 0, indexedDB: 0, localStorage: 0 },
-			cacheReady: false,
+                        cacheReady: false,
 
-			// Loading progress handled via utility
-		};
-	},
-	computed: {
+                        // Notification preferences
+                        suppressNotifications: getStoredNotificationSuppression(),
+
+                        // Loading progress handled via utility
+                };
+        },
+        computed: {
 		isDark() {
 			return this.$theme?.isDark || false;
 		},
@@ -132,10 +142,19 @@ export default {
 		},
 	},
 	watch: {
-		networkOnline(newVal, oldVal) {
-			if (newVal && !oldVal) {
-				this.refreshTaxInclusiveSetting();
-				this.eventBus.emit("network-online");
+                suppressNotifications: {
+                        handler(enabled) {
+                                setNotificationSuppression(enabled);
+                                if (this.eventBus) {
+                                        this.eventBus.emit("notification-suppression-changed", enabled);
+                                }
+                        },
+                        immediate: true,
+                },
+                networkOnline(newVal, oldVal) {
+                        if (newVal && !oldVal) {
+                                this.refreshTaxInclusiveSetting();
+                                this.eventBus.emit("network-online");
 				this.handleSyncInvoices();
 			}
 		},
@@ -162,6 +181,7 @@ export default {
                 this.setupNetworkListeners();
                 this.setupEventListeners();
                 this.handleRefreshCacheUsage();
+                initializeNotificationSuppression(this.suppressNotifications);
                 const customersStore = useCustomersStore();
                 const { loadProgress, customersLoaded } = storeToRefs(customersStore);
                 this.$watch(
@@ -181,7 +201,7 @@ export default {
                         { immediate: true },
                 );
         },
-	methods: {
+        methods: {
 		setupNetworkListeners,
 		checkNetworkConnectivity,
 		detectHostType,
@@ -190,12 +210,16 @@ export default {
 		checkCurrentOrigin,
 		checkExternalConnectivity,
 		checkWebSocketConnectivity,
-		setPage(page) {
-			this.page = page;
-		},
+                setPage(page) {
+                        this.page = page;
+                },
 
-		async initializeData() {
-			await initPromise;
+                handleSuppressNotifications(value) {
+                        this.suppressNotifications = Boolean(value);
+                },
+
+                async initializeData() {
+                        await initPromise;
 			await memoryInitPromise;
 			this.cacheReady = true;
 			checkDbHealth().catch(() => {});
