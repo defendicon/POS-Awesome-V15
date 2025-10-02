@@ -9,7 +9,7 @@
 
 import { ref } from 'vue';
 
-import { isOffline } from '../../offline/index.js';
+import { isOffline, getLocalStock } from '../../offline/index.js';
 
 import {
     parseBooleanSetting,
@@ -19,6 +19,8 @@ import {
 export function useCartValidation() {
     const isValidating = ref(false);
     const validationError = ref(null);
+    const validationCache = new Map();
+    const VALIDATION_CACHE_TTL = 5000;
 
     /**
      * Validates if an item can be added to the cart
@@ -74,7 +76,36 @@ export function useCartValidation() {
             // Allow negative stock items when Allow Negative Stock is enabled
             // This overrides POS Profile's block setting when negative stock is explicitly allowed
             const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
-            const availableQty = typeof item.actual_qty === 'number' ? item.actual_qty : null;
+
+            let availableQty = typeof item.actual_qty === 'number' ? item.actual_qty : null;
+
+            if (availableQty === null && typeof item.available_qty === 'number') {
+                availableQty = item.available_qty;
+                item.actual_qty = availableQty;
+            }
+
+            if (availableQty === null) {
+                const localStockQty = getLocalStock(item.item_code);
+                if (localStockQty !== null) {
+                    availableQty = localStockQty;
+                    item.actual_qty = localStockQty;
+                }
+            }
+
+            if (availableQty === null) {
+                const cachedEntry = validationCache.get(item.item_code);
+                if (cachedEntry && Date.now() - cachedEntry.timestamp < VALIDATION_CACHE_TTL) {
+                    availableQty = cachedEntry.availableQty;
+                }
+            }
+
+            if (availableQty !== null) {
+                validationCache.set(item.item_code, {
+                    availableQty,
+                    timestamp: Date.now(),
+                });
+            }
+
             const exceedsAvailable = availableQty !== null && requestedQty > availableQty;
             const enforceStockLimit = blockSaleBeyondAvailableQty && !allowNegativeStock;
 
@@ -109,7 +140,32 @@ export function useCartValidation() {
                             color: "error",
                         });
                     }
+                    const failedAvailableQty =
+                        typeof stockValidationResult.data?.available_qty === 'number'
+                            ? stockValidationResult.data.available_qty
+                            : null;
+
+                    if (failedAvailableQty !== null) {
+                        validationCache.set(item.item_code, {
+                            availableQty: failedAvailableQty,
+                            timestamp: Date.now(),
+                        });
+                        item.actual_qty = failedAvailableQty;
+                    }
                     return false;
+                }
+
+                const serverAvailableQty =
+                    typeof stockValidationResult.data?.available_qty === 'number'
+                        ? stockValidationResult.data.available_qty
+                        : availableQty;
+
+                if (serverAvailableQty !== null) {
+                    item.actual_qty = serverAvailableQty;
+                    validationCache.set(item.item_code, {
+                        availableQty: serverAvailableQty,
+                        timestamp: Date.now(),
+                    });
                 }
             }
 
@@ -217,7 +273,29 @@ export function useCartValidation() {
 
         // Allow negative stock items when Allow Negative Stock is enabled
         const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
-        const availableQty = typeof item.actual_qty === 'number' ? item.actual_qty : null;
+
+        let availableQty = typeof item.actual_qty === 'number' ? item.actual_qty : null;
+
+        if (availableQty === null && typeof item.available_qty === 'number') {
+            availableQty = item.available_qty;
+            item.actual_qty = availableQty;
+        }
+
+        if (availableQty === null) {
+            const localStockQty = getLocalStock(item.item_code);
+            if (localStockQty !== null) {
+                availableQty = localStockQty;
+                item.actual_qty = localStockQty;
+            }
+        }
+
+        if (availableQty !== null) {
+            validationCache.set(item.item_code, {
+                availableQty,
+                timestamp: Date.now(),
+            });
+        }
+
         const exceedsAvailable = availableQty !== null && requestedQty > availableQty;
         const enforceStockLimit = blockSaleBeyondAvailableQty && !allowNegativeStock;
 

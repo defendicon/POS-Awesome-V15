@@ -622,9 +622,10 @@ export default {
                 qty: 1,
 		refresh_interval: null,
 		abortController: null,
-		itemDetailsRequestCache: { key: null, promise: null, result: null },
-		itemDetailsRetryCount: 0,
-		itemDetailsRetryTimeout: null,
+                itemDetailsRequestCache: { key: null, promise: null, result: null },
+                itemDetailsRetryCount: 0,
+                itemDetailsRetryTimeout: null,
+                itemDetailsInFlight: new Map(),
                 selected_currency: "",
                 exchange_rate: 1,
 		prePopulateInProgress: false,
@@ -905,8 +906,76 @@ export default {
                 },
 	},
 
-	methods: {
-		// Performance optimization: Memoized search function
+        methods: {
+                hydrateItemFromCaches(item, options = {}) {
+                        const { includeUoms = false } = options;
+
+                        if (!item || !item.item_code) {
+                                return false;
+                        }
+
+                        let hasCompleteData = true;
+
+                        if (typeof item.actual_qty !== "number") {
+                                if (typeof item.available_qty === "number") {
+                                        item.actual_qty = item.available_qty;
+                                } else {
+                                        const localQty = getLocalStock(item.item_code);
+                                        if (localQty !== null) {
+                                                item.actual_qty = localQty;
+                                        } else {
+                                                hasCompleteData = false;
+                                        }
+                                }
+                        }
+
+                        if (includeUoms) {
+                                if (!Array.isArray(item.item_uoms) || item.item_uoms.length === 0) {
+                                        const cachedUoms = getItemUOMs(item.item_code);
+                                        if (cachedUoms.length > 0) {
+                                                item.item_uoms = cachedUoms;
+                                        } else {
+                                                item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
+                                                hasCompleteData = false;
+                                        }
+                                }
+                        }
+
+                        if (this.itemCache instanceof Map) {
+                                const cached = this.itemCache.get(item.item_code) || {};
+                                this.itemCache.set(item.item_code, { ...cached, ...item });
+                        }
+
+                        return hasCompleteData;
+                },
+
+                queueItemDetailsFetch(item) {
+                        if (!item || !item.item_code || isOffline()) {
+                                return;
+                        }
+
+                        if (!(this.itemDetailsInFlight instanceof Map)) {
+                                this.itemDetailsInFlight = new Map();
+                        }
+
+                        if (this.itemDetailsInFlight.has(item.item_code)) {
+                                return;
+                        }
+
+                        const pending = this.update_items_details([item])
+                                .catch((error) => {
+                                        if (error?.name !== "AbortError") {
+                                                console.error("Deferred item detail fetch failed", error);
+                                        }
+                                })
+                                .finally(() => {
+                                        this.itemDetailsInFlight.delete(item.item_code);
+                                });
+
+                        this.itemDetailsInFlight.set(item.item_code, pending);
+                },
+
+                // Performance optimization: Memoized search function
                 memoizedSearch(searchTerm, itemGroup) {
                         const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
 
@@ -1725,15 +1794,17 @@ export default {
 			}
 			await this.add_item(item);
 		},
-		async add_item(item, options = {}) {
-			const { suppressNegativeWarning = false } = options;
-			item = { ...item };
+                async add_item(item, options = {}) {
+                        const { suppressNegativeWarning = false } = options;
+                        item = { ...item };
 
-			// Handle variant items
-			if (item.has_variants) {
-				await this.handleVariantItem(item);
-				return;
-			}
+                        this.hydrateItemFromCaches(item);
+
+                        // Handle variant items
+                        if (item.has_variants) {
+                                await this.handleVariantItem(item);
+                                return;
+                        }
 
 			// Validate item before adding to cart
 			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
@@ -1753,7 +1824,7 @@ export default {
 			}
 
 			// Prepare item for cart
-			await this.prepareItemForCart(item, requestedQty);
+                        this.prepareItemForCart(item, requestedQty);
 
 			// Add item to cart
 			const payload = { ...item };
@@ -1804,18 +1875,16 @@ export default {
 		/**
 		 * Prepare item for adding to cart (UOMs, currency conversion, etc.)
 		 */
-		async prepareItemForCart(item, requestedQty) {
-			// Ensure UOMs are initialized
-			if (!item.item_uoms || item.item_uoms.length === 0) {
-				await this.update_items_details([item]);
-				if (!item.item_uoms || item.item_uoms.length === 0) {
-					item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-				}
-			}
+                prepareItemForCart(item, requestedQty) {
+                        const hasCompleteDetails = this.hydrateItemFromCaches(item, { includeUoms: true });
 
-			// Handle multi-currency conversion
-			if (this.pos_profile.posa_allow_multi_currency) {
-				this.applyCurrencyConversionToItem(item);
+                        if (!hasCompleteDetails) {
+                                this.queueItemDetailsFetch(item);
+                        }
+
+                        // Handle multi-currency conversion
+                        if (this.pos_profile.posa_allow_multi_currency) {
+                                this.applyCurrencyConversionToItem(item);
 
 				const base_rate = item.original_currency === this.pos_profile.currency
 					? item.original_rate
