@@ -3,6 +3,198 @@ import _ from "lodash";
 import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
 
+const mergeIndexKey = Symbol("posawesome:item-merge-index");
+
+const sanitizeQty = (value) => {
+        if (typeof value === "number") {
+                return Number.isFinite(value) ? value : null;
+        }
+
+        if (typeof value === "string") {
+                const trimmed = value.trim();
+                if (!trimmed) {
+                        return null;
+                }
+
+                const parsed = Number.parseFloat(trimmed);
+                return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        return null;
+};
+
+const qualifiesForIndex = (item) => {
+        if (!item || !item.item_code) {
+                return false;
+        }
+
+        if (item.posa_is_offer || item.posa_is_replace) {
+                return false;
+        }
+
+        const qty = sanitizeQty(item.qty);
+        if (qty !== null && qty <= 0) {
+                return false;
+        }
+
+        return true;
+};
+
+const getCurrentVersion = (context) => (Array.isArray(context.items) ? context.items.length : 0);
+
+const getMergeIndexState = (context) => {
+        if (!context[mergeIndexKey]) {
+                context[mergeIndexKey] = {
+                        map: new Map(),
+                        version: -1,
+                };
+        }
+
+        return context[mergeIndexKey];
+};
+
+const rebuildMergeIndex = (context, state = getMergeIndexState(context)) => {
+        const { map } = state;
+        map.clear();
+
+        if (Array.isArray(context.items)) {
+                context.items.forEach((entry) => {
+                        if (!qualifiesForIndex(entry)) {
+                                return;
+                        }
+
+                        const code = entry.item_code || "";
+                        let bucket = map.get(code);
+                        if (!bucket) {
+                                bucket = new Set();
+                                map.set(code, bucket);
+                        }
+                        bucket.add(entry);
+                });
+        }
+
+        state.version = getCurrentVersion(context);
+        return state.map;
+};
+
+const ensureIndexCurrent = (context) => {
+        const state = getMergeIndexState(context);
+        if (state.version !== getCurrentVersion(context)) {
+                rebuildMergeIndex(context, state);
+        }
+        return state.map;
+};
+
+const registerItemForMerge = (context, item) => {
+        const state = getMergeIndexState(context);
+
+        if (qualifiesForIndex(item)) {
+                const code = item.item_code || "";
+                let bucket = state.map.get(code);
+                if (!bucket) {
+                        bucket = new Set();
+                        state.map.set(code, bucket);
+                }
+                bucket.add(item);
+        }
+
+        state.version = getCurrentVersion(context);
+};
+
+const unregisterItemForMerge = (context, item) => {
+        const state = getMergeIndexState(context);
+
+        if (item && item.item_code) {
+                const bucket = state.map.get(item.item_code);
+                if (bucket) {
+                        bucket.delete(item);
+                        if (bucket.size === 0) {
+                                state.map.delete(item.item_code);
+                        }
+                }
+        }
+
+        state.version = getCurrentVersion(context);
+};
+
+const clearMergeIndex = (context) => {
+        const state = getMergeIndexState(context);
+        state.map.clear();
+        state.version = getCurrentVersion(context);
+};
+
+const refreshItemInMergeIndex = (context, item) => {
+        const state = getMergeIndexState(context);
+
+        if (!item || !item.item_code) {
+                return;
+        }
+
+        let bucket = state.map.get(item.item_code);
+        if (!qualifiesForIndex(item)) {
+                if (bucket) {
+                        bucket.delete(item);
+                        if (bucket.size === 0) {
+                                state.map.delete(item.item_code);
+                        }
+                }
+                return;
+        }
+
+        if (!bucket) {
+                bucket = new Set();
+                state.map.set(item.item_code, bucket);
+        }
+
+        if (!bucket.has(item)) {
+                bucket.add(item);
+        }
+};
+
+const findMergeCandidate = (context, incoming) => {
+        if (!incoming || !incoming.item_code) {
+                return null;
+        }
+
+        const index = ensureIndexCurrent(context);
+        const bucket = index.get(incoming.item_code);
+
+        if (!bucket || bucket.size === 0) {
+                return null;
+        }
+
+        const incomingUom = incoming.uom || incoming.stock_uom || "";
+        const ignoreBatch = Boolean(context?.pos_profile?.posa_auto_set_batch) && Boolean(
+                incoming.has_batch_no || incoming.batch_no || incoming.to_set_batch_no,
+        );
+        const incomingBatch = incoming.to_set_batch_no || incoming.batch_no || null;
+
+        for (const candidate of bucket) {
+                if (!qualifiesForIndex(candidate)) {
+                        continue;
+                }
+
+                const candidateUom = candidate.uom || candidate.stock_uom || "";
+                if (candidateUom !== incomingUom) {
+                        continue;
+                }
+
+                if (ignoreBatch) {
+                        return candidate;
+                }
+
+                const candidateBatch = candidate.batch_no || null;
+                if (
+                        (candidateBatch && incomingBatch && candidateBatch === incomingBatch) ||
+                        (!candidateBatch && !incomingBatch)
+                ) {
+                        return candidate;
+                }
+        }
+
+        return null;
+};
+
 /* global frappe, __ */
 
 export function useItemAddition() {
@@ -31,14 +223,17 @@ export function useItemAddition() {
         const removeItem = (item, context) => {
                 const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
                 if (index >= 0) {
-                        context.items.splice(index, 1);
-		}
-		if (item.is_bundle) {
-			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
-		}
-		// Remove from expanded if present
-		context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
-	};
+                        const [removed] = context.items.splice(index, 1);
+                        unregisterItemForMerge(context, removed || item);
+                } else {
+                        unregisterItemForMerge(context, item);
+                }
+                if (item.is_bundle) {
+                        context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
+                }
+                // Remove from expanded if present
+                context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
+        };
 
 	const { getBundleComponents } = useBundles();
 
@@ -86,70 +281,136 @@ export function useItemAddition() {
 		}
 	};
 
-	const moveItemToTop = (context, target) => {
-		if (!target) return;
-		const currentIndex = context.items.findIndex((item) => item.posa_row_id === target.posa_row_id);
-		if (currentIndex > 0) {
-			const [existing] = context.items.splice(currentIndex, 1);
-			context.items.unshift(existing);
-		}
-	};
+        const moveItemToTop = (context, target) => {
+                if (!target) return;
+                const currentIndex = context.items.findIndex((item) => item.posa_row_id === target.posa_row_id);
+                if (currentIndex > 0) {
+                        const [existing] = context.items.splice(currentIndex, 1);
+                        context.items.unshift(existing);
+                }
+        };
 
-	// Add item to invoice
+        const mergeIntoExisting = (context, existingItem, addition, { additionIsNewItem = false } = {}) => {
+                if (!existingItem) {
+                        return false;
+                }
+
+                const curItem = existingItem;
+                const previousQty = curItem.qty;
+
+                if (context.update_items_details) {
+                        runAsyncTask(
+                                () => context.update_items_details([curItem]),
+                                additionIsNewItem ? "update_items_details:merge_new" : "update_items_details:existing",
+                        );
+                }
+
+                if (additionIsNewItem) {
+                        if (addition.serial_no_selected && addition.serial_no_selected.length) {
+                                if (!Array.isArray(curItem.serial_no_selected)) {
+                                        curItem.serial_no_selected = [];
+                                }
+                                addition.serial_no_selected.forEach((sn) => {
+                                        if (!curItem.serial_no_selected.includes(sn)) {
+                                                curItem.serial_no_selected.push(sn);
+                                        }
+                                });
+                        }
+                } else if (addition.has_serial_no && addition.to_set_serial_no) {
+                        if (!Array.isArray(curItem.serial_no_selected)) {
+                                curItem.serial_no_selected = [];
+                        }
+                        if (curItem.serial_no_selected.includes(addition.to_set_serial_no)) {
+                                context.eventBus.emit("show_message", {
+                                        title: __(`This Serial Number {0} has already been added!`, [addition.to_set_serial_no]),
+                                        color: "warning",
+                                });
+                                addition.to_set_serial_no = null;
+                                return false;
+                        }
+                        curItem.serial_no_selected.push(addition.to_set_serial_no);
+                        addition.to_set_serial_no = null;
+                }
+
+                const additionQty = addition.qty ?? 1;
+                const numericQty =
+                        typeof additionQty === "number" && Number.isFinite(additionQty)
+                                ? additionQty
+                                : Number.parseFloat(additionQty) || 1;
+
+                if (context.isReturnInvoice) {
+                        curItem.qty -= Math.abs(numericQty);
+                } else {
+                        curItem.qty += numericQty;
+                }
+
+                if (context.calc_stock_qty) {
+                        context.calc_stock_qty(curItem, curItem.qty);
+                }
+
+                if (curItem.has_batch_no && curItem.batch_no && context.setBatchQty) {
+                        context.setBatchQty(curItem, curItem.batch_no, false);
+                }
+
+                if (context.setSerialNo) {
+                        context.setSerialNo(curItem);
+                }
+
+                if (
+                        context.calc_uom &&
+                        curItem.uom &&
+                        (!curItem.stock_uom || curItem.uom !== curItem.stock_uom)
+                ) {
+                        runAsyncTask(
+                                () => context.calc_uom(curItem, curItem.uom),
+                                additionIsNewItem ? "calc_uom:merge_new_item" : "calc_uom:merge_existing",
+                        );
+                }
+
+                if (context.fetch_available_qty) {
+                        runAsyncTask(
+                                () => context.fetch_available_qty(curItem),
+                                additionIsNewItem ? "fetch_available_qty:merge_new" : "fetch_available_qty:existing",
+                        );
+                }
+
+                refreshItemInMergeIndex(context, curItem);
+
+                if (!context.isReturnInvoice && curItem.qty > previousQty) {
+                        moveItemToTop(context, curItem);
+                }
+
+                return true;
+        };
+
+        // Add item to invoice
         const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
                 if (!item.uom) {
                         item.uom = item.stock_uom;
                 }
-		let index = -1;
-		if (!context.new_line) {
-			// For normal additions (not returns), only merge with existing positive quantity lines
-			// This ensures that negative quantities (returns) are kept separate from positive sales
-			if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
-				index = context.items.findIndex(
-					(el) =>
-						el.item_code === item.item_code &&
-						el.uom === item.uom &&
-						!el.posa_is_offer &&
-						!el.posa_is_replace &&
-						// Only merge with positive quantity lines for normal additions
-						el.qty > 0,
-				);
-			} else {
-				index = context.items.findIndex(
-					(el) =>
-						el.item_code === item.item_code &&
-						el.uom === item.uom &&
-						!el.posa_is_offer &&
-						!el.posa_is_replace &&
-						((el.batch_no && item.batch_no && el.batch_no === item.batch_no) ||
-							(!el.batch_no && !item.batch_no)) &&
-						// Only merge with positive quantity lines for normal additions
-						el.qty > 0,
-				);
-			}
-		}
 
-		let new_item;
-		if (index === -1 || context.new_line) {
-			new_item = getNewItem(item, context);
-			// Handle serial number logic
-			if (item.has_serial_no && item.to_set_serial_no) {
-				new_item.serial_no_selected = [];
-				new_item.serial_no_selected.push(item.to_set_serial_no);
-				item.to_set_serial_no = null;
-			}
-			// Handle batch number logic
-			if (item.has_batch_no && item.to_set_batch_no) {
-				new_item.batch_no = item.to_set_batch_no;
-				item.to_set_batch_no = null;
-				item.batch_no = null;
-				if (context.setBatchQty) context.setBatchQty(new_item, new_item.batch_no, false);
-			}
-			// Make quantity negative for returns
-			if (context.isReturnInvoice) {
-				new_item.qty = -Math.abs(new_item.qty || 1);
-			}
-			// Apply UOM conversion immediately if barcode specifies a different UOM
+                let existingItem = null;
+                if (!context.new_line) {
+                        existingItem = findMergeCandidate(context, item);
+                }
+
+                let new_item;
+                if (!existingItem || context.new_line) {
+                        new_item = getNewItem(item, context);
+                        if (item.has_serial_no && item.to_set_serial_no) {
+                                new_item.serial_no_selected = [];
+                                new_item.serial_no_selected.push(item.to_set_serial_no);
+                                item.to_set_serial_no = null;
+                        }
+                        if (item.has_batch_no && item.to_set_batch_no) {
+                                new_item.batch_no = item.to_set_batch_no;
+                                item.to_set_batch_no = null;
+                                item.batch_no = null;
+                                if (context.setBatchQty) context.setBatchQty(new_item, new_item.batch_no, false);
+                        }
+                        if (context.isReturnInvoice) {
+                                new_item.qty = -Math.abs(new_item.qty || 1);
+                        }
                         if (
                                 context.calc_uom &&
                                 new_item.uom &&
@@ -161,38 +422,17 @@ export function useItemAddition() {
                                 );
                         }
 
-                        // Re-check in case other async updates modified the cart meanwhile
                         if (!context.new_line) {
-                                // Apply same logic - only merge with positive quantity lines for normal additions
-                                if (context.pos_profile.posa_auto_set_batch && item.has_batch_no) {
-					index = context.items.findIndex(
-						(el) =>
-							el.item_code === item.item_code &&
-							el.uom === item.uom &&
-							!el.posa_is_offer &&
-							!el.posa_is_replace &&
-							// Only merge with positive quantity lines for normal additions
-							el.qty > 0,
-					);
-				} else {
-					index = context.items.findIndex(
-						(el) =>
-							el.item_code === item.item_code &&
-							el.uom === item.uom &&
-							!el.posa_is_offer &&
-							!el.posa_is_replace &&
-							((el.batch_no && item.batch_no && el.batch_no === item.batch_no) ||
-								(!el.batch_no && !item.batch_no)) &&
-							// Only merge with positive quantity lines for normal additions
-							el.qty > 0,
-					);
-				}
-			}
+                                const refreshed = findMergeCandidate(context, item);
+                                if (refreshed) {
+                                        existingItem = refreshed;
+                                }
+                        }
 
-			if (index === -1 || context.new_line) {
+                        if (!existingItem || context.new_line) {
                                 context.items.unshift(new_item);
+                                registerItemForMerge(context, new_item);
                                 runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
-                                // Skip recalculation to preserve the manually set rate
                                 if (context.update_item_detail) {
                                         runAsyncTask(
                                                 () => context.update_item_detail(new_item, false),
@@ -207,178 +447,75 @@ export function useItemAddition() {
                                         );
                                 }
 
-				if (
-					context.isReturnInvoice &&
-					context.pos_profile.posa_allow_return_without_invoice &&
-					new_item.has_batch_no &&
-					!context.pos_profile.posa_auto_set_batch
-				) {
-					const opts =
-						Array.isArray(new_item.batch_no_data) && new_item.batch_no_data.length > 0
-							? new_item.batch_no_data
-							: null;
-					if (opts) {
-						const dialog = new frappe.ui.Dialog({
-							title: __("Select Batch"),
-							fields: [
-								{
-									fieldtype: "Select",
-									fieldname: "batch",
-									label: __("Batch"),
-									options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
-									reqd: !context.pos_profile.posa_allow_free_batch_return,
-								},
-							],
-							primary_action_label: __("Select"),
-							primary_action(values) {
-								const selected = values.batch ? values.batch.split("|")[0].trim() : null;
-								context.setBatchQty(new_item, selected, false);
-								dialog.hide();
-							},
-						});
+                                if (
+                                        context.isReturnInvoice &&
+                                        context.pos_profile.posa_allow_return_without_invoice &&
+                                        new_item.has_batch_no &&
+                                        !context.pos_profile.posa_auto_set_batch
+                                ) {
+                                        const opts =
+                                                Array.isArray(new_item.batch_no_data) && new_item.batch_no_data.length > 0
+                                                        ? new_item.batch_no_data
+                                                        : null;
+                                        if (opts) {
+                                                const dialog = new frappe.ui.Dialog({
+                                                        title: __("Select Batch"),
+                                                        fields: [
+                                                                {
+                                                                        fieldtype: "Select",
+                                                                        fieldname: "batch",
+                                                                        label: __("Batch"),
+                                                                        options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
+                                                                        reqd: !context.pos_profile.posa_allow_free_batch_return,
+                                                                },
+                                                        ],
+                                                        primary_action_label: __("Select"),
+                                                        primary_action(values) {
+                                                                const selected = values.batch ? values.batch.split("|")[0].trim() : null;
+                                                                context.setBatchQty(new_item, selected, false);
+                                                                dialog.hide();
+                                                        },
+                                                });
                                                 dialog.onhide = () => {
                                                         if (!new_item.batch_no) {
                                                                 context.setBatchQty(new_item, null, false);
                                                         }
                                                 };
-						dialog.show();
-					} else {
-						context.setBatchQty(new_item, null, false);
-					}
-				}
-
-				// Expand new item if it has batch or serial number
-				if (
-					(!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
-					new_item.has_serial_no
-				) {
-					nextTick(() => {
-						context.expanded = [new_item.posa_row_id];
-					});
-				}
-			} else {
-				const cur_item = context.items[index];
-				const previousQty = cur_item.qty;
-                                if (context.update_items_details) {
-                                        runAsyncTask(
-                                                () => context.update_items_details([cur_item]),
-                                                "update_items_details:merge_new",
-                                        );
+                                                dialog.show();
+                                        } else {
+                                                context.setBatchQty(new_item, null, false);
+                                        }
                                 }
-				// Merge serial numbers if any
-				if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
-					new_item.serial_no_selected.forEach((sn) => {
-						if (!cur_item.serial_no_selected.includes(sn)) {
-							cur_item.serial_no_selected.push(sn);
-						}
-					});
-				}
-				if (context.isReturnInvoice) {
-					cur_item.qty -= Math.abs(new_item.qty || 1);
-				} else {
-					cur_item.qty += new_item.qty || 1;
-				}
-				if (context.calc_stock_qty) context.calc_stock_qty(cur_item, cur_item.qty);
-
-				if (cur_item.has_batch_no && cur_item.batch_no && context.setBatchQty) {
-					context.setBatchQty(cur_item, cur_item.batch_no, false);
-				}
-
-				if (context.setSerialNo) context.setSerialNo(cur_item);
 
                                 if (
-                                        context.calc_uom &&
-                                        cur_item.uom &&
-                                        (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
+                                        (!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
+                                        new_item.has_serial_no
                                 ) {
-                                        runAsyncTask(
-                                                () => context.calc_uom(cur_item, cur_item.uom),
-                                                "calc_uom:merge_new_item",
-                                        );
+                                        nextTick(() => {
+                                                context.expanded = [new_item.posa_row_id];
+                                        });
                                 }
 
-                                if (context.fetch_available_qty) {
-                                        runAsyncTask(
-                                                () => context.fetch_available_qty(cur_item),
-                                                "fetch_available_qty:merge_new",
-                                        );
+                                if (context.forceUpdate) {
+                                        runAsyncTask(() => context.forceUpdate(), "force_update");
                                 }
-                                if (cur_item.qty > previousQty) {
-					moveItemToTop(context, cur_item);
-				}
-			}
-		} else {
-			const cur_item = context.items[index];
-			const previousQty = cur_item.qty;
-                        if (context.update_items_details) {
-                                runAsyncTask(
-                                        () => context.update_items_details([cur_item]),
-                                        "update_items_details:existing",
-                                );
-                        }
-			// Serial number logic for existing item
-			if (item.has_serial_no && item.to_set_serial_no) {
-				if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
-					context.eventBus.emit("show_message", {
-						title: __(`This Serial Number {0} has already been added!`, [item.to_set_serial_no]),
-						color: "warning",
-					});
-					item.to_set_serial_no = null;
-					return;
-				}
-				cur_item.serial_no_selected.push(item.to_set_serial_no);
-				item.to_set_serial_no = null;
-			}
 
-			// For returns, subtract from quantity to make it more negative
-			if (context.isReturnInvoice) {
-				cur_item.qty -= Math.abs(item.qty || 1);
-			} else {
-				cur_item.qty += item.qty || 1;
-			}
-			if (context.calc_stock_qty) context.calc_stock_qty(cur_item, cur_item.qty);
-
-			// Update batch quantity if needed
-			if (cur_item.has_batch_no && cur_item.batch_no && context.setBatchQty) {
-				context.setBatchQty(cur_item, cur_item.batch_no, false);
-			}
-
-			if (context.setSerialNo) context.setSerialNo(cur_item);
-
-			// Recalculate rates if UOM differs from stock UOM
-                        if (
-                                context.calc_uom &&
-                                cur_item.uom &&
-                                (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
-                        ) {
-                                runAsyncTask(
-                                        () => context.calc_uom(cur_item, cur_item.uom),
-                                        "calc_uom:merge_existing",
-                                );
+                                return;
                         }
 
-                        if (context.fetch_available_qty) {
-                                runAsyncTask(
-                                        () => context.fetch_available_qty(cur_item),
-                                        "fetch_available_qty:existing",
-                                );
+                        const mergedNew = mergeIntoExisting(context, existingItem, new_item, { additionIsNewItem: true });
+                        if (mergedNew && context.forceUpdate) {
+                                runAsyncTask(() => context.forceUpdate(), "force_update");
                         }
-			if (cur_item.qty > previousQty) {
-				moveItemToTop(context, cur_item);
-			}
-		}
-                if (context.forceUpdate) {
-                        runAsyncTask(() => context.forceUpdate(), "force_update");
+                        return;
                 }
 
-		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
-			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
-		) {
-			context.expanded = [new_item.posa_row_id];
-		}
+                const mergedExisting = mergeIntoExisting(context, existingItem, item);
+                if (mergedExisting && context.forceUpdate) {
+                        runAsyncTask(() => context.forceUpdate(), "force_update");
+                }
         });
+
 
         // Create a new item object with default and calculated fields
         const getNewItem = (item, context) => {
@@ -472,13 +609,14 @@ export function useItemAddition() {
 		return new_item;
 	};
 
-	// Reset all invoice fields to default/empty values
-	const clearInvoice = (context) => {
-		context.items = [];
-		context.packed_items = [];
-		context.posa_offers = [];
-		context.expanded = [];
-		context.eventBus.emit("set_pos_coupons", []);
+        // Reset all invoice fields to default/empty values
+        const clearInvoice = (context) => {
+                context.items = [];
+                context.packed_items = [];
+                context.posa_offers = [];
+                context.expanded = [];
+                clearMergeIndex(context);
+                context.eventBus.emit("set_pos_coupons", []);
 		context.posa_coupons = [];
 		context.invoice_doc = "";
 		context.return_doc = "";
