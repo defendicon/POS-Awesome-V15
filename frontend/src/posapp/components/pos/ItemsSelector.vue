@@ -687,6 +687,9 @@ export default {
                 awaitingScanResult: false,
                 scanDebounceId: null,
                 scanQueuedCode: "",
+                scanProcessingQueue: [],
+                processingScanQueue: false,
+                pendingScanQueuePromise: null,
                 refreshInFlight: false,
                 clearingSearch: false,
         }),
@@ -1698,19 +1701,19 @@ export default {
 
 			return items_headers;
 		},
-		select_item(event, item) {
-			const targets = document.querySelectorAll(".items-table-container");
-			const target = targets[targets.length - 1];
-			const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
-			if (target && source && this.fly) {
-				this.fly(source, target, this.flyConfig);
-			}
-			this.add_item(item);
-		},
-		async click_item_row(event, { item }) {
-			const targets = document.querySelectorAll(".items-table-container");
-			const target = targets[targets.length - 1];
-			if (target && this.fly) {
+                select_item(event, item) {
+                        const targets = document.querySelectorAll(".items-table-container");
+                        const target = targets[targets.length - 1];
+                        const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
+                        if (target && source && this.fly) {
+                                this.fly(source, target, this.flyConfig);
+                        }
+                        this.add_item(item, { source: "item-card" });
+                },
+                async click_item_row(event, { item }) {
+                        const targets = document.querySelectorAll(".items-table-container");
+                        const target = targets[targets.length - 1];
+                        if (target && this.fly) {
 				const placeholder = document.createElement("div");
 				placeholder.style.width = "40px";
 				placeholder.style.height = "40px";
@@ -1720,47 +1723,117 @@ export default {
 				placeholder.style.top = `${event.clientY - 20}px`;
 				placeholder.style.left = `${event.clientX - 20}px`;
 				document.body.appendChild(placeholder);
-				this.fly(placeholder, target, this.flyConfig);
-				placeholder.remove();
-			}
-			await this.add_item(item);
-		},
-		async add_item(item, options = {}) {
-			const { suppressNegativeWarning = false } = options;
-			item = { ...item };
+                                this.fly(placeholder, target, this.flyConfig);
+                                placeholder.remove();
+                        }
+                        await this.add_item(item, { source: "item-row" });
+                },
+                async add_item(item, options = {}) {
+                        const items = Array.isArray(item) ? item : [item];
+                        return this.addItems(items, options);
+                },
+                async addItems(items, options = {}) {
+                        if (!Array.isArray(items) || items.length === 0) {
+                                return { valid: [], invalid: [], warnings: [] };
+                        }
 
-			// Handle variant items
-			if (item.has_variants) {
-				await this.handleVariantItem(item);
-				return;
-			}
+                        const {
+                                suppressNegativeWarning = false,
+                                source = "manual",
+                                useProvidedQty = true,
+                                aggregate = items.length > 1,
+                                scannedCodes = [],
+                        } = options;
 
-			// Validate item before adding to cart
-			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
-			const isValid = await this.cartValidation.validateCartItem(
-				item,
-				requestedQty,
-				this.pos_profile,
-				this.stock_settings,
-				this.eventBus,
-				this.blockSaleBeyondAvailableQty,
-				!suppressNegativeWarning
-			);
+                        const normalizedEntries = items.map((originalItem, index) => {
+                                const cloned = { ...originalItem };
+                                const rawQty =
+                                        useProvidedQty && typeof cloned.qty === "number"
+                                                ? cloned.qty
+                                                : this.qty != null
+                                                        ? this.qty
+                                                        : cloned.qty;
+                                const requestedQty = Math.abs(rawQty ?? 1) || 1;
 
-			if (!isValid) {
-				// Validation failed, error message already shown by validator
-				return;
-			}
+                                return {
+                                        item: cloned,
+                                        qty: requestedQty,
+                                        suppressNegativeWarning,
+                                        meta: {
+                                                index,
+                                                source,
+                                                scannedCode: Array.isArray(scannedCodes)
+                                                        ? scannedCodes[index]
+                                                        : scannedCodes,
+                                        },
+                                };
+                        });
 
-			// Prepare item for cart
-			await this.prepareItemForCart(item, requestedQty);
+                        if (normalizedEntries.length === 1 && normalizedEntries[0].item?.has_variants) {
+                                await this.handleVariantItem(normalizedEntries[0].item);
+                                return { valid: [], invalid: normalizedEntries, warnings: [] };
+                        }
 
-			// Add item to cart
-			const payload = { ...item };
-			delete payload._barcode_qty;
-			this.eventBus.emit("add_item", payload);
-			this.qty = 1;
-		},
+                        const validationResult = await this.cartValidation.validateCartItems(
+                                normalizedEntries,
+                                this.pos_profile,
+                                this.stock_settings,
+                                this.eventBus,
+                                this.blockSaleBeyondAvailableQty,
+                                !suppressNegativeWarning,
+                                aggregate,
+                        );
+
+                        if (aggregate && validationResult.invalid.length > 0) {
+                                const errorMessage = this.buildAggregatedErrorMessage(validationResult.invalid);
+                                if (source === "scan") {
+                                        this.showScanError({
+                                                message: this.__("Some scanned items could not be added"),
+                                                code: validationResult.invalid
+                                                        .map((entry) => entry.meta?.scannedCode || "")
+                                                        .filter(Boolean)
+                                                        .join(", "),
+                                                details: errorMessage,
+                                        });
+                                } else if (this.eventBus?.emit) {
+                                        this.eventBus.emit("show_message", {
+                                                title: this.__("Some items could not be added"),
+                                                summary: this.__("Cart validation"),
+                                                detail: errorMessage,
+                                                color: "error",
+                                                timeout: 6000,
+                                                groupId: "cart-validation-errors",
+                                        });
+                                }
+                        }
+
+                        if (aggregate && validationResult.warnings.length > 0 && this.eventBus?.emit) {
+                                const warningMessage = validationResult.warnings
+                                        .map((entry) => entry.message)
+                                        .filter(Boolean)
+                                        .join("\n");
+                                if (warningMessage) {
+                                        this.eventBus.emit("show_message", {
+                                                title: this.__("Negative stock warning"),
+                                                detail: warningMessage,
+                                                color: "warning",
+                                                timeout: 5000,
+                                                groupId: "cart-validation-warnings",
+                                        });
+                                }
+                        }
+
+                        for (const entry of validationResult.valid) {
+                                await this.prepareItemForCart(entry.item, entry.qty);
+                                const payload = { ...entry.item };
+                                delete payload._barcode_qty;
+                                this.eventBus.emit("add_item", payload);
+                        }
+
+                        this.qty = 1;
+
+                        return validationResult;
+                },
 
 		/**
 		 * Handle variant item selection
@@ -2969,153 +3042,187 @@ export default {
                         }
                         return index.get(normalized) || index.get(normalized.toLowerCase()) || null;
                 },
-		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
-			console.log("Adding scanned item to invoice:", item, scannedCode);
+                async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
+                        console.log("Adding scanned item to invoice:", item, scannedCode);
 
-			// Clone the item to avoid mutating list data
-			const newItem = { ...item };
+                        const newItem = { ...item };
 
-			// If the scanned barcode has a specific UOM, apply it
-			if (Array.isArray(newItem.item_barcode)) {
-				const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-				if (barcodeMatch && barcodeMatch.posa_uom) {
-					newItem.uom = barcodeMatch.posa_uom;
+                        if (Array.isArray(newItem.item_barcode)) {
+                                const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
+                                if (barcodeMatch && barcodeMatch.posa_uom) {
+                                        newItem.uom = barcodeMatch.posa_uom;
 
-					// Try fetching the rate for this UOM from the active price list
-					try {
-						const res = await frappe.call({
-							method: "posawesome.posawesome.api.items.get_price_for_uom",
-							args: {
-								item_code: newItem.item_code,
-								price_list: this.active_price_list,
-								uom: barcodeMatch.posa_uom,
-							},
-						});
-						if (res.message) {
-							const price = parseFloat(res.message);
-							newItem.rate = price;
-							newItem.price_list_rate = price;
-							newItem.base_rate = price;
-							newItem.base_price_list_rate = price;
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
-						}
-					} catch (e) {
-						console.error("Failed to fetch UOM price", e);
-					}
-				}
-			}
+                                        try {
+                                                const res = await frappe.call({
+                                                        method: "posawesome.posawesome.api.items.get_price_for_uom",
+                                                        args: {
+                                                                item_code: newItem.item_code,
+                                                                price_list: this.active_price_list,
+                                                                uom: barcodeMatch.posa_uom,
+                                                        },
+                                                });
+                                                if (res.message) {
+                                                        const price = parseFloat(res.message);
+                                                        newItem.rate = price;
+                                                        newItem.price_list_rate = price;
+                                                        newItem.base_rate = price;
+                                                        newItem.base_price_list_rate = price;
+                                                        newItem._manual_rate_set = true;
+                                                        newItem.skip_force_update = true;
+                                                }
+                                        } catch (e) {
+                                                console.error("Failed to fetch UOM price", e);
+                                        }
+                                }
+                        }
 
-			// Apply quantity from scale barcode if available
-			if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
-				newItem.qty = qtyFromBarcode;
-				newItem._barcode_qty = true;
-			}
+                        if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
+                                newItem.qty = qtyFromBarcode;
+                                newItem._barcode_qty = true;
+                        }
 
-			const requestedQtyRaw =
-				qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
-			const requestedQty = Math.abs(requestedQtyRaw || 1);
-			const availableQty =
-				typeof newItem.available_qty === "number"
-					? newItem.available_qty
-					: typeof newItem.actual_qty === "number"
-						? newItem.actual_qty
-						: null;
+                        const requestedQtyRaw =
+                                qtyFromBarcode !== null && !isNaN(qtyFromBarcode)
+                                        ? qtyFromBarcode
+                                        : newItem.qty ?? 1;
+                        newItem.qty = Math.abs(requestedQtyRaw || 1);
 
-			if (availableQty !== null && availableQty < requestedQty) {
-				const formattedAvailable = this.format_number
-					? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: availableQty;
-				const formattedRequested = this.format_number
-					? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: requestedQty;
-				const negativeStockEnabled = this.isNegativeStockEnabled();
-				const shouldBlock =
-					!negativeStockEnabled &&
-					(this.blockSaleBeyondAvailableQty || availableQty <= 0);
+                        this.scanProcessingQueue.push({
+                                item: newItem,
+                                scannedCode,
+                        });
 
-				if (shouldBlock) {
-					this.showScanError({
-						message: formatStockShortageError(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						code: scannedCode,
-						details: this.__("Adjust the quantity or enable negative stock to continue."),
-					});
-					return;
-				}
+                        return this.flushScanQueue();
+                },
+                async flushScanQueue() {
+                        if (this.processingScanQueue) {
+                                return this.pendingScanQueuePromise;
+                        }
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-				}
-			}
+                        this.processingScanQueue = true;
+                        this.pendingScanQueuePromise = (async () => {
+                                try {
+                                        while (this.scanProcessingQueue.length > 0) {
+                                                const batch = this.scanProcessingQueue.splice(0);
+                                                if (!batch.length) {
+                                                        continue;
+                                                }
 
-			this.awaitingScanResult = true;
+                                                const aggregate = batch.length > 1;
+                                                const items = batch.map((entry) => entry.item);
+                                                const scannedCodes = batch.map((entry) => entry.scannedCode);
 
-                        try {
-                                // Use existing add_item method with enhanced feedback
-                                await this.add_item(newItem, {
-                                        suppressNegativeWarning: true,
-                                        skipNotification: true,
-                                });
+                                                this.awaitingScanResult = true;
+
+                                                const result = await this.addItems(items, {
+                                                        suppressNegativeWarning: true,
+                                                        source: "scan",
+                                                        useProvidedQty: true,
+                                                        aggregate,
+                                                        scannedCodes,
+                                                });
+
+                                                this.handleScanBatchResult(result, batch, aggregate);
+                                        }
+                                } finally {
+                                        if (!this.scanErrorDialog) {
+                                                this.awaitingScanResult = false;
+                                        }
+                                        this.processingScanQueue = false;
+                                        this.pendingScanQueuePromise = null;
+                                }
+                        })();
+
+                        return this.pendingScanQueuePromise;
+                },
+                handleScanBatchResult(result, batch, aggregate) {
+                        const safeResult = result || {};
+                        const valid = Array.isArray(safeResult.valid) ? safeResult.valid : [];
+                        const invalid = Array.isArray(safeResult.invalid) ? safeResult.invalid : [];
+                        const hasErrors = invalid.length > 0;
+
+                        if (valid.length > 0) {
                                 this.playScanTone("success");
-                                this.scannerLocked = false;
-                                this.search_from_scanner = false;
-                                this.pendingScanCode = "";
 
-                                // Show success message
-                                const itemName =
-                                        newItem.item_name || newItem.item_code || scannedCode || this.__("Item");
-                                const rawPrecision = Number(this.float_precision);
-                                const precision = Number.isInteger(rawPrecision)
-                                        ? Math.min(Math.max(rawPrecision, 0), 6)
-                                        : 2;
-                                const displayQty = Number.isInteger(requestedQty)
-                                        ? requestedQty
-                                        : Number(requestedQty.toFixed(precision));
+                                if (!hasErrors) {
+                                        this.scannerLocked = false;
+                                        this.pendingScanCode = "";
+                                }
+
+                                this.search_from_scanner = false;
+
+                                const successLines = valid.map((entry) => {
+                                        const itemName =
+                                                entry.item?.item_name ||
+                                                entry.item?.item_code ||
+                                                this.__("Item");
+                                        const numericQtyRaw =
+                                                typeof entry.qty === "number"
+                                                        ? entry.qty
+                                                        : parseFloat(entry.qty ?? entry.item?.qty ?? 1);
+                                        const numericQty = Number.isFinite(numericQtyRaw) ? numericQtyRaw : 1;
+                                        const rawPrecision = Number(this.float_precision);
+                                        const precision = Number.isInteger(rawPrecision)
+                                                ? Math.min(Math.max(rawPrecision, 0), 6)
+                                                : 2;
+                                        const displayQty = Number.isInteger(numericQty)
+                                                ? numericQty
+                                                : Number(numericQty.toFixed(precision));
+                                        return `${itemName} (${this.__("Qty")}: ${displayQty})`;
+                                });
+
+                                const detailMessage = successLines.join("\n");
 
                                 if (this.eventBus?.emit) {
+                                        const firstItemName =
+                                                valid[0]?.item?.item_name ||
+                                                valid[0]?.item?.item_code ||
+                                                this.__("Item");
                                         this.eventBus.emit("show_message", {
-                                                title: this.__("Item {0} added to invoice", [itemName]),
+                                                title:
+                                                        valid.length === 1
+                                                                ? this.__("Item {0} added to invoice", [firstItemName])
+                                                                : this.__("{0} items added to invoice", [valid.length]),
                                                 summary: this.__("Items added to invoice"),
-                                                detail: this.__("{0} (Qty: {1})", [itemName, displayQty]),
+                                                detail: detailMessage,
                                                 color: "success",
                                                 groupId: "invoice-item-added",
                                         });
                                 } else if (frappe?.show_alert) {
                                         frappe.show_alert(
                                                 {
-                                                        message: `Added: ${itemName}`,
+                                                        message: detailMessage || this.__("Item added"),
                                                         indicator: "green",
                                                 },
                                                 3,
                                         );
                                 }
 
-                                // Clear search after successful addition and refocus input
-                                this.clearSearch();
-                                this.focusItemSearch();
-                        } finally {
-                                this.awaitingScanResult = false;
+                                if (!this.scanErrorDialog && !hasErrors) {
+                                        this.clearSearch();
+                                        this.focusItemSearch();
+                                }
+                        }
+
+                        if (!aggregate && invalid.length > 0) {
+                                const failed = invalid[0];
+                                const code = failed?.meta?.scannedCode || batch?.[0]?.scannedCode || "";
+                                const message = failed?.message || this.__("Unable to add scanned item.");
+                                this.showScanError({
+                                        message,
+                                        code,
+                                        details: failed?.message || "",
+                                });
                         }
                 },
 		isNegativeStockEnabled() {
 			return parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 		},
-		showMultipleItemsDialog(items, scannedCode) {
-			// Create a dialog to let user choose from multiple matches
-			const dialog = new frappe.ui.Dialog({
-				title: __("Multiple Items Found"),
-				fields: [
+                showMultipleItemsDialog(items, scannedCode) {
+                        // Create a dialog to let user choose from multiple matches
+                        const dialog = new frappe.ui.Dialog({
+                                title: __("Multiple Items Found"),
+                                fields: [
 					{
 						fieldtype: "HTML",
 						fieldname: "items_html",
@@ -3136,11 +3243,29 @@ export default {
 						this.addScannedItemToInvoice(item, scannedCode);
 						dialog.hide();
 					});
-				});
-			}, 100);
-		},
-		generateItemSelectionHTML(items, scannedCode) {
-			let html = `<div class="mb-3"><strong>Scanned Code:</strong> ${scannedCode}</div>`;
+                                });
+                        }, 100);
+                },
+                buildAggregatedErrorMessage(entries) {
+                        if (!Array.isArray(entries) || entries.length === 0) {
+                                return "";
+                        }
+
+                        const lines = entries.map((entry) => {
+                                const label =
+                                        entry?.item?.item_name ||
+                                        entry?.item?.item_code ||
+                                        (entry?.meta?.scannedCode
+                                                ? `${this.__("Code")} ${entry.meta.scannedCode}`
+                                                : this.__("Item"));
+                                const reason = entry?.message || this.__("Validation failed");
+                                return `• ${label}: ${reason}`;
+                        });
+
+                        return lines.join("\n");
+                },
+                generateItemSelectionHTML(items, scannedCode) {
+                        let html = `<div class="mb-3"><strong>Scanned Code:</strong> ${scannedCode}</div>`;
 			html += '<div class="item-selection-list">';
 
 			items.forEach((item, index) => {
@@ -3873,9 +3998,10 @@ export default {
 }
 
 .scan-error-dialog .scan-error-details {
-	margin-top: 12px;
-	color: rgba(0, 0, 0, 0.72);
-	line-height: 1.4;
+        margin-top: 12px;
+        color: rgba(0, 0, 0, 0.72);
+        line-height: 1.4;
+        white-space: pre-line;
 }
 
 :deep(.v-theme--dark) .scan-error-dialog .scan-error-code {
