@@ -1,53 +1,103 @@
+import _ from "lodash";
 import { silentPrint } from "../../plugins/print.js";
 import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
 
 export default {
-        scheduleOfferRefresh() {
-                if (this.isApplyingOffer) {
-                        return;
-                }
+	_offerStateSignature() {
+		const normalizeNumber = (value) => {
+			const parsed = Number(value);
+			return Number.isFinite(parsed) ? parsed : 0;
+		};
 
-                if (this._offerRefreshPending) {
-                        return;
-                }
+		const encodeItem = (item = {}) => {
+			const rowId = item.posa_row_id || item.name || "";
+			return [
+				rowId,
+				normalizeNumber(item.qty),
+				normalizeNumber(item.discount_percentage),
+				normalizeNumber(item.discount_amount),
+				normalizeNumber(item.discount_value),
+				item.posa_offer_applied ? 1 : 0,
+				item.posa_is_offer ? 1 : 0,
+				item.posa_is_replace ? 1 : 0,
+			].join("|");
+		};
 
-                this._offerRefreshPending = true;
+		const sections = [];
+		if (Array.isArray(this.items)) {
+			sections.push(...this.items.map(encodeItem));
+		}
+		if (Array.isArray(this.packed_items)) {
+			sections.push(...this.packed_items.map(encodeItem));
+		}
 
-                const schedule =
-                        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
-                                ? window.requestAnimationFrame.bind(window)
-                                : (cb) => setTimeout(cb, 16);
+		return sections.join("||");
+	},
+	_ensureOfferRefreshDebounce() {
+		if (!this._debouncedHandleOffers) {
+			this._debouncedHandleOffers = _.debounce(() => {
+				this.handelOffers();
 
-                this._offerRefreshHandle = schedule(() => {
-                        this._offerRefreshHandle = null;
-                        this._offerRefreshPending = false;
+				if (typeof this.$forceUpdate === "function") {
+					this.$forceUpdate();
+				}
+			}, 100);
+		}
 
-                        if (this.isApplyingOffer) {
-                                return;
-                        }
+		return this._debouncedHandleOffers;
+	},
+	scheduleOfferRefresh() {
+		if (this.isApplyingOffer) {
+			return;
+		}
 
-                        this.handelOffers();
+		const signature = this._offerStateSignature();
+		if (signature === this._lastOfferStateSignature) {
+			return;
+		}
+		this._lastOfferStateSignature = signature;
 
-                        if (typeof this.$forceUpdate === "function") {
-                                this.$forceUpdate();
-                        }
-                });
-        },
-        cancelScheduledOfferRefresh() {
-                if (this._offerRefreshHandle != null) {
-                        if (
-                                typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function"
-                        ) {
-                                window.cancelAnimationFrame(this._offerRefreshHandle);
-                        } else {
-                                clearTimeout(this._offerRefreshHandle);
-                        }
-                        this._offerRefreshHandle = null;
-                }
+		if (this._offerRefreshPending) {
+			return;
+		}
 
-                this._offerRefreshPending = false;
-        },
+		this._offerRefreshPending = true;
+
+		const schedule =
+				typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+					? window.requestAnimationFrame.bind(window)
+					: (cb) => setTimeout(cb, 16);
+
+		this._offerRefreshHandle = schedule(() => {
+			this._offerRefreshHandle = null;
+			this._offerRefreshPending = false;
+
+			if (this.isApplyingOffer) {
+				return;
+			}
+
+			this._ensureOfferRefreshDebounce()();
+		});
+	},
+	cancelScheduledOfferRefresh() {
+		if (this._offerRefreshHandle != null) {
+			if (
+				typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function"
+			) {
+				window.cancelAnimationFrame(this._offerRefreshHandle);
+			} else {
+				clearTimeout(this._offerRefreshHandle);
+			}
+			this._offerRefreshHandle = null;
+		}
+
+		this._offerRefreshPending = false;
+
+		if (this._debouncedHandleOffers && typeof this._debouncedHandleOffers.cancel === "function") {
+			this._debouncedHandleOffers.cancel();
+		}
+	},
         normalizeBrand(brand) {
                 return (brand || "").trim().toLowerCase();
         },

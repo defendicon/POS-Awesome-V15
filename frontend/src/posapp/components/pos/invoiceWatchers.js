@@ -33,19 +33,12 @@ export default {
 			value: this.discount_percentage_offer_name,
 		});
 	},
-	// Watch for items array changes (deep) and re-handle offers
-        items: {
-                deep: true,
-                handler() {
-                        this.scheduleOfferRefresh();
-                },
-        },
-        packed_items: {
-                deep: true,
-                handler() {
-                        this.scheduleOfferRefresh();
-                },
-        },
+	// Watch for offer-relevant item changes via store metadata counter
+	"invoiceStore.metadata.changeVersion": {
+		handler() {
+			this.scheduleOfferRefresh();
+		},
+	},
 	// Watch for invoice type change and emit
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
