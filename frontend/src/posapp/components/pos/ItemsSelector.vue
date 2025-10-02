@@ -570,8 +570,6 @@ import {
 } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { storeToRefs } from "pinia";
 
 export default {
 	mixins: [format],
@@ -581,23 +579,19 @@ export default {
                 const { fly } = useFlyAnimation();
                 const cartValidation = useCartValidation();
 
-                // Initialize Pinia store integration
-                const itemsIntegration = useItemsIntegration({
-                        enableDebounce: true,
-                        debounceDelay: 300
-                });
+		// Initialize Pinia store integration
+		const itemsIntegration = useItemsIntegration({
+			enableDebounce: true,
+			debounceDelay: 300
+		});
 
-                const customersStore = useCustomersStore();
-                const { selectedCustomer } = storeToRefs(customersStore);
-
-                return {
-                        ...responsive,
-                        ...rtl,
-                        fly,
-                        cartValidation,
-                        ...itemsIntegration,
-                        selectedCustomer
-                };
+		return {
+			...responsive,
+			...rtl,
+			fly,
+			cartValidation,
+			...itemsIntegration
+		};
         },
         components: {
                 CameraScanner,
@@ -608,7 +602,6 @@ export default {
                 pos_profile: {},
                 stock_settings: {},
                 flags: {},
-                customer: "",
                 items_view: "list",
                 first_search: "",
 		search_backup: "",
@@ -3626,9 +3619,13 @@ export default {
 		this.eventBus.on("update_customer_price_list", (data) => {
 			this.customer_price_list = data;
 		});
-                this.eventBus.on("focus_item_search", () => {
-                        this.focusItemSearch();
-                });
+		this.eventBus.on("update_customer", (data) => {
+			this.customer = data;
+		});
+
+		this.eventBus.on("focus_item_search", () => {
+			this.focusItemSearch();
+		});
 
 		// Manually trigger a full item reload when requested
 		this.eventBus.on("force_reload_items", async () => {
@@ -3717,22 +3714,12 @@ export default {
 		});
 	},
 
-        async mounted() {
-                this.$watch(
-                        () => this.selectedCustomer,
-                        (newCustomer) => {
-                                const normalized = newCustomer || "";
-                                if (this.customer !== normalized) {
-                                        this.customer = normalized;
-                                }
-                        },
-                        { immediate: true },
-                );
-                // Ensure POS profile is available
-                if (!this.pos_profile || !this.pos_profile.name) {
-                        try {
-                                // Try to get from global frappe context
-                                if (frappe.boot && frappe.boot.pos_profile) {
+	async mounted() {
+		// Ensure POS profile is available
+		if (!this.pos_profile || !this.pos_profile.name) {
+			try {
+				// Try to get from global frappe context
+				if (frappe.boot && frappe.boot.pos_profile) {
 					this.pos_profile = frappe.boot.pos_profile;
 				} else if (window.cur_pos && window.cur_pos.pos_profile) {
 					this.pos_profile = window.cur_pos.pos_profile;
@@ -3807,7 +3794,8 @@ export default {
 		this.eventBus.off("update_cur_items_details");
 		this.eventBus.off("update_offers_counters");
 		this.eventBus.off("update_coupons_counters");
-                this.eventBus.off("update_customer_price_list");
+		this.eventBus.off("update_customer_price_list");
+		this.eventBus.off("update_customer");
                 this.eventBus.off("force_reload_items");
                 this.eventBus.off("focus_item_search");
                 window.removeEventListener("resize", this.checkItemContainerOverflow);
