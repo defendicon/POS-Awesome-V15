@@ -689,28 +689,30 @@ export default {
 		changePriceListRate: Function,
 		isNegative: Function,
 	},
-	data() {
-		return {
-			draggedItem: null,
-			draggedIndex: null,
-			dragOverIndex: null,
-			isDragging: false,
-			pendingAdd: null,
-			editNameDialog: false,
-			editNameTarget: null,
-			editedName: "",
-			// Container awareness properties
-			containerWidth: 0,
-			containerHeight: 0,
-			resizeObserver: null,
-			breakpoint: "xl",
-			columnVisibility: new Map(),
-			// Performance optimization caches
-			qtyLengthCache: new Map(),
-			expandedCache: new Map(),
-			lastUpdateTime: 0,
-		};
-	},
+        data() {
+                return {
+                        draggedItem: null,
+                        draggedIndex: null,
+                        dragOverIndex: null,
+                        isDragging: false,
+                        pendingAdd: null,
+                        editNameDialog: false,
+                        editNameTarget: null,
+                        editedName: "",
+                        // Container awareness properties
+                        containerWidth: 0,
+                        containerHeight: 0,
+                        resizeObserver: null,
+                        breakpoint: "xl",
+                        columnVisibility: new Map(),
+                        // Performance optimization caches
+                        qtyLengthCache: new Map(),
+                        expandedCache: new Map(),
+                        searchTokenCache: new Map(),
+                        searchCacheSeq: 0,
+                        lastUpdateTime: 0,
+                };
+        },
         computed: {
                 items() {
                         return this.invoiceStore.items;
@@ -897,11 +899,18 @@ export default {
                         return this._rtlComputed;
                 },
         },
-	methods: {
-		customItemFilter(value, search, item) {
-			if (search == null) {
-				return true;
-			}
+        watch: {
+                "invoiceStore.metadata.changeVersion"(newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                                this.invalidateSearchTokenCache();
+                        }
+                },
+        },
+        methods: {
+                customItemFilter(value, search, item) {
+                        if (search == null) {
+                                return true;
+                        }
 
 			const normalized = String(search).toLowerCase().trim();
 			if (!normalized) {
@@ -913,48 +922,142 @@ export default {
 				return true;
 			}
 
-			const haystacks = [];
-			const collect = (input) => {
-				if (input == null) {
-					return;
-				}
+                        let haystacks = this.getSearchTokens(item);
+                        if (value != null) {
+                                const transient = this.extractSearchTokens(value);
+                                if (transient.length) {
+                                        haystacks = haystacks.concat(transient);
+                                }
+                        }
 
-				if (Array.isArray(input)) {
-					input.forEach(collect);
-					return;
-				}
+                        if (!haystacks.length) {
+                                return false;
+                        }
 
-				if (typeof input === "object") {
-					if (Object.prototype.hasOwnProperty.call(input, "barcode")) {
-						collect(input.barcode);
-						return;
-					}
+                        return terms.every((term) => haystacks.some((text) => text.includes(term)));
+                },
+                getItemCacheKey(item) {
+                        if (!item) {
+                                return null;
+                        }
+                        if (item.posa_row_id) {
+                                if (item._searchCacheKey && item._searchCacheKey !== item.posa_row_id) {
+                                        const cached = this.searchTokenCache.get(item._searchCacheKey);
+                                        if (cached) {
+                                                this.searchTokenCache.set(item.posa_row_id, cached);
+                                                item._searchTokens = cached;
+                                        }
+                                        this.searchTokenCache.delete(item._searchCacheKey);
+                                }
+                                item._searchCacheKey = item.posa_row_id;
+                                return item.posa_row_id;
+                        }
+                        if (!item._searchCacheKey) {
+                                this.searchCacheSeq += 1;
+                                item._searchCacheKey = `tmp-${this.searchCacheSeq}`;
+                        }
+                        return item._searchCacheKey;
+                },
+                collectSearchTokens(input, tokens, visited) {
+                        if (input == null) {
+                                return;
+                        }
 
-					Object.values(input).forEach(collect);
-					return;
-				}
+                        const type = typeof input;
+                        if (type === "string" || type === "number" || type === "boolean") {
+                                const normalized = String(input).toLowerCase();
+                                if (normalized) {
+                                        tokens.add(normalized);
+                                }
+                                return;
+                        }
 
-				haystacks.push(String(input).toLowerCase());
-			};
+                        if (input instanceof Date) {
+                                tokens.add(input.toISOString().toLowerCase());
+                                return;
+                        }
 
-			collect(value);
-			const raw = item?.raw ?? item;
-			collect(raw?.item_name);
-			collect(raw?.item_code);
-			collect(raw?.description);
-			collect(raw?.barcode);
-			collect(raw?.serial_no);
-			collect(raw?.batch_no);
-			collect(raw?.uom);
-			collect(raw?.item_barcode);
-			collect(raw?.barcodes);
+                        if (Array.isArray(input)) {
+                                input.forEach((entry) => this.collectSearchTokens(entry, tokens, visited));
+                                return;
+                        }
 
-			if (!haystacks.length) {
-				return false;
-			}
+                        if (type === "object") {
+                                if (!visited) {
+                                        visited = new WeakSet();
+                                }
+                                if (visited.has(input)) {
+                                        return;
+                                }
+                                visited.add(input);
 
-			return terms.every((term) => haystacks.some((text) => text.includes(term)));
-		},
+                                if (Object.prototype.hasOwnProperty.call(input, "barcode")) {
+                                        this.collectSearchTokens(input.barcode, tokens, visited);
+                                        return;
+                                }
+
+                                Object.entries(input).forEach(([key, value]) => {
+                                        if (typeof key === "string" && key.startsWith("_")) {
+                                                return;
+                                        }
+                                        this.collectSearchTokens(value, tokens, visited);
+                                });
+                        }
+                },
+                buildSearchTokens(item) {
+                        const tokens = new Set();
+                        this.collectSearchTokens(item, tokens, new WeakSet());
+                        return Array.from(tokens);
+                },
+                getSearchTokens(item) {
+                        if (!item) {
+                                return [];
+                        }
+                        const key = this.getItemCacheKey(item);
+                        if (!key) {
+                                return this.buildSearchTokens(item);
+                        }
+
+                        if (this.searchTokenCache.has(key)) {
+                                return this.searchTokenCache.get(key);
+                        }
+
+                        if (Array.isArray(item._searchTokens)) {
+                                this.searchTokenCache.set(key, item._searchTokens);
+                                return item._searchTokens;
+                        }
+
+                        const tokens = this.buildSearchTokens(item);
+                        this.searchTokenCache.set(key, tokens);
+                        item._searchTokens = tokens;
+                        return tokens;
+                },
+                extractSearchTokens(input) {
+                        const tokens = new Set();
+                        this.collectSearchTokens(input, tokens, new WeakSet());
+                        return Array.from(tokens);
+                },
+                refreshSearchTokens(item) {
+                        if (!item) {
+                                return [];
+                        }
+                        const key = this.getItemCacheKey(item);
+                        if (key) {
+                                this.searchTokenCache.delete(key);
+                        }
+                        item._searchTokens = undefined;
+                        return this.getSearchTokens(item);
+                },
+                invalidateSearchTokenCache() {
+                        this.searchTokenCache.clear();
+                        if (Array.isArray(this.items)) {
+                                this.items.forEach((entry) => {
+                                        if (entry) {
+                                                entry._searchTokens = undefined;
+                                        }
+                                });
+                        }
+                },
 
 		// Container awareness methods
 		updateContainerDimensions() {
@@ -1127,25 +1230,27 @@ export default {
 			div.innerHTML = name;
 			return (div.textContent || div.innerText || "").trim().slice(0, 140);
 		},
-		saveItemName() {
-			if (!this.editNameTarget) return;
-			const clean = this.sanitizeName(this.editedName);
-			if (!this.editNameTarget.original_item_name) {
-				this.editNameTarget.original_item_name = this.editNameTarget.item_name;
-			}
-			this.editNameTarget.item_name = clean;
-			this.editNameTarget.name_overridden = clean !== this.editNameTarget.original_item_name ? 1 : 0;
-			this.editNameDialog = false;
-		},
-		resetItemName(item) {
-			if (item && item.original_item_name) {
-				item.item_name = item.original_item_name;
-				item.name_overridden = 0;
-			}
-			if (this.editNameTarget === item) {
-				this.editedName = item.item_name;
-			}
-		},
+                saveItemName() {
+                        if (!this.editNameTarget) return;
+                        const clean = this.sanitizeName(this.editedName);
+                        if (!this.editNameTarget.original_item_name) {
+                                this.editNameTarget.original_item_name = this.editNameTarget.item_name;
+                        }
+                        this.editNameTarget.item_name = clean;
+                        this.editNameTarget.name_overridden = clean !== this.editNameTarget.original_item_name ? 1 : 0;
+                        this.refreshSearchTokens(this.editNameTarget);
+                        this.editNameDialog = false;
+                },
+                resetItemName(item) {
+                        if (item && item.original_item_name) {
+                                item.item_name = item.original_item_name;
+                                item.name_overridden = 0;
+                        }
+                        if (this.editNameTarget === item) {
+                                this.editedName = item.item_name;
+                        }
+                        this.refreshSearchTokens(item);
+                },
 		handleQtyChange(item, event) {
 			const newQty = parseFloat(event.target.value) || 0;
 			if (newQty === 0) {
@@ -1212,17 +1317,18 @@ export default {
                 });
         },
 
-	beforeUnmount() {
-		this.cleanupResizeObserver();
+        beforeUnmount() {
+                this.cleanupResizeObserver();
 
-		// Clean up performance caches to prevent memory leaks
-		if (this.qtyLengthCache) {
-			this.qtyLengthCache.clear();
-		}
-		if (this.expandedCache) {
-			this.expandedCache.clear();
-		}
-	},
+                // Clean up performance caches to prevent memory leaks
+                if (this.qtyLengthCache) {
+                        this.qtyLengthCache.clear();
+                }
+                if (this.expandedCache) {
+                        this.expandedCache.clear();
+                }
+                this.invalidateSearchTokenCache();
+        },
 };
 </script>
 
