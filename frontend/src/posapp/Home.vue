@@ -47,8 +47,6 @@ import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "./components/ui/UpdatePrompt.vue";
 import { useLoading } from "./composables/useLoading.js";
 import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "./utils/loading.js";
-import { useCustomersStore } from "./stores/customersStore.js";
-import { storeToRefs } from "pinia";
 import {
 	getOpeningStorage,
 	getCacheUsageEstimate,
@@ -153,34 +151,16 @@ export default {
 		AppLoadingOverlay,
 		UpdatePrompt,
 	},
-        mounted() {
-                this.remove_frappe_nav();
-                // Initialize cache ready state early from stored value
-                this.cacheReady = isCacheReady();
-                initLoadingSources(["init", "items", "customers"]);
-                this.initializeData();
-                this.setupNetworkListeners();
-                this.setupEventListeners();
-                this.handleRefreshCacheUsage();
-                const customersStore = useCustomersStore();
-                const { loadProgress, customersLoaded } = storeToRefs(customersStore);
-                this.$watch(
-                        () => loadProgress.value,
-                        (progress) => {
-                                setSourceProgress("customers", progress);
-                        },
-                        { immediate: true },
-                );
-                this.$watch(
-                        () => customersLoaded.value,
-                        (loaded) => {
-                                if (loaded) {
-                                        markSourceLoaded("customers");
-                                }
-                        },
-                        { immediate: true },
-                );
-        },
+	mounted() {
+		this.remove_frappe_nav();
+		// Initialize cache ready state early from stored value
+		this.cacheReady = isCacheReady();
+		initLoadingSources(["init", "items", "customers"]);
+		this.initializeData();
+		this.setupNetworkListeners();
+		this.setupEventListeners();
+		this.handleRefreshCacheUsage();
+	},
 	methods: {
 		setupNetworkListeners,
 		checkNetworkConnectivity,

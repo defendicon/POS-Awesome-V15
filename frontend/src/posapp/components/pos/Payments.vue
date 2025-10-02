@@ -794,17 +794,13 @@ import {
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { storeToRefs } from "pinia";
 
 export default {
         // Using format mixin for shared formatting methods
         mixins: [format],
         setup() {
                 const invoiceStore = useInvoiceStore();
-                const customersStore = useCustomersStore();
-                const { selectedCustomer, customerInfo } = storeToRefs(customersStore);
-                return { invoiceStore, selectedCustomer, customerInfoFromStore: customerInfo };
+                return { invoiceStore };
         },
         data() {
                 return {
@@ -1165,18 +1161,6 @@ export default {
                         if (this.invoice_doc && this.invoice_doc.customer) {
                                 this.get_addresses();
                         }
-                },
-                customerInfoFromStore(newInfo) {
-                        this.customer_info = newInfo || "";
-                },
-                selectedCustomer(newCustomer, oldCustomer) {
-                        if (newCustomer === oldCustomer) {
-                                return;
-                        }
-                        this.customer_credit_dict = [];
-                        this.redeem_customer_credit = false;
-                        this.is_cashback = true;
-                        this.is_credit_return = false;
                 },
         },
         methods: {
@@ -2192,12 +2176,23 @@ export default {
 					this.is_credit_return = false;
 				}
 			});
+			this.eventBus.on("update_customer", (customer) => {
+				if (this.customer !== customer) {
+					this.customer_credit_dict = [];
+					this.redeem_customer_credit = false;
+					this.is_cashback = true;
+					this.is_credit_return = false;
+				}
+			});
 			this.eventBus.on("set_pos_settings", (data) => {
 				this.pos_settings = data;
 			});
-                        this.eventBus.on("set_mpesa_payment", (data) => {
-                                this.set_mpesa_payment(data);
-                        });
+			this.eventBus.on("set_customer_info_to_edit", (data) => {
+				this.customer_info = data;
+			});
+			this.eventBus.on("set_mpesa_payment", (data) => {
+				this.set_mpesa_payment(data);
+			});
 			// Clear any stored invoice when parent emits clear_invoice
 			this.eventBus.on("clear_invoice", () => {
 				this.invoice_doc = "";
@@ -2212,11 +2207,13 @@ export default {
 	beforeUnmount() {
 		// Remove all event listeners
 		this.eventBus.off("send_invoice_doc_payment");
-                this.eventBus.off("register_pos_profile");
-                this.eventBus.off("add_the_new_address");
-                this.eventBus.off("update_invoice_type");
-                this.eventBus.off("set_pos_settings");
-                this.eventBus.off("set_mpesa_payment");
+		this.eventBus.off("register_pos_profile");
+		this.eventBus.off("add_the_new_address");
+		this.eventBus.off("update_invoice_type");
+		this.eventBus.off("update_customer");
+		this.eventBus.off("set_pos_settings");
+		this.eventBus.off("set_customer_info_to_edit");
+		this.eventBus.off("set_mpesa_payment");
 		this.eventBus.off("clear_invoice");
 		this.eventBus.off("network-online", this.syncPendingInvoices);
 		this.eventBus.off("server-online", this.syncPendingInvoices);
