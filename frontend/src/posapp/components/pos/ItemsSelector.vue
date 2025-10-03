@@ -819,25 +819,48 @@ export default {
 			}
 
 			// Filter by search term only if it exists and is long enough
-			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
-				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+                        if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
+                                const term = searchTerm.toLowerCase();
+                                const searchWords = term.split(/\s+/).filter(Boolean);
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
-				});
-			}
+                                filtered = filtered.filter((item) => {
+                                        const barcodeValues = [];
+
+                                        if (Array.isArray(item.item_barcode)) {
+                                                for (const barcode of item.item_barcode) {
+                                                        if (barcode?.barcode) {
+                                                                barcodeValues.push(barcode.barcode.toLowerCase());
+                                                        }
+                                                }
+                                        }
+
+                                        if (Array.isArray(item.barcodes)) {
+                                                for (const barcode of item.barcodes) {
+                                                        if (barcode) {
+                                                                barcodeValues.push(String(barcode).toLowerCase());
+                                                        }
+                                                }
+                                        }
+
+                                        if (item.barcode) {
+                                                barcodeValues.push(String(item.barcode).toLowerCase());
+                                        }
+
+                                        const searchableFields = [
+                                                item.item_code,
+                                                item.item_name,
+                                                item.description,
+                                        ]
+                                                .filter(Boolean)
+                                                .map((field) => field.toLowerCase());
+
+                                        const searchTargets = [...searchableFields, ...barcodeValues];
+
+                                        return searchWords.every((word) =>
+                                                searchTargets.some((field) => field.includes(word)),
+                                        );
+                                });
+                        }
 
 			return filtered;
 		},
