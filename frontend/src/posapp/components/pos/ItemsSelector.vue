@@ -782,6 +782,83 @@ export default {
 	},
 
 	methods: {
+		normalizeSearchTerms(searchTerm) {
+			if (!searchTerm) {
+				return [];
+			}
+
+			return Array.from(
+				new Set(
+					searchTerm
+						.split(/\s+/)
+						.map((term) => term.trim())
+						.filter(Boolean),
+				),
+			);
+		},
+
+		getItemSearchFields(item) {
+			const barcodeList = [];
+
+			if (Array.isArray(item?.item_barcode)) {
+				barcodeList.push(
+					...item.item_barcode
+						.map((b) => b && b.barcode)
+						.filter(Boolean),
+				);
+			} else if (item?.item_barcode) {
+				barcodeList.push(String(item.item_barcode));
+			}
+
+			if (Array.isArray(item?.barcodes)) {
+				barcodeList.push(
+					...item.barcodes
+						.map((b) => (b == null ? null : String(b)))
+						.filter(Boolean),
+				);
+			}
+
+			const additionalSerials =
+				this.pos_profile?.posa_search_serial_no && Array.isArray(item?.serial_no_data)
+					? item.serial_no_data.map((serial) => serial && serial.serial_no)
+					: [];
+
+			const additionalBatches =
+				this.pos_profile?.posa_search_batch_no && Array.isArray(item?.batch_no_data)
+					? item.batch_no_data.map((batch) => batch && batch.batch_no)
+					: [];
+
+			return [
+				item?.item_code,
+				item?.item_name,
+				item?.barcode,
+				item?.description,
+				...barcodeList,
+				...additionalSerials,
+				...additionalBatches,
+			]
+				.filter(Boolean)
+				.map((field) => String(field).toLowerCase());
+		},
+
+		itemMatchesSearchTerms(item, searchTerms) {
+			if (!searchTerms || searchTerms.length === 0) {
+				return true;
+			}
+
+			const normalizedTerms = searchTerms.map((term) => term.toLowerCase());
+			const itemName = String(item?.item_name || "").toLowerCase();
+
+			if (normalizedTerms.every((term) => itemName.includes(term))) {
+				return true;
+			}
+
+			const searchFields = this.getItemSearchFields(item);
+
+			return normalizedTerms.every((term) =>
+				searchFields.some((field) => field.includes(term)),
+			);
+		},
 		// Performance optimization: Memoized search function
 		memoizedSearch(searchTerm, itemGroup) {
 			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
@@ -820,23 +897,12 @@ export default {
 
 			// Filter by search term only if it exists and is long enough
 			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
-				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+				const normalized = searchTerm.trim().toLowerCase();
+				const searchTerms = this.normalizeSearchTerms(normalized);
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
-				});
+				filtered = filtered.filter((item) =>
+					this.itemMatchesSearchTerms(item, searchTerms),
+				);
 			}
 
 			return filtered;
@@ -3075,48 +3141,12 @@ export default {
 			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
 			let filteredItems = [...this.items];
 
-                        // Apply search filter only for queries with at least three characters
-                        if (searchTerm.length >= 3) {
-                                const searchTerms = Array.from(
-                                        new Set(searchTerm.split(/\s+/).filter(Boolean)),
-                                );
-
-                                filteredItems = filteredItems.filter((item) => {
-                                        const barcodeList = [];
-                                        if (Array.isArray(item.item_barcode)) {
-                                                barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
-                                        } else if (item.item_barcode) {
-                                                barcodeList.push(String(item.item_barcode));
-                                        }
-                                        if (Array.isArray(item.barcodes)) {
-                                                barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
-                                        }
-
-                                        const searchFields = [
-                                                item.item_code,
-                                                item.item_name,
-                                                item.barcode,
-                                                item.description,
-                                                ...barcodeList,
-                                                ...(this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
-                                                        ? item.serial_no_data.map((s) => s.serial_no)
-                                                        : []),
-                                                ...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
-                                                        ? item.batch_no_data.map((b) => b.batch_no)
-                                                        : []),
-                                        ]
-                                                .filter(Boolean)
-                                                .map((field) => field.toLowerCase());
-
-                                        if (!searchTerms.length) {
-                                                return true;
-                                        }
-
-                                        return searchTerms.every((term) =>
-                                                searchFields.some((field) => field.includes(term)),
-                                        );
-                                });
-                        }
+			if (searchTerm.length >= 3) {
+				const searchTerms = this.normalizeSearchTerms(searchTerm);
+				filteredItems = filteredItems.filter((item) =>
+					this.itemMatchesSearchTerms(item, searchTerms),
+				);
+			}
 
 			// Apply item group filter
 			if (this.item_group !== "ALL") {
