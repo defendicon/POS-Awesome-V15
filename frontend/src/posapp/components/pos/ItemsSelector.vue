@@ -525,6 +525,8 @@
 /* global frappe, __, setLocalStockCache, flt, onScan, get_currency_symbol, current_items, wordCount */
 import format from "../../format";
 import _ from "lodash";
+import { watch } from "vue";
+import { storeToRefs } from "pinia";
 import CameraScanner from "./CameraScanner.vue";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
@@ -563,9 +565,9 @@ import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import {
   parseBooleanSetting,
-  formatNegativeStockWarning,
   formatStockShortageError,
 } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
@@ -579,16 +581,28 @@ export default {
                 const { fly } = useFlyAnimation();
                 const cartValidation = useCartValidation();
 
-		// Initialize Pinia store integration
-		const itemsIntegration = useItemsIntegration({
-			enableDebounce: true,
-			debounceDelay: 300
-		});
+                // Initialize Pinia store integration
+                const itemsIntegration = useItemsIntegration({
+                        enableDebounce: true,
+                        debounceDelay: 300
+                });
 
-		return {
-			...responsive,
-			...rtl,
-			fly,
+                const invoiceStore = useInvoiceStore();
+                const { items: invoiceItems } = storeToRefs(invoiceStore);
+
+                watch(
+                        invoiceItems,
+                        (list) => {
+                                const source = Array.isArray(list) ? list : [];
+                                itemsIntegration.setCartItems(source);
+                        },
+                        { deep: true, immediate: true }
+                );
+
+                return {
+                        ...responsive,
+                        ...rtl,
+                        fly,
 			cartValidation,
 			...itemsIntegration
 		};
@@ -1881,49 +1895,25 @@ export default {
 							: null;
 				const requestedQty = Math.abs(new_item.qty || 1);
 
-				if (availableQty !== null && availableQty < requestedQty) {
-					const negativeStockEnabled = this.isNegativeStockEnabled();
-					const shouldBlock =
-						!negativeStockEnabled &&
-						(this.blockSaleBeyondAvailableQty || availableQty <= 0);
+                                if (availableQty !== null && availableQty < requestedQty) {
+                                        const negativeStockEnabled = this.isNegativeStockEnabled();
+                                        const shouldBlock =
+                                                !negativeStockEnabled &&
+                                                (this.blockSaleBeyondAvailableQty || availableQty <= 0);
 
-					if (shouldBlock || negativeStockEnabled) {
-						const formattedAvailable = this.format_number
-							? this.format_number(
-									availableQty,
-									this.hide_qty_decimals ? 0 : this.float_precision,
-								)
-							: availableQty;
-						const formattedRequested = this.format_number
-							? this.format_number(
-									requestedQty,
-									this.hide_qty_decimals ? 0 : this.float_precision,
-								)
-							: requestedQty;
-
-					if (shouldBlock) {
-						this.showScanError({
-							message: formatStockShortageError(
-								new_item.item_name || new_item.item_code || scannedCodeForDisplay,
-								availableQty,
-								requestedQty
-							),
-							code: scannedCodeForDisplay,
-							details: this.__("Adjust the quantity or enable negative stock to continue."),
-						});
-						return;
-					}
-
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							new_item.item_name || new_item.item_code || scannedCodeForDisplay,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-					}
-				}
+                                        if (shouldBlock) {
+                                                this.showScanError({
+                                                        message: formatStockShortageError(
+                                                                new_item.item_name || new_item.item_code || scannedCodeForDisplay,
+                                                                availableQty,
+                                                                requestedQty
+                                                        ),
+                                                        code: scannedCodeForDisplay,
+                                                        details: this.__("Adjust the quantity or enable negative stock to continue."),
+                                                });
+                                                return;
+                                        }
+                                }
 
 				if (fromScanner) {
 					this.awaitingScanResult = true;
@@ -3040,16 +3030,7 @@ export default {
 					return;
 				}
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-				}
+                                // Negative stock is allowed, so continue without raising notifications
 			}
 
 			this.awaitingScanResult = true;
