@@ -31,6 +31,9 @@ export const useItemsStore = defineStore('items', () => {
     const barcodeIndex = ref(new Map()); // O(1) barcode lookup
     const itemGroups = ref(['ALL']);
 
+    // Cart awareness state to adjust available quantities based on invoice items
+    const cartItems = ref([]);
+
     // Loading states
     const isLoading = ref(false);
     const isBackgroundLoading = ref(false);
@@ -59,6 +62,163 @@ export const useItemsStore = defineStore('items', () => {
         }
 
         return Boolean(value);
+    };
+
+    const parseQuantity = (value) => {
+        if (value === null || value === undefined) {
+            return null;
+        }
+
+        if (typeof value === 'number') {
+            return Number.isFinite(value) ? value : null;
+        }
+
+        if (typeof value === 'string') {
+            const normalized = value.trim();
+            if (!normalized) {
+                return null;
+            }
+            const parsed = Number.parseFloat(normalized);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        return null;
+    };
+
+    const toPositiveQuantity = (value) => {
+        const parsed = parseQuantity(value);
+        if (parsed === null) {
+            return 0;
+        }
+
+        return parsed > 0 ? parsed : 0;
+    };
+
+    const getOriginalQuantity = (item) => {
+        const stored = parseQuantity(item?.posa_original_qty);
+        if (stored !== null) {
+            return stored;
+        }
+
+        const candidates = [item?.available_qty, item?.actual_qty, item?.stock_qty];
+        for (const candidate of candidates) {
+            const parsed = parseQuantity(candidate);
+            if (parsed !== null) {
+                return parsed;
+            }
+        }
+
+        return 0;
+    };
+
+    const cartQuantityMap = computed(() => {
+        if (!Array.isArray(cartItems.value) || !cartItems.value.length) {
+            return new Map();
+        }
+
+        const map = new Map();
+        cartItems.value.forEach((entry) => {
+            if (!entry || !entry.item_code) {
+                return;
+            }
+
+            const qty = toPositiveQuantity(entry.qty ?? entry.quantity ?? entry.stock_qty ?? entry.qty_to_push);
+            if (!qty) {
+                return;
+            }
+
+            const current = map.get(entry.item_code) || 0;
+            map.set(entry.item_code, current + qty);
+        });
+
+        return map;
+    });
+
+    const adjustItemForCart = (item, quantityMap) => {
+        if (!item || typeof item !== 'object') {
+            return item;
+        }
+
+        const code = item.item_code;
+        if (!code) {
+            return item;
+        }
+
+        const qtyInCart = quantityMap.get(code) || 0;
+        const originalQty = getOriginalQuantity(item);
+
+        if (!qtyInCart) {
+            if (item.posa_original_qty === undefined && !item.posa_cart_qty) {
+                return item;
+            }
+
+            const restored = { ...item };
+            const baseQty = originalQty;
+
+            if ('actual_qty' in restored) {
+                restored.actual_qty = baseQty;
+            }
+            if ('stock_qty' in restored) {
+                restored.stock_qty = baseQty;
+            }
+            if ('available_qty' in restored) {
+                restored.available_qty = baseQty;
+            }
+
+            restored.posa_cart_qty = 0;
+            if (restored.posa_original_qty === undefined) {
+                restored.posa_original_qty = baseQty;
+            }
+
+            return restored;
+        }
+
+        const adjustedQty = Math.max(originalQty - qtyInCart, 0);
+        const updated = { ...item };
+        updated.posa_original_qty = originalQty;
+        updated.posa_cart_qty = qtyInCart;
+
+        if ('actual_qty' in updated) {
+            updated.actual_qty = adjustedQty;
+        }
+        if ('stock_qty' in updated) {
+            updated.stock_qty = adjustedQty;
+        }
+        if ('available_qty' in updated) {
+            updated.available_qty = adjustedQty;
+        }
+
+        return updated;
+    };
+
+    const applyCartAdjustments = (itemList) => {
+        if (!Array.isArray(itemList) || itemList.length === 0) {
+            return [];
+        }
+
+        const quantityMap = cartQuantityMap.value;
+        if (!quantityMap.size) {
+            return itemList.map((item) => adjustItemForCart(item, quantityMap));
+        }
+
+        return itemList.map((item) => adjustItemForCart(item, quantityMap));
+    };
+
+    const setFilteredItems = (list) => {
+        if (!Array.isArray(list)) {
+            filteredItems.value = [];
+            return;
+        }
+
+        filteredItems.value = applyCartAdjustments(list);
+    };
+
+    const refreshFilteredItems = () => {
+        if (!Array.isArray(filteredItems.value) || !filteredItems.value.length) {
+            return;
+        }
+
+        setFilteredItems(filteredItems.value.slice());
     };
 
     const limitSearchEnabled = computed(() => {
@@ -400,11 +560,11 @@ export const useItemsStore = defineStore('items', () => {
 
             // Reset to all items if search is too short
             if (!cachedPagination.value.enabled) {
-                filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+                setFilteredItems(filterItemsByGroup(items.value, itemGroup.value));
             } else {
                 cachedPagination.value.search = '';
                 cachedPagination.value.offset = Math.min(cachedPagination.value.offset, items.value.length);
-                filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+                setFilteredItems(filterItemsByGroup(items.value, itemGroup.value));
             }
             return filteredItems.value;
         }
@@ -418,7 +578,7 @@ export const useItemsStore = defineStore('items', () => {
                 });
 
                 const serverResults = filterItemsByGroup(items.value, itemGroup.value);
-                filteredItems.value = serverResults;
+                setFilteredItems(serverResults);
                 performanceMetrics.value.searchMisses++;
 
                 return serverResults;
@@ -433,7 +593,7 @@ export const useItemsStore = defineStore('items', () => {
         const cacheKey = `search_${term}_${itemGroup.value}`;
         const cached = getCachedSearchResult(cacheKey);
         if (cached) {
-            filteredItems.value = cached;
+            setFilteredItems(cached);
             performanceMetrics.value.searchHits++;
             return cached;
         }
@@ -479,7 +639,7 @@ export const useItemsStore = defineStore('items', () => {
             // Cache the search result
             setCachedSearchResult(cacheKey, searchResults);
 
-            filteredItems.value = searchResults;
+            setFilteredItems(searchResults);
             performanceMetrics.value.searchMisses++;
 
             if (shouldUseIndexed) {
@@ -506,7 +666,7 @@ export const useItemsStore = defineStore('items', () => {
                 await resetCachedItemsForGroup(group);
             } else {
                 // Just filter current items
-                filteredItems.value = filterItemsByGroup(items.value, group);
+                setFilteredItems(filterItemsByGroup(items.value, group));
             }
         }
     };
@@ -592,7 +752,7 @@ export const useItemsStore = defineStore('items', () => {
                 if (searchTerm.value) {
                     await searchItems(searchTerm.value);
                 } else {
-                    filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+                    setFilteredItems(filterItemsByGroup(items.value, itemGroup.value));
                 }
 
                 // Clear search cache to force refresh
@@ -642,7 +802,7 @@ export const useItemsStore = defineStore('items', () => {
         }
 
         if (!searchTerm.value) {
-            filteredItems.value = filterItemsByGroup(items.value, normalizedGroup);
+            setFilteredItems(filterItemsByGroup(items.value, normalizedGroup));
         }
     };
 
@@ -667,7 +827,7 @@ export const useItemsStore = defineStore('items', () => {
 
         clearSearchCache();
         if (preserveItems) {
-            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            setFilteredItems(filterItemsByGroup(items.value, itemGroup.value));
             return filteredItems.value;
         }
 
@@ -1060,9 +1220,9 @@ export const useItemsStore = defineStore('items', () => {
 
         // Update filtered items
         if (searchTerm.value) {
-            filteredItems.value = performLocalSearch(searchTerm.value, items.value);
+            setFilteredItems(performLocalSearch(searchTerm.value, items.value));
         } else {
-            filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+            setFilteredItems(filterItemsByGroup(items.value, itemGroup.value));
         }
     };
 
@@ -1273,7 +1433,7 @@ export const useItemsStore = defineStore('items', () => {
 
     const resetCachedItemsForGroup = async (group) => {
         if (limitSearchEnabled.value || !cachedPagination.value.enabled || !shouldUseIndexedSearch()) {
-            filteredItems.value = filterItemsByGroup(items.value, group);
+            setFilteredItems(filterItemsByGroup(items.value, group));
             return;
         }
 
@@ -1355,6 +1515,25 @@ export const useItemsStore = defineStore('items', () => {
         performanceMetrics.value.cacheHitRate = total > 0 ? (cachedRequests / total) * 100 : 0;
     };
 
+    const setCartItemsForStore = (items = []) => {
+        if (!Array.isArray(items)) {
+            cartItems.value = [];
+        } else {
+            cartItems.value = items
+                .map((entry) => ({
+                    item_code: entry?.item_code,
+                    qty: toPositiveQuantity(entry?.qty ?? entry?.quantity)
+                }))
+                .filter((entry) => entry.item_code);
+        }
+
+        refreshFilteredItems();
+    };
+
+    watch(cartQuantityMap, () => {
+        refreshFilteredItems();
+    });
+
     const getEstimatedMemoryUsage = () => {
         try {
             let usage = 0;
@@ -1403,11 +1582,13 @@ export const useItemsStore = defineStore('items', () => {
         performanceMetrics,
         cachedPagination,
         hasMoreCachedItems,
+        cartItems,
 
         // Computed
         activePriceList,
         itemStats,
         cacheStats,
+        cartQuantityMap,
 
         // Actions
         initialize,
@@ -1427,7 +1608,10 @@ export const useItemsStore = defineStore('items', () => {
         clearLimitSearchResults,
         clearAllCaches,
         clearSearchCache,
-        assessCacheHealth
+        assessCacheHealth,
+
+        // Cart helpers
+        setCartItems: setCartItemsForStore
     };
 });
 

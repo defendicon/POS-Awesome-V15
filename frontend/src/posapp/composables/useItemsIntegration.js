@@ -271,6 +271,7 @@ export function useItemsIntegration(options = {}) {
         getItemByBarcode: itemsStore.getItemByBarcode,
         addScannedItem: itemsStore.addScannedItem,
         clearLimitSearchResults: itemsStore.clearLimitSearchResults,
+        setCartItems: itemsStore.setCartItems,
 
         // Legacy method adapters
         get_items,

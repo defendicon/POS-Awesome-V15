@@ -525,6 +525,8 @@
 /* global frappe, __, setLocalStockCache, flt, onScan, get_currency_symbol, current_items, wordCount */
 import format from "../../format";
 import _ from "lodash";
+import { watch } from "vue";
+import { storeToRefs } from "pinia";
 import CameraScanner from "./CameraScanner.vue";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
@@ -563,6 +565,7 @@ import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import {
   parseBooleanSetting,
   formatNegativeStockWarning,
@@ -579,16 +582,28 @@ export default {
                 const { fly } = useFlyAnimation();
                 const cartValidation = useCartValidation();
 
-		// Initialize Pinia store integration
-		const itemsIntegration = useItemsIntegration({
-			enableDebounce: true,
-			debounceDelay: 300
-		});
+                // Initialize Pinia store integration
+                const itemsIntegration = useItemsIntegration({
+                        enableDebounce: true,
+                        debounceDelay: 300
+                });
 
-		return {
-			...responsive,
-			...rtl,
-			fly,
+                const invoiceStore = useInvoiceStore();
+                const { items: invoiceItems } = storeToRefs(invoiceStore);
+
+                watch(
+                        invoiceItems,
+                        (list) => {
+                                const source = Array.isArray(list) ? list : [];
+                                itemsIntegration.setCartItems(source);
+                        },
+                        { deep: true, immediate: true }
+                );
+
+                return {
+                        ...responsive,
+                        ...rtl,
+                        fly,
 			cartValidation,
 			...itemsIntegration
 		};
