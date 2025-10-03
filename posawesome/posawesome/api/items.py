@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+import re
 
 import frappe
 from erpnext.stock.doctype.batch.batch import (
@@ -167,6 +168,75 @@ def get_items(
     ):
         pos_profile = json.loads(pos_profile)
 
+        def _tokenize_search_value(value: str) -> list[str]:
+            """Return unique, order-preserving tokens from the provided value."""
+
+            if not value:
+                return []
+
+            tokens = [token for token in re.split(r"\s+", cstr(value).strip()) if token]
+            unique_tokens: list[str] = []
+            seen: set[str] = set()
+
+            for token in tokens:
+                lowered = token.lower()
+                if lowered in seen:
+                    continue
+                seen.add(lowered)
+                unique_tokens.append(token)
+
+            return unique_tokens
+
+        def _build_single_token_filters(token: str) -> list[list[str]]:
+            """Return OR filters for a single search token."""
+
+            like_prefix = f"{token}%"
+            like_contains = f"%{token}%"
+            return [
+                ["name", "like", like_prefix],
+                ["item_name", "like", like_prefix],
+                ["item_code", "like", like_contains],
+                ["brand", "like", like_contains],
+            ]
+
+        def _build_multi_token_filters(tokens: list[str]) -> list[list[str]]:
+            """Return OR filters that allow any token to match any searchable field."""
+
+            multi_filters: list[list[str]] = []
+            for token in tokens:
+                like_contains = f"%{token}%"
+                multi_filters.extend(
+                    [
+                        ["name", "like", like_contains],
+                        ["item_name", "like", like_contains],
+                        ["item_code", "like", like_contains],
+                        ["brand", "like", like_contains],
+                    ]
+                )
+            return multi_filters
+
+        def _item_matches_tokens(item_row, tokens: list[str]) -> bool:
+            """Check if the item matches every token across searchable fields."""
+
+            if not tokens:
+                return True
+
+            searchable_parts = [
+                cstr(item_row.get("name")),
+                cstr(item_row.get("item_code")),
+                cstr(item_row.get("item_name")),
+                cstr(item_row.get("brand")),
+            ]
+            if include_description:
+                searchable_parts.append(cstr(item_row.get("description")))
+
+            searchable_parts = [part.lower() for part in searchable_parts if part]
+
+            for token in tokens:
+                if not any(token in part for part in searchable_parts):
+                    return False
+            return True
+
         use_limit_search = pos_profile.get("posa_use_limit_search")
         search_serial_no = pos_profile.get("posa_search_serial_no")
         search_batch_no = pos_profile.get("posa_search_batch_no")
@@ -210,32 +280,40 @@ def get_items(
 
         # Add search conditions
         or_filters = []
-        item_code_for_search = None
+        fallback_tokens: list[str] = []
         data = {}
+        search_tokens = _tokenize_search_value(search_value)
+        lowered_tokens = [token.lower() for token in search_tokens] if len(search_tokens) > 1 else []
         if search_value:
             data = search_serial_or_batch_or_barcode_number(search_value, search_serial_no, search_batch_no)
             item_code = data.get("item_code") if data.get("item_code") else search_value
             min_search_len = 2
 
             if use_limit_search:
-                if len(search_value) >= min_search_len:
-                    or_filters = [
-                        ["name", "like", f"{item_code}%"],
-                        ["item_name", "like", f"{item_code}%"],
-                        ["item_code", "like", f"%{item_code}%"],
-                    ]
-                    item_code_for_search = item_code
-
-                # Prefer exact match when barcode/serial/batch resolves to item_code
                 if data.get("item_code"):
                     filters["item_code"] = data.get("item_code")
-                    or_filters = []
-                    item_code_for_search = None
-                elif len(search_value) < min_search_len:
+                elif len(search_value) >= min_search_len:
+                    if len(search_tokens) > 1:
+                        or_filters = _build_multi_token_filters(search_tokens)
+                        fallback_tokens = search_tokens[:]
+                    else:
+                        token = search_tokens[0] if search_tokens else item_code
+                        or_filters = _build_single_token_filters(token)
+                        fallback_tokens = [token]
+                else:
                     # For short inputs, only attempt exact matches
                     filters["item_code"] = item_code
-            elif data.get("item_code"):
-                filters["item_code"] = data.get("item_code")
+            else:
+                if data.get("item_code"):
+                    filters["item_code"] = data.get("item_code")
+                elif search_tokens:
+                    if len(search_tokens) > 1:
+                        or_filters = _build_multi_token_filters(search_tokens)
+                        fallback_tokens = search_tokens[:]
+                    else:
+                        token = search_tokens[0]
+                        or_filters = _build_single_token_filters(token)
+                        fallback_tokens = [token]
 
         if item_group and item_group.upper() != "ALL":
             filters["item_group"] = ["like", f"%{item_group}%"]
@@ -296,15 +374,16 @@ def get_items(
                 order_by=order_by,
             )
 
-            if not items_data and item_code_for_search and page_start == (limit_start or 0):
+            if not items_data and fallback_tokens and page_start == (limit_start or 0):
+                fallback_or_filters = (
+                    _build_multi_token_filters(fallback_tokens)
+                    if len(fallback_tokens) > 1
+                    else _build_single_token_filters(fallback_tokens[0])
+                )
                 items_data = frappe.get_all(
                     "Item",
                     filters=filters,
-                    or_filters=[
-                        ["name", "like", f"%{item_code_for_search}%"],
-                        ["item_name", "like", f"%{item_code_for_search}%"],
-                        ["item_code", "like", f"%{item_code_for_search}%"],
-                    ],
+                    or_filters=fallback_or_filters,
                     fields=fields,
                     limit_start=page_start,
                     limit_page_length=page_size,
@@ -313,6 +392,17 @@ def get_items(
 
             if not items_data:
                 break
+
+            fetched_count = len(items_data)
+
+            if lowered_tokens:
+                items_data = [item for item in items_data if _item_matches_tokens(item, lowered_tokens)]
+
+            if not items_data:
+                page_start += fetched_count
+                if fetched_count < page_size:
+                    break
+                continue
 
             details = get_items_details(
                 json.dumps(pos_profile),
@@ -360,8 +450,8 @@ def get_items(
             if limit_page_length and len(result) >= limit_page_length:
                 break
 
-            page_start += len(items_data)
-            if len(items_data) < page_size:
+            page_start += fetched_count
+            if fetched_count < page_size:
                 break
 
         return result[:limit_page_length] if limit_page_length else result
