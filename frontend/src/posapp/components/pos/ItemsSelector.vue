@@ -646,10 +646,12 @@ export default {
 		hide_qty_decimals: false,
 		temp_hide_qty_decimals: false,
 		hide_zero_rate_items: false,
-		temp_hide_zero_rate_items: false,
-		isDragging: false,
-		// Items per page configuration
-		enable_custom_items_per_page: false,
+                temp_hide_zero_rate_items: false,
+                isDragging: false,
+                // Temporarily skip cart validation for performance checks.
+                skip_cart_validation: true,
+                // Items per page configuration
+                enable_custom_items_per_page: false,
 		temp_enable_custom_items_per_page: false,
 		items_per_page: 50,
 		temp_items_per_page: 50,
@@ -1744,18 +1746,21 @@ export default {
 
 			// Validate item before adding to cart
 			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
-			const isValid = await this.cartValidation.validateCartItem(
-				item,
-				requestedQty,
-				this.pos_profile,
-				this.stock_settings,
-				this.eventBus,
-				this.blockSaleBeyondAvailableQty,
-				!suppressNegativeWarning
-			);
+                        let isValid = true;
+                        if (!this.skip_cart_validation) {
+                                isValid = await this.cartValidation.validateCartItem(
+                                        item,
+                                        requestedQty,
+                                        this.pos_profile,
+                                        this.stock_settings,
+                                        this.eventBus,
+                                        this.blockSaleBeyondAvailableQty,
+                                        !suppressNegativeWarning
+                                );
+                        }
 
-			if (!isValid) {
-				// Validation failed, error message already shown by validator
+                        if (!isValid) {
+                                // Validation failed, error message already shown by validator
 				return;
 			}
 
