@@ -867,16 +867,13 @@ export default {
 			this.sync_exchange_rate();
 		},
 
-		update_item_rates() {
-			console.log("Updating item rates with exchange rate:", this.exchange_rate);
-
-			this.items.forEach((item) => {
+                update_item_rates() {
+                        this.items.forEach((item) => {
 				// Set skip flag to avoid double calculations
 				item._skip_calc = true;
 
 				// First ensure base rates exist for all items
-				if (!item.base_rate) {
-					console.log(`Setting base rates for ${item.item_code} for the first time`);
+                                if (!item.base_rate) {
 					const baseCurrency = this.price_list_currency || this.pos_profile.currency;
 					if (this.selected_currency === baseCurrency) {
 						// When in base currency, base rates = displayed rates
@@ -893,24 +890,20 @@ export default {
 
 				// Currency conversion logic
 				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-				if (this.selected_currency === baseCurrency) {
-					// When switching back to default currency, restore from base rates
-					console.log(`Restoring rates for ${item.item_code} from base rates`);
-					item.price_list_rate = item.base_price_list_rate;
+                                if (this.selected_currency === baseCurrency) {
+                                        // When switching back to default currency, restore from base rates
+                                        item.price_list_rate = item.base_price_list_rate;
 					item.rate = item.base_rate;
 					item.discount_amount = item.base_discount_amount;
-				} else if (item.original_currency === this.selected_currency) {
-					// When selected currency matches the price list currency,
-					// no conversion should be applied
-					console.log(`Using original currency rates for ${item.item_code}`);
-					item.price_list_rate = item.base_price_list_rate;
+                                } else if (item.original_currency === this.selected_currency) {
+                                        // When selected currency matches the price list currency,
+                                        // no conversion should be applied
+                                        item.price_list_rate = item.base_price_list_rate;
 					item.rate = item.base_rate;
 					item.discount_amount = item.base_discount_amount;
-				} else {
-					// When switching to another currency, convert from base rates
-					console.log(`Converting rates for ${item.item_code} to ${this.selected_currency}`);
-
-					// Convert base currency values to the selected currency
+                                } else {
+                                        // When switching to another currency, convert from base rates
+                                        // Convert base currency values to the selected currency
 					const converted_price = this.flt(
 						item.base_price_list_rate * this.exchange_rate,
 						this.currency_precision,
@@ -933,17 +926,6 @@ export default {
 				// Always recalculate final amounts
 				item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 				item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
-
-				console.log(`Updated rates for ${item.item_code}:`, {
-					price_list_rate: item.price_list_rate,
-					base_price_list_rate: item.base_price_list_rate,
-					rate: item.rate,
-					base_rate: item.base_rate,
-					discount: item.discount_amount,
-					base_discount: item.base_discount_amount,
-					amount: item.amount,
-					base_amount: item.base_amount,
-				});
 
 				// Apply any other pricing rules if needed
 				this.calc_item_price(item);

@@ -802,18 +802,8 @@ export default {
 			remaining_amount -= payment_amount;
 		});
 
-		console.log("Generated payments:", {
-			currency: this.selected_currency,
-			exchange_rate: this.exchange_rate,
-			payments: payments.map((p) => ({
-				mode: p.mode_of_payment,
-				amount: p.amount,
-				base_amount: p.base_amount,
-			})),
-		});
-
-		return payments;
-	},
+                return payments;
+        },
 
 	// Convert amount to selected currency
 	convert_amount(amount) {
@@ -1348,10 +1338,6 @@ export default {
 
         // Update details for a single item (fetch from backend)
         async update_item_detail(item, force_update = false) {
-                console.log("update_item_detail request", {
-                        code: item ? item.item_code : undefined,
-                        force_update,
-                });
                 if (!item || !item.item_code) {
                         return;
                 }
@@ -1541,16 +1527,6 @@ export default {
 
                         item.amount = vm.flt(item.qty * item.rate, vm.currency_precision);
                         item.base_amount = vm.flt(item.qty * item.base_rate, vm.currency_precision);
-
-                        console.log(`Updated rates for ${item.item_code} on expand:`, {
-                                base_rate: item.base_rate,
-                                rate: item.rate,
-                                base_price_list_rate: item.base_price_list_rate,
-                                price_list_rate: item.price_list_rate,
-                                exchange_rate: vm.exchange_rate,
-                                selected_currency: vm.selected_currency,
-                                default_currency: vm.pos_profile.currency,
-                        });
 
                         item._detailSynced = true;
                         vm.$forceUpdate();
