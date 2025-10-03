@@ -4,6 +4,8 @@
 import json
 
 import frappe
+from frappe.query_builder import DocType
+from frappe.query_builder.utils import Order
 from erpnext.stock.doctype.batch.batch import (
     get_batch_no,
     get_batch_qty,
@@ -212,10 +214,13 @@ def get_items(
         or_filters = []
         item_code_for_search = None
         data = {}
+        search_terms = []
         if search_value:
             data = search_serial_or_batch_or_barcode_number(search_value, search_serial_no, search_batch_no)
             item_code = data.get("item_code") if data.get("item_code") else search_value
             min_search_len = 2
+
+            search_terms = [term.strip() for term in search_value.split() if term.strip()]
 
             if use_limit_search:
                 if len(search_value) >= min_search_len:
@@ -236,6 +241,9 @@ def get_items(
                     filters["item_code"] = item_code
             elif data.get("item_code"):
                 filters["item_code"] = data.get("item_code")
+
+            if data.get("item_code") or len(search_terms) <= 1:
+                search_terms = []
 
         if item_group and item_group.upper() != "ALL":
             filters["item_group"] = ["like", f"%{item_group}%"]
@@ -285,18 +293,100 @@ def get_items(
         page_start = limit_start or 0
         page_size = limit_page_length or 100
 
-        while True:
-            items_data = frappe.get_all(
-                "Item",
-                filters=filters,
-                or_filters=or_filters if or_filters else None,
-                fields=fields,
-                limit_start=page_start,
-                limit_page_length=page_size,
-                order_by=order_by,
-            )
+        Item = DocType("Item")
 
-            if not items_data and item_code_for_search and page_start == (limit_start or 0):
+        def apply_standard_filters(query):
+            for field, condition in filters.items():
+                column = getattr(Item, field)
+                if isinstance(condition, (list, tuple)):
+                    operator = (condition[0] or "").lower()
+                    value = condition[1] if len(condition) > 1 else None
+
+                    if operator == "in":
+                        query = query.where(column.isin(value or []))
+                    elif operator == "like":
+                        query = query.where(column.like(value))
+                    elif operator == ">":
+                        query = query.where(column > value)
+                    elif operator == "<":
+                        query = query.where(column < value)
+                    elif operator == ">=":
+                        query = query.where(column >= value)
+                    elif operator == "<=":
+                        query = query.where(column <= value)
+                    elif operator == "is":
+                        comparison = (value or "").lower() if isinstance(value, str) else value
+                        if comparison == "not set":
+                            query = query.where(column.isnull())
+                        elif comparison == "set":
+                            query = query.where(column.notnull())
+                        else:
+                            query = query.where(column == value)
+                    else:
+                        query = query.where(column == value)
+                else:
+                    query = query.where(column == condition)
+
+            return query
+
+        def apply_ordering(query):
+            clauses = [clause.strip() for clause in order_by.split(",") if clause.strip()]
+            for clause in clauses:
+                parts = clause.split()
+                if not parts:
+                    continue
+                column = getattr(Item, parts[0])
+                direction = parts[1].lower() if len(parts) > 1 else "asc"
+                if direction == "desc":
+                    query = query.orderby(column, order=Order.desc)
+                else:
+                    query = query.orderby(column, order=Order.asc)
+
+            return query
+
+        def run_multi_word_query(page_start: int, page_size: int):
+            query = frappe.qb.from_(Item).select(*[getattr(Item, field) for field in fields])
+            query = apply_standard_filters(query)
+
+            combined_condition = None
+            for term in search_terms:
+                pattern = f"%{term}%"
+                term_condition = (
+                    Item.name.like(pattern)
+                    | Item.item_name.like(pattern)
+                    | Item.item_code.like(pattern)
+                )
+                combined_condition = (
+                    term_condition if combined_condition is None else combined_condition & term_condition
+                )
+
+            if combined_condition is not None:
+                query = query.where(combined_condition)
+
+            query = apply_ordering(query)
+            query = query.offset(page_start).limit(page_size)
+            return query.run(as_dict=True)
+
+        while True:
+            if search_terms:
+                items_data = run_multi_word_query(page_start, page_size)
+            else:
+                items_data = frappe.get_all(
+                    "Item",
+                    filters=filters,
+                    or_filters=or_filters if or_filters else None,
+                    fields=fields,
+                    limit_start=page_start,
+                    limit_page_length=page_size,
+                    order_by=order_by,
+                )
+
+            if (
+                not search_terms
+                and not items_data
+                and item_code_for_search
+                and page_start == (limit_start or 0)
+            ):
                 items_data = frappe.get_all(
                     "Item",
                     filters=filters,
