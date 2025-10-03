@@ -334,56 +334,116 @@
 							@update:model-value="update_delivery_date()"
 						/>
 					</v-col>
-					<!-- Shipping Address Selection (if delivery date is set) -->
-					<v-col cols="12" v-if="invoice_doc.posa_delivery_date">
-						<v-autocomplete
-							density="compact"
-							clearable
-							auto-select-first
-							variant="solo"
-							color="primary"
-							:label="frappe._('Address')"
-							v-model="invoice_doc.shipping_address_name"
-							:items="addresses"
-							item-title="address_title"
-							item-value="name"
-							class="sleek-field pos-themed-input"
-							:no-data-text="__('Address not found')"
-							hide-details
-							:customFilter="addressFilter"
-							append-icon="mdi-plus"
-							@click:append="new_address"
-						>
-							<template v-slot:item="{ item }">
-								<v-list-item>
-									<v-list-item-title class="text-primary text-subtitle-1">
-										<div v-html="item.address_title"></div>
-									</v-list-item-title>
-									<v-list-item-subtitle>
-										<div v-html="item.address_line1"></div>
-									</v-list-item-subtitle>
-									<v-list-item-subtitle v-if="item.address_line2">
-										<div v-html="item.address_line2"></div>
-									</v-list-item-subtitle>
-									<v-list-item-subtitle v-if="item.city">
-										<div v-html="item.city"></div>
-									</v-list-item-subtitle>
-									<v-list-item-subtitle v-if="item.state">
-										<div v-html="item.state"></div>
-									</v-list-item-subtitle>
-									<v-list-item-subtitle v-if="item.country">
-										<div v-html="item.country"></div>
-									</v-list-item-subtitle>
-									<v-list-item-subtitle v-if="item.mobile_no">
-										<div v-html="item.mobile_no"></div>
-									</v-list-item-subtitle>
-									<v-list-item-subtitle v-if="item.address_type">
-										<div v-html="item.address_type"></div>
-									</v-list-item-subtitle>
-								</v-list-item>
-							</template>
-						</v-autocomplete>
-					</v-col>
+                                        <!-- Shipping Address Selection (if delivery date is set) -->
+                                        <v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
+                                                <v-autocomplete
+                                                        density="compact"
+                                                        clearable
+                                                        auto-select-first
+                                                        variant="solo"
+                                                        color="primary"
+                                                        :label="frappe._('Address')"
+                                                        v-model="invoice_doc.shipping_address_name"
+                                                        :items="addresses"
+                                                        item-title="display_title"
+                                                        item-value="name"
+                                                        class="sleek-field pos-themed-input"
+                                                        :no-data-text="__('Address not found')"
+                                                        hide-details
+                                                        :customFilter="addressFilter"
+                                                        append-icon="mdi-plus"
+                                                        @click:append="new_address"
+                                                >
+                                                        <template v-slot:item="{ props, item }">
+                                                                <v-list-item v-bind="props">
+                                                                        <v-list-item-title class="text-primary text-subtitle-1">
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.address_title) ||
+                                                                                                item.address_title
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-title>
+                                                                        <v-list-item-subtitle>
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.address_line1) ||
+                                                                                                item.address_line1
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                        <v-list-item-subtitle
+                                                                                v-if="
+                                                                                        (item?.raw && item.raw.address_line2) ||
+                                                                                        item.address_line2
+                                                                                "
+                                                                        >
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.address_line2) ||
+                                                                                                item.address_line2
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                        <v-list-item-subtitle
+                                                                                v-if="(item?.raw && item.raw.city) || item.city"
+                                                                        >
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.city) || item.city
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                        <v-list-item-subtitle
+                                                                                v-if="(item?.raw && item.raw.state) || item.state"
+                                                                        >
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.state) ||
+                                                                                                item.state
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                        <v-list-item-subtitle
+                                                                                v-if="(item?.raw && item.raw.country) || item.country"
+                                                                        >
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.country) ||
+                                                                                                item.country
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                        <v-list-item-subtitle
+                                                                                v-if="
+                                                                                        (item?.raw && item.raw.mobile_no) ||
+                                                                                        item.mobile_no
+                                                                                "
+                                                                        >
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.mobile_no) ||
+                                                                                                item.mobile_no
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                        <v-list-item-subtitle
+                                                                                v-if="
+                                                                                        (item?.raw && item.raw.address_type) ||
+                                                                                        item.address_type
+                                                                                "
+                                                                        >
+                                                                                <div
+                                                                                        v-html="
+                                                                                                (item?.raw && item.raw.address_type) ||
+                                                                                                item.address_type
+                                                                                        "
+                                                                                ></div>
+                                                                        </v-list-item-subtitle>
+                                                                </v-list-item>
+                                                        </template>
+                                                </v-autocomplete>
+                                        </v-col>
 
 					<!-- Additional Notes (if enabled in POS profile) -->
 					<v-col cols="12" v-if="pos_profile.posa_display_additional_notes">
@@ -1021,25 +1081,44 @@ export default {
 				});
 			}
 		},
-		// Watch is_credit_return to toggle cashback payments
-		is_credit_return(newVal) {
-			if (newVal) {
-				this.is_cashback = false;
-				// Clear any payment amounts
-				this.invoice_doc.payments.forEach((payment) => {
-					payment.amount = 0;
-					if (payment.base_amount !== undefined) {
-						payment.base_amount = 0;
-					}
-				});
-			} else {
-				this.is_cashback = true;
-				// Ensure default negative payment for returns
-				this.ensureReturnPaymentsAreNegative();
-			}
-		},
-	},
-	methods: {
+                // Watch is_credit_return to toggle cashback payments
+                is_credit_return(newVal) {
+                        if (newVal) {
+                                this.is_cashback = false;
+                                // Clear any payment amounts
+                                this.invoice_doc.payments.forEach((payment) => {
+                                        payment.amount = 0;
+                                        if (payment.base_amount !== undefined) {
+                                                payment.base_amount = 0;
+                                        }
+                                });
+                        } else {
+                                this.is_cashback = true;
+                                // Ensure default negative payment for returns
+                                this.ensureReturnPaymentsAreNegative();
+                        }
+                },
+                'invoice_doc.customer'(customer, previous) {
+                        if (customer && customer !== previous) {
+                                this.get_addresses();
+                        } else if (!customer) {
+                                this.addresses = [];
+                        }
+                },
+                'invoice_doc.posa_delivery_date'(date) {
+                        if (!date) {
+                                if (this.invoice_doc) {
+                                        this.invoice_doc.shipping_address_name = null;
+                                }
+                                this.addresses = [];
+                                return;
+                        }
+                        if (this.invoice_doc && this.invoice_doc.customer) {
+                                this.get_addresses();
+                        }
+                },
+        },
+        methods: {
 		// Go back to invoice view and reset customer readonly
 		back_to_invoice() {
 			this.eventBus.emit("show_payment", "false");
@@ -1561,37 +1640,63 @@ export default {
 				this.customer_credit_dict = [];
 			}
 		},
-		// Get customer addresses for shipping
-		get_addresses() {
-			const vm = this;
-			if (!vm.invoice_doc || !vm.invoice_doc.customer) {
-				vm.addresses = [];
-				return;
-			}
-			frappe.call({
-				method: "posawesome.posawesome.api.customers.get_customer_addresses",
-				args: { customer: vm.invoice_doc.customer },
-				async: true,
-				callback: function (r) {
-					if (!r.exc) {
-						vm.addresses = r.message;
-					} else {
-						vm.addresses = [];
-					}
-				},
-			});
-		},
-		// Filter addresses for autocomplete
-		addressFilter(item, queryText) {
-			const searchText = queryText.toLowerCase();
-			return (
-				(item.address_title && item.address_title.toLowerCase().includes(searchText)) ||
-				(item.address_line1 && item.address_line1.toLowerCase().includes(searchText)) ||
-				(item.address_line2 && item.address_line2.toLowerCase().includes(searchText)) ||
-				(item.city && item.city.toLowerCase().includes(searchText)) ||
-				(item.name && item.name.toLowerCase().includes(searchText))
-			);
-		},
+                // Get customer addresses for shipping
+                get_addresses() {
+                        const vm = this;
+                        if (!vm.invoice_doc || !vm.invoice_doc.customer) {
+                                vm.addresses = [];
+                                return;
+                        }
+                        frappe.call({
+                                method: "posawesome.posawesome.api.customers.get_customer_addresses",
+                                args: { customer: vm.invoice_doc.customer },
+                                async: true,
+                                callback: function (r) {
+                                        if (!r.exc) {
+                                                const records = Array.isArray(r.message) ? r.message : [];
+                                                const normalized = records
+                                                        .map((row) => vm.normalizeAddress(row))
+                                                        .filter(Boolean);
+                                                vm.addresses = normalized;
+                                                if (
+                                                        vm.invoice_doc &&
+                                                        vm.invoice_doc.shipping_address_name &&
+                                                        !normalized.some(
+                                                                (row) => row.name === vm.invoice_doc.shipping_address_name,
+                                                        )
+                                                ) {
+                                                        vm.invoice_doc.shipping_address_name = null;
+                                                }
+                                        } else {
+                                                vm.addresses = [];
+                                        }
+                                },
+                        });
+                },
+                // Filter addresses for autocomplete
+                addressFilter(item, queryText) {
+                        const record = (item && item.raw) || item || {};
+                        const searchText = (queryText || "").toLowerCase();
+                        if (!searchText) {
+                                return true;
+                        }
+                        const fields = [
+                                "address_title",
+                                "address_line1",
+                                "address_line2",
+                                "city",
+                                "state",
+                                "country",
+                                "name",
+                        ];
+                        return fields.some((field) => {
+                                const value = record[field];
+                                if (!value) {
+                                        return false;
+                                }
+                                return String(value).toLowerCase().includes(searchText);
+                        });
+                },
 		// Open dialog to add new address
 		new_address() {
 			if (!this.invoice_doc || !this.invoice_doc.customer) {
@@ -1755,31 +1860,50 @@ export default {
 			};
 			this.eventBus.emit("open_mpesa_payments", data);
 		},
-		// Set M-Pesa payment as customer credit
-		set_mpesa_payment(payment) {
-			this.pos_profile.use_customer_credit = true;
-			this.redeem_customer_credit = true;
-			const invoiceAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-			let amount =
-				payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
-			amount = amount > 0 ? amount : 0;
-			const advance = {
-				type: "Advance",
-				credit_origin: payment.name,
-				total_credit: this.flt(payment.unallocated_amount),
-				credit_to_redeem: this.flt(amount),
-			};
-			this.clear_all_amounts();
-			this.customer_credit_dict.push(advance);
-		},
-		// Update delivery date after selection
-		update_delivery_date() {
-			this.invoice_doc.posa_delivery_date = this.formatDate(this.new_delivery_date);
-			// After setting delivery date, fetch addresses if not already loaded
-			if (this.invoice_doc.customer && (!this.addresses || this.addresses.length === 0)) {
-				this.get_addresses();
-			}
-		},
+                // Set M-Pesa payment as customer credit
+                set_mpesa_payment(payment) {
+                        this.pos_profile.use_customer_credit = true;
+                        this.redeem_customer_credit = true;
+                        const invoiceAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+                        let amount =
+                                payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
+                        amount = amount > 0 ? amount : 0;
+                        const advance = {
+                                type: "Advance",
+                                credit_origin: payment.name,
+                                total_credit: this.flt(payment.unallocated_amount),
+                                credit_to_redeem: this.flt(amount),
+                        };
+                        this.clear_all_amounts();
+                        this.customer_credit_dict.push(advance);
+                },
+                // Normalize address records returned from the server
+                normalizeAddress(address) {
+                        if (!address) {
+                                return null;
+                        }
+                        const normalized = { ...address };
+                        const fallback =
+                                normalized.address_title || normalized.address_line1 || normalized.name || "";
+                        normalized.address_title = normalized.address_title || fallback;
+                        normalized.display_title = fallback;
+                        return normalized;
+                },
+                // Update delivery date after selection
+                update_delivery_date() {
+                        const formatted = this.formatDate(this.new_delivery_date);
+                        if (this.invoice_doc) {
+                                this.invoice_doc.posa_delivery_date = formatted;
+                                if (!formatted) {
+                                        this.invoice_doc.shipping_address_name = null;
+                                }
+                        } else {
+                                this.invoiceStore.mergeInvoiceDoc({ posa_delivery_date: formatted });
+                        }
+                        if (!formatted) {
+                                this.addresses = [];
+                        }
+                },
 		// Update purchase order date after selection
 		update_po_date() {
 			this.invoice_doc.po_date = this.formatDate(this.new_po_date);
@@ -1975,10 +2099,18 @@ export default {
 				this.stock_settings = data.stock_settings || {};
 				this.get_mpesa_modes();
 			});
-			this.eventBus.on("add_the_new_address", (data) => {
-				this.addresses.push(data);
-				this.$forceUpdate();
-			});
+                        this.eventBus.on("add_the_new_address", (data) => {
+                                const normalized = this.normalizeAddress(data);
+                                if (normalized) {
+                                        const existing = this.addresses.filter(
+                                                (addr) => addr.name !== normalized.name,
+                                        );
+                                        this.addresses = [...existing, normalized];
+                                        if (this.invoice_doc) {
+                                                this.invoice_doc.shipping_address_name = normalized.name;
+                                        }
+                                }
+                        });
 			this.eventBus.on("update_invoice_type", (data) => {
 				this.invoiceType = data;
 				if (this.invoice_doc && data !== "Order") {
