@@ -26,35 +26,8 @@ export default {
 		return removeItem(item, this);
 	},
 
-        async add_item(item, options = {}) {
-                const res = await addItem(item, this);
-                if (!options?.skipNotification && this.eventBus?.emit) {
-                        const rawQty = typeof item?.qty === "number" ? item.qty : parseFloat(item?.qty);
-                        const shouldAnnounce = Number.isFinite(rawQty) ? rawQty > 0 : true;
-
-                        if (shouldAnnounce) {
-                                const addedQty = Number.isFinite(rawQty) ? Math.abs(rawQty) : 1;
-                                const rawPrecision = Number(this.float_precision);
-                                const precision = Number.isInteger(rawPrecision)
-                                        ? Math.min(Math.max(rawPrecision, 0), 6)
-                                        : 2;
-                                const displayQty = Number.isInteger(addedQty)
-                                        ? addedQty
-                                        : Number(addedQty.toFixed(precision));
-                                const itemName = item?.item_name || item?.item_code || __("Item");
-                                const detail = __("{0} (Qty: {1})", [itemName, displayQty]);
-
-                                this.eventBus.emit("show_message", {
-                                        title: __("Item {0} added to invoice", [itemName]),
-                                        summary: __("Items added to invoice"),
-                                        detail,
-                                        color: "success",
-                                        groupId: "invoice-item-added",
-                                });
-                        }
-                }
-
-                return res;
+        async add_item(item, _options = {}) {
+                return addItem(item, this);
         },
 
 	// Create a new item object with default and calculated fields

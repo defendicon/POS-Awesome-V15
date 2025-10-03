@@ -3057,24 +3057,6 @@ export default {
                                         ? requestedQty
                                         : Number(requestedQty.toFixed(precision));
 
-                                if (this.eventBus?.emit) {
-                                        this.eventBus.emit("show_message", {
-                                                title: this.__("Item {0} added to invoice", [itemName]),
-                                                summary: this.__("Items added to invoice"),
-                                                detail: this.__("{0} (Qty: {1})", [itemName, displayQty]),
-                                                color: "success",
-                                                groupId: "invoice-item-added",
-                                        });
-                                } else if (frappe?.show_alert) {
-                                        frappe.show_alert(
-                                                {
-                                                        message: `Added: ${itemName}`,
-                                                        indicator: "green",
-                                                },
-                                                3,
-                                        );
-                                }
-
                                 // Clear search after successful addition and refocus input
                                 this.clearSearch();
                                 this.focusItemSearch();
