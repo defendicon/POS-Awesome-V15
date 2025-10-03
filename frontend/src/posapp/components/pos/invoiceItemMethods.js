@@ -1,4 +1,5 @@
 /* global __, frappe, flt */
+import throttle from "lodash/throttle";
 import {
 	isOffline,
 	saveCustomerBalance,
@@ -15,6 +16,36 @@ import { useBatchSerial } from "../../composables/useBatchSerial.js";
 import { useDiscounts } from "../../composables/useDiscounts.js";
 import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useStockUtils } from "../../composables/useStockUtils.js";
+
+const totalsRecalcSchedulers = new WeakMap();
+
+const scheduleTotalsRecalc = (vm) => {
+	if (!vm) {
+		return;
+	}
+
+	let runner = totalsRecalcSchedulers.get(vm);
+	if (!runner) {
+		runner = throttle(
+			() => {
+				if (typeof vm.update_totals === "function") {
+					vm.update_totals();
+				} else if (typeof vm.recalculate_totals === "function") {
+					vm.recalculate_totals();
+				}
+
+				if (typeof vm.$forceUpdate === "function") {
+					vm.$forceUpdate();
+				}
+			},
+			50,
+			{ leading: false, trailing: true },
+		);
+		totalsRecalcSchedulers.set(vm, runner);
+	}
+
+	runner();
+};
 
 const { setSerialNo, setBatchQty } = useBatchSerial();
 const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
@@ -1373,226 +1404,256 @@ export default {
 		}
 	},
 
-        // Update details for a single item (fetch from backend)
-        async update_item_detail(item, force_update = false) {
-                console.log("update_item_detail request", {
-                        code: item ? item.item_code : undefined,
-                        force_update,
-                });
-                if (!item || !item.item_code) {
-                        return;
-                }
+        
+	// Update details for a single item (fetch from backend)
+	async update_item_detail(item, force_update = false) {
+	        console.log("update_item_detail request", {
+	                code: item ? item.item_code : undefined,
+	                force_update,
+	        });
+	        if (!item || !item.item_code) {
+	                return;
+	        }
 
-                // If a manual rate was set (e.g. via explicit UOM pricing), don't
-                // overwrite it on expand unless explicitly forced.
-                if (item._manual_rate_set && !force_update) {
-                        return;
-                }
+	        // If a manual rate was set (e.g. via explicit UOM pricing), don't
+	        // overwrite it on expand unless explicitly forced.
+	        if (item._manual_rate_set && !force_update) {
+	                return;
+	        }
 
-                if (force_update) {
-                        item._detailSynced = false;
-                }
+	        const existingPromise = item._detailInFlight;
+	        if (existingPromise) {
+	                if (!force_update) {
+	                        return existingPromise;
+	                }
+	                try {
+	                        await existingPromise;
+	                } catch (error) {
+	                        console.debug("Waiting existing detail fetch failed", error);
+	                }
+	        }
 
-                if (item._detailInFlight || (!force_update && item._detailSynced)) {
-                        return;
-                }
+	        if (force_update) {
+	                item._detailSynced = false;
+	        }
 
-                item._detailInFlight = true;
-                const vm = this;
+	        if (!force_update && item._detailSynced) {
+	                return existingPromise;
+	        }
 
-                try {
-                        const currentDoc = vm.get_invoice_doc();
-                        const response = await frappe.call({
-                                method: "posawesome.posawesome.api.items.get_item_detail",
-                                args: {
-                                        warehouse: item.warehouse || vm.pos_profile.warehouse,
-                                        doc: currentDoc,
-                                        price_list: vm.selected_price_list || vm.pos_profile.selling_price_list,
-                                        item: {
-                                                item_code: item.item_code,
-                                                customer: vm.customer,
-                                                doctype: currentDoc.doctype,
-                                                name: currentDoc.name || `New ${currentDoc.doctype} 1`,
-                                                company: vm.pos_profile.company,
-                                                conversion_rate: 1,
-                                                currency: vm.pos_profile.currency,
-                                                qty: item.qty,
-                                                price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
-                                                child_docname: `New ${currentDoc.doctype} Item 1`,
-                                                cost_center: vm.pos_profile.cost_center,
-                                                pos_profile: vm.pos_profile.name,
-                                                uom: item.uom,
-                                                tax_category: "",
-                                                transaction_type: "selling",
-                                                update_stock: vm.pos_profile.update_stock,
-                                                price_list: vm.get_price_list(),
-                                                has_batch_no: item.has_batch_no,
-                                                has_serial_no: item.has_serial_no,
-                                                serial_no: item.serial_no,
-                                                batch_no: item.batch_no,
-                                                is_stock_item: item.is_stock_item,
-                                        },
-                                },
-                        });
+	        const vm = this;
+	        let requestPromise;
 
-                        const data = response?.message;
-                        if (!data) {
-                                return;
-                        }
+	        const execute = async () => {
+	                try {
+	                        const currentDoc = vm.get_invoice_doc();
+	                        const response = await frappe.call({
+	                                method: "posawesome.posawesome.api.items.get_item_detail",
+	                                args: {
+	                                        warehouse: item.warehouse || vm.pos_profile.warehouse,
+	                                        doc: currentDoc,
+	                                        price_list: vm.selected_price_list || vm.pos_profile.selling_price_list,
+	                                        item: {
+	                                                item_code: item.item_code,
+	                                                customer: vm.customer,
+	                                                doctype: currentDoc.doctype,
+	                                                name: currentDoc.name || `New ${currentDoc.doctype} 1`,
+	                                                company: vm.pos_profile.company,
+	                                                conversion_rate: 1,
+	                                                currency: vm.pos_profile.currency,
+	                                                qty: item.qty,
+	                                                price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
+	                                                child_docname: `New ${currentDoc.doctype} Item 1`,
+	                                                cost_center: vm.pos_profile.cost_center,
+	                                                pos_profile: vm.pos_profile.name,
+	                                                uom: item.uom,
+	                                                tax_category: "",
+	                                                transaction_type: "selling",
+	                                                update_stock: vm.pos_profile.update_stock,
+	                                                price_list: vm.get_price_list(),
+	                                                has_batch_no: item.has_batch_no,
+	                                                has_serial_no: item.has_serial_no,
+	                                                serial_no: item.serial_no,
+	                                                batch_no: item.batch_no,
+	                                                is_stock_item: item.is_stock_item,
+	                                        },
+	                                },
+	                        });
 
-                        if (!item.warehouse) {
-                                item.warehouse = vm.pos_profile.warehouse;
-                        }
-                        if (data.price_list_currency) {
-                                vm.price_list_currency = data.price_list_currency;
-                        }
+	                        const data = response?.message;
+	                        if (!data) {
+	                                return;
+	                        }
 
-                        if (!item.original_currency) {
-                                item.original_currency =
-                                        data.price_list_currency || vm.price_list_currency || vm.selected_currency;
-                        }
-                        if (!item.original_rate) {
-                                item.original_rate = data.price_list_rate;
-                        }
-                        if (data.serial_no_data) {
-                                item.serial_no_data = data.serial_no_data;
-                        }
-                        if (data.batch_no_data) {
-                                item.batch_no_data = data.batch_no_data;
-                        }
-                        if (
-                                item.has_batch_no &&
-                                vm.pos_profile.posa_auto_set_batch &&
-                                !item.batch_no &&
-                                Array.isArray(data.batch_no_data) &&
-                                data.batch_no_data.length > 0
-                        ) {
-                                item.batch_no_data = data.batch_no_data;
-                                vm.set_batch_qty(item, null, false);
-                        }
+	                        if (!item.warehouse) {
+	                                item.warehouse = vm.pos_profile.warehouse;
+	                        }
+	                        if (data.price_list_currency) {
+	                                vm.price_list_currency = data.price_list_currency;
+	                        }
 
-                        if (!item.locked_price) {
-                                if (force_update || !item.base_rate) {
-                                        if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
-                                                item.base_price_list_rate = data.price_list_rate;
-                                                if (!item.posa_offer_applied) {
-                                                        item.base_rate = data.price_list_rate;
-                                                }
-                                        }
-                                }
+	                        if (!item.original_currency) {
+	                                item.original_currency =
+	                                        data.price_list_currency || vm.price_list_currency || vm.selected_currency;
+	                        }
+	                        if (!item.original_rate) {
+	                                item.original_rate = data.price_list_rate;
+	                        }
+	                        if (data.serial_no_data) {
+	                                item.serial_no_data = data.serial_no_data;
+	                        }
+	                        if (data.batch_no_data) {
+	                                item.batch_no_data = data.batch_no_data;
+	                        }
+	                        if (
+	                                item.has_batch_no &&
+	                                vm.pos_profile.posa_auto_set_batch &&
+	                                !item.batch_no &&
+	                                Array.isArray(data.batch_no_data) &&
+	                                data.batch_no_data.length > 0
+	                        ) {
+	                                item.batch_no_data = data.batch_no_data;
+	                                vm.set_batch_qty(item, null, false);
+	                        }
 
-                                if (!item.posa_offer_applied) {
-                                        const companyCurrency = vm.pos_profile.currency;
-                                        const baseCurrency = companyCurrency;
+	                        if (!item.locked_price) {
+	                                if (force_update || !item.base_rate) {
+	                                        if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
+	                                                item.base_price_list_rate = data.price_list_rate;
+	                                                if (!item.posa_offer_applied) {
+	                                                        item.base_rate = data.price_list_rate;
+	                                                }
+	                                        }
+	                                }
 
-                                        if (vm.selected_currency === vm.price_list_currency && vm.selected_currency !== companyCurrency) {
-                                                const conv = vm.conversion_rate || 1;
-                                                item.price_list_rate = vm.flt(
-                                                        item.base_price_list_rate / conv,
-                                                        vm.currency_precision,
-                                                );
+	                                if (force_update || !item.rate) {
+	                                        if (data.price_list_rate !== 0 || !item.price_list_rate) {
+	                                                item.price_list_rate = data.price_list_rate;
+	                                        }
+	                                        if (!item.posa_offer_applied) {
+	                                                item.rate = data.price_list_rate;
+	                                        }
+	                                }
 
-                                                if (!item._manual_rate_set) {
-                                                        item.rate = vm.flt(item.base_rate / conv, vm.currency_precision);
-                                                }
-                                        } else if (vm.selected_currency !== baseCurrency) {
-                                                const exchange_rate = vm.exchange_rate || 1;
-                                                item.price_list_rate = vm.flt(
-                                                        item.base_price_list_rate * exchange_rate,
-                                                        vm.currency_precision,
-                                                );
+	                                if (vm.selected_currency && vm.selected_currency !== vm.pos_profile.currency) {
+	                                        const baseCurrency = vm.price_list_currency || vm.pos_profile.currency;
+	                                        if (vm.selected_currency === baseCurrency) {
+	                                                const conv = vm.conversion_rate || 1;
+	                                                item.price_list_rate = vm.flt(
+	                                                        item.base_price_list_rate / conv,
+	                                                        vm.currency_precision,
+	                                                );
 
-                                                item.rate = vm.flt(item.base_rate * exchange_rate, vm.currency_precision);
-                                        } else {
-                                                item.price_list_rate = item.base_price_list_rate;
+	                                                if (!item._manual_rate_set) {
+	                                                        item.rate = vm.flt(item.base_rate / conv, vm.currency_precision);
+	                                                }
+	                                        } else if (vm.selected_currency !== baseCurrency) {
+	                                                const exchange_rate = vm.exchange_rate || 1;
+	                                                item.price_list_rate = vm.flt(
+	                                                        item.base_price_list_rate * exchange_rate,
+	                                                        vm.currency_precision,
+	                                                );
 
-                                                if (!item._manual_rate_set) {
-                                                        item.rate = item.base_rate;
-                                                }
-                                        }
-                                } else {
-                                        const baseCurrency = vm.price_list_currency || vm.pos_profile.currency;
-                                        if (vm.selected_currency !== baseCurrency) {
-                                                item.price_list_rate = vm.flt(
-                                                        item.base_rate * vm.exchange_rate,
-                                                        vm.currency_precision,
-                                                );
-                                        } else {
-                                                item.price_list_rate = item.base_rate;
-                                        }
-                                }
+	                                                item.rate = vm.flt(item.base_rate * exchange_rate, vm.currency_precision);
+	                                        } else {
+	                                                item.price_list_rate = item.base_price_list_rate;
 
-                                if (
-                                        !item.posa_offer_applied &&
-                                        vm.pos_profile.posa_apply_customer_discount &&
-                                        vm.customer_info.posa_discount > 0 &&
-                                        vm.customer_info.posa_discount <= 100 &&
-                                        item.posa_is_offer == 0 &&
-                                        !item.posa_is_replace
-                                ) {
-                                        const discount_percent =
-                                                item.max_discount > 0
-                                                        ? Math.min(item.max_discount, vm.customer_info.posa_discount)
-                                                        : vm.customer_info.posa_discount;
+	                                                if (!item._manual_rate_set) {
+	                                                        item.rate = item.base_rate;
+	                                                }
+	                                        }
+	                                } else {
+	                                        const baseCurrency = vm.price_list_currency || vm.pos_profile.currency;
+	                                        if (vm.selected_currency !== baseCurrency) {
+	                                                item.price_list_rate = vm.flt(
+	                                                        item.base_rate * vm.exchange_rate,
+	                                                        vm.currency_precision,
+	                                                );
+	                                        } else {
+	                                                item.price_list_rate = item.base_rate;
+	                                        }
+	                                }
 
-                                        item.discount_percentage = discount_percent;
+	                                if (
+	                                        !item.posa_offer_applied &&
+	                                        vm.pos_profile.posa_apply_customer_discount &&
+	                                        vm.customer_info.posa_discount > 0 &&
+	                                        vm.customer_info.posa_discount <= 100 &&
+	                                        item.posa_is_offer == 0 &&
+	                                        !item.posa_is_replace
+	                                ) {
+	                                        const discount_percent =
+	                                                item.max_discount > 0
+	                                                        ? Math.min(item.max_discount, vm.customer_info.posa_discount)
+	                                                        : vm.customer_info.posa_discount;
 
-                                        const discount_amount = vm.flt(
-                                                (item.price_list_rate * discount_percent) / 100,
-                                                vm.currency_precision,
-                                        );
-                                        item.discount_amount = discount_amount;
+	                                        item.discount_percentage = discount_percent;
 
-                                        item.base_discount_amount = vm.flt(
-                                                (item.base_price_list_rate * discount_percent) / 100,
-                                                vm.currency_precision,
-                                        );
+	                                        const discount_amount = vm.flt(
+	                                                (item.price_list_rate * discount_percent) / 100,
+	                                                vm.currency_precision,
+	                                        );
+	                                        item.discount_amount = discount_amount;
 
-                                        item.rate = vm.flt(item.price_list_rate - discount_amount, vm.currency_precision);
-                                        item.base_rate = vm.flt(
-                                                item.base_price_list_rate - item.base_discount_amount,
-                                                vm.currency_precision,
-                                        );
-                                }
-                        }
+	                                        item.base_discount_amount = vm.flt(
+	                                                (item.base_price_list_rate * discount_percent) / 100,
+	                                                vm.currency_precision,
+	                                        );
 
-                        item.last_purchase_rate = data.last_purchase_rate;
-                        item.projected_qty = data.projected_qty;
-                        item.reserved_qty = data.reserved_qty;
-                        item.conversion_factor = data.conversion_factor;
-                        item.stock_qty = data.stock_qty;
-                        item.actual_qty = data.actual_qty;
-                        item.stock_uom = data.stock_uom;
-                        item.has_serial_no = data.has_serial_no;
-                        item.has_batch_no = data.has_batch_no;
+	                                        item.rate = vm.flt(item.price_list_rate - discount_amount, vm.currency_precision);
+	                                        item.base_rate = vm.flt(
+	                                                item.base_price_list_rate - item.base_discount_amount,
+	                                                vm.currency_precision,
+	                                        );
+	                                }
+	                        }
 
-                        item.amount = vm.flt(item.qty * item.rate, vm.currency_precision);
-                        item.base_amount = vm.flt(item.qty * item.base_rate, vm.currency_precision);
+	                        item.last_purchase_rate = data.last_purchase_rate;
+	                        item.projected_qty = data.projected_qty;
+	                        item.reserved_qty = data.reserved_qty;
+	                        item.conversion_factor = data.conversion_factor;
+	                        item.stock_qty = data.stock_qty;
+	                        item.actual_qty = data.actual_qty;
+	                        item.stock_uom = data.stock_uom;
+	                        item.has_serial_no = data.has_serial_no;
+	                        item.has_batch_no = data.has_batch_no;
 
-                        console.log(`Updated rates for ${item.item_code} on expand:`, {
-                                base_rate: item.base_rate,
-                                rate: item.rate,
-                                base_price_list_rate: item.base_price_list_rate,
-                                price_list_rate: item.price_list_rate,
-                                exchange_rate: vm.exchange_rate,
-                                selected_currency: vm.selected_currency,
-                                default_currency: vm.pos_profile.currency,
-                        });
+	                        item.amount = vm.flt(item.qty * item.rate, vm.currency_precision);
+	                        item.base_amount = vm.flt(item.qty * item.base_rate, vm.currency_precision);
 
-                        item._detailSynced = true;
-                        vm.$forceUpdate();
-                } catch (error) {
-                        console.error("Error updating item detail:", error);
-                        vm.eventBus.emit("show_message", {
-                                title: __("Error updating item details"),
-                                color: "error",
-                        });
-                } finally {
-                        item._detailInFlight = false;
-                }
-        },
+	                        console.log(`Updated rates for ${item.item_code} on expand:`, {
+	                                base_rate: item.base_rate,
+	                                rate: item.rate,
+	                                base_price_list_rate: item.base_price_list_rate,
+	                                price_list_rate: item.price_list_rate,
+	                                exchange_rate: vm.exchange_rate,
+	                                selected_currency: vm.selected_currency,
+	                                default_currency: vm.pos_profile.currency,
+	                        });
 
-        // Fetch customer details (info, price list, etc)
+	                        item._detailSynced = true;
+	                        scheduleTotalsRecalc(vm);
+	                } catch (error) {
+	                        console.error("Error updating item detail:", error);
+	                        vm.eventBus.emit("show_message", {
+	                                title: __("Error updating item details"),
+	                                color: "error",
+	                        });
+	                        throw error;
+	                } finally {
+	                        if (item._detailInFlight === requestPromise) {
+	                                item._detailInFlight = null;
+	                        }
+	                }
+	        };
+
+	        requestPromise = execute();
+	        item._detailInFlight = requestPromise;
+	        requestPromise.catch(() => {});
+	        return requestPromise;
+	},
+
+// Fetch customer details (info, price list, etc)
 	async fetch_customer_details() {
 		var vm = this;
 		if (!this.customer) return;
@@ -1812,32 +1873,75 @@ export default {
 	async fetch_available_qty(item) {
 		if (!item || !item.item_code || !item.warehouse) return;
 		const key = `${item.item_code}:${item.warehouse}:${item.batch_no || ""}:${item.uom}`;
-		const cached = this.available_stock_cache[key];
+		const cache = this.available_stock_cache || (this.available_stock_cache = {});
 		const now = Date.now();
-		if (cached && now - cached.ts < 60000) {
-			item.available_qty = cached.qty;
-			this.update_qty_limits(item);
-			return;
+		const entry = cache[key];
+
+		if (entry?.promise) {
+			if (entry.qty !== undefined) {
+				item.available_qty = entry.qty;
+				this.update_qty_limits(item);
+				scheduleTotalsRecalc(this);
+			}
+			try {
+				return await entry.promise;
+			} catch (error) {
+				return entry.qty ?? 0;
+			}
 		}
-		try {
-			const r = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_available_qty",
-				args: {
-					items: JSON.stringify([
-						{
-							item_code: item.item_code,
-							warehouse: item.warehouse,
-							batch_no: item.batch_no,
-						},
-					]),
-				},
-			});
-			const qty = r.message && r.message.length ? flt(r.message[0].available_qty) : 0;
-			this.available_stock_cache[key] = { qty, ts: now };
-			item.available_qty = qty;
+
+		if (entry && entry.qty !== undefined) {
+			item.available_qty = entry.qty;
 			this.update_qty_limits(item);
-		} catch (e) {
-			console.error("Failed to fetch available qty", e);
+			scheduleTotalsRecalc(this);
+			if (now - entry.ts < 60000) {
+				return entry.qty;
+			}
+		}
+
+		let requestPromise;
+		const execute = async () => {
+			try {
+				const r = await frappe.call({
+					method: "posawesome.posawesome.api.items.get_available_qty",
+					args: {
+						items: JSON.stringify([
+							{
+								item_code: item.item_code,
+								warehouse: item.warehouse,
+								batch_no: item.batch_no,
+							},
+						]),
+					},
+				});
+				const qty = r.message && r.message.length ? flt(r.message[0].available_qty) : 0;
+				cache[key] = { qty, ts: Date.now() };
+				item.available_qty = qty;
+				this.update_qty_limits(item);
+				scheduleTotalsRecalc(this);
+				return qty;
+			} catch (e) {
+				console.error("Failed to fetch available qty", e);
+				throw e;
+			} finally {
+				const current = cache[key];
+				if (current && current.promise === requestPromise) {
+					delete current.promise;
+				}
+			}
+		};
+
+		requestPromise = execute();
+		cache[key] = {
+			qty: entry?.qty,
+			ts: entry?.ts ?? 0,
+			promise: requestPromise,
+		};
+
+		try {
+			return await requestPromise;
+		} catch (error) {
+			return cache[key]?.qty ?? 0;
 		}
 	},
 

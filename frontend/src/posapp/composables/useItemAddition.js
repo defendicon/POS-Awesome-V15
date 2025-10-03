@@ -6,26 +6,68 @@ import { withPerf } from "../utils/perf.js";
 /* global frappe, __ */
 
 export function useItemAddition() {
-        const runAsyncTask = (task, contextLabel) => {
-                Promise.resolve().then(() => {
-                        try {
-                                const result = typeof task === "function" ? task() : null;
-                                if (result && typeof result.then === "function") {
-                                        result.catch((error) => {
-                                                console.error(
-                                                        `Async task failed${contextLabel ? ` (${contextLabel})` : ""}:`,
-                                                        error,
-                                                );
-                                        });
-                                }
-                        } catch (error) {
-                                console.error(
-                                        `Async task threw synchronously${contextLabel ? ` (${contextLabel})` : ""}:`,
-                                        error,
-                                );
-                        }
-                });
-        };
+	const pendingItemTaskKeys = new Map();
+
+	const getItemRequestKey = (item, context) => {
+		if (!item || !item.item_code) {
+			return null;
+		}
+		const warehouse = item.warehouse || context?.pos_profile?.warehouse || "";
+		const batch = item.batch_no || "";
+		return `${item.item_code}::${warehouse}::${batch}`;
+	};
+
+	const runAsyncTask = (task, contextLabel, requestKey) => {
+		if (requestKey) {
+			const existing = pendingItemTaskKeys.get(requestKey);
+			if (existing) {
+				return existing;
+			}
+		}
+
+		let scheduled = Promise.resolve().then(() => {
+			let result;
+			try {
+				result = typeof task === "function" ? task() : null;
+			} catch (error) {
+				console.error(
+					`Async task threw synchronously${contextLabel ? ` (${contextLabel})` : ""}:`,
+					error,
+				);
+				throw error;
+			}
+
+			if (result && typeof result.then === "function") {
+				return result.catch((error) => {
+					console.error(
+						`Async task failed${contextLabel ? ` (${contextLabel})` : ""}:`,
+						error,
+					);
+					throw error;
+				});
+			}
+
+			return result;
+		});
+
+		scheduled = scheduled.finally(() => {
+			if (requestKey) {
+				pendingItemTaskKeys.delete(requestKey);
+			}
+		});
+
+		if (requestKey) {
+			pendingItemTaskKeys.set(requestKey, scheduled);
+		}
+
+		scheduled.catch(() => {});
+		return scheduled;
+	};
+
+	const scheduleItemTask = (task, contextLabel, item, context) => {
+		const key = getItemRequestKey(item, context);
+		return runAsyncTask(task, contextLabel, key);
+	};
 
         // Remove item from invoice
         const removeItem = (item, context) => {
@@ -77,11 +119,21 @@ export function useItemAddition() {
 			};
 			context.packed_items.push(child);
                         if (context.update_item_detail) {
-                                runAsyncTask(() => context.update_item_detail(child, false), "update_item_detail:bundle_child");
+                                scheduleItemTask(
+                                        () => context.update_item_detail(child, false),
+                                        "update_item_detail:bundle_child",
+                                        child,
+                                        context,
+                                );
                                 context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
                         }
                         if (context.fetch_available_qty) {
-                                runAsyncTask(() => context.fetch_available_qty(child), "fetch_available_qty:bundle_child");
+                                scheduleItemTask(
+                                        () => context.fetch_available_qty(child),
+                                        "fetch_available_qty:bundle_child",
+                                        child,
+                                        context,
+                                );
                         }
 		}
 	};
@@ -194,16 +246,20 @@ export function useItemAddition() {
                                 runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
                                 // Skip recalculation to preserve the manually set rate
                                 if (context.update_item_detail) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
                                                 () => context.update_item_detail(new_item, false),
                                                 "update_item_detail:new",
+                                                new_item,
+                                                context,
                                         );
                                 }
 
                                 if (context.fetch_available_qty) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
                                                 () => context.fetch_available_qty(new_item),
                                                 "fetch_available_qty:new",
+                                                new_item,
+                                                context,
                                         );
                                 }
 
@@ -260,9 +316,11 @@ export function useItemAddition() {
 				const cur_item = context.items[index];
 				const previousQty = cur_item.qty;
                                 if (context.update_items_details) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
                                                 () => context.update_items_details([cur_item]),
                                                 "update_items_details:merge_new",
+                                                cur_item,
+                                                context,
                                         );
                                 }
 				// Merge serial numbers if any
@@ -298,9 +356,11 @@ export function useItemAddition() {
                                 }
 
                                 if (context.fetch_available_qty) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
                                                 () => context.fetch_available_qty(cur_item),
                                                 "fetch_available_qty:merge_new",
+                                                cur_item,
+                                                context,
                                         );
                                 }
                                 if (cur_item.qty > previousQty) {
@@ -311,9 +371,11 @@ export function useItemAddition() {
 			const cur_item = context.items[index];
 			const previousQty = cur_item.qty;
                         if (context.update_items_details) {
-                                runAsyncTask(
+                                scheduleItemTask(
                                         () => context.update_items_details([cur_item]),
                                         "update_items_details:existing",
+                                        cur_item,
+                                        context,
                                 );
                         }
 			// Serial number logic for existing item
