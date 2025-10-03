@@ -568,7 +568,6 @@ import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import {
   parseBooleanSetting,
-  formatNegativeStockWarning,
   formatStockShortageError,
 } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
@@ -1896,49 +1895,25 @@ export default {
 							: null;
 				const requestedQty = Math.abs(new_item.qty || 1);
 
-				if (availableQty !== null && availableQty < requestedQty) {
-					const negativeStockEnabled = this.isNegativeStockEnabled();
-					const shouldBlock =
-						!negativeStockEnabled &&
-						(this.blockSaleBeyondAvailableQty || availableQty <= 0);
+                                if (availableQty !== null && availableQty < requestedQty) {
+                                        const negativeStockEnabled = this.isNegativeStockEnabled();
+                                        const shouldBlock =
+                                                !negativeStockEnabled &&
+                                                (this.blockSaleBeyondAvailableQty || availableQty <= 0);
 
-					if (shouldBlock || negativeStockEnabled) {
-						const formattedAvailable = this.format_number
-							? this.format_number(
-									availableQty,
-									this.hide_qty_decimals ? 0 : this.float_precision,
-								)
-							: availableQty;
-						const formattedRequested = this.format_number
-							? this.format_number(
-									requestedQty,
-									this.hide_qty_decimals ? 0 : this.float_precision,
-								)
-							: requestedQty;
-
-					if (shouldBlock) {
-						this.showScanError({
-							message: formatStockShortageError(
-								new_item.item_name || new_item.item_code || scannedCodeForDisplay,
-								availableQty,
-								requestedQty
-							),
-							code: scannedCodeForDisplay,
-							details: this.__("Adjust the quantity or enable negative stock to continue."),
-						});
-						return;
-					}
-
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							new_item.item_name || new_item.item_code || scannedCodeForDisplay,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-					}
-				}
+                                        if (shouldBlock) {
+                                                this.showScanError({
+                                                        message: formatStockShortageError(
+                                                                new_item.item_name || new_item.item_code || scannedCodeForDisplay,
+                                                                availableQty,
+                                                                requestedQty
+                                                        ),
+                                                        code: scannedCodeForDisplay,
+                                                        details: this.__("Adjust the quantity or enable negative stock to continue."),
+                                                });
+                                                return;
+                                        }
+                                }
 
 				if (fromScanner) {
 					this.awaitingScanResult = true;
@@ -3055,16 +3030,7 @@ export default {
 					return;
 				}
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-				}
+                                // Negative stock is allowed, so continue without raising notifications
 			}
 
 			this.awaitingScanResult = true;

@@ -11,7 +11,6 @@ import { ref } from 'vue';
 
 import {
     parseBooleanSetting,
-    formatNegativeStockWarning,
     formatStockShortageError,
 } from '../utils/stock.js';
 export function useCartValidation() {
@@ -104,17 +103,6 @@ export function useCartValidation() {
                     });
                 }
                 return false;
-            }
-
-            if (allowNegativeStock && exceedsAvailable && eventBus && showNegativeStockWarning) {
-                eventBus.emit("show_message", {
-                    title: formatNegativeStockWarning(
-                        item.item_name || item.item_code,
-                        item.actual_qty,
-                        requestedQty
-                    ),
-                    color: "warning",
-                });
             }
 
             return true;
@@ -241,17 +229,6 @@ export function useCartValidation() {
                 });
             }
             return false;
-        }
-
-        if (allowNegativeStock && exceedsAvailable && eventBus && showNegativeStockWarning) {
-            eventBus.emit("show_message", {
-                title: formatNegativeStockWarning(
-                    item.item_name || item.item_code,
-                    item.actual_qty,
-                    requestedQty
-                ),
-                color: "warning",
-            });
         }
 
         return true;
