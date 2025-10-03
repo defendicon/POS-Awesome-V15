@@ -249,96 +249,127 @@ export async function getAllStoredItems() {
 }
 
 export async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0 } = {}) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		const term = search.toLowerCase();
-		if (term) {
-			let collection = db
-				.table("items")
-				.where("item_code")
-				.startsWithIgnoreCase(term)
-				.or("item_name")
-				.startsWithIgnoreCase(term)
-				.or("barcodes")
-				.equalsIgnoreCase(term)
-				.or("name_keywords")
-				.startsWithIgnoreCase(term)
-				.or("serials")
-				.equalsIgnoreCase(term)
-				.or("batches")
-				.equalsIgnoreCase(term);
-			if (itemGroup && itemGroup.toLowerCase() !== "all") {
-				const group = itemGroup.toLowerCase();
-				collection = collection.and((it) => it.item_group && it.item_group.toLowerCase() === group);
-			}
-			let results = await collection.toArray();
-			if (!results.length) {
-				let fallback = db.table("items");
-				if (itemGroup && itemGroup.toLowerCase() !== "all") {
-					fallback = fallback.where("item_group").equalsIgnoreCase(itemGroup);
-				}
-				results = await fallback
-					.filter((it) => {
-						const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
-						const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
-						const barcodeMatch = Array.isArray(it.item_barcode)
-							? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
-							: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
-						const serialMatch = Array.isArray(it.serial_no_data)
-							? it.serial_no_data.some((s) => s.serial_no && s.serial_no.toLowerCase() === term)
-							: Array.isArray(it.serials)
-								? it.serials.some((s) => s && s.toLowerCase() === term)
-								: false;
-						const batchMatch = Array.isArray(it.batch_no_data)
-							? it.batch_no_data.some((b) => b.batch_no && b.batch_no.toLowerCase() === term)
-							: Array.isArray(it.batches)
-								? it.batches.some((b) => b && b.toLowerCase() === term)
-								: false;
-						return nameMatch || codeMatch || barcodeMatch || serialMatch || batchMatch;
-					})
-					.toArray();
-			}
-			const map = new Map();
-			results.forEach((it) => {
-				if (!map.has(it.item_code)) {
-					map.set(it.item_code, it);
-				}
-			});
-			const unique = Array.from(map.values());
-			return unique.slice(offset, offset + limit);
-		}
-		let collection = db.table("items");
-		if (itemGroup && itemGroup.toLowerCase() !== "all") {
-			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
-		}
-		if (search) {
-			const term = search.toLowerCase();
-			collection = collection.filter((it) => {
-				const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
-				const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
-				const barcodeMatch = Array.isArray(it.item_barcode)
-					? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
-					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
-				const serialMatch = Array.isArray(it.serial_no_data)
-					? it.serial_no_data.some((s) => s.serial_no && s.serial_no.toLowerCase() === term)
-					: Array.isArray(it.serials)
-						? it.serials.some((s) => s && s.toLowerCase() === term)
-						: false;
-				const batchMatch = Array.isArray(it.batch_no_data)
-					? it.batch_no_data.some((b) => b.batch_no && b.batch_no.toLowerCase() === term)
-					: Array.isArray(it.batches)
-						? it.batches.some((b) => b && b.toLowerCase() === term)
-						: false;
-				return nameMatch || codeMatch || barcodeMatch || serialMatch || batchMatch;
-			});
-		}
-		const res = await collection.offset(offset).limit(limit).toArray();
-		return res;
-	} catch (e) {
-		console.error("Failed to query stored items", e);
-		return [];
-	}
+        try {
+                await checkDbHealth();
+                if (!db.isOpen()) await db.open();
+
+                const tokens = Array.from(
+                        new Set(
+                                (search || "")
+                                        .toLowerCase()
+                                        .split(/\s+/)
+                                        .map((part) => part.trim())
+                                        .filter(Boolean),
+                        ),
+                );
+
+                const matchesTokens = (it) => {
+                        if (!tokens.length) {
+                                return true;
+                        }
+
+                        const searchableFields = [];
+                        const pushValue = (value) => {
+                                if (value) {
+                                        searchableFields.push(String(value).toLowerCase());
+                                }
+                        };
+
+                        pushValue(it.item_name);
+                        pushValue(it.item_code);
+                        pushValue(it.barcode);
+
+                        if (Array.isArray(it.item_barcode)) {
+                                it.item_barcode.forEach((b) => pushValue(b && b.barcode));
+                        } else {
+                                pushValue(it.item_barcode);
+                        }
+
+                        if (Array.isArray(it.barcodes)) {
+                                it.barcodes.forEach((bc) => pushValue(bc));
+                        }
+
+                        if (Array.isArray(it.name_keywords)) {
+                                it.name_keywords.forEach((kw) => pushValue(kw));
+                        }
+
+                        if (Array.isArray(it.serial_no_data)) {
+                                it.serial_no_data.forEach((s) => pushValue(s && s.serial_no));
+                        }
+
+                        if (Array.isArray(it.serials)) {
+                                it.serials.forEach((s) => pushValue(s));
+                        }
+
+                        if (Array.isArray(it.batch_no_data)) {
+                                it.batch_no_data.forEach((b) => pushValue(b && b.batch_no));
+                        }
+
+                        if (Array.isArray(it.batches)) {
+                                it.batches.forEach((b) => pushValue(b));
+                        }
+
+                        if (!searchableFields.length) {
+                                return false;
+                        }
+
+                        return tokens.every((token) => searchableFields.some((field) => field.includes(token)));
+                };
+
+                if (tokens.length) {
+                        const [primaryToken] = tokens;
+                        let collection = db
+                                .table("items")
+                                .where("item_code")
+                                .startsWithIgnoreCase(primaryToken)
+                                .or("item_name")
+                                .startsWithIgnoreCase(primaryToken)
+                                .or("barcodes")
+                                .equalsIgnoreCase(primaryToken)
+                                .or("name_keywords")
+                                .startsWithIgnoreCase(primaryToken)
+                                .or("serials")
+                                .equalsIgnoreCase(primaryToken)
+                                .or("batches")
+                                .equalsIgnoreCase(primaryToken);
+
+                        if (itemGroup && itemGroup.toLowerCase() !== "all") {
+                                const group = itemGroup.toLowerCase();
+                                collection = collection.and((it) => it.item_group && it.item_group.toLowerCase() === group);
+                        }
+
+                        let results = (await collection.toArray()).filter(matchesTokens);
+
+                        if (!results.length) {
+                                let fallback = db.table("items");
+                                if (itemGroup && itemGroup.toLowerCase() !== "all") {
+                                        fallback = fallback.where("item_group").equalsIgnoreCase(itemGroup);
+                                }
+                                results = await fallback.filter(matchesTokens).toArray();
+                        }
+
+                        const map = new Map();
+                        results.forEach((it) => {
+                                if (!map.has(it.item_code)) {
+                                        map.set(it.item_code, it);
+                                }
+                        });
+
+                        const unique = Array.from(map.values());
+                        return unique.slice(offset, offset + limit);
+                }
+
+                let collection = db.table("items");
+                if (itemGroup && itemGroup.toLowerCase() !== "all") {
+                        collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
+                }
+
+                const res = await collection.offset(offset).limit(limit).toArray();
+                return res;
+        } catch (e) {
+                console.error("Failed to query stored items", e);
+                return [];
+        }
 }
 
 export async function clearStoredItems() {

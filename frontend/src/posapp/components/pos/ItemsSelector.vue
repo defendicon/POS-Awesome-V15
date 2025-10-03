@@ -819,28 +819,62 @@ export default {
 			}
 
 			// Filter by search term only if it exists and is long enough
-			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
-				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+                       if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
+                               const tokens = Array.from(
+                                       new Set(
+                                               searchTerm
+                                                       .toLowerCase()
+                                                       .split(/\s+/)
+                                                       .map((part) => part.trim())
+                                                       .filter(Boolean),
+                                       ),
+                               );
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
-				});
-			}
+                               if (tokens.length) {
+                                       filtered = filtered.filter((item) => {
+                                               const searchableFields = [];
 
-			return filtered;
-		},
+                                               if (item.item_code) {
+                                                       searchableFields.push(String(item.item_code).toLowerCase());
+                                               }
+
+                                               if (item.item_name) {
+                                                       searchableFields.push(String(item.item_name).toLowerCase());
+                                               }
+
+                                               if (item.barcode) {
+                                                       searchableFields.push(String(item.barcode).toLowerCase());
+                                               }
+
+                                               if (Array.isArray(item.item_barcode)) {
+                                                       searchableFields.push(
+                                                               ...item.item_barcode
+                                                                       .map((b) => b && b.barcode && String(b.barcode).toLowerCase())
+                                                                       .filter(Boolean),
+                                                       );
+                                               }
+
+                                               if (Array.isArray(item.barcodes)) {
+                                                       searchableFields.push(
+                                                               ...item.barcodes
+                                                                       .map((bc) => (bc != null ? String(bc).toLowerCase() : ""))
+                                                                       .filter(Boolean),
+                                                       );
+                                               }
+
+                                               if (!searchableFields.length) {
+                                                       return false;
+                                               }
+
+                                               return tokens.every((token) =>
+                                                       searchableFields.some((field) => field.includes(token)),
+                                               );
+                                       });
+                               }
+                       }
+
+                       return filtered;
+               },
 
 		async fetchServerItemsTimestamp() {
 			try {

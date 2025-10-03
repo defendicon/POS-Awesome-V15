@@ -999,18 +999,52 @@ export async function searchStoredItems({ search = "", itemGroup = "", limit = 1
 		if (itemGroup && itemGroup.toLowerCase() !== "all") {
 			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
 		}
-		if (search) {
-			const term = search.toLowerCase();
-			collection = collection.filter((it) => {
-				const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
-				const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
-				const barcodeMatch = Array.isArray(it.item_barcode)
-					? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
-					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
-				return nameMatch || codeMatch || barcodeMatch;
-			});
-		}
-		return await collection.offset(offset).limit(limit).toArray();
+               if (search) {
+                       const tokens = Array.from(
+                               new Set(
+                                       search
+                                               .toLowerCase()
+                                               .split(/\s+/)
+                                               .map((part) => part.trim())
+                                               .filter(Boolean),
+                               ),
+                       );
+
+                       if (tokens.length) {
+                               collection = collection.filter((it) => {
+                                       const searchableFields = [];
+
+                                       if (it.item_name) {
+                                               searchableFields.push(String(it.item_name).toLowerCase());
+                                       }
+
+                                       if (it.item_code) {
+                                               searchableFields.push(String(it.item_code).toLowerCase());
+                                       }
+
+                                       if (it.item_barcode) {
+                                               if (Array.isArray(it.item_barcode)) {
+                                                       searchableFields.push(
+                                                               ...it.item_barcode
+                                                                       .map((b) => b && b.barcode && String(b.barcode).toLowerCase())
+                                                                       .filter(Boolean),
+                                                       );
+                                               } else {
+                                                       searchableFields.push(String(it.item_barcode).toLowerCase());
+                                               }
+                                       }
+
+                                       if (!searchableFields.length) {
+                                               return false;
+                                       }
+
+                                       return tokens.every((token) =>
+                                               searchableFields.some((field) => field.includes(token)),
+                                       );
+                               });
+                       }
+               }
+               return await collection.offset(offset).limit(limit).toArray();
 	} catch (e) {
 		console.error("Failed to query stored items", e);
 		return [];
