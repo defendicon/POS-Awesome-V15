@@ -4,7 +4,7 @@
  */
 
 import { defineStore } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 const toNumber = (value) => {
     if (value == null) {
@@ -167,14 +167,6 @@ export const useInvoiceStore = defineStore('invoice', () => {
         });
         return map;
     });
-
-    watch(
-        items,
-        () => {
-            touch();
-        },
-        { deep: true }
-    );
 
     return {
         invoiceDoc,
