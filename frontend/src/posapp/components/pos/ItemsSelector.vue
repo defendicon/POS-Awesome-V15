@@ -565,7 +565,6 @@ import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import {
   parseBooleanSetting,
-  formatNegativeStockWarning,
   formatStockShortageError,
 } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
@@ -1921,16 +1920,9 @@ export default {
 						return;
 					}
 
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							new_item.item_name || new_item.item_code || scannedCodeForDisplay,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-					}
-				}
+                                        // Low stock warnings are suppressed to avoid distracting notifications
+                                        }
+                                }
 
 				if (fromScanner) {
 					this.awaitingScanResult = true;
@@ -3047,17 +3039,8 @@ export default {
 					return;
 				}
 
-				if (negativeStockEnabled) {
-					this.eventBus.emit("show_message", {
-						title: formatNegativeStockWarning(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty
-						),
-						color: "warning",
-					});
-				}
-			}
+                                // Suppress low stock notifications when negative stock is allowed
+                        }
 
 			this.awaitingScanResult = true;
 

@@ -28,7 +28,11 @@ export default {
 
         async add_item(item, options = {}) {
                 const res = await addItem(item, this);
-                if (!options?.skipNotification && this.eventBus?.emit) {
+
+                const shouldNotify =
+                        options?.notifyOnSuccess === true && !options?.skipNotification && this.eventBus?.emit;
+
+                if (shouldNotify) {
                         const rawQty = typeof item?.qty === "number" ? item.qty : parseFloat(item?.qty);
                         const shouldAnnounce = Number.isFinite(rawQty) ? rawQty > 0 : true;
 
