@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+import re
 
 import frappe
 from erpnext.stock.doctype.batch.batch import (
@@ -176,6 +177,25 @@ def get_items(
         if not price_list:
             price_list = pos_profile.get("selling_price_list")
 
+        raw_search_value = cstr(search_value or "").strip()
+        token_order = []
+        token_set = set()
+        if raw_search_value:
+            for part in re.split(r"\s+", raw_search_value):
+                cleaned = cstr(part).strip()
+                if not cleaned:
+                    continue
+                lowered = cleaned.lower()
+                if lowered in token_set:
+                    continue
+                token_set.add(lowered)
+                token_order.append(cleaned)
+
+        tokenized_terms_lower = [token.lower() for token in token_order] if len(token_order) > 1 else []
+        search_term_for_query = token_order[0] if token_order else raw_search_value
+        if len(token_order) > 1:
+            search_term_for_query = max(token_order, key=len)
+
         def _to_positive_int(value):
             """Convert the input to a non-negative integer if possible."""
             try:
@@ -212,13 +232,13 @@ def get_items(
         or_filters = []
         item_code_for_search = None
         data = {}
-        if search_value:
-            data = search_serial_or_batch_or_barcode_number(search_value, search_serial_no, search_batch_no)
-            item_code = data.get("item_code") if data.get("item_code") else search_value
+        if raw_search_value:
+            data = search_serial_or_batch_or_barcode_number(raw_search_value, search_serial_no, search_batch_no)
+            item_code = data.get("item_code") if data.get("item_code") else search_term_for_query
             min_search_len = 2
 
             if use_limit_search:
-                if len(search_value) >= min_search_len:
+                if len(search_term_for_query) >= min_search_len:
                     or_filters = [
                         ["name", "like", f"{item_code}%"],
                         ["item_name", "like", f"{item_code}%"],
@@ -231,11 +251,17 @@ def get_items(
                     filters["item_code"] = data.get("item_code")
                     or_filters = []
                     item_code_for_search = None
-                elif len(search_value) < min_search_len:
+                elif len(search_term_for_query) < min_search_len:
                     # For short inputs, only attempt exact matches
                     filters["item_code"] = item_code
             elif data.get("item_code"):
                 filters["item_code"] = data.get("item_code")
+        else:
+            tokenized_terms_lower = []
+
+        if raw_search_value and data.get("item_code"):
+            # Exact matches from barcode/serial/batch searches should bypass token filtering
+            tokenized_terms_lower = []
 
         if item_group and item_group.upper() != "ALL":
             filters["item_group"] = ["like", f"%{item_group}%"]
@@ -254,7 +280,7 @@ def get_items(
         # When a specific search term is provided, fetch all matching
         # items. Applying a limit in this scenario can truncate results
         # and prevent relevant items from appearing in the item selector.
-        if not search_value:
+        if not raw_search_value:
             if limit is not None:
                 limit_page_length = limit
                 if offset and not start_after:
@@ -284,6 +310,55 @@ def get_items(
 
         page_start = limit_start or 0
         page_size = limit_page_length or 100
+
+        def matches_search_tokens(item_row, detail_row):
+            if not tokenized_terms_lower:
+                return True
+
+            search_fields = [
+                item_row.get("item_code"),
+                item_row.get("item_name"),
+                item_row.get("description"),
+                item_row.get("barcode"),
+            ]
+
+            if detail_row:
+                for barcode in (detail_row.get("item_barcode") or []):
+                    if isinstance(barcode, dict):
+                        search_fields.append(barcode.get("barcode"))
+                    else:
+                        search_fields.append(barcode)
+
+                for barcode in (detail_row.get("barcodes") or []):
+                    if isinstance(barcode, dict):
+                        search_fields.append(barcode.get("barcode"))
+                    else:
+                        search_fields.append(barcode)
+
+                for serial in (detail_row.get("serial_no_data") or []):
+                    if isinstance(serial, dict):
+                        search_fields.append(serial.get("serial_no"))
+                    else:
+                        search_fields.append(serial)
+
+                for batch in (detail_row.get("batch_no_data") or []):
+                    if isinstance(batch, dict):
+                        search_fields.append(batch.get("batch_no"))
+                    else:
+                        search_fields.append(batch)
+
+            normalized_fields = [
+                cstr(value).strip().lower()
+                for value in search_fields
+                if cstr(value).strip()
+            ]
+            if not normalized_fields:
+                return False
+
+            return all(
+                any(token in field for field in normalized_fields)
+                for token in tokenized_terms_lower
+            )
 
         while True:
             items_data = frappe.get_all(
@@ -353,6 +428,8 @@ def get_items(
                         "item_attributes": item_attributes or "",
                     }
                 )
+                if not matches_search_tokens(row, detail):
+                    continue
                 result.append(row)
                 if limit_page_length and len(result) >= limit_page_length:
                     break
