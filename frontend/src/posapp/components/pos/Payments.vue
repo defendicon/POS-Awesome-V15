@@ -1799,94 +1799,118 @@ export default {
 			});
 		},
 		// Request payment for phone type
-		request_payment() {
-			this.phone_dialog = false;
-			const vm = this;
-			if (!this.invoice_doc.contact_mobile) {
-				this.eventBus.emit("show_message", {
-					title: __("Please set the customer's mobile number"),
-					color: "error",
-				});
-				this.eventBus.emit("open_edit_customer");
-				this.back_to_invoice();
-				return;
-			}
-			this.eventBus.emit("freeze", { title: __("Waiting for payment...") });
-			this.invoice_doc.payments.forEach((payment) => {
-				payment.amount = this.flt(payment.amount);
-			});
-			let formData = { ...this.invoice_doc };
-			formData["total_change"] = !this.invoice_doc.is_return ? -this.diff_payment : 0;
-			formData["paid_change"] = !this.invoice_doc.is_return ? this.paid_change : 0;
-			formData["credit_change"] = -this.credit_change;
-			formData["redeemed_customer_credit"] = this.redeemed_customer_credit;
-			formData["customer_credit_dict"] = this.customer_credit_dict;
-			formData["is_cashback"] = this.is_cashback;
-			frappe
-				.call({
-					method: "posawesome.posawesome.api.invoices.update_invoice",
-					args: { data: formData },
-					async: false,
-					callback: function (r) {
-						if (r.message) {
-							vm.invoice_doc = r.message;
-						}
-					},
-				})
-				.then(() => {
-					frappe
-						.call({
-							method: "posawesome.posawesome.api.payments.create_payment_request",
-							args: { doc: vm.invoice_doc },
-						})
-						.fail(() => {
-							vm.eventBus.emit("unfreeze");
-							vm.eventBus.emit("show_message", {
-								title: __("Payment request failed"),
-								color: "error",
-							});
-						})
-						.then(({ message }) => {
-							const payment_request_name = message.name;
-							setTimeout(() => {
-								frappe.db
-									.get_value("Payment Request", payment_request_name, [
-										"status",
-										"grand_total",
-									])
-									.then(({ message }) => {
-										if (message.status !== "Paid") {
-											vm.eventBus.emit("unfreeze");
-											vm.eventBus.emit("show_message", {
-												title: __(
-													"Payment Request took too long to respond. Please try requesting for payment again",
-												),
-												color: "error",
-											});
-										} else {
-											vm.eventBus.emit("unfreeze");
-											vm.eventBus.emit("show_message", {
-												title: __("Payment of {0} received successfully.", [
-													vm.formatCurrency(
-														message.grand_total,
-														vm.invoice_doc.currency,
-														0,
-													),
-												]),
-												color: "success",
-											});
-											frappe.db
-												.get_doc(vm.invoice_doc.doctype, vm.invoice_doc.name)
-												.then((doc) => {
-													vm.invoice_doc = doc;
-													vm.submit(null, true);
-												});
-										}
-									});
-							}, 30000);
-						});
-				});
-		},
+                async request_payment() {
+                        this.phone_dialog = false;
+                        if (!this.invoice_doc.contact_mobile) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Please set the customer's mobile number"),
+                                        color: "error",
+                                });
+                                this.eventBus.emit("open_edit_customer");
+                                this.back_to_invoice();
+                                return;
+                        }
+
+                        this.eventBus.emit("freeze", { title: __("Waiting for payment...") });
+
+                        try {
+                                this.invoice_doc.payments.forEach((payment) => {
+                                        payment.amount = this.flt(payment.amount);
+                                });
+
+                                const formData = {
+                                        ...this.invoice_doc,
+                                        total_change: !this.invoice_doc.is_return ? -this.diff_payment : 0,
+                                        paid_change: !this.invoice_doc.is_return ? this.paid_change : 0,
+                                        credit_change: -this.credit_change,
+                                        redeemed_customer_credit: this.redeemed_customer_credit,
+                                        customer_credit_dict: this.customer_credit_dict,
+                                        is_cashback: this.is_cashback,
+                                };
+
+                                const updateResponse = await frappe.call({
+                                        method: "posawesome.posawesome.api.invoices.update_invoice",
+                                        args: { data: formData },
+                                });
+
+                                if (updateResponse?.message) {
+                                        this.invoice_doc = updateResponse.message;
+                                }
+
+                                const paymentResponse = await frappe.call({
+                                        method: "posawesome.posawesome.api.payments.create_payment_request",
+                                        args: { doc: this.invoice_doc },
+                                });
+
+                                const payment_request_name = paymentResponse?.message?.name;
+                                if (!payment_request_name) {
+                                        throw new Error("Payment request failed");
+                                }
+
+                                await new Promise((resolve, reject) => {
+                                        setTimeout(async () => {
+                                                try {
+                                                        const { message } = await frappe.db.get_value(
+                                                                "Payment Request",
+                                                                payment_request_name,
+                                                                ["status", "grand_total"],
+                                                        );
+
+                                                        if (!message) {
+                                                                this.eventBus.emit("show_message", {
+                                                                        title: __(
+                                                                                "Payment request status could not be retrieved. Please try again",
+                                                                        ),
+                                                                        color: "error",
+                                                                });
+                                                                resolve();
+                                                                return;
+                                                        }
+
+                                                        if (message.status !== "Paid") {
+                                                                this.eventBus.emit("show_message", {
+                                                                        title: __(
+                                                                                "Payment Request took too long to respond. Please try requesting for payment again",
+                                                                        ),
+                                                                        color: "error",
+                                                                });
+                                                                resolve();
+                                                                return;
+                                                        }
+
+                                                        this.eventBus.emit("show_message", {
+                                                                title: __("Payment of {0} received successfully.", [
+                                                                        this.formatCurrency(
+                                                                                message.grand_total,
+                                                                                this.invoice_doc.currency,
+                                                                                0,
+                                                                        ),
+                                                                ]),
+                                                                color: "success",
+                                                        });
+
+                                                        const doc = await frappe.db.get_doc(
+                                                                this.invoice_doc.doctype,
+                                                                this.invoice_doc.name,
+                                                        );
+                                                        this.invoice_doc = doc;
+                                                        this.submit(null, true);
+                                                        resolve();
+                                                } catch (error) {
+                                                        reject(error);
+                                                }
+                                        }, 30000);
+                                });
+                        } catch (error) {
+                                console.error("Payment request error:", error);
+                                this.eventBus.emit("show_message", {
+                                        title: __(error.message || "Payment request failed"),
+                                        color: "error",
+                                });
+                        } finally {
+                                this.eventBus.emit("unfreeze");
+                        }
+                },
 		// Get M-Pesa payment modes from backend
 		get_mpesa_modes() {
 			const vm = this;
