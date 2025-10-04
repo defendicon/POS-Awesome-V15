@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+import re
 
 import frappe
 from erpnext.stock.doctype.batch.batch import (
@@ -212,30 +213,54 @@ def get_items(
         or_filters = []
         item_code_for_search = None
         data = {}
+        search_words = []
+        normalized_search_value = ""
+        longest_search_token = ""
+        raw_search_value = ""
         if search_value:
+            raw_search_value = cstr(search_value).strip()
             data = search_serial_or_batch_or_barcode_number(search_value, search_serial_no, search_batch_no)
-            item_code = data.get("item_code") if data.get("item_code") else search_value
+
+            tokens = re.split(r"\s+", raw_search_value)
+            seen = []
+            for token in tokens:
+                cleaned = cstr(token).strip()
+                if not cleaned:
+                    continue
+                if len(cleaned) > len(longest_search_token):
+                    longest_search_token = cleaned
+                lowered = cleaned.lower()
+                if lowered not in seen:
+                    seen.append(lowered)
+            search_words = seen
+            normalized_search_value = " ".join(search_words)
+
+            resolved_item_code = data.get("item_code")
+            base_search_term = resolved_item_code or (longest_search_token or raw_search_value)
+            item_code = resolved_item_code or raw_search_value
             min_search_len = 2
 
             if use_limit_search:
-                if len(search_value) >= min_search_len:
+                if len(raw_search_value) >= min_search_len:
                     or_filters = [
-                        ["name", "like", f"{item_code}%"],
-                        ["item_name", "like", f"{item_code}%"],
-                        ["item_code", "like", f"%{item_code}%"],
+                        ["name", "like", f"{base_search_term}%"],
+                        ["item_name", "like", f"{base_search_term}%"],
+                        ["item_code", "like", f"%{base_search_term}%"],
                     ]
-                    item_code_for_search = item_code
+                    item_code_for_search = base_search_term
 
                 # Prefer exact match when barcode/serial/batch resolves to item_code
-                if data.get("item_code"):
-                    filters["item_code"] = data.get("item_code")
+                if resolved_item_code:
+                    filters["item_code"] = resolved_item_code
                     or_filters = []
                     item_code_for_search = None
-                elif len(search_value) < min_search_len:
+                elif len(raw_search_value) < min_search_len:
                     # For short inputs, only attempt exact matches
-                    filters["item_code"] = item_code
-            elif data.get("item_code"):
-                filters["item_code"] = data.get("item_code")
+                    filters["item_code"] = base_search_term
+            elif resolved_item_code:
+                filters["item_code"] = resolved_item_code
+        else:
+            resolved_item_code = None
 
         if item_group and item_group.upper() != "ALL":
             filters["item_group"] = ["like", f"%{item_group}%"]
@@ -284,6 +309,69 @@ def get_items(
 
         page_start = limit_start or 0
         page_size = limit_page_length or 100
+
+        word_filter_active = bool(normalized_search_value) and len(normalized_search_value) >= 3
+
+        def _collect_searchable_values(row):
+            values = [
+                row.get("item_code"),
+                row.get("item_name"),
+                row.get("name"),
+                row.get("description"),
+                row.get("barcode"),
+                row.get("brand"),
+                row.get("item_group"),
+                row.get("attributes"),
+            ]
+
+            item_attributes = row.get("item_attributes")
+            if isinstance(item_attributes, list):
+                for attr in item_attributes:
+                    if isinstance(attr, dict):
+                        values.append(attr.get("attribute"))
+                        values.append(attr.get("attribute_value"))
+                    else:
+                        values.append(attr)
+            elif item_attributes:
+                values.append(item_attributes)
+
+            for barcode in row.get("item_barcode") or []:
+                if isinstance(barcode, dict):
+                    values.append(barcode.get("barcode"))
+                else:
+                    values.append(barcode)
+
+            for barcode in row.get("barcodes") or []:
+                values.append(barcode)
+
+            for serial in row.get("serial_no_data") or []:
+                if isinstance(serial, dict):
+                    values.append(serial.get("serial_no"))
+                else:
+                    values.append(serial)
+
+            for batch in row.get("batch_no_data") or []:
+                if isinstance(batch, dict):
+                    values.append(batch.get("batch_no"))
+                else:
+                    values.append(batch)
+
+            normalized_values = []
+            for val in values:
+                normalized = cstr(val).strip()
+                if normalized:
+                    normalized_values.append(normalized.lower())
+            return normalized_values
+
+        def matches_search_words(row):
+            if not word_filter_active or not search_words:
+                return True
+
+            searchable_values = _collect_searchable_values(row)
+            for word in search_words:
+                if not any(word in value for value in searchable_values):
+                    return False
+            return True
 
         while True:
             items_data = frappe.get_all(
@@ -353,6 +441,8 @@ def get_items(
                         "item_attributes": item_attributes or "",
                     }
                 )
+                if not matches_search_words(row):
+                    continue
                 result.append(row)
                 if limit_page_length and len(result) >= limit_page_length:
                     break

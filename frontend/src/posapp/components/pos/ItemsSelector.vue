@@ -783,8 +783,9 @@ export default {
 
 	methods: {
 		// Performance optimization: Memoized search function
-		memoizedSearch(searchTerm, itemGroup) {
-			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
+               memoizedSearch(searchTerm, itemGroup) {
+                       const normalizedSearch = this.normalizeSearchTerm(searchTerm);
+                       const cacheKey = `${normalizedSearch || ""}_${itemGroup || "ALL"}`;
 
 			// Check if we have a cached result
 			if (this.searchCache && this.searchCache.has(cacheKey)) {
@@ -793,7 +794,7 @@ export default {
 			}
 
 			// Perform the search
-			const result = this.performSearch(searchTerm, itemGroup);
+                       const result = this.performSearch(normalizedSearch, itemGroup);
 
 			// Cache the result
 			if (this.searchCache) {
@@ -803,12 +804,33 @@ export default {
 			return result;
 		},
 
-		performSearch(searchTerm, itemGroup) {
-			if (!this.items || !this.items.length) {
-				return [];
-			}
+               normalizeSearchTerm(searchTerm) {
+                       if (!searchTerm || !String(searchTerm).trim()) {
+                               return "";
+                       }
 
-			let filtered = this.items;
+                       const words = String(searchTerm)
+                               .toLowerCase()
+                               .trim()
+                               .split(/\s+/)
+                               .filter(Boolean);
+
+                       if (!words.length) {
+                               return "";
+                       }
+
+                       // Sort to make cache keys consistent regardless of order and remove duplicates
+                       const uniqueWords = [...new Set(words)].sort();
+
+                       return uniqueWords.join(" ");
+               },
+
+               performSearch(searchTerm, itemGroup) {
+                       if (!this.items || !this.items.length) {
+                               return [];
+                       }
+
+                       let filtered = this.items;
 
 			// Filter by item group
 			if (itemGroup !== "ALL") {
@@ -819,25 +841,48 @@ export default {
 			}
 
 			// Filter by search term only if it exists and is long enough
-			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
-				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+                       if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
+                               const searchWords = searchTerm
+                                       .toLowerCase()
+                                       .split(/\s+/)
+                                       .filter(Boolean);
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
-				});
-			}
+                               filtered = filtered.filter((item) => {
+                                       if (!searchWords.length) {
+                                               return true;
+                                       }
+
+                                       const name = (item.item_name || "").toLowerCase();
+                                       const code = (item.item_code || "").toLowerCase();
+
+                                       const barcodeValues = [];
+                                       if (Array.isArray(item.item_barcode)) {
+                                               item.item_barcode.forEach((b) => {
+                                                       if (b?.barcode) {
+                                                               barcodeValues.push(String(b.barcode).toLowerCase());
+                                                       }
+                                               });
+                                       }
+                                       if (Array.isArray(item.barcodes)) {
+                                               item.barcodes.forEach((bc) => {
+                                                       if (bc) {
+                                                               barcodeValues.push(String(bc).toLowerCase());
+                                                       }
+                                               });
+                                       }
+                                       if (item.barcode) {
+                                               barcodeValues.push(String(item.barcode).toLowerCase());
+                                       }
+
+                                       return searchWords.every((word) => {
+                                               return (
+                                                       code.includes(word) ||
+                                                       name.includes(word) ||
+                                                       barcodeValues.some((barcode) => barcode.includes(word))
+                                               );
+                                       });
+                               });
+                       }
 
 			return filtered;
 		},
@@ -3073,16 +3118,19 @@ export default {
 				return [];
 			}
 
-			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-			let filteredItems = [...this.items];
+                       const rawSearchTerm = this.get_search(this.first_search).trim();
+                       const searchTerm = this.normalizeSearchTerm(rawSearchTerm);
+                       let filteredItems = [...this.items];
 
-			// Apply search filter only for queries with at least three characters
-			if (searchTerm.length >= 3) {
-				filteredItems = filteredItems.filter((item) => {
-					const barcodeList = [];
-					if (Array.isArray(item.item_barcode)) {
-						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
-					} else if (item.item_barcode) {
+                        // Apply search filter only for queries with at least three characters
+                       if (searchTerm.length >= 3) {
+                               const searchWords = searchTerm.split(/\s+/).filter(Boolean);
+
+                               filteredItems = filteredItems.filter((item) => {
+                                        const barcodeList = [];
+                                        if (Array.isArray(item.item_barcode)) {
+                                                barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
+                                        } else if (item.item_barcode) {
 						barcodeList.push(String(item.item_barcode));
 					}
 					if (Array.isArray(item.barcodes)) {
@@ -3101,13 +3149,19 @@ export default {
 						...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
 							? item.batch_no_data.map((b) => b.batch_no)
 							: []),
-					]
-						.filter(Boolean)
-						.map((field) => field.toLowerCase());
+                                        ]
+                                                .filter(Boolean)
+                                                .map((field) => String(field).toLowerCase());
 
-					return searchFields.some((field) => field.includes(searchTerm));
-				});
-			}
+                                        if (!searchWords.length) {
+                                                return true;
+                                        }
+
+                                        return searchWords.every((word) =>
+                                                searchFields.some((field) => field.includes(word)),
+                                        );
+                                });
+                        }
 
 			// Apply item group filter
 			if (this.item_group !== "ALL") {
