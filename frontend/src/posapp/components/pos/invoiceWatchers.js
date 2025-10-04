@@ -6,6 +6,7 @@ const buildSnapshot = (items) => {
         const snapshot = {
                 order: [],
                 qty: {},
+                stockQty: {},
                 meta: {},
         };
 
@@ -16,10 +17,15 @@ const buildSnapshot = (items) => {
                 const rowId = item.posa_row_id;
                 snapshot.order.push(rowId);
                 snapshot.qty[rowId] = item.qty;
+                snapshot.stockQty[rowId] = item.stock_qty;
                 snapshot.meta[rowId] = {
                         item_code: item.item_code,
                         item_group: item.item_group,
                         brand: item.brand,
+                        uom: item.uom,
+                        conversion_factor: item.conversion_factor,
+                        price_list_rate: item.price_list_rate,
+                        stock_qty: item.stock_qty,
                         posa_is_offer: item.posa_is_offer,
                         posa_is_replace: item.posa_is_replace,
                 };
@@ -29,7 +35,7 @@ const buildSnapshot = (items) => {
 };
 
 const diffSnapshots = (previous, current) => {
-        const prevSnapshot = previous || { order: [], qty: {}, meta: {} };
+        const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
         const changed = new Set();
         const removedInfo = {};
 
@@ -56,6 +62,17 @@ const diffSnapshots = (previous, current) => {
         currOrder.forEach((rowId) => {
                 const previousQty = prevSnapshot.qty ? prevSnapshot.qty[rowId] : undefined;
                 if (previousQty !== current.qty[rowId]) {
+                        changed.add(rowId);
+                }
+
+                const previousStockQty = prevSnapshot.stockQty ? prevSnapshot.stockQty[rowId] : undefined;
+                if (previousStockQty !== current.stockQty[rowId]) {
+                        changed.add(rowId);
+                }
+
+                const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
+                const currMeta = current.meta ? current.meta[rowId] : undefined;
+                if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
                         changed.add(rowId);
                 }
         });
