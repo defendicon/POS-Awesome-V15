@@ -51,29 +51,35 @@ export default {
         normalizeBrand(brand) {
                 return (brand || "").trim().toLowerCase();
         },
-	getItemBrand(item) {
-		let brand = this.normalizeBrand(item.brand);
-		if (brand) {
-			item.brand = brand;
-			return brand;
-		}
-		if (this.brand_cache && this.brand_cache[item.item_code]) {
-			brand = this.brand_cache[item.item_code];
-		} else {
-			frappe.call({
-				method: "posawesome.posawesome.api.items.get_item_brand",
-				args: { item_code: item.item_code },
-				async: false,
-				callback: (r) => {
-					brand = this.normalizeBrand(r.message);
-				},
-			});
-			this.brand_cache = this.brand_cache || {};
-			this.brand_cache[item.item_code] = brand;
-		}
-		item.brand = brand;
-		return brand;
-	},
+        async getItemBrand(item) {
+                let brand = this.normalizeBrand(item.brand);
+                if (brand) {
+                        item.brand = brand;
+                        return brand;
+                }
+
+                this.brand_cache = this.brand_cache || {};
+
+                if (this.brand_cache[item.item_code]) {
+                        brand = this.brand_cache[item.item_code];
+                } else {
+                        try {
+                                const { message } = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.get_item_brand",
+                                        args: { item_code: item.item_code },
+                                });
+                                brand = this.normalizeBrand(message);
+                        } catch (error) {
+                                console.error("Failed to fetch item brand:", error);
+                                brand = "";
+                        }
+
+                        this.brand_cache[item.item_code] = brand;
+                }
+
+                item.brand = brand;
+                return brand;
+        },
 	checkOfferIsAppley(item, offer) {
 		let applied = false;
 		const item_offers = JSON.parse(item.posa_offers);
@@ -87,35 +93,34 @@ export default {
 		return applied;
 	},
 
-	handelOffers() {
-		const offers = [];
-		this.posOffers.forEach((offer) => {
-			if (offer.apply_on === "Item Code") {
-				const itemOffer = this.getItemOffer(offer);
-				if (itemOffer) {
-					offers.push(itemOffer);
-				}
-			} else if (offer.apply_on === "Item Group") {
-				const groupOffer = this.getGroupOffer(offer);
-				if (groupOffer) {
-					offers.push(groupOffer);
-				}
-			} else if (offer.apply_on === "Brand") {
-				const brandOffer = this.getBrandOffer(offer);
-				if (brandOffer) {
-					offers.push(brandOffer);
-				}
-			} else if (offer.apply_on === "Transaction") {
-				const transactionOffer = this.getTransactionOffer(offer);
-				if (transactionOffer) {
-					offers.push(transactionOffer);
-				}
-			}
-		});
+        async handelOffers() {
+                try {
+                        const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
+                        const offerPromises = sourceOffers.map(async (offer) => {
+                                if (offer.apply_on === "Item Code") {
+                                        return this.getItemOffer(offer);
+                                }
+                                if (offer.apply_on === "Item Group") {
+                                        return this.getGroupOffer(offer);
+                                }
+                                if (offer.apply_on === "Brand") {
+                                        return this.getBrandOffer(offer);
+                                }
+                                if (offer.apply_on === "Transaction") {
+                                        return this.getTransactionOffer(offer);
+                                }
+                                return null;
+                        });
 
-		this.setItemGiveOffer(offers);
-		this.updatePosOffers(offers);
-	},
+                        const offerResults = await Promise.all(offerPromises);
+                        const offers = offerResults.filter((offer) => !!offer);
+
+                        this.setItemGiveOffer(offers);
+                        this.updatePosOffers(offers);
+                } catch (error) {
+                        console.error("Failed to process offers:", error);
+                }
+        },
 
 	setItemGiveOffer(offers) {
 		// Set item give offer for replace
@@ -283,36 +288,42 @@ export default {
 		return apply_offer;
 	},
 
-	getBrandOffer(offer) {
-		let apply_offer = null;
-		if (offer.apply_on === "Brand") {
-			if (this.checkOfferCoupon(offer)) {
-				const items = [];
-				let total_count = 0;
-				let total_amount = 0;
-				const offer_brand = this.normalizeBrand(offer.brand);
-				const combined = [...this.items, ...this.packed_items];
-				combined.forEach((item) => {
-					const item_brand = this.getItemBrand(item);
-					if (!item.posa_is_offer && item_brand && item_brand === offer_brand) {
-						if (
-							offer.offer === "Item Price" &&
-							item.posa_offer_applied &&
-							!this.checkOfferIsAppley(item, offer)
-						) {
-							return;
-						}
-						total_count += item.stock_qty;
-						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-						total_amount += item.stock_qty * rate;
-						items.push(item.posa_row_id);
-					}
-				});
-				if (total_count || total_amount) {
-					const res = this.checkQtyAnountOffer(offer, total_count, total_amount);
-					if (res.apply) {
-						offer.items = items;
-						apply_offer = offer;
+        async getBrandOffer(offer) {
+                let apply_offer = null;
+                if (offer.apply_on === "Brand") {
+                        if (this.checkOfferCoupon(offer)) {
+                                const items = [];
+                                let total_count = 0;
+                                let total_amount = 0;
+                                const offer_brand = this.normalizeBrand(offer.brand);
+                                const combined = [...this.items, ...this.packed_items];
+                                const brandedItems = await Promise.all(
+                                        combined.map(async (item) => ({
+                                                item,
+                                                brand: await this.getItemBrand(item),
+                                        })),
+                                );
+
+                                brandedItems.forEach(({ item, brand }) => {
+                                        if (!item.posa_is_offer && brand && brand === offer_brand) {
+                                                if (
+                                                        offer.offer === "Item Price" &&
+                                                        item.posa_offer_applied &&
+                                                        !this.checkOfferIsAppley(item, offer)
+                                                ) {
+                                                        return;
+                                                }
+                                                total_count += item.stock_qty;
+                                                const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
+                                                total_amount += item.stock_qty * rate;
+                                                items.push(item.posa_row_id);
+                                        }
+                                });
+                                if (total_count || total_amount) {
+                                        const res = this.checkQtyAnountOffer(offer, total_count, total_amount);
+                                        if (res.apply) {
+                                                offer.items = items;
+                                                apply_offer = offer;
 					}
 				}
 			}

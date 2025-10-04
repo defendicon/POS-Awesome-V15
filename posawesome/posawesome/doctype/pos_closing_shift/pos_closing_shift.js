@@ -49,20 +49,20 @@ frappe.ui.form.on("POS Closing Shift", {
                         });
 	},
 
-	get_pos_invoices(frm) {
-		frappe.call({
-			method: "posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.get_pos_invoices",
-			args: {
-				pos_opening_shift: frm.doc.pos_opening_shift,
-			},
-			callback: (r) => {
-				let pos_docs = r.message;
-				set_form_data(pos_docs, frm);
-				refresh_fields(frm);
-				set_html_data(frm);
-			},
-		});
-	},
+        get_pos_invoices(frm) {
+                frappe.call({
+                        method: "posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.get_pos_invoices",
+                        args: {
+                                pos_opening_shift: frm.doc.pos_opening_shift,
+                        },
+                        callback: async (r) => {
+                                const pos_docs = r.message;
+                                await set_form_data(pos_docs, frm);
+                                refresh_fields(frm);
+                                set_html_data(frm);
+                        },
+                });
+        },
 
 	get_pos_payments(frm) {
 		frappe.call({
@@ -87,16 +87,20 @@ frappe.ui.form.on("POS Closing Shift Detail", {
 	},
 });
 
-function set_form_data(data, frm) {
-        data.forEach((d) => {
+async function set_form_data(data, frm) {
+        if (!Array.isArray(data)) {
+                return;
+        }
+
+        for (const d of data) {
                 add_to_pos_transaction(d, frm);
                 const conversion_rate = get_conversion_rate(d);
                 frm.doc.grand_total += get_base_value(d, "grand_total", "base_grand_total", conversion_rate);
                 frm.doc.net_total += get_base_value(d, "net_total", "base_net_total", conversion_rate);
                 frm.doc.total_quantity += flt(d.total_qty);
-                add_to_payments(d, frm, conversion_rate);
+                await add_to_payments(d, frm, conversion_rate);
                 add_to_taxes(d, frm, conversion_rate);
-        });
+        }
 }
 
 function set_form_payments_data(data, frm) {
@@ -133,22 +137,18 @@ function add_to_pos_payments(d, frm) {
 	});
 }
 
-function add_to_payments(d, frm, conversion_rate) {
-        d.payments.forEach((p) => {
+async function add_to_payments(d, frm, conversion_rate) {
+        const payments = Array.isArray(d.payments) ? d.payments : [];
+        const cash_mode_of_payment = await get_cash_mode_of_payment(frm);
+
+        payments.forEach((p) => {
                 const payment = frm.doc.payment_reconciliation.find(
                         (pay) => pay.mode_of_payment === p.mode_of_payment,
                 );
                 if (payment) {
                         let amount = get_base_value(p, "amount", "base_amount", conversion_rate);
-                        let cash_mode_of_payment = get_value(
-                                "POS Profile",
-                                frm.doc.pos_profile,
-                                "posa_cash_mode_of_payment",
-                        );
-                        if (!cash_mode_of_payment) {
-                                cash_mode_of_payment = "Cash";
-                        }
-                        if (payment.mode_of_payment == cash_mode_of_payment) {
+
+                        if (payment.mode_of_payment === cash_mode_of_payment) {
                                 amount -= get_base_value(d, "change_amount", "base_change_amount", conversion_rate);
                         }
                         payment.expected_amount += flt(amount);
@@ -228,23 +228,32 @@ function set_html_data(frm) {
 	});
 }
 
-const get_value = (doctype, name, field) => {
-        let value;
-        frappe.call({
-                method: "frappe.client.get_value",
-                args: {
-			doctype: doctype,
-			filters: { name: name },
-			fieldname: field,
-		},
-		async: false,
-		callback: function (r) {
-			if (!r.exc) {
-				value = r.message[field];
-			}
-		},
-        });
-        return value;
+const get_value = async (doctype, name, field) => {
+        if (!doctype || !name || !field) {
+                        return undefined;
+        }
+
+        try {
+                const { message } = await frappe.db.get_value(doctype, name, field);
+                return message ? message[field] : undefined;
+        } catch (error) {
+                console.error("Failed to fetch value:", error);
+                return undefined;
+        }
+};
+
+const get_cash_mode_of_payment = async (frm) => {
+        const profile = frm.doc.pos_profile;
+
+        if (!frm.__cashModeCache || frm.__cashModeCache.profile !== profile) {
+                const value = await get_value("POS Profile", profile, "posa_cash_mode_of_payment");
+                frm.__cashModeCache = {
+                        profile,
+                        value: value || "Cash",
+                };
+        }
+
+        return frm.__cashModeCache.value;
 };
 
 const get_conversion_rate = (doc) =>

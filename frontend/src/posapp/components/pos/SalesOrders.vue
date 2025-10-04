@@ -20,17 +20,26 @@
 								clearable
 								class="mx-4 pos-themed-input"
 							></v-text-field>
-							<v-btn
-								variant="text"
-								class="ml-2"
-								color="primary"
-								theme="dark"
-								@click="search_orders"
-								>{{ __("Search") }}</v-btn
-							>
-						</v-row>
-						<v-row no-gutters>
-							<v-col cols="12" class="pa-1">
+                                                        <v-btn
+                                                                variant="text"
+                                                                class="ml-2"
+                                                                color="primary"
+                                                                theme="dark"
+                                                                :loading="isLoading"
+                                                                :disabled="isLoading || isSubmitting"
+                                                                @click="search_orders"
+                                                                >{{ __("Search") }}</v-btn
+                                                        >
+                                                </v-row>
+                                                <v-row v-if="errorMessage">
+                                                        <v-col cols="12" class="pt-0">
+                                                                <v-alert type="error" dense border="start" class="mx-4">
+                                                                        {{ errorMessage }}
+                                                                </v-alert>
+                                                        </v-col>
+                                                </v-row>
+                                                <v-row no-gutters>
+                                                        <v-col cols="12" class="pa-1">
 								<v-data-table
 									:headers="headers"
 									:items="dialog_data"
@@ -55,17 +64,24 @@
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
-					<v-btn v-if="selected.length" color="success" theme="dark" @click="submit_dialog"
-						>Select</v-btn
-					>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
+                                        <v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
+                                        <v-btn
+                                                v-if="selected.length"
+                                                color="success"
+                                                theme="dark"
+                                                :loading="isSubmitting"
+                                                :disabled="isSubmitting"
+                                                @click="submit_dialog"
+                                                >Select</v-btn
+                                        >
+                                </v-card-actions>
+                        </v-card>
+                </v-dialog>
 	</v-row>
 </template>
 
 <script>
+/* global __, frappe */
 import format from "../../format";
 export default {
 	// props: ["draftsDialog"],
@@ -75,9 +91,12 @@ export default {
 		singleSelect: true,
 		pos_profile: {},
 		selected: [],
-		dialog_data: {},
-		order_name: "",
-		headers: [
+                dialog_data: [],
+                order_name: "",
+                isLoading: false,
+                isSubmitting: false,
+                errorMessage: "",
+                headers: [
 			{
 				title: __("Customer"),
 				key: "customer_name",
@@ -121,88 +140,112 @@ export default {
 			this.selected = [];
 		},
 
-		search_orders() {
-			frappe.call({
-				method: "posawesome.posawesome.api.sales_orders.search_orders",
-				args: {
-					order_name: vm.order_name,
-					company: this.pos_profile.company,
-					currency: this.pos_profile.currency,
-				},
-				async: false,
-				callback: function (r) {
-					if (r.message) {
-						vm.dialog_data = r.message;
-					}
-				},
-			});
-		},
+                async search_orders() {
+                        if (this.isLoading || this.isSubmitting) {
+                                return;
+                        }
 
-		async submit_dialog() {
-			if (this.selected.length > 0) {
-				var invoice_doc_for_load = {};
-				await frappe.call({
-					method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
-					args: {
-						sales_order: this.selected[0].name,
-					},
-					callback: function (r) {
-						if (r.message) {
-							invoice_doc_for_load = r.message;
-						}
-					},
-				});
-				if (invoice_doc_for_load.items) {
-					const selectedItems = this.selected[0].items;
-					const loadedItems = invoice_doc_for_load.items;
+                        this.errorMessage = "";
+                        this.isLoading = true;
 
-					const loadedItemsMap = {};
-					loadedItems.forEach((item) => {
-						loadedItemsMap[item.item_code] = item;
-					});
+                        try {
+                                const { message } = await frappe.call({
+                                        method: "posawesome.posawesome.api.sales_orders.search_orders",
+                                        args: {
+                                                order_name: this.order_name,
+                                                company: this.pos_profile.company,
+                                                currency: this.pos_profile.currency,
+                                        },
+                                });
 
-					// Iterate through selectedItems and update or discard items
-					for (let i = 0; i < selectedItems.length; i++) {
-						const selectedItem = selectedItems[i];
-						const loadedItem = loadedItemsMap[selectedItem.item_code];
+                                this.dialog_data = message || [];
+                        } catch (error) {
+                                console.error("Failed to search sales orders:", error);
+                                this.errorMessage = __("Unable to fetch sales orders");
+                        } finally {
+                                this.isLoading = false;
+                        }
+                },
 
-						if (loadedItem) {
-							// Update the fields of selected item with loaded item's values
-							selectedItem.qty = loadedItem.qty;
-							selectedItem.amount = loadedItem.amount;
-							selectedItem.uom = loadedItem.uom;
-							selectedItem.rate = loadedItem.rate;
-							// Update other fields as needed
-						} else {
-							// If 'item_code' doesn't exist in loadedItems, discard the item
-							selectedItems.splice(i, 1);
-							i--; // Adjust the index as items are removed
-						}
-					}
-				}
-				this.eventBus.emit("load_order", this.selected[0]);
-				this.draftsDialog = false;
-				frappe.call({
-					method: "posawesome.posawesome.api.invoices.delete_sales_invoice",
-					args: {
-						sales_invoice: invoice_doc_for_load.name,
-					},
-					callback: function (r) {
-						if (r.message) {
-							// invoice_doc_for_load = r.message;
-						}
-					},
-				});
-			}
-		},
+                async submit_dialog() {
+                        if (this.isSubmitting || this.selected.length === 0) {
+                                return;
+                        }
+
+                        this.isSubmitting = true;
+                        this.errorMessage = "";
+
+                        try {
+                                let invoice_doc_for_load = {};
+                                const { message } = await frappe.call({
+                                        method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
+                                        args: {
+                                                sales_order: this.selected[0].name,
+                                        },
+                                });
+
+                                if (message) {
+                                        invoice_doc_for_load = message;
+                                }
+
+                                if (invoice_doc_for_load.items) {
+                                        const selectedItems = this.selected[0].items;
+                                        const loadedItems = invoice_doc_for_load.items;
+
+                                        const loadedItemsMap = {};
+                                        loadedItems.forEach((item) => {
+                                                loadedItemsMap[item.item_code] = item;
+                                        });
+
+                                        // Iterate through selectedItems and update or discard items
+                                        for (let i = 0; i < selectedItems.length; i++) {
+                                                const selectedItem = selectedItems[i];
+                                                const loadedItem = loadedItemsMap[selectedItem.item_code];
+
+                                                if (loadedItem) {
+                                                        // Update the fields of selected item with loaded item's values
+                                                        selectedItem.qty = loadedItem.qty;
+                                                        selectedItem.amount = loadedItem.amount;
+                                                        selectedItem.uom = loadedItem.uom;
+                                                        selectedItem.rate = loadedItem.rate;
+                                                        // Update other fields as needed
+                                                } else {
+                                                        // If 'item_code' doesn't exist in loadedItems, discard the item
+                                                        selectedItems.splice(i, 1);
+                                                        i--; // Adjust the index as items are removed
+                                                }
+                                        }
+                                }
+
+                                this.eventBus.emit("load_order", this.selected[0]);
+                                this.draftsDialog = false;
+
+                                if (invoice_doc_for_load.name) {
+                                        await frappe.call({
+                                                method: "posawesome.posawesome.api.invoices.delete_sales_invoice",
+                                                args: {
+                                                        sales_invoice: invoice_doc_for_load.name,
+                                                },
+                                        });
+                                }
+                        } catch (error) {
+                                console.error("Failed to submit sales order:", error);
+                                this.errorMessage = __("Unable to load the selected sales order");
+                        } finally {
+                                this.isSubmitting = false;
+                        }
+                },
 	},
 	created: function () {
-		this.eventBus.on("open_orders", (data) => {
-			this.clearSelected();
-			this.draftsDialog = true;
-			this.dialog_data = data;
-			this.order_name = "";
-		});
+                this.eventBus.on("open_orders", (data) => {
+                        this.clearSelected();
+                        this.draftsDialog = true;
+                        this.dialog_data = data;
+                        this.order_name = "";
+                        this.errorMessage = "";
+                        this.isLoading = false;
+                        this.isSubmitting = false;
+                });
 	},
 	mounted() {
 		this.eventBus.on("register_pos_profile", (data) => {
