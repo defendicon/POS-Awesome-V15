@@ -16,15 +16,175 @@ import { useDiscounts } from "../../composables/useDiscounts.js";
 import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useStockUtils } from "../../composables/useStockUtils.js";
 
+const ITEM_DETAIL_CACHE_TTL = 5000;
+const STOCK_CACHE_TTL = 5000;
+
 const { setSerialNo, setBatchQty } = useBatchSerial();
 const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
 const { removeItem, addItem, getNewItem, clearInvoice } = useItemAddition();
 const { calcUom, calcStockQty } = useStockUtils();
 
 export default {
-	remove_item(item) {
-		return removeItem(item, this);
-	},
+        _ensureTaskBucket(rowId) {
+                if (!rowId) {
+                        return null;
+                }
+                if (!this._itemTaskCache) {
+                        this._itemTaskCache = new Map();
+                }
+                if (!this._itemTaskCache.has(rowId)) {
+                        this._itemTaskCache.set(rowId, {});
+                }
+                return this._itemTaskCache.get(rowId);
+        },
+        _getItemTaskPromise(rowId, taskName) {
+                if (!rowId || !this._itemTaskCache) {
+                        return null;
+                }
+                const bucket = this._itemTaskCache.get(rowId);
+                return bucket ? bucket[taskName] || null : null;
+        },
+        _setItemTaskPromise(rowId, taskName, promise) {
+                if (!rowId || !promise) {
+                        return promise;
+                }
+                const bucket = this._ensureTaskBucket(rowId);
+                const trackedPromise = Promise.resolve(promise).finally(() => {
+                        const activeBucket = this._itemTaskCache ? this._itemTaskCache.get(rowId) : null;
+                        if (activeBucket) {
+                                delete activeBucket[taskName];
+                                if (!Object.keys(activeBucket).length) {
+                                        this._itemTaskCache.delete(rowId);
+                                }
+                        }
+                });
+                bucket[taskName] = trackedPromise;
+                return trackedPromise;
+        },
+        resetItemTaskCache(rowId, taskName = null) {
+                if (!this._itemTaskCache) {
+                        return;
+                }
+                if (!rowId) {
+                        this._itemTaskCache = new Map();
+                        return;
+                }
+                if (taskName === null) {
+                        this._itemTaskCache.delete(rowId);
+                        return;
+                }
+                const bucket = this._itemTaskCache.get(rowId);
+                if (!bucket) {
+                        return;
+                }
+                delete bucket[taskName];
+                if (!Object.keys(bucket).length) {
+                        this._itemTaskCache.delete(rowId);
+                }
+        },
+        queueItemTask(itemOrRowId, taskName, taskFn, options = {}) {
+                const rowId = typeof itemOrRowId === "string" ? itemOrRowId : itemOrRowId?.posa_row_id;
+                const { force = false } = options;
+                const executeTask = () => Promise.resolve().then(() => taskFn());
+
+                if (!rowId) {
+                        return executeTask();
+                }
+
+                if (force) {
+                        this.resetItemTaskCache(rowId, taskName);
+                } else {
+                        const existing = this._getItemTaskPromise(rowId, taskName);
+                        if (existing) {
+                                return existing;
+                        }
+                }
+
+                const promise = executeTask();
+                return this._setItemTaskPromise(rowId, taskName, promise);
+        },
+        hasItemTaskPromise(rowId, taskName) {
+                return !!this._getItemTaskPromise(rowId, taskName);
+        },
+        getItemTaskPromise(rowId, taskName) {
+                return this._getItemTaskPromise(rowId, taskName);
+        },
+        _getItemDetailCacheKey(item) {
+                const code = item?.item_code;
+                const warehouse = item?.warehouse || this.pos_profile?.warehouse;
+                if (!code || !warehouse) {
+                        return null;
+                }
+                return `${code}::${warehouse}`;
+        },
+        _getCachedItemDetail(key) {
+                if (!key) {
+                        return null;
+                }
+                const cache = this.item_detail_cache || {};
+                const entry = cache[key];
+                if (!entry) {
+                        return null;
+                }
+                if (Date.now() - entry.ts > ITEM_DETAIL_CACHE_TTL) {
+                        delete cache[key];
+                        return null;
+                }
+                return entry.data;
+        },
+        _storeItemDetailCache(key, data) {
+                if (!key || !data) {
+                        return;
+                }
+                if (!this.item_detail_cache) {
+                        this.item_detail_cache = {};
+                }
+                this.item_detail_cache[key] = {
+                        ts: Date.now(),
+                        data: JSON.parse(JSON.stringify(data)),
+                };
+        },
+        clearItemDetailCache() {
+                this.item_detail_cache = {};
+        },
+        _getStockCacheKey(item) {
+                const code = item?.item_code;
+                const warehouse = item?.warehouse || this.pos_profile?.warehouse;
+                if (!code || !warehouse) {
+                        return null;
+                }
+                return `${code}::${warehouse}`;
+        },
+        _getCachedStockQty(key) {
+                if (!key) {
+                        return null;
+                }
+                const cache = this.item_stock_cache || {};
+                const entry = cache[key];
+                if (!entry) {
+                        return null;
+                }
+                if (Date.now() - entry.ts > STOCK_CACHE_TTL) {
+                        delete cache[key];
+                        return null;
+                }
+                return entry.qty;
+        },
+        _storeStockQty(key, qty) {
+                if (!key) {
+                        return;
+                }
+                if (!this.item_stock_cache) {
+                        this.item_stock_cache = {};
+                }
+                this.item_stock_cache[key] = { ts: Date.now(), qty };
+        },
+        clearItemStockCache() {
+                this.item_stock_cache = {};
+        },
+        remove_item(item) {
+                return removeItem(item, this);
+        },
 
         async add_item(item, options = {}) {
                 const res = await addItem(item, this);
@@ -1395,8 +1555,19 @@ export default {
 		}
 	},
 
+
+
         // Update details for a single item (fetch from backend)
         async update_item_detail(item, force_update = false) {
+                return this.queueItemTask(
+                        item,
+                        "update_item_detail",
+                        () => this._performItemDetailUpdate(item, force_update),
+                        { force: force_update },
+                );
+        },
+
+        async _performItemDetailUpdate(item, force_update = false) {
                 console.log("update_item_detail request", {
                         code: item ? item.item_code : undefined,
                         force_update,
@@ -1405,8 +1576,6 @@ export default {
                         return;
                 }
 
-                // If a manual rate was set (e.g. via explicit UOM pricing), don't
-                // overwrite it on expand unless explicitly forced.
                 if (item._manual_rate_set && !force_update) {
                         return;
                 }
@@ -1415,39 +1584,52 @@ export default {
                         item._detailSynced = false;
                 }
 
-                if (item._detailInFlight || (!force_update && item._detailSynced)) {
+                if (!force_update && item._detailSynced) {
+                        return;
+                }
+
+                const cacheKey = this._getItemDetailCacheKey(item);
+                if (!force_update) {
+                        const cachedPayload = this._getCachedItemDetail(cacheKey);
+                        if (cachedPayload) {
+                                this._applyItemDetailPayload(item, cachedPayload, { forceUpdate: force_update, fromCache: true });
+                                item._detailSynced = true;
+                                return;
+                        }
+                }
+
+                if (item._detailInFlight) {
                         return;
                 }
 
                 item._detailInFlight = true;
-                const vm = this;
 
                 try {
-                        const currentDoc = vm.get_invoice_doc();
+                        const currentDoc = this.get_invoice_doc();
                         const response = await frappe.call({
                                 method: "posawesome.posawesome.api.items.get_item_detail",
                                 args: {
-                                        warehouse: item.warehouse || vm.pos_profile.warehouse,
+                                        warehouse: item.warehouse || this.pos_profile.warehouse,
                                         doc: currentDoc,
-                                        price_list: vm.selected_price_list || vm.pos_profile.selling_price_list,
+                                        price_list: this.selected_price_list || this.pos_profile.selling_price_list,
                                         item: {
                                                 item_code: item.item_code,
-                                                customer: vm.customer,
+                                                customer: this.customer,
                                                 doctype: currentDoc.doctype,
                                                 name: currentDoc.name || `New ${currentDoc.doctype} 1`,
-                                                company: vm.pos_profile.company,
+                                                company: this.pos_profile.company,
                                                 conversion_rate: 1,
-                                                currency: vm.pos_profile.currency,
+                                                currency: this.pos_profile.currency,
                                                 qty: item.qty,
                                                 price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
                                                 child_docname: `New ${currentDoc.doctype} Item 1`,
-                                                cost_center: vm.pos_profile.cost_center,
-                                                pos_profile: vm.pos_profile.name,
+                                                cost_center: this.pos_profile.cost_center,
+                                                pos_profile: this.pos_profile.name,
                                                 uom: item.uom,
                                                 tax_category: "",
                                                 transaction_type: "selling",
-                                                update_stock: vm.pos_profile.update_stock,
-                                                price_list: vm.get_price_list(),
+                                                update_stock: this.pos_profile.update_stock,
+                                                price_list: this.get_price_list(),
                                                 has_batch_no: item.has_batch_no,
                                                 has_serial_no: item.has_serial_no,
                                                 serial_no: item.serial_no,
@@ -1462,150 +1644,15 @@ export default {
                                 return;
                         }
 
-                        if (!item.warehouse) {
-                                item.warehouse = vm.pos_profile.warehouse;
-                        }
-                        if (data.price_list_currency) {
-                                vm.price_list_currency = data.price_list_currency;
-                        }
-
-                        if (!item.original_currency) {
-                                item.original_currency =
-                                        data.price_list_currency || vm.price_list_currency || vm.selected_currency;
-                        }
-                        if (!item.original_rate) {
-                                item.original_rate = data.price_list_rate;
-                        }
-                        if (data.serial_no_data) {
-                                item.serial_no_data = data.serial_no_data;
-                        }
-                        if (data.batch_no_data) {
-                                item.batch_no_data = data.batch_no_data;
-                        }
-                        if (
-                                item.has_batch_no &&
-                                vm.pos_profile.posa_auto_set_batch &&
-                                !item.batch_no &&
-                                Array.isArray(data.batch_no_data) &&
-                                data.batch_no_data.length > 0
-                        ) {
-                                item.batch_no_data = data.batch_no_data;
-                                vm.set_batch_qty(item, null, false);
-                        }
-
-                        if (!item.locked_price) {
-                                if (force_update || !item.base_rate) {
-                                        if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
-                                                item.base_price_list_rate = data.price_list_rate;
-                                                if (!item.posa_offer_applied) {
-                                                        item.base_rate = data.price_list_rate;
-                                                }
-                                        }
-                                }
-
-                                if (!item.posa_offer_applied) {
-                                        const companyCurrency = vm.pos_profile.currency;
-                                        const baseCurrency = companyCurrency;
-
-                                        if (vm.selected_currency === vm.price_list_currency && vm.selected_currency !== companyCurrency) {
-                                                const conv = vm.conversion_rate || 1;
-                                                item.price_list_rate = vm.flt(
-                                                        item.base_price_list_rate / conv,
-                                                        vm.currency_precision,
-                                                );
-
-                                                if (!item._manual_rate_set) {
-                                                        item.rate = vm.flt(item.base_rate / conv, vm.currency_precision);
-                                                }
-                                        } else if (vm.selected_currency !== baseCurrency) {
-                                                const exchange_rate = vm.exchange_rate || 1;
-                                                item.price_list_rate = vm.flt(
-                                                        item.base_price_list_rate * exchange_rate,
-                                                        vm.currency_precision,
-                                                );
-
-                                                item.rate = vm.flt(item.base_rate * exchange_rate, vm.currency_precision);
-                                        } else {
-                                                item.price_list_rate = item.base_price_list_rate;
-
-                                                if (!item._manual_rate_set) {
-                                                        item.rate = item.base_rate;
-                                                }
-                                        }
-                                } else {
-                                        const baseCurrency = vm.price_list_currency || vm.pos_profile.currency;
-                                        if (vm.selected_currency !== baseCurrency) {
-                                                item.price_list_rate = vm.flt(
-                                                        item.base_rate * vm.exchange_rate,
-                                                        vm.currency_precision,
-                                                );
-                                        } else {
-                                                item.price_list_rate = item.base_rate;
-                                        }
-                                }
-
-                                if (
-                                        !item.posa_offer_applied &&
-                                        vm.pos_profile.posa_apply_customer_discount &&
-                                        vm.customer_info.posa_discount > 0 &&
-                                        vm.customer_info.posa_discount <= 100 &&
-                                        item.posa_is_offer == 0 &&
-                                        !item.posa_is_replace
-                                ) {
-                                        const discount_percent =
-                                                item.max_discount > 0
-                                                        ? Math.min(item.max_discount, vm.customer_info.posa_discount)
-                                                        : vm.customer_info.posa_discount;
-
-                                        item.discount_percentage = discount_percent;
-
-                                        const discount_amount = vm.flt(
-                                                (item.price_list_rate * discount_percent) / 100,
-                                                vm.currency_precision,
-                                        );
-                                        item.discount_amount = discount_amount;
-
-                                        item.base_discount_amount = vm.flt(
-                                                (item.base_price_list_rate * discount_percent) / 100,
-                                                vm.currency_precision,
-                                        );
-
-                                        item.rate = vm.flt(item.price_list_rate - discount_amount, vm.currency_precision);
-                                        item.base_rate = vm.flt(
-                                                item.base_price_list_rate - item.base_discount_amount,
-                                                vm.currency_precision,
-                                        );
-                                }
-                        }
-
-                        item.last_purchase_rate = data.last_purchase_rate;
-                        item.projected_qty = data.projected_qty;
-                        item.reserved_qty = data.reserved_qty;
-                        item.conversion_factor = data.conversion_factor;
-                        item.stock_qty = data.stock_qty;
-                        item.actual_qty = data.actual_qty;
-                        item.stock_uom = data.stock_uom;
-                        item.has_serial_no = data.has_serial_no;
-                        item.has_batch_no = data.has_batch_no;
-
-                        item.amount = vm.flt(item.qty * item.rate, vm.currency_precision);
-                        item.base_amount = vm.flt(item.qty * item.base_rate, vm.currency_precision);
-
-                        console.log(`Updated rates for ${item.item_code} on expand:`, {
-                                base_rate: item.base_rate,
-                                rate: item.rate,
-                                base_price_list_rate: item.base_price_list_rate,
-                                price_list_rate: item.price_list_rate,
-                                exchange_rate: vm.exchange_rate,
-                                selected_currency: vm.selected_currency,
-                                default_currency: vm.pos_profile.currency,
-                        });
-
+                        this._applyItemDetailPayload(item, data, { forceUpdate: force_update, fromCache: false });
+                        this._storeItemDetailCache(cacheKey, data);
                         item._detailSynced = true;
-                        vm.$forceUpdate();
+                        if (typeof this.$forceUpdate === "function") {
+                                this.$forceUpdate();
+                        }
                 } catch (error) {
                         console.error("Error updating item detail:", error);
-                        vm.eventBus.emit("show_message", {
+                        this.eventBus.emit("show_message", {
                                 title: __("Error updating item details"),
                                 color: "error",
                         });
@@ -1614,6 +1661,200 @@ export default {
                 }
         },
 
+        _applyItemDetailPayload(item, data, options = {}) {
+                const { forceUpdate = false } = options;
+
+                if (!item.warehouse) {
+                        item.warehouse = this.pos_profile.warehouse;
+                }
+                if (data.price_list_currency) {
+                        this.price_list_currency = data.price_list_currency;
+                }
+
+                if (data.uom) {
+                        item.stock_uom = data.stock_uom;
+                        item.uom = data.uom;
+                }
+                if (data.conversion_factor) {
+                        item.conversion_factor = data.conversion_factor;
+                }
+
+                item.item_uoms = data.item_uoms || [];
+
+                if (Array.isArray(item.item_uoms) && item.item_uoms.length) {
+                        const existingIndex = item.item_uoms.findIndex((uom) => uom.uom === item.uom);
+                        if (existingIndex === -1) {
+                                item.item_uoms.push({
+                                        uom: item.uom,
+                                        conversion_factor: item.conversion_factor || 1,
+                                });
+                        }
+                }
+
+                if (data.uom) {
+                        item.uom = data.uom;
+                }
+
+                item.allow_change_warehouse = data.allow_change_warehouse;
+                item.locked_price = data.locked_price;
+                item.description = data.description;
+                item.item_tax_template = data.item_tax_template;
+                item.discount_percentage = data.discount_percentage;
+                item.warehouse = data.warehouse || item.warehouse;
+                item.has_batch_no = data.has_batch_no;
+                item.has_serial_no = data.has_serial_no;
+                item.serial_no = data.serial_no;
+                item.batch_no = data.batch_no;
+                item.is_stock_item = data.is_stock_item;
+                item.is_fixed_asset = data.is_fixed_asset;
+                item.allow_alternative_item = data.allow_alternative_item;
+                item.is_stock_item = data.is_stock_item;
+                item.warehouse = data.warehouse || item.warehouse;
+
+                item.actual_qty = data.actual_qty;
+                item.available_qty = data.actual_qty;
+
+                if (this.update_qty_limits) {
+                        this.update_qty_limits(item);
+                }
+
+                if (data.barcode) {
+                        item.barcode = data.barcode;
+                }
+                if (data.brand) {
+                        item.brand = data.brand;
+                }
+                if (data.batch_no) {
+                        item.batch_no = data.batch_no;
+                }
+                if (data.serial_no_data) {
+                        item.serial_no_data = data.serial_no_data;
+                }
+                if (data.batch_no_data) {
+                        item.batch_no_data = data.batch_no_data;
+                }
+                if (
+                        item.has_batch_no &&
+                        this.pos_profile.posa_auto_set_batch &&
+                        !item.batch_no &&
+                        Array.isArray(data.batch_no_data) &&
+                        data.batch_no_data.length > 0
+                ) {
+                        item.batch_no_data = data.batch_no_data;
+                        this.set_batch_qty(item, null, false);
+                }
+
+                if (!item.locked_price) {
+                        if (forceUpdate || !item.base_rate) {
+                                if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
+                                        item.base_price_list_rate = data.price_list_rate;
+                                        if (!item.posa_offer_applied) {
+                                                item.base_rate = data.price_list_rate;
+                                        }
+                                }
+                        }
+
+                        if (!item.posa_offer_applied) {
+                                const companyCurrency = this.pos_profile.currency;
+                                const baseCurrency = companyCurrency;
+
+                                if (
+                                        this.selected_currency === this.price_list_currency &&
+                                        this.selected_currency !== companyCurrency
+                                ) {
+                                        const conv = this.conversion_rate || 1;
+                                        item.price_list_rate = this.flt(
+                                                item.base_price_list_rate / conv,
+                                                this.currency_precision,
+                                        );
+
+                                        if (!item._manual_rate_set) {
+                                                item.rate = this.flt(item.base_rate / conv, this.currency_precision);
+                                        }
+                                } else if (this.selected_currency !== baseCurrency) {
+                                        const exchange_rate = this.exchange_rate || 1;
+                                        item.price_list_rate = this.flt(
+                                                item.base_price_list_rate * exchange_rate,
+                                                this.currency_precision,
+                                        );
+
+                                        item.rate = this.flt(item.base_rate * exchange_rate, this.currency_precision);
+                                } else {
+                                        item.price_list_rate = item.base_price_list_rate;
+
+                                        if (!item._manual_rate_set) {
+                                                item.rate = item.base_rate;
+                                        }
+                                }
+                        } else {
+                                const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                                if (this.selected_currency !== baseCurrency) {
+                                        item.price_list_rate = this.flt(
+                                                item.base_rate * this.exchange_rate,
+                                                this.currency_precision,
+                                        );
+                                } else {
+                                        item.price_list_rate = item.base_rate;
+                                }
+                        }
+
+                        if (
+                                !item.posa_offer_applied &&
+                                this.pos_profile.posa_apply_customer_discount &&
+                                this.customer_info.posa_discount > 0 &&
+                                this.customer_info.posa_discount <= 100 &&
+                                item.posa_is_offer == 0 &&
+                                !item.posa_is_replace
+                        ) {
+                                const discount_percent =
+                                        item.max_discount > 0
+                                                ? Math.min(item.max_discount, this.customer_info.posa_discount)
+                                                : this.customer_info.posa_discount;
+
+                                item.discount_percentage = discount_percent;
+
+                                const discount_amount = this.flt(
+                                        (item.price_list_rate * discount_percent) / 100,
+                                        this.currency_precision,
+                                );
+                                item.discount_amount = discount_amount;
+
+                                item.base_discount_amount = this.flt(
+                                        (item.base_price_list_rate * discount_percent) / 100,
+                                        this.currency_precision,
+                                );
+
+                                item.rate = this.flt(item.price_list_rate - discount_amount, this.currency_precision);
+                                item.base_rate = this.flt(
+                                        item.base_price_list_rate - item.base_discount_amount,
+                                        this.currency_precision,
+                                );
+                        }
+                }
+
+                item.last_purchase_rate = data.last_purchase_rate;
+                item.projected_qty = data.projected_qty;
+                item.reserved_qty = data.reserved_qty;
+                item.conversion_factor = data.conversion_factor;
+                item.stock_qty = data.stock_qty;
+                item.actual_qty = data.actual_qty;
+                item.stock_uom = data.stock_uom;
+                item.has_serial_no = data.has_serial_no;
+                item.has_batch_no = data.has_batch_no;
+
+                item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+
+                console.log(`Updated rates for ${item.item_code} on expand:`, {
+                        base_rate: item.base_rate,
+                        rate: item.rate,
+                        base_price_list_rate: item.base_price_list_rate,
+                        price_list_rate: item.price_list_rate,
+                        exchange_rate: this.exchange_rate,
+                        selected_currency: this.selected_currency,
+                        default_currency: this.pos_profile.currency,
+                });
+        },
         // Fetch customer details (info, price list, etc)
 	async fetch_customer_details() {
 		var vm = this;
@@ -1801,9 +2042,12 @@ export default {
 	},
 
 	// Update UOM (unit of measure) for an item and recalculate prices
-	calc_uom(item, value) {
-		return calcUom(item, value, this);
-	},
+        calc_uom(item, value) {
+                if (!item) {
+                        return;
+                }
+                return this.queueItemTask(item, "calc_uom", () => calcUom(item, value, this));
+        },
 
 	// Calculate stock quantity for an item (simplified - validation handled centrally)
 	calc_stock_qty(item, value) {
@@ -1831,37 +2075,50 @@ export default {
 	},
 
 	// Fetch available stock for an item and cache it
-	async fetch_available_qty(item) {
-		if (!item || !item.item_code || !item.warehouse) return;
-		const key = `${item.item_code}:${item.warehouse}:${item.batch_no || ""}:${item.uom}`;
-		const cached = this.available_stock_cache[key];
-		const now = Date.now();
-		if (cached && now - cached.ts < 60000) {
-			item.available_qty = cached.qty;
-			this.update_qty_limits(item);
-			return;
-		}
-		try {
-			const r = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_available_qty",
-				args: {
-					items: JSON.stringify([
-						{
-							item_code: item.item_code,
-							warehouse: item.warehouse,
-							batch_no: item.batch_no,
-						},
-					]),
-				},
-			});
-			const qty = r.message && r.message.length ? flt(r.message[0].available_qty) : 0;
-			this.available_stock_cache[key] = { qty, ts: now };
-			item.available_qty = qty;
-			this.update_qty_limits(item);
-		} catch (e) {
-			console.error("Failed to fetch available qty", e);
-		}
-	},
+        async fetch_available_qty(item) {
+                if (!item || !item.item_code || !item.warehouse) return;
+
+                const key = this._getStockCacheKey(item);
+                const cachedQty = this._getCachedStockQty(key);
+                if (cachedQty !== null && cachedQty !== undefined) {
+                        item.available_qty = cachedQty;
+                        this.update_qty_limits(item);
+                        return cachedQty;
+                }
+
+                const runner = async () => {
+                        try {
+                                const response = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.get_available_qty",
+                                        args: {
+                                                items: JSON.stringify([
+                                                        {
+                                                                item_code: item.item_code,
+                                                                warehouse: item.warehouse,
+                                                                batch_no: item.batch_no,
+                                                        },
+                                                ]),
+                                        },
+                                });
+                                const qty =
+                                        response.message && response.message.length
+                                                ? flt(response.message[0].available_qty)
+                                                : 0;
+                                this._storeStockQty(key, qty);
+                                if (this.available_stock_cache) {
+                                        this.available_stock_cache[key] = { qty, ts: Date.now() };
+                                }
+                                item.available_qty = qty;
+                                this.update_qty_limits(item);
+                                return qty;
+                        } catch (error) {
+                                console.error("Failed to fetch available qty", error);
+                                throw error;
+                        }
+                };
+
+                return this.queueItemTask(item, "fetch_available_qty", runner);
+        },
 
 	// Set serial numbers for an item (and update qty)
 	set_serial_no(item) {

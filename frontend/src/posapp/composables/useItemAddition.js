@@ -27,18 +27,33 @@ export function useItemAddition() {
                 });
         };
 
+        const scheduleItemTask = (context, item, taskName, task, contextLabel) => {
+                runAsyncTask(() => {
+                        if (item?.posa_row_id && typeof context?.getItemTaskPromise === "function") {
+                                const existing = context.getItemTaskPromise(item.posa_row_id, taskName);
+                                if (existing) {
+                                        return existing;
+                                }
+                        }
+                        return typeof task === "function" ? task() : null;
+                }, contextLabel);
+        };
+
         // Remove item from invoice
         const removeItem = (item, context) => {
                 const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
                 if (index >= 0) {
                         context.items.splice(index, 1);
 		}
-		if (item.is_bundle) {
-			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
-		}
-		// Remove from expanded if present
-		context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
-	};
+                if (item.is_bundle) {
+                        context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
+                }
+                // Remove from expanded if present
+                context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
+                if (item?.posa_row_id && typeof context?.resetItemTaskCache === "function") {
+                        context.resetItemTaskCache(item.posa_row_id);
+                }
+        };
 
 	const { getBundleComponents } = useBundles();
 
@@ -77,14 +92,26 @@ export function useItemAddition() {
 			};
 			context.packed_items.push(child);
                         if (context.update_item_detail) {
-                                runAsyncTask(() => context.update_item_detail(child, false), "update_item_detail:bundle_child");
+                                scheduleItemTask(
+                                        context,
+                                        child,
+                                        "update_item_detail",
+                                        () => context.update_item_detail(child, false),
+                                        "update_item_detail:bundle_child",
+                                );
                                 context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
                         }
                         if (context.fetch_available_qty) {
-                                runAsyncTask(() => context.fetch_available_qty(child), "fetch_available_qty:bundle_child");
+                                scheduleItemTask(
+                                        context,
+                                        child,
+                                        "fetch_available_qty",
+                                        () => context.fetch_available_qty(child),
+                                        "fetch_available_qty:bundle_child",
+                                );
                         }
-		}
-	};
+                }
+        };
 
 	const moveItemToTop = (context, target) => {
 		if (!target) return;
@@ -155,7 +182,10 @@ export function useItemAddition() {
                                 new_item.uom &&
                                 (!new_item.stock_uom || new_item.uom !== new_item.stock_uom)
                         ) {
-                                runAsyncTask(
+                                scheduleItemTask(
+                                        context,
+                                        new_item,
+                                        "calc_uom",
                                         () => context.calc_uom(new_item, new_item.uom),
                                         "calc_uom:new_item",
                                 );
@@ -194,14 +224,20 @@ export function useItemAddition() {
                                 runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
                                 // Skip recalculation to preserve the manually set rate
                                 if (context.update_item_detail) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
+                                                context,
+                                                new_item,
+                                                "update_item_detail",
                                                 () => context.update_item_detail(new_item, false),
                                                 "update_item_detail:new",
                                         );
                                 }
 
                                 if (context.fetch_available_qty) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
+                                                context,
+                                                new_item,
+                                                "fetch_available_qty",
                                                 () => context.fetch_available_qty(new_item),
                                                 "fetch_available_qty:new",
                                         );
@@ -291,14 +327,20 @@ export function useItemAddition() {
                                         cur_item.uom &&
                                         (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
                                 ) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
+                                                context,
+                                                cur_item,
+                                                "calc_uom",
                                                 () => context.calc_uom(cur_item, cur_item.uom),
                                                 "calc_uom:merge_new_item",
                                         );
                                 }
 
                                 if (context.fetch_available_qty) {
-                                        runAsyncTask(
+                                        scheduleItemTask(
+                                                context,
+                                                cur_item,
+                                                "fetch_available_qty",
                                                 () => context.fetch_available_qty(cur_item),
                                                 "fetch_available_qty:merge_new",
                                         );
@@ -351,14 +393,20 @@ export function useItemAddition() {
                                 cur_item.uom &&
                                 (!cur_item.stock_uom || cur_item.uom !== cur_item.stock_uom)
                         ) {
-                                runAsyncTask(
+                                scheduleItemTask(
+                                        context,
+                                        cur_item,
+                                        "calc_uom",
                                         () => context.calc_uom(cur_item, cur_item.uom),
                                         "calc_uom:merge_existing",
                                 );
                         }
 
                         if (context.fetch_available_qty) {
-                                runAsyncTask(
+                                scheduleItemTask(
+                                        context,
+                                        cur_item,
+                                        "fetch_available_qty",
                                         () => context.fetch_available_qty(cur_item),
                                         "fetch_available_qty:existing",
                                 );
@@ -496,14 +544,27 @@ export function useItemAddition() {
 		// Always reset to default customer after invoice
 		context.customer = context.pos_profile.customer;
 
-		context.eventBus.emit("set_customer_readonly", false);
-		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-		context.invoiceTypes = ["Invoice", "Order", "Quotation"];
+                context.eventBus.emit("set_customer_readonly", false);
+                context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
+                context.invoiceTypes = ["Invoice", "Order", "Quotation"];
 
-		if (Object.prototype.hasOwnProperty.call(context, "itemSearch")) {
-			context.itemSearch = "";
-		}
-	};
+                if (Object.prototype.hasOwnProperty.call(context, "itemSearch")) {
+                        context.itemSearch = "";
+                }
+
+                if (typeof context.resetItemTaskCache === "function") {
+                        context.resetItemTaskCache(null);
+                }
+                if (typeof context.clearItemDetailCache === "function") {
+                        context.clearItemDetailCache();
+                }
+                if (typeof context.clearItemStockCache === "function") {
+                        context.clearItemStockCache();
+                }
+                if (context.available_stock_cache) {
+                        context.available_stock_cache = {};
+                }
+        };
 
 	// Add this utility for grouping logic, matching ItemsTable.vue
 	function groupAndAddItem(items, newItem) {

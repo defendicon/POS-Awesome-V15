@@ -385,8 +385,10 @@ export default {
 			float_precision: 6, // Float precision for calculations
 			currency_precision: 6, // Currency precision for display
 			new_line: false, // Add new line for item
-			available_stock_cache: {},
-			brand_cache: {},
+                        available_stock_cache: {},
+                        item_detail_cache: {},
+                        item_stock_cache: {},
+                        brand_cache: {},
 			delivery_charges: [], // List of delivery charges
 			base_delivery_charges_rate: 0, // Delivery charge in company currency
 			delivery_charges_rate: 0, // Selected delivery charge rate

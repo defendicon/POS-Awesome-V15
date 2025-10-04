@@ -2,6 +2,84 @@ import { clearPriceListCache } from "../../../offline/index.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 /* global frappe */
 
+const buildSnapshot = (items) => {
+        const snapshot = {
+                order: [],
+                qty: {},
+                stockQty: {},
+                meta: {},
+        };
+
+        (Array.isArray(items) ? items : []).forEach((item) => {
+                if (!item || !item.posa_row_id) {
+                        return;
+                }
+                const rowId = item.posa_row_id;
+                snapshot.order.push(rowId);
+                snapshot.qty[rowId] = item.qty;
+                snapshot.stockQty[rowId] = item.stock_qty;
+                snapshot.meta[rowId] = {
+                        item_code: item.item_code,
+                        item_group: item.item_group,
+                        brand: item.brand,
+                        uom: item.uom,
+                        conversion_factor: item.conversion_factor,
+                        price_list_rate: item.price_list_rate,
+                        stock_qty: item.stock_qty,
+                        posa_is_offer: item.posa_is_offer,
+                        posa_is_replace: item.posa_is_replace,
+                };
+        });
+
+        return snapshot;
+};
+
+const diffSnapshots = (previous, current) => {
+        const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
+        const changed = new Set();
+        const removedInfo = {};
+
+        const prevOrder = Array.isArray(prevSnapshot.order) ? prevSnapshot.order : [];
+        const currOrder = Array.isArray(current.order) ? current.order : [];
+        const prevSet = new Set(prevOrder);
+        const currSet = new Set(currOrder);
+
+        currOrder.forEach((rowId) => {
+                if (!prevSet.has(rowId)) {
+                        changed.add(rowId);
+                }
+        });
+
+        prevOrder.forEach((rowId) => {
+                if (!currSet.has(rowId)) {
+                        changed.add(rowId);
+                        if (prevSnapshot.meta && prevSnapshot.meta[rowId]) {
+                                removedInfo[rowId] = { ...prevSnapshot.meta[rowId] };
+                        }
+                }
+        });
+
+        currOrder.forEach((rowId) => {
+                const previousQty = prevSnapshot.qty ? prevSnapshot.qty[rowId] : undefined;
+                if (previousQty !== current.qty[rowId]) {
+                        changed.add(rowId);
+                }
+
+                const previousStockQty = prevSnapshot.stockQty ? prevSnapshot.stockQty[rowId] : undefined;
+                if (previousStockQty !== current.stockQty[rowId]) {
+                        changed.add(rowId);
+                }
+
+                const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
+                const currMeta = current.meta ? current.meta[rowId] : undefined;
+                if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
+                        changed.add(rowId);
+                }
+        });
+
+        return { changed, removedInfo };
+};
+
 export default {
 	// Watch for customer change and update related data
         customer() {
@@ -33,17 +111,63 @@ export default {
 			value: this.discount_percentage_offer_name,
 		});
 	},
-	// Watch for items array changes (deep) and re-handle offers
+        // Watch for items array changes (deep) and re-handle offers
         items: {
                 deep: true,
-                handler() {
-                        this.scheduleOfferRefresh();
+                handler(newItems) {
+                        const snapshot = buildSnapshot(newItems);
+                        this._offerSnapshots = this._offerSnapshots || {};
+                        const previous = this._offerSnapshots.items;
+                        this._offerSnapshots.items = snapshot;
+
+                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+
+                        if (removedInfo && Object.keys(removedInfo).length) {
+                                this._pendingRemovedRowInfo = {
+                                        ...(this._pendingRemovedRowInfo || {}),
+                                        ...removedInfo,
+                                };
+                        }
+
+                        if (!previous) {
+                                if (snapshot.order.length) {
+                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                }
+                                return;
+                        }
+
+                        if (changed.size) {
+                                this.scheduleOfferRefresh(Array.from(changed));
+                        }
                 },
         },
         packed_items: {
                 deep: true,
-                handler() {
-                        this.scheduleOfferRefresh();
+                handler(newItems) {
+                        const snapshot = buildSnapshot(newItems);
+                        this._offerSnapshots = this._offerSnapshots || {};
+                        const previous = this._offerSnapshots.packed;
+                        this._offerSnapshots.packed = snapshot;
+
+                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+
+                        if (removedInfo && Object.keys(removedInfo).length) {
+                                this._pendingRemovedRowInfo = {
+                                        ...(this._pendingRemovedRowInfo || {}),
+                                        ...removedInfo,
+                                };
+                        }
+
+                        if (!previous) {
+                                if (snapshot.order.length) {
+                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                }
+                                return;
+                        }
+
+                        if (changed.size) {
+                                this.scheduleOfferRefresh(Array.from(changed));
+                        }
                 },
         },
 	// Watch for invoice type change and emit
@@ -111,6 +235,16 @@ export default {
                         this.packed_items.forEach((item) => {
                                 item._detailSynced = false;
                         });
+                }
+
+                if (typeof this.clearItemDetailCache === "function") {
+                        this.clearItemDetailCache();
+                }
+                if (typeof this.clearItemStockCache === "function") {
+                        this.clearItemStockCache();
+                }
+                if (this.available_stock_cache) {
+                        this.available_stock_cache = {};
                 }
         },
 
