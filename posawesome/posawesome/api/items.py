@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+import re
 
 import frappe
 from erpnext.stock.doctype.batch.batch import (
@@ -212,10 +213,31 @@ def get_items(
         or_filters = []
         item_code_for_search = None
         data = {}
-        if search_value:
-            data = search_serial_or_batch_or_barcode_number(search_value, search_serial_no, search_batch_no)
+        normalized_search_value = " ".join(search_value.split()) if search_value else ""
+        search_tokens: list[str] = []
+        search_tokens_lower: list[str] = []
+
+        if normalized_search_value:
+            search_value = normalized_search_value
+            data = search_serial_or_batch_or_barcode_number(
+                search_value,
+                search_serial_no,
+                search_batch_no,
+            )
             item_code = data.get("item_code") if data.get("item_code") else search_value
             min_search_len = 2
+
+            raw_tokens = [tok.strip() for tok in re.split(r"\s+", search_value) if tok.strip()]
+            seen_tokens: set[str] = set()
+            for token in raw_tokens:
+                if use_limit_search and len(token) < min_search_len:
+                    continue
+                token_lower = token.lower()
+                if token_lower in seen_tokens:
+                    continue
+                seen_tokens.add(token_lower)
+                search_tokens.append(token)
+                search_tokens_lower.append(token_lower)
 
             if use_limit_search:
                 if len(search_value) >= min_search_len:
@@ -236,6 +258,21 @@ def get_items(
                     filters["item_code"] = item_code
             elif data.get("item_code"):
                 filters["item_code"] = data.get("item_code")
+
+            if search_tokens and not filters.get("item_code"):
+                like_fields = ["name", "item_name", "item_code"]
+                if include_description:
+                    like_fields.append("description")
+
+                existing = {tuple(cond) for cond in or_filters}
+                for token in search_tokens:
+                    escaped = frappe.db.escape_like(token)
+                    like_value = f"%{escaped}%"
+                    for field in like_fields:
+                        clause = (field, "like", like_value)
+                        if clause not in existing:
+                            or_filters.append(list(clause))
+                            existing.add(clause)
 
         if item_group and item_group.upper() != "ALL":
             filters["item_group"] = ["like", f"%{item_group}%"]
@@ -353,6 +390,38 @@ def get_items(
                         "item_attributes": item_attributes or "",
                     }
                 )
+
+                if search_tokens_lower and not filters.get("item_code"):
+                    searchable_strings = [
+                        cstr(row.get("item_code")),
+                        cstr(row.get("item_name")),
+                        cstr(row.get("name")),
+                        cstr(row.get("description")),
+                    ]
+
+                    barcode_values = []
+                    for barcode in row.get("item_barcode") or []:
+                        if isinstance(barcode, dict):
+                            barcode_values.append(cstr(barcode.get("barcode")))
+                        else:
+                            barcode_values.append(cstr(barcode))
+                    searchable_strings.extend(barcode_values)
+
+                    if search_serial_no:
+                        for serial in row.get("serial_no_data") or []:
+                            serial_value = serial.get("serial_no") if isinstance(serial, dict) else serial
+                            searchable_strings.append(cstr(serial_value))
+
+                    if search_batch_no:
+                        for batch in row.get("batch_no_data") or []:
+                            batch_value = batch.get("batch_no") if isinstance(batch, dict) else batch
+                            searchable_strings.append(cstr(batch_value))
+
+                    normalized_fields = [s.lower() for s in searchable_strings if s]
+
+                    if not all(any(token in field for field in normalized_fields) for token in search_tokens_lower):
+                        continue
+
                 result.append(row)
                 if limit_page_length and len(result) >= limit_page_length:
                     break
