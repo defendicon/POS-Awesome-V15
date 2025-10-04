@@ -36,15 +36,17 @@ frappe.ui.form.on("POS Closing Shift", {
 	},
 
 	set_opening_amounts(frm) {
-		frappe.db.get_doc("POS Opening Shift", frm.doc.pos_opening_shift).then(({ balance_details }) => {
-			balance_details.forEach((detail) => {
-				frm.add_child("payment_reconciliation", {
-					mode_of_payment: detail.mode_of_payment,
-					opening_amount: detail.amount || 0,
-					expected_amount: detail.amount || 0,
+		return frappe
+			.db.get_doc("POS Opening Shift", frm.doc.pos_opening_shift)
+			.then(({ balance_details }) => {
+				balance_details.forEach((detail) => {
+					frm.add_child("payment_reconciliation", {
+						mode_of_payment: detail.mode_of_payment,
+						opening_amount: detail.amount || 0,
+						expected_amount: detail.amount || 0,
+					});
 				});
 			});
-		});
 	},
 
 	get_pos_invoices(frm) {
@@ -88,11 +90,12 @@ frappe.ui.form.on("POS Closing Shift Detail", {
 function set_form_data(data, frm) {
 	data.forEach((d) => {
 		add_to_pos_transaction(d, frm);
-		frm.doc.grand_total += flt(d.grand_total);
-		frm.doc.net_total += flt(d.net_total);
+		const conversion_rate = get_conversion_rate(d);
+		frm.doc.grand_total += get_base_value(d, "grand_total", "base_grand_total", conversion_rate);
+		frm.doc.net_total += get_base_value(d, "net_total", "base_net_total", conversion_rate);
 		frm.doc.total_quantity += flt(d.total_qty);
-		add_to_payments(d, frm);
-		add_to_taxes(d, frm);
+		add_to_payments(d, frm, conversion_rate);
+		add_to_taxes(d, frm, conversion_rate);
 	});
 }
 
@@ -104,9 +107,12 @@ function set_form_payments_data(data, frm) {
 }
 
 function add_to_pos_transaction(d, frm) {
+	const conversion_rate = get_conversion_rate(d);
 	const child = {
 		posting_date: d.posting_date,
-		grand_total: d.grand_total,
+		grand_total: get_base_value(d, "grand_total", "base_grand_total", conversion_rate),
+		transaction_currency: d.currency,
+		transaction_amount: flt(d.grand_total),
 		customer: d.customer,
 	};
 	if (d.doctype === "POS Invoice") {
@@ -127,13 +133,13 @@ function add_to_pos_payments(d, frm) {
 	});
 }
 
-function add_to_payments(d, frm) {
+function add_to_payments(d, frm, conversion_rate) {
 	d.payments.forEach((p) => {
 		const payment = frm.doc.payment_reconciliation.find(
 			(pay) => pay.mode_of_payment === p.mode_of_payment,
 		);
 		if (payment) {
-			let amount = p.amount;
+			let amount = get_base_value(p, "amount", "base_amount", conversion_rate);
 			let cash_mode_of_payment = get_value(
 				"POS Profile",
 				frm.doc.pos_profile,
@@ -143,14 +149,19 @@ function add_to_payments(d, frm) {
 				cash_mode_of_payment = "Cash";
 			}
 			if (payment.mode_of_payment == cash_mode_of_payment) {
-				amount = p.amount - d.change_amount;
+				amount -= get_base_value(d, "change_amount", "base_change_amount", conversion_rate);
 			}
 			payment.expected_amount += flt(amount);
 		} else {
 			frm.add_child("payment_reconciliation", {
 				mode_of_payment: p.mode_of_payment,
 				opening_amount: 0,
-				expected_amount: p.amount || 0,
+				expected_amount: get_base_value(
+					p,
+					"amount",
+					"base_amount",
+					conversion_rate,
+				),
 			});
 		}
 	});
@@ -159,27 +170,29 @@ function add_to_payments(d, frm) {
 function add_pos_payment_to_payments(p, frm) {
 	const payment = frm.doc.payment_reconciliation.find((pay) => pay.mode_of_payment === p.mode_of_payment);
 	if (payment) {
-		let amount = p.paid_amount;
+		let amount = get_base_value(p, "paid_amount", "base_paid_amount");
 		payment.expected_amount += flt(amount);
 	} else {
 		frm.add_child("payment_reconciliation", {
 			mode_of_payment: p.mode_of_payment,
 			opening_amount: 0,
-			expected_amount: p.amount || 0,
+			expected_amount: get_base_value(p, "paid_amount", "base_paid_amount"),
 		});
 	}
 }
 
-function add_to_taxes(d, frm) {
+function add_to_taxes(d, frm, conversion_rate) {
 	d.taxes.forEach((t) => {
 		const tax = frm.doc.taxes.find((tx) => tx.account_head === t.account_head && tx.rate === t.rate);
 		if (tax) {
-			tax.amount += flt(t.tax_amount);
+			tax.amount += flt(
+				get_base_value(t, "tax_amount", "base_tax_amount", conversion_rate),
+			);
 		} else {
 			frm.add_child("taxes", {
 				account_head: t.account_head,
 				rate: t.rate,
-				amount: t.tax_amount,
+				amount: get_base_value(t, "tax_amount", "base_tax_amount", conversion_rate),
 			});
 		}
 	});
@@ -232,4 +245,35 @@ const get_value = (doctype, name, field) => {
 		},
 	});
 	return value;
+};
+
+const get_conversion_rate = (doc) =>
+	doc.conversion_rate ||
+	doc.exchange_rate ||
+	doc.target_exchange_rate ||
+	doc.plc_conversion_rate ||
+	1;
+
+const get_base_value = (doc, field, base_field, conversion_rate) => {
+	const base_fieldname = base_field || `base_${field}`;
+	const base_value = doc[base_fieldname];
+	if (base_value !== undefined && base_value !== null && base_value !== "") {
+		return flt(base_value);
+	}
+
+	const value = doc[field];
+	if (value === undefined || value === null || value === "") {
+		return 0;
+	}
+
+	if (!conversion_rate) {
+		conversion_rate =
+			doc.conversion_rate ||
+			doc.exchange_rate ||
+			doc.target_exchange_rate ||
+			doc.plc_conversion_rate ||
+			1;
+	}
+
+	return flt(value) * flt(conversion_rate || 1);
 };
