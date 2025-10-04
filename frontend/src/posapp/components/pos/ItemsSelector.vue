@@ -948,36 +948,37 @@ export default {
 			}
 			return dbHealthy;
 		},
-		async loadVisibleItems(reset = false) {
-			this.loadProgress = 0;
-			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
-			await initPromise;
-			await this.ensureStorageHealth();
-			if (reset) {
-				this.currentPage = 0;
-				this.items = [];
-			}
-			const search = this.get_search(this.first_search);
-			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
-			const pageItems = await searchStoredItems({
-				search,
-				itemGroup,
-				limit: this.itemsPerPage,
-				offset: this.currentPage * this.itemsPerPage,
-			});
-			const total = pageItems.length || 1;
-			pageItems.forEach((it, idx) => {
-				this.items.push(it);
-				const progress = Math.round(((idx + 1) / total) * 100);
-				this.loadProgress = progress;
-				this.eventBus.emit("data-load-progress", {
-					name: "items",
-					progress,
-				});
-			});
-			this.eventBus.emit("set_all_items", this.items);
-			if (pageItems.length) this.update_items_details(pageItems);
-		},
+               async loadVisibleItems(reset = false) {
+                       this.loadProgress = 0;
+                       this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+                       await initPromise;
+                       await this.ensureStorageHealth();
+                       if (reset) {
+                               this.currentPage = 0;
+                       }
+                       const search = this.get_search(this.first_search);
+                       const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
+                       const pageItems = await searchStoredItems({
+                               search,
+                               itemGroup,
+                               limit: this.itemsPerPage,
+                               offset: this.currentPage * this.itemsPerPage,
+                       });
+                       const total = pageItems.length || 1;
+                       const updatedItems = reset ? [] : [...this.items];
+                       pageItems.forEach((it, idx) => {
+                               updatedItems.push(it);
+                               const progress = Math.round(((idx + 1) / total) * 100);
+                               this.loadProgress = progress;
+                               this.eventBus.emit("data-load-progress", {
+                                       name: "items",
+                                       progress,
+                               });
+                       });
+                       this.items = updatedItems;
+                       this.eventBus.emit("set_all_items", this.items);
+                       if (pageItems.length) this.update_items_details(pageItems);
+               },
 		onListScroll(event) {
 			if (this.scrollThrottle) return;
 
