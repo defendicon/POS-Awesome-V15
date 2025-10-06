@@ -8,6 +8,7 @@ Additional Discount,Descuento Adicional
 Items Discounts,Descuentos de Artículos
 HOLD,EN ESPERA
 Hold,En Espera
+Fetch Items Directly from Server,Obtener artículos directamente del servidor
 RETURN,DEVOLUCIÓN
 Return,Devolución
 CANCEL,CANCELAR
@@ -80,3 +81,36 @@ Batch No,Número de Lote
 Use Customer Credit,Usar Crédito del Cliente
 Is Credit Sale,Es Venta a Crédito
 Due Date,Fecha de Vencimiento
+Menu,Menú
+Actions,Acciones
+Close Shift,Cerrar Turno
+End current session,Finalizar sesión actual
+Print Last Invoice,Imprimir Última Factura
+Reprint previous transaction,Reimprimir transacción anterior
+Sync Offline Invoices,Sincronizar Facturas Sin Conexión
+Upload pending transactions,Subir transacciones pendientes
+Go Online,Conectarse
+Go Offline,Desconectarse
+Disable offline mode,Deshabilitar modo sin conexión
+Work without server connection,Trabajar sin conexión al servidor
+Clear Cache,Limpiar Caché
+Remove local data and refresh,Eliminar datos locales y actualizar
+About,Acerca de
+App information,Información de la aplicación
+Language,Idioma
+Change interface language,Cambiar idioma de la interfaz
+Light Mode,Modo Claro
+Dark Mode,Modo Oscuro
+Switch theme appearance,Cambiar apariencia del tema
+Logout,Cerrar Sesión
+Sign out of session,Cerrar sesión
+Select Language,Seleccionar Idioma
+Choose your preferred language for the POS interface,Elige tu idioma preferido para la interfaz POS
+Language will be changed to,El idioma se cambiará a
+Cancel,Cancelar
+Change Language,Cambiar Idioma
+Close,Cerrar
+Cannot change language - same language selected,No se puede cambiar el idioma - mismo idioma seleccionado
+Language changed successfully! Reloading...,¡Idioma cambiado exitosamente! Recargando...
+Failed to change language,Error al cambiar el idioma
+Unknown error,Error desconocido

@@ -1,152 +1,479 @@
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Account,حساب
-DocType: POS Closing Shift Taxes,Account Head,رأس الحساب
-DocType: POS Offer,Accounts Manager,مدير الحسابات
-DocType: POS Offer,Accounts User,مستخدم الحسابات
-Custom Field - label: Sales Invoice-posa_additional_notes_section,Additional Notes,ملاحظات إضافية
-DocType: POS Closing Shift,Administrator,المسؤول
-Custom Field - label: POS Profile-posa_allow_sales_order,Allow Create Sales Order,السماح بإنشاء أمر مبيعات
-Custom Field - label: POS Profile-posa_allow_credit_sale,Allow Credit Sale,السماح ببيع الائتمان
-Custom Field - label: POS Profile-posa_allow_partial_payment,Allow Partial Payment,السماح بالدفع الجزئي
-Custom Field - label: POS Profile-posa_allow_return,Allow Return,السماح بالعودة
-Custom Field - label: POS Profile-posa_allow_submissions_in_background_job,Allow Submissions in background job,السماح لتقديم الطلبات في وظيفة الخلفية
-Custom Field - label: POS Profile-posa_allow_user_to_edit_item_discount,Allow User to Edit Item Discount,السماح للمستخدم بتحرير خصم العنصر
-Custom Field - label: POS Profile-posa_allow_user_to_edit_additional_discount,Allow user to edit Additional Discount,السماح للمستخدم بتحرير خصم إضافي
-Custom Field - label: POS Profile-posa_allow_user_to_edit_rate,Allow user to edit Rate,السماح للمستخدم بتحرير معدل
-DocType: POS Closing Shift,Amended From,معدّل من
-DocType: POS Closing Shift Taxes,Amount,كمية
-Custom Field - label: POS Profile-posa_apply_customer_discount,Apply Customer Discount,تطبيق خصم العميل
-DocType: POS Offer,Apply For,التقدم بطلب
-DocType: POS Offer Detail,Apply On,تقدم بطلب
-DocType: POS Offer,Apply Rule On Brand,تطبيق القاعدة على العلامة التجارية
-DocType: POS Offer,Apply Rule On Item Code,تطبيق القاعدة على رمز العنصر
-DocType: POS Offer,Apply Rule On Item Group,تطبيق القاعدة على مجموعة العناصر
-DocType: POS Offer,Apply Type,تطبيق النوع
-DocType: POS Offer,Auto Apply,تطبيق تلقائي
-Custom Field - label: POS Profile-posa_allow_delete,Auto Delete Draft Invoice,حذف فاتورة حذف تلقائي
-Custom Field - label: POS Profile-posa_allow_delete_offline_invoice,Allow Delete Offline Invoice,السماح بحذف فاتورة في وضع عدم الاتصال
-Custom Field - label: POS Profile-posa_auto_set_batch,Auto Set Batch,مجموعة مجموعة السيارات
-Custom Field - label: POS Profile-posa_allow_price_list_rate_change,Allow Price List Rate Change,السماح بتغيير سعر قائمة الأسعار
-DocType: POS Offer,Brand,ماركة
-DocType: POS Opening Shift,Cancelled,ألغى
-Custom Field - label: POS Profile-posa_cash_mode_of_payment,Cash Mode of Payment,الوضع النقدي للدفع
-DocType: POS Closing Shift,Cashier,أمين الصندوق
-DocType: POS Opening Shift,Closed,مغلق
-DocType: POS Closing Shift Detail,Closing Amount,مبلغ إغلاق
-DocType: POS Closing Shift,Company,شركة
-DocType: Sales Invoice Reference,Customer,عميل
-DocType: Sales Invoice Reference,Date,تاريخ
-DocType: POS Offer,Default Loyalty Program,برنامج الولاء الافتراضي
-Custom Field - label: Sales Invoice-posa_delivery_date,Delivery Date,تاريخ التسليم او الوصول
-DocType: POS Offer,Description,وصف
-DocType: POS Closing Shift,Details,تفاصيل
-DocType: POS Closing Shift Detail,Difference,اختلاف
-DocType: POS Offer,Disable,إبطال
-Custom Field - label: Customer-posa_discount,Discount %,تخفيض ٪
-DocType: POS Offer,Discount Amount,مبلغ الخصم
-DocType: POS Offer,Discount Percentage,نسبة الخصم
-DocType: POS Offer,Discount Type,نوع الخصم
-DocType: POS Opening Shift,Draft,مسودة
-DocType: POS Closing Shift Detail,Expected Amount,المبلغ المتوقع
-Custom Field - description: POS Profile-posa_cash_mode_of_payment,For POS Closing Shift Payment Reconciliation,لإغلاق نقاط البيع الإغلاق المصالحة الدفع
-DocType: POS Offer Detail,Give Item,إعطاء العنصر
-DocType: POS Offer Detail,Give Item Row ID,أعط معرف صف العنصر
-DocType: POS Offer,Give Product,إعطاء المنتج
-DocType: POS Offer,Given Quantity,كمية معطاة
-DocType: POS Closing Shift,Grand Total,المجموع الإجمالي
-Custom Field - label: POS Profile-posa_hide_closing_shift,Hide Close Shift,إخفاء التحول الوثيق
-Custom Field - label: POS Profile-posa_display_items_in_stock,Hide Unavailable Items,إخفاء العناصر غير المتوفرة
-Custom Field - label: POS Profile-posa_hide_variants_items,Hide Variants Items,إخفاء عناصر المتغيرات
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Invalid Period,فترة غير صالحة
-Custom Field - label: Sales Invoice Item-posa_is_offer,Is Offer,هو العرض
-Custom Field - label: Sales Invoice Item-posa_is_replace,Is Offer Replace For item Row ID,هو العرض استبدال معرف صف العنصر
-Custom Field - description: POS Profile-posa_scale_barcode_start,It is best not to use more than four numbers,من الأفضل عدم استخدام أكثر من أربعة أرقام
-DocType: POS Offer,Item Code,رمز البند
-DocType: POS Offer,Item Group,مجموعة العناصر
-DocType: POS Offer,Item Price,سعر البند
-DocType: POS Offer,Item Rate Should Less Then,يجب أن يكون معدل البند أقل بعد ذلك
-DocType: POS Offer Detail,Items,أغراض
-DocType: POS Closing Shift,Linked Invoices,الفواتير المرتبطة
-DocType: POS Offer,Loyalty Point,نقطة الولاء
-DocType: POS Offer,Loyalty Point Scheme,مخطط نقطة الولاء
-DocType: POS Offer,Loyalty Points,نقاط الولاء
-DocType: POS Offer,Max Amount,كمية كحد أقصى
-Custom Field - label: POS Profile-posa_max_discount_allowed,Max Discount Percentage Allowed ,مئوية خصم الحد الأقصى المسموح به
-DocType: POS Offer,Max Quantity,كمية كحد أقصى
-DocType: POS Offer,Min Amount,مبلغ دقيقة
-DocType: POS Offer,Min Quantity,كمية MIN
-DocType: POS Closing Shift Detail,Mode of Payment,طريقة الدفع
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Mode of Payments,طريقة المدفوعات
-DocType: POS Closing Shift,Modes of Payment,أنماط الدفع
-DocType: POS Closing Shift,Net Total,إجمالي صافي
-DocType: POS Offer Detail,Offer,يعرض
-DocType: POS Offer Detail,Offer Applied,عرض تطبيق
-DocType: POS Offer Detail,Offer Name,اسم العرض
-DocType: POS Opening Shift,Open,يفتح
-DocType: POS Closing Shift Detail,Opening Amount,مبلغ الافتتاح
-DocType: POS Opening Shift,Opening Balance Details,فتح تفاصيل التوازن
-,POS Awesome,نقاط رائعة
-Custom Field - label: POS Profile-posa_pos_awesome_advance_settings,POS Awesome Advance Settings,POS إعدادات مقدمة رائعة
-Custom Field - label: POS Profile-posa_pos_awesome_settings,POS Awesome Settings,نقاط البيع إعدادات رائعة
-DocType: POS Closing Shift,POS Closing Shift,نقاط نقاط إغلاق التحول
-DocType: POS Closing Shift Detail,POS Closing Shift Detail,نقاط نقاط إغلاق التفاصيل التحول
-DocType: POS Closing Shift Taxes,POS Closing Shift Taxes,نقاط البيع إغلاق الضرائب على التحول
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,POS Closing Shift {} against {} between selected period,نقاط الإغلاق نقاط نقاط البيع {} ضد {} بين الفترة المحددة
-DocType: POS Offer,POS Offer,عرض نقاط
-DocType: POS Offer Detail,POS Offer Detail,POS عرض التفاصيل
-Custom Field - label: Sales Invoice Item-posa_offers,POS Offers,عروض نقاط البيع
-Custom Field - label: Sales Invoice-posa_offers,POS Offers Detail,POS يقدم التفاصيل
-DocType: POS Closing Shift,POS Opening Shift,نقاش نقاط فتح
-DocType: POS Opening Shift Detail,POS Opening Shift Detail,نقاط فتح التفاصيل التفصيلية
-DocType: POS Closing Shift,POS Profile,POS profile
-apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,POS Profile {} does not belongs to company {},ملف تعريف POS {} لا ينتمي إلى الشركة {}
-Custom Field - label: Sales Invoice-posa_pos_opening_shift,POS Shift,نقاط التحول
-DocType: POS Closing Shift,POS Transactions,معاملات POS
-DocType: POS Closing Shift,POSAwesome,posawesome
-DocType: POS Closing Shift,Payment Reconciliation,تسوية الدفع
-DocType: POS Closing Shift,Period End Date,تاريخ نهاية الفترة
-DocType: POS Closing Shift,Period Start Date,تاريخ بدء الفترة
-DocType: POS Closing Shift,Posting Date,تاريخ النشر
-Custom Field - label: Batch-posa_batch_price,Price,سعر
-DocType: POS Offer,Price Discount Scheme ,مخطط خصم السعر
-Custom Field - label: Sales Invoice-posa_is_printed,Printed,مطبوعة
-DocType: POS Offer,Product Discount Scheme,مخطط خصم المنتج
-DocType: POS Offer,Promo Type,نوع الترويج
-DocType: POS Offer,Qualifying Transaction / Item,معاملة / عنصر مؤهل
-DocType: POS Offer,Quantity and Amount Conditions,شروط الكمية والكمية
-DocType: POS Closing Shift Taxes,Rate,معدل
-DocType: POS Offer,Replace Cheapest Item,استبدال أرخص عنصر
-DocType: POS Offer,Replace Same Item,استبدل نفس العنصر
-DocType: POS Offer Detail,Row ID,معرف الصف
-DocType: Sales Invoice Reference,Sales Invoice,فاتورة المبيعات
-DocType: Sales Invoice Reference,Sales Invoice Reference,مرجع فاتورة المبيعات
-DocType: POS Closing Shift,Sales Manager,مدير المبيعات
-DocType: POS Offer,Sales Master Manager,مدير المبيعات الرئيسية
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Sales Summary,ملخص المبيعات
-DocType: POS Offer,Sales User,مستخدم المبيعات
-Custom Field - label: POS Profile-posa_scale_barcode_start,Scale Barcode Start With,Scale Barcode ابدأ بـ
-Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number,البحث حسب الرقم التسلسلي
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Selected POS Opening Shift should be open.,يجب أن يكون تحول فتح نقاط البيع المحدد مفتوحًا.
-Custom Field - description: POS Profile-posa_allow_submissions_in_background_job,Send invoice to submit after printing,أرسل فاتورة للتقديم بعد الطباعة
-DocType: POS Opening Shift,Set Posting Date,تعيين تاريخ النشر
-Custom Field - label: POS Profile-posa_show_template_items,Show Template Items,عرض عناصر قالب
-DocType: POS Opening Shift,Status,حالة
-apps/posawesome/posawesome/posawesome/api/status_updater.py,Status must be one of {0},يجب أن تكون الحالة واحدة من {0}
-DocType: POS Closing Shift,System Manager,مدير النظام
-DocType: POS Closing Shift,Taxes,الضرائب
-apps/posawesome/posawesome/posawesome/api/posapp.py,This invoice {0} cannot be deleted,لا يمكن حذف هذه الفاتورة {0}
-apps/posawesome/posawesome/posawesome/api/posapp.py,Invoice {0} Deleted,فاتورة {0} تم حذفها
-DocType: POS Offer,Title,عنوان
-DocType: POS Closing Shift,Total Quantity,الكمية الكلية
-DocType: POS Offer,Transaction,عملية
-Custom Field - label: Item Barcode-posa_uom,UOM,UOM
-Custom Field - label: POS Profile-posa_local_storage,Use Browser Local Storage,استخدم التخزين المحلي للمتصفح
-Custom Field - label: POS Profile-use_cashback,Use Cashback,استخدم استرداد النقود
-Custom Field - label: POS Profile-use_customer_credit,Use Customer Credit,استخدم ائتمان العملاء
-apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,User {} has been disabled. Please select valid user/cashier,تم تعطيل المستخدم {}.الرجاء تحديد مستخدم/أمين الصندوق صالح
-DocType: POS Offer,Valid From,صالح من
-DocType: POS Offer,Valid Upto,تصل إلى تصل
-DocType: POS Offer,Warehouse,مستودع
-apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,is Offer,هو العرض
-apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Type,يكتب
-apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Total Qty,مجموع الكمية
-Custom Field - label: POS Profile-posa_create_only_sales_order,Create Only Sales Order,إنشاء أمر مبيعات فقط
+﻿Account,الحساب
+Account Head,رئيس الحسابات
+Accounts Manager,مدير الحسابات
+Accounts User,مستخدم الحسابات
+Additional Notes,ملاحظات إضافية
+Administrator,مدير النظام
+Allow Create Sales Order,السماح بإنشاء أمر مبيعات
+Allow Credit Sale,السماح بالبيع بالائتمان
+Allow Partial Payment,السماح بالدفع الجزئي
+Allow Return,السماح بالإرجاع
+Allow Submissions in background job,السماح بإرسال الطلبات في مهمة خلفية
+Allow User to Edit Item Discount,السماح للمستخدم بتعديل خصم الصنف
+Allow user to edit Additional Discount,السماح للمستخدم بتعديل الخصم الإضافي
+Allow user to edit Rate,السماح للمستخدم بتعديل السعر
+Amended From,معدل من
+Amount,المبلغ
+Apply Customer Discount,تطبيق خصم العميل
+Apply For,التقديم لـ
+Apply On,يطبق على
+Apply Rule On Brand,تطبيق القاعدة على العلامة التجارية
+Apply Rule On Item Code,تطبيق القاعدة على كود الصنف
+Apply Rule On Item Group,تطبيق القاعدة على مجموعة الأصناف
+Apply Type,نوع التطبيق
+Auto Apply,تطبيق تلقائي
+Auto Delete Draft Invoice,حذف الفاتورة المسودة تلقائيًا
+Allow Delete Offline Invoice,السماح بحذف الفاتورة في وضع عدم الاتصال
+Auto Set Batch,تعيين الدفعة تلقائيًا
+Allow Price List Rate Change,السماح بتغيير سعر قائمة الأسعار
+Brand,العلامة التجارية
+Cancelled,ملغاة
+Cash Mode of Payment,طريقة الدفع نقدًا
+Cashier,أمين الصندوق
+Closed,مغلقة
+Closing Amount,مبلغ الإقفال
+Company,الشركة
+Customer,العميل
+Date,التاريخ
+Default Loyalty Program,برنامج المكافآت الافتراضي
+Delivery Date,تاريخ التسليم
+Description,الوصف
+Details,التفاصيل
+Difference,الفرق
+Disable,تعطيل
+Discount %,نسبة الخصم ٪
+Discount Amount,قيمة الخصم
+Discount Percentage,نسبة الخصم
+Discount Type,نوع الخصم
+Draft,مسودة
+Expected Amount,المبلغ المتوقع
+For POS Closing Shift Payment Reconciliation,للمطابقة بين المدفوعات عند إقفال نقطة البيع
+Give Item,الصنف الممنوح
+Give Item Row ID,معرّف صف الصنف الممنوح
+Give Product,المنتج الممنوح
+Given Quantity,الكمية الممنوحة
+Grand Total,الإجمالي الكلي
+Hide Close Shift,إخفاء إقفال الوردية
+Hide Unavailable Items,إخفاء الأصناف غير المتوفرة
+Hide Variants Items,إخفاء أصناف المتغيرات
+Invalid Period,فترة غير صالحة
+Is Offer,هو عرض
+Is Offer Replace For item Row ID,هل العرض لاستبدال معرّف صف الصنف
+It is best not to use more than four numbers,يفضل عدم استخدام أكثر من أربعة أرقام
+Item Code,كود الصنف
+Items Group,مجموعة الأصناف
+Item Price,سعر الصنف
+Item Rate Should Less Then,يجب أن يكون سعر الصنف أقل من
+Items,الأصناف
+Linked Invoices,الفواتير المرتبطة
+Loyalty Point,نقطة مكافأة
+Loyalty Point Scheme,برنامج المكافآت
+Loyalty Points,نقاط المكافآت
+Max Amount,الحد الأقصى للمبلغ
+Max Discount Percentage Allowed ,الحد الأقصى المسموح به لنسبة الخصم
+Max Quantity,الحد الأقصى للكمية
+Min Amount,الحد الأدنى للمبلغ
+Min Quantity,الحد الأدنى للكمية
+Mode of Payment,طريقة الدفع
+Mode of Payments,طرق الدفع
+Modes of Payment,طرق الدفع
+Net Total,صافي الإجمالي
+Offer,العرض
+Offer Applied,تم تطبيق العرض
+Offer Name,اسم العرض
+Open,مفتوحة
+Opening Amount,مبلغ الافتتاح
+Opening Balance Details,تفاصيل الرصيد الافتتاحي
+POS Awesome Advance Settings,إعدادات نقاط البيع أوسم المتقدمة
+POS Awesome Settings,إعدادات نقاط البيع أوسم
+POS Closing Shift,إقفال وردية نقطة البيع
+POS Closing Shift Detail,تفاصيل إقفال وردية نقطة البيع
+POS Closing Shift Taxes,ضرائب إقفال وردية نقطة البيع
+POS Closing Shift {} against {} between selected period,إقفال وردية نقطة البيع {} مقابل {} خلال الفترة المحددة
+POS Offer,عرض نقطة البيع
+POS Offer Detail,تفاصيل عرض نقطة البيع
+POS Offers,عروض نقطة البيع
+POS Offers Detail,تفاصيل عروض نقطة البيع
+POS Opening Shift,وردية فتح نقطة البيع
+POS Opening Shift Detail,تفاصيل وردية فتح نقطة البيع
+POS Profile,ملف تعريف نقطة البيع
+POS Profile {} does not belongs to company {},ملف تعريف نقطة البيع {} لا ينتمي إلى الشركة {}
+POS Shift,وردية نقطة البيع
+POS Transactions,معاملات نقطة البيع
+Payment Reconciliation,تسوية المدفوعات
+Period End Date,تاريخ نهاية الفترة
+Period Start Date,تاريخ بداية الفترة
+Posting Date,تاريخ النشر
+Price,السعر
+Price Discount Scheme ,مخطط خصم السعر
+Printed,مطبوعة
+Product Discount Scheme,مخطط خصم المنتج
+Promo Type,نوع الترويج
+Qualifying Transaction / Item,معاملة / صنف مؤهل
+Quantity and Amount Conditions,شروط الكمية والمبلغ
+Rate,المعدل
+Replace Cheapest Item,استبدال أرخص صنف
+Replace Same Item,استبدال نفس الصنف
+Row ID,معرّف الصف
+Sales Invoice,فاتورة مبيعات
+Sales Invoice Reference,مرجع فاتورة المبيعات
+Sales Manager,مدير المبيعات
+Sales Master Manager,مدير المبيعات الرئيسي
+Sales Summary,ملخص المبيعات
+Sales User,مستخدم المبيعات
+Scale Barcode Start With,يبدأ باركود الميزان بـ
+Search by Serial Number,البحث حسب الرقم التسلسلي
+Selected POS Opening Shift should be open.,يجب أن تكون وردية فتح نقطة البيع المحددة مفتوحة
+Send invoice to submit after printing,إرسال الفاتورة للإعتماد بعد الطباعة
+Set Posting Date,تعيين تاريخ النشر
+Show Template Items,عرض أصناف القوالب
+Status,الحالة
+Status must be one of {0},يجب أن تكون الحالة واحدة من {0}
+System Manager,مدير النظام
+Taxes,الضرائب
+This invoice {0} cannot be deleted,لا يمكن حذف الفاتورة {0}
+Invoice {0} Deleted,تم حذف الفاتورة {0}
+Title,العنوان
+Total Quantity,إجمالي الكمية
+Transaction,المعاملة
+UOM,وحدة القياس
+Use Browser Local Storage,استخدام التخزين المحلي للمتصفح
+Fetch Items Directly from Server,جلب الأصناف مباشرة من الخادم
+Use Cashback,استخدام الاسترداد النقدي
+Use Customer Credit,استخدام رصيد العميل
+User {} has been disabled. Please select valid user/cashier,تم تعطيل المستخدم {}. يرجى اختيار مستخدم/أمين صندوق صالح
+Valid From,صالح من
+Valid Upto,صالح حتى
+Warehouse,المستودع
+Type,النوع
+Total Qty,إجمالي الكمية
+Available QTY, الكمية المتاحة
+Create Only Sales Order,إنشاء أوامر مبيعات فقط
+Search Items,البحث عن الأصناف
+Scan with Camera,المسح بالكاميرا
+Settings,الإعدادات
+Reload Items,إعادة تحميل الأصناف
+Hide quantity decimals,إخفاء عشريات الكمية
+Always fetch items from server,جلب الأصناف دائماً من الخادم
+Cancel,إلغاء
+Change Language,تغيير اللغة
+Close,إغلاق
+Language will be changed to,سيتم تغيير اللغة إلى
+Apply,تطبيق
+Clear,مسح
+Back,رجوع
+Select,اختيار
+Search,بحث
+Yes, Cancel sale,نعم، إلغاء البيع
+Cancel Sale,إلغاء البيع 
+No Item has this barcode,لا يوجد صنف بهذا الباركود
+Item not found,الصنف غير موجود
+No invoices found. Try different search criteria.,لم يتم العثور على فواتير. جرب معايير بحث مختلفة
+No camera found on this device.,لم يتم العثور على كاميرا في هذا الجهاز
+Camera access is required to scan barcodes.,مطلوب الوصول للكاميرا لمسح الباركود
+Select a customer to use coupon,اختر عميلاً لاستخدام الكوبون
+Customer Name,اسم العميل
+Customer ID,معرف العميل
+Mobile Number,رقم الهاتف المحمول
+Tax ID,الرقم الضريبي
+City,المدينة
+Country,البلد
+Email Id,البريد الإلكتروني
+Gender,النوع
+Referral Code,كود الإحالة
+Mobile No,رقم الهاتف
+Address Line 1,العنوان السطر 1
+Columns,الأعمدة
+Name,الاسم
+QTY,الكمية
+Additional Discount,خصم إضافي
+Items Discounts,خصومات الأصناف
+Total,الإجمالي
+Save & Clear,حفظ ومسح
+Load Drafts,تحميل المسودات
+PAY,دفع
+Sales Return,مرتجع مبيعات
+Paid Amount,المبلغ المدفوع
+Paid Change,الباقي المدفوع
+Credit Change,الباقي الائتماني
+Tax and Charges,الضرائب والرسوم
+Total Amount,إجمالي المبلغ
+Rounded Total,الإجمالي المدور
+Get Payments,الحصول على المدفوعات
+Request,طلب
+Submit,إرسال
+Submit & Print,إرسال وطباعة
+Cancel Payment,إلغاء الدفع
+Closing,الإقفال
+Menu,القائمة
+Actions,الإجراءات
+Close Shift,إغلاق الوردية
+Print Last Invoice,طباعة آخر فاتورة
+Sync Offline Invoices,مزامنة الفواتير غير المتصلة
+Go Online/Offline,الاتصال/عدم الاتصال
+Clear Cache,مسح التخزين المؤقت
+About,عن النظام
+Light/Dark Mode,الوضع الفاتح/الداكن
+Logout,تسجيل الخروج
+Select Language,اختيار اللغة
+Item Selector Settings,إعدادات محدد الأصناف
+Hide zero rated items,إخفاء الأصناف ذات السعر صفر
+Custom items per page,عدد مخصص من الأصناف لكل صفحة
+Always fetch items from server (ignore local cache),جلب الأصناف دائماً من الخادم (تجاهل التخزين المحلي)
+POS Awesome,نقاط البيع 
+Select S.O, اختر أمر البيع 
+Offers,عروض
+Coupons,كوبونات
+ms,مللي ثانية
+MB,ميجابايت
+Connected to Server,متصل بالخادم
+To Sync,بانتظار المزامنة
+Synced,تمت المزامنة
+POS,نقاط البيع
+Awesome,الرائع
+No items found,لم يتم العثور على أصناف
+No items in cart,لا توجد أصناف في السلة
+Customers not found,لم يتم العثور على عملاء
+Charges not found,لم يتم العثور على رسوم
+Address not found,لم يتم العثور على عنوان
+Sales Person not found,لم يتم العثور على مندوب المبيعات
+Group not found,لم يتم العثور على مجموعة
+Territory not found,لم يتم العثور على منطقة
+Total Outstanding,إجمالي المستحق
+Total Unallocated,إجمالي غير المخصص
+Action,إجراء
+Add New Address,إضافة عنوان جديد
+Add/Edit Coupon Conditions,إضافة/تعديل شروط القسيمة
+All Caught Up!,أنت على اطلاع كامل!
+All Synced,تمت المزامنة بالكامل
+App information,معلومات التطبيق
+Applied,تم التطبيق
+Apps,التطبيقات
+Are you sure you want to close? All entered data will be lost.,هل أنت متأكد أنك تريد الإغلاق؟ سيتم فقدان جميع البيانات المدخلة.
+Available,المتوفر
+Balance will be updated when connection is restored,سيتم تحديث الرصيد عند استعادة الاتصال
+Basic Information,المعلومات الأساسية
+Batch Information,معلومات الدفعة
+Breakdown,تفصيل
+Built with Frappe,تم تطويره باستخدام Frappe
+CPU Cores,عدد أنوية المعالج
+CPU Load,استخدام المعالج
+Cache Usage,استخدام الذاكرة المخبأة
+Cache cleared successfully,تم مسح الذاكرة المخبأة بنجاح
+Calculating,جارٍ الحساب
+Camera Access Required,يتطلب الوصول إلى الكاميرا
+Camera access aborted.,تم إلغاء الوصول إلى الكاميرا.
+Camera permission denied. Please allow camera access in your browser settings.,تم رفض إذن الكاميرا. يرجى السماح بالوصول إلى الكاميرا من إعدادات المتصفح.
+Cannot Save Offline Invoice,لا يمكن حفظ الفاتورة في وضع عدم الاتصال
+Cannot Save Offline Payment,لا يمكن حفظ الدفع في وضع عدم الاتصال
+Cannot clear cache while offline,لا يمكن مسح الذاكرة المخبأة في وضع عدم الاتصال
+Card,بطاقة
+Change Price,تغيير السعر
+Change interface language,تغيير لغة الواجهة
+Choose your preferred language for the POS interface,اختر لغتك المفضلة لواجهة نقاط البيع
+Click to refresh,انقر للتحديث
+Client CPU Lag,تأخير المعالج لدى العميل
+Client Memory Usage,استخدام ذاكرة العميل
+Client Metrics,إحصائيات العميل
+Close Scanner,إغلاق الماسح
+Closing POS Shift,إغلاق وردية نقاط البيع
+Code,الرمز
+Code scanned successfully,تم مسح الرمز بنجاح
+Confirm Close,تأكيد الإغلاق
+Confirm Mobile Number,تأكيد رقم الجوال
+Connections,الاتصالات
+Continue Editing,متابعة التعديل
+Could not fetch latest balance from server,تعذر جلب الرصيد الأخير من الخادم
+Coupon,قسيمة
+Create Customer,إنشاء عميل
+Create POS Opening Shift,إنشاء وردية فتح نقاط البيع
+Current Event Loop Lag,تأخير دورة الأحداث الحالية
+Custom Due Days,أيام استحقاق مخصصة
+Customer Balance,رصيد العميل
+Customer Name is required,اسم العميل مطلوب
+Customer balance unavailable offline,رصيد العميل غير متاح في وضع عدم الاتصال
+Customer created successfully.,تم إنشاء العميل بنجاح.
+Customer creation failed.,فشل إنشاء العميل.
+Customer group is required,مجموعة العملاء مطلوبة
+Customer saved offline,تم حفظ العميل في وضع عدم الاتصال
+Customer territory is required,منطقة العميل مطلوبة
+Customer updated successfully.,تم تحديث العميل بنجاح.
+Dark Mode,الوضع الداكن
+Database Health,صحة قاعدة البيانات
+Database Info,معلومات قاعدة البيانات
+Database health affects overall system speed and reliability.,صحة قاعدة البيانات تؤثر على سرعة النظام وموثوقيته.
+Decrease,إنقاص
+Delete Invoice,حذف الفاتورة
+Delivery Information,معلومات التسليم
+Detecting formats,جارٍ اكتشاف التنسيقات
+Device Memory,ذاكرة الجهاز
+Disable offline mode,تعطيل وضع عدم الاتصال
+Due Date,تاريخ الاستحقاق
+End current session,إنهاء الجلسة الحالية
+Error Loading Data,خطأ في تحميل البيانات
+Error accessing camera,خطأ في الوصول إلى الكاميرا
+Error adding offer to items,خطأ في إضافة العرض إلى العناصر
+Error calculating prices,خطأ في حساب الأسعار
+Error deleting offer from items,خطأ في حذف العرض من العناصر
+Error fetching customer balance,خطأ في جلب رصيد العميل
+Error loading currencies,خطأ في تحميل العملات
+Error processing payment,خطأ في معالجة الدفع
+Error removing price offer,خطأ في إزالة عرض السعر
+Error searching invoices,خطأ في البحث عن الفواتير
+Error submitting invoice,خطأ في إرسال الفاتورة
+Error submitting invoice No response from server,خطأ في إرسال الفاتورة لا يوجد استجابة من الخادم
+Error toggling item details,خطأ في تبديل تفاصيل العنصر
+Error updating item details,خطأ في تحديث تفاصيل العنصر
+Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag measures how busy your browser is. Lower is better.
+Failed to clear cache,فشل في مسح الذاكرة المخبأة
+Failed to load items. Please try again.,فشل تحميل العناصر. يرجى المحاولة مرة أخرى.
+Fixing payment amounts for return invoice,تصحيح مبالغ الدفع لفاتورة الإرجاع
+Flash Off,إيقاف الفلاش
+Flash On,تشغيل الفلاش
+Full Name,الاسم الكامل
+Go Offline,الانتقال إلى وضع عدم الاتصال
+Go Online,الاتصال بالإنترنت
+Hide Non Essential Fields,إخفاء الحقول غير الأساسية
+Increase,زيادة
+IndexedDB,IndexedDB
+Initialize your shift with opening balances,ابدأ ورديتك بالأرصدة الافتتاحية
+Installed Applications,التطبيقات المثبتة
+Invalid closing amount,مبلغ إغلاق غير صالح
+Invoice,فاتورة
+Invoice saved offline,تم حفظ الفاتورة في وضع عدم الاتصال
+Invoices,الفواتير
+Item,عنصر
+Item order updated,تم تحديث ترتيب العناصر
+Item price updated,تم تحديث سعر العنصر
+Items per page,عدد العناصر لكل صفحة
+Language,اللغة
+Light Mode,الوضع الفاتح
+Load More Invoices,تحميل المزيد من الفواتير
+Load Sales Invoice,تحميل فاتورة المبيعات
+Load previously saved invoices,تحميل الفواتير المحفوظة مسبقًا
+Loading cache,جارٍ تحميل الذاكرة المخبأة
+Loading database stats,جارٍ تحميل إحصائيات قاعدة البيانات
+Loading server CPU/memory usage,جارٍ تحميل استخدام المعالج/الذاكرة للخادم
+Loading,جارٍ التحميل
+Loyalty Point Offer Applied,تم تطبيق عرض نقاط المكافأة
+Manage your offline transactions,إدارة معاملاتك في وضع عدم الاتصال
+Mode,الوضع
+Multiple Items Found,تم العثور على عناصر متعددة
+Negative values not allowed,القيم السالبة غير مسموح بها
+New Offer Available,عرض جديد متاح
+New Price List Rate,سعر قائمة جديد
+No invoices found,لم يتم العثور على فواتير
+No offline invoices pending synchronization,لا توجد فواتير غير متصلة بانتظار المزامنة
+Nobile Number,رقم الجوال
+Offline Invoices,الفواتير في وضع عدم الاتصال
+Order,طلب
+Outstanding,مستحق
+Paid,مدفوع
+Payment ID,معرّف الدفع
+Payment Methods,طرق الدفع
+Payment Request took too long to respond. Please try requesting for payment again,استغرق طلب الدفع وقتًا طويلاً للاستجابة. يرجى إعادة المحاولة.
+Payment name not found. Cannot open print view.,لم يتم العثور على اسم الدفع. لا يمكن فتح عرض الطباعة.
+Payment request failed,فشل طلب الدفع
+Payment saved offline,تم حفظ الدفع في وضع عدم الاتصال
+Payment submitted but print function could not be executed. Payment name not found.,تم إرسال الدفع ولكن لم يتم تنفيذ الطباعة. لم يتم العثور على اسم الدفع.
+Payments,المدفوعات
+Peak Memory,أقصى استخدام للذاكرة
+Peak Server,أقصى استخدام للخادم
+Peak,الذروة
+Pending,قيد الانتظار
+Pending Invoices,الفواتير المعلقة
+Please allow camera access to scan codes,يرجى السماح بالوصول إلى الكاميرا لمسح الرموز
+Please configure a POS Profile first,يرجى إعداد ملف تعريف نقاط البيع أولاً
+Please make a payment or select an payment,يرجى إجراء الدفع أو اختيار وسيلة دفع
+Please request phone payment or use another payment method,يرجى طلب الدفع عبر الهاتف أو استخدام طريقة دفع أخرى
+Please select a customer,يرجى اختيار عميل
+Please select a customer first,يرجى اختيار العميل أولاً
+Please select an invoice,يرجى اختيار فاتورة
+Please set the customer's mobile number,يرجى إدخال رقم جوال العميل
+Position the QR code or barcode within the scanning area,ضع رمز QR أو الباركود داخل منطقة المسح
+Pricing & Discounts,التسعير والخصومات
+Print Draft,طباعة المسودة
+Processing Payment,جارٍ معالجة الدفع
+Quick Actions,إجراءات سريعة
+Reconcile payment methods and close shift,تسوية طرق الدفع وإغلاق الوردية
+Remove,إزالة
+Remove local data and refresh,إزالة البيانات المحلية وتحديث
+Reprint previous transaction,إعادة طباعة المعاملة السابقة
+Required columns cannot be hidden,لا يمكن إخفاء الأعمدة المطلوبة
+Retry,إعادة المحاولة
+Return without Invoice,إرجاع بدون فاتورة
+Rows,الصفوف
+Scan QR Code/Barcode,مسح رمز QR/الباركود
+Search Mpesa Payments,بحث مدفوعات Mpesa
+Secure context (HTTPS) required for camera access.,يتطلب الوصول إلى الكاميرا سياق آمن (HTTPS).
+Select Columns to Display,اختر الأعمدة لعرضها
+Select Payment,اختر الدفع
+Select Return Invoice,اختر فاتورة الإرجاع
+Select Sales Orders,اختر أوامر المبيعات
+Serial Numbers,الأرقام التسلسلية
+Server CPU Usage,استخدام المعالج للخادم
+Server Health,صحة الخادم
+Server Memory Usage,استخدام ذاكرة الخادم
+Server Metrics,إحصائيات الخادم
+Server Uptime,مدة تشغيل الخادم
+Sign out of session,تسجيل الخروج من الجلسة
+Size,الحجم
+Slow Queries,الاستعلامات البطيئة
+Stock Information,معلومات المخزون
+STOCK UOM,وحدة قياس المخزون
+Successfully scanned,تم المسح بنجاح
+Switch Camera,تبديل الكاميرا
+Switch theme appearance,تبديل مظهر السمة
+Switched to,تم التبديل إلى
+Sync All,مزامنة الكل
+System Information,معلومات النظام
+Tables,الجداول
+The app stores data locally for offline use. This is called cache.,يقوم التطبيق بتخزين البيانات محليًا للاستخدام في وضع عدم الاتصال. يُعرف ذلك بالذاكرة المخبأة.
+These invoices will be synced when connection is restored,سيتم مزامنة هذه الفواتير عند استعادة الاتصال
+This coupon already used !,تم استخدام هذه القسيمة بالفعل!
+This is an item template. Please choose a variant.,هذا قالب عنصر. يرجى اختيار متغير.
+Time,الوقت
+Tip Clear cache regularly to free up space and keep the app fast.,نصيحة امسح الذاكرة المخبأة بانتظام لتوفير المساحة والحفاظ على سرعة التطبيق.
+Tip Close unused tabs or apps to reduce lag.,نصيحة أغلق علامات التبويب أو التطبيقات غير المستخدمة لتقليل التأخير.
+Tip Monitor slow queries and table size for optimal performance.,نصيحة راقب الاستعلامات البطيئة وحجم الجداول للحصول على أداء مثالي.
+Top Tables,أعلى الجداول
+Total Invoices,إجمالي الفواتير
+Total Mpesa,إجمالي Mpesa
+Total Payments,إجمالي المدفوعات
+Total Selected ,الإجمالي المحدد
+Total Size,إجمالي الحجم
+UOM not found,لم يتم العثور على وحدة القياس
+Unallocated,غير مخصص
+Unknown error,خطأ غير معروف
+Update,تحديث
+Update Customer,تحديث العميل
+Updates automatically,يتم التحديث تلقائيًا
+Upload pending transactions,تحميل المعاملات المعلقة
+Usage,الاستخدام
+Usage Stats,إحصائيات الاستخدام
+Use date range to search for older invoices,استخدم نطاق التاريخ للبحث عن الفواتير القديمة
+Used,المستخدم
+Using cached customer balance,استخدام رصيد العميل من الذاكرة المخبأة
+Verify closing amounts for each payment method,تحقق من مبالغ الإغلاق لكل طريقة دفع
+Waiting for payment,في انتظار الدفع
+Warning High cache usage may affect performance.,تحذير الاستخدام العالي للذاكرة المخبأة قد يؤثر على الأداء.
+Warning High lag may indicate heavy processing or browser slowness.,تحذير التأخير العالي قد يشير إلى معالجة ثقيلة أو بطء في المتصفح.
+Work without server connection,العمل بدون اتصال بالخادم
+"Yes, Cancel sale",نعم، ألغِ البيع
+"Yes, Close",نعم، إغلاق
+add,إضافة
+localStorage,التخزين المحلي
+Card,كبطاقات
+List,كقائمة
+Setup complete!,اكتمل الإعداد
+Ready!,جاهز
+Loading app data...,جارٍ تحميل بيانات التطبيق...
+Taking longer than expected...,يستغرق وقتًا أطول من المتوقع...
+Loading,جارٍ التحميل
+Initializing application...,جارٍ تهيئة التطبيق...
+Loading product catalog...,جارٍ تحميل كتالوج المنتجات...
+Loading customer database...,جارٍ تحميل قاعدة بيانات العملاء...
+Cannot change language - same language selected,لا يمكن تغيير اللغة - تم تحديد نفس اللغة
+Language changed successfully! Reloading...,تم تغيير اللغة بنجاح جارٍ إعادة التحميل
+Failed to change language,فشل في تغيير اللغة
+Unknown error,خطأ غير معروف

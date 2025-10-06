@@ -18,12 +18,12 @@ self.addEventListener("install", (event) => {
 			const cache = await caches.open(CACHE_NAME);
 			const resources = [
 				"/app/posapp",
-				"/assets/posawesome/js/posawesome.bundle.js",
+                                "/assets/posawesome/dist/js/posawesome.umd.js",
 
-				"/assets/posawesome/js/offline/index.js",
+                                "/assets/posawesome/dist/js/offline/index.js",
 
-				"/assets/posawesome/js/posapp/workers/itemWorker.js",
-				"/assets/posawesome/js/libs/dexie.min.js",
+                                "/assets/posawesome/dist/js/posapp/workers/itemWorker.js",
+                                "/assets/posawesome/dist/js/libs/dexie.min.js",
 
 				"/manifest.json",
 				"/offline.html",
@@ -68,12 +68,26 @@ self.addEventListener("fetch", (event) => {
 	if (event.request.mode === "navigate") {
 		event.respondWith(
 			(async () => {
-				try {
-					return await fetch(event.request);
-				} catch (err) {
-					const cached = await caches.match(event.request, { ignoreSearch: true });
-					return cached || caches.match("/app/posapp") || caches.match("/offline.html");
-				}
+                                try {
+                                        return await fetch(event.request);
+                                } catch (err) {
+                                        const cached = await caches.match(event.request, { ignoreSearch: true });
+                                        if (cached) {
+                                                return cached;
+                                        }
+
+                                        const appShell = await caches.match("/app/posapp");
+                                        if (appShell) {
+                                                return appShell;
+                                        }
+
+                                        const offlinePage = await caches.match("/offline.html");
+                                        if (offlinePage) {
+                                                return offlinePage;
+                                        }
+
+                                        return Response.error();
+                                }
 			})(),
 		);
 		return;

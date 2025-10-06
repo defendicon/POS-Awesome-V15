@@ -26,8 +26,8 @@ For switching branches or pulling latest changes:
 4. cd ../..
 5. bench build --app posawesome
 6. bench --site your.site migrate
-   - If the build exits with code 143, verify that your system has enough RAM or swap space.
-   - You can also try building the app in smaller parts to reduce memory usage.
+    - If the build exits with code 143, verify that your system has enough RAM or swap space.
+    - You can also try building the app in smaller parts to reduce memory usage.
 
 ### Main Features
 
@@ -36,7 +36,7 @@ For switching branches or pulling latest changes:
    Customers can be invoiced in different currencies.
    Exchange Rate is fetched automatically based on selected currency. When a price list has its own exchange rate set, POS Awesome uses that rate and falls back to the standard ERPNext rate otherwise.
    Invoices made with posawesome display Grand Total in both base and selected currency in erpnext.
-3. Supports offline mode for creating invoices and customers, saves data locally with stock validation, and syncs automatically when reconnected. If **Allow Negative Stock** is enabled in Stock Settings, offline invoices can still be saved even when quantities are below zero.
+3. Supports offline mode for creating invoices and customers, saves data locally with stock validation, and syncs automatically when reconnected. If **Allow Negative Stock** is enabled in Stock Settings, offline invoices can still be saved even when quantities are below zero. **Enable browser local storage from settings and also enable the server cache for offline mode.**
 4. User-friendly and provides a good user experience and speed of use
 5. The cashier can either use list view or card view during sales transactions. Card view shows the images of the items
 6. Supports enqueue invoice submission after printing the receipt for faster processing
@@ -70,22 +70,39 @@ For switching branches or pulling latest changes:
 34. A lot more bug fixes from the version 14
 35. Offline invoices that fail to submit are saved as draft documents
 
-### How to Install
+### Quick Start
 
-#### Self Hosting:
+Follow these steps to install and start using POS Awesome:
 
-1. `bench get-app --branch Version-15 https://github.com/defendicon/POS-Awesome-V15`
-2. `bench setup requirements`
-3. `bench build --app posawesome`
-4. `bench restart`
-5. `bench --site [your.site.name] install-app posawesome`
-6. `bench --site [your.site.name] migrate`
+1. **Install the app** in your bench:
+    1. `bench get-app --branch Version-15 https://github.com/defendicon/POS-Awesome-V15`
+    2. `bench setup requirements`
+    3. `bench build --app posawesome`
+    4. `bench restart`
+    5. `bench --site your.site.name install-app posawesome`
+    6. `bench --site your.site.name migrate`
 
----
+2. **Open the POS Awesome workspace**
 
-### How To Use:
+    Log in to ERPNext, go to the home page, and click **POS Awesome** from the left-hand menu.
 
-[POS Awesome Wiki](https://github.com/yrestom/POS-Awesome/wiki)
+3. **Create a POS Profile**
+    - Navigate to **POS Awesome → POS Profile → New**.
+    - Fill in the mandatory fields:
+        - **Name** – any label for this profile.
+        - **Company** – the company under which transactions will be recorded.
+        - **Warehouse** – the default warehouse for item stock deduction.
+        - **Customer** – a default customer (create one if none exists).
+        - **Applicable for Users** – add the users allowed to use this POS.
+        - **Payment Methods** – add accepted modes (e.g., Cash, Card).
+
+4. **Save the profile**
+
+5. **Start selling**
+
+    Return to the **POS Awesome** workspace and launch the POS. Select the newly created profile if prompted and begin creating invoices.
+
+For more details, see the [POS Awesome Wiki](https://github.com/yrestom/POS-Awesome/wiki).
 
 ---
 

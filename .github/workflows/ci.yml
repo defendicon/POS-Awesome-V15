@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_USER: user
+          MYSQL_PASSWORD: frappe
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: frappe
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+          -v ${{ github.workspace }}/frappe.cnf:/etc/mysql/conf.d/frappe.cnf
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Stop Default MySQL
+        run: sudo service mysql stop
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev python3-pip python3-setuptools python3-venv \
+              libmysqlclient-dev redis-server curl software-properties-common git
+
+          curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+          sudo apt-get install -y nodejs yarn
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Frappe Bench CLI
+        run: |
+          pip3 install --upgrade pip
+          pip3 install frappe-bench
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Initialize Frappe Bench (v15)
+        run: |
+          bench init --frappe-branch version-15 --python python3 frappe-bench
+
+      - name: Setup Site and Install App (Dynamic)
+        run: |
+          cd frappe-bench
+
+          # Detect the branch name that triggered the workflow
+          # Use GITHUB_HEAD_REF for pull request events, otherwise fall back to GITHUB_REF
+          BRANCH_NAME="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+
+          # Find the app path dynamically (search for hooks.py)
+          APP_PATH=$(find ../ -maxdepth 2 -type f -name "hooks.py" | head -n 1 | xargs dirname)
+
+          # Extract the app folder name
+          APP_NAME=$(basename "$APP_PATH")
+
+          echo "Detected App Path: $APP_PATH"
+          echo "Detected App Name: $APP_NAME"
+          echo "Using Branch: $BRANCH_NAME"
+
+          # Create site
+          bench new-site example.com \
+            --mariadb-root-password frappe \
+            --admin-password frappe \
+            --no-mariadb-socket
+
+          # Install ERPNext
+          bench get-app --branch version-15 https://github.com/frappe/erpnext
+          bench --site example.com install-app erpnext
+
+          # Install local app using current branch
+          bench get-app --branch "$BRANCH_NAME" "https://github.com/${GITHUB_REPOSITORY}.git"
+          bench --site example.com install-app "$APP_NAME"
+
+          # Build frontend assets
+          bench build
+
+          # Show installed apps
+          bench --site example.com list-apps

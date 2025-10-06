@@ -6,4 +6,4 @@ import unittest
 
 
 class TestMpesaC2BRegisterURL(unittest.TestCase):
-	pass
+    pass
