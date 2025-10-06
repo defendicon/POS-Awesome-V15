@@ -38,17 +38,34 @@ def get_child_nodes(group_type, root):
 	)
 
 
+# def get_customer_group_condition(pos_profile):
+# 	cond = "disabled = 0"
+# 	customer_groups = get_customer_groups(pos_profile)
+# 	if customer_groups:
+# 		cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
+
+# 	return cond % tuple(customer_groups)
+
 def get_customer_group_condition(pos_profile):
 	cond = "disabled = 0"
 	customer_groups = get_customer_groups(pos_profile)
-	if customer_groups:
-		cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
 
+	if not customer_groups:
+		return cond
+
+	# ✅ If "All Customer Groups" or "All" is selected → allow all customers
+	if "All Customer Groups" in customer_groups or "All" in customer_groups:
+		return "disabled = 0"
+
+	# ✅ Else filter by those groups
+	cond = " customer_group in ({})".format(", ".join(["%s"] * len(customer_groups)))
 	return cond % tuple(customer_groups)
+
 
 
 @frappe.whitelist()
 def get_customer_names(pos_profile):
+
 	_pos_profile = json.loads(pos_profile)
 	ttl = _pos_profile.get("posa_server_cache_duration")
 	if ttl:
@@ -59,11 +76,17 @@ def get_customer_names(pos_profile):
 		return _get_customer_names(pos_profile)
 
 	def _get_customer_names(pos_profile):
+		
 		pos_profile = json.loads(pos_profile)
 		filters = {"disabled": 0}
 
 		customer_groups = get_customer_groups(pos_profile)
-		if customer_groups:
+		customer_groups = [g.strip("'").strip('"') for g in customer_groups]
+		# print(f"\n\n********************customer group {customer_groups}**********************\n\n")
+		# ✅ Apply filter only if not "All Customer Groups" or "All"
+		if customer_groups and not (
+			"All Customer Groups" in customer_groups or "All" in customer_groups
+		):
 			filters["customer_group"] = ["in", customer_groups]
 
 		customers = frappe.get_all(
@@ -85,7 +108,6 @@ def get_customer_names(pos_profile):
 		return __get_customer_names(pos_profile)
 	else:
 		return _get_customer_names(pos_profile)
-
 
 @frappe.whitelist()
 def get_customer_info(customer):

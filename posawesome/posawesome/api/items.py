@@ -29,13 +29,36 @@ def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
 	)
 
 
+# def get_item_group_condition(pos_profile):
+# 	cond = " and 1=1"
+# 	item_groups = get_item_groups(pos_profile)
+# 	if item_groups:
+# 		cond = " and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
+
+# 	return cond % tuple(item_groups)
+
+
+
 def get_item_group_condition(pos_profile):
 	cond = " and 1=1"
 	item_groups = get_item_groups(pos_profile)
-	if item_groups:
-		cond = " and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
 
+	if not item_groups:
+		return cond
+
+	# If "All Item Groups" or "All" is present → allow all items (no filter)
+	if "All Item Groups" in item_groups or "All" in item_groups:
+		return " and 1=1"
+
+	# # If "All Item Groups" or "All" is present → allow all items (no filter)
+	# if "All Item Groups" in item_groups or "All" in item_groups:
+	# 	return " and 1=1"
+	# else	# Otherwise filter only for selected item groups
+	cond = " and item_group in ({})".format(", ".join(["%s"] * len(item_groups)))
 	return cond % tuple(item_groups)
+
+
+
 
 
 def search_serial_or_batch_or_barcode_number(search_value, search_serial_no):
@@ -177,9 +200,9 @@ def get_items(
 			limit_clause = f" LIMIT {limit}"
 			if offset:
 				limit_clause += f" OFFSET {offset}"
-
-		condition += get_item_group_condition(pos_profile.get("name"))
-
+		
+		condition +=  get_item_group_condition(pos_profile.get("name"))
+        
 		if use_limit_search and limit is None:
 			search_limit = pos_profile.get("posa_search_limit") or 500
 			data = {}
@@ -215,6 +238,11 @@ def get_items(
 
 		# Add item group filter
 		item_groups = get_item_groups(pos_profile.get("name"))
+
+
+		item_groups = [g.strip("'").strip('"') for g in item_groups]
+
+
 		if item_groups:
 			filters["item_group"] = ["in", item_groups]
 
@@ -234,8 +262,11 @@ def get_items(
 				filters["name"] = data.get("item_code")
 				or_filters = []
 
+		# print(f"\n\n-------------group----{item_group}----------------\n\n")
+
 		if item_group:
 			filters["item_group"] = ["like", f"%{item_group}%"]
+
 
 		if not posa_show_template_items:
 			filters["has_variants"] = 0
@@ -252,7 +283,8 @@ def get_items(
 			limit_page_length = search_limit
 			if pos_profile.get("posa_force_reload_items") and search_value:
 				limit_page_length = None
-
+		print(f"\n\n-------------filters  {filters}---------------\n\n")
+		print(f"\n\n-------------or filters  {or_filters}---------------\n\n")
 		items_data = frappe.get_all(
 			"Item",
 			filters=filters,
