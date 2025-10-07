@@ -947,20 +947,39 @@ export default {
                         if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
                                 const term = searchTerm.toLowerCase();
 				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+					if (!searchWords.length) {
+						return true;
+					}
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
+					const name = (item.item_name || "").toLowerCase();
+					const code = (item.item_code || "").toLowerCase();
+
+					const barcodeValues = [];
+					if (Array.isArray(item.item_barcode)) {
+						item.item_barcode.forEach((b) => {
+							if (b?.barcode) {
+								barcodeValues.push(String(b.barcode).toLowerCase());
+							}
+						});
+					}
+					if (Array.isArray(item.barcodes)) {
+						item.barcodes.forEach((bc) => {
+							if (bc) {
+								barcodeValues.push(String(bc).toLowerCase());
+							}
+						});
+					}
+					if (item.barcode) {
+						barcodeValues.push(String(item.barcode).toLowerCase());
+					}
+
+					return searchWords.every((word) => {
+						return (
+							code.includes(word) ||
+							name.includes(word) ||
+							barcodeValues.some((barcode) => barcode.includes(word))
+						);
+					});
 				});
 			}
 

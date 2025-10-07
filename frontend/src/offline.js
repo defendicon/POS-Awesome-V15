@@ -1011,8 +1011,17 @@ export async function searchStoredItems({ search = "", itemGroup = "", limit = 1
 					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
 				return nameMatch || codeMatch || barcodeMatch;
 			});
+
+			const unique = Array.from(map.values());
+			return unique.slice(offset, offset + limit);
 		}
-		return await collection.offset(offset).limit(limit).toArray();
+
+		let collection = applyItemGroupFilter(db.table("items"));
+		if (words.length) {
+			collection = collection.filter(matchesAllWords);
+		}
+		const res = await collection.offset(offset).limit(limit).toArray();
+		return res;
 	} catch (e) {
 		console.error("Failed to query stored items", e);
 		return [];
