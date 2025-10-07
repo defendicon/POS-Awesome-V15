@@ -3,99 +3,32 @@ import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
 
 export default {
-        scheduleOfferRefresh(changedRowIds = []) {
-                if (this.isApplyingOffer) {
-                        return;
-                }
-
-                this._pendingOfferRowIds = this._pendingOfferRowIds || new Set();
-                if (Array.isArray(changedRowIds)) {
-                        changedRowIds.forEach((rowId) => {
-                                if (rowId) {
-                                        this._pendingOfferRowIds.add(rowId);
-                                }
-                        });
-                }
-
-                if (this._offerRefreshPending) {
-                        return;
-                }
-
-                this._offerRefreshPending = true;
-
-                const schedule =
-                        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
-                                ? window.requestAnimationFrame.bind(window)
-                                : (cb) => setTimeout(cb, 16);
-
-                this._offerRefreshHandle = schedule(() => {
-                        this._offerRefreshHandle = null;
-                        this._offerRefreshPending = false;
-
-                        if (this.isApplyingOffer) {
-                                return;
-                        }
-
-                        const pendingRows = this._pendingOfferRowIds ? Array.from(this._pendingOfferRowIds) : [];
-                        this._pendingOfferRowIds = new Set();
-                        const removedRows = this._pendingRemovedRowInfo || {};
-                        this._pendingRemovedRowInfo = {};
-
-                        this.handelOffers(pendingRows, removedRows);
-
-                        if (typeof this.$forceUpdate === "function") {
-                                this.$forceUpdate();
-                        }
-                });
-        },
-        cancelScheduledOfferRefresh() {
-                if (this._offerRefreshHandle != null) {
-                        if (
-                                typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function"
-                        ) {
-                                window.cancelAnimationFrame(this._offerRefreshHandle);
-                        } else {
-                                clearTimeout(this._offerRefreshHandle);
-                        }
-                        this._offerRefreshHandle = null;
-                }
-
-                this._offerRefreshPending = false;
-                this._pendingOfferRowIds = new Set();
-                this._pendingRemovedRowInfo = {};
-        },
-        normalizeBrand(brand) {
-                return (brand || "").trim().toLowerCase();
-        },
-        async getItemBrand(item) {
-                let brand = this.normalizeBrand(item.brand);
-                if (brand) {
-                        item.brand = brand;
-                        return brand;
-                }
-
-                this.brand_cache = this.brand_cache || {};
-
-                if (this.brand_cache[item.item_code]) {
-                        brand = this.brand_cache[item.item_code];
-                } else {
-                        try {
-                                const { message } = await frappe.call({
-                                        method: "posawesome.posawesome.api.items.get_item_brand",
-                                        args: { item_code: item.item_code },
-                                });
-                                brand = this.normalizeBrand(message);
-                        } catch (error) {
-                                console.error("Failed to fetch item brand:", error);
-                                brand = "";
-                        }
-
-                        this.brand_cache[item.item_code] = brand;
-                }
-
-                item.brand = brand;
-                return brand;
-        },
+	normalizeBrand(brand) {
+		return (brand || "").trim().toLowerCase();
+	},
+	getItemBrand(item) {
+		let brand = this.normalizeBrand(item.brand);
+		if (brand) {
+			item.brand = brand;
+			return brand;
+		}
+		if (this.brand_cache && this.brand_cache[item.item_code]) {
+			brand = this.brand_cache[item.item_code];
+		} else {
+			frappe.call({
+				method: "posawesome.posawesome.api.items.get_item_brand",
+				args: { item_code: item.item_code },
+				async: false,
+				callback: (r) => {
+					brand = this.normalizeBrand(r.message);
+				},
+			});
+			this.brand_cache = this.brand_cache || {};
+			this.brand_cache[item.item_code] = brand;
+		}
+		item.brand = brand;
+		return brand;
+	},
 	checkOfferIsAppley(item, offer) {
 		let applied = false;
 		const item_offers = JSON.parse(item.posa_offers);
@@ -109,242 +42,35 @@ export default {
 		return applied;
 	},
 
-        async handelOffers(changedRowIds = [], removedRows = {}) {
-                try {
-                        const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
-                        if (!sourceOffers.length) {
-                                this.updatePosOffers([]);
-                                this._cachedOfferResults = new Map();
-                                return;
-                        }
+	handelOffers() {
+		const offers = [];
+		this.posOffers.forEach((offer) => {
+			if (offer.apply_on === "Item Code") {
+				const itemOffer = this.getItemOffer(offer);
+				if (itemOffer) {
+					offers.push(itemOffer);
+				}
+			} else if (offer.apply_on === "Item Group") {
+				const groupOffer = this.getGroupOffer(offer);
+				if (groupOffer) {
+					offers.push(groupOffer);
+				}
+			} else if (offer.apply_on === "Brand") {
+				const brandOffer = this.getBrandOffer(offer);
+				if (brandOffer) {
+					offers.push(brandOffer);
+				}
+			} else if (offer.apply_on === "Transaction") {
+				const transactionOffer = this.getTransactionOffer(offer);
+				if (transactionOffer) {
+					offers.push(transactionOffer);
+				}
+			}
+		});
 
-                        const allItems = [...(this.items || []), ...(this.packed_items || [])];
-                        const itemMap = new Map();
-                        allItems.forEach((item) => {
-                                if (item && item.posa_row_id) {
-                                        itemMap.set(item.posa_row_id, item);
-                                }
-                        });
-
-                        const changedSet = new Set((Array.isArray(changedRowIds) ? changedRowIds : []).filter(Boolean));
-                        const removedInfo = removedRows || {};
-
-                        this._cachedOfferResults =
-                                this._cachedOfferResults instanceof Map ? this._cachedOfferResults : new Map();
-                        const cache = this._cachedOfferResults;
-
-                        const offerNames = new Set(sourceOffers.map((offer) => offer.name));
-                        for (const cachedName of Array.from(cache.keys())) {
-                                if (!offerNames.has(cachedName)) {
-                                        cache.delete(cachedName);
-                                }
-                        }
-
-                        const offersToRecompute =
-                                !changedSet.size && !Object.keys(removedInfo).length
-                                        ? sourceOffers
-                                        : sourceOffers.filter((offer) =>
-                                                  this.isOfferAffected(offer, changedSet, itemMap, removedInfo),
-                                          );
-
-                        let context = null;
-                        if (offersToRecompute.length) {
-                                context = await this.buildOfferEvaluationContext(allItems, offersToRecompute);
-                                context.itemMap = itemMap;
-                        } else {
-                                context = { itemMap };
-                        }
-
-                        for (const offer of offersToRecompute) {
-                                const evaluated = this.evaluateOffer(offer, context);
-                                if (evaluated) {
-                                        cache.set(offer.name, evaluated);
-                                } else {
-                                        cache.delete(offer.name);
-                                }
-                        }
-
-                        const offers = sourceOffers
-                                .map((offer) => cache.get(offer.name))
-                                .filter((entry) => !!entry);
-
-                        this.setItemGiveOffer(offers);
-                        this.updatePosOffers(offers);
-                } catch (error) {
-                        console.error("Failed to process offers:", error);
-                }
-        },
-
-        isOfferAffected(offer, changedSet, itemMap, removedInfo = {}) {
-                if (!offer) {
-                        return false;
-                }
-
-                if (!changedSet || !changedSet.size) {
-                        return true;
-                }
-
-                const applyOn = offer.apply_on;
-                const normalizedBrand = applyOn === "Brand" ? this.normalizeBrand(offer.brand) : null;
-
-                for (const rowId of changedSet) {
-                        const item = itemMap.get(rowId);
-                        const fallback = removedInfo[rowId];
-                        const meta = item
-                                ? {
-                                          item_code: item.item_code,
-                                          item_group: item.item_group,
-                                          brand: this.normalizeBrand(
-                                                  item.brand || (this.brand_cache && this.brand_cache[item.item_code]) || "",
-                                          ),
-                                  }
-                                : fallback
-                                ? {
-                                          item_code: fallback.item_code,
-                                          item_group: fallback.item_group,
-                                          brand: this.normalizeBrand(
-                                                  fallback.brand || (this.brand_cache && this.brand_cache[fallback.item_code]) || "",
-                                          ),
-                                  }
-                                : null;
-
-                        if (!meta) {
-                                return true;
-                        }
-
-                        switch (applyOn) {
-                                case "Item Code":
-                                        if (meta.item_code === offer.item) {
-                                                return true;
-                                        }
-                                        break;
-                                case "Item Group":
-                                        if (meta.item_group === offer.item_group) {
-                                                return true;
-                                        }
-                                        break;
-                                case "Brand":
-                                        if (!normalizedBrand) {
-                                                return true;
-                                        }
-                                        if (!meta.brand) {
-                                                return true;
-                                        }
-                                        if (meta.brand === normalizedBrand) {
-                                                return true;
-                                        }
-                                        break;
-                                case "Transaction":
-                                        return true;
-                                default:
-                                        break;
-                        }
-                }
-
-                return false;
-        },
-
-        async buildOfferEvaluationContext(allItems, offers) {
-                const context = {
-                        itemMap: new Map(),
-                        itemCodeBuckets: new Map(),
-                        itemGroupBuckets: new Map(),
-                        brandBuckets: new Map(),
-                        transactionBucket: { items: [], qty: 0, amount: 0 },
-                };
-
-                const needItemCode = offers.some((offer) => offer.apply_on === "Item Code");
-                const needGroup = offers.some((offer) => offer.apply_on === "Item Group");
-                const needBrand = offers.some((offer) => offer.apply_on === "Brand");
-                const needTransaction = offers.some((offer) => offer.apply_on === "Transaction");
-
-                const brandCandidates = [];
-
-                (Array.isArray(allItems) ? allItems : []).forEach((item) => {
-                        if (!item) {
-                                return;
-                        }
-                        if (item.posa_row_id) {
-                                context.itemMap.set(item.posa_row_id, item);
-                        }
-
-                        const qty = item.stock_qty || 0;
-                        const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-                        const amount = qty * rate;
-
-                        if (needItemCode && !item.posa_is_offer && item.item_code) {
-                                let bucket = context.itemCodeBuckets.get(item.item_code);
-                                if (!bucket) {
-                                        bucket = { items: [], qty: 0, amount: 0 };
-                                        context.itemCodeBuckets.set(item.item_code, bucket);
-                                }
-                                bucket.items.push(item);
-                                bucket.qty += qty;
-                                bucket.amount += amount;
-                        }
-
-                        if (needGroup && !item.posa_is_offer && item.item_group) {
-                                let bucket = context.itemGroupBuckets.get(item.item_group);
-                                if (!bucket) {
-                                        bucket = { items: [], qty: 0, amount: 0 };
-                                        context.itemGroupBuckets.set(item.item_group, bucket);
-                                }
-                                bucket.items.push(item);
-                                bucket.qty += qty;
-                                bucket.amount += amount;
-                        }
-
-                        if (needBrand && !item.posa_is_offer && item.item_code) {
-                                brandCandidates.push(item);
-                        }
-
-                        if (needTransaction && !item.posa_is_offer && !item.posa_is_replace) {
-                                context.transactionBucket.items.push(item);
-                                context.transactionBucket.qty += qty;
-                                context.transactionBucket.amount += amount;
-                        }
-                });
-
-                if (needBrand) {
-                        for (const item of brandCandidates) {
-                                const brand = await this.getItemBrand(item);
-                                if (!brand) {
-                                        continue;
-                                }
-                                let bucket = context.brandBuckets.get(brand);
-                                if (!bucket) {
-                                        bucket = { items: [], qty: 0, amount: 0 };
-                                        context.brandBuckets.set(brand, bucket);
-                                }
-                                bucket.items.push(item);
-                                bucket.qty += item.stock_qty || 0;
-                                const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-                                bucket.amount += (item.stock_qty || 0) * rate;
-                        }
-                }
-
-                return context;
-        },
-
-        evaluateOffer(offer, context = {}) {
-                if (!offer) {
-                        return null;
-                }
-
-                if (offer.apply_on === "Item Code") {
-                        return this.getItemOffer({ ...offer }, context);
-                }
-                if (offer.apply_on === "Item Group") {
-                        return this.getGroupOffer({ ...offer }, context);
-                }
-                if (offer.apply_on === "Brand") {
-                        return this.getBrandOffer({ ...offer }, context);
-                }
-                if (offer.apply_on === "Transaction") {
-                        return this.getTransactionOffer({ ...offer }, context);
-                }
-                return null;
-        },
+		this.setItemGiveOffer(offers);
+		this.updatePosOffers(offers);
+	},
 
 	setItemGiveOffer(offers) {
 		// Set item give offer for replace
@@ -448,179 +174,134 @@ export default {
 		}
 	},
 
-        getItemOffer(offer, context = {}) {
-                if (!offer || offer.apply_on !== "Item Code") {
-                        return null;
-                }
+	getItemOffer(offer) {
+		let apply_offer = null;
+		if (offer.apply_on === "Item Code") {
+			if (this.checkOfferCoupon(offer)) {
+				const combined = [...this.items, ...this.packed_items];
+				combined.forEach((item) => {
+					if (!item.posa_is_offer && item.item_code === offer.item) {
+						if (
+							offer.offer === "Item Price" &&
+							item.posa_offer_applied &&
+							!this.checkOfferIsAppley(item, offer)
+						) {
+							return;
+						}
+						const items = [];
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
+						const res = this.checkQtyAnountOffer(offer, item.stock_qty, item.stock_qty * rate);
+						if (res.apply) {
+							items.push(item.posa_row_id);
+							offer.items = items;
+							apply_offer = offer;
+						}
+					}
+				});
+			}
+		}
+		return apply_offer;
+	},
 
-                if (!this.checkOfferCoupon(offer)) {
-                        return null;
-                }
+	getGroupOffer(offer) {
+		let apply_offer = null;
+		if (offer.apply_on === "Item Group") {
+			if (this.checkOfferCoupon(offer)) {
+				const items = [];
+				let total_count = 0;
+				let total_amount = 0;
+				const combined = [...this.items, ...this.packed_items];
+				combined.forEach((item) => {
+					if (!item.posa_is_offer && item.item_group === offer.item_group) {
+						if (
+							offer.offer === "Item Price" &&
+							item.posa_offer_applied &&
+							!this.checkOfferIsAppley(item, offer)
+						) {
+							return;
+						}
+						total_count += item.stock_qty;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
+						total_amount += item.stock_qty * rate;
+						items.push(item.posa_row_id);
+					}
+				});
+				if (total_count || total_amount) {
+					const res = this.checkQtyAnountOffer(offer, total_count, total_amount);
+					if (res.apply) {
+						offer.items = items;
+						apply_offer = offer;
+					}
+				}
+			}
+		}
+		return apply_offer;
+	},
 
-                const bucket = context.itemCodeBuckets ? context.itemCodeBuckets.get(offer.item) : null;
-                if (!bucket) {
-                        return null;
-                }
-
-                const items = [];
-                let totalQty = 0;
-                let totalAmount = 0;
-
-                bucket.items.forEach((item) => {
-                        if (!item || item.posa_is_offer) {
-                                return;
-                        }
-                        if (
-                                offer.offer === "Item Price" &&
-                                item.posa_offer_applied &&
-                                !this.checkOfferIsAppley(item, offer)
-                        ) {
-                                return;
-                        }
-                        const qty = item.stock_qty || 0;
-                        const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-                        totalQty += qty;
-                        totalAmount += qty * rate;
-                        items.push(item.posa_row_id);
-                });
-
-                if (!totalQty && !totalAmount) {
-                        return null;
-                }
-
-                const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
-                if (!res.apply) {
-                        return null;
-                }
-
-                offer.items = items;
-                return offer;
-        },
-
-        getGroupOffer(offer, context = {}) {
-                if (!offer || offer.apply_on !== "Item Group") {
-                        return null;
-                }
-
-                if (!this.checkOfferCoupon(offer)) {
-                        return null;
-                }
-
-                const bucket = context.itemGroupBuckets ? context.itemGroupBuckets.get(offer.item_group) : null;
-                if (!bucket) {
-                        return null;
-                }
-
-                const items = [];
-                let totalQty = 0;
-                let totalAmount = 0;
-
-                bucket.items.forEach((item) => {
-                        if (!item || item.posa_is_offer) {
-                                return;
-                        }
-                        if (
-                                offer.offer === "Item Price" &&
-                                item.posa_offer_applied &&
-                                !this.checkOfferIsAppley(item, offer)
-                        ) {
-                                return;
-                        }
-                        const qty = item.stock_qty || 0;
-                        const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-                        totalQty += qty;
-                        totalAmount += qty * rate;
-                        items.push(item.posa_row_id);
-                });
-
-                if (!totalQty && !totalAmount) {
-                        return null;
-                }
-
-                const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
-                if (!res.apply) {
-                        return null;
-                }
-
-                offer.items = items;
-                return offer;
-        },
-
-        getBrandOffer(offer, context = {}) {
-                if (!offer || offer.apply_on !== "Brand") {
-                        return null;
-                }
-
-                if (!this.checkOfferCoupon(offer)) {
-                        return null;
-                }
-
-                const normalizedBrand = this.normalizeBrand(offer.brand);
-                if (!normalizedBrand) {
-                        return null;
-                }
-
-                const bucket = context.brandBuckets ? context.brandBuckets.get(normalizedBrand) : null;
-                if (!bucket) {
-                        return null;
-                }
-
-                const items = [];
-                let totalQty = 0;
-                let totalAmount = 0;
-
-                bucket.items.forEach((item) => {
-                        if (!item || item.posa_is_offer) {
-                                return;
-                        }
-                        if (
-                                offer.offer === "Item Price" &&
-                                item.posa_offer_applied &&
-                                !this.checkOfferIsAppley(item, offer)
-                        ) {
-                                return;
-                        }
-                        const qty = item.stock_qty || 0;
-                        const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-                        totalQty += qty;
-                        totalAmount += qty * rate;
-                        items.push(item.posa_row_id);
-                });
-
-                if (!totalQty && !totalAmount) {
-                        return null;
-                }
-
-                const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
-                if (!res.apply) {
-                        return null;
-                }
-
-                offer.items = items;
-                return offer;
-        },
-        getTransactionOffer(offer, context = {}) {
-                if (!offer || offer.apply_on !== "Transaction") {
-                        return null;
-                }
-
-                if (!this.checkOfferCoupon(offer)) {
-                        return null;
-                }
-
-                const bucket = context.transactionBucket || { items: [], qty: 0, amount: 0 };
-                if (!bucket.items.length && !bucket.qty && !bucket.amount) {
-                        return null;
-                }
-
-                const res = this.checkQtyAnountOffer(offer, bucket.qty, bucket.amount);
-                if (!res.apply) {
-                        return null;
-                }
-
-                offer.items = bucket.items.map((item) => item.posa_row_id);
-                return offer;
-        },
+	getBrandOffer(offer) {
+		let apply_offer = null;
+		if (offer.apply_on === "Brand") {
+			if (this.checkOfferCoupon(offer)) {
+				const items = [];
+				let total_count = 0;
+				let total_amount = 0;
+				const offer_brand = this.normalizeBrand(offer.brand);
+				const combined = [...this.items, ...this.packed_items];
+				combined.forEach((item) => {
+					const item_brand = this.getItemBrand(item);
+					if (!item.posa_is_offer && item_brand && item_brand === offer_brand) {
+						if (
+							offer.offer === "Item Price" &&
+							item.posa_offer_applied &&
+							!this.checkOfferIsAppley(item, offer)
+						) {
+							return;
+						}
+						total_count += item.stock_qty;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
+						total_amount += item.stock_qty * rate;
+						items.push(item.posa_row_id);
+					}
+				});
+				if (total_count || total_amount) {
+					const res = this.checkQtyAnountOffer(offer, total_count, total_amount);
+					if (res.apply) {
+						offer.items = items;
+						apply_offer = offer;
+					}
+				}
+			}
+		}
+		return apply_offer;
+	},
+	getTransactionOffer(offer) {
+		let apply_offer = null;
+		if (offer.apply_on === "Transaction") {
+			if (this.checkOfferCoupon(offer)) {
+				const combined = [...this.items, ...this.packed_items];
+				let total_qty = 0;
+				let total_amount = 0;
+				const items = [];
+				combined.forEach((item) => {
+					if (!item.posa_is_offer && !item.posa_is_replace) {
+						total_qty += item.stock_qty;
+						const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
+						total_amount += item.stock_qty * rate;
+						items.push(item.posa_row_id);
+					}
+				});
+				const total_count = total_qty;
+				if (total_count || total_amount) {
+					const res = this.checkQtyAnountOffer(offer, total_count, total_amount);
+					if (res.apply) {
+						offer.items = items;
+						apply_offer = offer;
+					}
+				}
+			}
+		}
+		return apply_offer;
+	},
 
 	updatePosOffers(offers) {
 		this.eventBus.emit("update_pos_offers", offers);

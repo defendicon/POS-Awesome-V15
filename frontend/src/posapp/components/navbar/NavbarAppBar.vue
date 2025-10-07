@@ -2,12 +2,11 @@
 	<v-app-bar
 		app
 		flat
-		:height="isMobile ? 64 : 56"
+		height="56"
 		:class="[
-			'pos-navbar-enhanced elevation-2 pos-themed-card pos-theme-immediate',
+			'pos-navbar-enhanced elevation-2 px-2 pb-1 pos-themed-card pos-theme-immediate',
 			rtlClasses,
 			isRtl ? 'rtl-app-bar' : 'ltr-app-bar',
-			isMobile ? 'mobile-navbar' : 'desktop-navbar',
 		]"
 		:style="[rtlStyles, { flexDirection: isRtl ? 'row-reverse' : 'row' }]"
 	>
@@ -16,38 +15,26 @@
 			<v-app-bar-nav-icon
 				ref="navIcon"
 				@click="$emit('nav-click')"
-				:aria-label="__('Toggle navigation drawer')"
-				:size="isMobile ? 'default' : 'large'"
 				:class="['pos-text-primary nav-icon', isRtl ? 'rtl-nav-icon' : 'ltr-nav-icon']"
 			/>
 
 			<v-img
 				:src="posLogo"
 				alt="POS Awesome"
-				:max-width="isMobile ? 24 : 32"
+				max-width="32"
 				:class="['pos-navbar-logo', isRtl ? 'rtl-logo' : 'ltr-logo']"
-				loading="lazy"
 			/>
 
 			<v-toolbar-title
 				@click="$emit('go-desk')"
-				@keydown.enter="$emit('go-desk')"
 				:class="[
 					'text-h6 font-weight-bold text-primary pos-navbar-title',
 					isRtl ? 'rtl-title' : 'ltr-title',
 				]"
 				style="cursor: pointer; text-decoration: none"
-				tabindex="0"
-				:aria-label="__('Go to Frappe Desk')"
-				role="button"
 			>
-				<template v-if="isMobile">
-					<span class="pos-navbar-title-compact">{{ __("POS") }}</span>
-				</template>
-				<template v-else>
-					<span class="font-weight-light pos-navbar-title-light">{{ __("POS") }}</span
-					><span class="pos-navbar-title-bold">{{ __("Awesome") }}</span>
-				</template>
+				<span class="font-weight-light pos-navbar-title-light">{{ __("POS") }}</span
+				><span class="pos-navbar-title-bold">{{ __("Awesome") }}</span>
 			</v-toolbar-title>
 		</div>
 
@@ -55,107 +42,56 @@
 
 		<!-- Actions Section (right in LTR, left in RTL) -->
 		<div :class="['pos-navbar-actions-section', isRtl ? 'rtl-actions-section' : 'ltr-actions-section']">
-			<!-- Mobile: Show only essential items, others in menu -->
-			<template v-if="isMobile">
-				<!-- Always visible status indicator -->
-				<slot name="status-indicator"></slot>
+			<!-- Enhanced connectivity status indicator - Always visible -->
+			<slot name="status-indicator"></slot>
 
-				<!-- Offline Invoices with higher priority on mobile -->
-				<v-btn
-					icon
-					size="small"
-					:class="[
-						'offline-invoices-btn mobile-btn pos-themed-button',
-						isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
-						{ 'has-pending': pendingInvoices > 0 },
-					]"
-					:aria-label="__('View offline invoices') + ` (${pendingInvoices})`"
-					@click="$emit('show-offline-invoices')"
+			<!-- Cache Usage Meter -->
+			<slot name="cache-usage-meter"></slot>
+
+			<!-- Database Usage Gadget -->
+			<slot name="db-usage-gadget"></slot>
+
+			<!-- CPU Load Gadget -->
+			<slot name="cpu-gadget"></slot>
+
+			<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
+				<v-chip
+					variant="outlined"
+					:class="['profile-chip pos-themed-card', isRtl ? 'rtl-profile-chip' : 'ltr-profile-chip']"
 				>
-					<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
-						<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					</v-badge>
-					<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					<v-tooltip activator="parent" location="bottom">
-						{{ __("Offline Invoices") }} ({{ pendingInvoices }})
-					</v-tooltip>
-				</v-btn>
-
-				<!-- Mobile Menu - contains all other items -->
-				<slot name="menu"></slot>
-			</template>
-
-			<!-- Desktop: Show all items normally -->
-			<template v-else>
-				<!-- Enhanced connectivity status indicator -->
-				<div class="gadget-wrapper status-gadget">
-					<slot name="status-indicator"></slot>
-				</div>
-
-				<!-- Cache Usage Meter -->
-				<div class="gadget-wrapper cache-gadget">
-					<slot name="cache-usage-meter"></slot>
-				</div>
-
-				<!-- Database Usage Gadget -->
-				<div class="gadget-wrapper db-gadget">
-					<slot name="db-usage-gadget"></slot>
-				</div>
-
-				<!-- CPU Load Gadget -->
-				<div class="gadget-wrapper cpu-gadget">
-					<slot name="cpu-gadget"></slot>
-				</div>
-
-				<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
-					<v-chip
-						variant="outlined"
-						:class="['profile-chip pos-themed-card', isRtl ? 'rtl-profile-chip' : 'ltr-profile-chip']"
+					<v-icon
+						:start="!isRtl"
+						:end="isRtl"
+						:class="['pos-text-primary', isRtl ? 'rtl-profile-icon' : 'ltr-profile-icon']"
 					>
-						<v-icon
-							:start="!isRtl"
-							:end="isRtl"
-							:class="['pos-text-primary', isRtl ? 'rtl-profile-icon' : 'ltr-profile-icon']"
-						>
-							mdi-account-circle
-						</v-icon>
-						<span :class="['pos-text-primary', isRtl ? 'rtl-profile-text' : 'ltr-profile-text']">
-							{{ displayName }}
-						</span>
-					</v-chip>
-				</div>
+						mdi-account-circle
+					</v-icon>
+					<span :class="['pos-text-primary', isRtl ? 'rtl-profile-text' : 'ltr-profile-text']">
+						{{ displayName }}
+					</span>
+				</v-chip>
+			</div>
 
-				<v-btn
-					icon
-					:class="[
-						'offline-invoices-btn pos-themed-button',
-						isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
-						{ 'has-pending': pendingInvoices > 0 },
-					]"
-					:aria-label="__('View offline invoices') + ` (${pendingInvoices})`"
-					:aria-describedby="'offline-invoices-tooltip'"
-					@click="$emit('show-offline-invoices')"
-					@keydown.enter="$emit('show-offline-invoices')"
-					tabindex="0"
-				>
-					<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
-						<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					</v-badge>
-					<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					<v-tooltip
-						id="offline-invoices-tooltip"
-						activator="parent"
-						:location="isRtl ? 'bottom start' : 'bottom end'"
-						:open-delay="500"
-						:close-delay="200"
-					>
-						{{ __("Offline Invoices") }} ({{ pendingInvoices }})
-					</v-tooltip>
-				</v-btn>
+			<v-btn
+				icon
+				:class="[
+					'offline-invoices-btn pos-themed-button',
+					isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
+					{ 'has-pending': pendingInvoices > 0 },
+				]"
+				@click="$emit('show-offline-invoices')"
+			>
+				<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
+					<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
+				</v-badge>
+				<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
+				<v-tooltip activator="parent" :location="isRtl ? 'bottom start' : 'bottom end'">
+					{{ __("Offline Invoices") }} ({{ pendingInvoices }})
+				</v-tooltip>
+			</v-btn>
 
-				<!-- Menu component slot -->
-				<slot name="menu"></slot>
-			</template>
+			<!-- Menu component slot -->
+			<slot name="menu"></slot>
 		</div>
 
 		<!-- Glass Morphism Loading Bar -->
@@ -193,27 +129,6 @@ export default {
 			posLogo,
 		};
 	},
-	data() {
-		return {
-			windowWidth: window.innerWidth,
-			resizeRafId: null,
-		};
-	},
-	mounted() {
-		this.updateWindowWidth();
-		window.addEventListener("resize", this.updateWindowWidth, { passive: true });
-		this.$el.addEventListener("keydown", this.handleKeyboardNavigation, { passive: false });
-	},
-	beforeUnmount() {
-		window.removeEventListener("resize", this.updateWindowWidth);
-		if (this.$el && this.$el.removeEventListener) {
-			this.$el.removeEventListener("keydown", this.handleKeyboardNavigation);
-		}
-		if (this.resizeRafId) {
-			cancelAnimationFrame(this.resizeRafId);
-			this.resizeRafId = null;
-		}
-	},
 	props: {
 		posProfile: {
 			type: Object,
@@ -221,7 +136,7 @@ export default {
 		},
 		pendingInvoices: {
 			type: Number,
-			default: 0,
+			deflt: 0,
 		},
 		loadingProgress: {
 			type: Number,
@@ -258,53 +173,8 @@ export default {
 
 			return "User";
 		},
-
-		// Mobile breakpoint detection
-		isMobile() {
-			return this.windowWidth < 768;
-		},
-
-		isTablet() {
-			return this.windowWidth >= 768 && this.windowWidth < 1024;
-		},
-
-		isDesktop() {
-			return this.windowWidth >= 1024;
-		},
 	},
 
-	methods: {
-		updateWindowWidth() {
-			if (this.resizeRafId) {
-				cancelAnimationFrame(this.resizeRafId);
-			}
-			this.resizeRafId = requestAnimationFrame(() => {
-				this.windowWidth = window.innerWidth;
-			});
-		},
-
-		// Enhanced accessibility helper
-		handleKeyboardNavigation(event) {
-			if (event.key === 'Tab') {
-				// Ensure proper tab order
-				const focusableElements = this.$el.querySelectorAll(
-					'button, [tabindex="0"], [role="button"]'
-				);
-				if (focusableElements.length > 0) {
-					// Tab navigation is handled by browser, just ensure visibility
-					this.$nextTick(() => {
-						const activeElement = document.activeElement;
-						if (activeElement && this.$el.contains(activeElement)) {
-							activeElement.scrollIntoView({
-								block: 'nearest',
-								inline: 'nearest'
-							});
-						}
-					});
-				}
-			}
-		},
-	},
 	emits: ["nav-click", "go-desk", "show-offline-invoices"],
 };
 </script>
@@ -344,12 +214,6 @@ export default {
 	/* Default to normal row */
 	flex-shrink: 0;
 	min-width: max-content;
-}
-
-.pos-navbar-title-compact {
-	font-weight: 600;
-	font-size: 1.05rem;
-	letter-spacing: 0.03em;
 }
 
 .rtl-brand-section {
@@ -474,34 +338,6 @@ export default {
 	transform: scale(1.05);
 }
 
-@media (max-width: 960px) {
-	.pos-navbar-brand-section {
-		gap: 8px;
-		min-width: 0;
-	}
-	.pos-navbar-actions-section {
-		gap: 6px;
-	}
-}
-
-@media (max-width: 768px) {
-	.mobile-navbar .pos-navbar-brand-section {
-		flex: 1;
-	}
-	.mobile-navbar .pos-navbar-actions-section {
-		gap: 4px;
-	}
-}
-
-@media (max-width: 600px) {
-	.pos-navbar-title {
-		font-size: 1rem !important;
-	}
-	.nav-icon {
-		margin-inline-end: 0;
-	}
-}
-
 /* Brand Title Styling */
 .pos-navbar-title {
 	text-decoration: none !important;
@@ -592,37 +428,6 @@ export default {
 .ltr-nav-icon {
 	order: 0;
 	/* Normal order for LTR */
-}
-
-/* Gadget Wrapper Styling for Consistency */
-.gadget-wrapper {
-	display: flex;
-	align-items: center;
-	min-height: 40px;
-	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.gadget-wrapper:empty {
-	display: none;
-}
-
-/* Individual gadget responsiveness */
-@media (max-width: 1200px) {
-	.db-gadget {
-		display: none;
-	}
-}
-
-@media (max-width: 1024px) {
-	.cpu-gadget {
-		display: none;
-	}
-}
-
-@media (max-width: 900px) {
-	.cache-gadget {
-		display: none;
-	}
 }
 
 /* Profile Section */
@@ -905,133 +710,7 @@ export default {
 	}
 }
 
-/* Mobile Navbar Styles */
-.mobile-navbar {
-	padding: 0 8px !important;
-}
-
-.mobile-navbar .pos-navbar-brand-section {
-	gap: 8px;
-	flex-shrink: 0;
-}
-
-.mobile-navbar .pos-navbar-logo {
-	max-width: 28px !important;
-}
-
-.mobile-navbar .pos-navbar-title {
-	font-size: 1rem !important;
-}
-
-.mobile-navbar .pos-navbar-title-light,
-.mobile-navbar .pos-navbar-title-bold {
-	font-size: 0.9rem !important;
-}
-
-.mobile-navbar .pos-navbar-actions-section {
-	gap: 6px;
-}
-
-.mobile-navbar .mobile-btn {
-	min-width: 36px !important;
-	min-height: 36px !important;
-	padding: 6px !important;
-}
-
-.mobile-navbar .nav-icon {
-	min-width: 36px !important;
-	min-height: 36px !important;
-	padding: 6px !important;
-}
-
-/* Desktop Navbar Styles */
-.desktop-navbar {
-	padding: 0 16px 4px !important;
-}
-
-/* Enhanced mobile responsiveness */
-@media (max-width: 480px) {
-	.mobile-navbar {
-		padding: 0 4px !important;
-		height: 56px !important;
-	}
-
-	.mobile-navbar .pos-navbar-brand-section {
-		gap: 6px;
-	}
-
-	.mobile-navbar .pos-navbar-logo {
-		max-width: 24px !important;
-	}
-
-	.mobile-navbar .pos-navbar-title {
-		font-size: 0.9rem !important;
-	}
-
-	.mobile-navbar .pos-navbar-title-light {
-		display: none !important; /* Hide "POS" part on very small screens */
-	}
-
-	.mobile-navbar .mobile-btn,
-	.mobile-navbar .nav-icon {
-		min-width: 32px !important;
-		min-height: 32px !important;
-		padding: 4px !important;
-	}
-
-	/* Hide hamburger icon text on very small screens */
-	.mobile-navbar .v-app-bar-nav-icon .v-icon {
-		font-size: 20px !important;
-	}
-}
-
-/* Touch-friendly interactions for mobile */
-@media (hover: none) and (pointer: coarse) {
-	.nav-icon,
-	.offline-invoices-btn,
-	.mobile-btn {
-		min-width: 44px !important;
-		min-height: 44px !important;
-		-webkit-tap-highlight-color: rgba(25, 118, 210, 0.1);
-	}
-
-	.pos-navbar-title {
-		min-height: 44px;
-		display: flex;
-		align-items: center;
-	}
-}
-
-/* Reduced motion accessibility */
-@media (prefers-reduced-motion: reduce) {
-	.pos-navbar-enhanced,
-	.nav-icon,
-	.offline-invoices-btn,
-	.profile-chip,
-	.pos-navbar-logo,
-	.gadget-wrapper {
-		transition: none !important;
-		animation: none !important;
-	}
-
-	.offline-invoices-btn.has-pending {
-		animation: none !important;
-	}
-}
-
-/* Tablet optimizations */
-@media (min-width: 768px) and (max-width: 1023px) {
-	.pos-navbar-actions-section {
-		gap: 6px;
-	}
-
-	.profile-chip {
-		padding: 6px 12px !important;
-		font-size: 0.9rem !important;
-	}
-}
-
-/* Original responsive adjustments for loading bar */
+/* Responsive adjustments */
 @media (max-width: 768px) {
 	.glass-card {
 		padding: 6px 12px;
@@ -1048,31 +727,29 @@ export default {
 		padding: 1px 6px;
 		min-width: 28px;
 	}
-}
 
-/* High DPI display adjustments */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-	.mobile-navbar .pos-navbar-logo,
-	.mobile-navbar .v-icon {
-		image-rendering: -webkit-optimize-contrast;
-		image-rendering: crisp-edges;
-	}
-}
-
-/* Landscape mobile adjustments */
-@media (max-height: 500px) and (orientation: landscape) {
-	.mobile-navbar {
-		height: 48px !important;
+	/* Mobile title adjustments */
+	.pos-navbar-title {
+		font-size: 1.1rem !important;
+		min-width: max-content !important;
+		flex-shrink: 0 !important;
 	}
 
-	.mobile-navbar .pos-navbar-title {
-		font-size: 0.8rem !important;
+	.pos-navbar-title-light {
+		font-weight: 300 !important;
+		letter-spacing: 0.3px;
+		margin-right: 1px;
 	}
 
-	.mobile-navbar .mobile-btn,
-	.mobile-navbar .nav-icon {
-		min-width: 28px !important;
-		min-height: 28px !important;
+	.pos-navbar-title-bold {
+		font-weight: 600 !important;
+		letter-spacing: 0.2px;
+	}
+
+	.pos-navbar-brand-section {
+		flex-shrink: 0 !important;
+		min-width: auto !important;
+		gap: 8px;
 	}
 }
 </style>

@@ -992,24 +992,133 @@ export async function getStoredItems() {
 }
 
 export async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0 } = {}) {
-        try {
-                await checkDbHealth();
-                if (!db.isOpen()) await db.open();
-                const normalizedGroup = typeof itemGroup === "string" ? itemGroup.trim() : "";
-                let collection = db.table("items");
-                if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
-                        collection = collection.where("item_group").equalsIgnoreCase(normalizedGroup);
-                }
-                const normalizedSearch = typeof search === "string" ? search.trim() : "";
-                if (normalizedSearch) {
-                        const term = normalizedSearch.toLowerCase();
-                        collection = collection.filter((it) => {
-                                const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
-                                const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
-                                const barcodeMatch = Array.isArray(it.item_barcode)
-                                        ? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
-					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
-				return nameMatch || codeMatch || barcodeMatch;
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+
+		const normalizedSearch = String(search || "")
+			.toLowerCase()
+			.trim();
+		const words = Array.from(new Set(normalizedSearch.split(/\s+/).filter(Boolean)));
+		const primaryWord = words.reduce(
+			(longest, word) => (word.length > longest.length ? word : longest),
+			words[0] || "",
+		);
+
+		const matchesAllWords = (item) => {
+			if (!words.length) {
+				return true;
+			}
+
+			const searchable = [];
+			const pushValue = (value) => {
+				if (value === undefined || value === null) {
+					return;
+				}
+				const text = String(value).trim().toLowerCase();
+				if (text) {
+					searchable.push(text);
+				}
+			};
+
+			pushValue(item.item_code);
+			pushValue(item.item_name);
+			pushValue(item.name);
+			pushValue(item.description);
+			pushValue(item.barcode);
+			pushValue(item.brand);
+			pushValue(item.item_group);
+			pushValue(item.attributes);
+
+			const handleArray = (source, extractor) => {
+				if (!Array.isArray(source)) {
+					return;
+				}
+				source.forEach((entry) => {
+					if (extractor) {
+						pushValue(extractor(entry));
+					} else {
+						pushValue(entry);
+					}
+				});
+			};
+
+			if (Array.isArray(item.item_barcode)) {
+				item.item_barcode.forEach((barcode) => pushValue(barcode && barcode.barcode));
+			} else {
+				pushValue(item.item_barcode);
+			}
+
+			handleArray(item.barcodes);
+			handleArray(item.serial_no_data, (serial) => serial && serial.serial_no);
+			handleArray(item.serials);
+			handleArray(item.batch_no_data, (batch) => batch && batch.batch_no);
+			handleArray(item.batches);
+
+			const attributes = item.item_attributes;
+			if (Array.isArray(attributes)) {
+				attributes.forEach((attr) => {
+					if (attr && typeof attr === "object") {
+						pushValue(attr.attribute);
+						pushValue(attr.attribute_value);
+					} else {
+						pushValue(attr);
+					}
+				});
+			} else {
+				pushValue(attributes);
+			}
+
+			if (!searchable.length) {
+				return false;
+			}
+
+			return words.every((word) => searchable.some((field) => field.includes(word)));
+		};
+
+		const applyItemGroupFilter = (collection) => {
+			if (itemGroup && itemGroup.toLowerCase() !== "all") {
+				const group = itemGroup.toLowerCase();
+				return collection.filter((it) => it.item_group && it.item_group.toLowerCase() === group);
+			}
+			return collection;
+		};
+
+		if (primaryWord) {
+			let collection = db
+				.table("items")
+				.where("item_code")
+				.startsWithIgnoreCase(primaryWord)
+				.or("item_name")
+				.startsWithIgnoreCase(primaryWord)
+				.or("barcodes")
+				.equalsIgnoreCase(primaryWord)
+				.or("name_keywords")
+				.startsWithIgnoreCase(primaryWord)
+				.or("serials")
+				.equalsIgnoreCase(primaryWord)
+				.or("batches")
+				.equalsIgnoreCase(primaryWord);
+
+			collection = applyItemGroupFilter(collection);
+
+			let results = await collection.toArray();
+			results = results.filter(matchesAllWords);
+
+			if (!results.length) {
+				let fallback = applyItemGroupFilter(db.table("items"));
+				results = await fallback.filter(matchesAllWords).toArray();
+			}
+
+			if (!results.length) {
+				return [];
+			}
+
+			const map = new Map();
+			results.forEach((item) => {
+				if (!map.has(item.item_code)) {
+					map.set(item.item_code, item);
+				}
 			});
 
 			const unique = Array.from(map.values());

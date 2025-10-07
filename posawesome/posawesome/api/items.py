@@ -10,72 +10,17 @@ from erpnext.stock.doctype.batch.batch import (
     get_batch_qty,
 )
 from erpnext.stock.get_item_details import get_item_details
-from frappe import _, as_json
+from frappe import _
 from frappe.utils import cstr, flt, get_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import redis_cache
 
-from .utils import (
-    HAS_VARIANTS_EXCLUSION,
-    expand_item_groups,
-    get_active_pos_profile,
-    get_item_groups,
-)
+from .utils import HAS_VARIANTS_EXCLUSION, get_item_groups, expand_item_groups
 
 
 def normalize_brand(brand: str) -> str:
     """Return a normalized representation of a brand name."""
     return cstr(brand).strip().lower()
-
-
-def _ensure_pos_profile(pos_profile):
-    """Return a ``(profile_dict, profile_json)`` tuple for the given input.
-
-    The POS profile parameter can arrive as a JSON string, a python ``dict``,
-    a bare profile name or even ``None`` (when the frontend has not yet loaded
-    the active profile). This helper normalises those inputs so downstream code
-    can rely on a fully populated dictionary and a JSON serialised
-    representation of the same profile. If no valid profile can be resolved a
-    user-facing validation error is raised.
-    """
-
-    profile_dict = None
-    profile_json = None
-
-    if isinstance(pos_profile, dict):
-        profile_dict = pos_profile
-        profile_json = as_json(pos_profile)
-    elif isinstance(pos_profile, str):
-        raw_value = pos_profile.strip()
-        if raw_value:
-            try:
-                decoded_value = json.loads(raw_value)
-            except Exception:
-                decoded_value = raw_value
-
-            if isinstance(decoded_value, dict):
-                profile_dict = decoded_value
-                profile_json = raw_value
-            elif isinstance(decoded_value, str):
-                if decoded_value:
-                    profile_doc = frappe.get_doc("POS Profile", decoded_value)
-                    profile_dict = profile_doc.as_dict()
-                else:
-                    profile_dict = get_active_pos_profile()
-            elif decoded_value is None:
-                profile_dict = get_active_pos_profile()
-        else:
-            profile_dict = get_active_pos_profile()
-    elif pos_profile is None:
-        profile_dict = get_active_pos_profile()
-
-    if profile_dict and not profile_json:
-        profile_json = as_json(profile_dict)
-
-    if not profile_dict or not profile_json:
-        frappe.throw(_("POS profile data is missing or invalid."))
-
-    return profile_dict, profile_json
 
 
 def get_stock_availability(item_code, warehouse):
@@ -159,7 +104,7 @@ def get_items(
     include_image=False,
     item_groups=None,
 ):
-    _pos_profile, pos_profile_json = _ensure_pos_profile(pos_profile)
+    _pos_profile = json.loads(pos_profile)
     use_price_list = _pos_profile.get("posa_use_server_cache")
     pos_profile_name = _pos_profile.get("name")
     warehouse = _pos_profile.get("warehouse")
@@ -193,7 +138,7 @@ def get_items(
         item_groups_tuple,
     ):
         return _get_items(
-            pos_profile_json,
+            pos_profile,
             price_list,
             item_group,
             search_value,
@@ -245,8 +190,7 @@ def get_items(
 
         search_limit = 0
         if use_limit_search:
-            raw_search_limit = pos_profile.get("posa_search_limit")
-            search_limit = _to_positive_int(raw_search_limit) or 500
+            search_limit = pos_profile.get("posa_search_limit") or 500
 
         result = []
 
@@ -332,19 +276,18 @@ def get_items(
         limit_start = None
         order_by = "item_name asc"
 
-        if limit is not None:
-            limit_page_length = limit
-            if offset and not start_after:
-                limit_start = offset
-        elif use_limit_search and not pos_profile.get("posa_force_reload_items"):
-            limit_page_length = search_limit
-
-        # When not using limit search and no explicit limit is supplied,
-        # allow searches to return the full matching catalog. Limit-search
-        # profiles continue to honour the configured cap so Enter queries
-        # only hydrate the requested subset of items.
-        if search_value and not use_limit_search and limit is None:
-            limit_page_length = None
+        # When a specific search term is provided, fetch all matching
+        # items. Applying a limit in this scenario can truncate results
+        # and prevent relevant items from appearing in the item selector.
+        if not search_value:
+            if limit is not None:
+                limit_page_length = limit
+                if offset and not start_after:
+                    limit_start = offset
+            elif use_limit_search:
+                limit_page_length = search_limit
+                if pos_profile.get("posa_force_reload_items"):
+                    limit_page_length = None
 
         fields = [
             "name",
@@ -531,7 +474,7 @@ def get_items(
         )
     else:
         return _get_items(
-            pos_profile_json,
+            pos_profile,
             price_list,
             item_group,
             search_value,
@@ -557,7 +500,7 @@ def get_items_groups():
 
 @frappe.whitelist()
 def get_items_count(pos_profile, item_groups=None):
-    pos_profile, _ = _ensure_pos_profile(pos_profile)
+    pos_profile = json.loads(pos_profile)
     if isinstance(item_groups, str):
         try:
             item_groups = json.loads(item_groups)
@@ -574,7 +517,7 @@ def get_items_count(pos_profile, item_groups=None):
 @frappe.whitelist()
 def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=None):
     """Return variants of an item along with attribute metadata."""
-    pos_profile, pos_profile_json = _ensure_pos_profile(pos_profile)
+    pos_profile = json.loads(pos_profile)
     price_list = price_list or pos_profile.get("selling_price_list")
 
     fields = [
@@ -605,7 +548,7 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
         return {"variants": [], "attributes_meta": {}}
 
     details = get_items_details(
-        pos_profile_json,
+        json.dumps(pos_profile),
         json.dumps(items_data),
         price_list=price_list,
         customer=customer,
@@ -659,7 +602,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
     for offline selection without additional round trips per item.
     """
 
-    pos_profile, _ = _ensure_pos_profile(pos_profile)
+    pos_profile = json.loads(pos_profile)
     items_data = json.loads(items_data)
 
     warehouse = pos_profile.get("warehouse")

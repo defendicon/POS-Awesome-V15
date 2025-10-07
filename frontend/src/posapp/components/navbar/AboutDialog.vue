@@ -15,16 +15,6 @@
 							<v-icon start size="14">mdi-application-outline</v-icon>
 							{{ appInfo.length }} {{ __("Apps") }}
 						</v-chip>
-						<v-chip
-							v-if="formattedBuildVersion"
-							size="small"
-							color="secondary"
-							variant="tonal"
-							class="status-chip-improved"
-						>
-							<v-icon start size="14">mdi-counter</v-icon>
-							{{ __("Build Time:") }} {{ formattedBuildVersion }}
-						</v-chip>
 					</div>
 				</div>
 				<v-btn
@@ -92,10 +82,6 @@
 </template>
 
 <script>
-import { formatBuildVersion } from "../../stores/updateStore.js";
-
-const BUILD_VERSION = typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
-
 export default {
 	name: "AboutDialog",
 	props: {
@@ -107,13 +93,7 @@ export default {
 			loadingAppInfo: false,
 			appInfoError: false,
 			appInfo: [],
-			buildVersion: BUILD_VERSION,
 		};
-	},
-	computed: {
-		formattedBuildVersion() {
-			return this.buildVersion ? formatBuildVersion(this.buildVersion) : null;
-		},
 	},
 	watch: {
 		modelValue(val) {
@@ -140,9 +120,6 @@ export default {
 					this.loadingAppInfo = false;
 					if (Array.isArray(r.message.apps)) {
 						this.appInfo = r.message.apps;
-						if (r.message.build_version) {
-							this.buildVersion = r.message.build_version;
-						}
 					} else {
 						this.appInfoError = true;
 					}

@@ -13,7 +13,6 @@ import psutil
 import functools
 
 from .utils import get_item_groups, get_active_pos_profile
-from posawesome.utils import get_build_version
 
 
 def get_version():
@@ -157,7 +156,7 @@ def get_app_info() -> Dict[str, List[Dict[str, str]]]:
 
         apps_info.append({"app_name": app_name, "installed_version": app_version})
 
-    return {"apps": apps_info, "build_version": get_build_version()}
+    return {"apps": apps_info}
 
 
 def ensure_child_doctype(doc, table_field, child_doctype):

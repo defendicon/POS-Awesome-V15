@@ -1,4 +1,4 @@
-from posawesome.utils import get_build_version
+from . import __version__ as app_version
 
 app_name = "posawesome"
 app_title = "POS Awesome"
@@ -15,14 +15,12 @@ app_license = "GPLv3"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/posawesome/css/posawesome.css"
 # app_include_js = "/assets/posawesome/js/posawesome.js"
-_asset_version = get_build_version()
-
 app_include_js = [
-    f"/assets/posawesome/dist/js/posawesome.umd.js?v={_asset_version}",
+    "/assets/posawesome/dist/js/posawesome.umd.js",
 ]
 
 app_include_css = [
-    f"/assets/posawesome/dist/js/posawesome.css?v={_asset_version}",
+    "/assets/posawesome/dist/js/posawesome.css",
 ]
 
 # include js, css files in header of web template

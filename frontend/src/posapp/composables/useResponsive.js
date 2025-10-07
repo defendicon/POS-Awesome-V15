@@ -52,19 +52,9 @@ export function useResponsive() {
 		};
 	});
 
-	let resizeRafId = null;
-
 	const handleResize = () => {
-		// Debounce with requestAnimationFrame for better performance
-		if (resizeRafId) {
-			cancelAnimationFrame(resizeRafId);
-		}
-
-		resizeRafId = requestAnimationFrame(() => {
-			windowWidth.value = window.innerWidth;
-			windowHeight.value = window.innerHeight;
-			resizeRafId = null;
-		});
+		windowWidth.value = window.innerWidth;
+		windowHeight.value = window.innerHeight;
 	};
 
 	onMounted(() => {
@@ -74,10 +64,6 @@ export function useResponsive() {
 
 	onBeforeUnmount(() => {
 		window.removeEventListener("resize", handleResize);
-		if (resizeRafId) {
-			cancelAnimationFrame(resizeRafId);
-			resizeRafId = null;
-		}
 	});
 
 	return {

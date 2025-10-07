@@ -1,109 +1,60 @@
 /* global flt, __, get_currency_symbol */
-import { perfMarkStart, perfMarkEnd } from "../../utils/perf.js";
-
-import { parseBooleanSetting } from "../../utils/stock.js";
 
 export default {
-        // Calculate total quantity of all items
-        total_qty() {
-                const mark = perfMarkStart("pos:totals-total_qty");
-                this.close_payments();
-                const store = this.invoiceStore;
-                const storeValue = store?.totalQty?.value ?? store?.totalQty;
-                let qty;
+	// Calculate total quantity of all items
+	total_qty() {
+		this.close_payments();
+		let qty = 0;
+		this.items.forEach((item) => {
+			qty += flt(item.qty);
+		});
+		return this.flt(qty, this.float_precision);
+	},
+	// Calculate total amount for all items (handles returns)
+	Total() {
+		let sum = 0;
+		this.items.forEach((item) => {
+			// For returns, use absolute value for correct calculation
+			const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+			const rate = flt(item.rate);
+			sum += qty * rate;
+		});
+		return this.flt(sum, this.currency_precision);
+	},
+	// Calculate subtotal after discounts and delivery charges
+	subtotal() {
+		this.close_payments();
+		let sum = 0;
+		this.items.forEach((item) => {
+			// For returns, use absolute value for correct calculation
+			const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+			const rate = flt(item.rate);
+			sum += qty * rate;
+		});
 
-                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-                        qty = storeValue;
-                } else {
-                        qty = 0;
-                        this.items.forEach((item) => {
-                                qty += flt(item.qty);
-                        });
-                }
-
-                const result = this.flt(qty, this.float_precision);
-                perfMarkEnd("pos:totals-total_qty", mark);
-                return result;
-        },
-        // Calculate total amount for all items (handles returns)
-        Total() {
-                const mark = perfMarkStart("pos:totals-gross");
-                const store = this.invoiceStore;
-                const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
-                let sum;
-
-                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-                        sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
-                } else {
-                        sum = 0;
-                        this.items.forEach((item) => {
-                                // For returns, use absolute value for correct calculation
-                                const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-                                const rate = flt(item.rate);
-                                sum += qty * rate;
-                        });
-                }
-
-                const result = this.flt(sum, this.currency_precision);
-                perfMarkEnd("pos:totals-gross", mark);
-                return result;
-        },
-        // Calculate subtotal after discounts and delivery charges
-        subtotal() {
-                const mark = perfMarkStart("pos:totals-subtotal");
-                this.close_payments();
-                const store = this.invoiceStore;
-                const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
-                let sum = typeof storeValue === "number" && !Number.isNaN(storeValue) ? storeValue : 0;
-
-                if (!(typeof storeValue === "number" && !Number.isNaN(storeValue))) {
-                        this.items.forEach((item) => {
-                                // For returns, use absolute value for correct calculation
-                                const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-                                const rate = flt(item.rate);
-                                sum += qty * rate;
-                        });
-                } else if (this.isReturnInvoice) {
-                        sum = Math.abs(sum);
-                }
-
-                // Subtract additional discount
-                const additional_discount = this.flt(this.additional_discount);
-                sum -= additional_discount;
+		// Subtract additional discount
+		const additional_discount = this.flt(this.additional_discount);
+		sum -= additional_discount;
 
 		// Add delivery charges
 		const delivery_charges = this.flt(this.delivery_charges_rate);
 		sum += delivery_charges;
 
-                const result = this.flt(sum, this.currency_precision);
-                perfMarkEnd("pos:totals-subtotal", mark);
-                return result;
-        },
-        // Calculate total discount amount for all items
-        total_items_discount_amount() {
-                const mark = perfMarkStart("pos:totals-discount");
-                const store = this.invoiceStore;
-                const storeValue = store?.discountTotal?.value ?? store?.discountTotal;
-                let sum;
-
-                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-                        sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
-                } else {
-                        sum = 0;
-                        this.items.forEach((item) => {
-                                // For returns, use absolute value for correct calculation
-                                if (this.isReturnInvoice) {
-                                        sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
-                                } else {
-                                        sum += flt(item.qty) * flt(item.discount_amount);
-                                }
-                        });
-                }
-
-                const result = this.flt(sum, this.float_precision);
-                perfMarkEnd("pos:totals-discount", mark);
-                return result;
-        },
+		return this.flt(sum, this.currency_precision);
+	},
+	// Calculate total discount amount for all items
+	total_items_discount_amount() {
+		let sum = 0;
+		this.items.forEach((item) => {
+			// For returns, use absolute value for correct calculation
+			if (this.isReturnInvoice) {
+				sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
+			} else {
+				sum += flt(item.qty) * flt(item.discount_amount);
+			}
+		});
+		return this.flt(sum, this.float_precision);
+	},
 	// Format posting_date for display as DD-MM-YYYY
 	formatted_posting_date: {
 		get() {
@@ -138,13 +89,9 @@ export default {
 		return this.invoiceType === "Return" || (this.invoice_doc && this.invoice_doc.is_return);
 	},
 	blockSaleBeyondAvailableQty() {
-		if (["Order", "Quotation"].includes(this.invoiceType)) {
-			return false;
-		}
-		const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 		return (
-			!allowNegative &&
-			Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty)
+			!["Order", "Quotation"].includes(this.invoiceType) &&
+			this.pos_profile.posa_block_sale_beyond_available_qty
 		);
 	},
 	// Table headers for item table (for another table if needed)

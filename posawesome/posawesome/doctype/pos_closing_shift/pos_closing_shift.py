@@ -188,16 +188,10 @@ class POSClosingShift(Document):
         if not sales_invoice:
             return False
 
-        if frappe.db.exists(
-            "POS Invoice Merge Log", {"consolidated_invoice": sales_invoice}
-        ):
+        if frappe.db.exists("POS Invoice Merge Log", {"consolidated_invoice": sales_invoice}):
             return True
 
-        return bool(
-            frappe.db.exists(
-                "POS Invoice Merge Log", {"consolidated_credit_note": sales_invoice}
-            )
-        )
+        return bool(frappe.db.exists("POS Invoice Merge Log", {"consolidated_credit_note": sales_invoice}))
 
     def delete_draft_invoices(self):
         if frappe.get_value("POS Profile", self.pos_profile, "posa_allow_delete"):
@@ -228,9 +222,7 @@ class POSClosingShift(Document):
 
     @frappe.whitelist()
     def get_payment_reconciliation_details(self):
-        company_currency = frappe.get_cached_value(
-            "Company", self.company, "default_currency"
-        )
+        company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
 
         sales_breakdown = defaultdict(float)
         net_breakdown = defaultdict(float)
@@ -249,10 +241,7 @@ class POSClosingShift(Document):
                 row["currencies"][currency] += flt(amount)
 
         cash_mode_of_payment = (
-            frappe.db.get_value(
-                "POS Profile", self.pos_profile, "posa_cash_mode_of_payment"
-            )
-            or "Cash"
+            frappe.db.get_value("POS Profile", self.pos_profile, "posa_cash_mode_of_payment") or "Cash"
         )
 
         for row in self.get("pos_transactions", []):
@@ -473,9 +462,7 @@ def make_closing_shift_from_opening(opening_shift):
     closing_shift.net_total = 0
     closing_shift.total_quantity = 0
 
-    company_currency = frappe.get_cached_value(
-        "Company", closing_shift.company, "default_currency"
-    )
+    company_currency = frappe.get_cached_value("Company", closing_shift.company, "default_currency")
 
     invoices = get_pos_invoices(opening_shift.get("name"), doctype)
 
@@ -503,27 +490,21 @@ def make_closing_shift_from_opening(opening_shift):
                 {
                     invoice_field: d.name,
                     "posting_date": d.posting_date,
-                    "grand_total": get_base_value(
-                        d, "grand_total", "base_grand_total", conversion_rate
-                    ),
+                    "grand_total": get_base_value(d, "grand_total", "base_grand_total", conversion_rate),
                     "transaction_currency": d.get("currency") or company_currency,
                     "transaction_amount": flt(d.get("grand_total")),
                     "customer": d.customer,
                 }
             )
         )
-        base_grand_total = get_base_value(
-            d, "grand_total", "base_grand_total", conversion_rate
-        )
+        base_grand_total = get_base_value(d, "grand_total", "base_grand_total", conversion_rate)
         base_net_total = get_base_value(d, "net_total", "base_net_total", conversion_rate)
         closing_shift.grand_total += base_grand_total
         closing_shift.net_total += base_net_total
         closing_shift.total_quantity += flt(d.total_qty)
 
         for t in d.taxes:
-            existing_tax = [
-                tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate
-            ]
+            existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
             if existing_tax:
                 existing_tax[0].amount += get_base_value(
                     t, "tax_amount", "base_tax_amount", d.get("conversion_rate")
@@ -551,15 +532,12 @@ def make_closing_shift_from_opening(opening_shift):
                 )
                 if not cash_mode_of_payment:
                     cash_mode_of_payment = "Cash"
-                conversion_rate = d.get("conversion_rate")
                 if existing_pay[0].mode_of_payment == cash_mode_of_payment:
-                    amount = get_base_value(p, "amount", "base_amount", conversion_rate) - get_base_value(
-                        d, "change_amount", "base_change_amount", conversion_rate
-                    )
-                else:
                     amount = get_base_value(
-                        p, "amount", "base_amount", conversion_rate
-                    )
+                        p, "amount", "base_amount", d.get("conversion_rate")
+                    ) - get_base_value(d, "change_amount", "base_change_amount", d.get("conversion_rate"))
+                else:
+                    amount = get_base_value(p, "amount", "base_amount", d.get("conversion_rate"))
                 existing_pay[0].expected_amount += flt(amount)
             else:
                 payments.append(
@@ -590,18 +568,14 @@ def make_closing_shift_from_opening(opening_shift):
         )
         existing_pay = [pay for pay in payments if pay.mode_of_payment == py.mode_of_payment]
         if existing_pay:
-            existing_pay[0].expected_amount += get_base_value(
-                py, "paid_amount", "base_paid_amount"
-            )
+            existing_pay[0].expected_amount += get_base_value(py, "paid_amount", "base_paid_amount")
         else:
             payments.append(
                 frappe._dict(
                     {
                         "mode_of_payment": py.mode_of_payment,
                         "opening_amount": 0,
-                        "expected_amount": get_base_value(
-                            py, "paid_amount", "base_paid_amount"
-                        ),
+                        "expected_amount": get_base_value(py, "paid_amount", "base_paid_amount"),
                     }
                 )
             )

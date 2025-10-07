@@ -45,7 +45,7 @@
 					</v-col>
 
 					<!-- Paid Change (if applicable) -->
-                                        <v-col cols="7" v-if="invoice_doc && credit_change > 0 && !invoice_doc.is_return">
+					<v-col cols="7" v-if="credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -62,7 +62,7 @@
 					</v-col>
 
 					<!-- Credit Change (if applicable) -->
-                                        <v-col cols="5" v-if="invoice_doc && credit_change > 0 && !invoice_doc.is_return">
+					<v-col cols="5" v-if="credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -82,11 +82,9 @@
 
 				<v-divider></v-divider>
 
-                                <!-- Payment Inputs (All Payment Methods) -->
-                                <div
-                                        v-if="is_cashback && invoice_doc && Array.isArray(invoice_doc.payments)"
-                                >
-                                        <v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
+				<!-- Payment Inputs (All Payment Methods) -->
+				<div v-if="is_cashback">
+					<v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
 						<v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
 							<v-text-field
 								density="compact"
@@ -222,11 +220,11 @@
 
 				<v-divider></v-divider>
 
-                                <!-- Invoice Totals (Net, Tax, Total, Discount, Grand, Rounded) -->
-                                <v-row v-if="invoice_doc" class="pa-1">
-                                        <v-col cols="6">
-                                                <v-text-field
-                                                        density="compact"
+				<!-- Invoice Totals (Net, Tax, Total, Discount, Grand, Rounded) -->
+				<v-row class="pa-1">
+					<v-col cols="6">
+						<v-text-field
+							density="compact"
 							variant="solo"
 							color="primary"
 							:label="frappe._('Net Total')"
@@ -309,7 +307,7 @@
 							persistent-placeholder
 						></v-text-field>
 					</v-col>
-                                        <v-col v-if="invoice_doc && invoice_doc.rounded_total" cols="6">
+					<v-col v-if="invoice_doc.rounded_total" cols="6">
 						<v-text-field
 							density="compact"
 							variant="solo"
@@ -337,115 +335,79 @@
 						/>
 					</v-col>
 					<!-- Shipping Address Selection (if delivery date is set) -->
-                                        <v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
-                                                <v-autocomplete
-                                                        density="compact"
-                                                        clearable
-                                                        auto-select-first
-                                                        variant="solo"
-                                                        color="primary"
-                                                        :label="frappe._('Address')"
-                                                        v-model="invoice_doc.shipping_address_name"
-                                                        :items="addresses"
-                                                        item-title="display_title"
-                                                        item-value="name"
-                                                        class="sleek-field pos-themed-input"
-                                                        :no-data-text="__('Address not found')"
-                                                        hide-details
-                                                        :customFilter="addressFilter"
-                                                        append-icon="mdi-plus"
-                                                        @click:append="new_address"
-                                                >
-                                                        <template v-slot:item="{ props, item }">
-                                                                <v-list-item v-bind="props">
-                                                                        <v-list-item-title class="text-primary text-subtitle-1">
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.address_title) ||
-                                                                                                item.address_title
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-title>
-                                                                        <v-list-item-subtitle>
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.address_line1) ||
-                                                                                                item.address_line1
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                        <v-list-item-subtitle
-                                                                                v-if="
-                                                                                        (item?.raw && item.raw.address_line2) ||
-                                                                                        item.address_line2
-                                                                                "
-                                                                        >
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.address_line2) ||
-                                                                                                item.address_line2
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                        <v-list-item-subtitle
-                                                                                v-if="(item?.raw && item.raw.city) || item.city"
-                                                                        >
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.city) || item.city
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                        <v-list-item-subtitle
-                                                                                v-if="(item?.raw && item.raw.state) || item.state"
-                                                                        >
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.state) ||
-                                                                                                item.state
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                        <v-list-item-subtitle
-                                                                                v-if="(item?.raw && item.raw.country) || item.country"
-                                                                        >
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.country) ||
-                                                                                                item.country
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                        <v-list-item-subtitle
-                                                                                v-if="
-                                                                                        (item?.raw && item.raw.mobile_no) ||
-                                                                                        item.mobile_no
-                                                                                "
-                                                                        >
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.mobile_no) ||
-                                                                                                item.mobile_no
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                        <v-list-item-subtitle
-                                                                                v-if="
-                                                                                        (item?.raw && item.raw.address_type) ||
-                                                                                        item.address_type
-                                                                                "
-                                                                        >
-                                                                                <div
-                                                                                        v-html="
-                                                                                                (item?.raw && item.raw.address_type) ||
-                                                                                                item.address_type
-                                                                                        "
-                                                                                ></div>
-                                                                        </v-list-item-subtitle>
-                                                                </v-list-item>
-                                                        </template>
-                                                </v-autocomplete>
-                                        </v-col>
+					<v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
+						<v-autocomplete
+							density="compact"
+							clearable
+							auto-select-first
+							variant="solo"
+							color="primary"
+							:label="frappe._('Address')"
+							v-model="invoice_doc.shipping_address_name"
+							:items="addresses"
+							item-title="display_title"
+							item-value="name"
+							class="sleek-field pos-themed-input"
+							:no-data-text="__('Address not found')"
+							hide-details
+							:customFilter="addressFilter"
+							append-icon="mdi-plus"
+							@click:append="new_address"
+						>
+							<template v-slot:item="{ props, item }">
+								<v-list-item v-bind="props">
+									<v-list-item-title class="text-primary text-subtitle-1">
+										<div
+											v-html="
+												(item?.raw && item.raw.address_title) || item.address_title
+											"
+										></div>
+									</v-list-item-title>
+									<v-list-item-subtitle>
+										<div
+											v-html="
+												(item?.raw && item.raw.address_line1) || item.address_line1
+											"
+										></div>
+									</v-list-item-subtitle>
+									<v-list-item-subtitle
+										v-if="(item?.raw && item.raw.address_line2) || item.address_line2"
+									>
+										<div
+											v-html="
+												(item?.raw && item.raw.address_line2) || item.address_line2
+											"
+										></div>
+									</v-list-item-subtitle>
+									<v-list-item-subtitle v-if="(item?.raw && item.raw.city) || item.city">
+										<div v-html="(item?.raw && item.raw.city) || item.city"></div>
+									</v-list-item-subtitle>
+									<v-list-item-subtitle v-if="(item?.raw && item.raw.state) || item.state">
+										<div v-html="(item?.raw && item.raw.state) || item.state"></div>
+									</v-list-item-subtitle>
+									<v-list-item-subtitle
+										v-if="(item?.raw && item.raw.country) || item.country"
+									>
+										<div v-html="(item?.raw && item.raw.country) || item.country"></div>
+									</v-list-item-subtitle>
+									<v-list-item-subtitle
+										v-if="(item?.raw && item.raw.mobile_no) || item.mobile_no"
+									>
+										<div
+											v-html="(item?.raw && item.raw.mobile_no) || item.mobile_no"
+										></div>
+									</v-list-item-subtitle>
+									<v-list-item-subtitle
+										v-if="(item?.raw && item.raw.address_type) || item.address_type"
+									>
+										<div
+											v-html="(item?.raw && item.raw.address_type) || item.address_type"
+										></div>
+									</v-list-item-subtitle>
+								</v-list-item>
+							</template>
+						</v-autocomplete>
+					</v-col>
 
 					<!-- Additional Notes (if enabled in POS profile) -->
 					<v-col cols="12" v-if="pos_profile.posa_display_additional_notes">
@@ -506,15 +468,14 @@
 
 				<!-- Switches for Write Off and Credit Sale -->
 				<v-row class="pa-1" align="start" no-gutters>
-                                        <v-col
-                                                cols="6"
-                                                v-if="
-                                                        invoice_doc &&
-                                                        pos_profile.posa_allow_write_off_change &&
-                                                        credit_change > 0 &&
-                                                        !invoice_doc.is_return
-                                                "
-                                        >
+					<v-col
+						cols="6"
+						v-if="
+							pos_profile.posa_allow_write_off_change &&
+							credit_change > 0 &&
+							!invoice_doc.is_return
+						"
+					>
 						<v-switch
 							v-model="is_write_off_change"
 							flat
@@ -522,13 +483,10 @@
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
-                                        <v-col
-                                                cols="6"
-                                                v-if="invoice_doc && pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
-                                        >
+					<v-col cols="6" v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return">
 						<v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
 					</v-col>
-                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
+					<v-col cols="6" v-if="invoice_doc.is_return && pos_profile.use_cashback">
 						<v-switch
 							v-model="is_cashback"
 							flat
@@ -536,7 +494,7 @@
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
-                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return">
+					<v-col cols="6" v-if="invoice_doc.is_return">
 						<v-switch
 							v-model="is_credit_return"
 							flat
@@ -580,7 +538,7 @@
 							</v-chip>
 						</div>
 					</v-col>
-                                        <v-col cols="6" v-if="invoice_doc && !invoice_doc.is_return && pos_profile.use_customer_credit">
+					<v-col cols="6" v-if="!invoice_doc.is_return && pos_profile.use_customer_credit">
 						<v-switch
 							v-model="redeem_customer_credit"
 							flat
@@ -780,10 +738,9 @@
 /* global frappe, __, get_currency_symbol */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
-import { parseBooleanSetting } from "../../utils/stock.js";
 import {
-        saveOfflineInvoice,
-        syncOfflineInvoices,
+	saveOfflineInvoice,
+	syncOfflineInvoices,
 	getPendingOfflineInvoiceCount,
 	isOffline,
 	getSalesPersonsStorage,
@@ -793,25 +750,17 @@ import {
 
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint } from "../../plugins/print.js";
-import { useInvoiceStore } from "../../stores/invoiceStore.js";
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { storeToRefs } from "pinia";
 
 export default {
-        // Using format mixin for shared formatting methods
-        mixins: [format],
-        setup() {
-                const invoiceStore = useInvoiceStore();
-                const customersStore = useCustomersStore();
-                const { selectedCustomer, customerInfo } = storeToRefs(customersStore);
-                return { invoiceStore, selectedCustomer, customerInfoFromStore: customerInfo };
-        },
-        data() {
-                return {
-                        loading: false, // UI loading state
-                        pos_profile: "", // POS profile settings
-                        pos_settings: "", // POS settings
-                        stock_settings: "", // Stock settings
+	// Using format mixin for shared formatting methods
+	mixins: [format],
+	data() {
+		return {
+			loading: false, // UI loading state
+			pos_profile: "", // POS profile settings
+			pos_settings: "", // POS settings
+			invoice_doc: "", // Current invoice document
+			stock_settings: "", // Stock settings
 			invoiceType: "Invoice", // Type of invoice
 			is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
@@ -841,33 +790,23 @@ export default {
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 		};
-        },
-        computed: {
-                invoice_doc: {
-                        get() {
-                                return this.invoiceStore.invoiceDoc;
-                        },
-                        set(value) {
-                                this.invoiceStore.setInvoiceDoc(value);
-                        },
-                },
-                // Get currency symbol for given or current currency
-                currencySymbol() {
-                        return (currency) => {
-                                const fallbackCurrency = this.invoice_doc ? this.invoice_doc.currency : undefined;
-                                return get_currency_symbol(currency || fallbackCurrency);
-                        };
-                },
+	},
+	computed: {
+		// Get currency symbol for given or current currency
+		currencySymbol() {
+			return (currency) => {
+				return get_currency_symbol(currency || this.invoice_doc.currency);
+			};
+		},
 		// Display currency for invoice
 		displayCurrency() {
 			return this.invoice_doc ? this.invoice_doc.currency : "";
 		},
 		blockSaleBeyondAvailableQty() {
-			if (["Order", "Quotation"].includes(this.invoiceType)) {
-				return false;
-			}
-			const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
-			return !allowNegative && Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
+			return (
+				!["Order", "Quotation"].includes(this.invoiceType) &&
+				this.pos_profile.posa_block_sale_beyond_available_qty
+			);
 		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {
@@ -880,32 +819,30 @@ export default {
 			}
 
 			// Add loyalty amount (convert if needed)
-                        const doc = this.invoice_doc;
+			if (this.loyalty_amount) {
+				// Loyalty points are stored in base currency (PKR)
+				if (this.invoice_doc.currency !== this.pos_profile.currency) {
+					// Convert to selected currency (e.g. USD) by dividing
+					total += this.flt(
+						this.loyalty_amount / (this.invoice_doc.conversion_rate || 1),
+						this.currency_precision,
+					);
+				} else {
+					total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
+				}
+			}
 
-                        if (this.loyalty_amount && doc) {
-                                // Loyalty points are stored in base currency (PKR)
-                                if (doc.currency && doc.currency !== this.pos_profile.currency) {
-                                        // Convert to selected currency (e.g. USD) by dividing
-                                        total += this.flt(
-                                                this.loyalty_amount / (doc.conversion_rate || 1),
-                                                this.currency_precision,
-                                        );
-                                } else {
-                                        total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
-                                }
-                        }
-
-                        // Add redeemed customer credit (convert if needed)
-                        if (this.redeemed_customer_credit && doc) {
-                                // Customer credit is stored in base currency (PKR)
-                                if (doc.currency && doc.currency !== this.pos_profile.currency) {
-                                        // Convert to selected currency (e.g. USD) by dividing
-                                        total += this.flt(
-                                                this.redeemed_customer_credit / (doc.conversion_rate || 1),
-                                                this.currency_precision,
-                                        );
-                                } else {
-                                        total +=
+			// Add redeemed customer credit (convert if needed)
+			if (this.redeemed_customer_credit) {
+				// Customer credit is stored in base currency (PKR)
+				if (this.invoice_doc.currency !== this.pos_profile.currency) {
+					// Convert to selected currency (e.g. USD) by dividing
+					total += this.flt(
+						this.redeemed_customer_credit / (this.invoice_doc.conversion_rate || 1),
+						this.currency_precision,
+					);
+				} else {
+					total +=
 						parseFloat(formatUtils.fromArabicNumerals(String(this.redeemed_customer_credit))) ||
 						0;
 				}
@@ -943,17 +880,13 @@ export default {
 			return diff >= 0 ? diff : 0;
 		},
 
-                // Calculate change to be given back to customer
-                credit_change() {
-                        if (!this.invoice_doc) {
-                                return 0;
-                        }
-
-                        // For multi-currency, use grand_total instead of rounded_total
-                        let invoice_total;
-                        if (
-                                this.pos_profile.posa_allow_multi_currency &&
-                                this.invoice_doc.currency !== this.pos_profile.currency
+		// Calculate change to be given back to customer
+		credit_change() {
+			// For multi-currency, use grand_total instead of rounded_total
+			let invoice_total;
+			if (
+				this.pos_profile.posa_allow_multi_currency &&
+				this.invoice_doc.currency !== this.pos_profile.currency
 			) {
 				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
 			} else {
@@ -967,8 +900,8 @@ export default {
 			let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
 
 			// Ensure change is not negative
-                        return change > 0 ? change : 0;
-                },
+			return change > 0 ? change : 0;
+		},
 
 		// Label for the difference field (To Be Paid/Change)
 		diff_label() {
@@ -985,23 +918,21 @@ export default {
 			return this.formatCurrency(this.diff_payment, this.displayCurrency);
 		},
 		// Calculate available loyalty points amount in selected currency
-                available_points_amount() {
-                        let amount = 0;
-                        const doc = this.invoice_doc;
+		available_points_amount() {
+			let amount = 0;
+			if (this.customer_info.loyalty_points) {
+				// Convert loyalty points to amount in base currency (PKR)
+				amount = this.customer_info.loyalty_points * this.customer_info.conversion_factor;
 
-                        if (this.customer_info.loyalty_points && doc) {
-                                // Convert loyalty points to amount in base currency (PKR)
-                                amount = this.customer_info.loyalty_points * this.customer_info.conversion_factor;
-
-                                // Convert to selected currency if needed
-                                if (doc.currency !== this.pos_profile.currency) {
-                                        // Convert PKR to USD by dividing
-                                        amount = this.flt(
-                                                amount / (doc.conversion_rate || 1),
-                                                this.currency_precision,
-                                        );
-                                }
-                        }
+				// Convert to selected currency if needed
+				if (this.invoice_doc.currency !== this.pos_profile.currency) {
+					// Convert PKR to USD by dividing
+					amount = this.flt(
+						amount / (this.invoice_doc.conversion_rate || 1),
+						this.currency_precision,
+					);
+				}
+			}
 			return amount;
 		},
 		// Calculate total available customer credit
@@ -1009,18 +940,14 @@ export default {
 			return this.customer_credit_dict.reduce((total, row) => total + this.flt(row.total_credit), 0);
 		},
 		// Validate if payment can be submitted
-                vaildatPayment() {
-                        if (!this.pos_profile.posa_allow_sales_order) {
-                                return false;
-                        }
-
-                        if (this.invoiceType !== "Order") {
-                                return false;
-                        }
-
-                        const doc = this.invoice_doc;
-                        return !doc || !doc.posa_delivery_date;
-                },
+		vaildatPayment() {
+			if (this.pos_profile.posa_allow_sales_order) {
+				if (this.invoiceType === "Order" && !this.invoice_doc.posa_delivery_date) {
+					return true;
+				}
+			}
+			return false;
+		},
 		// Should request payment field be shown?
 		request_payment_field() {
 			return (
@@ -1049,13 +976,10 @@ export default {
 				this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
 			}
 		},
-                // Watch loyalty_amount to handle loyalty points redemption
-                loyalty_amount(value) {
-                        if (!this.invoice_doc) {
-                                return;
-                        }
-                        if (value > this.available_points_amount) {
-                                this.invoice_doc.loyalty_amount = 0;
+		// Watch loyalty_amount to handle loyalty points redemption
+		loyalty_amount(value) {
+			if (value > this.available_points_amount) {
+				this.invoice_doc.loyalty_amount = 0;
 				this.invoice_doc.redeem_loyalty_points = 0;
 				this.invoice_doc.loyalty_points = 0;
 				this.loyalty_amount = 0;
@@ -1088,13 +1012,10 @@ export default {
 			},
 			deep: true,
 		},
-                // Watch sales_person to update sales_team
-                sales_person(newVal) {
-                        if (!this.invoice_doc) {
-                                return;
-                        }
-                        if (newVal) {
-                                this.invoice_doc.sales_team = [
+		// Watch sales_person to update sales_team
+		sales_person(newVal) {
+			if (newVal) {
+				this.invoice_doc.sales_team = [
 					{
 						sales_person: newVal,
 						allocated_percentage: 100,
@@ -1106,13 +1027,10 @@ export default {
 				console.log("Cleared sales_team");
 			}
 		},
-                // Watch is_credit_sale to reset cash payments
-                is_credit_sale(newVal) {
-                        if (!this.invoice_doc) {
-                                return;
-                        }
-                        if (newVal) {
-                                // If credit sale is enabled, set cash payment to 0
+		// Watch is_credit_sale to reset cash payments
+		is_credit_sale(newVal) {
+			if (newVal) {
+				// If credit sale is enabled, set cash payment to 0
 				this.invoice_doc.payments.forEach((payment) => {
 					if (payment.mode_of_payment.toLowerCase() === "cash") {
 						payment.amount = 0;
@@ -1127,13 +1045,10 @@ export default {
 				});
 			}
 		},
-                // Watch is_credit_return to toggle cashback payments
-                is_credit_return(newVal) {
-                        if (!this.invoice_doc) {
-                                return;
-                        }
-                        if (newVal) {
-                                this.is_cashback = false;
+		// Watch is_credit_return to toggle cashback payments
+		is_credit_return(newVal) {
+			if (newVal) {
+				this.is_cashback = false;
 				// Clear any payment amounts
 				this.invoice_doc.payments.forEach((payment) => {
 					payment.amount = 0;
@@ -1144,42 +1059,30 @@ export default {
 			} else {
 				this.is_cashback = true;
 				// Ensure default negative payment for returns
-                                this.ensureReturnPaymentsAreNegative();
-                        }
-                },
-                'invoice_doc.customer'(customer, previous) {
-                        if (customer && customer !== previous) {
-                                this.get_addresses();
-                        } else if (!customer) {
-                                this.addresses = [];
-                        }
-                },
-                'invoice_doc.posa_delivery_date'(date) {
-                        if (!date) {
-                                if (this.invoice_doc) {
-                                        this.invoice_doc.shipping_address_name = null;
-                                }
-                                this.addresses = [];
-                                return;
-                        }
-                        if (this.invoice_doc && this.invoice_doc.customer) {
-                                this.get_addresses();
-                        }
-                },
-                customerInfoFromStore(newInfo) {
-                        this.customer_info = newInfo || "";
-                },
-                selectedCustomer(newCustomer, oldCustomer) {
-                        if (newCustomer === oldCustomer) {
-                                return;
-                        }
-                        this.customer_credit_dict = [];
-                        this.redeem_customer_credit = false;
-                        this.is_cashback = true;
-                        this.is_credit_return = false;
-                },
-        },
-        methods: {
+				this.ensureReturnPaymentsAreNegative();
+			}
+		},
+		"invoice_doc.customer"(customer, previous) {
+			if (customer && customer !== previous) {
+				this.get_addresses();
+			} else if (!customer) {
+				this.addresses = [];
+			}
+		},
+		"invoice_doc.posa_delivery_date"(date) {
+			if (!date) {
+				if (this.invoice_doc) {
+					this.invoice_doc.shipping_address_name = null;
+				}
+				this.addresses = [];
+				return;
+			}
+			if (this.invoice_doc && this.invoice_doc.customer) {
+				this.get_addresses();
+			}
+		},
+	},
+	methods: {
 		// Go back to invoice view and reset customer readonly
 		back_to_invoice() {
 			this.eventBus.emit("show_payment", "false");
@@ -1701,63 +1604,59 @@ export default {
 				this.customer_credit_dict = [];
 			}
 		},
-                // Get customer addresses for shipping
-                get_addresses() {
-                        const vm = this;
-                        if (!vm.invoice_doc || !vm.invoice_doc.customer) {
-                                vm.addresses = [];
-                                return;
-                        }
-                        frappe.call({
-                                method: "posawesome.posawesome.api.customers.get_customer_addresses",
-                                args: { customer: vm.invoice_doc.customer },
-                                async: true,
-                                callback: function (r) {
-                                        if (!r.exc) {
-                                                const records = Array.isArray(r.message) ? r.message : [];
-                                                const normalized = records
-                                                        .map((row) => vm.normalizeAddress(row))
-                                                        .filter(Boolean);
-                                                vm.addresses = normalized;
-                                                if (
-                                                        vm.invoice_doc &&
-                                                        vm.invoice_doc.shipping_address_name &&
-                                                        !normalized.some(
-                                                                (row) => row.name === vm.invoice_doc.shipping_address_name,
-                                                        )
-                                                ) {
-                                                        vm.invoice_doc.shipping_address_name = null;
-                                                }
-                                        } else {
-                                                vm.addresses = [];
-                                        }
-                                },
-                        });
-                },
-                // Filter addresses for autocomplete
-                addressFilter(item, queryText) {
-                        const record = (item && item.raw) || item || {};
-                        const searchText = (queryText || "").toLowerCase();
-                        if (!searchText) {
-                                return true;
-                        }
-                        const fields = [
-                                "address_title",
-                                "address_line1",
-                                "address_line2",
-                                "city",
-                                "state",
-                                "country",
-                                "name",
-                        ];
-                        return fields.some((field) => {
-                                const value = record[field];
-                                if (!value) {
-                                        return false;
-                                }
-                                return String(value).toLowerCase().includes(searchText);
-                        });
-                },
+		// Get customer addresses for shipping
+		get_addresses() {
+			const vm = this;
+			if (!vm.invoice_doc || !vm.invoice_doc.customer) {
+				vm.addresses = [];
+				return;
+			}
+			frappe.call({
+				method: "posawesome.posawesome.api.customers.get_customer_addresses",
+				args: { customer: vm.invoice_doc.customer },
+				async: true,
+				callback: function (r) {
+					if (!r.exc) {
+						const records = Array.isArray(r.message) ? r.message : [];
+						const normalized = records.map((row) => vm.normalizeAddress(row)).filter(Boolean);
+						vm.addresses = normalized;
+						if (
+							vm.invoice_doc &&
+							vm.invoice_doc.shipping_address_name &&
+							!normalized.some((row) => row.name === vm.invoice_doc.shipping_address_name)
+						) {
+							vm.invoice_doc.shipping_address_name = null;
+						}
+					} else {
+						vm.addresses = [];
+					}
+				},
+			});
+		},
+		// Filter addresses for autocomplete
+		addressFilter(item, queryText) {
+			const record = (item && item.raw) || item || {};
+			const searchText = (queryText || "").toLowerCase();
+			if (!searchText) {
+				return true;
+			}
+			const fields = [
+				"address_title",
+				"address_line1",
+				"address_line2",
+				"city",
+				"state",
+				"country",
+				"name",
+			];
+			return fields.some((field) => {
+				const value = record[field];
+				if (!value) {
+					return false;
+				}
+				return String(value).toLowerCase().includes(searchText);
+			});
+		},
 		// Open dialog to add new address
 		new_address() {
 			if (!this.invoice_doc || !this.invoice_doc.customer) {
@@ -1799,118 +1698,94 @@ export default {
 			});
 		},
 		// Request payment for phone type
-                async request_payment() {
-                        this.phone_dialog = false;
-                        if (!this.invoice_doc.contact_mobile) {
-                                this.eventBus.emit("show_message", {
-                                        title: __("Please set the customer's mobile number"),
-                                        color: "error",
-                                });
-                                this.eventBus.emit("open_edit_customer");
-                                this.back_to_invoice();
-                                return;
-                        }
-
-                        this.eventBus.emit("freeze", { title: __("Waiting for payment...") });
-
-                        try {
-                                this.invoice_doc.payments.forEach((payment) => {
-                                        payment.amount = this.flt(payment.amount);
-                                });
-
-                                const formData = {
-                                        ...this.invoice_doc,
-                                        total_change: !this.invoice_doc.is_return ? -this.diff_payment : 0,
-                                        paid_change: !this.invoice_doc.is_return ? this.paid_change : 0,
-                                        credit_change: -this.credit_change,
-                                        redeemed_customer_credit: this.redeemed_customer_credit,
-                                        customer_credit_dict: this.customer_credit_dict,
-                                        is_cashback: this.is_cashback,
-                                };
-
-                                const updateResponse = await frappe.call({
-                                        method: "posawesome.posawesome.api.invoices.update_invoice",
-                                        args: { data: formData },
-                                });
-
-                                if (updateResponse?.message) {
-                                        this.invoice_doc = updateResponse.message;
-                                }
-
-                                const paymentResponse = await frappe.call({
-                                        method: "posawesome.posawesome.api.payments.create_payment_request",
-                                        args: { doc: this.invoice_doc },
-                                });
-
-                                const payment_request_name = paymentResponse?.message?.name;
-                                if (!payment_request_name) {
-                                        throw new Error("Payment request failed");
-                                }
-
-                                await new Promise((resolve, reject) => {
-                                        setTimeout(async () => {
-                                                try {
-                                                        const { message } = await frappe.db.get_value(
-                                                                "Payment Request",
-                                                                payment_request_name,
-                                                                ["status", "grand_total"],
-                                                        );
-
-                                                        if (!message) {
-                                                                this.eventBus.emit("show_message", {
-                                                                        title: __(
-                                                                                "Payment request status could not be retrieved. Please try again",
-                                                                        ),
-                                                                        color: "error",
-                                                                });
-                                                                resolve();
-                                                                return;
-                                                        }
-
-                                                        if (message.status !== "Paid") {
-                                                                this.eventBus.emit("show_message", {
-                                                                        title: __(
-                                                                                "Payment Request took too long to respond. Please try requesting for payment again",
-                                                                        ),
-                                                                        color: "error",
-                                                                });
-                                                                resolve();
-                                                                return;
-                                                        }
-
-                                                        this.eventBus.emit("show_message", {
-                                                                title: __("Payment of {0} received successfully.", [
-                                                                        this.formatCurrency(
-                                                                                message.grand_total,
-                                                                                this.invoice_doc.currency,
-                                                                                0,
-                                                                        ),
-                                                                ]),
-                                                                color: "success",
-                                                        });
-
-                                                        const doc = await frappe.db.get_doc(
-                                                                this.invoice_doc.doctype,
-                                                                this.invoice_doc.name,
-                                                        );
-                                                        this.invoice_doc = doc;
-                                                        this.submit(null, true);
-                                                        resolve();
-                                                } catch (error) {
-                                                        reject(error);
-                                                }
-                                        }, 30000);
-                                });
-                        } catch (error) {
-                                console.error("Payment request error:", error);
-                                this.eventBus.emit("show_message", {
-                                        title: __(error.message || "Payment request failed"),
-                                        color: "error",
-                                });
-                        } finally {
-                                this.eventBus.emit("unfreeze");
-                        }
-                },
+		request_payment() {
+			this.phone_dialog = false;
+			const vm = this;
+			if (!this.invoice_doc.contact_mobile) {
+				this.eventBus.emit("show_message", {
+					title: __("Please set the customer's mobile number"),
+					color: "error",
+				});
+				this.eventBus.emit("open_edit_customer");
+				this.back_to_invoice();
+				return;
+			}
+			this.eventBus.emit("freeze", { title: __("Waiting for payment...") });
+			this.invoice_doc.payments.forEach((payment) => {
+				payment.amount = this.flt(payment.amount);
+			});
+			let formData = { ...this.invoice_doc };
+			formData["total_change"] = !this.invoice_doc.is_return ? -this.diff_payment : 0;
+			formData["paid_change"] = !this.invoice_doc.is_return ? this.paid_change : 0;
+			formData["credit_change"] = -this.credit_change;
+			formData["redeemed_customer_credit"] = this.redeemed_customer_credit;
+			formData["customer_credit_dict"] = this.customer_credit_dict;
+			formData["is_cashback"] = this.is_cashback;
+			frappe
+				.call({
+					method: "posawesome.posawesome.api.invoices.update_invoice",
+					args: { data: formData },
+					async: false,
+					callback: function (r) {
+						if (r.message) {
+							vm.invoice_doc = r.message;
+						}
+					},
+				})
+				.then(() => {
+					frappe
+						.call({
+							method: "posawesome.posawesome.api.payments.create_payment_request",
+							args: { doc: vm.invoice_doc },
+						})
+						.fail(() => {
+							vm.eventBus.emit("unfreeze");
+							vm.eventBus.emit("show_message", {
+								title: __("Payment request failed"),
+								color: "error",
+							});
+						})
+						.then(({ message }) => {
+							const payment_request_name = message.name;
+							setTimeout(() => {
+								frappe.db
+									.get_value("Payment Request", payment_request_name, [
+										"status",
+										"grand_total",
+									])
+									.then(({ message }) => {
+										if (message.status !== "Paid") {
+											vm.eventBus.emit("unfreeze");
+											vm.eventBus.emit("show_message", {
+												title: __(
+													"Payment Request took too long to respond. Please try requesting for payment again",
+												),
+												color: "error",
+											});
+										} else {
+											vm.eventBus.emit("unfreeze");
+											vm.eventBus.emit("show_message", {
+												title: __("Payment of {0} received successfully.", [
+													vm.formatCurrency(
+														message.grand_total,
+														vm.invoice_doc.currency,
+														0,
+													),
+												]),
+												color: "success",
+											});
+											frappe.db
+												.get_doc(vm.invoice_doc.doctype, vm.invoice_doc.name)
+												.then((doc) => {
+													vm.invoice_doc = doc;
+													vm.submit(null, true);
+												});
+										}
+									});
+							}, 30000);
+						});
+				});
+		},
 		// Get M-Pesa payment modes from backend
 		get_mpesa_modes() {
 			const vm = this;
@@ -1946,52 +1821,48 @@ export default {
 			this.eventBus.emit("open_mpesa_payments", data);
 		},
 		// Set M-Pesa payment as customer credit
-                set_mpesa_payment(payment) {
-                        this.pos_profile.use_customer_credit = true;
-                        this.redeem_customer_credit = true;
-                        const invoiceAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-                        let amount =
-                                payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
-                        amount = amount > 0 ? amount : 0;
-                        const advance = {
-                                type: "Advance",
-                                credit_origin: payment.name,
-                                total_credit: this.flt(payment.unallocated_amount),
-                                credit_to_redeem: this.flt(amount),
-                        };
-                        this.clear_all_amounts();
-                        this.customer_credit_dict.push(advance);
-                },
-                // Normalize address records returned from the server
-                normalizeAddress(address) {
-                        if (!address) {
-                                return null;
-                        }
-                        const normalized = { ...address };
-                        const fallback =
-                                normalized.address_title ||
-                                normalized.address_line1 ||
-                                normalized.name ||
-                                "";
-                        normalized.address_title = normalized.address_title || fallback;
-                        normalized.display_title = fallback;
-                        return normalized;
-                },
-                // Update delivery date after selection
-                update_delivery_date() {
-                        const formatted = this.formatDate(this.new_delivery_date);
-                        if (this.invoice_doc) {
-                                this.invoice_doc.posa_delivery_date = formatted;
-                                if (!formatted) {
-                                        this.invoice_doc.shipping_address_name = null;
-                                }
-                        } else {
-                                this.invoiceStore.mergeInvoiceDoc({ posa_delivery_date: formatted });
-                        }
-                        if (!formatted) {
-                                this.addresses = [];
-                        }
-                },
+		set_mpesa_payment(payment) {
+			this.pos_profile.use_customer_credit = true;
+			this.redeem_customer_credit = true;
+			const invoiceAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+			let amount =
+				payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
+			amount = amount > 0 ? amount : 0;
+			const advance = {
+				type: "Advance",
+				credit_origin: payment.name,
+				total_credit: this.flt(payment.unallocated_amount),
+				credit_to_redeem: this.flt(amount),
+			};
+			this.clear_all_amounts();
+			this.customer_credit_dict.push(advance);
+		},
+		// Normalize address records returned from the server
+		normalizeAddress(address) {
+			if (!address) {
+				return null;
+			}
+			const normalized = { ...address };
+			const fallback = normalized.address_title || normalized.address_line1 || normalized.name || "";
+			normalized.address_title = normalized.address_title || fallback;
+			normalized.display_title = fallback;
+			return normalized;
+		},
+		// Update delivery date after selection
+		update_delivery_date() {
+			const formatted = this.formatDate(this.new_delivery_date);
+			if (this.invoice_doc) {
+				this.invoice_doc.posa_delivery_date = formatted;
+				if (!formatted) {
+					this.invoice_doc.shipping_address_name = null;
+				}
+			} else {
+				this.invoiceStore.mergeInvoiceDoc({ posa_delivery_date: formatted });
+			}
+			if (!formatted) {
+				this.addresses = [];
+			}
+		},
 		// Update purchase order date after selection
 		update_po_date() {
 			this.invoice_doc.po_date = this.formatDate(this.new_po_date);
@@ -2187,16 +2058,16 @@ export default {
 				this.stock_settings = data.stock_settings || {};
 				this.get_mpesa_modes();
 			});
-                        this.eventBus.on("add_the_new_address", (data) => {
-                                const normalized = this.normalizeAddress(data);
-                                if (normalized) {
-                                        const existing = this.addresses.filter((addr) => addr.name !== normalized.name);
-                                        this.addresses = [...existing, normalized];
-                                        if (this.invoice_doc) {
-                                                this.invoice_doc.shipping_address_name = normalized.name;
-                                        }
-                                }
-                        });
+			this.eventBus.on("add_the_new_address", (data) => {
+				const normalized = this.normalizeAddress(data);
+				if (normalized) {
+					const existing = this.addresses.filter((addr) => addr.name !== normalized.name);
+					this.addresses = [...existing, normalized];
+					if (this.invoice_doc) {
+						this.invoice_doc.shipping_address_name = normalized.name;
+					}
+				}
+			});
 			this.eventBus.on("update_invoice_type", (data) => {
 				this.invoiceType = data;
 				if (this.invoice_doc && data !== "Order") {
@@ -2216,12 +2087,23 @@ export default {
 					this.is_credit_return = false;
 				}
 			});
+			this.eventBus.on("update_customer", (customer) => {
+				if (this.customer !== customer) {
+					this.customer_credit_dict = [];
+					this.redeem_customer_credit = false;
+					this.is_cashback = true;
+					this.is_credit_return = false;
+				}
+			});
 			this.eventBus.on("set_pos_settings", (data) => {
 				this.pos_settings = data;
 			});
-                        this.eventBus.on("set_mpesa_payment", (data) => {
-                                this.set_mpesa_payment(data);
-                        });
+			this.eventBus.on("set_customer_info_to_edit", (data) => {
+				this.customer_info = data;
+			});
+			this.eventBus.on("set_mpesa_payment", (data) => {
+				this.set_mpesa_payment(data);
+			});
 			// Clear any stored invoice when parent emits clear_invoice
 			this.eventBus.on("clear_invoice", () => {
 				this.invoice_doc = "";
@@ -2236,11 +2118,13 @@ export default {
 	beforeUnmount() {
 		// Remove all event listeners
 		this.eventBus.off("send_invoice_doc_payment");
-                this.eventBus.off("register_pos_profile");
-                this.eventBus.off("add_the_new_address");
-                this.eventBus.off("update_invoice_type");
-                this.eventBus.off("set_pos_settings");
-                this.eventBus.off("set_mpesa_payment");
+		this.eventBus.off("register_pos_profile");
+		this.eventBus.off("add_the_new_address");
+		this.eventBus.off("update_invoice_type");
+		this.eventBus.off("update_customer");
+		this.eventBus.off("set_pos_settings");
+		this.eventBus.off("set_customer_info_to_edit");
+		this.eventBus.off("set_mpesa_payment");
 		this.eventBus.off("clear_invoice");
 		this.eventBus.off("network-online", this.syncPendingInvoices);
 		this.eventBus.off("server-online", this.syncPendingInvoices);

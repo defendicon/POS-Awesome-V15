@@ -2,23 +2,12 @@
 	<div class="cache-usage-section mx-1">
 		<v-tooltip location="bottom">
 			<template v-slot:activator="{ props }">
-				<div
-					v-bind="props"
-					class="cache-meter-container"
-					role="button"
-					tabindex="0"
-					:aria-busy="cacheUsageLoading"
-					:aria-disabled="cacheUsageLoading"
-					@click="refreshCacheUsage"
-					@keyup.enter.prevent="refreshCacheUsage"
-					@keyup.space.prevent="refreshCacheUsage"
-				>
+				<div v-bind="props" class="cache-meter-container" @click="refreshCacheUsage">
 					<v-progress-circular
 						:model-value="cacheUsage"
 						:color="cacheUsageColor"
 						:size="32"
 						:width="3"
-						:aria-label="cacheUsageLabel"
 						class="cache-meter"
 					>
 						<v-icon size="16" color="info">mdi-database-clock</v-icon>
@@ -120,15 +109,9 @@ export default {
 				return "linear-gradient(90deg, #f953c6 0%, #b91d73 100%)";
 			}
 		},
-		cacheUsageLabel() {
-			return `${this.cacheUsage}% ${this.__("cache used")}`;
-		},
 	},
 	methods: {
 		refreshCacheUsage() {
-			if (this.cacheUsageLoading) {
-				return;
-			}
 			this.$emit("refresh");
 		},
 		formatBytes(bytes) {

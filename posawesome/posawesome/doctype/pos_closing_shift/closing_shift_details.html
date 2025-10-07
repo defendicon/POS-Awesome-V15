@@ -3,14 +3,14 @@
                 <div class="grid-body">
                         <div class="rows text-center">
 
-				<!-- Sales summary section -->
-				<div>
-						<h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Sales Summary") }}</h6>
-						<div class="tax-break-up" style="overflow-x: auto;">
-							<table class="table table-bordered table-hover">
-								<thead>
-								</thead>
-								<tbody>
+                                <!-- Sales summary section -->
+                                <div>
+                                                <h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Sales Summary") }}</h6>
+                                                <div class="tax-break-up" style="overflow-x: auto;">
+                                                        <table class="table table-bordered table-hover">
+                                                                <thead>
+                                                                </thead>
+                                                                <tbody>
                                                                         <tr>
                                                                                 <td class="text-left font-bold">{{ _('Grand Total') }}</td>
                                                                                 <td class='text-right'>
@@ -37,10 +37,10 @@
                                                                                         {% endif %}
                                                                                 </td>
                                                                         </tr>
-									<tr>
-										<td class="text-left font-bold">{{ _('Total Quantity') }}</td>
-										<td class='text-right'>{{ data.total_quantity or '' }}</td>
-									</tr>
+                                                                        <tr>
+                                                                                <td class="text-left font-bold">{{ _('Total Quantity') }}</td>
+                                                                                <td class='text-right'>{{ data.total_quantity or '' }}</td>
+                                                                        </tr>
 
                                                                 </tbody>
                                                         </table>
@@ -48,18 +48,18 @@
                                 </div>
                                 <!-- Section end -->
 
-				<!-- Mode of payment section -->
-				<div>
-						<h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Mode of Payments") }}</h6>
-						<div class="tax-break-up" style="overflow-x: auto;">
-							<table class="table table-bordered table-hover">
-								<thead>
-									<tr>
-										<th class="text-left">{{ _("Mode of Payment") }}</th>
-										<th class="text-right">{{ _("Amount") }}</th>
-									</tr>
-								</thead>
-								<tbody>
+                                <!-- Mode of payment section -->
+                                <div>
+                                                <h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Mode of Payments") }}</h6>
+                                                <div class="tax-break-up" style="overflow-x: auto;">
+                                                        <table class="table table-bordered table-hover">
+                                                                <thead>
+                                                                        <tr>
+                                                                                <th class="text-left">{{ _("Mode of Payment") }}</th>
+                                                                                <th class="text-right">{{ _("Amount") }}</th>
+                                                                        </tr>
+                                                                </thead>
+                                                                <tbody>
                                                                 {% set summaries = mode_summaries if mode_summaries else data.payment_reconciliation %}
                                                                 {% for d in summaries %}
                                                                         <tr>
@@ -78,11 +78,11 @@
                                                                                 </td>
                                                                         </tr>
                                                                 {% endfor %}
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<!-- Section end -->
+                                                                </tbody>
+                                                        </table>
+                                                </div>
+                                </div>
+                                <!-- Section end -->
 
                                 <!-- Taxes section -->
                                 {% if data.taxes %}

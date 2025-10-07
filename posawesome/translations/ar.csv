@@ -166,7 +166,7 @@ Back,رجوع
 Select,اختيار
 Search,بحث
 Yes, Cancel sale,نعم، إلغاء البيع
-Cancel Sale,إلغاء البيع
+Cancel Sale,إلغاء البيع 
 No Item has this barcode,لا يوجد صنف بهذا الباركود
 Item not found,الصنف غير موجود
 No invoices found. Try different search criteria.,لم يتم العثور على فواتير. جرب معايير بحث مختلفة
@@ -221,8 +221,8 @@ Item Selector Settings,إعدادات محدد الأصناف
 Hide zero rated items,إخفاء الأصناف ذات السعر صفر
 Custom items per page,عدد مخصص من الأصناف لكل صفحة
 Always fetch items from server (ignore local cache),جلب الأصناف دائماً من الخادم (تجاهل التخزين المحلي)
-POS Awesome,نقاط البيع
-Select S.O, اختر أمر البيع
+POS Awesome,نقاط البيع 
+Select S.O, اختر أمر البيع 
 Offers,عروض
 Coupons,كوبونات
 ms,مللي ثانية
@@ -478,6 +478,3 @@ Cannot change language - same language selected,لا يمكن تغيير الل�
 Language changed successfully! Reloading...,تم تغيير اللغة بنجاح جارٍ إعادة التحميل
 Failed to change language,فشل في تغيير اللغة
 Unknown error,خطأ غير معروف
-his item,هذا الصنف
-"{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.","{0} لديه {1} فقط في المخزون. لقد طلبت {2}. يرجى تعديل الكمية أو إعادة التخزين."
-"Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.","تحديث المخزون: {0} لديه {1} متاح. إضافة {2} ستؤدي إلى رصيد سالب."
