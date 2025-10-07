@@ -429,7 +429,12 @@ export default {
 		font-size: 0.95rem !important;
 	}
 }
-
+/* When screen width ≤ 1024px and height ≤ 768px */
+@media (max-width: 1024px) {
+  .summary-btn {
+    font-size: 0.8rem !important;  /* slightly smaller text */
+  }
+}
 /* Loading state animations */
 .summary-btn:deep(.v-btn__loader) {
 	opacity: 0.8;
