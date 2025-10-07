@@ -51,8 +51,7 @@ def get_offers(profile):
         "valid_from": date,
         "valid_upto": date,
     }
-    data = (
-        frappe.db.sql(
+    data = frappe.db.sql(
             """
         SELECT *
         FROM `tabPOS Offer`
