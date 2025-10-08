@@ -320,6 +320,7 @@
 			@cancel-sale="cancel_dialog = true"
 			@open-returns="open_returns"
 			@print-draft="print_draft_invoice"
+			@apply-offers="apply_offers_and_reload"
 			@show-payment="show_payment"
 		/>
 	</div>

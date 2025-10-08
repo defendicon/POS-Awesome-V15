@@ -171,6 +171,19 @@
 							{{ __("Print Draft") }}
 						</v-btn>
 					</v-col>
+			<v-col cols="6">
+				<v-btn
+					block
+					color="info"
+					theme="dark"
+					prepend-icon="mdi-tag"
+					@click="handleApplyOffers"
+					class="summary-btn"
+					:loading="applyOffersLoading"
+				>
+					{{ __("Apply Offers") }}
+				</v-btn>
+			</v-col>
 					<v-col cols="12">
 						<v-btn
 							block
@@ -216,6 +229,7 @@ export default {
 			cancelLoading: false,
 			returnsLoading: false,
 			printLoading: false,
+			applyOffersLoading: false,
 			paymentLoading: false,
 		};
 	},
@@ -229,6 +243,7 @@ export default {
 		"cancel-sale",
 		"open-returns",
 		"print-draft",
+		"apply-offers",
 		"show-payment",
 	],
 	computed: {
@@ -306,6 +321,15 @@ export default {
 				await this.$emit("print-draft");
 			} finally {
 				this.printLoading = false;
+			}
+		},
+
+		async handleApplyOffers() {
+			this.applyOffersLoading = true;
+			try {
+				await this.$emit("apply-offers");
+			} finally {
+				this.applyOffersLoading = false;
 			}
 		},
 

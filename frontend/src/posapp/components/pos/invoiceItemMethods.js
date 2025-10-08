@@ -1135,6 +1135,84 @@ export default {
 		return this.update_invoice_from_order(doc);
 	},
 
+	// Apply available offers, save the invoice, and reload it from backend
+	async apply_offers_and_reload() {
+		try {
+			if (!Array.isArray(this.items) || this.items.length === 0) {
+				this.eventBus.emit("show_message", {
+					title: __("Select items to apply offers"),
+					color: "warning",
+				});
+				return;
+			}
+
+			// Recompute and apply offers for current items
+			if (typeof this.handelOffers === "function") {
+				await this.handelOffers();
+			}
+
+			// Persist invoice (server calculates totals/taxes)
+			const updated = await this.process_invoice();
+			if (!updated) {
+				return;
+			}
+
+			// Reload same invoice from backend without selection UI
+			if (!isOffline() && updated.name) {
+				await this.reload_current_invoice_from_backend();
+			}
+
+			this.eventBus.emit("show_message", {
+				title: __("Offers applied and invoice refreshed"),
+				color: "success",
+			});
+		} catch (error) {
+			console.error("Error in apply_offers_and_reload:", error);
+			this.eventBus.emit("show_message", {
+				title: __("Failed to apply offers"),
+				color: "error",
+			});
+		}
+	},
+
+	// Reload the currently open invoice from the backend and load it into the UI
+	async reload_current_invoice_from_backend() {
+		try {
+			if (isOffline()) {
+				return null;
+			}
+
+			const current = this.invoice_doc || {};
+			const name = current.name;
+			const doctype =
+				current.doctype ||
+				(this.pos_profile?.create_pos_invoice_instead_of_sales_invoice ? "POS Invoice" : "Sales Invoice");
+
+			if (!name || !doctype) {
+				return null;
+			}
+
+			const r = await frappe.call({
+				method: "frappe.client.get",
+				args: { doctype, name },
+			});
+
+			const doc = r?.message;
+			if (doc) {
+				await this.load_invoice(doc);
+				return doc;
+			}
+			return null;
+		} catch (error) {
+			console.error("Error reloading current invoice from backend:", error);
+			this.eventBus.emit("show_message", {
+				title: __("Failed to reload invoice from server"),
+				color: "warning",
+			});
+			return null;
+		}
+	},
+
 	// Show payment dialog after validation and processing
 	async show_payment() {
 		try {
@@ -1197,6 +1275,18 @@ export default {
 			if (!invoice_doc) {
 				console.log("Failed to process invoice");
 				return;
+			}
+
+			// Reload current invoice from backend (no selection dialog) to ensure items/totals are up-to-date
+			if (!isOffline() && invoice_doc.name) {
+				console.log("Reloading current invoice from backend");
+				const refreshed = await this.reload_current_invoice_from_backend();
+				if (refreshed) {
+					invoice_doc = refreshed;
+					console.log("Refreshed invoice:", invoice_doc);
+				} else {
+					console.log("Failed to refresh invoice");
+				}
 			}
 
 			// Update invoice_doc with current currency info
