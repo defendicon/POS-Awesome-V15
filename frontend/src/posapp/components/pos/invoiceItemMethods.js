@@ -341,35 +341,43 @@ export default {
 			this.invoiceTypes = ["Return"];
 		}
 
-		this.invoice_doc = data;
-		this.items = data.items || [];
-		this.packed_items = data.packed_items || [];
-		console.log("Items set:", this.items.length, "items");
+                this.invoice_doc = data;
+                this.items = data.items || [];
+                this.packed_items = data.packed_items || [];
+                console.log("Items set:", this.items.length, "items");
 
-		if (data.is_return && data.return_against) {
-			this.items.forEach((item) => {
-				item.locked_price = true;
-			});
-			this.packed_items.forEach((pi) => {
-				pi.locked_price = true;
-			});
-		}
+                if (data.is_return && data.return_against) {
+                        this.items.forEach((item) => {
+                                item.locked_price = true;
+                        });
+                        this.packed_items.forEach((pi) => {
+                                pi.locked_price = true;
+                        });
+                }
 
-		if (this.items.length > 0) {
-			this.update_items_details(this.items);
-			this.posa_offers = data.posa_offers || [];
-			this.items.forEach((item) => {
-				if (!item.posa_row_id) {
-					item.posa_row_id = this.makeid(20);
-				}
-				if (item.batch_no) {
-					this.set_batch_qty(item, item.batch_no);
-				}
-				if (!item.original_item_name) {
-					item.original_item_name = item.item_name;
-				}
-			});
-		} else {
+                if (this.items.length > 0) {
+                        this.items.forEach((item) => {
+                                if (!item.posa_row_id) {
+                                        item.posa_row_id = this.makeid(20);
+                                }
+                                if (item.batch_no) {
+                                        this.set_batch_qty(item, item.batch_no);
+                                }
+                                if (!item.original_item_name) {
+                                        item.original_item_name = item.item_name;
+                                }
+                        });
+
+                        const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
+
+                        await this.update_items_details(this.items);
+
+                        if (manualSnapshots.length) {
+                                this._restoreManualSnapshots(this.items, manualSnapshots);
+                        }
+
+                        this.posa_offers = data.posa_offers || [];
+                } else {
 			console.log("Warning: No items in return invoice");
 		}
 
@@ -1360,7 +1368,133 @@ export default {
                 });
         },
 
-	// Show payment dialog after validation and processing
+        _buildManualOverrideKeyFromItem(item) {
+                if (!item) {
+                        return null;
+                }
+
+                const idx =
+                        item.idx !== undefined && item.idx !== null && !Number.isNaN(Number(item.idx))
+                                ? Number(item.idx)
+                                : null;
+
+                if (!item.name && !item.posa_row_id && !item.item_code) {
+                        return null;
+                }
+
+                return {
+                        name: item.name || null,
+                        posa_row_id: item.posa_row_id || null,
+                        item_code: item.item_code || null,
+                        idx,
+                        batch_no: item.batch_no || null,
+                        serial_no: item.serial_no || null,
+                };
+        },
+
+        _snapshotManualValuesFromDocItems(items) {
+                if (!Array.isArray(items) || !items.length) {
+                        return [];
+                }
+
+                const EPSILON = 0.000001;
+
+                return items
+                        .map((item) => {
+                                const keys = this._buildManualOverrideKeyFromItem(item);
+                                if (!keys) {
+                                        return null;
+                                }
+
+                                const rate = Number(item?.rate ?? 0);
+                                const priceListRate = Number(item?.price_list_rate ?? rate);
+                                const baseRate = Number(item?.base_rate ?? 0);
+                                const basePriceListRate = Number(item?.base_price_list_rate ?? baseRate);
+                                const discountAmount = Number(item?.discount_amount ?? 0);
+                                const baseDiscountAmount = Number(item?.base_discount_amount ?? 0);
+                                const discountPercentage = Number(item?.discount_percentage ?? 0);
+
+                                const preserveRate =
+                                        item?._manual_rate_set === true ||
+                                        Math.abs(rate - priceListRate) > EPSILON ||
+                                        Math.abs(baseRate - basePriceListRate) > EPSILON ||
+                                        Math.abs(discountAmount) > EPSILON ||
+                                        Math.abs(baseDiscountAmount) > EPSILON ||
+                                        Math.abs(discountPercentage) > EPSILON;
+
+                                const preserveUom = Boolean(item?.uom);
+
+                                return {
+                                        keys,
+                                        preserveRate,
+                                        preserveUom,
+                                        values: {
+                                                rate: item.rate,
+                                                base_rate: item.base_rate,
+                                                price_list_rate: item.price_list_rate,
+                                                base_price_list_rate: item.base_price_list_rate,
+                                                discount_amount: item.discount_amount,
+                                                base_discount_amount: item.base_discount_amount,
+                                                discount_percentage: item.discount_percentage,
+                                                amount: item.amount,
+                                                base_amount: item.base_amount,
+                                                conversion_factor: item.conversion_factor,
+                                                uom: item.uom,
+                                        },
+                                };
+                        })
+                        .filter((entry) => entry !== null);
+        },
+
+        _restoreManualSnapshots(items, snapshots) {
+                if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length) {
+                        return;
+                }
+
+                const remaining = [...snapshots];
+
+                items.forEach((item) => {
+                        if (!item || !remaining.length) {
+                                return;
+                        }
+
+                        const index = remaining.findIndex((snapshot) =>
+                                this._doesManualOverrideMatchItem({ keys: snapshot.keys }, item),
+                        );
+
+                        if (index === -1) {
+                                return;
+                        }
+
+                        const snapshot = remaining.splice(index, 1)[0];
+                        const values = snapshot.values || {};
+
+                        if (snapshot.preserveRate) {
+                                this._assignManualOverrideValues(item, values);
+                        } else if (snapshot.preserveUom) {
+                                if (values.uom !== undefined) {
+                                        item.uom = values.uom;
+                                }
+                                if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
+                                        item.conversion_factor = values.conversion_factor;
+                                }
+
+                                if (values.amount !== undefined) {
+                                        item.amount = values.amount;
+                                } else if (typeof item.qty === "number" && typeof item.rate === "number") {
+                                        item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                                }
+
+                                if (values.base_amount !== undefined) {
+                                        item.base_amount = values.base_amount;
+                                } else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
+                                        item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+                                }
+                        }
+                });
+        },
+
+        // Show payment dialog after validation and processing
         async show_payment() {
                 if (this._suppressClosePaymentsTimer) {
                         clearTimeout(this._suppressClosePaymentsTimer);
