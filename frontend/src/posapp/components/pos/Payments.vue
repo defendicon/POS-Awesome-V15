@@ -565,10 +565,10 @@
 						redeem_customer_credit
 					"
 				>
-					<v-row v-for="(row, idx) in customer_credit_dict" :key="idx">
-						<v-col cols="4">
-							<div class="pa-2 py-3">{{ row.credit_origin }}</div>
-						</v-col>
+                                        <v-row v-for="(row, idx) in customer_credit_dict" :key="idx">
+                                                <v-col cols="4">
+                                                        <div class="pa-2 py-3">{{ creditSourceLabel(row) }}</div>
+                                                </v-col>
 						<v-col cols="4">
 							<v-text-field
 								density="compact"
@@ -2011,18 +2011,29 @@ export default {
 			}
 			return formatUtils.toArabicNumerals(western);
 		},
-		// Show paid amount info message
-		showPaidAmount() {
-			this.eventBus.emit("show_message", {
-				title: `Total Paid Amount: ${this.formatCurrency(this.total_payments)}`,
-				color: "info",
-			});
-		},
-		// Show diff payment info message
-		showDiffPayment() {
-			if (!this.invoice_doc) return;
-			this.eventBus.emit("show_message", {
-				title: `To Be Paid: ${this.formatCurrency(this.diff_payment)}`,
+                // Show paid amount info message
+                showPaidAmount() {
+                        this.eventBus.emit("show_message", {
+                                title: `Total Paid Amount: ${this.formatCurrency(this.total_payments)}`,
+                                color: "info",
+                        });
+                },
+                // Format customer credit source label for display
+                creditSourceLabel(row) {
+                        if (!row) {
+                                return "";
+                        }
+                        const sourceLabel = row.source_type ? this.__(row.source_type) : null;
+                        if (sourceLabel) {
+                                return `${sourceLabel}: ${row.credit_origin}`;
+                        }
+                        return row.credit_origin;
+                },
+                // Show diff payment info message
+                showDiffPayment() {
+                        if (!this.invoice_doc) return;
+                        this.eventBus.emit("show_message", {
+                                title: `To Be Paid: ${this.formatCurrency(this.diff_payment)}`,
 				color: "info",
 			});
 		},
