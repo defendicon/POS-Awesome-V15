@@ -1216,12 +1216,18 @@ export default {
 	},
 
 	// Show payment dialog after validation and processing
-	async show_payment() {
-		try {
-			console.log("Starting show_payment process");
-			console.log("Invoice state before payment:", {
-				invoiceType: this.invoiceType,
-				is_return: this.invoice_doc ? this.invoice_doc.is_return : false,
+        async show_payment() {
+                if (this._suppressClosePaymentsTimer) {
+                        clearTimeout(this._suppressClosePaymentsTimer);
+                        this._suppressClosePaymentsTimer = null;
+                }
+                this._suppressClosePayments = true;
+
+                try {
+                        console.log("Starting show_payment process");
+                        console.log("Invoice state before payment:", {
+                                invoiceType: this.invoiceType,
+                                is_return: this.invoice_doc ? this.invoice_doc.is_return : false,
 				items_count: this.items.length,
 				customer: this.customer,
 			});
@@ -1367,18 +1373,26 @@ export default {
 				console.log("Ensured negative payment amounts for return:", invoice_doc.payments);
 			}
 
-			console.log("Showing payment dialog with currency:", invoice_doc.currency);
-			this.eventBus.emit("show_payment", "true");
-			this.eventBus.emit("send_invoice_doc_payment", invoice_doc);
-		} catch (error) {
-			console.error("Error in show_payment:", error);
-			this.eventBus.emit("show_message", {
-				title: __("Error processing payment"),
-				color: "error",
-				message: error.message,
-			});
-		}
-	},
+                        console.log("Showing payment dialog with currency:", invoice_doc.currency);
+                        if (typeof this.paymentVisible !== "undefined") {
+                                this.paymentVisible = true;
+                        }
+                        this.eventBus.emit("show_payment", "true");
+                        this.eventBus.emit("send_invoice_doc_payment", invoice_doc);
+                } catch (error) {
+                        console.error("Error in show_payment:", error);
+                        this.eventBus.emit("show_message", {
+                                title: __("Error processing payment"),
+                                color: "error",
+                                message: error.message,
+                        });
+                } finally {
+                        this._suppressClosePaymentsTimer = setTimeout(() => {
+                                this._suppressClosePayments = false;
+                                this._suppressClosePaymentsTimer = null;
+                        }, 300);
+                }
+        },
 
 	// Validate invoice before payment/submit (return logic, quantity, rates, etc)
 	async validate() {
@@ -1585,9 +1599,21 @@ export default {
 	},
 
 	// Close payment dialog
-	close_payments() {
-		this.eventBus.emit("show_payment", "false");
-	},
+        close_payments() {
+                if (this._suppressClosePayments) {
+                        return;
+                }
+
+                if (typeof this.paymentVisible !== "undefined" && !this.paymentVisible) {
+                        return;
+                }
+
+                if (typeof this.paymentVisible !== "undefined") {
+                        this.paymentVisible = false;
+                }
+
+                this.eventBus.emit("show_payment", "false");
+        },
 
 	// Update details for all items (fetch from backend)
 	async update_items_details(items) {
