@@ -177,15 +177,65 @@
 				</v-row>
 
 				<!-- Customer Credit Redemption -->
-				<v-row
-					class="payments pa-1"
-					v-if="
-						invoice_doc &&
-						available_customer_credit > 0 &&
-						!invoice_doc.is_return &&
-						redeem_customer_credit
-					"
-				>
+                                <div
+                                        v-if="showAvailableCreditSummary"
+                                        class="payments pa-1 mb-3"
+                                >
+                                        <v-alert
+                                                variant="tonal"
+                                                type="info"
+                                                border="start"
+                                                class="mb-3"
+                                        >
+                                                <div
+                                                        class="d-flex flex-wrap align-center justify-space-between"
+                                                        style="gap: 8px"
+                                                >
+                                                        <div>
+                                                                <strong>{{ __("Available Customer Credit") }}:</strong>
+                                                                <span class="text-primary ml-1">
+                                                                        {{ currencySymbol(invoice_doc.currency) }}
+                                                                        {{ formatCurrency(available_customer_credit) }}
+                                                                </span>
+                                                        </div>
+                                                        <v-btn
+                                                                size="small"
+                                                                color="primary"
+                                                                variant="tonal"
+                                                                @click="applyAvailableCredit"
+                                                                :disabled="available_credit_loading"
+                                                        >
+                                                                {{ __("Apply Credit to Invoice") }}
+                                                        </v-btn>
+                                                </div>
+                                        </v-alert>
+                                        <v-data-table
+                                                :headers="available_credit_headers"
+                                                :items="available_credit_notes"
+                                                :items-per-page="-1"
+                                                class="elevation-1"
+                                                hide-default-footer
+                                                density="compact"
+                                                :loading="available_credit_loading"
+                                        >
+                                                <template v-slot:item.total_credit="{ item }">
+                                                        <span class="text-primary">
+                                                                {{ currencySymbol(invoice_doc.currency) }}
+                                                                {{ formatCurrency(item.total_credit) }}
+                                                        </span>
+                                                </template>
+                                        </v-data-table>
+                                </div>
+
+                                <v-row
+                                        class="payments pa-1"
+                                        v-if="
+                                                invoice_doc &&
+                                                available_customer_credit > 0 &&
+                                                !invoice_doc.is_return &&
+                                                redeem_customer_credit
+                                        "
+                                >
 					<v-col cols="7">
 						<v-text-field
 							density="compact"
@@ -780,15 +830,37 @@ export default {
 			invoiceType: "Invoice", // Type of invoice
 			is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
-			redeemed_customer_credit: 0, // Customer credit to redeem
-			credit_change: 0, // Change to be given as credit
+                        redeemed_customer_credit: 0, // Customer credit to redeem
+                        available_credit_notes: [], // Raw credit note/advance rows
+                        available_credit_loading: false, // Loading state for credit summary
+                        credit_change: 0, // Change to be given as credit
 			paid_change: 0, // Change to be given as paid
 			is_credit_sale: false, // Is this a credit sale?
 			is_write_off_change: false, // Write-off for change enabled
 			is_cashback: true, // Cashback enabled
 			is_credit_return: false, // Is this a credit return?
 			redeem_customer_credit: false, // Redeem customer credit?
-			customer_credit_dict: [], // List of available customer credits
+                        customer_credit_dict: [], // List of credits selected for redemption
+                        available_credit_headers: [
+                                {
+                                        title: __("Reference"),
+                                        align: "start",
+                                        sortable: false,
+                                        key: "credit_origin",
+                                },
+                                {
+                                        title: __("Type"),
+                                        align: "start",
+                                        sortable: false,
+                                        key: "type",
+                                },
+                                {
+                                        title: __("Amount"),
+                                        align: "end",
+                                        sortable: false,
+                                        key: "total_credit",
+                                },
+                        ],
 			paid_change_rules: [], // Validation rules for paid change
 			phone_dialog: false, // Show phone payment dialog
 			custom_days_dialog: false, // Show custom days dialog
@@ -966,10 +1038,19 @@ export default {
 			}
 			return amount;
 		},
-		// Calculate total available customer credit
-		available_customer_credit() {
-			return this.customer_credit_dict.reduce((total, row) => total + this.flt(row.total_credit), 0);
-		},
+                // Calculate total available customer credit
+                available_customer_credit() {
+                        return this.available_credit_notes.reduce((total, row) => total + this.flt(row.total_credit), 0);
+                },
+                // Show credit summary banner/table
+                showAvailableCreditSummary() {
+                        return (
+                                this.invoice_doc &&
+                                !this.invoice_doc.is_return &&
+                                this.pos_profile?.use_customer_credit &&
+                                this.available_customer_credit > 0
+                        );
+                },
 		// Validate if payment can be submitted
 		vaildatPayment() {
 			if (!this.pos_profile.posa_allow_sales_order) {
@@ -1043,11 +1124,11 @@ export default {
 			}
 		},
 		// Recalculate total redeemed credit whenever credit entries change
-		customer_credit_dict: {
-			handler(newVal) {
-				const total = newVal.reduce((sum, row) => sum + this.flt(row.credit_to_redeem || 0), 0);
-				this.redeemed_customer_credit = this.flt(total, this.currency_precision);
-			},
+                customer_credit_dict: {
+                        handler(newVal) {
+                                const total = newVal.reduce((sum, row) => sum + this.flt(row.credit_to_redeem || 0), 0);
+                                this.redeemed_customer_credit = this.flt(total, this.currency_precision);
+                        },
 			deep: true,
 		},
 		// Watch sales_person to update sales_team
@@ -1109,13 +1190,19 @@ export default {
 				this.ensureReturnPaymentsAreNegative();
 			}
 		},
-		"invoice_doc.customer"(customer, previous) {
-			if (customer && customer !== previous) {
-				this.get_addresses();
-			} else if (!customer) {
-				this.addresses = [];
-			}
-		},
+                "invoice_doc.customer"(customer, previous) {
+                        if (customer && customer !== previous) {
+                                this.get_addresses();
+                                this.refreshCustomerCreditSummary({ apply: this.redeem_customer_credit });
+                        } else if (!customer) {
+                                this.addresses = [];
+                                this.available_credit_notes = [];
+                                if (!this.redeem_customer_credit) {
+                                        this.redeemed_customer_credit = 0;
+                                }
+                                this.customer_credit_dict = [];
+                        }
+                },
 		"invoice_doc.posa_delivery_date"(date) {
 			if (!date) {
 				if (this.invoice_doc) {
@@ -1128,18 +1215,23 @@ export default {
 				this.get_addresses();
 			}
 		},
-		customerInfoFromStore(newInfo) {
-			this.customer_info = newInfo || "";
-		},
-		selectedCustomer(newCustomer, oldCustomer) {
-			if (newCustomer === oldCustomer) {
-				return;
-			}
-			this.customer_credit_dict = [];
-			this.redeem_customer_credit = false;
-			this.is_cashback = true;
-			this.is_credit_return = false;
-		},
+                customerInfoFromStore(newInfo) {
+                        this.customer_info = newInfo || "";
+                        if (newInfo && this.pos_profile?.use_customer_credit) {
+                                this.refreshCustomerCreditSummary({ apply: this.redeem_customer_credit });
+                        }
+                },
+                selectedCustomer(newCustomer, oldCustomer) {
+                        if (newCustomer === oldCustomer) {
+                                return;
+                        }
+                        this.customer_credit_dict = [];
+                        this.available_credit_notes = [];
+                        this.redeemed_customer_credit = 0;
+                        this.redeem_customer_credit = false;
+                        this.is_cashback = true;
+                        this.is_credit_return = false;
+                },
 	},
 	methods: {
 		// Go back to invoice view and reset customer readonly
@@ -1627,42 +1719,111 @@ export default {
 				}
 			}
 		},
-		// Get available customer credit and auto-allocate
-		get_available_credit(use_credit) {
-			this.clear_all_amounts();
-			if (use_credit) {
-				frappe
-					.call("posawesome.posawesome.api.payments.get_available_credit", {
-						customer: this.invoice_doc.customer,
-						company: this.pos_profile.company,
-					})
-					.then((r) => {
-						const data = r.message;
-						if (data.length) {
-							const amount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-							let remainAmount = amount;
-							data.forEach((row) => {
-								if (remainAmount > 0) {
-									if (remainAmount >= row.total_credit) {
-										row.credit_to_redeem = row.total_credit;
-										remainAmount -= row.total_credit;
-									} else {
-										row.credit_to_redeem = remainAmount;
-										remainAmount = 0;
-									}
-								} else {
-									row.credit_to_redeem = 0;
-								}
-							});
-							this.customer_credit_dict = data;
-						} else {
-							this.customer_credit_dict = [];
-						}
-					});
-			} else {
-				this.customer_credit_dict = [];
-			}
-		},
+                // Toggle customer credit usage
+                async get_available_credit(use_credit) {
+                        this.redeem_customer_credit = use_credit;
+                        if (!use_credit) {
+                                this.customer_credit_dict = [];
+                                this.redeemed_customer_credit = 0;
+                                return;
+                        }
+                        await this.refreshCustomerCreditSummary({ apply: true, clearPayments: true });
+                },
+                // Fetch credit summary from backend and optionally auto-allocate
+                async refreshCustomerCreditSummary({ apply = false, clearPayments = false } = {}) {
+                        if (
+                                !this.pos_profile?.use_customer_credit ||
+                                !this.invoice_doc ||
+                                !this.invoice_doc.customer ||
+                                this.invoice_doc.is_return
+                        ) {
+                                this.available_credit_notes = [];
+                                if (!apply) {
+                                        this.customer_credit_dict = [];
+                                        this.redeemed_customer_credit = 0;
+                                }
+                                return;
+                        }
+
+                        if (isOffline()) {
+                                this.available_credit_notes = [];
+                                return;
+                        }
+
+                        if (clearPayments) {
+                                this.clear_all_amounts();
+                        }
+
+                        this.available_credit_loading = true;
+                        try {
+                                const response = await frappe.call({
+                                        method: "posawesome.posawesome.api.payments.get_available_credit",
+                                        args: {
+                                                customer: this.invoice_doc.customer,
+                                                company: this.pos_profile.company,
+                                        },
+                                });
+                                const credits = Array.isArray(response.message)
+                                        ? response.message.map((row) => ({
+                                                  ...row,
+                                                  total_credit: this.flt(row.total_credit),
+                                                  credit_to_redeem: this.flt(row.credit_to_redeem || 0),
+                                          }))
+                                        : [];
+                                this.available_credit_notes = credits;
+
+                                if (apply) {
+                                        this.customer_credit_dict = this.autoAllocateCustomerCredit(credits);
+                                } else if (!this.redeem_customer_credit) {
+                                        this.customer_credit_dict = [];
+                                        this.redeemed_customer_credit = 0;
+                                }
+                        } catch (error) {
+                                console.error("Failed to fetch customer credit", error);
+                                this.available_credit_notes = [];
+                                if (apply) {
+                                        this.customer_credit_dict = [];
+                                }
+                        } finally {
+                                this.available_credit_loading = false;
+                        }
+                },
+                // Auto allocate credit rows against current invoice total
+                autoAllocateCustomerCredit(entries = []) {
+                        if (!this.invoice_doc) {
+                                return [];
+                        }
+                        const totalAmount = this.flt(
+                                this.invoice_doc.rounded_total || this.invoice_doc.grand_total || 0,
+                                this.currency_precision,
+                        );
+                        let remaining = totalAmount;
+
+                        return entries.map((entry) => {
+                                const row = { ...entry };
+                                const available = this.flt(row.total_credit, this.currency_precision);
+                                let toRedeem = 0;
+                                if (remaining > 0 && available > 0) {
+                                        toRedeem = Math.min(remaining, available);
+                                        remaining = Math.max(0, this.flt(remaining - toRedeem, this.currency_precision));
+                                }
+                                row.credit_to_redeem = this.flt(toRedeem, this.currency_precision);
+                                return row;
+                        });
+                },
+                // Apply available credit to invoice totals from UI action
+                async applyAvailableCredit() {
+                        if (!this.showAvailableCreditSummary) {
+                                return;
+                        }
+                        this.redeem_customer_credit = true;
+                        if (!this.available_credit_notes.length) {
+                                await this.refreshCustomerCreditSummary({ apply: true, clearPayments: true });
+                                return;
+                        }
+                        this.clear_all_amounts();
+                        this.customer_credit_dict = this.autoAllocateCustomerCredit(this.available_credit_notes);
+                },
 		// Get customer addresses for shipping
 		get_addresses() {
 			const vm = this;
@@ -1900,22 +2061,26 @@ export default {
 			this.eventBus.emit("open_mpesa_payments", data);
 		},
 		// Set M-Pesa payment as customer credit
-		set_mpesa_payment(payment) {
-			this.pos_profile.use_customer_credit = true;
-			this.redeem_customer_credit = true;
-			const invoiceAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-			let amount =
-				payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
-			amount = amount > 0 ? amount : 0;
-			const advance = {
-				type: "Advance",
-				credit_origin: payment.name,
-				total_credit: this.flt(payment.unallocated_amount),
-				credit_to_redeem: this.flt(amount),
-			};
-			this.clear_all_amounts();
-			this.customer_credit_dict.push(advance);
-		},
+                set_mpesa_payment(payment) {
+                        this.pos_profile.use_customer_credit = true;
+                        this.redeem_customer_credit = true;
+                        const invoiceAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+                        let amount =
+                                payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
+                        amount = amount > 0 ? amount : 0;
+                        const advance = {
+                                type: "Advance",
+                                credit_origin: payment.name,
+                                total_credit: this.flt(payment.unallocated_amount),
+                                credit_to_redeem: this.flt(amount),
+                        };
+                        this.clear_all_amounts();
+                        this.customer_credit_dict.push(advance);
+                        if (!this.available_credit_notes.some((row) => row.credit_origin === advance.credit_origin)) {
+                                this.available_credit_notes.push({ ...advance });
+                        }
+                        this.redeemed_customer_credit = this.flt(amount, this.currency_precision);
+                },
 		// Normalize address records returned from the server
 		normalizeAddress(address) {
 			if (!address) {
@@ -2127,16 +2292,18 @@ export default {
 				this.loyalty_amount = 0;
 				this.redeemed_customer_credit = 0;
 				// Only get addresses if customer exists
-				if (invoice_doc.customer) {
-					this.get_addresses();
-				}
-				this.get_sales_person_names();
-			});
-			this.eventBus.on("register_pos_profile", (data) => {
-				this.pos_profile = data.pos_profile;
-				this.stock_settings = data.stock_settings || {};
-				this.get_mpesa_modes();
-			});
+                                if (invoice_doc.customer) {
+                                        this.get_addresses();
+                                }
+                                this.get_sales_person_names();
+                                this.refreshCustomerCreditSummary({ apply: false });
+                        });
+                        this.eventBus.on("register_pos_profile", (data) => {
+                                this.pos_profile = data.pos_profile;
+                                this.stock_settings = data.stock_settings || {};
+                                this.get_mpesa_modes();
+                                this.refreshCustomerCreditSummary({ apply: this.redeem_customer_credit });
+                        });
 			this.eventBus.on("add_the_new_address", (data) => {
 				const normalized = this.normalizeAddress(data);
 				if (normalized) {
@@ -2173,11 +2340,15 @@ export default {
 				this.set_mpesa_payment(data);
 			});
 			// Clear any stored invoice when parent emits clear_invoice
-			this.eventBus.on("clear_invoice", () => {
-				this.invoice_doc = "";
-				this.is_return = false;
-				this.is_credit_return = false;
-			});
+                        this.eventBus.on("clear_invoice", () => {
+                                this.invoice_doc = "";
+                                this.is_return = false;
+                                this.is_credit_return = false;
+                                this.available_credit_notes = [];
+                                this.customer_credit_dict = [];
+                                this.redeemed_customer_credit = 0;
+                                this.redeem_customer_credit = false;
+                        });
 			// Scroll to top when payment view is shown
 			this.eventBus.on("show_payment", this.handleShowPayment);
 		});
