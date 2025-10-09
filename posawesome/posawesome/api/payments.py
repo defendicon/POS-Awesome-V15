@@ -314,11 +314,10 @@ def get_available_credit(customer, company):
         {
             "outstanding_amount": ["<", 0],
             "docstatus": 1,
-            "is_return": 0,
             "customer": customer,
             "company": company,
         },
-        ["name", "outstanding_amount"],
+        ["name", "outstanding_amount", "is_return"],
     )
 
     for row in outstanding_invoices:
@@ -328,6 +327,7 @@ def get_available_credit(customer, company):
             "credit_origin": row.name,
             "total_credit": outstanding_amount,
             "credit_to_redeem": 0,
+            "source_type": "Sales Return" if row.is_return else "Sales Invoice",
         }
 
         total_credit.append(row)
@@ -350,6 +350,7 @@ def get_available_credit(customer, company):
             "credit_origin": row.name,
             "total_credit": row.unallocated_amount,
             "credit_to_redeem": 0,
+            "source_type": "Payment Entry",
         }
 
         total_credit.append(row)
