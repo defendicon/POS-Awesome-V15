@@ -2906,6 +2906,35 @@ export default {
 	border-bottom: 1px solid #e0e0e0;
 }
 
+@media (max-width: 1024px) {
+	.sleek-data-table :deep(.v-table) {
+		/* This is crucial: it forces the table to obey the widths we set below */
+		table-layout: fixed !important;
+	}
+	.sleek-data-table :deep(th),
+	.sleek-data-table :deep(td) {
+		padding: 12px 6px !important; /* Slightly less padding for more space */
+		font-size: 0.8rem !important;
+	}
+	/* 1st Column: NAME - gets half the space */
+	.sleek-data-table :deep(th:nth-child(1)),
+	.sleek-data-table :deep(td:nth-child(1)) {
+		width: 50% !important;
+	}
+	/* 2nd Column: RATE */
+	.sleek-data-table :deep(th:nth-child(2)),
+	.sleek-data-table :deep(td:nth-child(2)) {
+		width: 25% !important;
+	}
+	/* 3rd Column: AVAILABLE QTY */
+	.sleek-data-table :deep(th:nth-child(3)),
+	.sleek-data-table :deep(td:nth-child(3)) {
+		width: 25% !important;
+		/* Allows the header text to wrap if needed, preventing overflow */
+		white-space: normal;
+	}
+}
+
 [data-theme="dark"] .sticky-header {
 	background-color: var(--surface-primary, #1e1e1e);
 }

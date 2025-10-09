@@ -13,7 +13,7 @@
 				location="top"
 				color="info"
 			></v-progress-linear>
-			<div ref="paymentContainer" class="overflow-y-auto pa-2" style="max-height: 67vh">
+			<div ref="paymentContainer" class="overflow-y-auto pa-2 force-fit" style="max-height: 67vh">
 				<!-- Payment Summary (Paid, To Be Paid, Change) -->
 				<v-row v-if="invoice_doc" class="pa-1" dense>
 					<v-col cols="7">
@@ -597,7 +597,7 @@
 				<v-divider></v-divider>
 
 				<!-- Sales Person Selection -->
-				<v-row class="pb-0 mb-2" align="start">
+				<!-- <v-row class="pb-0 mb-2" align="start">
 					<v-col cols="12">
 						<p v-if="sales_persons && sales_persons.length > 0" class="mt-1 mb-1 text-subtitle-2">
 							{{ sales_persons.length }} sales persons found
@@ -620,7 +620,7 @@
 							:disabled="readonly"
 						></v-select>
 					</v-col>
-				</v-row>
+				</v-row> -->
 			</div>
 		</v-card>
 
@@ -2099,6 +2099,27 @@ export default {
 @media (max-width: 1024px) {
 	::v-deep(.dark-field input) {
 		font-size: 0.8rem !important; /* slightly smaller text */
+	}
+}
+@media (max-width: 1024px) {
+	.force-fit {
+		/* Force the scrollbar to be hidden, overriding any other styles */
+		overflow-y: hidden !important;
+	}
+
+	/* Make the text fields themselves take up less vertical space */
+	.force-fit :deep(.v-input__control) {
+		min-height: 44px;
+	}
+	
+	.force-fit :deep(.v-field__field) {
+		height: 44px;
+	}
+
+	/* Shrink the text inside the fields for a better fit */
+	.force-fit :deep(.v-field__input),
+	.force-fit :deep(.v-label) {
+		font-size: 13px !important; /* Using pixels for more control */
 	}
 }
 
