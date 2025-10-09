@@ -419,12 +419,13 @@ export default {
 			selected_price_list: "", // Currently selected price list
 			price_list_currency: "", // Currency of the selected price list
 			selected_columns: [], // Selected columns for items table
-			temp_selected_columns: [], // Temporary array for column selection
-			available_columns: [], // All available columns
-			show_column_selector: false, // Column selector dialog visibility
-			invoiceHeight: null,
-		};
-	},
+                        temp_selected_columns: [], // Temporary array for column selection
+                        available_columns: [], // All available columns
+                        show_column_selector: false, // Column selector dialog visibility
+                        invoiceHeight: null,
+                        paymentVisible: false, // Track current payment view state
+                };
+        },
 
 	components: {
 		Customer,
@@ -1374,25 +1375,34 @@ export default {
 			this.posting_date = frappe.datetime.nowdate();
 		});
 		this.eventBus.on("calc_uom", this.calc_uom);
-		this.eventBus.on("item-drag-start", () => {
-			this.showDropFeedback(true);
-		});
-		this.eventBus.on("item-drag-end", () => {
-			this.showDropFeedback(false);
-		});
-	},
-	// Cleanup event listeners before component is destroyed
-	beforeUnmount() {
-		// Existing cleanup
-		this.eventBus.off("register_pos_profile");
+                this.eventBus.on("item-drag-start", () => {
+                        this.showDropFeedback(true);
+                });
+                this.eventBus.on("item-drag-end", () => {
+                        this.showDropFeedback(false);
+                });
+
+                this.eventBus.on("show_payment", (data) => {
+                        this.paymentVisible = data === "true";
+                });
+        },
+        // Cleanup event listeners before component is destroyed
+        beforeUnmount() {
+                // Existing cleanup
+                this.eventBus.off("register_pos_profile");
 		this.eventBus.off("add_item");
 		this.eventBus.off("clear_invoice");
-		// Cleanup reset_posting_date listener
-		this.eventBus.off("reset_posting_date");
-		if (typeof this.cancelScheduledOfferRefresh === "function") {
-			this.cancelScheduledOfferRefresh();
-		}
-	},
+                // Cleanup reset_posting_date listener
+                this.eventBus.off("reset_posting_date");
+                this.eventBus.off("show_payment");
+                if (typeof this.cancelScheduledOfferRefresh === "function") {
+                        this.cancelScheduledOfferRefresh();
+                }
+                if (this._suppressClosePaymentsTimer) {
+                        clearTimeout(this._suppressClosePaymentsTimer);
+                        this._suppressClosePaymentsTimer = null;
+                }
+        },
 	// Register global keyboard shortcuts when component is created
 	created() {
 		this.invoiceStore.clear();
