@@ -1177,12 +1177,36 @@ export default {
 
 	// Reload the currently open invoice from the backend and load it into the UI
 	async reload_current_invoice_from_backend() {
-		try {
-			if (isOffline()) {
-				return null;
-			}
+                try {
+                        if (isOffline()) {
+                                return null;
+                        }
 
-			const current = this.invoice_doc || {};
+                        const manualRateOverrides = new Map();
+                        if (Array.isArray(this.items)) {
+                                this.items.forEach((item) => {
+                                        if (!item || !item._manual_rate_set) {
+                                                return;
+                                        }
+
+                                        const key = item.posa_row_id || item.name;
+                                        if (!key) {
+                                                return;
+                                        }
+
+                                        manualRateOverrides.set(key, {
+                                                rate: item.rate,
+                                                base_rate: item.base_rate,
+                                                price_list_rate: item.price_list_rate,
+                                                base_price_list_rate: item.base_price_list_rate,
+                                                discount_amount: item.discount_amount,
+                                                base_discount_amount: item.base_discount_amount,
+                                                discount_percentage: item.discount_percentage,
+                                        });
+                                });
+                        }
+
+                        const current = this.invoice_doc || {};
 			const name = current.name;
 			const doctype =
 				current.doctype ||
@@ -1199,26 +1223,104 @@ export default {
 				args: { doctype, name },
 			});
 
-			const doc = r?.message;
-			if (doc) {
-				await this.load_invoice(doc);
-				return doc;
-			}
-			return null;
-		} catch (error) {
-			console.error("Error reloading current invoice from backend:", error);
-			this.eventBus.emit("show_message", {
-				title: __("Failed to reload invoice from server"),
-				color: "warning",
-			});
-			return null;
-		}
-	},
+                        const doc = r?.message;
+                        if (doc) {
+                                await this.load_invoice(doc);
+                                if (manualRateOverrides.size) {
+                                        this.restore_manual_rates(manualRateOverrides);
+                                }
+                                return doc;
+                        }
+                        return null;
+                } catch (error) {
+                        console.error("Error reloading current invoice from backend:", error);
+                        this.eventBus.emit("show_message", {
+                                title: __("Failed to reload invoice from server"),
+                                color: "warning",
+                        });
+                        return null;
+                }
+        },
 
-	// Show payment dialog after validation and processing
-	async show_payment() {
-		try {
-			console.log("Starting show_payment process");
+        // Restore manually overridden item rates after reloading invoice data
+        restore_manual_rates(overrideMap) {
+                if (!(overrideMap instanceof Map) || overrideMap.size === 0) {
+                        return;
+                }
+
+                const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                const exchangeRate = this.exchange_rate || 1;
+
+                const applyOverride = (item) => {
+                        if (!item) {
+                                return;
+                        }
+
+                        const key = item.posa_row_id || item.name;
+                        if (!key || !overrideMap.has(key)) {
+                                return;
+                        }
+
+                        const data = overrideMap.get(key) || {};
+                        const manualRate = data.rate;
+                        if (manualRate === undefined || manualRate === null) {
+                                return;
+                        }
+
+                        item._manual_rate_set = true;
+                        item.rate = manualRate;
+
+                        if (data.price_list_rate !== undefined) {
+                                item.price_list_rate = data.price_list_rate;
+                        }
+                        if (data.base_price_list_rate !== undefined) {
+                                item.base_price_list_rate = data.base_price_list_rate;
+                        }
+
+                        const computedBaseRate =
+                                data.base_rate !== undefined && data.base_rate !== null
+                                        ? data.base_rate
+                                        : this.selected_currency !== baseCurrency
+                                        ? this.flt(manualRate / exchangeRate, this.currency_precision)
+                                        : manualRate;
+
+                        item.base_rate = computedBaseRate;
+
+                        if (data.discount_amount !== undefined) {
+                                item.discount_amount = data.discount_amount;
+                        }
+                        if (data.base_discount_amount !== undefined) {
+                                item.base_discount_amount = data.base_discount_amount;
+                        }
+                        if (data.discount_percentage !== undefined) {
+                                item.discount_percentage = data.discount_percentage;
+                        }
+
+                        item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                        const baseAmount = this.flt(item.qty * (item.base_rate || 0), this.currency_precision);
+                        item.base_amount = baseAmount;
+                };
+
+                if (Array.isArray(this.items)) {
+                        this.items.forEach(applyOverride);
+                }
+
+                if (
+                        Array.isArray(this.invoice_doc?.items) &&
+                        this.invoice_doc.items !== this.items
+                ) {
+                        this.invoice_doc.items.forEach(applyOverride);
+                }
+
+                if (typeof this.$forceUpdate === "function") {
+                        this.$forceUpdate();
+                }
+        },
+
+        // Show payment dialog after validation and processing
+        async show_payment() {
+                try {
+                        console.log("Starting show_payment process");
 			console.log("Invoice state before payment:", {
 				invoiceType: this.invoiceType,
 				is_return: this.invoice_doc ? this.invoice_doc.is_return : false,
@@ -1616,19 +1718,23 @@ export default {
 						item.has_serial_no = updated_item.has_serial_no;
 						item.batch_no_data = updated_item.batch_no_data;
 						item.serial_no_data = updated_item.serial_no_data;
-						if (updated_item.rate !== undefined) {
-							const force =
-								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-							const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
-							if (!item.locked_price && !item.posa_offer_applied) {
-								if (force || price) {
-									item.rate = price;
-									item.price_list_rate = price;
-								}
-							} else if (!item.price_list_rate && (force || price)) {
-								item.price_list_rate = price;
-							}
-						}
+                                                if (updated_item.rate !== undefined) {
+                                                        const force =
+                                                                this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                        const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
+                                                        const hasManualOverride = Boolean(item._manual_rate_set);
+
+                                                        if (hasManualOverride && price && !item.price_list_rate) {
+                                                                item.price_list_rate = price;
+                                                        } else if (!item.locked_price && !item.posa_offer_applied) {
+                                                                if (force || price) {
+                                                                        item.rate = price;
+                                                                        item.price_list_rate = price;
+                                                                }
+                                                        } else if (!item.price_list_rate && (force || price)) {
+                                                                item.price_list_rate = price;
+                                                        }
+                                                }
 						if (updated_item.currency) {
 							item.currency = updated_item.currency;
 						}
