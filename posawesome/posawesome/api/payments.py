@@ -15,6 +15,10 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 
+def get_posawesome_credit_redeem_remark(invoice_name):
+    return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
+
+
 @frappe.whitelist()
 def create_payment_request(doc):
     doc = json.loads(doc)
@@ -260,6 +264,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
                 jv_doc.flags.ignore_permissions = True
                 frappe.flags.ignore_account_permission = True
+                jv_doc.user_remark = get_posawesome_credit_redeem_remark(invoice_doc.name)
                 jv_doc.set_missing_values()
                 try:
                     jv_doc.save()
