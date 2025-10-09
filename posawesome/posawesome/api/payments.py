@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import nowdate, flt
 from frappe import _
 from erpnext.accounts.party import get_party_bank_account
 from erpnext.accounts.doctype.payment_request.payment_request import (
@@ -217,7 +217,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
         if not cost_center:
             frappe.throw(_("Cost Center is not set in pos profile {}").format(invoice_doc.pos_profile))
         for row in data.get("customer_credit_dict"):
-            if row["type"] == "Invoice" and row["credit_to_redeem"]:
+            if row["type"] in ("Invoice", "Credit Note") and row["credit_to_redeem"]:
                 outstanding_invoice = frappe.get_doc("Sales Invoice", row["credit_origin"])
 
                 jv_doc = frappe.get_doc(
@@ -322,10 +322,38 @@ def get_available_credit(customer, company):
     )
 
     for row in outstanding_invoices:
-        outstanding_amount = -(row.outstanding_amount)
+        outstanding_amount = abs(flt(row.outstanding_amount))
+        if not outstanding_amount:
+            continue
         row = {
             "type": "Invoice",
             "credit_origin": row.name,
+            "total_credit": outstanding_amount,
+            "credit_to_redeem": 0,
+        }
+
+        total_credit.append(row)
+
+    credit_notes = frappe.get_all(
+        "Sales Invoice",
+        {
+            "outstanding_amount": ["<", 0],
+            "docstatus": 1,
+            "is_return": 1,
+            "customer": customer,
+            "company": company,
+        },
+        ["name", "outstanding_amount", "return_against"],
+    )
+
+    for row in credit_notes:
+        outstanding_amount = abs(flt(row.outstanding_amount))
+        if not outstanding_amount:
+            continue
+        row = {
+            "type": "Credit Note",
+            "credit_origin": row.name,
+            "return_against": row.return_against,
             "total_credit": outstanding_amount,
             "credit_to_redeem": 0,
         }

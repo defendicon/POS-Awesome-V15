@@ -565,10 +565,20 @@
 						redeem_customer_credit
 					"
 				>
-					<v-row v-for="(row, idx) in customer_credit_dict" :key="idx">
-						<v-col cols="4">
-							<div class="pa-2 py-3">{{ row.credit_origin }}</div>
-						</v-col>
+                                        <v-row v-for="(row, idx) in customer_credit_dict" :key="idx">
+                                                <v-col cols="4">
+                                                        <div class="pa-2 py-3">
+                                                                <div class="text-body-2 font-weight-medium">
+                                                                        {{ row.credit_origin }}
+                                                                </div>
+                                                                <div
+                                                                        v-if="creditSourceLabel(row)"
+                                                                        class="text-caption text-medium-emphasis"
+                                                                >
+                                                                        {{ creditSourceLabel(row) }}
+                                                                </div>
+                                                        </div>
+                                                </v-col>
 						<v-col cols="4">
 							<v-text-field
 								density="compact"
@@ -1150,29 +1160,55 @@ export default {
 				this.eventBus.emit("focus_item_search");
 			});
 		},
-		// Highlight and focus the submit button when payment screen opens
-		handleShowPayment(data) {
-			if (data === "true") {
-				this.$nextTick(() => {
-					setTimeout(() => {
-						const btn = this.$refs.submitButton;
-						const el = btn && btn.$el ? btn.$el : btn;
-						if (el) {
-							el.scrollIntoView({ behavior: "smooth", block: "center" });
-							el.focus();
-							this.highlightSubmit = true;
-						}
-					}, 100);
-				});
-			} else {
-				this.highlightSubmit = false;
-			}
-		},
-		// Reset all cash payments to zero
-		reset_cash_payments() {
-			this.invoice_doc.payments.forEach((payment) => {
-				if (payment.mode_of_payment.toLowerCase() === "cash") {
-					payment.amount = 0;
+                // Highlight and focus the submit button when payment screen opens
+                handleShowPayment(data) {
+                        if (data === "true") {
+                                this.$nextTick(() => {
+                                        setTimeout(() => {
+                                                const btn = this.$refs.submitButton;
+                                                const el = btn && btn.$el ? btn.$el : btn;
+                                                if (el) {
+                                                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                                        el.focus();
+                                                        this.highlightSubmit = true;
+                                                }
+                                        }, 100);
+                                });
+                        } else {
+                                this.highlightSubmit = false;
+                        }
+                },
+                // Build a readable label for credit sources (advance, overpayment, credit note)
+                creditSourceLabel(row) {
+                        if (!row) {
+                                return "";
+                        }
+
+                        const parts = [];
+
+                        if (row.type) {
+                                if (row.type === "Advance") {
+                                        parts.push(__("Advance Payment"));
+                                } else if (row.type === "Invoice") {
+                                        parts.push(__("Invoice Credit"));
+                                } else if (row.type === "Credit Note") {
+                                        parts.push(__("Credit Note"));
+                                } else {
+                                        parts.push(row.type);
+                                }
+                        }
+
+                        if (row.return_against) {
+                                parts.push(row.return_against);
+                        }
+
+                        return parts.join(" • ");
+                },
+                // Reset all cash payments to zero
+                reset_cash_payments() {
+                        this.invoice_doc.payments.forEach((payment) => {
+                                if (payment.mode_of_payment.toLowerCase() === "cash") {
+                                        payment.amount = 0;
 				}
 			});
 		},
