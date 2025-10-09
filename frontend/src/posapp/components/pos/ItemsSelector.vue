@@ -478,7 +478,7 @@ export default {
 		first_search: "",
 		search_backup: "",
 		// Limit the displayed items to avoid overly large lists
-		itemsPerPage: 5,
+		itemsPerPage: 10,
 		offersCount: 0,
 		appliedOffersCount: 0,
 		couponsCount: 0,
@@ -511,8 +511,8 @@ export default {
 		// Items per page configuration
 		enable_custom_items_per_page: false,
 		temp_enable_custom_items_per_page: false,
-		items_per_page: 5,
-		temp_items_per_page: 5,
+		items_per_page: 10,
+		temp_items_per_page: 10,
 		temp_force_server_items: false,
 		// Performance optimizations
 		searchCache: new Map(),
@@ -1582,7 +1582,7 @@ export default {
 					key: "item_code",
 				},
 				{ title: __("Rate"), key: "rate", align: "start" },
-				{ title: __("Available QTY"), key: "actual_qty", align: "start" },
+				{ title: __("Avl. QTY"), key: "actual_qty", align: "start" },
 				// { title: __("UOM"), key: "stock_uom", align: "start" },
 			];
 			if (!this.pos_profile.posa_display_item_code) {
@@ -2462,9 +2462,9 @@ export default {
 			this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
 			this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
 			if (this.enable_custom_items_per_page) {
-				this.items_per_page = parseInt(this.temp_items_per_page) || 5;
+				this.items_per_page = parseInt(this.temp_items_per_page) || 10;
 			} else {
-				this.items_per_page = 5;
+				this.items_per_page = 10;
 			}
 			this.itemsPerPage = this.items_per_page;
 			this.pos_profile.posa_force_server_items = this.temp_force_server_items ? 1 : 0;
@@ -2908,30 +2908,36 @@ export default {
 
 @media (max-width: 1024px) {
 	.sleek-data-table :deep(.v-table) {
-		/* This is crucial: it forces the table to obey the widths we set below */
 		table-layout: fixed !important;
 	}
+
+	.sleek-data-table :deep(th) {
+		/* This new rule prevents header text from breaking into a new line */
+		white-space: nowrap;
+	}
+
 	.sleek-data-table :deep(th),
 	.sleek-data-table :deep(td) {
-		padding: 12px 6px !important; /* Slightly less padding for more space */
+		padding: 0px 2px 2px 6px !important;
 		font-size: 0.8rem !important;
 	}
-	/* 1st Column: NAME - gets half the space */
+
+	/* 1st Column: NAME */
 	.sleek-data-table :deep(th:nth-child(1)),
 	.sleek-data-table :deep(td:nth-child(1)) {
-		width: 50% !important;
+		width: 40% !important;
 	}
+
 	/* 2nd Column: RATE */
 	.sleek-data-table :deep(th:nth-child(2)),
 	.sleek-data-table :deep(td:nth-child(2)) {
-		width: 25% !important;
+		width: 30% !important;
 	}
-	/* 3rd Column: AVAILABLE QTY */
+
+	/* 3rd Column: Avl. QTY */
 	.sleek-data-table :deep(th:nth-child(3)),
 	.sleek-data-table :deep(td:nth-child(3)) {
-		width: 25% !important;
-		/* Allows the header text to wrap if needed, preventing overflow */
-		white-space: normal;
+		width: 30% !important;
 	}
 }
 

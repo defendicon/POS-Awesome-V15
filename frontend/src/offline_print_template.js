@@ -171,8 +171,29 @@ function defaultOfflineHTML(invoice) {
     // Calculate change amount, ensuring it's not negative.
     const changeAmount = Math.max((paid_amount || 0) - (invoice.grand_total || 0), 0).toFixed(2);
 
+        /**
+ * Formats a date string into DD/MM/YYYY format.
+ * @param {string} dateString - The date string to format.
+ * @returns {string} The formatted date.
+ */
+function formatDate(dateString) {
+  if (!dateString) {
+    return ""; // Return an empty string if the date is not provided
+  }
+
+  const date = new Date(dateString);
+
+  // Get day, month, and year
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
     // The main HTML structure, built using a template literal.
     return `<!DOCTYPE html>
+
+
         <html>
             <head>
                 <meta charset="utf-8">
@@ -236,7 +257,7 @@ function defaultOfflineHTML(invoice) {
 
                     <table width="100%" style="margin-top: 6px; font-size: 11px;">
                         <tr>
-                            <td>Date: ${invoice.posting_date}</td>
+                            <td>Date: ${formatDate(invoice.posting_date)}</td>
                             <td style="text-align: right;">Staff ID: ${invoice.staff_id || "53193"}</td>
                         </tr>
                         <tr>
