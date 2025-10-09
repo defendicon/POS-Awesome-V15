@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
 )
+from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 
 @frappe.whitelist()
