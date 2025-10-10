@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import json
+import logging
 from functools import cache
 
 import frappe
 
 # Reusable ORM filter to exclude template items
 HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
+
+
+logger = logging.getLogger(__name__)
 
 
 def expand_item_groups(item_groups):
@@ -72,6 +77,48 @@ def get_default_warehouse(company=None):
     if not warehouse:
         warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
     return warehouse
+
+
+def fetch_sales_person_names():
+    """Return the list of enabled sales persons allowed for the active POS profile."""
+
+    logger.info("Fetching sales persons...")
+
+    try:
+        profile = get_active_pos_profile()
+        allowed = []
+        if profile:
+            allowed = [
+                d.get("sales_person")
+                for d in profile.get("posa_sales_persons", [])
+                if d.get("sales_person")
+            ]
+
+        filters = {"enabled": 1}
+        if allowed:
+            filters["name"] = ["in", allowed]
+
+        sales_persons = frappe.get_list(
+            "Sales Person",
+            filters=filters,
+            fields=["name", "sales_person_name"],
+            limit_page_length=100000,
+        )
+
+        logger.info(
+            "Found %s sales persons: %s",
+            len(sales_persons),
+            json.dumps(sales_persons),
+        )
+
+        return sales_persons
+    except Exception as exc:
+        logger.exception("Error fetching sales persons")
+        frappe.log_error(
+            f"Error fetching sales persons: {exc}",
+            "POS Sales Person Error",
+        )
+        return []
 
 
 @cache
