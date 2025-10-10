@@ -9,7 +9,12 @@ from frappe.utils import cstr, add_to_date, get_datetime
 from typing import List, Dict
 import time
 import os
-import psutil
+try:
+    import psutil
+except ImportError:  # pragma: no cover - optional dependency
+    psutil = None
+
+_PSUTIL_MISSING_LOGGED = False
 import functools
 
 from .utils import get_item_groups, fetch_sales_person_names
@@ -337,33 +342,33 @@ def get_database_usage():
 
 @frappe.whitelist()
 def get_server_usage():
-    try:
+    global _PSUTIL_MISSING_LOGGED
 
-        cpu_percent = psutil.cpu_percent(interval=0.5)
-        mem = psutil.virtual_memory()
-        memory_percent = mem.percent
-        memory_total = mem.total
-        memory_used = mem.used
-        memory_available = mem.available
-        load_avg = os.getloadavg() if hasattr(os, "getloadavg") else (0, 0, 0)
-        uptime = time.time() - psutil.boot_time()
-    except ImportError:
-        cpu_percent = None
-        memory_percent = None
-        memory_total = None
-        memory_used = None
-        memory_available = None
-        load_avg = (None, None, None)
-        uptime = None
-    except Exception as e:
-        frappe.log_error(f"Server usage error: {e}")
-        cpu_percent = None
-        memory_percent = None
-        memory_total = None
-        memory_used = None
-        memory_available = None
-        load_avg = (None, None, None)
-        uptime = None
+    cpu_percent = None
+    memory_percent = None
+    memory_total = None
+    memory_used = None
+    memory_available = None
+    load_avg = (None, None, None)
+    uptime = None
+
+    if psutil is None:
+        if not _PSUTIL_MISSING_LOGGED:
+            frappe.log_error("psutil is not installed; server usage metrics unavailable.")
+            _PSUTIL_MISSING_LOGGED = True
+    else:
+        try:
+
+            cpu_percent = psutil.cpu_percent(interval=0.5)
+            mem = psutil.virtual_memory()
+            memory_percent = mem.percent
+            memory_total = mem.total
+            memory_used = mem.used
+            memory_available = mem.available
+            load_avg = os.getloadavg() if hasattr(os, "getloadavg") else (0, 0, 0)
+            uptime = time.time() - psutil.boot_time()
+        except Exception as e:
+            frappe.log_error(f"Server usage error: {e}")
     return {
         "cpu_percent": cpu_percent,
         "memory_percent": memory_percent,
