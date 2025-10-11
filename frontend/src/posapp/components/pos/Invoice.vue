@@ -418,6 +418,7 @@ export default {
 			price_lists: [], // Available selling price lists
 			selected_price_list: "", // Currently selected price list
 			price_list_currency: "", // Currency of the selected price list
+			_shortcutHandlers: {},
 			selected_columns: [], // Selected columns for items table
                         temp_selected_columns: [], // Temporary array for column selection
                         available_columns: [], // All available columns
@@ -1427,17 +1428,30 @@ export default {
 				}
 			},
 		);
-		document.addEventListener("keydown", this.shortOpenPayment.bind(this));
-		document.addEventListener("keydown", this.shortDeleteFirstItem.bind(this));
-		document.addEventListener("keydown", this.shortOpenFirstItem.bind(this));
-		document.addEventListener("keydown", this.shortSelectDiscount.bind(this));
+		this._shortcutHandlers = this._shortcutHandlers || {};
+
+		this._shortcutHandlers.shortOpenPayment = this.shortOpenPayment.bind(this);
+		this._shortcutHandlers.shortDeleteFirstItem = this.shortDeleteFirstItem.bind(this);
+		this._shortcutHandlers.shortOpenFirstItem = this.shortOpenFirstItem.bind(this);
+		this._shortcutHandlers.shortSelectDiscount = this.shortSelectDiscount.bind(this);
+
+		document.addEventListener("keydown", this._shortcutHandlers.shortOpenPayment);
+		document.addEventListener("keydown", this._shortcutHandlers.shortDeleteFirstItem);
+		document.addEventListener("keydown", this._shortcutHandlers.shortOpenFirstItem);
+		document.addEventListener("keydown", this._shortcutHandlers.shortSelectDiscount);
 	},
 	// Remove global keyboard shortcuts when component is unmounted
 	unmounted() {
-		document.removeEventListener("keydown", this.shortOpenPayment);
-		document.removeEventListener("keydown", this.shortDeleteFirstItem);
-		document.removeEventListener("keydown", this.shortOpenFirstItem);
-		document.removeEventListener("keydown", this.shortSelectDiscount);
+		if (!this._shortcutHandlers) {
+			return;
+		}
+
+		document.removeEventListener("keydown", this._shortcutHandlers.shortOpenPayment);
+		document.removeEventListener("keydown", this._shortcutHandlers.shortDeleteFirstItem);
+		document.removeEventListener("keydown", this._shortcutHandlers.shortOpenFirstItem);
+		document.removeEventListener("keydown", this._shortcutHandlers.shortSelectDiscount);
+
+		this._shortcutHandlers = {};
 	},
 	watch: invoiceWatchers,
 };
