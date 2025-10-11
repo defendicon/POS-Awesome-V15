@@ -2464,20 +2464,26 @@ export default {
 	},
 
 	// Update quantity limits based on available stock (simplified - validation handled centrally)
-	update_qty_limits(item) {
-		if (item && item.available_qty !== undefined) {
-			item.max_qty = flt(item.available_qty / (item.conversion_factor || 1));
+        update_qty_limits(item) {
+                if (item && item.is_stock_item === 0) {
+                        item.max_qty = undefined;
+                        item.disable_increment = false;
+                        return;
+                }
 
-			// Set increment disable flag based on stock limits
-			item.disable_increment =
-				(!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty) &&
-				item.qty >= item.max_qty;
-		}
-	},
+                if (item && item.available_qty !== undefined) {
+                        item.max_qty = flt(item.available_qty / (item.conversion_factor || 1));
 
-	// Fetch available stock for an item and cache it
-	async fetch_available_qty(item) {
-		if (!item || !item.item_code || !item.warehouse) return;
+                        // Set increment disable flag based on stock limits
+                        item.disable_increment =
+                                (!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty) &&
+                                item.qty >= item.max_qty;
+                }
+        },
+
+        // Fetch available stock for an item and cache it
+        async fetch_available_qty(item) {
+                if (!item || !item.item_code || !item.warehouse || item.is_stock_item === 0) return;
 
 		const key = this._getStockCacheKey(item);
 		const cachedQty = this._getCachedStockQty(key);
