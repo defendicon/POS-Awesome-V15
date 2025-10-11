@@ -353,25 +353,24 @@ def set_customer_info(customer, fieldname, value=""):
 def get_customer_addresses(customer):
     return frappe.db.sql(
         """
-	SELECT
-	    address.name,
-	    address.address_line1,
-	    address.address_line2,
-	    address.address_title,
-	    address.city,
-	    address.state,
-	    address.country,
-	    address.address_type
-	FROM `tabAddress` as address
-	INNER JOIN `tabDynamic Link` AS link
-				ON address.name = link.parent
-	WHERE link.link_doctype = 'Customer'
-	    AND link.link_name = '{0}'
-	    AND address.disabled = 0
-	ORDER BY address.name
-	""".format(
-            customer
-        ),
+        SELECT
+            address.name,
+            address.address_line1,
+            address.address_line2,
+            address.address_title,
+            address.city,
+            address.state,
+            address.country,
+            address.address_type
+        FROM `tabAddress` as address
+        INNER JOIN `tabDynamic Link` AS link
+                                ON address.name = link.parent
+        WHERE link.link_doctype = 'Customer'
+            AND link.link_name = %s
+            AND address.disabled = 0
+        ORDER BY address.name
+        """,
+        (customer,),
         as_dict=1,
     )
 
