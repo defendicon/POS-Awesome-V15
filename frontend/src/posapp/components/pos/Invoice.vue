@@ -424,6 +424,7 @@ export default {
                         show_column_selector: false, // Column selector dialog visibility
                         invoiceHeight: null,
                         paymentVisible: false, // Track current payment view state
+                        _busHandlers: {},
                 };
         },
 
@@ -1217,10 +1218,10 @@ export default {
 		},
 
 		// Handle item reordering from drag and drop
-		handleItemReorder(reorderData) {
-			const { fromIndex, toIndex } = reorderData;
+                handleItemReorder(reorderData) {
+                        const { fromIndex, toIndex } = reorderData;
 
-			if (fromIndex === toIndex) return;
+                        if (fromIndex === toIndex) return;
 
 			// Create a copy of the items array
 			const newItems = [...this.items];
@@ -1240,161 +1241,159 @@ export default {
 				color: "success",
 			});
 
-			// Optionally, you can also update the idx field for each item
-			this.items.forEach((item, index) => {
-				item.idx = index + 1;
-			});
-		},
-	},
+                        // Optionally, you can also update the idx field for each item
+                        this.items.forEach((item, index) => {
+                                item.idx = index + 1;
+                        });
+                },
+                handleRegisterPosProfile(data) {
+                        this.pos_profile = data.pos_profile;
+                        this.company = data.company || null;
+                        this.customer = data.pos_profile.customer;
+                        this.pos_opening_shift = data.pos_opening_shift;
+                        this.stock_settings = data.stock_settings;
+                        const prec = parseInt(data.pos_profile.posa_decimal_precision);
+                        if (!isNaN(prec)) {
+                                this.float_precision = prec;
+                                this.currency_precision = prec;
+                        }
+                        this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
+                        this.initializeItemsHeaders();
 
-	mounted() {
-		// Load saved column preferences
-		this.loadColumnPreferences();
-		// Restore saved invoice height
-		this.loadInvoiceHeight();
-		this.eventBus.on("item-drag-start", () => {
-			this.showDropFeedback(true);
-		});
-		this.eventBus.on("item-drag-end", () => {
-			this.showDropFeedback(false);
-		});
+                        if (this.pos_profile.posa_allow_multi_currency) {
+                                this.fetch_available_currencies()
+                                        .then(async () => {
+                                                this.selected_currency = this.pos_profile.currency;
+                                                await this.update_currency_and_rate();
+                                        })
+                                        .catch((error) => {
+                                                console.error("Error initializing currencies:", error);
+                                                this.eventBus.emit("show_message", {
+                                                        title: __("Error loading currencies"),
+                                                        color: "error",
+                                                });
+                                        });
+                        }
 
-		// Register event listeners for POS profile, items, customer, offers, etc.
-		this.eventBus.on("register_pos_profile", (data) => {
-			this.pos_profile = data.pos_profile;
-			this.company = data.company || null;
-			this.customer = data.pos_profile.customer;
-			this.pos_opening_shift = data.pos_opening_shift;
-			this.stock_settings = data.stock_settings;
-			const prec = parseInt(data.pos_profile.posa_decimal_precision);
-			if (!isNaN(prec)) {
-				this.float_precision = prec;
-				this.currency_precision = prec;
-			}
-			this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
-			this.initializeItemsHeaders();
-
-			// Add this block to handle currency initialization
-			if (this.pos_profile.posa_allow_multi_currency) {
-				this.fetch_available_currencies()
-					.then(async () => {
-						// Set default currency after currencies are loaded
-						this.selected_currency = this.pos_profile.currency;
-						// Fetch proper exchange rate from server
-						await this.update_currency_and_rate();
-					})
-					.catch((error) => {
-						console.error("Error initializing currencies:", error);
-						this.eventBus.emit("show_message", {
-							title: __("Error loading currencies"),
-							color: "error",
-						});
-					});
-			}
-
-			this.fetch_price_lists();
-			this.update_price_list();
-		});
-		this.eventBus.on("add_item", (item) => {
-			this.add_item(item);
-		});
-		this.eventBus.on("clear_invoice", () => {
-			this.clear_invoice();
-			this.eventBus.emit("focus_item_search");
-		});
-		this.eventBus.on("load_invoice", (data) => {
-			this.load_invoice(data);
-		});
-		this.eventBus.on("load_order", (data) => {
-			this.new_order(data);
-			// this.eventBus.emit("set_pos_coupons", data.posa_coupons);
-		});
-		this.eventBus.on("set_offers", (data) => {
-			this.posOffers = data;
-		});
-		this.eventBus.on("update_invoice_offers", (data) => {
-			this.updateInvoiceOffers(data);
-		});
-		this.eventBus.on("update_invoice_coupons", (data) => {
-			this.posa_coupons = data;
-			this.handelOffers();
-		});
-		this.eventBus.on("set_all_items", (data) => {
-			this.allItems = data;
-			this.items.forEach((item) => {
-				if (item._detailSynced !== true) {
-					this.update_item_detail(item);
-				}
-			});
-		});
-		this.eventBus.on("load_return_invoice", (data) => {
-			// Handle loading of return invoice and set all related fields
-			console.log("Invoice component received load_return_invoice event with data:", data);
-			this.load_invoice(data.invoice_doc);
-			// Explicitly mark as return invoice
-			this.invoiceType = "Return";
-			this.invoiceTypes = ["Return"];
-			this.invoice_doc.is_return = 1;
-			// Ensure negative values for returns
-			if (this.items && this.items.length) {
-				this.items.forEach((item) => {
-					// Ensure item quantities are negative
-					if (item.qty > 0) item.qty = -Math.abs(item.qty);
-					if (item.stock_qty > 0) item.stock_qty = -Math.abs(item.stock_qty);
-				});
-			}
-			if (data.return_doc) {
-				console.log("Return against existing invoice:", data.return_doc.name);
-				this.discount_amount = data.return_doc.discount_amount || 0;
-				this.additional_discount = data.return_doc.discount_amount || 0;
-				this.return_doc = data.return_doc;
-				// Set return_against reference
-				this.invoice_doc.return_against = data.return_doc.name;
-			} else {
-				console.log("Return without invoice reference");
-				// For return without invoice, reset discount values
-				this.discount_amount = 0;
-				this.additional_discount = 0;
-				this.additional_discount_percentage = 0;
-			}
-			console.log("Invoice state after loading return:", {
-				invoiceType: this.invoiceType,
-				is_return: this.invoice_doc.is_return,
-				items: this.items.length,
-				customer: this.customer,
-			});
-		});
-		this.eventBus.on("set_new_line", (data) => {
-			this.new_line = data;
-		});
-		if (this.pos_profile.posa_allow_multi_currency) {
-			this.fetch_available_currencies();
-		}
-		// Listen for reset_posting_date to reset posting date after invoice submission
-		this.eventBus.on("reset_posting_date", () => {
-			this.posting_date = frappe.datetime.nowdate();
-		});
-		this.eventBus.on("calc_uom", this.calc_uom);
-                this.eventBus.on("item-drag-start", () => {
+                        this.fetch_price_lists();
+                        this.update_price_list();
+                },
+                handleClearInvoice() {
+                        this.clear_invoice();
+                        this.eventBus.emit("focus_item_search");
+                },
+                handleLoadInvoice(data) {
+                        this.load_invoice(data);
+                },
+                handleLoadOrder(data) {
+                        this.new_order(data);
+                        // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
+                },
+                handleSetOffers(data) {
+                        this.posOffers = data;
+                },
+                handleUpdateInvoiceOffers(data) {
+                        this.updateInvoiceOffers(data);
+                },
+                handleUpdateInvoiceCoupons(data) {
+                        this.posa_coupons = data;
+                        this.handelOffers();
+                },
+                handleSetAllItems(data) {
+                        this.allItems = data;
+                        this.items.forEach((item) => {
+                                if (item._detailSynced !== true) {
+                                        this.update_item_detail(item);
+                                }
+                        });
+                },
+                handleLoadReturnInvoice(data) {
+                        console.log("Invoice component received load_return_invoice event with data:", data);
+                        this.load_invoice(data.invoice_doc);
+                        this.invoiceType = "Return";
+                        this.invoiceTypes = ["Return"];
+                        this.invoice_doc.is_return = 1;
+                        if (this.items && this.items.length) {
+                                this.items.forEach((item) => {
+                                        if (item.qty > 0) item.qty = -Math.abs(item.qty);
+                                        if (item.stock_qty > 0) item.stock_qty = -Math.abs(item.stock_qty);
+                                });
+                        }
+                        if (data.return_doc) {
+                                console.log("Return against existing invoice:", data.return_doc.name);
+                                this.discount_amount = data.return_doc.discount_amount || 0;
+                                this.additional_discount = data.return_doc.discount_amount || 0;
+                                this.return_doc = data.return_doc;
+                                this.invoice_doc.return_against = data.return_doc.name;
+                        } else {
+                                console.log("Return without invoice reference");
+                                this.discount_amount = 0;
+                                this.additional_discount = 0;
+                                this.additional_discount_percentage = 0;
+                        }
+                        console.log("Invoice state after loading return:", {
+                                invoiceType: this.invoiceType,
+                                is_return: this.invoice_doc.is_return,
+                                items: this.items.length,
+                                customer: this.customer,
+                        });
+                },
+                handleSetNewLine(data) {
+                        this.new_line = data;
+                },
+                handleResetPostingDate() {
+                        this.posting_date = frappe.datetime.nowdate();
+                },
+                handleItemDragStart() {
                         this.showDropFeedback(true);
-                });
-                this.eventBus.on("item-drag-end", () => {
+                },
+                handleItemDragEnd() {
                         this.showDropFeedback(false);
+                },
+                handleShowPayment(data) {
+                        this.paymentVisible = data === "true";
+                },
+        },
+
+        mounted() {
+                // Load saved column preferences
+                this.loadColumnPreferences();
+                // Restore saved invoice height
+                this.loadInvoiceHeight();
+
+                this._busHandlers = {
+                        "item-drag-start": this.handleItemDragStart,
+                        "item-drag-end": this.handleItemDragEnd,
+                        register_pos_profile: this.handleRegisterPosProfile,
+                        add_item: this.add_item,
+                        clear_invoice: this.handleClearInvoice,
+                        load_invoice: this.handleLoadInvoice,
+                        load_order: this.handleLoadOrder,
+                        set_offers: this.handleSetOffers,
+                        update_invoice_offers: this.handleUpdateInvoiceOffers,
+                        update_invoice_coupons: this.handleUpdateInvoiceCoupons,
+                        set_all_items: this.handleSetAllItems,
+                        load_return_invoice: this.handleLoadReturnInvoice,
+                        set_new_line: this.handleSetNewLine,
+                        reset_posting_date: this.handleResetPostingDate,
+                        calc_uom: this.calc_uom,
+                        show_payment: this.handleShowPayment,
+                };
+
+                Object.entries(this._busHandlers).forEach(([eventName, handler]) => {
+                        this.eventBus.on(eventName, handler);
                 });
 
-                this.eventBus.on("show_payment", (data) => {
-                        this.paymentVisible = data === "true";
-                });
+                if (this.pos_profile.posa_allow_multi_currency) {
+                        this.fetch_available_currencies();
+                }
         },
         // Cleanup event listeners before component is destroyed
         beforeUnmount() {
-                // Existing cleanup
-                this.eventBus.off("register_pos_profile");
-		this.eventBus.off("add_item");
-		this.eventBus.off("clear_invoice");
-                // Cleanup reset_posting_date listener
-                this.eventBus.off("reset_posting_date");
-                this.eventBus.off("show_payment");
+                Object.entries(this._busHandlers || {}).forEach(([eventName, handler]) => {
+                        this.eventBus.off(eventName, handler);
+                });
+                this._busHandlers = {};
                 if (typeof this.cancelScheduledOfferRefresh === "function") {
                         this.cancelScheduledOfferRefresh();
                 }

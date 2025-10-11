@@ -68,8 +68,8 @@ export function useStockUtils() {
 			}
 		}
 
-		if (uomRate) {
-			item._manual_rate_set = true;
+                if (uomRate) {
+                        item._manual_rate_set = true;
 
 			// default rates based on fetched UOM price
 			let base_price = uomRate;
@@ -139,11 +139,16 @@ export function useStockUtils() {
 			return;
 		}
 
-		// No explicit UOM price found, allow normal recalculation
-		item._manual_rate_set = false;
+                // No explicit UOM price found, allow normal recalculation but
+                // lock the rate when the user selected a non-stock UOM so the
+                // backend refresh (triggered when opening payments) does not
+                // revert the displayed rate back to the single-unit price.
+                const shouldPreserveManualRate =
+                        value !== item.stock_uom || item.conversion_factor !== 1;
+                item._manual_rate_set = shouldPreserveManualRate;
 
 		// Reset discount if not offer
-		if (!item.posa_offer_applied) {
+                if (!item.posa_offer_applied) {
 			item.discount_amount = 0;
 			item.discount_percentage = 0;
 		}
