@@ -30,7 +30,7 @@ def get_bundle_components(bundles):
             item = frappe.db.get_value(
                 "Item",
                 row.item_code,
-                ["has_batch_no", "has_serial_no", "stock_uom"],
+                ["has_batch_no", "has_serial_no", "stock_uom", "is_stock_item"],
                 as_dict=True,
             )
             uom = row.uom or (item.stock_uom if item else None)
@@ -41,6 +41,7 @@ def get_bundle_components(bundles):
                     "uom": uom,
                     "is_batch": item.has_batch_no if item else 0,
                     "is_serial": item.has_serial_no if item else 0,
+                    "is_stock_item": item.is_stock_item if item else 0,
                 }
             )
         result[code] = components
