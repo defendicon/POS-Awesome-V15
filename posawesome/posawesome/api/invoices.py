@@ -492,10 +492,24 @@ def submit_invoice(invoice, data):
 
     # creating advance payment
     if data.get("credit_change"):
+        cash_mode_of_payment = None
+        for payment in invoice_doc.payments:
+            if payment.get("type") == "Cash" and payment.get("mode_of_payment"):
+                cash_mode_of_payment = payment.get("mode_of_payment")
+                break
+
+        if not cash_mode_of_payment and pos_profile:
+            cash_mode_of_payment = (
+                frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment")
+                or "Cash"
+            )
+
+        posting_date = invoice_doc.get("posting_date") or nowdate()
+        reference_no = invoice_doc.get("posa_pos_opening_shift")
         advance_payment_entry = frappe.get_doc(
             {
                 "doctype": "Payment Entry",
-                "mode_of_payment": "Cash",
+                "mode_of_payment": cash_mode_of_payment or "Cash",
                 "paid_to": cash_account["account"],
                 "payment_type": "Receive",
                 "party_type": "Customer",
@@ -503,8 +517,13 @@ def submit_invoice(invoice, data):
                 "paid_amount": invoice_doc.get("credit_change"),
                 "received_amount": invoice_doc.get("credit_change"),
                 "company": invoice_doc.get("company"),
+                "posting_date": posting_date,
             }
         )
+
+        if reference_no:
+            advance_payment_entry.reference_no = reference_no
+            advance_payment_entry.reference_date = posting_date
 
         advance_payment_entry.flags.ignore_permissions = True
         frappe.flags.ignore_account_permission = True
