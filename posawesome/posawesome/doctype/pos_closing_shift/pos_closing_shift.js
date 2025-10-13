@@ -275,30 +275,3 @@ const get_base_value = (doc, field, base_field, conversion_rate) => {
 
 	return flt(value) * flt(conversion_rate || 1);
 };
-
-const get_conversion_rate = (doc) =>
-	doc.conversion_rate || doc.exchange_rate || doc.target_exchange_rate || doc.plc_conversion_rate || 1;
-
-const get_base_value = (doc, field, base_field, conversion_rate) => {
-	const base_fieldname = base_field || `base_${field}`;
-	const base_value = doc[base_fieldname];
-	if (base_value !== undefined && base_value !== null && base_value !== "") {
-		return flt(base_value);
-	}
-
-	const value = doc[field];
-	if (value === undefined || value === null || value === "") {
-		return 0;
-	}
-
-	if (!conversion_rate) {
-		conversion_rate =
-			doc.conversion_rate ||
-			doc.exchange_rate ||
-			doc.target_exchange_rate ||
-			doc.plc_conversion_rate ||
-			1;
-	}
-
-	return flt(value) * flt(conversion_rate || 1);
-};
