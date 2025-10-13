@@ -1016,6 +1016,14 @@ export default {
                                 this.paid_change_rules = [];
                                 this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
                         }
+
+                        const effectivePaid = Math.min(this.paid_change, changeLimit);
+                        const creditAmount = this.flt(changeLimit - effectivePaid, this.currency_precision);
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = effectivePaid;
+                                this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
+                        }
                 },
 		// Watch loyalty_amount to handle loyalty points redemption
 		loyalty_amount(value) {
@@ -1392,12 +1400,30 @@ export default {
 					row.credit_to_redeem = this.flt(row.credit_to_redeem);
 				});
 			}
+                        const changeLimit = !this.invoice_doc.is_return
+                                ? Math.max(-this.diff_payment, 0)
+                                : 0;
+                        const paidChange = !this.invoice_doc.is_return
+                                ? this.flt(Math.min(this.paid_change, changeLimit), this.currency_precision)
+                                : 0;
+                        const creditChange = !this.invoice_doc.is_return
+                                ? this.flt(Math.max(changeLimit - paidChange, 0), this.currency_precision)
+                                : 0;
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = paidChange;
+                                this.invoice_doc.credit_change = creditChange;
+                        }
+
+                        if (!this.invoice_doc.is_return) {
+                                this.credit_change = creditChange ? -creditChange : 0;
+                                this.paid_change = paidChange;
+                        }
+
                         let data = {
-                                total_change: !this.invoice_doc.is_return
-                                        ? Math.max(-this.diff_payment, 0)
-                                        : 0,
-                                paid_change: !this.invoice_doc.is_return ? this.paid_change : 0,
-                                credit_change: -this.credit_change,
+                                total_change: changeLimit,
+                                paid_change: paidChange,
+                                credit_change: creditChange,
 				redeemed_customer_credit: this.redeemed_customer_credit,
 				customer_credit_dict: this.customer_credit_dict,
 				is_cashback: this.is_cashback,
@@ -2078,6 +2104,11 @@ export default {
 
                         this.credit_change = requestedCredit ? -requestedCredit : 0;
                         this.paid_change = remainingPaidChange;
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.credit_change = requestedCredit;
+                                this.invoice_doc.paid_change = remainingPaidChange;
+                        }
                 },
 		// Format currency value
 		formatCurrency(value) {
