@@ -341,43 +341,43 @@ export default {
 			this.invoiceTypes = ["Return"];
 		}
 
-                this.invoice_doc = data;
-                this.items = data.items || [];
-                this.packed_items = data.packed_items || [];
-                console.log("Items set:", this.items.length, "items");
+		this.invoice_doc = data;
+		this.items = data.items || [];
+		this.packed_items = data.packed_items || [];
+		console.log("Items set:", this.items.length, "items");
 
-                if (data.is_return && data.return_against) {
-                        this.items.forEach((item) => {
-                                item.locked_price = true;
-                        });
-                        this.packed_items.forEach((pi) => {
-                                pi.locked_price = true;
-                        });
-                }
+		if (data.is_return && data.return_against) {
+			this.items.forEach((item) => {
+				item.locked_price = true;
+			});
+			this.packed_items.forEach((pi) => {
+				pi.locked_price = true;
+			});
+		}
 
-                if (this.items.length > 0) {
-                        this.items.forEach((item) => {
-                                if (!item.posa_row_id) {
-                                        item.posa_row_id = this.makeid(20);
-                                }
-                                if (item.batch_no) {
-                                        this.set_batch_qty(item, item.batch_no);
-                                }
-                                if (!item.original_item_name) {
-                                        item.original_item_name = item.item_name;
-                                }
-                        });
+		if (this.items.length > 0) {
+			this.items.forEach((item) => {
+				if (!item.posa_row_id) {
+					item.posa_row_id = this.makeid(20);
+				}
+				if (item.batch_no) {
+					this.set_batch_qty(item, item.batch_no);
+				}
+				if (!item.original_item_name) {
+					item.original_item_name = item.item_name;
+				}
+			});
 
-                        const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
+			const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
 
-                        await this.update_items_details(this.items);
+			await this.update_items_details(this.items);
 
-                        if (manualSnapshots.length) {
-                                this._restoreManualSnapshots(this.items, manualSnapshots);
-                        }
+			if (manualSnapshots.length) {
+				this._restoreManualSnapshots(this.items, manualSnapshots);
+			}
 
-                        this.posa_offers = data.posa_offers || [];
-                } else {
+			this.posa_offers = data.posa_offers || [];
+		} else {
 			console.log("Warning: No items in return invoice");
 		}
 
@@ -1184,329 +1184,326 @@ export default {
 	},
 
 	// Reload the currently open invoice from the backend and load it into the UI
-        async reload_current_invoice_from_backend() {
-                try {
-                        if (isOffline()) {
-                                return null;
-                        }
+	async reload_current_invoice_from_backend() {
+		try {
+			if (isOffline()) {
+				return null;
+			}
 
-                        const current = this.invoice_doc || {};
-                        const name = current.name;
-                        const doctype =
-                                current.doctype ||
-                                (this.pos_profile?.create_pos_invoice_instead_of_sales_invoice
-                                        ? "POS Invoice"
-                                        : "Sales Invoice");
+			const current = this.invoice_doc || {};
+			const name = current.name;
+			const doctype =
+				current.doctype ||
+				(this.pos_profile?.create_pos_invoice_instead_of_sales_invoice
+					? "POS Invoice"
+					: "Sales Invoice");
 
-                        if (!name || !doctype) {
-                                return null;
-                        }
+			if (!name || !doctype) {
+				return null;
+			}
 
-                        const manualOverrides = this._collectManualRateOverrides(this.items);
+			const manualOverrides = this._collectManualRateOverrides(this.items);
 
-                        const r = await frappe.call({
-                                method: "frappe.client.get",
-                                args: { doctype, name },
-                        });
+			const r = await frappe.call({
+				method: "frappe.client.get",
+				args: { doctype, name },
+			});
 
-                        const doc = r?.message;
-                        if (doc) {
-                                if (manualOverrides.length) {
-                                        this._applyManualRateOverridesToDoc(doc, manualOverrides);
-                                }
-                                await this.load_invoice(doc);
-                                return doc;
-                        }
-                        return null;
-                } catch (error) {
-                        console.error("Error reloading current invoice from backend:", error);
-                        this.eventBus.emit("show_message", {
-                                title: __("Failed to reload invoice from server"),
-                                color: "warning",
-                        });
-                        return null;
-                }
-        },
+			const doc = r?.message;
+			if (doc) {
+				if (manualOverrides.length) {
+					this._applyManualRateOverridesToDoc(doc, manualOverrides);
+				}
+				await this.load_invoice(doc);
+				return doc;
+			}
+			return null;
+		} catch (error) {
+			console.error("Error reloading current invoice from backend:", error);
+			this.eventBus.emit("show_message", {
+				title: __("Failed to reload invoice from server"),
+				color: "warning",
+			});
+			return null;
+		}
+	},
 
-        _collectManualRateOverrides(items) {
-                if (!Array.isArray(items) || !items.length) {
-                        return [];
-                }
+	_collectManualRateOverrides(items) {
+		if (!Array.isArray(items) || !items.length) {
+			return [];
+		}
 
-                return items
-                        .filter((item) => item && item._manual_rate_set)
-                        .map((item) => ({
-                                keys: {
-                                        name: item.name || null,
-                                        posa_row_id: item.posa_row_id || null,
-                                        item_code: item.item_code || null,
-                                        idx:
-                                                item.idx !== undefined && item.idx !== null
-                                                        ? Number(item.idx)
-                                                        : null,
-                                        batch_no: item.batch_no || null,
-                                        serial_no: item.serial_no || null,
-                                },
-                                values: {
-                                        rate: item.rate,
-                                        base_rate: item.base_rate,
-                                        price_list_rate: item.price_list_rate,
-                                        base_price_list_rate: item.base_price_list_rate,
-                                        discount_amount: item.discount_amount,
-                                        base_discount_amount: item.base_discount_amount,
-                                        discount_percentage: item.discount_percentage,
-                                        amount: item.amount,
-                                        base_amount: item.base_amount,
-                                        conversion_factor: item.conversion_factor,
-                                        uom: item.uom,
-                                },
-                        }));
-        },
+		return items
+			.filter((item) => item && item._manual_rate_set)
+			.map((item) => ({
+				keys: {
+					name: item.name || null,
+					posa_row_id: item.posa_row_id || null,
+					item_code: item.item_code || null,
+					idx: item.idx !== undefined && item.idx !== null ? Number(item.idx) : null,
+					batch_no: item.batch_no || null,
+					serial_no: item.serial_no || null,
+				},
+				values: {
+					rate: item.rate,
+					base_rate: item.base_rate,
+					price_list_rate: item.price_list_rate,
+					base_price_list_rate: item.base_price_list_rate,
+					discount_amount: item.discount_amount,
+					base_discount_amount: item.base_discount_amount,
+					discount_percentage: item.discount_percentage,
+					amount: item.amount,
+					base_amount: item.base_amount,
+					conversion_factor: item.conversion_factor,
+					uom: item.uom,
+				},
+			}));
+	},
 
-        _doesManualOverrideMatchItem(override, item) {
-                if (!override?.keys || !item) {
-                        return false;
-                }
+	_doesManualOverrideMatchItem(override, item) {
+		if (!override?.keys || !item) {
+			return false;
+		}
 
-                const { name, posa_row_id, item_code, idx, batch_no, serial_no } = override.keys;
+		const { name, posa_row_id, item_code, idx, batch_no, serial_no } = override.keys;
 
-                if (name && item.name && name === item.name) {
-                        return true;
-                }
+		if (name && item.name && name === item.name) {
+			return true;
+		}
 
-                if (posa_row_id && item.posa_row_id && posa_row_id === item.posa_row_id) {
-                        return true;
-                }
+		if (posa_row_id && item.posa_row_id && posa_row_id === item.posa_row_id) {
+			return true;
+		}
 
-                if (item_code && item.item_code === item_code) {
-                        if (idx !== null && idx !== undefined) {
-                                const itemIdx = item.idx !== undefined && item.idx !== null ? Number(item.idx) : null;
-                                if (itemIdx !== null && itemIdx === idx) {
-                                        return true;
-                                }
-                        }
+		if (item_code && item.item_code === item_code) {
+			if (idx !== null && idx !== undefined) {
+				const itemIdx = item.idx !== undefined && item.idx !== null ? Number(item.idx) : null;
+				if (itemIdx !== null && itemIdx === idx) {
+					return true;
+				}
+			}
 
-                        const batchMatch = (batch_no || null) === (item.batch_no || null);
-                        const serialMatch = (serial_no || null) === (item.serial_no || null);
+			const batchMatch = (batch_no || null) === (item.batch_no || null);
+			const serialMatch = (serial_no || null) === (item.serial_no || null);
 
-                        if (batchMatch && serialMatch) {
-                                return true;
-                        }
-                }
+			if (batchMatch && serialMatch) {
+				return true;
+			}
+		}
 
-                return false;
-        },
+		return false;
+	},
 
-        _assignManualOverrideValues(item, values = {}) {
-                if (!item || !values) {
-                        return;
-                }
+	_assignManualOverrideValues(item, values = {}) {
+		if (!item || !values) {
+			return;
+		}
 
-                item._manual_rate_set = true;
+		item._manual_rate_set = true;
 
-                if (values.uom) {
-                        item.uom = values.uom;
-                }
-                if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
-                        item.conversion_factor = values.conversion_factor;
-                }
+		if (values.uom) {
+			item.uom = values.uom;
+		}
+		if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
+			item.conversion_factor = values.conversion_factor;
+		}
 
-                if (values.price_list_rate !== undefined) {
-                        item.price_list_rate = values.price_list_rate;
-                }
-                if (values.base_price_list_rate !== undefined) {
-                        item.base_price_list_rate = values.base_price_list_rate;
-                }
-                if (values.rate !== undefined) {
-                        item.rate = values.rate;
-                }
-                if (values.base_rate !== undefined) {
-                        item.base_rate = values.base_rate;
-                }
-                if (values.discount_amount !== undefined) {
-                        item.discount_amount = values.discount_amount;
-                }
-                if (values.base_discount_amount !== undefined) {
-                        item.base_discount_amount = values.base_discount_amount;
-                }
-                if (values.discount_percentage !== undefined) {
-                        item.discount_percentage = values.discount_percentage;
-                }
+		if (values.price_list_rate !== undefined) {
+			item.price_list_rate = values.price_list_rate;
+		}
+		if (values.base_price_list_rate !== undefined) {
+			item.base_price_list_rate = values.base_price_list_rate;
+		}
+		if (values.rate !== undefined) {
+			item.rate = values.rate;
+		}
+		if (values.base_rate !== undefined) {
+			item.base_rate = values.base_rate;
+		}
+		if (values.discount_amount !== undefined) {
+			item.discount_amount = values.discount_amount;
+		}
+		if (values.base_discount_amount !== undefined) {
+			item.base_discount_amount = values.base_discount_amount;
+		}
+		if (values.discount_percentage !== undefined) {
+			item.discount_percentage = values.discount_percentage;
+		}
 
-                if (values.amount !== undefined) {
-                        item.amount = values.amount;
-                } else if (typeof item.qty === "number" && typeof item.rate === "number") {
-                        item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-                }
+		if (values.amount !== undefined) {
+			item.amount = values.amount;
+		} else if (typeof item.qty === "number" && typeof item.rate === "number") {
+			item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+		}
 
-                if (values.base_amount !== undefined) {
-                        item.base_amount = values.base_amount;
-                } else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
-                        item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
-                }
-        },
+		if (values.base_amount !== undefined) {
+			item.base_amount = values.base_amount;
+		} else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
+			item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+		}
+	},
 
-        _applyManualRateOverridesToDoc(doc, overrides) {
-                if (!doc || !Array.isArray(doc.items) || !Array.isArray(overrides) || !overrides.length) {
-                        return;
-                }
+	_applyManualRateOverridesToDoc(doc, overrides) {
+		if (!doc || !Array.isArray(doc.items) || !Array.isArray(overrides) || !overrides.length) {
+			return;
+		}
 
-                const remaining = [...overrides];
+		const remaining = [...overrides];
 
-                doc.items.forEach((item) => {
-                        if (!item || !remaining.length) {
-                                return;
-                        }
+		doc.items.forEach((item) => {
+			if (!item || !remaining.length) {
+				return;
+			}
 
-                        const index = remaining.findIndex((entry) => this._doesManualOverrideMatchItem(entry, item));
-                        if (index === -1) {
-                                return;
-                        }
+			const index = remaining.findIndex((entry) => this._doesManualOverrideMatchItem(entry, item));
+			if (index === -1) {
+				return;
+			}
 
-                        const override = remaining.splice(index, 1)[0];
-                        this._assignManualOverrideValues(item, override.values);
-                });
-        },
+			const override = remaining.splice(index, 1)[0];
+			this._assignManualOverrideValues(item, override.values);
+		});
+	},
 
-        _buildManualOverrideKeyFromItem(item) {
-                if (!item) {
-                        return null;
-                }
+	_buildManualOverrideKeyFromItem(item) {
+		if (!item) {
+			return null;
+		}
 
-                const idx =
-                        item.idx !== undefined && item.idx !== null && !Number.isNaN(Number(item.idx))
-                                ? Number(item.idx)
-                                : null;
+		const idx =
+			item.idx !== undefined && item.idx !== null && !Number.isNaN(Number(item.idx))
+				? Number(item.idx)
+				: null;
 
-                if (!item.name && !item.posa_row_id && !item.item_code) {
-                        return null;
-                }
+		if (!item.name && !item.posa_row_id && !item.item_code) {
+			return null;
+		}
 
-                return {
-                        name: item.name || null,
-                        posa_row_id: item.posa_row_id || null,
-                        item_code: item.item_code || null,
-                        idx,
-                        batch_no: item.batch_no || null,
-                        serial_no: item.serial_no || null,
-                };
-        },
+		return {
+			name: item.name || null,
+			posa_row_id: item.posa_row_id || null,
+			item_code: item.item_code || null,
+			idx,
+			batch_no: item.batch_no || null,
+			serial_no: item.serial_no || null,
+		};
+	},
 
-        _snapshotManualValuesFromDocItems(items) {
-                if (!Array.isArray(items) || !items.length) {
-                        return [];
-                }
+	_snapshotManualValuesFromDocItems(items) {
+		if (!Array.isArray(items) || !items.length) {
+			return [];
+		}
 
-                const EPSILON = 0.000001;
+		const EPSILON = 0.000001;
 
-                return items
-                        .map((item) => {
-                                const keys = this._buildManualOverrideKeyFromItem(item);
-                                if (!keys) {
-                                        return null;
-                                }
+		return items
+			.map((item) => {
+				const keys = this._buildManualOverrideKeyFromItem(item);
+				if (!keys) {
+					return null;
+				}
 
-                                const rate = Number(item?.rate ?? 0);
-                                const priceListRate = Number(item?.price_list_rate ?? rate);
-                                const baseRate = Number(item?.base_rate ?? 0);
-                                const basePriceListRate = Number(item?.base_price_list_rate ?? baseRate);
-                                const discountAmount = Number(item?.discount_amount ?? 0);
-                                const baseDiscountAmount = Number(item?.base_discount_amount ?? 0);
-                                const discountPercentage = Number(item?.discount_percentage ?? 0);
+				const rate = Number(item?.rate ?? 0);
+				const priceListRate = Number(item?.price_list_rate ?? rate);
+				const baseRate = Number(item?.base_rate ?? 0);
+				const basePriceListRate = Number(item?.base_price_list_rate ?? baseRate);
+				const discountAmount = Number(item?.discount_amount ?? 0);
+				const baseDiscountAmount = Number(item?.base_discount_amount ?? 0);
+				const discountPercentage = Number(item?.discount_percentage ?? 0);
 
-                                const preserveRate =
-                                        item?._manual_rate_set === true ||
-                                        Math.abs(rate - priceListRate) > EPSILON ||
-                                        Math.abs(baseRate - basePriceListRate) > EPSILON ||
-                                        Math.abs(discountAmount) > EPSILON ||
-                                        Math.abs(baseDiscountAmount) > EPSILON ||
-                                        Math.abs(discountPercentage) > EPSILON;
+				const preserveRate =
+					item?._manual_rate_set === true ||
+					Math.abs(rate - priceListRate) > EPSILON ||
+					Math.abs(baseRate - basePriceListRate) > EPSILON ||
+					Math.abs(discountAmount) > EPSILON ||
+					Math.abs(baseDiscountAmount) > EPSILON ||
+					Math.abs(discountPercentage) > EPSILON;
 
-                                const preserveUom = Boolean(item?.uom);
+				const preserveUom = Boolean(item?.uom);
 
-                                return {
-                                        keys,
-                                        preserveRate,
-                                        preserveUom,
-                                        values: {
-                                                rate: item.rate,
-                                                base_rate: item.base_rate,
-                                                price_list_rate: item.price_list_rate,
-                                                base_price_list_rate: item.base_price_list_rate,
-                                                discount_amount: item.discount_amount,
-                                                base_discount_amount: item.base_discount_amount,
-                                                discount_percentage: item.discount_percentage,
-                                                amount: item.amount,
-                                                base_amount: item.base_amount,
-                                                conversion_factor: item.conversion_factor,
-                                                uom: item.uom,
-                                        },
-                                };
-                        })
-                        .filter((entry) => entry !== null);
-        },
+				return {
+					keys,
+					preserveRate,
+					preserveUom,
+					values: {
+						rate: item.rate,
+						base_rate: item.base_rate,
+						price_list_rate: item.price_list_rate,
+						base_price_list_rate: item.base_price_list_rate,
+						discount_amount: item.discount_amount,
+						base_discount_amount: item.base_discount_amount,
+						discount_percentage: item.discount_percentage,
+						amount: item.amount,
+						base_amount: item.base_amount,
+						conversion_factor: item.conversion_factor,
+						uom: item.uom,
+					},
+				};
+			})
+			.filter((entry) => entry !== null);
+	},
 
-        _restoreManualSnapshots(items, snapshots) {
-                if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length) {
-                        return;
-                }
+	_restoreManualSnapshots(items, snapshots) {
+		if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length) {
+			return;
+		}
 
-                const remaining = [...snapshots];
+		const remaining = [...snapshots];
 
-                items.forEach((item) => {
-                        if (!item || !remaining.length) {
-                                return;
-                        }
+		items.forEach((item) => {
+			if (!item || !remaining.length) {
+				return;
+			}
 
-                        const index = remaining.findIndex((snapshot) =>
-                                this._doesManualOverrideMatchItem({ keys: snapshot.keys }, item),
-                        );
+			const index = remaining.findIndex((snapshot) =>
+				this._doesManualOverrideMatchItem({ keys: snapshot.keys }, item),
+			);
 
-                        if (index === -1) {
-                                return;
-                        }
+			if (index === -1) {
+				return;
+			}
 
-                        const snapshot = remaining.splice(index, 1)[0];
-                        const values = snapshot.values || {};
+			const snapshot = remaining.splice(index, 1)[0];
+			const values = snapshot.values || {};
 
-                        if (snapshot.preserveRate) {
-                                this._assignManualOverrideValues(item, values);
-                        } else if (snapshot.preserveUom) {
-                                if (values.uom !== undefined) {
-                                        item.uom = values.uom;
-                                }
-                                if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
-                                        item.conversion_factor = values.conversion_factor;
-                                }
+			if (snapshot.preserveRate) {
+				this._assignManualOverrideValues(item, values);
+			} else if (snapshot.preserveUom) {
+				if (values.uom !== undefined) {
+					item.uom = values.uom;
+				}
+				if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
+					item.conversion_factor = values.conversion_factor;
+				}
 
-                                if (values.amount !== undefined) {
-                                        item.amount = values.amount;
-                                } else if (typeof item.qty === "number" && typeof item.rate === "number") {
-                                        item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-                                }
+				if (values.amount !== undefined) {
+					item.amount = values.amount;
+				} else if (typeof item.qty === "number" && typeof item.rate === "number") {
+					item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+				}
 
-                                if (values.base_amount !== undefined) {
-                                        item.base_amount = values.base_amount;
-                                } else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
-                                        item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
-                                }
-                        }
-                });
-        },
+				if (values.base_amount !== undefined) {
+					item.base_amount = values.base_amount;
+				} else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
+					item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+				}
+			}
+		});
+	},
 
-        // Show payment dialog after validation and processing
-        async show_payment() {
-                if (this._suppressClosePaymentsTimer) {
-                        clearTimeout(this._suppressClosePaymentsTimer);
-                        this._suppressClosePaymentsTimer = null;
-                }
-                this._suppressClosePayments = true;
+	// Show payment dialog after validation and processing
+	async show_payment() {
+		if (this._suppressClosePaymentsTimer) {
+			clearTimeout(this._suppressClosePaymentsTimer);
+			this._suppressClosePaymentsTimer = null;
+		}
+		this._suppressClosePayments = true;
 
-                try {
-                        console.log("Starting show_payment process");
-                        console.log("Invoice state before payment:", {
-                                invoiceType: this.invoiceType,
-                                is_return: this.invoice_doc ? this.invoice_doc.is_return : false,
+		try {
+			console.log("Starting show_payment process");
+			console.log("Invoice state before payment:", {
+				invoiceType: this.invoiceType,
+				is_return: this.invoice_doc ? this.invoice_doc.is_return : false,
 				items_count: this.items.length,
 				customer: this.customer,
 			});
@@ -1652,26 +1649,26 @@ export default {
 				console.log("Ensured negative payment amounts for return:", invoice_doc.payments);
 			}
 
-                        console.log("Showing payment dialog with currency:", invoice_doc.currency);
-                        if (typeof this.paymentVisible !== "undefined") {
-                                this.paymentVisible = true;
-                        }
-                        this.eventBus.emit("show_payment", "true");
-                        this.eventBus.emit("send_invoice_doc_payment", invoice_doc);
-                } catch (error) {
-                        console.error("Error in show_payment:", error);
-                        this.eventBus.emit("show_message", {
-                                title: __("Error processing payment"),
-                                color: "error",
-                                message: error.message,
-                        });
-                } finally {
-                        this._suppressClosePaymentsTimer = setTimeout(() => {
-                                this._suppressClosePayments = false;
-                                this._suppressClosePaymentsTimer = null;
-                        }, 300);
-                }
-        },
+			console.log("Showing payment dialog with currency:", invoice_doc.currency);
+			if (typeof this.paymentVisible !== "undefined") {
+				this.paymentVisible = true;
+			}
+			this.eventBus.emit("show_payment", "true");
+			this.eventBus.emit("send_invoice_doc_payment", invoice_doc);
+		} catch (error) {
+			console.error("Error in show_payment:", error);
+			this.eventBus.emit("show_message", {
+				title: __("Error processing payment"),
+				color: "error",
+				message: error.message,
+			});
+		} finally {
+			this._suppressClosePaymentsTimer = setTimeout(() => {
+				this._suppressClosePayments = false;
+				this._suppressClosePaymentsTimer = null;
+			}, 300);
+		}
+	},
 
 	// Validate invoice before payment/submit (return logic, quantity, rates, etc)
 	async validate() {
@@ -1878,21 +1875,21 @@ export default {
 	},
 
 	// Close payment dialog
-        close_payments() {
-                if (this._suppressClosePayments) {
-                        return;
-                }
+	close_payments() {
+		if (this._suppressClosePayments) {
+			return;
+		}
 
-                if (typeof this.paymentVisible !== "undefined" && !this.paymentVisible) {
-                        return;
-                }
+		if (typeof this.paymentVisible !== "undefined" && !this.paymentVisible) {
+			return;
+		}
 
-                if (typeof this.paymentVisible !== "undefined") {
-                        this.paymentVisible = false;
-                }
+		if (typeof this.paymentVisible !== "undefined") {
+			this.paymentVisible = false;
+		}
 
-                this.eventBus.emit("show_payment", "false");
-        },
+		this.eventBus.emit("show_payment", "false");
+	},
 
 	// Update details for all items (fetch from backend)
 	async update_items_details(items) {
@@ -1909,41 +1906,39 @@ export default {
 				},
 			});
 
-                        if (response?.message) {
-                                items.forEach((item) => {
-                                        const updated_item = response.message.find(
-                                                (element) => element.posa_row_id == item.posa_row_id,
-                                        );
-                                        if (updated_item) {
-                                                item.actual_qty = updated_item.actual_qty;
-                                                item.item_uoms = updated_item.item_uoms;
-                                                item.has_batch_no = updated_item.has_batch_no;
-                                                item.has_serial_no = updated_item.has_serial_no;
-                                                item.batch_no_data = updated_item.batch_no_data;
-                                                item.serial_no_data = updated_item.serial_no_data;
-                                                if (updated_item.rate !== undefined) {
-                                                        const force =
-                                                                this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-                                                        const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
-                                                        const manualLocked = item._manual_rate_set === true;
-                                                        const shouldOverrideRate =
-                                                                !item.locked_price &&
-                                                                !item.posa_offer_applied &&
-                                                                !manualLocked;
+			if (response?.message) {
+				items.forEach((item) => {
+					const updated_item = response.message.find(
+						(element) => element.posa_row_id == item.posa_row_id,
+					);
+					if (updated_item) {
+						item.actual_qty = updated_item.actual_qty;
+						item.item_uoms = updated_item.item_uoms;
+						item.has_batch_no = updated_item.has_batch_no;
+						item.has_serial_no = updated_item.has_serial_no;
+						item.batch_no_data = updated_item.batch_no_data;
+						item.serial_no_data = updated_item.serial_no_data;
+						if (updated_item.rate !== undefined) {
+							const force =
+								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
+							const manualLocked = item._manual_rate_set === true;
+							const shouldOverrideRate =
+								!item.locked_price && !item.posa_offer_applied && !manualLocked;
 
-                                                        if (shouldOverrideRate) {
-                                                                if (force || price) {
-                                                                        item.rate = price;
-                                                                        item.price_list_rate = price;
-                                                                }
-                                                        } else if (!item.price_list_rate && (force || price)) {
-                                                                item.price_list_rate = price;
-                                                        }
-                                                }
-                                                if (updated_item.currency) {
-                                                        item.currency = updated_item.currency;
-                                                }
-                                        }
+							if (shouldOverrideRate) {
+								if (force || price) {
+									item.rate = price;
+									item.price_list_rate = price;
+								}
+							} else if (!item.price_list_rate && (force || price)) {
+								item.price_list_rate = price;
+							}
+						}
+						if (updated_item.currency) {
+							item.currency = updated_item.currency;
+						}
+					}
 				});
 			}
 		} catch (error) {
