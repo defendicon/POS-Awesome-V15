@@ -63,17 +63,17 @@
 
 					<!-- Credit Change (if applicable) -->
                                         <v-col cols="5" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
-						<v-text-field
-							variant="solo"
-							color="primary"
-							:label="frappe._('Credit Change')"
-							class="sleek-field pos-themed-input"
-							:model-value="formatCurrency(credit_change)"
-							:prefix="currencySymbol(invoice_doc.currency)"
-							density="compact"
-							type="text"
-							@change="
-								setFormatedCurrency(this, 'credit_change', null, false, $event);
+                                                <v-text-field
+                                                        variant="solo"
+                                                        color="primary"
+                                                        :label="frappe._('Credit Change')"
+                                                        class="sleek-field pos-themed-input"
+                                                        :model-value="formatCurrency(Math.abs(credit_change))"
+                                                        :prefix="currencySymbol(invoice_doc.currency)"
+                                                        density="compact"
+                                                        type="text"
+                                                        @change="
+                                                                setFormatedCurrency(this, 'credit_change', null, false, $event);
 								updateCreditChange(this.credit_change);
 							"
 						></v-text-field>
@@ -2059,12 +2059,25 @@ export default {
 		},
 		// Show credit change info message
                 showCreditChange(value) {
-                        if (value > 0) {
-                                this.credit_change = value;
-                                this.paid_change = Math.max(-this.diff_payment, 0);
+                        const sanitizedValue = this.flt(value || 0, this.currency_precision);
+                        if (sanitizedValue > 0) {
+                                this.updateCreditChange(sanitizedValue);
                         } else {
-                                this.credit_change = 0;
+                                this.updateCreditChange(0);
                         }
+                },
+                updateCreditChange(rawValue) {
+                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        let requestedCredit = this.flt(Math.abs(rawValue) || 0, this.currency_precision);
+
+                        if (requestedCredit > changeLimit) {
+                                requestedCredit = changeLimit;
+                        }
+
+                        const remainingPaidChange = this.flt(changeLimit - requestedCredit, this.currency_precision);
+
+                        this.credit_change = requestedCredit ? -requestedCredit : 0;
+                        this.paid_change = remainingPaidChange;
                 },
 		// Format currency value
 		formatCurrency(value) {
