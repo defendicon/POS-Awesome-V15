@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import nowdate, flt
 from frappe import _
 from erpnext.accounts.party import get_party_bank_account
 from erpnext.accounts.doctype.payment_request.payment_request import (
@@ -326,12 +326,43 @@ def get_available_credit(customer, company):
         ["name", "outstanding_amount", "is_return"],
     )
 
+    allocations = {}
+    invoice_names = [row.name for row in outstanding_invoices]
+    if invoice_names:
+        placeholders = ", ".join(["%s"] * len(invoice_names))
+        payment_allocations = frappe.db.sql(
+            f"""
+                select
+                    per.reference_name,
+                    sum(per.allocated_amount) as allocated_amount
+                from `tabPayment Entry Reference` per
+                inner join `tabPayment Entry` pe on pe.name = per.parent
+                where per.reference_doctype = 'Sales Invoice'
+                    and per.reference_name in ({placeholders})
+                    and pe.docstatus = 1
+                    and pe.payment_type = 'Pay'
+                group by per.reference_name
+            """,
+            invoice_names,
+            as_dict=True,
+        )
+
+        allocations = {
+            row.reference_name: flt(row.allocated_amount) for row in payment_allocations
+        }
+
     for row in outstanding_invoices:
         outstanding_amount = -(row.outstanding_amount)
+        cash_paid = allocations.get(row.name, 0)
+        remaining_credit = flt(outstanding_amount - cash_paid)
+
+        if remaining_credit <= 0:
+            continue
+
         row = {
             "type": "Invoice",
             "credit_origin": row.name,
-            "total_credit": outstanding_amount,
+            "total_credit": remaining_credit,
             "credit_to_redeem": 0,
             "source_type": "Sales Return" if row.is_return else "Sales Invoice",
         }
