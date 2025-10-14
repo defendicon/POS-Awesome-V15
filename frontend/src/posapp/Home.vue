@@ -65,7 +65,7 @@ import {
 	isOffline,
 	getLastSyncTotals,
 } from "../offline/index.js";
-import { silentPrint } from "./plugins/print.js";
+import { silentPrint, watchPrintWindow } from "./plugins/print.js";
 import {
 	setupNetworkListeners,
 	checkNetworkConnectivity,
@@ -363,19 +363,14 @@ export default {
 				"&no_letterhead=" +
 				letter_head;
 
-			if (this.posProfile.posa_silent_print) {
-				silentPrint(url);
-			} else {
-				const printWindow = window.open(url, "Print");
-				printWindow.addEventListener(
-					"load",
-					function () {
-						printWindow.print();
-					},
-					{ once: true },
-				);
-			}
-		},
+                        const printOptions = {};
+                        if (this.posProfile.posa_silent_print) {
+                                silentPrint(url, printOptions);
+                        } else {
+                                const printWindow = window.open(url, "Print");
+                                watchPrintWindow(printWindow, printOptions);
+                        }
+                },
 
 		async handleSyncInvoices() {
 			const pending = getPendingOfflineInvoiceCount();
