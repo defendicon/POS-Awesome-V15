@@ -388,7 +388,7 @@ import {
 	getCustomerStorage,
 	getOfflineCustomers,
 } from "../../../offline/index.js";
-import { silentPrint } from "../../plugins/print.js";
+import { silentPrint, watchPrintWindow } from "../../plugins/print.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
@@ -1100,12 +1100,14 @@ export default {
 
 			console.log("Opening printing URL:", url);
 
-			if (this.pos_profile?.posa_silent_print) {
-				silentPrint(url);
-			} else {
-				window.open(url, "_blank");
-			}
-		},
+                        const printOptions = {};
+                        if (this.pos_profile?.posa_silent_print) {
+                                silentPrint(url, printOptions);
+                        } else {
+                                const printWindow = window.open(url, "_blank");
+                                watchPrintWindow(printWindow, printOptions);
+                        }
+                },
 
 		async syncPendingPayments() {
 			const pending = getPendingOfflinePaymentCount();
