@@ -61,27 +61,112 @@ export default {
 		bucket[taskName] = trackedPromise;
 		return trackedPromise;
 	},
-	resetItemTaskCache(rowId, taskName = null) {
-		if (!this._itemTaskCache) {
-			return;
-		}
-		if (!rowId) {
-			this._itemTaskCache = new Map();
-			return;
-		}
-		if (taskName === null) {
-			this._itemTaskCache.delete(rowId);
-			return;
-		}
-		const bucket = this._itemTaskCache.get(rowId);
-		if (!bucket) {
-			return;
-		}
-		delete bucket[taskName];
-		if (!Object.keys(bucket).length) {
-			this._itemTaskCache.delete(rowId);
-		}
-	},
+        resetItemTaskCache(rowId, taskName = null) {
+                if (!this._itemTaskCache) {
+                        return;
+                }
+                if (!rowId) {
+                        this._itemTaskCache = new Map();
+                        return;
+                }
+                if (taskName === null) {
+                        this._itemTaskCache.delete(rowId);
+                        return;
+                }
+                const bucket = this._itemTaskCache.get(rowId);
+                if (!bucket) {
+                        return;
+                }
+                delete bucket[taskName];
+                if (!Object.keys(bucket).length) {
+                        this._itemTaskCache.delete(rowId);
+                }
+        },
+        getDiscountBaseAmount() {
+                const total = flt(this.Total || 0);
+                if (!total) {
+                        return 0;
+                }
+
+                const baseTotal = this.isReturnInvoice ? Math.abs(total) : total;
+
+                const applyDiscountOn =
+                        (this.invoice_doc && this.invoice_doc.apply_discount_on) ||
+                        (this.pos_profile && this.pos_profile.apply_discount_on) ||
+                        "Net Total";
+
+                const applyOnNet =
+                        typeof applyDiscountOn === "string" && applyDiscountOn.toLowerCase().includes("net");
+
+                if (!applyOnNet) {
+                        return baseTotal;
+                }
+
+                const docNet = this.invoice_doc && this.invoice_doc.net_total;
+                if (docNet) {
+                        const normalizedNet = this.isReturnInvoice ? Math.abs(flt(docNet)) : flt(docNet);
+                        if (normalizedNet) {
+                                return normalizedNet;
+                        }
+                }
+
+                let includedTax = 0;
+                const taxes = this.invoice_doc && Array.isArray(this.invoice_doc.taxes) ? this.invoice_doc.taxes : [];
+                if (taxes.length) {
+                        taxes.forEach((tax) => {
+                                if (!tax) {
+                                        return;
+                                }
+                                const included =
+                                        tax.included_in_print_rate ||
+                                        (!!(this.pos_profile && this.pos_profile.posa_tax_inclusive) &&
+                                                tax.charge_type !== "Actual");
+                                if (!included) {
+                                        return;
+                                }
+                                const taxAmount = flt(tax.tax_amount || 0);
+                                if (taxAmount) {
+                                        includedTax += Math.abs(taxAmount);
+                                }
+                        });
+                }
+
+                if (
+                        !includedTax &&
+                        ((this.pos_profile && this.pos_profile.posa_tax_inclusive) || getTaxInclusiveSetting())
+                ) {
+                        const templateName = this.pos_profile && this.pos_profile.taxes_and_charges;
+                        if (templateName) {
+                                const template = getTaxTemplate(templateName);
+                                if (template && Array.isArray(template.taxes)) {
+                                        let cumulativeRate = 0;
+                                        template.taxes.forEach((row) => {
+                                                if (!row) {
+                                                        return;
+                                                }
+                                                const chargeType = row.charge_type || "On Net Total";
+                                                if (chargeType === "Actual") {
+                                                        return;
+                                                }
+                                                const rate = flt(row.rate ?? row.tax_rate ?? 0);
+                                                if (rate) {
+                                                        cumulativeRate += rate;
+                                                }
+                                        });
+                                        if (cumulativeRate) {
+                                                includedTax = (baseTotal * cumulativeRate) / (100 + cumulativeRate);
+                                        }
+                                }
+                        }
+                }
+
+                const base = baseTotal - includedTax;
+                if (base > 0) {
+                        return flt(base, this.currency_precision || 2);
+                }
+
+                return baseTotal;
+        },
 	queueItemTask(itemOrRowId, taskName, taskFn, options = {}) {
 		const rowId = typeof itemOrRowId === "string" ? itemOrRowId : itemOrRowId?.posa_row_id;
 		const { force = false } = options;
@@ -593,13 +678,31 @@ export default {
 		let discountAmount = flt(this.additional_discount);
 		if (isReturn && discountAmount > 0) discountAmount = -Math.abs(discountAmount);
 
-		doc.discount_amount = discountAmount;
-		doc.base_discount_amount = discountAmount * (this.exchange_rate || 1);
+                doc.discount_amount = discountAmount;
+                doc.base_discount_amount = discountAmount * (this.exchange_rate || 1);
 
-		let discountPercentage = flt(this.additional_discount_percentage);
-		if (isReturn && discountPercentage > 0) discountPercentage = -Math.abs(discountPercentage);
+                const baseForDiscount =
+                        typeof this.getDiscountBaseAmount === "function"
+                                ? this.getDiscountBaseAmount()
+                                : this.Total;
+                let discountPercentage = 0;
+                const normalizedBase = Math.abs(flt(baseForDiscount));
+                const normalizedAmount = Math.abs(discountAmount);
+                if (normalizedBase) {
+                        discountPercentage = (normalizedAmount / normalizedBase) * 100;
+                }
+                if (isReturn && discountPercentage > 0) {
+                        discountPercentage = -Math.abs(discountPercentage);
+                }
 
-		doc.additional_discount_percentage = discountPercentage;
+                doc.additional_discount_percentage = discountPercentage;
+
+                const applyDiscountOn =
+                        (this.invoice_doc && this.invoice_doc.apply_discount_on) ||
+                        (this.pos_profile && this.pos_profile.apply_discount_on);
+                if (applyDiscountOn) {
+                        doc.apply_discount_on = applyDiscountOn;
+                }
 
 		// Calculate grand total with correct sign for returns
 		let grandTotal = this.subtotal;
