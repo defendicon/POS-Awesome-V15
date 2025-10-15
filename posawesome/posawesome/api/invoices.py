@@ -70,11 +70,30 @@ def _get_available_stock(item):
     return get_stock_availability(item_code, warehouse)
 
 
+def _is_stock_item(item):
+    """Return True when the provided row represents a stock item."""
+
+    if item is None:
+        return False
+
+    flag = item.get("is_stock_item")
+    if flag is not None:
+        return bool(cint(flag))
+
+    item_code = item.get("item_code")
+    if not item_code:
+        return False
+
+    return bool(cint(frappe.get_cached_value("Item", item_code, "is_stock_item") or 0))
+
+
 def _collect_stock_errors(items):
     """Return list of items exceeding available stock."""
     errors = []
     for d in items:
         if flt(d.get("qty")) < 0:
+            continue
+        if not _is_stock_item(d):
             continue
         available = _get_available_stock(d)
         requested = flt(d.get("stock_qty") or (flt(d.get("qty")) * flt(d.get("conversion_factor") or 1)))
