@@ -2341,87 +2341,156 @@ export default {
 		}
 	},
 
-	// Apply cached price list rates to existing invoice items
-	async apply_cached_price_list(price_list) {
-		const cached = await getCachedPriceListItems(price_list);
-		if (!Array.isArray(cached) || !cached.length) {
+	_applyPriceListRate(item, newRate, priceCurrency) {
+		if (!item) {
 			return;
 		}
 
-		const map = {};
-		cached.forEach((ci) => {
-			map[ci.item_code] = ci;
-		});
+		const rate = Number.isFinite(Number(newRate)) ? Number(newRate) : 0;
+		const resolvedCurrency = priceCurrency || this.selected_currency;
+		const manualOverride = item._manual_rate_set === true;
+		const companyCurrency = this.pos_profile?.currency;
 
-		this.items.forEach((item) => {
-			const ci = map[item.item_code];
-			if (!ci) return;
+		if (!item.original_currency) {
+			item.original_currency = resolvedCurrency;
+		}
+		if (item.original_rate === undefined || item.original_rate === null) {
+			item.original_rate = rate;
+		}
 
-			const newRate = ci.rate || ci.price_list_rate;
-			const priceCurrency = ci.currency || this.selected_currency;
-
-			if (!item.original_currency) {
-				item.original_currency = priceCurrency;
-			}
-			if (!item.original_rate) {
-				item.original_rate = newRate;
-			}
-
-			if (priceCurrency === this.selected_currency) {
-				const companyCurrency = this.pos_profile.currency;
-				if (priceCurrency !== companyCurrency) {
-					const conv = this.conversion_rate || 1;
-					item.base_price_list_rate = newRate * conv;
-					if (!item._manual_rate_set) {
-						item.base_rate = newRate * conv;
-					}
-				} else {
-					item.base_price_list_rate = newRate;
-					if (!item._manual_rate_set) {
-						item.base_rate = newRate;
-					}
-				}
-				item.price_list_rate = newRate;
-				if (!item._manual_rate_set) {
-					item.rate = newRate;
+		if (resolvedCurrency === this.selected_currency) {
+			if (resolvedCurrency !== companyCurrency) {
+				const conv = this.conversion_rate || 1;
+				item.base_price_list_rate = rate * conv;
+				if (!manualOverride) {
+					item.base_rate = rate * conv;
 				}
 			} else {
-				// Rate in base currency
-				if (newRate !== 0 || !item.base_price_list_rate) {
-					item.base_price_list_rate = newRate;
-					if (!item._manual_rate_set) {
-						item.base_rate = newRate;
-					}
+				item.base_price_list_rate = rate;
+				if (!manualOverride) {
+					item.base_rate = rate;
 				}
-
-				const baseCurrency = this.pos_profile.currency;
-				if (this.selected_currency !== baseCurrency) {
-					const conv = this.exchange_rate || 1;
-					const convRate = this.flt(newRate * conv, this.currency_precision);
-					if (newRate !== 0 || !item.price_list_rate) {
-						item.price_list_rate = convRate;
-					}
-					if (!item._manual_rate_set && (newRate !== 0 || !item.rate)) {
-						item.rate = convRate;
-					}
-				} else {
-					if (newRate !== 0 || !item.price_list_rate) {
-						item.price_list_rate = newRate;
-					}
-					if (!item._manual_rate_set && (newRate !== 0 || !item.rate)) {
-						item.rate = newRate;
-					}
+			}
+			item.price_list_rate = rate;
+			if (!manualOverride) {
+				item.rate = rate;
+			}
+		} else {
+			if (rate !== 0 || !item.base_price_list_rate) {
+				item.base_price_list_rate = rate;
+				if (!manualOverride) {
+					item.base_rate = rate;
 				}
 			}
 
-			// Recalculate final amounts
-			item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-			item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
-		});
+			if (this.selected_currency !== companyCurrency) {
+				const conv = this.exchange_rate || 1;
+				const converted = this.flt(rate * conv, this.currency_precision);
+				if (rate !== 0 || !item.price_list_rate) {
+					item.price_list_rate = converted;
+				}
+				if (!manualOverride && (rate !== 0 || !item.rate)) {
+					item.rate = converted;
+				}
+			} else {
+				if (rate !== 0 || !item.price_list_rate) {
+					item.price_list_rate = rate;
+				}
+				if (!manualOverride && (rate !== 0 || !item.rate)) {
+					item.rate = rate;
+				}
+			}
+		}
 
-		this.$forceUpdate();
+		if (typeof item.qty === "number" && typeof item.rate === "number") {
+			item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+		}
+		if (typeof item.qty === "number" && typeof item.base_rate === "number") {
+			item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+		}
 	},
 
+	// Apply cached price list rates to existing invoice items
+	async apply_cached_price_list(price_list) {
+		const targetPriceList = price_list || this.pos_profile?.selling_price_list;
+		const cached = targetPriceList ? await getCachedPriceListItems(targetPriceList) : null;
+
+		const fallbackItems = [];
+
+		if (Array.isArray(this.items)) {
+			if (Array.isArray(cached) && cached.length) {
+				const priceMap = new Map();
+				cached.forEach((row) => {
+					if (row && row.item_code) {
+						priceMap.set(row.item_code, row);
+					}
+				});
+
+				this.items.forEach((item) => {
+					if (!item || !item.item_code) {
+						return;
+					}
+					const row = priceMap.get(item.item_code);
+					if (row) {
+						const rate = row.rate ?? row.price_list_rate ?? 0;
+						const currency = row.currency || this.selected_currency;
+						this._applyPriceListRate(item, rate, currency);
+					} else {
+						fallbackItems.push(item);
+					}
+				});
+			} else {
+				fallbackItems.push(...this.items);
+			}
+		}
+
+		if (fallbackItems.length && !isOffline() && targetPriceList) {
+			try {
+				const response = await frappe.call({
+					method: "posawesome.posawesome.api.items.get_items_details",
+					args: {
+						pos_profile: JSON.stringify(this.pos_profile),
+						items_data: JSON.stringify(fallbackItems),
+						price_list: targetPriceList,
+					},
+				});
+
+				const details = response?.message;
+				if (Array.isArray(details) && details.length) {
+					const detailMap = new Map();
+					details.forEach((detail) => {
+						if (!detail) {
+							return;
+						}
+						const key = detail.posa_row_id || detail.item_code;
+						if (key) {
+							detailMap.set(key, detail);
+						}
+					});
+
+					fallbackItems.forEach((item) => {
+						if (!item) {
+							return;
+						}
+						const key = item.posa_row_id || item.item_code;
+						const detail = detailMap.get(key);
+						if (!detail) {
+							return;
+						}
+						const rate = detail.price_list_rate ?? detail.rate ?? 0;
+						const currency = detail.currency || detail.price_list_currency || this.selected_currency;
+						this._applyPriceListRate(item, rate, currency);
+					});
+				}
+			} catch (error) {
+				console.error("Failed to refresh price list rates for invoice items", error);
+			}
+		}
+
+		if (typeof this.$forceUpdate === "function") {
+			this.$forceUpdate();
+		}
+	},
 	// Update additional discount amount based on percentage
 	update_discount_umount() {
 		return updateDiscountAmount(this);
