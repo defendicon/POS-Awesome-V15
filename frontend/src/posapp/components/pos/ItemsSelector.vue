@@ -3578,9 +3578,14 @@ export default {
 			this.couponsCount = data.couponsCount;
 			this.appliedCouponsCount = data.appliedCouponsCount;
 		});
-		this.eventBus.on("update_customer_price_list", (data) => {
-			this.customer_price_list = data;
-		});
+                this.eventBus.on("update_customer_price_list", (data) => {
+                        const fallback = this.pos_profile?.selling_price_list || null;
+                        if (data === null || data === undefined) {
+                                this.customer_price_list = fallback;
+                                return;
+                        }
+                        this.customer_price_list = data;
+                });
 		this.eventBus.on("focus_item_search", () => {
 			this.focusItemSearch();
 		});

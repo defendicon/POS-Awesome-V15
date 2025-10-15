@@ -2256,39 +2256,37 @@ export default {
 		var vm = this;
 		if (!this.customer) return;
 
-		if (isOffline()) {
-			try {
-				const list = await getCustomerStorage();
-				const cached = (list || []).find(
-					(c) => c.name === vm.customer || c.customer_name === vm.customer,
-				);
-				if (cached) {
-					vm.customer_info = { ...cached };
-					if (
-						vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
-						cached.customer_price_list
-					) {
-						vm.selected_price_list = cached.customer_price_list;
-						vm.eventBus.emit("update_customer_price_list", cached.customer_price_list);
-						vm.apply_cached_price_list(cached.customer_price_list);
-					}
-					return;
-				}
-				const queued = (getOfflineCustomers() || [])
-					.map((e) => e.args)
-					.find((c) => c.customer_name === vm.customer);
-				if (queued) {
-					vm.customer_info = { ...queued, name: queued.customer_name };
-					if (
-						vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
-						queued.customer_price_list
-					) {
-						vm.selected_price_list = queued.customer_price_list;
-						vm.eventBus.emit("update_customer_price_list", queued.customer_price_list);
-						vm.apply_cached_price_list(queued.customer_price_list);
-					}
-					return;
-				}
+                if (isOffline()) {
+                        try {
+                                const list = await getCustomerStorage();
+                                const cached = (list || []).find(
+                                        (c) => c.name === vm.customer || c.customer_name === vm.customer,
+                                );
+                                if (cached) {
+                                        vm.customer_info = { ...cached };
+                                        if (vm.pos_profile.posa_force_price_from_customer_price_list !== false) {
+                                                const defaultPriceList = vm.pos_profile?.selling_price_list || null;
+                                                const resolvedPriceList = cached.customer_price_list || defaultPriceList;
+                                                vm.selected_price_list = resolvedPriceList;
+                                                vm.eventBus.emit("update_customer_price_list", resolvedPriceList);
+                                                vm.apply_cached_price_list(resolvedPriceList);
+                                        }
+                                        return;
+                                }
+                                const queued = (getOfflineCustomers() || [])
+                                        .map((e) => e.args)
+                                        .find((c) => c.customer_name === vm.customer);
+                                if (queued) {
+                                        vm.customer_info = { ...queued, name: queued.customer_name };
+                                        if (vm.pos_profile.posa_force_price_from_customer_price_list !== false) {
+                                                const defaultPriceList = vm.pos_profile?.selling_price_list || null;
+                                                const resolvedPriceList = queued.customer_price_list || defaultPriceList;
+                                                vm.selected_price_list = resolvedPriceList;
+                                                vm.eventBus.emit("update_customer_price_list", resolvedPriceList);
+                                                vm.apply_cached_price_list(resolvedPriceList);
+                                        }
+                                        return;
+                                }
 			} catch (error) {
 				console.error("Failed to fetch cached customer", error);
 			}
@@ -2310,18 +2308,17 @@ export default {
 			// When force reload is enabled, automatically switch to the
 			// customer's default price list so that item rates are fetched
 			// correctly from the server.
-			if (
-				vm.pos_profile.posa_force_price_from_customer_price_list !== false &&
-				message.customer_price_list
-			) {
-				vm.selected_price_list = message.customer_price_list;
-				vm.eventBus.emit("update_customer_price_list", message.customer_price_list);
-				vm.apply_cached_price_list(message.customer_price_list);
-			}
-		} catch (error) {
-			console.error("Failed to fetch customer details", error);
-		}
-	},
+                        if (vm.pos_profile.posa_force_price_from_customer_price_list !== false) {
+                                const defaultPriceList = vm.pos_profile?.selling_price_list || null;
+                                const resolvedPriceList = message.customer_price_list || defaultPriceList;
+                                vm.selected_price_list = resolvedPriceList;
+                                vm.eventBus.emit("update_customer_price_list", resolvedPriceList);
+                                vm.apply_cached_price_list(resolvedPriceList);
+                        }
+                } catch (error) {
+                        console.error("Failed to fetch customer details", error);
+                }
+        },
 
 	// Get price list for current customer
 	get_price_list() {
@@ -2331,15 +2328,16 @@ export default {
 	},
 
 	// Update price list for customer
-	update_price_list() {
-		// Only set the POS Profile price list if it has changed
-		const price_list = this.pos_profile.selling_price_list;
-		if (this.selected_price_list !== price_list) {
-			this.selected_price_list = price_list;
-			// Clear any customer specific price list to avoid reloading items
-			this.eventBus.emit("update_customer_price_list", null);
-		}
-	},
+        update_price_list() {
+                const price_list = this.pos_profile?.selling_price_list || null;
+                const hasChanged = this.selected_price_list !== price_list;
+                if (hasChanged) {
+                        this.selected_price_list = price_list;
+                } else if (this.selected_price_list === undefined) {
+                        this.selected_price_list = price_list;
+                }
+                this.eventBus.emit("update_customer_price_list", price_list);
+        },
 
 	_applyPriceListRate(item, newRate, priceCurrency) {
 		if (!item) {
