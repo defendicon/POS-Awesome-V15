@@ -549,11 +549,27 @@ export default {
 		doc.conversion_rate = (sourceDoc && sourceDoc.conversion_rate) || this.conversion_rate || 1;
 
 		// Use actual price list currency if available
-		doc.price_list_currency = this.price_list_currency || doc.currency;
+                doc.price_list_currency = this.price_list_currency || doc.currency;
 
-		doc.plc_conversion_rate =
-			(sourceDoc && sourceDoc.plc_conversion_rate) ||
-			(doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
+                doc.plc_conversion_rate =
+                        (sourceDoc && sourceDoc.plc_conversion_rate) ||
+                        (doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
+
+                const applyDiscountOn = (
+                        doc.apply_discount_on ||
+                        sourceDoc.apply_discount_on ||
+                        this.pos_profile?.apply_discount_on ||
+                        this.pos_profile?.posa_apply_discount_on ||
+                        ""
+                )
+                        .toString()
+                        .trim();
+
+                if (applyDiscountOn) {
+                        doc.apply_discount_on = applyDiscountOn;
+                } else {
+                        doc.apply_discount_on = "Grand Total";
+                }
 
 		// Other fields
 		doc.campaign = doc.campaign || this.pos_profile.campaign;
@@ -2422,10 +2438,85 @@ export default {
 		this.$forceUpdate();
 	},
 
-	// Update additional discount amount based on percentage
-	update_discount_umount() {
-		return updateDiscountAmount(this);
-	},
+        // Update additional discount amount based on percentage
+        update_discount_umount() {
+                return updateDiscountAmount(this);
+        },
+
+        // Determine the amount that should be used when calculating additional discounts
+        get_discount_base_amount() {
+                let baseAmount = this.flt(this.Total || 0, this.currency_precision);
+
+                if (!baseAmount) {
+                        return 0;
+                }
+
+                const applyDiscountOn = (
+                        (this.invoice_doc && this.invoice_doc.apply_discount_on) ||
+                        this.pos_profile?.apply_discount_on ||
+                        this.pos_profile?.posa_apply_discount_on ||
+                        ""
+                )
+                        .toString()
+                        .toLowerCase();
+
+                if (applyDiscountOn !== "net total") {
+                        return baseAmount;
+                }
+
+                let inclusiveTax = 0;
+
+                if (Array.isArray(this.invoice_doc?.taxes) && this.invoice_doc.taxes.length) {
+                        inclusiveTax = this.invoice_doc.taxes.reduce((sum, tax) => {
+                                if (tax && (tax.included_in_print_rate || tax.included_in_print_rate === 1)) {
+                                        return sum + this.flt(tax.tax_amount || 0, this.currency_precision);
+                                }
+                                return sum;
+                        }, 0);
+                } else {
+                        const inclusiveSetting =
+                                (Array.isArray(this.invoice_doc?.taxes) &&
+                                        this.invoice_doc.taxes.some((tax) => tax?.included_in_print_rate)) ||
+                                this.pos_profile?.posa_tax_inclusive ||
+                                getTaxInclusiveSetting();
+
+                        if (inclusiveSetting) {
+                                const templateName = this.pos_profile?.taxes_and_charges;
+                                if (templateName) {
+                                        const template = getTaxTemplate(templateName);
+                                        if (template && Array.isArray(template.taxes)) {
+                                                template.taxes.forEach((row) => {
+                                                        if (!row) {
+                                                                return;
+                                                        }
+
+                                                        if (row.charge_type === "Actual") {
+                                                                if (row.included_in_print_rate) {
+                                                                        inclusiveTax += this.flt(row.tax_amount || 0, this.currency_precision);
+                                                                }
+                                                                return;
+                                                        }
+
+                                                        const rate = this.flt(row.rate || 0, this.float_precision);
+                                                        if (!rate) {
+                                                                return;
+                                                        }
+
+                                                        if (row.included_in_print_rate || inclusiveSetting) {
+                                                                inclusiveTax += this.flt(
+                                                                        (baseAmount * rate) / (100 + rate),
+                                                                        this.currency_precision,
+                                                                );
+                                                        }
+                                                });
+                                        }
+                                }
+                        }
+                }
+
+                const adjusted = this.flt(baseAmount - inclusiveTax, this.currency_precision);
+                return adjusted > 0 ? adjusted : 0;
+        },
 
 	// Calculate prices and discounts for an item based on field change
 	calc_prices(item, value, $event) {

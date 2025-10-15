@@ -175,17 +175,23 @@ export default {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
 	},
 	// Watch for additional discount and update percentage accordingly
-	additional_discount() {
-		if (!this.additional_discount || this.additional_discount == 0) {
-			this.additional_discount_percentage = 0;
-		} else if (this.pos_profile.posa_use_percentage_discount) {
-			// Prevent division by zero which causes NaN
-			if (this.Total && this.Total !== 0) {
-				this.additional_discount_percentage = (this.additional_discount / this.Total) * 100;
-			} else {
-				this.additional_discount_percentage = 0;
-			}
-		} else {
+        additional_discount() {
+                if (!this.additional_discount || this.additional_discount == 0) {
+                        this.additional_discount_percentage = 0;
+                } else if (this.pos_profile.posa_use_percentage_discount) {
+                        // Prevent division by zero which causes NaN
+                        const baseAmount =
+                                typeof this.get_discount_base_amount === "function"
+                                        ? this.get_discount_base_amount()
+                                        : this.Total;
+
+                        if (baseAmount && baseAmount !== 0) {
+                                this.additional_discount_percentage =
+                                        (this.additional_discount / baseAmount) * 100;
+                        } else {
+                                this.additional_discount_percentage = 0;
+                        }
+                } else {
 			this.additional_discount_percentage = 0;
 		}
 	},

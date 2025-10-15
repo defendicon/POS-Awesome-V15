@@ -11,12 +11,18 @@ export function useDiscounts() {
 			return;
 		}
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
+                // Determine the base amount for calculating the discount
+                const baseAmount =
+                        typeof context.get_discount_base_amount === "function"
+                                ? context.get_discount_base_amount()
+                                : context.Total;
+
+                // Calculate discount amount based on percentage
+                if (baseAmount && baseAmount !== 0) {
+                        context.additional_discount = (baseAmount * value) / 100;
+                } else {
+                        context.additional_discount = 0;
+                }
 	};
 
 	// Calculate prices and discounts for an item based on field change
