@@ -540,9 +540,12 @@ export default {
 		}
 		doc.is_pos = 1;
 		doc.ignore_pricing_rule = 1;
-		doc.company = doc.company || this.pos_profile.company;
-		doc.pos_profile = doc.pos_profile || this.pos_profile.name;
-		doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
+                doc.company = doc.company || this.pos_profile.company;
+                doc.pos_profile = doc.pos_profile || this.pos_profile.name;
+                doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
+                if (!doc.apply_discount_on && this.pos_profile?.apply_discount_on) {
+                        doc.apply_discount_on = this.pos_profile.apply_discount_on;
+                }
 
 		// Currency related fields
 		doc.currency = this.selected_currency || this.pos_profile.currency;
