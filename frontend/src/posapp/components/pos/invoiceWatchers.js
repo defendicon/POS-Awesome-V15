@@ -175,8 +175,12 @@ export default {
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
 	},
-	// Watch for additional discount and update percentage accordingly
+        // Watch for additional discount and update percentage accordingly
         additional_discount() {
+                if (this._updatingAdditionalDiscountFromPercentage) {
+                        return;
+                }
+
                 const discount = flt(this.additional_discount);
 
                 if (!discount) {
@@ -189,14 +193,24 @@ export default {
                         return;
                 }
 
+                const currencyPrecision = this.currency_precision ?? 2;
                 const base = getAdditionalDiscountBase(this);
 
-                if (!base) {
+                const baseMagnitude = Math.abs(flt(base, currencyPrecision));
+
+                if (!baseMagnitude) {
                         this.additional_discount_percentage = 0;
                         return;
                 }
 
-                this.additional_discount_percentage = (discount / base) * 100;
+                const discountMagnitude = Math.abs(discount);
+                const sign = discount === 0 ? 0 : discount > 0 ? 1 : -1;
+                const percentage = flt(
+                        (discountMagnitude / baseMagnitude) * 100,
+                        this.float_precision ?? 3,
+                );
+
+                this.additional_discount_percentage = sign >= 0 ? percentage : -percentage;
         },
 	// Keep display date in sync with posting_date
 	posting_date: {

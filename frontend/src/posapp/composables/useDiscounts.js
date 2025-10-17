@@ -62,21 +62,39 @@ export function useDiscounts() {
         // Update additional discount amount based on percentage
         const updateDiscountAmount = (context) => {
                 const value = flt(context.additional_discount_percentage);
+                const setAdditionalDiscount = (amount) => {
+                        context._updatingAdditionalDiscountFromPercentage = true;
+                        try {
+                                context.additional_discount = amount;
+                        } finally {
+                                context._updatingAdditionalDiscountFromPercentage = false;
+                        }
+                };
                 // If value is too large, reset to 0
                 if (value < -100 || value > 100) {
-			context.additional_discount_percentage = 0;
-			context.additional_discount = 0;
-			return;
-		}
-
-                const base = getAdditionalDiscountBase(context);
-
-                if (!base) {
-                        context.additional_discount = 0;
+                        context.additional_discount_percentage = 0;
+                        setAdditionalDiscount(0);
                         return;
                 }
 
-                context.additional_discount = (base * value) / 100;
+                const precision = context.currency_precision ?? 2;
+                const base = getAdditionalDiscountBase(context);
+
+                const baseMagnitude = Math.abs(flt(base, precision));
+
+                if (!baseMagnitude) {
+                        setAdditionalDiscount(0);
+                        return;
+                }
+
+                const percentageMagnitude = Math.abs(value);
+                const sign = value === 0 ? 0 : value > 0 ? 1 : -1;
+                const amount = flt(
+                        (baseMagnitude * percentageMagnitude) / 100,
+                        precision,
+                );
+
+                setAdditionalDiscount(sign >= 0 ? amount : -amount);
         };
 
 	// Calculate prices and discounts for an item based on field change
