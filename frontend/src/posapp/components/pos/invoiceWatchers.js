@@ -1,6 +1,7 @@
 import { clearPriceListCache } from "../../../offline/index.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
-/* global frappe */
+import { getAdditionalDiscountBase } from "../../composables/useDiscounts.js";
+/* global frappe, flt */
 
 const buildSnapshot = (items) => {
 	const snapshot = {
@@ -175,20 +176,28 @@ export default {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
 	},
 	// Watch for additional discount and update percentage accordingly
-	additional_discount() {
-		if (!this.additional_discount || this.additional_discount == 0) {
-			this.additional_discount_percentage = 0;
-		} else if (this.pos_profile.posa_use_percentage_discount) {
-			// Prevent division by zero which causes NaN
-			if (this.Total && this.Total !== 0) {
-				this.additional_discount_percentage = (this.additional_discount / this.Total) * 100;
-			} else {
-				this.additional_discount_percentage = 0;
-			}
-		} else {
-			this.additional_discount_percentage = 0;
-		}
-	},
+        additional_discount() {
+                const discount = flt(this.additional_discount);
+
+                if (!discount) {
+                        this.additional_discount_percentage = 0;
+                        return;
+                }
+
+                if (!this.pos_profile.posa_use_percentage_discount) {
+                        this.additional_discount_percentage = 0;
+                        return;
+                }
+
+                const base = getAdditionalDiscountBase(this);
+
+                if (!base) {
+                        this.additional_discount_percentage = 0;
+                        return;
+                }
+
+                this.additional_discount_percentage = (discount / base) * 100;
+        },
 	// Keep display date in sync with posting_date
 	posting_date: {
 		handler(newVal) {

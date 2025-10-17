@@ -1,23 +1,83 @@
 /* global __, flt */
 
+export const getAdditionalDiscountBase = (context) => {
+        if (!context) {
+                return 0;
+        }
+
+        const precision = context.currency_precision;
+        const doc = context.invoice_doc || {};
+        const discountAmount = flt(
+                context.additional_discount ?? doc.discount_amount ?? 0,
+                precision,
+        );
+
+        const applyOn =
+                doc.apply_discount_on ||
+                context.apply_discount_on ||
+                context.pos_profile?.apply_discount_on ||
+                null;
+
+        const hasValue = (value) => value !== undefined && value !== null;
+        const toCurrency = (value) => flt(value || 0, precision);
+
+        let base;
+
+        if (applyOn === "Net Total") {
+                if (hasValue(doc.net_total)) {
+                        base = toCurrency(doc.net_total) + discountAmount;
+                } else if (hasValue(context.net_total)) {
+                        base = toCurrency(context.net_total) + discountAmount;
+                }
+        } else if (applyOn === "Grand Total") {
+                if (hasValue(doc.grand_total)) {
+                        base = toCurrency(doc.grand_total) + discountAmount;
+                } else if (hasValue(doc.total)) {
+                        base = toCurrency(doc.total) + discountAmount;
+                } else if (hasValue(context.subtotal)) {
+                        base = toCurrency(context.subtotal) + discountAmount;
+                }
+        }
+
+        if (base === undefined) {
+                if (hasValue(context.Total)) {
+                        base = toCurrency(context.Total);
+                } else if (hasValue(doc.total)) {
+                        base = toCurrency(doc.total) + discountAmount;
+                } else if (hasValue(doc.grand_total)) {
+                        base = toCurrency(doc.grand_total) + discountAmount;
+                } else if (hasValue(doc.net_total)) {
+                        base = toCurrency(doc.net_total) + discountAmount;
+                } else if (hasValue(context.subtotal)) {
+                        base = toCurrency(context.subtotal) + discountAmount;
+                } else {
+                        base = 0;
+                }
+        }
+
+        return Number.isFinite(base) ? base : 0;
+};
+
 export function useDiscounts() {
-	// Update additional discount amount based on percentage
-	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
-		// If value is too large, reset to 0
-		if (value < -100 || value > 100) {
+        // Update additional discount amount based on percentage
+        const updateDiscountAmount = (context) => {
+                const value = flt(context.additional_discount_percentage);
+                // If value is too large, reset to 0
+                if (value < -100 || value > 100) {
 			context.additional_discount_percentage = 0;
 			context.additional_discount = 0;
 			return;
 		}
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
-	};
+                const base = getAdditionalDiscountBase(context);
+
+                if (!base) {
+                        context.additional_discount = 0;
+                        return;
+                }
+
+                context.additional_discount = (base * value) / 100;
+        };
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {
