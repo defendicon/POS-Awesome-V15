@@ -78,23 +78,28 @@ export function useDiscounts() {
                 }
 
                 const precision = context.currency_precision ?? 2;
-                const base = getAdditionalDiscountBase(context);
+                const baseWithDiscount = flt(getAdditionalDiscountBase(context), precision);
+                const currentDiscount = flt(
+                        context.additional_discount ??
+                                context.invoice_doc?.discount_amount ??
+                                0,
+                        precision,
+                );
 
-                const baseMagnitude = Math.abs(flt(base, precision));
+                let baseValue = baseWithDiscount - currentDiscount;
 
-                if (!baseMagnitude) {
+                if (context.invoice_doc?.is_return) {
+                        baseValue = -Math.abs(baseValue);
+                }
+
+                if (!baseValue) {
                         setAdditionalDiscount(0);
                         return;
                 }
 
-                const percentageMagnitude = Math.abs(value);
-                const sign = value === 0 ? 0 : value > 0 ? 1 : -1;
-                const amount = flt(
-                        (baseMagnitude * percentageMagnitude) / 100,
-                        precision,
-                );
+                const amount = flt((-baseValue * value) / 100, precision);
 
-                setAdditionalDiscount(sign >= 0 ? amount : -amount);
+                setAdditionalDiscount(amount);
         };
 
 	// Calculate prices and discounts for an item based on field change

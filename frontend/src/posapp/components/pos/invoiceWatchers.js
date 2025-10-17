@@ -194,9 +194,24 @@ export default {
                 }
 
                 const currencyPrecision = this.currency_precision ?? 2;
-                const base = getAdditionalDiscountBase(this);
+                const baseWithDiscount = flt(
+                        getAdditionalDiscountBase(this),
+                        currencyPrecision,
+                );
+                const currentDiscount = flt(
+                        this.additional_discount ??
+                                this.invoice_doc?.discount_amount ??
+                                0,
+                        currencyPrecision,
+                );
 
-                const baseMagnitude = Math.abs(flt(base, currencyPrecision));
+                let baseValue = baseWithDiscount - currentDiscount;
+
+                if (this.invoice_doc?.is_return) {
+                        baseValue = -Math.abs(baseValue);
+                }
+
+                const baseMagnitude = Math.abs(baseValue);
 
                 if (!baseMagnitude) {
                         this.additional_discount_percentage = 0;
