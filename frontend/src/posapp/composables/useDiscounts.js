@@ -1,23 +1,102 @@
 /* global __, flt */
 
 export function useDiscounts() {
-	// Update additional discount amount based on percentage
-	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
-		// If value is too large, reset to 0
-		if (value < -100 || value > 100) {
-			context.additional_discount_percentage = 0;
-			context.additional_discount = 0;
-			return;
-		}
+        const toNumber = (value) => {
+                if (value === null || value === undefined) {
+                        return null;
+                }
+                const number = flt(value);
+                return Number.isFinite(number) ? number : null;
+        };
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
-	};
+        const getAdditionalDiscountBase = (context) => {
+                if (!context) {
+                        return 0;
+                }
+
+                const doc = context.invoice_doc || {};
+                const discountAmount = flt(context.additional_discount);
+                const applyOn = doc.apply_discount_on || context.pos_profile?.apply_discount_on;
+
+                const addBackDiscount = (value) => {
+                        const numeric = toNumber(value);
+                        if (numeric === null) {
+                                return null;
+                        }
+                        return numeric + discountAmount;
+                };
+
+                const getTaxTotal = () => {
+                        if (doc && Array.isArray(doc.taxes) && doc.taxes.length) {
+                                return doc.taxes.reduce((sum, tax) => {
+                                        const amount =
+                                                toNumber(tax?.tax_amount_after_discount_amount) ??
+                                                toNumber(tax?.tax_amount);
+                                        return sum + (amount || 0);
+                                }, 0);
+                        }
+
+                        return (
+                                toNumber(doc?.total_taxes_and_charges) ?? toNumber(context.total_tax)
+                        );
+                };
+
+                let baseAmount = null;
+
+                if (applyOn === "Net Total") {
+                        baseAmount = addBackDiscount(doc?.net_total);
+                        if (baseAmount === null) {
+                                baseAmount = addBackDiscount(doc?.total);
+                        }
+                        if (baseAmount === null) {
+                                baseAmount = addBackDiscount(context.Total);
+                        }
+                } else if (applyOn === "Grand Total") {
+                        baseAmount = addBackDiscount(doc?.grand_total);
+                        if (baseAmount === null) {
+                                const net =
+                                        toNumber(doc?.net_total) ??
+                                        toNumber(doc?.total) ??
+                                        toNumber(context.Total);
+                                const taxes = getTaxTotal();
+                                if (net !== null || taxes !== null) {
+                                        baseAmount = (net || 0) + (taxes || 0) + discountAmount;
+                                }
+                        }
+                        if (baseAmount === null) {
+                                baseAmount = addBackDiscount(context.subtotal);
+                        }
+                }
+
+                if (baseAmount === null) {
+                        baseAmount = addBackDiscount(doc?.total);
+                }
+                if (baseAmount === null) {
+                        baseAmount = addBackDiscount(context.Total);
+                }
+
+                return baseAmount ?? 0;
+        };
+
+        // Update additional discount amount based on percentage
+        const updateDiscountAmount = (context) => {
+                const value = flt(context.additional_discount_percentage);
+                // If value is too large, reset to 0
+                if (value < -100 || value > 100) {
+                        context.additional_discount_percentage = 0;
+                        context.additional_discount = 0;
+                        return;
+                }
+
+                const baseAmount = getAdditionalDiscountBase(context);
+
+                // Calculate discount amount based on percentage
+                if (baseAmount) {
+                        context.additional_discount = (baseAmount * value) / 100;
+                } else {
+                        context.additional_discount = 0;
+                }
+        };
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {
@@ -252,9 +331,10 @@ export function useDiscounts() {
 		if (context.forceUpdate) context.forceUpdate();
 	};
 
-	return {
-		updateDiscountAmount,
-		calcPrices,
-		calcItemPrice,
-	};
+        return {
+                getAdditionalDiscountBase,
+                updateDiscountAmount,
+                calcPrices,
+                calcItemPrice,
+        };
 }
