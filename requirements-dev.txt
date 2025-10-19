@@ -1,2 +1,7 @@
 # Development dependencies for code formatting
 black==25.1.0
+
+# SMS functionality
+twilio
+pycountry
+phonenumbers

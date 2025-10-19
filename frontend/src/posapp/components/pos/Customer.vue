@@ -13,8 +13,9 @@
 			:label="frappe._('Customer')"
 			v-model="internalCustomer"
 			:items="filteredCustomers"
-			item-title="customer_name"
+			item-text="custom_customer_name"
 			item-value="name"
+			:return-object="false"
 			:no-data-text="
 				isCustomerBackgroundLoading ? __('Loading customer data...') : __('Customers not found')
 			"
@@ -29,6 +30,11 @@
 			:virtual-scroll="true"
 			:virtual-scroll-item-height="48"
 		>
+			<!-- Selection display (what shows when item is selected) -->
+			<template #selection="{ item }">
+				<span>{{ getCustomerDisplayName(item) }}</span>
+			</template>
+
 			<!-- Edit icon (left) -->
 			<template #prepend-inner>
 				<v-tooltip text="Edit customer">
@@ -64,20 +70,24 @@
 			<!-- Dropdown display -->
 			<template #item="{ props, item }">
 				<v-list-item v-bind="props">
-					<v-list-item-subtitle v-if="item.raw.customer_name !== item.raw.name">
-						<div v-html="`ID: ${item.raw.name}`"></div>
+					<v-list-item-title
+						class="primary--text subtitle-1"
+						v-html="item.custom_customer_name"
+					></v-list-item-title>
+					<v-list-item-subtitle v-if="item.customer_name !== item.name">
+						<div v-html="`ID: ${item.name}`"></div>
 					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.tax_id">
-						<div v-html="`TAX ID: ${item.raw.tax_id}`"></div>
+					<v-list-item-subtitle v-if="item.custom_search_mobile_no">
+						<div v-html="`Mobile No: ${item.custom_search_mobile_no}`"></div>
 					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.email_id">
-						<div v-html="`Email: ${item.raw.email_id}`"></div>
+					<v-list-item-subtitle v-if="item.custom_customer_id">
+						<div v-html="`Customer ID: ${item.custom_customer_id}`"></div>
 					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.mobile_no">
-						<div v-html="`Mobile No: ${item.raw.mobile_no}`"></div>
+					<v-list-item-subtitle v-if="item.customer_group">
+						<div v-html="`Customer Group: ${item.customer_group}`"></div>
 					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.primary_address">
-						<div v-html="`Primary Address: ${item.raw.primary_address}`"></div>
+					<v-list-item-subtitle v-if="item.email_id">
+						<div v-html="`Email: ${item.email_id}`"></div>
 					</v-list-item-subtitle>
 				</v-list-item>
 			</template>
@@ -372,6 +382,22 @@ export default {
 			detachScrollListener();
 		});
 
+		const getCustomerDisplayName = (item) => {
+			if (!item) return '';
+			
+			// If item is a string (customer name/ID), return it as is
+			if (typeof item === 'string') return item;
+			
+			// If item is an object, return the custom_customer_name or fallback to name
+			if (typeof item === 'object') {
+				// Priority: custom_customer_name > customer_name > name
+				return item.custom_customer_name || item.customer_name || item.name || '';
+			}
+			
+			// Fallback for any other type
+			return String(item);
+		};
+
 		return {
 			customerDropdown,
 			filteredCustomers,
@@ -385,6 +411,7 @@ export default {
 			handleEnter,
 			new_customer,
 			edit_customer,
+			getCustomerDisplayName,
 		};
 	},
 };

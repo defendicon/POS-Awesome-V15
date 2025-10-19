@@ -30,11 +30,88 @@
 				@logout="handleLogout"
 				@refresh-cache-usage="handleRefreshCacheUsage"
 				@update-after-delete="handleUpdateAfterDelete"
+				@change-pos-profile="handleChangePosProfile"
 			/>
 			<div class="page-content">
 				<component v-bind:is="page" class="mx-4 md-4"></component>
 			</div>
 		</v-main>
+
+		<!-- POS Profile Change Dialog -->
+		<v-dialog v-model="showPosProfileDialog" max-width="600px" persistent>
+			<v-card>
+				<v-card-title class="text-h6 d-flex align-center">
+					<v-icon start color="primary" class="mr-2">mdi-swap-horizontal</v-icon>
+					{{ __("Switch POS Profile") }}
+				</v-card-title>
+				<v-card-text>
+					<div class="text-body-2 mb-3">
+						{{ __("Select a new POS Profile to switch to") }}
+					</div>
+					<v-autocomplete
+						v-model="selectedPosProfile"
+						:items="availablePosProfiles"
+						item-title="name"
+						item-value="name"
+						:label="__('POS Profile')"
+						variant="outlined"
+						density="compact"
+						:loading="loadingPosProfiles"
+						:disabled="loadingPosProfiles"
+						clearable
+					>
+						<template #item="{ item, props }">
+							<v-list-item v-bind="props">
+								<template #prepend>
+									<v-icon :color="item.raw.name === posProfile?.name ? 'primary' : 'grey'">
+										{{
+											item.raw.name === posProfile?.name
+												? "mdi-check-circle"
+												: "mdi-circle-outline"
+										}}
+									</v-icon>
+								</template>
+								<v-list-item-title>
+									{{ item.raw.name }}
+								</v-list-item-title>
+								<v-list-item-subtitle v-if="item.raw.company">
+									{{ item.raw.company }}
+								</v-list-item-subtitle>
+							</v-list-item>
+						</template>
+					</v-autocomplete>
+					<v-alert
+						v-if="selectedPosProfile && selectedPosProfile !== posProfile?.name"
+						type="info"
+						variant="tonal"
+						density="compact"
+						class="mt-3"
+					>
+						{{ __("Switching to") }}: <strong>{{ selectedPosProfile }}</strong>
+					</v-alert>
+				</v-card-text>
+				<v-card-actions class="pa-4 pt-0">
+					<v-spacer />
+					<v-btn
+						color="error"
+						variant="text"
+						@click="closePosProfileDialog"
+						:disabled="loadingPosProfiles"
+					>
+						{{ __("Cancel") }}
+					</v-btn>
+					<v-btn
+						color="primary"
+						variant="elevated"
+						@click="switchPosProfile"
+						:disabled="!selectedPosProfile || selectedPosProfile === posProfile?.name || loadingPosProfiles"
+						:loading="loadingPosProfiles"
+					>
+						{{ __("Switch Profile") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</v-app>
 </template>
 
@@ -94,6 +171,7 @@ export default {
 			page: "POS",
 			// POS Profile data
 			posProfile: {},
+			pos_opening_shift: {},
 			pendingInvoices: 0,
 			lastInvoiceId: "",
 
@@ -113,6 +191,12 @@ export default {
 			cacheUsageLoading: false,
 			cacheUsageDetails: { total: 0, indexedDB: 0, localStorage: 0 },
 			cacheReady: false,
+
+			// POS Profile change data
+			showPosProfileDialog: false,
+			selectedPosProfile: null,
+			availablePosProfiles: [],
+			loadingPosProfiles: false,
 
 			// Loading progress handled via utility
 		};
@@ -203,6 +287,7 @@ export default {
 			const openingData = getOpeningStorage();
 			if (openingData && openingData.pos_profile) {
 				this.posProfile = openingData.pos_profile;
+				this.pos_opening_shift = openingData.pos_opening_shift || {};
 				if (navigator.onLine) {
 					await this.refreshTaxInclusiveSetting();
 				}
@@ -252,6 +337,7 @@ export default {
 			if (this.eventBus) {
 				this.eventBus.on("register_pos_profile", (data) => {
 					this.posProfile = data.pos_profile || {};
+					this.pos_opening_shift = data.pos_opening_shift || {};
 					if (navigator.onLine) {
 						this.refreshTaxInclusiveSetting();
 					}
@@ -423,6 +509,176 @@ export default {
 			frappe.call("logout").finally(() => {
 				window.location.href = "/app";
 			});
+		},
+
+		handleChangePosProfile() {
+			this.showPosProfileDialog = true;
+			this.loadAvailablePosProfiles();
+		},
+
+		async loadAvailablePosProfiles() {
+			this.loadingPosProfiles = true;
+			try {
+				const r = await frappe.call({
+					method: "posawesome.posawesome.api.utilities.get_available_pos_profiles",
+					args: {
+						company: this.posProfile?.company || frappe.boot?.sysdefaults?.company,
+						currency: this.posProfile?.currency || frappe.boot?.sysdefaults?.currency,
+					},
+				});
+				if (r.message) {
+					this.availablePosProfiles = r.message;
+				}
+			} catch (error) {
+				console.error("Failed to load POS profiles:", error);
+				frappe.msgprint(__("Failed to load POS profiles"));
+			} finally {
+				this.loadingPosProfiles = false;
+			}
+		},
+
+		closePosProfileDialog() {
+			this.showPosProfileDialog = false;
+			this.selectedPosProfile = null;
+		},
+
+		async switchPosProfile() {
+			if (!this.selectedPosProfile || this.selectedPosProfile === this.posProfile?.name) {
+				return;
+			}
+
+			this.loadingPosProfiles = true;
+			try {
+				// Step 1: Get current opening shift from backend
+				const currentShiftData = await frappe.call(
+					"posawesome.posawesome.api.posapp.check_opening_shift",
+					{
+						user: frappe.session.user
+					}
+				);
+
+				console.log("Current shift data response:", currentShiftData);
+
+				let openingShiftData = null;
+				let balanceDetails = [];
+
+				// Check if we have a valid opening shift from backend
+				if (currentShiftData.message && 
+					currentShiftData.message !== "" && 
+					currentShiftData.message.pos_opening_shift) {
+					// Use the opening shift from backend
+					openingShiftData = currentShiftData.message.pos_opening_shift;
+					balanceDetails = openingShiftData.balance_details || [];
+					console.log("Using backend opening shift:", openingShiftData);
+				} else if (this.pos_opening_shift && Object.keys(this.pos_opening_shift).length > 0) {
+					// Fallback to frontend data
+					openingShiftData = this.pos_opening_shift;
+					balanceDetails = openingShiftData.balance_details || [];
+					console.log("Using frontend opening shift:", openingShiftData);
+				} else if (this.posProfile?.pos_opening_shift && Object.keys(this.posProfile.pos_opening_shift).length > 0) {
+					// Fallback to posProfile data
+					openingShiftData = this.posProfile.pos_opening_shift;
+					balanceDetails = openingShiftData.balance_details || [];
+					console.log("Using posProfile opening shift:", openingShiftData);
+				} else {
+					// No opening shift found, create a new one directly
+					console.log("No opening shift found, creating new one directly");
+					await this.createNewOpeningShift();
+					return;
+				}
+
+				console.log("Balance details:", balanceDetails);
+
+				// Step 2: Close the current shift
+				const closingData = await frappe.call(
+					"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.make_closing_shift_from_opening",
+					{
+						opening_shift: JSON.stringify(openingShiftData),
+					}
+				);
+
+				if (closingData.message) {
+					// Step 3: Submit the closing shift
+					await frappe.call(
+						"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.submit_closing_shift",
+						{
+							closing_shift: JSON.stringify(closingData.message),
+						}
+					);
+
+					// Step 4: Create new opening shift for selected profile
+					const newOpeningData = await frappe.call(
+						"posawesome.posawesome.api.posapp.create_opening_voucher",
+						{
+							pos_profile: this.selectedPosProfile,
+							company: this.posProfile?.company || frappe.boot?.sysdefaults?.company,
+							balance_details: JSON.stringify(balanceDetails),
+						}
+					);
+
+					if (newOpeningData.message) {
+						// Step 5: Update the UI with new profile data
+						this.posProfile = newOpeningData.message.pos_profile;
+						this.pos_opening_shift = newOpeningData.message.pos_opening_shift;
+						
+						// Emit events to update other components
+						if (this.eventBus) {
+							this.eventBus.emit("register_pos_profile", newOpeningData.message);
+							this.eventBus.emit("set_company", newOpeningData.message.company);
+						}
+						
+						// Close the dialog
+						this.closePosProfileDialog();
+						
+						// Show success message
+						frappe.msgprint(__("POS Profile switched successfully"), __("Success"));
+					}
+				}
+			} catch (error) {
+				console.error("Failed to switch POS profile:", error);
+				frappe.msgprint(__("Failed to switch POS profile: ") + error.message);
+			} finally {
+				this.loadingPosProfiles = false;
+			}
+		},
+
+		async createNewOpeningShift() {
+			try {
+				console.log("Creating new opening shift for profile:", this.selectedPosProfile);
+				
+				// Create new opening shift for selected profile
+				const newOpeningData = await frappe.call(
+					"posawesome.posawesome.api.posapp.create_opening_voucher",
+					{
+						pos_profile: this.selectedPosProfile,
+						company: this.posProfile?.company || frappe.boot?.sysdefaults?.company,
+						balance_details: JSON.stringify([]), // Empty balance details for new shift
+					}
+				);
+
+				if (newOpeningData.message) {
+					// Update the UI with new profile data
+					this.posProfile = newOpeningData.message.pos_profile;
+					this.pos_opening_shift = newOpeningData.message.pos_opening_shift;
+					
+					// Emit events to update other components
+					if (this.eventBus) {
+						this.eventBus.emit("register_pos_profile", newOpeningData.message);
+						this.eventBus.emit("set_company", newOpeningData.message.company);
+					}
+					
+					// Close the dialog
+					this.closePosProfileDialog();
+					
+					// Show success message
+					frappe.msgprint(__("POS Profile switched successfully"), __("Success"));
+				}
+			} catch (error) {
+				console.error("Failed to create new opening shift:", error);
+				frappe.msgprint(__("Failed to create new opening shift: ") + error.message);
+			} finally {
+				this.loadingPosProfiles = false;
+			}
 		},
 
 		handleRefreshCacheUsage() {

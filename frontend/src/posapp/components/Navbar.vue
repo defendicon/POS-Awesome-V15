@@ -10,6 +10,7 @@
 			@nav-click="handleNavClick"
 			@go-desk="goDesk"
 			@show-offline-invoices="showOfflineInvoices = true"
+			@change-pos-profile="handleChangePosProfile"
 		>
 			<!-- Slot for status indicator -->
 			<template #status-indicator>
@@ -270,6 +271,10 @@ export default {
 		}
 	},
 	methods: {
+		handleChangePosProfile() {
+			this.$emit('change-pos-profile');
+		},
+
 		preInitialize() {
 			// Early initialization to prevent cache-related element destruction
 			// Use reactive assignment instead of direct property modification

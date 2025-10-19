@@ -1,0 +1,166 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-13 16:48:59.429279",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable",
+  "sms_gateway",
+  "section_break_jukks",
+  "twilio_account_sid",
+  "twilio_auth_token",
+  "sender_phone_number",
+  "include_whatsapp",
+  "whatsapp_sender_phone_number",
+  "section_break_yd1wt",
+  "url_end_point",
+  "api_key",
+  "sender_id",
+  "to",
+  "use_customer_phone_number",
+  "column_break_po9ne",
+  "message_body",
+  "column_break_ryghi",
+  "sms_message",
+  "column_break_qjp2q",
+  "sms_message_submit_only"
+ ],
+ "fields": [
+  {
+   "fieldname": "twilio_account_sid",
+   "fieldtype": "Data",
+   "label": "Twilio Account SID"
+  },
+  {
+   "fieldname": "column_break_ryghi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "twilio_auth_token",
+   "fieldtype": "Data",
+   "label": "Twilio Auth Token"
+  },
+  {
+   "fieldname": "sender_phone_number",
+   "fieldtype": "Data",
+   "label": "Sender Phone Number"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.sms_gateway==\"Bulk Ghana\"",
+   "fieldname": "section_break_yd1wt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "{% set company, pdf_link = frappe.db.get_value('Sales Invoice', {'name': custom_sales_invoice}, ['company','custom_pdf_link']) %}\nDear {{ party }},\nYou have an Appointment for:  {{ custom_service_staff | map(attribute='service_item') | join(', ') }} at  on {{ company }}\n{{ scheduled_time }}. We look forward to seeing you on the appointment date.\n{{ frappe.utils.get_url(pdf_link) }}",
+   "fieldname": "sms_message",
+   "fieldtype": "Code",
+   "label": "SMS Message (Submit & Rebook)"
+  },
+  {
+   "default": "Twilio",
+   "fieldname": "sms_gateway",
+   "fieldtype": "Select",
+   "label": "SMS Gateway",
+   "options": "Twilio\nBulk Ghana"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.sms_gateway==\"Twilio\"",
+   "fieldname": "section_break_jukks",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API key"
+  },
+  {
+   "depends_on": "eval:!doc.use_customer_phone_number",
+   "fieldname": "to",
+   "fieldtype": "Data",
+   "label": "To"
+  },
+  {
+   "fieldname": "message_body",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Message body",
+   "max_height": "300px"
+  },
+  {
+   "fieldname": "sender_id",
+   "fieldtype": "Data",
+   "label": "Sender Id"
+  },
+  {
+   "fieldname": "column_break_po9ne",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "url_end_point",
+   "fieldtype": "Data",
+   "label": "URL End Point"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  },
+  {
+   "fieldname": "column_break_qjp2q",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "{% set company, pdf_link = frappe.db.get_value('Sales Invoice', {'name': name}, ['company','custom_pdf_link']) %}\nDear {{ customer_name }},\n\nThank you for your purchase!\n{{ frappe.utils.get_url(pdf_link) }}",
+   "fieldname": "sms_message_submit_only",
+   "fieldtype": "Code",
+   "label": "SMS Message (Submit)"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_whatsapp",
+   "fieldtype": "Check",
+   "label": "Send Whatsapp Message"
+  },
+  {
+   "depends_on": "eval: doc.include_whatsapp",
+   "fieldname": "whatsapp_sender_phone_number",
+   "fieldtype": "Data",
+   "label": "Whatsapp Sender Phone Number"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_customer_phone_number",
+   "fieldtype": "Check",
+   "label": "Use Customer Phone Number"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-01-13 16:48:59.429279",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "SMS Gateway Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

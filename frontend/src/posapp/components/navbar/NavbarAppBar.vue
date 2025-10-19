@@ -108,24 +108,57 @@
 				</div>
 
 				<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
-					<v-chip
-						variant="outlined"
-						:class="[
-							'profile-chip pos-themed-card',
-							isRtl ? 'rtl-profile-chip' : 'ltr-profile-chip',
-						]"
+					<v-menu
+						:close-on-content-click="false"
+						:location="isRtl ? 'bottom start' : 'bottom end'"
+						:offset="[0, 4]"
 					>
-						<v-icon
-							:start="!isRtl"
-							:end="isRtl"
-							:class="['pos-text-primary', isRtl ? 'rtl-profile-icon' : 'ltr-profile-icon']"
-						>
-							mdi-account-circle
-						</v-icon>
-						<span :class="['pos-text-primary', isRtl ? 'rtl-profile-text' : 'ltr-profile-text']">
-							{{ displayName }}
-						</span>
-					</v-chip>
+						<template #activator="{ props }">
+							<v-chip
+								v-bind="props"
+								variant="outlined"
+								:class="[
+									'profile-chip pos-themed-card clickable-chip',
+									isRtl ? 'rtl-profile-chip' : 'ltr-profile-chip',
+								]"
+								@click="handleProfileClick"
+							>
+								<v-icon
+									:start="!isRtl"
+									:end="isRtl"
+									:class="['pos-text-primary', isRtl ? 'rtl-profile-icon' : 'ltr-profile-icon']"
+								>
+									mdi-account-circle
+								</v-icon>
+								<span :class="['pos-text-primary', isRtl ? 'rtl-profile-text' : 'ltr-profile-text']">
+									{{ displayName }}
+								</span>
+								<v-icon
+									:end="!isRtl"
+									:start="isRtl"
+									size="16"
+									:class="['pos-text-primary', isRtl ? 'rtl-profile-arrow' : 'ltr-profile-arrow']"
+								>
+									mdi-chevron-down
+								</v-icon>
+							</v-chip>
+						</template>
+						<v-card class="profile-menu-card pos-themed-card" elevation="8">
+							<v-list density="compact" class="profile-menu-list">
+								<v-list-item
+									@click="changePosProfile"
+									class="profile-menu-item"
+								>
+									<template #prepend>
+										<v-icon class="pos-text-primary">mdi-swap-horizontal</v-icon>
+									</template>
+									<v-list-item-title class="pos-text-primary">
+										{{ __("Change POS Profile") }}
+									</v-list-item-title>
+								</v-list-item>
+							</v-list>
+						</v-card>
+					</v-menu>
 				</div>
 
 				<v-btn
@@ -284,6 +317,14 @@ export default {
 			this.resizeRafId = requestAnimationFrame(() => {
 				this.windowWidth = window.innerWidth;
 			});
+		},
+
+		handleProfileClick() {
+			// This will be handled by the v-menu activator
+		},
+
+		changePosProfile() {
+			this.$emit('change-pos-profile');
 		},
 
 		// Enhanced accessibility helper
@@ -1077,5 +1118,32 @@ export default {
 		min-width: 28px !important;
 		min-height: 28px !important;
 	}
+}
+
+/* Profile chip styles */
+.clickable-chip {
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.clickable-chip:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.profile-menu-card {
+	min-width: 200px;
+}
+
+.profile-menu-list {
+	padding: 8px 0;
+}
+
+.profile-menu-item {
+	min-height: 40px;
+}
+
+.profile-menu-item:hover {
+	background-color: rgba(var(--v-theme-primary), 0.08);
 }
 </style>

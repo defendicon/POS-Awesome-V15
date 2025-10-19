@@ -399,3 +399,94 @@ def make_address(args):
 @frappe.whitelist()
 def get_sales_person_names():
     return fetch_sales_person_names()
+
+
+@frappe.whitelist()
+def create_customer(
+    customer_id,
+    customer_name,
+    company,
+    pos_profile_doc,
+    tax_id=None,
+    mobile_no=None,
+    email_id=None,
+    referral_code=None,
+    birthday=None,
+    customer_group=None,
+    territory=None,
+    custom_country_name=None,
+    customer_type=None,
+    gender=None,
+    method="create",
+    custom_customer_id="",
+    custom_customer_first_name="",
+    custom_customer_last_name="",
+    custom_customer_name="",
+    custom_country_code="",
+    address_line1="",
+    city="",
+    **kwargs
+):
+    """Create or update customer with custom fields"""
+    pos_profile = json.loads(pos_profile_doc) if isinstance(pos_profile_doc, str) else pos_profile_doc
+    
+    if method == "create":
+        # Check if customer already exists
+        is_exist = frappe.db.exists("Customer", {"customer_name": customer_name})
+        
+        if pos_profile.get("posa_allow_duplicate_customer_names") or not is_exist:
+            customer = frappe.get_doc({
+                "doctype": "Customer",
+                "customer_name": customer_name,
+                "custom_customer_name": custom_customer_name,
+                "custom_customer_first_name": custom_customer_first_name,
+                "custom_customer_last_name": custom_customer_last_name,
+                "custom_customer_id": custom_customer_id,
+                "custom_country_name": custom_country_name,
+                "custom_country_code": custom_country_code,
+                "custom_search_mobile_no": mobile_no,
+                "tax_id": tax_id,
+                "mobile_no": str(mobile_no).lstrip("0") if mobile_no else "",
+                "email_id": email_id,
+                "referral_code": referral_code,
+                "posa_birthday": birthday,
+                "customer_type": customer_type or "Individual",
+                "gender": gender,
+            })
+            
+            if customer_group:
+                customer.customer_group = customer_group
+            else:
+                customer.customer_group = "All Customer Groups"
+                
+            if territory:
+                customer.territory = territory
+            else:
+                customer.territory = "All Territories"
+                
+            customer.save()
+            return customer
+        else:
+            frappe.throw(_("Customer already exists"))
+            
+    elif method == "update":
+        customer_doc = frappe.get_doc("Customer", customer_id)
+        customer_doc.customer_name = customer_name
+        customer_doc.custom_customer_name = custom_customer_name
+        customer_doc.custom_customer_first_name = custom_customer_first_name
+        customer_doc.custom_customer_last_name = custom_customer_last_name
+        customer_doc.custom_customer_id = custom_customer_id
+        customer_doc.custom_country_name = custom_country_name
+        customer_doc.custom_country_code = custom_country_code
+        customer_doc.custom_search_mobile_no = mobile_no
+        customer_doc.tax_id = tax_id
+        customer_doc.mobile_no = str(mobile_no).lstrip("0") if mobile_no else ""
+        customer_doc.email_id = email_id
+        customer_doc.referral_code = referral_code
+        customer_doc.posa_birthday = birthday
+        customer_doc.customer_type = customer_type or "Individual"
+        customer_doc.gender = gender
+        customer_doc.customer_group = customer_group
+        customer_doc.territory = territory
+        customer_doc.save()
+        return customer_doc

@@ -25,10 +25,35 @@
 									:label="frappe._('Customer Name') + ' *'"
 									hide-details
 									class="pos-themed-input"
-									v-model="customer_name"
+									v-model="custom_customer_name"
+									readonly
 								></v-text-field>
 							</v-col>
 							<v-col cols="6">
+								<v-text-field
+									density="compact"
+									color="primary"
+									:label="frappe._('Customer First Name') + ' *'"
+									hide-details
+									class="pos-themed-input"
+									v-model="customer_first_name"
+									required
+									@input="updateCustomerName"
+								></v-text-field>
+							</v-col>
+							<v-col cols="6">
+								<v-text-field
+									density="compact"
+									color="primary"
+									:label="frappe._('Customer Last Name') + ' *'"
+									hide-details
+									class="pos-themed-input"
+									v-model="customer_last_name"
+									required
+									@input="updateCustomerName"
+								></v-text-field>
+							</v-col>
+							<!-- <v-col cols="6">
 								<v-text-field
 									density="compact"
 									color="primary"
@@ -37,15 +62,16 @@
 									hide-details
 									v-model="tax_id"
 								></v-text-field>
-							</v-col>
+							</v-col> -->
 							<v-col cols="6">
 								<v-text-field
 									density="compact"
 									color="primary"
-									:label="frappe._('Mobile No')"
+									:label="frappe._('Mobile No') + ' *'"
 									class="pos-themed-input"
 									hide-details
 									v-model="mobile_no"
+									required
 								></v-text-field>
 							</v-col>
 							<v-col cols="12" v-if="!hideNonEssential">
@@ -69,18 +95,31 @@
 								></v-text-field>
 							</v-col>
 
-							<v-col cols="12" sm="6" v-if="!hideNonEssential">
+							<v-col cols="6">
 								<v-select
-									v-model="country"
+									v-model="custom_country_name"
 									:items="countries"
 									variant="outlined"
 									density="compact"
-									:label="__('Country')"
+									:label="__('Country') + ' *'"
 									class="pos-themed-input"
+									required
+									@update:model-value="updateCountryCode"
 								></v-select>
 							</v-col>
-
 							<v-col cols="6">
+								<v-text-field
+									density="compact"
+									color="primary"
+									:label="frappe._('Country Code')"
+									hide-details
+									class="pos-themed-input"
+									v-model="custom_country_code"
+									readonly
+								></v-text-field>
+							</v-col>
+
+							<!-- <v-col cols="6">
 								<v-text-field
 									density="compact"
 									color="primary"
@@ -89,7 +128,7 @@
 									hide-details
 									v-model="email_id"
 								></v-text-field>
-							</v-col>
+							</v-col> -->
 							<v-col cols="6">
 								<v-select
 									density="compact"
@@ -122,7 +161,7 @@
 									class="pos-themed-input"
 								></v-text-field>
 							</v-col>
-							<v-col cols="6" v-if="!hideNonEssential">
+							<v-col cols="6">
 								<v-autocomplete
 									clearable
 									density="compact"
@@ -135,10 +174,11 @@
 									:no-data-text="__('Group not found')"
 									hide-details
 									required
+									@update:model-value="handleGroupChange"
 								>
 								</v-autocomplete>
 							</v-col>
-							<v-col cols="6" v-if="!hideNonEssential">
+							<v-col cols="6">
 								<v-autocomplete
 									clearable
 									density="compact"
@@ -172,6 +212,27 @@
 									readonly
 									hide-details
 									class="pos-themed-input"
+								></v-text-field>
+							</v-col>
+							<v-col cols="6" v-if="reqd_customer_id">
+								<v-text-field
+									density="compact"
+									color="primary"
+									:label="frappe._('Customer ID') + ' *'"
+									hide-details
+									class="pos-themed-input"
+									v-model="custom_customer_id"
+									required
+								></v-text-field>
+							</v-col>
+							<v-col cols="6" v-else>
+								<v-text-field
+									density="compact"
+									color="primary"
+									:label="frappe._('Customer ID')"
+									hide-details
+									class="pos-themed-input"
+									v-model="custom_customer_id"
 								></v-text-field>
 							</v-col>
 						</v-row>
@@ -219,6 +280,12 @@ export default {
 		pos_profile: "",
 		customer_id: "",
 		customer_name: "",
+		custom_customer_name: "",
+		customer_first_name: "",
+		customer_last_name: "",
+		custom_customer_id: "",
+		custom_country_name: "",
+		custom_country_code: "",
 		tax_id: "",
 		mobile_no: "",
 		address_line1: "",
@@ -238,6 +305,7 @@ export default {
 		loyalty_points: null,
 		loyalty_program: null,
 		hideNonEssential: false,
+		reqd_customer_id: false,
 		countries: [
 			"Afghanistan",
 			"Australia",
@@ -388,6 +456,12 @@ export default {
 		},
 		clear_customer() {
 			this.customer_name = "";
+			this.custom_customer_name = "";
+			this.customer_first_name = "";
+			this.customer_last_name = "";
+			this.custom_customer_id = "";
+			this.custom_country_name = "";
+			this.custom_country_code = "";
 			this.tax_id = "";
 			this.mobile_no = "";
 			this.address_line1 = "";
@@ -403,6 +477,79 @@ export default {
 			this.gender = "";
 			this.loyalty_points = null;
 			this.loyalty_program = null;
+			this.reqd_customer_id = false;
+		},
+		updateCustomerName() {
+			const first = this.customer_first_name ? this.customer_first_name.trim() : '';
+			const last = this.customer_last_name ? this.customer_last_name.trim() : '';
+			const mobile = this.mobile_no ? this.mobile_no.trim() : '';
+			
+			// custom_customer_name is just first + last name
+			this.custom_customer_name = `${first} ${last}`.trim();
+			
+			// customer_name is first + last + mobile_no (for doctype name)
+			this.customer_name = `${first} ${last} ${mobile}`.trim();
+		},
+		updateCountryCode() {
+			// Map country names to country codes
+			const countryCodeMap = {
+				"Pakistan": "+92",
+				"India": "+91",
+				"United States": "+1",
+				"United Kingdom": "+44",
+				"Canada": "+1",
+				"Australia": "+61",
+				"Germany": "+49",
+				"France": "+33",
+				"China": "+86",
+				"Japan": "+81",
+				"South Korea": "+82",
+				"Singapore": "+65",
+				"Malaysia": "+60",
+				"Thailand": "+66",
+				"Indonesia": "+62",
+				"Philippines": "+63",
+				"Vietnam": "+84",
+				"Bangladesh": "+880",
+				"Sri Lanka": "+94",
+				"Nepal": "+977",
+				"Afghanistan": "+93",
+				"Iran": "+98",
+				"Turkey": "+90",
+				"Saudi Arabia": "+966",
+				"United Arab Emirates": "+971",
+				"Qatar": "+974",
+				"Kuwait": "+965",
+				"Bahrain": "+973",
+				"Oman": "+968",
+				"Yemen": "+967",
+				"Syria": "+963",
+				"Denmark": "+45",
+				"Netherlands": "+31",
+				"Norway": "+47",
+				"Sweden": "+46",
+				"Switzerland": "+41",
+				"Spain": "+34",
+				"Italy": "+39",
+				"New Zealand": "+64"
+			};
+			
+			this.custom_country_code = countryCodeMap[this.custom_country_name] || "";
+		},
+		handleGroupChange() {
+			// Check if customer group requires customer ID
+			if (this.group) {
+				frappe.db.get_value("Customer Group", this.group, "custom_customer_id")
+					.then((data) => {
+						this.reqd_customer_id = data.message.custom_customer_id || false;
+					})
+					.catch((error) => {
+						console.error("Error checking customer group:", error);
+						this.reqd_customer_id = false;
+					});
+			} else {
+				this.reqd_customer_id = false;
+			}
 		},
 		getCustomerGroups() {
 			if (this.groups.length > 0) return;
@@ -470,8 +617,28 @@ export default {
 		},
 		async submit_dialog() {
 			const vm = this;
-			if (!this.customer_name) {
+			if (!this.customer_first_name) {
+				frappe.throw(__("Customer First Name is required"));
+				return;
+			}
+
+			if (!this.customer_last_name) {
+				frappe.throw(__("Customer Last Name is required"));
+				return;
+			}
+
+			if (!this.mobile_no) {
+				frappe.throw(__("Mobile No is required"));
+				return;
+			}
+
+			if (!this.custom_customer_name) {
 				frappe.throw(__("Customer Name is required"));
+				return;
+			}
+
+			if (this.reqd_customer_id && !this.custom_customer_id) {
+				frappe.throw(__("Customer ID is required for this customer group"));
 				return;
 			}
 
@@ -541,6 +708,12 @@ export default {
 			const args = {
 				customer_id: this.customer_id,
 				customer_name: this.customer_name,
+				custom_customer_name: this.custom_customer_name,
+				customer_first_name: this.customer_first_name,
+				customer_last_name: this.customer_last_name,
+				custom_customer_id: this.custom_customer_id,
+				custom_country_name: this.custom_country_name,
+				custom_country_code: this.custom_country_code,
 				tax_id: this.tax_id,
 				mobile_no: this.mobile_no,
 				address_line1: this.address_line1,
@@ -658,6 +831,12 @@ export default {
 
 			if (data) {
 				this.customer_name = data.customer_name;
+				this.custom_customer_name = data.custom_customer_name || data.customer_name;
+				this.customer_first_name = data.custom_customer_first_name || "";
+				this.customer_last_name = data.custom_customer_last_name || "";
+				this.custom_customer_id = data.custom_customer_id || "";
+				this.custom_country_name = data.custom_country_name || data.country || "Pakistan";
+				this.custom_country_code = data.custom_country_code || "";
 				this.customer_id = data.name;
 				this.address_line1 = data.address_line1 || "";
 				this.city = data.city || "";
@@ -673,6 +852,11 @@ export default {
 				this.loyalty_points = data.loyalty_points;
 				this.loyalty_program = data.loyalty_program;
 				this.gender = data.gender;
+				
+				// Check if customer group requires customer ID
+				if (this.group) {
+					this.handleGroupChange();
+				}
 			} else {
 				this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Pakistan";
 			}

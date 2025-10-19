@@ -954,3 +954,54 @@ def get_price_list_currency(price_list: str) -> str:
     if not price_list:
         return None
     return frappe.db.get_value("Price List", price_list, "currency")
+
+
+def notify_customer_via_sms(doc, method):
+    """Send SMS notification for appointment creation"""
+    sms_gateway_settings = frappe.get_doc("SMS Gateway Settings")
+    if not sms_gateway_settings.enable:
+        return
+    
+    sms_message = "sms_message"
+    if doc.custom_sales_invoice and doc.scheduled_time:
+        if sms_gateway_settings.sms_gateway == "Bulk Ghana":
+            from posawesome.scripts.bulk_sms_ghana import send_sms
+            phone_number = sms_gateway_settings.to
+            if sms_gateway_settings.use_customer_phone_number:
+                phone_number = doc.customer_phone_number
+
+            send_sms(sms_gateway_settings.api_key, phone_number.strip("+"), sms_message, sms_gateway_settings.sender_id, context=doc, url=sms_gateway_settings.url_end_point)
+        elif sms_gateway_settings.sms_gateway == "Twilio":
+            from posawesome.twilio_sms import send_twilio_sms
+            send_twilio_sms(doc.party, doc, doc.customer_phone_number, sms_message)
+
+
+def notify_customer_via_sms_submit_only(doc, method):
+    """Send SMS notification for invoice submission"""
+    sms_gateway_settings = frappe.get_doc("SMS Gateway Settings")
+    if not sms_gateway_settings.enable:
+        return
+    
+    if doc.get("custom_is_submit_and_rebook"):
+        return
+
+    sms_message = "sms_message_submit_only"
+    phone_number = frappe.db.get_value("Customer", doc.customer, ["custom_country_code", "mobile_no"], as_dict=1) or ""
+    phone_number_string = ""
+    if phone_number:
+        if phone_number.get("custom_country_code") and phone_number.get("mobile_no"):
+            phone_number_string = phone_number.custom_country_code + phone_number.mobile_no
+
+            if sms_gateway_settings.sms_gateway == "Bulk Ghana":
+                from posawesome.scripts.bulk_sms_ghana import send_sms
+                phone_number = sms_gateway_settings.to
+                if sms_gateway_settings.use_customer_phone_number:
+                    phone_number = phone_number_string
+                send_sms(sms_gateway_settings.api_key, phone_number.strip("+"), sms_message, sms_gateway_settings.sender_id, context=doc, url=sms_gateway_settings.url_end_point)
+            elif sms_gateway_settings.sms_gateway == "Twilio":
+                from posawesome.twilio_sms import send_twilio_sms
+                send_twilio_sms(doc.customer, doc, phone_number_string, sms_message)
+        else:
+            frappe.msgprint(
+                _("Customer has no mobile number. Please check"), title="Error in Sending SMS", indicator="orange", alert=True
+            )

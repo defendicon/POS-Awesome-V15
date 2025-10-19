@@ -100,17 +100,22 @@ doc_events = {
     "Sales Invoice": {
         "validate": "posawesome.posawesome.api.invoice.validate",
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+        "on_submit": "posawesome.posawesome.api.invoices.notify_customer_via_sms_submit_only",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
     },
     "POS Invoice": {
         "validate": "posawesome.posawesome.api.invoice.validate",
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+        "on_submit": "posawesome.posawesome.api.invoices.notify_customer_via_sms_submit_only",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
     },
     "Customer": {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
     },
+    "Appointment": {
+        "validate": "posawesome.posawesome.api.invoices.notify_customer_via_sms"
+    }
 }
 
 # Scheduled Tasks
@@ -223,6 +228,7 @@ fixtures = [
                     "POS Invoice-posa_additional_notes_section",
                     "Sales Invoice-posa_notes",
                     "POS Invoice-posa_notes",
+                    "Sales Invoice-custom_is_submit_and_rebook",
                     "Sales Invoice-posa_column_break_111",
                     "POS Invoice-posa_column_break_111",
                     "Sales Invoice-posa_delivery_date",
@@ -251,6 +257,13 @@ fixtures = [
                     "Customer-posa_referral_company",
                     "Customer-posa_referral_section",
                     "Customer-posa_birthday",
+                    "Customer-custom_country_code",
+                    "Customer-custom_country_name",
+                    "Customer-custom_customer_first_name",
+                    "Customer-custom_customer_id",
+                    "Customer-custom_customer_last_name",
+                    "Customer-custom_customer_name",
+                    "Customer-custom_search_mobile_no",
                     "Sales Order-posa_offers",
                     "Sales Order-posa_coupons",
                     "Sales Order Item-posa_row_id",
@@ -282,6 +295,17 @@ fixtures = [
                     "POS Profile-posa_use_server_cache",
                     "POS Profile-posa_server_cache_duration",
                     "POS Profile-posa_allow_duplicate_customer_names",
+                    "POS Profile-allow_print_last_duplicate_invoice",
+                    "POS Profile-current_date",
+                    "POS Profile-custom_show_submit_and_rebook_button",
+                    "POS Profile-customer_group",
+                    "POS Profile-customer_territory",
+                    "POS Profile-customer_type",
+                    "POS Profile-make_order_type_as_required",
+                    "POS Profile-pos_default_settings",
+                    "POS Profile-print_format_copy",
+                    "POS Profile-si_print_format",
+                    "POS Profile-warehouse_ending_time",
                     "POS Profile-column_break_anyol",
                     "POS Profile-pose_use_limit_search",
                     "POS Profile-posa_search_batch_no",
@@ -309,6 +333,12 @@ fixtures = [
                     "POS Invoice-posa_pos_opening_shift-no_copy",
                     "Sales Invoice Reference-sales_invoice-reqd",
                     "Sales Invoice-update_outstanding_for_self-default",
+                    "Customer-customer_name-default",
+                    "Customer-customer_name-label",
+                    "Customer-main-field_order",
+                    "Customer-mobile_no-in_list_view",
+                    "Customer-naming_series-hidden",
+                    "Customer-naming_series-reqd",
                 ),
             ]
         ],
@@ -322,6 +352,27 @@ fixtures = [
                 [
                     "POS Profile-posa_allow_multi_currency",
                     "POS Profile-posa_decimal_precision",
+                ],
+            ]
+        ],
+    },
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Sales Invoice Item-custom_hair_stylist",
+                    "Sales Invoice Item-custom_hair_stylist_1",
+                    "Sales Invoice Item-custom_hair_stylist_2",
+                    "Sales Invoice Item-custom_hair_stylist_3",
+                    "Sales Invoice-custom_is_submit_and_rebook",
+                    "POS Profile-custom_show_service_staff_for_products",
+                    "Appointment-custom_sales_invoice",
+                    "Appointment-custom_service_staff_details",
+                    "Appointment-custom_service_staff",
+                    "Appointment-custom_printed",
                 ],
             ]
         ],

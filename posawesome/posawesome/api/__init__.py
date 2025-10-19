@@ -39,6 +39,14 @@ from .payments import (
     create_payment_request,
     get_available_credit,
 )
+from .posapp import (
+    get_sales_person_names,
+    get_opening_dialog_data,
+    create_opening_voucher,
+    check_opening_shift,
+    submit_invoice,
+    get_customer_names as get_customer_names_filtered,
+)
 from .sales_orders import (
     search_orders,
     submit_sales_order,
@@ -56,6 +64,7 @@ from .shifts import (
 from .utilities import (
     get_app_branch,
     get_app_info,
+    get_available_pos_profiles,
     get_language_options,
     get_pos_profile_tax_inclusive,
     get_selling_price_lists,

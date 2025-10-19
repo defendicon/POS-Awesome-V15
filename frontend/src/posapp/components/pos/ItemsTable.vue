@@ -172,6 +172,117 @@
 				</v-btn>
 			</template>
 
+			<!-- Service Staff 1 column -->
+			<template v-slot:item.custom_hair_stylist_1="{ item }">
+				<v-autocomplete
+					v-if="
+						item.is_stock_item == 0 ||
+						pos_profile.custom_show_service_staff_for_products
+					"
+					v-model="item.custom_hair_stylist_1"
+					:items="sales_persons"
+					item-title="sales_person_name"
+					item-value="name"
+					:return-object="false"
+					variant="outlined"
+					density="compact"
+					color="primary"
+					class="pos-themed-input"
+					:label="frappe._('Service Staff 1')"
+					clearable
+					auto-select-first
+					:disabled="readonly"
+					:filter="salesPersonFilter"
+					@update:model-value="
+						updateSalesPerson(item.posa_row_id, $event, '', '')
+					"
+					prepend-inner-icon="mdi-account"
+					hide-details
+				>
+					<template v-slot:item="{ props, item }">
+						<v-list-item v-bind="props">
+							<v-list-item-title
+								v-html="item.sales_person_name"
+							></v-list-item-title>
+						</v-list-item>
+					</template>
+				</v-autocomplete>
+			</template>
+
+			<!-- Service Staff 2 column -->
+			<template v-slot:item.custom_hair_stylist_2="{ item }">
+				<v-autocomplete
+					v-if="
+						item.is_stock_item == 0 ||
+						pos_profile.custom_show_service_staff_for_products
+					"
+					v-model="item.custom_hair_stylist_2"
+					:items="sales_persons"
+					item-title="sales_person_name"
+					item-value="name"
+					:return-object="false"
+					variant="outlined"
+					density="compact"
+					color="primary"
+					class="pos-themed-input"
+					:label="frappe._('Service Staff 2')"
+					clearable
+					auto-select-first
+					:disabled="readonly"
+					:filter="salesPersonFilter"
+					@update:model-value="
+						updateSalesPerson(item.posa_row_id, '', $event, '')
+					"
+					prepend-inner-icon="mdi-account"
+					hide-details
+				>
+					<template v-slot:item="{ props, item }">
+						<v-list-item v-bind="props">
+							<v-list-item-title
+								v-html="item.sales_person_name"
+							></v-list-item-title>
+						</v-list-item>
+					</template>
+				</v-autocomplete>
+			</template>
+
+			<!-- Service Staff 3 column -->
+			<template v-slot:item.custom_hair_stylist_3="{ item }">
+				<v-autocomplete
+					v-if="
+						item.is_stock_item == 0 ||
+						pos_profile.custom_show_service_staff_for_products
+					"
+					v-model="item.custom_hair_stylist_3"
+					:items="sales_persons"
+					item-title="sales_person_name"
+					item-value="name"
+					:return-object="false"
+					variant="outlined"
+					density="compact"
+					color="primary"
+					class="pos-themed-input"
+					:label="frappe._('Service Staff 3')"
+					clearable
+					auto-select-first
+					:disabled="readonly"
+					:filter="salesPersonFilter"
+					@update:model-value="
+						updateSalesPerson(item.posa_row_id, '', '', $event)
+					"
+					prepend-inner-icon="mdi-account"
+					hide-details
+				>
+					<template v-slot:item="{ props, item }">
+						<v-list-item v-bind="props">
+							<v-list-item-title
+								v-html="item.sales_person_name"
+							></v-list-item-title>
+						</v-list-item>
+					</template>
+				</v-autocomplete>
+			</template>
+
 			<!-- Actions -->
 			<template v-slot:item.actions="{ item }">
 				<v-btn
@@ -594,6 +705,109 @@
 								</div>
 							</div>
 
+							<!-- Service Staff Section -->
+							<div
+								class="form-section"
+								v-if="
+									item.is_stock_item == 0 ||
+									pos_profile.custom_show_service_staff_for_products
+								"
+							>
+								<div class="section-header">
+									<v-icon size="small" class="section-icon">mdi-account-group</v-icon>
+									<span class="section-title">{{ __("Service Staff") }}</span>
+								</div>
+								<div class="form-row">
+									<div class="form-field">
+										<v-autocomplete
+											v-model="item.custom_hair_stylist_1"
+											:items="sales_persons"
+											item-title="sales_person_name"
+											item-value="name"
+											variant="outlined"
+											density="compact"
+											color="primary"
+											class="pos-themed-input"
+											:label="frappe._('Service Staff 1')"
+											clearable
+											auto-select-first
+											:disabled="readonly"
+											:filter="salesPersonFilter"
+											@update:model-value="
+												updateSalesPerson(item.posa_row_id, $event, '', '')
+											"
+											prepend-inner-icon="mdi-account"
+										>
+											<template v-slot:item="{ props, item }">
+												<v-list-item v-bind="props">
+													<v-list-item-title
+														v-html="item.sales_person_name"
+													></v-list-item-title>
+												</v-list-item>
+											</template>
+										</v-autocomplete>
+									</div>
+									<div class="form-field">
+										<v-autocomplete
+											v-model="item.custom_hair_stylist_2"
+											:items="sales_persons"
+											item-title="sales_person_name"
+											item-value="name"
+											variant="outlined"
+											density="compact"
+											color="primary"
+											class="pos-themed-input"
+											:label="frappe._('Service Staff 2')"
+											clearable
+											auto-select-first
+											:disabled="readonly"
+											:filter="salesPersonFilter"
+											@update:model-value="
+												updateSalesPerson(item.posa_row_id, '', $event, '')
+											"
+											prepend-inner-icon="mdi-account"
+										>
+											<template v-slot:item="{ props, item }">
+												<v-list-item v-bind="props">
+													<v-list-item-title
+														v-html="item.sales_person_name"
+													></v-list-item-title>
+												</v-list-item>
+											</template>
+										</v-autocomplete>
+									</div>
+									<div class="form-field">
+										<v-autocomplete
+											v-model="item.custom_hair_stylist_3"
+											:items="sales_persons"
+											item-title="sales_person_name"
+											item-value="name"
+											variant="outlined"
+											density="compact"
+											color="primary"
+											class="pos-themed-input"
+											:label="frappe._('Service Staff 3')"
+											clearable
+											auto-select-first
+											:disabled="readonly"
+											:filter="salesPersonFilter"
+											@update:model-value="
+												updateSalesPerson(item.posa_row_id, '', '', $event)
+											"
+											prepend-inner-icon="mdi-account"
+										>
+											<template v-slot:item="{ props, item }">
+												<v-list-item v-bind="props">
+													<v-list-item-title
+														v-html="item.sales_person_name"
+													></v-list-item-title>
+												</v-list-item>
+											</template>
+										</v-autocomplete>
+									</div>
+								</div>
+							</div>
+
 							<!-- Delivery Date Section -->
 							<div
 								class="form-section"
@@ -694,6 +908,10 @@ export default {
 		toggleOffer: Function,
 		changePriceListRate: Function,
 		isNegative: Function,
+		sales_persons: Array,
+		updateSalesPerson: Function,
+		salesPersonFilter: Function,
+		readonly: Boolean,
 	},
 	data() {
 		return {

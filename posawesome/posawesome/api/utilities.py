@@ -643,3 +643,15 @@ def get_language_info(lang_code):
     except Exception as e:
         frappe.log_error(f"Error getting language info for {lang_code}: {str(e)}")
         return {"success": False, "message": "Failed to get language info"}
+
+
+@frappe.whitelist()
+def get_available_pos_profiles(company, currency):
+    """Get available POS profiles for a given company and currency"""
+    pos_profiles_list = frappe.get_list(
+        "POS Profile",
+        filters={"disabled": 0, "company": company, "currency": currency},
+        fields=["name", "company", "currency"],
+        order_by="name"
+    )
+    return pos_profiles_list
