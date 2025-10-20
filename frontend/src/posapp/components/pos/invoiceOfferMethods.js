@@ -1,4 +1,5 @@
 import { silentPrint } from "../../plugins/print.js";
+import { isOffline } from "../../../offline/index.js";
 import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
 
@@ -1355,9 +1356,9 @@ export default {
 			"&no_letterhead=" +
 			letter_head;
 
-		if (this.pos_profile.posa_silent_print) {
-			silentPrint(url);
-		} else {
+                if (this.pos_profile.posa_silent_print) {
+                        silentPrint(url, { allowOfflineFallback: isOffline() });
+                } else {
 			const printWindow = window.open(url, "Print");
 			printWindow.addEventListener(
 				"load",

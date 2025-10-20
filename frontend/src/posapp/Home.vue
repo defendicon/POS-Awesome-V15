@@ -363,7 +363,7 @@ export default {
 				"&no_letterhead=" +
 				letter_head;
 
-                        const printOptions = {};
+                        const printOptions = { allowOfflineFallback: isOffline() };
                         if (this.posProfile.posa_silent_print) {
                                 silentPrint(url, printOptions);
                         } else {

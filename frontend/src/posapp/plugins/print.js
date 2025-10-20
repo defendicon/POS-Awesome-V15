@@ -156,6 +156,7 @@ async function ensureReadyAndPrint(targetWindow, options = {}) {
                 selectors = DEFAULT_READY_SELECTORS,
                 timeout = DEFAULT_TIMEOUT,
                 invoiceDoc = null,
+                allowOfflineFallback = true,
         } = options;
 
         const readySelectors = Array.isArray(selectors)
@@ -168,7 +169,10 @@ async function ensureReadyAndPrint(targetWindow, options = {}) {
                 targetWindow.print();
         } catch (err) {
                 console.warn("Print readiness check failed", err);
-                const usedFallback = await fallbackToOfflinePrint(invoiceDoc, targetWindow);
+                let usedFallback = false;
+                if (allowOfflineFallback && invoiceDoc) {
+                        usedFallback = await fallbackToOfflinePrint(invoiceDoc, targetWindow);
+                }
                 if (!usedFallback) {
                         try {
                                 targetWindow.focus();

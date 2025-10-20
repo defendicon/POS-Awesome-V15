@@ -1635,7 +1635,10 @@ export default {
 				print_format +
 				"&no_letterhead=" +
 				letter_head;
-                        const printOptions = { invoiceDoc: this.invoice_doc };
+                        const printOptions = {
+                                invoiceDoc: this.invoice_doc,
+                                allowOfflineFallback: isOffline(),
+                        };
                         if (this.pos_profile.posa_silent_print) {
                                 silentPrint(url, printOptions);
                         } else {

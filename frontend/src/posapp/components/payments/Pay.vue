@@ -1100,7 +1100,7 @@ export default {
 
 			console.log("Opening printing URL:", url);
 
-                        const printOptions = {};
+                        const printOptions = { allowOfflineFallback: isOffline() };
                         if (this.pos_profile?.posa_silent_print) {
                                 silentPrint(url, printOptions);
                         } else {
