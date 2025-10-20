@@ -766,6 +766,7 @@ import { silentPrint, watchPrintWindow } from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
+import stockCoordinator from "../../utils/stockCoordinator.js";
 
 export default {
 	// Using format mixin for shared formatting methods
@@ -1530,10 +1531,13 @@ export default {
                                         frappe.utils.play_sound("submit");
                                         // Update local stock quantities immediately after successful
                                         // invoice submission so item availability reflects changes
-                                        updateLocalStock(vm.invoice_doc.items || []);
                                         const submittedItems = Array.isArray(vm.invoice_doc.items)
                                                 ? vm.invoice_doc.items
                                                 : [];
+                                        updateLocalStock(submittedItems);
+                                        stockCoordinator.applyInvoiceConsumption(submittedItems, {
+                                                source: "invoice",
+                                        });
                                         const submittedCodes = submittedItems
                                                 .map((item) => (item ? item.item_code : null))
                                                 .filter((code) => code !== undefined && code !== null);

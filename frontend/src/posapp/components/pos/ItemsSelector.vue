@@ -529,33 +529,34 @@ import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import { RecycleScroller } from "vue-virtual-scroller";
 import {
-	saveItemUOMs,
-	getItemUOMs,
-	getLocalStock,
-	isOffline,
-	getStoredItemsCount,
-	initializeStockCache,
-	saveItemsBulk,
-	saveItems,
-	clearStoredItems,
-	getLocalStockCache,
-	setLocalStockCache,
-	initPromise,
-	memoryInitPromise,
-	checkDbHealth,
-	getCachedPriceListItems,
-	savePriceListItems,
-	clearPriceListCache,
-	updateLocalStockCache,
-	isStockCacheReady,
-	getCachedItemDetails,
-	saveItemDetailsCache,
-	saveItemGroups,
-	getCachedItemGroups,
-	getItemsLastSync,
-	setItemsLastSync,
-	forceClearAllCache,
+        saveItemUOMs,
+        getItemUOMs,
+        getLocalStock,
+        isOffline,
+        getStoredItemsCount,
+        initializeStockCache,
+        saveItemsBulk,
+        saveItems,
+        clearStoredItems,
+        getLocalStockCache,
+        setLocalStockCache,
+        initPromise,
+        memoryInitPromise,
+        checkDbHealth,
+        getCachedPriceListItems,
+        savePriceListItems,
+        clearPriceListCache,
+        updateLocalStockCache,
+        isStockCacheReady,
+        getCachedItemDetails,
+        saveItemDetailsCache,
+        saveItemGroups,
+        getCachedItemGroups,
+        getItemsLastSync,
+        setItemsLastSync,
+        forceClearAllCache,
 } from "../../../offline/index.js";
+import stockCoordinator from "../../utils/stockCoordinator.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
@@ -623,10 +624,11 @@ export default {
 		selected_currency: "",
 		exchange_rate: 1,
 		prePopulateInProgress: false,
-		itemWorker: null,
-		flyConfig: { speed: 0.6, easing: "ease-in-out" },
-		storageAvailable: true,
-		localStorageAvailable: true,
+                itemWorker: null,
+                flyConfig: { speed: 0.6, easing: "ease-in-out" },
+                storageAvailable: true,
+                localStorageAvailable: true,
+                stockUnsubscribe: null,
 		items_request_token: 0,
 		pendingGetItems: null,
 		lastGetItemsKey: "",
@@ -646,7 +648,6 @@ export default {
 		searchCache: new Map(),
                 barcodeIndex: new Map(),
                 itemCache: new Map(),
-                cartQuantities: {},
                 virtualScrollEnabled: true,
 		virtualScrollBuffer: 200,
 		renderBuffer: 10,
@@ -1405,11 +1406,11 @@ export default {
 		show_coupons() {
 			this.eventBus.emit("show_coupons", "true");
 		},
-		async initializeItems() {
-			await this.ensureStorageHealth();
-			if (
-				this.pos_profile &&
-				this.pos_profile.posa_local_storage &&
+                async initializeItems() {
+                        await this.ensureStorageHealth();
+                        if (
+                                this.pos_profile &&
+                                this.pos_profile.posa_local_storage &&
 				this.storageAvailable &&
 				!this.usesLimitSearch
 			) {
@@ -1422,15 +1423,19 @@ export default {
 			}
 			await this.get_items(true);
 
-			if (
-				this.pos_profile &&
-				this.pos_profile.posa_local_storage &&
-				this.storageAvailable &&
-				!this.usesLimitSearch
-			) {
-				await this.verifyServerItemCount();
-			}
-		},
+                        if (
+                                this.pos_profile &&
+                                this.pos_profile.posa_local_storage &&
+                                this.storageAvailable &&
+                                !this.usesLimitSearch
+                        ) {
+                                await this.verifyServerItemCount();
+                        }
+
+                        this.$nextTick(() => {
+                                this.primeStockState();
+                        });
+                },
 		async forceReloadItems() {
 			console.log("[ItemsSelector] forceReloadItems called");
 			// Clear cached price list items so the reload always
@@ -2070,23 +2075,101 @@ export default {
                         this.qty = 1;
                         this.focusItemSearch();
                 },
+                syncItemsWithStockState(codes = null, options = {}) {
+                        const collections = [];
+                        if (Array.isArray(this.items)) {
+                                collections.push(this.items);
+                        }
+                        if (Array.isArray(this.displayedItems)) {
+                                collections.push(this.displayedItems);
+                        }
+                        if (Array.isArray(this.filteredItems)) {
+                                collections.push(this.filteredItems);
+                        }
+                        const codesSet = (() => {
+                                if (codes === null) {
+                                        return null;
+                                }
+                                const iterable = Array.isArray(codes)
+                                        ? codes
+                                        : codes instanceof Set || typeof codes[Symbol.iterator] === "function"
+                                        ? Array.from(codes)
+                                        : [codes];
+                                return new Set(
+                                        iterable
+                                                .map((code) =>
+                                                        code !== undefined && code !== null
+                                                                ? String(code).trim()
+                                                                : "",
+                                                )
+                                                .filter(Boolean),
+                                );
+                        })();
+                        collections.forEach((items) => {
+                                stockCoordinator.applyAvailabilityToCollection(items, codesSet, options);
+                        });
+                        if (collections.length) {
+                                this.$forceUpdate();
+                        }
+                },
+                primeStockState(source = "items-selector") {
+                        const allItems = Array.isArray(this.items) ? [...this.items] : [];
+                        const extra = Array.isArray(this.displayedItems) ? this.displayedItems : [];
+                        extra.forEach((item) => {
+                                if (allItems.includes(item)) {
+                                        return;
+                                }
+                                allItems.push(item);
+                        });
+                        if (!allItems.length) {
+                                return;
+                        }
+                        stockCoordinator.primeFromItems(allItems, { silent: true, source });
+                        this.syncItemsWithStockState(
+                                allItems
+                                        .map((item) => (item && item.item_code !== undefined ? String(item.item_code).trim() : null))
+                                        .filter(Boolean),
+                                { updateBaseAvailable: false },
+                        );
+                },
+                handleStockSnapshotUpdate(event = {}) {
+                        const codes = Array.isArray(event.codes) ? event.codes : [];
+                        if (!codes.length) {
+                                return;
+                        }
+                        this.syncItemsWithStockState(codes, { updateBaseAvailable: false });
+                },
                 captureBaseAvailability(item, explicitActualQty = undefined) {
                         if (!item) {
                                 return;
                         }
 
+                        let resolvedBase = null;
+
                         if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
                                 item._base_available_qty = item.available_qty;
+                                resolvedBase = item.available_qty;
                         }
 
                         const hasExplicit = typeof explicitActualQty === "number" && !Number.isNaN(explicitActualQty);
                         if (hasExplicit) {
                                 item._base_actual_qty = explicitActualQty;
-                                return;
+                                resolvedBase = explicitActualQty;
+                        } else if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
+                                item._base_actual_qty = item.actual_qty;
+                                resolvedBase = item.actual_qty;
                         }
 
-                        if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
-                                item._base_actual_qty = item.actual_qty;
+                        if (resolvedBase !== null && item.item_code) {
+                                stockCoordinator.updateBaseQuantities(
+                                        [
+                                                {
+                                                        item_code: item.item_code,
+                                                        actual_qty: resolvedBase,
+                                                },
+                                        ],
+                                        { silent: true, source: "items-selector" },
+                                );
                         }
                 },
                 getBaseActualQty(item) {
@@ -2117,23 +2200,23 @@ export default {
                         }
 
                         const codeKey = String(item.item_code).trim();
-                        const baseActual = this.getBaseActualQty(item);
-                        if (baseActual === null) {
+                        if (!codeKey) {
                                 return;
                         }
 
-                        const reserved = Number(this.cartQuantities?.[codeKey]) || 0;
-                        const adjustedActual = Math.max(0, baseActual - reserved);
-                        if (item.actual_qty !== adjustedActual) {
-                                item.actual_qty = adjustedActual;
+                        if (this.getBaseActualQty(item) !== null) {
+                                stockCoordinator.updateBaseQuantities(
+                                        [
+                                                {
+                                                        item_code: codeKey,
+                                                        actual_qty: item._base_actual_qty,
+                                                },
+                                        ],
+                                        { silent: true, source: "items-selector" },
+                                );
                         }
 
-                        if (typeof item._base_available_qty === "number" && !Number.isNaN(item._base_available_qty)) {
-                                const adjustedAvailable = Math.max(0, item._base_available_qty - reserved);
-                                if (item.available_qty !== adjustedAvailable) {
-                                        item.available_qty = adjustedAvailable;
-                                }
-                        }
+                        stockCoordinator.applyAvailabilityToItem(item, { updateBaseAvailable: false });
                 },
                 recomputeAvailabilityForCodes(codes = []) {
                         if (!Array.isArray(codes) || !codes.length) {
@@ -2148,50 +2231,20 @@ export default {
                         }
 
                         const targetCodes = new Set(normalizedCodes);
-                        const applyIfAffected = (item) => {
-                                if (!item || !item.item_code) {
-                                        return;
-                                }
-                                const code = String(item.item_code).trim();
-                                if (code && targetCodes.has(code)) {
-                                        this.applyReservationToItem(item);
-                                }
-                        };
-
-                        if (Array.isArray(this.items)) {
-                                this.items.forEach(applyIfAffected);
-                        }
-
-                        if (Array.isArray(this.displayedItems)) {
-                                this.displayedItems.forEach(applyIfAffected);
-                        }
-
+                        this.syncItemsWithStockState(targetCodes, { updateBaseAvailable: false });
                         targetCodes.forEach((code) => {
                                 const indexedItem = this.lookupItemByBarcode(code);
                                 if (indexedItem) {
                                         this.applyReservationToItem(indexedItem);
                                 }
                         });
-
-                        this.$forceUpdate();
                 },
                 handleCartQuantitiesUpdated(totals = {}) {
-                        const normalizedTotals = {};
-                        if (totals && typeof totals === "object") {
-                                Object.entries(totals).forEach(([code, qty]) => {
-                                        const normalizedCode = String(code).trim();
-                                        const numericQty = Number(qty);
-                                        if (normalizedCode && Number.isFinite(numericQty) && numericQty > 0) {
-                                                normalizedTotals[normalizedCode] = numericQty;
-                                        }
-                                });
-                        }
-
-                        const previousCodes = Object.keys(this.cartQuantities || {});
-                        this.cartQuantities = normalizedTotals;
-                        const affected = new Set([...previousCodes, ...Object.keys(normalizedTotals)]);
-                        if (affected.size) {
-                                this.recomputeAvailabilityForCodes(Array.from(affected));
+                        const impacted = stockCoordinator.updateReservations(totals, {
+                                source: "items-selector",
+                        });
+                        if (impacted.length) {
+                                this.recomputeAvailabilityForCodes(impacted);
                         }
                 },
                 async handleInvoiceStockAdjusted(payload = {}) {
@@ -2299,6 +2352,18 @@ export default {
                         const affectedCodes = Array.from(
                                 new Set(itemCodes.filter((code) => code !== undefined && code !== null)),
                         );
+                        const baseRecords = new Map();
+                        const flushBaseRecords = () => {
+                                if (!baseRecords.size) {
+                                        return;
+                                }
+                                const baseEntries = Array.from(baseRecords.entries()).map(([code, qty]) => ({
+                                        item_code: code,
+                                        actual_qty: qty,
+                                }));
+                                stockCoordinator.updateBaseQuantities(baseEntries, { source: "items-selector" });
+                                baseRecords.clear();
+                        };
                         const cacheResult = await getCachedItemDetails(
                                 vm.pos_profile.name,
                                 vm.active_price_list,
@@ -2330,6 +2395,9 @@ export default {
                                         }
 
                                         vm.captureBaseAvailability(item, det.actual_qty);
+                                        if (det.actual_qty !== undefined && det.actual_qty !== null) {
+                                                baseRecords.set(item.item_code, det.actual_qty);
+                                        }
                                         if (!item.original_rate) {
                                                 item.original_rate = item.rate;
                                                 item.original_currency = item.currency || vm.pos_profile.currency;
@@ -2341,11 +2409,12 @@ export default {
 			});
 
 			let allCached = cacheResult.missing.length === 0;
-			items.forEach((item) => {
+                        items.forEach((item) => {
                                 const localQty = getLocalStock(item.item_code);
                                 if (localQty !== null) {
                                         item.actual_qty = localQty;
                                         vm.captureBaseAvailability(item, localQty);
+                                        baseRecords.set(item.item_code, localQty);
                                 } else {
                                         allCached = false;
                                 }
@@ -2362,9 +2431,10 @@ export default {
 				}
 			});
 
-			// When offline or everything is cached, skip server call
+                        // When offline or everything is cached, skip server call
                         if (isOffline() || allCached) {
                                 vm.itemDetailsRetryCount = 0;
+                                flushBaseRecords();
                                 vm.recomputeAvailabilityForCodes(affectedCodes);
                                 return;
                         }
@@ -2375,6 +2445,7 @@ export default {
 
                         if (itemsToFetch.length === 0) {
                                 vm.itemDetailsRetryCount = 0;
+                                flushBaseRecords();
                                 vm.recomputeAvailabilityForCodes(affectedCodes);
                                 return;
                         }
@@ -2431,6 +2502,9 @@ export default {
                                         updatedItems.forEach(({ item, updates }) => {
                                                 Object.assign(item, updates);
                                                 vm.captureBaseAvailability(item, updates.actual_qty);
+                                                if (updates.actual_qty !== undefined && updates.actual_qty !== null) {
+                                                        baseRecords.set(item.item_code, updates.actual_qty);
+                                                }
                                                 vm.indexItem(item);
                                                 vm.applyCurrencyConversionToItem(item);
                                         });
@@ -2464,11 +2538,12 @@ export default {
                                                 if (localQty !== null) {
                                                         item.actual_qty = localQty;
                                                         vm.captureBaseAvailability(item, localQty);
+                                                        baseRecords.set(item.item_code, localQty);
                                                 }
                                                 if (!item.item_uoms || item.item_uoms.length === 0) {
                                                         const cached = getItemUOMs(item.item_code);
                                                         if (cached.length > 0) {
-								item.item_uoms = cached;
+                                                                item.item_uoms = cached;
 							}
 						}
 					});
@@ -2490,6 +2565,7 @@ export default {
                                 }
                         };
 
+                        flushBaseRecords();
                         vm.recomputeAvailabilityForCodes(affectedCodes);
                 },
 		update_cur_items_details() {
@@ -3724,12 +3800,14 @@ export default {
 		},
 	},
 
-	async created() {
-		console.log("ItemsSelector created - starting initialization with Pinia store");
+        async created() {
+                console.log("ItemsSelector created - starting initialization with Pinia store");
 
-		// Initialize the Pinia store with existing POS profile data
-		if (this.pos_profile && this.pos_profile.name) {
-			await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
+                this.stockUnsubscribe = stockCoordinator.subscribe(this.handleStockSnapshotUpdate);
+
+                // Initialize the Pinia store with existing POS profile data
+                if (this.pos_profile && this.pos_profile.name) {
+                        await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
 			console.log("Pinia store initialized successfully");
 		} else {
 			console.warn("No POS Profile available for store initialization");
@@ -3952,15 +4030,20 @@ export default {
 		});
 	},
 
-	beforeUnmount() {
-		// Clear interval when component is destroyed
-		if (this.refresh_interval) {
-			clearInterval(this.refresh_interval);
-		}
+        beforeUnmount() {
+                // Clear interval when component is destroyed
+                if (this.refresh_interval) {
+                        clearInterval(this.refresh_interval);
+                }
 
-		if (this.itemDetailsRetryTimeout) {
-			clearTimeout(this.itemDetailsRetryTimeout);
-		}
+                if (typeof this.stockUnsubscribe === "function") {
+                        this.stockUnsubscribe();
+                        this.stockUnsubscribe = null;
+                }
+
+                if (this.itemDetailsRetryTimeout) {
+                        clearTimeout(this.itemDetailsRetryTimeout);
+                }
 		this.itemDetailsRetryCount = 0;
 
 		// Call cleanup function for abort controller

@@ -344,6 +344,7 @@ import shortcutMethods from "./invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
+import stockCoordinator from "../../utils/stockCoordinator.js";
 
 export default {
 	name: "POSInvoice",
@@ -386,10 +387,11 @@ export default {
 			float_precision: 6, // Float precision for calculations
 			currency_precision: 6, // Currency precision for display
 			new_line: false, // Add new line for item
-			available_stock_cache: {},
-			item_detail_cache: {},
-			item_stock_cache: {},
-			brand_cache: {},
+                        available_stock_cache: {},
+                        item_detail_cache: {},
+                        item_stock_cache: {},
+                        brand_cache: {},
+                        stockUnsubscribe: null,
 			delivery_charges: [], // List of delivery charges
 			base_delivery_charges_rate: 0, // Delivery charge in company currency
 			delivery_charges_rate: 0, // Selected delivery charge rate
@@ -551,6 +553,13 @@ export default {
                         (Array.isArray(this.items) ? this.items : []).forEach(accumulate);
                         (Array.isArray(this.packed_items) ? this.packed_items : []).forEach(accumulate);
 
+                        const impacted = stockCoordinator.updateReservations(totals, {
+                                source: "invoice",
+                        });
+                        if (impacted.length) {
+                                this.applyStockStateToInvoiceItems(impacted);
+                        }
+
                         this.eventBus.emit("cart_quantities_updated", totals);
                 },
                 // Handle item dropped from ItemsSelector to ItemsTable
@@ -558,13 +567,80 @@ export default {
                         console.log("Item dropped:", item);
 
                         // Use the existing add_item method to add the dropped item
-			this.add_item(item);
-		},
+                        this.add_item(item);
+                },
 
-		// Show visual feedback when item is being dragged over drop zone
-		showDropFeedback(isDragging) {
-			// Add visual feedback class to the items table
-			const itemsTable = this.$el.querySelector(".modern-items-table");
+                applyStockStateToInvoiceItems(codes = null) {
+                        const collections = [];
+                        if (Array.isArray(this.items)) {
+                                collections.push(this.items);
+                        }
+                        if (Array.isArray(this.packed_items)) {
+                                collections.push(this.packed_items);
+                        }
+                        if (!collections.length) {
+                                return;
+                        }
+                        const codesSet = (() => {
+                                if (codes === null) {
+                                        return null;
+                                }
+                                const iterable = Array.isArray(codes)
+                                        ? codes
+                                        : codes instanceof Set || (codes && typeof codes[Symbol.iterator] === "function")
+                                        ? Array.from(codes)
+                                        : [codes];
+                                return new Set(
+                                        iterable
+                                                .map((code) =>
+                                                        code !== undefined && code !== null
+                                                                ? String(code).trim()
+                                                                : "",
+                                                )
+                                                .filter(Boolean),
+                                );
+                        })();
+
+                        collections.forEach((items) => {
+                                stockCoordinator.applyAvailabilityToCollection(items, codesSet, {
+                                        updateBaseAvailable: false,
+                                });
+                        });
+
+                        this.$forceUpdate();
+                },
+                primeInvoiceStockState(source = "invoice") {
+                        const baseItems = [];
+                        if (Array.isArray(this.items)) {
+                                baseItems.push(...this.items);
+                        }
+                        if (Array.isArray(this.packed_items)) {
+                                baseItems.push(...this.packed_items);
+                        }
+                        if (!baseItems.length) {
+                                return;
+                        }
+
+                        stockCoordinator.primeFromItems(baseItems, { silent: true, source });
+                        const codes = baseItems
+                                .map((item) =>
+                                        item && item.item_code !== undefined ? String(item.item_code).trim() : null,
+                                )
+                                .filter(Boolean);
+                        this.applyStockStateToInvoiceItems(codes);
+                },
+                handleStockCoordinatorUpdate(event = {}) {
+                        const codes = Array.isArray(event.codes) ? event.codes : [];
+                        if (!codes.length) {
+                                return;
+                        }
+                        this.applyStockStateToInvoiceItems(codes);
+                },
+
+                // Show visual feedback when item is being dragged over drop zone
+                showDropFeedback(isDragging) {
+                        // Add visual feedback class to the items table
+                        const itemsTable = this.$el.querySelector(".modern-items-table");
 			if (itemsTable) {
 				if (isDragging) {
 					itemsTable.classList.add("drag-over");
@@ -1376,6 +1452,7 @@ export default {
                                         this.update_item_detail(item);
                                 }
                         });
+                        this.primeInvoiceStockState();
                 },
                 handleLoadReturnInvoice(data) {
                         console.log("Invoice component received load_return_invoice event with data:", data);
@@ -1454,14 +1531,24 @@ export default {
                         this.eventBus.on(eventName, handler);
                 });
 
+                this.stockUnsubscribe = stockCoordinator.subscribe(this.handleStockCoordinatorUpdate);
+
                 if (this.pos_profile.posa_allow_multi_currency) {
                         this.fetch_available_currencies();
                 }
 
                 this.emitCartQuantities();
+                this.$nextTick(() => {
+                        this.primeInvoiceStockState();
+                });
         },
         // Cleanup event listeners before component is destroyed
         beforeUnmount() {
+                if (typeof this.stockUnsubscribe === "function") {
+                        this.stockUnsubscribe();
+                        this.stockUnsubscribe = null;
+                }
+
                 Object.entries(this._busHandlers || {}).forEach(([eventName, handler]) => {
                         this.eventBus.off(eventName, handler);
                 });

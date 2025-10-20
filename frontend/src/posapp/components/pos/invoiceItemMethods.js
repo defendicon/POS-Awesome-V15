@@ -15,6 +15,7 @@ import { useBatchSerial } from "../../composables/useBatchSerial.js";
 import { useDiscounts } from "../../composables/useDiscounts.js";
 import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useStockUtils } from "../../composables/useStockUtils.js";
+import stockCoordinator from "../../utils/stockCoordinator.js";
 
 const ITEM_DETAIL_CACHE_TTL = 5000;
 const STOCK_CACHE_TTL = 5000;
@@ -2104,15 +2105,35 @@ export default {
 		item.is_stock_item = data.is_stock_item;
 		item.is_fixed_asset = data.is_fixed_asset;
 		item.allow_alternative_item = data.allow_alternative_item;
-		item.is_stock_item = data.is_stock_item;
-		item.warehouse = data.warehouse || item.warehouse;
+                item.is_stock_item = data.is_stock_item;
+                item.warehouse = data.warehouse || item.warehouse;
 
-		item.actual_qty = data.actual_qty;
-		item.available_qty = data.actual_qty;
+                item.actual_qty = data.actual_qty;
+                item.available_qty = data.actual_qty;
 
-		if (this.update_qty_limits) {
-			this.update_qty_limits(item);
-		}
+                const hasCode = item && item.item_code !== undefined && item.item_code !== null;
+                const baseActualQty = Number(data.actual_qty);
+                if (hasCode && Number.isFinite(baseActualQty)) {
+                        item._base_actual_qty = baseActualQty;
+                        item._base_available_qty = baseActualQty;
+                        stockCoordinator.updateBaseQuantities(
+                                [
+                                        {
+                                                item_code: item.item_code,
+                                                actual_qty: baseActualQty,
+                                        },
+                                ],
+                                { source: "invoice" },
+                        );
+                }
+
+                if (hasCode) {
+                        stockCoordinator.applyAvailabilityToItem(item, { updateBaseAvailable: false });
+                }
+
+                if (this.update_qty_limits) {
+                        this.update_qty_limits(item);
+                }
 
 		if (data.barcode) {
 			item.barcode = data.barcode;
@@ -2228,15 +2249,14 @@ export default {
 			}
 		}
 
-		item.last_purchase_rate = data.last_purchase_rate;
-		item.projected_qty = data.projected_qty;
-		item.reserved_qty = data.reserved_qty;
-		item.conversion_factor = data.conversion_factor;
-		item.stock_qty = data.stock_qty;
-		item.actual_qty = data.actual_qty;
-		item.stock_uom = data.stock_uom;
-		item.has_serial_no = data.has_serial_no;
-		item.has_batch_no = data.has_batch_no;
+                item.last_purchase_rate = data.last_purchase_rate;
+                item.projected_qty = data.projected_qty;
+                item.reserved_qty = data.reserved_qty;
+                item.conversion_factor = data.conversion_factor;
+                item.stock_qty = data.stock_qty;
+                item.stock_uom = data.stock_uom;
+                item.has_serial_no = data.has_serial_no;
+                item.has_batch_no = data.has_batch_no;
 
 		item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 		item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
