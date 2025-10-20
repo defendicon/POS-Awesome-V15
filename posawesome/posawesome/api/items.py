@@ -3,6 +3,8 @@
 
 import json
 import frappe
+# from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from frappe.utils import flt
 from frappe import _
 from frappe.utils import nowdate, flt, cstr
 from erpnext.stock.get_item_details import get_item_details
@@ -818,3 +820,47 @@ def get_price_for_uom(item_code, price_list, uom):
         "price_list_rate",
     )
     return price
+
+
+
+
+
+
+
+@frappe.whitelist()
+def get_discount_for_pos_item(pos_profile, item_code):
+    """
+    Fetch discount percentage and discount amount from Pricing Rule for POS.
+    """
+    # Try to find a matching Pricing Rule for the given item
+    # rule = frappe.db.sql("""
+    #     SELECT pr.name, pr.rate_or_discount, pr.discount_percentage, pr.discount_amount
+    #     FROM `tabPricing Rule` pr
+    #     INNER JOIN `tabPricing Rule Item Code` pri ON pri.parent = pr.name
+    #     WHERE pri.item_code = %s
+    #       AND pr.selling = 1
+    #       AND pr.disable = 0
+    #     ORDER BY pr.priority DESC, pr.creation DESC
+    #     LIMIT 1
+    # """, (item_code,), as_dict=1)
+
+    rule = frappe.db.sql("""
+        SELECT pr.name, pr.rate_or_discount, pr.discount_percentage, pr.discount_amount
+        FROM `tabPricing Rule` pr
+        ORDER BY pr.priority DESC, pr.creation DESC
+        LIMIT 1
+    """,  as_dict=1)
+    if not rule:
+        return {"discount_percentage": 0, "discount_amount": 0}
+
+    discount_percentage = flt(rule[0].discount_percentage or 0)
+    discount_amount = flt(rule[0].discount_amount or 0)
+
+    return {
+        "discount_percentage": discount_percentage,
+        "discount_amount": discount_amount
+    }
+
+
+
+

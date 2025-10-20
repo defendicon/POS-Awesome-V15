@@ -46,13 +46,15 @@
 					<span class="amount-value">{{ formatCurrency(item.qty * item.rate) }}</span>
 				</div>
 			</template>
-
-			<!-- Discount percentage column -->
+			{{
+			item
+			 }}
+			<!-- Discount percentage column //change discount_value-->
 			<template v-slot:item.discount_value="{ item }">
 				<div class="amount-value">
 					{{
 						formatFloat(
-							item.discount_percentage ||
+							item.discount_value||
 								(item.price_list_rate
 									? (item.discount_amount / item.price_list_rate) * 100
 									: 0),
@@ -222,7 +224,7 @@
 										color="primary"
 										id="discount_percentage"
 										:label="frappe._('Discount %')"
-										:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+										:bg-color="red"
 										class="dark-field"
 										hide-details
 										:model-value="formatFloat(item.discount_percentage || 0)"
@@ -236,7 +238,7 @@
 											),
 											calcPrices(item, $event.target.value, $event),
 										]"
-										:disabled="!!item.posa_is_replace || !!item.posa_offer_applied"
+										
 										prepend-inner-icon="mdi-percent"
 									></v-text-field>
 								</div>
@@ -246,13 +248,13 @@
 										variant="outlined"
 										color="primary"
 										id="discount_amount"
-										:label="frappe._('Discount Amount')"
+										:label="frappe._('Discount Amount..')"
 										:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 										class="dark-field"
 										hide-details
-										:model-value="formatCurrency(item.discount_amount || 0)"
+										:model-value="formatCurrency(item.rate || 0)"
 										@change="[
-											setFormatedCurrency(item, 'discount_amount', null, false, $event),
+											setFormatedCurrency(item, 'rate', null, false, $event),
 											calcPrices(item, $event.target.value, $event),
 										]"
 										:disabled="!!item.posa_is_replace || !!item.posa_offer_applied"

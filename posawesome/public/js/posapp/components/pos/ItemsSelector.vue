@@ -549,7 +549,7 @@ export default {
 					}
 					if (det.rate !== undefined) {
 						if (det.rate !== 0 || !item.rate) {
-							upd.rate = det.rate;
+							upd.rate = 999; det.rate;
 							upd.price_list_rate = det.price_list_rate || det.rate;
 						}
 					}
