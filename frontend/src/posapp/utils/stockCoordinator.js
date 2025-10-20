@@ -32,7 +32,7 @@ const computeAvailability = (code) => {
         }
         const base = baseQuantities.get(code);
         const reserved = reservedQuantities.get(code) || 0;
-        const available = Math.max(0, base - reserved);
+        const available = base - reserved;
         availabilityMap.set(code, available);
         return available;
 };
@@ -350,7 +350,7 @@ const applyInvoiceConsumption = (items = [], options = {}) => {
                         return;
                 }
                 const current = baseQuantities.get(code);
-                const next = Math.max(0, current - consumption);
+                const next = current - consumption;
                 if (next !== current) {
                         baseQuantities.set(code, next);
                         changed.add(code);
