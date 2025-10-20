@@ -2347,10 +2347,15 @@ export default {
                         return;
                 }
 
+                const existingDoc = this.invoice_doc || {};
                 const customerDetails = details || this.customer_info || {};
+                const resolvedCustomer = this.customer || customerDetails.customer || existingDoc.customer;
+                const hasCustomerChanged =
+                        existingDoc.customer && resolvedCustomer && existingDoc.customer !== resolvedCustomer;
+
                 const updatedDoc = {
-                        ...this.invoice_doc,
-                        customer: this.customer || this.invoice_doc.customer,
+                        ...existingDoc,
+                        customer: resolvedCustomer,
                 };
 
                 const fieldsToSync = [
@@ -2362,11 +2367,17 @@ export default {
                         "tax_id",
                         "primary_address",
                         "primary_address_name",
+                        "customer_primary_address",
                         "shipping_address_name",
                         "customer_primary_contact",
                         "mobile_no",
                         "phone",
                         "email_id",
+                        "contact_person",
+                        "contact_display",
+                        "contact_email",
+                        "contact_mobile",
+                        "contact_phone",
                 ];
 
                 fieldsToSync.forEach((field) => {
@@ -2374,6 +2385,41 @@ export default {
                                 updatedDoc[field] = customerDetails[field];
                         }
                 });
+
+                const addressFields = {
+                        customer_address:
+                                customerDetails.customer_address ?? customerDetails.primary_address_name ?? null,
+                        customer_address_display:
+                                customerDetails.customer_address_display ?? customerDetails.primary_address ?? null,
+                        shipping_address: customerDetails.shipping_address ?? null,
+                        shipping_address_display:
+                                customerDetails.shipping_address_display ?? customerDetails.shipping_address ?? null,
+                };
+
+                Object.entries(addressFields).forEach(([field, value]) => {
+                        if (value !== undefined && value !== null) {
+                                updatedDoc[field] = value;
+                        } else if (hasCustomerChanged) {
+                                updatedDoc[field] = null;
+                        }
+                });
+
+                if (hasCustomerChanged) {
+                        const alwaysResetOnChange = [
+                                "shipping_address_name",
+                                "contact_person",
+                                "contact_display",
+                                "contact_email",
+                                "contact_mobile",
+                                "contact_phone",
+                        ];
+
+                        alwaysResetOnChange.forEach((field) => {
+                                if (customerDetails[field] === undefined) {
+                                        updatedDoc[field] = null;
+                                }
+                        });
+                }
 
                 this.invoice_doc = updatedDoc;
         },
