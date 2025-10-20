@@ -131,21 +131,22 @@ export default {
 				};
 			}
 
-			if (!previous) {
-				if (snapshot.order.length) {
-					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-				}
-				return;
-			}
+                        if (!previous) {
+                                if (snapshot.order.length) {
+                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                }
+                        } else if (changed.size) {
+                                this.scheduleOfferRefresh(Array.from(changed));
+                        }
 
-			if (changed.size) {
-				this.scheduleOfferRefresh(Array.from(changed));
-			}
-		},
-	},
-	packed_items: {
-		deep: true,
-		handler(newItems) {
+                        if (typeof this.emitCartQuantities === "function") {
+                                this.emitCartQuantities();
+                        }
+                },
+        },
+        packed_items: {
+                deep: true,
+                handler(newItems) {
 			const snapshot = buildSnapshot(newItems);
 			this._offerSnapshots = this._offerSnapshots || {};
 			const previous = this._offerSnapshots.packed;
@@ -160,18 +161,19 @@ export default {
 				};
 			}
 
-			if (!previous) {
-				if (snapshot.order.length) {
-					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-				}
-				return;
-			}
+                        if (!previous) {
+                                if (snapshot.order.length) {
+                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                }
+                        } else if (changed.size) {
+                                this.scheduleOfferRefresh(Array.from(changed));
+                        }
 
-			if (changed.size) {
-				this.scheduleOfferRefresh(Array.from(changed));
-			}
-		},
-	},
+                        if (typeof this.emitCartQuantities === "function") {
+                                this.emitCartQuantities();
+                        }
+                },
+        },
 	// Watch for invoice type change and emit
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);

@@ -511,12 +511,55 @@ export default {
 			this.updateHeadersFromSelection();
 		},
 		// Handle item dropped from ItemsSelector to ItemsTable
-		handleItemDrop(item) {
-			console.log("Item dropped:", item);
+                handleItemDrop(item) {
+                        console.log("Item dropped:", item);
 
-			// Use the existing add_item method to add the dropped item
-			this.add_item(item);
-		},
+                        // Use the existing add_item method to add the dropped item
+                        this.add_item(item);
+                },
+
+                emitCartQuantities() {
+                        if (!this.eventBus || typeof this.eventBus.emit !== "function") {
+                                return;
+                        }
+
+                        const totals = {};
+                        const accumulate = (collection) => {
+                                if (!Array.isArray(collection)) {
+                                        return;
+                                }
+
+                                collection.forEach((entry) => {
+                                        if (!entry || !entry.item_code) {
+                                                return;
+                                        }
+
+                                        const code = entry.item_code;
+                                        const stockQty = Number(entry?.stock_qty);
+                                        let qty = Number.isFinite(stockQty) ? stockQty : null;
+
+                                        if (qty === null) {
+                                                const rowQty = Number(entry?.qty);
+                                                const conversion = Number(entry?.conversion_factor);
+                                                if (Number.isFinite(rowQty)) {
+                                                        const factor = Number.isFinite(conversion) ? conversion : 1;
+                                                        qty = rowQty * factor;
+                                                }
+                                        }
+
+                                        if (!Number.isFinite(qty) || qty <= 0) {
+                                                return;
+                                        }
+
+                                        totals[code] = (totals[code] || 0) + qty;
+                                });
+                        };
+
+                        accumulate(this.items);
+                        accumulate(this.packed_items);
+
+                        this.eventBus.emit("cart_quantities_updated", { totals });
+                },
 
 		// Show visual feedback when item is being dragged over drop zone
 		showDropFeedback(isDragging) {
@@ -1414,6 +1457,8 @@ export default {
                 if (this.pos_profile.posa_allow_multi_currency) {
                         this.fetch_available_currencies();
                 }
+
+                this.emitCartQuantities();
         },
         // Cleanup event listeners before component is destroyed
         beforeUnmount() {
