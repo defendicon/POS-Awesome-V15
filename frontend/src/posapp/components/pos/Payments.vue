@@ -1428,14 +1428,53 @@ export default {
 				customer_credit_dict: this.customer_credit_dict,
 				is_cashback: this.is_cashback,
 			};
-			const vm = this;
+                        const vm = this;
+                        const notifyStockUpdate = (items = []) => {
+                                const safeItems = Array.isArray(items) ? items : [];
+                                const sanitizedItems = [];
+                                const uniqueCodes = [];
+                                const seenCodes = new Set();
 
-			if (isOffline()) {
-				try {
-					saveOfflineInvoice({ data: data, invoice: this.invoice_doc });
-					this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
-					vm.eventBus.emit("show_message", {
-						title: __("Invoice saved offline"),
+                                safeItems.forEach((entry) => {
+                                        if (!entry) {
+                                                return;
+                                        }
+
+                                        const code = entry.item_code !== undefined && entry.item_code !== null
+                                                ? String(entry.item_code).trim()
+                                                : "";
+
+                                        if (!code) {
+                                                return;
+                                        }
+
+                                        sanitizedItems.push({ item_code: code });
+                                        if (!seenCodes.has(code)) {
+                                                seenCodes.add(code);
+                                                uniqueCodes.push(code);
+                                        }
+                                });
+
+                                if (!uniqueCodes.length) {
+                                        return;
+                                }
+
+                                vm.eventBus.emit("invoice_stock_updated", {
+                                        item_codes: uniqueCodes,
+                                        items: sanitizedItems,
+                                });
+                        };
+
+                        if (isOffline()) {
+                                try {
+                                        const soldItems = Array.isArray(vm.invoice_doc?.items) ? vm.invoice_doc.items : [];
+                                        updateLocalStock(soldItems);
+                                        notifyStockUpdate(soldItems);
+
+                                        saveOfflineInvoice({ data: data, invoice: this.invoice_doc });
+                                        this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
+                                        vm.eventBus.emit("show_message", {
+                                                title: __("Invoice saved offline"),
 						color: "warning",
 					});
 					if (print) {
@@ -1511,29 +1550,31 @@ export default {
 					}
 					if (print) {
 						vm.load_print_page();
-					}
-					vm.customer_credit_dict = [];
-					vm.redeem_customer_credit = false;
-					vm.is_cashback = true;
-					vm.is_credit_return = false;
+                                        }
+                                        vm.customer_credit_dict = [];
+                                        vm.redeem_customer_credit = false;
+                                        vm.is_cashback = true;
+                                        vm.is_credit_return = false;
 					vm.sales_person = "";
 					vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
-					vm.eventBus.emit("show_message", {
-						title:
-							vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
-								? __("Sales Order {0} is Submitted", [r.message.name])
-								: vm.invoiceType === "Quotation"
-									? __("Quotation {0} is Submitted", [r.message.name])
-									: __("Invoice {0} is Submitted", [r.message.name]),
-						color: "success",
-					});
-					frappe.utils.play_sound("submit");
-					// Update local stock quantities immediately after successful
-					// invoice submission so item availability reflects changes
-					updateLocalStock(vm.invoice_doc.items || []);
-					vm.addresses = [];
-					vm.eventBus.emit("clear_invoice");
-					vm.eventBus.emit("focus_item_search");
+                                        vm.eventBus.emit("show_message", {
+                                                title:
+                                                        vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
+                                                                ? __("Sales Order {0} is Submitted", [r.message.name])
+                                                                : vm.invoiceType === "Quotation"
+                                                                        ? __("Quotation {0} is Submitted", [r.message.name])
+                                                                        : __("Invoice {0} is Submitted", [r.message.name]),
+                                                color: "success",
+                                        });
+                                        frappe.utils.play_sound("submit");
+                                        // Update local stock quantities immediately after successful
+                                        // invoice submission so item availability reflects changes
+                                        const soldItems = Array.isArray(vm.invoice_doc?.items) ? vm.invoice_doc.items : [];
+                                        updateLocalStock(soldItems);
+                                        notifyStockUpdate(soldItems);
+                                        vm.addresses = [];
+                                        vm.eventBus.emit("clear_invoice");
+                                        vm.eventBus.emit("focus_item_search");
 					vm.eventBus.emit("reset_posting_date");
 					vm.back_to_invoice();
 					vm.loading = false;

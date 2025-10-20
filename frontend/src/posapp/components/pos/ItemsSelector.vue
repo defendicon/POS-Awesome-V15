@@ -2194,6 +2194,101 @@ export default {
                                 this.recomputeAvailabilityForCodes(Array.from(affected));
                         }
                 },
+                handleInvoiceStockUpdated(payload = {}) {
+                        try {
+                                const collectedCodes = [];
+                                const pushCode = (value) => {
+                                        if (value === undefined || value === null) {
+                                                return;
+                                        }
+                                        const normalized = String(value).trim();
+                                        if (!normalized) {
+                                                return;
+                                        }
+                                        collectedCodes.push(normalized);
+                                };
+
+                                if (Array.isArray(payload)) {
+                                        payload.forEach(pushCode);
+                                } else if (payload && typeof payload === "object") {
+                                        if (Array.isArray(payload.item_codes)) {
+                                                payload.item_codes.forEach(pushCode);
+                                        }
+                                        if (Array.isArray(payload.items)) {
+                                                payload.items.forEach((entry) => pushCode(entry?.item_code));
+                                        }
+                                        if (payload.invoice && Array.isArray(payload.invoice.items)) {
+                                                payload.invoice.items.forEach((entry) => pushCode(entry?.item_code));
+                                        }
+                                }
+
+                                const uniqueCodes = Array.from(new Set(collectedCodes));
+                                if (!uniqueCodes.length) {
+                                        return;
+                                }
+
+                                const codesSet = new Set(uniqueCodes);
+                                const itemsByCode = new Map();
+                                const captureFromList = (list) => {
+                                        if (!Array.isArray(list)) {
+                                                return;
+                                        }
+                                        list.forEach((item) => {
+                                                if (!item || item.item_code === undefined || item.item_code === null) {
+                                                        return;
+                                                }
+                                                const code = String(item.item_code).trim();
+                                                if (!code || !codesSet.has(code) || itemsByCode.has(code)) {
+                                                        return;
+                                                }
+                                                itemsByCode.set(code, item);
+                                        });
+                                };
+
+                                captureFromList(this.items);
+                                captureFromList(this.displayedItems);
+
+                                uniqueCodes.forEach((code) => {
+                                        if (!itemsByCode.has(code)) {
+                                                const indexed = this.lookupItemByBarcode(code);
+                                                if (indexed) {
+                                                        itemsByCode.set(code, indexed);
+                                                }
+                                        }
+                                });
+
+                                if (!itemsByCode.size) {
+                                        return;
+                                }
+
+                                const targets = Array.from(itemsByCode.values());
+                                const immediateCodes = new Set();
+                                targets.forEach((item) => {
+                                        try {
+                                                const localQtyRaw = getLocalStock(item.item_code);
+                                                const localQty = Number(localQtyRaw);
+                                                if (!Number.isFinite(localQty)) {
+                                                        return;
+                                                }
+                                                this.captureBaseAvailability(item, localQty);
+                                                item.actual_qty = localQty;
+                                                immediateCodes.add(String(item.item_code).trim());
+                                        } catch (err) {
+                                                console.warn("Failed to apply local stock for", item?.item_code, err);
+                                        }
+                                });
+
+                                if (immediateCodes.size) {
+                                        this.recomputeAvailabilityForCodes(Array.from(immediateCodes));
+                                }
+
+                                this.update_items_details(targets).catch((error) => {
+                                        console.error("Failed to refresh item details after invoice submission", error);
+                                });
+                        } catch (error) {
+                                console.error("Failed to process invoice stock update", error);
+                        }
+                },
                 async update_items_details(items) {
                         const vm = this;
                         if (!items || !items.length) return;
@@ -3715,6 +3810,7 @@ export default {
                         this.appliedCouponsCount = data.appliedCouponsCount;
                 });
                 this.eventBus.on("cart_quantities_updated", this.handleCartQuantitiesUpdated);
+                this.eventBus.on("invoice_stock_updated", this.handleInvoiceStockUpdated);
                 this.eventBus.on("update_customer_price_list", (data) => {
                         const fallback = this.pos_profile?.selling_price_list || null;
                         if (data === null || data === undefined) {
@@ -3905,9 +4001,10 @@ export default {
                 this.eventBus.off("update_offers_counters");
                 this.eventBus.off("update_coupons_counters");
                 this.eventBus.off("cart_quantities_updated", this.handleCartQuantitiesUpdated);
+                this.eventBus.off("invoice_stock_updated", this.handleInvoiceStockUpdated);
                 this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("force_reload_items");
-		this.eventBus.off("focus_item_search");
+                this.eventBus.off("force_reload_items");
+                this.eventBus.off("focus_item_search");
 		window.removeEventListener("resize", this.checkItemContainerOverflow);
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
