@@ -2353,6 +2353,12 @@ export default {
                 const hasCustomerChanged =
                         existingDoc.customer && resolvedCustomer && existingDoc.customer !== resolvedCustomer;
 
+                const resolvedCustomerName =
+                        customerDetails.customer_name ??
+                        customerDetails.customer ??
+                        resolvedCustomer ??
+                        null;
+
                 const updatedDoc = {
                         ...existingDoc,
                         customer: resolvedCustomer,
@@ -2403,6 +2409,18 @@ export default {
                                 updatedDoc[field] = null;
                         }
                 });
+
+                if (resolvedCustomerName) {
+                        const previousTitle = existingDoc.title ?? null;
+                        const titleMatchesPreviousCustomer =
+                                previousTitle &&
+                                (previousTitle === existingDoc.customer || previousTitle === existingDoc.customer_name);
+                        if (hasCustomerChanged || !previousTitle || titleMatchesPreviousCustomer) {
+                                updatedDoc.title = resolvedCustomerName;
+                        }
+                } else if (hasCustomerChanged) {
+                        updatedDoc.title = resolvedCustomer || "";
+                }
 
                 if (hasCustomerChanged) {
                         const alwaysResetOnChange = [
