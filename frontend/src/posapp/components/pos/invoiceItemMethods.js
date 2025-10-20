@@ -12,7 +12,7 @@ import {
 
 // Import composables
 import { useBatchSerial } from "../../composables/useBatchSerial.js";
-import { useDiscounts } from "../../composables/useDiscounts.js";
+import { getDiscountBase, useDiscounts } from "../../composables/useDiscounts.js";
 import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useStockUtils } from "../../composables/useStockUtils.js";
 import stockCoordinator from "../../utils/stockCoordinator.js";
@@ -393,9 +393,19 @@ export default {
 
 		this.customer = data.customer;
 		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-		this.discount_amount = data.discount_amount;
-		this.additional_discount_percentage = data.additional_discount_percentage;
-		this.additional_discount = data.discount_amount;
+                this.discount_amount = data.discount_amount;
+                this.additional_discount = data.discount_amount;
+
+                if (this.pos_profile?.posa_use_percentage_discount) {
+                        const base = getDiscountBase(this);
+                        if (base) {
+                                this.additional_discount_percentage = (flt(this.additional_discount) / base) * 100;
+                        } else {
+                                this.additional_discount_percentage = flt(data.additional_discount_percentage);
+                        }
+                } else {
+                        this.additional_discount_percentage = flt(data.additional_discount_percentage);
+                }
 
 		if (this.items.length > 0) {
 			this.items.forEach((item) => {
@@ -502,8 +512,19 @@ export default {
 			});
 			this.customer = data.customer;
 			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-			this.discount_amount = data.discount_amount;
-			this.additional_discount_percentage = data.additional_discount_percentage;
+                        this.discount_amount = data.discount_amount;
+                        this.additional_discount = data.discount_amount;
+
+                        if (this.pos_profile?.posa_use_percentage_discount) {
+                                const base = getDiscountBase(this);
+                                if (base) {
+                                        this.additional_discount_percentage = (flt(this.additional_discount) / base) * 100;
+                                } else {
+                                        this.additional_discount_percentage = flt(data.additional_discount_percentage);
+                                }
+                        } else {
+                                this.additional_discount_percentage = flt(data.additional_discount_percentage);
+                        }
 			this.items.forEach((item) => {
 				if (item.serial_no) {
 					item.serial_no_selected = [];

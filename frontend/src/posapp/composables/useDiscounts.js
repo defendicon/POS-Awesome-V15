@@ -1,23 +1,221 @@
 /* global __, flt */
 
-export function useDiscounts() {
-	// Update additional discount amount based on percentage
-	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
-		// If value is too large, reset to 0
-		if (value < -100 || value > 100) {
-			context.additional_discount_percentage = 0;
-			context.additional_discount = 0;
-			return;
-		}
+const normalizeNumber = (value) => {
+        if (value == null || value === "") {
+                return 0;
+        }
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
-	};
+        const numeric = typeof value === "number" ? value : flt(value);
+        if (!Number.isFinite(numeric)) {
+                return 0;
+        }
+
+        return numeric;
+};
+
+const normalizePositive = (value) => {
+        const numeric = normalizeNumber(value);
+        if (!numeric) {
+                return 0;
+        }
+
+        return numeric < 0 ? Math.abs(numeric) : numeric;
+};
+
+const deriveNetFromItems = (items) => {
+        if (!Array.isArray(items) || !items.length) {
+                return 0;
+        }
+
+        let sum = 0;
+        let hasNetValues = false;
+
+        items.forEach((item) => {
+                if (!item) {
+                        return;
+                }
+
+                if (item.net_amount != null && item.net_amount !== "") {
+                        sum += normalizePositive(item.net_amount);
+                        hasNetValues = true;
+                        return;
+                }
+
+                if (item.net_rate != null && item.net_rate !== "" && item.qty != null) {
+                        const netRate = normalizePositive(item.net_rate);
+                        const qty = normalizePositive(item.qty);
+                        if (netRate && qty) {
+                                sum += netRate * qty;
+                                hasNetValues = true;
+                        }
+                }
+        });
+
+        return hasNetValues ? sum : 0;
+};
+
+const deriveInclusiveTaxTotal = (taxes, doc) => {
+        if (!Array.isArray(taxes) || !taxes.length) {
+                return 0;
+        }
+
+        const conversionRate = doc?.conversion_rate || 1;
+
+        return taxes.reduce((total, tax) => {
+                if (!tax) {
+                        return total;
+                }
+
+                const included = tax.included_in_print_rate === 1 || tax.included_in_print_rate === true;
+                if (!included) {
+                        return total;
+                }
+
+                if (tax.tax_amount != null && tax.tax_amount !== "") {
+                        return total + normalizePositive(tax.tax_amount);
+                }
+
+                if (tax.base_tax_amount != null && tax.base_tax_amount !== "") {
+                        const converted = normalizePositive(tax.base_tax_amount) / conversionRate;
+                        return total + converted;
+                }
+
+                return total;
+        }, 0);
+};
+
+const collectCandidateDocs = (context) => {
+        const docs = [];
+
+        if (context?.invoice_doc) {
+                docs.push(context.invoice_doc);
+        }
+
+        if (context?.return_doc && context.return_doc !== context.invoice_doc) {
+                docs.push(context.return_doc);
+        }
+
+        const storeDocRef = context?.invoiceStore?.invoiceDoc;
+        if (storeDocRef) {
+                const storeDoc = storeDocRef.value ?? storeDocRef;
+                if (storeDoc && storeDoc !== context.invoice_doc && storeDoc !== context.return_doc) {
+                        docs.push(storeDoc);
+                }
+        }
+
+        return docs;
+};
+
+const resolveApplyDiscountOn = (context, docs) => {
+        for (const doc of docs) {
+                if (doc?.apply_discount_on) {
+                        return String(doc.apply_discount_on).trim().toLowerCase();
+                }
+        }
+
+        if (context?.pos_profile?.apply_discount_on) {
+                return String(context.pos_profile.apply_discount_on).trim().toLowerCase();
+        }
+
+        if (context?.apply_discount_on) {
+                return String(context.apply_discount_on).trim().toLowerCase();
+        }
+
+        return "";
+};
+
+export const getDiscountBase = (context) => {
+        if (!context) {
+                return 0;
+        }
+
+        const docs = collectCandidateDocs(context);
+        const applyOn = resolveApplyDiscountOn(context, docs);
+        const prefersNet = applyOn === "net total";
+
+        const totalCandidates = [context?.Total, docs[0]?.total, docs[0]?.grand_total];
+        const fallbackTotal = totalCandidates
+                .map((value) => normalizePositive(value))
+                .find((value) => value > 0);
+
+        if (!prefersNet) {
+                return fallbackTotal || 0;
+        }
+
+        const isTaxInclusiveProfile = Boolean(
+                context?.pos_profile?.posa_tax_inclusive ||
+                        docs.find((doc) => doc?.posa_tax_inclusive)
+        );
+
+        const candidates = docs.length ? docs : [context];
+
+        for (const doc of candidates) {
+                if (!doc) {
+                        continue;
+                }
+
+                const docNetCandidates = [
+                        doc.net_total,
+                        doc.net_total_after_discount,
+                        doc.base_net_total && doc.conversion_rate
+                                ? doc.base_net_total / (doc.conversion_rate || 1)
+                                : null,
+                ];
+
+                for (const candidate of docNetCandidates) {
+                        const normalized = normalizePositive(candidate);
+                        if (normalized) {
+                                return normalized;
+                        }
+                }
+
+                const netFromItems = deriveNetFromItems(doc.items);
+                if (netFromItems) {
+                        return netFromItems;
+                }
+
+                const docTotal = normalizePositive(doc.total ?? doc.grand_total ?? fallbackTotal);
+                if (!docTotal) {
+                        continue;
+                }
+
+                let inclusiveTax = deriveInclusiveTaxTotal(doc.taxes, doc);
+
+                if (!inclusiveTax && isTaxInclusiveProfile) {
+                        inclusiveTax = normalizePositive(doc.total_taxes_and_charges);
+                }
+
+                if (inclusiveTax && inclusiveTax < docTotal) {
+                        return docTotal - inclusiveTax;
+                }
+        }
+
+        const netFromContextItems = deriveNetFromItems(context.items);
+        if (netFromContextItems) {
+                return netFromContextItems;
+        }
+
+        return fallbackTotal || 0;
+};
+
+export function useDiscounts() {
+        // Update additional discount amount based on percentage
+        const updateDiscountAmount = (context) => {
+                const value = flt(context.additional_discount_percentage);
+                // If value is too large, reset to 0
+                if (value < -100 || value > 100) {
+                        context.additional_discount_percentage = 0;
+                        context.additional_discount = 0;
+                        return;
+                }
+
+                const base = getDiscountBase(context);
+                if (base) {
+                        context.additional_discount = (base * value) / 100;
+                } else {
+                        context.additional_discount = 0;
+                }
+        };
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {
