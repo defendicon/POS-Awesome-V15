@@ -636,29 +636,35 @@ export default {
 			this.expanded = Array.isArray(ids) ? ids.slice(-1) : [];
 		},
 
-		async print_draft_invoice() {
-			if (!this.pos_profile.posa_allow_print_draft_invoices) {
-				this.eventBus.emit("show_message", {
-					title: __(`You are not allowed to print draft invoices`),
-					color: "error",
-				});
-				return;
-			}
-			let invoice_name = this.invoice_doc.name;
-			try {
-				const invoice_doc = await this.save_and_clear_invoice();
-				if (invoice_doc?.name) {
-					invoice_name = invoice_doc.name;
-				}
-				this.load_print_page(invoice_name);
-			} catch (error) {
-				console.error("Failed to print draft invoice:", error);
-				this.eventBus.emit("show_message", {
-					title: __("Unable to print draft invoice"),
-					color: "error",
-				});
-			}
-		},
+                async print_draft_invoice() {
+                        if (!this.pos_profile.posa_allow_print_draft_invoices) {
+                                this.eventBus.emit("show_message", {
+                                        title: __(`You are not allowed to print draft invoices`),
+                                        color: "error",
+                                });
+                                return;
+                        }
+
+                        let invoice_name = this.invoice_doc?.name || null;
+                        try {
+                                const invoice_doc = await this.save_and_clear_invoice();
+                                if (invoice_doc?.name) {
+                                        invoice_name = invoice_doc.name;
+                                }
+
+                                if (!invoice_name) {
+                                        throw new Error("Invoice could not be saved before printing");
+                                }
+
+                                this.load_print_page(invoice_name);
+                        } catch (error) {
+                                console.error("Failed to print draft invoice:", error);
+                                this.eventBus.emit("show_message", {
+                                        title: __("Unable to print draft invoice"),
+                                        color: "error",
+                                });
+                        }
+                },
 		async set_delivery_charges() {
 			var vm = this;
 			if (!this.pos_profile || !this.customer || !this.pos_profile.posa_use_delivery_charges) {

@@ -2264,6 +2264,7 @@ export default {
                                 );
                                 if (cached) {
                                         vm.customer_info = { ...cached };
+                                        vm.sync_invoice_customer_details(vm.customer_info);
                                         if (vm.pos_profile.posa_force_price_from_customer_price_list !== false) {
                                                 const defaultPriceList = vm.pos_profile?.selling_price_list || null;
                                                 const resolvedPriceList = cached.customer_price_list || defaultPriceList;
@@ -2278,6 +2279,7 @@ export default {
                                         .find((c) => c.customer_name === vm.customer);
                                 if (queued) {
                                         vm.customer_info = { ...queued, name: queued.customer_name };
+                                        vm.sync_invoice_customer_details(vm.customer_info);
                                         if (vm.pos_profile.posa_force_price_from_customer_price_list !== false) {
                                                 const defaultPriceList = vm.pos_profile?.selling_price_list || null;
                                                 const resolvedPriceList = queued.customer_price_list || defaultPriceList;
@@ -2299,12 +2301,13 @@ export default {
 					customer: vm.customer,
 				},
 			});
-			const message = r.message;
-			if (!r.exc) {
-				vm.customer_info = {
-					...message,
-				};
-			}
+                        const message = r.message;
+                        if (!r.exc) {
+                                vm.customer_info = {
+                                        ...message,
+                                };
+                                vm.sync_invoice_customer_details(vm.customer_info);
+                        }
 			// When force reload is enabled, automatically switch to the
 			// customer's default price list so that item rates are fetched
 			// correctly from the server.
@@ -2337,6 +2340,42 @@ export default {
                         this.selected_price_list = price_list;
                 }
                 this.eventBus.emit("update_customer_price_list", price_list);
+        },
+
+        sync_invoice_customer_details(details = null) {
+                if (!this.invoice_doc || typeof this.invoice_doc !== "object") {
+                        return;
+                }
+
+                const customerDetails = details || this.customer_info || {};
+                const updatedDoc = {
+                        ...this.invoice_doc,
+                        customer: this.customer || this.invoice_doc.customer,
+                };
+
+                const fieldsToSync = [
+                        "customer_name",
+                        "customer_group",
+                        "customer_price_list",
+                        "territory",
+                        "customer_type",
+                        "tax_id",
+                        "primary_address",
+                        "primary_address_name",
+                        "shipping_address_name",
+                        "customer_primary_contact",
+                        "mobile_no",
+                        "phone",
+                        "email_id",
+                ];
+
+                fieldsToSync.forEach((field) => {
+                        if (customerDetails[field] !== undefined && customerDetails[field] !== null) {
+                                updatedDoc[field] = customerDetails[field];
+                        }
+                });
+
+                this.invoice_doc = updatedDoc;
         },
 
 	_applyPriceListRate(item, newRate, priceCurrency) {

@@ -82,19 +82,21 @@ const diffSnapshots = (previous, current) => {
 
 export default {
 	// Watch for customer change and update related data
-	customer() {
-		this.close_payments();
-		const customersStore = useCustomersStore();
-		customersStore.setSelectedCustomer(this.customer || null);
-		this.fetch_customer_details();
-		this.fetch_customer_balance();
-		this.set_delivery_charges();
-	},
-	// Watch for customer_info change and emit to edit form
-	customer_info() {
-		const customersStore = useCustomersStore();
-		customersStore.setCustomerInfo(this.customer_info || {});
-	},
+        customer() {
+                this.close_payments();
+                const customersStore = useCustomersStore();
+                customersStore.setSelectedCustomer(this.customer || null);
+                this.fetch_customer_details();
+                this.fetch_customer_balance();
+                this.set_delivery_charges();
+                this.sync_invoice_customer_details();
+        },
+        // Watch for customer_info change and emit to edit form
+        customer_info() {
+                const customersStore = useCustomersStore();
+                customersStore.setCustomerInfo(this.customer_info || {});
+                this.sync_invoice_customer_details(this.customer_info);
+        },
 	// Watch for expanded row change and update item detail
 	expanded(data_value) {
 		if (data_value.length > 0) {
