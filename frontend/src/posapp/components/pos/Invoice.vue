@@ -470,10 +470,10 @@ export default {
 		...shortcutMethods,
 		...offerMethods,
 		...invoiceItemMethods,
-		initializeItemsHeaders() {
-			// Define all available columns
-			this.available_columns = [
-				{ title: __("Name"), align: "start", sortable: true, key: "item_name", required: true },
+                initializeItemsHeaders() {
+                        // Define all available columns
+                        this.available_columns = [
+                                { title: __("Name"), align: "start", sortable: true, key: "item_name", required: true },
 				{ title: __("QTY"), key: "qty", align: "center", required: true },
 				{ title: __("UOM"), key: "uom", align: "center", required: false },
 				{
@@ -507,14 +507,57 @@ export default {
 					.map((col) => col.key);
 			}
 
-			// Generate headers based on selected columns
-			this.updateHeadersFromSelection();
-		},
-		// Handle item dropped from ItemsSelector to ItemsTable
-		handleItemDrop(item) {
-			console.log("Item dropped:", item);
+                        // Generate headers based on selected columns
+                        this.updateHeadersFromSelection();
+                },
+                emitCartQuantities() {
+                        const totals = {};
+                        const normalizeNumber = (value) => {
+                                const num = Number(value);
+                                return Number.isFinite(num) ? num : null;
+                        };
+                        const accumulate = (line) => {
+                                if (!line || !line.item_code) {
+                                        return;
+                                }
 
-			// Use the existing add_item method to add the dropped item
+                                const code = String(line.item_code).trim();
+                                if (!code) {
+                                        return;
+                                }
+
+                                let stockQty = normalizeNumber(line.stock_qty);
+                                if (stockQty === null) {
+                                        const qty = normalizeNumber(line.qty);
+                                        if (qty !== null) {
+                                                const conversion = normalizeNumber(line.conversion_factor);
+                                                const factor = conversion !== null && conversion !== 0 ? conversion : 1;
+                                                stockQty = qty * factor;
+                                        }
+                                }
+
+                                if (stockQty === null) {
+                                        return;
+                                }
+
+                                const positiveQty = Math.max(0, stockQty);
+                                if (!positiveQty) {
+                                        return;
+                                }
+
+                                totals[code] = (totals[code] || 0) + positiveQty;
+                        };
+
+                        (Array.isArray(this.items) ? this.items : []).forEach(accumulate);
+                        (Array.isArray(this.packed_items) ? this.packed_items : []).forEach(accumulate);
+
+                        this.eventBus.emit("cart_quantities_updated", totals);
+                },
+                // Handle item dropped from ItemsSelector to ItemsTable
+                handleItemDrop(item) {
+                        console.log("Item dropped:", item);
+
+                        // Use the existing add_item method to add the dropped item
 			this.add_item(item);
 		},
 
@@ -1414,6 +1457,8 @@ export default {
                 if (this.pos_profile.posa_allow_multi_currency) {
                         this.fetch_available_currencies();
                 }
+
+                this.emitCartQuantities();
         },
         // Cleanup event listeners before component is destroyed
         beforeUnmount() {
