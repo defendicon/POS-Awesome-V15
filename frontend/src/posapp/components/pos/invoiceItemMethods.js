@@ -226,9 +226,13 @@ export default {
 	},
 
 	// Reset all invoice fields to default/empty values
-	clear_invoice() {
-		return clearInvoice(this);
-	},
+        clear_invoice() {
+                const result = clearInvoice(this);
+                if (typeof this.syncInvoiceDocTotals === "function") {
+                        this.syncInvoiceDocTotals();
+                }
+                return result;
+        },
 
 	// Fetch customer balance from backend or cache
 	async fetch_customer_balance() {
@@ -416,13 +420,17 @@ export default {
 			this.eventBus.emit("set_pos_coupons", data.posa_coupons);
 		}
 
-		console.log("load_invoice completed, invoice state:", {
-			invoiceType: this.invoiceType,
-			is_return: this.invoice_doc.is_return,
-			items: this.items.length,
-			customer: this.customer,
-		});
-	},
+                console.log("load_invoice completed, invoice state:", {
+                        invoiceType: this.invoiceType,
+                        is_return: this.invoice_doc.is_return,
+                        items: this.items.length,
+                        customer: this.customer,
+                });
+
+                if (typeof this.syncInvoiceDocTotals === "function") {
+                        this.syncInvoiceDocTotals();
+                }
+        },
 
 	// Save and clear the current invoice (draft logic)
 	async save_and_clear_invoice() {
@@ -769,8 +777,70 @@ export default {
 			});
 		}
 
-		return doc;
-	},
+                return doc;
+        },
+
+        syncInvoiceDocTotals(options = {}) {
+                if (!this.invoiceStore || typeof this.invoiceStore.mergeInvoiceDoc !== "function") {
+                        return null;
+                }
+
+                let snapshot;
+                try {
+                        snapshot = this.get_invoice_doc();
+                } catch (error) {
+                        console.error("Failed to build invoice snapshot while syncing totals", error);
+                        return null;
+                }
+
+                const assignIfDefined = (target, key, value, includeNull = true) => {
+                        if (value === undefined) {
+                                return;
+                        }
+                        if (value === null && !includeNull) {
+                                return;
+                        }
+                        target[key] = value;
+                };
+
+                const patch = {};
+
+                assignIfDefined(patch, "currency", snapshot.currency, false);
+                assignIfDefined(patch, "conversion_rate", snapshot.conversion_rate, false);
+                assignIfDefined(patch, "plc_conversion_rate", snapshot.plc_conversion_rate, false);
+                assignIfDefined(patch, "total", snapshot.total);
+                assignIfDefined(patch, "base_total", snapshot.base_total);
+                assignIfDefined(patch, "net_total", snapshot.net_total);
+                assignIfDefined(patch, "base_net_total", snapshot.base_net_total);
+                assignIfDefined(patch, "discount_amount", snapshot.discount_amount);
+                assignIfDefined(patch, "base_discount_amount", snapshot.base_discount_amount);
+                assignIfDefined(patch, "additional_discount_percentage", snapshot.additional_discount_percentage);
+                assignIfDefined(patch, "total_taxes_and_charges", snapshot.total_taxes_and_charges);
+                assignIfDefined(patch, "grand_total", snapshot.grand_total);
+                assignIfDefined(patch, "base_grand_total", snapshot.base_grand_total);
+                assignIfDefined(patch, "rounded_total", snapshot.rounded_total);
+                assignIfDefined(patch, "base_rounded_total", snapshot.base_rounded_total);
+                assignIfDefined(patch, "posa_delivery_charges_rate", snapshot.posa_delivery_charges_rate);
+                assignIfDefined(patch, "posa_delivery_charges", snapshot.posa_delivery_charges);
+                assignIfDefined(patch, "is_return", snapshot.is_return);
+
+                if (Array.isArray(snapshot.taxes)) {
+                        patch.taxes = snapshot.taxes.map((tax) => ({ ...tax }));
+                }
+
+                if (options && typeof options.mergeExtras === "object") {
+                        Object.assign(patch, options.mergeExtras);
+                }
+
+                try {
+                        this.invoiceStore.mergeInvoiceDoc(patch);
+                } catch (error) {
+                        console.error("Failed to merge invoice totals into store", error, { patch });
+                        return null;
+                }
+
+                return patch;
+        },
 
 	// Get invoice doc from order doc (for sales order to invoice conversion)
 	async get_invoice_from_order_doc() {
@@ -2610,9 +2680,13 @@ export default {
 		}
 	},
 	// Update additional discount amount based on percentage
-	update_discount_umount() {
-		return updateDiscountAmount(this);
-	},
+        update_discount_umount() {
+                const result = updateDiscountAmount(this);
+                if (typeof this.syncInvoiceDocTotals === "function") {
+                        this.syncInvoiceDocTotals();
+                }
+                return result;
+        },
 
 	// Calculate prices and discounts for an item based on field change
 	calc_prices(item, value, $event) {

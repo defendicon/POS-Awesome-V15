@@ -143,6 +143,10 @@ export default {
                         if (typeof this.emitCartQuantities === "function") {
                                 this.emitCartQuantities();
                         }
+
+                        if (typeof this.syncInvoiceDocTotals === "function") {
+                                this.syncInvoiceDocTotals();
+                        }
                 },
         },
         packed_items: {
@@ -195,6 +199,9 @@ export default {
                 const amount = normalize(this.additional_discount, this.currency_precision);
                 if (!amount) {
                         this.additional_discount_percentage = 0;
+                        if (typeof this.syncInvoiceDocTotals === "function") {
+                                this.syncInvoiceDocTotals();
+                        }
                         return;
                 }
 
@@ -209,9 +216,18 @@ export default {
                 } else {
                         this.additional_discount_percentage = 0;
                 }
+
+                if (typeof this.syncInvoiceDocTotals === "function") {
+                        this.syncInvoiceDocTotals();
+                }
         },
-	// Keep display date in sync with posting_date
-	posting_date: {
+        delivery_charges_rate() {
+                if (typeof this.syncInvoiceDocTotals === "function") {
+                        this.syncInvoiceDocTotals();
+                }
+        },
+        // Keep display date in sync with posting_date
+        posting_date: {
 		handler(newVal) {
 			this.posting_date_display = this.formatDateForDisplay(newVal);
 		},

@@ -74,9 +74,9 @@
 					</v-col>
 
 					<!-- Total (moved to maintain row alignment) -->
-					<v-col cols="6">
-						<v-text-field
-							:model-value="formatCurrency(subtotal)"
+                                        <v-col cols="6">
+                                                <v-text-field
+                                                        :model-value="formatCurrency(resolvedSubtotal)"
 							:prefix="currencySymbol(displayCurrency)"
 							:label="frappe._('Total')"
 							prepend-inner-icon="mdi-cash"
@@ -206,18 +206,19 @@
 
 <script>
 export default {
-	props: {
-		pos_profile: Object,
-		total_qty: [Number, String],
-		additional_discount: Number,
-		additional_discount_percentage: Number,
-		total_items_discount_amount: Number,
-		subtotal: Number,
-		displayCurrency: String,
-		formatFloat: Function,
-		formatCurrency: Function,
-		currencySymbol: Function,
-		discount_percentage_offer_name: [String, Number],
+        props: {
+                pos_profile: Object,
+                total_qty: [Number, String],
+                additional_discount: Number,
+                additional_discount_percentage: Number,
+                total_items_discount_amount: Number,
+                subtotal: Number,
+                invoice_doc: Object,
+                displayCurrency: String,
+                formatFloat: Function,
+                formatCurrency: Function,
+                currencySymbol: Function,
+                discount_percentage_offer_name: [String, Number],
 		isNumber: Function,
 	},
 	data() {
@@ -246,20 +247,53 @@ export default {
 		"apply-offers",
 		"show-payment",
 	],
-	computed: {
-		hide_qty_decimals() {
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					return !!opts.hide_qty_decimals;
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
-			}
-			return false;
-		},
-	},
+        computed: {
+                hide_qty_decimals() {
+                        try {
+                                const saved = localStorage.getItem("posawesome_item_selector_settings");
+                                if (saved) {
+                                        const opts = JSON.parse(saved);
+                                        return !!opts.hide_qty_decimals;
+                                }
+                        } catch (e) {
+                                console.error("Failed to load item selector settings:", e);
+                        }
+                        return false;
+                },
+                resolvedSubtotal() {
+                        const parseNumber = (value) => {
+                                if (value === null || value === undefined || value === "") {
+                                        return null;
+                                }
+                                if (typeof value === "number") {
+                                        return Number.isFinite(value) ? value : null;
+                                }
+                                const parsed = Number.parseFloat(value);
+                                return Number.isFinite(parsed) ? parsed : null;
+                        };
+
+                        const doc = this.invoice_doc || {};
+                        const candidates = [
+                                parseNumber(doc.rounded_total),
+                                parseNumber(doc.grand_total),
+                                parseNumber(doc.total),
+                                parseNumber(this.subtotal),
+                        ];
+                        let total = candidates.find((value) => value !== null && value !== undefined);
+                        if (total === undefined) {
+                                total = 0;
+                        }
+
+                        const flag = doc && Object.prototype.hasOwnProperty.call(doc, "is_return") ? doc.is_return : null;
+                        const isReturn = typeof flag === "string" ? ["1", "true", "yes"].includes(flag.toLowerCase()) : Boolean(flag);
+
+                        if (isReturn) {
+                                total = Math.abs(total);
+                        }
+
+                        return total;
+                },
+        },
 	methods: {
 		// Debounced handlers for better performance
 		handleAdditionalDiscountUpdate(value) {

@@ -298,14 +298,15 @@
 			</div>
 		</v-card>
 		<!-- Payment Section -->
-		<InvoiceSummary
-			:pos_profile="pos_profile"
-			:total_qty="total_qty"
-			:additional_discount="additional_discount"
-			:additional_discount_percentage="additional_discount_percentage"
-			:total_items_discount_amount="total_items_discount_amount"
-			:subtotal="subtotal"
-			:displayCurrency="displayCurrency"
+                <InvoiceSummary
+                        :pos_profile="pos_profile"
+                        :total_qty="total_qty"
+                        :additional_discount="additional_discount"
+                        :additional_discount_percentage="additional_discount_percentage"
+                        :total_items_discount_amount="total_items_discount_amount"
+                        :subtotal="subtotal"
+                        :invoice_doc="invoice_doc"
+                        :displayCurrency="displayCurrency"
 			:formatFloat="formatFloat"
 			:formatCurrency="formatCurrency"
 			:currencySymbol="currencySymbol"
@@ -829,16 +830,20 @@ export default {
 			}
 			this.update_delivery_charges_rate();
 		},
-		update_delivery_charges_rate() {
-			if (this.base_delivery_charges_rate) {
-				this.delivery_charges_rate = this.flt(
-					this.base_delivery_charges_rate / (this.conversion_rate || 1),
-					this.currency_precision,
-				);
-			} else {
-				this.delivery_charges_rate = 0;
-			}
-		},
+                update_delivery_charges_rate() {
+                        if (this.base_delivery_charges_rate) {
+                                this.delivery_charges_rate = this.flt(
+                                        this.base_delivery_charges_rate / (this.conversion_rate || 1),
+                                        this.currency_precision,
+                                );
+                        } else {
+                                this.delivery_charges_rate = 0;
+                        }
+
+                        if (typeof this.syncInvoiceDocTotals === "function") {
+                                this.syncInvoiceDocTotals();
+                        }
+                },
 		updatePostingDate(date) {
 			if (!date) return;
 			this.posting_date = date;
