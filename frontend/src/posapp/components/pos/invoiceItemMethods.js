@@ -1,13 +1,13 @@
 /* global __, frappe, flt */
 import {
-	isOffline,
-	saveCustomerBalance,
-	getCachedCustomerBalance,
-	getCachedPriceListItems,
-	getCustomerStorage,
-	getOfflineCustomers,
-	getTaxTemplate,
-	getTaxInclusiveSetting,
+        isOffline,
+        saveCustomerBalance,
+        getCachedCustomerBalance,
+        getCachedPriceListItems,
+        getCustomerStorage,
+        getOfflineCustomers,
+        getTaxTemplate,
+        getTaxInclusiveSetting,
 } from "../../../offline/index.js";
 
 // Import composables
@@ -19,6 +19,37 @@ import stockCoordinator from "../../utils/stockCoordinator.js";
 
 const ITEM_DETAIL_CACHE_TTL = 5000;
 const STOCK_CACHE_TTL = 5000;
+
+const truthyFlag = (value) => {
+        if (typeof value === "boolean") {
+                return value;
+        }
+        if (typeof value === "number") {
+                return value !== 0;
+        }
+        if (typeof value === "string") {
+                const normalized = value.trim().toLowerCase();
+                if (!normalized.length) {
+                        return false;
+                }
+                return !["0", "false", "no", "off"].includes(normalized);
+        }
+        return Boolean(value);
+};
+
+const toNumber = (value) => {
+        if (value === null || value === undefined || value === "") {
+                return 0;
+        }
+        if (typeof value === "number") {
+                return Number.isFinite(value) ? value : 0;
+        }
+        if (typeof value === "string") {
+                const parsed = Number.parseFloat(value);
+                return Number.isFinite(parsed) ? parsed : 0;
+        }
+        return 0;
+};
 
 const { setSerialNo, setBatchQty } = useBatchSerial();
 const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
@@ -180,12 +211,156 @@ export default {
 		}
 		this.item_stock_cache[key] = { ts: Date.now(), qty };
 	},
-	clearItemStockCache() {
-		this.item_stock_cache = {};
-	},
-	remove_item(item) {
-		return removeItem(item, this);
-	},
+        clearItemStockCache() {
+                this.item_stock_cache = {};
+        },
+
+        resolveInvoiceTaxesTemplate() {
+                const doc = this.invoice_doc;
+                if (doc && Array.isArray(doc.taxes) && doc.taxes.length) {
+                        return {
+                                rows: doc.taxes.map((tax) => ({ ...tax })),
+                                inclusiveFallback: null,
+                        };
+                }
+
+                if (isOffline()) {
+                        const template = getTaxTemplate(this.pos_profile?.taxes_and_charges);
+                        if (template && Array.isArray(template.taxes) && template.taxes.length) {
+                                return {
+                                        rows: template.taxes.map((tax) => ({ ...tax })),
+                                        inclusiveFallback: truthyFlag(getTaxInclusiveSetting()),
+                                };
+                        }
+                }
+
+                return { rows: [], inclusiveFallback: null };
+        },
+
+        computeInvoiceTaxSnapshot({
+                baseNet = 0,
+                subtotalBeforeTaxes = 0,
+                templateRows = [],
+                inclusiveFallback = null,
+        } = {}) {
+                const precision = Number.isInteger(this.currency_precision) ? this.currency_precision : 2;
+                const exchangeRate = this.exchange_rate || 1;
+                const doc = this.invoice_doc || {};
+                const baseNetAbs = Math.max(toNumber(baseNet), 0);
+                const subtotalAbs = Math.max(toNumber(subtotalBeforeTaxes), 0);
+
+                if (!Array.isArray(templateRows) || !templateRows.length) {
+                        const netTotal = flt(baseNetAbs, precision);
+                        const grandTotal = flt(subtotalAbs, precision);
+                        return {
+                                rows: [],
+                                totalTaxes: 0,
+                                inclusiveTaxes: 0,
+                                netTotal,
+                                grandTotal,
+                        };
+                }
+
+                const originalNet = Math.abs(
+                        toNumber(doc.net_total || doc.base_net_total || doc.total || doc.base_total || baseNetAbs),
+                );
+                const ratio = originalNet ? baseNetAbs / originalNet : null;
+
+                let runningTotal = subtotalAbs;
+                let totalTaxes = 0;
+                let inclusiveTaxes = 0;
+                let inclusiveBase = baseNetAbs;
+                const computedRows = [];
+
+                templateRows.forEach((templateRow, index) => {
+                        if (!templateRow) {
+                                return;
+                        }
+
+                        const chargeType = templateRow.charge_type || "On Net Total";
+                        const rateValue = Number.parseFloat(templateRow.rate);
+                        const rate = Number.isFinite(rateValue) ? rateValue : null;
+                        const originalAmount = Math.abs(toNumber(templateRow.tax_amount));
+                        const previous = computedRows[index - 1] || null;
+
+                        const included =
+                                chargeType === "Actual"
+                                        ? false
+                                        : templateRow.hasOwnProperty("included_in_print_rate")
+                                                ? truthyFlag(templateRow.included_in_print_rate)
+                                                : truthyFlag(inclusiveFallback);
+
+                        let taxAmount = 0;
+
+                        if (chargeType === "Actual") {
+                                taxAmount = originalAmount;
+                        } else if (included && rate !== null) {
+                                const baseForInclusive = Math.max(inclusiveBase, 0);
+                                taxAmount = (baseForInclusive * rate) / (100 + rate);
+                        } else if (chargeType === "On Net Total" && rate !== null) {
+                                taxAmount = (baseNetAbs * rate) / 100;
+                        } else if (chargeType === "On Previous Row Amount" && rate !== null) {
+                                const baseAmount = previous ? previous.tax_amount : originalAmount;
+                                taxAmount = (baseAmount * rate) / 100;
+                        } else if (chargeType === "On Previous Row Total" && rate !== null) {
+                                const baseAmount = previous ? previous.total_after_tax : runningTotal;
+                                taxAmount = (baseAmount * rate) / 100;
+                        } else if (rate !== null) {
+                                taxAmount = (baseNetAbs * rate) / 100;
+                        } else if (ratio !== null && originalAmount) {
+                                taxAmount = originalAmount * ratio;
+                        } else {
+                                taxAmount = originalAmount;
+                        }
+
+                        if (!Number.isFinite(taxAmount)) {
+                                taxAmount = 0;
+                        }
+
+                        const roundedAmount = flt(taxAmount, precision);
+                        const totalAfterTax = included ? runningTotal : flt(runningTotal + roundedAmount, precision);
+
+                        computedRows.push({
+                                template: templateRow,
+                                tax_amount: roundedAmount,
+                                total_after_tax: totalAfterTax,
+                                included,
+                        });
+
+                        runningTotal = totalAfterTax;
+                        totalTaxes += roundedAmount;
+                        if (included) {
+                                inclusiveTaxes += roundedAmount;
+                                inclusiveBase = Math.max(inclusiveBase - roundedAmount, 0);
+                        }
+                });
+
+                const rows = computedRows.map(({ template, tax_amount, total_after_tax, included }) => {
+                        const clone = { ...template };
+                        clone.charge_type = template.charge_type || "On Net Total";
+                        clone.included_in_print_rate = included ? 1 : 0;
+                        clone.tax_amount = flt(tax_amount, precision);
+                        clone.total = flt(total_after_tax, precision);
+                        clone.base_tax_amount = flt(clone.tax_amount * exchangeRate, precision);
+                        clone.base_total = flt(clone.total * exchangeRate, precision);
+                        return clone;
+                });
+
+                const netTotal = flt(Math.max(baseNetAbs - inclusiveTaxes, 0), precision);
+                const grandTotal = flt(Math.max(runningTotal, 0), precision);
+
+                return {
+                        rows,
+                        totalTaxes: flt(totalTaxes, precision),
+                        inclusiveTaxes: flt(inclusiveTaxes, precision),
+                        netTotal,
+                        grandTotal,
+                };
+        },
+
+        remove_item(item) {
+                return removeItem(item, this);
+        },
 
 	async add_item(item, options = {}) {
 		const res = await addItem(item, this);
@@ -590,10 +765,8 @@ export default {
 		let total = this.Total;
 		if (isReturn && total > 0) total = -Math.abs(total);
 
-		doc.total = total;
-		doc.net_total = total; // Will adjust later if taxes are inclusive
-		doc.base_total = total * (this.exchange_rate || 1);
-		doc.base_net_total = total * (this.exchange_rate || 1);
+                doc.total = total;
+                doc.base_total = total * (this.exchange_rate || 1);
 
 		// Apply discounts with correct sign for returns
 		let discountAmount = flt(this.additional_discount);
@@ -607,77 +780,51 @@ export default {
 
 		doc.additional_discount_percentage = discountPercentage;
 
-		// Calculate grand total with correct sign for returns
-		let grandTotal = this.subtotal;
+                // Prepare taxes array using current cart values
+                const discountAbs = Math.abs(discountAmount);
+                const totalAbs = Math.abs(this.Total);
+                const baseNetAbs = Math.max(totalAbs - discountAbs, 0);
+                const subtotalBeforeTaxesAbs = Math.max(Math.abs(this.subtotal), 0);
+                const taxTemplateSource = this.resolveInvoiceTaxesTemplate();
+                const taxSnapshot = this.computeInvoiceTaxSnapshot({
+                        baseNet: baseNetAbs,
+                        subtotalBeforeTaxes: subtotalBeforeTaxesAbs,
+                        templateRows: taxTemplateSource.rows,
+                        inclusiveFallback: taxTemplateSource.inclusiveFallback,
+                });
 
-		// Prepare taxes array
-		doc.taxes = [];
-		if (this.invoice_doc && this.invoice_doc.taxes) {
-			let totalTax = 0;
-			this.invoice_doc.taxes.forEach((tax) => {
-				if (tax.tax_amount) {
-					grandTotal += flt(tax.tax_amount);
-					totalTax += flt(tax.tax_amount);
-				}
-				doc.taxes.push({
-					account_head: tax.account_head,
-					charge_type: tax.charge_type || "On Net Total",
-					description: tax.description,
-					rate: tax.rate,
-					included_in_print_rate: tax.included_in_print_rate || 0,
-					tax_amount: tax.tax_amount,
-					total: tax.total,
-					base_tax_amount: tax.tax_amount * (this.exchange_rate || 1),
-					base_total: tax.total * (this.exchange_rate || 1),
-				});
-			});
-			doc.total_taxes_and_charges = totalTax;
-		} else if (isOffline()) {
-			const tmpl = getTaxTemplate(this.pos_profile.taxes_and_charges);
-			if (tmpl && Array.isArray(tmpl.taxes)) {
-				const inclusive = getTaxInclusiveSetting();
-				let runningTotal = grandTotal;
-				let totalTax = 0;
-				tmpl.taxes.forEach((row) => {
-					let tax_amount = 0;
-					if (row.charge_type === "Actual") {
-						tax_amount = flt(row.tax_amount || 0);
-					} else if (inclusive) {
-						tax_amount = flt((doc.total * flt(row.rate)) / 100);
-					} else {
-						tax_amount = flt((doc.net_total * flt(row.rate)) / 100);
-					}
-					if (!inclusive) {
-						runningTotal += tax_amount;
-					}
-					totalTax += tax_amount;
-					doc.taxes.push({
-						account_head: row.account_head,
-						charge_type: row.charge_type || "On Net Total",
-						description: row.description,
-						rate: row.rate,
-						included_in_print_rate: row.charge_type === "Actual" ? 0 : inclusive ? 1 : 0,
-						tax_amount: tax_amount,
-						total: runningTotal,
-						base_tax_amount: tax_amount * (this.exchange_rate || 1),
-						base_total: runningTotal * (this.exchange_rate || 1),
-					});
-				});
-				if (inclusive) {
-					doc.net_total = doc.total - totalTax;
-					doc.base_net_total = doc.net_total * (this.exchange_rate || 1);
-					grandTotal = doc.total;
-				} else {
-					grandTotal = runningTotal;
-				}
-				doc.total_taxes_and_charges = totalTax;
-			}
-		}
+                const signMultiplier = isReturn ? -1 : 1;
 
-		if (isReturn && grandTotal > 0) grandTotal = -Math.abs(grandTotal);
+                doc.taxes = taxSnapshot.rows.map((row) => {
+                        const normalized = { ...row };
+                        normalized.tax_amount = normalized.tax_amount * signMultiplier;
+                        normalized.base_tax_amount = normalized.base_tax_amount * signMultiplier;
+                        normalized.total = normalized.total * signMultiplier;
+                        normalized.base_total = normalized.base_total * signMultiplier;
+                        return normalized;
+                });
 
-		doc.grand_total = grandTotal;
-		doc.base_grand_total = grandTotal * (this.exchange_rate || 1);
+                const totalTaxesSigned = taxSnapshot.totalTaxes * signMultiplier;
+                doc.total_taxes_and_charges = totalTaxesSigned;
+                doc.base_total_taxes_and_charges = flt(
+                        totalTaxesSigned * (this.exchange_rate || 1),
+                        this.currency_precision,
+                );
+
+                const netTotalSigned = taxSnapshot.netTotal * signMultiplier;
+                doc.net_total = netTotalSigned;
+                doc.base_net_total = flt(netTotalSigned * (this.exchange_rate || 1), this.currency_precision);
+
+                let grandTotalAbs = taxSnapshot.grandTotal;
+                if (!Number.isFinite(grandTotalAbs)) {
+                        grandTotalAbs = subtotalBeforeTaxesAbs;
+                }
+                let grandTotal = grandTotalAbs * signMultiplier;
+
+                if (isReturn && grandTotal > 0) grandTotal = -Math.abs(grandTotal);
+
+                doc.grand_total = grandTotal;
+                doc.base_grand_total = grandTotal * (this.exchange_rate || 1);
 
 		// Apply rounding to get rounded total unless disabled in POS Profile
 		if (this.pos_profile.disable_rounded_total) {
@@ -816,6 +963,7 @@ export default {
                 assignIfDefined(patch, "base_discount_amount", snapshot.base_discount_amount);
                 assignIfDefined(patch, "additional_discount_percentage", snapshot.additional_discount_percentage);
                 assignIfDefined(patch, "total_taxes_and_charges", snapshot.total_taxes_and_charges);
+                assignIfDefined(patch, "base_total_taxes_and_charges", snapshot.base_total_taxes_and_charges);
                 assignIfDefined(patch, "grand_total", snapshot.grand_total);
                 assignIfDefined(patch, "base_grand_total", snapshot.base_grand_total);
                 assignIfDefined(patch, "rounded_total", snapshot.rounded_total);
