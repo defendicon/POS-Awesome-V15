@@ -486,27 +486,7 @@ export default {
                 },
 
                 focusItemSearchField() {
-                        const searchField = this.$refs.itemSearchField;
-                        if (!searchField) {
-                                return;
-                        }
-
-                        if (typeof searchField.focus === "function") {
-                                searchField.focus();
-                        } else if (searchField.$el) {
-                                const inputEl = searchField.$el.querySelector("input");
-                                if (inputEl) {
-                                        inputEl.focus();
-                                        inputEl.select?.();
-                                }
-                                return;
-                        }
-
-                        const inputEl = searchField.$el?.querySelector("input");
-                        if (inputEl) {
-                                inputEl.focus();
-                                inputEl.select?.();
-                        }
+                        this.eventBus.emit("focus_item_search");
                 },
 
                 initializeItemsHeaders() {
