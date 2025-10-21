@@ -345,6 +345,7 @@ import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator.js";
+import { computeAdditionalDiscountPercentage } from "../../composables/useDiscounts.js";
 
 export default {
 	name: "POSInvoice",
@@ -1468,8 +1469,11 @@ export default {
                         }
                         if (data.return_doc) {
                                 console.log("Return against existing invoice:", data.return_doc.name);
-                                this.discount_amount = data.return_doc.discount_amount || 0;
-                                this.additional_discount = data.return_doc.discount_amount || 0;
+                                const returnDiscount = data.return_doc.discount_amount || 0;
+                                this.discount_amount = returnDiscount;
+                                this.additional_discount = returnDiscount;
+                                const recalculated = computeAdditionalDiscountPercentage(this, this.additional_discount);
+                                this.additional_discount_percentage = Number.isFinite(recalculated) ? recalculated : 0;
                                 this.return_doc = data.return_doc;
                                 this.invoice_doc.return_against = data.return_doc.name;
                         } else {

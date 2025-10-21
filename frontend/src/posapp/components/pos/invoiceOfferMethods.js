@@ -1,5 +1,9 @@
 import { silentPrint } from "../../plugins/print.js";
 import { formatUtils } from "../../format.js";
+import {
+        computeAdditionalDiscountAmount,
+        computeAdditionalDiscountPercentage,
+} from "../../composables/useDiscounts.js";
 /* global __, frappe, flt */
 
 export default {
@@ -1220,27 +1224,24 @@ export default {
 			// Discount already applied, do not recalculate when items change
 			return;
 		}
-		if (
-			(!this.discount_percentage_offer_name || this.discount_percentage_offer_name == offer.name) &&
-			offer.discount_percentage > 0 &&
-			offer.discount_percentage <= 100
-		) {
-			this.discount_amount = this.flt(
-				(flt(this.Total) * flt(offer.discount_percentage)) / 100,
-				this.currency_precision,
-			);
-			this.discount_percentage_offer_name = offer.name;
+                if (
+                        (!this.discount_percentage_offer_name || this.discount_percentage_offer_name == offer.name) &&
+                        offer.discount_percentage > 0 &&
+                        offer.discount_percentage <= 100
+                ) {
+                        const calculatedAmount = computeAdditionalDiscountAmount(this, offer.discount_percentage);
+                        this.discount_amount = this.flt
+                                ? this.flt(calculatedAmount, this.currency_precision)
+                                : calculatedAmount;
+                        this.discount_percentage_offer_name = offer.name;
 
-			// Update invoice level discount fields so the value
-			// is reflected in the UI and saved correctly
-			this.additional_discount = this.discount_amount;
-			if (this.Total && this.Total !== 0) {
-				this.additional_discount_percentage = (this.discount_amount / this.Total) * 100;
-			} else {
-				this.additional_discount_percentage = 0;
-			}
-		}
-	},
+                        // Update invoice level discount fields so the value
+                        // is reflected in the UI and saved correctly
+                        this.additional_discount = this.discount_amount;
+                        const percentage = computeAdditionalDiscountPercentage(this, this.additional_discount);
+                        this.additional_discount_percentage = Number.isFinite(percentage) ? percentage : 0;
+                }
+        },
 
 	RemoveOnTotal(offer) {
 		if (this.discount_percentage_offer_name && this.discount_percentage_offer_name == offer.offer_name) {

@@ -21,7 +21,12 @@ const ITEM_DETAIL_CACHE_TTL = 5000;
 const STOCK_CACHE_TTL = 5000;
 
 const { setSerialNo, setBatchQty } = useBatchSerial();
-const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
+const {
+        updateDiscountAmount,
+        calcPrices,
+        calcItemPrice,
+        computeAdditionalDiscountPercentage,
+} = useDiscounts();
 const { removeItem, addItem, getNewItem, clearInvoice } = useItemAddition();
 const { calcUom, calcStockQty } = useStockUtils();
 
@@ -393,9 +398,15 @@ export default {
 
 		this.customer = data.customer;
 		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-		this.discount_amount = data.discount_amount;
-		this.additional_discount_percentage = data.additional_discount_percentage;
-		this.additional_discount = data.discount_amount;
+                const discountAmount = data.discount_amount || 0;
+                this.discount_amount = discountAmount;
+                this.additional_discount = discountAmount;
+                const derivedPercentage = computeAdditionalDiscountPercentage(this, discountAmount);
+                if (Number.isFinite(derivedPercentage)) {
+                        this.additional_discount_percentage = derivedPercentage;
+                } else {
+                        this.additional_discount_percentage = data.additional_discount_percentage || 0;
+                }
 
 		if (this.items.length > 0) {
 			this.items.forEach((item) => {
@@ -467,12 +478,13 @@ export default {
 		this.eventBus.emit("set_pos_coupons", []);
 		this.posa_coupons = [];
 		this.return_doc = "";
-		if (!data.name && !data.is_return) {
-			this.items = [];
-			this.customer = this.pos_profile.customer;
-			this.invoice_doc = "";
-			this.discount_amount = 0;
-			this.additional_discount_percentage = 0;
+                if (!data.name && !data.is_return) {
+                        this.items = [];
+                        this.customer = this.pos_profile.customer;
+                        this.invoice_doc = "";
+                        this.discount_amount = 0;
+                        this.additional_discount = 0;
+                        this.additional_discount_percentage = 0;
 			this.invoiceType = "Invoice";
 			this.invoiceTypes = ["Invoice", "Order", "Quotation"];
 		} else {
@@ -500,10 +512,17 @@ export default {
 					this.set_batch_qty(item, item.batch_no);
 				}
 			});
-			this.customer = data.customer;
-			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-			this.discount_amount = data.discount_amount;
-			this.additional_discount_percentage = data.additional_discount_percentage;
+                        this.customer = data.customer;
+                        this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
+                        const discountAmount = data.discount_amount || 0;
+                        this.discount_amount = discountAmount;
+                        this.additional_discount = discountAmount;
+                        const derivedPercentage = computeAdditionalDiscountPercentage(this, discountAmount);
+                        if (Number.isFinite(derivedPercentage)) {
+                                this.additional_discount_percentage = derivedPercentage;
+                        } else {
+                                this.additional_discount_percentage = data.additional_discount_percentage || 0;
+                        }
 			this.items.forEach((item) => {
 				if (item.serial_no) {
 					item.serial_no_selected = [];
