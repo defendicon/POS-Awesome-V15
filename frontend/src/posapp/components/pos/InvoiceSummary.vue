@@ -58,35 +58,65 @@
 						/>
 					</v-col>
 
-					<!-- Items Discount -->
-					<v-col cols="6">
-						<v-text-field
-							:model-value="formatCurrency(total_items_discount_amount)"
-							:prefix="currencySymbol(displayCurrency)"
-							:label="frappe._('Items Discounts')"
-							prepend-inner-icon="mdi-tag-minus"
-							variant="solo"
-							density="compact"
-							color="warning"
-							readonly
-							class="summary-field"
-						/>
-					</v-col>
+                                        <!-- Items Discount -->
+                                        <v-col cols="6">
+                                                <v-text-field
+                                                        :model-value="formatCurrency(total_items_discount_amount)"
+                                                        :prefix="currencySymbol(displayCurrency)"
+                                                        :label="frappe._('Items Discounts')"
+                                                        prepend-inner-icon="mdi-tag-minus"
+                                                        variant="solo"
+                                                        density="compact"
+                                                        color="warning"
+                                                        readonly
+                                                        class="summary-field"
+                                                />
+                                        </v-col>
 
-					<!-- Total (moved to maintain row alignment) -->
+                                        <!-- Net Total -->
+                                        <v-col cols="6">
+                                                <v-text-field
+                                                        :model-value="formatCurrency(resolvedNetTotal)"
+                                                        :prefix="currencySymbol(displayCurrency)"
+                                                        :label="frappe._('Net Total')"
+                                                        prepend-inner-icon="mdi-scale-balance"
+                                                        variant="solo"
+                                                        density="compact"
+                                                        readonly
+                                                        color="primary"
+                                                        class="summary-field"
+                                                />
+                                        </v-col>
+
+                                        <!-- Tax and Charges -->
+                                        <v-col cols="6">
+                                                <v-text-field
+                                                        :model-value="formatCurrency(resolvedTaxes)"
+                                                        :prefix="currencySymbol(displayCurrency)"
+                                                        :label="frappe._('Tax and Charges')"
+                                                        prepend-inner-icon="mdi-receipt"
+                                                        variant="solo"
+                                                        density="compact"
+                                                        readonly
+                                                        color="primary"
+                                                        class="summary-field"
+                                                />
+                                        </v-col>
+
+                                        <!-- Grand Total -->
                                         <v-col cols="6">
                                                 <v-text-field
                                                         :model-value="formatCurrency(resolvedSubtotal)"
-							:prefix="currencySymbol(displayCurrency)"
-							:label="frappe._('Total')"
-							prepend-inner-icon="mdi-cash"
-							variant="solo"
-							density="compact"
-							readonly
-							color="success"
-							class="summary-field"
-						/>
-					</v-col>
+                                                        :prefix="currencySymbol(displayCurrency)"
+                                                        :label="frappe._('Grand Total')"
+                                                        prepend-inner-icon="mdi-cash"
+                                                        variant="solo"
+                                                        density="compact"
+                                                        readonly
+                                                        color="success"
+                                                        class="summary-field"
+                                                />
+                                        </v-col>
 				</v-row>
 			</v-col>
 
@@ -260,45 +290,88 @@ export default {
                         }
                         return false;
                 },
-                resolvedSubtotal() {
-                        const parseNumber = (value) => {
-                                if (value === null || value === undefined || value === "") {
-                                        return null;
-                                }
-                                if (typeof value === "number") {
-                                        return Number.isFinite(value) ? value : null;
-                                }
-                                const parsed = Number.parseFloat(value);
-                                return Number.isFinite(parsed) ? parsed : null;
-                        };
-
+                resolvedNetTotal() {
                         const doc = this.invoice_doc || {};
                         const candidates = [
-                                parseNumber(doc.rounded_total),
-                                parseNumber(doc.grand_total),
-                                parseNumber(doc.total),
-                                parseNumber(this.subtotal),
+                                this.parseNumber(doc.net_total),
+                                this.parseNumber(doc.base_net_total),
+                                this.parseNumber(doc.total),
+                                this.parseNumber(doc.base_total),
+                                this.parseNumber(this.subtotal),
+                        ];
+                        let net = candidates.find((value) => value !== null && value !== undefined);
+                        if (net === undefined) {
+                                net = 0;
+                        }
+
+                        if (this.isReturnDocument(doc)) {
+                                net = Math.abs(net);
+                        }
+
+                        return net;
+                },
+                resolvedTaxes() {
+                        const doc = this.invoice_doc || {};
+                        const candidates = [
+                                this.parseNumber(doc.total_taxes_and_charges),
+                                this.parseNumber(doc.base_total_taxes_and_charges),
+                        ];
+                        let taxes = candidates.find((value) => value !== null && value !== undefined);
+                        if (taxes === undefined) {
+                                taxes = 0;
+                        }
+
+                        if (this.isReturnDocument(doc)) {
+                                taxes = Math.abs(taxes);
+                        }
+
+                        return taxes;
+                },
+                resolvedSubtotal() {
+                        const doc = this.invoice_doc || {};
+                        const candidates = [
+                                this.parseNumber(doc.rounded_total),
+                                this.parseNumber(doc.base_rounded_total),
+                                this.parseNumber(doc.grand_total),
+                                this.parseNumber(doc.base_grand_total),
+                                this.parseNumber(doc.total),
+                                this.parseNumber(this.subtotal),
                         ];
                         let total = candidates.find((value) => value !== null && value !== undefined);
                         if (total === undefined) {
                                 total = 0;
                         }
 
-                        const flag = doc && Object.prototype.hasOwnProperty.call(doc, "is_return") ? doc.is_return : null;
-                        const isReturn = typeof flag === "string" ? ["1", "true", "yes"].includes(flag.toLowerCase()) : Boolean(flag);
-
-                        if (isReturn) {
+                        if (this.isReturnDocument(doc)) {
                                 total = Math.abs(total);
                         }
 
                         return total;
                 },
         },
-	methods: {
-		// Debounced handlers for better performance
-		handleAdditionalDiscountUpdate(value) {
-			this.$emit("update:additional_discount", value);
-		},
+        methods: {
+                parseNumber(value) {
+                        if (value === null || value === undefined || value === "") {
+                                return null;
+                        }
+                        if (typeof value === "number") {
+                                return Number.isFinite(value) ? value : null;
+                        }
+                        const parsed = Number.parseFloat(value);
+                        return Number.isFinite(parsed) ? parsed : null;
+                },
+                isReturnDocument(doc = this.invoice_doc || {}) {
+                        const flag =
+                                doc && Object.prototype.hasOwnProperty.call(doc, "is_return") ? doc.is_return : null;
+                        if (typeof flag === "string") {
+                                return ["1", "true", "yes"].includes(flag.toLowerCase());
+                        }
+                        return Boolean(flag);
+                },
+                // Debounced handlers for better performance
+                handleAdditionalDiscountUpdate(value) {
+                        this.$emit("update:additional_discount", value);
+                },
 
 		handleAdditionalDiscountPercentageUpdate(value) {
 			this.$emit("update:additional_discount_percentage", value);
