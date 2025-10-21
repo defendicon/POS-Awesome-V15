@@ -156,10 +156,10 @@ export default {
 		UpdateCustomer,
 		Skeleton,
 	},
-	setup(props) {
-		const { proxy } = getCurrentInstance();
-		const eventBus = proxy?.eventBus;
-		const customersStore = useCustomersStore();
+        setup(props, { expose }) {
+                const { proxy } = getCurrentInstance();
+                const eventBus = proxy?.eventBus;
+                const customersStore = useCustomersStore();
 		const {
 			customers,
 			filteredCustomers,
@@ -173,11 +173,11 @@ export default {
 		const tempSelectedCustomer = ref(null);
 		const isMenuOpen = ref(false);
 		const customerDropdown = ref(null);
-		const readonlyState = ref(false);
+                const readonlyState = ref(false);
 
-		let scrollContainer = null;
+                let scrollContainer = null;
 
-		const effectiveReadonly = computed(() => readonlyState.value && navigator.onLine);
+                const effectiveReadonly = computed(() => readonlyState.value && navigator.onLine);
 
 		const searchDebounce = _.debounce((term) => {
 			customersStore.queueSearch(term || "");
@@ -319,11 +319,40 @@ export default {
 			eventBus?.emit("open_update_customer", null);
 		};
 
-		const edit_customer = () => {
-			eventBus?.emit("open_update_customer", customerInfo.value || {});
-		};
+                const edit_customer = () => {
+                        eventBus?.emit("open_update_customer", customerInfo.value || {});
+                };
 
-		const busHandlers = [];
+                const focusCustomerSearch = async () => {
+                        const dropdown = customerDropdown.value;
+                        if (!dropdown) {
+                                return;
+                        }
+
+                        try {
+                                dropdown.menu = true;
+                        } catch (err) {
+                                dropdown.$emit?.("update:menu", true);
+                        }
+
+                        isMenuOpen.value = true;
+
+                        if (typeof dropdown.focus === "function") {
+                                dropdown.focus();
+                        }
+
+                        await nextTick();
+
+                        const inputEl = dropdown.$el?.querySelector("input");
+                        if (inputEl) {
+                                inputEl.focus();
+                                inputEl.select?.();
+                        }
+                };
+
+                expose({ focusCustomerSearch });
+
+                const busHandlers = [];
 
 		const registerBus = (event, handler) => {
 			if (eventBus && typeof eventBus.on === "function") {
@@ -372,20 +401,21 @@ export default {
 			detachScrollListener();
 		});
 
-		return {
-			customerDropdown,
-			filteredCustomers,
-			loadingCustomers,
-			isCustomerBackgroundLoading,
-			internalCustomer,
-			effectiveReadonly,
-			onCustomerMenuToggle,
-			onCustomerChange,
-			onCustomerSearch,
-			handleEnter,
-			new_customer,
-			edit_customer,
-		};
-	},
+                return {
+                        customerDropdown,
+                        filteredCustomers,
+                        loadingCustomers,
+                        isCustomerBackgroundLoading,
+                        internalCustomer,
+                        effectiveReadonly,
+                        onCustomerMenuToggle,
+                        onCustomerChange,
+                        onCustomerSearch,
+                        handleEnter,
+                        new_customer,
+                        edit_customer,
+                        focusCustomerSearch,
+                };
+        },
 };
 </script>

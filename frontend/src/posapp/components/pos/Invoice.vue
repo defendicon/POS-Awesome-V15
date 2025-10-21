@@ -31,7 +31,7 @@
 				<v-row align="center" class="items px-3 py-2">
 					<v-col :cols="pos_profile.posa_allow_sales_order ? 9 : 12" class="pb-0 pr-0">
 						<!-- Customer selection component -->
-						<Customer />
+                                            <Customer ref="customerComponent" />
 					</v-col>
 					<!-- Invoice Type Selection (Only shown if sales orders are allowed) -->
 					<v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-4">
@@ -120,9 +120,10 @@
 				<div class="items-table-wrapper">
 					<!-- Column selector button moved outside the table -->
 					<div class="column-selector-container">
-						<v-text-field
-							v-model="itemSearch"
-							density="compact"
+                                                <v-text-field
+                                                        ref="itemSearchField"
+                                                        v-model="itemSearch"
+                                                        density="compact"
 							variant="solo"
 							color="primary"
 							class="item-search-field pos-themed-input"
@@ -465,13 +466,49 @@ export default {
 				this.invoiceStore.setPackedItems(value);
 			},
 		},
-		...invoiceComputed,
-	},
+                ...invoiceComputed,
+        },
 
-	methods: {
-		...shortcutMethods,
+        methods: {
+                ...shortcutMethods,
 		...offerMethods,
 		...invoiceItemMethods,
+                focusCustomerSearchField() {
+                        const customerComponent = this.$refs.customerComponent;
+                        if (!customerComponent) {
+                                return;
+                        }
+
+                        const focusFn = customerComponent.focusCustomerSearch;
+                        if (typeof focusFn === "function") {
+                                focusFn();
+                        }
+                },
+
+                focusItemSearchField() {
+                        const searchField = this.$refs.itemSearchField;
+                        if (!searchField) {
+                                return;
+                        }
+
+                        if (typeof searchField.focus === "function") {
+                                searchField.focus();
+                        } else if (searchField.$el) {
+                                const inputEl = searchField.$el.querySelector("input");
+                                if (inputEl) {
+                                        inputEl.focus();
+                                        inputEl.select?.();
+                                }
+                                return;
+                        }
+
+                        const inputEl = searchField.$el?.querySelector("input");
+                        if (inputEl) {
+                                inputEl.focus();
+                                inputEl.select?.();
+                        }
+                },
+
                 initializeItemsHeaders() {
                         // Define all available columns
                         this.available_columns = [
@@ -1585,31 +1622,37 @@ export default {
 				}
 			},
 		);
-		this._shortcutHandlers = this._shortcutHandlers || {};
+                this._shortcutHandlers = this._shortcutHandlers || {};
 
-		this._shortcutHandlers.shortOpenPayment = this.shortOpenPayment.bind(this);
-		this._shortcutHandlers.shortDeleteFirstItem = this.shortDeleteFirstItem.bind(this);
-		this._shortcutHandlers.shortOpenFirstItem = this.shortOpenFirstItem.bind(this);
-		this._shortcutHandlers.shortSelectDiscount = this.shortSelectDiscount.bind(this);
+                this._shortcutHandlers.shortOpenPayment = this.shortOpenPayment.bind(this);
+                this._shortcutHandlers.shortDeleteFirstItem = this.shortDeleteFirstItem.bind(this);
+                this._shortcutHandlers.shortOpenFirstItem = this.shortOpenFirstItem.bind(this);
+                this._shortcutHandlers.shortSelectDiscount = this.shortSelectDiscount.bind(this);
+                this._shortcutHandlers.shortFocusCustomer = this.shortFocusCustomer.bind(this);
+                this._shortcutHandlers.shortFocusItem = this.shortFocusItem.bind(this);
 
-		document.addEventListener("keydown", this._shortcutHandlers.shortOpenPayment);
-		document.addEventListener("keydown", this._shortcutHandlers.shortDeleteFirstItem);
-		document.addEventListener("keydown", this._shortcutHandlers.shortOpenFirstItem);
-		document.addEventListener("keydown", this._shortcutHandlers.shortSelectDiscount);
-	},
-	// Remove global keyboard shortcuts when component is unmounted
-	unmounted() {
-		if (!this._shortcutHandlers) {
-			return;
-		}
+                document.addEventListener("keydown", this._shortcutHandlers.shortOpenPayment);
+                document.addEventListener("keydown", this._shortcutHandlers.shortDeleteFirstItem);
+                document.addEventListener("keydown", this._shortcutHandlers.shortOpenFirstItem);
+                document.addEventListener("keydown", this._shortcutHandlers.shortSelectDiscount);
+                document.addEventListener("keydown", this._shortcutHandlers.shortFocusCustomer);
+                document.addEventListener("keydown", this._shortcutHandlers.shortFocusItem);
+        },
+        // Remove global keyboard shortcuts when component is unmounted
+        unmounted() {
+                if (!this._shortcutHandlers) {
+                        return;
+                }
 
-		document.removeEventListener("keydown", this._shortcutHandlers.shortOpenPayment);
-		document.removeEventListener("keydown", this._shortcutHandlers.shortDeleteFirstItem);
-		document.removeEventListener("keydown", this._shortcutHandlers.shortOpenFirstItem);
-		document.removeEventListener("keydown", this._shortcutHandlers.shortSelectDiscount);
+                document.removeEventListener("keydown", this._shortcutHandlers.shortOpenPayment);
+                document.removeEventListener("keydown", this._shortcutHandlers.shortDeleteFirstItem);
+                document.removeEventListener("keydown", this._shortcutHandlers.shortOpenFirstItem);
+                document.removeEventListener("keydown", this._shortcutHandlers.shortSelectDiscount);
+                document.removeEventListener("keydown", this._shortcutHandlers.shortFocusCustomer);
+                document.removeEventListener("keydown", this._shortcutHandlers.shortFocusItem);
 
-		this._shortcutHandlers = {};
-	},
+                this._shortcutHandlers = {};
+        },
 	watch: invoiceWatchers,
 };
 </script>
