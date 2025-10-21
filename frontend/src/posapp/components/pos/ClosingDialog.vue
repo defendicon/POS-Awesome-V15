@@ -80,29 +80,29 @@
 				</v-card-text>
 
 				<v-divider></v-divider>
-				<v-card-actions class="dialog-actions-container">
-					<v-btn
-						theme="dark"
-						@click="submit_dialog"
-						class="pos-action-btn submit-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-check-circle-outline</v-icon>
-						<span>{{ __("Submit") }}</span>
-					</v-btn>
-					<v-spacer></v-spacer>
-					<v-btn
-						theme="dark"
-						@click="close_dialog"
-						class="pos-action-btn cancel-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-close-circle-outline</v-icon>
-						<span>{{ __("Close") }}</span>
-					</v-btn>
-				</v-card-actions>
+                                <v-card-actions class="dialog-actions-container">
+                                        <v-spacer></v-spacer>
+                                        <v-btn
+                                                theme="dark"
+                                                @click="close_dialog"
+                                                class="pos-action-btn cancel-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-close-circle-outline</v-icon>
+                                                <span>{{ __("Close") }}</span>
+                                        </v-btn>
+                                        <v-btn
+                                                theme="dark"
+                                                @click="submit_dialog"
+                                                class="pos-action-btn submit-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-check-circle-outline</v-icon>
+                                                <span>{{ __("Submit") }}</span>
+                                        </v-btn>
+                                </v-card-actions>
 			</v-card>
 		</v-dialog>
 	</v-row>

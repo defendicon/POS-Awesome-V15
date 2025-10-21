@@ -92,31 +92,31 @@
 				</v-card-text>
 
 				<!-- Actions Section -->
-				<v-card-actions class="dialog-actions-container">
-					<v-btn
-						theme="dark"
-						@click="go_desk"
-						class="pos-action-btn cancel-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-close-circle-outline</v-icon>
-						<span>{{ __("Cancel") }}</span>
-					</v-btn>
-					<v-spacer />
-					<v-btn
-						theme="dark"
-						:disabled="is_loading"
-						:loading="is_loading"
-						@click="submit_dialog"
-						class="pos-action-btn submit-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-check-circle-outline</v-icon>
-						<span>{{ __("Submit") }}</span>
-					</v-btn>
-				</v-card-actions>
+                                <v-card-actions class="dialog-actions-container">
+                                        <v-spacer />
+                                        <v-btn
+                                                theme="dark"
+                                                @click="go_desk"
+                                                class="pos-action-btn cancel-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-close-circle-outline</v-icon>
+                                                <span>{{ __("Close") }}</span>
+                                        </v-btn>
+                                        <v-btn
+                                                theme="dark"
+                                                :disabled="is_loading"
+                                                :loading="is_loading"
+                                                @click="submit_dialog"
+                                                class="pos-action-btn submit-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-check-circle-outline</v-icon>
+                                                <span>{{ __("Submit") }}</span>
+                                        </v-btn>
+                                </v-card-actions>
 			</v-card>
 		</v-dialog>
 	</v-row>
