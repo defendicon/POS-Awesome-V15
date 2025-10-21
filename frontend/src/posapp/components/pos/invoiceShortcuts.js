@@ -86,7 +86,7 @@ export default {
         },
 
         shortFocusCustomer(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "g") {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
                         e.preventDefault();
                         e.stopPropagation();
                         if (typeof this.focusCustomerSearchField === "function") {
@@ -96,7 +96,7 @@ export default {
         },
 
         shortFocusItem(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t") {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") {
                         e.preventDefault();
                         e.stopPropagation();
                         if (typeof this.focusItemSearchField === "function") {
