@@ -1,6 +1,7 @@
 import { clearPriceListCache } from "../../../offline/index.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
-/* global frappe */
+import { resolveAdditionalDiscountBase } from "../../composables/useDiscounts.js";
+/* global frappe, flt */
 
 const buildSnapshot = (items) => {
 	const snapshot = {
@@ -179,20 +180,36 @@ export default {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
 	},
 	// Watch for additional discount and update percentage accordingly
-	additional_discount() {
-		if (!this.additional_discount || this.additional_discount == 0) {
-			this.additional_discount_percentage = 0;
-		} else if (this.pos_profile.posa_use_percentage_discount) {
-			// Prevent division by zero which causes NaN
-			if (this.Total && this.Total !== 0) {
-				this.additional_discount_percentage = (this.additional_discount / this.Total) * 100;
-			} else {
-				this.additional_discount_percentage = 0;
-			}
-		} else {
-			this.additional_discount_percentage = 0;
-		}
-	},
+        additional_discount() {
+                const normalize = (value, precision) => {
+                        if (typeof this.flt === "function") {
+                                return precision !== undefined ? this.flt(value, precision) : this.flt(value);
+                        }
+                        if (typeof flt === "function") {
+                                return precision !== undefined ? flt(value, precision) : flt(value);
+                        }
+                        const parsed = parseFloat(value);
+                        return Number.isFinite(parsed) ? parsed : 0;
+                };
+
+                const amount = normalize(this.additional_discount, this.currency_precision);
+                if (!amount) {
+                        this.additional_discount_percentage = 0;
+                        return;
+                }
+
+                if (this.pos_profile.posa_use_percentage_discount) {
+                        const base = resolveAdditionalDiscountBase(this);
+                        if (Number.isFinite(base) && base !== 0) {
+                                const percentage = (amount / base) * 100;
+                                this.additional_discount_percentage = normalize(percentage, this.float_precision);
+                        } else {
+                                this.additional_discount_percentage = 0;
+                        }
+                } else {
+                        this.additional_discount_percentage = 0;
+                }
+        },
 	// Keep display date in sync with posting_date
 	posting_date: {
 		handler(newVal) {

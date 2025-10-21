@@ -1,23 +1,255 @@
 /* global __, flt */
 
-export function useDiscounts() {
-	// Update additional discount amount based on percentage
-	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
-		// If value is too large, reset to 0
-		if (value < -100 || value > 100) {
-			context.additional_discount_percentage = 0;
-			context.additional_discount = 0;
-			return;
-		}
+const truthyFlag = (value) => {
+        if (typeof value === "boolean") {
+                return value;
+        }
+        if (typeof value === "number") {
+                return value !== 0;
+        }
+        if (typeof value === "string") {
+                const normalized = value.trim().toLowerCase();
+                if (!normalized.length) {
+                        return false;
+                }
+                return !["0", "false", "no"].includes(normalized);
+        }
+        return Boolean(value);
+};
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
-	};
+const readMaybeFunction = (value) => {
+        if (typeof value === "function") {
+                try {
+                        return value();
+                } catch (error) {
+                        console.warn("Failed to evaluate function-based value while resolving discounts", error);
+                        return undefined;
+                }
+        }
+        return value;
+};
+
+const resolveFlt = (context) => {
+        if (context && typeof context.flt === "function") {
+                return context.flt.bind(context);
+        }
+        if (typeof flt === "function") {
+                return flt;
+        }
+        return (value) => {
+                const parsed = parseFloat(value);
+                return Number.isFinite(parsed) ? parsed : 0;
+        };
+};
+
+const toNumber = (context, value) => {
+        if (value === null || value === undefined || value === "") {
+                return null;
+        }
+        if (typeof value === "number") {
+                return Number.isFinite(value) ? value : null;
+        }
+        if (typeof value === "string") {
+                const fltFn = resolveFlt(context);
+                const parsed = fltFn(value);
+                return Number.isFinite(parsed) ? parsed : null;
+        }
+        return null;
+};
+
+const adjustReturnSign = (value, isReturn) => {
+        if (!Number.isFinite(value) || value === 0) {
+                return value;
+        }
+        if (isReturn && value > 0) {
+                return -value;
+        }
+        return value;
+};
+
+const resolveIsReturn = (context, overrides, doc) => {
+        if (overrides && Object.prototype.hasOwnProperty.call(overrides, "isReturn")) {
+                return Boolean(overrides.isReturn);
+        }
+        if (doc && Object.prototype.hasOwnProperty.call(doc, "is_return")) {
+                return truthyFlag(doc.is_return);
+        }
+        if (context && context.invoice_doc && Object.prototype.hasOwnProperty.call(context.invoice_doc, "is_return")) {
+                return truthyFlag(context.invoice_doc.is_return);
+        }
+        if (context && typeof context.isReturnInvoice === "boolean") {
+                return context.isReturnInvoice;
+        }
+        if (context && typeof context.isReturnInvoice === "function") {
+                try {
+                        return Boolean(context.isReturnInvoice());
+                } catch (error) {
+                        console.warn("Failed to evaluate isReturnInvoice while resolving discounts", error);
+                }
+        }
+        if (context && context.invoiceType === "Return") {
+                return true;
+        }
+        return false;
+};
+
+export function resolveAdditionalDiscountBase(context, overrides = {}) {
+        if (!context) {
+                return 0;
+        }
+
+        const doc = overrides.invoiceDoc ?? context.invoice_doc ?? null;
+        const isReturn = resolveIsReturn(context, overrides, doc);
+
+        const candidateNetSources = [];
+
+        if (Object.prototype.hasOwnProperty.call(overrides, "netTotal")) {
+                candidateNetSources.push(toNumber(context, overrides.netTotal));
+        }
+
+        if (doc && Object.prototype.hasOwnProperty.call(doc, "net_total")) {
+                candidateNetSources.push(toNumber(context, doc.net_total));
+        }
+
+        if (context && Object.prototype.hasOwnProperty.call(context, "net_total")) {
+                candidateNetSources.push(toNumber(context, context.net_total));
+        }
+
+        const netCandidate = candidateNetSources.find((val) => val !== null && val !== undefined);
+        if (netCandidate !== undefined) {
+                return adjustReturnSign(netCandidate, isReturn);
+        }
+
+        const grossCandidates = [];
+
+        if (Object.prototype.hasOwnProperty.call(overrides, "total")) {
+                grossCandidates.push(toNumber(context, readMaybeFunction(overrides.total)));
+        }
+
+        if (doc && Object.prototype.hasOwnProperty.call(doc, "total")) {
+                grossCandidates.push(toNumber(context, doc.total));
+        }
+
+        if (doc && Object.prototype.hasOwnProperty.call(doc, "grand_total")) {
+                grossCandidates.push(toNumber(context, doc.grand_total));
+        }
+
+        const contextTotal = readMaybeFunction(context?.Total);
+        if (contextTotal !== undefined) {
+                grossCandidates.push(toNumber(context, contextTotal));
+        }
+
+        if (context && Object.prototype.hasOwnProperty.call(context, "subtotal")) {
+                grossCandidates.push(toNumber(context, readMaybeFunction(context.subtotal)));
+        }
+
+        let gross = grossCandidates.find((val) => val !== null && val !== undefined);
+        if (gross === undefined) {
+                gross = 0;
+        }
+
+        const taxesSource =
+                overrides.taxes ??
+                (doc && Array.isArray(doc.taxes) ? doc.taxes : undefined) ??
+                (Array.isArray(context?.taxes) ? context.taxes : undefined);
+
+        if (Array.isArray(taxesSource) && taxesSource.length && Number.isFinite(gross) && gross !== 0) {
+                let inclusiveTaxTotal = 0;
+                taxesSource.forEach((tax) => {
+                        if (!tax) {
+                                return;
+                        }
+                        if (!truthyFlag(tax.included_in_print_rate)) {
+                                return;
+                        }
+                        const taxAmount = toNumber(context, tax.tax_amount);
+                        if (taxAmount !== null && taxAmount !== undefined) {
+                                inclusiveTaxTotal += taxAmount;
+                        }
+                });
+
+                if (inclusiveTaxTotal) {
+                        const netFromTaxes = gross - inclusiveTaxTotal;
+                        if (Number.isFinite(netFromTaxes)) {
+                                return adjustReturnSign(netFromTaxes, isReturn);
+                        }
+                }
+        }
+
+        return adjustReturnSign(Number.isFinite(gross) ? gross : 0, isReturn);
+}
+
+export function applyAdditionalDiscountFromDoc(target, doc, overrides = {}) {
+        if (!target || !doc) {
+                        return;
+        }
+
+        const fltFn = resolveFlt(target);
+        const currencyPrecision = overrides.currencyPrecision ?? target?.currency_precision;
+        const percentPrecision = overrides.percentPrecision ?? target?.float_precision;
+
+        const overrideContext = { ...overrides, invoiceDoc: doc };
+        if (!Object.prototype.hasOwnProperty.call(overrideContext, "total")) {
+                overrideContext.total = doc.total ?? doc.grand_total ?? overrideContext.total;
+        }
+        if (!Object.prototype.hasOwnProperty.call(overrideContext, "netTotal") && Object.prototype.hasOwnProperty.call(doc, "net_total")) {
+                overrideContext.netTotal = doc.net_total;
+        }
+        if (!Object.prototype.hasOwnProperty.call(overrideContext, "taxes") && Array.isArray(doc.taxes)) {
+                overrideContext.taxes = doc.taxes;
+        }
+
+        let amount = toNumber(target, doc.discount_amount ?? doc.additional_discount ?? 0);
+        if (amount === null || amount === undefined) {
+                amount = 0;
+        }
+        amount = currencyPrecision !== undefined ? fltFn(amount, currencyPrecision) : fltFn(amount);
+
+        const base = resolveAdditionalDiscountBase(target, overrideContext);
+
+        let percentage = toNumber(target, doc.additional_discount_percentage);
+        if ((percentage === null || percentage === undefined) && Number.isFinite(base) && base !== 0 && amount) {
+                percentage = (amount / base) * 100;
+        }
+        if (percentage === null || percentage === undefined) {
+                percentage = 0;
+        }
+        percentage = percentPrecision !== undefined ? fltFn(percentage, percentPrecision) : fltFn(percentage);
+
+        if (Number.isFinite(base) && base !== 0) {
+                const recomputedAmount = (base * percentage) / 100;
+                amount = currencyPrecision !== undefined ? fltFn(recomputedAmount, currencyPrecision) : fltFn(recomputedAmount);
+        }
+
+        target.additional_discount = amount;
+        if (Object.prototype.hasOwnProperty.call(target, "discount_amount")) {
+                target.discount_amount = amount;
+        }
+        target.additional_discount_percentage = percentage;
+}
+
+export function useDiscounts() {
+        // Update additional discount amount based on percentage
+        const updateDiscountAmount = (context) => {
+                const fltFn = resolveFlt(context);
+                const value = fltFn(context.additional_discount_percentage);
+                // If value is too large, reset to 0
+                if (value < -100 || value > 100) {
+                        context.additional_discount_percentage = 0;
+                        context.additional_discount = 0;
+                        return;
+                }
+
+                const base = resolveAdditionalDiscountBase(context);
+                if (!Number.isFinite(base) || base === 0) {
+                        context.additional_discount = 0;
+                        return;
+                }
+
+                const amount = (base * value) / 100;
+                const precision = context?.currency_precision;
+                context.additional_discount = precision !== undefined ? fltFn(amount, precision) : fltFn(amount);
+        };
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {

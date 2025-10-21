@@ -12,7 +12,7 @@ import {
 
 // Import composables
 import { useBatchSerial } from "../../composables/useBatchSerial.js";
-import { useDiscounts } from "../../composables/useDiscounts.js";
+import { useDiscounts, applyAdditionalDiscountFromDoc } from "../../composables/useDiscounts.js";
 import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useStockUtils } from "../../composables/useStockUtils.js";
 import stockCoordinator from "../../utils/stockCoordinator.js";
@@ -393,9 +393,7 @@ export default {
 
 		this.customer = data.customer;
 		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-		this.discount_amount = data.discount_amount;
-		this.additional_discount_percentage = data.additional_discount_percentage;
-		this.additional_discount = data.discount_amount;
+                applyAdditionalDiscountFromDoc(this, data);
 
 		if (this.items.length > 0) {
 			this.items.forEach((item) => {
@@ -502,8 +500,7 @@ export default {
 			});
 			this.customer = data.customer;
 			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-			this.discount_amount = data.discount_amount;
-			this.additional_discount_percentage = data.additional_discount_percentage;
+                        applyAdditionalDiscountFromDoc(this, data);
 			this.items.forEach((item) => {
 				if (item.serial_no) {
 					item.serial_no_selected = [];
