@@ -40,7 +40,10 @@
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
                                 <div class="d-flex align-center">
-                                        <span>{{ item.item_name }}</span>
+									<div class="d-flex flex-column">
+										<div>{{ item.item_name }}</div>
+										<div>({{ item.barcode }})</div>
+									</div>
                                         <v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">{{
                                                 __("Bundle")
                                         }}</v-chip>
@@ -60,7 +63,7 @@
 						class="ml-1"
 						@click.stop="resetItemName(item)"
 						>mdi-undo</v-icon
-					>
+					> 
 				</div>
 			</template>
 
