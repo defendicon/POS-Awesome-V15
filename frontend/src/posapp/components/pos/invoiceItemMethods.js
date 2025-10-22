@@ -317,12 +317,22 @@ export default {
 	},
 
 	// Load an invoice (or return invoice) from data, set all fields accordingly
-	async load_invoice(data = {}) {
-		console.log("load_invoice called with data:", {
-			is_return: data.is_return,
-			return_against: data.return_against,
-			customer: data.customer,
-			items_count: data.items ? data.items.length : 0,
+        async load_invoice(data = {}, options = {}) {
+                const { preserveAdditionalDiscountPercentage = false } = options || {};
+                const usePercentageDiscount = Boolean(this.pos_profile?.posa_use_percentage_discount);
+                const previousDiscountPercentage = usePercentageDiscount
+                        ? flt(this.additional_discount_percentage)
+                        : null;
+                const shouldPreserveDiscountPercentage =
+                        usePercentageDiscount &&
+                        preserveAdditionalDiscountPercentage &&
+                        Number.isFinite(previousDiscountPercentage);
+
+                console.log("load_invoice called with data:", {
+                        is_return: data.is_return,
+                        return_against: data.return_against,
+                        customer: data.customer,
+                        items_count: data.items ? data.items.length : 0,
 		});
 
 		this.clear_invoice();
@@ -393,14 +403,55 @@ export default {
 
 		this.customer = data.customer;
 		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-		this.discount_amount = data.discount_amount;
-		this.additional_discount_percentage = data.additional_discount_percentage;
-		this.additional_discount = data.discount_amount;
+                const docDiscountAmount = flt(data.discount_amount);
+                const docDiscountPercentage =
+                        data.additional_discount_percentage !== undefined &&
+                        data.additional_discount_percentage !== null
+                                ? flt(data.additional_discount_percentage)
+                                : 0;
 
-		if (this.items.length > 0) {
-			this.items.forEach((item) => {
-				if (item.serial_no) {
-					item.serial_no_selected = [];
+                if (usePercentageDiscount) {
+                        let resolvedPercentage = 0;
+
+                        if (shouldPreserveDiscountPercentage) {
+                                resolvedPercentage = previousDiscountPercentage;
+                        } else if (this.Total) {
+                                const grossTotal = this.Total;
+                                resolvedPercentage = grossTotal
+                                        ? this.flt((docDiscountAmount / grossTotal) * 100, this.float_precision)
+                                        : 0;
+                        } else {
+                                resolvedPercentage = docDiscountPercentage;
+                        }
+
+                        if (!Number.isFinite(resolvedPercentage)) {
+                                resolvedPercentage = 0;
+                        }
+
+                        this.additional_discount_percentage = resolvedPercentage;
+                        updateDiscountAmount(this);
+
+                        // Ensure watchers or rounding adjustments don't overwrite the intended value
+                        if (typeof this.$nextTick === "function") {
+                                this.$nextTick(() => {
+                                        if (this.pos_profile?.posa_use_percentage_discount) {
+                                                this.additional_discount_percentage = resolvedPercentage;
+                                        }
+                                });
+                        }
+
+                        this.additional_discount = this.flt(this.additional_discount, this.currency_precision);
+                        this.discount_amount = this.additional_discount;
+                } else {
+                        this.discount_amount = docDiscountAmount;
+                        this.additional_discount_percentage = docDiscountPercentage;
+                        this.additional_discount = docDiscountAmount;
+                }
+
+                if (this.items.length > 0) {
+                        this.items.forEach((item) => {
+                                if (item.serial_no) {
+                                        item.serial_no_selected = [];
 					const serial_list = item.serial_no.split("\n");
 					serial_list.forEach((element) => {
 						if (element.length) {
@@ -1215,7 +1266,9 @@ export default {
 				if (manualOverrides.length) {
 					this._applyManualRateOverridesToDoc(doc, manualOverrides);
 				}
-				await this.load_invoice(doc);
+                                await this.load_invoice(doc, {
+                                        preserveAdditionalDiscountPercentage: true,
+                                });
 				return doc;
 			}
 			return null;
