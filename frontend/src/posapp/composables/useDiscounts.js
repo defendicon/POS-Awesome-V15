@@ -2,22 +2,25 @@
 
 export function useDiscounts() {
 	// Update additional discount amount based on percentage
-	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
-		// If value is too large, reset to 0
-		if (value < -100 || value > 100) {
-			context.additional_discount_percentage = 0;
-			context.additional_discount = 0;
-			return;
-		}
+        const updateDiscountAmount = (context) => {
+                const value = flt(context.additional_discount_percentage);
+                // If value is too large, reset to 0
+                if (value < -100 || value > 100) {
+                        context.additional_discount_percentage = 0;
+                        context.additional_discount = 0;
+                        return;
+                }
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
-	};
+                // Calculate discount amount based on percentage
+                if (context.Total && context.Total !== 0) {
+                        const signedTotal = context.isReturnInvoice
+                                ? -Math.abs(context.Total)
+                                : context.Total;
+                        context.additional_discount = (signedTotal * value) / 100;
+                } else {
+                        context.additional_discount = 0;
+                }
+        };
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {

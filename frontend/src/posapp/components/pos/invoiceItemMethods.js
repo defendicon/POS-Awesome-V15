@@ -409,24 +409,62 @@ export default {
                         data.additional_discount_percentage !== null
                                 ? flt(data.additional_discount_percentage)
                                 : 0;
+                const docIsReturn = Boolean(data.is_return);
 
                 if (usePercentageDiscount) {
                         let resolvedPercentage = 0;
 
                         if (shouldPreserveDiscountPercentage) {
-                                resolvedPercentage = previousDiscountPercentage;
-                        } else if (this.Total) {
-                                const grossTotal = this.Total;
-                                resolvedPercentage = grossTotal
-                                        ? this.flt((docDiscountAmount / grossTotal) * 100, this.float_precision)
-                                        : 0;
+                                resolvedPercentage = Math.abs(previousDiscountPercentage);
                         } else {
-                                resolvedPercentage = docDiscountPercentage;
+                                const totalsForPercentage = [];
+
+                                if (this.Total) {
+                                        const signedTotal = docIsReturn
+                                                ? -Math.abs(this.Total)
+                                                : this.Total;
+                                        if (signedTotal) {
+                                                totalsForPercentage.push(signedTotal);
+                                        }
+                                }
+
+                                if (data.total !== undefined && data.total !== null) {
+                                        const docTotal = flt(data.total);
+                                        const signedDocTotal = docIsReturn
+                                                ? -Math.abs(docTotal)
+                                                : docTotal;
+                                        if (signedDocTotal) {
+                                                totalsForPercentage.push(signedDocTotal);
+                                        }
+                                }
+
+                                if (data.net_total !== undefined && data.net_total !== null) {
+                                        const docNetTotal = flt(data.net_total);
+                                        const signedNetTotal = docIsReturn
+                                                ? -Math.abs(docNetTotal)
+                                                : docNetTotal;
+                                        if (signedNetTotal) {
+                                                totalsForPercentage.push(signedNetTotal);
+                                        }
+                                }
+
+                                const percentageBase = totalsForPercentage.find((value) => value);
+
+                                if (percentageBase) {
+                                        resolvedPercentage = this.flt(
+                                                (docDiscountAmount / percentageBase) * 100,
+                                                this.float_precision,
+                                        );
+                                } else {
+                                        resolvedPercentage = docDiscountPercentage;
+                                }
                         }
 
                         if (!Number.isFinite(resolvedPercentage)) {
                                 resolvedPercentage = 0;
                         }
+
+                        resolvedPercentage = Math.abs(resolvedPercentage);
 
                         this.additional_discount_percentage = resolvedPercentage;
                         updateDiscountAmount(this);
@@ -648,10 +686,14 @@ export default {
 		doc.discount_amount = discountAmount;
 		doc.base_discount_amount = discountAmount * (this.exchange_rate || 1);
 
-		let discountPercentage = flt(this.additional_discount_percentage);
-		if (isReturn && discountPercentage > 0) discountPercentage = -Math.abs(discountPercentage);
+                let discountPercentage = flt(this.additional_discount_percentage);
+                if (this.pos_profile?.posa_use_percentage_discount) {
+                        discountPercentage = Math.abs(discountPercentage);
+                } else if (isReturn && discountPercentage > 0) {
+                        discountPercentage = -Math.abs(discountPercentage);
+                }
 
-		doc.additional_discount_percentage = discountPercentage;
+                doc.additional_discount_percentage = discountPercentage;
 
 		// Calculate grand total with correct sign for returns
 		let grandTotal = this.subtotal;
