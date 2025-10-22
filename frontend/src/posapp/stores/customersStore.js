@@ -12,7 +12,7 @@ import {
 	isOffline,
 } from "../../offline/index.js";
 
-const PAGE_SIZE = 200;
+const PAGE_SIZE = 1000;
 
 function normalizeSearchTerm(term) {
 	if (typeof term !== "string") {
