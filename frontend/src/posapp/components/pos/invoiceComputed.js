@@ -68,8 +68,12 @@ export default {
 		}
 
 		// Subtract additional discount
-		const additional_discount = this.flt(this.additional_discount);
-		sum -= additional_discount;
+                const additional_discount = this.flt(this.additional_discount);
+                if (this.isReturnInvoice) {
+                        sum += additional_discount;
+                } else {
+                        sum -= additional_discount;
+                }
 
 		// Add delivery charges
 		const delivery_charges = this.flt(this.delivery_charges_rate);
