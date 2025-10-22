@@ -1344,12 +1344,22 @@ export default {
 
 			// Update invoice level discount fields so the value
 			// is reflected in the UI and saved correctly
-			this.additional_discount = this.discount_amount;
-			if (this.Total && this.Total !== 0) {
-				this.additional_discount_percentage = (this.discount_amount / this.Total) * 100;
-			} else {
-				this.additional_discount_percentage = 0;
-			}
+                        this.additional_discount = this.discount_amount;
+                        if (this.Total && this.Total !== 0) {
+                                const baseTotal = this.isReturnInvoice
+                                        ? Math.abs(this.Total)
+                                        : this.Total;
+
+                                let computedPercentage = (this.discount_amount / baseTotal) * 100;
+
+                                if (this.isReturnInvoice) {
+                                        computedPercentage = -Math.abs(computedPercentage);
+                                }
+
+                                this.additional_discount_percentage = computedPercentage;
+                        } else {
+                                this.additional_discount_percentage = 0;
+                        }
 		}
 	},
 

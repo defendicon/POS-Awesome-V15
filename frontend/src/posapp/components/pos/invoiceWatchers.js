@@ -186,12 +186,18 @@ export default {
                         // Prevent division by zero which causes NaN
                         const baseTotal = this.Total && this.Total !== 0
                                 ? this.isReturnInvoice
-                                        ? -Math.abs(this.Total)
+                                        ? Math.abs(this.Total)
                                         : this.Total
                                 : 0;
 
                         if (baseTotal) {
-                                this.additional_discount_percentage = (this.additional_discount / baseTotal) * 100;
+                                let computedPercentage = (this.additional_discount / baseTotal) * 100;
+
+                                if (this.isReturnInvoice) {
+                                        computedPercentage = -Math.abs(computedPercentage);
+                                }
+
+                                this.additional_discount_percentage = computedPercentage;
                         } else {
                                 this.additional_discount_percentage = 0;
                         }

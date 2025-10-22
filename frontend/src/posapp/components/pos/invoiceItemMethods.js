@@ -415,7 +415,7 @@ export default {
                         let resolvedPercentage = 0;
 
                         if (shouldPreserveDiscountPercentage) {
-                                resolvedPercentage = Math.abs(previousDiscountPercentage);
+                                resolvedPercentage = previousDiscountPercentage;
                         } else {
                                 const totalsForPercentage = [];
 
@@ -464,7 +464,11 @@ export default {
                                 resolvedPercentage = 0;
                         }
 
-                        resolvedPercentage = Math.abs(resolvedPercentage);
+                        if (docIsReturn) {
+                                resolvedPercentage = -Math.abs(resolvedPercentage);
+                        } else {
+                                resolvedPercentage = Math.abs(resolvedPercentage);
+                        }
 
                         this.additional_discount_percentage = resolvedPercentage;
                         updateDiscountAmount(this);
@@ -591,8 +595,14 @@ export default {
 			});
 			this.customer = data.customer;
 			this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-			this.discount_amount = data.discount_amount;
-			this.additional_discount_percentage = data.additional_discount_percentage;
+                        this.discount_amount = data.discount_amount;
+                        if (data.is_return && this.pos_profile?.posa_use_percentage_discount) {
+                                this.additional_discount_percentage = -Math.abs(
+                                        flt(data.additional_discount_percentage),
+                                );
+                        } else {
+                                this.additional_discount_percentage = data.additional_discount_percentage;
+                        }
 			this.items.forEach((item) => {
 				if (item.serial_no) {
 					item.serial_no_selected = [];
