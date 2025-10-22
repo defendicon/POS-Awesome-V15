@@ -106,7 +106,7 @@ After clearing site data go to browser settings and delete cache and images data
 - `CTRL or CMD + D` remove the first item from the top
 - `CTRL or CMD + A` expand the first item from the top
 - `CTRL or CMD + E` focus on discount field
-- `CTRL or CMD + V` focus on customer search
+- `CTRL or CMD + B` focus on customer search
 - `CTRL or CMD + I` focus on item search field
 
 ---

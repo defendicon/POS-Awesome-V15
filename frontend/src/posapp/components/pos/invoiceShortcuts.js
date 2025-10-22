@@ -86,7 +86,7 @@ export default {
         },
 
         shortFocusCustomer(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
                         e.preventDefault();
                         e.stopPropagation();
                         if (typeof this.focusCustomerSearchField === "function") {

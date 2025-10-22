@@ -419,11 +419,11 @@ export default {
 			this.$theme.toggle();
 		},
 
-		handleLogout() {
-			frappe.call("logout").finally(() => {
-				window.location.href = "/app";
-			});
-		},
+                handleLogout() {
+                        frappe.call("logout").finally(() => {
+                                window.location.href = "/app";
+                        });
+                },
 
 		handleRefreshCacheUsage() {
 			this.cacheUsageLoading = true;
