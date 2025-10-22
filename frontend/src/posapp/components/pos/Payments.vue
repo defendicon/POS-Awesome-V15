@@ -122,6 +122,20 @@
 							</v-btn>
 						</v-col>
 
+						<v-col cols="6" v-if="!is_mpesa_c2b_payment(payment) && payment.mode_of_payment.toLowerCase().includes('card')">
+							<v-text-field
+								density="compact"
+								variant="solo"
+								color="primary"
+								:label="frappe._('Card Last 4 Digits')"
+								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+								class="dark-field sleek-field"
+								hide-details
+								:model-value="payment.custom_card_last_4_digits"
+								@change="setCardLast4Digits(payment, 'custom_card_last_4_digits', $event)"
+							></v-text-field>
+						</v-col>
+
 						<!-- M-Pesa Payment Button (if payment is M-Pesa) -->
 						<v-col cols="12" v-if="is_mpesa_c2b_payment(payment)" class="pl-3">
 							<v-btn block color="success" theme="dark" @click="mpesa_c2b_dialog(payment)">

@@ -203,6 +203,35 @@ export default {
 			return this.formatFloat(value, precision);
 		},
 
+		setCardLast4Digits(el, field_name, $event) {
+			let input_val = $event && $event.target ? $event.target.value : $event;
+
+			if (typeof input_val === "string") {
+				// Convert Arabic numerals to Western for parsing
+				input_val = formatUtils.fromArabicNumerals(input_val);
+				// Remove anything that's not a digit
+				input_val = input_val.replace(/\D/g, "");
+				// Keep only last 4 digits
+				if (input_val.length > 4) {
+					input_val = input_val.slice(-4);
+				}
+			}
+
+			// If value is empty or invalid
+			if (!input_val) {
+				input_val = "";
+			}
+
+			// Update the element or component state
+			if (typeof el === "object") {
+				el[field_name] = input_val;
+			} else {
+				this[field_name] = input_val;
+			}
+
+			return input_val;
+		},
+
 		currencySymbol(currency) {
 			return get_currency_symbol(currency);
 		},
