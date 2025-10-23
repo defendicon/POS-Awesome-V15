@@ -2335,7 +2335,7 @@ export default {
 				// Convert to selected currency
 				if (this.selected_currency !== baseCurrency) {
 					// Convert base currency values using the current exchange rate
-					item.rate = this.flt(converted_rate * this.exchange_rate, this.currency_precision);
+				item.rate = this.flt(converted_rate * this.exchange_rate, this.currency_precision);
 					item.price_list_rate = item.rate;
 				} else {
 					item.rate = converted_rate;

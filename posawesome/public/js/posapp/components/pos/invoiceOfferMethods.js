@@ -38,6 +38,12 @@ export default {
 					offers.push(transactionOffer);
 				}
 			}
+			else if(!offer.apply_on || offer.apply_on == "") {
+
+			
+			const groupOffer = this.getCustomerGroupOffer(offer);
+			if (groupOffer) offers.push(groupOffer);
+			}
 		});
 
 		this.setItemGiveOffer(offers);
@@ -149,9 +155,9 @@ export default {
 	getItemOffer(offer) {
 		let apply_offer = null;
 		if (offer.apply_on === "Item Code") {
-			if (this.checkOfferCoupon(offer)) {
+			if (this.checkOfferCoupon(offer) ) {
 				this.items.forEach((item) => {
-					if (!item.posa_is_offer && item.item_code === offer.item) {
+					if (!item.posa_is_offer && item.item_code === offer.item && this.checkCustomerGroupCondition(offer)) {
 						const items = [];
 						if (
 							offer.offer === "Item Price" &&
@@ -180,12 +186,12 @@ export default {
 	getGroupOffer(offer) {
 		let apply_offer = null;
 		if (offer.apply_on === "Item Group") {
-			if (this.checkOfferCoupon(offer)) {
+			if (this.checkOfferCoupon(offer) ) {
 				const items = [];
 				let total_count = 0;
 				let total_amount = 0;
 				this.items.forEach((item) => {
-					if (!item.posa_is_offer && item.item_group === offer.item_group) {
+					if (!item.posa_is_offer && item.item_group === offer.item_group && this.checkCustomerGroupCondition(offer)) {
 						if (
 							offer.offer === "Item Price" &&
 							item.posa_offer_applied &&
@@ -213,12 +219,18 @@ export default {
 	getBrandOffer(offer) {
 		let apply_offer = null;
 		if (offer.apply_on === "Brand") {
-			if (this.checkOfferCoupon(offer)) {
+			if (this.checkOfferCoupon(offer) ) {
 				const items = [];
 				let total_count = 0;
 				let total_amount = 0;
 				this.items.forEach((item) => {
-					if (!item.posa_is_offer && item.brand === offer.brand) {
+					console.log("Checking item for brand offer:", {
+						item_code: item.item_code,
+						brand: item.brand,
+						offer_brand: offer.brand,
+						condition: this.checkCustomerGroupCondition(offer)
+					});
+					if (!item.posa_is_offer && item.brand === offer.brand && this.checkCustomerGroupCondition(offer)) {
 						if (
 							offer.offer === "Item Price" &&
 							item.posa_offer_applied &&
@@ -245,10 +257,10 @@ export default {
 	getTransactionOffer(offer) {
 		let apply_offer = null;
 		if (offer.apply_on === "Transaction") {
-			if (this.checkOfferCoupon(offer)) {
+			if (this.checkOfferCoupon(offer) ) {
 				let total_qty = 0;
 				this.items.forEach((item) => {
-					if (!item.posa_is_offer && !item.posa_is_replace) {
+					if (!item.posa_is_offer && !item.posa_is_replace && this.checkCustomerGroupCondition(offer)) {
 						total_qty += item.stock_qty;
 					}
 				});
@@ -267,6 +279,68 @@ export default {
 				}
 			}
 		}
+		return apply_offer;
+	},
+
+	checkCustomerGroupCondition(offer) {
+		if (!offer.customer_group) return true; // offer applies to everyone
+		const currentCustomer = this.customer || {};
+		const currentGroup = this.customer_info?.customer_group || null;
+
+		// console.log("**** this.customers ****", this);
+
+		// console.log("--Checking Customer Group Condition:--", {
+		// 		this: this.customer_info.customer_group
+		// }
+		// )
+		return offer.customer_group === currentGroup;
+	}
+	,
+	getCustomerGroupOffer(offer) {
+		let apply_offer = null;
+
+		// Make sure this is indeed a Customer Group offer
+		if (!offer.customer_group) return apply_offer
+
+		console.log("--Checking Customer Group Offer:--", {
+				offer_customer_group: offer.customer_group,
+				current_customer_group: this.customer,
+			});
+		// Check if the offer requires a coupon or not
+		if (this.checkOfferCoupon(offer)) {
+			const currentCustomer = this.customer || null;
+			if (!currentCustomer || !currentCustomer.customer_group) {
+				console.warn("No customer group found on POS customer");
+				return null;
+			}
+
+			// Compare the POS customer's group to the offer's target group
+			if (offer.customer_group && offer.customer_group === currentCustomer.customer_group) {
+				const items = [];
+				let total_count = 0;
+				let total_amount = 0;
+
+				// Collect items that can have this offer
+				this.items.forEach((item) => {
+					if (!item.posa_is_offer) {
+						// skip other offers or check additional conditions if needed
+						total_count += item.stock_qty;
+						total_amount += item.stock_qty * item.price_list_rate;
+						items.push(item.posa_row_id);
+					}
+				});
+
+				if (total_count || total_amount) {
+					// Reuse existing offer check for qty or amount
+					const res = this.checkQtyAnountOffer(offer, total_count, total_amount);
+					if (res.apply) {
+						offer.items = items;
+						apply_offer = offer;
+					}
+				}
+			}
+		}
+
 		return apply_offer;
 	},
 
@@ -575,8 +649,8 @@ export default {
 		new_item.posa_offers = JSON.stringify([]);
 		new_item.posa_offer_applied =
 			offer.discount_type === "Rate" ||
-			offer.discount_type === "Discount Amount" ||
-			offer.discount_type === "Discount Percentage"
+				offer.discount_type === "Discount Amount" ||
+				offer.discount_type === "Discount Percentage"
 				? 1
 				: 0;
 		new_item.posa_is_offer = 1;

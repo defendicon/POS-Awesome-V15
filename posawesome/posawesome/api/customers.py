@@ -52,7 +52,7 @@ def get_customer_group_condition(pos_profile):
 
 	if not customer_groups:
 		return cond
-
+	
 	# ✅ If "All Customer Groups" or "All" is selected → allow all customers
 	if "All Customer Groups" in customer_groups or "All" in customer_groups:
 		return "disabled = 0"
@@ -81,7 +81,9 @@ def get_customer_names(pos_profile):
 		filters = {"disabled": 0}
 
 		customer_groups = get_customer_groups(pos_profile)
+
 		customer_groups = [g.strip("'").strip('"') for g in customer_groups]
+		# frappe.log_error("POS Awesome", f"Customer already exists {customer_groups}")	
 		# print(f"\n\n********************customer group {customer_groups}**********************\n\n")
 		# ✅ Apply filter only if not "All Customer Groups" or "All"
 		if customer_groups and not (
@@ -99,6 +101,7 @@ def get_customer_names(pos_profile):
 				"tax_id",
 				"customer_name",
 				"primary_address",
+				"customer_group",
 			],
 			order_by="name",
 		)
