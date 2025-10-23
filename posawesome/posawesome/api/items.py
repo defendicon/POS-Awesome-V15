@@ -1104,7 +1104,7 @@ def get_item_brand(item_code):
     data = frappe.db.get_value("Item", item_code, ["brand", "variant_of"], as_dict=True)
     if not data:
         return ""
-    brand = data.brand
-    if not brand and data.variant_of:
-        brand = frappe.db.get_value("Item", data.variant_of, "brand")
+    brand = data.get("brand")
+    if not brand and data.get("variant_of"):
+        brand = frappe.db.get_value("Item", data.get("variant_of"), "brand")
     return normalize_brand(brand) if brand else ""
