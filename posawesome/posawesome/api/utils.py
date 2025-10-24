@@ -8,6 +8,7 @@ def get_active_pos_profile(user=None):
 
     # 1️⃣ Try to get user-specific POS Profile
     profile = frappe.db.get_value("POS Profile User", {"user": user}, "parent")
+    
 
     # 2️⃣ If not found, try to get default profile
     if not profile:
@@ -20,15 +21,19 @@ def get_active_pos_profile(user=None):
 
     pos_profile = frappe.get_doc("POS Profile", profile).as_dict()
 
-    # 3️⃣ Attach allowed customer groups for POS (important for your issue)
-    pos_profile["customer_groups"] = [
-        d.customer_group for d in frappe.get_all(
-            "POS Customer Group",
-            filters={"parent": profile},
-            pluck="customer_group"
-        )
-    ]
-
+    try:
+        # 3️⃣ Attach allowed customer groups for POS (important for your issue)
+        pos_profile["customer_groups"] = [
+            d["customer_group"] for d in frappe.get_all(
+                "POS Customer Group",
+                filters={"parent": pos_profile["name"]},
+                fields=["customer_group"]
+            )
+        ]
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Error fetching customer groups for POS Profile")  
+    
+    # frappe.log_error("POS Profile Debug", f"Active POS Profile for user {user}: {pos_profile}")
     return pos_profile
 
 

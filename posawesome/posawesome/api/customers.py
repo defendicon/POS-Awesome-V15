@@ -15,6 +15,7 @@ from frappe.utils.caching import redis_cache
 
 def get_customer_groups(pos_profile):
 	customer_groups = []
+	
 	if pos_profile.get("customer_groups"):
 		# Get items based on the item groups defined in the POS profile
 		for data in pos_profile.get("customer_groups"):
@@ -48,6 +49,7 @@ def get_child_nodes(group_type, root):
 
 def get_customer_group_condition(pos_profile):
 	cond = "disabled = 0"
+	
 	customer_groups = get_customer_groups(pos_profile)
 
 	if not customer_groups:
@@ -77,20 +79,35 @@ def get_customer_names(pos_profile):
 
 	def _get_customer_names(pos_profile):
 		
-		pos_profile = json.loads(pos_profile)
+		"""Return customers filtered by customer groups in POS Profile"""
+		try:
+			if isinstance(pos_profile, str):
+				pos_profile = json.loads(pos_profile)
+		except Exception:
+			frappe.log_error("Invalid POS Profile JSON", f"{pos_profile}")
+			return []
+		
 		filters = {"disabled": 0}
-
 		customer_groups = get_customer_groups(pos_profile)
+		
+		# Normalize customer_groups (ensure list of strings)
+		if isinstance(customer_groups, str):
+			try:
+				customer_groups = json.loads(customer_groups)
+			except Exception:
+					customer_groups = [g.strip() for g in customer_groups.split(",") if g.strip()]
+		elif not isinstance(customer_groups, list):
+			customer_groups = []
 
-		customer_groups = [g.strip("'").strip('"') for g in customer_groups]
-		# frappe.log_error("POS Awesome", f"Customer already exists {customer_groups}")	
-		# print(f"\n\n********************customer group {customer_groups}**********************\n\n")
+		customer_groups = [g.strip("'").strip('"').strip() for g in customer_groups if g]
+
+		
+
 		# ✅ Apply filter only if not "All Customer Groups" or "All"
-		if customer_groups and not (
-			"All Customer Groups" in customer_groups or "All" in customer_groups
-		):
+		if customer_groups and not any(x in ["All Customer Groups", "All"] for x in customer_groups):
 			filters["customer_group"] = ["in", customer_groups]
-
+		frappe.log_error("Filter Values", f"Filters: {filters}")
+		# Fetch customers based on filters
 		customers = frappe.get_all(
 			"Customer",
 			filters=filters,
@@ -106,11 +123,13 @@ def get_customer_names(pos_profile):
 			order_by="name",
 		)
 		return customers
+		# frappe.log_error("POS Customer Fetch", f"Groups: {customer_groups}\nCustomers: {len(customers)}")
 
 	if _pos_profile.get("posa_use_server_cache"):
 		return __get_customer_names(pos_profile)
 	else:
 		return _get_customer_names(pos_profile)
+
 
 @frappe.whitelist()
 def get_customer_info(customer):
