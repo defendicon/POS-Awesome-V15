@@ -325,17 +325,30 @@ export default {
 				return;
 			}
 
-			const print_format = this.posProfile.print_format_for_online || this.posProfile.print_format;
+			const print_format = this.posProfile.sales_invoice_print_format || this.posProfile.print_format_for_online || this.posProfile.print_format;
 			const letter_head = this.posProfile.letter_head || 0;
 			const doctype = this.posProfile.create_pos_invoice_instead_of_sales_invoice
 				? "POS Invoice"
 				: "Sales Invoice";
+			const docname = this.lastInvoiceId;
+			const lang_code = frappe.boot.lang;
+
+			if (this.posProfile.qz_printing) {
+				this._print_via_qz(doctype, docname, print_format, letter_head, lang_code);
+				console.log("Attempting to print via QZ Tray from Home.vue");
+			} else {
+				this._print_regular(doctype, docname, print_format, letter_head);
+				console.log("Printing via regular method from Home.vue");
+			}
+		},
+
+		_print_regular(doctype, docname, print_format, letter_head) {
 			const url =
 				frappe.urllib.get_base_url() +
 				"/printview?doctype=" +
 				encodeURIComponent(doctype) +
 				"&name=" +
-				this.lastInvoiceId +
+				docname +
 				"&trigger_print=1" +
 				"&format=" +
 				print_format +
@@ -354,6 +367,257 @@ export default {
 					{ once: true },
 				);
 			}
+		},
+
+		_print_via_qz(doctype, docname, print_format, letter_head, lang_code) {
+			try {
+				const print_format_printer_map = this._get_print_format_printer_map();
+				const mapped_printer = this._get_mapped_printer(print_format_printer_map, doctype, print_format);
+
+				if (mapped_printer.length === 1) {
+					this._print_with_mapped_printer(doctype, docname, print_format, letter_head, lang_code, mapped_printer[0]);
+				} else if (this._is_raw_printing(print_format)) {
+					frappe.show_alert({
+						message: __("Printer mapping not set."),
+						subtitle: __("Please set a printer mapping for this print format in the Printer Settings"),
+						indicator: "warning"
+					}, 14);
+					this._printer_setting_dialog(doctype, print_format);
+				} else {
+					this._print_regular(doctype, docname, print_format, letter_head);
+				}
+			} catch (error) {
+				console.error("QZ printing failed:", error);
+				frappe.show_alert({
+					message: __("QZ printing failed, using regular print."),
+					indicator: "orange"
+				});
+				this._print_regular(doctype, docname, print_format, letter_head);
+			}
+		},
+
+		_print_with_mapped_printer(doctype, docname, print_format, letter_head, lang_code, printer_map) {
+			if (this._is_raw_printing(print_format)) {
+				this._get_raw_commands(doctype, docname, print_format, lang_code, (out) => {
+					frappe.ui.form.qz_connect()
+						.then(() => {
+							let config = qz.configs.create(printer_map.printer);
+							let data = [out.raw_commands];
+							return qz.print(config, data);
+						})
+						.then(frappe.ui.form.qz_success)
+						.catch((err) => {
+							frappe.ui.form.qz_fail(err);
+							this._print_regular(doctype, docname, print_format, letter_head);
+						});
+				});
+			} else {
+				frappe.show_alert({
+					message: __('PDF printing via "Raw Print" is not supported.'),
+					subtitle: __("Please remove the printer mapping in Printer Settings and try again."),
+					indicator: "info"
+				}, 14);
+				this._print_regular(doctype, docname, print_format, letter_head);
+			}
+		},
+
+		_get_raw_commands(doctype, docname, print_format, lang_code, callback) {
+			frappe.call({
+				method: "frappe.www.printview.get_rendered_raw_commands",
+				args: {
+					doc: frappe.get_doc(doctype, docname),
+					print_format: print_format,
+					_lang: lang_code
+				},
+				callback: (r) => {
+					if (!r.exc) {
+						callback(r.message);
+					}
+				}
+			});
+		},
+
+		_is_raw_printing(format) {
+			let print_format = {};
+			if (locals["Print Format"] && locals["Print Format"][format]) {
+				print_format = locals["Print Format"][format];
+			}
+			return print_format.raw_printing === 1;
+		},
+
+		_get_print_format_printer_map() {
+			try {
+				return JSON.parse(localStorage.print_format_printer_map || "{}");
+			} catch (e) {
+				return {};
+			}
+		},
+
+		_get_mapped_printer(print_format_printer_map, doctype, print_format) {
+			if (print_format_printer_map[doctype]) {
+				return print_format_printer_map[doctype].filter(
+					(printer_map) => printer_map.print_format === print_format
+				);
+			}
+			return [];
+		},
+
+		_get_print_format_options(doctype, callback) {
+			// Try to get print formats from meta first
+			try {
+				let formats = frappe.meta.get_print_formats(doctype);
+				if (formats && Array.isArray(formats) && formats.length > 2) {
+					callback(formats);
+					return;
+				}
+			} catch (error) {
+				console.warn("Error getting print formats from meta:", error);
+			}
+
+			// Try to get from frappe.boot if available
+			if (frappe.boot && frappe.boot.print_formats && frappe.boot.print_formats[doctype]) {
+				let formats = frappe.boot.print_formats[doctype];
+				if (formats && formats.length > 2) {
+					callback(formats);
+					return;
+				}
+			}
+
+			// Fetch all print formats from database
+			frappe.call({
+				method: "frappe.client.get_list",
+				args: {
+					doctype: "Print Format",
+					fields: ["name", "print_format_type", "disabled"],
+					filters: [
+						["doc_type", "=", doctype],
+						["disabled", "=", 0]
+					],
+					order_by: "name"
+				},
+				callback: (r) => {
+					let formats = ["Standard"]; // Always include Standard
+					
+					if (r.message && r.message.length > 0) {
+						// Add all enabled print formats
+						const custom_formats = r.message.map(format => format.name);
+						formats = formats.concat(custom_formats);
+					}
+					
+					// Add some common fallback formats if none found
+					if (formats.length <= 1) {
+						formats.push("POS invoice print");
+					}
+					
+					// Remove duplicates and return
+					formats = [...new Set(formats)];
+					callback(formats);
+				},
+				error: () => {
+					// Final fallback
+					callback(["Standard", "POS invoice print"]);
+				}
+			});
+		},
+
+		_printer_setting_dialog(doctype, current_print_format) {
+			// Show loading message
+			const loading_dialog = frappe.show_alert({
+				message: __("Loading print formats and printers..."),
+				indicator: 'blue'
+			});
+
+			Promise.all([
+				frappe.ui.form.qz_get_printer_list(),
+				new Promise((resolve) => {
+					this._get_print_format_options(doctype, resolve);
+				})
+			]).then(([printer_list, print_format_options]) => {
+				// Hide loading message
+				if (loading_dialog) loading_dialog.hide();
+
+				if (!(printer_list && printer_list.length)) {
+					frappe.throw(__("No Printer is Available."));
+					return;
+				}
+
+				const print_format_printer_map = this._get_print_format_printer_map();
+				let data = print_format_printer_map[doctype] || [];
+
+				const dialog = new frappe.ui.Dialog({
+					title: __("Printer Settings"),
+					fields: [
+						{
+							fieldtype: "Section Break"
+						},
+						{
+							fieldname: "printer_mapping",
+							fieldtype: "Table",
+							label: __("Printer Mapping"),
+							in_place_edit: true,
+							data: data,
+							get_data: () => {
+								return data;
+							},
+							fields: [
+								{
+									fieldtype: "Select",
+									fieldname: "print_format",
+									default: 0,
+									options: print_format_options,
+									read_only: 0,
+									in_list_view: 1,
+									label: __("Print Format")
+								},
+								{
+									fieldtype: "Select",
+									fieldname: "printer",
+									default: 0,
+									options: printer_list,
+									read_only: 0,
+									in_list_view: 1,
+									label: __("Printer")
+								}
+							]
+						}
+					],
+					primary_action: () => {
+						let printer_mapping = dialog.get_values()["printer_mapping"];
+						if (printer_mapping && printer_mapping.length) {
+							let print_format_list = printer_mapping.map((a) => a.print_format);
+							let has_duplicate = print_format_list.some(
+								(item, idx) => print_format_list.indexOf(item) != idx
+							);
+							if (has_duplicate) {
+								frappe.throw(__("Cannot have multiple printers mapped to a single print format."));
+								return;
+							}
+						} else {
+							printer_mapping = [];
+						}
+
+						let saved_print_format_printer_map = this._get_print_format_printer_map();
+						saved_print_format_printer_map[doctype] = printer_mapping;
+						localStorage.print_format_printer_map = JSON.stringify(saved_print_format_printer_map);
+
+						dialog.hide();
+
+						// Try printing again with the new settings
+						this._print_via_qz(doctype, docname, current_print_format, letter_head, lang_code);
+					},
+					primary_action_label: __("Save")
+				});
+
+				dialog.show();
+			}).catch((error) => {
+				// Hide loading message
+				if (loading_dialog) loading_dialog.hide();
+				
+				frappe.show_alert({
+					message: __("Error loading printer settings: ") + (error.message || error),
+					indicator: 'red'
+				});
+			});
 		},
 
 		async handleSyncInvoices() {

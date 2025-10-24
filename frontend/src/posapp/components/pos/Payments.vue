@@ -69,7 +69,7 @@
 					<v-col cols="5" v-if="credit_change > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
-							color="primary"
+						color="primary"
 							:label="frappe._('Credit Change')"
 							:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 							class="dark-field sleek-field"
@@ -739,17 +739,18 @@
 </template>
 
 <script>
-/* global frappe, __, get_currency_symbol */
+/* global frappe, __, get_currency_symbol, qz */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
+// Remove the QZ Tray import - it's loaded as a global script
 import {
-	saveOfflineInvoice,
-	syncOfflineInvoices,
-	getPendingOfflineInvoiceCount,
-	isOffline,
-	getSalesPersonsStorage,
-	setSalesPersonsStorage,
-	updateLocalStock,
+    saveOfflineInvoice,
+    syncOfflineInvoices,
+    getPendingOfflineInvoiceCount,
+    isOffline,
+    getSalesPersonsStorage,
+    setSalesPersonsStorage,
+    updateLocalStock,
 } from "../../../offline/index.js";
 
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
@@ -1231,7 +1232,7 @@ export default {
 			if (credit_calc_check.length > 0) {
 				this.eventBus.emit("show_message", {
 					title: `Redeemed credit cannot be greater than its total.`,
-					color: "error",
+				 color: "error",
 				});
 				frappe.utils.play_sound("error");
 				return;
@@ -1243,7 +1244,7 @@ export default {
 			) {
 				this.eventBus.emit("show_message", {
 					title: `Cannot redeem customer credit more than invoice total`,
-					color: "error",
+				 color: "error",
 				});
 				frappe.utils.play_sound("error");
 				return;
@@ -1484,33 +1485,20 @@ export default {
 		},
 		// Open print page for invoice
 		load_print_page() {
-			const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
+			const print_format = this.pos_profile.sales_invoice_print_format || this.pos_profile.print_format_for_online || this.pos_profile.print_format;
 			const letter_head = this.pos_profile.letter_head || 0;
 			const doctype = this.pos_profile.create_pos_invoice_instead_of_sales_invoice
 				? "POS Invoice"
 				: "Sales Invoice";
-			const url =
-				frappe.urllib.get_base_url() +
-				"/printview?doctype=" +
-				encodeURIComponent(doctype) +
-				"&name=" +
-				this.invoice_doc.name +
-				"&trigger_print=1" +
-				"&format=" +
-				print_format +
-				"&no_letterhead=" +
-				letter_head;
-			if (this.pos_profile.posa_silent_print) {
-				silentPrint(url);
+			const docname = this.invoice_doc.name;
+			const lang_code = frappe.boot.lang;
+
+			if (this.pos_profile.qz_printing) {
+				this._print_via_qz(doctype, docname, print_format, letter_head, lang_code);
+				console.log("Printing via QZ Tray from Payments.vue");
 			} else {
-				const printWindow = window.open(url, "Print");
-				printWindow.addEventListener(
-					"load",
-					function () {
-						printWindow.print();
-					},
-					{ once: true },
-				);
+				this._print_regular(doctype, docname, print_format, letter_head);
+				console.log("Printing via regular method from Payments.vue");
 			}
 		},
 		// Print invoice using a more detailed offline template
@@ -1936,6 +1924,475 @@ export default {
 			}
 			this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
 		},
+		/**
+		 * Load QZ Tray library from local file with CDN fallback
+		 * QZ Tray library (v2.2.2) is stored locally at /assets/posawesome/js/qz-tray.js
+		 * This ensures printing functionality works even without internet connection
+		 */
+		_load_qz_library() {
+			return new Promise((resolve, reject) => {
+				if (typeof qz !== "undefined") {
+					console.log("QZ library already loaded");
+
+
+					resolve();
+					return;
+				}
+
+				console.log("Loading QZ library from local file...");
+				const script = document.createElement("script");
+				// Load from local file instead of CDN
+				script.src = "/assets/posawesome/js/qz-tray.js";
+				script.onload = () => {
+					console.log("QZ library script loaded from local file");
+					// Wait a bit for the library to initialize
+					setTimeout(() => {
+						if (typeof qz !== "undefined") {
+							console.log("QZ library initialized successfully from local file");
+							resolve();
+						} else {
+							console.error("QZ library loaded from local file but qz object not available");
+							reject(new Error("QZ library loaded but qz object not available"));
+						}
+					}, 1000);
+				};
+				script.onerror = (error) => {
+					console.error("Failed to load QZ library from local file:", error);
+					console.log("Trying CDN fallback...");
+					
+					// Remove the failed script element
+					document.head.removeChild(script);
+					
+					// Create new script element for CDN fallback
+					const fallbackScript = document.createElement("script");
+					fallbackScript.src = "https://cdn.jsdelivr.net/npm/qz-tray@2.2.2/qz-tray.js";
+					fallbackScript.onload = () => {
+						console.log("QZ library script loaded from CDN fallback");
+						setTimeout(() => {
+							if (typeof qz !== "undefined") {
+								console.log("QZ library initialized successfully from CDN");
+								resolve();
+							} else {
+								console.error("QZ library loaded from CDN but qz object not available");
+								reject(new Error("QZ library loaded but qz object not available"));
+							}
+						}, 1000);
+					};
+					fallbackScript.onerror = (fallbackError) => {
+						console.error("Failed to load QZ library from CDN:", fallbackError);
+						reject(new Error("Failed to load QZ library script from both local file and CDN"));
+					};
+					document.head.appendChild(fallbackScript);
+				};
+				document.head.appendChild(script);
+			});
+		},
+
+		_print_regular(doctype, docname, print_format, letter_head) {
+			const url =
+				frappe.urllib.get_base_url() +
+				"/printview?doctype=" +
+				encodeURIComponent(doctype) +
+				"&name=" +
+				docname +
+				"&trigger_print=1" +
+				"&format=" +
+				print_format +
+				"&no_letterhead=" +
+				letter_head;
+
+			if (this.pos_profile.posa_silent_print) {
+				silentPrint(url);
+			} else {
+				const printWindow = window.open(url, "Print");
+				printWindow.addEventListener(
+					"load",
+					function () {
+						printWindow.print();
+					},
+					{ once: true },
+				);
+			}
+		},
+
+		async _print_via_qz(doctype, docname, print_format, letter_head, lang_code) {
+			// Check if QZ library is loaded, if not, load it
+			if (typeof qz === "undefined") {
+				try {
+					await this._load_qz_library();
+				} catch (error) {
+					frappe.show_alert({
+						message: __(
+							"QZ Tray library could not be loaded. Please ensure QZ Tray is installed and running.",
+						),
+						indicator: "orange",
+					});
+					this._print_regular(doctype, docname, print_format, letter_head);
+					return;
+				}
+			}
+
+			try {
+				const print_format_printer_map = this._get_print_format_printer_map();
+				const mapped_printer = this._get_mapped_printer(print_format_printer_map, doctype, print_format);
+
+				if (mapped_printer.length === 1) {
+					await this._print_with_mapped_printer(
+						doctype,
+						docname,
+						print_format,
+						letter_head,
+						lang_code,
+						mapped_printer[0],
+					);
+				} else if (await this._is_raw_printing(print_format)) {
+					frappe.show_alert(
+						{
+							message: __("Printer mapping not set."),
+							subtitle: __(
+								"Please set a printer mapping for this print format in the Printer Settings",
+							),
+							indicator: "warning",
+						},
+						14,
+					);
+					await this._printer_setting_dialog(doctype, print_format, docname, letter_head, lang_code);
+				} else {
+					this._print_regular(doctype, docname, print_format, letter_head);
+				}
+			} catch (error) {
+				console.error("QZ printing failed:", error);
+				frappe.show_alert({
+					message: __("QZ printing failed, using regular print."),
+					indicator: "orange",
+				});
+				this._print_regular(doctype, docname, print_format, letter_head);
+			}
+		},
+
+		async _print_with_mapped_printer(doctype, docname, print_format, letter_head, lang_code, printer_map) {
+			if (await this._is_raw_printing(print_format)) {
+				try {
+					// Check if QZ Tray is already connected before attempting to connect
+					if (!qz.websocket.isActive()) {
+						await qz.websocket.connect();
+					}
+					
+					// Get raw commands
+					const rawCommands = await this._get_raw_commands(doctype, docname, print_format, lang_code);
+					
+					// Create config and print using QZ Tray
+					const config = qz.configs.create(printer_map.printer);
+					const data = [rawCommands];
+					await qz.print(config, data);
+					
+					frappe.show_alert({
+						message: __("Print job sent successfully"),
+						indicator: "green"
+					});
+				} catch (error) {
+					console.error("QZ Raw printing failed:", error);
+					frappe.show_alert({
+						message: __("QZ Raw printing failed: ") + error.message,
+						indicator: "red"
+					});
+					this._print_regular(doctype, docname, print_format, letter_head);
+				}
+			} else {
+				try {
+					// Check if QZ Tray is already connected before attempting to connect
+					if (!qz.websocket.isActive()) {
+						await qz.websocket.connect();
+					}
+					
+					// Get PDF URL
+					const url = frappe.urllib.get_base_url() +
+						"/printview?doctype=" +
+						encodeURIComponent(doctype) +
+						"&name=" +
+						docname +
+						"&format=" +
+						print_format +
+						"&no_letterhead=" +
+						letter_head;
+					
+					// Print PDF using QZ Tray
+					const config = qz.configs.create(printer_map.printer);
+					const data = [{
+						type: 'pixel',
+						format: 'pdf',
+						flavor: 'file',
+						data: url
+					}];
+					await qz.print(config, data);
+					
+					frappe.show_alert({
+						message: __("Print job sent successfully"),
+						indicator: "green"
+					});
+				} catch (error) {
+					console.error("QZ PDF printing failed:", error);
+					frappe.show_alert({
+						message: __("QZ PDF printing failed: ") + error.message,
+						indicator: "red"
+					});
+					this._print_regular(doctype, docname, print_format, letter_head);
+				}
+			}
+		},
+
+		async _get_raw_commands(doctype, docname, print_format, lang_code) {
+			return new Promise((resolve, reject) => {
+				// First ensure we have the document by fetching from server
+				frappe.db
+					.get_doc(doctype, docname)
+					.then((doc) => {
+						if (!doc || !doc.name) {
+							reject(new Error("Document not found for printing"));
+							return;
+						}
+
+						frappe.call({
+							method: "frappe.www.printview.get_rendered_raw_commands",
+							args: {
+								doc: JSON.stringify(doc),
+								print_format: print_format,
+								_lang: lang_code,
+							},
+							callback: (r) => {
+								if (!r.exc && r.message) {
+									resolve(r.message.raw_commands);
+								} else {
+									reject(new Error(r.exc || "Failed to get raw commands"));
+								}
+							},
+							error: (err) => {
+								reject(err);
+							}
+						});
+					})
+					.catch((error) => {
+						reject(new Error("Error loading document for printing"));
+					});
+			});
+		},
+
+		async _is_raw_printing(format) {
+			// Try to get from locals first
+			let print_format = {};
+			if (locals?.["Print Format"]?.[format]) {
+				print_format = locals["Print Format"][format];
+				return print_format.raw_printing === 1;
+			}
+
+			// If not in locals, try to fetch from server
+			try {
+				const { message } = await frappe.db.get_value("Print Format", format, "raw_printing");
+				return message?.raw_printing === 1;
+			} catch (err) {
+				return false;
+			}
+		},
+
+		_get_print_format_printer_map() {
+			try {
+				return JSON.parse(localStorage.print_format_printer_map || "{}");
+			} catch (e) {
+				return {};
+			}
+		},
+
+		_get_mapped_printer(print_format_printer_map, doctype, print_format) {
+			if (print_format_printer_map[doctype]) {
+				return print_format_printer_map[doctype].filter(
+					(printer_map) => printer_map.print_format === print_format
+				);
+			}
+			return [];
+		},
+
+		async _get_print_format_options(doctype) {
+			return new Promise((resolve) => {
+				// Try to get print formats from meta first
+				try {
+					let formats = frappe.meta.get_print_formats(doctype);
+					if (formats && Array.isArray(formats) && formats.length > 2) {
+						resolve(formats);
+						return;
+					}
+				} catch (error) {
+					console.warn("Error getting print formats from meta:", error);
+				}
+
+				// Try to get from frappe.boot if available
+				if (frappe.boot && frappe.boot.print_formats && frappe.boot.print_formats[doctype]) {
+					let formats = frappe.boot.print_formats[doctype];
+					if (formats && formats.length > 2) {
+						resolve(formats);
+						return;
+					}
+				}
+
+				// Fetch print formats specifically for this doctype from database
+				frappe.call({
+					method: "frappe.client.get_list",
+					args: {
+						doctype: "Print Format",
+						fields: ["name", "print_format_type", "disabled"],
+						filters: [
+							["doc_type", "=", doctype],
+							["disabled", "=", 0]
+						],
+						order_by: "name"
+					},
+					callback: (r) => {
+						let formats = ["Standard"]; // Always include Standard
+						
+						if (r.message && r.message.length > 0) {
+							// Add all enabled print formats for this specific doctype
+							const custom_formats = r.message.map(format => format.name);
+							formats = formats.concat(custom_formats);
+						}
+						
+						// Add some common fallback formats if none found
+						if (formats.length <= 1) {
+							if (doctype === "Sales Invoice" || doctype === "POS Invoice") {
+								formats.push("POS invoice print");
+							}
+						}
+						
+						// Remove duplicates and return
+						formats = [...new Set(formats)];
+						resolve(formats);
+					},
+					error: () => {
+						// Final fallback based on doctype
+						const fallbackFormats = ["Standard"];
+						if (doctype === "Sales Invoice" || doctype === "POS Invoice") {
+							fallbackFormats.push("POS invoice print");
+						}
+						resolve(fallbackFormats);
+					}
+				});
+			});
+		},
+
+		async _get_printer_list() {
+			try {
+				// Check if QZ Tray is already connected
+				if (!qz.websocket.isActive()) {
+					await qz.websocket.connect();
+				}
+				return await qz.printers.find();
+			} catch (error) {
+				console.error("Failed to get printer list:", error);
+				throw error;
+			}
+		},
+
+		async _printer_setting_dialog(doctype, current_print_format, docname, letter_head, lang_code) {
+			// Show loading message
+			const loading_dialog = frappe.show_alert({
+				message: __("Loading print formats and printers..."),
+				indicator: 'blue'
+			});
+
+			try {
+				const [printer_list, print_format_options] = await Promise.all([
+					this._get_printer_list(),
+					this._get_print_format_options(doctype)
+				]);
+
+				// Hide loading message
+				if (loading_dialog) loading_dialog.hide();
+
+				if (!(printer_list && printer_list.length)) {
+					frappe.throw(__("No Printer is Available."));
+					return;
+				}
+
+				const print_format_printer_map = this._get_print_format_printer_map();
+				let data = print_format_printer_map[doctype] || [];
+
+				const dialog = new frappe.ui.Dialog({
+					title: __("Printer Settings"),
+					fields: [
+						{
+							fieldtype: "Section Break",
+						},
+						{
+							fieldname: "printer_mapping",
+							fieldtype: "Table",
+							label: __("Printer Mapping"),
+							in_place_edit: true,
+							data: data,
+							get_data: () => {
+								return data;
+							},
+							fields: [
+								{
+									fieldtype: "Select",
+									fieldname: "print_format",
+									default: 0,
+									options: print_format_options,
+									read_only: 0,
+									in_list_view: 1,
+									label: __("Print Format"),
+								},
+								{
+									fieldtype: "Select",
+									fieldname: "printer",
+									default: 0,
+									options: printer_list,
+									read_only: 0,
+									in_list_view: 1,
+									label: __("Printer"),
+								},
+							],
+						},
+					],
+					primary_action: () => {
+						let printer_mapping = dialog.get_values()["printer_mapping"];
+						if (printer_mapping && printer_mapping.length) {
+							let print_format_list = printer_mapping.map((a) => a.print_format);
+							let has_duplicate = print_format_list.some(
+								(item, idx) => print_format_list.indexOf(item) != idx,
+							);
+							if (has_duplicate) {
+								frappe.throw(
+									__("Cannot have multiple printers mapped to a single print format."),
+								);
+								return;
+							}
+						} else {
+							printer_mapping = [];
+						}
+
+						let saved_print_format_printer_map = this._get_print_format_printer_map();
+						saved_print_format_printer_map[doctype] = printer_mapping;
+						localStorage.print_format_printer_map = JSON.stringify(saved_print_format_printer_map);
+
+						dialog.hide();
+
+						// Try printing again with the new settings
+						this._print_via_qz(doctype, docname, current_print_format, letter_head, lang_code);
+					},
+					primary_action_label: __("Save"),
+				});
+
+				dialog.show();
+			} catch (error) {
+				// Hide loading message
+				if (loading_dialog) loading_dialog.hide();
+				
+				frappe.show_alert({
+					message: __("Error loading printer settings: ") + (error.message || error),
+					indicator: 'red'
+				});
+			}
+		},
+
+		// ...rest of existing methods...
 	},
 	// Lifecycle hook: created
 	created() {

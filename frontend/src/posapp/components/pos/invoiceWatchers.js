@@ -35,7 +35,7 @@ export default {
                 deep: true,
                 handler() {
                         if (this.isApplyingOffer) return;
-                        this.handelOffers();
+                        this.handleOffers();
                         this.$forceUpdate();
                 },
         },
@@ -43,7 +43,7 @@ export default {
                 deep: true,
                 handler() {
                         if (this.isApplyingOffer) return;
-                        this.handelOffers();
+                        this.handleOffers();
                         this.$forceUpdate();
                 },
         },

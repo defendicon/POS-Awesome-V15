@@ -241,7 +241,7 @@ export default {
 		removeOffers(offers_id_list) {
 			this.pos_offers = this.pos_offers.filter((offer) => !offers_id_list.includes(offer.row_id));
 		},
-		handelOffers() {
+		handleOffers() {
 			const applyedOffers = this.pos_offers.filter((offer) => offer.offer_applied);
 			this.eventBus.emit("update_invoice_offers", applyedOffers);
 		},
@@ -305,7 +305,7 @@ export default {
 		pos_offers: {
 			deep: true,
 			handler() {
-				this.handelOffers();
+				this.handleOffers();
 				this.updateCounters();
 				this.updatePosCoupuns();
 			},

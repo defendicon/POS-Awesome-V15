@@ -390,314 +390,314 @@ import format from "../../format";
 import Customer from "../pos/Customer.vue";
 import UpdateCustomer from "../pos/UpdateCustomer.vue";
 import {
-	getOpeningStorage,
-	setOpeningStorage,
-	initPromise,
-	checkDbHealth,
-	saveOfflinePayment,
-	syncOfflinePayments,
-	getPendingOfflinePaymentCount,
-	isOffline,
-	getCustomerStorage,
-	getOfflineCustomers,
+    getOpeningStorage,
+    setOpeningStorage,
+    initPromise,
+    checkDbHealth,
+    saveOfflinePayment,
+    syncOfflinePayments,
+    getPendingOfflinePaymentCount,
+    isOffline,
+    getCustomerStorage,
+    getOfflineCustomers,
 } from "../../../offline/index.js";
 import { silentPrint } from "../../plugins/print.js";
 import { useRtl } from "../../composables/useRtl.js";
 
 export default {
-	mixins: [format],
-	setup() {
-		const { isRtl, rtlStyles, rtlClasses } = useRtl();
-		return {
-			isRtl,
-			rtlStyles,
-			rtlClasses
-		};
-	},
-	data: function () {
-		return {
-			dialog: false,
-			pos_profile: "",
-			pos_opening_shift: "",
-			customer_name: "",
-			customer_info: "",
-			company: "",
-			singleSelect: true,
-			invoices_loading: false,
-			unallocated_payments_loading: false,
-			mpesa_payments_loading: false,
-			payment_methods: [],
-			outstanding_invoices: [],
-			unallocated_payments: [],
-			mpesa_payments: [],
-			selected_invoices: [],
-			selected_payments: [],
-			selected_mpesa_payments: [],
-			pos_profiles_list: [],
-			pos_profile_search: "",
-			payment_methods_list: [],
-			mpesa_search_name: "",
-			mpesa_search_mobile: "",
-			invoices_headers: [
-				{
-					title: "",
-					align: "start",
-					sortable: false,
-					key: "actions",
-					width: "50px",
-				},
-				{
-					title: __("Invoice"),
-					align: "start",
-					sortable: true,
-					key: "voucher_no",
-				},
-				{
-					title: __("Customer"),
-					align: "start",
-					sortable: true,
-					key: "customer_name",
-				},
-				{
-					title: __("Date"),
-					align: "start",
-					sortable: true,
-					key: "posting_date",
-				},
-				{
-					title: __("Due Date"),
-					align: "start",
-					sortable: true,
-					key: "due_date",
-				},
-				{
-					title: __("Total"),
-					align: "end",
-					sortable: true,
-					key: "invoice_amount",
-				},
-				{
-					title: __("Outstanding"),
-					align: "end",
-					sortable: true,
-					key: "outstanding_amount",
-				},
-			],
-			unallocated_payments_headers: [
-				{
-					title: "",
-					align: "center",
-					sortable: false,
-					key: "select",
-					width: "50px",
-				},
-				{
-					title: __("Payment ID"),
-					align: "start",
-					sortable: true,
-					key: "name",
-				},
-				{
-					title: __("Customer"),
-					align: "start",
-					sortable: true,
-					key: "customer_name",
-				},
-				{
-					title: __("Date"),
-					align: "start",
-					sortable: true,
-					key: "posting_date",
-				},
-				{
-					title: __("Mode"),
-					align: "start",
-					sortable: true,
-					key: "mode_of_payment",
-				},
-				{
-					title: __("Paid"),
-					align: "end",
-					sortable: true,
-					key: "paid_amount",
-				},
-				{
-					title: __("Unallocated"),
-					align: "end",
-					sortable: true,
-					key: "unallocated_amount",
-				},
-			],
-			mpesa_payment_headers: [
-				{
-					title: __("Payment ID"),
-					align: "start",
-					sortable: true,
-					key: "transid",
-				},
-				{
-					title: __("Full Name"),
-					align: "start",
-					sortable: true,
-					key: "full_name",
-				},
-				{
-					title: __("Nobile Number"),
-					align: "start",
-					sortable: true,
-					key: "mobile_no",
-				},
-				{
-					title: __("Date"),
-					align: "start",
-					sortable: true,
-					key: "posting_date",
-				},
-				{
-					title: __("Amount"),
-					align: "end",
-					sortable: true,
-					key: "amount",
-				},
-			],
-			isSubmitting: false,
-		};
-	},
+    mixins: [format],
+    setup() {
+        const { isRtl, rtlStyles, rtlClasses } = useRtl();
+        return {
+            isRtl,
+            rtlStyles,
+            rtlClasses
+        };
+    },
+    data: function () {
+        return {
+            dialog: false,
+            pos_profile: "",
+            pos_opening_shift: "",
+            customer_name: "",
+            customer_info: "",
+            company: "",
+            singleSelect: true,
+            invoices_loading: false,
+            unallocated_payments_loading: false,
+            mpesa_payments_loading: false,
+            payment_methods: [],
+            outstanding_invoices: [],
+            unallocated_payments: [],
+            mpesa_payments: [],
+            selected_invoices: [],
+            selected_payments: [],
+            selected_mpesa_payments: [],
+            pos_profiles_list: [],
+            pos_profile_search: "",
+            payment_methods_list: [],
+            mpesa_search_name: "",
+            mpesa_search_mobile: "",
+            invoices_headers: [
+                {
+                    title: "",
+                    align: "start",
+                    sortable: false,
+                    key: "actions",
+                    width: "50px",
+                },
+                {
+                    title: __("Invoice"),
+                    align: "start",
+                    sortable: true,
+                    key: "voucher_no",
+                },
+                {
+                    title: __("Customer"),
+                    align: "start",
+                    sortable: true,
+                    key: "customer_name",
+                },
+                {
+                    title: __("Date"),
+                    align: "start",
+                    sortable: true,
+                    key: "posting_date",
+                },
+                {
+                    title: __("Due Date"),
+                    align: "start",
+                    sortable: true,
+                    key: "due_date",
+                },
+                {
+                    title: __("Total"),
+                    align: "end",
+                    sortable: true,
+                    key: "invoice_amount",
+                },
+                {
+                    title: __("Outstanding"),
+                    align: "end",
+                    sortable: true,
+                    key: "outstanding_amount",
+                },
+            ],
+            unallocated_payments_headers: [
+                {
+                    title: "",
+                    align: "center",
+                    sortable: false,
+                    key: "select",
+                    width: "50px",
+                },
+                {
+                    title: __("Payment ID"),
+                    align: "start",
+                    sortable: true,
+                    key: "name",
+                },
+                {
+                    title: __("Customer"),
+                    align: "start",
+                    sortable: true,
+                    key: "customer_name",
+                },
+                {
+                    title: __("Date"),
+                    align: "start",
+                    sortable: true,
+                    key: "posting_date",
+                },
+                {
+                    title: __("Mode"),
+                    align: "start",
+                    sortable: true,
+                    key: "mode_of_payment",
+                },
+                {
+                    title: __("Paid"),
+                    align: "end",
+                    sortable: true,
+                    key: "paid_amount",
+                },
+                {
+                    title: __("Unallocated"),
+                    align: "end",
+                    sortable: true,
+                    key: "unallocated_amount",
+                },
+            ],
+            mpesa_payment_headers: [
+                {
+                    title: __("Payment ID"),
+                    align: "start",
+                    sortable: true,
+                    key: "transid",
+                },
+                {
+                    title: __("Full Name"),
+                    align: "start",
+                    sortable: true,
+                    key: "full_name",
+                },
+                {
+                    title: __("Nobile Number"),
+                    align: "start",
+                    sortable: true,
+                    key: "mobile_no",
+                },
+                {
+                    title: __("Date"),
+                    align: "start",
+                    sortable: true,
+                    key: "posting_date",
+                },
+                {
+                    title: __("Amount"),
+                    align: "end",
+                    sortable: true,
+                    key: "amount",
+                },
+            ],
+            isSubmitting: false,
+        };
+    },
 
-	components: {
-		Customer,
-		UpdateCustomer,
-	},
+    components: {
+        Customer,
+        UpdateCustomer,
+    },
 
-	methods: {
-		async check_opening_entry() {
-			var vm = this;
-			await initPromise;
-			await checkDbHealth();
-			return frappe
-				.call("posawesome.posawesome.api.shifts.check_opening_shift", {
-					user: frappe.session.user,
-				})
-				.then((r) => {
-					if (r.message) {
-						this.pos_profile = r.message.pos_profile;
-						this.pos_opening_shift = r.message.pos_opening_shift;
-						this.company = r.message.company.name;
-						vm.eventBus.emit("payments_register_pos_profile", r.message);
-						vm.eventBus.emit("set_company", r.message.company);
-						this.set_payment_methods();
-						try {
-							setOpeningStorage(r.message);
-						} catch (e) {
-							console.error("Failed to cache opening data", e);
-						}
+    methods: {
+        async check_opening_entry() {
+            var vm = this;
+            await initPromise;
+            await checkDbHealth();
+            return frappe
+                .call("posawesome.posawesome.api.shifts.check_opening_shift", {
+                    user: frappe.session.user,
+                })
+                .then((r) => {
+                    if (r.message) {
+                        this.pos_profile = r.message.pos_profile;
+                        this.pos_opening_shift = r.message.pos_opening_shift;
+                        this.company = r.message.company.name;
+                        vm.eventBus.emit("payments_register_pos_profile", r.message);
+                        vm.eventBus.emit("set_company", r.message.company);
+                        this.set_payment_methods();
+                        try {
+                            setOpeningStorage(r.message);
+                        } catch (e) {
+                            console.error("Failed to cache opening data", e);
+                        }
 
-						// Initialize pos_profile_search as empty
-						this.pos_profile_search = "";
+                        // Initialize pos_profile_search as empty
+                        this.pos_profile_search = "";
 
-						// Initialize the dropdown list with profiles but don't select any
-						this.pos_profiles_list = [];
-						// Add current profile to the list but don't select it
-						if (r.message.pos_profile && r.message.pos_profile.name) {
-							this.pos_profiles_list.push(r.message.pos_profile.name);
-						}
+                        // Initialize the dropdown list with profiles but don't select any
+                        this.pos_profiles_list = [];
+                        // Add current profile to the list but don't select it
+                        if (r.message.pos_profile && r.message.pos_profile.name) {
+                            this.pos_profiles_list.push(r.message.pos_profile.name);
+                        }
 
-						this.payment_methods_list = [];
-						this.pos_profile.payments.forEach((element) => {
-							this.payment_methods_list.push(element.mode_of_payment);
-						});
-						this.get_available_pos_profiles();
-						this.get_outstanding_invoices();
-						this.get_draft_mpesa_payments_register();
-					} else {
-						const data = getOpeningStorage();
-						if (data) {
-							this.pos_profile = data.pos_profile;
-							this.pos_opening_shift = data.pos_opening_shift;
-							this.company = data.company.name;
-							vm.eventBus.emit("payments_register_pos_profile", data);
-							vm.eventBus.emit("set_company", data.company);
-							this.set_payment_methods();
-							this.payment_methods_list = [];
-							this.pos_profile.payments.forEach((element) => {
-								this.payment_methods_list.push(element.mode_of_payment);
-							});
-							this.get_available_pos_profiles();
-							this.get_outstanding_invoices();
-							this.get_draft_mpesa_payments_register();
-							return;
-						}
-						this.create_opening_voucher();
-					}
-				})
-				.catch(() => {
-					const data = getOpeningStorage();
-					if (data) {
-						this.pos_profile = data.pos_profile;
-						this.pos_opening_shift = data.pos_opening_shift;
-						this.company = data.company.name;
-						vm.eventBus.emit("payments_register_pos_profile", data);
-						vm.eventBus.emit("set_company", data.company);
-						this.set_payment_methods();
-						this.payment_methods_list = [];
-						this.pos_profile.payments.forEach((element) => {
-							this.payment_methods_list.push(element.mode_of_payment);
-						});
-						this.get_available_pos_profiles();
-						this.get_outstanding_invoices();
-						this.get_draft_mpesa_payments_register();
-						return;
-					}
-					this.create_opening_voucher();
-				});
-		},
-		get_available_pos_profiles() {
-			if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
-			return frappe
-				.call("posawesome.posawesome.api.payment_entry.get_available_pos_profiles", {
-					company: this.company,
-					currency: this.pos_profile.currency,
-				})
-				.then((r) => {
-					if (r.message) {
-						this.pos_profiles_list = r.message;
-					}
-				});
-		},
-		create_opening_voucher() {
-			this.dialog = true;
-		},
-		async fetch_customer_details() {
-			var vm = this;
-			if (!this.customer_name) return;
+                        this.payment_methods_list = [];
+                        this.pos_profile.payments.forEach((element) => {
+                            this.payment_methods_list.push(element.mode_of_payment);
+                        });
+                        this.get_available_pos_profiles();
+                        this.get_outstanding_invoices();
+                        this.get_draft_mpesa_payments_register();
+                    } else {
+                        const data = getOpeningStorage();
+                        if (data) {
+                            this.pos_profile = data.pos_profile;
+                            this.pos_opening_shift = data.pos_opening_shift;
+                            this.company = data.company.name;
+                            vm.eventBus.emit("payments_register_pos_profile", data);
+                            vm.eventBus.emit("set_company", data.company);
+                            this.set_payment_methods();
+                            this.payment_methods_list = [];
+                            this.pos_profile.payments.forEach((element) => {
+                                this.payment_methods_list.push(element.mode_of_payment);
+                            });
+                            this.get_available_pos_profiles();
+                            this.get_outstanding_invoices();
+                            this.get_draft_mpesa_payments_register();
+                            return;
+                        }
+                        this.create_opening_voucher();
+                    }
+                })
+                .catch(() => {
+                    const data = getOpeningStorage();
+                    if (data) {
+                        this.pos_profile = data.pos_profile;
+                        this.pos_opening_shift = data.pos_opening_shift;
+                        this.company = data.company.name;
+                        vm.eventBus.emit("payments_register_pos_profile", data);
+                        vm.eventBus.emit("set_company", data.company);
+                        this.set_payment_methods();
+                        this.payment_methods_list = [];
+                        this.pos_profile.payments.forEach((element) => {
+                            this.payment_methods_list.push(element.mode_of_payment);
+                        });
+                        this.get_available_pos_profiles();
+                        this.get_outstanding_invoices();
+                        this.get_draft_mpesa_payments_register();
+                        return;
+                    }
+                    this.create_opening_voucher();
+                });
+        },
+        get_available_pos_profiles() {
+            if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
+            return frappe
+                .call("posawesome.posawesome.api.payment_entry.get_available_pos_profiles", {
+                    company: this.company,
+                    currency: this.pos_profile.currency,
+                })
+                .then((r) => {
+                    if (r.message) {
+                        this.pos_profiles_list = r.message;
+                    }
+                });
+        },
+        create_opening_voucher() {
+            this.dialog = true;
+        },
+        async fetch_customer_details() {
+            var vm = this;
+            if (!this.customer_name) return;
 
-			// When offline, attempt to load details from cached customers
-			if (isOffline()) {
-				try {
-					const cached = (getCustomerStorage() || []).find(
-						(c) => c.name === vm.customer_name || c.customer_name === vm.customer_name,
-					);
-					if (cached) {
-						vm.customer_info = { ...cached };
-						vm.set_mpesa_search_params();
-						vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
-						return;
-					}
-					const queued = (getOfflineCustomers() || [])
-						.map((e) => e.args)
-						.find((c) => c.customer_name === vm.customer_name);
-					if (queued) {
-						vm.customer_info = { ...queued, name: queued.customer_name };
-						vm.set_mpesa_search_params();
-						vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
-					}
-				} catch (error) {
-					console.error("Failed to fetch cached customer", error);
-				}
-				return;
-			}
+            // When offline, attempt to load details from cached customers
+            if (isOffline()) {
+                try {
+                    const cached = (getCustomerStorage() || []).find(
+                        (c) => c.name === vm.customer_name || c.customer_name === vm.customer_name,
+                    );
+                    if (cached) {
+                        vm.customer_info = { ...cached };
+                        vm.set_mpesa_search_params();
+                        vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
+                        return;
+                    }
+                    const queued = (getOfflineCustomers() || [])
+                        .map((e) => e.args)
+                        .find((c) => c.customer_name === vm.customer_name);
+                    if (queued) {
+                        vm.customer_info = { ...queued, name: queued.customer_name };
+                        vm.set_mpesa_search_params();
+                        vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cached customer", error);
+                }
+                return;
+            }
 
-			try {
+            try {
                                 const r = await frappe.call({
                                         method: "posawesome.posawesome.api.customers.get_customer_info",
                                         args: {
@@ -1096,45 +1096,484 @@ export default {
 				return;
 			}
 
-			// Use simplest URL possible to avoid errors
-			const url =
-				frappe.urllib.get_base_url() +
-				"/printview?doctype=Payment%20Entry" +
-				"&name=" +
-				payment_name +
-				"&trigger_print=1";
+			const doctype = "Payment Entry";
+			const docname = payment_name;
+			const print_format = this.pos_profile.payment_entry_print_format;
+			const letter_head = this.pos_profile.letter_head || 0;
+			const lang_code = frappe.boot.lang;
 
-			console.log("Opening printing URL:", url);
-
-			if (this.pos_profile?.posa_silent_print) {
-				silentPrint(url);
+			if (this.pos_profile.qz_printing) {
+				this._print_via_qz(doctype, docname, print_format, letter_head, lang_code);
+				console.log("Attempting QZ print from Pay.vue");
 			} else {
-				window.open(url, "_blank");
+				this._print_regular(doctype, docname, print_format, letter_head);
+				console.log("Printing via regular method from Pay.vue");
 			}
 		},
 
-		async syncPendingPayments() {
-			const pending = getPendingOfflinePaymentCount();
-			if (pending) {
-				this.eventBus.emit("show_message", {
-					title: `${pending} payment${pending > 1 ? "s" : ""} pending for sync`,
-					color: "warning",
-				});
-			}
-			if (isOffline()) {
-				return;
-			}
-			const result = await syncOfflinePayments();
-			if (result && result.synced) {
-				this.eventBus.emit("show_message", {
-					title: `${result.synced} offline payment${result.synced > 1 ? "s" : ""} synced`,
-					color: "success",
-				});
-			}
-		},
-	},
+		/**
+         * Load QZ Tray library from local file with CDN fallback
+         * QZ Tray library (v2.2.2) is stored locally at /assets/posawesome/js/qz-tray.js
+         * This ensures printing functionality works even without internet connection
+         */
+        _load_qz_library() {
+            return new Promise((resolve, reject) => {
+                if (typeof qz !== "undefined") {
+                    console.log("QZ library already loaded");
+                    resolve();
+                    return;
+                }
 
-	computed: {
+                console.log("Loading QZ library from local file...");
+                const script = document.createElement("script");
+                // Load from local file instead of CDN
+                script.src = "/assets/posawesome/js/qz-tray.js";
+                script.onload = () => {
+                    console.log("QZ library script loaded from local file");
+                    // Wait a bit for the library to initialize
+                    setTimeout(() => {
+                        if (typeof qz !== "undefined") {
+                            console.log("QZ library initialized successfully from local file");
+                            resolve();
+                        } else {
+                            console.error("QZ library loaded from local file but qz object not available");
+                            reject(new Error("QZ library loaded but qz object not available"));
+                        }
+                    }, 1000);
+                };
+                script.onerror = (error) => {
+                    console.error("Failed to load QZ library from local file:", error);
+                    console.log("Trying CDN fallback...");
+                    
+                    // Remove the failed script element
+                    document.head.removeChild(script);
+                    
+                    // Create new script element for CDN fallback
+                    const fallbackScript = document.createElement("script");
+                    fallbackScript.src = "https://cdn.jsdelivr.net/npm/qz-tray@2.2.2/qz-tray.js";
+                    fallbackScript.onload = () => {
+                        console.log("QZ library script loaded from CDN fallback");
+                        setTimeout(() => {
+                            if (typeof qz !== "undefined") {
+                                console.log("QZ library initialized successfully from CDN");
+                                resolve();
+                            } else {
+                                console.error("QZ library loaded from CDN but qz object not available");
+                                reject(new Error("QZ library loaded but qz object not available"));
+                            }
+                        }, 1000);
+                    };
+                    fallbackScript.onerror = (fallbackError) => {
+                        console.error("Failed to load QZ library from CDN:", fallbackError);
+                        reject(new Error("Failed to load QZ library script from both local file and CDN"));
+                    };
+                    document.head.appendChild(fallbackScript);
+                };
+                document.head.appendChild(script);
+            });
+        },
+
+        _print_regular(doctype, docname, print_format, letter_head) {
+            const url =
+                frappe.urllib.get_base_url() +
+                "/printview?doctype=" +
+                encodeURIComponent(doctype) +
+                "&name=" +
+                docname +
+                "&trigger_print=1" +
+                "&format=" +
+                print_format +
+                "&no_letterhead=" +
+                letter_head;
+
+            if (this.pos_profile?.posa_silent_print) {
+                silentPrint(url);
+            } else {
+                window.open(url, "_blank");
+            }
+        },
+
+        async _print_via_qz(doctype, docname, print_format, letter_head, lang_code) {
+            // Check if QZ library is loaded, if not, load it
+            if (typeof qz === "undefined") {
+                try {
+                    await this._load_qz_library();
+                } catch (error) {
+                    frappe.show_alert({
+                        message: __(
+                            "QZ Tray library could not be loaded. Please ensure QZ Tray is installed and running.",
+                        ),
+                        indicator: "orange",
+                    });
+                    this._print_regular(doctype, docname, print_format, letter_head);
+                    return;
+                }
+            }
+
+            try {
+                const print_format_printer_map = this._get_print_format_printer_map();
+                const mapped_printer = this._get_mapped_printer(print_format_printer_map, doctype, print_format);
+
+                if (mapped_printer.length === 1) {
+                    await this._print_with_mapped_printer(
+                        doctype,
+                        docname,
+                        print_format,
+                        letter_head,
+                        lang_code,
+                        mapped_printer[0],
+                    );
+                } else if (await this._is_raw_printing(print_format)) {
+                    frappe.show_alert(
+                        {
+                            message: __("Printer mapping not set."),
+                            subtitle: __(
+                                "Please set a printer mapping for this print format in the Printer Settings",
+                            ),
+                            indicator: "warning",
+                        },
+                        14,
+                    );
+                    await this._printer_setting_dialog(doctype, print_format, docname, letter_head, lang_code);
+                } else {
+                    this._print_regular(doctype, docname, print_format, letter_head);
+                }
+            } catch (error) {
+                console.error("QZ printing failed:", error);
+                frappe.show_alert({
+                    message: __("QZ printing failed, using regular print."),
+                    indicator: "orange",
+                });
+                this._print_regular(doctype, docname, print_format, letter_head);
+            }
+        },
+
+        async _print_with_mapped_printer(doctype, docname, print_format, letter_head, lang_code, printer_map) {
+            if (await this._is_raw_printing(print_format)) {
+                try {
+                    // Check if QZ Tray is already connected before attempting to connect
+                    if (!qz.websocket.isActive()) {
+                        await qz.websocket.connect();
+                    }
+                    
+                    // Get raw commands
+                    const rawCommands = await this._get_raw_commands(doctype, docname, print_format, lang_code);
+                    
+                    // Create config and print using QZ Tray
+                    const config = qz.configs.create(printer_map.printer);
+                    const data = [rawCommands];
+                    await qz.print(config, data);
+                    
+                    frappe.show_alert({
+                        message: __("Print job sent successfully"),
+                        indicator: "green"
+                    });
+                } catch (error) {
+                    console.error("QZ Raw printing failed:", error);
+                    frappe.show_alert({
+                        message: __("QZ Raw printing failed: ") + error.message,
+                        indicator: "red"
+                    });
+                    this._print_regular(doctype, docname, print_format, letter_head);
+                }
+            } else {
+                try {
+                    // Check if QZ Tray is already connected before attempting to connect
+                    if (!qz.websocket.isActive()) {
+                        await qz.websocket.connect();
+                    }
+                    
+                    // Get PDF URL
+                    const url = frappe.urllib.get_base_url() +
+                        "/printview?doctype=" +
+                        encodeURIComponent(doctype) +
+                        "&name=" +
+                        docname +
+                        "&format=" +
+                        print_format +
+                        "&no_letterhead=" +
+                        letter_head;
+                    
+                    // Print PDF using QZ Tray
+                    const config = qz.configs.create(printer_map.printer);
+                    const data = [{
+                        type: 'pixel',
+                        format: 'pdf',
+                        flavor: 'file',
+                        data: url
+                    }];
+                    await qz.print(config, data);
+                    
+                    frappe.show_alert({
+                        message: __("Print job sent successfully"),
+                        indicator: "green"
+                    });
+                } catch (error) {
+                    console.error("QZ PDF printing failed:", error);
+                    frappe.show_alert({
+                        message: __("QZ PDF printing failed: ") + error.message,
+                        indicator: "red"
+                    });
+                    this._print_regular(doctype, docname, print_format, letter_head);
+                }
+            }
+        },
+
+        async _get_raw_commands(doctype, docname, print_format, lang_code) {
+            return new Promise((resolve, reject) => {
+                // First ensure we have the document by fetching from server
+                frappe.db
+                    .get_doc(doctype, docname)
+                    .then((doc) => {
+                        if (!doc || !doc.name) {
+                            reject(new Error("Document not found for printing"));
+                            return;
+                        }
+
+                        frappe.call({
+                            method: "frappe.www.printview.get_rendered_raw_commands",
+                            args: {
+                                doc: JSON.stringify(doc),
+                                print_format: print_format,
+                                _lang: lang_code,
+                            },
+                            callback: (r) => {
+                                if (!r.exc && r.message) {
+                                    resolve(r.message.raw_commands);
+                                } else {
+                                    reject(new Error(r.exc || "Failed to get raw commands"));
+                                }
+                            },
+                            error: (err) => {
+                                reject(err);
+                            }
+                        });
+                    })
+                    .catch((error) => {
+                        reject(new Error("Error loading document for printing"));
+                    });
+            });
+        },
+
+        async _is_raw_printing(format) {
+            // Try to get from locals first
+            let print_format = {};
+            if (locals?.["Print Format"]?.[format]) {
+                print_format = locals["Print Format"][format];
+                return print_format.raw_printing === 1;
+            }
+
+            // If not in locals, try to fetch from server
+            try {
+                const { message } = await frappe.db.get_value("Print Format", format, "raw_printing");
+                return message?.raw_printing === 1;
+            } catch (err) {
+                return false;
+            }
+        },
+
+        _get_print_format_printer_map() {
+            try {
+                return JSON.parse(localStorage.print_format_printer_map || "{}");
+            } catch (e) {
+                return {};
+            }
+        },
+
+        _get_mapped_printer(print_format_printer_map, doctype, print_format) {
+            if (print_format_printer_map[doctype]) {
+                return print_format_printer_map[doctype].filter(
+                    (printer_map) => printer_map.print_format === print_format
+                );
+            }
+            return [];
+        },
+
+        async _get_print_format_options(doctype) {
+            return new Promise((resolve) => {
+                // Try to get print formats from meta first
+                try {
+                    let formats = frappe.meta.get_print_formats(doctype);
+                    if (formats && Array.isArray(formats) && formats.length > 2) {
+                        resolve(formats);
+                        return;
+                    }
+                } catch (error) {
+                    console.warn("Error getting print formats from meta:", error);
+                }
+
+                // Try to get from frappe.boot if available
+                if (frappe.boot && frappe.boot.print_formats && frappe.boot.print_formats[doctype]) {
+                    let formats = frappe.boot.print_formats[doctype];
+                    if (formats && formats.length > 2) {
+                        resolve(formats);
+                        return;
+                    }
+                }
+
+                // Fetch print formats specifically for this doctype from database
+                frappe.call({
+                    method: "frappe.client.get_list",
+                    args: {
+                        doctype: "Print Format",
+                        fields: ["name", "print_format_type", "disabled"],
+                        filters: [
+                            ["doc_type", "=", doctype],
+                            ["disabled", "=", 0]
+                        ],
+                        order_by: "name"
+                    },
+                    callback: (r) => {
+                        let formats = ["Standard"]; // Always include Standard
+                        
+                        if (r.message && r.message.length > 0) {
+                            // Add all enabled print formats for this specific doctype
+                            const custom_formats = r.message.map(format => format.name);
+                            formats = formats.concat(custom_formats);
+                        }
+                        
+                        // Add some common fallback formats if none found
+                        if (formats.length <= 1) {
+                            if (doctype === "Payment Entry") {
+                                formats.push("Payment Entry Print");
+                            }
+                        }
+                        
+                        // Remove duplicates and return
+                        formats = [...new Set(formats)];
+                        resolve(formats);
+                    },
+                    error: () => {
+                        // Final fallback based on doctype
+                        const fallbackFormats = ["Standard"];
+                        if (doctype === "Payment Entry") {
+                            fallbackFormats.push("Payment Entry Print");
+                        }
+                        resolve(fallbackFormats);
+                    }
+                });
+            });
+        },
+
+        async _get_printer_list() {
+            try {
+                // Check if QZ Tray is already connected
+                if (!qz.websocket.isActive()) {
+                    await qz.websocket.connect();
+                }
+                return await qz.printers.find();
+            } catch (error) {
+                console.error("Failed to get printer list:", error);
+                throw error;
+            }
+        },
+
+        async _printer_setting_dialog(doctype, current_print_format, docname, letter_head, lang_code) {
+            // Show loading message
+            const loading_dialog = frappe.show_alert({
+                message: __("Loading print formats and printers..."),
+                indicator: 'blue'
+            });
+
+            try {
+                const [printer_list, print_format_options] = await Promise.all([
+                    this._get_printer_list(),
+                    this._get_print_format_options(doctype)
+                ]);
+
+                // Hide loading message
+                if (loading_dialog) loading_dialog.hide();
+
+                if (!(printer_list && printer_list.length)) {
+                    frappe.throw(__("No Printer is Available."));
+                    return;
+                }
+
+                const print_format_printer_map = this._get_print_format_printer_map();
+                let data = print_format_printer_map[doctype] || [];
+
+                const dialog = new frappe.ui.Dialog({
+                    title: __("Printer Settings"),
+                    fields: [
+                        {
+                            fieldtype: "Section Break",
+                        },
+                        {
+                            fieldname: "printer_mapping",
+                            fieldtype: "Table",
+                            label: __("Printer Mapping"),
+                            in_place_edit: true,
+                            data: data,
+                            get_data: () => {
+                                return data;
+                            },
+                            fields: [
+                                {
+                                    fieldtype: "Select",
+                                    fieldname: "print_format",
+                                    default: 0,
+                                    options: print_format_options,
+                                    read_only: 0,
+                                    in_list_view: 1,
+                                    label: __("Print Format"),
+                                },
+                                {
+                                    fieldtype: "Select",
+                                    fieldname: "printer",
+                                    default: 0,
+                                    options: printer_list,
+                                    read_only: 0,
+                                    in_list_view: 1,
+                                    label: __("Printer"),
+                                },
+                            ],
+                        },
+                    ],
+                    primary_action: () => {
+                        let printer_mapping = dialog.get_values()["printer_mapping"];
+                        if (printer_mapping && printer_mapping.length) {
+                            let print_format_list = printer_mapping.map((a) => a.print_format);
+                            let has_duplicate = print_format_list.some(
+                                (item, idx) => print_format_list.indexOf(item) != idx,
+                            );
+                            if (has_duplicate) {
+                                frappe.throw(
+                                    __("Cannot have multiple printers mapped to a single print format."),
+                                );
+                                return;
+                            }
+                        } else {
+                            printer_mapping = [];
+                        }
+
+                        let saved_print_format_printer_map = this._get_print_format_printer_map();
+                        saved_print_format_printer_map[doctype] = printer_mapping;
+                        localStorage.print_format_printer_map = JSON.stringify(saved_print_format_printer_map);
+
+                        dialog.hide();
+
+                        // Try printing again with the new settings
+                        this._print_via_qz(doctype, docname, current_print_format, letter_head, lang_code);
+                    },
+                    primary_action_label: __("Save"),
+                });
+
+                dialog.show();
+            } catch (error) {
+                // Hide loading message
+                if (loading_dialog) loading_dialog.hide();
+                
+                frappe.show_alert({
+                    message: __("Error loading printer settings: ") + (error.message || error),
+                    indicator: 'red'
+                });
+            }
+        },
+
+        // ...existing methods...
+    },
+
+    computed: {
 		total_outstanding_amount() {
 			if (!this.outstanding_invoices || !this.outstanding_invoices.length) return 0;
 			return this.outstanding_invoices.reduce((acc, cur) => acc + flt(cur?.outstanding_amount || 0), 0);

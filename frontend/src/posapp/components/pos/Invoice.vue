@@ -607,8 +607,8 @@ export default {
 					const invoice_doc = this.save_and_clear_invoice();
 					invoice_name = invoice_doc.name ? invoice_doc.name : invoice_name;
 				},
-				() => {
-					this.load_print_page(invoice_name);
+				async () => {
+					await this.load_print_page(invoice_name);
 				},
 			]);
 		},
@@ -1255,7 +1255,7 @@ export default {
 		});
 		this.eventBus.on("update_invoice_coupons", (data) => {
 			this.posa_coupons = data;
-			this.handelOffers();
+			this.handleOffers();
 		});
 		this.eventBus.on("set_all_items", (data) => {
 			this.allItems = data;
