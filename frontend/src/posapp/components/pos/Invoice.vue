@@ -1455,8 +1455,8 @@ export default {
                 handleSetOffers(data) {
                         this.posOffers = data;
                 },
-                handleUpdateInvoiceOffers(data) {
-                        this.updateInvoiceOffers(data);
+                async handleUpdateInvoiceOffers(data) {
+                        await this.updateInvoiceOffers(data);
                 },
                 handleUpdateInvoiceCoupons(data) {
                         this.posa_coupons = data;
