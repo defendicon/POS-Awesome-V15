@@ -335,8 +335,12 @@ export default {
                         items_count: data.items ? data.items.length : 0,
 		});
 
-		this.clear_invoice();
-		if (data.is_return) {
+                this.clear_invoice();
+                if (data?.is_return) {
+                        this._normalizeReturnDocTotals(data);
+                }
+
+                if (data.is_return) {
 			console.log("Processing return invoice");
 			// For return without invoice case, check if there's a return_against
 			// Only set customer readonly if this is a return with reference to an invoice
@@ -352,8 +356,8 @@ export default {
 			this.invoiceTypes = ["Return"];
 		}
 
-		this.invoice_doc = data;
-		this.items = data.items || [];
+                this.invoice_doc = data;
+                this.items = data.items || [];
 		this.packed_items = data.packed_items || [];
 		console.log("Items set:", this.items.length, "items");
 
@@ -568,13 +572,14 @@ export default {
 			this.additional_discount_percentage = 0;
 			this.invoiceType = "Invoice";
 			this.invoiceTypes = ["Invoice", "Order", "Quotation"];
-		} else {
-			if (data.is_return) {
-				// For return without invoice case, check if there's a return_against
-				// Only set customer readonly if this is a return with reference to an invoice
-				if (data.return_against) {
-					this.eventBus.emit("set_customer_readonly", true);
-				} else {
+                } else {
+                        if (data.is_return) {
+                                this._normalizeReturnDocTotals(data);
+                                // For return without invoice case, check if there's a return_against
+                                // Only set customer readonly if this is a return with reference to an invoice
+                                if (data.return_against) {
+                                        this.eventBus.emit("set_customer_readonly", true);
+                                } else {
 					// Allow customer selection for returns without invoice
 					this.eventBus.emit("set_customer_readonly", false);
 				}
@@ -1145,19 +1150,22 @@ export default {
 					: "posawesome.posawesome.api.invoices.update_invoice";
 
 		try {
-			const response = await frappe.call({
-				method,
-				args: {
-					data: doc,
-				},
+                        const response = await frappe.call({
+                                method,
+                                args: {
+                                        data: doc,
+                                },
 			});
 
 			const message = response?.message;
-			if (message) {
-				this.invoice_doc = message;
-				if (message.exchange_rate_date) {
-					this.exchange_rate_date = message.exchange_rate_date;
-					const posting_backend = this.formatDateForBackend(this.posting_date_display);
+                        if (message) {
+                                if (message.is_return) {
+                                        this._normalizeReturnDocTotals(message);
+                                }
+                                this.invoice_doc = message;
+                                if (message.exchange_rate_date) {
+                                        this.exchange_rate_date = message.exchange_rate_date;
+                                        const posting_backend = this.formatDateForBackend(this.posting_date_display);
 					if (posting_backend !== this.exchange_rate_date) {
 						this.eventBus.emit("show_message", {
 							title: __(
@@ -1196,8 +1204,11 @@ export default {
 			});
 
 			const message = response?.message;
-			if (message) {
-				this.invoice_doc = message;
+                        if (message) {
+                                if (message.is_return) {
+                                        this._normalizeReturnDocTotals(message);
+                                }
+                                this.invoice_doc = message;
 				if (message.exchange_rate_date) {
 					this.exchange_rate_date = message.exchange_rate_date;
 					const posting_backend = this.formatDateForBackend(this.posting_date_display);
@@ -1288,11 +1299,11 @@ export default {
 	},
 
 	// Reload the currently open invoice from the backend and load it into the UI
-	async reload_current_invoice_from_backend() {
-		try {
-			if (isOffline()) {
-				return null;
-			}
+        async reload_current_invoice_from_backend() {
+                try {
+                        if (isOffline()) {
+                                return null;
+                        }
 
 			const current = this.invoice_doc || {};
 			const name = current.name;
@@ -1330,14 +1341,105 @@ export default {
 				title: __("Failed to reload invoice from server"),
 				color: "warning",
 			});
-			return null;
-		}
-	},
+                        return null;
+                }
+        },
 
-	_collectManualRateOverrides(items) {
-		if (!Array.isArray(items) || !items.length) {
-			return [];
-		}
+        _normalizeReturnDocTotals(doc) {
+                if (!doc || !doc.is_return) {
+                        return doc;
+                }
+
+                const toNumber = (value) => {
+                        if (value === undefined || value === null || value === "") {
+                                return null;
+                        }
+
+                        const number = flt(value, this.currency_precision);
+                        return Number.isFinite(number) ? number : null;
+                };
+
+                const ensureNegative = (value) => {
+                        if (value === null) {
+                                return value;
+                        }
+                        return value > 0 ? -Math.abs(value) : value;
+                };
+
+                const adjustFieldByDelta = (field, delta) => {
+                        if (!delta || !Number.isFinite(delta)) {
+                                return;
+                        }
+
+                        if (doc[field] === undefined || doc[field] === null || doc[field] === "") {
+                                return;
+                        }
+
+                        const currentValue = toNumber(doc[field]);
+                        if (currentValue === null) {
+                                return;
+                        }
+
+                        doc[field] = flt(currentValue - delta, this.currency_precision);
+                };
+
+                const originalDiscount = toNumber(doc.discount_amount);
+                let discountDelta = 0;
+                if (originalDiscount !== null) {
+                        const normalizedDiscount = ensureNegative(originalDiscount);
+                        discountDelta = normalizedDiscount - originalDiscount;
+                        doc.discount_amount = normalizedDiscount;
+                }
+
+                const originalBaseDiscount = toNumber(doc.base_discount_amount);
+                let baseDiscountDelta = 0;
+                if (originalBaseDiscount !== null) {
+                        const normalizedBaseDiscount = ensureNegative(originalBaseDiscount);
+                        baseDiscountDelta = normalizedBaseDiscount - originalBaseDiscount;
+                        doc.base_discount_amount = normalizedBaseDiscount;
+                }
+
+                if (discountDelta) {
+                        ["net_total", "grand_total", "rounded_total"].forEach((field) =>
+                                adjustFieldByDelta(field, discountDelta),
+                        );
+                }
+
+                if (baseDiscountDelta) {
+                        ["base_net_total", "base_grand_total", "base_rounded_total"].forEach((field) =>
+                                adjustFieldByDelta(field, baseDiscountDelta),
+                        );
+                }
+
+                [
+                        "total",
+                        "net_total",
+                        "grand_total",
+                        "rounded_total",
+                        "base_total",
+                        "base_net_total",
+                        "base_grand_total",
+                        "base_rounded_total",
+                ].forEach((field) => {
+                        if (doc[field] === undefined || doc[field] === null || doc[field] === "") {
+                                return;
+                        }
+
+                        const value = toNumber(doc[field]);
+                        if (value === null) {
+                                return;
+                        }
+
+                        doc[field] = ensureNegative(value);
+                });
+
+                return doc;
+        },
+
+        _collectManualRateOverrides(items) {
+                if (!Array.isArray(items) || !items.length) {
+                        return [];
+                }
 
 		return items
 			.filter((item) => item && item._manual_rate_set)
