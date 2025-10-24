@@ -167,7 +167,7 @@ def _fetch_item_meta(item_codes: Tuple[str, ...]):
         return []
     return frappe.get_all(
         "Item",
-        fields=["name", "has_batch_no", "has_serial_no", "stock_uom"],
+        fields=["name", "item_name", "has_batch_no", "has_serial_no", "stock_uom"],
         filters={"name": ["in", item_codes]},
     )
 
@@ -351,6 +351,8 @@ def merge_item_row(
             "conversion_rate": exchange_rate,
         }
     )
+    if not row.get("item_name") and meta.get("item_name"):
+        row["item_name"] = meta.get("item_name")
     return row
 
 
