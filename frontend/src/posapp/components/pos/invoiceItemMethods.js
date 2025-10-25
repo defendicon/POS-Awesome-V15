@@ -420,6 +420,12 @@ export default {
 
                         if (shouldPreserveDiscountPercentage) {
                                 resolvedPercentage = previousDiscountPercentage;
+                        } else if (
+                                data.additional_discount_percentage !== undefined &&
+                                data.additional_discount_percentage !== null &&
+                                Number.isFinite(docDiscountPercentage)
+                        ) {
+                                resolvedPercentage = docDiscountPercentage;
                         } else {
                                 const totalsForPercentage = [];
 
