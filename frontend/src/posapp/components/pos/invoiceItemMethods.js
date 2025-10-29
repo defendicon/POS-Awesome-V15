@@ -2120,42 +2120,73 @@ export default {
 				},
 			});
 
-			if (response?.message) {
-				items.forEach((item) => {
-					const updated_item = response.message.find(
-						(element) => element.posa_row_id == item.posa_row_id,
-					);
-					if (updated_item) {
-						item.actual_qty = updated_item.actual_qty;
-						item.item_uoms = updated_item.item_uoms;
-						item.has_batch_no = updated_item.has_batch_no;
-						item.has_serial_no = updated_item.has_serial_no;
-						item.batch_no_data = updated_item.batch_no_data;
-						item.serial_no_data = updated_item.serial_no_data;
-						if (updated_item.rate !== undefined) {
-							const force =
-								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-							const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
-							const manualLocked = item._manual_rate_set === true;
-							const shouldOverrideRate =
-								!item.locked_price && !item.posa_offer_applied && !manualLocked;
+                        if (response?.message) {
+                                const detailMap = new Map();
+                                response.message.forEach((detail) => {
+                                        if (!detail) {
+                                                return;
+                                        }
+                                        const key = detail.posa_row_id || detail.item_code;
+                                        if (key) {
+                                                detailMap.set(key, detail);
+                                        }
+                                });
 
-							if (shouldOverrideRate) {
-								if (force || price) {
-									item.rate = price;
-									item.price_list_rate = price;
-								}
-							} else if (!item.price_list_rate && (force || price)) {
-								item.price_list_rate = price;
-							}
-						}
-						if (updated_item.currency) {
-							item.currency = updated_item.currency;
-						}
-					}
-				});
-			}
-		} catch (error) {
+                                items.forEach((item) => {
+                                        if (!item) {
+                                                return;
+                                        }
+
+                                        const key = item.posa_row_id || item.item_code;
+                                        const updated_item = key ? detailMap.get(key) : null;
+                                        if (!updated_item) {
+                                                return;
+                                        }
+
+                                        item.actual_qty = updated_item.actual_qty;
+                                        item.item_uoms = updated_item.item_uoms;
+                                        item.has_batch_no = updated_item.has_batch_no;
+                                        item.has_serial_no = updated_item.has_serial_no;
+                                        item.batch_no_data = updated_item.batch_no_data;
+                                        item.serial_no_data = updated_item.serial_no_data;
+
+                                        if (updated_item.price_list_currency) {
+                                                item.price_list_currency = updated_item.price_list_currency;
+                                        }
+
+                                        if (updated_item.rate !== undefined || updated_item.price_list_rate !== undefined) {
+                                                const force =
+                                                        this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+                                                const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
+                                                const priceCurrency =
+                                                        updated_item.currency ||
+                                                        updated_item.price_list_currency ||
+                                                        item.price_list_currency ||
+                                                        this.selected_currency;
+                                                const manualLocked = item._manual_rate_set === true;
+                                                const shouldOverrideRate =
+                                                        !item.locked_price && !item.posa_offer_applied && !manualLocked;
+
+                                                if (shouldOverrideRate) {
+                                                        if (force || price) {
+                                                                this._applyPriceListRate(item, price, priceCurrency);
+                                                        }
+                                                } else if (!item.price_list_rate && (force || price)) {
+                                                        const converted = this._computePriceConversion(price, priceCurrency);
+                                                        if (converted.base_price_list_rate !== undefined) {
+                                                                item.base_price_list_rate = converted.base_price_list_rate;
+                                                        }
+                                                        item.price_list_rate = converted.price_list_rate;
+                                                }
+                                        }
+
+                                        const resolvedCurrency = this.selected_currency || updated_item.currency;
+                                        if (resolvedCurrency) {
+                                                item.currency = resolvedCurrency;
+                                        }
+                                });
+                        }
+                } catch (error) {
 			console.error("Error updating items:", error);
 			this.eventBus.emit("show_message", {
 				title: __("Error updating item details"),
@@ -2742,9 +2773,44 @@ export default {
 		if (typeof item.qty === "number" && typeof item.base_rate === "number") {
 			item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 		}
-	},
+        },
 
-	// Apply cached price list rates to existing invoice items
+        _computePriceConversion(rate, priceCurrency) {
+                const numericRate = Number.isFinite(Number(rate)) ? Number(rate) : 0;
+                const resolvedCurrency = priceCurrency || this.selected_currency;
+                const companyCurrency = this.pos_profile?.currency;
+                const selectedCurrency = this.selected_currency || companyCurrency;
+
+                const result = {
+                        base_price_list_rate: this.flt(numericRate, this.currency_precision),
+                        price_list_rate: this.flt(numericRate, this.currency_precision),
+                };
+
+                if (!resolvedCurrency || resolvedCurrency === selectedCurrency) {
+                        if (resolvedCurrency && companyCurrency && resolvedCurrency !== companyCurrency) {
+                                const conv = this.conversion_rate || 1;
+                                result.base_price_list_rate = this.flt(
+                                        numericRate * conv,
+                                        this.currency_precision,
+                                );
+                        }
+                        return result;
+                }
+
+                result.base_price_list_rate = this.flt(numericRate, this.currency_precision);
+
+                if (selectedCurrency && companyCurrency && selectedCurrency !== companyCurrency) {
+                        const exchange = this.exchange_rate || 1;
+                        result.price_list_rate = this.flt(
+                                numericRate * exchange,
+                                this.currency_precision,
+                        );
+                }
+
+                return result;
+        },
+
+        // Apply cached price list rates to existing invoice items
 	async apply_cached_price_list(price_list) {
 		const targetPriceList = price_list || this.pos_profile?.selling_price_list;
 		const cached = targetPriceList ? await getCachedPriceListItems(targetPriceList) : null;
