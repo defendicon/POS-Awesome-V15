@@ -5,6 +5,7 @@ import json
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import (
@@ -525,14 +526,19 @@ def submit_invoice(invoice, data):
 
         posting_date = invoice_doc.get("posting_date") or nowdate()
         reference_no = invoice_doc.get("posa_pos_opening_shift")
+        customer_account = invoice_doc.get("debit_to") or get_party_account(
+            "Customer", invoice_doc.get("customer"), invoice_doc.get("company")
+        )
+
         advance_payment_entry = frappe.get_doc(
             {
                 "doctype": "Payment Entry",
                 "mode_of_payment": cash_mode_of_payment or "Cash",
-                "paid_to": cash_account["account"],
-                "payment_type": "Receive",
+                "payment_type": "Pay",
                 "party_type": "Customer",
                 "party": invoice_doc.get("customer"),
+                "paid_from": cash_account["account"],
+                "paid_to": customer_account,
                 "paid_amount": invoice_doc.get("credit_change"),
                 "received_amount": invoice_doc.get("credit_change"),
                 "company": invoice_doc.get("company"),

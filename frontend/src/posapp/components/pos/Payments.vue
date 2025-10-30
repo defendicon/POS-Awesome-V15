@@ -916,9 +916,9 @@ export default {
 
                 // Calculate change to be given back to customer
                 change_due() {
-			if (!this.invoice_doc) {
-				return 0;
-			}
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
 
 			// For multi-currency, use grand_total instead of rounded_total
 			let invoice_total;
@@ -941,10 +941,29 @@ export default {
                         return change > 0 ? change : 0;
                 },
 
-		// Label for the difference field (To Be Paid/Change)
-		diff_label() {
-			return this.diff_payment > 0
-				? `To Be Paid (${this.displayCurrency})`
+                hasPositiveCashPayment() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return false;
+                        }
+
+                        return this.invoice_doc.payments.some((payment) => {
+                                const type = (payment?.type || "").toLowerCase();
+                                const mode = (payment?.mode_of_payment || "").toLowerCase();
+                                const rawAmount = formatUtils.fromArabicNumerals(String(payment?.amount || 0));
+                                const amount = parseFloat(rawAmount) || 0;
+
+                                if (!amount) {
+                                        return false;
+                                }
+
+                                return type === "cash" || mode.includes("cash");
+                        });
+                },
+
+                // Label for the difference field (To Be Paid/Change)
+                diff_label() {
+                        return this.diff_payment > 0
+                                ? `To Be Paid (${this.displayCurrency})`
 				: `Change (${this.displayCurrency})`;
 		},
 		// Display formatted total payments
@@ -1000,10 +1019,26 @@ export default {
 		},
 	},
 	watch: {
-		// Watch diff_payment to update paid_change
+                // Watch diff_payment to update paid_change
                 diff_payment(newVal) {
                         if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
+                                const changeLimit = Math.max(-newVal, 0);
+
+                                if (
+                                        changeLimit > 0 &&
+                                        !this.invoice_doc?.is_return &&
+                                        !this.hasPositiveCashPayment
+                                ) {
+                                        this.credit_change = changeLimit ? -changeLimit : 0;
+                                        this.paid_change = 0;
+
+                                        if (this.invoice_doc) {
+                                                this.invoice_doc.paid_change = 0;
+                                                this.invoice_doc.credit_change = changeLimit;
+                                        }
+                                } else {
+                                        this.paid_change = newVal < 0 ? -newVal : 0;
+                                }
                         }
                 },
                 // Watch paid_change to validate and update credit_change
