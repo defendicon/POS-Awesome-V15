@@ -841,214 +841,128 @@ export default {
 			this.selected_mpesa_payments = [];
 			this.set_payment_methods();
 		},
+
 		submit() {
-			if (this.isSubmitting) return;
-			this.isSubmitting = true;
-			const customer = this.customer_name;
-			const vm = this;
-
-			if (!customer) {
-				this.isSubmitting = false;
-				frappe.throw(__("Please select a customer"));
-				return;
-			}
-
-			// Check if we have selected invoices
-			if (this.selected_invoices.length == 0) {
-				this.isSubmitting = false;
-				frappe.throw(__("Please select an invoice"));
-				return;
-			}
-
-			// Calculate payment values
-			let total_payments =
-				this.total_selected_payments +
-				this.total_selected_mpesa_payments +
-				this.total_payment_methods;
-
-			if (total_payments <= 0) {
-				this.isSubmitting = false;
-				frappe.throw(__("Please make a payment or select an payment"));
-				return;
-			}
-
-			this.payment_methods.forEach((payment) => {
-				payment.amount = flt(payment.amount);
-			});
-
-			const payload = {};
-			payload.customer = customer;
-			payload.company = this.company;
-			payload.currency = this.pos_profile.currency;
-			payload.pos_opening_shift_name = this.pos_opening_shift.name;
-			payload.pos_profile_name = this.pos_profile.name;
-			payload.pos_profile = this.pos_profile;
-			payload.payment_methods = this.payment_methods;
-			payload.selected_invoices = this.selected_invoices;
-			payload.selected_payments = this.selected_payments;
-			payload.total_selected_invoices = flt(this.total_selected_invoices);
-			payload.selected_mpesa_payments = this.selected_mpesa_payments;
-			payload.total_selected_payments = flt(this.total_selected_payments);
-			payload.total_payment_methods = flt(this.total_payment_methods);
-			payload.total_selected_mpesa_payments = flt(this.total_selected_mpesa_payments);
-
-			if (isOffline()) {
-				try {
-					saveOfflinePayment({ args: { payload } });
-					vm.eventBus.emit("show_message", {
-						title: __("Payment saved offline"),
-						color: "warning",
-					});
-					vm.clear_all(false);
-					vm.customer_name = customer;
-					vm.get_outstanding_invoices();
-					vm.get_unallocated_payments();
-					vm.set_mpesa_search_params();
-					vm.get_draft_mpesa_payments_register();
-				} catch (error) {
-					frappe.msgprint(
-						__("Cannot Save Offline Payment: ") + (error.message || __("Unknown error")),
-					);
-				}
-				vm.isSubmitting = false;
-				return;
-			}
-
-			frappe.call({
-				method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
-				args: { payload },
-				freeze: true,
-				freeze_message: __("Processing Payment"),
-				callback: function (r) {
-					vm.isSubmitting = false;
-					if (r.message) {
-						frappe.utils.play_sound("submit");
-						vm.clear_all(false);
-						vm.customer_name = customer;
-						vm.get_outstanding_invoices();
-						vm.get_unallocated_payments();
-						vm.set_mpesa_search_params();
-						vm.get_draft_mpesa_payments_register();
-					}
-				},
-				error: function () {
-					vm.isSubmitting = false;
-				},
-			});
+			return this.processPayment({ printAfter: false });
 		},
 		submit_and_print() {
+			return this.processPayment({ printAfter: true });
+		},
+		async processPayment({ printAfter = false } = {}) {
 			if (this.isSubmitting) return;
+
 			this.isSubmitting = true;
 			const customer = this.customer_name;
-			const vm = this;
-			if (!customer) {
-				this.isSubmitting = false;
-				frappe.throw(__("Please select a customer"));
-				return;
-			}
 
-			// Check if we have selected invoices
-			if (this.selected_invoices.length == 0) {
-				this.isSubmitting = false;
-				frappe.throw(__("Please select an invoice"));
-				return;
-			}
+			const finalizeSubmission = () => {
+				this.clear_all(false);
+				this.customer_name = customer;
+				this.get_outstanding_invoices();
+				this.get_unallocated_payments();
+				this.set_mpesa_search_params();
+				this.get_draft_mpesa_payments_register();
+			};
 
-			// Calculate payment values
-			let total_payments =
-				this.total_selected_payments +
-				this.total_selected_mpesa_payments +
-				this.total_payment_methods;
-
-			if (total_payments <= 0) {
-				this.isSubmitting = false;
-				frappe.throw(__("Please make a payment or select an payment"));
-				return;
-			}
-
-			this.payment_methods.forEach((payment) => {
-				payment.amount = flt(payment.amount);
-			});
-
-			const payload = {};
-			payload.customer = customer;
-			payload.company = this.company;
-			payload.currency = this.pos_profile.currency;
-			payload.pos_opening_shift_name = this.pos_opening_shift.name;
-			payload.pos_profile_name = this.pos_profile.name;
-			payload.pos_profile = this.pos_profile;
-			payload.payment_methods = this.payment_methods;
-			payload.selected_invoices = this.selected_invoices;
-			payload.selected_payments = this.selected_payments;
-			payload.total_selected_invoices = flt(this.total_selected_invoices);
-			payload.selected_mpesa_payments = this.selected_mpesa_payments;
-			payload.total_selected_payments = flt(this.total_selected_payments);
-			payload.total_payment_methods = flt(this.total_payment_methods);
-			payload.total_selected_mpesa_payments = flt(this.total_selected_mpesa_payments);
-
-			if (isOffline()) {
-				try {
-					saveOfflinePayment({ args: { payload } });
-					vm.eventBus.emit("show_message", {
-						title: __("Payment saved offline"),
-						color: "warning",
-					});
-					vm.clear_all(false);
-					vm.customer_name = customer;
-					vm.get_outstanding_invoices();
-					vm.get_unallocated_payments();
-					vm.set_mpesa_search_params();
-					vm.get_draft_mpesa_payments_register();
-				} catch (error) {
-					frappe.msgprint(
-						__("Cannot Save Offline Payment: ") + (error.message || __("Unknown error")),
-					);
+			try {
+				if (!customer) {
+					frappe.throw(__("Please select a customer"));
 				}
-				vm.isSubmitting = false;
-				return;
-			}
 
-			frappe.call({
-				method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
-				args: { payload },
-				freeze: true,
-				freeze_message: __("Processing Payment"),
-				callback: function (r) {
-					vm.isSubmitting = false;
-					if (r.message) {
-						console.log("Server response:", JSON.stringify(r.message));
-						frappe.utils.play_sound("submit");
+				if (this.selected_invoices.length == 0) {
+					frappe.throw(__("Please select an invoice"));
+				}
 
-						// Extract payment name from server response
-						const payment_name =
-							r.message.new_payments_entry && r.message.new_payments_entry.length > 0
-								? r.message.new_payments_entry[0].name
-								: null;
+				const total_payments =
+					this.total_selected_payments +
+					this.total_selected_mpesa_payments +
+					this.total_payment_methods;
 
-						if (payment_name) {
-							console.log("Opening print view with payment name:", payment_name);
-							vm.load_print_page(payment_name);
-						} else {
-							console.log("No payment_name found in response");
-							frappe.msgprint(
-								__(
-									"Payment submitted but print function could not be executed. Payment name not found.",
-								),
-							);
-						}
-						vm.clear_all(false);
-						vm.customer_name = customer;
-						vm.get_outstanding_invoices();
-						vm.get_unallocated_payments();
-						vm.set_mpesa_search_params();
-						vm.get_draft_mpesa_payments_register();
+				if (total_payments <= 0) {
+					frappe.throw(__("Please make a payment or select an payment"));
+				}
+
+				this.payment_methods.forEach((payment) => {
+					payment.amount = flt(payment.amount);
+				});
+
+				const payload = {
+					customer,
+					company: this.company,
+					currency: this.pos_profile.currency,
+					pos_opening_shift_name: this.pos_opening_shift.name,
+					pos_profile_name: this.pos_profile.name,
+					pos_profile: this.pos_profile,
+					payment_methods: this.payment_methods,
+					selected_invoices: this.selected_invoices,
+					selected_payments: this.selected_payments,
+					total_selected_invoices: flt(this.total_selected_invoices),
+					selected_mpesa_payments: this.selected_mpesa_payments,
+					total_selected_payments: flt(this.total_selected_payments),
+					total_payment_methods: flt(this.total_payment_methods),
+					total_selected_mpesa_payments: flt(this.total_selected_mpesa_payments),
+				};
+
+				if (isOffline()) {
+					try {
+						saveOfflinePayment({ args: { payload } });
+						this.eventBus.emit("show_message", {
+							title: __("Payment saved offline"),
+							color: "warning",
+						});
+						finalizeSubmission();
+					} catch (error) {
+						frappe.msgprint(
+							__("Cannot Save Offline Payment: ") + (error.message || __("Unknown error")),
+						);
 					}
-				},
-				error: function () {
-					vm.isSubmitting = false;
-				},
-			});
+					return;
+				}
+
+				const response = await new Promise((resolve, reject) => {
+					frappe.call({
+						method: "posawesome.posawesome.api.payment_entry.process_pos_payment",
+						args: { payload },
+						freeze: true,
+						freeze_message: __("Processing Payment"),
+						callback: (r) => resolve(r),
+						error: (err) => reject(err),
+					});
+				});
+
+				if (!response || !response.message) {
+					return;
+				}
+
+				frappe.utils.play_sound("submit");
+
+				if (printAfter) {
+					console.log("Server response:", JSON.stringify(response.message));
+					const payment_name =
+						response.message.new_payments_entry &&
+						response.message.new_payments_entry.length > 0
+							? response.message.new_payments_entry[0].name
+							: null;
+
+					if (payment_name) {
+						console.log("Opening print view with payment name:", payment_name);
+						this.load_print_page(payment_name);
+					} else {
+						console.log("No payment_name found in response");
+						frappe.msgprint(
+							__("Payment submitted but print function could not be executed. Payment name not found."),
+						);
+					}
+				}
+
+				finalizeSubmission();
+			} catch (error) {
+				console.error("Failed to process payment", error);
+				throw error;
+			} finally {
+				this.isSubmitting = false;
+			}
 		},
+
 		selectSingleInvoice(item) {
 			console.log("Row clicked:", item);
 			if (item) {
