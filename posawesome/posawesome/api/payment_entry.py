@@ -270,6 +270,15 @@ def process_pos_payment(payload):
     allow_reconcile_payments = data.pos_profile.get("posa_allow_reconcile_payments")
     allow_mpesa_reconcile_payments = data.pos_profile.get("posa_allow_mpesa_reconcile_payments")
     today = nowdate()
+    overpayment_resolution = data.get("overpayment_resolution") or "credit_balance"
+    default_payment_modes = set(data.get("default_payment_modes") or [])
+    if not default_payment_modes and data.pos_profile.get("payments"):
+        default_payment_modes = {
+            method.get("mode_of_payment")
+            for method in data.pos_profile.get("payments", [])
+            if method.get("default") in (1, "1", True)
+            or method.get("is_default") in (1, "1", True)
+        }
 
     # prepare invoice list once so allocations can update remaining amounts
     remaining_invoices = []
@@ -289,7 +298,9 @@ def process_pos_payment(payload):
     new_payments_entry = []
     all_payments_entry = []
     reconciled_payments = []
+    change_journal_entries = []
     errors = []
+    non_default_overpayment = 0
 
     # first process mpesa payments
     if (
@@ -403,6 +414,7 @@ def process_pos_payment(payload):
                 if not amount:
                     continue
                 mode_of_payment = payment_method.get("mode_of_payment")
+                is_default_mode = mode_of_payment in default_payment_modes if default_payment_modes else False
                 payment_entry = create_payment_entry(
                     company=company,
                     customer=customer,
@@ -446,12 +458,38 @@ def process_pos_payment(payload):
 
                 payment_entry.save(ignore_permissions=True)
                 payment_entry.submit()
+                unallocated_amount = flt(payment_entry.unallocated_amount)
+                if unallocated_amount > 0 and not is_default_mode:
+                    non_default_overpayment += unallocated_amount
 
                 new_payments_entry.append(payment_entry)
                 all_payments_entry.append(payment_entry)
             except Exception as e:
                 errors.append(str(e))
                 frappe.log_error(f"Error creating payment entry: {str(e)}", "POS Payment Error")
+
+    if overpayment_resolution == "return_cash" and non_default_overpayment > 0:
+        cash_mode = next(iter(default_payment_modes), None)
+        if not cash_mode:
+            errors.append(
+                _("Default cash mode of payment not configured; unable to return change from cash.")
+            )
+        else:
+            try:
+                change_entry = create_change_return_entry(
+                    company=company,
+                    customer=customer,
+                    amount=non_default_overpayment,
+                    currency=currency,
+                    mode_of_payment=cash_mode,
+                    reference_no=pos_opening_shift_name,
+                )
+                if change_entry:
+                    change_journal_entries.append(change_entry)
+                    all_payments_entry.append(change_entry)
+            except Exception as e:
+                frappe.log_error(f"Failed to create change return entry: {str(e)}", "POS Payment Error")
+                errors.append(str(e))
 
     # Old allocation logic disabled
     # then show the results
@@ -480,6 +518,18 @@ def process_pos_payment(payload):
             )
         msg += "</tbody>"
         msg += "</table>"
+    if len(change_journal_entries) > 0:
+        msg += "<h4>Change Returned</h4>"
+        msg += "<table class='table table-bordered'>"
+        msg += "<thead><tr><th>Journal Entry</th><th>Amount</th></tr></thead>"
+        msg += "<tbody>"
+        for journal_entry in change_journal_entries:
+            msg += "<tr><td>{0}</td><td>{1}</td></tr>".format(
+                journal_entry.get("name"),
+                journal_entry.get("total_credit") or journal_entry.get("total_debit") or non_default_overpayment,
+            )
+        msg += "</tbody>"
+        msg += "</table>"
     if len(errors) > 0:
         msg += "<h4>Errors</h4>"
         msg += "<table class='table table-bordered'>"
@@ -496,6 +546,7 @@ def process_pos_payment(payload):
         "new_payments_entry": new_payments_entry,
         "all_payments_entry": all_payments_entry,
         "reconciled_payments": reconciled_payments,
+        "change_journal_entries": change_journal_entries,
         "errors": errors,
     }
 
@@ -509,6 +560,51 @@ def get_available_pos_profiles(company, currency):
         pluck="name",
     )
     return pos_profiles_list
+
+
+def create_change_return_entry(company, customer, amount, currency, mode_of_payment, reference_no=None):
+    amount = flt(amount)
+    if amount <= 0:
+        return None
+
+    receivable_account = get_party_account("Customer", customer, company)
+    if not receivable_account:
+        frappe.throw(
+            _("Receivable account not found for customer {0} in company {1}").format(customer, company)
+        )
+
+    bank_account = get_bank_cash_account(company, mode_of_payment)
+    if not bank_account or not bank_account.get("account"):
+        frappe.throw(
+            _("Cash account not found for mode of payment {0} in company {1}").format(mode_of_payment, company)
+        )
+
+    journal_entry = frappe.new_doc("Journal Entry")
+    journal_entry.voucher_type = "Journal Entry"
+    journal_entry.company = company
+    journal_entry.posting_date = nowdate()
+    journal_entry.multi_currency = 0
+    journal_entry.user_remark = _("Return change for POS payment")
+
+    customer_row = journal_entry.append("accounts", {})
+    customer_row.account = receivable_account
+    customer_row.party_type = "Customer"
+    customer_row.party = customer
+    customer_row.debit_in_account_currency = amount
+    if reference_no:
+        customer_row.reference_type = "POS Opening Shift"
+        customer_row.reference_name = reference_no
+
+    cash_row = journal_entry.append("accounts", {})
+    cash_row.account = bank_account.get("account")
+    cash_row.credit_in_account_currency = amount
+
+    journal_entry.set_missing_values()
+    journal_entry.flags.ignore_permissions = True
+    journal_entry.insert(ignore_permissions=True)
+    journal_entry.submit()
+
+    return journal_entry
 
 
 def get_party_account(party_type, party, company):
