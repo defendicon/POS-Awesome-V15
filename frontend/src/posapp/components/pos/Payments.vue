@@ -1307,6 +1307,16 @@ export default {
 				this.ensureReturnPaymentsAreNegative();
 			}
 
+                        const changeAmount = this.getOutstandingChangeAmount();
+                        if (
+                                changeAmount > 0 &&
+                                !this.invoice_doc.is_return &&
+                                !this.overpayment_resolution_confirmed &&
+                                this.hasCashPaymentMethod()
+                        ) {
+                                this.applyCashOverpayment(changeAmount);
+                        }
+
                         if (!this.shouldPromptForOverpaymentAction()) {
                                 this.overpayment_resolution = null;
                                 this.overpayment_resolution_confirmed = false;
@@ -2273,6 +2283,28 @@ export default {
                 shouldPromptForOverpaymentAction() {
                         const changeAmount = this.getOutstandingChangeAmount();
                         return changeAmount > 0;
+                },
+                hasCashPaymentMethod() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return false;
+                        }
+
+                        return this.invoice_doc.payments.some((payment) => {
+                                const mode = payment.mode_of_payment || "";
+                                return typeof mode === "string" && mode.toLowerCase().includes("cash");
+                        });
+                },
+                applyCashOverpayment(changeAmount) {
+                        this.overpayment_resolution = "cash";
+                        this.overpayment_resolution_confirmed = true;
+                        this.paid_change = changeAmount;
+                        this.credit_change = 0;
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = changeAmount;
+                                this.invoice_doc.credit_change = 0;
+                                this.invoice_doc.change_return_mode = "cash";
+                        }
                 },
                 handleOverpaymentChoice(option) {
                         const changeAmount = this.getOutstandingChangeAmount();
