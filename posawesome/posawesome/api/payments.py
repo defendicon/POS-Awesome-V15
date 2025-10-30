@@ -43,7 +43,7 @@ def _is_cash_payment_row(payment) -> bool:
     return payment_type == "cash" or "cash" in mode_of_payment
 
 
-def _should_record_cash_change(invoice_doc, payments) -> bool:
+def _should_record_cash_change(invoice_doc, payments=None, recorded_payments=None) -> bool:
     if not invoice_doc:
         return False
 
@@ -56,7 +56,8 @@ def _should_record_cash_change(invoice_doc, payments) -> bool:
     )
 
     non_cash_total = 0
-    for payment in payments or []:
+    payment_rows = payments or recorded_payments or []
+    for payment in payment_rows:
         amount = flt(payment.get("amount"))
         if amount <= 0:
             continue
@@ -320,7 +321,9 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
     if data.get("change_return_mode") == "cash":
         change_amount = flt(data.get("paid_change"))
-        if change_amount > 0 and _should_record_cash_change(invoice_doc, payments):
+        if change_amount > 0 and _should_record_cash_change(
+            invoice_doc, data.get("payments"), payments
+        ):
             existing_cost_center = locals().get("cost_center")
             cost_center = existing_cost_center or _get_pos_cost_center(invoice_doc)
             cash_account_name = cash_account.get("account") if isinstance(cash_account, dict) else None
