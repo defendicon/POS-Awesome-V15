@@ -1046,8 +1046,29 @@ export default {
 	watch: {
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
-                        if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
+                        if (this.is_user_editing_paid_change) {
+                                return;
+                        }
+
+                        const isOverpayment = newVal < 0;
+                        if (!isOverpayment) {
+                                if (this.paid_change !== 0) {
+                                        this.paid_change = 0;
+                                }
+                                return;
+                        }
+
+                        const shouldPrompt = this.shouldPromptForOverpaymentAction();
+                        if (shouldPrompt && this.overpayment_resolution !== "cash") {
+                                if (this.paid_change !== 0) {
+                                        this.paid_change = 0;
+                                }
+                                return;
+                        }
+
+                        const change = -newVal;
+                        if (this.paid_change !== change) {
+                                this.paid_change = change;
                         }
                 },
                 // Watch paid_change to validate and update credit_change
@@ -1302,6 +1323,13 @@ export default {
                                 !payment_received
                         ) {
                                 this.pending_submit_args = { event, payment_received, print };
+                                this.paid_change = 0;
+                                this.credit_change = 0;
+                                if (this.invoice_doc) {
+                                        this.invoice_doc.paid_change = 0;
+                                        this.invoice_doc.credit_change = 0;
+                                        this.invoice_doc.change_return_mode = null;
+                                }
                                 this.overpayment_dialog = true;
                                 return;
                         }
@@ -1496,9 +1524,16 @@ export default {
                                 this.paid_change = paidChange;
                         }
 
-                        this.overpayment_resolution = paidChange > 0 ? "cash" : creditChange > 0 ? "credit" : null;
+                        let changeReturnMode = this.overpayment_resolution;
+                        if (!this.shouldPromptForOverpaymentAction()) {
+                                changeReturnMode = paidChange > 0 ? "cash" : creditChange > 0 ? "credit" : null;
+                        } else if (!changeReturnMode) {
+                                changeReturnMode = null;
+                        }
+
+                        this.overpayment_resolution = changeReturnMode;
                         if (this.invoice_doc) {
-                                this.invoice_doc.change_return_mode = this.overpayment_resolution;
+                                this.invoice_doc.change_return_mode = changeReturnMode;
                         }
 
                         let data = {
@@ -2202,15 +2237,16 @@ export default {
                         this.credit_change = requestedCredit ? -requestedCredit : 0;
                         this.paid_change = remainingPaidChange;
 
-                        if (this.invoice_doc) {
-                                this.invoice_doc.credit_change = requestedCredit;
-                                this.invoice_doc.paid_change = remainingPaidChange;
-                        }
-
                         if (requestedCredit > 0) {
                                 this.overpayment_resolution = "credit";
                         } else if (this.overpayment_resolution !== "cash") {
                                 this.overpayment_resolution = null;
+                        }
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.credit_change = requestedCredit;
+                                this.invoice_doc.paid_change = remainingPaidChange;
+                                this.invoice_doc.change_return_mode = this.overpayment_resolution;
                         }
                 },
                 shouldPromptForOverpaymentAction() {
@@ -2278,6 +2314,9 @@ export default {
                         if (option === "credit") {
                                 this.overpayment_resolution = "credit";
                                 this.updateCreditChange(changeAmount);
+                                if (this.invoice_doc) {
+                                        this.invoice_doc.change_return_mode = "credit";
+                                }
                         } else {
                                 this.overpayment_resolution = "cash";
                                 this.paid_change = changeAmount;
@@ -2285,6 +2324,7 @@ export default {
                                 if (this.invoice_doc) {
                                         this.invoice_doc.paid_change = changeAmount;
                                         this.invoice_doc.credit_change = 0;
+                                        this.invoice_doc.change_return_mode = "cash";
                                 }
                         }
 
@@ -2300,6 +2340,13 @@ export default {
                         this.pending_submit_args = null;
                         if (this.change_due > 0) {
                                 this.overpayment_resolution = null;
+                                this.paid_change = 0;
+                                this.credit_change = 0;
+                                if (this.invoice_doc) {
+                                        this.invoice_doc.paid_change = 0;
+                                        this.invoice_doc.credit_change = 0;
+                                        this.invoice_doc.change_return_mode = null;
+                                }
                         }
                 },
                 // Format currency value
