@@ -34,6 +34,40 @@ def _get_pos_cost_center(invoice_doc):
     return cost_center
 
 
+def _is_cash_payment_row(payment) -> bool:
+    if not payment:
+        return False
+
+    payment_type = (payment.get("type") or "").lower()
+    mode_of_payment = (payment.get("mode_of_payment") or "").lower()
+    return payment_type == "cash" or "cash" in mode_of_payment
+
+
+def _should_record_cash_change(invoice_doc, payments) -> bool:
+    if not invoice_doc:
+        return False
+
+    invoice_total = flt(
+        invoice_doc.get("base_rounded_total")
+        or invoice_doc.get("base_grand_total")
+        or invoice_doc.get("rounded_total")
+        or invoice_doc.get("grand_total")
+        or 0,
+    )
+
+    non_cash_total = 0
+    for payment in payments or []:
+        amount = flt(payment.get("amount"))
+        if amount <= 0:
+            continue
+
+        if not _is_cash_payment_row(payment):
+            non_cash_total += amount
+
+    # Allow a small tolerance to avoid floating point issues
+    return flt(non_cash_total - invoice_total, 6) > 0
+
+
 @frappe.whitelist()
 def create_payment_request(doc):
     doc = json.loads(doc)
@@ -286,7 +320,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
     if data.get("change_return_mode") == "cash":
         change_amount = flt(data.get("paid_change"))
-        if change_amount > 0:
+        if change_amount > 0 and _should_record_cash_change(invoice_doc, payments):
             existing_cost_center = locals().get("cost_center")
             cost_center = existing_cost_center or _get_pos_cost_center(invoice_doc)
             cash_account_name = cash_account.get("account") if isinstance(cash_account, dict) else None

@@ -1489,16 +1489,32 @@ export default {
                         const changeLimit = !this.invoice_doc.is_return
                                 ? Math.max(-this.diff_payment, 0)
                                 : 0;
-                        const paidChange = !this.invoice_doc.is_return
-                                ? this.flt(Math.min(this.paid_change, changeLimit), this.currency_precision)
-                                : 0;
-                        const creditChange = !this.invoice_doc.is_return
-                                ? this.flt(Math.max(changeLimit - paidChange, 0), this.currency_precision)
-                                : 0;
-                        const changeResolution =
+
+                        const resolvedChange =
                                 !this.invoice_doc.is_return && this.overpayment_resolution_confirmed
                                         ? this.overpayment_resolution
                                         : null;
+
+                        const allowCashChange =
+                                resolvedChange === "cash" && this.shouldRecordCashChange(changeLimit);
+
+                        let changeResolution = null;
+                        if (!this.invoice_doc.is_return) {
+                                if (resolvedChange === "credit") {
+                                        changeResolution = "credit";
+                                } else if (allowCashChange) {
+                                        changeResolution = "cash";
+                                }
+                        }
+
+                        const paidChange =
+                                !this.invoice_doc.is_return && changeResolution
+                                        ? this.flt(Math.min(this.paid_change, changeLimit), this.currency_precision)
+                                        : 0;
+                        const creditChange =
+                                !this.invoice_doc.is_return && changeResolution
+                                        ? this.flt(Math.max(changeLimit - paidChange, 0), this.currency_precision)
+                                        : 0;
 
                         if (this.invoice_doc) {
                                 this.invoice_doc.paid_change = paidChange;
@@ -1509,7 +1525,7 @@ export default {
                         }
 
                         if (!this.invoice_doc.is_return) {
-                                this.credit_change = creditChange ? -creditChange : 0;
+                                this.credit_change = changeResolution ? (creditChange ? -creditChange : 0) : 0;
                                 this.paid_change = paidChange;
                                 this.overpayment_resolution = changeResolution;
                                 this.overpayment_resolution_confirmed = Boolean(changeResolution);
@@ -2269,6 +2285,48 @@ export default {
                         }
 
                         return 0;
+                },
+                shouldRecordCashChange(changeLimit) {
+                        if (
+                                !changeLimit ||
+                                changeLimit <= 0 ||
+                                !this.invoice_doc ||
+                                this.invoice_doc.is_return
+                        ) {
+                                return false;
+                        }
+
+                        const invoiceTotal = this.flt(
+                                this.invoice_doc.base_rounded_total ||
+                                        this.invoice_doc.base_grand_total ||
+                                        this.invoice_doc.rounded_total ||
+                                        this.invoice_doc.grand_total ||
+                                        0,
+                                this.currency_precision,
+                        );
+                        let nonCashTotal = 0;
+
+                        (this.invoice_doc.payments || []).forEach((payment) => {
+                                const amount = this.flt(payment.amount);
+                                if (amount <= 0) {
+                                        return;
+                                }
+
+                                if (!this.isCashLikePayment(payment)) {
+                                        nonCashTotal += amount;
+                                }
+                        });
+
+                        return nonCashTotal > invoiceTotal;
+                },
+                isCashLikePayment(payment) {
+                        if (!payment) {
+                                return false;
+                        }
+
+                        const type = String(payment.type || "").toLowerCase();
+                        const mode = String(payment.mode_of_payment || "").toLowerCase();
+                        return type === "cash" || mode.includes("cash");
                 },
                 shouldPromptForOverpaymentAction() {
                         const changeAmount = this.getOutstandingChangeAmount();
