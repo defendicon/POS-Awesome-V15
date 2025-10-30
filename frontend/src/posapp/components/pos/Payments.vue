@@ -85,16 +85,16 @@
 				<!-- Payment Inputs (All Payment Methods) -->
 				<div v-if="is_cashback && invoice_doc && Array.isArray(invoice_doc.payments)">
 					<v-row class="payments pa-1" v-for="payment in invoice_doc.payments" :key="payment.name">
-						<v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
-							<v-text-field
+                                        <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
+                                                <v-text-field
 								density="compact"
 								variant="solo"
 								color="primary"
 								:label="frappe._(payment.mode_of_payment)"
 								class="sleek-field pos-themed-input"
 								hide-details
-								:model-value="formatCurrency(payment.amount)"
-								@change="setFormatedCurrency(payment, 'amount', null, false, $event)"
+                                                                :model-value="formatCurrency(payment.amount)"
+                                                                @change="handlePaymentAmountChange(payment, $event)"
 								:rules="[
 									isNumber,
 									(v) =>
@@ -810,9 +810,10 @@ export default {
 			sales_person: "", // Selected sales person
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
-			highlightSubmit: false, // Highlight state for submit button
-		};
-	},
+                        highlightSubmit: false, // Highlight state for submit button
+                        last_payment_change_was_cash: null, // Track last edited payment type
+                };
+        },
 	computed: {
 		invoice_doc: {
 			get() {
@@ -962,7 +963,7 @@ export default {
 
                                         const amount = this.flt(payment.amount || 0, this.currency_precision);
 
-                                        if (payment.type === "Cash") {
+                                        if (this.isCashLikePayment(payment)) {
                                                 accumulator.cash += amount;
                                         } else {
                                                 accumulator.nonCash += amount;
@@ -1041,10 +1042,12 @@ export default {
                                 return;
                         }
 
+                        const lastEditWasCash = this.last_payment_change_was_cash;
+
                         if (newVal < 0) {
                                 const changeDue = -newVal;
 
-                                if (this.shouldAutoApplyCreditChange) {
+                                if (this.shouldAutoApplyCreditChange || lastEditWasCash === false) {
                                         this.updateCreditChange(changeDue);
                                 } else {
                                         this.paid_change = changeDue;
@@ -1052,6 +1055,8 @@ export default {
                         } else {
                                 this.updateCreditChange(0);
                         }
+
+                        this.last_payment_change_was_cash = null;
                 },
                 // Watch paid_change to validate and update credit_change
                 paid_change(newVal) {
@@ -2159,6 +2164,23 @@ export default {
                         } else {
                                 this.updateCreditChange(0);
                         }
+                },
+                handlePaymentAmountChange(payment, event) {
+                        this.last_payment_change_was_cash = this.isCashLikePayment(payment);
+                        format.methods.setFormatedCurrency.call(this, payment, "amount", null, false, event);
+                },
+                isCashLikePayment(payment) {
+                        if (!payment) {
+                                return false;
+                        }
+
+                        const type = String(payment.type || "").toLowerCase();
+                        if (type === "cash") {
+                                return true;
+                        }
+
+                        const mode = String(payment.mode_of_payment || "").toLowerCase();
+                        return mode.includes("cash");
                 },
                 updateCreditChange(rawValue) {
                         const changeLimit = Math.max(-this.diff_payment, 0);
