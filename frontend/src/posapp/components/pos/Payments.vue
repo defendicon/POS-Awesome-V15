@@ -916,9 +916,9 @@ export default {
 
                 // Calculate change to be given back to customer
                 change_due() {
-			if (!this.invoice_doc) {
-				return 0;
-			}
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
 
 			// For multi-currency, use grand_total instead of rounded_total
 			let invoice_total;
@@ -939,6 +939,63 @@ export default {
 
                         // Ensure change is not negative
                         return change > 0 ? change : 0;
+                },
+
+                calculateChangeDistribution(changeDue) {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return {
+                                        cashChange: this.flt(changeDue, this.currency_precision),
+                                        creditChange: 0,
+                                };
+                        }
+
+                        const payments = Array.isArray(this.invoice_doc.payments)
+                                ? this.invoice_doc.payments
+                                : [];
+
+                        let cashPaid = 0;
+                        let nonCashPaid = 0;
+
+                        payments.forEach((payment) => {
+                                if (!payment) {
+                                        return;
+                                }
+
+                                const amount = this.flt(payment.amount || 0, this.currency_precision);
+
+                                if (amount <= 0) {
+                                        return;
+                                }
+
+                                if ((payment.type || "").toLowerCase() === "cash") {
+                                        cashPaid += amount;
+                                } else {
+                                        nonCashPaid += amount;
+                                }
+                        });
+
+                        let invoiceTotal;
+
+                        if (
+                                this.pos_profile.posa_allow_multi_currency &&
+                                this.invoice_doc.currency !== this.pos_profile.currency
+                        ) {
+                                invoiceTotal = this.flt(this.invoice_doc.grand_total, this.currency_precision);
+                        } else {
+                                invoiceTotal = this.flt(
+                                        this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
+                                        this.currency_precision,
+                                );
+                        }
+
+                        const appliedNonCash = Math.min(nonCashPaid, invoiceTotal);
+                        const remainingAfterNonCash = Math.max(invoiceTotal - appliedNonCash, 0);
+                        const cashAppliedToInvoice = Math.min(cashPaid, remainingAfterNonCash);
+                        const rawCashChange = Math.max(0, cashPaid - cashAppliedToInvoice);
+                        const cashChange = this.flt(Math.min(rawCashChange, changeDue), this.currency_precision);
+                        const creditChange = this.flt(Math.max(0, changeDue - cashChange), this.currency_precision);
+
+                        return { cashChange, creditChange };
                 },
 
 		// Label for the difference field (To Be Paid/Change)
@@ -1002,8 +1059,17 @@ export default {
 	watch: {
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
-                        if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
+                        if (this.is_user_editing_paid_change) {
+                                return;
+                        }
+
+                        if (newVal < 0) {
+                                const changeDue = -newVal;
+                                const { creditChange } = this.calculateChangeDistribution(changeDue);
+
+                                this.updateCreditChange(creditChange);
+                        } else {
+                                this.updateCreditChange(0);
                         }
                 },
                 // Watch paid_change to validate and update credit_change
