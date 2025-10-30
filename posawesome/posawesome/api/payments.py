@@ -19,6 +19,21 @@ def get_posawesome_credit_redeem_remark(invoice_name):
     return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
 
 
+
+def get_posawesome_cash_return_remark(invoice_name):
+    return _("POS Awesome cash refund for Sales Invoice {0}").format(invoice_name)
+
+
+
+def _get_pos_cost_center(invoice_doc):
+    cost_center = frappe.get_value("POS Profile", invoice_doc.pos_profile, "cost_center")
+    if not cost_center:
+        cost_center = frappe.get_value("Company", invoice_doc.company, "cost_center")
+    if not cost_center:
+        frappe.throw(_("Cost Center is not set in pos profile {0}").format(invoice_doc.pos_profile))
+    return cost_center
+
+
 @frappe.whitelist()
 def create_payment_request(doc):
     doc = json.loads(doc)
@@ -216,11 +231,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
     # redeeming customer credit with journal voucher
     today = nowdate()
     if data.get("redeemed_customer_credit"):
-        cost_center = frappe.get_value("POS Profile", invoice_doc.pos_profile, "cost_center")
-        if not cost_center:
-            cost_center = frappe.get_value("Company", invoice_doc.company, "cost_center")
-        if not cost_center:
-            frappe.throw(_("Cost Center is not set in pos profile {}").format(invoice_doc.pos_profile))
+        cost_center = _get_pos_cost_center(invoice_doc)
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Invoice" and row["credit_to_redeem"]:
                 outstanding_invoice = frappe.get_doc("Sales Invoice", row["credit_origin"])
@@ -272,6 +283,61 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(), "POSAwesome JV Error")
                     frappe.throw(_("Unable to create Journal Entry for customer credit."))
+
+    if data.get("change_return_mode") == "cash":
+        change_amount = flt(data.get("paid_change"))
+        if change_amount > 0:
+            existing_cost_center = locals().get("cost_center")
+            cost_center = existing_cost_center or _get_pos_cost_center(invoice_doc)
+            cash_account_name = cash_account.get("account") if isinstance(cash_account, dict) else None
+            if not cash_account_name:
+                cash_account_name = frappe.get_value("Company", invoice_doc.company, "default_cash_account")
+            if not cash_account_name:
+                frappe.throw(_("Cash account is not configured for company {0}").format(invoice_doc.company))
+
+            jv_doc = frappe.get_doc(
+                {
+                    "doctype": "Journal Entry",
+                    "voucher_type": "Journal Entry",
+                    "posting_date": today,
+                    "company": invoice_doc.company,
+                }
+            )
+
+            debit_row = jv_doc.append("accounts", {})
+            debit_row.update(
+                {
+                    "account": invoice_doc.debit_to,
+                    "party_type": "Customer",
+                    "party": invoice_doc.customer,
+                    "reference_type": invoice_doc.doctype,
+                    "reference_name": invoice_doc.name,
+                    "debit_in_account_currency": change_amount,
+                    "cost_center": cost_center,
+                }
+            )
+
+            credit_row = jv_doc.append("accounts", {})
+            credit_row.update(
+                {
+                    "account": cash_account_name,
+                    "credit_in_account_currency": change_amount,
+                    "cost_center": cost_center,
+                }
+            )
+
+            ensure_child_doctype(jv_doc, "accounts", "Journal Entry Account")
+
+            jv_doc.flags.ignore_permissions = True
+            frappe.flags.ignore_account_permission = True
+            jv_doc.user_remark = get_posawesome_cash_return_remark(invoice_doc.name)
+            jv_doc.set_missing_values()
+            try:
+                jv_doc.save()
+                jv_doc.submit()
+            except Exception:
+                frappe.log_error(frappe.get_traceback(), "POSAwesome Cash Return JV Error")
+                frappe.throw(_("Unable to create Journal Entry for cash refund."))
 
     if is_payment_entry and total_cash > 0:
         for payment in payments:
