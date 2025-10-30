@@ -640,37 +640,55 @@ export default {
 		}
 
 		// Always set these fields first
-		if (this.invoiceType === "Quotation") {
-			doc.doctype = "Quotation";
-		} else if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
-			doc.doctype = "Sales Order";
-		} else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
-			doc.doctype = "POS Invoice";
-		} else {
-			doc.doctype = "Sales Invoice";
-		}
-		doc.is_pos = 1;
-		doc.ignore_pricing_rule = 1;
-		doc.company = doc.company || this.pos_profile.company;
-		doc.pos_profile = doc.pos_profile || this.pos_profile.name;
-		doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
+                if (this.invoiceType === "Quotation") {
+                        doc.doctype = "Quotation";
+                } else if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
+                        doc.doctype = "Sales Order";
+                } else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
+                        doc.doctype = "POS Invoice";
+                } else {
+                        doc.doctype = "Sales Invoice";
+                }
+                doc.is_pos = 1;
+                doc.ignore_pricing_rule = 1;
+                doc.company = doc.company || this.pos_profile.company;
+                doc.pos_profile = doc.pos_profile || this.pos_profile.name;
+                doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
 
-		// Currency related fields
-		doc.currency = this.selected_currency || this.pos_profile.currency;
-		doc.conversion_rate = (sourceDoc && sourceDoc.conversion_rate) || this.conversion_rate || 1;
+                // Currency related fields
+                doc.currency = this.selected_currency || this.pos_profile.currency;
+                doc.conversion_rate = (sourceDoc && sourceDoc.conversion_rate) || this.conversion_rate || 1;
 
-		// Use actual price list currency if available
-		doc.price_list_currency = this.price_list_currency || doc.currency;
+                // Use actual price list currency if available
+                doc.price_list_currency = this.price_list_currency || doc.currency;
 
-		doc.plc_conversion_rate =
-			(sourceDoc && sourceDoc.plc_conversion_rate) ||
-			(doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
+                doc.plc_conversion_rate =
+                        (sourceDoc && sourceDoc.plc_conversion_rate) ||
+                        (doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
 
-		// Other fields
-		doc.campaign = doc.campaign || this.pos_profile.campaign;
-		doc.selling_price_list = this.pos_profile.selling_price_list;
-		doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
-		doc.customer = this.customer;
+                // Other fields
+                doc.campaign = doc.campaign || this.pos_profile.campaign;
+                doc.selling_price_list = this.pos_profile.selling_price_list;
+                doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
+                const customerDetails =
+                        this.customer_info && typeof this.customer_info === "object"
+                                ? this.customer_info
+                                : {};
+                const resolvedCustomer =
+                        this.customer ||
+                        customerDetails.customer ||
+                        doc.customer ||
+                        null;
+                doc.customer = resolvedCustomer;
+                if (!doc.customer_name && customerDetails.customer_name) {
+                        doc.customer_name = customerDetails.customer_name;
+                }
+                if (doc.doctype === "Quotation") {
+                        doc.quotation_to = doc.quotation_to || "Customer";
+                        if (resolvedCustomer) {
+                                doc.party_name = resolvedCustomer;
+                        }
+                }
 
 		// Determine if this is a return invoice
 		const isReturn = this.isReturnInvoice;
@@ -2655,6 +2673,20 @@ export default {
                                 updatedDoc[field] = customerDetails[field];
                         }
                 });
+
+                if (!updatedDoc.customer_name && resolvedCustomerName) {
+                        updatedDoc.customer_name = resolvedCustomerName;
+                }
+
+                const currentDoctype = updatedDoc.doctype || existingDoc.doctype || null;
+                if (currentDoctype === "Quotation") {
+                        updatedDoc.quotation_to = updatedDoc.quotation_to || "Customer";
+                        if (resolvedCustomer) {
+                                updatedDoc.party_name = resolvedCustomer;
+                        } else if (hasCustomerChanged) {
+                                updatedDoc.party_name = null;
+                        }
+                }
 
                 const addressFields = {
                         customer_address:

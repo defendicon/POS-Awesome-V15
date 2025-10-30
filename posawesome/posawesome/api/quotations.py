@@ -1,4 +1,5 @@
 import json
+
 import frappe
 from frappe.utils import getdate
 
@@ -27,11 +28,28 @@ def _map_delivery_dates(data):
                 item["delivery_date"] = parsed
 
 
+def _ensure_customer_fields(data):
+    if not isinstance(data, dict):
+        return
+
+    if data.get("doctype") != "Quotation":
+        return
+
+    customer = data.get("customer") or data.get("party_name")
+    if customer:
+        data["customer"] = customer
+        data["party_name"] = customer
+        data.setdefault("customer_name", customer)
+
+    data.setdefault("quotation_to", "Customer")
+
+
 @frappe.whitelist()
 def update_quotation(data):
     """Create or update a Quotation document."""
     data = json.loads(data)
     _map_delivery_dates(data)
+    _ensure_customer_fields(data)
     if data.get("name") and frappe.db.exists("Quotation", data.get("name")):
         doc = frappe.get_doc("Quotation", data.get("name"))
         doc.update(data)
@@ -50,6 +68,7 @@ def submit_quotation(order):
     """Submit quotation document."""
     order = json.loads(order)
     _map_delivery_dates(order)
+    _ensure_customer_fields(order)
     if order.get("name") and frappe.db.exists("Quotation", order.get("name")):
         doc = frappe.get_doc("Quotation", order.get("name"))
         doc.update(order)
