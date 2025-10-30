@@ -3,7 +3,7 @@
 
 import frappe, erpnext, json
 from frappe import _
-from frappe.utils import nowdate, getdate, flt
+from frappe.utils import nowdate, getdate, flt, fmt_money
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import (
@@ -271,6 +271,11 @@ def process_pos_payment(payload):
     allow_mpesa_reconcile_payments = data.pos_profile.get("posa_allow_mpesa_reconcile_payments")
     today = nowdate()
 
+    overpayment_resolution = data.get("overpayment_resolution")
+    overpayment_amount = flt(data.get("overpayment_amount") or 0)
+    default_cash_mode = data.get("default_cash_mode_of_payment")
+    default_cash_account = data.get("default_cash_account")
+
     # prepare invoice list once so allocations can update remaining amounts
     remaining_invoices = []
     for invoice in data.selected_invoices:
@@ -453,6 +458,26 @@ def process_pos_payment(payload):
                 errors.append(str(e))
                 frappe.log_error(f"Error creating payment entry: {str(e)}", "POS Payment Error")
 
+    change_journal_entry = None
+    if overpayment_resolution == "return_cash" and overpayment_amount > 0:
+        try:
+            cash_mode = default_cash_mode or (data.pos_profile.get("posa_cash_mode_of_payment") if data.pos_profile else None)
+            linked_payment_entry = get_payment_entry_for_change(new_payments_entry)
+            change_journal_entry = create_pos_change_journal_entry(
+                company=company,
+                customer=customer,
+                amount=overpayment_amount,
+                currency=currency,
+                cash_account=default_cash_account,
+                cash_mode_of_payment=cash_mode,
+                posting_date=today,
+                reference=pos_opening_shift_name,
+                linked_payment_entry=linked_payment_entry,
+            )
+        except Exception as e:
+            errors.append(_("Failed to create change journal entry: {0}").format(str(e)))
+            frappe.log_error(frappe.get_traceback(), "POS Change Journal Error")
+
     # Old allocation logic disabled
     # then show the results
     msg = ""
@@ -497,7 +522,140 @@ def process_pos_payment(payload):
         "all_payments_entry": all_payments_entry,
         "reconciled_payments": reconciled_payments,
         "errors": errors,
+        "change_journal_entry": change_journal_entry.name if change_journal_entry else None,
     }
+
+
+def get_payment_entry_for_change(payment_entries):
+    if not payment_entries:
+        return None
+
+    for entry in payment_entries:
+        if not entry:
+            continue
+
+        name = None
+        unallocated = 0
+
+        if isinstance(entry, dict):
+            name = entry.get("name")
+            unallocated = flt(entry.get("unallocated_amount") or 0)
+        else:
+            name = getattr(entry, "name", None)
+            unallocated = flt(getattr(entry, "unallocated_amount", 0))
+
+        if not name:
+            continue
+
+        if unallocated <= 0:
+            try:
+                unallocated = flt(frappe.db.get_value("Payment Entry", name, "unallocated_amount") or 0)
+            except Exception:
+                unallocated = 0
+
+        if unallocated > 0:
+            return name
+
+    return None
+
+
+def create_pos_change_journal_entry(
+    company,
+    customer,
+    amount,
+    currency,
+    cash_account=None,
+    cash_mode_of_payment=None,
+    posting_date=None,
+    reference=None,
+    linked_payment_entry=None,
+):
+    amount = flt(amount)
+    if amount <= 0:
+        return None
+
+    receivable_account = get_party_account("Customer", customer, company)
+    if not receivable_account:
+        raise frappe.ValidationError(
+            _("Customer account is not configured for company {0}").format(company)
+        )
+
+    cash_account_to_use = cash_account or None
+    if not cash_account_to_use and cash_mode_of_payment:
+        bank = get_bank_cash_account(company, cash_mode_of_payment)
+        if bank and bank.account:
+            cash_account_to_use = bank.account
+
+    if not cash_account_to_use:
+        raise frappe.ValidationError(
+            _("Cash mode of payment is not linked with an account for returning change.")
+        )
+
+    je = frappe.new_doc("Journal Entry")
+    je.company = company
+    je.posting_date = posting_date or nowdate()
+    je.voucher_type = "Journal Entry"
+    je.remark = _("Change returned to customer {0} for POS overpayment").format(customer)
+    if reference:
+        je.user_remark = _("Generated from POS Opening Shift {0}").format(reference)
+
+    je.append(
+        "accounts",
+        {
+            "account": receivable_account,
+            "party_type": "Customer",
+            "party": customer,
+            "debit_in_account_currency": amount,
+            "credit_in_account_currency": 0,
+        },
+    )
+    je.append(
+        "accounts",
+        {
+            "account": cash_account_to_use,
+            "debit_in_account_currency": 0,
+            "credit_in_account_currency": amount,
+        },
+    )
+
+    je.flags.ignore_permissions = True
+    je.insert(ignore_permissions=True)
+    je.submit()
+
+    formatted_amount = fmt_money(amount, currency=currency) if currency else amount
+
+    if linked_payment_entry and frappe.db.exists("Payment Entry", linked_payment_entry):
+        try:
+            frappe.db.set_value(
+                "Payment Entry", linked_payment_entry, "posa_linked_je", je.name
+            )
+        except Exception:
+            pass
+
+        try:
+            frappe.get_doc(
+                {
+                    "doctype": "Comment",
+                    "comment_type": "Info",
+                    "reference_doctype": "Payment Entry",
+                    "reference_name": linked_payment_entry,
+                    "content": _(
+                        "Change journal entry {0} created for {1}."
+                    ).format(je.name, formatted_amount),
+                }
+            ).insert(ignore_permissions=True)
+        except Exception:
+            pass
+
+        try:
+            je.add_comment(
+                "Info",
+                _("Linked with Payment Entry {0}").format(linked_payment_entry),
+            )
+        except Exception:
+            pass
+
+    return je
 
 
 @frappe.whitelist()
