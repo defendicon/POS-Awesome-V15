@@ -885,26 +885,15 @@ export default {
 			return this.flt(total, this.currency_precision);
 		},
 
-		// Calculate difference between invoice total and payments
-		diff_payment() {
+                // Calculate difference between invoice total and payments
+                diff_payment() {
                         if (!this.invoice_doc) return 0;
 
-			// For multi-currency, use grand_total instead of rounded_total
-			let invoice_total;
-			if (
-				this.pos_profile.posa_allow_multi_currency &&
-				this.invoice_doc.currency !== this.pos_profile.currency
-			) {
-				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
-			} else {
-				invoice_total = this.flt(
-					this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
-					this.currency_precision,
-				);
-			}
-
-			// Calculate difference (all amounts are in selected currency)
-			let diff = this.flt(invoice_total - this.total_payments, this.currency_precision);
+                        // Calculate difference (all amounts are in selected currency)
+                        let diff = this.flt(
+                                this.invoice_total_value - this.total_payments,
+                                this.currency_precision,
+                        );
 
 			// For returns, ensure difference is not negative
                         if (this.invoice_doc.is_return) {
@@ -916,29 +905,89 @@ export default {
 
                 // Calculate change to be given back to customer
                 change_due() {
-			if (!this.invoice_doc) {
-				return 0;
-			}
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
 
-			// For multi-currency, use grand_total instead of rounded_total
-			let invoice_total;
-			if (
-				this.pos_profile.posa_allow_multi_currency &&
-				this.invoice_doc.currency !== this.pos_profile.currency
-			) {
-				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
-			} else {
-				invoice_total = this.flt(
-					this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
-					this.currency_precision,
-				);
-			}
-
-			// Calculate change (all amounts are in selected currency)
-                        let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
+                        // Calculate change (all amounts are in selected currency)
+                        let change = this.flt(
+                                this.total_payments - this.invoice_total_value,
+                                this.currency_precision,
+                        );
 
                         // Ensure change is not negative
                         return change > 0 ? change : 0;
+                },
+
+                invoice_total_value() {
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
+
+                        if (
+                                this.pos_profile.posa_allow_multi_currency &&
+                                this.invoice_doc.currency !== this.pos_profile.currency
+                        ) {
+                                return this.flt(this.invoice_doc.grand_total, this.currency_precision);
+                        }
+
+                        return this.flt(
+                                this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
+                                this.currency_precision,
+                        );
+                },
+
+                changeAllocation() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return { cash: 0, credit: 0 };
+                        }
+
+                        const changeDue = this.change_due;
+
+                        if (changeDue <= 0) {
+                                return { cash: 0, credit: 0 };
+                        }
+
+                        const payments = Array.isArray(this.invoice_doc.payments)
+                                ? this.invoice_doc.payments
+                                : [];
+
+                        const totals = payments.reduce(
+                                (accumulator, payment) => {
+                                        if (!payment) {
+                                                return accumulator;
+                                        }
+
+                                        const amount = this.flt(payment.amount || 0, this.currency_precision);
+
+                                        if (payment.type === "Cash") {
+                                                accumulator.cash += amount;
+                                        } else {
+                                                accumulator.nonCash += amount;
+                                        }
+
+                                        return accumulator;
+                                },
+                                { cash: 0, nonCash: 0 },
+                        );
+
+                        const invoiceTotal = this.invoice_total_value;
+                        const requiredCash = Math.max(
+                                0,
+                                this.flt(invoiceTotal - totals.nonCash, this.currency_precision),
+                        );
+                        const cashSurplus = Math.max(
+                                0,
+                                this.flt(totals.cash - requiredCash, this.currency_precision),
+                        );
+
+                        const cashChange = this.flt(Math.min(changeDue, cashSurplus), this.currency_precision);
+                        const creditChange = this.flt(changeDue - cashChange, this.currency_precision);
+
+                        return {
+                                cash: cashChange,
+                                credit: creditChange > 0 ? creditChange : 0,
+                        };
                 },
 
 		// Label for the difference field (To Be Paid/Change)
@@ -1002,8 +1051,16 @@ export default {
 	watch: {
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
-                        if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
+                        if (this.is_user_editing_paid_change) {
+                                return;
+                        }
+
+                        if (newVal < 0) {
+                                const allocation = this.changeAllocation;
+                                const creditToApply = this.flt(allocation.credit || 0, this.currency_precision);
+                                this.updateCreditChange(creditToApply);
+                        } else {
+                                this.updateCreditChange(0);
                         }
                 },
                 // Watch paid_change to validate and update credit_change
