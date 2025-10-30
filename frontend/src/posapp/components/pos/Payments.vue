@@ -45,7 +45,7 @@
 					</v-col>
 
 					<!-- Paid Change (if applicable) -->
-                                        <v-col cols="7" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
+					<v-col cols="7" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
 						<v-text-field
 							variant="solo"
 							color="primary"
@@ -62,18 +62,18 @@
 					</v-col>
 
 					<!-- Credit Change (if applicable) -->
-                                        <v-col cols="5" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
-                                                <v-text-field
-                                                        variant="solo"
-                                                        color="primary"
-                                                        :label="frappe._('Credit Change')"
-                                                        class="sleek-field pos-themed-input"
-                                                        :model-value="formatCurrency(Math.abs(credit_change))"
-                                                        :prefix="currencySymbol(invoice_doc.currency)"
-                                                        density="compact"
-                                                        type="text"
-                                                        @change="
-                                                                setFormatedCurrency(this, 'credit_change', null, false, $event);
+					<v-col cols="5" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
+						<v-text-field
+							variant="solo"
+							color="primary"
+							:label="frappe._('Credit Change')"
+							class="sleek-field pos-themed-input"
+							:model-value="formatCurrency(Math.abs(credit_change))"
+							:prefix="currencySymbol(invoice_doc.currency)"
+							density="compact"
+							type="text"
+							@change="
+								setFormatedCurrency(this, 'credit_change', null, false, $event);
 								updateCreditChange(this.credit_change);
 							"
 						></v-text-field>
@@ -273,12 +273,12 @@
 							:label="diff_label"
 							class="sleek-field pos-themed-input"
 							hide-details
-                                                        :model-value="
-                                                                formatCurrency(
-                                                                        diff_payment < 0 ? -diff_payment : diff_payment,
-                                                                        displayCurrency,
-                                                                )
-                                                        "
+							:model-value="
+								formatCurrency(
+									diff_payment < 0 ? -diff_payment : diff_payment,
+									displayCurrency,
+								)
+							"
 							readonly
 							:prefix="currencySymbol()"
 							persistent-placeholder
@@ -743,6 +743,38 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
+
+		<!-- Overpayment handling dialog -->
+		<v-dialog v-model="overpayment_dialog" max-width="480" persistent>
+			<v-card>
+				<v-card-title class="text-h6">
+					{{ __("Confirm Change Handling") }}
+				</v-card-title>
+				<v-card-text>
+					<p class="mb-2">
+						{{
+							__("Received payments exceed the invoice total by {0}.", [
+								formatCurrency(change_due, displayCurrency),
+							])
+						}}
+					</p>
+					<p class="mb-0">
+						{{ __("How would you like to handle the difference?") }}
+					</p>
+				</v-card-text>
+				<v-card-actions class="d-flex flex-column">
+					<v-btn color="primary" class="mb-2" block @click="handleOverpaymentChoice('cash')">
+						{{ __("Return payment from cash") }}
+					</v-btn>
+					<v-btn color="secondary" class="mb-2" block @click="handleOverpaymentChoice('credit')">
+						{{ __("Credit amount to customer balance") }}
+					</v-btn>
+					<v-btn variant="text" block @click="cancelOverpaymentDialog">
+						{{ __("Cancel") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 
@@ -797,6 +829,7 @@ export default {
 			customer_credit_dict: [], // List of available customer credits
 			paid_change_rules: [], // Validation rules for paid change
 			phone_dialog: false, // Show phone payment dialog
+			overpayment_dialog: false, // Show overpayment handling dialog
 			custom_days_dialog: false, // Show custom days dialog
 			custom_days_value: null, // Custom days entry
 			new_delivery_date: null, // New delivery date value
@@ -811,6 +844,8 @@ export default {
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
+			overpayment_resolution: null, // Selected handling for overpayment change
+			pending_submit_args: null, // Pending submit arguments while awaiting confirmation
 		};
 	},
 	computed: {
@@ -887,7 +922,7 @@ export default {
 
 		// Calculate difference between invoice total and payments
 		diff_payment() {
-                        if (!this.invoice_doc) return 0;
+			if (!this.invoice_doc) return 0;
 
 			// For multi-currency, use grand_total instead of rounded_total
 			let invoice_total;
@@ -907,15 +942,15 @@ export default {
 			let diff = this.flt(invoice_total - this.total_payments, this.currency_precision);
 
 			// For returns, ensure difference is not negative
-                        if (this.invoice_doc.is_return) {
-                                return diff >= 0 ? diff : 0;
-                        }
+			if (this.invoice_doc.is_return) {
+				return diff >= 0 ? diff : 0;
+			}
 
-                        return diff;
-                },
+			return diff;
+		},
 
-                // Calculate change to be given back to customer
-                change_due() {
+		// Calculate change to be given back to customer
+		change_due() {
 			if (!this.invoice_doc) {
 				return 0;
 			}
@@ -935,11 +970,11 @@ export default {
 			}
 
 			// Calculate change (all amounts are in selected currency)
-                        let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
+			let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
 
-                        // Ensure change is not negative
-                        return change > 0 ? change : 0;
-                },
+			// Ensure change is not negative
+			return change > 0 ? change : 0;
+		},
 
 		// Label for the difference field (To Be Paid/Change)
 		diff_label() {
@@ -952,10 +987,10 @@ export default {
 			return this.formatCurrency(this.total_payments, this.displayCurrency);
 		},
 		// Display formatted difference payment
-                diff_payment_display() {
-                        const value = this.diff_payment < 0 ? -this.diff_payment : this.diff_payment;
-                        return this.formatCurrency(value, this.displayCurrency);
-                },
+		diff_payment_display() {
+			const value = this.diff_payment < 0 ? -this.diff_payment : this.diff_payment;
+			return this.formatCurrency(value, this.displayCurrency);
+		},
 		// Calculate available loyalty points amount in selected currency
 		available_points_amount() {
 			let amount = 0;
@@ -1001,31 +1036,54 @@ export default {
 	},
 	watch: {
 		// Watch diff_payment to update paid_change
-                diff_payment(newVal) {
-                        if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
-                        }
-                },
-                // Watch paid_change to validate and update credit_change
-                paid_change(newVal) {
-                        const changeLimit = Math.max(-this.diff_payment, 0);
-                        if (newVal > changeLimit) {
-                                this.paid_change = changeLimit;
-                                this.credit_change = 0;
-                                this.paid_change_rules = ["Paid change can not be greater than total change!"];
-                        } else {
-                                this.paid_change_rules = [];
-                                this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
-                        }
+		diff_payment(newVal) {
+			if (!this.is_user_editing_paid_change) {
+				this.paid_change = newVal < 0 ? -newVal : 0;
+			}
+		},
+		// Watch paid_change to validate and update credit_change
+		paid_change(newVal) {
+			const changeLimit = Math.max(-this.diff_payment, 0);
+			if (newVal > changeLimit) {
+				this.paid_change = changeLimit;
+				this.credit_change = 0;
+				this.paid_change_rules = ["Paid change can not be greater than total change!"];
+			} else {
+				this.paid_change_rules = [];
+				this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
+			}
 
-                        const effectivePaid = Math.min(this.paid_change, changeLimit);
-                        const creditAmount = this.flt(changeLimit - effectivePaid, this.currency_precision);
+			const effectivePaid = Math.min(this.paid_change, changeLimit);
+			const creditAmount = this.flt(changeLimit - effectivePaid, this.currency_precision);
 
-                        if (this.invoice_doc) {
-                                this.invoice_doc.paid_change = effectivePaid;
-                                this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
-                        }
-                },
+			if (this.invoice_doc) {
+				this.invoice_doc.paid_change = effectivePaid;
+				this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
+			}
+
+			if (this.change_due > 0 && this.shouldPromptForOverpaymentAction()) {
+				if (effectivePaid > 0) {
+					this.overpayment_resolution = "cash";
+				} else if (creditAmount > 0) {
+					this.overpayment_resolution = "credit";
+				} else if (this.overpayment_resolution && this.overpayment_resolution !== "cash") {
+					this.overpayment_resolution = null;
+				}
+			} else if (this.change_due <= 0) {
+				this.overpayment_resolution = null;
+			}
+		},
+		change_due(newVal, oldVal) {
+			if (!newVal || newVal <= 0) {
+				this.overpayment_resolution = null;
+				this.overpayment_dialog = false;
+				this.pending_submit_args = null;
+			} else if (oldVal !== undefined && newVal !== oldVal) {
+				if (!this.paid_change && !this.credit_change) {
+					this.overpayment_resolution = null;
+				}
+			}
+		},
 		// Watch loyalty_amount to handle loyalty points redemption
 		loyalty_amount(value) {
 			if (!this.invoice_doc) {
@@ -1191,6 +1249,52 @@ export default {
 				}
 			});
 		},
+		// Determine if we should ask the user how to handle overpayments
+		shouldPromptForOverpaymentAction() {
+			if (!this.invoice_doc || this.invoice_doc.is_return) {
+				return false;
+			}
+
+			const changeAmount = Math.max(-this.diff_payment, 0);
+			return changeAmount > 0;
+		},
+		// Persist the user's choice for handling overpayment and continue submission
+		handleOverpaymentChoice(option) {
+			const changeAmount = Math.max(-this.diff_payment, 0);
+			if (!changeAmount) {
+				this.overpayment_dialog = false;
+				this.pending_submit_args = null;
+				return;
+			}
+
+			if (option === "credit") {
+				this.overpayment_resolution = "credit";
+				this.updateCreditChange(changeAmount);
+			} else {
+				this.overpayment_resolution = "cash";
+				this.paid_change = changeAmount;
+				this.credit_change = 0;
+				if (this.invoice_doc) {
+					this.invoice_doc.paid_change = changeAmount;
+					this.invoice_doc.credit_change = 0;
+				}
+			}
+
+			this.overpayment_dialog = false;
+			const pending = this.pending_submit_args;
+			this.pending_submit_args = null;
+			if (pending) {
+				this.submit(pending.event, pending.payment_received, pending.print);
+			}
+		},
+		// Close the overpayment dialog without taking action
+		cancelOverpaymentDialog() {
+			this.overpayment_dialog = false;
+			this.pending_submit_args = null;
+			if (this.change_due > 0) {
+				this.overpayment_resolution = null;
+			}
+		},
 		// Ensure all payments are negative for return invoices
 		ensureReturnPaymentsAreNegative() {
 			if (!this.invoice_doc || !this.invoice_doc.is_return || !this.is_cashback) {
@@ -1229,6 +1333,15 @@ export default {
 			// For return invoices, ensure payment amounts are negative
 			if (this.invoice_doc.is_return) {
 				this.ensureReturnPaymentsAreNegative();
+			}
+
+			if (!this.shouldPromptForOverpaymentAction()) {
+				this.overpayment_resolution = null;
+				this.pending_submit_args = null;
+			} else if (!this.overpayment_resolution && !payment_received) {
+				this.pending_submit_args = { event, payment_received, print };
+				this.overpayment_dialog = true;
+				return;
 			}
 			// Validate total payments only if not credit sale and invoice total is not zero
 			if (
@@ -1300,24 +1413,24 @@ export default {
 					return;
 				}
 			}
-                        // Validate paid_change
-                        const changeLimit = Math.max(-this.diff_payment, 0);
-                        if (this.paid_change > changeLimit) {
-                                this.eventBus.emit("show_message", {
-                                        title: `Paid change cannot be greater than total change!`,
-                                        color: "error",
-                                });
-                                frappe.utils.play_sound("error");
-                                return;
-                        }
-                        // Validate cashback
-                        let total_change = this.flt(this.flt(this.paid_change) + this.flt(-this.credit_change));
-                        if (this.is_cashback && total_change !== changeLimit) {
-                                this.eventBus.emit("show_message", {
-                                        title: `Error in change calculations!`,
-                                        color: "error",
-                                });
-                                frappe.utils.play_sound("error");
+			// Validate paid_change
+			const changeLimit = Math.max(-this.diff_payment, 0);
+			if (this.paid_change > changeLimit) {
+				this.eventBus.emit("show_message", {
+					title: `Paid change cannot be greater than total change!`,
+					color: "error",
+				});
+				frappe.utils.play_sound("error");
+				return;
+			}
+			// Validate cashback
+			let total_change = this.flt(this.flt(this.paid_change) + this.flt(-this.credit_change));
+			if (this.is_cashback && total_change !== changeLimit) {
+				this.eventBus.emit("show_message", {
+					title: `Error in change calculations!`,
+					color: "error",
+				});
+				frappe.utils.play_sound("error");
 				return;
 			}
 			// Validate customer credit redemption
@@ -1401,30 +1514,35 @@ export default {
 					row.credit_to_redeem = this.flt(row.credit_to_redeem);
 				});
 			}
-                        const changeLimit = !this.invoice_doc.is_return
-                                ? Math.max(-this.diff_payment, 0)
-                                : 0;
-                        const paidChange = !this.invoice_doc.is_return
-                                ? this.flt(Math.min(this.paid_change, changeLimit), this.currency_precision)
-                                : 0;
-                        const creditChange = !this.invoice_doc.is_return
-                                ? this.flt(Math.max(changeLimit - paidChange, 0), this.currency_precision)
-                                : 0;
+			const changeLimit = !this.invoice_doc.is_return ? Math.max(-this.diff_payment, 0) : 0;
+			const paidChange = !this.invoice_doc.is_return
+				? this.flt(Math.min(this.paid_change, changeLimit), this.currency_precision)
+				: 0;
+			const creditChange = !this.invoice_doc.is_return
+				? this.flt(Math.max(changeLimit - paidChange, 0), this.currency_precision)
+				: 0;
 
-                        if (this.invoice_doc) {
-                                this.invoice_doc.paid_change = paidChange;
-                                this.invoice_doc.credit_change = creditChange;
-                        }
+			if (this.invoice_doc) {
+				this.invoice_doc.paid_change = paidChange;
+				this.invoice_doc.credit_change = creditChange;
+			}
 
-                        if (!this.invoice_doc.is_return) {
-                                this.credit_change = creditChange ? -creditChange : 0;
-                                this.paid_change = paidChange;
-                        }
+			if (!this.invoice_doc.is_return) {
+				this.credit_change = creditChange ? -creditChange : 0;
+				this.paid_change = paidChange;
+			}
 
-                        let data = {
-                                total_change: changeLimit,
-                                paid_change: paidChange,
-                                credit_change: creditChange,
+			const changeResolution = paidChange > 0 ? "cash" : creditChange > 0 ? "credit" : null;
+			this.overpayment_resolution = changeResolution;
+			if (this.invoice_doc) {
+				this.invoice_doc.change_return_mode = changeResolution;
+			}
+
+			let data = {
+				total_change: changeLimit,
+				paid_change: paidChange,
+				credit_change: creditChange,
+				change_return_mode: changeResolution,
 				redeemed_customer_credit: this.redeemed_customer_credit,
 				customer_credit_dict: this.customer_credit_dict,
 				is_cashback: this.is_cashback,
@@ -1445,6 +1563,9 @@ export default {
 					vm.eventBus.emit("clear_invoice");
 					vm.eventBus.emit("focus_item_search");
 					vm.eventBus.emit("reset_posting_date");
+					vm.overpayment_resolution = null;
+					vm.pending_submit_args = null;
+					vm.overpayment_dialog = false;
 					vm.back_to_invoice();
 					vm.loading = false;
 					return;
@@ -1518,39 +1639,40 @@ export default {
 					vm.is_cashback = true;
 					vm.is_credit_return = false;
 					vm.sales_person = "";
+					vm.overpayment_resolution = null;
+					vm.pending_submit_args = null;
+					vm.overpayment_dialog = false;
 					vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
-                                        vm.eventBus.emit("show_message", {
-                                                title:
-                                                        vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
-                                                                ? __("Sales Order {0} is Submitted", [r.message.name])
-                                                                : vm.invoiceType === "Quotation"
-                                                                        ? __("Quotation {0} is Submitted", [r.message.name])
-                                                                        : __("Invoice {0} is Submitted", [r.message.name]),
-                                                color: "success",
-                                        });
-                                        frappe.utils.play_sound("submit");
-                                        // Update local stock quantities immediately after successful
-                                        // invoice submission so item availability reflects changes
-                                        const submittedItems = Array.isArray(vm.invoice_doc.items)
-                                                ? vm.invoice_doc.items
-                                                : [];
-                                        updateLocalStock(submittedItems);
-                                        stockCoordinator.applyInvoiceConsumption(submittedItems, {
-                                                source: "invoice",
-                                        });
-                                        const submittedCodes = submittedItems
-                                                .map((item) => (item ? item.item_code : null))
-                                                .filter((code) => code !== undefined && code !== null);
-                                        vm.eventBus.emit("invoice_stock_adjusted", {
-                                                items: submittedItems,
-                                                item_codes: submittedCodes,
-                                                timestamp: Date.now(),
-                                        });
-                                        vm.addresses = [];
-                                        vm.eventBus.emit("clear_invoice");
-                                        vm.eventBus.emit("focus_item_search");
-                                        vm.eventBus.emit("reset_posting_date");
-                                        vm.back_to_invoice();
+					vm.eventBus.emit("show_message", {
+						title:
+							vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
+								? __("Sales Order {0} is Submitted", [r.message.name])
+								: vm.invoiceType === "Quotation"
+									? __("Quotation {0} is Submitted", [r.message.name])
+									: __("Invoice {0} is Submitted", [r.message.name]),
+						color: "success",
+					});
+					frappe.utils.play_sound("submit");
+					// Update local stock quantities immediately after successful
+					// invoice submission so item availability reflects changes
+					const submittedItems = Array.isArray(vm.invoice_doc.items) ? vm.invoice_doc.items : [];
+					updateLocalStock(submittedItems);
+					stockCoordinator.applyInvoiceConsumption(submittedItems, {
+						source: "invoice",
+					});
+					const submittedCodes = submittedItems
+						.map((item) => (item ? item.item_code : null))
+						.filter((code) => code !== undefined && code !== null);
+					vm.eventBus.emit("invoice_stock_adjusted", {
+						items: submittedItems,
+						item_codes: submittedCodes,
+						timestamp: Date.now(),
+					});
+					vm.addresses = [];
+					vm.eventBus.emit("clear_invoice");
+					vm.eventBus.emit("focus_item_search");
+					vm.eventBus.emit("reset_posting_date");
+					vm.back_to_invoice();
 					vm.loading = false;
 				},
 			});
@@ -1619,19 +1741,19 @@ export default {
 		},
 		// Open print page for invoice
 		load_print_page() {
-                        const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
-                        const letter_head = this.pos_profile.letter_head || 0;
-                        let doctype;
+			const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
+			const letter_head = this.pos_profile.letter_head || 0;
+			let doctype;
 
-                        if (this.invoiceType === "Quotation") {
-                                doctype = "Quotation";
-                        } else if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
-                                doctype = "Sales Order";
-                        } else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
-                                doctype = "POS Invoice";
-                        } else {
-                                doctype = "Sales Invoice";
-                        }
+			if (this.invoiceType === "Quotation") {
+				doctype = "Quotation";
+			} else if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
+				doctype = "Sales Order";
+			} else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
+				doctype = "POS Invoice";
+			} else {
+				doctype = "Sales Invoice";
+			}
 			const url =
 				frappe.urllib.get_base_url() +
 				"/printview?doctype=" +
@@ -1643,17 +1765,17 @@ export default {
 				print_format +
 				"&no_letterhead=" +
 				letter_head;
-                        const printOptions = {
-                                invoiceDoc: this.invoice_doc,
-                                allowOfflineFallback: isOffline(),
-                        };
-                        if (this.pos_profile.posa_silent_print) {
-                                silentPrint(url, printOptions);
-                        } else {
-                                const printWindow = window.open(url, "Print");
-                                watchPrintWindow(printWindow, printOptions);
-                        }
-                },
+			const printOptions = {
+				invoiceDoc: this.invoice_doc,
+				allowOfflineFallback: isOffline(),
+			};
+			if (this.pos_profile.posa_silent_print) {
+				silentPrint(url, printOptions);
+			} else {
+				const printWindow = window.open(url, "Print");
+				watchPrintWindow(printWindow, printOptions);
+			}
+		},
 		// Print invoice using a more detailed offline template
 		async print_offline_invoice(invoice) {
 			if (!invoice) return;
@@ -1832,13 +1954,11 @@ export default {
 					payment.amount = this.flt(payment.amount);
 				});
 
-                                const formData = {
-                                        ...this.invoice_doc,
-                                        total_change: !this.invoice_doc.is_return
-                                                ? Math.max(-this.diff_payment, 0)
-                                                : 0,
-                                        paid_change: !this.invoice_doc.is_return ? this.paid_change : 0,
-                                        credit_change: -this.credit_change,
+				const formData = {
+					...this.invoice_doc,
+					total_change: !this.invoice_doc.is_return ? Math.max(-this.diff_payment, 0) : 0,
+					paid_change: !this.invoice_doc.is_return ? this.paid_change : 0,
+					credit_change: -this.credit_change,
 					redeemed_customer_credit: this.redeemed_customer_credit,
 					customer_credit_dict: this.customer_credit_dict,
 					is_cashback: this.is_cashback,
@@ -2088,15 +2208,15 @@ export default {
 			return row.credit_origin;
 		},
 		// Show diff payment info message
-                showDiffPayment() {
-                        if (!this.invoice_doc) return;
-                        this.eventBus.emit("show_message", {
-                                title: `To Be Paid: ${this.formatCurrency(
-                                        this.diff_payment < 0 ? -this.diff_payment : this.diff_payment,
-                                )}`,
-                                color: "info",
-                        });
-                },
+		showDiffPayment() {
+			if (!this.invoice_doc) return;
+			this.eventBus.emit("show_message", {
+				title: `To Be Paid: ${this.formatCurrency(
+					this.diff_payment < 0 ? -this.diff_payment : this.diff_payment,
+				)}`,
+				color: "info",
+			});
+		},
 		// Show paid change info message
 		showPaidChange() {
 			this.eventBus.emit("show_message", {
@@ -2105,32 +2225,38 @@ export default {
 			});
 		},
 		// Show credit change info message
-                showCreditChange(value) {
-                        const sanitizedValue = this.flt(value || 0, this.currency_precision);
-                        if (sanitizedValue > 0) {
-                                this.updateCreditChange(sanitizedValue);
-                        } else {
-                                this.updateCreditChange(0);
-                        }
-                },
-                updateCreditChange(rawValue) {
-                        const changeLimit = Math.max(-this.diff_payment, 0);
-                        let requestedCredit = this.flt(Math.abs(rawValue) || 0, this.currency_precision);
+		showCreditChange(value) {
+			const sanitizedValue = this.flt(value || 0, this.currency_precision);
+			if (sanitizedValue > 0) {
+				this.updateCreditChange(sanitizedValue);
+			} else {
+				this.updateCreditChange(0);
+			}
+		},
+		updateCreditChange(rawValue) {
+			const changeLimit = Math.max(-this.diff_payment, 0);
+			let requestedCredit = this.flt(Math.abs(rawValue) || 0, this.currency_precision);
 
-                        if (requestedCredit > changeLimit) {
-                                requestedCredit = changeLimit;
-                        }
+			if (requestedCredit > changeLimit) {
+				requestedCredit = changeLimit;
+			}
 
-                        const remainingPaidChange = this.flt(changeLimit - requestedCredit, this.currency_precision);
+			const remainingPaidChange = this.flt(changeLimit - requestedCredit, this.currency_precision);
 
-                        this.credit_change = requestedCredit ? -requestedCredit : 0;
-                        this.paid_change = remainingPaidChange;
+			this.credit_change = requestedCredit ? -requestedCredit : 0;
+			this.paid_change = remainingPaidChange;
 
-                        if (this.invoice_doc) {
-                                this.invoice_doc.credit_change = requestedCredit;
-                                this.invoice_doc.paid_change = remainingPaidChange;
-                        }
-                },
+			if (this.invoice_doc) {
+				this.invoice_doc.credit_change = requestedCredit;
+				this.invoice_doc.paid_change = remainingPaidChange;
+			}
+
+			if (requestedCredit > 0) {
+				this.overpayment_resolution = "credit";
+			} else if (this.overpayment_resolution !== "cash") {
+				this.overpayment_resolution = null;
+			}
+		},
 		// Format currency value
 		formatCurrency(value) {
 			return this.$options.mixins[0].methods.formatCurrency.call(this, value, this.currency_precision);
