@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import json
 
 import frappe
-from frappe.utils import cstr, flt, nowdate
+from frappe.utils import cstr, flt, getdate, nowdate
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
@@ -22,6 +22,7 @@ def get_pos_coupon(coupon, customer, company):
 @frappe.whitelist()
 def get_active_gift_coupons(customer, company):
     coupons = []
+    today = getdate(nowdate())
     coupons_data = frappe.get_all(
         "POS Coupon",
         filters={
@@ -30,11 +31,27 @@ def get_active_gift_coupons(customer, company):
             "customer": customer,
             "used": 0,
         },
-        fields=["coupon_code"],
+        fields=["coupon_code", "valid_from", "valid_upto"],
     )
     if len(coupons_data):
-        coupons = [i.coupon_code for i in coupons_data]
+        coupons = [
+            i.coupon_code
+            for i in coupons_data
+            if _is_coupon_active(i, today)
+        ]
     return coupons
+
+
+def _is_coupon_active(coupon_data, today):
+    """Return True if the coupon is valid for the provided date."""
+
+    if coupon_data.valid_from and getdate(coupon_data.valid_from) > today:
+        return False
+
+    if coupon_data.valid_upto and getdate(coupon_data.valid_upto) < today:
+        return False
+
+    return True
 
 
 @frappe.whitelist()
