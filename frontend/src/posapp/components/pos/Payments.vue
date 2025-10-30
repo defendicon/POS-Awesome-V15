@@ -1619,11 +1619,19 @@ export default {
 		},
 		// Open print page for invoice
 		load_print_page() {
-			const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
-			const letter_head = this.pos_profile.letter_head || 0;
-			const doctype = this.pos_profile.create_pos_invoice_instead_of_sales_invoice
-				? "POS Invoice"
-				: "Sales Invoice";
+                        const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
+                        const letter_head = this.pos_profile.letter_head || 0;
+                        let doctype;
+
+                        if (this.invoiceType === "Quotation") {
+                                doctype = "Quotation";
+                        } else if (this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order) {
+                                doctype = "Sales Order";
+                        } else if (this.pos_profile.create_pos_invoice_instead_of_sales_invoice) {
+                                doctype = "POS Invoice";
+                        } else {
+                                doctype = "Sales Invoice";
+                        }
 			const url =
 				frappe.urllib.get_base_url() +
 				"/printview?doctype=" +
