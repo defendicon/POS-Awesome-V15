@@ -1301,15 +1301,23 @@ export default {
 			});
 		},
 		// Submit payment after validation
-		async submit(event, payment_received = false, print = false) {
-			// For return invoices, ensure payment amounts are negative
-			if (this.invoice_doc.is_return) {
-				this.ensureReturnPaymentsAreNegative();
-			}
+                async submit(event, payment_received = false, print = false) {
+                        // For return invoices, ensure payment amounts are negative
+                        if (this.invoice_doc.is_return) {
+                                this.ensureReturnPaymentsAreNegative();
+                        }
 
-                        if (!this.shouldPromptForOverpaymentAction()) {
-                                this.overpayment_resolution = null;
-                                this.overpayment_resolution_confirmed = false;
+                        const changeAmount = this.getOutstandingChangeAmount();
+                        const changeMatchesPayment = this.changeAccountMatchesPaymentMethod();
+                        const shouldPrompt = changeAmount > 0 && !changeMatchesPayment;
+
+                        if (!shouldPrompt) {
+                                if (changeAmount > 0 && changeMatchesPayment) {
+                                        this.autoConfirmCashResolution(changeAmount);
+                                } else {
+                                        this.overpayment_resolution = null;
+                                        this.overpayment_resolution_confirmed = false;
+                                }
                         } else if (!this.overpayment_resolution_confirmed && !payment_received) {
                                 this.pending_submit_args = { event, payment_received, print };
                                 this.overpayment_dialog = true;
@@ -2271,8 +2279,144 @@ export default {
                         return 0;
                 },
                 shouldPromptForOverpaymentAction() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+
                         const changeAmount = this.getOutstandingChangeAmount();
-                        return changeAmount > 0;
+                        if (changeAmount <= 0) {
+                                return false;
+                        }
+
+                        return !this.changeAccountMatchesPaymentMethod();
+                },
+                changeAccountMatchesPaymentMethod() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+
+                        const changeIdentifiers = this.getChangeIdentifiers();
+                        if (!changeIdentifiers.length) {
+                                return false;
+                        }
+
+                        const paymentIdentifiers = this.getPaymentIdentifiers();
+                        if (!paymentIdentifiers.length) {
+                                return false;
+                        }
+
+                        return changeIdentifiers.some((identifier) => paymentIdentifiers.includes(identifier));
+                },
+                getChangeIdentifiers() {
+                        const identifierKeys = [
+                                "change_account",
+                                "change_amount_account",
+                                "change_return_account",
+                                "change_account_name",
+                                "change_account_number",
+                                "change_mode_of_payment",
+                                "change_payment_method",
+                                "change_payment_mode",
+                                "paid_change_account",
+                                "paid_change_mode_of_payment",
+                        ];
+
+                        const identifiers = new Set();
+                        const collectFromSource = (source) => {
+                                if (!source) {
+                                        return;
+                                }
+                                identifierKeys.forEach((key) => {
+                                        const normalized = this.extractNormalizedIdentifier(source[key]);
+                                        if (normalized) {
+                                                identifiers.add(normalized);
+                                        }
+                                });
+                        };
+
+                        collectFromSource(this.invoice_doc);
+                        collectFromSource(this.pos_profile);
+
+                        if (this.invoice_doc && Array.isArray(this.invoice_doc.payments)) {
+                                this.invoice_doc.payments.forEach((payment) => {
+                                        const paymentChangeAccount = this.extractNormalizedIdentifier(payment?.change_account);
+                                        if (paymentChangeAccount) {
+                                                identifiers.add(paymentChangeAccount);
+                                        }
+                                        const paymentChangeMode = this.extractNormalizedIdentifier(
+                                                payment?.change_mode_of_payment,
+                                        );
+                                        if (paymentChangeMode) {
+                                                identifiers.add(paymentChangeMode);
+                                        }
+                                });
+                        }
+
+                        return Array.from(identifiers);
+                },
+                getPaymentIdentifiers() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return [];
+                        }
+
+                        const identifiers = new Set();
+                        const paymentKeys = ["account", "mode_of_payment", "default_account", "default_mode_of_payment"];
+
+                        this.invoice_doc.payments.forEach((payment) => {
+                                paymentKeys.forEach((key) => {
+                                        const normalized = this.extractNormalizedIdentifier(payment?.[key]);
+                                        if (normalized) {
+                                                identifiers.add(normalized);
+                                        }
+                                });
+                        });
+
+                        return Array.from(identifiers);
+                },
+                extractNormalizedIdentifier(value) {
+                        if (!value) {
+                                return null;
+                        }
+
+                        if (typeof value === "string") {
+                                const trimmed = value.trim();
+                                return trimmed ? trimmed.toLowerCase() : null;
+                        }
+
+                        if (typeof value === "object") {
+                                const candidateKeys = [
+                                        "account",
+                                        "account_name",
+                                        "mode_of_payment",
+                                        "mode_of_payment_name",
+                                        "name",
+                                        "value",
+                                        "label",
+                                ];
+
+                                for (const key of candidateKeys) {
+                                        const candidate = value[key];
+                                        if (typeof candidate === "string" && candidate.trim()) {
+                                                return candidate.trim().toLowerCase();
+                                        }
+                                }
+                        }
+
+                        return null;
+                },
+                autoConfirmCashResolution(changeAmount) {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return;
+                        }
+
+                        const sanitizedAmount = this.flt(changeAmount, this.currency_precision);
+                        this.overpayment_resolution = "cash";
+                        this.overpayment_resolution_confirmed = true;
+                        this.paid_change = sanitizedAmount;
+                        this.credit_change = 0;
+                        this.invoice_doc.paid_change = sanitizedAmount;
+                        this.invoice_doc.credit_change = 0;
+                        this.invoice_doc.change_return_mode = "cash";
                 },
                 handleOverpaymentChoice(option) {
                         const changeAmount = this.getOutstandingChangeAmount();
