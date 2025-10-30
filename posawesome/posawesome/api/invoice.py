@@ -8,7 +8,10 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, flt
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
-from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
+from posawesome.posawesome.api.payments import (
+    get_posawesome_cash_return_remark,
+    get_posawesome_credit_redeem_remark,
+)
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
@@ -34,11 +37,23 @@ def before_cancel(doc, method):
 
 
 def on_cancel(doc, method):
-    cancel_posawesome_credit_journal_entries(doc)
+    cancel_posawesome_payment_journal_entries(doc)
 
 
-def cancel_posawesome_credit_journal_entries(doc):
-    remark = get_posawesome_credit_redeem_remark(doc.name)
+def cancel_posawesome_payment_journal_entries(doc):
+    cancel_posawesome_journal_entries(
+        doc,
+        get_posawesome_credit_redeem_remark(doc.name),
+        "POSAwesome Credit Journal Cancellation Error",
+    )
+    cancel_posawesome_journal_entries(
+        doc,
+        get_posawesome_cash_return_remark(doc.name),
+        "POSAwesome Cash Refund Journal Cancellation Error",
+    )
+
+
+def cancel_posawesome_journal_entries(doc, remark, log_title):
     linked_journal_entries = frappe.get_all(
         "Journal Entry",
         filters={"docstatus": 1, "user_remark": remark},
@@ -63,7 +78,7 @@ def cancel_posawesome_credit_journal_entries(doc):
         except Exception:
             frappe.log_error(
                 frappe.get_traceback(),
-                "POSAwesome Credit Journal Cancellation Error",
+                log_title,
             )
             frappe.throw(
                 _(
