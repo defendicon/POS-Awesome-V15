@@ -1307,9 +1307,14 @@ export default {
 				this.ensureReturnPaymentsAreNegative();
 			}
 
-                        if (!this.shouldPromptForOverpaymentAction()) {
+                        const changeAmount = this.getOutstandingChangeAmount();
+                        const shouldAutoResolve = changeAmount > 0 && this.shouldAutoResolveOverpayment();
+
+                        if (changeAmount <= 0) {
                                 this.overpayment_resolution = null;
                                 this.overpayment_resolution_confirmed = false;
+                        } else if (shouldAutoResolve) {
+                                this.applyCashOverpayment(changeAmount);
                         } else if (!this.overpayment_resolution_confirmed && !payment_received) {
                                 this.pending_submit_args = { event, payment_received, print };
                                 this.overpayment_dialog = true;
@@ -2270,9 +2275,133 @@ export default {
 
                         return 0;
                 },
-                shouldPromptForOverpaymentAction() {
-                        const changeAmount = this.getOutstandingChangeAmount();
-                        return changeAmount > 0;
+                getDefaultPaymentMethod() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return null;
+                        }
+
+                        return (
+                                this.invoice_doc.payments.find((payment) => payment && payment.default) || null
+                        );
+                },
+                getProfileDefaultPayment() {
+                        if (!this.pos_profile || !Array.isArray(this.pos_profile.payments)) {
+                                return null;
+                        }
+
+                        return (
+                                this.pos_profile.payments.find((payment) => payment && payment.default) || null
+                        );
+                },
+                normalizeAccountValue(value) {
+                        if (!value) {
+                                return "";
+                        }
+
+                        if (typeof value === "object") {
+                                const candidates = [
+                                        value.account,
+                                        value.account_name,
+                                        value.name,
+                                        value.value,
+                                        value.mode_of_payment,
+                                        value.label,
+                                ];
+                                const candidate = candidates.find((entry) => entry);
+                                return candidate ? this.normalizeAccountValue(candidate) : "";
+                        }
+
+                        return String(value).trim().toLowerCase();
+                },
+                shouldAutoResolveOverpayment() {
+                        if (this.overpayment_resolution_confirmed || !this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+
+                        const defaultPayment = this.getDefaultPaymentMethod();
+                        const profileDefaultPayment = this.getProfileDefaultPayment();
+
+                        if (!defaultPayment && !profileDefaultPayment) {
+                                return false;
+                        }
+
+                        const normalize = (val) => this.normalizeAccountValue(val);
+
+                        const changeAccountCandidates = [
+                                this.invoice_doc.change_account,
+                                this.invoice_doc.change_account_name,
+                                this.invoice_doc.change_account_value,
+                                this.invoice_doc.paid_change_account,
+                                this.invoice_doc.posa_change_account,
+                                this.pos_profile?.change_account,
+                                this.pos_profile?.posa_change_account,
+                        ];
+
+                        const changeModeCandidates = [
+                                this.invoice_doc.change_mode_of_payment,
+                                this.invoice_doc.change_mode,
+                                this.invoice_doc.posa_change_mode_of_payment,
+                                this.pos_profile?.change_mode_of_payment,
+                                this.pos_profile?.posa_change_mode_of_payment,
+                        ];
+
+                        const paymentAccountCandidates = [
+                                defaultPayment?.account,
+                                defaultPayment?.account_name,
+                                defaultPayment?.default_account,
+                                defaultPayment?.account_field,
+                                profileDefaultPayment?.account,
+                                profileDefaultPayment?.account_name,
+                                profileDefaultPayment?.default_account,
+                        ];
+
+                        const paymentModeCandidates = [
+                                defaultPayment?.mode_of_payment,
+                                defaultPayment?.mode,
+                                profileDefaultPayment?.mode_of_payment,
+                                profileDefaultPayment?.mode,
+                        ];
+
+                        const changeAccount = changeAccountCandidates.map(normalize).find(Boolean);
+                        const changeMode = changeModeCandidates.map(normalize).find(Boolean);
+                        const paymentAccount = paymentAccountCandidates.map(normalize).find(Boolean);
+                        const paymentMode = paymentModeCandidates.map(normalize).find(Boolean);
+
+                        if (changeAccount && paymentAccount && changeAccount === paymentAccount) {
+                                return true;
+                        }
+
+                        if (changeAccount && paymentMode && changeAccount === paymentMode) {
+                                return true;
+                        }
+
+                        if (changeMode && paymentMode && changeMode === paymentMode) {
+                                return true;
+                        }
+
+                        return false;
+                },
+                applyCashOverpayment(amount) {
+                        if (!amount || amount <= 0) {
+                                return;
+                        }
+
+                        const resolvedAmount = this.flt(amount, this.currency_precision);
+                        this.overpayment_resolution = "cash";
+                        this.overpayment_resolution_confirmed = true;
+
+                        if (!this.invoice_doc?.is_return) {
+                                this.paid_change = resolvedAmount;
+                                this.credit_change = 0;
+                        }
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = resolvedAmount;
+                                this.invoice_doc.credit_change = 0;
+                                if (!this.invoice_doc.is_return) {
+                                        this.invoice_doc.change_return_mode = "cash";
+                                }
+                        }
                 },
                 handleOverpaymentChoice(option) {
                         const changeAmount = this.getOutstandingChangeAmount();
@@ -2285,15 +2414,7 @@ export default {
                         if (option === "credit") {
                                 this.updateCreditChange(changeAmount, { confirm: true });
                         } else {
-                                this.overpayment_resolution = "cash";
-                                this.overpayment_resolution_confirmed = true;
-                                this.paid_change = changeAmount;
-                                this.credit_change = 0;
-                                if (this.invoice_doc) {
-                                        this.invoice_doc.paid_change = changeAmount;
-                                        this.invoice_doc.credit_change = 0;
-                                        this.invoice_doc.change_return_mode = "cash";
-                                }
+                                this.applyCashOverpayment(changeAmount);
                         }
 
                         this.overpayment_dialog = false;
