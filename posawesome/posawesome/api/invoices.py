@@ -5,6 +5,7 @@ import json
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import (
@@ -525,20 +526,40 @@ def submit_invoice(invoice, data):
 
         posting_date = invoice_doc.get("posting_date") or nowdate()
         reference_no = invoice_doc.get("posa_pos_opening_shift")
-        advance_payment_entry = frappe.get_doc(
-            {
-                "doctype": "Payment Entry",
-                "mode_of_payment": cash_mode_of_payment or "Cash",
-                "paid_to": cash_account["account"],
-                "payment_type": "Receive",
-                "party_type": "Customer",
-                "party": invoice_doc.get("customer"),
-                "paid_amount": invoice_doc.get("credit_change"),
-                "received_amount": invoice_doc.get("credit_change"),
-                "company": invoice_doc.get("company"),
-                "posting_date": posting_date,
-            }
+
+        cash_account_name = (
+            cash_account.get("account") if isinstance(cash_account, (dict, frappe._dict)) else cash_account
         )
+        if not cash_account_name:
+            frappe.throw(_("Unable to determine cash account for change payment entry."))
+
+        party_account = invoice_doc.get("debit_to")
+        if not party_account and invoice_doc.get("customer"):
+            party_account = get_party_account("Customer", invoice_doc.get("customer"), invoice_doc.get("company"))
+        if not party_account:
+            frappe.throw(_("Unable to determine customer receivable account for change payment entry."))
+
+        advance_payment_entry = frappe.new_doc("Payment Entry")
+        advance_payment_entry.payment_type = "Pay"
+        advance_payment_entry.mode_of_payment = cash_mode_of_payment or "Cash"
+        advance_payment_entry.party_type = "Customer"
+        advance_payment_entry.party = invoice_doc.get("customer")
+        advance_payment_entry.company = invoice_doc.get("company")
+        advance_payment_entry.posting_date = posting_date
+        advance_payment_entry.paid_from = cash_account_name
+        advance_payment_entry.paid_to = party_account
+        amount = flt(invoice_doc.get("credit_change"))
+        advance_payment_entry.paid_amount = amount
+        advance_payment_entry.received_amount = amount
+        advance_payment_entry.difference_amount = 0
+        advance_payment_entry.reference_no = reference_no
+        advance_payment_entry.reference_date = posting_date
+
+        advance_payment_entry.setup_party_account_field()
+        advance_payment_entry.set_missing_values()
+        advance_payment_entry.set_amounts()
+        advance_payment_entry.paid_amount = amount
+        advance_payment_entry.received_amount = amount
 
         if reference_no:
             advance_payment_entry.reference_no = reference_no

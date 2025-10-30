@@ -916,9 +916,9 @@ export default {
 
                 // Calculate change to be given back to customer
                 change_due() {
-			if (!this.invoice_doc) {
-				return 0;
-			}
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
 
 			// For multi-currency, use grand_total instead of rounded_total
 			let invoice_total;
@@ -939,6 +939,41 @@ export default {
 
                         // Ensure change is not negative
                         return change > 0 ? change : 0;
+                },
+
+                shouldAutoApplyCreditChange() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+
+                        if (this.change_due <= 0) {
+                                return false;
+                        }
+
+                        const payments = Array.isArray(this.invoice_doc.payments)
+                                ? this.invoice_doc.payments
+                                : [];
+
+                        const totals = payments.reduce(
+                                (accumulator, payment) => {
+                                        if (!payment) {
+                                                return accumulator;
+                                        }
+
+                                        const amount = this.flt(payment.amount || 0, this.currency_precision);
+
+                                        if (payment.type === "Cash") {
+                                                accumulator.cash += amount;
+                                        } else {
+                                                accumulator.nonCash += amount;
+                                        }
+
+                                        return accumulator;
+                                },
+                                { cash: 0, nonCash: 0 },
+                        );
+
+                        return totals.nonCash > 0 && totals.cash === 0;
                 },
 
 		// Label for the difference field (To Be Paid/Change)
@@ -1002,8 +1037,20 @@ export default {
 	watch: {
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
-                        if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
+                        if (this.is_user_editing_paid_change) {
+                                return;
+                        }
+
+                        if (newVal < 0) {
+                                const changeDue = -newVal;
+
+                                if (this.shouldAutoApplyCreditChange) {
+                                        this.updateCreditChange(changeDue);
+                                } else {
+                                        this.paid_change = changeDue;
+                                }
+                        } else {
+                                this.updateCreditChange(0);
                         }
                 },
                 // Watch paid_change to validate and update credit_change
