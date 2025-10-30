@@ -1002,9 +1002,19 @@ export default {
 	watch: {
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
-                        if (!this.is_user_editing_paid_change) {
-                                this.paid_change = newVal < 0 ? -newVal : 0;
+                        if (this.is_user_editing_paid_change) {
+                                return;
                         }
+
+                        if (newVal < 0) {
+                                const changeLimit = Math.max(-this.diff_payment, 0);
+                                if (this.shouldAutoCreditChange()) {
+                                        this.updateCreditChange(changeLimit);
+                                        return;
+                                }
+                        }
+
+                        this.paid_change = newVal < 0 ? -newVal : 0;
                 },
                 // Watch paid_change to validate and update credit_change
                 paid_change(newVal) {
@@ -1192,10 +1202,10 @@ export default {
 			});
 		},
 		// Ensure all payments are negative for return invoices
-		ensureReturnPaymentsAreNegative() {
-			if (!this.invoice_doc || !this.invoice_doc.is_return || !this.is_cashback) {
-				return;
-			}
+                ensureReturnPaymentsAreNegative() {
+                        if (!this.invoice_doc || !this.invoice_doc.is_return || !this.is_cashback) {
+                                return;
+                        }
 			// Check if any payment amount is set
 			let hasPaymentSet = false;
 			this.invoice_doc.payments.forEach((payment) => {
@@ -1215,20 +1225,45 @@ export default {
 				}
 			}
 			// Ensure all set payments are negative
-			this.invoice_doc.payments.forEach((payment) => {
-				if (payment.amount > 0) {
-					payment.amount = -Math.abs(payment.amount);
-				}
-				if (payment.base_amount !== undefined && payment.base_amount > 0) {
-					payment.base_amount = -Math.abs(payment.base_amount);
-				}
-			});
-		},
-		// Submit payment after validation
-		async submit(event, payment_received = false, print = false) {
-			// For return invoices, ensure payment amounts are negative
-			if (this.invoice_doc.is_return) {
-				this.ensureReturnPaymentsAreNegative();
+                        this.invoice_doc.payments.forEach((payment) => {
+                                if (payment.amount > 0) {
+                                        payment.amount = -Math.abs(payment.amount);
+                                }
+                                if (payment.base_amount !== undefined && payment.base_amount > 0) {
+                                        payment.base_amount = -Math.abs(payment.base_amount);
+                                }
+                        });
+                },
+                // Determine whether a payment row should be treated as cash
+                isCashPaymentMethod(payment) {
+                        if (!payment) {
+                                return false;
+                        }
+                        const type = String(payment.type || "").toLowerCase();
+                        const mode = String(payment.mode_of_payment || "").toLowerCase();
+                        return type === "cash" || mode.includes("cash");
+                },
+                // Check if there is any positive cash payment entered
+                hasPositiveCashPayment() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return false;
+                        }
+                        return this.invoice_doc.payments.some(
+                                (payment) => this.isCashPaymentMethod(payment) && this.flt(payment.amount) > 0,
+                        );
+                },
+                // Decide whether change should automatically convert to customer credit
+                shouldAutoCreditChange() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+                        return !this.hasPositiveCashPayment();
+                },
+                // Submit payment after validation
+                async submit(event, payment_received = false, print = false) {
+                        // For return invoices, ensure payment amounts are negative
+                        if (this.invoice_doc.is_return) {
+                                this.ensureReturnPaymentsAreNegative();
 			}
 			// Validate total payments only if not credit sale and invoice total is not zero
 			if (
