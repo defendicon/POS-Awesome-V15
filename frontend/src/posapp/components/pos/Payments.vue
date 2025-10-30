@@ -712,9 +712,9 @@
 			</v-card>
 		</v-dialog>
 
-		<!-- Phone Payment Dialog -->
-		<v-dialog v-model="phone_dialog" max-width="400px">
-			<v-card>
+                <!-- Phone Payment Dialog -->
+                <v-dialog v-model="phone_dialog" max-width="400px">
+                        <v-card>
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Confirm Mobile Number") }}</span>
 				</v-card-title>
@@ -740,10 +740,43 @@
 					<v-btn color="primary" theme="dark" @click="request_payment">
 						{{ __("Request") }}
 					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
-	</div>
+                                </v-card-actions>
+                        </v-card>
+                </v-dialog>
+                <v-dialog v-model="overpayment_dialog" max-width="480px">
+                        <v-card>
+                                <v-card-title class="text-h6">
+                                        {{ __('Handle Extra Payment') }}
+                                </v-card-title>
+                                <v-card-text>
+                                        <p>
+                                                {{
+                                                        __('The received amount exceeds the invoice total by {0}.', [
+                                                                formatCurrency(overpayment_amount),
+                                                        ])
+                                                }}
+                                        </p>
+                                        <p>{{ __('How would you like to handle the extra amount?') }}</p>
+                                </v-card-text>
+                                <v-card-actions class="justify-end flex-wrap">
+                                        <v-btn variant="text" color="secondary" @click="cancelOverpaymentDialog">
+                                                {{ __('Cancel') }}
+                                        </v-btn>
+                                        <v-btn
+                                                variant="tonal"
+                                                color="secondary"
+                                                class="ma-1"
+                                                @click="handleOverpaymentAction('credit')"
+                                        >
+                                                {{ __('Credit amount to Customer Balance') }}
+                                        </v-btn>
+                                        <v-btn color="primary" class="ma-1" @click="handleOverpaymentAction('cash')">
+                                                {{ __('Return payment from Cash') }}
+                                        </v-btn>
+                                </v-card-actions>
+                        </v-card>
+                </v-dialog>
+        </div>
 </template>
 
 <script>
@@ -796,9 +829,9 @@ export default {
 			redeem_customer_credit: false, // Redeem customer credit?
 			customer_credit_dict: [], // List of available customer credits
 			paid_change_rules: [], // Validation rules for paid change
-			phone_dialog: false, // Show phone payment dialog
-			custom_days_dialog: false, // Show custom days dialog
-			custom_days_value: null, // Custom days entry
+                        phone_dialog: false, // Show phone payment dialog
+                        custom_days_dialog: false, // Show custom days dialog
+                        custom_days_value: null, // Custom days entry
 			new_delivery_date: null, // New delivery date value
 			new_po_date: null, // New PO date value
 			new_credit_due_date: null, // New credit due date value
@@ -809,10 +842,14 @@ export default {
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
 			addresses: [], // List of customer addresses
-			is_user_editing_paid_change: false, // User interaction flag
-			highlightSubmit: false, // Highlight state for submit button
-		};
-	},
+                        is_user_editing_paid_change: false, // User interaction flag
+                        highlightSubmit: false, // Highlight state for submit button
+                        overpayment_dialog: false, // Prompt for handling overpayment change
+                        overpayment_amount: 0, // Amount of overpayment to resolve
+                        overpayment_action: null, // Selected action for overpayment
+                        pendingSubmit: null, // Stored submit context while waiting for choice
+                };
+        },
 	computed: {
 		invoice_doc: {
 			get() {
@@ -1345,9 +1382,9 @@ export default {
 				return;
 			}
 			// Validate stock availability before submitting
-			if (!isOffline()) {
-				try {
-					const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
+                        if (!isOffline()) {
+                                try {
+                                        const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
 					const stockCheck = await frappe.call({
 						method: "posawesome.posawesome.api.invoices.validate_cart_items",
 						args: { items: JSON.stringify(itemsToCheck) },
@@ -1375,13 +1412,20 @@ export default {
 					}
 				} catch (e) {
 					console.error("Stock validation failed", e);
-				}
-			}
+                                }
+                        }
 
-			// Proceed to submit the invoice
-			this.loading = true;
-			this.submit_invoice(print);
-		},
+                        if (!payment_received && this.shouldPromptOverpaymentAction(changeLimit)) {
+                                this.overpayment_amount = changeLimit;
+                                this.pendingSubmit = { print, payment_received };
+                                this.overpayment_action = null;
+                                this.overpayment_dialog = true;
+                                return;
+                        }
+
+                        // Proceed to submit the invoice
+                        this.finalizeSubmit(print);
+                },
 		// Submit invoice to backend after all validations
 		submit_invoice(print) {
 			// For return invoices, ensure payments are negative one last time
@@ -1425,10 +1469,11 @@ export default {
                                 total_change: changeLimit,
                                 paid_change: paidChange,
                                 credit_change: creditChange,
-				redeemed_customer_credit: this.redeemed_customer_credit,
-				customer_credit_dict: this.customer_credit_dict,
-				is_cashback: this.is_cashback,
-			};
+                                redeemed_customer_credit: this.redeemed_customer_credit,
+                                customer_credit_dict: this.customer_credit_dict,
+                                is_cashback: this.is_cashback,
+                                overpayment_action: this.overpayment_action,
+                        };
 			const vm = this;
 
 			if (isOffline()) {
@@ -1439,12 +1484,16 @@ export default {
 						title: __("Invoice saved offline"),
 						color: "warning",
 					});
-					if (print) {
-						this.print_offline_invoice(this.invoice_doc);
-					}
-					vm.eventBus.emit("clear_invoice");
-					vm.eventBus.emit("focus_item_search");
-					vm.eventBus.emit("reset_posting_date");
+                                        if (print) {
+                                                this.print_offline_invoice(this.invoice_doc);
+                                        }
+                                        vm.overpayment_action = null;
+                                        vm.overpayment_amount = 0;
+                                        vm.pendingSubmit = null;
+                                        vm.overpayment_dialog = false;
+                                        vm.eventBus.emit("clear_invoice");
+                                        vm.eventBus.emit("focus_item_search");
+                                        vm.eventBus.emit("reset_posting_date");
 					vm.back_to_invoice();
 					vm.loading = false;
 					return;
@@ -1513,11 +1562,15 @@ export default {
 					if (print) {
 						vm.load_print_page();
 					}
-					vm.customer_credit_dict = [];
-					vm.redeem_customer_credit = false;
-					vm.is_cashback = true;
-					vm.is_credit_return = false;
-					vm.sales_person = "";
+                                        vm.customer_credit_dict = [];
+                                        vm.redeem_customer_credit = false;
+                                        vm.is_cashback = true;
+                                        vm.is_credit_return = false;
+                                        vm.sales_person = "";
+                                        vm.overpayment_action = null;
+                                        vm.overpayment_amount = 0;
+                                        vm.pendingSubmit = null;
+                                        vm.overpayment_dialog = false;
 					vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
                                         vm.eventBus.emit("show_message", {
                                                 title:
@@ -2123,6 +2176,84 @@ export default {
                                 this.invoice_doc.paid_change = remainingPaidChange;
                         }
                 },
+                shouldPromptOverpaymentAction(changeLimit) {
+                        if (
+                                !this.invoice_doc ||
+                                this.invoice_doc.is_return ||
+                                !Array.isArray(this.invoice_doc.payments)
+                        ) {
+                                return false;
+                        }
+
+                        const totalChange = this.flt(changeLimit, this.currency_precision);
+                        if (totalChange <= 0) {
+                                return false;
+                        }
+
+                        const paidChange = this.flt(
+                                Math.min(this.paid_change, totalChange),
+                                this.currency_precision,
+                        );
+                        const creditChange = this.flt(totalChange - paidChange, this.currency_precision);
+
+                        if (creditChange <= 0) {
+                                return false;
+                        }
+
+                        const defaultPayment = this.invoice_doc.payments.find((payment) => payment.default === 1);
+                        if (!defaultPayment) {
+                                return false;
+                        }
+
+                        const defaultMode = (defaultPayment.mode_of_payment || "").toLowerCase();
+                        if (!defaultMode.includes("cash")) {
+                                return false;
+                        }
+
+                        if (this.flt(defaultPayment.amount) > 0) {
+                                return false;
+                        }
+
+                        const hasOtherPositivePayment = this.invoice_doc.payments
+                                .filter((payment) => payment.default !== 1)
+                                .some((payment) => this.flt(payment.amount) > 0);
+
+                        if (!hasOtherPositivePayment) {
+                                return false;
+                        }
+
+                        return true;
+                },
+                handleOverpaymentAction(action) {
+                        if (!this.pendingSubmit) {
+                                this.cancelOverpaymentDialog();
+                                return;
+                        }
+
+                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        this.overpayment_action = action;
+
+                        if (action === "cash") {
+                                this.paid_change = changeLimit;
+                        } else if (action === "credit") {
+                                this.paid_change = 0;
+                        }
+
+                        const { print } = this.pendingSubmit;
+                        this.pendingSubmit = null;
+                        this.overpayment_dialog = false;
+                        this.finalizeSubmit(print);
+                },
+                cancelOverpaymentDialog() {
+                        this.overpayment_dialog = false;
+                        this.pendingSubmit = null;
+                        this.overpayment_action = null;
+                        this.overpayment_amount = 0;
+                },
+                finalizeSubmit(print) {
+                        this.loading = true;
+                        this.submit_invoice(print);
+                },
 		// Format currency value
 		formatCurrency(value) {
 			return this.$options.mixins[0].methods.formatCurrency.call(this, value, this.currency_precision);
@@ -2254,11 +2385,15 @@ export default {
 				this.set_mpesa_payment(data);
 			});
 			// Clear any stored invoice when parent emits clear_invoice
-			this.eventBus.on("clear_invoice", () => {
-				this.invoice_doc = "";
-				this.is_return = false;
-				this.is_credit_return = false;
-			});
+                        this.eventBus.on("clear_invoice", () => {
+                                this.invoice_doc = "";
+                                this.is_return = false;
+                                this.is_credit_return = false;
+                                this.overpayment_dialog = false;
+                                this.overpayment_amount = 0;
+                                this.overpayment_action = null;
+                                this.pendingSubmit = null;
+                        });
 			// Scroll to top when payment view is shown
 			this.eventBus.on("show_payment", this.handleShowPayment);
 		});

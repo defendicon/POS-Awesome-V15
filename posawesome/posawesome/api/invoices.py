@@ -190,6 +190,73 @@ def _auto_set_return_batches(invoice_doc):
                 frappe.throw(_("No batches available in {0} for {1}.").format(d.warehouse, d.item_code))
 
 
+def _create_cash_change_journal_entry(invoice_doc, data, cash_account):
+    """Create a journal entry to settle overpayments returned from cash."""
+
+    action = (data or {}).get("overpayment_action")
+    if action != "cash":
+        return
+
+    change_amount = abs(flt((data or {}).get("paid_change") or 0))
+    if change_amount <= 0:
+        return
+
+    account_name = (
+        cash_account.get("account")
+        if isinstance(cash_account, dict)
+        else cash_account
+    )
+    if not account_name:
+        return
+
+    customer_account = invoice_doc.get("debit_to")
+    if not customer_account:
+        return
+
+    company_currency = getattr(invoice_doc, "company_currency", None) or frappe.get_cached_value(
+        "Company", invoice_doc.company, "default_currency"
+    )
+    invoice_currency = invoice_doc.get("currency") or company_currency
+    conversion_rate = flt(invoice_doc.get("conversion_rate") or 1)
+    base_change = (
+        change_amount * conversion_rate if invoice_currency != company_currency else change_amount
+    )
+    base_change = flt(base_change)
+
+    if base_change <= 0:
+        return
+
+    journal_entry = frappe.new_doc("Journal Entry")
+    journal_entry.posting_date = invoice_doc.get("posting_date") or nowdate()
+    journal_entry.company = invoice_doc.company
+    journal_entry.voucher_type = "Journal Entry"
+    journal_entry.remark = _("Cash change returned for {0}").format(invoice_doc.name)
+
+    debit_row = journal_entry.append("accounts", {})
+    debit_row.account = customer_account
+    debit_row.party_type = "Customer"
+    debit_row.party = invoice_doc.get("customer")
+    debit_row.reference_type = invoice_doc.doctype
+    debit_row.reference_name = invoice_doc.name
+    debit_row.debit_in_account_currency = base_change
+    debit_row.debit = base_change
+
+    credit_row = journal_entry.append("accounts", {})
+    credit_row.account = account_name
+    credit_row.credit_in_account_currency = base_change
+    credit_row.credit = base_change
+
+    cost_center = invoice_doc.get("cost_center")
+    if cost_center:
+        debit_row.cost_center = cost_center
+        credit_row.cost_center = cost_center
+
+    journal_entry.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    journal_entry.save()
+    journal_entry.submit()
+
+
 @frappe.whitelist()
 def validate_cart_items(items, pos_profile=None):
     """Validate cart items for available stock.
@@ -634,6 +701,7 @@ def submit_invoice(invoice, data):
     else:
         invoice_doc.submit()
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+        _create_cash_change_journal_entry(invoice_doc, data, cash_account)
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
@@ -665,6 +733,7 @@ def submit_in_background_job(kwargs):
 
     invoice_doc.submit()
     redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+    _create_cash_change_journal_entry(invoice_doc, data, cash_account)
 
 
 @frappe.whitelist()
