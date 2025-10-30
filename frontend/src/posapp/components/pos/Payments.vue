@@ -2224,11 +2224,33 @@ export default {
                                 }
                         }
                 },
+                getOutstandingChangeAmount() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return 0;
+                        }
+
+                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        if (changeLimit > 0) {
+                                return changeLimit;
+                        }
+
+                        const paidChange = this.flt(this.invoice_doc.paid_change || this.paid_change || 0);
+                        const creditChange = this.flt(
+                                this.invoice_doc.credit_change || Math.abs(this.credit_change) || 0,
+                        );
+
+                        if (paidChange > 0 || creditChange > 0) {
+                                return this.flt(paidChange + creditChange, this.currency_precision);
+                        }
+
+                        return 0;
+                },
                 shouldPromptForOverpaymentAction() {
-                        return Boolean(this.invoice_doc && !this.invoice_doc.is_return && this.change_due > 0);
+                        const changeAmount = this.getOutstandingChangeAmount();
+                        return changeAmount > 0;
                 },
                 handleOverpaymentChoice(option) {
-                        const changeAmount = Math.max(-this.diff_payment, 0);
+                        const changeAmount = this.getOutstandingChangeAmount();
                         if (!changeAmount) {
                                 this.overpayment_dialog = false;
                                 this.pending_submit_args = null;
