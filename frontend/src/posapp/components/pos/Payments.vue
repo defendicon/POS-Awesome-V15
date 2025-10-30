@@ -74,9 +74,9 @@
                                                         type="text"
                                                         @change="
                                                                 setFormatedCurrency(this, 'credit_change', null, false, $event);
-								updateCreditChange(this.credit_change);
-							"
-						></v-text-field>
+                                                                updateCreditChange(this.credit_change, { confirm: true });
+                                                        "
+                                                ></v-text-field>
 					</v-col>
 				</v-row>
 
@@ -822,14 +822,14 @@ export default {
 			paid_change: 0, // Change to be given as paid
 			is_credit_sale: false, // Is this a credit sale?
 			is_write_off_change: false, // Write-off for change enabled
-			is_cashback: true, // Cashback enabled
-			is_credit_return: false, // Is this a credit return?
-			redeem_customer_credit: false, // Redeem customer credit?
-			customer_credit_dict: [], // List of available customer credits
-			paid_change_rules: [], // Validation rules for paid change
-			phone_dialog: false, // Show phone payment dialog
-			overpayment_dialog: false, // Show overpayment handling dialog
-			custom_days_dialog: false, // Show custom days dialog
+                        is_cashback: true, // Cashback enabled
+                        is_credit_return: false, // Is this a credit return?
+                        redeem_customer_credit: false, // Redeem customer credit?
+                        customer_credit_dict: [], // List of available customer credits
+                        paid_change_rules: [], // Validation rules for paid change
+                        phone_dialog: false, // Show phone payment dialog
+                        overpayment_dialog: false, // Show overpayment handling dialog
+                        custom_days_dialog: false, // Show custom days dialog
 			custom_days_value: null, // Custom days entry
 			new_delivery_date: null, // New delivery date value
 			new_po_date: null, // New PO date value
@@ -841,10 +841,11 @@ export default {
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
 			addresses: [], // List of customer addresses
-			is_user_editing_paid_change: false, // User interaction flag
-			highlightSubmit: false, // Highlight state for submit button
-			overpayment_resolution: null, // Selected handling for change due
-			pending_submit_args: null, // Deferred submit arguments when confirming overpayment
+                        is_user_editing_paid_change: false, // User interaction flag
+                        highlightSubmit: false, // Highlight state for submit button
+                        overpayment_resolution: null, // Selected handling for change due
+                        overpayment_resolution_confirmed: false, // Whether the handling choice has been confirmed
+                        pending_submit_args: null, // Deferred submit arguments when confirming overpayment
 		};
 	},
 	computed: {
@@ -1040,53 +1041,67 @@ export default {
                                 this.paid_change = newVal < 0 ? -newVal : 0;
                         }
                 },
-		// Watch paid_change to validate and update credit_change
-		paid_change(newVal) {
-			const changeLimit = Math.max(-this.diff_payment, 0);
-			if (newVal > changeLimit) {
-				this.paid_change = changeLimit;
-				this.credit_change = 0;
-				this.paid_change_rules = ["Paid change can not be greater than total change!"];
-			} else {
-				this.paid_change_rules = [];
-				this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
-			}
+                // Watch paid_change to validate and update credit_change
+                paid_change(newVal) {
+                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        if (newVal > changeLimit) {
+                                this.paid_change = changeLimit;
+                                this.credit_change = 0;
+                                this.paid_change_rules = ["Paid change can not be greater than total change!"];
+                        } else {
+                                this.paid_change_rules = [];
+                                this.credit_change = this.flt(newVal - changeLimit, this.currency_precision);
+                        }
 
-			const effectivePaid = Math.min(this.paid_change, changeLimit);
-			const creditAmount = this.flt(changeLimit - effectivePaid, this.currency_precision);
+                        const effectivePaid = Math.min(this.paid_change, changeLimit);
+                        const creditAmount = this.flt(changeLimit - effectivePaid, this.currency_precision);
 
-			if (this.invoice_doc) {
-				this.invoice_doc.paid_change = effectivePaid;
-				this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
-			}
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = effectivePaid;
+                                this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
+                                if (!this.invoice_doc.is_return) {
+                                        this.invoice_doc.change_return_mode = this.overpayment_resolution_confirmed
+                                                ? this.overpayment_resolution
+                                                : null;
+                                }
+                        }
 
-			if (!this.invoice_doc || this.invoice_doc.is_return) {
-				this.overpayment_resolution = null;
-				return;
-			}
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                this.overpayment_resolution = null;
+                                this.overpayment_resolution_confirmed = false;
+                                return;
+                        }
 
-			if (this.change_due > 0) {
-				if (creditAmount > 0) {
-					this.overpayment_resolution = "credit";
-				} else if (effectivePaid > 0) {
-					this.overpayment_resolution = "cash";
-				} else {
-					this.overpayment_resolution = null;
-				}
-			} else {
-				this.overpayment_resolution = null;
-			}
-		},
-		change_due(newVal, oldVal) {
-			if (!newVal || newVal <= 0) {
-				this.overpayment_resolution = null;
-				return;
-			}
+                        if (this.change_due > 0) {
+                                if (this.overpayment_resolution_confirmed) {
+                                        if (creditAmount > 0) {
+                                                this.overpayment_resolution = "credit";
+                                        } else if (effectivePaid > 0) {
+                                                this.overpayment_resolution = "cash";
+                                        } else {
+                                                this.overpayment_resolution = null;
+                                                this.overpayment_resolution_confirmed = false;
+                                        }
+                                } else {
+                                        this.overpayment_resolution = null;
+                                }
+                        } else {
+                                this.overpayment_resolution = null;
+                                this.overpayment_resolution_confirmed = false;
+                        }
+                },
+                change_due(newVal, oldVal) {
+                        if (!newVal || newVal <= 0) {
+                                this.overpayment_resolution = null;
+                                this.overpayment_resolution_confirmed = false;
+                                return;
+                        }
 
-			if (oldVal !== undefined && newVal !== oldVal) {
-				this.overpayment_resolution = null;
-			}
-		},
+                        if (oldVal !== undefined && newVal !== oldVal) {
+                                this.overpayment_resolution = null;
+                                this.overpayment_resolution_confirmed = false;
+                        }
+                },
 		// Watch loyalty_amount to handle loyalty points redemption
 		loyalty_amount(value) {
 			if (!this.invoice_doc) {
@@ -1292,13 +1307,14 @@ export default {
 				this.ensureReturnPaymentsAreNegative();
 			}
 
-			if (!this.shouldPromptForOverpaymentAction()) {
-				this.overpayment_resolution = null;
-			} else if (!this.overpayment_resolution && !payment_received) {
-				this.pending_submit_args = { event, payment_received, print };
-				this.overpayment_dialog = true;
-				return;
-			}
+                        if (!this.shouldPromptForOverpaymentAction()) {
+                                this.overpayment_resolution = null;
+                                this.overpayment_resolution_confirmed = false;
+                        } else if (!this.overpayment_resolution_confirmed && !payment_received) {
+                                this.pending_submit_args = { event, payment_received, print };
+                                this.overpayment_dialog = true;
+                                return;
+                        }
 			// Validate total payments only if not credit sale and invoice total is not zero
 			if (
 				!this.is_credit_sale &&
@@ -1479,9 +1495,10 @@ export default {
                         const creditChange = !this.invoice_doc.is_return
                                 ? this.flt(Math.max(changeLimit - paidChange, 0), this.currency_precision)
                                 : 0;
-                        const changeResolution = !this.invoice_doc.is_return
-                                ? this.overpayment_resolution || (paidChange > 0 ? "cash" : creditChange > 0 ? "credit" : null)
-                                : null;
+                        const changeResolution =
+                                !this.invoice_doc.is_return && this.overpayment_resolution_confirmed
+                                        ? this.overpayment_resolution
+                                        : null;
 
                         if (this.invoice_doc) {
                                 this.invoice_doc.paid_change = paidChange;
@@ -1495,6 +1512,7 @@ export default {
                                 this.credit_change = creditChange ? -creditChange : 0;
                                 this.paid_change = paidChange;
                                 this.overpayment_resolution = changeResolution;
+                                this.overpayment_resolution_confirmed = Boolean(changeResolution);
                         }
 
                         let data = {
@@ -1590,14 +1608,15 @@ export default {
 					if (print) {
 						vm.load_print_page();
 					}
-					vm.customer_credit_dict = [];
-					vm.redeem_customer_credit = false;
-					vm.is_cashback = true;
-					vm.is_credit_return = false;
-					vm.sales_person = "";
-					vm.overpayment_resolution = null;
-					vm.pending_submit_args = null;
-					vm.overpayment_dialog = false;
+                                        vm.customer_credit_dict = [];
+                                        vm.redeem_customer_credit = false;
+                                        vm.is_cashback = true;
+                                        vm.is_credit_return = false;
+                                        vm.sales_person = "";
+                                        vm.overpayment_resolution = null;
+                                        vm.overpayment_resolution_confirmed = false;
+                                        vm.pending_submit_args = null;
+                                        vm.overpayment_dialog = false;
 					vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
                                         vm.eventBus.emit("show_message", {
                                                 title:
@@ -2196,7 +2215,8 @@ export default {
                                 this.updateCreditChange(0);
                         }
                 },
-                updateCreditChange(rawValue) {
+                updateCreditChange(rawValue, options = {}) {
+                        const { confirm = false } = options;
                         const changeLimit = Math.max(-this.diff_payment, 0);
                         let requestedCredit = this.flt(Math.abs(rawValue) || 0, this.currency_precision);
 
@@ -2206,22 +2226,27 @@ export default {
 
                         const remainingPaidChange = this.flt(changeLimit - requestedCredit, this.currency_precision);
 
+                        if (confirm && this.invoice_doc && !this.invoice_doc.is_return) {
+                                if (requestedCredit > 0) {
+                                        this.overpayment_resolution = "credit";
+                                        this.overpayment_resolution_confirmed = true;
+                                } else if (remainingPaidChange > 0) {
+                                        this.overpayment_resolution = "cash";
+                                        this.overpayment_resolution_confirmed = true;
+                                } else {
+                                        this.overpayment_resolution = null;
+                                        this.overpayment_resolution_confirmed = false;
+                                }
+                        } else if (!this.overpayment_resolution_confirmed) {
+                                this.overpayment_resolution = null;
+                        }
+
                         this.credit_change = requestedCredit ? -requestedCredit : 0;
                         this.paid_change = remainingPaidChange;
 
                         if (this.invoice_doc) {
                                 this.invoice_doc.credit_change = requestedCredit;
                                 this.invoice_doc.paid_change = remainingPaidChange;
-                        }
-
-                        if (this.invoice_doc && !this.invoice_doc.is_return) {
-                                if (requestedCredit > 0) {
-                                        this.overpayment_resolution = "credit";
-                                } else if (remainingPaidChange > 0) {
-                                        this.overpayment_resolution = "cash";
-                                } else if (this.change_due <= 0) {
-                                        this.overpayment_resolution = null;
-                                }
                         }
                 },
                 getOutstandingChangeAmount() {
@@ -2258,15 +2283,16 @@ export default {
                         }
 
                         if (option === "credit") {
-                                this.overpayment_resolution = "credit";
-                                this.updateCreditChange(changeAmount);
+                                this.updateCreditChange(changeAmount, { confirm: true });
                         } else {
                                 this.overpayment_resolution = "cash";
+                                this.overpayment_resolution_confirmed = true;
                                 this.paid_change = changeAmount;
                                 this.credit_change = 0;
                                 if (this.invoice_doc) {
                                         this.invoice_doc.paid_change = changeAmount;
                                         this.invoice_doc.credit_change = 0;
+                                        this.invoice_doc.change_return_mode = "cash";
                                 }
                         }
 
@@ -2280,9 +2306,8 @@ export default {
                 cancelOverpaymentDialog() {
                         this.overpayment_dialog = false;
                         this.pending_submit_args = null;
-                        if (this.change_due <= 0) {
-                                this.overpayment_resolution = null;
-                        }
+                        this.overpayment_resolution = null;
+                        this.overpayment_resolution_confirmed = false;
                 },
                 // Format currency value
 		formatCurrency(value) {
