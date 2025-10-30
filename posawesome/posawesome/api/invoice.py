@@ -9,6 +9,8 @@ from frappe.utils import add_days, flt
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
 from posawesome.posawesome.api.payments import (
+    build_posawesome_cash_return_remark,
+    build_posawesome_credit_redeem_remark,
     get_posawesome_cash_return_remark,
     get_posawesome_credit_redeem_remark,
 )
@@ -43,22 +45,49 @@ def on_cancel(doc, method):
 def cancel_posawesome_payment_journal_entries(doc):
     cancel_posawesome_journal_entries(
         doc,
-        get_posawesome_credit_redeem_remark(doc.name),
+        {
+            get_posawesome_credit_redeem_remark(doc.name),
+            build_posawesome_credit_redeem_remark(doc.name),
+        },
         "POSAwesome Credit Journal Cancellation Error",
     )
     cancel_posawesome_journal_entries(
         doc,
-        get_posawesome_cash_return_remark(doc.name),
+        {
+            get_posawesome_cash_return_remark(doc.name),
+            build_posawesome_cash_return_remark(doc.name),
+        },
         "POSAwesome Cash Refund Journal Cancellation Error",
     )
 
 
-def cancel_posawesome_journal_entries(doc, remark, log_title):
-    linked_journal_entries = frappe.get_all(
-        "Journal Entry",
-        filters={"docstatus": 1, "user_remark": remark},
-        pluck="name",
+def cancel_posawesome_journal_entries(doc, remark_candidates, log_title):
+    remark_candidates = {remark.strip() for remark in remark_candidates if remark}
+
+    linked_journal_entries = set()
+
+    if remark_candidates:
+        filters = {"docstatus": 1, "user_remark": ["in", list(remark_candidates)]}
+        linked_journal_entries.update(
+            frappe.get_all(
+                "Journal Entry",
+                filters=filters,
+                pluck="name",
+            )
+        )
+
+    reference_matches = frappe.get_all(
+        "Journal Entry Account",
+        filters={
+            "docstatus": 1,
+            "parenttype": "Journal Entry",
+            "reference_type": doc.doctype,
+            "reference_name": doc.name,
+        },
+        pluck="parent",
     )
+
+    linked_journal_entries.update(reference_matches)
 
     for journal_entry in linked_journal_entries:
         je_doc = frappe.get_doc("Journal Entry", journal_entry)
@@ -72,6 +101,14 @@ def cancel_posawesome_journal_entries(doc, remark, log_title):
 
         if not has_reference:
             continue
+
+        if remark_candidates:
+            user_remark = (je_doc.user_remark or "").strip()
+            remarks = (je_doc.remark or "").strip()
+            if user_remark not in remark_candidates and remarks not in remark_candidates:
+                normalized = user_remark or remarks
+                if "POS Awesome" not in (normalized or ""):
+                    continue
 
         try:
             je_doc.cancel()

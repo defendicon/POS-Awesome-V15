@@ -15,12 +15,20 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 from posawesome.posawesome.api.utilities import ensure_child_doctype
 
 
+def build_posawesome_credit_redeem_remark(invoice_name):
+    return f"POS Awesome credit redemption for Sales Invoice {invoice_name}"
+
+
+def build_posawesome_cash_return_remark(invoice_name):
+    return f"POS Awesome cash refund for Sales Invoice {invoice_name}"
+
+
 def get_posawesome_credit_redeem_remark(invoice_name):
-    return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
+    return _(build_posawesome_credit_redeem_remark(invoice_name))
 
 
 def get_posawesome_cash_return_remark(invoice_name):
-    return _("POS Awesome cash refund for Sales Invoice {0}").format(invoice_name)
+    return _(build_posawesome_cash_return_remark(invoice_name))
 
 
 def _get_pos_cost_center(invoice_doc):
