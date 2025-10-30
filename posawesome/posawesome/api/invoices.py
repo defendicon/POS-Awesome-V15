@@ -509,10 +509,8 @@ def submit_invoice(invoice, data):
 
     invoice_doc.remarks = "\n".join(items)
 
-    change_return_mode = data.get("change_return_mode") or invoice_doc.get("change_return_mode")
-
     # creating advance payment
-    if data.get("credit_change") and change_return_mode != "credit":
+    if data.get("credit_change"):
         cash_mode_of_payment = None
         for payment in invoice_doc.payments:
             if payment.get("type") == "Cash" and payment.get("mode_of_payment"):

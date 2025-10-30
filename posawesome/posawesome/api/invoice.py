@@ -8,10 +8,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, flt
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
-from posawesome.posawesome.api.payments import (
-    get_posawesome_cash_return_remark,
-    get_posawesome_credit_redeem_remark,
-)
+from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
@@ -41,13 +38,10 @@ def on_cancel(doc, method):
 
 
 def cancel_posawesome_credit_journal_entries(doc):
-    remarks = [
-        get_posawesome_credit_redeem_remark(doc.name),
-        get_posawesome_cash_return_remark(doc.name),
-    ]
+    remark = get_posawesome_credit_redeem_remark(doc.name)
     linked_journal_entries = frappe.get_all(
         "Journal Entry",
-        filters={"docstatus": 1, "user_remark": ("in", remarks)},
+        filters={"docstatus": 1, "user_remark": remark},
         pluck="name",
     )
 
