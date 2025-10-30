@@ -1329,17 +1329,28 @@ export default {
                                 return null;
                         }
 
-			const current = this.invoice_doc || {};
-			const name = current.name;
-			const doctype =
-				current.doctype ||
-				(this.pos_profile?.create_pos_invoice_instead_of_sales_invoice
-					? "POS Invoice"
-					: "Sales Invoice");
+                        const current = this.invoice_doc || {};
+                        const name = current.name;
+                        let doctype = current.doctype;
 
-			if (!name || !doctype) {
-				return null;
-			}
+                        if (!doctype) {
+                                if (this.invoiceType === "Quotation") {
+                                        doctype = "Quotation";
+                                } else if (
+                                        this.invoiceType === "Order" &&
+                                        this.pos_profile?.posa_create_only_sales_order
+                                ) {
+                                        doctype = "Sales Order";
+                                } else if (this.pos_profile?.create_pos_invoice_instead_of_sales_invoice) {
+                                        doctype = "POS Invoice";
+                                } else {
+                                        doctype = "Sales Invoice";
+                                }
+                        }
+
+                        if (!name || !doctype) {
+                                return null;
+                        }
 
 			const manualOverrides = this._collectManualRateOverrides(this.items);
 
