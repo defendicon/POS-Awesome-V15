@@ -2272,7 +2272,65 @@ export default {
                 },
                 shouldPromptForOverpaymentAction() {
                         const changeAmount = this.getOutstandingChangeAmount();
-                        return changeAmount > 0;
+                        if (!changeAmount) {
+                                return false;
+                        }
+
+                        if (this.isChangeAccountAlignedWithPaymentMethod()) {
+                                return false;
+                        }
+
+                        return true;
+                },
+                isChangeAccountAlignedWithPaymentMethod() {
+                        const invoice = this.invoice_doc;
+                        if (!invoice) {
+                                return false;
+                        }
+
+                        const changeCandidates = [];
+                        const addCandidate = (value) => {
+                                if (!value && value !== 0) {
+                                        return;
+                                }
+
+                                const normalized = String(value).trim().toLowerCase();
+                                if (normalized) {
+                                        changeCandidates.push(normalized);
+                                }
+                        };
+
+                        addCandidate(invoice.change_account);
+                        addCandidate(invoice.change_account_name);
+                        addCandidate(invoice.change_return_account);
+                        addCandidate(invoice.change_mode_of_payment);
+                        addCandidate(invoice.change_return_mode_of_payment);
+                        addCandidate(invoice.posa_change_account);
+                        addCandidate(invoice.posa_change_mode_of_payment);
+                        addCandidate(this.pos_profile?.posa_change_account);
+                        addCandidate(this.pos_profile?.posa_change_mode_of_payment);
+
+                        if (!changeCandidates.length) {
+                                return false;
+                        }
+
+                        const payments = Array.isArray(invoice.payments) ? invoice.payments : [];
+                        return payments.some((payment) => {
+                                if (!payment) {
+                                        return false;
+                                }
+
+                                const modeOfPayment = (payment.mode_of_payment || "").toString().trim().toLowerCase();
+                                const paymentAccount = (payment.account || payment.default_account || "")
+                                        .toString()
+                                        .trim()
+                                        .toLowerCase();
+
+                                return (
+                                        (modeOfPayment && changeCandidates.includes(modeOfPayment)) ||
+                                        (paymentAccount && changeCandidates.includes(paymentAccount))
+                                );
+                        });
                 },
                 handleOverpaymentChoice(option) {
                         const changeAmount = this.getOutstandingChangeAmount();
