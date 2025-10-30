@@ -1301,11 +1301,13 @@ export default {
 			});
 		},
 		// Submit payment after validation
-		async submit(event, payment_received = false, print = false) {
-			// For return invoices, ensure payment amounts are negative
-			if (this.invoice_doc.is_return) {
-				this.ensureReturnPaymentsAreNegative();
-			}
+                async submit(event, payment_received = false, print = false) {
+                        // For return invoices, ensure payment amounts are negative
+                        if (this.invoice_doc.is_return) {
+                                this.ensureReturnPaymentsAreNegative();
+                        }
+
+                        this.autoResolveCashOverpayment();
 
                         if (!this.shouldPromptForOverpaymentAction()) {
                                 this.overpayment_resolution = null;
@@ -2273,6 +2275,48 @@ export default {
                 shouldPromptForOverpaymentAction() {
                         const changeAmount = this.getOutstandingChangeAmount();
                         return changeAmount > 0;
+                },
+                autoResolveCashOverpayment() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+
+                        const changeAmount = this.getOutstandingChangeAmount();
+                        if (!(changeAmount > 0)) {
+                                return false;
+                        }
+
+                        const payments = Array.isArray(this.invoice_doc.payments)
+                                ? this.invoice_doc.payments
+                                : [];
+                        const positivePayments = payments.filter((payment) => this.flt(payment.amount) > 0);
+
+                        if (!positivePayments.length) {
+                                return false;
+                        }
+
+                        const cashPaymentsOnly = positivePayments.every((payment) => {
+                                const mode = (payment.mode_of_payment || "").toLowerCase();
+                                return mode.includes("cash");
+                        });
+
+                        if (!cashPaymentsOnly) {
+                                return false;
+                        }
+
+                        this.overpayment_resolution = "cash";
+                        this.overpayment_resolution_confirmed = true;
+                        this.paid_change = changeAmount;
+                        this.credit_change = 0;
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = changeAmount;
+                                this.invoice_doc.credit_change = 0;
+                                this.invoice_doc.change_return_mode = "cash";
+                        }
+
+                        this.overpayment_dialog = false;
+                        return true;
                 },
                 handleOverpaymentChoice(option) {
                         const changeAmount = this.getOutstandingChangeAmount();
