@@ -22,14 +22,17 @@ def get_pos_coupon(coupon, customer, company):
 @frappe.whitelist()
 def get_active_gift_coupons(customer, company):
     coupons = []
+    today = nowdate()
     coupons_data = frappe.get_all(
         "POS Coupon",
-        filters={
-            "company": company,
-            "coupon_type": "Gift Card",
-            "customer": customer,
-            "used": 0,
-        },
+        filters=[
+            ["company", "=", company],
+            ["coupon_type", "=", "Gift Card"],
+            ["customer", "=", customer],
+            ["used", "=", 0],
+            ["or", ["valid_from", "is", "not set"], ["valid_from", "<=", today]],
+            ["or", ["valid_upto", "is", "not set"], ["valid_upto", ">=", today]],
+        ],
         fields=["coupon_code"],
     )
     if len(coupons_data):
