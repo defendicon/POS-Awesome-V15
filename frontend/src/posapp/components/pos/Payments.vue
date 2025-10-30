@@ -1301,19 +1301,23 @@ export default {
 			});
 		},
 		// Submit payment after validation
-		async submit(event, payment_received = false, print = false) {
-			// For return invoices, ensure payment amounts are negative
-			if (this.invoice_doc.is_return) {
-				this.ensureReturnPaymentsAreNegative();
-			}
+                async submit(event, payment_received = false, print = false) {
+                        // For return invoices, ensure payment amounts are negative
+                        if (this.invoice_doc.is_return) {
+                                this.ensureReturnPaymentsAreNegative();
+                        }
 
-                        if (!this.shouldPromptForOverpaymentAction()) {
+                        const shouldPrompt = this.shouldPromptForOverpaymentAction();
+
+                        if (shouldPrompt) {
+                                if (!this.overpayment_resolution_confirmed && !payment_received) {
+                                        this.pending_submit_args = { event, payment_received, print };
+                                        this.overpayment_dialog = true;
+                                        return;
+                                }
+                        } else if (!this.getOutstandingChangeAmount()) {
                                 this.overpayment_resolution = null;
                                 this.overpayment_resolution_confirmed = false;
-                        } else if (!this.overpayment_resolution_confirmed && !payment_received) {
-                                this.pending_submit_args = { event, payment_received, print };
-                                this.overpayment_dialog = true;
-                                return;
                         }
 			// Validate total payments only if not credit sale and invoice total is not zero
 			if (
@@ -2272,7 +2276,54 @@ export default {
                 },
                 shouldPromptForOverpaymentAction() {
                         const changeAmount = this.getOutstandingChangeAmount();
-                        return changeAmount > 0;
+
+                        if (!changeAmount) {
+                                return false;
+                        }
+
+                        if (this.overpayment_resolution_confirmed) {
+                                return false;
+                        }
+
+                        if (this.canAutomaticallyReturnCashChange()) {
+                                this.resolveChangeAsCash(changeAmount);
+                                return false;
+                        }
+
+                        return true;
+                },
+                canAutomaticallyReturnCashChange() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return false;
+                        }
+
+                        return this.invoice_doc.payments.some((payment) => {
+                                const mode = (payment.mode_of_payment || "").toLowerCase();
+                                if (!mode.includes("cash")) {
+                                        return false;
+                                }
+
+                                const amount = this.flt(payment.amount || 0, this.currency_precision);
+                                return amount > 0;
+                        });
+                },
+                resolveChangeAsCash(changeAmount) {
+                        const sanitizedChange = this.flt(changeAmount || 0, this.currency_precision);
+
+                        if (!sanitizedChange) {
+                                return;
+                        }
+
+                        this.overpayment_resolution = "cash";
+                        this.overpayment_resolution_confirmed = true;
+                        this.paid_change = sanitizedChange;
+                        this.credit_change = 0;
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = sanitizedChange;
+                                this.invoice_doc.credit_change = 0;
+                                this.invoice_doc.change_return_mode = "cash";
+                        }
                 },
                 handleOverpaymentChoice(option) {
                         const changeAmount = this.getOutstandingChangeAmount();
