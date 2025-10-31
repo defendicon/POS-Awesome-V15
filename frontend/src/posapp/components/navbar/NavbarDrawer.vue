@@ -2,10 +2,11 @@
         <v-navigation-drawer
                 v-model="drawerOpen"
                 rail
-                width="64"
+                rail-width="64"
                 :permanent="!isMobile"
                 :temporary="isMobile"
                 :class="['drawer-custom', rtlClasses]"
+                :style="railStyles"
                 :location="isRtl ? 'right' : 'left'"
         >
                 <div class="drawer-header-mini">
@@ -72,6 +73,9 @@ export default {
                         activeItem: this.item,
                         showSport: true,
                         isMobile: false,
+                        railStyles: {
+                                "--v-navigation-drawer-rail-width": "64px",
+                        },
                 };
         },
         watch: {
@@ -154,7 +158,9 @@ export default {
 
 /* Styling for the navigation drawer list items */
 .drawer-item {
+        display: flex;
         justify-content: center;
+        align-items: center;
         padding-inline: 0;
         min-height: 56px;
         text-align: center;
@@ -165,6 +171,10 @@ export default {
         width: 100%;
         display: flex;
         justify-content: center;
+}
+
+.drawer-item :deep(.v-list-item__prepend > .v-icon) {
+        margin-inline: 0 !important;
 }
 
 /* Hover effect for all list items in the navigation drawer */
@@ -213,7 +223,6 @@ export default {
 
 /* Ensure the drawer rail width stays consistent */
 .drawer-custom {
-        width: 64px !important;
         border-right: 1px solid var(--pos-border);
 }
 </style>
