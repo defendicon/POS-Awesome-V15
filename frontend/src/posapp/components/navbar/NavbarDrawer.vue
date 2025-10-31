@@ -1,15 +1,18 @@
 <template>
-	<v-navigation-drawer
-		v-model="drawerOpen"
-		:rail="mini"
-		expand-on-hover
-		width="220"
-		:class="['drawer-custom', { 'drawer-visible': drawerOpen }, rtlClasses]"
-		@mouseleave="handleMouseLeave"
-		temporary
-		:location="isRtl ? 'right' : 'left'"
-		:scrim="scrimColor"
-	>
+        <v-navigation-drawer
+                v-model="drawerOpen"
+                :rail="mini"
+                :rail-width="railWidth"
+                :width="expandedWidth"
+                :class="[
+                        'drawer-custom',
+                        { 'drawer-visible': drawerOpen, 'drawer-mini': mini },
+                        rtlClasses,
+                ]"
+                temporary
+                :location="isRtl ? 'right' : 'left'"
+                :scrim="scrimColor"
+        >
 		<div v-if="!mini" class="drawer-header">
 			<v-avatar size="40">
 				<v-img :src="companyImg" alt="Company logo" />
@@ -24,20 +27,34 @@
 
 		<v-divider />
 
-		<v-list density="compact" nav v-model:selected="activeItem" selected-class="active-item">
-			<v-list-item
-				v-for="(item, index) in items"
-				:key="item.text"
-				:value="index"
-				@click="changePage(item.text)"
-				class="drawer-item"
-			>
-				<template v-slot:prepend>
-					<v-icon class="drawer-icon">{{ item.icon }}</v-icon>
-				</template>
-				<v-list-item-title class="drawer-item-title">{{ item.text }}</v-list-item-title>
-			</v-list-item>
-		</v-list>
+                <v-list density="compact" nav v-model:selected="activeItem" selected-class="active-item">
+                        <v-tooltip
+                                v-for="(item, index) in items"
+                                :key="item.text"
+                                :text="item.text"
+                                :disabled="!mini"
+                                :location="tooltipLocation"
+                                open-delay="150"
+                        >
+                                <template #activator="{ props: tooltipProps }">
+                                        <v-list-item
+                                                v-bind="tooltipProps"
+                                                :value="index"
+                                                @click="changePage(item.text)"
+                                                class="drawer-item"
+                                                :aria-label="item.text"
+                                                :title="mini ? '' : item.text"
+                                        >
+                                                <template #prepend>
+                                                        <v-icon class="drawer-icon">{{ item.icon }}</v-icon>
+                                                </template>
+                                                <v-list-item-title v-if="!mini" class="drawer-item-title">
+                                                        {{ item.text }}
+                                                </v-list-item-title>
+                                        </v-list-item>
+                                </template>
+                        </v-tooltip>
+                </v-list>
 		<!-- Sport section, hidden by default -->
 		<div v-if="showSport">
 			<!-- Sport content goes here -->
@@ -68,59 +85,75 @@ export default {
 	},
 	data() {
 		return {
-			mini: false,
-			drawerOpen: this.drawer,
-			activeItem: this.item,
-			showSport: true,
-		};
-	},
-	computed: {
-		scrimColor() {
-			// Use an opaque background in light mode so that
-			// underlying content doesn't show through the drawer
-			return this.isDark ? true : "rgba(255,255,255,1)";
-		},
-	},
-	watch: {
-		drawer(val) {
-			this.drawerOpen = val;
-			if (val) {
-				this.mini = false;
-			}
-		},
-		drawerOpen(val) {
-			document.body.style.overflow = val ? "hidden" : "";
-			this.$emit("update:drawer", val);
-		},
-		item(val) {
-			this.activeItem = val;
+                        mini: true,
+                        drawerOpen: this.drawer,
+                        activeItem: this.item,
+                        showSport: true,
+                        isMobileViewport: false,
+                        railWidth: 72,
+                        expandedWidth: 260,
+                };
+        },
+        computed: {
+                scrimColor() {
+                        // Use an opaque background in light mode so that
+                        // underlying content doesn't show through the drawer
+                        return this.isDark ? true : "rgba(255,255,255,1)";
+                },
+                tooltipLocation() {
+                        return this.isRtl ? "left" : "right";
+                },
+        },
+        watch: {
+                drawer(val) {
+                        this.drawerOpen = val;
+                        this.updateMiniState();
+                },
+                drawerOpen(val) {
+                        if (this.isMobileViewport) {
+                                document.body.style.overflow = val ? "hidden" : "";
+                        }
+                        this.$emit("update:drawer", val);
+                },
+                item(val) {
+                        this.activeItem = val;
 		},
 		activeItem(val) {
 			this.$emit("update:item", val);
 		},
 	},
-	mounted() {},
-	methods: {
-		handleMouseLeave() {
-			if (!this.drawerOpen) return;
-			clearTimeout(this._closeTimeout);
-			this._closeTimeout = setTimeout(() => {
-				this.drawerOpen = false;
-				this.mini = true;
-			}, 250);
-		},
-		changePage(key) {
-			this.$emit("change-page", key);
-			// Close drawer after selection
-			if (window.innerWidth < 1024) {
-				this.closeDrawer();
+        mounted() {
+                this.updateViewport();
+                if (typeof window !== "undefined") {
+                        window.addEventListener("resize", this.updateViewport);
+                }
+        },
+        unmounted() {
+                if (typeof window !== "undefined") {
+                        window.removeEventListener("resize", this.updateViewport);
+                }
+        },
+        methods: {
+                updateViewport() {
+                        if (typeof window === "undefined") return;
+                        this.isMobileViewport = window.innerWidth <= 900;
+                        this.updateMiniState();
+                },
+                updateMiniState() {
+                        this.mini = !this.isMobileViewport;
+                },
+                changePage(key) {
+                        this.$emit("change-page", key);
+                        // Close drawer after selection
+                        if (window.innerWidth < 1024) {
+                                this.closeDrawer();
 			}
 		},
-		closeDrawer() {
-			this.drawerOpen = false;
-			this.mini = true;
-		},
-	},
+                closeDrawer() {
+                        this.drawerOpen = false;
+                        this.updateMiniState();
+                },
+        },
 };
 </script>
 
@@ -240,34 +273,40 @@ export default {
 
 /* Hide drawer by default, show only when activated */
 .drawer-custom {
-	display: none !important;
+        display: none !important;
 }
 .drawer-custom.drawer-visible {
-	display: block !important;
+        display: block !important;
 }
 
-/* Responsive adjustments for width and dark theme */
-@media (max-width: 900px) and (orientation: landscape) {
-	.drawer-custom.drawer-visible {
-		width: 180px !important;
-	}
+.drawer-custom.drawer-visible.drawer-mini {
+        width: 72px !important;
 }
 
-@media (min-width: 601px) and (max-width: 1024px) {
-	.drawer-custom.drawer-visible {
-		width: 240px !important;
-	}
+.drawer-custom.drawer-visible:not(.drawer-mini) {
+        width: 260px !important;
 }
 
-@media (min-width: 1025px) {
-	.drawer-custom.drawer-visible {
-		width: 300px !important;
-	}
+.drawer-custom.drawer-mini .drawer-item {
+        justify-content: center;
+        padding-inline: 0;
+}
+
+.drawer-custom.drawer-mini .drawer-icon {
+        margin-inline: auto;
+}
+
+.drawer-custom.drawer-mini .drawer-item-title {
+        display: none;
 }
 
 @media (max-width: 1024px) {
-	.drawer-custom.drawer-visible {
-		background-color: var(--pos-navbar-bg) !important;
-	}
+        .drawer-custom.drawer-visible:not(.drawer-mini) {
+                width: 220px !important;
+        }
+
+        .drawer-custom.drawer-visible {
+                background-color: var(--pos-navbar-bg) !important;
+        }
 }
 </style>
