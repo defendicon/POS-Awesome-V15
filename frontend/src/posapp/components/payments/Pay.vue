@@ -146,26 +146,41 @@
 								</p>
 							</v-col>
 						</v-row>
-						<v-data-table
-							:headers="unallocated_payments_headers"
-							:items="unallocated_payments"
-							item-key="name"
-							class="elevation-1 mt-0"
-							:loading="unallocated_payments_loading"
-						>
-							<template v-slot:item.select="{ item }">
-								<v-checkbox
-									v-model="selected_payments"
-									:value="item"
+                                                <v-data-table
+                                                        :headers="unallocated_payments_headers"
+                                                        :items="unallocated_payments"
+                                                        item-key="name"
+                                                        class="elevation-1 mt-0"
+                                                        :loading="unallocated_payments_loading"
+                                                        :item-class="paymentRowClass"
+                                                >
+                                                        <template v-slot:item.select="{ item }">
+                                                                <v-checkbox
+                                                                        v-model="selected_payments"
+                                                                        :value="item"
 									color="primary"
 									hide-details
 									@click.stop
-								></v-checkbox>
-							</template>
-							<template v-slot:item.paid_amount="{ item }">
-								{{ currencySymbol(item.currency) }}
-								{{ formatCurrency(item.paid_amount) }}
-							</template>
+                                                                ></v-checkbox>
+                                                        </template>
+                                                        <template v-slot:item.mode_of_payment="{ item }">
+                                                                <span>
+                                                                        {{
+                                                                                item?.is_credit_note
+                                                                                        ? __("Credit Note")
+                                                                                        : item?.mode_of_payment
+                                                                        }}
+                                                                </span>
+                                                        </template>
+                                                        <template v-slot:item.reference_invoice="{ item }">
+                                                                <span v-if="item?.is_credit_note && item?.reference_invoice">
+                                                                        {{ item.reference_invoice }}
+                                                                </span>
+                                                        </template>
+                                                        <template v-slot:item.paid_amount="{ item }">
+                                                                {{ currencySymbol(item.currency) }}
+                                                                {{ formatCurrency(item.paid_amount) }}
+                                                        </template>
 							<template v-slot:item.unallocated_amount="{ item }">
 								<span class="text-primary"
 									>{{ currencySymbol(item.currency) }}
@@ -507,43 +522,49 @@ export default {
 					key: "outstanding_amount",
 				},
 			],
-			unallocated_payments_headers: [
-				{
-					title: "",
-					align: "center",
-					sortable: false,
-					key: "select",
-					width: "50px",
-				},
-				{
-					title: __("Payment ID"),
-					align: "start",
-					sortable: true,
-					key: "name",
-				},
-				{
-					title: __("Customer"),
-					align: "start",
-					sortable: true,
-					key: "customer_name",
-				},
-				{
-					title: __("Date"),
-					align: "start",
-					sortable: true,
-					key: "posting_date",
-				},
-				{
-					title: __("Mode"),
-					align: "start",
-					sortable: true,
-					key: "mode_of_payment",
-				},
-				{
-					title: __("Paid"),
-					align: "end",
-					sortable: true,
-					key: "paid_amount",
+                        unallocated_payments_headers: [
+                                {
+                                        title: "",
+                                        align: "center",
+                                        sortable: false,
+                                        key: "select",
+                                        width: "50px",
+                                },
+                                {
+                                        title: __("Payment ID"),
+                                        align: "start",
+                                        sortable: true,
+                                        key: "name",
+                                },
+                                {
+                                        title: __("Customer"),
+                                        align: "start",
+                                        sortable: true,
+                                        key: "customer_name",
+                                },
+                                {
+                                        title: __("Date"),
+                                        align: "start",
+                                        sortable: true,
+                                        key: "posting_date",
+                                },
+                                {
+                                        title: __("Mode"),
+                                        align: "start",
+                                        sortable: true,
+                                        key: "mode_of_payment",
+                                },
+                                {
+                                        title: __("Reference"),
+                                        align: "start",
+                                        sortable: false,
+                                        key: "reference_invoice",
+                                },
+                                {
+                                        title: __("Paid"),
+                                        align: "end",
+                                        sortable: true,
+                                        key: "paid_amount",
 				},
 				{
 					title: __("Unallocated"),
@@ -593,8 +614,8 @@ export default {
 		UpdateCustomer,
 	},
 
-	methods: {
-		async check_opening_entry() {
+        methods: {
+                async check_opening_entry() {
 			var vm = this;
 			await initPromise;
 			await checkDbHealth();
@@ -687,12 +708,18 @@ export default {
 						this.pos_profiles_list = r.message;
 					}
 				});
-		},
-		create_opening_voucher() {
-			this.dialog = true;
-		},
-		async fetch_customer_details() {
-			var vm = this;
+                },
+                create_opening_voucher() {
+                        this.dialog = true;
+                },
+                paymentRowClass(item) {
+                        if (!item || typeof item !== "object") {
+                                return "";
+                        }
+                        return item.is_credit_note ? "credit-note-row" : "";
+                },
+                async fetch_customer_details() {
+                        var vm = this;
 			if (!this.customer_name) return;
 
 			// When offline, attempt to load details from cached customers
@@ -800,7 +827,14 @@ export default {
                                         currency: this.pos_profile.currency,
                                 })
                                 .then((r) => {
-                                        this.unallocated_payments = r.message || [];
+                                        const payments = Array.isArray(r.message) ? r.message : [];
+                                        this.unallocated_payments = payments.map((payment) => ({
+                                                ...payment,
+                                                is_credit_note: Boolean(payment?.is_credit_note),
+                                                mode_of_payment: payment?.is_credit_note
+                                                        ? __("Credit Note")
+                                                        : payment?.mode_of_payment,
+                                        }));
                                         this.unallocated_payments_loading = false;
                                 });
                 },
@@ -1298,6 +1332,10 @@ input[total_selected_mpesa_payments] {
 }
 
 .selected-row {
-	background-color: #e3f2fd !important;
+        background-color: #e3f2fd !important;
+}
+
+.credit-note-row {
+        background-color: rgba(76, 175, 80, 0.08) !important;
 }
 </style>

@@ -3,7 +3,7 @@
 
 import frappe, erpnext, json
 from frappe import _
-from frappe.utils import nowdate, getdate, flt, fmt_money
+from frappe.utils import nowdate, getdate, flt, fmt_money, cint
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import (
@@ -13,11 +13,12 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
 from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from erpnext.accounts.utils import (
-    QueryPaymentLedger,
     get_outstanding_invoices as _get_outstanding_invoices,
     reconcile_against_document,
 )
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
+    reconcile_dr_cr_note,
+)
 
 
 def create_payment_entry(
@@ -234,6 +235,64 @@ def get_unallocated_payments(customer, company, currency, mode_of_payment=None):
         ],
         order_by="posting_date asc",
     )
+    for payment in unallocated_payment:
+        payment["voucher_type"] = "Payment Entry"
+        payment["is_credit_note"] = 0
+
+    credit_notes = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "customer": customer,
+            "company": company,
+            "docstatus": 1,
+            "is_return": 1,
+            "outstanding_amount": ("<", 0),
+        },
+        fields=[
+            "name",
+            "posting_date",
+            "customer_name",
+            "return_against",
+            "outstanding_amount",
+            "currency",
+            "conversion_rate",
+            "remarks",
+        ],
+        order_by="posting_date asc",
+    )
+
+    for note in credit_notes:
+        outstanding_credit = abs(flt(note.outstanding_amount or 0))
+        if not outstanding_credit:
+            continue
+
+        unallocated_payment.append(
+            {
+                "name": note.name,
+                "paid_amount": outstanding_credit,
+                "received_amount": outstanding_credit,
+                "customer_name": note.customer_name,
+                "posting_date": note.posting_date,
+                "unallocated_amount": outstanding_credit,
+                "mode_of_payment": _("Credit Note"),
+                "currency": note.currency or currency,
+                "voucher_type": "Sales Invoice",
+                "is_credit_note": 1,
+                "return_against": note.return_against,
+                "reference_invoice": note.return_against,
+                "conversion_rate": note.conversion_rate,
+                "remarks": note.remarks,
+            }
+        )
+
+    unallocated_payment = sorted(
+        unallocated_payment,
+        key=lambda pay: (
+            getdate(pay.get("posting_date")) if pay.get("posting_date") else getdate(nowdate()),
+            pay.get("name"),
+        ),
+    )
+
     return unallocated_payment
 
 
@@ -325,6 +384,124 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
 
     for payment in unallocated_payments:
         payment_name = payment.get("name")
+        if cint(payment.get("is_credit_note")) or payment.get("voucher_type") == "Sales Invoice":
+            try:
+                credit_note_doc = frappe.get_doc("Sales Invoice", payment_name)
+            except Exception as exc:
+                skipped_payments.append(
+                    _("Unable to load Credit Note {0}: {1}").format(payment_name, frappe._(str(exc)))
+                )
+                continue
+
+            outstanding_credit = abs(flt(credit_note_doc.get("outstanding_amount")))
+            if outstanding_credit <= 0:
+                skipped_payments.append(
+                    _("Credit Note {0} has no remaining balance to allocate.").format(payment_name)
+                )
+                continue
+
+            remaining_credit = outstanding_credit
+            note_entries = []
+            invoice_allocations = []
+
+            receivable_account = credit_note_doc.get("debit_to") or get_party_account(
+                "Customer", customer, company
+            )
+            cost_center = getattr(credit_note_doc, "cost_center", None)
+            if not cost_center:
+                try:
+                    cost_center = credit_note_doc.items[0].cost_center if credit_note_doc.items else None
+                except Exception:
+                    cost_center = None
+
+            for invoice in outstanding_invoices:
+                if remaining_credit <= 0:
+                    break
+
+                outstanding = flt(invoice.get("outstanding_amount"))
+                if outstanding <= 0:
+                    continue
+
+                allocation = min(remaining_credit, outstanding)
+                if allocation <= 0:
+                    continue
+
+                note_entries.append(
+                    frappe._dict(
+                        {
+                            "voucher_type": "Sales Invoice",
+                            "voucher_no": payment_name,
+                            "voucher_detail_no": None,
+                            "against_voucher_type": "Sales Invoice",
+                            "against_voucher": invoice.get("voucher_no"),
+                            "account": receivable_account,
+                            "party_type": "Customer",
+                            "party": customer,
+                            "dr_or_cr": "credit_in_account_currency",
+                            "unreconciled_amount": remaining_credit,
+                            "unadjusted_amount": outstanding_credit,
+                            "allocated_amount": allocation,
+                            "difference_amount": 0,
+                            "difference_account": None,
+                            "difference_posting_date": None,
+                            "exchange_rate": flt(credit_note_doc.get("conversion_rate")) or 1,
+                            "debit_or_credit_note_posting_date": credit_note_doc.get("posting_date"),
+                            "cost_center": cost_center,
+                            "currency": credit_note_doc.get("currency") or currency,
+                        }
+                    )
+                )
+
+                invoice_allocations.append(
+                    {
+                        "invoice": invoice.get("voucher_no"),
+                        "amount": allocation,
+                    }
+                )
+
+                invoice["outstanding_amount"] = outstanding - allocation
+                remaining_credit -= allocation
+
+            if not note_entries:
+                skipped_payments.append(
+                    _("No outstanding invoices were available to reconcile Credit Note {0}.").format(
+                        payment_name
+                    )
+                )
+                continue
+
+            try:
+                reconcile_dr_cr_note(note_entries, company)
+            except Exception as exc:
+                _restore_outstandings(invoice_allocations)
+                skipped_payments.append(
+                    _("Failed to reconcile Credit Note {0}: {1}").format(payment_name, frappe._(str(exc)))
+                )
+                frappe.log_error(
+                    title="POS Auto Reconcile Error",
+                    message=f"Failed to auto reconcile credit note {payment_name}: {str(exc)}",
+                )
+                continue
+
+            allocated_credit = outstanding_credit - remaining_credit
+            if allocated_credit <= 0:
+                _restore_outstandings(invoice_allocations)
+                skipped_payments.append(
+                    _("No allocation was recorded for Credit Note {0}.").format(payment_name)
+                )
+                continue
+
+            total_allocated += allocated_credit
+            allocations.append(
+                {
+                    "payment_entry": payment_name,
+                    "allocated_amount": allocated_credit,
+                    "allocations": invoice_allocations,
+                    "type": "Credit Note",
+                }
+            )
+            continue
+
         try:
             pe_doc = frappe.get_doc("Payment Entry", payment_name)
         except Exception as exc:
@@ -427,6 +604,7 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
                 "payment_entry": payment_name,
                 "allocated_amount": allocated_amount,
                 "allocations": invoice_allocations,
+                "type": "Payment Entry",
             }
         )
 
@@ -541,8 +719,116 @@ def process_pos_payment(payload):
     # then reconcile selected payments with invoices
     if allow_reconcile_payments and len(data.selected_payments) > 0 and data.total_selected_payments > 0:
         for pay in data.selected_payments:
+            payment_name = pay.get("name")
+            is_credit_note = cint(pay.get("is_credit_note")) or pay.get("voucher_type") == "Sales Invoice"
+
+            if is_credit_note:
+                try:
+                    credit_note_doc = frappe.get_doc("Sales Invoice", payment_name)
+                    outstanding_credit = abs(flt(credit_note_doc.outstanding_amount))
+                    if outstanding_credit <= 0:
+                        errors.append(
+                            _("Credit note {0} is already fully allocated").format(payment_name)
+                        )
+                        continue
+
+                    total_outstanding = sum(inv["outstanding_amount"] for inv in remaining_invoices)
+                    if total_outstanding <= 0:
+                        errors.append(
+                            _("No outstanding invoices available for allocation of credit note {0}").format(
+                                payment_name
+                            )
+                        )
+                        continue
+
+                    remaining_credit = outstanding_credit
+                    note_entries = []
+                    cost_center = getattr(credit_note_doc, "cost_center", None)
+                    if not cost_center:
+                        try:
+                            cost_center = (
+                                credit_note_doc.items[0].cost_center if credit_note_doc.items else None
+                            )
+                        except Exception:
+                            cost_center = None
+
+                    receivable_account = credit_note_doc.debit_to or get_party_account(
+                        "Customer", customer, company
+                    )
+
+                    for inv in remaining_invoices:
+                        if remaining_credit <= 0:
+                            break
+                        if inv["outstanding_amount"] <= 0:
+                            continue
+
+                        allocation = min(remaining_credit, inv["outstanding_amount"])
+                        if allocation <= 0:
+                            continue
+
+                        note_entries.append(
+                            frappe._dict(
+                                {
+                                    "voucher_type": "Sales Invoice",
+                                    "voucher_no": payment_name,
+                                    "voucher_detail_no": None,
+                                    "against_voucher_type": "Sales Invoice",
+                                    "against_voucher": inv["name"],
+                                    "account": receivable_account,
+                                    "party_type": "Customer",
+                                    "party": customer,
+                                    "dr_or_cr": "credit_in_account_currency",
+                                    "unreconciled_amount": remaining_credit,
+                                    "unadjusted_amount": outstanding_credit,
+                                    "allocated_amount": allocation,
+                                    "difference_amount": 0,
+                                    "difference_account": None,
+                                    "difference_posting_date": None,
+                                    "exchange_rate": flt(credit_note_doc.conversion_rate) or 1,
+                                    "debit_or_credit_note_posting_date": credit_note_doc.posting_date,
+                                    "cost_center": cost_center,
+                                    "currency": credit_note_doc.currency or currency,
+                                }
+                            )
+                        )
+
+                        inv["outstanding_amount"] -= allocation
+                        remaining_credit -= allocation
+
+                    allocated_credit = outstanding_credit - remaining_credit
+                    if allocated_credit <= 0:
+                        errors.append(
+                            _("No allocation made for credit note {0}").format(payment_name)
+                        )
+                        continue
+
+                    reconcile_dr_cr_note(note_entries, company)
+
+                    reconciled_payments.append(
+                        {
+                            "payment_entry": payment_name,
+                            "allocated_amount": allocated_credit,
+                        }
+                    )
+                    all_payments_entry.append(credit_note_doc)
+
+                    if remaining_credit > 0:
+                        errors.append(
+                            _("Credit note {0} still has an unapplied balance of {1}").format(
+                                payment_name,
+                                fmt_money(remaining_credit, currency=credit_note_doc.currency or currency),
+                            )
+                        )
+
+                except Exception as e:
+                    errors.append(str(e))
+                    frappe.log_error(
+                        f"Error allocating credit note {payment_name}: {str(e)}",
+                        "POS Payment Error",
+                    )
+                continue
+
             try:
-                payment_name = pay.get("name")
                 pe_doc = frappe.get_doc("Payment Entry", payment_name)
                 unallocated = flt(pe_doc.unallocated_amount)
                 if unallocated <= 0:
