@@ -3,12 +3,10 @@
                 v-model="drawerOpen"
                 rail
                 width="72"
-		:class="['drawer-custom', { 'drawer-visible': drawerOpen }, rtlClasses]"
-		@mouseleave="handleMouseLeave"
-		temporary
-		:location="isRtl ? 'right' : 'left'"
-		:scrim="scrimColor"
-	>
+                :class="['drawer-custom', rtlClasses]"
+                :location="isRtl ? 'right' : 'left'"
+                :scrim="scrimColor"
+        >
                 <div class="drawer-header-mini">
                         <v-avatar size="40">
                                 <v-img :src="companyImg" alt="Company logo" />
@@ -74,21 +72,18 @@ export default {
 			showSport: true,
 		};
 	},
-	computed: {
-		scrimColor() {
-			// Use an opaque background in light mode so that
-			// underlying content doesn't show through the drawer
-			return this.isDark ? true : "rgba(255,255,255,1)";
-		},
-	},
+        computed: {
+                scrimColor() {
+                        return false;
+                },
+        },
 	watch: {
                 drawer(val) {
                         this.drawerOpen = val;
                 },
-		drawerOpen(val) {
-			document.body.style.overflow = val ? "hidden" : "";
-			this.$emit("update:drawer", val);
-		},
+                drawerOpen(val) {
+                        this.$emit("update:drawer", val);
+                },
 		item(val) {
 			this.activeItem = val;
 		},
@@ -98,14 +93,7 @@ export default {
 	},
 	mounted() {},
 	methods: {
-		handleMouseLeave() {
-			if (!this.drawerOpen) return;
-                        clearTimeout(this._closeTimeout);
-                        this._closeTimeout = setTimeout(() => {
-                                this.drawerOpen = false;
-                        }, 250);
-		},
-		changePage(key) {
+                changePage(key) {
 			this.$emit("change-page", key);
 			// Close drawer after selection
 			if (window.innerWidth < 1024) {
@@ -122,9 +110,11 @@ export default {
 <style scoped>
 /* Custom styling for the navigation drawer */
 .drawer-custom {
-	background-color: var(--surface-secondary, #ffffff);
-	transition: var(--transition-normal, all 0.3s ease);
-	z-index: 1005 !important; /* Higher than navbar but lower than dialogs */
+        transition: var(--transition-normal, all 0.3s ease);
+        z-index: 1005 !important; /* Higher than navbar but lower than dialogs */
+        background-color: var(--pos-navbar-bg) !important;
+        color: var(--pos-text-primary) !important;
+        width: 72px !important;
 }
 
 /* Styling for the header section of the mini navigation drawer */
@@ -150,21 +140,22 @@ export default {
         min-height: 56px;
 }
 
+.drawer-item :deep(.v-list-item__prepend) {
+        margin-inline: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+}
+
 /* Hover effect for all list items in the navigation drawer */
 .v-list-item:hover {
-	background-color: rgba(25, 118, 210, 0.08) !important;
+        background-color: rgba(25, 118, 210, 0.08) !important;
 }
 
 /* Styling for the actively selected list item in the navigation drawer */
 .active-item {
 	background-color: rgba(25, 118, 210, 0.12) !important;
 	border-right: 3px solid #1976d2;
-}
-
-/* Theme-aware drawer styling */
-.drawer-custom {
-	background-color: var(--pos-navbar-bg) !important;
-	color: var(--pos-text-primary) !important;
 }
 
 .drawer-header-mini {
@@ -194,19 +185,4 @@ export default {
 	border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-/* Hide drawer by default, show only when activated */
-.drawer-custom {
-	display: none !important;
-}
-.drawer-custom.drawer-visible {
-	display: block !important;
-	width: 72px !important;
-}
-
-/* Responsive adjustments for width and dark theme */
-@media (max-width: 1024px) {
-	.drawer-custom.drawer-visible {
-		background-color: var(--pos-navbar-bg) !important;
-	}
-}
 </style>

@@ -196,7 +196,10 @@ export default {
 	},
 	data() {
 		return {
-			drawer: false,
+                        drawer:
+                                typeof window !== "undefined"
+                                        ? window.innerWidth >= 1024
+                                        : true,
 			mini: true,
 			item: 0,
 			items: [
@@ -244,32 +247,39 @@ export default {
 			return this.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
 		},
 	},
-	mounted() {
-		this.initializeNavbar();
-		this.setupEventListeners();
-	},
+        mounted() {
+                this.initializeNavbar();
+                this.setupEventListeners();
+                this.syncDrawerToViewport(true);
+                if (typeof window !== "undefined") {
+                        window.addEventListener("resize", this.syncDrawerToViewport);
+                }
+        },
 
-	created() {
+        created() {
 		// Initialize early to prevent reactivity issues
 		this.preInitialize();
 	},
-	unmounted() {
-		if (this.notificationUpdateHandle !== null) {
-			if (this.notificationUpdateUsesTimeout) {
-				clearTimeout(this.notificationUpdateHandle);
+        unmounted() {
+                if (this.notificationUpdateHandle !== null) {
+                        if (this.notificationUpdateUsesTimeout) {
+                                clearTimeout(this.notificationUpdateHandle);
 			} else if (typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
 				window.cancelAnimationFrame(this.notificationUpdateHandle);
 			}
 			this.notificationUpdateHandle = null;
 		}
-		if (this.eventBus) {
-			this.eventBus.off("show_message", this.showMessage);
-			this.eventBus.off("freeze", this.handleFreeze);
-			this.eventBus.off("unfreeze", this.handleUnfreeze);
-			this.eventBus.off("set_company", this.handleSetCompany);
-		}
-	},
-	methods: {
+                if (this.eventBus) {
+                        this.eventBus.off("show_message", this.showMessage);
+                        this.eventBus.off("freeze", this.handleFreeze);
+                        this.eventBus.off("unfreeze", this.handleUnfreeze);
+                        this.eventBus.off("set_company", this.handleSetCompany);
+                }
+                if (typeof window !== "undefined") {
+                        window.removeEventListener("resize", this.syncDrawerToViewport);
+                }
+        },
+        methods: {
 		preInitialize() {
 			// Early initialization to prevent cache-related element destruction
 			// Use reactive assignment instead of direct property modification
@@ -349,10 +359,27 @@ export default {
 				this.eventBus.on("set_company", this.handleSetCompany);
 			}
 		},
-		handleNavClick() {
-			this.drawer = !this.drawer;
-			this.$emit("nav-click");
-		},
+                handleNavClick() {
+                        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                                this.drawer = !this.drawer;
+                        } else {
+                                this.drawer = true;
+                        }
+                        this.$emit("nav-click");
+                },
+                syncDrawerToViewport(force = false) {
+                        if (typeof window === "undefined") {
+                                return;
+                        }
+                        const isDesktop = window.innerWidth >= 1024;
+                        if (isDesktop) {
+                                if (!this.drawer) {
+                                        this.drawer = true;
+                                }
+                        } else if (force) {
+                                this.drawer = false;
+                        }
+                },
 		goDesk() {
 			window.location.href = "/app";
 		},
