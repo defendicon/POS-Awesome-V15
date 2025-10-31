@@ -31,6 +31,7 @@
                                                 :value="index"
                                                 @click="changePage(item.text)"
                                                 class="drawer-item"
+                                                :style="drawerItemInlineStyles"
                                         >
                                                 <template #prepend>
                                                         <v-icon class="drawer-icon">{{ item.icon }}</v-icon>
@@ -77,6 +78,17 @@ export default {
                                 "--v-navigation-drawer-rail-width": "64px",
                         },
                 };
+        },
+        computed: {
+                drawerItemInlineStyles() {
+                        return {
+                                "--v-list-item-padding-top": "0px",
+                                "--v-list-item-padding-bottom": "0px",
+                                "--v-list-item-padding-start": "0px",
+                                "--v-list-item-padding-end": "0px",
+                                "--v-list-item-prepend-width": "100%",
+                        };
+                },
         },
         watch: {
                 drawer: {
@@ -161,20 +173,25 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding-inline: 0;
         min-height: 56px;
         text-align: center;
+        width: 100%;
 }
 
-.drawer-item :deep(.v-list-item__prepend) {
+:deep(.drawer-item .v-list-item__prepend) {
         margin-inline: 0 !important;
         width: 100%;
         display: flex;
         justify-content: center;
+        align-items: center;
 }
 
-.drawer-item :deep(.v-list-item__prepend > .v-icon) {
+:deep(.drawer-item .v-list-item__prepend > .v-icon) {
         margin-inline: 0 !important;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 }
 
 /* Hover effect for all list items in the navigation drawer */
