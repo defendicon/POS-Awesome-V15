@@ -194,6 +194,17 @@ export default {
         align-items: center;
 }
 
+:deep(.drawer-item .v-list-item__prepend .v-icon__slot) {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+}
+
+:deep(.drawer-item .v-list-item__prepend .v-icon__slot > *) {
+        margin: 0 auto;
+}
+
 /* Hover effect for all list items in the navigation drawer */
 .v-list-item:hover {
 	background-color: rgba(25, 118, 210, 0.08) !important;
