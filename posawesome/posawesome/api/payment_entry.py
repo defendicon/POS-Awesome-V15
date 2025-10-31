@@ -238,6 +238,158 @@ def get_unallocated_payments(customer, company, currency, mode_of_payment=None):
 
 
 @frappe.whitelist()
+def auto_reconcile_customer_invoices(customer, company, currency, pos_profile=None):
+    if not customer:
+        frappe.throw(_("Customer is required for auto reconciliation"))
+    if not company:
+        frappe.throw(_("Company is required for auto reconciliation"))
+    if not currency:
+        frappe.throw(_("Currency is required for auto reconciliation"))
+
+    outstanding_invoices = get_outstanding_invoices(customer, company, currency, pos_profile)
+    if not outstanding_invoices:
+        return {
+            "status": "no_invoices",
+            "message": _("No outstanding invoices found for {0}.").format(customer),
+            "reconciled_payments": [],
+            "errors": [],
+        }
+
+    pending_payments = get_unallocated_payments(customer, company, currency)
+    if not pending_payments:
+        return {
+            "status": "no_payments",
+            "message": _("No unallocated payments are available for automatic reconciliation."),
+            "reconciled_payments": [],
+            "errors": [],
+        }
+
+    remaining_invoices = []
+    for invoice in outstanding_invoices:
+        name = invoice.get("voucher_no") or invoice.get("name")
+        if not name:
+            continue
+        remaining_invoices.append(
+            {
+                "name": name,
+                "posting_date": getdate(invoice.get("posting_date")) if invoice.get("posting_date") else None,
+                "outstanding_amount": flt(invoice.get("outstanding_amount")),
+            }
+        )
+
+    remaining_invoices.sort(key=lambda x: x.get("posting_date") or getdate(nowdate()))
+
+    errors = []
+    reconciled = []
+
+    payments_sorted = sorted(
+        pending_payments,
+        key=lambda x: getdate(x.get("posting_date")) if x.get("posting_date") else getdate(nowdate()),
+    )
+
+    for payment_info in payments_sorted:
+        try:
+            payment_name = payment_info.get("name")
+            if not payment_name:
+                continue
+
+            pe_doc = frappe.get_doc("Payment Entry", payment_name)
+            unallocated = flt(pe_doc.unallocated_amount)
+            if unallocated <= 0:
+                continue
+
+            remaining_amount = unallocated
+            entry_list = []
+
+            for invoice in remaining_invoices:
+                if remaining_amount <= 0:
+                    break
+                outstanding_amount = flt(invoice.get("outstanding_amount"))
+                if outstanding_amount <= 0:
+                    continue
+
+                allocate = min(remaining_amount, outstanding_amount)
+                if allocate <= 0:
+                    continue
+
+                outstanding_before = outstanding_amount
+                entry_list.append(
+                    frappe._dict(
+                        {
+                            "voucher_type": "Payment Entry",
+                            "voucher_no": payment_name,
+                            "voucher_detail_no": None,
+                            "against_voucher_type": "Sales Invoice",
+                            "against_voucher": invoice.get("name"),
+                            "account": pe_doc.paid_from,
+                            "party_type": "Customer",
+                            "party": customer,
+                            "dr_or_cr": "credit_in_account_currency",
+                            "unreconciled_amount": unallocated,
+                            "unadjusted_amount": unallocated,
+                            "allocated_amount": allocate,
+                            "grand_total": outstanding_before,
+                            "outstanding_amount": outstanding_before,
+                            "exchange_rate": 1,
+                            "is_advance": 0,
+                            "difference_amount": 0,
+                            "cost_center": pe_doc.cost_center,
+                        }
+                    )
+                )
+
+                invoice["outstanding_amount"] = max(0, flt(outstanding_amount - allocate))
+                remaining_amount -= allocate
+
+            if not entry_list:
+                continue
+
+            try:
+                reconcile_against_document(entry_list)
+            except Exception as reconcile_error:
+                errors.append(str(reconcile_error))
+                frappe.log_error(
+                    f"Error auto reconciling payment {payment_name}: {str(reconcile_error)}",
+                    "POS Payment Auto Reconcile",
+                )
+                continue
+
+            pe_doc.reload()
+
+            allocated_after = unallocated - flt(pe_doc.unallocated_amount)
+            if allocated_after > 0:
+                reconciled.append(
+                    {
+                        "payment_entry": payment_name,
+                        "allocated_amount": allocated_after,
+                    }
+                )
+        except Exception as e:
+            errors.append(str(e))
+            frappe.log_error(
+                f"Unexpected error during auto reconciliation for payment {payment_info.get('name')}: {str(e)}",
+                "POS Payment Auto Reconcile",
+            )
+
+    updated_invoices = get_outstanding_invoices(customer, company, currency, pos_profile)
+
+    status = "success" if reconciled else "noop"
+    message = None
+    if reconciled:
+        message = _("Automatically reconciled {0} payment(s).").format(len(reconciled))
+    elif not errors:
+        message = _("No allocations were created. Payments may already be fully allocated.")
+
+    return {
+        "status": status,
+        "message": message,
+        "reconciled_payments": reconciled,
+        "errors": errors,
+        "remaining_invoices": updated_invoices,
+    }
+
+
+@frappe.whitelist()
 def process_pos_payment(payload):
     data = json.loads(payload)
     data = frappe._dict(data)

@@ -95,33 +95,52 @@
 						</v-data-table>
 						<v-divider></v-divider>
 					</div>
-					<div v-if="pos_profile.posa_allow_reconcile_payments && unallocated_payments.length">
-						<v-row>
-							<v-col md="7" cols="12">
-								<p>
-									<strong>{{ __("Payments") }}</strong>
-									<span v-if="total_unallocated_amount" class="text-primary">
+                                        <div v-if="pos_profile.posa_allow_reconcile_payments && unallocated_payments.length">
+                                                <v-row>
+                                                        <v-col md="7" cols="12">
+                                                                <p>
+                                                                        <strong>{{ __("Payments") }}</strong>
+                                                                        <span v-if="total_unallocated_amount" class="text-primary">
 										{{ __("- Total Unallocated") }} :
 										{{ currencySymbol(pos_profile.currency) }}
 										{{ formatCurrency(total_unallocated_amount) }}
 									</span>
 								</p>
 							</v-col>
-							<v-col md="5" cols="12">
-								<p v-if="total_selected_payments" class="golden--text text-end">
-									<span>{{ __("Total Selected :") }}</span>
-									<span>
-										{{ currencySymbol(pos_profile.currency) }}
-										{{ formatCurrency(total_selected_payments) }}
-									</span>
-								</p>
-							</v-col>
-						</v-row>
-						<v-data-table
-							:headers="unallocated_payments_headers"
-							:items="unallocated_payments"
-							item-key="name"
-							class="elevation-1 mt-0"
+                                                        <v-col md="5" cols="12">
+                                                                <p v-if="total_selected_payments" class="golden--text text-end">
+                                                                        <span>{{ __("Total Selected :") }}</span>
+                                                                        <span>
+                                                                                {{ currencySymbol(pos_profile.currency) }}
+                                                                                {{ formatCurrency(total_selected_payments) }}
+                                                                        </span>
+                                                                </p>
+                                                        </v-col>
+                                                </v-row>
+                                                <v-row class="mb-2" align="center">
+                                                        <v-col md="9" cols="12">
+                                                                <span class="text-medium-emphasis" v-if="canAutoReconcile">
+                                                                        {{ __("Automatically allocate available payments against the oldest invoices.") }}
+                                                                </span>
+                                                        </v-col>
+                                                        <v-col md="3" cols="12">
+                                                                <v-btn
+                                                                        block
+                                                                        color="primary"
+                                                                        theme="dark"
+                                                                        :loading="auto_reconcile_loading"
+                                                                        :disabled="!canAutoReconcile || auto_reconcile_loading"
+                                                                        @click="autoReconcileInvoices"
+                                                                >
+                                                                        {{ __("Auto Reconcile") }}
+                                                                </v-btn>
+                                                        </v-col>
+                                                </v-row>
+                                                <v-data-table
+                                                        :headers="unallocated_payments_headers"
+                                                        :items="unallocated_payments"
+                                                        item-key="name"
+                                                        class="elevation-1 mt-0"
 							:loading="unallocated_payments_loading"
 						>
 							<template v-slot:item.select="{ item }">
@@ -418,8 +437,9 @@ export default {
 			singleSelect: true,
 			invoices_loading: false,
 			unallocated_payments_loading: false,
-			mpesa_payments_loading: false,
-			payment_methods: [],
+                        mpesa_payments_loading: false,
+                        auto_reconcile_loading: false,
+                        payment_methods: [],
 			outstanding_invoices: [],
 			unallocated_payments: [],
 			mpesa_payments: [],
@@ -748,36 +768,115 @@ export default {
 					}
 				});
 		},
-		get_unallocated_payments() {
-			if (!this.pos_profile.posa_allow_reconcile_payments) return;
-			this.unallocated_payments_loading = true;
-			if (!this.customer_name) {
-				this.unallocated_payments = [];
-				this.unallocated_payments_loading = false;
-				return;
-			}
+                get_unallocated_payments() {
+                        if (!this.pos_profile.posa_allow_reconcile_payments) return;
+                        this.unallocated_payments_loading = true;
+                        if (!this.customer_name) {
+                                this.unallocated_payments = [];
+                                this.unallocated_payments_loading = false;
+                                return;
+                        }
 
-			if (isOffline()) {
-				this.unallocated_payments = [];
-				this.unallocated_payments_loading = false;
-				return;
-			}
-			return frappe
-				.call("posawesome.posawesome.api.payment_entry.get_unallocated_payments", {
-					customer: this.customer_name,
-					company: this.company,
-					currency: this.pos_profile.currency,
-				})
-				.then((r) => {
-					if (r.message) {
-						this.unallocated_payments = r.message;
-						this.unallocated_payments_loading = false;
-					}
-				});
-		},
-		set_mpesa_search_params() {
-			if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
-			if (!this.customer_name) return;
+                        if (isOffline()) {
+                                this.unallocated_payments = [];
+                                this.unallocated_payments_loading = false;
+                                return;
+                        }
+                        return frappe
+                                .call("posawesome.posawesome.api.payment_entry.get_unallocated_payments", {
+                                        customer: this.customer_name,
+                                        company: this.company,
+                                        currency: this.pos_profile.currency,
+                                })
+                                .then((r) => {
+                                        if (r.message) {
+                                                this.unallocated_payments = r.message;
+                                        } else {
+                                                this.unallocated_payments = [];
+                                        }
+                                        this.unallocated_payments_loading = false;
+                                });
+                },
+                async autoReconcileInvoices() {
+                        if (!this.pos_profile.posa_allow_reconcile_payments) {
+                                return;
+                        }
+                        if (!this.customer_name) {
+                                frappe.msgprint({
+                                        title: __("Missing Customer"),
+                                        message: __("Please select a customer before running auto reconciliation."),
+                                });
+                                return;
+                        }
+                        if (!this.outstanding_invoices.length || !this.unallocated_payments.length) {
+                                frappe.show_alert({
+                                        message: __("There are no outstanding invoices or payments to reconcile."),
+                                        indicator: "warning",
+                                });
+                                return;
+                        }
+                        if (isOffline()) {
+                                frappe.msgprint({
+                                        title: __("Unavailable Offline"),
+                                        message: __("Auto reconciliation requires an online connection."),
+                                });
+                                return;
+                        }
+
+                        this.auto_reconcile_loading = true;
+
+                        try {
+                                const response = await frappe.call({
+                                        method: "posawesome.posawesome.api.payment_entry.auto_reconcile_customer_invoices",
+                                        args: {
+                                                customer: this.customer_name,
+                                                company: this.company,
+                                                currency: this.pos_profile.currency,
+                                                pos_profile: this.pos_profile_search || null,
+                                        },
+                                });
+
+                                const payload = response?.message || {};
+                                if (payload.message) {
+                                        frappe.show_alert({
+                                                message: payload.message,
+                                                indicator: payload.status === "success" ? "green" : "blue",
+                                        });
+                                }
+
+                                if (Array.isArray(payload.errors) && payload.errors.length) {
+                                        frappe.msgprint({
+                                                title: __("Auto Reconciliation"),
+                                                message: payload.errors.join("<br>"),
+                                                indicator: "orange",
+                                        });
+                                } else if (
+                                        Array.isArray(payload.reconciled_payments) &&
+                                        !payload.reconciled_payments.length
+                                ) {
+                                        frappe.show_alert({
+                                                message: __("No matching payments were found for automatic reconciliation."),
+                                                indicator: "orange",
+                                        });
+                                }
+                        } catch (error) {
+                                console.error("Failed to auto reconcile invoices", error);
+                                frappe.msgprint({
+                                        title: __("Auto Reconciliation Failed"),
+                                        message: error?.message || __("An unexpected error occurred."),
+                                        indicator: "red",
+                                });
+                        } finally {
+                                this.auto_reconcile_loading = false;
+                                this.selected_invoices = [];
+                                this.selected_payments = [];
+                                await this.get_outstanding_invoices();
+                                await this.get_unallocated_payments();
+                        }
+                },
+                set_mpesa_search_params() {
+                        if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
+                        if (!this.customer_name) return;
 			this.mpesa_search_name = this.customer_info.customer_name.split(" ")[0];
 			if (this.customer_info.mobile_no) {
 				this.mpesa_search_mobile =
@@ -1049,15 +1148,30 @@ export default {
 			if (!this.outstanding_invoices || !this.outstanding_invoices.length) return 0;
 			return this.outstanding_invoices.reduce((acc, cur) => acc + flt(cur?.outstanding_amount || 0), 0);
 		},
-		total_unallocated_amount() {
-			if (!this.unallocated_payments || !this.unallocated_payments.length) return 0;
-			return this.unallocated_payments.reduce((acc, cur) => acc + flt(cur?.unallocated_amount || 0), 0);
-		},
-		total_selected_invoices() {
-			if (!this.selected_invoices || !this.selected_invoices.length) {
-				console.log("No selected invoices");
-				return 0;
-			}
+                total_unallocated_amount() {
+                        if (!this.unallocated_payments || !this.unallocated_payments.length) return 0;
+                        return this.unallocated_payments.reduce((acc, cur) => acc + flt(cur?.unallocated_amount || 0), 0);
+                },
+                canAutoReconcile() {
+                        if (!this.pos_profile?.posa_allow_reconcile_payments) {
+                                return false;
+                        }
+                        if (!this.customer_name) {
+                                return false;
+                        }
+                        if (!this.outstanding_invoices.length || !this.unallocated_payments.length) {
+                                return false;
+                        }
+                        if (isOffline()) {
+                                return false;
+                        }
+                        return true;
+                },
+                total_selected_invoices() {
+                        if (!this.selected_invoices || !this.selected_invoices.length) {
+                                console.log("No selected invoices");
+                                return 0;
+                        }
 			const total = this.selected_invoices.reduce(
 				(acc, cur) => acc + flt(cur?.outstanding_amount || 0),
 				0,
