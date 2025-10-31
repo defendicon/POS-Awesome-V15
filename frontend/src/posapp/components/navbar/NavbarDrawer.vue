@@ -1,43 +1,44 @@
 <template>
-	<v-navigation-drawer
-		v-model="drawerOpen"
-		:rail="mini"
-		expand-on-hover
-		width="220"
+        <v-navigation-drawer
+                v-model="drawerOpen"
+                rail
+                width="72"
 		:class="['drawer-custom', { 'drawer-visible': drawerOpen }, rtlClasses]"
 		@mouseleave="handleMouseLeave"
 		temporary
 		:location="isRtl ? 'right' : 'left'"
 		:scrim="scrimColor"
 	>
-		<div v-if="!mini" class="drawer-header">
-			<v-avatar size="40">
-				<v-img :src="companyImg" alt="Company logo" />
-			</v-avatar>
-			<span class="drawer-company">{{ company }}</span>
-		</div>
-		<div v-else class="drawer-header-mini">
-			<v-avatar size="40">
-				<v-img :src="companyImg" alt="Company logo" />
-			</v-avatar>
-		</div>
+                <div class="drawer-header-mini">
+                        <v-avatar size="40">
+                                <v-img :src="companyImg" alt="Company logo" />
+                        </v-avatar>
+                </div>
 
-		<v-divider />
+                <v-divider />
 
-		<v-list density="compact" nav v-model:selected="activeItem" selected-class="active-item">
-			<v-list-item
-				v-for="(item, index) in items"
-				:key="item.text"
-				:value="index"
-				@click="changePage(item.text)"
-				class="drawer-item"
-			>
-				<template v-slot:prepend>
-					<v-icon class="drawer-icon">{{ item.icon }}</v-icon>
-				</template>
-				<v-list-item-title class="drawer-item-title">{{ item.text }}</v-list-item-title>
-			</v-list-item>
-		</v-list>
+                <v-list density="compact" nav v-model:selected="activeItem" selected-class="active-item">
+                        <v-tooltip
+                                v-for="(item, index) in items"
+                                :key="item.text"
+                                location="right"
+                                :text="item.text"
+                                open-delay="150"
+                        >
+                                <template #activator="{ props }">
+                                        <v-list-item
+                                                v-bind="props"
+                                                :value="index"
+                                                @click="changePage(item.text)"
+                                                class="drawer-item"
+                                        >
+                                                <template #prepend>
+                                                        <v-icon class="drawer-icon">{{ item.icon }}</v-icon>
+                                                </template>
+                                        </v-list-item>
+                                </template>
+                        </v-tooltip>
+                </v-list>
 		<!-- Sport section, hidden by default -->
 		<div v-if="showSport">
 			<!-- Sport content goes here -->
@@ -67,9 +68,8 @@ export default {
 		isDark: Boolean,
 	},
 	data() {
-		return {
-			mini: false,
-			drawerOpen: this.drawer,
+                return {
+                        drawerOpen: this.drawer,
 			activeItem: this.item,
 			showSport: true,
 		};
@@ -82,12 +82,9 @@ export default {
 		},
 	},
 	watch: {
-		drawer(val) {
-			this.drawerOpen = val;
-			if (val) {
-				this.mini = false;
-			}
-		},
+                drawer(val) {
+                        this.drawerOpen = val;
+                },
 		drawerOpen(val) {
 			document.body.style.overflow = val ? "hidden" : "";
 			this.$emit("update:drawer", val);
@@ -103,11 +100,10 @@ export default {
 	methods: {
 		handleMouseLeave() {
 			if (!this.drawerOpen) return;
-			clearTimeout(this._closeTimeout);
-			this._closeTimeout = setTimeout(() => {
-				this.drawerOpen = false;
-				this.mini = true;
-			}, 250);
+                        clearTimeout(this._closeTimeout);
+                        this._closeTimeout = setTimeout(() => {
+                                this.drawerOpen = false;
+                        }, 250);
 		},
 		changePage(key) {
 			this.$emit("change-page", key);
@@ -117,10 +113,9 @@ export default {
 			}
 		},
 		closeDrawer() {
-			this.drawerOpen = false;
-			this.mini = true;
-		},
-	},
+                        this.drawerOpen = false;
+                },
+        },
 };
 </script>
 
@@ -132,49 +127,27 @@ export default {
 	z-index: 1005 !important; /* Higher than navbar but lower than dialogs */
 }
 
-/* Styling for the header section of the expanded navigation drawer */
-.drawer-header {
-	display: flex;
-	align-items: center;
-	height: 64px;
-	padding: 0 16px;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
 /* Styling for the header section of the mini navigation drawer */
 .drawer-header-mini {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 64px;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Styling for the company name text within the drawer header */
-.drawer-company {
-	margin-left: 12px;
-	flex: 1;
-	font-weight: 500;
-	font-size: 1rem;
-	color: #0097a7;
-	font-family: "Roboto", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 64px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Styling for icons within the navigation drawer list items */
 .drawer-icon {
-	font-size: 24px;
-	color: var(--pos-primary);
+        font-size: 24px;
+        color: var(--pos-primary);
 }
 
-/* Styling for the title text of navigation drawer list items */
-.drawer-item-title {
-	margin-left: 8px;
-	font-weight: 500;
-	font-size: 0.95rem;
-	color: var(--pos-text-primary) !important;
-	font-family: "Roboto", sans-serif;
+/* Styling for the navigation drawer list items */
+.drawer-item {
+        justify-content: center;
+        padding-inline: 0;
+        min-height: 56px;
 }
 
 /* Hover effect for all list items in the navigation drawer */
@@ -194,32 +167,15 @@ export default {
 	color: var(--pos-text-primary) !important;
 }
 
-.drawer-header,
 .drawer-header-mini {
-	background: var(--pos-navbar-bg) !important;
-	border-bottom: 1px solid var(--pos-border);
-}
-
-:deep([data-theme="dark"]) .drawer-item-title,
-:deep(.v-theme--dark) .drawer-item-title {
-	color: var(--pos-text-primary) !important;
-	font-weight: 500;
-	font-size: 0.95rem;
-	font-family: "Roboto", sans-serif;
-}
-
-:deep([data-theme="dark"]) .drawer-company,
-:deep(.v-theme--dark) .drawer-company {
-	color: var(--text-primary, #ffffff) !important;
-	font-weight: 500;
-	font-size: 1rem;
-	font-family: "Roboto", sans-serif;
+        background: var(--pos-navbar-bg) !important;
+        border-bottom: 1px solid var(--pos-border);
 }
 
 :deep([data-theme="dark"]) .drawer-icon,
 :deep(.v-theme--dark) .drawer-icon {
-	color: var(--pos-primary) !important;
-	font-size: 24px;
+        color: var(--pos-primary) !important;
+        font-size: 24px;
 }
 
 :deep([data-theme="dark"]) .v-list-item:hover,
@@ -244,27 +200,10 @@ export default {
 }
 .drawer-custom.drawer-visible {
 	display: block !important;
+	width: 72px !important;
 }
 
 /* Responsive adjustments for width and dark theme */
-@media (max-width: 900px) and (orientation: landscape) {
-	.drawer-custom.drawer-visible {
-		width: 180px !important;
-	}
-}
-
-@media (min-width: 601px) and (max-width: 1024px) {
-	.drawer-custom.drawer-visible {
-		width: 240px !important;
-	}
-}
-
-@media (min-width: 1025px) {
-	.drawer-custom.drawer-visible {
-		width: 300px !important;
-	}
-}
-
 @media (max-width: 1024px) {
 	.drawer-custom.drawer-visible {
 		background-color: var(--pos-navbar-bg) !important;
