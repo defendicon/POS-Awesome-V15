@@ -198,12 +198,14 @@ export default {
 		return {
 			drawer: false,
 			mini: true,
-			item: 0,
-			items: [
-				{ text: "POS", icon: "mdi-network-pos" },
-				{ text: "Payments", icon: "mdi-credit-card" },
-			],
-			company: "POS Awesome",
+		item: 0,
+		items: [
+			{ text: "POS", icon: "mdi-network-pos" },
+			{ text: "Payments", icon: "mdi-credit-card" },
+			{ text: "Stock Entry", icon: "mdi-package-variant" },
+			{ text: "Item", icon: "mdi-tag" },
+		],
+		company: "POS Awesome",
 			companyImg: posLogo,
 			showAboutDialog: false,
 			showOfflineInvoices: false,

@@ -43,6 +43,8 @@
 import Navbar from "./components/Navbar.vue";
 import POS from "./components/pos/Pos.vue";
 import Payments from "./components/payments/Pay.vue";
+import StockEntry from "./components/stock/MiniStockEntry.vue";
+import Item from "./components/item/MiniItem.vue";
 import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "./components/ui/UpdatePrompt.vue";
 import { useLoading } from "./composables/useLoading.js";
@@ -150,6 +152,8 @@ export default {
 		Navbar,
 		POS,
 		Payments,
+		"Stock Entry": StockEntry,
+		Item,
 		AppLoadingOverlay,
 		UpdatePrompt,
 	},
