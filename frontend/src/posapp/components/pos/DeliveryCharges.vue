@@ -13,8 +13,7 @@
 				item-title="name"
 				item-value="name"
 				return-object
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				:no-data-text="__('Charges not found')"
 				hide-details
 				:customFilter="deliveryChargesFilter"
@@ -38,11 +37,10 @@
 				variant="solo"
 				color="primary"
 				:label="frappe._('Delivery Charges Rate')"
-				:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-				class="dark-field sleek-field"
+				class="pos-themed-input sleek-field"
 				hide-details
 				:model-value="formatCurrency(delivery_charges_rate)"
-				:prefix="currencySymbol(pos_profile.currency)"
+				:prefix="currencySymbol()"
 				disabled
 			></v-text-field>
 		</v-col>
@@ -66,11 +64,7 @@ export default {
 			internal_selected_delivery_charge: this.selected_delivery_charge,
 		};
 	},
-	computed: {
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
-	},
+	computed: {},
 	watch: {
 		selected_delivery_charge(val) {
 			this.internal_selected_delivery_charge = val;
@@ -84,33 +78,4 @@ export default {
 };
 </script>
 
-<style scoped>
-:deep([data-theme="dark"]) .dark-field,
-:deep(.v-theme--dark) .dark-field,
-::v-deep([data-theme="dark"]) .dark-field,
-::v-deep(.v-theme--dark) .dark-field {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__input),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__input),
-:deep([data-theme="dark"]) .dark-field :deep(input),
-:deep(.v-theme--dark) .dark-field :deep(input),
-:deep([data-theme="dark"]) .dark-field :deep(.v-label),
-:deep(.v-theme--dark) .dark-field :deep(.v-label),
-::v-deep([data-theme="dark"]) .dark-field .v-field__input,
-::v-deep(.v-theme--dark) .dark-field .v-field__input,
-::v-deep([data-theme="dark"]) .dark-field input,
-::v-deep(.v-theme--dark) .dark-field input,
-::v-deep([data-theme="dark"]) .dark-field .v-label,
-::v-deep(.v-theme--dark) .dark-field .v-label {
-	color: #fff !important;
-}
-
-:deep([data-theme="dark"]) .dark-field :deep(.v-field__overlay),
-:deep(.v-theme--dark) .dark-field :deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) .dark-field .v-field__overlay,
-::v-deep(.v-theme--dark) .dark-field .v-field__overlay {
-	background-color: #1e1e1e !important;
-}
-</style>
+<style scoped></style>

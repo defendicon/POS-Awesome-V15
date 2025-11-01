@@ -1,16 +1,80 @@
 <template>
-	<v-menu :min-width="240" :close-on-content-click="true" location="bottom end" :offset="[0, 4]">
+	<v-menu
+		:min-width="isMobile ? 280 : 240"
+		:close-on-content-click="true"
+		:location="isMobile ? 'bottom end' : 'bottom end'"
+		:offset="[0, 4]"
+		:max-height="isMobile ? '80vh' : 'auto'"
+	>
 		<template #activator="{ props }">
-			<v-btn v-bind="props" color="primary" variant="elevated" class="menu-btn-compact">
-				{{ __("Menu") }}
-				<v-icon end size="16" class="ml-1">mdi-menu-down</v-icon>
+			<v-btn
+				v-bind="props"
+				:variant="isMobile ? 'text' : 'elevated'"
+				:icon="isMobile"
+				:class="[
+					'menu-btn-compact pos-themed-button',
+					isMobile ? 'mobile-menu-btn' : 'desktop-menu-btn',
+				]"
+			>
+				<template v-if="isMobile">
+					<v-icon class="pos-text-primary">mdi-dots-vertical</v-icon>
+				</template>
+				<template v-else>
+					{{ __("Menu") }}
+					<v-icon end size="16" class="ml-1 pos-text-primary">mdi-menu-down</v-icon>
+				</template>
 			</v-btn>
 		</template>
-		<v-card class="menu-card-compact" elevation="12">
+		<v-card class="menu-card-compact pos-themed-card" elevation="12">
 			<div class="menu-header-compact">
-				<v-icon color="primary" size="20">mdi-menu</v-icon>
-				<span class="menu-header-text-compact">{{ __("Actions") }}</span>
+				<v-icon class="pos-text-primary" size="20">mdi-menu</v-icon>
+				<span class="menu-header-text-compact pos-text-primary">{{ __("Actions") }}</span>
 			</div>
+
+			<!-- Mobile-only: Show hidden items first -->
+			<template v-if="isMobile">
+				<v-list density="compact" class="menu-list-compact mobile-only-section">
+					<!-- Profile Information on mobile -->
+					<v-list-item class="menu-item-compact profile-info-mobile">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact info-icon">
+								<v-icon color="white" size="16">mdi-account-circle</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								displayUserName
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Current User")
+							}}</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
+					<!-- Cache and System Status on mobile -->
+					<v-list-item
+						class="menu-item-compact system-info-mobile"
+						@click="$emit('refresh-cache-usage')"
+					>
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact neutral-icon">
+								<v-icon color="white" size="16">mdi-database-clock</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("System Status")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Check cache and performance")
+							}}</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
+					<v-divider class="menu-section-divider-compact"></v-divider>
+				</v-list>
+			</template>
+
 			<v-list density="compact" class="menu-list-compact">
 				<v-list-item
 					v-if="!posProfile.posa_hide_closing_shift"
@@ -149,13 +213,13 @@
 					<template v-slot:prepend>
 						<div class="menu-icon-wrapper-compact info-icon">
 							<v-icon color="white" size="16">{{
-								isDark ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
+								$theme.isDark ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
 							}}</v-icon>
 						</div>
 					</template>
 					<div class="menu-content-compact">
 						<v-list-item-title class="menu-item-title-compact">{{
-							isDark ? __("Light Mode") : __("Dark Mode")
+							$theme.isDark ? __("Light Mode") : __("Dark Mode")
 						}}</v-list-item-title>
 						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
 							__("Switch theme appearance")
@@ -229,9 +293,10 @@
 
 				<v-switch
 					v-model="useWesternNumerals"
-					class="mt-3"
+					class="mt-3 western-numerals-switch"
 					density="compact"
 					inset
+					:color="useWesternNumerals ? 'success' : 'error'"
 					:label="__('Use Western numerals')"
 					@update:modelValue="saveWesternPreference"
 				></v-switch>
@@ -298,7 +363,6 @@ export default {
 		manualOffline: Boolean,
 		networkOnline: Boolean,
 		serverOnline: Boolean,
-		isDark: Boolean,
 	},
 	data() {
 		return {
@@ -310,6 +374,7 @@ export default {
 			changing: false,
 			useWesternNumerals: false,
 			originalWesternNumerals: false,
+			windowWidth: window.innerWidth,
 			notification: {
 				show: false,
 				message: "",
@@ -317,6 +382,17 @@ export default {
 				timeout: 3000,
 			},
 		};
+	},
+	mounted() {
+		// Add window resize listener for responsive behavior
+		this.handleResize = () => {
+			this.windowWidth = window.innerWidth;
+		};
+		window.addEventListener("resize", this.handleResize);
+	},
+	beforeUnmount() {
+		// Clean up the event listener
+		window.removeEventListener("resize", this.handleResize);
 	},
 	computed: {
 		canChangeLanguage() {
@@ -330,8 +406,38 @@ export default {
 			const lang = this.availableLanguages.find((l) => l.code === this.selectedLanguage);
 			return lang?.name || this.selectedLanguage.toUpperCase();
 		},
+		// Mobile breakpoint detection
+		isMobile() {
+			return this.windowWidth < 768;
+		},
+		isTablet() {
+			return this.windowWidth >= 768 && this.windowWidth < 1024;
+		},
+		isDesktop() {
+			return this.windowWidth >= 1024;
+		},
+		// Display name for mobile menu
+		displayUserName() {
+			// Show POS profile name if available, otherwise show user name
+			if (this.posProfile && this.posProfile.name) {
+				return this.posProfile.name;
+			}
+
+			// Fallback to Frappe user
+			if (typeof frappe !== "undefined" && frappe.session) {
+				if (frappe.session.user_fullname) {
+					return frappe.session.user_fullname;
+				}
+				if (frappe.session.user) {
+					return frappe.session.user;
+				}
+			}
+
+			return "User";
+		},
 	},
 	async mounted() {
+		// Add window resize listener for responsive behavior (already added above)
 		await this.initializeLanguage();
 		this.initializeWesternNumerals();
 	},
@@ -353,6 +459,11 @@ export default {
 				this.useWesternNumerals = false;
 			}
 			this.originalWesternNumerals = this.useWesternNumerals;
+
+			// Force reactivity update
+			this.$nextTick(() => {
+				this.$forceUpdate();
+			});
 		},
 
 		saveWesternPreference() {
@@ -474,64 +585,114 @@ export default {
 		"show-about",
 		"toggle-theme",
 		"logout",
+		"refresh-cache-usage",
 	],
 };
 </script>
 
 <style scoped>
-/* Compact Menu Button - Better Navbar Integration */
+/* Elite Menu Button - Refined Navbar Integration */
 .menu-btn-compact {
 	margin-left: 8px;
 	margin-right: 4px;
 	padding: 6px 16px;
 	border-radius: 20px;
-	font-weight: 600;
+	font-weight: 500;
 	text-transform: none;
 	font-size: 13px;
-	letter-spacing: 0.3px;
-	box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+	letter-spacing: 0.5px;
+	box-shadow: none;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	background: rgba(25, 118, 210, 0.08) !important;
+	border: 1px solid rgba(25, 118, 210, 0.12);
+	backdrop-filter: blur(8px);
 	min-width: 90px;
 	height: 36px;
+	color: #1976d2 !important;
+}
+
+/* Mobile Menu Button Styles */
+.mobile-menu-btn {
+	margin: 0 !important;
+	padding: 6px !important;
+	border-radius: 12px !important;
+	min-width: 36px !important;
+	max-width: 36px !important;
+	width: 36px !important;
+	height: 36px !important;
+	background: rgba(25, 118, 210, 0.08) !important;
+	border: 1px solid rgba(25, 118, 210, 0.12) !important;
+}
+
+.mobile-menu-btn:hover {
+	background: rgba(25, 118, 210, 0.12) !important;
+	border-color: rgba(25, 118, 210, 0.2) !important;
+	transform: translateY(-1px);
+}
+
+/* Desktop Menu Button - keep existing styling */
+.desktop-menu-btn {
+	/* Inherits from .menu-btn-compact */
+}
+
+/* Elite menu button text and icon colors */
+.menu-btn-compact .v-btn__content {
+	color: #1976d2 !important;
+	font-weight: 500;
+}
+
+.menu-btn-compact .pos-text-primary,
+.menu-btn-compact .v-icon {
+	color: #1976d2 !important;
+	transition: color 0.25s ease;
 }
 
 .menu-btn-compact:hover {
-	transform: translateY(-1px) scale(1.02);
-	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-	background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+	background: rgba(25, 118, 210, 0.12) !important;
+	border-color: rgba(25, 118, 210, 0.2);
 }
 
-/* Compact Menu Card - Smaller and Better Positioned */
+.menu-btn-compact:hover .v-btn__content,
+.menu-btn-compact:hover .pos-text-primary,
+.menu-btn-compact:hover .v-icon {
+	color: #1565c0 !important;
+}
+
+/* Elite Menu Card - Glass Morphism Design */
 .menu-card-compact {
-	border-radius: 16px;
+	border-radius: 20px;
 	overflow: hidden;
-	background: #ffffff;
-	border: none;
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.2);
 	box-shadow:
-		0 8px 24px rgba(0, 0, 0, 0.12),
-		0 2px 6px rgba(0, 0, 0, 0.08);
-	backdrop-filter: blur(8px);
+		0 20px 40px rgba(0, 0, 0, 0.08),
+		0 8px 16px rgba(0, 0, 0, 0.04),
+		0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+	backdrop-filter: blur(20px) saturate(1.2);
 	min-width: 260px;
 	max-width: 280px;
 	margin-top: 2px;
 }
 
-/* Compact Menu Header */
+/* Elite Menu Header */
 .menu-header-compact {
-	padding: 12px 16px 10px;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+	padding: 16px 20px 12px;
+	background: rgba(248, 249, 250, 0.6);
+	backdrop-filter: blur(8px);
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	border-bottom: 1px solid rgba(25, 118, 210, 0.06);
+	border-bottom: 1px solid rgba(25, 118, 210, 0.08);
 }
 
 .menu-header-text-compact {
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 500;
 	color: #1976d2;
-	letter-spacing: 0.3px;
+	letter-spacing: 0.5px;
+	opacity: 0.9;
 }
 
 /* Compact Menu List */
@@ -643,7 +804,7 @@ export default {
 
 .menu-item-subtitle-compact {
 	font-size: 11px;
-	color: #666666;
+	color: var(--pos-text-secondary, #666666);
 	line-height: 1.3;
 	font-weight: 400;
 }
@@ -777,56 +938,48 @@ export default {
 }
 
 /* Dark Theme Adjustments */
-:deep([data-theme="dark"]) .menu-btn-compact,
-:deep(.v-theme--dark) .menu-btn-compact {
+/* Theme-aware compact menu styling */
+.menu-btn-compact {
 	background: linear-gradient(135deg, #90caf9 0%, #42a5f5 100%);
-	color: #1e1e1e !important;
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .menu-btn-compact:hover,
-:deep(.v-theme--dark) .menu-btn-compact:hover {
+.menu-btn-compact:hover {
 	background: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
 	box-shadow: 0 4px 12px rgba(144, 202, 249, 0.3);
 }
 
-:deep([data-theme="dark"]) .menu-card-compact,
-:deep(.v-theme--dark) .menu-card-compact {
-	background: var(--surface-primary, #1e1e1e) !important;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+.menu-card-compact {
+	background: var(--pos-card-bg) !important;
+	border: 1px solid var(--pos-border);
 	box-shadow:
-		0 8px 24px rgba(0, 0, 0, 0.4),
-		0 2px 6px rgba(0, 0, 0, 0.2);
+		0 8px 24px var(--pos-shadow-dark),
+		0 2px 6px var(--pos-shadow);
 }
 
-:deep([data-theme="dark"]) .menu-header-compact,
-:deep(.v-theme--dark) .menu-header-compact {
-	background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%) !important;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+.menu-header-compact {
+	background: var(--pos-navbar-bg) !important;
+	border-bottom: 1px solid var(--pos-border);
 }
 
-:deep([data-theme="dark"]) .menu-header-text-compact,
-:deep(.v-theme--dark) .menu-header-text-compact {
-	color: var(--primary-light, #90caf9) !important;
+.menu-header-text-compact {
+	color: var(--pos-primary) !important;
 }
 
-:deep([data-theme="dark"]) .menu-list-compact,
-:deep(.v-theme--dark) .menu-list-compact {
-	background: var(--surface-primary, #1e1e1e) !important;
+.menu-list-compact {
+	background: var(--pos-card-bg) !important;
 }
 
-:deep([data-theme="dark"]) .menu-item-title-compact,
-:deep(.v-theme--dark) .menu-item-title-compact {
-	color: var(--text-primary, #ffffff) !important;
+.menu-item-title-compact {
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .menu-item-subtitle-compact,
-:deep(.v-theme--dark) .menu-item-subtitle-compact {
-	color: var(--text-secondary, #b0b0b0) !important;
+.menu-item-subtitle-compact {
+	color: var(--pos-text-secondary) !important;
 }
 
-:deep([data-theme="dark"]) .menu-section-divider-compact,
-:deep(.v-theme--dark) .menu-section-divider-compact {
-	border-color: rgba(255, 255, 255, 0.12) !important;
+.menu-section-divider-compact {
+	border-color: var(--pos-border) !important;
 }
 
 :deep([data-theme="dark"]) .menu-item-compact:hover::before,
@@ -873,5 +1026,52 @@ export default {
 :deep(.v-theme--dark) .warning-icon {
 	background: linear-gradient(135deg, #ffb74d 0%, #ffc107 100%);
 	box-shadow: 0 2px 6px rgba(255, 183, 77, 0.3);
+}
+
+/* Western Numerals Switch Custom Colors */
+.western-numerals-switch :deep(.v-switch__track) {
+	background-color: #f44336 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch :deep(.v-switch--inset .v-switch__track) {
+	background-color: #f44336 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch :deep(.v-switch__thumb) {
+	background-color: white !important;
+}
+
+.western-numerals-switch.v-input--is-focused :deep(.v-switch__track),
+.western-numerals-switch:hover :deep(.v-switch__track) {
+	background-color: #d32f2f !important;
+}
+
+/* Active state - Green */
+.western-numerals-switch :deep(.v-selection-control--dirty .v-switch__track) {
+	background-color: #4caf50 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch :deep(.v-selection-control--dirty .v-switch--inset .v-switch__track) {
+	background-color: #4caf50 !important;
+	opacity: 1 !important;
+}
+
+.western-numerals-switch.v-input--is-focused :deep(.v-selection-control--dirty .v-switch__track),
+.western-numerals-switch:hover :deep(.v-selection-control--dirty .v-switch__track) {
+	background-color: #388e3c !important;
+}
+
+/* Dark theme adjustments for the switch */
+:deep([data-theme="dark"]) .western-numerals-switch .v-switch__track,
+:deep(.v-theme--dark) .western-numerals-switch .v-switch__track {
+	background-color: #f44336 !important;
+}
+
+:deep([data-theme="dark"]) .western-numerals-switch .v-selection-control--dirty .v-switch__track,
+:deep(.v-theme--dark) .western-numerals-switch .v-selection-control--dirty .v-switch__track {
+	background-color: #4caf50 !important;
 }
 </style>

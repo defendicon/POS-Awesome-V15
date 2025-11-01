@@ -40,7 +40,7 @@ jobs:
           sudo apt-get install -y python3-dev python3-pip python3-setuptools python3-venv \
               libmysqlclient-dev redis-server curl software-properties-common git
 
-          curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+          curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
           sudo apt-get install -y nodejs yarn
 
       - name: Cache pip dependencies

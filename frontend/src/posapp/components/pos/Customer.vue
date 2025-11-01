@@ -1,9 +1,11 @@
 <template>
 	<!-- ? Disable dropdown if either readonly or loadingCustomers is true -->
 	<div class="customer-input-wrapper">
+		<Skeleton v-if="loadingCustomers" height="48" class="w-100" />
 		<v-autocomplete
+			v-else
 			ref="customerDropdown"
-			class="customer-autocomplete sleek-field"
+			class="customer-autocomplete sleek-field pos-themed-input"
 			density="compact"
 			clearable
 			variant="solo"
@@ -13,8 +15,9 @@
 			:items="filteredCustomers"
 			item-title="customer_name"
 			item-value="name"
-			:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-			:no-data-text="__('Customers not found')"
+			:no-data-text="
+				isCustomerBackgroundLoading ? __('Loading customer data...') : __('Customers not found')
+			"
 			hide-details
 			:customFilter="() => true"
 			:disabled="effectiveReadonly || loadingCustomers"
@@ -96,6 +99,7 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
+	position: relative;
 }
 
 .customer-autocomplete {
@@ -104,42 +108,22 @@
 	border-radius: 12px;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 	transition: box-shadow 0.3s ease;
-	background-color: #fff;
+	background-color: var(--pos-input-bg);
 }
 
 .customer-autocomplete:hover {
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Dark mode styling */
-:deep([data-theme="dark"]) .customer-autocomplete,
-:deep(.v-theme--dark) .customer-autocomplete,
-::v-deep([data-theme="dark"]) .customer-autocomplete,
-::v-deep(.v-theme--dark) .customer-autocomplete {
-	/* Use surface color for dark mode */
-	background-color: #1e1e1e !important;
+/* Theme-aware internal field colors */
+.customer-autocomplete :deep(.v-field__input),
+.customer-autocomplete :deep(input),
+.customer-autocomplete :deep(.v-label) {
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-field__input),
-:deep(.v-theme--dark) .customer-autocomplete :deep(.v-field__input),
-:deep([data-theme="dark"]) .customer-autocomplete :deep(input),
-:deep(.v-theme--dark) .customer-autocomplete :deep(input),
-:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-label),
-:deep(.v-theme--dark) .customer-autocomplete :deep(.v-label),
-::v-deep([data-theme="dark"]) .customer-autocomplete .v-field__input,
-::v-deep(.v-theme--dark) .customer-autocomplete .v-field__input,
-::v-deep([data-theme="dark"]) .customer-autocomplete input,
-::v-deep(.v-theme--dark) .customer-autocomplete input,
-::v-deep([data-theme="dark"]) .customer-autocomplete .v-label,
-::v-deep(.v-theme--dark) .customer-autocomplete .v-label {
-	color: #fff !important;
-}
-
-:deep([data-theme="dark"]) .customer-autocomplete :deep(.v-field__overlay),
-:deep(.v-theme--dark) .customer-autocomplete :deep(.v-field__overlay),
-::v-deep([data-theme="dark"]) .customer-autocomplete .v-field__overlay,
-::v-deep(.v-theme--dark) .customer-autocomplete .v-field__overlay {
-	background-color: #1e1e1e !important;
+.customer-autocomplete :deep(.v-field__overlay) {
+	background-color: var(--pos-input-bg) !important;
 }
 
 .icon-button {
@@ -156,353 +140,282 @@
 </style>
 
 <script>
-/* global frappe */
+/* global frappe __ */
+import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from "vue";
+import { storeToRefs } from "pinia";
+import _ from "lodash";
 import UpdateCustomer from "./UpdateCustomer.vue";
-import {
-	getCustomerStorage,
-	setCustomerStorage,
-	memoryInitPromise,
-	getCustomersLastSync,
-	setCustomersLastSync,
-} from "../../../offline/index.js";
+import Skeleton from "../ui/Skeleton.vue";
+import { useCustomersStore } from "../../stores/customersStore.js";
 
 export default {
 	props: {
 		pos_profile: Object,
 	},
-
-	data: () => ({
-		pos_profile: "",
-		customers: [],
-		customer: "", // Selected customer
-		internalCustomer: null, // Model bound to the dropdown
-		tempSelectedCustomer: null, // Temporarily holds customer selected from dropdown
-		isMenuOpen: false, // Tracks whether dropdown menu is open
-		readonly: false,
-		effectiveReadonly: false,
-		customer_info: {}, // Used for edit modal
-		loadingCustomers: false, // ? New state to track loading status
-		customers_loaded: false,
-		customerSearch: "", // Search text
-		customersPageLimit: 500,
-	}),
-
 	components: {
 		UpdateCustomer,
+		Skeleton,
 	},
+        setup(props, { expose }) {
+                const { proxy } = getCurrentInstance();
+                const eventBus = proxy?.eventBus;
+                const customersStore = useCustomersStore();
+		const {
+			customers,
+			filteredCustomers,
+			loadingCustomers,
+			isCustomerBackgroundLoading,
+			selectedCustomer,
+			customerInfo,
+		} = storeToRefs(customersStore);
 
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
+		const internalCustomer = ref(null);
+		const tempSelectedCustomer = ref(null);
+		const isMenuOpen = ref(false);
+		const customerDropdown = ref(null);
+                const readonlyState = ref(false);
 
-		filteredCustomers() {
-			const search = this.customerSearch.toLowerCase();
-			let results = this.customers;
-			if (search) {
-				results = results.filter((cust) => {
-					return (
-						(cust.customer_name && cust.customer_name.toLowerCase().includes(search)) ||
-						(cust.tax_id && cust.tax_id.toLowerCase().includes(search)) ||
-						(cust.email_id && cust.email_id.toLowerCase().includes(search)) ||
-						(cust.mobile_no && cust.mobile_no.toLowerCase().includes(search)) ||
-						(cust.name && cust.name.toLowerCase().includes(search))
-					);
-				});
+                let scrollContainer = null;
+
+                const effectiveReadonly = computed(() => readonlyState.value && navigator.onLine);
+
+		const searchDebounce = _.debounce((term) => {
+			customersStore.queueSearch(term || "");
+		}, 300);
+
+		watch(
+			selectedCustomer,
+			(value) => {
+				if (!isMenuOpen.value) {
+					internalCustomer.value = value || null;
+				}
+			},
+			{ immediate: true },
+		);
+
+		watch(
+			() => props.pos_profile,
+			(profile) => {
+				if (profile) {
+					customersStore.setPosProfile(profile);
+				}
+			},
+			{ immediate: true },
+		);
+
+		const detachScrollListener = () => {
+			if (scrollContainer) {
+				scrollContainer.removeEventListener("scroll", onCustomerScroll);
+				scrollContainer = null;
 			}
-			return results;
-		},
-	},
+		};
 
-	watch: {
-		readonly(val) {
-			this.effectiveReadonly = val && navigator.onLine;
-		},
-               customers_loaded(val) {
-                       if (val) {
-                               this.eventBus.emit("customers_loaded");
-                       }
-               },
-	},
+		const onCustomerScroll = (event) => {
+			const el = event.target;
+			if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+				customersStore.loadMoreCustomers();
+			}
+		};
 
-	methods: {
-		// Called when dropdown opens or closes
-		onCustomerMenuToggle(isOpen) {
-			this.isMenuOpen = isOpen;
+		const attachScrollListener = () => {
+			const dropdown = customerDropdown.value?.$el?.querySelector(".v-overlay__content .v-select-list");
+			if (dropdown) {
+				scrollContainer = dropdown;
+				scrollContainer.scrollTop = 0;
+				scrollContainer.addEventListener("scroll", onCustomerScroll);
+			}
+		};
 
+		const onCustomerMenuToggle = (isOpen) => {
+			isMenuOpen.value = isOpen;
 			if (isOpen) {
-				this.internalCustomer = null;
-
-				this.$nextTick(() => {
+				internalCustomer.value = null;
+				nextTick(() => {
 					setTimeout(() => {
-						const dropdown = this.$refs.customerDropdown?.$el?.querySelector(
-							".v-overlay__content .v-select-list",
-						);
-						if (dropdown) dropdown.scrollTop = 0;
+						attachScrollListener();
 					}, 50);
 				});
-			} else {
-				// Restore selection if user didn't pick anything
-				if (this.tempSelectedCustomer) {
-					this.internalCustomer = this.tempSelectedCustomer;
-					this.customer = this.tempSelectedCustomer;
-					this.eventBus.emit("update_customer", this.customer);
-				} else if (this.customer) {
-					this.internalCustomer = this.customer;
-				}
-
-				this.tempSelectedCustomer = null;
+				return;
 			}
-		},
 
-		// Called when a customer is selected
-               onCustomerChange(val) {
-                        // if user selects the same customer again, show a meaningful error
-                        if (val && val === this.customer) {
-                                // keep the current selection and notify the user
-                                this.internalCustomer = this.customer;
-                                this.eventBus.emit("show_message", {
-                                        title: __("Customer already selected"),
-                                        color: "error",
-                                });
-                                return;
-                        }
+			detachScrollListener();
+			if (tempSelectedCustomer.value) {
+				internalCustomer.value = tempSelectedCustomer.value;
+				customersStore.setSelectedCustomer(tempSelectedCustomer.value);
+			} else if (selectedCustomer.value) {
+				internalCustomer.value = selectedCustomer.value;
+			}
+			tempSelectedCustomer.value = null;
+		};
 
-                        this.tempSelectedCustomer = val;
+		const closeCustomerMenu = () => {
+			const dropdown = customerDropdown.value;
+			if (dropdown) {
+				try {
+					dropdown.menu = false;
+				} catch (err) {
+					dropdown.$emit?.("update:menu", false);
+				}
+				const inputEl = dropdown.$el?.querySelector("input");
+				if (inputEl) {
+					inputEl.blur();
+				}
+			}
+			isMenuOpen.value = false;
+			detachScrollListener();
+		};
 
-                        if (!this.isMenuOpen && val) {
-                                this.customer = val;
-                                this.eventBus.emit("update_customer", val);
-                        }
-               },
+		const onCustomerChange = (val) => {
+			if (val && val === selectedCustomer.value) {
+				internalCustomer.value = selectedCustomer.value;
+				eventBus?.emit("show_message", {
+					title: __("Customer already selected"),
+					color: "error",
+				});
+				return;
+			}
 
-		onCustomerSearch(val) {
-			this.customerSearch = val || "";
-		},
+			tempSelectedCustomer.value = val;
 
-		// Pressing Enter in input
-		handleEnter(event) {
+			if (isMenuOpen.value && val) {
+				closeCustomerMenu();
+			} else if (!isMenuOpen.value && val) {
+				customersStore.setSelectedCustomer(val);
+			}
+		};
+
+		const onCustomerSearch = (value) => {
+			const term = value || "";
+			if (isCustomerBackgroundLoading.value) {
+				customersStore.queueSearch(term);
+				return;
+			}
+			searchDebounce(term);
+		};
+
+		const handleEnter = (event) => {
 			const inputText = event.target.value?.toLowerCase() || "";
-
-			const matched = this.customers.find((cust) => {
+			const matched = customers.value.find((cust) => {
 				return (
 					cust.customer_name?.toLowerCase().includes(inputText) ||
 					cust.name?.toLowerCase().includes(inputText)
 				);
 			});
 
-			if (matched) {
-				this.tempSelectedCustomer = matched.name;
-				this.internalCustomer = matched.name;
-				this.customer = matched.name;
-				this.eventBus.emit("update_customer", matched.name);
-				this.isMenuOpen = false;
-
-				event.target.blur();
-			}
-		},
-
-              backgroundLoadCustomers(startAfter, syncSince, loaded = 0) {
-                      const limit = this.customersPageLimit;
-                      const lastSync = syncSince;
-                      frappe.call({
-                              method: "posawesome.posawesome.api.customers.get_customer_names",
-                              args: {
-                                      pos_profile: this.pos_profile.pos_profile,
-                                      modified_after: lastSync,
-                                      limit,
-                                      start_after: startAfter,
-                              },
-                              callback: (r) => {
-                                      const rows = r.message || [];
-                                      const newLoaded = loaded + rows.length;
-                                       rows.forEach((c) => {
-                                               const idx = this.customers.findIndex((x) => x.name === c.name);
-                                               if (idx !== -1) {
-                                                       this.customers.splice(idx, 1, c);
-                                               } else {
-                                                       this.customers.push(c);
-                                               }
-                                       });
-                                       setCustomerStorage(this.customers);
-                                       const progress = Math.min(99, Math.round((newLoaded / (newLoaded + limit)) * 100));
-                                       this.eventBus.emit("data-load-progress", { name: "customers", progress });
-                                      if (rows.length === limit) {
-                                              const nextStart = rows[rows.length - 1]?.name || null;
-                                              this.backgroundLoadCustomers(nextStart, syncSince, newLoaded);
-                                      } else {
-                                               setCustomersLastSync(new Date().toISOString());
-                                               this.eventBus.emit("data-load-progress", { name: "customers", progress: 100 });
-                                               this.eventBus.emit("data-loaded", "customers");
-                                               this.customers_loaded = true;
-                                       }
-                               },
-                               error: (err) => {
-                                       console.error("Failed to background load customers", err);
-                               },
-                       });
-               },
-               // Fetch customers list
-               get_customer_names() {
-                       var vm = this;
-			if (this.customers.length > 0) {
-				this.customers_loaded = true;
+			if (!matched) {
 				return;
 			}
 
-                        const syncSince = getCustomersLastSync();
+			tempSelectedCustomer.value = matched.name;
+			internalCustomer.value = matched.name;
+			customersStore.setSelectedCustomer(matched.name);
+			closeCustomerMenu();
+			if (event?.target?.blur) {
+				event.target.blur();
+			}
+		};
 
-                        if (getCustomerStorage().length) {
-                                try {
-                                        vm.customers = getCustomerStorage();
-                                } catch (e) {
-                                        console.error("Failed to parse customer cache:", e);
-                                        vm.customers = [];
-                                }
+		const new_customer = () => {
+			eventBus?.emit("open_update_customer", null);
+		};
+
+                const edit_customer = () => {
+                        eventBus?.emit("open_update_customer", customerInfo.value || {});
+                };
+
+                const focusCustomerSearch = async () => {
+                        const dropdown = customerDropdown.value;
+                        if (!dropdown) {
+                                return;
                         }
 
-                       this.eventBus.emit("data-load-progress", { name: "customers", progress: 0 });
-                       this.loadingCustomers = true; // Start loading
-                       frappe.call({
-                               method: "posawesome.posawesome.api.customers.get_customer_names",
-                               args: {
-                                       pos_profile: this.pos_profile.pos_profile,
-                                       modified_after: syncSince,
-                                       limit: this.customersPageLimit,
-                                       start_after: null,
-                               },
-                               callback: function (r) {
-                                       if (r.message) {
-                                               const newCust = r.message;
-                                               const total = newCust.length || 1;
-                                                if (syncSince && vm.customers.length) {
-                                                        newCust.forEach((c, idx) => {
-                                                                const idxExisting = vm.customers.findIndex((x) => x.name === c.name);
-                                                                if (idxExisting !== -1) {
-                                                                        vm.customers.splice(idxExisting, 1, c);
-                                                                } else {
-                                                                        vm.customers.push(c);
-                                                                }
-                                                                vm.eventBus.emit("data-load-progress", {
-                                                                        name: "customers",
-                                                                        progress: Math.round(((idx + 1) / total) * 100),
-                                                                });
-                                                        });
-                                                } else {
-                                                        vm.customers = [];
-                                                        newCust.forEach((c, idx) => {
-                                                                vm.customers.push(c);
-                                                                vm.eventBus.emit("data-load-progress", {
-                                                                        name: "customers",
-                                                                        progress: Math.round(((idx + 1) / total) * 100),
-                                                                });
-                                                        });
-                                                }
+                        try {
+                                dropdown.menu = true;
+                        } catch (err) {
+                                dropdown.$emit?.("update:menu", true);
+                        }
 
-                                               setCustomerStorage(vm.customers);
-                                               const progress = Math.min(
-                                                       99,
-                                                       Math.round((vm.customers.length / (vm.customers.length + vm.customersPageLimit)) * 100),
-                                               );
-                                               if (newCust.length === vm.customersPageLimit) {
-                                                       vm.eventBus.emit("data-load-progress", { name: "customers", progress });
-                                                       const last = newCust[newCust.length - 1]?.name || null;
-                                                       vm.backgroundLoadCustomers(last, syncSince, vm.customers.length);
-                                               } else {
-                                                       setCustomersLastSync(new Date().toISOString());
-                                                       vm.eventBus.emit("data-load-progress", { name: "customers", progress: 100 });
-                                                       vm.eventBus.emit("data-loaded", "customers");
-                                                       vm.customers_loaded = true;
-                                               }
-                                       }
-                                       vm.loadingCustomers = false; // Stop loading
-                               },
-                               error: function (err) {
-                                       console.error("Failed to fetch customers:", err);
-                                       if (getCustomerStorage().length) {
-                                               try {
-                                                       vm.customers = getCustomerStorage();
-                                               } catch (e) {
-                                                       console.error("Failed to load cached customers", e);
-                                                       vm.customers = [];
-                                               }
-                                       }
-                                       vm.loadingCustomers = false;
-                                       vm.eventBus.emit("data-load-progress", { name: "customers", progress: 100 });
-                                       vm.eventBus.emit("data-loaded", "customers");
-                                       vm.customers_loaded = true;
-                               },
-                       });
-               },
+                        isMenuOpen.value = true;
 
-		new_customer() {
-			this.eventBus.emit("open_update_customer", null);
-		},
+                        if (typeof dropdown.focus === "function") {
+                                dropdown.focus();
+                        }
 
-		edit_customer() {
-			this.eventBus.emit("open_update_customer", this.customer_info);
-		},
-	},
+                        await nextTick();
 
-	created() {
-		memoryInitPromise.then(() => {
-			if (getCustomerStorage().length) {
-				try {
-					this.customers = getCustomerStorage();
-				} catch (e) {
-					console.error("Failed to parse customer cache:", e);
-					this.customers = [];
-				}
+                        const inputEl = dropdown.$el?.querySelector("input");
+                        if (inputEl) {
+                                inputEl.focus();
+                                inputEl.select?.();
+                        }
+                };
+
+                expose({ focusCustomerSearch });
+
+                const busHandlers = [];
+
+		const registerBus = (event, handler) => {
+			if (eventBus && typeof eventBus.on === "function") {
+				eventBus.on(event, handler);
+				busHandlers.push({ event, handler });
 			}
-			this.effectiveReadonly = this.readonly && navigator.onLine;
-		});
+		};
 
-		this.effectiveReadonly = this.readonly && navigator.onLine;
+		onMounted(async () => {
+			await customersStore.searchCustomers("");
 
-		this.$nextTick(() => {
-			this.eventBus.on("register_pos_profile", async (pos_profile) => {
-				await memoryInitPromise;
-				this.pos_profile = pos_profile;
-				this.get_customer_names();
+			registerBus("register_pos_profile", async (data) => {
+				customersStore.setPosProfile(data);
+				await customersStore.get_customer_names();
 			});
 
-			this.eventBus.on("payments_register_pos_profile", async (pos_profile) => {
-				await memoryInitPromise;
-				this.pos_profile = pos_profile;
-				this.get_customer_names();
+			registerBus("payments_register_pos_profile", async (data) => {
+				customersStore.setPosProfile(data);
+				await customersStore.get_customer_names();
 			});
 
-			this.eventBus.on("set_customer", (customer) => {
-				this.customer = customer;
-				this.internalCustomer = customer;
+			registerBus("set_customer", (customer) => {
+				customersStore.setSelectedCustomer(customer);
+				internalCustomer.value = customer || null;
 			});
 
-			this.eventBus.on("add_customer_to_list", (customer) => {
-				const index = this.customers.findIndex((c) => c.name === customer.name);
-				if (index !== -1) {
-					// Replace existing entry to avoid duplicates after update
-					this.customers.splice(index, 1, customer);
-				} else {
-					this.customers.push(customer);
-				}
-				setCustomerStorage(this.customers);
-				this.customer = customer.name;
-				this.internalCustomer = customer.name;
-				this.eventBus.emit("update_customer", customer.name);
+			registerBus("add_customer_to_list", async (customer) => {
+				await customersStore.addOrUpdateCustomer(customer);
+				internalCustomer.value = customer?.name || null;
 			});
 
-			this.eventBus.on("set_customer_readonly", (value) => {
-				this.readonly = value;
+			registerBus("set_customer_readonly", (value) => {
+				readonlyState.value = Boolean(value);
 			});
 
-			this.eventBus.on("set_customer_info_to_edit", (data) => {
-				this.customer_info = data;
-			});
-
-			this.eventBus.on("fetch_customer_details", () => {
-				this.get_customer_names();
+			registerBus("set_customer_info_to_edit", (data) => {
+				customersStore.setCustomerInfo(data || {});
 			});
 		});
-	},
+
+		onBeforeUnmount(() => {
+			busHandlers.forEach(({ event, handler }) => {
+				eventBus?.off(event, handler);
+			});
+			searchDebounce.cancel();
+			detachScrollListener();
+		});
+
+                return {
+                        customerDropdown,
+                        filteredCustomers,
+                        loadingCustomers,
+                        isCustomerBackgroundLoading,
+                        internalCustomer,
+                        effectiveReadonly,
+                        onCustomerMenuToggle,
+                        onCustomerChange,
+                        onCustomerSearch,
+                        handleEnter,
+                        new_customer,
+                        edit_customer,
+                        focusCustomerSearch,
+                };
+        },
 };
 </script>

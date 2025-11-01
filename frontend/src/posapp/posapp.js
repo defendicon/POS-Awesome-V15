@@ -5,23 +5,34 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "../../../posawesome/public/css/rtl.css";
 import "../style.css";
+import "./styles/theme.css";
 import eventBus from "./bus";
 import themePlugin from "./plugins/theme.js";
+import { pinia } from "./stores/index.js";
+import "../sw-updater.js"; // Initialize service worker auto-updater
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import Home from "./Home.vue";
+import { attachProfilerHelpers, initLongTaskObserver, isPerfEnabled } from "./utils/perf.js";
+
+attachProfilerHelpers();
 
 // Expose Dexie globally for libraries that expect a global Dexie instance
 if (typeof window !== "undefined" && !window.Dexie) {
 	window.Dexie = Dexie;
 }
 
-frappe.provide("frappe.PosApp");
+// Ensure frappe is available
+if (typeof frappe === "undefined") {
+	console.error("Frappe is not defined");
+} else {
+	frappe.provide("frappe.PosApp");
+}
 
 frappe.PosApp.posapp = class {
 	constructor({ parent }) {
 		this.$parent = $(document);
-		this.page = parent.page;
+		this.page = parent?.page || parent;
 		this.make_body();
 	}
 	make_body() {
@@ -40,7 +51,7 @@ frappe.PosApp.posapp = class {
 							background: "#FFFFFF",
 							primary: "#0097A7",
 							secondary: "#00BCD4",
-							accent: "#9575CD",
+							accent: "#FF6B35",
 							success: "#66BB6A",
 							info: "#2196F3",
 							warning: "#FF9800",
@@ -56,10 +67,10 @@ frappe.PosApp.posapp = class {
 						colors: {
 							background: "#121212",
 							surface: "#1E1E1E",
-							primary: "#BB86FC",
-							primaryVariant: "#985EFF",
+							primary: "#00D4FF",
+							primaryVariant: "#00A0CC",
 							secondary: "#03DAC6",
-							accent: "#9575CD",
+							accent: "#FF6B35",
 							success: "#66BB6A",
 							info: "#2196F3",
 							warning: "#FF9800",
@@ -78,10 +89,15 @@ frappe.PosApp.posapp = class {
 		});
 		const app = createApp(Home);
 		app.component("VueDatePicker", VueDatePicker);
+		app.use(pinia);
 		app.use(eventBus);
 		app.use(vuetify);
 		app.use(themePlugin, { vuetify });
 		app.mount(this.$el[0]);
+
+		if (isPerfEnabled()) {
+			initLongTaskObserver("posapp");
+		}
 
 		if (!document.querySelector('link[rel="manifest"]')) {
 			const link = document.createElement("link");
@@ -96,9 +112,12 @@ frappe.PosApp.posapp = class {
 			window.location.hostname === "127.0.0.1"
 		) {
 			navigator.serviceWorker
-				.register("/sw.js")
+				.register("/assets/posawesome/dist/www/sw.js")
+				.then((registration) => {
+					console.log("SW registered successfully", registration);
+				})
 				.catch((err) => console.error("SW registration failed", err));
 		}
 	}
-	setup_header() { }
+	setup_header() {}
 };

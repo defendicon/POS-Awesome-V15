@@ -1,10 +1,6 @@
 <template>
 	<div>
-		<v-card
-			:class="['selection mx-auto mt-3', isDarkTheme ? '' : 'bg-grey-lighten-5']"
-			:style="isDarkTheme ? 'background-color:#1E1E1E' : ''"
-			style="max-height: 80vh; height: 80vh"
-		>
+		<v-card class="selection mx-auto mt-3 pos-themed-card" style="max-height: 80vh; height: 80vh">
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Offers") }}</span>
 			</v-card-title>
@@ -24,20 +20,26 @@
 					:items-per-page="itemsPerPage"
 					hide-default-footer
 				>
-                                         <template v-slot:item.offer_applied="{ item }">
-                                               <v-checkbox-btn
-                                                       @click="toggleOfferApplied"
-                                                       v-model="item.offer_applied"
-                                                        :disabled="
-                                                                (item.offer == 'Give Product' &&
-                                                                        !item.give_item &&
-                                                                        (!item.replace_cheapest_item || !item.replace_item)) ||
-                                                                (item.offer == 'Grand Total' &&
-                                                                        discount_percentage_offer_name &&
-                                                                        discount_percentage_offer_name != item.name)
-                                                        "
-                                                ></v-checkbox-btn>
-                                        </template>
+					<template v-slot:item.offer_applied="{ item }">
+						<v-btn
+							v-if="!item.offer_applied"
+							color="green"
+							@click="applyOffer(item)"
+							:disabled="
+								(item.offer == 'Give Product' &&
+									!item.give_item &&
+									(!item.replace_cheapest_item || !item.replace_item)) ||
+								(item.offer == 'Grand Total' &&
+									discount_percentage_offer_name &&
+									discount_percentage_offer_name != item.name)
+							"
+						>
+							{{ __("Apply") }}
+						</v-btn>
+						<v-btn v-else color="red" @click="removeOffer(item)">
+							{{ __("Remove") }}
+						</v-btn>
+					</template>
 					<template v-slot:expanded-row="{ item }">
 						<td :colspan="items_headers.length">
 							<v-row class="mt-2">
@@ -48,8 +50,8 @@
 									<v-autocomplete
 										v-model="item.give_item"
 										:items="get_give_items(item)"
-                                                                                item-title="item_name"
-                                                                                item-value="item_code"
+										item-title="item_name"
+										item-value="item_code"
 										variant="outlined"
 										density="compact"
 										color="primary"
@@ -89,14 +91,21 @@
 <script>
 /* global __, frappe */
 import format from "../../format";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 export default {
 	mixins: [format],
+	setup() {
+		const customersStore = useCustomersStore();
+		const { selectedCustomer } = storeToRefs(customersStore);
+		return { selectedCustomer };
+	},
 	data: () => ({
 		loading: false,
 		pos_profile: "",
 		pos_offers: [],
-                allItems: [],
-                groupItemCache: {},
+		allItems: [],
+		groupItemCache: {},
 		discount_percentage_offer_name: null,
 		itemsPerPage: 1000,
 		expanded: [],
@@ -116,60 +125,61 @@ export default {
 		appliedOffersCount() {
 			return this.pos_offers.filter((el) => !!el.offer_applied).length;
 		},
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
 	},
 
-        methods: {
-                back_to_invoice() {
-                        this.eventBus.emit("show_offers", "false");
-                },
-                async fetchGroupItems(group) {
-                        try {
-                                const { message } = await frappe.call({
-                                        method: "posawesome.posawesome.api.items.get_items",
-                                        args: {
-                                                pos_profile: JSON.stringify(this.pos_profile),
-                                                item_group: group,
-                                                // fetch complete inventory; backend paginates internally
-                                        },
-                                });
+	methods: {
+		back_to_invoice() {
+			this.eventBus.emit("show_offers", "false");
+		},
+		async fetchGroupItems(group) {
+			try {
+				const { message } = await frappe.call({
+					method: "posawesome.posawesome.api.items.get_items",
+					args: {
+						pos_profile: JSON.stringify(this.pos_profile),
+						item_group: group,
+						// fetch complete inventory; backend paginates internally
+					},
+				});
 
-                                const fullItems = message || [];
+				const fullItems = message || [];
 
-                                // cache minimal info for dropdown use
-                                this.groupItemCache[group] = fullItems.map((it) => ({
-                                        item_code: it.item_code,
-                                        item_name: it.item_name || it.item_code,
-                                        rate: it.price_list_rate,
-                                }));
+				// cache minimal info for dropdown use
+				this.groupItemCache[group] = fullItems.map((it) => ({
+					item_code: it.item_code,
+					item_name: it.item_name || it.item_code,
+					rate: it.price_list_rate,
+				}));
 
-                                // merge fetched items into allItems so offer application has details
-                                const existing = new Set(this.allItems.map((it) => it.item_code));
-                                const newItems = fullItems.filter((it) => !existing.has(it.item_code));
-                                if (newItems.length) {
-                                        this.allItems.push(...newItems);
-                                        this.eventBus.emit("set_all_items", this.allItems);
-                                }
+				// merge fetched items into allItems so offer application has details
+				const existing = new Set(this.allItems.map((it) => it.item_code));
+				const newItems = fullItems.filter((it) => !existing.has(it.item_code));
+				if (newItems.length) {
+					this.allItems.push(...newItems);
+					this.eventBus.emit("set_all_items", this.allItems);
+				}
 
-                                this.forceUpdateItem();
-                        } catch (error) {
-                                console.error("Failed to fetch group items", error);
-                        }
-                },
-                forceUpdateItem() {
-                        let list_offers = [];
-                        list_offers = [...this.pos_offers];
-                        this.pos_offers = list_offers;
-                },
-                toggleOfferApplied() {
-                        // re-emit updated offers so watchers respond
-                        this.forceUpdateItem();
-                },
-                makeid(length) {
-                        let result = "";
-                        const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+				this.forceUpdateItem();
+			} catch (error) {
+				console.error("Failed to fetch group items", error);
+			}
+		},
+		forceUpdateItem() {
+			let list_offers = [];
+			list_offers = [...this.pos_offers];
+			this.pos_offers = list_offers;
+		},
+		applyOffer(item) {
+			item.offer_applied = true;
+			this.forceUpdateItem();
+		},
+		removeOffer(item) {
+			item.offer_applied = false;
+			this.forceUpdateItem();
+		},
+		makeid(length) {
+			let result = "";
+			const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
 			const charactersLength = characters.length;
 			for (var i = 0; i < length; i++) {
 				result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -224,12 +234,12 @@ export default {
 							newOffer.offer_applied = !!offer.auto;
 						}
 					}
-                                        if (newOffer.offer == "Give Product" && !newOffer.give_item) {
-                                                const giveItems = this.get_give_items(newOffer);
-                                                if (giveItems.length) {
-                                                        newOffer.give_item = giveItems[0].item_code;
-                                                }
-                                        }
+					if (newOffer.offer == "Give Product" && !newOffer.give_item) {
+						const giveItems = this.get_give_items(newOffer);
+						if (giveItems.length) {
+							newOffer.give_item = giveItems[0].item_code;
+						}
+					}
 					this.pos_offers.push(newOffer);
 					this.eventBus.emit("show_message", {
 						title: __("New Offer Available"),
@@ -252,41 +262,39 @@ export default {
 				return "";
 			}
 		},
-                get_give_items(offer) {
-                        if (offer.apply_type === "Item Code") {
-                                return [
-                                        {
-                                                item_code: offer.apply_item_code,
-                                                item_name: offer.apply_item_code,
-                                        },
-                                ];
-                        } else if (offer.apply_type === "Item Group") {
-                                const group = offer.apply_item_group;
-                                if (!this.groupItemCache[group]) {
-                                        this.fetchGroupItems(group);
-                                        return [];
-                                }
-                                let filtered_items = this.groupItemCache[group];
-                                if (offer.less_then > 0) {
-                                        filtered_items = filtered_items.filter(
-                                                (item) => item.rate < offer.less_then,
-                                        );
-                                }
-                                const unique = [];
-                                const seen = new Set();
-                                filtered_items.forEach((item) => {
-                                        if (!seen.has(item.item_code)) {
-                                                seen.add(item.item_code);
-                                                unique.push({
-                                                        item_code: item.item_code,
-                                                        item_name: item.item_name || item.item_code,
-                                                });
-                                        }
-                                });
-                                return unique;
-                        }
-                        return [];
-                },
+		get_give_items(offer) {
+			if (offer.apply_type === "Item Code") {
+				return [
+					{
+						item_code: offer.apply_item_code,
+						item_name: offer.apply_item_code,
+					},
+				];
+			} else if (offer.apply_type === "Item Group") {
+				const group = offer.apply_item_group;
+				if (!this.groupItemCache[group]) {
+					this.fetchGroupItems(group);
+					return [];
+				}
+				let filtered_items = this.groupItemCache[group];
+				if (offer.less_then > 0) {
+					filtered_items = filtered_items.filter((item) => item.rate < offer.less_then);
+				}
+				const unique = [];
+				const seen = new Set();
+				filtered_items.forEach((item) => {
+					if (!seen.has(item.item_code)) {
+						seen.add(item.item_code);
+						unique.push({
+							item_code: item.item_code,
+							item_name: item.item_name || item.item_code,
+						});
+					}
+				});
+				return unique;
+			}
+			return [];
+		},
 		updateCounters() {
 			this.eventBus.emit("update_offers_counters", {
 				offersCount: this.offersCount,
@@ -310,6 +318,12 @@ export default {
 				this.updatePosCoupuns();
 			},
 		},
+		selectedCustomer(newCustomer, oldCustomer) {
+			if (newCustomer === oldCustomer) {
+				return;
+			}
+			this.offers = [];
+		},
 	},
 
 	created: function () {
@@ -317,11 +331,6 @@ export default {
 			this.eventBus.on("register_pos_profile", (data) => {
 				this.pos_profile = data.pos_profile;
 			});
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				this.offers = [];
-			}
 		});
 		this.eventBus.on("update_pos_offers", (data) => {
 			this.updatePosOffers(data);

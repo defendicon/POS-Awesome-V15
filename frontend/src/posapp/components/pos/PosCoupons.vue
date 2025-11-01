@@ -1,10 +1,6 @@
 <template>
 	<div>
-		<v-card
-			:class="['selection mx-auto mt-3', isDarkTheme ? '' : 'bg-grey-lighten-5']"
-			:style="isDarkTheme ? 'background-color:#1E1E1E' : ''"
-			style="max-height: 80vh; height: 80vh"
-		>
+		<v-card class="selection mx-auto mt-3 pos-themed-card" style="max-height: 80vh; height: 80vh">
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Coupons") }}</span>
 			</v-card-title>
@@ -17,10 +13,9 @@
 						variant="outlined"
 						color="primary"
 						:label="frappe._('Coupon')"
-						:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+						class="pos-themed-input coupon-input"
 						hide-details
 						v-model="new_coupon"
-						class="coupon-input"
 						@keydown.enter="add_coupon(new_coupon)"
 					>
 					</v-text-field>
@@ -80,7 +75,15 @@
 
 <script>
 /* global __, frappe */
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
+
 export default {
+	setup() {
+		const customersStore = useCustomersStore();
+		const { selectedCustomer } = storeToRefs(customersStore);
+		return { selectedCustomer };
+	},
 	data: () => ({
 		loading: false,
 		pos_profile: "",
@@ -103,9 +106,6 @@ export default {
 		},
 		appliedCouponsCount() {
 			return this.posa_coupons.filter((el) => !!el.applied).length;
-		},
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
 		},
 	},
 
@@ -214,6 +214,28 @@ export default {
 				this.updateCounters();
 			},
 		},
+		selectedCustomer(newCustomer, oldCustomer) {
+			if (newCustomer === oldCustomer && newCustomer === this.customer) {
+				this.setActiveGiftCoupons();
+				return;
+			}
+			const normalized = newCustomer || "";
+			if (this.customer !== normalized) {
+				const to_remove = [];
+				this.posa_coupons.forEach((el) => {
+					if (el.type == "Promotional") {
+						el.customer = normalized;
+					} else {
+						to_remove.push(el.coupon);
+					}
+				});
+				this.customer = normalized;
+				if (to_remove.length) {
+					this.removeCoupon(to_remove);
+				}
+			}
+			this.setActiveGiftCoupons();
+		},
 	},
 
 	created: function () {
@@ -221,23 +243,6 @@ export default {
 			this.eventBus.on("register_pos_profile", (data) => {
 				this.pos_profile = data.pos_profile;
 			});
-		});
-		this.eventBus.on("update_customer", (customer) => {
-			if (this.customer != customer) {
-				const to_remove = [];
-				this.posa_coupons.forEach((el) => {
-					if (el.type == "Promotional") {
-						el.customer = customer;
-					} else {
-						to_remove.push(el.coupon);
-					}
-				});
-				this.customer = customer;
-				if (to_remove.length) {
-					this.removeCoupon(to_remove);
-				}
-			}
-			this.setActiveGiftCoupons();
 		});
 		this.eventBus.on("update_pos_coupons", (data) => {
 			this.updatePosCoupons(data);

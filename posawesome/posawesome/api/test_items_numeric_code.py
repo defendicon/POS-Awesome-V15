@@ -37,9 +37,7 @@ class TestNumericItemCodes(FrappeTestCase):
 
     def test_numeric_code_appears_without_search(self):
         pos_profile = json.dumps({"name": "TestProfile"})
-        with patch(
-            "posawesome.posawesome.api.items.get_items_details", return_value=[]
-        ):
+        with patch("posawesome.posawesome.api.items.get_items_details", return_value=[]):
             first_page = get_items(pos_profile, limit=2)
             last_name = first_page[-1]["item_name"]
             second_page = get_items(pos_profile, limit=2, start_after=last_name)

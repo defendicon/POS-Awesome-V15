@@ -25,7 +25,7 @@
 const DEBUG = false;
 
 export default {
-        name: "StatusIndicator",
+	name: "StatusIndicator",
 	props: {
 		networkOnline: Boolean,
 		serverOnline: Boolean,
@@ -40,21 +40,21 @@ export default {
 		 * @returns {string} A Vuetify color string ('green', 'red').
 		 */
 		statusColor() {
-                        // Enhanced debugging with more context
-                        if (DEBUG) {
-                                console.log(
-                                        "StatusIndicator - Network:",
-                                        this.networkOnline,
-                                        "Server:",
-                                        this.serverOnline,
-                                        "Connecting:",
-                                        this.serverConnecting,
-                                        "IP Host:",
-                                        this.isIpHost,
-                                        "Host:",
-                                        window.location.hostname,
-                                );
-                        }
+			// Enhanced debugging with more context
+			if (DEBUG) {
+				console.log(
+					"StatusIndicator - Network:",
+					this.networkOnline,
+					"Server:",
+					this.serverOnline,
+					"Connecting:",
+					this.serverConnecting,
+					"IP Host:",
+					this.isIpHost,
+					"Host:",
+					window.location.hostname,
+				);
+			}
 
 			// Show yellow/orange when connecting
 			if (this.serverConnecting) {
@@ -84,16 +84,16 @@ export default {
 		 * @returns {string} A Material Design Icon class string.
 		 */
 		statusIcon() {
-                        if (DEBUG) {
-                                console.log(
-                                        "StatusIndicator - Determining icon for network:",
-                                        this.networkOnline,
-                                        "server:",
-                                        this.serverOnline,
-                                        "connecting:",
-                                        this.serverConnecting,
-                                );
-                        }
+			if (DEBUG) {
+				console.log(
+					"StatusIndicator - Determining icon for network:",
+					this.networkOnline,
+					"server:",
+					this.serverOnline,
+					"connecting:",
+					this.serverConnecting,
+				);
+			}
 
 			// Show loading icon when connecting
 			if (this.serverConnecting) {

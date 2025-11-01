@@ -1,0 +1,39 @@
+name: Snapshot (Mirror + LFS)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Install Git LFS
+        run: |
+          git lfs install
+          git lfs fetch --all
+
+      - name: Pack .git mirror
+        run: |
+          # Make a bare mirror folder
+          git clone --mirror . mirror.git
+          cd mirror.git
+          # LFS objects already fetched in parent .git; copy them
+          mkdir -p lfs-copy && cd ..
+          rsync -a .git/lfs mirror.git/lfs || true
+          cd mirror.git/..
+          TAR=repo-mirror-$(date +%Y%m%d-%H%M%S).tar.gz
+          tar -czf "$TAR" mirror.git
+          echo "MIRROR=$TAR" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.MIRROR }}
+          path: ${{ env.MIRROR }}
+          retention-days: 60

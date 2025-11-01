@@ -64,7 +64,7 @@
 										<v-card-text class="text--primary pa-1">
 											<div class="text-caption text-primary text-accent-3">
 												{{
-													formatCurrencySafe(item.price_list_rate || item.rate || 0)
+													formatCurrencySafe(item.price_list_rate ?? item.rate ?? 0)
 												}}
 												{{ item.currency || "" }}
 											</div>
@@ -173,13 +173,13 @@ export default {
 		applyCurrencyConversionToItem(item) {
 			if (!item) return;
 			if (!item.original_rate) {
-				item.original_rate = item.price_list_rate || item.rate;
+				item.original_rate = item.price_list_rate ?? item.rate ?? 0;
 				item.original_currency = item.currency || (this.pos_profile && this.pos_profile.currency);
 			}
 			// Use original_rate as price list rate in item's currency
-			item.base_price_list_rate = item.price_list_rate || item.original_rate;
+			item.base_price_list_rate = item.price_list_rate ?? item.original_rate ?? 0;
 			item.base_rate = item.base_rate || item.base_price_list_rate;
-			item.rate = item.price_list_rate || item.rate;
+			item.rate = item.price_list_rate ?? item.rate ?? 0;
 			item.currency = item.currency || (this.pos_profile && this.pos_profile.currency);
 			console.log("after currency conversion", {
 				code: item.item_code,

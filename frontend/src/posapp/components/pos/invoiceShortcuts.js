@@ -70,18 +70,38 @@ export default {
 		}
 	},
 
-	shortSelectDiscount(e) {
-		console.log("Shortcut pressed:", e.key, e.ctrlKey);
-		if (e.key.toLowerCase() === "e" && (e.ctrlKey || e.metaKey)) {
-			console.log("Focusing discount field");
-			e.preventDefault();
-			e.stopPropagation();
-			if (this.$refs.discount) {
-				this.$refs.discount.focus();
-				console.log("Discount field focused");
-			} else {
-				console.log("Discount field ref not found");
-			}
-		}
-	},
+        shortSelectDiscount(e) {
+                console.log("Shortcut pressed:", e.key, e.ctrlKey);
+                if (e.key.toLowerCase() === "e" && (e.ctrlKey || e.metaKey)) {
+                        console.log("Focusing discount field");
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (this.$refs.discount) {
+                                this.$refs.discount.focus();
+                                console.log("Discount field focused");
+                        } else {
+                                console.log("Discount field ref not found");
+                        }
+                }
+        },
+
+        shortFocusCustomer(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof this.focusCustomerSearchField === "function") {
+                                this.focusCustomerSearchField();
+                        }
+                }
+        },
+
+        shortFocusItem(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof this.focusItemSearchField === "function") {
+                                this.focusItemSearchField();
+                        }
+                }
+        },
 };

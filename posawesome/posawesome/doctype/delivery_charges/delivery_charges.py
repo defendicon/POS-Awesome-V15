@@ -56,9 +56,7 @@ def get_applicable_delivery_charges(
             )
         )
     for address in address_list:
-        address_charges = frappe.get_cached_value(
-            "Address", address, "posa_delivery_charges"
-        )
+        address_charges = frappe.get_cached_value("Address", address, "posa_delivery_charges")
         if address_charges:
             delivery_charges_list.append(address_charges)
 

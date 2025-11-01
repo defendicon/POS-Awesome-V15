@@ -3,42 +3,43 @@ import { withWriteLock } from "./db-utils.js";
 
 // --- Dexie initialization ---------------------------------------------------
 export const db = new Dexie("posawesome_offline");
-db.version(6)
-        .stores({
-                keyval: "&key",
-                queue: "&key",
-                cache: "&key",
-               items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
-                item_prices: "&[price_list+item_code],price_list,item_code",
-        })
-        .upgrade((tx) =>
-                tx
-                        .table("items")
-                        .toCollection()
-                        .modify((item) => {
-                                item.barcodes = Array.isArray(item.item_barcode)
-                                        ? item.item_barcode.map((b) => b.barcode).filter(Boolean)
-                                        : item.item_barcode
-                                                ? [String(item.item_barcode)]
-                                                : [];
-                                item.name_keywords = item.item_name
-                                        ? item.item_name.toLowerCase().split(/\s+/).filter(Boolean)
-                                        : [];
-                               item.serials = Array.isArray(item.serial_no_data)
-                                       ? item.serial_no_data.map((s) => s.serial_no).filter(Boolean)
-                                       : [];
-                               item.batches = Array.isArray(item.batch_no_data)
-                                       ? item.batch_no_data.map((b) => b.batch_no).filter(Boolean)
-                                       : [];
-                        }),
-        );
+db.version(7)
+	.stores({
+		keyval: "&key",
+		queue: "&key",
+		cache: "&key",
+		items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+		item_prices: "&[price_list+item_code],price_list,item_code",
+		customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	})
+	.upgrade((tx) =>
+		tx
+			.table("items")
+			.toCollection()
+			.modify((item) => {
+				item.barcodes = Array.isArray(item.item_barcode)
+					? item.item_barcode.map((b) => b.barcode).filter(Boolean)
+					: item.item_barcode
+						? [String(item.item_barcode)]
+						: [];
+				item.name_keywords = item.item_name
+					? item.item_name.toLowerCase().split(/\s+/).filter(Boolean)
+					: [];
+				item.serials = Array.isArray(item.serial_no_data)
+					? item.serial_no_data.map((s) => s.serial_no).filter(Boolean)
+					: [];
+				item.batches = Array.isArray(item.batch_no_data)
+					? item.batch_no_data.map((b) => b.batch_no).filter(Boolean)
+					: [];
+			}),
+	);
 
 export const KEY_TABLE_MAP = {
-        offline_invoices: "queue",
-        offline_customers: "queue",
-        offline_payments: "queue",
-        item_details_cache: "cache",
-        customer_storage: "cache",
+	offline_invoices: "queue",
+	offline_customers: "queue",
+	offline_payments: "queue",
+	item_details_cache: "cache",
+	customer_storage: "cache",
 };
 
 const LARGE_KEYS = new Set(["items", "item_details_cache", "local_stock_cache"]);
@@ -94,12 +95,12 @@ export function initPersistWorker() {
 	try {
 		// Load the worker without a query string so the service worker
 		// can serve the cached version when offline.
-                        const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-                try {
-                        persistWorker = new Worker(workerUrl, { type: "classic" });
-                } catch {
-                        persistWorker = new Worker(workerUrl, { type: "module" });
-                }
+		const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
+		try {
+			persistWorker = new Worker(workerUrl, { type: "classic" });
+		} catch {
+			persistWorker = new Worker(workerUrl, { type: "module" });
+		}
 	} catch (e) {
 		console.error("Failed to init persist worker", e);
 		persistWorker = null;
@@ -172,17 +173,13 @@ export function persist(key, value) {
 			.catch((e) => console.error(`Failed to persist ${key}`, e)),
 	);
 
-        if (
-                typeof localStorage !== "undefined" &&
-                key !== "price_list_cache" &&
-                !LARGE_KEYS.has(key)
-        ) {
-                try {
-                        localStorage.setItem(`posa_${key}`, JSON.stringify(value));
-                } catch (err) {
-                        console.error("Failed to persist", key, "to localStorage", err);
-                }
-        }
+	if (typeof localStorage !== "undefined" && key !== "price_list_cache" && !LARGE_KEYS.has(key)) {
+		try {
+			localStorage.setItem(`posa_${key}`, JSON.stringify(value));
+		} catch (err) {
+			console.error("Failed to persist", key, "to localStorage", err);
+		}
+	}
 }
 
 export const initPromise = new Promise((resolve) => {

@@ -5,6 +5,7 @@ import json
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import (
@@ -12,7 +13,15 @@ from erpnext.stock.doctype.batch.batch import (
     get_batch_qty,
 )  # This should be from erpnext directly
 from frappe import _
-from frappe.utils import cint, cstr, flt, getdate, money_in_words, nowdate, strip_html_tags
+from frappe.utils import (
+    cint,
+    cstr,
+    flt,
+    getdate,
+    money_in_words,
+    nowdate,
+    strip_html_tags,
+)
 from frappe.utils.background_jobs import enqueue
 
 from posawesome.posawesome.api.payments import (
@@ -62,11 +71,30 @@ def _get_available_stock(item):
     return get_stock_availability(item_code, warehouse)
 
 
+def _is_stock_item(item):
+    """Return True when the provided row represents a stock item."""
+
+    if item is None:
+        return False
+
+    flag = item.get("is_stock_item")
+    if flag is not None:
+        return bool(cint(flag))
+
+    item_code = item.get("item_code")
+    if not item_code:
+        return False
+
+    return bool(cint(frappe.get_cached_value("Item", item_code, "is_stock_item") or 0))
+
+
 def _collect_stock_errors(items):
     """Return list of items exceeding available stock."""
     errors = []
     for d in items:
         if flt(d.get("qty")) < 0:
+            continue
+        if not _is_stock_item(d):
             continue
         available = _get_available_stock(d)
         requested = flt(d.get("stock_qty") or (flt(d.get("qty")) * flt(d.get("conversion_factor") or 1)))
@@ -79,93 +107,88 @@ def _collect_stock_errors(items):
                     "available_qty": available,
                 }
             )
-        return errors
+    return errors
 
 
 def _merge_duplicate_taxes(invoice_doc):
-        """Remove duplicate tax rows with same account and rate.
+    """Remove duplicate tax rows with same account and rate.
 
-        If duplicates are found, keep the first occurrence and recalculate totals.
-        """
-        seen = set()
-        unique = []
-        for tax in invoice_doc.get("taxes", []):
-                key = (tax.account_head, flt(tax.rate), cstr(tax.charge_type))
-                if key in seen:
-                        continue
-                seen.add(key)
-                unique.append(tax)
-        if len(unique) != len(invoice_doc.get("taxes", [])):
-                invoice_doc.set("taxes", unique)
-                invoice_doc.calculate_taxes_and_totals()
+    If duplicates are found, keep the first occurrence and recalculate totals.
+    """
+    seen = set()
+    unique = []
+    for tax in invoice_doc.get("taxes", []):
+        key = (tax.account_head, flt(tax.rate), cstr(tax.charge_type))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(tax)
+    if len(unique) != len(invoice_doc.get("taxes", [])):
+        invoice_doc.set("taxes", unique)
+        invoice_doc.calculate_taxes_and_totals()
 
 
 def _should_block(pos_profile):
-    block_sale = cint(
-        frappe.db.get_value(
-            "POS Profile", pos_profile, "posa_block_sale_beyond_available_qty"
+    allow_negative = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)
+    if allow_negative:
+        return False
+
+    block_sale = 1
+    if pos_profile:
+        block_sale = cint(
+            frappe.db.get_value("POS Profile", pos_profile, "posa_block_sale_beyond_available_qty") or 1
         )
-        or 1
-    )
-    allow_negative = cint(
-        frappe.get_value("Stock Settings", None, "allow_negative_stock")
-    )
-    return block_sale and not allow_negative
+
+    return bool(block_sale)
 
 
 def _validate_stock_on_invoice(invoice_doc):
-        items_to_check = [d.as_dict() for d in invoice_doc.items if d.get("is_stock_item")]
-        if hasattr(invoice_doc, "packed_items"):
-                items_to_check.extend([d.as_dict() for d in invoice_doc.packed_items])
-        errors = _collect_stock_errors(items_to_check)
-        if errors and _should_block(invoice_doc.pos_profile):
-                frappe.throw(frappe.as_json({"errors": errors}), frappe.ValidationError)
+    if invoice_doc.doctype == "Sales Invoice" and not cint(getattr(invoice_doc, "update_stock", 0)):
+        frappe.logger().debug("Skipping stock validation for Sales Invoice without stock update")
+        return
+    items_to_check = [d.as_dict() for d in invoice_doc.items if d.get("is_stock_item")]
+    if hasattr(invoice_doc, "packed_items"):
+        items_to_check.extend([d.as_dict() for d in invoice_doc.packed_items])
+    errors = _collect_stock_errors(items_to_check)
+    if errors and _should_block(invoice_doc.pos_profile):
+        frappe.throw(frappe.as_json({"errors": errors}), frappe.ValidationError)
 
 
 def _auto_set_return_batches(invoice_doc):
-        """Assign batch numbers for return invoices without a source invoice.
+    """Assign batch numbers for return invoices without a source invoice.
 
-        When the POS Profile allows returns without an original invoice and an
-        item requires a batch number, this function allocates the first
-        available batch in FIFO order. If no batches exist in the selected
-        warehouse, an informative error is raised instead of the generic
-        validation error.
-        """
+    When the POS Profile allows returns without an original invoice and an
+    item requires a batch number, this function allocates the first
+    available batch in FIFO order. If no batches exist in the selected
+    warehouse, an informative error is raised instead of the generic
+    validation error.
+    """
 
-        if not invoice_doc.is_return or invoice_doc.get("return_against"):
-                return
+    if not invoice_doc.is_return or invoice_doc.get("return_against"):
+        return
 
-        profile = invoice_doc.get("pos_profile")
-        allow_without_invoice = profile and frappe.db.get_value(
-                "POS Profile", profile, "posa_allow_return_without_invoice"
-        )
-        if not cint(allow_without_invoice):
-                return
+    profile = invoice_doc.get("pos_profile")
+    allow_without_invoice = profile and frappe.db.get_value(
+        "POS Profile", profile, "posa_allow_return_without_invoice"
+    )
+    if not cint(allow_without_invoice):
+        return
 
-        allow_free = cint(
-                frappe.db.get_value("POS Profile", profile, "posa_allow_free_batch_return")
-                or 0
-        )
+    allow_free = cint(frappe.db.get_value("POS Profile", profile, "posa_allow_free_batch_return") or 0)
 
-        for d in invoice_doc.items:
-                if not d.get("item_code") or not d.get("warehouse"):
-                        continue
+    for d in invoice_doc.items:
+        if not d.get("item_code") or not d.get("warehouse"):
+            continue
 
-                has_batch = frappe.db.get_value("Item", d.item_code, "has_batch_no")
-                if has_batch and not d.get("batch_no"):
-                        batch_list = get_batch_qty(
-                                item_code=d.item_code, warehouse=d.warehouse
-                        ) or []
-                        batch_list = [b for b in batch_list if flt(b.get("qty")) > 0]
-                        if batch_list:
-                                # FIFO: batches are already sorted by posting/expiry in ERPNext
-                                d.batch_no = batch_list[0].get("batch_no")
-                        elif not allow_free:
-                                frappe.throw(
-                                        _(
-                                                "No batches available in {0} for {1}."
-                                        ).format(d.warehouse, d.item_code)
-                                )
+        has_batch = frappe.db.get_value("Item", d.item_code, "has_batch_no")
+        if has_batch and not d.get("batch_no"):
+            batch_list = get_batch_qty(item_code=d.item_code, warehouse=d.warehouse) or []
+            batch_list = [b for b in batch_list if flt(b.get("qty")) > 0]
+            if batch_list:
+                # FIFO: batches are already sorted by posting/expiry in ERPNext
+                d.batch_no = batch_list[0].get("batch_no")
+            elif not allow_free:
+                frappe.throw(_("No batches available in {0} for {1}.").format(d.warehouse, d.item_code))
 
 
 @frappe.whitelist()
@@ -178,7 +201,18 @@ def validate_cart_items(items, pos_profile=None):
 
     if isinstance(items, str):
         items = json.loads(items)
-    return _collect_stock_errors(items)
+
+    if pos_profile and not frappe.db.exists("POS Profile", pos_profile):
+        pos_profile = None
+
+    if not _should_block(pos_profile):
+        return []
+
+    errors = _collect_stock_errors(items)
+    if not errors:
+        return []
+
+    return errors
 
 
 def get_latest_rate(from_currency: str, to_currency: str):
@@ -328,9 +362,7 @@ def update_invoice(data):
     # Ensure selected currency is preserved after set_missing_values
     if selected_currency:
         invoice_doc.currency = selected_currency
-        company_currency = frappe.get_cached_value(
-            "Company", invoice_doc.company, "default_currency"
-        )
+        company_currency = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
     price_list_currency = price_list_currency or company_currency
 
     conversion_rate = 1
@@ -343,9 +375,9 @@ def update_invoice(data):
         if not conversion_rate:
             frappe.throw(
                 _(
-                        "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
-                    ).format(invoice_doc.currency, company_currency)
-                )
+                    "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
+                ).format(invoice_doc.currency, company_currency)
+            )
 
         plc_conversion_rate = 1
         if price_list_currency != invoice_doc.currency:
@@ -415,12 +447,8 @@ def update_invoice(data):
             payment.amount = -abs(payment.amount)
             payment.base_amount = -abs(payment.base_amount)
 
-        invoice_doc.paid_amount = flt(
-                sum(p.amount for p in invoice_doc.payments)
-        )
-        invoice_doc.base_paid_amount = flt(
-                sum(p.base_amount for p in invoice_doc.payments)
-        )
+        invoice_doc.paid_amount = flt(sum(p.amount for p in invoice_doc.payments))
+        invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments))
 
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -484,19 +512,58 @@ def submit_invoice(invoice, data):
 
     # creating advance payment
     if data.get("credit_change"):
-        advance_payment_entry = frappe.get_doc(
-            {
-                "doctype": "Payment Entry",
-                "mode_of_payment": "Cash",
-                "paid_to": cash_account["account"],
-                "payment_type": "Receive",
-                "party_type": "Customer",
-                "party": invoice_doc.get("customer"),
-                "paid_amount": invoice_doc.get("credit_change"),
-                "received_amount": invoice_doc.get("credit_change"),
-                "company": invoice_doc.get("company"),
-            }
+        cash_mode_of_payment = None
+        for payment in invoice_doc.payments:
+            if payment.get("type") == "Cash" and payment.get("mode_of_payment"):
+                cash_mode_of_payment = payment.get("mode_of_payment")
+                break
+
+        if not cash_mode_of_payment and pos_profile:
+            cash_mode_of_payment = (
+                frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment")
+                or "Cash"
+            )
+
+        posting_date = invoice_doc.get("posting_date") or nowdate()
+        reference_no = invoice_doc.get("posa_pos_opening_shift")
+
+        cash_account_name = (
+            cash_account.get("account") if isinstance(cash_account, (dict, frappe._dict)) else cash_account
         )
+        if not cash_account_name:
+            frappe.throw(_("Unable to determine cash account for change payment entry."))
+
+        party_account = invoice_doc.get("debit_to")
+        if not party_account and invoice_doc.get("customer"):
+            party_account = get_party_account("Customer", invoice_doc.get("customer"), invoice_doc.get("company"))
+        if not party_account:
+            frappe.throw(_("Unable to determine customer receivable account for change payment entry."))
+
+        advance_payment_entry = frappe.new_doc("Payment Entry")
+        advance_payment_entry.payment_type = "Pay"
+        advance_payment_entry.mode_of_payment = cash_mode_of_payment or "Cash"
+        advance_payment_entry.party_type = "Customer"
+        advance_payment_entry.party = invoice_doc.get("customer")
+        advance_payment_entry.company = invoice_doc.get("company")
+        advance_payment_entry.posting_date = posting_date
+        advance_payment_entry.paid_from = cash_account_name
+        advance_payment_entry.paid_to = party_account
+        amount = flt(invoice_doc.get("credit_change"))
+        advance_payment_entry.paid_amount = amount
+        advance_payment_entry.received_amount = amount
+        advance_payment_entry.difference_amount = 0
+        advance_payment_entry.reference_no = reference_no
+        advance_payment_entry.reference_date = posting_date
+
+        advance_payment_entry.setup_party_account_field()
+        advance_payment_entry.set_missing_values()
+        advance_payment_entry.set_amounts()
+        advance_payment_entry.paid_amount = amount
+        advance_payment_entry.received_amount = amount
+
+        if reference_no:
+            advance_payment_entry.reference_no = reference_no
+            advance_payment_entry.reference_date = posting_date
 
         advance_payment_entry.flags.ignore_permissions = True
         frappe.flags.ignore_account_permission = True
@@ -525,9 +592,7 @@ def submit_invoice(invoice, data):
                 advance_row = invoice_doc.append("advances", {})
                 advance_row.update(advance_payment)
                 child_dt = (
-                    "POS Invoice Advance"
-                    if invoice_doc.doctype == "POS Invoice"
-                    else "Sales Invoice Advance"
+                    "POS Invoice Advance" if invoice_doc.doctype == "POS Invoice" else "Sales Invoice Advance"
                 )
                 ensure_child_doctype(invoice_doc, "advances", child_dt)
                 invoice_doc.is_pos = 0
@@ -890,9 +955,7 @@ def get_available_currencies():
 
 
 @frappe.whitelist()
-def fetch_exchange_rate(
-    currency: str, company: str, posting_date: str | None = None
-):
+def fetch_exchange_rate(currency: str, company: str, posting_date: str | None = None):
     """Return latest exchange rate and its date."""
     company_currency = frappe.get_cached_value("Company", company, "default_currency")
     rate, date = get_latest_rate(currency, company_currency)
@@ -900,9 +963,7 @@ def fetch_exchange_rate(
 
 
 @frappe.whitelist()
-def fetch_exchange_rate_pair(
-    from_currency: str, to_currency: str, posting_date: str | None = None
-):
+def fetch_exchange_rate_pair(from_currency: str, to_currency: str, posting_date: str | None = None):
     """Return latest exchange rate between two currencies along with rate date."""
     rate, date = get_latest_rate(from_currency, to_currency)
     return {"exchange_rate": rate, "date": date}

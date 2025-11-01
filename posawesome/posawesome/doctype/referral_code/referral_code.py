@@ -10,9 +10,7 @@ from frappe.utils import strip
 class ReferralCode(Document):
     def autoname(self):
         if not self.referral_name:
-            self.referral_name = (
-                strip(self.customer) + "-" + frappe.generate_hash()[:5].upper()
-            )
+            self.referral_name = strip(self.customer) + "-" + frappe.generate_hash()[:5].upper()
             self.name = self.referral_name
         else:
             self.referral_name = strip(self.referral_name)
@@ -25,9 +23,7 @@ class ReferralCode(Document):
         pass
 
 
-def create_referral_code(
-    company, customer, customer_offer, primary_offer=None, campaign=None
-):
+def create_referral_code(company, customer, customer_offer, primary_offer=None, campaign=None):
     doc = frappe.new_doc("Referral Code")
     doc.company = company
     doc.customer = customer

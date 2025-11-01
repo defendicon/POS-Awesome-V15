@@ -1,0 +1,381 @@
+/**
+ * Global Theme CSS Custom Properties for POSAwesome
+ * These variables are updated dynamically by the useTheme composable
+ */
+
+:root {
+	/* Primary Background Colors */
+	--pos-bg-primary: #ffffff;
+	--pos-bg-secondary: #f8f9fa;
+	--pos-bg-tertiary: #e3f2fd;
+
+	/* Surface Colors */
+	--pos-surface: #ffffff;
+	--pos-surface-variant: #f5f5f5;
+	--pos-surface-container: #fafafa;
+
+	/* Text Colors */
+	--pos-text-primary: #212121;
+	--pos-text-secondary: #666666;
+	--pos-text-disabled: #9e9e9e;
+	--pos-text-hint: #bdbdbd;
+
+	/* Primary Colors - Original Light Mode */
+	--pos-primary: #0097a7;
+	--pos-primary-variant: #00838f;
+	--pos-primary-container: #e0f7fa;
+	--pos-on-primary: #ffffff;
+
+	/* Secondary Colors - Original Light Mode */
+	--pos-secondary: #00bcd4;
+	--pos-secondary-variant: #0097a7;
+	--pos-secondary-container: #e0f7fa;
+	--pos-on-secondary: #ffffff;
+
+	/* Accent Colors - Modern Orange (Light Mode) */
+	--pos-accent: #ff6b35;
+	--pos-accent-variant: #e55a2b;
+
+	/* Semantic Colors */
+	--pos-success: #66bb6a;
+	--pos-success-container: #e8f5e8;
+	--pos-warning: #ff9800;
+	--pos-warning-container: #fff3e0;
+	--pos-error: #e86674;
+	--pos-error-container: #fdeaea;
+	--pos-info: #2196f3;
+	--pos-info-container: #e3f2fd;
+
+	/* Border and Divider Colors */
+	--pos-border: rgba(0, 0, 0, 0.12);
+	--pos-border-light: rgba(0, 0, 0, 0.06);
+	--pos-divider: rgba(0, 0, 0, 0.06);
+	--pos-outline: rgba(0, 0, 0, 0.2);
+
+	/* Shadow Colors */
+	--pos-shadow: rgba(0, 0, 0, 0.1);
+	--pos-shadow-dark: rgba(0, 0, 0, 0.2);
+	--pos-shadow-light: rgba(0, 0, 0, 0.05);
+
+	/* Interactive Colors */
+	--pos-hover-bg: rgba(25, 118, 210, 0.04);
+	--pos-pressed-bg: rgba(25, 118, 210, 0.08);
+	--pos-selected-bg: rgba(25, 118, 210, 0.12);
+	--pos-focus-bg: rgba(25, 118, 210, 0.06);
+
+	/* Card and Component Backgrounds */
+	--pos-card-bg: #ffffff;
+	--pos-input-bg: #f5f5f5;
+	--pos-button-bg: #ffffff;
+	--pos-menu-bg: #ffffff;
+	--pos-dialog-bg: #ffffff;
+
+	/* Special Use Cases */
+	--pos-navbar-bg: #ffffff;
+	--pos-sidebar-bg: #f8f9fa;
+	--pos-invoice-bg: #ffffff;
+	--pos-table-header-bg: #f5f5f5;
+	--pos-table-row-hover: rgba(25, 118, 210, 0.04);
+
+	/* RTL Support Variables */
+	--pos-direction: ltr;
+	--pos-text-align: left;
+	--pos-margin-start: 0;
+	--pos-margin-end: 0;
+	--pos-padding-start: 0;
+	--pos-padding-end: 0;
+}
+
+/* Dark Theme Override */
+[data-theme="dark"],
+[data-theme-mode="dark"],
+.v-theme--dark {
+	/* Primary Background Colors */
+	--pos-bg-primary: #121212;
+	--pos-bg-secondary: #1e1e1e;
+	--pos-bg-tertiary: #2d2d2d;
+
+	/* Surface Colors */
+	--pos-surface: #1e1e1e;
+	--pos-surface-variant: #373737;
+	--pos-surface-container: #2d2d2d;
+
+	/* Text Colors - Enhanced Contrast for Dark Mode */
+	--pos-text-primary: #ffffff;
+	--pos-text-secondary: #e0e0e0;
+	--pos-text-disabled: #9e9e9e;
+	--pos-text-hint: #bdbdbd;
+
+	/* Primary Colors - High Contrast Blue-Cyan */
+	--pos-primary: #00d4ff;
+	--pos-primary-variant: #00a0cc;
+	--pos-primary-container: #003344;
+	--pos-on-primary: #000000;
+
+	/* Secondary Colors - High Contrast Cyan-Green */
+	--pos-secondary: #00e5b8;
+	--pos-secondary-variant: #00b894;
+	--pos-secondary-container: #004433;
+	--pos-on-secondary: #000000;
+
+	/* Accent Colors - Modern Orange */
+	--pos-accent: #ff6b35;
+	--pos-accent-variant: #e55a2b;
+
+	/* Semantic Colors - High Contrast */
+	--pos-success: #4caf50;
+	--pos-success-container: #2e7d32;
+	--pos-warning: #ffc107;
+	--pos-warning-container: #f57c00;
+	--pos-error: #f44336;
+	--pos-error-container: #c62828;
+	--pos-info: #2196f3;
+	--pos-info-container: #1565c0;
+
+	/* Border and Divider Colors */
+	--pos-border: rgba(255, 255, 255, 0.12);
+	--pos-border-light: rgba(255, 255, 255, 0.06);
+	--pos-divider: #373737;
+	--pos-outline: rgba(255, 255, 255, 0.2);
+
+	/* Shadow Colors */
+	--pos-shadow: rgba(0, 0, 0, 0.4);
+	--pos-shadow-dark: rgba(0, 0, 0, 0.6);
+	--pos-shadow-light: rgba(0, 0, 0, 0.2);
+
+	/* Interactive Colors - Better Visibility */
+	--pos-hover-bg: rgba(255, 255, 255, 0.12);
+	--pos-pressed-bg: rgba(255, 255, 255, 0.16);
+	--pos-selected-bg: rgba(255, 255, 255, 0.2);
+	--pos-focus-bg: rgba(255, 255, 255, 0.14);
+
+	/* Card and Component Backgrounds */
+	--pos-card-bg: #1e1e1e;
+	--pos-input-bg: #2d2d2d;
+	--pos-button-bg: #2d2d2d;
+	--pos-menu-bg: #1e1e1e;
+	--pos-dialog-bg: #1e1e1e;
+
+	/* Special Use Cases */
+	--pos-navbar-bg: #1e1e1e;
+	--pos-sidebar-bg: #121212;
+	--pos-invoice-bg: #1e1e1e;
+	--pos-table-header-bg: #2d2d2d;
+	--pos-table-row-hover: rgba(255, 255, 255, 0.04);
+}
+
+/* Automatic Theme Support - follows system preference */
+@media (prefers-color-scheme: dark) {
+	[data-theme-mode="automatic"] {
+		/* Apply dark theme variables when system preference is dark */
+		--pos-bg-primary: #121212;
+		--pos-bg-secondary: #1e1e1e;
+		--pos-bg-tertiary: #2d2d2d;
+		--pos-surface: #1e1e1e;
+		--pos-surface-variant: #373737;
+		--pos-surface-container: #2d2d2d;
+		--pos-text-primary: #ffffff;
+		--pos-text-secondary: #b0b0b0;
+		--pos-text-disabled: #666666;
+		--pos-text-hint: #757575;
+		--pos-primary: #00d4ff;
+		--pos-primary-variant: #00a0cc;
+		--pos-primary-container: #003344;
+		--pos-on-primary: #000000;
+		--pos-secondary: #00e5b8;
+		--pos-secondary-variant: #00b894;
+		--pos-secondary-container: #004433;
+		--pos-on-secondary: #000000;
+		--pos-accent: #ff6b35;
+		--pos-accent-variant: #e55a2b;
+		--pos-success: #4caf50;
+		--pos-success-container: #2e7d32;
+		--pos-warning: #ffc107;
+		--pos-warning-container: #f57c00;
+		--pos-error: #f44336;
+		--pos-error-container: #c62828;
+		--pos-info: #2196f3;
+		--pos-info-container: #1565c0;
+		--pos-border: rgba(255, 255, 255, 0.12);
+		--pos-border-light: rgba(255, 255, 255, 0.06);
+		--pos-divider: #373737;
+		--pos-outline: rgba(255, 255, 255, 0.2);
+		--pos-shadow: rgba(0, 0, 0, 0.4);
+		--pos-shadow-dark: rgba(0, 0, 0, 0.6);
+		--pos-shadow-light: rgba(0, 0, 0, 0.2);
+		--pos-hover-bg: rgba(255, 255, 255, 0.08);
+		--pos-pressed-bg: rgba(255, 255, 255, 0.12);
+		--pos-selected-bg: rgba(255, 255, 255, 0.16);
+		--pos-focus-bg: rgba(255, 255, 255, 0.1);
+		--pos-card-bg: #1e1e1e;
+		--pos-input-bg: #2d2d2d;
+		--pos-button-bg: #2d2d2d;
+		--pos-menu-bg: #1e1e1e;
+		--pos-dialog-bg: #1e1e1e;
+		--pos-navbar-bg: #1e1e1e;
+		--pos-sidebar-bg: #121212;
+		--pos-invoice-bg: #1e1e1e;
+		--pos-table-header-bg: #2d2d2d;
+		--pos-table-row-hover: rgba(255, 255, 255, 0.04);
+	}
+}
+
+/* Utility Classes for Theme Colors - Scoped to POSApp */
+.posapp .pos-bg-primary {
+	background-color: var(--pos-bg-primary) !important;
+}
+.posapp .pos-bg-secondary {
+	background-color: var(--pos-bg-secondary) !important;
+}
+.posapp .pos-bg-surface {
+	background-color: var(--pos-surface) !important;
+}
+.posapp .pos-bg-card {
+	background-color: var(--pos-card-bg) !important;
+}
+
+.posapp .pos-text-primary {
+	color: var(--pos-text-primary) !important;
+}
+.posapp .pos-text-secondary {
+	color: var(--pos-text-secondary) !important;
+}
+
+.posapp .pos-border {
+	border-color: var(--pos-border) !important;
+}
+.posapp .pos-border-light {
+	border-color: var(--pos-border-light) !important;
+}
+
+/* Theme-aware component base styles - Scoped to POSApp */
+.posapp .pos-themed-card {
+	background-color: var(--pos-card-bg);
+	color: var(--pos-text-primary);
+	border-color: var(--pos-border);
+	box-shadow: 0 2px 8px var(--pos-shadow);
+}
+
+.posapp .pos-themed-input {
+	background-color: var(--pos-input-bg);
+	color: var(--pos-text-primary);
+	border-color: var(--pos-border);
+}
+
+/* Ensure inputs adapt to the active theme without per-component overrides */
+.posapp .pos-themed-input :deep(.v-field__input),
+.posapp .pos-themed-input :deep(input),
+.posapp .pos-themed-input :deep(.v-label) {
+	color: var(--pos-text-primary) !important;
+}
+
+.posapp .pos-themed-input :deep(.v-field__overlay) {
+	background-color: var(--pos-input-bg) !important;
+}
+
+/* Fix for Frappe navbar collapse elements being hidden by POSAwesome CSS */
+/* This overrides the problematic .collapse { visibility: collapse; } rule */
+.navbar-collapse,
+.navbar-collapse.collapsing,
+.navbar-collapse.show,
+.navbar-collapse.collapse.show {
+	visibility: visible !important;
+}
+
+/* Ensure Bootstrap collapse behavior works correctly */
+.collapse:not(.show) {
+	display: none;
+}
+
+.collapsing {
+	height: 0;
+	overflow: hidden;
+	transition: height 0.35s ease;
+}
+
+/* Specific fix for Frappe's awesome bar and navbar elements */
+#navbar-breadcrumbs,
+.navbar-right,
+.awesome-bar,
+.navbar-user-image {
+	visibility: visible !important;
+}
+
+/* Restore horizontal layout for Frappe breadcrumbs */
+#navbar-breadcrumbs {
+	display: flex !important;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+
+#navbar-breadcrumbs .breadcrumb {
+	margin-bottom: 0;
+	flex-wrap: nowrap;
+}
+
+.posapp .pos-themed-button {
+	background-color: var(--pos-button-bg);
+	color: var(--pos-text-primary);
+	border-color: var(--pos-border);
+}
+
+.posapp .pos-themed-button:hover {
+	background-color: var(--pos-hover-bg);
+}
+
+.posapp .pos-themed-menu {
+	background-color: var(--pos-menu-bg);
+	color: var(--pos-text-primary);
+	border-color: var(--pos-border);
+}
+
+/* Optimized fast theme transitions - scoped to POSApp only */
+.posapp .pos-themed-card *,
+.posapp .pos-themed-card *::before,
+.posapp .pos-themed-card *::after,
+.posapp .pos-themed-input *,
+.posapp .pos-themed-button *,
+.posapp .pos-text-primary,
+.posapp .pos-text-secondary {
+	transition-property: background-color, color, border-color;
+	transition-duration: 0.05s;
+	transition-timing-function: ease-out;
+}
+
+/* Ultra-fast immediate update for critical elements - Scoped to POSApp */
+.posapp .pos-themed-card,
+.posapp .pos-themed-button,
+.posapp .pos-themed-input,
+.posapp .pos-text-primary,
+.posapp .pos-text-secondary,
+.posapp nav.pos-themed-card,
+.posapp .v-app-bar,
+.posapp .v-btn,
+.posapp .v-icon,
+.posapp .v-chip {
+	transition:
+		background-color 0.02s linear,
+		color 0.02s linear,
+		border-color 0.02s linear !important;
+}
+
+/* Prevent animation on theme change for specific elements that shouldn't animate - Scoped to POSApp */
+.posapp .pos-no-theme-transition,
+.posapp .pos-no-theme-transition * {
+	transition: none !important;
+}
+
+/* Immediate theme update class for critical UI elements - Scoped to POSApp */
+.posapp .pos-theme-immediate {
+	transition:
+		background-color 0.01s linear,
+		color 0.01s linear,
+		border-color 0.01s linear !important;
+}
+
+.posapp .pos-theme-immediate * {
+	transition:
+		background-color 0.01s linear,
+		color 0.01s linear,
+		border-color 0.01s linear !important;
+}

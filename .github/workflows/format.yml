@@ -1,0 +1,81 @@
+name: Format (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode: check = verify only, write = format & commit"
+        type: choice
+        options: [check, write]
+        default: check
+      prettier_glob:
+        description: 'Prettier file glob (optional)'
+        required: false
+        default: '**/*.{js,vue,css,scss,html}'
+      python_version:
+        description: "Python version"
+        type: choice
+        options: ["3.10", "3.11"]
+        default: "3.10"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      MODE: ${{ github.event.inputs.mode }}
+      PRETTIER_GLOB: ${{ github.event.inputs.prettier_glob }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Prettier (check/write)
+        run: |
+          if [ -z "$PRETTIER_GLOB" ]; then PRETTIER_GLOB='**/*.{js,vue,css,scss,html}'; fi
+          if [ "$MODE" = "write" ]; then
+            npx prettier --write "$PRETTIER_GLOB"
+          else
+            npx prettier --check "$PRETTIER_GLOB"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ github.event.inputs.python_version }}
+
+      - name: Install Python formatting tools
+        run: |
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          else
+            pip install black
+          fi
+
+      - name: Black (check/write)
+        run: |
+          if [ "$MODE" = "write" ]; then
+            black .
+          else
+            black --check .
+          fi
+
+      - name: Commit changes (only in write mode)
+        if: env.MODE == 'write'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: format code"
+          commit_user_name: GitHub Actions
+          commit_user_email: actions@github.com

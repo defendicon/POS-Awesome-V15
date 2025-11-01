@@ -14,9 +14,7 @@ class MpesaC2BRegisterURL(Document):
         mpesa_settings = frappe.get_doc("Mpesa Settings", self.mpesa_settings)
         env = "production" if not mpesa_settings.sandbox else "sandbox"
         business_shortcode = (
-            mpesa_settings.business_shortcode
-            if env == "production"
-            else mpesa_settings.till_number
+            mpesa_settings.business_shortcode if env == "production" else mpesa_settings.till_number
         )
         if env == "sandbox":
             base_url = sandbox_url
@@ -28,12 +26,8 @@ class MpesaC2BRegisterURL(Document):
             base_url=base_url,
         )
         site_url = get_request_site_address(True)
-        validation_url = (
-            site_url + "/api/method/posawesome.posawesome.api.m_pesa.validation"
-        )
-        confirmation_url = (
-            site_url + "/api/method/posawesome.posawesome.api.m_pesa.confirmation"
-        )
+        validation_url = site_url + "/api/method/posawesome.posawesome.api.m_pesa.validation"
+        confirmation_url = site_url + "/api/method/posawesome.posawesome.api.m_pesa.confirmation"
         register_url = base_url + "/mpesa/c2b/v2/registerurl"
 
         payload = {

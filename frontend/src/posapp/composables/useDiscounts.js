@@ -2,22 +2,48 @@
 
 export function useDiscounts() {
 	// Update additional discount amount based on percentage
-	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
-		// If value is too large, reset to 0
-		if (value < -100 || value > 100) {
-			context.additional_discount_percentage = 0;
-			context.additional_discount = 0;
-			return;
-		}
+        const updateDiscountAmount = (context) => {
+                let value = flt(context.additional_discount_percentage);
+                const usePercentage = Boolean(context.pos_profile?.posa_use_percentage_discount);
+                // If value is too large, reset to 0
+                if (value < -100 || value > 100) {
+                        context.additional_discount_percentage = 0;
+                        context.additional_discount = 0;
+                        return;
+                }
 
-		// Calculate discount amount based on percentage
-		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
-		} else {
-			context.additional_discount = 0;
-		}
-	};
+                // Calculate discount amount based on percentage
+                if (context.Total && context.Total !== 0) {
+                        if (usePercentage && context.isReturnInvoice && value > 0) {
+                                value = -Math.abs(value);
+                                context.additional_discount_percentage = value;
+                        }
+
+                        if (usePercentage) {
+                                const baseTotal = context.isReturnInvoice
+                                        ? Math.abs(context.Total)
+                                        : context.Total;
+
+                                const percentMagnitude = Math.abs(value);
+                                let discountAmount = (baseTotal * percentMagnitude) / 100;
+
+                                if (value < 0 || context.isReturnInvoice) {
+                                        discountAmount = -Math.abs(discountAmount);
+                                } else {
+                                        discountAmount = Math.abs(discountAmount);
+                                }
+
+                                context.additional_discount = discountAmount;
+                        } else {
+                                const signedTotal = context.isReturnInvoice
+                                        ? -Math.abs(context.Total)
+                                        : context.Total;
+                                context.additional_discount = (signedTotal * value) / 100;
+                        }
+                } else {
+                        context.additional_discount = 0;
+                }
+        };
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {
@@ -180,52 +206,49 @@ export function useDiscounts() {
 			return;
 		}
 
-                if (item.posa_offer_applied) {
-                        item.amount = context.flt(item.qty * item.rate, context.currency_precision);
-                        const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-                        if (context.selected_currency !== baseCurrency) {
-                                item.base_amount = context.flt(
-                                        item.amount / context.exchange_rate,
-                                        context.currency_precision,
-                                );
-                        } else {
-                                item.base_amount = item.amount;
-                        }
-                        if (context.forceUpdate) context.forceUpdate();
-                        return;
-                }
+		if (item.posa_offer_applied) {
+			item.amount = context.flt(item.qty * item.rate, context.currency_precision);
+			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+			if (context.selected_currency !== baseCurrency) {
+				item.base_amount = context.flt(
+					item.amount / context.exchange_rate,
+					context.currency_precision,
+				);
+			} else {
+				item.base_amount = item.amount;
+			}
+			if (context.forceUpdate) context.forceUpdate();
+			return;
+		}
 
-                if (item.price_list_rate) {
-                        // Always work with base rates first
-                        if (!item.base_price_list_rate) {
-                                item.base_price_list_rate = item.price_list_rate;
-                                item.base_rate = item.rate;
-                        }
+		if (item.price_list_rate) {
+			// Always work with base rates first
+			if (!item.base_price_list_rate) {
+				item.base_price_list_rate = item.price_list_rate;
+				item.base_rate = item.rate;
+			}
 
-                        // Convert to selected currency
-                        const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-                        if (context.selected_currency !== baseCurrency) {
-                                item.price_list_rate = context.flt(
-                                        item.base_price_list_rate / context.exchange_rate,
-                                        context.currency_precision,
-                                );
-                                item.rate = context.flt(
-                                        item.base_rate / context.exchange_rate,
-                                        context.currency_precision,
-                                );
-                        } else {
-                                item.price_list_rate = item.base_price_list_rate;
-                                item.rate = item.base_rate;
-                        }
-                }
+			// Convert to selected currency
+			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+			if (context.selected_currency !== baseCurrency) {
+				item.price_list_rate = context.flt(
+					item.base_price_list_rate / context.exchange_rate,
+					context.currency_precision,
+				);
+				item.rate = context.flt(item.base_rate / context.exchange_rate, context.currency_precision);
+			} else {
+				item.price_list_rate = item.base_price_list_rate;
+				item.rate = item.base_rate;
+			}
+		}
 
-                // Handle discounts
-                if (item.discount_percentage) {
-                        // Calculate discount in selected currency
-                        const price_list_rate = item.price_list_rate;
-                        const discount_amount = context.flt(
-                                (price_list_rate * item.discount_percentage) / 100,
-                                context.currency_precision,
+		// Handle discounts
+		if (item.discount_percentage) {
+			// Calculate discount in selected currency
+			const price_list_rate = item.price_list_rate;
+			const discount_amount = context.flt(
+				(price_list_rate * item.discount_percentage) / 100,
+				context.currency_precision,
 			);
 
 			item.discount_amount = discount_amount;

@@ -1,0 +1,52 @@
+name: Request more info on low-detail issues
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate issue body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = (issue.body || "").trim();
+            const minLen = 180; // adjust if needed
+            const mustHave = ["Steps to reproduce", "Expected", "Actual"];
+            const lc = body.toLowerCase();
+
+            const missing = mustHave.filter(k => !lc.includes(k.toLowerCase()));
+            const tooShort = body.replace(/\s+/g,' ').length < minLen;
+
+            if (tooShort || missing.length) {
+              const tips = [
+                "Thanks for opening an issue! 👋",
+                "Please add the following details:",
+                "- **Environment** (OS/Node/Browser)",
+                "- **Steps to reproduce** (numbered)",
+                "- **Expected vs Actual** with screenshots/logs",
+                "",
+                "When ready, comment `@maintainers info provided` to re-check. 🙏"
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: issue.number,
+                body: tips
+              });
+
+              // add label if not present
+              const labels = issue.labels.map(l => typeof l === "string" ? l : l.name);
+              if (!labels.includes("needs-info")) {
+                await github.rest.issues.addLabels({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  labels: ["needs-info"]
+                });
+              }
+            }

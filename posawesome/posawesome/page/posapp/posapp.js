@@ -71,7 +71,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 								console.warn("Failed to cache tax inclusive setting", err);
 							}
 							applySetting(posa_tax_inclusive);
-                                                        import("/assets/posawesome/dist/js/offline/index.js")
+							import("/assets/posawesome/dist/js/offline/index.js")
 								.then((m) => {
 									if (m && m.setTaxInclusiveSetting) {
 										m.setTaxInclusiveSetting(posa_tax_inclusive);
@@ -94,7 +94,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 				try {
 					const val = JSON.parse(cachedValue);
 					applySetting(val);
-                                        import("/assets/posawesome/dist/js/offline/index.js")
+					import("/assets/posawesome/dist/js/offline/index.js")
 						.then((m) => {
 							if (m && m.setTaxInclusiveSetting) {
 								m.setTaxInclusiveSetting(val);

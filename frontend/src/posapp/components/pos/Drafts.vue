@@ -4,10 +4,7 @@
 			<!-- <template v-slot:activator="{ on, attrs }">
         <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
       </template>-->
-                        <v-card
-                                variant="flat"
-                                :color="isDarkTheme ? $vuetify.theme.themes.dark.colors.surface : 'white'"
-                        >
+			<v-card variant="flat" class="pos-themed-card">
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Load Sales Invoice") }}</span>
 				</v-card-title>
@@ -18,17 +15,17 @@
 					<v-container>
 						<v-row no-gutters>
 							<v-col cols="12" class="pa-1">
-                                                                <v-data-table
-                                                                        :headers="headers"
-                                                                        :items="dialog_data"
-                                                                        item-value="name"
-                                                                        class="elevation-1"
-                                                                        :theme="isDarkTheme ? 'dark' : 'light'"
-                                                                        show-select
-                                                                        v-model="selected"
-                                                                        select-strategy="single"
-                                                                        return-object
-                                                                >
+								<v-data-table
+									:headers="headers"
+									:items="dialog_data"
+									item-value="name"
+									class="elevation-1"
+									:theme="$theme.isDark ? 'dark' : 'light'"
+									show-select
+									v-model="selected"
+									select-strategy="single"
+									return-object
+								>
 									<template v-slot:item.posting_time="{ item }">
 										{{ item.posting_time.split(".")[0] }}
 									</template>
@@ -56,12 +53,12 @@ import format from "../../format";
 export default {
 	// props: ["draftsDialog"],
 	mixins: [format],
-        data: () => ({
-                draftsDialog: false,
-                singleSelect: true,
-                selected: [],
-                dialog_data: {},
-                headers: [
+	data: () => ({
+		draftsDialog: false,
+		singleSelect: true,
+		selected: [],
+		dialog_data: {},
+		headers: [
 			{
 				title: __("Customer"),
 				value: "customer_name",
@@ -91,19 +88,15 @@ export default {
 				value: "grand_total",
 				align: "end",
 				sortable: false,
-                        },
-                ],
-        }),
-        computed: {
-                isDarkTheme() {
-                        return this.$theme.current === "dark";
-                },
-        },
-        watch: {},
-        methods: {
-                close_dialog() {
-                        this.draftsDialog = false;
-                },
+			},
+		],
+	}),
+	computed: {},
+	watch: {},
+	methods: {
+		close_dialog() {
+			this.draftsDialog = false;
+		},
 
 		submit_dialog() {
 			if (this.selected.length > 0) {

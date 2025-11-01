@@ -24,8 +24,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Invoice ID')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="invoice_name"
 								density="compact"
@@ -39,7 +38,6 @@
 								format="dd-MM-yyyy"
 								:enable-time-picker="false"
 								auto-apply
-								:dark="isDarkTheme"
 								@update:model-value="formatFromDate()"
 							/>
 						</v-col>
@@ -50,7 +48,6 @@
 								format="dd-MM-yyyy"
 								:enable-time-picker="false"
 								auto-apply
-								:dark="isDarkTheme"
 								@update:model-value="formatToDate()"
 							/>
 						</v-col>
@@ -62,8 +59,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Customer Name')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="customer_name"
 								density="compact"
@@ -74,8 +70,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Customer ID')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="customer_id"
 								density="compact"
@@ -88,8 +83,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Mobile Number')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="mobile_no"
 								density="compact"
@@ -100,8 +94,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Tax ID')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="tax_id"
 								density="compact"
@@ -116,8 +109,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Minimum Amount')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="min_amount"
 								density="compact"
@@ -131,8 +123,7 @@
 							<v-text-field
 								color="primary"
 								:label="frappe._('Maximum Amount')"
-								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-								class="dark-field"
+								class="pos-themed-input"
 								hide-details
 								v-model="max_amount"
 								density="compact"
@@ -297,11 +288,7 @@ export default {
 			},
 		],
 	}),
-	computed: {
-		isDarkTheme() {
-			return this.$theme?.current === "dark";
-		},
-	},
+	computed: {},
 	watch: {
 		from_date() {
 			this.formatFromDate();

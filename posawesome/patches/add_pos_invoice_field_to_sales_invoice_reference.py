@@ -2,9 +2,7 @@ import frappe
 
 
 def execute():
-    if not frappe.db.exists(
-        "Custom Field", "Sales Invoice Reference-pos_invoice"
-    ):
+    if not frappe.db.exists("Custom Field", "Sales Invoice Reference-pos_invoice"):
         frappe.get_doc(
             {
                 "doctype": "Custom Field",
@@ -18,9 +16,7 @@ def execute():
             }
         ).insert()
 
-    if not frappe.db.exists(
-        "Property Setter", "Sales Invoice Reference-sales_invoice-reqd"
-    ):
+    if not frappe.db.exists("Property Setter", "Sales Invoice Reference-sales_invoice-reqd"):
         frappe.get_doc(
             {
                 "doctype": "Property Setter",

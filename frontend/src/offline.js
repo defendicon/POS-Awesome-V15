@@ -8,7 +8,7 @@ let persistWorker = null;
 if (typeof Worker !== "undefined") {
 	try {
 		// Use the plain URL so the service worker cache matches when offline
-                const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
+		const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
 		persistWorker = new Worker(workerUrl, { type: "classic" });
 	} catch (e) {
 		console.error("Failed to init persist worker", e);
@@ -458,21 +458,21 @@ export async function syncOfflineInvoices() {
 
 		for (const inv of invoices) {
 			try {
-                                await frappe.call({
-                                        method: "posawesome.posawesome.api.invoices.submit_invoice",
-                                        args: {
-                                                invoice: inv.invoice,
-                                                data: inv.data,
-                                        },
-                                });
+				await frappe.call({
+					method: "posawesome.posawesome.api.invoices.submit_invoice",
+					args: {
+						invoice: inv.invoice,
+						data: inv.data,
+					},
+				});
 				synced++;
 			} catch (error) {
 				console.error("Failed to submit invoice, saving as draft", error);
 				try {
-                                        await frappe.call({
-                                                method: "posawesome.posawesome.api.invoices.update_invoice",
-                                                args: { data: inv.invoice },
-                                        });
+					await frappe.call({
+						method: "posawesome.posawesome.api.invoices.update_invoice",
+						args: { data: inv.invoice },
+					});
 					drafted += 1;
 				} catch (draftErr) {
 					console.error("Failed to save invoice as draft", draftErr);
@@ -526,10 +526,10 @@ export async function syncOfflineCustomers() {
 
 	for (const cust of customers) {
 		try {
-                        const result = await frappe.call({
-                                method: "posawesome.posawesome.api.customers.create_customer",
-                                args: cust.args,
-                        });
+			const result = await frappe.call({
+				method: "posawesome.posawesome.api.customers.create_customer",
+				args: cust.args,
+			});
 			synced++;
 			if (
 				result &&
@@ -912,14 +912,14 @@ export async function fetchItemStockQuantities(items, pos_profile, chunkSize = 1
 		for (let i = 0; i < items.length; i += chunkSize) {
 			const chunk = items.slice(i, i + chunkSize);
 			const response = await new Promise((resolve, reject) => {
-                                frappe.call({
-                                        method: "posawesome.posawesome.api.items.get_items_details",
-                                        args: {
-                                                pos_profile: JSON.stringify(pos_profile),
-                                                items_data: JSON.stringify(chunk),
-                                        },
-                                        freeze: false,
-                                        callback: function (r) {
+				frappe.call({
+					method: "posawesome.posawesome.api.items.get_items_details",
+					args: {
+						pos_profile: JSON.stringify(pos_profile),
+						items_data: JSON.stringify(chunk),
+					},
+					freeze: false,
+					callback: function (r) {
 						if (r.message) {
 							resolve(r.message);
 						} else {
@@ -995,12 +995,14 @@ export async function searchStoredItems({ search = "", itemGroup = "", limit = 1
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
+		const normalizedGroup = typeof itemGroup === "string" ? itemGroup.trim() : "";
 		let collection = db.table("items");
-		if (itemGroup && itemGroup.toLowerCase() !== "all") {
-			collection = collection.where("item_group").equalsIgnoreCase(itemGroup);
+		if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
+			collection = collection.where("item_group").equalsIgnoreCase(normalizedGroup);
 		}
-		if (search) {
-			const term = search.toLowerCase();
+		const normalizedSearch = typeof search === "string" ? search.trim() : "";
+		if (normalizedSearch) {
+			const term = normalizedSearch.toLowerCase();
 			collection = collection.filter((it) => {
 				const nameMatch = it.item_name && it.item_name.toLowerCase().includes(term);
 				const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
@@ -1009,8 +1011,17 @@ export async function searchStoredItems({ search = "", itemGroup = "", limit = 1
 					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
 				return nameMatch || codeMatch || barcodeMatch;
 			});
+
+			const unique = Array.from(map.values());
+			return unique.slice(offset, offset + limit);
 		}
-		return await collection.offset(offset).limit(limit).toArray();
+
+		let collection = applyItemGroupFilter(db.table("items"));
+		if (words.length) {
+			collection = collection.filter(matchesAllWords);
+		}
+		const res = await collection.offset(offset).limit(limit).toArray();
+		return res;
 	} catch (e) {
 		console.error("Failed to query stored items", e);
 		return [];

@@ -1,17 +1,40 @@
 <template>
 	<div :style="responsiveStyles">
+		<v-dialog v-model="scanErrorDialog" persistent max-width="420" content-class="scan-error-dialog">
+			<v-card>
+				<v-card-title class="d-flex align-center text-error text-h6">
+					<v-icon color="error" class="mr-2">mdi-alert-octagon</v-icon>
+					{{ __("Scan Error") }}
+				</v-card-title>
+				<v-divider></v-divider>
+				<v-card-text>
+					<p class="scan-error-message">{{ scanErrorMessage }}</p>
+					<p v-if="scanErrorCode" class="scan-error-code mt-2 mb-0">
+						<strong>{{ __("Scanned Code:") }}</strong>
+						<span>{{ scanErrorCode }}</span>
+					</p>
+					<p v-if="scanErrorDetails" class="scan-error-details mt-4 mb-0">
+						{{ scanErrorDetails }}
+					</p>
+				</v-card-text>
+				<v-card-actions class="justify-end">
+					<v-btn color="primary" variant="tonal" autofocus @click="acknowledgeScanError">
+						{{ __("OK") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 		<v-card
 			:class="[
-				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable',
-				isDarkTheme ? '' : 'bg-grey-lighten-5',
+				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
 			]"
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
-				backgroundColor: isDarkTheme ? '#121212' : '',
 				resize: 'vertical',
 				overflow: 'auto',
+				position: 'relative',
 			}"
 		>
 			<v-progress-linear
@@ -44,19 +67,79 @@
 								@focus="handleItemSearchFocus"
 								ref="debounce_search"
 							>
-								<!-- Add camera scan button if enabled -->
-								<template v-slot:append-inner v-if="pos_profile.posa_enable_camera_scanning">
+								<template v-slot:append-inner>
 									<v-btn
+										:icon="showManualScanInput ? 'mdi-barcode-off' : 'mdi-barcode-scan'"
+										size="small"
+										color="primary"
+										:variant="showManualScanInput ? 'tonal' : 'text'"
+										class="mr-1"
+										@click.stop="toggleManualScanInput"
+										:title="
+											showManualScanInput
+												? __('Hide Manual Entry')
+												: __('Show Manual Entry')
+										"
+									>
+									</v-btn>
+									<v-btn
+										v-if="pos_profile.posa_enable_camera_scanning"
 										icon="mdi-camera"
 										size="small"
 										color="primary"
 										variant="text"
+										:disabled="scannerLocked"
 										@click="startCameraScanning"
-										:title="__('Scan with Camera')"
+										:title="
+											scannerLocked
+												? __('Acknowledge the error to resume scanning')
+												: __('Scan with Camera')
+										"
 									>
 									</v-btn>
 								</template>
 							</v-text-field>
+							<v-expand-transition>
+								<div v-if="showManualScanInput" class="manual-scan-container mt-2">
+									<div class="manual-scan-text mb-3">
+										<div class="text-subtitle-2 font-weight-medium">
+											{{ __("Manual or Hardware Scanner Input") }}
+										</div>
+										<div class="text-body-2 text-medium-emphasis">
+											{{
+												__(
+													"Scan with a hardware scanner or type the code, then press Enter.",
+												)
+											}}
+										</div>
+									</div>
+									<v-text-field
+										density="comfortable"
+										variant="outlined"
+										color="primary"
+										clearable
+										hide-details
+										:label="__('Enter Code Manually')"
+										v-model="manualScanValue"
+										@keydown.enter.prevent="submitManualScan"
+										@click:clear="manualScanValue = ''"
+										autocomplete="off"
+										ref="manualScanInput"
+										prepend-inner-icon="mdi-barcode-scan"
+									>
+										<template #append-inner>
+											<v-btn
+												icon="mdi-check"
+												variant="tonal"
+												color="primary"
+												size="small"
+												@click="submitManualScan"
+												:title="__('Submit Code')"
+											></v-btn>
+										</template>
+									</v-text-field>
+								</div>
+							</v-expand-transition>
 						</v-col>
 						<v-col cols="3" class="pb-0" v-if="pos_profile.posa_input_qty">
 							<v-text-field
@@ -162,10 +245,9 @@
 												density="compact"
 												variant="outlined"
 												color="primary"
-												:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
 												hide-details
 												:label="__('Items per page')"
-												class="mb-2 dark-field"
+												class="mb-2 pos-themed-input"
 											>
 											</v-text-field>
 										</v-card-text>
@@ -187,115 +269,132 @@
 				<v-row class="items">
 					<v-col cols="12" class="pt-0 mt-0">
 						<div v-if="items_view == 'card'" class="items-card-container">
-							<div
-								class="items-card-grid"
-								ref="itemsContainer"
-								@scroll.passive="onCardScroll"
-								:class="{ 'item-container': isOverflowing }"
-							>
-								<div
-									v-for="item in filtered_items"
-									:key="item.item_code"
-									class="card-item-card"
-									@click="add_item(item)"
-									:draggable="true"
-									@dragstart="onDragStart($event, item)"
-									@dragend="onDragEnd"
-								>
-									<div class="card-item-image-container">
-										<v-img
-											:src="item.image || placeholderImage"
-											class="card-item-image"
-											aspect-ratio="1"
-											:alt="item.item_name"
-										>
-											<template v-slot:placeholder>
-												<div class="image-placeholder">
-													<v-icon size="40" color="grey-lighten-2"
-														>mdi-image</v-icon
-													>
-												</div>
-											</template>
-										</v-img>
-									</div>
-									<div class="card-item-content">
-										<div class="card-item-header">
-											<h4 class="card-item-name">{{ item.item_name }}</h4>
-											<span class="card-item-code">{{ item.item_code }}</span>
-										</div>
-										<div class="card-item-details">
-											<div class="card-item-price">
-												<div class="primary-price">
-													<span class="currency-symbol">
-														{{
-															currencySymbol(
-																item.original_currency ||
-																	pos_profile.currency,
-															)
-														}}
-													</span>
-													<span class="price-amount">
-														{{
-															format_currency(
-																item.base_price_list_rate || item.rate,
-																item.original_currency ||
-																	pos_profile.currency,
-																ratePrecision(
-																	item.base_price_list_rate || item.rate,
-																),
-															)
-														}}
-													</span>
-												</div>
-												<div
-													v-if="
-														pos_profile.posa_allow_multi_currency &&
-														selected_currency !== pos_profile.currency
-													"
-													class="secondary-price"
-												>
-													<span class="currency-symbol">{{
-														currencySymbol(selected_currency)
-													}}</span>
-													<span class="price-amount">
-														{{
-															format_currency(
-																item.rate,
-																selected_currency,
-																ratePrecision(item.rate),
-															)
-														}}
-													</span>
-												</div>
-											</div>
-											<div class="card-item-stock">
-												<v-icon size="small" class="stock-icon"
-													>mdi-package-variant</v-icon
-												>
-												<span
-													class="stock-amount"
-													:class="{
-														'negative-number': isNegative(item.actual_qty),
-													}"
-												>
-													{{
-														format_number(
-															item.actual_qty,
-															hide_qty_decimals ? 0 : 4,
-														) || 0
-													}}
-												</span>
-												<span class="stock-uom">{{ item.stock_uom || "" }}</span>
-											</div>
-										</div>
-									</div>
-								</div>
+							<div v-if="loading" class="items-card-grid">
+								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
 							</div>
+							<RecycleScroller
+								v-else
+								ref="itemsContainer"
+								class="virtual-scroller"
+								:list-class="['items-card-grid', { 'item-container': isOverflowing }]"
+								:items="displayedItems"
+								key-field="item_code"
+								:item-size="cardRowHeight"
+								:grid-items="cardColumns"
+								:item-secondary-size="cardColumnWidth"
+								:buffer="virtualScrollBuffer"
+								:emit-update="true"
+								@update="onVirtualRangeUpdate"
+							>
+								<template #default="{ item }">
+									<div
+										v-if="item"
+										:key="item.item_code"
+										class="card-item-card"
+										@click="select_item($event, item)"
+										:draggable="true"
+										@dragstart="onDragStart($event, item)"
+										@dragend="onDragEnd"
+									>
+										<div class="card-item-image-container">
+											<v-img
+												:src="item.image || placeholderImage"
+												class="card-item-image"
+												aspect-ratio="1"
+												:alt="item.item_name"
+											>
+												<template #placeholder>
+													<div class="image-placeholder">
+														<v-icon size="40" color="grey-lighten-2">
+															mdi-image
+														</v-icon>
+													</div>
+												</template>
+											</v-img>
+										</div>
+										<div class="card-item-content">
+											<div class="card-item-header">
+												<h4 class="card-item-name">{{ item.item_name }}</h4>
+												<span class="card-item-code">{{ item.item_code }}</span>
+											</div>
+											<div class="card-item-details">
+												<div class="card-item-price">
+													<div class="primary-price">
+														<span class="currency-symbol">
+															{{
+																currencySymbol(
+																	item.original_currency ||
+																		pos_profile.currency,
+																)
+															}}
+														</span>
+														<span class="price-amount">
+															{{
+																format_currency(
+																	item.base_price_list_rate ??
+																		item.rate ??
+																		0,
+																	item.original_currency ||
+																		pos_profile.currency,
+																	ratePrecision(
+																		item.base_price_list_rate ??
+																			item.rate ??
+																			0,
+																	),
+																)
+															}}
+														</span>
+													</div>
+													<div
+														v-if="
+															pos_profile.posa_allow_multi_currency &&
+															selected_currency !== pos_profile.currency
+														"
+														class="secondary-price"
+													>
+														<span class="currency-symbol">
+															{{ currencySymbol(selected_currency) }}
+														</span>
+														<span class="price-amount">
+															{{
+																format_currency(
+																	item.rate,
+																	selected_currency,
+																	ratePrecision(item.rate),
+																)
+															}}
+														</span>
+													</div>
+												</div>
+												<div class="card-item-stock">
+													<v-icon size="small" class="stock-icon">
+														mdi-package-variant
+													</v-icon>
+													<span
+														class="stock-amount"
+														:class="{
+															'negative-number': isNegative(item.actual_qty),
+														}"
+													>
+														{{
+															format_number(
+																item.actual_qty,
+																hide_qty_decimals ? 0 : 4,
+															) || 0
+														}}
+													</span>
+													<span class="stock-uom">{{ item.stock_uom || "" }}</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</template>
+							</RecycleScroller>
 						</div>
 						<div v-else class="items-table-container">
 							<v-data-table-virtual
 								:headers="headers"
-								:items="filtered_items"
+								:items="displayedItems"
 								class="sleek-data-table overflow-y-auto"
 								:style="{ height: 'calc(100% - 80px)' }"
 								item-key="item_code"
@@ -314,9 +413,11 @@
 											}}
 											{{
 												format_currency(
-													item.base_price_list_rate || item.rate,
+													item.base_price_list_rate ?? item.rate ?? 0,
 													item.original_currency || pos_profile.currency,
-													ratePrecision(item.base_price_list_rate || item.rate),
+													ratePrecision(
+														item.base_price_list_rate ?? item.rate ?? 0,
+													),
 												)
 											}}
 										</div>
@@ -412,6 +513,8 @@
 			ref="cameraScanner"
 			:scan-type="pos_profile.posa_camera_scan_type || 'Both'"
 			@barcode-scanned="onBarcodeScanned"
+			@scanner-opened="onScannerOpened"
+			@scanner-closed="onScannerClosed"
 		/>
 	</div>
 </template>
@@ -423,58 +526,86 @@ import format from "../../format";
 import _ from "lodash";
 import CameraScanner from "./CameraScanner.vue";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import { RecycleScroller } from "vue-virtual-scroller";
 import {
-	saveItemUOMs,
-	getItemUOMs,
-	getLocalStock,
-	isOffline,
-	getStoredItemsCount,
-	initializeStockCache,
-	searchStoredItems,
-	saveItemsBulk,
-	saveItems,
-	clearStoredItems,
-	getLocalStockCache,
-	setLocalStockCache,
-	initPromise,
-	memoryInitPromise,
-	checkDbHealth,
-	getCachedPriceListItems,
-	savePriceListItems,
-	clearPriceListCache,
-	updateLocalStockCache,
-	isStockCacheReady,
-	getCachedItemDetails,
-	saveItemDetailsCache,
-	saveItemGroups,
-	getCachedItemGroups,
-	getItemsLastSync,
-	setItemsLastSync,
-	forceClearAllCache,
+        saveItemUOMs,
+        getItemUOMs,
+        getLocalStock,
+        isOffline,
+        getStoredItemsCount,
+        initializeStockCache,
+        saveItemsBulk,
+        saveItems,
+        clearStoredItems,
+        getLocalStockCache,
+        setLocalStockCache,
+        initPromise,
+        memoryInitPromise,
+        checkDbHealth,
+        getCachedPriceListItems,
+        savePriceListItems,
+        clearPriceListCache,
+        updateLocalStockCache,
+        isStockCacheReady,
+        getCachedItemDetails,
+        saveItemDetailsCache,
+        saveItemGroups,
+        getCachedItemGroups,
+        getItemsLastSync,
+        setItemsLastSync,
+        forceClearAllCache,
 } from "../../../offline/index.js";
+import stockCoordinator from "../../utils/stockCoordinator.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
+import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
+import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
+import { useCartValidation } from "../../composables/useCartValidation.js";
+import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
+import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
 import placeholderImage from "./placeholder-image.png";
+import Skeleton from "../ui/Skeleton.vue";
+import { useCustomersStore } from "../../stores/customersStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
 	mixins: [format],
 	setup() {
 		const responsive = useResponsive();
 		const rtl = useRtl();
-		return { ...responsive, ...rtl };
+		const { fly } = useFlyAnimation();
+		const cartValidation = useCartValidation();
+
+		// Initialize Pinia store integration
+		const itemsIntegration = useItemsIntegration({
+			enableDebounce: true,
+			debounceDelay: 300,
+		});
+
+		const customersStore = useCustomersStore();
+		const { selectedCustomer } = storeToRefs(customersStore);
+
+		return {
+			...responsive,
+			...rtl,
+			fly,
+			cartValidation,
+			...itemsIntegration,
+			selectedCustomer,
+		};
 	},
 	components: {
 		CameraScanner,
+		Skeleton,
+		RecycleScroller,
 	},
 	data: () => ({
 		pos_profile: {},
+		stock_settings: {},
 		flags: {},
+		customer: "",
 		items_view: "list",
-		item_group: "ALL",
-		loading: false,
-		items_group: ["ALL"],
-		items: [],
-		search: "",
 		first_search: "",
 		search_backup: "",
 		// Limit the displayed items to avoid overly large lists
@@ -483,8 +614,6 @@ export default {
 		appliedOffersCount: 0,
 		couponsCount: 0,
 		appliedCouponsCount: 0,
-		customer_price_list: null,
-		customer: null,
 		new_line: false,
 		qty: 1,
 		refresh_interval: null,
@@ -492,13 +621,14 @@ export default {
 		itemDetailsRequestCache: { key: null, promise: null, result: null },
 		itemDetailsRetryCount: 0,
 		itemDetailsRetryTimeout: null,
-		items_loaded: false,
 		selected_currency: "",
 		exchange_rate: 1,
 		prePopulateInProgress: false,
-		itemWorker: null,
-		storageAvailable: true,
-		localStorageAvailable: true,
+                itemWorker: null,
+                flyConfig: { speed: 0.6, easing: "ease-in-out" },
+                storageAvailable: true,
+                localStorageAvailable: true,
+                stockUnsubscribe: null,
 		items_request_token: 0,
 		pendingGetItems: null,
 		lastGetItemsKey: "",
@@ -516,14 +646,19 @@ export default {
 		temp_force_server_items: false,
 		// Performance optimizations
 		searchCache: new Map(),
-		itemCache: new Map(),
-		virtualScrollEnabled: true,
+                barcodeIndex: new Map(),
+                itemCache: new Map(),
+                virtualScrollEnabled: true,
+		virtualScrollBuffer: 200,
 		renderBuffer: 10,
 		lastScrollTop: 0,
 		scrollThrottle: null,
 		searchDebounce: null,
 		// Prevent repeated server fetches when local storage is empty
 		fallbackAttempted: false,
+		cardContainerWidth: 0,
+		virtualScrollPending: false,
+		metricsRaf: null,
 		// Fixed page size for incremental item loading to avoid
 		// pulling the entire catalog at once.
 		itemsPageLimit: 100,
@@ -531,16 +666,45 @@ export default {
 		search_from_scanner: false,
 		currentPage: 0,
 		isOverflowing: false,
+		// Track background loading state and pending searches
+		isBackgroundLoading: false,
+		pendingItemSearch: null,
+		loadProgress: 0,
+		totalItemCount: 0,
+		scanErrorDialog: false,
+		scanErrorMessage: "",
+		scanErrorDetails: "",
+		scanErrorCode: "",
+		scannerLocked: false,
+		cameraScannerActive: false,
+		showManualScanInput: false,
+		manualScanValue: "",
+		scanAudioContext: null,
+		pendingScanCode: "",
+		awaitingScanResult: false,
+		scanDebounceId: null,
+		scanQueuedCode: "",
+		refreshInFlight: false,
+		clearingSearch: false,
 	}),
 
 	watch: {
+		showManualScanInput(newVal) {
+			if (newVal) {
+				this.queueManualScanFocus();
+			} else {
+				this.manualScanValue = "";
+				if (!this.cameraScannerActive) {
+					this.$nextTick(() => this.focusItemSearch());
+				}
+			}
+		},
 		customer: _.debounce(function () {
 			if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
-					if (!this.items_loaded || !this.filtered_items.length) {
-						this.items_loaded = false;
+					if (!this.itemsLoaded || !this.displayedItems.length) {
 						if (!isOffline()) {
 							this.get_items(true);
 						} else {
@@ -559,7 +723,6 @@ export default {
 					}
 				} else {
 					// Fall back to full reload
-					this.items_loaded = false;
 					if (!isOffline()) {
 						this.get_items(true);
 					} else {
@@ -577,7 +740,7 @@ export default {
 			}
 			// When the customer changes, avoid reloading all items.
 			// Simply refresh prices for visible items only
-			if (this.items_loaded && this.filtered_items && this.filtered_items.length > 0) {
+			if (this.itemsLoaded && this.displayedItems && this.displayedItems.length > 0) {
 				this.$nextTick(() => this.refreshPricesForVisibleItems());
 			} else {
 				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
@@ -592,8 +755,7 @@ export default {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
-					if (!this.items_loaded || !this.items.length) {
-						this.items_loaded = false;
+					if (!this.itemsLoaded || !this.items.length) {
 						if (!isOffline()) {
 							this.get_items(true);
 						} else {
@@ -605,7 +767,6 @@ export default {
 					}
 				} else {
 					// Fall back to full reload
-					this.items_loaded = false;
 					if (!isOffline()) {
 						this.get_items(true);
 					} else {
@@ -615,7 +776,7 @@ export default {
 				return;
 			}
 			// Apply cached rates if available for immediate update
-			if (this.items_loaded && this.items && this.items.length > 0) {
+			if (this.itemsLoaded && this.items && this.items.length > 0) {
 				const cached = await getCachedPriceListItems(this.customer_price_list);
 				if (cached && cached.length) {
 					const map = {};
@@ -625,8 +786,13 @@ export default {
 					this.items.forEach((it) => {
 						const ci = map[it.item_code];
 						if (ci) {
-							it.rate = ci.rate;
-							it.price_list_rate = ci.price_list_rate || ci.rate;
+							const force =
+								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = ci.price_list_rate ?? ci.rate ?? 0;
+							if (force || price) {
+								it.rate = price;
+								it.price_list_rate = price;
+							}
 						}
 					});
 					this.eventBus.emit("set_all_items", this.items);
@@ -635,7 +801,6 @@ export default {
 				}
 			}
 			// No cache found - force a reload so prices are updated
-			this.items_loaded = false;
 			if (!isOffline()) {
 				this.get_items(true);
 			} else {
@@ -650,7 +815,7 @@ export default {
 			this.eventBus.emit("set_new_line", this.new_line);
 		},
 		item_group(newValue, oldValue) {
-			if (this.pos_profile && this.pos_profile.pose_use_limit_search && newValue !== oldValue) {
+			if (this.usesLimitSearch && newValue !== oldValue) {
 				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
 					this.get_items(true);
 				} else {
@@ -664,21 +829,33 @@ export default {
 				}
 			}
 		},
-		filtered_items(new_value, old_value) {
+		displayedItems(new_value, old_value) {
 			// Update item details if items changed
-			if (
-				this.pos_profile &&
-				!this.pos_profile.pose_use_limit_search &&
-				new_value.length !== old_value.length
-			) {
+			if (!this.usesLimitSearch && new_value.length !== old_value.length) {
 				this.update_items_details(new_value);
 			}
-			this.$nextTick(this.checkItemContainerOverflow);
+			this.$nextTick(() => {
+				this.checkItemContainerOverflow();
+				this.scheduleCardMetricsUpdate();
+			});
 		},
 		// Automatically search when the query has at least 3 characters
 		first_search: _.debounce(function (val, oldVal) {
+			if (this.clearingSearch) {
+				return;
+			}
 			const newLen = (val || "").trim().length;
 			const oldLen = (oldVal || "").trim().length;
+
+			// When limit search is enabled, wait for an explicit Enter key press
+			if (this.usesLimitSearch) {
+				if (oldLen >= 3 && newLen === 0) {
+					// Reset items only when search is fully cleared
+					this.clearSearch();
+				}
+				return;
+			}
+
 			if (newLen >= 3) {
 				// Call without arguments so search_onchange treats it like an Enter key
 				this.search_onchange();
@@ -700,14 +877,16 @@ export default {
 		windowWidth() {
 			// Keep the configured items per page on resize
 			this.itemsPerPage = this.items_per_page;
+			this.scheduleCardMetricsUpdate();
 		},
 		windowHeight() {
 			// Maintain the configured items per page on resize
 			this.itemsPerPage = this.items_per_page;
+			this.scheduleCardMetricsUpdate();
 		},
-		items_loaded(val) {
+		itemsLoaded(val) {
 			if (val) {
-				this.eventBus.emit("items_loaded");
+				this.eventBus.emit("itemsLoaded");
 				this.eventBus.emit("data-loaded", "items");
 			}
 		},
@@ -715,6 +894,7 @@ export default {
 			this.$nextTick(() => {
 				if (this.items_view === "card") {
 					this.checkItemContainerOverflow();
+					this.scheduleCardMetricsUpdate();
 				} else {
 					this.isOverflowing = false;
 				}
@@ -745,7 +925,9 @@ export default {
 		},
 
 		performSearch(searchTerm, itemGroup) {
+			const mark = perfMarkStart("pos:search-filter");
 			if (!this.items || !this.items.length) {
+				perfMarkEnd("pos:search-filter", mark);
 				return [];
 			}
 
@@ -763,23 +945,43 @@ export default {
 			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
 				const term = searchTerm.toLowerCase();
 				filtered = filtered.filter((item) => {
-					const barcodeMatch =
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some(
-								(b) => b.barcode && b.barcode.toLowerCase().includes(term),
-							)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc).toLowerCase().includes(term))) ||
-						(item.barcode && String(item.barcode).toLowerCase().includes(term));
+					if (!searchWords.length) {
+						return true;
+					}
 
-					return (
-						item.item_code.toLowerCase().includes(term) ||
-						item.item_name.toLowerCase().includes(term) ||
-						barcodeMatch
-					);
+					const name = (item.item_name || "").toLowerCase();
+					const code = (item.item_code || "").toLowerCase();
+
+					const barcodeValues = [];
+					if (Array.isArray(item.item_barcode)) {
+						item.item_barcode.forEach((b) => {
+							if (b?.barcode) {
+								barcodeValues.push(String(b.barcode).toLowerCase());
+							}
+						});
+					}
+					if (Array.isArray(item.barcodes)) {
+						item.barcodes.forEach((bc) => {
+							if (bc) {
+								barcodeValues.push(String(bc).toLowerCase());
+							}
+						});
+					}
+					if (item.barcode) {
+						barcodeValues.push(String(item.barcode).toLowerCase());
+					}
+
+					return searchWords.every((word) => {
+						return (
+							code.includes(word) ||
+							name.includes(word) ||
+							barcodeValues.some((barcode) => barcode.includes(word))
+						);
+					});
 				});
 			}
 
+			perfMarkEnd("pos:search-filter", mark);
 			return filtered;
 		},
 
@@ -798,6 +1000,53 @@ export default {
 			} catch (e) {
 				console.error("Failed to fetch server items timestamp", e);
 				return null;
+			}
+		},
+
+		scheduleCardMetricsUpdate() {
+			if (this.metricsRaf) {
+				cancelAnimationFrame(this.metricsRaf);
+			}
+			this.metricsRaf = requestAnimationFrame(() => {
+				this.metricsRaf = null;
+				this.updateCardContainerMetrics();
+			});
+		},
+		updateCardContainerMetrics() {
+			this.$nextTick(() => {
+				const ref = this.$refs.itemsContainer;
+				const el = ref && ref.$el ? ref.$el : ref;
+				if (!el || typeof el.getBoundingClientRect !== "function") {
+					return;
+				}
+				const { width } = el.getBoundingClientRect();
+				if (width && Math.round(width) !== Math.round(this.cardContainerWidth)) {
+					this.cardContainerWidth = width;
+				}
+			});
+		},
+		async onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
+			const total = this.displayedItems ? this.displayedItems.length : 0;
+			if (!total) {
+				this.scheduleCardMetricsUpdate();
+				return;
+			}
+
+			const threshold = Math.max(1, this.cardColumns * 2);
+			const nearEnd = visibleEndIndex >= total - threshold;
+
+			if (nearEnd && this.hasMoreCachedItems && !this.virtualScrollPending && !this.loading) {
+				this.virtualScrollPending = true;
+				try {
+					await this.appendCachedItemsPage();
+				} catch (error) {
+					console.warn("Failed to append cached items page", error);
+				} finally {
+					this.virtualScrollPending = false;
+					this.scheduleCardMetricsUpdate();
+				}
+			} else {
+				this.scheduleCardMetricsUpdate();
 			}
 		},
 
@@ -890,31 +1139,35 @@ export default {
 			return dbHealthy;
 		},
 		async loadVisibleItems(reset = false) {
+			this.loadProgress = 0;
 			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
 			await initPromise;
 			await this.ensureStorageHealth();
+
 			if (reset) {
 				this.currentPage = 0;
-				this.items = [];
+				await this.loadItems({
+					searchValue: this.get_search(this.first_search),
+					groupFilter: this.item_group,
+					limit: this.usesLimitSearch ? this.limitSearchCap : undefined,
+				});
 			}
-			const search = this.get_search(this.first_search);
-			const itemGroup = this.item_group !== "ALL" ? this.item_group.toLowerCase() : "";
-			const pageItems = await searchStoredItems({
-				search,
-				itemGroup,
-				limit: this.itemsPerPage,
-				offset: this.currentPage * this.itemsPerPage,
-			});
-			const total = pageItems.length || 1;
-			pageItems.forEach((it, idx) => {
-				this.items.push(it);
+
+			const pageItems = await this.appendCachedItemsPage();
+
+			if (Array.isArray(pageItems) && pageItems.length) {
+				this.eventBus.emit("set_all_items", this.items);
+				await this.update_items_details(pageItems);
+
+				this.loadProgress = this.totalItemCount
+					? Math.round((this.items.length / this.totalItemCount) * 100)
+					: 100;
+
 				this.eventBus.emit("data-load-progress", {
 					name: "items",
-					progress: Math.round(((idx + 1) / total) * 100),
+					progress: this.loadProgress,
 				});
-			});
-			this.eventBus.emit("set_all_items", this.items);
-			if (pageItems.length) this.update_items_details(pageItems);
+			}
 		},
 		onListScroll(event) {
 			if (this.scrollThrottle) return;
@@ -935,7 +1188,8 @@ export default {
 		},
 
 		checkItemContainerOverflow() {
-			const el = this.$refs.itemsContainer;
+			const ref = this.$refs.itemsContainer;
+			const el = ref && ref.$el ? ref.$el : ref;
 			if (!el) {
 				this.isOverflowing = false;
 				return;
@@ -953,6 +1207,7 @@ export default {
 
 			el.style.maxHeight = `${availableHeight}px`;
 			this.isOverflowing = el.scrollHeight > availableHeight;
+			this.scheduleCardMetricsUpdate();
 		},
 
 		async fetchItemDetails(items) {
@@ -1023,54 +1278,71 @@ export default {
 		},
 		async refreshPricesForVisibleItems() {
 			const vm = this;
-			if (!vm.filtered_items || vm.filtered_items.length === 0) return;
+			if (!vm.displayedItems || vm.displayedItems.length === 0) return;
 
-			vm.loading = true;
-
-			const itemCodes = vm.filtered_items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
-			const updates = [];
-
-			cacheResult.cached.forEach((det) => {
-				const item = vm.filtered_items.find((it) => it.item_code === det.item_code);
-				if (item) {
-					const upd = { actual_qty: det.actual_qty };
-					if (det.item_uoms && det.item_uoms.length > 0) {
-						upd.item_uoms = det.item_uoms;
-						saveItemUOMs(item.item_code, det.item_uoms);
-					}
-					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
-							upd.rate = det.rate;
-							upd.price_list_rate = det.price_list_rate || det.rate;
-						}
-					}
-					if (det.currency) {
-						upd.currency = det.currency;
-					}
-					updates.push({ item, upd });
-				}
-			});
-
-			if (cacheResult.missing.length === 0) {
-				vm.$nextTick(() => {
-					updates.forEach(({ item, upd }) => Object.assign(item, upd));
-					updateLocalStockCache(cacheResult.cached);
-					vm.loading = false;
-				});
+			if (vm.refreshInFlight) {
 				return;
 			}
 
-			const itemsToFetch = vm.filtered_items.filter((it) => cacheResult.missing.includes(it.item_code));
+			vm.refreshInFlight = true;
+			const wasLoading = vm.loading;
+			if (!wasLoading) {
+				vm.loading = true;
+			}
+			const releaseLoading = () => {
+				if (!wasLoading) {
+					vm.loading = false;
+				}
+			};
 
 			try {
+				const itemCodes = vm.displayedItems.map((it) => it.item_code);
+				const cacheResult = await getCachedItemDetails(
+					vm.pos_profile.name,
+					vm.active_price_list,
+					itemCodes,
+				);
+				const updates = [];
+
+				cacheResult.cached.forEach((det) => {
+					const item = vm.displayedItems.find((it) => it.item_code === det.item_code);
+					if (item) {
+						const upd = { actual_qty: det.actual_qty };
+						if (det.item_uoms && det.item_uoms.length > 0) {
+							upd.item_uoms = det.item_uoms;
+							saveItemUOMs(item.item_code, det.item_uoms);
+						}
+						if (det.rate !== undefined) {
+							const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = det.price_list_rate ?? det.rate ?? 0;
+							if (force || price) {
+								upd.rate = price;
+								upd.price_list_rate = price;
+							}
+						}
+						if (det.currency) {
+							upd.currency = det.currency;
+						}
+						updates.push({ item, upd });
+					}
+				});
+
+				if (cacheResult.missing.length === 0) {
+					vm.$nextTick(() => {
+						updates.forEach(({ item, upd }) => Object.assign(item, upd));
+						updateLocalStockCache(cacheResult.cached);
+						releaseLoading();
+					});
+					return;
+				}
+
+				const itemsToFetch = vm.displayedItems.filter((it) =>
+					cacheResult.missing.includes(it.item_code),
+				);
+
 				const details = await vm.fetchItemDetails(itemsToFetch);
 				details.forEach((updItem) => {
-					const item = vm.filtered_items.find((it) => it.item_code === updItem.item_code);
+					const item = vm.displayedItems.find((it) => it.item_code === updItem.item_code);
 					if (item) {
 						const upd = { actual_qty: updItem.actual_qty };
 						if (updItem.item_uoms && updItem.item_uoms.length > 0) {
@@ -1078,9 +1350,11 @@ export default {
 							saveItemUOMs(item.item_code, updItem.item_uoms);
 						}
 						if (updItem.rate !== undefined) {
-							if (updItem.rate !== 0 || !item.rate) {
-								upd.rate = updItem.rate;
-								upd.price_list_rate = updItem.price_list_rate || updItem.rate;
+							const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+							const price = updItem.price_list_rate ?? updItem.rate ?? 0;
+							if (force || price) {
+								upd.rate = price;
+								upd.price_list_rate = price;
 							}
 						}
 						if (updItem.currency) {
@@ -1104,7 +1378,7 @@ export default {
 						vm.pos_profile &&
 						vm.pos_profile.posa_local_storage &&
 						vm.storageAvailable &&
-						!vm.pos_profile.pose_use_limit_search
+						!vm.usesLimitSearch
 					) {
 						try {
 							await saveItemsBulk(details);
@@ -1113,13 +1387,16 @@ export default {
 							vm.markStorageUnavailable && vm.markStorageUnavailable();
 						}
 					}
-					vm.loading = false;
+					releaseLoading();
 				});
 			} catch (err) {
 				if (err.name !== "AbortError") {
 					console.error("Error fetching item details:", err);
-					vm.loading = false;
+					releaseLoading();
 				}
+			} finally {
+				vm.refreshInFlight = false;
+				releaseLoading();
 			}
 		},
 
@@ -1129,6 +1406,36 @@ export default {
 		show_coupons() {
 			this.eventBus.emit("show_coupons", "true");
 		},
+                async initializeItems() {
+                        await this.ensureStorageHealth();
+                        if (
+                                this.pos_profile &&
+                                this.pos_profile.posa_local_storage &&
+				this.storageAvailable &&
+				!this.usesLimitSearch
+			) {
+				const localCount = await getStoredItemsCount();
+				if (localCount > 0) {
+					await this.loadVisibleItems(true);
+					await this.verifyServerItemCount();
+					return;
+				}
+			}
+			await this.get_items(true);
+
+                        if (
+                                this.pos_profile &&
+                                this.pos_profile.posa_local_storage &&
+                                this.storageAvailable &&
+                                !this.usesLimitSearch
+                        ) {
+                                await this.verifyServerItemCount();
+                        }
+
+                        this.$nextTick(() => {
+                                this.primeStockState();
+                        });
+                },
 		async forceReloadItems() {
 			console.log("[ItemsSelector] forceReloadItems called");
 			// Clear cached price list items so the reload always
@@ -1137,7 +1444,6 @@ export default {
 			console.log("[ItemsSelector] price list cache cleared");
 			await this.ensureStorageHealth();
 			console.log("[ItemsSelector] storage health ensured");
-			this.items_loaded = false;
 
 			// When no search term is entered, reset the search so
 			// we fetch the entire item list from the server.
@@ -1152,6 +1458,18 @@ export default {
 			console.log("[ItemsSelector] forceReloadItems finished");
 		},
 		async verifyServerItemCount() {
+			if (this.usesLimitSearch) {
+				console.log("[ItemsSelector] limit search enabled, skipping background reconciliation");
+				return;
+			}
+			if (!this.pos_profile || !this.pos_profile.posa_local_storage || !this.storageAvailable) {
+				console.log("[ItemsSelector] local caching disabled, skipping background reconciliation");
+				return;
+			}
+			if (this.isBackgroundLoading) {
+				console.log("[ItemsSelector] background load already in progress, skipping reconciliation");
+				return;
+			}
 			if (isOffline()) {
 				console.log("[ItemsSelector] offline, skipping server item count check");
 				return;
@@ -1169,30 +1487,53 @@ export default {
 				});
 				const serverCount = res.message || 0;
 				console.log("[ItemsSelector] server item count result", { serverCount });
-				if (typeof serverCount === "number" && serverCount !== localCount) {
-					console.log("[ItemsSelector] count mismatch, forcing reload");
-					await this.forceReloadItems();
+				if (typeof serverCount === "number") {
+					this.totalItemCount = serverCount;
+					if (serverCount <= localCount) {
+						this.loadProgress = serverCount
+							? Math.min(100, Math.round((localCount / serverCount) * 100))
+							: 100;
+						this.eventBus.emit("data-load-progress", {
+							name: "items",
+							progress: this.loadProgress,
+						});
+						if (serverCount < localCount) {
+							console.log("[ItemsSelector] local cache has extra items, forcing reload");
+							await this.forceReloadItems();
+						}
+						return;
+					}
+
+					this.loadProgress = serverCount ? Math.round((localCount / serverCount) * 100) : 0;
+					this.eventBus.emit("data-load-progress", {
+						name: "items",
+						progress: this.loadProgress,
+					});
+
+					const lastSync = getItemsLastSync();
+					const requestToken = ++this.items_request_token;
+					await this.backgroundLoadItems();
 				}
 			} catch (err) {
 				console.error("Error checking item count:", err);
 			}
 		},
 		async get_items(force_server = false) {
-			console.log("[ItemsSelector] get_items called", {
-				force_server,
-				first_search: this.first_search,
-				item_group: this.item_group,
-			});
-			// Ensure POS profile is available
+			if (this.isBackgroundLoading) {
+				if (this.pendingGetItems) {
+					this.pendingGetItems.force_server = this.pendingGetItems.force_server || force_server;
+				} else {
+					this.pendingGetItems = { force_server };
+				}
+				return;
+			}
+
 			if (!this.pos_profile || !this.pos_profile.name) {
 				console.warn("No POS Profile available, attempting to get it...");
-				// Try to get the current POS profile
 				try {
 					if (frappe.boot && frappe.boot.pos_profile) {
 						this.pos_profile = frappe.boot.pos_profile;
 					} else {
-						// If still no profile, show error and return
-						console.error("No POS Profile configured");
 						frappe.msgprint(__("Please configure a POS Profile first"));
 						return;
 					}
@@ -1202,333 +1543,101 @@ export default {
 				}
 			}
 
-			const vm = this;
+			const searchValue = this.get_search(this.first_search);
+			const normalizedGroup =
+				typeof this.item_group === "string" && this.item_group.length > 0 ? this.item_group : "ALL";
 
-			// Respect POS profile search limit when limit search is enabled
-			if (vm.pos_profile?.pose_use_limit_search) {
-				vm.itemsPageLimit = parseInt(vm.pos_profile.posa_search_limit) || vm.itemsPageLimit;
-			}
+			console.log("[ItemsSelector] get_items via store", {
+				force_server,
+				searchValue,
+				normalizedGroup,
+			});
 
-			const search = this.get_search(this.first_search);
-			const gr = vm.item_group !== "ALL" ? vm.item_group.toLowerCase() : "";
-			const sr = search || "";
-			const profileGroups = (vm.pos_profile?.item_groups || []).map((g) => g.item_group);
-			console.log("[ItemsSelector] prepared fetch params", { search: sr, item_group: gr });
-
-			// Skip if already loading the same data
-			if (!force_server && this.items_loaded && this.items.length > 0) {
-				console.log("[ItemsSelector] items already loaded, skipping fetch");
-				this.loading = false;
-				return;
-			}
-
-			this.loading = true;
-			const requestToken = ++this.items_request_token;
-			console.log("[ItemsSelector] sending request", { requestToken });
 			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
-			console.log("[ItemsSelector] data-load-progress emitted", { progress: 0 });
+			const requestToken = ++this.items_request_token;
 
 			try {
-				// Simple API call to get items
-				const response = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_items",
-					args: {
-						pos_profile: JSON.stringify(vm.pos_profile),
-						price_list: vm.customer_price_list,
-						item_group: gr,
-						search_value: sr,
-						customer: vm.customer,
-						limit: vm.itemsPageLimit,
-						start_after: null,
-						include_image: 1,
-						item_groups: profileGroups,
-					},
-				});
-				console.log("[ItemsSelector] server responded", { count: response.message?.length });
-
-				const items = response.message || [];
-
-				// Process items
-				items.forEach((item) => {
-					// Ensure UOMs
-					if (!item.item_uoms || item.item_uoms.length === 0) {
-						item.item_uoms = item.stock_uom
-							? [{ uom: item.stock_uom, conversion_factor: 1.0 }]
-							: [];
-					}
-
-					// Set default quantity
-					if (item.actual_qty === undefined) {
-						item.actual_qty = 0;
-					}
+				const result = await this.loadItems({
+					forceServer: force_server,
+					searchValue,
+					groupFilter: normalizedGroup,
+					priceList: this.customer_price_list,
+					limit: this.usesLimitSearch ? this.limitSearchCap : undefined,
 				});
 
-				vm.items = items;
-				vm.items_loaded = true;
-				vm.eventBus.emit("set_all_items", vm.items);
-				console.log("[ItemsSelector] set_all_items emitted", { itemsLength: vm.items.length });
+				const resolvedItems = Array.isArray(result) && result.length ? result : this.items;
+				this.replaceBarcodeIndex(resolvedItems);
+				this.eventBus.emit("set_all_items", resolvedItems);
 
-				const hasMore = !vm.pos_profile.pose_use_limit_search && items.length === vm.itemsPageLimit;
-				const progress = hasMore
-					? Math.min(99, Math.round((items.length / (items.length + vm.itemsPageLimit)) * 100))
-					: 100;
-				vm.eventBus.emit("data-load-progress", { name: "items", progress });
-				console.log("[ItemsSelector] data-load-progress emitted", { progress });
+				const progress = this.loadProgress
+					? this.loadProgress
+					: this.totalItemCount
+						? Math.round((resolvedItems.length / this.totalItemCount) * 100)
+						: 100;
 
-				if (
-					vm.pos_profile &&
-					vm.pos_profile.posa_local_storage &&
-					vm.storageAvailable &&
-					!vm.pos_profile.pose_use_limit_search
-				) {
-					try {
-						if (force_server) {
-							console.log("[ItemsSelector] clearing local items before save");
-							await clearStoredItems();
-						}
-						await saveItemsBulk(vm.items);
-						console.log("[ItemsSelector] items persisted locally", { length: vm.items.length });
-					} catch (e) {
-						console.error("Failed to persist items locally", e);
-						vm.markStorageUnavailable();
-					}
+				this.eventBus.emit("data-load-progress", {
+					name: "items",
+					progress,
+				});
+
+				if (!this.usesLimitSearch && this.hasMoreCachedItems) {
+					await this.appendCachedItemsPage();
 				}
 
-				if (hasMore) {
-					const last = items[items.length - 1]?.item_name || null;
-					console.log("[ItemsSelector] more items available, starting background load", {
-						last,
-						requestToken,
-					});
-					this.backgroundLoadItems(last, null, false, requestToken, items.length);
+				if (!this.usesLimitSearch && requestToken === this.items_request_token) {
+					this.kickoffBackgroundSync();
 				}
 			} catch (error) {
-				console.error("Failed to load items:", error);
+				console.error("Failed to load items via store:", error);
 				frappe.msgprint(__("Failed to load items. Please try again."));
-			} finally {
-				vm.loading = false;
-				console.log("[ItemsSelector] get_items finished");
 			}
 		},
-		async backgroundLoadItems(startAfter, syncSince, clearBefore = false, requestToken, loaded = 0) {
-			console.log("[ItemsSelector] backgroundLoadItems called", {
-				startAfter,
-				syncSince,
-				clearBefore,
-				requestToken,
-				loaded,
-			});
-			const limit = this.itemsPageLimit;
-			const profileGroups = (this.pos_profile?.item_groups || []).map((g) => g.item_group);
-			// When the limit is extremely high, treat it as
-			// "no incremental loading" and exit early.
-			if (!limit || limit >= 10000) {
-				console.log("[ItemsSelector] background load skipped due to high limit", { limit });
-				return;
+		kickoffBackgroundSync() {
+			if (this.isBackgroundLoading || this.usesLimitSearch) {
+				return Promise.resolve([]);
 			}
-			if (this.items_request_token !== requestToken) {
-				console.log("[ItemsSelector] background load token mismatch, aborting");
-				return;
-			}
-			const lastSync = syncSince;
-			if (this.itemWorker && this.storageAvailable) {
-				try {
-					const res = await frappe.call({
-						method: "posawesome.posawesome.api.items.get_items",
-						args: {
-							pos_profile: JSON.stringify(this.pos_profile),
-							price_list: this.customer_price_list,
-							item_group: this.item_group !== "ALL" ? this.item_group.toLowerCase() : "",
-							search_value: this.search || "",
-							customer: this.customer,
-							modified_after: lastSync,
-							limit,
-							start_after: startAfter,
-							include_image: 1,
-							item_groups: profileGroups,
-						},
-						freeze: false,
-					});
-					console.log("[ItemsSelector] background load server response", {
-						count: res.message?.length,
-					});
-					const text = JSON.stringify(res);
-					if (this.items_request_token !== requestToken) {
-						console.log("[ItemsSelector] background load token mismatch after response");
-						return;
-					}
-					let lastItemName = null;
-					const count = await new Promise((resolve) => {
-						this.itemWorker.onmessage = async (ev) => {
-							if (this.items_request_token !== requestToken) {
-								console.log(
-									"[ItemsSelector] background load token mismatch during worker message",
-								);
-								resolve(0);
-								return;
-							}
-							if (ev.data.type === "parsed") {
-								const newItems = ev.data.items || [];
-								newItems.forEach((it) => {
-									const existing = this.items.find((i) => i.item_code === it.item_code);
-									if (existing) Object.assign(existing, it);
-									else this.items.push(it);
-								});
-								lastItemName = newItems[newItems.length - 1]?.item_name || null;
-								this.eventBus.emit("set_all_items", this.items);
-								console.log("[ItemsSelector] background load set_all_items emitted", {
-									length: this.items.length,
-								});
-								if (
-									this.pos_profile &&
-									this.pos_profile.posa_local_storage &&
-									this.storageAvailable &&
-									!this.pos_profile.pose_use_limit_search
-								) {
-									try {
-										if (clearBefore) {
-											await clearStoredItems();
-											clearBefore = false;
-										}
-										await saveItemsBulk(newItems);
-										console.log("[ItemsSelector] background load items persisted", {
-											length: newItems.length,
-										});
-									} catch (e) {
-										console.error(e);
-										this.markStorageUnavailable();
-									}
-								}
-								resolve(newItems.length);
-							} else if (ev.data.type === "error") {
-								console.error("Item worker parse error:", ev.data.error);
-								resolve(0);
-							}
-						};
-						this.itemWorker.postMessage({
-							type: "parse_and_cache",
-							json: text,
-							priceList: this.customer_price_list || "",
-						});
-					});
-					if (this.items_request_token !== requestToken) {
-						console.log("[ItemsSelector] background load token mismatch after worker");
-						return;
-					}
-					const newLoaded = loaded + count;
-					const progress = Math.min(99, Math.round((newLoaded / (newLoaded + limit)) * 100));
-					this.eventBus.emit("data-load-progress", { name: "items", progress });
-					console.log("[ItemsSelector] background load progress", { progress });
-					if (count === limit) {
-						await this.backgroundLoadItems(
-							lastItemName,
-							syncSince,
-							clearBefore,
-							requestToken,
-							newLoaded,
-						);
-					} else {
-						if (this.storageAvailable && this.localStorageAvailable) {
-							setItemsLastSync(new Date().toISOString());
-						}
-						if (this.itemWorker) {
-							this.itemWorker.terminate();
-							this.itemWorker = null;
-						}
-						if (this.items && this.items.length > 0) {
-							await this.prePopulateStockCache(this.items);
-						}
-						this.eventBus.emit("data-load-progress", { name: "items", progress: 100 });
-						console.log("[ItemsSelector] background load completed");
-						this.items_loaded = true;
-					}
-				} catch (err) {
-					console.error("Failed to background load items", err);
-					this.markStorageUnavailable();
-					return this.backgroundLoadItems(startAfter, syncSince, clearBefore, requestToken, loaded);
-				}
-			} else {
-				frappe.call({
-					method: "posawesome.posawesome.api.items.get_items",
-					args: {
-						pos_profile: JSON.stringify(this.pos_profile),
-						price_list: this.customer_price_list,
-						item_group: this.item_group !== "ALL" ? this.item_group.toLowerCase() : "",
-						search_value: this.search || "",
-						customer: this.customer,
-						modified_after: lastSync,
-						limit,
-						start_after: startAfter,
-						include_image: 1,
-						item_groups: profileGroups,
-					},
-					callback: async (r) => {
-						if (this.items_request_token !== requestToken) {
-							console.log("[ItemsSelector] background load token mismatch in callback");
-							return;
-						}
-						const rows = r.message || [];
-						console.log("[ItemsSelector] background load callback items", { count: rows.length });
-						rows.forEach((it) => {
-							const existing = this.items.find((i) => i.item_code === it.item_code);
-							if (existing) Object.assign(existing, it);
-							else this.items.push(it);
-						});
+
+			const normalizedSearch = this.get_search(this.first_search || "").trim();
+
+			this.isBackgroundLoading = true;
+
+			return this.backgroundSyncItems({
+				groupFilter: this.item_group,
+				searchValue: normalizedSearch,
+			})
+				.then((appended) => {
+					if (Array.isArray(appended) && appended.length) {
 						this.eventBus.emit("set_all_items", this.items);
-						console.log("[ItemsSelector] background load set_all_items emitted", {
-							length: this.items.length,
-						});
-						if (
-							this.pos_profile &&
-							this.pos_profile.posa_local_storage &&
-							this.storageAvailable &&
-							!this.pos_profile.pose_use_limit_search
-						) {
-							try {
-								if (clearBefore) {
-									await clearStoredItems();
-									clearBefore = false;
-								}
-								await saveItemsBulk(rows);
-								console.log("[ItemsSelector] background load items persisted", {
-									length: rows.length,
-								});
-							} catch (e) {
-								console.error(e);
-								this.markStorageUnavailable();
-							}
-						}
-						const newLoaded = loaded + rows.length;
-						const progress = Math.min(99, Math.round((newLoaded / (newLoaded + limit)) * 100));
-						this.eventBus.emit("data-load-progress", { name: "items", progress });
-						console.log("[ItemsSelector] background load progress", { progress });
-						if (rows.length === limit) {
-							const nextStart = rows[rows.length - 1]?.item_name || null;
-							await this.backgroundLoadItems(
-								nextStart,
-								syncSince,
-								clearBefore,
-								requestToken,
-								newLoaded,
-							);
-						} else {
-							if (this.storageAvailable && this.localStorageAvailable) {
-								setItemsLastSync(new Date().toISOString());
-							}
-							if (this.items && this.items.length > 0) {
-								await this.prePopulateStockCache(this.items);
-							}
-							this.eventBus.emit("data-load-progress", { name: "items", progress: 100 });
-							console.log("[ItemsSelector] background load completed");
-							this.items_loaded = true;
-						}
-					},
-					error: (err) => {
-						console.error("Failed to background load items", err);
-					},
+					}
+					return appended;
+				})
+				.finally(() => {
+					this.finishBackgroundLoad();
 				});
+		},
+		finishBackgroundLoad() {
+			this.isBackgroundLoading = false;
+
+			const pendingSearch = this.pendingItemSearch;
+			this.pendingItemSearch = null;
+			if (pendingSearch) {
+				this.search_onchange(pendingSearch);
+				if (this.search_onchange.flush) {
+					this.search_onchange.flush();
+				}
+				return;
+			}
+
+			if (this.pendingGetItems) {
+				const { force_server: forceServer } = this.pendingGetItems;
+				this.pendingGetItems = null;
+				this.get_items(!!forceServer);
 			}
 		},
+		async backgroundLoadItems() {
+			return this.kickoffBackgroundSync();
+		},
+
 		get_items_groups() {
 			if (!this.pos_profile) {
 				console.log("No POS Profile");
@@ -1591,176 +1700,345 @@ export default {
 
 			return items_headers;
 		},
+		select_item(event, item) {
+			const targets = document.querySelectorAll(".items-table-container");
+			const target = targets[targets.length - 1];
+			const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
+			if (target && source && this.fly) {
+				this.fly(source, target, this.flyConfig);
+			}
+			this.add_item(item);
+		},
 		async click_item_row(event, { item }) {
+			const targets = document.querySelectorAll(".items-table-container");
+			const target = targets[targets.length - 1];
+			if (target && this.fly) {
+				const placeholder = document.createElement("div");
+				placeholder.style.width = "40px";
+				placeholder.style.height = "40px";
+				placeholder.style.background = "#ccc";
+				placeholder.style.borderRadius = "50%";
+				placeholder.style.position = "fixed";
+				placeholder.style.top = `${event.clientY - 20}px`;
+				placeholder.style.left = `${event.clientX - 20}px`;
+				document.body.appendChild(placeholder);
+				this.fly(placeholder, target, this.flyConfig);
+				placeholder.remove();
+			}
 			await this.add_item(item);
 		},
-		async add_item(item) {
+		async add_item(item, options = {}) {
+			const { suppressNegativeWarning = false } = options;
 			item = { ...item };
+
+			// Handle variant items
 			if (item.has_variants) {
-				let variants = this.items.filter((it) => it.variant_of == item.item_code);
-				let attrsMeta = {};
-				if (!variants.length) {
-					try {
-						const res = await frappe.call({
-							method: "posawesome.posawesome.api.items.get_item_variants",
-							args: {
-								pos_profile: JSON.stringify(this.pos_profile),
-								parent_item_code: item.item_code,
-								price_list: this.active_price_list,
-								customer: this.customer,
-							},
-						});
-						if (res.message) {
-							variants = res.message.variants || res.message;
-							attrsMeta = res.message.attributes_meta || {};
-							this.items.push(...variants);
-						}
-					} catch (e) {
-						console.error("Failed to fetch variants", e);
-					}
-				}
-				this.eventBus.emit("show_message", {
-					title: __("This is an item template. Please choose a variant."),
-					color: "warning",
-				});
-				console.log("sending profile", this.pos_profile);
-				// Ensure attributes meta is always an object
-				attrsMeta = attrsMeta || {};
-				this.eventBus.emit("open_variants_model", item, variants, this.pos_profile, attrsMeta);
-			} else {
-				if (item.actual_qty === 0 && this.pos_profile.posa_display_items_in_stock) {
-					this.eventBus.emit("show_message", {
-						title: `No stock available for ${item.item_name}`,
-						color: "warning",
+				await this.handleVariantItem(item);
+				return;
+			}
+
+			// Validate item before adding to cart
+			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
+			const isValid = await this.cartValidation.validateCartItem(
+				item,
+				requestedQty,
+				this.pos_profile,
+				this.stock_settings,
+				this.eventBus,
+				this.blockSaleBeyondAvailableQty,
+				!suppressNegativeWarning,
+			);
+
+			if (!isValid) {
+				// Validation failed, error message already shown by validator
+				return;
+			}
+
+			// Prepare item for cart
+			await this.prepareItemForCart(item, requestedQty);
+
+			// Add item to cart
+			const payload = { ...item };
+			delete payload._barcode_qty;
+			this.eventBus.emit("add_item", payload);
+			this.qty = 1;
+		},
+
+		/**
+		 * Handle variant item selection
+		 */
+		async handleVariantItem(item) {
+			let variants = this.items.filter((it) => it.variant_of == item.item_code);
+			let attrsMeta = {};
+
+			// Fetch variants if not already loaded
+			if (!variants.length) {
+				try {
+					const res = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_item_variants",
+						args: {
+							pos_profile: JSON.stringify(this.pos_profile),
+							parent_item_code: item.item_code,
+							price_list: this.active_price_list,
+							customer: this.customer,
+						},
 					});
-					await this.update_items_details([item]);
-					return;
+					if (res.message) {
+						variants = res.message.variants || res.message;
+						attrsMeta = res.message.attributes_meta || {};
+						this.items.push(...variants);
+					}
+				} catch (e) {
+					console.error("Failed to fetch variants", e);
 				}
+			}
 
-				// Ensure UOMs are initialized before adding the item
+			// Show variant selection dialog
+			this.eventBus.emit("show_message", {
+				title: __("This is an item template. Please choose a variant."),
+				color: "warning",
+			});
+
+			attrsMeta = attrsMeta || {};
+			this.eventBus.emit("open_variants_model", item, variants, this.pos_profile, attrsMeta);
+		},
+
+		/**
+		 * Prepare item for adding to cart (UOMs, currency conversion, etc.)
+		 */
+		async prepareItemForCart(item, requestedQty) {
+			// Ensure UOMs are initialized
+			if (!item.item_uoms || item.item_uoms.length === 0) {
+				await this.update_items_details([item]);
 				if (!item.item_uoms || item.item_uoms.length === 0) {
-					// If UOMs are not available, fetch them first
-					await this.update_items_details([item]);
-
-					// Add stock UOM as fallback
-					if (!item.item_uoms || item.item_uoms.length === 0) {
-						item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-					}
+					item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
 				}
+			}
 
-				// Ensure correct rate based on selected currency
-				if (this.pos_profile.posa_allow_multi_currency) {
-					this.applyCurrencyConversionToItem(item);
+			// Handle multi-currency conversion
+			if (this.pos_profile.posa_allow_multi_currency) {
+				this.applyCurrencyConversionToItem(item);
 
-					// Compute base rates from original values
-					const base_rate =
-						item.original_currency === this.pos_profile.currency
-							? item.original_rate
-							: item.original_rate * (item.plc_conversion_rate || this.exchange_rate);
-					item.base_rate = base_rate;
-					item.base_price_list_rate = base_rate;
+				const base_rate =
+					item.original_currency === this.pos_profile.currency
+						? item.original_rate
+						: item.original_rate * (item.plc_conversion_rate || this.exchange_rate);
+
+				item.base_rate = base_rate;
+				item.base_price_list_rate = base_rate;
+			}
+
+			// Set final quantity
+			const hasBarcodeQty = item._barcode_qty;
+			if (!item.qty || (item.qty === 1 && !hasBarcodeQty)) {
+				let qtyVal = requestedQty;
+				if (this.hide_qty_decimals) {
+					qtyVal = Math.trunc(qtyVal);
 				}
-
-				if (!item.qty || item.qty === 1) {
-					let qtyVal = this.qty != null ? this.qty : 1;
-					qtyVal = Math.abs(qtyVal);
-					if (this.hide_qty_decimals) {
-						qtyVal = Math.trunc(qtyVal);
-					}
-					item.qty = qtyVal;
-				}
-				this.eventBus.emit("add_item", item);
-				this.qty = 1;
+				item.qty = qtyVal;
 			}
 		},
 		async enter_event() {
-			let match = false;
-			if (!this.filtered_items.length || !this.first_search) {
+			if (!this.displayedItems.length || !this.first_search) {
 				return;
 			}
-			const qty = this.get_item_qty(this.first_search);
-			const new_item = { ...this.filtered_items[0] };
+
+			// Derive the searchable code and detect scale barcode
+			const search = this.get_search(this.first_search);
+			const isScaleBarcode =
+				this.pos_profile?.posa_scale_barcode_start &&
+				this.first_search.startsWith(this.pos_profile.posa_scale_barcode_start);
+			this.search = search;
+
+			const qty = parseFloat(this.get_item_qty(this.first_search));
+			const new_item = { ...this.displayedItems[0] };
 			new_item.qty = flt(qty);
+			if (isScaleBarcode) {
+				new_item._barcode_qty = true;
+			}
+
+			let match = false;
 			if (Array.isArray(new_item.item_barcode)) {
 				new_item.item_barcode.forEach((element) => {
-					if (this.search == element.barcode) {
+					if (search === element.barcode) {
 						new_item.uom = element.posa_uom;
 						match = true;
 					}
 				});
 			}
+			if (!match && new_item.barcode === search) {
+				match = true;
+			}
+			if (!match && Array.isArray(new_item.barcodes)) {
+				match = new_item.barcodes.some((bc) => String(bc) === search);
+			}
+
 			if (this.flags.serial_no) {
 				new_item.to_set_serial_no = this.flags.serial_no;
 			}
 			if (this.flags.batch_no) {
 				new_item.to_set_batch_no = this.flags.batch_no;
 			}
+
 			if (match) {
-				await this.add_item(new_item);
+				const fromScanner = this.search_from_scanner;
+				const scannedCodeForDisplay = this.pendingScanCode || this.first_search || search;
+				const availableQty =
+					typeof new_item.available_qty === "number"
+						? new_item.available_qty
+						: typeof new_item.actual_qty === "number"
+							? new_item.actual_qty
+							: null;
+				const requestedQty = Math.abs(new_item.qty || 1);
+
+				if (availableQty !== null && availableQty < requestedQty) {
+					const negativeStockEnabled = this.isNegativeStockEnabled();
+					const shouldBlock =
+						!negativeStockEnabled && (this.blockSaleBeyondAvailableQty || availableQty <= 0);
+
+					if (shouldBlock || negativeStockEnabled) {
+						const formattedAvailable = this.format_number
+							? this.format_number(
+									availableQty,
+									this.hide_qty_decimals ? 0 : this.float_precision,
+								)
+							: availableQty;
+						const formattedRequested = this.format_number
+							? this.format_number(
+									requestedQty,
+									this.hide_qty_decimals ? 0 : this.float_precision,
+								)
+							: requestedQty;
+
+						if (shouldBlock) {
+							this.showScanError({
+								message: formatStockShortageError(
+									new_item.item_name || new_item.item_code || scannedCodeForDisplay,
+									availableQty,
+									requestedQty,
+								),
+								code: scannedCodeForDisplay,
+								details: this.__("Adjust the quantity or enable negative stock to continue."),
+							});
+							return;
+						}
+
+						// Low stock warnings are suppressed to avoid distracting notifications
+					}
+				}
+
+				if (fromScanner) {
+					this.awaitingScanResult = true;
+				}
+
+				try {
+					await this.add_item(new_item, { suppressNegativeWarning: true });
+					if (fromScanner) {
+						this.playScanTone("success");
+						this.scannerLocked = false;
+						this.pendingScanCode = "";
+					}
+				} finally {
+					if (fromScanner) {
+						this.awaitingScanResult = false;
+					}
+				}
+
 				this.flags.serial_no = null;
 				this.flags.batch_no = null;
 				this.qty = 1;
-				// Clear search field after successfully adding an item
-				this.clearSearch();
-				this.$refs.debounce_search.focus();
+
+				if (fromScanner) {
+					this.search_from_scanner = false;
+				}
+
+				if (!this.scanErrorDialog) {
+					// Clear search field after successfully adding an item
+					this.clearSearch();
+					this.focusItemSearch();
+				}
 			}
 		},
-		search_onchange: _.debounce(async function (newSearchTerm) {
-			const vm = this;
+		search_onchange: _.debounce(
+			withPerf("pos:search-trigger", async function (newSearchTerm) {
+				const vm = this;
 
-			vm.cancelItemDetailsRequest();
+				vm.cancelItemDetailsRequest();
 
-			// Determine the actual query string and trim whitespace
-			const query = typeof newSearchTerm === "string" ? newSearchTerm : vm.first_search;
-
-			vm.search = (query || "").trim();
-
-			// Require a minimum of three characters before running a search
-			if (!vm.search || vm.search.length < 3) {
-				vm.search_from_scanner = false;
-				return;
-			}
-
-			const fromScanner = vm.search_from_scanner;
-
-			if (vm.pos_profile && vm.pos_profile.pose_use_limit_search) {
-				if (vm.pos_profile && (!vm.pos_profile.posa_local_storage || !vm.storageAvailable)) {
-					vm.get_items(true);
+				// Determine the actual query string and trim whitespace
+				let query;
+				if (typeof newSearchTerm === "string") {
+					query = newSearchTerm;
+				} else if (newSearchTerm && newSearchTerm.target) {
+					query = newSearchTerm.target?.value ?? "";
 				} else {
-					vm.get_items();
+					query = vm.first_search;
 				}
-			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
-				if (vm.storageAvailable) {
-					await vm.loadVisibleItems(true);
+				const trimmedQuery = (query || "").trim();
+
+				// Keep first_search in sync with the value we are about to search for
+				vm.first_search = trimmedQuery;
+
+				// Require a minimum of three characters before running a search
+				if (!trimmedQuery || trimmedQuery.length < 3) {
+					vm.search_from_scanner = false;
+					return;
+				}
+
+				// If background loading is in progress, defer the search without changing the active query
+				if (vm.isBackgroundLoading) {
+					vm.pendingItemSearch = trimmedQuery;
+					return;
+				}
+
+				vm.search = trimmedQuery;
+
+				const fromScanner = vm.search_from_scanner;
+
+				if (vm.usesLimitSearch) {
+					const shouldForceServer =
+						!vm.pos_profile.posa_local_storage || !vm.storageAvailable || !isOffline();
+					await vm.get_items(shouldForceServer);
+				} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
+					if (vm.storageAvailable) {
+						await vm.loadVisibleItems(true);
+						vm.enter_event();
+					} else {
+						vm.get_items(true);
+					}
+				} else {
+					// When local storage is disabled, always fetch items
+					// from the server so searches aren't limited to the
+					// initially loaded set.
+					await vm.get_items(true);
 					vm.enter_event();
-				} else {
-					vm.get_items(true);
-				}
-			} else {
-				// Save the current filtered items before search to maintain quantity data
-				const current_items = [...vm.filtered_items];
-				vm.enter_event();
 
-				// After search, update quantities for newly filtered items
-				if (vm.filtered_items && vm.filtered_items.length > 0) {
-					setTimeout(() => {
-						vm.update_items_details(vm.filtered_items);
-					}, 300);
+					if (vm.displayedItems && vm.displayedItems.length > 0) {
+						setTimeout(() => {
+							vm.update_items_details(vm.displayedItems);
+						}, 300);
+					}
 				}
-			}
 
-			// Clear the input only when triggered via scanner
-			if (fromScanner) {
-				vm.clearSearch();
-				vm.$refs.debounce_search && vm.$refs.debounce_search.focus();
-				vm.search_from_scanner = false;
-			}
-		}, 300),
+				// Clear the input only when triggered via scanner
+				if (fromScanner) {
+					vm.clearSearch();
+					vm.focusItemSearch();
+					vm.search_from_scanner = false;
+				}
+			}),
+			300,
+		),
 		get_item_qty(first_search) {
 			const qtyVal = this.qty != null ? this.qty : 1;
 			let scal_qty = Math.abs(qtyVal);
+			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
+
 			if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-				let pesokg1 = first_search.substr(7, 5);
+				// Determine item code length dynamically based on EAN-13 structure:
+				// prefix + item_code + 5 qty digits + 1 check digit
+				const item_code_len = first_search.length - prefix_len - 6;
+				let pesokg1 = first_search.substr(prefix_len + item_code_len, 5);
 				let pesokg;
 				if (pesokg1.startsWith("0000")) {
 					pesokg = "0.00" + pesokg1.substr(4);
@@ -1782,33 +2060,316 @@ export default {
 		},
 		get_search(first_search) {
 			if (!first_search) return "";
-			return first_search.startsWith(this.pos_profile.posa_scale_barcode_start)
-				? first_search.substr(0, 7)
-				: first_search;
+			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
+			if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+				return first_search;
+			}
+			// Calculate item code length from total barcode length
+			const item_code_len = first_search.length - prefix_len - 6;
+			return first_search.substr(0, prefix_len + item_code_len);
 		},
-		esc_event() {
-			this.search = null;
-			this.first_search = null;
-			this.search_backup = null;
-			this.qty = 1;
-			this.$refs.debounce_search.focus();
-		},
-		async update_items_details(items) {
-			const vm = this;
-			if (!items || !items.length) return;
+                esc_event() {
+                        this.search = null;
+                        this.first_search = null;
+                        this.search_backup = null;
+                        this.qty = 1;
+                        this.focusItemSearch();
+                },
+                syncItemsWithStockState(codes = null, options = {}) {
+                        const collections = [];
+                        if (Array.isArray(this.items)) {
+                                collections.push(this.items);
+                        }
+                        if (Array.isArray(this.displayedItems)) {
+                                collections.push(this.displayedItems);
+                        }
+                        if (Array.isArray(this.filteredItems)) {
+                                collections.push(this.filteredItems);
+                        }
+                        const codesSet = (() => {
+                                if (codes === null) {
+                                        return null;
+                                }
+                                const iterable = Array.isArray(codes)
+                                        ? codes
+                                        : codes instanceof Set || typeof codes[Symbol.iterator] === "function"
+                                        ? Array.from(codes)
+                                        : [codes];
+                                return new Set(
+                                        iterable
+                                                .map((code) =>
+                                                        code !== undefined && code !== null
+                                                                ? String(code).trim()
+                                                                : "",
+                                                )
+                                                .filter(Boolean),
+                                );
+                        })();
+                        collections.forEach((items) => {
+                                stockCoordinator.applyAvailabilityToCollection(items, codesSet, options);
+                        });
+                        if (collections.length) {
+                                this.$forceUpdate();
+                        }
+                },
+                primeStockState(source = "items-selector") {
+                        const allItems = Array.isArray(this.items) ? [...this.items] : [];
+                        const extra = Array.isArray(this.displayedItems) ? this.displayedItems : [];
+                        extra.forEach((item) => {
+                                if (allItems.includes(item)) {
+                                        return;
+                                }
+                                allItems.push(item);
+                        });
+                        if (!allItems.length) {
+                                return;
+                        }
+                        stockCoordinator.primeFromItems(allItems, { silent: true, source });
+                        this.syncItemsWithStockState(
+                                allItems
+                                        .map((item) => (item && item.item_code !== undefined ? String(item.item_code).trim() : null))
+                                        .filter(Boolean),
+                                { updateBaseAvailable: false },
+                        );
+                },
+                handleStockSnapshotUpdate(event = {}) {
+                        const codes = Array.isArray(event.codes) ? event.codes : [];
+                        if (!codes.length) {
+                                return;
+                        }
+                        this.syncItemsWithStockState(codes, { updateBaseAvailable: false });
+                },
+                captureBaseAvailability(item, explicitActualQty = undefined) {
+                        if (!item) {
+                                return;
+                        }
 
-			// reset any pending retry timer
-			if (vm.itemDetailsRetryTimeout) {
+                        let resolvedBase = null;
+
+                        if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
+                                item._base_available_qty = item.available_qty;
+                                resolvedBase = item.available_qty;
+                        }
+
+                        const hasExplicit = typeof explicitActualQty === "number" && !Number.isNaN(explicitActualQty);
+                        if (hasExplicit) {
+                                item._base_actual_qty = explicitActualQty;
+                                resolvedBase = explicitActualQty;
+                        } else if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
+                                item._base_actual_qty = item.actual_qty;
+                                resolvedBase = item.actual_qty;
+                        }
+
+                        if (resolvedBase !== null && item.item_code) {
+                                stockCoordinator.updateBaseQuantities(
+                                        [
+                                                {
+                                                        item_code: item.item_code,
+                                                        actual_qty: resolvedBase,
+                                                },
+                                        ],
+                                        { silent: true, source: "items-selector" },
+                                );
+                        }
+                },
+                getBaseActualQty(item) {
+                        if (!item) {
+                                return null;
+                        }
+
+                        if (typeof item._base_actual_qty === "number" && !Number.isNaN(item._base_actual_qty)) {
+                                return item._base_actual_qty;
+                        }
+
+                        if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
+                                item._base_actual_qty = item.actual_qty;
+                                return item.actual_qty;
+                        }
+
+                        if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
+                                item._base_available_qty = item.available_qty;
+                                item._base_actual_qty = item.available_qty;
+                                return item.available_qty;
+                        }
+
+                        return null;
+                },
+                applyReservationToItem(item) {
+                        if (!item || !item.item_code) {
+                                return;
+                        }
+
+                        const codeKey = String(item.item_code).trim();
+                        if (!codeKey) {
+                                return;
+                        }
+
+                        if (this.getBaseActualQty(item) !== null) {
+                                stockCoordinator.updateBaseQuantities(
+                                        [
+                                                {
+                                                        item_code: codeKey,
+                                                        actual_qty: item._base_actual_qty,
+                                                },
+                                        ],
+                                        { silent: true, source: "items-selector" },
+                                );
+                        }
+
+                        stockCoordinator.applyAvailabilityToItem(item, { updateBaseAvailable: false });
+                },
+                recomputeAvailabilityForCodes(codes = []) {
+                        if (!Array.isArray(codes) || !codes.length) {
+                                return;
+                        }
+
+                        const normalizedCodes = codes
+                                .filter((code) => code !== undefined && code !== null && String(code).trim())
+                                .map((code) => String(code).trim());
+                        if (!normalizedCodes.length) {
+                                return;
+                        }
+
+                        const targetCodes = new Set(normalizedCodes);
+                        this.syncItemsWithStockState(targetCodes, { updateBaseAvailable: false });
+                        targetCodes.forEach((code) => {
+                                const indexedItem = this.lookupItemByBarcode(code);
+                                if (indexedItem) {
+                                        this.applyReservationToItem(indexedItem);
+                                }
+                        });
+                },
+                handleCartQuantitiesUpdated(totals = {}) {
+                        const impacted = stockCoordinator.updateReservations(totals, {
+                                source: "items-selector",
+                        });
+                        if (impacted.length) {
+                                this.recomputeAvailabilityForCodes(impacted);
+                        }
+                },
+                async handleInvoiceStockAdjusted(payload = {}) {
+                        const collectedCodes = new Set();
+
+                        const collectCode = (code) => {
+                                if (code === undefined || code === null) {
+                                        return;
+                                }
+                                const normalized = String(code).trim();
+                                if (normalized) {
+                                        collectedCodes.add(normalized);
+                                }
+                        };
+
+                        const collectFromItems = (items) => {
+                                if (!Array.isArray(items)) {
+                                        return;
+                                }
+                                items.forEach((entry) => {
+                                        if (!entry) {
+                                                return;
+                                        }
+                                        if (typeof entry === "string" || typeof entry === "number") {
+                                                collectCode(entry);
+                                        } else if (entry.item_code !== undefined) {
+                                                collectCode(entry.item_code);
+                                        }
+                                });
+                        };
+
+                        if (Array.isArray(payload)) {
+                                collectFromItems(payload);
+                        } else if (payload && typeof payload === "object") {
+                                collectFromItems(payload.items);
+                                collectFromItems(payload.item_codes);
+                                if (payload.item_code !== undefined) {
+                                        collectCode(payload.item_code);
+                                }
+                        } else {
+                                collectCode(payload);
+                        }
+
+                        if (!collectedCodes.size) {
+                                return;
+                        }
+
+                        const codes = Array.from(collectedCodes);
+                        const targetCodes = new Set(codes);
+                        const seenItems = new Set();
+                        const candidates = [];
+
+                        const considerItem = (item) => {
+                                if (!item || !item.item_code) {
+                                        return;
+                                }
+                                const code = String(item.item_code).trim();
+                                if (!code || !targetCodes.has(code)) {
+                                        return;
+                                }
+                                if (seenItems.has(item)) {
+                                        return;
+                                }
+                                seenItems.add(item);
+                                candidates.push(item);
+                        };
+
+                        if (Array.isArray(this.items)) {
+                                this.items.forEach(considerItem);
+                        }
+
+                        if (Array.isArray(this.displayedItems)) {
+                                this.displayedItems.forEach(considerItem);
+                        }
+
+                        targetCodes.forEach((code) => {
+                                const indexed = this.lookupItemByBarcode(code);
+                                if (indexed) {
+                                        considerItem(indexed);
+                                }
+                        });
+
+                        try {
+                                if (candidates.length) {
+                                        await this.update_items_details(candidates, { forceRefresh: true });
+                                }
+                        } catch (error) {
+                                console.error("Failed to refresh item details after invoice submission", error);
+                        } finally {
+                                this.recomputeAvailabilityForCodes(codes);
+                        }
+                },
+                async update_items_details(items, options = {}) {
+                        const { forceRefresh = false } = options;
+                        const vm = this;
+                        if (!items || !items.length) return;
+
+                        // reset any pending retry timer
+                        if (vm.itemDetailsRetryTimeout) {
 				clearTimeout(vm.itemDetailsRetryTimeout);
 				vm.itemDetailsRetryTimeout = null;
 			}
 
-			const itemCodes = items.map((it) => it.item_code);
-			const cacheResult = await getCachedItemDetails(
-				vm.pos_profile.name,
-				vm.active_price_list,
-				itemCodes,
-			);
+                        const itemCodes = items.map((it) => it.item_code);
+                        const affectedCodes = Array.from(
+                                new Set(itemCodes.filter((code) => code !== undefined && code !== null)),
+                        );
+                        const baseRecords = new Map();
+                        const flushBaseRecords = () => {
+                                if (!baseRecords.size) {
+                                        return;
+                                }
+                                const baseEntries = Array.from(baseRecords.entries()).map(([code, qty]) => ({
+                                        item_code: code,
+                                        actual_qty: qty,
+                                }));
+                                stockCoordinator.updateBaseQuantities(baseEntries, { source: "items-selector" });
+                                baseRecords.clear();
+                        };
+                        const cacheResult = await getCachedItemDetails(
+                                vm.pos_profile.name,
+                                vm.active_price_list,
+                                itemCodes,
+                                forceRefresh ? 0 : undefined,
+                        );
 			cacheResult.cached.forEach((det) => {
 				const item = items.find((it) => it.item_code === det.item_code);
 				if (item) {
@@ -1822,32 +2383,41 @@ export default {
 						saveItemUOMs(item.item_code, det.item_uoms);
 					}
 					if (det.rate !== undefined) {
-						if (det.rate !== 0 || !item.rate) {
-							item.rate = det.rate;
-							item.price_list_rate = det.price_list_rate || det.rate;
+						const force = vm.pos_profile?.posa_force_price_from_customer_price_list !== false;
+						const price = det.price_list_rate ?? det.rate ?? 0;
+						if (force || price) {
+							item.rate = price;
+							item.price_list_rate = price;
 						}
 					}
-					if (det.currency) {
-						item.currency = det.currency;
-					}
+                                        if (det.currency) {
+                                                item.currency = det.currency;
+                                        }
 
-					if (!item.original_rate) {
-						item.original_rate = item.rate;
-						item.original_currency = item.currency || vm.pos_profile.currency;
-					}
+                                        vm.captureBaseAvailability(item, det.actual_qty);
+                                        if (det.actual_qty !== undefined && det.actual_qty !== null) {
+                                                baseRecords.set(item.item_code, det.actual_qty);
+                                        }
+                                        if (!item.original_rate) {
+                                                item.original_rate = item.rate;
+                                                item.original_currency = item.currency || vm.pos_profile.currency;
+                                        }
 
+					vm.indexItem(item);
 					vm.applyCurrencyConversionToItem(item);
 				}
 			});
 
 			let allCached = cacheResult.missing.length === 0;
-			items.forEach((item) => {
-				const localQty = getLocalStock(item.item_code);
-				if (localQty !== null) {
-					item.actual_qty = localQty;
-				} else {
-					allCached = false;
-				}
+                        items.forEach((item) => {
+                                const localQty = getLocalStock(item.item_code);
+                                if (localQty !== null) {
+                                        item.actual_qty = localQty;
+                                        vm.captureBaseAvailability(item, localQty);
+                                        baseRecords.set(item.item_code, localQty);
+                                } else {
+                                        allCached = false;
+                                }
 
 				if (!item.item_uoms || item.item_uoms.length === 0) {
 					const cachedUoms = getItemUOMs(item.item_code);
@@ -1861,20 +2431,24 @@ export default {
 				}
 			});
 
-			// When offline or everything is cached, skip server call
-			if (isOffline() || allCached) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        // When offline or everything is cached, skip server call
+                        if (isOffline() || allCached) {
+                                vm.itemDetailsRetryCount = 0;
+                                flushBaseRecords();
+                                vm.recomputeAvailabilityForCodes(affectedCodes);
+                                return;
+                        }
 
 			const itemsToFetch = items.filter(
 				(it) => cacheResult.missing.includes(it.item_code) && !it.has_variants,
 			);
 
-			if (itemsToFetch.length === 0) {
-				vm.itemDetailsRetryCount = 0;
-				return;
-			}
+                        if (itemsToFetch.length === 0) {
+                                vm.itemDetailsRetryCount = 0;
+                                flushBaseRecords();
+                                vm.recomputeAvailabilityForCodes(affectedCodes);
+                                return;
+                        }
 
 			try {
 				const details = await vm.fetchItemDetails(itemsToFetch);
@@ -1925,10 +2499,15 @@ export default {
 						}
 					});
 
-					updatedItems.forEach(({ item, updates }) => {
-						Object.assign(item, updates);
-						vm.applyCurrencyConversionToItem(item);
-					});
+                                        updatedItems.forEach(({ item, updates }) => {
+                                                Object.assign(item, updates);
+                                                vm.captureBaseAvailability(item, updates.actual_qty);
+                                                if (updates.actual_qty !== undefined && updates.actual_qty !== null) {
+                                                        baseRecords.set(item.item_code, updates.actual_qty);
+                                                }
+                                                vm.indexItem(item);
+                                                vm.applyCurrencyConversionToItem(item);
+                                        });
 
 					updateLocalStockCache(details);
 					saveItemDetailsCache(vm.pos_profile.name, vm.active_price_list, details);
@@ -1937,7 +2516,7 @@ export default {
 						vm.pos_profile &&
 						vm.pos_profile.posa_local_storage &&
 						vm.storageAvailable &&
-						!vm.pos_profile.pose_use_limit_search
+						!vm.usesLimitSearch
 					) {
 						try {
 							await saveItemsBulk(details);
@@ -1954,15 +2533,17 @@ export default {
 			} catch (err) {
 				if (err.name !== "AbortError") {
 					console.error("Error fetching item details:", err);
-					items.forEach((item) => {
-						const localQty = getLocalStock(item.item_code);
-						if (localQty !== null) {
-							item.actual_qty = localQty;
-						}
-						if (!item.item_uoms || item.item_uoms.length === 0) {
-							const cached = getItemUOMs(item.item_code);
-							if (cached.length > 0) {
-								item.item_uoms = cached;
+                                        items.forEach((item) => {
+                                                const localQty = getLocalStock(item.item_code);
+                                                if (localQty !== null) {
+                                                        item.actual_qty = localQty;
+                                                        vm.captureBaseAvailability(item, localQty);
+                                                        baseRecords.set(item.item_code, localQty);
+                                                }
+                                                if (!item.item_uoms || item.item_uoms.length === 0) {
+                                                        const cached = getItemUOMs(item.item_code);
+                                                        if (cached.length > 0) {
+                                                                item.item_uoms = cached;
 							}
 						}
 					});
@@ -1978,15 +2559,18 @@ export default {
 			}
 
 			// Cleanup on component destroy
-			this.cleanupBeforeDestroy = () => {
-				if (vm.abortController) {
-					vm.abortController.abort();
-				}
-			};
-		},
+                        this.cleanupBeforeDestroy = () => {
+                                if (vm.abortController) {
+                                        vm.abortController.abort();
+                                }
+                        };
+
+                        flushBaseRecords();
+                        vm.recomputeAvailabilityForCodes(affectedCodes);
+                },
 		update_cur_items_details() {
-			if (this.filtered_items && this.filtered_items.length > 0) {
-				this.update_items_details(this.filtered_items);
+			if (this.displayedItems && this.displayedItems.length > 0) {
+				this.update_items_details(this.displayedItems);
 			}
 		},
 		async prePopulateStockCache(items) {
@@ -2070,9 +2654,11 @@ export default {
 						return onScan.decodeKeyEvent(oEvent);
 					},
 					onScan: function (sCode) {
-						setTimeout(() => {
-							vm.trigger_onscan(sCode);
-						}, 300);
+						if (vm.scannerLocked) {
+							vm.playScanTone("error");
+							return;
+						}
+						vm.trigger_onscan(sCode);
 					},
 				});
 
@@ -2083,26 +2669,37 @@ export default {
 			}
 		},
 		trigger_onscan(sCode) {
+			if (this.scannerLocked) {
+				this.playScanTone("error");
+				return;
+			}
 			// indicate this search came from a scanner
 			this.search_from_scanner = true;
 			// apply scanned code as search term
 			this.first_search = sCode;
 			this.search = sCode;
+			this.pendingScanCode = sCode;
 
 			this.$nextTick(() => {
-				if (this.filtered_items.length == 0) {
+				if (this.displayedItems.length == 0) {
 					this.eventBus.emit("show_message", {
 						title: `No Item has this barcode "${sCode}"`,
 						color: "error",
 					});
-					frappe.utils.play_sound("error");
+					this.showScanError({
+						message: `${this.__("Item not found")}: ${sCode}`,
+						code: sCode,
+						details: this.__("Please verify the barcode or search manually."),
+					});
 				} else {
 					this.enter_event();
 				}
 
 				// clear search field for next scan and refocus input
-				this.clearSearch();
-				this.$refs.debounce_search && this.$refs.debounce_search.focus();
+				if (!this.scanErrorDialog) {
+					this.clearSearch();
+					this.focusItemSearch();
+				}
 			});
 		},
 		generateWordCombinations(inputString) {
@@ -2128,13 +2725,81 @@ export default {
 			return combinations;
 		},
 		clearSearch() {
+			if (this.clearingSearch) {
+				return;
+			}
+
+			const hadQuery = Boolean(
+				(this.first_search && this.first_search.trim()) || (this.search && this.search.trim()),
+			);
+			const shouldReload = hadQuery || !this.itemsLoaded || !this.items.length;
+
 			this.search_backup = this.first_search;
+			this.clearingSearch = true;
 			this.first_search = "";
 			this.search = "";
-			// Reset the visible items to the full list
-			this.loadVisibleItems(true);
-			// Refresh items from the server if needed
-			this.get_items();
+
+			const release = () => {
+				this.$nextTick(() => {
+					this.clearingSearch = false;
+				});
+			};
+
+			if (this.usesLimitSearch) {
+				const preservedItems =
+					this.clearLimitSearchResults({ preserveItems: true }) || this.items || [];
+				this.resetBarcodeIndex();
+
+				if (Array.isArray(preservedItems) && preservedItems.length) {
+					this.eventBus.emit("set_all_items", preservedItems);
+				} else if (Array.isArray(this.items) && this.items.length) {
+					this.eventBus.emit("set_all_items", this.items);
+				}
+
+				if (shouldReload) {
+					this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+					const reloadPromise = this.get_items(true);
+					if (reloadPromise && typeof reloadPromise.finally === "function") {
+						reloadPromise.finally(release);
+						return reloadPromise;
+					}
+				}
+
+				release();
+				return;
+			}
+
+			if (!shouldReload) {
+				release();
+				return;
+			}
+
+			if (this.pos_profile?.posa_local_storage && this.storageAvailable) {
+				this.loadVisibleItems(true);
+				if (!this.isBackgroundLoading) {
+					this.verifyServerItemCount();
+				}
+				release();
+				return;
+			}
+
+			if (this.isBackgroundLoading) {
+				if (this.pendingGetItems) {
+					this.pendingGetItems.force_server = this.pendingGetItems.force_server || false;
+				} else {
+					this.pendingGetItems = { force_server: false };
+				}
+				release();
+				return;
+			}
+
+			if (!this.itemsLoaded || !this.items.length) {
+				this.get_items(true);
+			} else {
+				this.eventBus.emit("set_all_items", this.items);
+			}
+
+			release();
 		},
 
 		restoreSearch() {
@@ -2151,74 +2816,331 @@ export default {
 			// this.search_backup = "";
 		},
 
+		focusItemSearch() {
+			if (this.cameraScannerActive) {
+				return;
+			}
+			this.$nextTick(() => {
+				if (this.cameraScannerActive) {
+					return;
+				}
+				if (this.showManualScanInput) {
+					this.queueManualScanFocus();
+					return;
+				}
+				const input = this.$refs.debounce_search;
+				if (input && typeof input.focus === "function") {
+					input.focus();
+				}
+			});
+		},
+
+		blurItemSearch() {
+			const input = this.$refs.debounce_search;
+			if (input && typeof input.blur === "function") {
+				input.blur();
+			}
+		},
+
 		clearQty() {
 			this.qty = null;
 		},
 
+		ensureScanAudioContext() {
+			if (typeof window === "undefined") {
+				return null;
+			}
+			if (!this.scanAudioContext) {
+				const AudioContext = window.AudioContext || window.webkitAudioContext;
+				if (!AudioContext) {
+					return null;
+				}
+				this.scanAudioContext = new AudioContext();
+			}
+			if (this.scanAudioContext?.state === "suspended") {
+				this.scanAudioContext.resume().catch(() => {});
+			}
+			return this.scanAudioContext;
+		},
+		playScanTone(type = "success") {
+			if (typeof window === "undefined") {
+				return;
+			}
+			try {
+				const ctx = this.ensureScanAudioContext();
+				if (!ctx) {
+					if (frappe?.utils?.play_sound) {
+						frappe.utils.play_sound(type === "success" ? "submit" : "error");
+					}
+					return;
+				}
+				const now = ctx.currentTime;
+				const duration = type === "success" ? 0.16 : 0.35;
+				const oscillator = ctx.createOscillator();
+				const gainNode = ctx.createGain();
+				oscillator.type = "sine";
+				oscillator.frequency.value = type === "success" ? 880 : 220;
+				gainNode.gain.setValueAtTime(type === "success" ? 0.18 : 0.28, now);
+				gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+				oscillator.connect(gainNode);
+				gainNode.connect(ctx.destination);
+				oscillator.start(now);
+				oscillator.stop(now + duration);
+			} catch (error) {
+				console.warn("Scan tone playback failed:", error);
+				if (frappe?.utils?.play_sound) {
+					frappe.utils.play_sound(type === "success" ? "submit" : "error");
+				}
+			}
+		},
+		showScanError({ message, code = "", details = "" } = {}) {
+			this.scanErrorMessage = message || this.__("Unable to add scanned item.");
+			this.scanErrorCode = code;
+			this.scanErrorDetails = details;
+			if (code) {
+				this.pendingScanCode = code;
+			}
+			this.awaitingScanResult = false;
+			this.search_from_scanner = false;
+			this.scanErrorDialog = true;
+			this.scannerLocked = true;
+			if (this.$refs.cameraScanner?.pauseForExternalLock) {
+				this.$refs.cameraScanner.pauseForExternalLock();
+			}
+			this.playScanTone("error");
+			if (frappe?.show_alert) {
+				frappe.show_alert(
+					{
+						message: this.scanErrorMessage,
+						indicator: "red",
+					},
+					5,
+				);
+			}
+		},
+		handleScanPipelineError(error, code = "") {
+			const normalizedCode = code || this.pendingScanCode || "";
+			console.error("Unexpected barcode processing error:", error);
+			const details =
+				error && typeof error.message === "string" && error.message.trim()
+					? error.message
+					: this.__("Please try again or enter the item manually.");
+			this.showScanError({
+				message: this.__("Unable to add scanned item."),
+				code: normalizedCode,
+				details,
+			});
+		},
+		acknowledgeScanError() {
+			this.scanErrorDialog = false;
+			this.scannerLocked = false;
+			this.scanErrorMessage = "";
+			this.scanErrorCode = "";
+			this.scanErrorDetails = "";
+			this.pendingScanCode = "";
+			this.awaitingScanResult = false;
+			if (this.$refs.cameraScanner?.resumeFromExternalLock) {
+				this.$refs.cameraScanner.resumeFromExternalLock();
+			}
+			this.focusItemSearch();
+		},
+
+		toggleManualScanInput() {
+			this.showManualScanInput = !this.showManualScanInput;
+			if (this.showManualScanInput) {
+				this.queueManualScanFocus();
+			} else {
+				this.focusItemSearch();
+			}
+		},
+
+		submitManualScan() {
+			const code = (this.manualScanValue ?? "").toString().trim();
+			if (!code) {
+				return;
+			}
+			if (this.scannerLocked) {
+				this.onBarcodeScanned(code);
+				this.queueManualScanFocus();
+				return;
+			}
+			this.manualScanValue = "";
+			this.onBarcodeScanned(code);
+			this.queueManualScanFocus();
+		},
+
+		focusManualScanInput() {
+			const input = this.$refs.manualScanInput;
+			if (input && typeof input.focus === "function") {
+				input.focus();
+			}
+		},
+
+		queueManualScanFocus() {
+			this.$nextTick(() => {
+				const scheduler =
+					typeof requestAnimationFrame === "function"
+						? requestAnimationFrame
+						: (cb) => setTimeout(cb, 16);
+				scheduler(() => {
+					this.focusManualScanInput();
+				});
+			});
+		},
+
+		onScannerOpened() {
+			this.cameraScannerActive = true;
+			this.showManualScanInput = false;
+			this.manualScanValue = "";
+			this.blurItemSearch();
+		},
+
+		onScannerClosed() {
+			this.cameraScannerActive = false;
+			this.focusItemSearch();
+		},
+
 		startCameraScanning() {
+			if (this.scannerLocked) {
+				this.playScanTone("error");
+				return;
+			}
 			if (this.$refs.cameraScanner) {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
 		onBarcodeScanned(scannedCode) {
-			console.log("Barcode scanned:", scannedCode);
-
-			// mark this search as coming from a scanner
-			this.search_from_scanner = true;
-
-			// Clear any previous search
-			this.search = "";
-			this.first_search = "";
-
-			// Set the scanned code as search term
-			this.first_search = scannedCode;
-			this.search = scannedCode;
-
-			// Show scanning feedback
-			frappe.show_alert(
-				{
-					message: `Scanning for: ${scannedCode}`,
-					indicator: "blue",
-				},
-				2,
-			);
-
-			// Enhanced item search and submission logic
-			setTimeout(() => {
-				this.processScannedItem(scannedCode);
-			}, 300);
-		},
-		async processScannedItem(scannedCode) {
-			// First try to find exact match by barcode
-			let foundItem = this.items.find((item) => {
-				const barcodeMatch =
-					item.barcode === scannedCode ||
-					(Array.isArray(item.item_barcode) &&
-						item.item_barcode.some((b) => b.barcode === scannedCode)) ||
-					(Array.isArray(item.barcodes) && item.barcodes.some((bc) => String(bc) === scannedCode));
-				return barcodeMatch || item.item_code === scannedCode;
-			});
-
-			if (foundItem) {
-				console.log("Found item by exact match:", foundItem);
-				this.addScannedItemToInvoice(foundItem, scannedCode);
+			if (this.scannerLocked) {
+				this.playScanTone("error");
+				if (frappe?.show_alert) {
+					frappe.show_alert(
+						{
+							message: this.__("Acknowledge the error to resume scanning."),
+							indicator: "red",
+						},
+						3,
+					);
+				}
 				return;
 			}
 
-			// If not found locally, attempt to fetch from server by barcode
+			const runScanPipeline = async (code) => {
+				const mark = perfMarkStart("pos:scan-handler");
+				try {
+					console.log("Barcode scanned:", code);
+					this.pendingScanCode = code;
+
+					// mark this search as coming from a scanner
+					this.search_from_scanner = true;
+
+					// Clear any previous search
+					this.search = "";
+					this.first_search = "";
+
+					// Set the scanned code as search term
+					this.first_search = code;
+					this.search = code;
+
+					// Show scanning feedback
+					if (this.eventBus?.emit) {
+						this.eventBus.emit("show_message", {
+							title: this.__("Scanning for: {0}", [code]),
+							summary: this.__("Scanning items"),
+							detail: code,
+							color: "info",
+							timeout: 2000,
+							groupId: "scanner-progress",
+						});
+					} else if (frappe?.show_alert) {
+						frappe.show_alert(
+							{
+								message: `Scanning for: ${code}`,
+								indicator: "blue",
+							},
+							2,
+						);
+					}
+
+					// Enhanced item search and submission logic
+					await this.processScannedItem(code);
+				} catch (error) {
+					this.handleScanPipelineError(error, code);
+				} finally {
+					perfMarkEnd("pos:scan-handler", mark);
+				}
+			};
+
+			if (this.scanDebounceId) {
+				clearTimeout(this.scanDebounceId);
+			}
+			this.scanQueuedCode = scannedCode;
+			this.scanDebounceId = setTimeout(() => {
+				this.scanDebounceId = null;
+				const code = this.scanQueuedCode || scannedCode;
+				this.scanQueuedCode = "";
+				scheduleFrame(() => {
+					const maybePromise = runScanPipeline(code);
+					if (maybePromise && typeof maybePromise.catch === "function") {
+						maybePromise.catch((error) => {
+							this.handleScanPipelineError(error, code);
+						});
+					}
+				});
+			}, 12);
+		},
+		async processScannedItem(scannedCode) {
+			const mark = perfMarkStart("pos:scan-process");
+			this.pendingScanCode = scannedCode;
+			// Handle scale barcodes by extracting the item code and quantity
+			let searchCode = scannedCode;
+			let qtyFromBarcode = null;
+			if (
+				this.pos_profile?.posa_scale_barcode_start &&
+				scannedCode.startsWith(this.pos_profile.posa_scale_barcode_start)
+			) {
+				searchCode = this.get_search(scannedCode);
+				qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
+			}
+
+			// First try to find exact match by processed code using the pre-built index
+			const barcodeIndex = this.ensureBarcodeIndex();
+			let foundItem = this.lookupItemByBarcode(searchCode);
+
+			if (!foundItem && barcodeIndex.size === 0) {
+				// Index not populated yet, build it and fall back to a direct scan once
+				this.replaceBarcodeIndex(this.items);
+				foundItem = this.items.find((item) => {
+					const barcodeMatch =
+						item.barcode === searchCode ||
+						(Array.isArray(item.item_barcode) &&
+							item.item_barcode.some((b) => b.barcode === searchCode)) ||
+						(Array.isArray(item.barcodes) &&
+							item.barcodes.some((bc) => String(bc) === searchCode));
+					return barcodeMatch || item.item_code === searchCode;
+				});
+			}
+
+			if (foundItem) {
+				console.log("Found item by processed code:", foundItem);
+				await this.addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode);
+				return;
+			}
+
+			// If not found locally, attempt to fetch from server using processed code
 			try {
 				const res = await frappe.call({
 					method: "posawesome.posawesome.api.items.get_items_from_barcode",
 					args: {
 						selling_price_list: this.active_price_list,
 						currency: this.pos_profile.currency,
-						barcode: scannedCode,
+						barcode: searchCode,
 					},
 				});
 
 				if (res && res.message) {
 					const newItem = res.message;
 					this.items.push(newItem);
+					this.indexItem(newItem);
 
 					if (this.searchCache) {
 						this.searchCache.clear();
@@ -2228,28 +3150,30 @@ export default {
 					await savePriceListItems(this.customer_price_list, this.items);
 					this.eventBus.emit("set_all_items", this.items);
 					await this.update_items_details([newItem]);
-					this.addScannedItemToInvoice(newItem, scannedCode);
+					await this.addScannedItemToInvoice(newItem, searchCode, qtyFromBarcode);
 					return;
 				}
 
-				frappe.show_alert(
-					{
-						message: `${this.__("Item not found")}: ${scannedCode}`,
-						indicator: "red",
-					},
-					5,
-				);
+				this.first_search = scannedCode;
+				this.search = scannedCode;
+				this.showScanError({
+					message: `${this.__("Item not found")}: ${scannedCode}`,
+					code: scannedCode,
+					details: this.__("Please verify the barcode or check the item's availability."),
+				});
 				return;
 			} catch (e) {
 				console.error("Error fetching item from barcode:", e);
-				frappe.show_alert(
-					{
-						message: `${this.__("Item not found")}: ${scannedCode}`,
-						indicator: "red",
-					},
-					5,
-				);
+				this.first_search = scannedCode;
+				this.search = scannedCode;
+				this.showScanError({
+					message: `${this.__("Item not found")}: ${scannedCode}`,
+					code: scannedCode,
+					details: this.__("The system could not retrieve the item details. Please try again."),
+				});
 				return;
+			} finally {
+				perfMarkEnd("pos:scan-process", mark);
 			}
 		},
 		searchItemsByCode(code) {
@@ -2270,7 +3194,69 @@ export default {
 				);
 			});
 		},
-		async addScannedItemToInvoice(item, scannedCode) {
+		// PERF: maintain a barcode index so unfound scans do not walk the full list
+		ensureBarcodeIndex() {
+			if (!this.barcodeIndex || typeof this.barcodeIndex.set !== "function") {
+				this.barcodeIndex = new Map();
+			}
+			return this.barcodeIndex;
+		},
+		resetBarcodeIndex() {
+			const index = this.ensureBarcodeIndex();
+			index.clear();
+		},
+		indexItem(item) {
+			if (!item) {
+				return;
+			}
+			const index = this.ensureBarcodeIndex();
+			const register = (code) => {
+				if (code === undefined || code === null) {
+					return;
+				}
+				const normalized = String(code).trim();
+				if (!normalized) {
+					return;
+				}
+				if (!index.has(normalized)) {
+					index.set(normalized, item);
+				}
+				const lower = normalized.toLowerCase();
+				if (!index.has(lower)) {
+					index.set(lower, item);
+				}
+			};
+			register(item.item_code);
+			register(item.barcode);
+			if (Array.isArray(item.item_barcode)) {
+				item.item_barcode.forEach((barcode) => register(barcode?.barcode));
+			}
+			if (Array.isArray(item.barcodes)) {
+				item.barcodes.forEach((barcode) => register(barcode));
+			}
+			if (Array.isArray(item.serial_no_data)) {
+				item.serial_no_data.forEach((serial) => register(serial?.serial_no));
+			}
+			if (Array.isArray(item.batch_no_data)) {
+				item.batch_no_data.forEach((batch) => register(batch?.batch_no));
+			}
+		},
+		replaceBarcodeIndex(items = this.items) {
+			this.resetBarcodeIndex();
+			items.forEach((item) => this.indexItem(item));
+		},
+		lookupItemByBarcode(code) {
+			if (code === undefined || code === null) {
+				return null;
+			}
+			const index = this.ensureBarcodeIndex();
+			const normalized = String(code).trim();
+			if (!normalized) {
+				return null;
+			}
+			return index.get(normalized) || index.get(normalized.toLowerCase()) || null;
+		},
+		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null) {
 			console.log("Adding scanned item to invoice:", item, scannedCode);
 
 			// Clone the item to avoid mutating list data
@@ -2307,21 +3293,97 @@ export default {
 				}
 			}
 
-			// Use existing add_item method with enhanced feedback
-			await this.add_item(newItem);
+			// Apply quantity from scale barcode if available
+			if (qtyFromBarcode !== null && !isNaN(qtyFromBarcode)) {
+				newItem.qty = qtyFromBarcode;
+				newItem._barcode_qty = true;
+			}
 
-			// Show success message
-			frappe.show_alert(
-				{
-					message: `Added: ${item.item_name}`,
-					indicator: "green",
-				},
-				3,
-			);
+			const requestedQtyRaw =
+				qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
+			const requestedQty = Math.abs(requestedQtyRaw || 1);
+			const availableQty =
+				typeof newItem.available_qty === "number"
+					? newItem.available_qty
+					: typeof newItem.actual_qty === "number"
+						? newItem.actual_qty
+						: null;
 
-			// Clear search after successful addition and refocus input
-			this.clearSearch();
-			this.$refs.debounce_search && this.$refs.debounce_search.focus();
+			if (availableQty !== null && availableQty < requestedQty) {
+				const formattedAvailable = this.format_number
+					? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
+					: availableQty;
+				const formattedRequested = this.format_number
+					? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
+					: requestedQty;
+				const negativeStockEnabled = this.isNegativeStockEnabled();
+				const shouldBlock =
+					!negativeStockEnabled && (this.blockSaleBeyondAvailableQty || availableQty <= 0);
+
+				if (shouldBlock) {
+					this.showScanError({
+						message: formatStockShortageError(
+							newItem.item_name || newItem.item_code || scannedCode,
+							availableQty,
+							requestedQty,
+						),
+						code: scannedCode,
+						details: this.__("Adjust the quantity or enable negative stock to continue."),
+					});
+					return;
+				}
+
+				// Suppress low stock notifications when negative stock is allowed
+			}
+
+			this.awaitingScanResult = true;
+
+			try {
+				// Use existing add_item method with enhanced feedback
+				await this.add_item(newItem, {
+					suppressNegativeWarning: true,
+					skipNotification: true,
+				});
+				this.playScanTone("success");
+				this.scannerLocked = false;
+				this.search_from_scanner = false;
+				this.pendingScanCode = "";
+
+				// Show success message
+				const itemName = newItem.item_name || newItem.item_code || scannedCode || this.__("Item");
+				const rawPrecision = Number(this.float_precision);
+				const precision = Number.isInteger(rawPrecision) ? Math.min(Math.max(rawPrecision, 0), 6) : 2;
+				const displayQty = Number.isInteger(requestedQty)
+					? requestedQty
+					: Number(requestedQty.toFixed(precision));
+
+				if (this.eventBus?.emit) {
+					this.eventBus.emit("show_message", {
+						title: this.__("Item {0} added to invoice", [itemName]),
+						summary: this.__("Items added to invoice"),
+						detail: this.__("{0} (Qty: {1})", [itemName, displayQty]),
+						color: "success",
+						groupId: "invoice-item-added",
+					});
+				} else if (frappe?.show_alert) {
+					frappe.show_alert(
+						{
+							message: `Added: ${itemName}`,
+							indicator: "green",
+						},
+						3,
+					);
+				}
+
+				// Clear search after successful addition and refocus input
+				this.clearSearch();
+				this.focusItemSearch();
+			} finally {
+				this.awaitingScanResult = false;
+			}
+		},
+		isNegativeStockEnabled() {
+			return parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 		},
 		showMultipleItemsDialog(items, scannedCode) {
 			// Create a dialog to let user choose from multiple matches
@@ -2377,17 +3439,13 @@ export default {
 		handleItemNotFound(scannedCode) {
 			console.warn("Item not found for scanned code:", scannedCode);
 
-			// Show error message
-			frappe.show_alert(
-				{
-					message: `Item not found: ${scannedCode}`,
-					indicator: "red",
-				},
-				5,
-			);
-
-			// Keep the search term for manual search
-			this.trigger_onscan(scannedCode);
+			this.first_search = scannedCode;
+			this.search = scannedCode;
+			this.showScanError({
+				message: `${this.__("Item not found")}: ${scannedCode}`,
+				code: scannedCode,
+				details: this.__("This barcode could not be matched to any item."),
+			});
 		},
 
 		currencySymbol(currency) {
@@ -2416,15 +3474,15 @@ export default {
 
 		// Force load quantities for all visible items
 		forceLoadQuantities() {
-			if (this.filtered_items && this.filtered_items.length > 0) {
+			if (this.displayedItems && this.displayedItems.length > 0) {
 				// Set default quantities if not available
-				this.filtered_items.forEach((item) => {
+				this.displayedItems.forEach((item) => {
 					if (item.actual_qty === undefined || item.actual_qty === null) {
 						item.actual_qty = 0;
 					}
 				});
 				// Force update quantities from server
-				this.update_items_details(this.filtered_items);
+				this.update_items_details(this.displayedItems);
 			}
 		},
 
@@ -2437,8 +3495,8 @@ export default {
 					}
 				});
 			}
-			if (this.filtered_items && this.filtered_items.length > 0) {
-				this.filtered_items.forEach((item) => {
+			if (this.displayedItems && this.displayedItems.length > 0) {
+				this.displayedItems.forEach((item) => {
 					if (item.actual_qty === undefined || item.actual_qty === null) {
 						item.actual_qty = 0;
 					}
@@ -2545,19 +3603,107 @@ export default {
 	},
 
 	computed: {
+		usesLimitSearch() {
+			const rawValue =
+				this.pos_profile?.pose_use_limit_search ?? this.pos_profile?.posa_use_limit_search;
+
+			if (typeof rawValue === "string") {
+				const normalized = rawValue.trim().toLowerCase();
+				return normalized === "1" || normalized === "true" || normalized === "yes";
+			}
+
+			if (typeof rawValue === "number") {
+				return rawValue === 1;
+			}
+
+			return Boolean(rawValue);
+		},
+		limitSearchCap() {
+			if (!this.usesLimitSearch) {
+				return null;
+			}
+
+			const rawLimit = this.pos_profile?.posa_search_limit;
+			const parsed = parseInt(rawLimit, 10);
+
+			if (Number.isFinite(parsed) && parsed > 0) {
+				return parsed;
+			}
+
+			return 500;
+		},
+		blockSaleBeyondAvailableQty() {
+			return (
+				Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty) &&
+				!this.isNegativeStockEnabled()
+			);
+		},
 		headers() {
 			return this.getItemsHeaders();
 		},
-		filtered_items() {
-			if (!this.items || this.items.length === 0) {
+		cardColumns() {
+			if (this.windowWidth <= 768) {
+				return 1;
+			}
+			if (this.windowWidth <= 1200) {
+				return 2;
+			}
+			return 3;
+		},
+		cardGap() {
+			if (this.windowWidth <= 768) {
+				return 10;
+			}
+			if (this.windowWidth <= 1200) {
+				return 12;
+			}
+			return 16;
+		},
+		cardPadding() {
+			if (this.windowWidth <= 768) {
+				return 10;
+			}
+			if (this.windowWidth <= 1200) {
+				return 12;
+			}
+			return 16;
+		},
+		cardRowHeight() {
+			if (this.windowWidth <= 768) {
+				return 220;
+			}
+			if (this.windowWidth <= 1200) {
+				return 240;
+			}
+			return 260;
+		},
+		cardColumnWidth() {
+			const columns = Math.max(1, this.cardColumns);
+			const containerWidth = this.cardContainerWidth || 0;
+			if (!containerWidth) {
+				return 240;
+			}
+
+			const gapTotal = this.cardGap * (columns - 1);
+			const paddingTotal = this.cardPadding * 2;
+			const available = Math.max(0, containerWidth - gapTotal - paddingTotal);
+			const width = Math.floor(available / columns);
+			return Math.max(180, width);
+		},
+		displayedItems() {
+			const baseItems = Array.isArray(this.filteredItems) ? [...this.filteredItems] : [];
+
+			if (!baseItems.length) {
 				return [];
 			}
 
 			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-			let filteredItems = [...this.items];
+			let filteredItems = baseItems;
 
 			// Apply search filter only for queries with at least three characters
 			if (searchTerm.length >= 3) {
+				const searchTerms = Array.from(new Set(searchTerm.split(/\s+/).filter(Boolean)));
+
 				filteredItems = filteredItems.filter((item) => {
 					const barcodeList = [];
 					if (Array.isArray(item.item_barcode)) {
@@ -2585,7 +3731,11 @@ export default {
 						.filter(Boolean)
 						.map((field) => field.toLowerCase());
 
-					return searchFields.some((field) => field.includes(searchTerm));
+					if (!searchTerms.length) {
+						return true;
+					}
+
+					return searchTerms.every((term) => searchFields.some((field) => field.includes(term)));
 				});
 			}
 
@@ -2645,18 +3795,28 @@ export default {
 				this.qty = parsed;
 			}, 200),
 		},
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
 		active_price_list() {
 			return this.customer_price_list || (this.pos_profile && this.pos_profile.selling_price_list);
 		},
 	},
 
-	created() {
-		console.log("ItemsSelector created - starting initialization");
+        async created() {
+                console.log("ItemsSelector created - starting initialization with Pinia store");
 
-		// Setup search debounce
+                this.stockUnsubscribe = stockCoordinator.subscribe(this.handleStockSnapshotUpdate);
+
+                // Initialize the Pinia store with existing POS profile data
+                if (this.pos_profile && this.pos_profile.name) {
+                        await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
+			console.log("Pinia store initialized successfully");
+		} else {
+			console.warn("No POS Profile available for store initialization");
+		}
+
+		// Keep legacy initialization for backward compatibility
+		this.replaceBarcodeIndex(this.items || []);
+
+		// Setup search debounce (now handled by store, but keeping for compatibility)
 		this.searchDebounce = _.debounce(() => {
 			this.get_items();
 		}, 300);
@@ -2684,14 +3844,19 @@ export default {
 					if (!this.pos_profile || !this.pos_profile.name) {
 						this.pos_profile = await ensurePosProfile();
 					}
+
+					// Initialize store with fallback profile
+					if (this.pos_profile && this.pos_profile.name) {
+						await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
+					}
 				}
 
-				// Load initial items if we have a profile
+				// Load initial items if we have a profile (now handled by store)
 				if (this.pos_profile && this.pos_profile.name) {
 					console.log("Loading items with POS Profile:", this.pos_profile.name);
 					this.get_items_groups();
-					await this.get_items();
-					this.verifyServerItemCount();
+					// Store handles item loading automatically, but keep legacy method for compatibility
+					await this.initializeItems();
 				} else {
 					console.warn("No POS Profile available during initialization");
 				}
@@ -2701,10 +3866,11 @@ export default {
 		});
 
 		// Event listeners
-		this.eventBus.on("register_pos_profile", (data) => {
+		this.eventBus.on("register_pos_profile", async (data) => {
 			this.pos_profile = data.pos_profile;
+			this.stock_settings = data.stock_settings || {};
 			this.get_items_groups();
-			this.get_items();
+			await this.initializeItems();
 			this.items_view = this.pos_profile.posa_default_card_view ? "card" : "list";
 		});
 		this.eventBus.on("update_cur_items_details", () => {
@@ -2714,21 +3880,27 @@ export default {
 			this.offersCount = data.offersCount;
 			this.appliedOffersCount = data.appliedOffersCount;
 		});
-		this.eventBus.on("update_coupons_counters", (data) => {
-			this.couponsCount = data.couponsCount;
-			this.appliedCouponsCount = data.appliedCouponsCount;
-		});
-		this.eventBus.on("update_customer_price_list", (data) => {
-			this.customer_price_list = data;
-		});
-		this.eventBus.on("update_customer", (data) => {
-			this.customer = data;
+                this.eventBus.on("update_coupons_counters", (data) => {
+                        this.couponsCount = data.couponsCount;
+                        this.appliedCouponsCount = data.appliedCouponsCount;
+                });
+                this.eventBus.on("cart_quantities_updated", this.handleCartQuantitiesUpdated);
+                this.eventBus.on("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);
+                this.eventBus.on("update_customer_price_list", (data) => {
+                        const fallback = this.pos_profile?.selling_price_list || null;
+                        if (data === null || data === undefined) {
+                                this.customer_price_list = fallback;
+                                return;
+                        }
+                        this.customer_price_list = data;
+                });
+		this.eventBus.on("focus_item_search", () => {
+			this.focusItemSearch();
 		});
 
 		// Manually trigger a full item reload when requested
 		this.eventBus.on("force_reload_items", async () => {
 			await this.ensureStorageHealth();
-			this.items_loaded = false;
 			if (!isOffline()) {
 				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
 					await forceClearAllCache();
@@ -2797,7 +3969,7 @@ export default {
 		// Trigger an immediate refresh once items are available
 		this.update_cur_items_details();
 		this.refresh_interval = setInterval(() => {
-			if (this.filtered_items && this.filtered_items.length > 0) {
+			if (this.displayedItems && this.displayedItems.length > 0) {
 				this.update_cur_items_details();
 			}
 		}, 30000); // Refresh every 30 seconds after the initial fetch
@@ -2814,6 +3986,16 @@ export default {
 	},
 
 	async mounted() {
+		this.$watch(
+			() => this.selectedCustomer,
+			(newCustomer) => {
+				const normalized = newCustomer || "";
+				if (this.customer !== normalized) {
+					this.customer = normalized;
+				}
+			},
+			{ immediate: true },
+		);
 		// Ensure POS profile is available
 		if (!this.pos_profile || !this.pos_profile.name) {
 			try {
@@ -2829,7 +4011,7 @@ export default {
 		}
 
 		// Load items if we have a profile and haven't loaded yet
-		if (this.pos_profile && this.pos_profile.name && !this.items_loaded) {
+		if (this.pos_profile && this.pos_profile.name && !this.itemsLoaded) {
 			this.get_items_groups();
 			await this.get_items();
 		}
@@ -2842,18 +4024,26 @@ export default {
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
 		window.addEventListener("resize", this.checkItemContainerOverflow);
-		this.$nextTick(this.checkItemContainerOverflow);
+		this.$nextTick(() => {
+			this.checkItemContainerOverflow();
+			this.scheduleCardMetricsUpdate();
+		});
 	},
 
-	beforeUnmount() {
-		// Clear interval when component is destroyed
-		if (this.refresh_interval) {
-			clearInterval(this.refresh_interval);
-		}
+        beforeUnmount() {
+                // Clear interval when component is destroyed
+                if (this.refresh_interval) {
+                        clearInterval(this.refresh_interval);
+                }
 
-		if (this.itemDetailsRetryTimeout) {
-			clearTimeout(this.itemDetailsRetryTimeout);
-		}
+                if (typeof this.stockUnsubscribe === "function") {
+                        this.stockUnsubscribe();
+                        this.stockUnsubscribe = null;
+                }
+
+                if (this.itemDetailsRetryTimeout) {
+                        clearTimeout(this.itemDetailsRetryTimeout);
+                }
 		this.itemDetailsRetryCount = 0;
 
 		// Call cleanup function for abort controller
@@ -2875,16 +4065,31 @@ export default {
 			this.itemWorker.terminate();
 		}
 
-		this.eventBus.off("update_currency");
-		this.eventBus.off("server-online");
-		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("update_cur_items_details");
-		this.eventBus.off("update_offers_counters");
-		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("update_customer");
+		if (this.scanAudioContext) {
+			try {
+				this.scanAudioContext.close();
+			} catch (error) {
+				console.warn("Scan audio context close failed:", error);
+			}
+			this.scanAudioContext = null;
+		}
+
+                this.eventBus.off("update_currency");
+                this.eventBus.off("server-online");
+                this.eventBus.off("register_pos_profile");
+                this.eventBus.off("update_cur_items_details");
+                this.eventBus.off("update_offers_counters");
+                this.eventBus.off("update_coupons_counters");
+                this.eventBus.off("cart_quantities_updated", this.handleCartQuantitiesUpdated);
+                this.eventBus.off("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);
+                this.eventBus.off("update_customer_price_list");
 		this.eventBus.off("force_reload_items");
+		this.eventBus.off("focus_item_search");
 		window.removeEventListener("resize", this.checkItemContainerOverflow);
+		if (this.metricsRaf) {
+			cancelAnimationFrame(this.metricsRaf);
+			this.metricsRaf = null;
+		}
 	},
 };
 </script>
@@ -2896,6 +4101,69 @@ export default {
 	padding: var(--dynamic-sm);
 }
 
+.manual-scan-container {
+	padding: 16px;
+	border-radius: 12px;
+	border: 1px solid var(--pos-border, rgba(0, 0, 0, 0.08));
+	background-color: var(--pos-card-bg, rgba(255, 255, 255, 0.96));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.manual-scan-text .text-body-2 {
+	color: rgba(0, 0, 0, 0.6);
+}
+
+:deep(.v-theme--dark) .manual-scan-container {
+	background-color: rgba(30, 30, 30, 0.92);
+	border-color: rgba(255, 255, 255, 0.12);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:deep(.v-theme--dark) .manual-scan-text .text-body-2 {
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.scan-error-dialog {
+	border-radius: 16px;
+}
+
+.scan-error-dialog .scan-error-message {
+	font-weight: 600;
+	font-size: 1.05rem;
+	margin: 0;
+}
+
+.scan-error-dialog .scan-error-code {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-family:
+		"Roboto Mono", "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
+	font-size: 0.95rem;
+	padding: 6px 10px;
+	border-radius: 6px;
+	background-color: rgba(244, 67, 54, 0.12);
+}
+
+.scan-error-dialog .scan-error-details {
+	margin-top: 12px;
+	color: rgba(0, 0, 0, 0.72);
+	line-height: 1.4;
+}
+
+:deep(.v-theme--dark) .scan-error-dialog .scan-error-code {
+	background-color: rgba(244, 67, 54, 0.25);
+	color: #ffebee;
+}
+
+:deep(.v-theme--dark) .scan-error-dialog .scan-error-details {
+	color: rgba(255, 255, 255, 0.7);
+}
+
 .sticky-header {
 	position: sticky;
 	top: 0;
@@ -2903,16 +4171,24 @@ export default {
 	background-color: var(--surface-primary, #fff);
 	padding: var(--dynamic-sm);
 	margin: 0;
-	border-bottom: 1px solid #e0e0e0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	/* Performance optimizations for theme switching */
+	contain: layout style;
+	will-change: background-color;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
 }
 
-[data-theme="dark"] .sticky-header {
-	background-color: var(--surface-primary, #1e1e1e);
+.sticky-header {
+	background-color: var(--pos-card-bg);
+	border-bottom: 1px solid var(--pos-border);
 }
 
 .dynamic-scroll {
-	transition: max-height var(--transition-normal);
+	transition: max-height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	padding-bottom: var(--dynamic-sm);
+	contain: layout style;
 }
 
 .item-container {
@@ -2930,21 +4206,28 @@ export default {
 }
 
 .dynamic-item-card {
-	transition: var(--transition-normal);
+	transition:
+		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.2s ease;
 	background-color: var(--surface-secondary);
 	display: flex;
 	flex-direction: column;
 	height: auto;
 	max-width: 180px;
 	box-sizing: border-box;
+	will-change: transform;
+	backface-visibility: hidden;
+	transform: translate3d(0, 0, 0);
 }
 
 .dynamic-item-card .v-img {
 	object-fit: contain;
+	will-change: auto;
 }
 
 .dynamic-item-card:hover {
-	transform: scale(calc(1 + 0.02 * var(--font-scale)));
+	transform: translate3d(0, -2px, 0) scale(1.02);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .text-success {
@@ -3032,6 +4315,25 @@ export default {
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+	/* Performance optimizations */
+	contain: layout style;
+	will-change: scroll-position;
+	transform: translate3d(0, 0, 0);
+}
+
+.virtual-scroller {
+	height: calc(100% - 80px);
+	overflow-y: auto;
+	position: relative;
+}
+
+.virtual-scroller .items-card-grid {
+	height: auto;
+	overflow: visible;
+}
+
+.virtual-scroller .vue-recycle-scroller__item-wrapper {
+	display: contents;
 }
 
 .items-card-grid::-webkit-scrollbar {
@@ -3052,16 +4354,22 @@ export default {
 	border-radius: 12px;
 	border: 1px solid rgba(0, 0, 0, 0.08);
 	overflow: hidden;
-	transition: all 0.3s ease;
+	transition:
+		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.2s ease,
+		border-color 0.2s ease;
 	cursor: pointer;
 	display: flex;
 	flex-direction: column;
 	height: auto;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	will-change: transform;
+	backface-visibility: hidden;
+	transform: translate3d(0, 0, 0);
 }
 
 .card-item-card:hover {
-	transform: translateY(-2px);
+	transform: translate3d(0, -2px, 0);
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 	border-color: var(--primary-color, #1976d2);
 }
@@ -3077,11 +4385,13 @@ export default {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	transition: transform 0.3s ease;
+	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	will-change: transform;
+	backface-visibility: hidden;
 }
 
 .card-item-card:hover .card-item-image {
-	transform: scale(1.05);
+	transform: scale3d(1.05, 1.05, 1);
 }
 
 .image-placeholder {
@@ -3126,7 +4436,7 @@ export default {
 
 .card-item-code {
 	font-size: 0.75rem;
-	color: var(--text-secondary, #6c757d);
+	color: var(--pos-text-secondary, #6c757d);
 	font-weight: 500;
 	background: rgba(0, 0, 0, 0.04);
 	padding: 2px 6px;
@@ -3199,7 +4509,7 @@ export default {
 }
 
 .stock-icon {
-	color: var(--text-secondary, #6c757d);
+	color: var(--pos-text-secondary, #6c757d);
 }
 
 .stock-amount {
@@ -3218,7 +4528,7 @@ export default {
 
 .stock-uom {
 	font-size: 0.75rem;
-	color: var(--text-secondary, #6c757d);
+	color: var(--pos-text-secondary, #6c757d);
 	font-weight: 500;
 }
 
@@ -3252,7 +4562,7 @@ export default {
 :deep([data-theme="dark"]) .card-item-code,
 :deep(.v-theme--dark) .card-item-code {
 	background: rgba(255, 255, 255, 0.08);
-	color: var(--text-secondary, #b0b0b0);
+	color: var(--pos-text-secondary, #e0e0e0);
 }
 
 :deep([data-theme="dark"]) .card-item-stock,
@@ -3484,6 +4794,89 @@ export default {
 
 	.cards {
 		padding: var(--dynamic-xs) !important;
+	}
+}
+
+/* ===============================================================
+   PERFORMANCE OPTIMIZATIONS FOR THEME SWITCHING
+   =============================================================== */
+
+/* Reduce paint and layout operations during theme transitions */
+* {
+	/* Optimize font rendering to reduce repaints */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Enable hardware acceleration for better performance */
+.dynamic-item-card,
+.card-item-card,
+.items-card-grid,
+.sticky-header {
+	/* Force hardware acceleration */
+	transform: translate3d(0, 0, 0);
+	-webkit-transform: translate3d(0, 0, 0);
+	/* Improve compositing performance */
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+}
+
+/* Optimize theme-sensitive elements */
+[data-theme] .dynamic-item-card,
+[data-theme] .card-item-card,
+[data-theme] .sticky-header {
+	/* Minimize reflow during theme changes */
+	will-change: background-color, border-color, color;
+	transition:
+		background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+		color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent layout shifts during image loading */
+.card-item-image,
+.dynamic-item-card .v-img {
+	content-visibility: auto;
+	contain-intrinsic-size: 120px 120px;
+}
+
+/* Optimize scrolling performance */
+.items-card-grid,
+.item-container {
+	/* Improve scroll performance */
+	overscroll-behavior: contain;
+	scroll-behavior: smooth;
+	/* Enable scroll anchoring */
+	overflow-anchor: auto;
+}
+
+/* Defer non-critical paint operations */
+.card-item-content,
+.dynamic-item-card .v-card-text {
+	contain: style;
+	will-change: auto;
+}
+
+/* Reduce complexity of hover effects */
+@media (hover: hover) {
+	.dynamic-item-card:hover,
+	.card-item-card:hover {
+		/* Use GPU-accelerated transforms only */
+		transition:
+			transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+			box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+}
+
+/* Disable animations on reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+	.dynamic-item-card,
+	.card-item-card,
+	.card-item-image,
+	.sticky-header {
+		transition: none !important;
+		animation: none !important;
+		transform: none !important;
 	}
 }
 </style>

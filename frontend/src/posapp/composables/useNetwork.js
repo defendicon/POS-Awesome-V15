@@ -44,22 +44,27 @@ export function manualNetworkRetry(vm) {
 
 // Enhanced periodic check with exponential backoff
 function scheduleNextCheck(vm) {
-	setTimeout(async () => {
-		if (isManualOffline()) {
-			vm.serverConnecting = false;
-			vm.networkOnline = false;
-			vm.serverOnline = false;
-			window.serverOnline = false;
-			persistStatus(false, false);
-			vm.$forceUpdate();
-			scheduleNextCheck(vm);
-			return;
-		}
-		vm.serverConnecting = true;
-		vm.$forceUpdate();
-		await vm.checkNetworkConnectivity();
-		vm.serverConnecting = false;
-		vm.$forceUpdate();
+        setTimeout(async () => {
+                if (isManualOffline()) {
+                        vm.serverConnecting = false;
+                        vm.networkOnline = false;
+                        vm.serverOnline = false;
+                        window.serverOnline = false;
+                        persistStatus(false, false);
+                        vm.$forceUpdate();
+                        scheduleNextCheck(vm);
+                        return;
+                }
+                const shouldShowConnecting = !vm.serverOnline || !vm.networkOnline;
+                if (shouldShowConnecting) {
+                        vm.serverConnecting = true;
+                        vm.$forceUpdate();
+                }
+                await vm.checkNetworkConnectivity();
+                if (shouldShowConnecting) {
+                        vm.serverConnecting = false;
+                        vm.$forceUpdate();
+                }
 		// If failed, increase interval (up to max)
 		if (!vm.serverOnline) {
 			checkInterval = Math.min(checkInterval * 2, MAX_INTERVAL);

@@ -6,7 +6,6 @@ import {
 	initPersistWorker,
 	tableForKey,
 } from "./core.js";
-import { getAllByCursor } from "./db-utils.js";
 import { clearPriceListCache } from "./items.js";
 import Dexie from "dexie/dist/dexie.mjs";
 
@@ -14,6 +13,8 @@ import Dexie from "dexie/dist/dexie.mjs";
 export const CACHE_VERSION = 1;
 
 export const MAX_QUEUE_ITEMS = 1000;
+
+let cacheUsageEstimatePromise = null;
 
 // Memory cache object
 export const memory = {
@@ -40,10 +41,10 @@ export const memory = {
 	// Track the current cache schema version
 	cache_version: CACHE_VERSION,
 	cache_ready: false,
-        tax_inclusive: false,
-        manual_offline: false,
-        print_template: "",
-        terms_and_conditions: "",
+	tax_inclusive: false,
+	manual_offline: false,
+	print_template: "",
+	terms_and_conditions: "",
 };
 
 // Initialize memory from IndexedDB and expose a promise for consumers
@@ -130,26 +131,26 @@ export function reduceCacheUsage() {
 // --- Generic getters and setters for cached data ----------------------------
 
 export async function getStoredItems() {
-        try {
-                await checkDbHealth();
-                if (!db.isOpen()) await db.open();
-                const items = await db.table("items").toArray();
-               return items;
-        } catch (e) {
-                console.error("Failed to get stored items", e);
-                return [];
-        }
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		const items = await db.table("items").toArray();
+		return items;
+	} catch (e) {
+		console.error("Failed to get stored items", e);
+		return [];
+	}
 }
 
 export async function getStoredItemsCount() {
-        try {
-                await checkDbHealth();
-                if (!db.isOpen()) await db.open();
-                return await db.table("items").count();
-        } catch (e) {
-                console.error("Failed to count stored items", e);
-                return 0;
-        }
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		return await db.table("items").count();
+	} catch (e) {
+		console.error("Failed to count stored items", e);
+		return 0;
+	}
 }
 
 export async function saveItems(items) {
@@ -179,13 +180,22 @@ export async function clearStoredItems() {
 	}
 }
 
-export function getCustomerStorage() {
-	return memory.customer_storage || [];
+export async function getCustomerStorage(limit = Infinity, offset = 0) {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		return await db.table("customers").offset(offset).limit(limit).toArray();
+	} catch (e) {
+		console.error("Failed to get customers from storage", e);
+		return [];
+	}
 }
 
-export function setCustomerStorage(customers) {
+export async function setCustomerStorage(customers) {
 	try {
-		memory.customer_storage = customers.map((c) => ({
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		const clean = customers.map((c) => ({
 			name: c.name,
 			customer_name: c.customer_name,
 			mobile_no: c.mobile_no,
@@ -193,11 +203,37 @@ export function setCustomerStorage(customers) {
 			primary_address: c.primary_address,
 			tax_id: c.tax_id,
 		}));
+		const CHUNK_SIZE = 1000;
+		await db.transaction("rw", db.table("customers"), async () => {
+			for (let i = 0; i < clean.length; i += CHUNK_SIZE) {
+				const chunk = clean.slice(i, i + CHUNK_SIZE);
+				await db.table("customers").bulkPut(chunk);
+			}
+		});
 	} catch (e) {
-		console.error("Failed to trim customers for storage", e);
-		memory.customer_storage = [];
+		console.error("Failed to set customer storage", e);
 	}
-	persist("customer_storage", memory.customer_storage);
+}
+
+export async function getCustomerStorageCount() {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		return await db.table("customers").count();
+	} catch (e) {
+		console.error("Failed to count customers", e);
+		return 0;
+	}
+}
+
+export async function clearCustomerStorage() {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		await db.table("customers").clear();
+	} catch (e) {
+		console.error("Failed to clear customer storage", e);
+	}
 }
 
 export function getItemsLastSync() {
@@ -316,39 +352,39 @@ export function setTaxTemplate(name, doc) {
 }
 
 export function getPrintTemplate() {
-        try {
-                return memory.print_template || "";
-        } catch (e) {
-                console.error("Failed to get print template", e);
-                return "";
-        }
+	try {
+		return memory.print_template || "";
+	} catch (e) {
+		console.error("Failed to get print template", e);
+		return "";
+	}
 }
 
 export function setPrintTemplate(template) {
-        try {
-                memory.print_template = template || "";
-                persist("print_template", memory.print_template);
-        } catch (e) {
-                console.error("Failed to set print template", e);
-        }
+	try {
+		memory.print_template = template || "";
+		persist("print_template", memory.print_template);
+	} catch (e) {
+		console.error("Failed to set print template", e);
+	}
 }
 
 export function getTermsAndConditions() {
-        try {
-                return memory.terms_and_conditions || "";
-        } catch (e) {
-                console.error("Failed to get terms and conditions", e);
-                return "";
-        }
+	try {
+		return memory.terms_and_conditions || "";
+	} catch (e) {
+		console.error("Failed to get terms and conditions", e);
+		return "";
+	}
 }
 
 export function setTermsAndConditions(terms) {
-        try {
-                memory.terms_and_conditions = terms || "";
-                persist("terms_and_conditions", memory.terms_and_conditions);
-        } catch (e) {
-                console.error("Failed to set terms and conditions", e);
-        }
+	try {
+		memory.terms_and_conditions = terms || "";
+		persist("terms_and_conditions", memory.terms_and_conditions);
+	} catch (e) {
+		console.error("Failed to set terms and conditions", e);
+	}
 }
 
 export function getTranslationsCache(lang) {
@@ -532,57 +568,115 @@ export async function forceClearAllCache() {
 }
 
 /**
- * Estimates the current cache usage size in bytes and percentage
- * @returns {Promise<Object>} Object containing total, localStorage, and indexedDB sizes in bytes, and usage percentage
+ * Fallback IndexedDB size estimation by iterating over all records.
+ * This is only used when the StorageManager API is not available.
+ * @returns {Promise<number>} estimated IndexedDB usage in bytes
+ */
+async function estimateIndexedDbSizeFallback() {
+	if (!db.tables || !db.tables.length) {
+		return 0;
+	}
+
+	let total = 0;
+	for (const table of db.tables) {
+		try {
+			await db.transaction("r", db.table(table.name), async () => {
+				await db.table(table.name).each((item) => {
+					try {
+						total += JSON.stringify(item).length * 2;
+					} catch (stringifyErr) {
+						console.warn("Failed to measure IndexedDB entry size", stringifyErr);
+					}
+				});
+			});
+		} catch (tableErr) {
+			console.warn(`Failed to inspect table ${table.name} for cache usage`, tableErr);
+		}
+	}
+
+	return total;
+}
+
+/**
+ * Estimates the current cache usage size in bytes and percentage.
+ * @returns {Promise<Object>} usage breakdown for localStorage and IndexedDB
  */
 export async function getCacheUsageEstimate() {
-	try {
-		await checkDbHealth();
-		// Calculate localStorage size
-		let localStorageSize = 0;
-		if (typeof localStorage !== "undefined") {
-			for (let i = 0; i < localStorage.length; i++) {
-				const key = localStorage.key(i);
-				if (key && key.startsWith("posa_")) {
-					const value = localStorage.getItem(key) || "";
-					localStorageSize += (key.length + value.length) * 2; // UTF-16 characters are 2 bytes each
-				}
-			}
-		}
-
-		// Estimate IndexedDB size using cursor to avoid loading everything in memory
-		let indexedDBSize = 0;
-		try {
-			if (db.isOpen()) {
-				for (const table of db.tables) {
-					const entries = await getAllByCursor(table.name);
-					indexedDBSize += entries.reduce((size, item) => {
-						const itemSize = JSON.stringify(item).length * 2; // UTF-16 characters
-						return size + itemSize;
-					}, 0);
-				}
-			}
-		} catch (e) {
-			console.error("Failed to calculate IndexedDB size", e);
-		}
-
-		const totalSize = localStorageSize + indexedDBSize;
-		const maxSize = 50 * 1024 * 1024; // Assume 50MB as max size
-		const usagePercentage = Math.min(100, Math.round((totalSize / maxSize) * 100));
-
-		return {
-			total: totalSize,
-			localStorage: localStorageSize,
-			indexedDB: indexedDBSize,
-			percentage: usagePercentage,
-		};
-	} catch (e) {
-		console.error("Failed to estimate cache usage", e);
-		return {
-			total: 0,
-			localStorage: 0,
-			indexedDB: 0,
-			percentage: 0,
-		};
+	if (cacheUsageEstimatePromise) {
+		return cacheUsageEstimatePromise;
 	}
+
+	cacheUsageEstimatePromise = (async () => {
+		try {
+			await checkDbHealth();
+			let localStorageSize = 0;
+			if (typeof localStorage !== "undefined") {
+				for (let i = 0; i < localStorage.length; i++) {
+					const key = localStorage.key(i);
+					if (key && key.startsWith("posa_")) {
+						const value = localStorage.getItem(key) || "";
+						localStorageSize += (key.length + value.length) * 2;
+					}
+				}
+			}
+
+			let totalSize = 0;
+			let indexedDBSize = 0;
+			let maxSize = 50 * 1024 * 1024;
+
+			if (typeof navigator !== "undefined" && navigator.storage && navigator.storage.estimate) {
+				try {
+					const { usage, quota } = await navigator.storage.estimate();
+					if (typeof usage === "number" && usage >= 0) {
+						totalSize = usage;
+						indexedDBSize = Math.max(totalSize - localStorageSize, 0);
+					}
+					if (typeof quota === "number" && quota > 0) {
+						maxSize = quota;
+					}
+				} catch (estimateErr) {
+					console.warn("StorageManager estimate failed", estimateErr);
+				}
+			}
+
+			if (!totalSize) {
+				if (!db.isOpen()) {
+					try {
+						await db.open();
+					} catch (openErr) {
+						console.warn("Failed to open IndexedDB for cache estimation", openErr);
+						return {
+							total: localStorageSize,
+							localStorage: localStorageSize,
+							indexedDB: 0,
+							percentage: Math.min(100, Math.round((localStorageSize / maxSize) * 100)),
+						};
+					}
+				}
+				indexedDBSize = await estimateIndexedDbSizeFallback();
+				totalSize = localStorageSize + indexedDBSize;
+			}
+
+			const usagePercentage = maxSize ? Math.min(100, Math.round((totalSize / maxSize) * 100)) : 0;
+
+			return {
+				total: totalSize,
+				localStorage: localStorageSize,
+				indexedDB: indexedDBSize,
+				percentage: usagePercentage,
+			};
+		} catch (e) {
+			console.error("Failed to estimate cache usage", e);
+			return {
+				total: 0,
+				localStorage: 0,
+				indexedDB: 0,
+				percentage: 0,
+			};
+		} finally {
+			cacheUsageEstimatePromise = null;
+		}
+	})();
+
+	return cacheUsageEstimatePromise;
 }

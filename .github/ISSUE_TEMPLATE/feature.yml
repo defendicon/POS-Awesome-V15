@@ -1,0 +1,30 @@
+name: "🌟 Feature request"
+description: Propose an enhancement
+labels: [feature, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What pain point does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe UI/UX, API, config, or examples
+    validations:
+      required: true
+  - type: input
+    id: scope
+    attributes:
+      label: Out of scope (if any)
+      placeholder: "Not changing X, Y"
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - label: Backward compatible
+        - label: Breaking change (requires major version)

@@ -44,7 +44,7 @@
 									<template v-slot:item.closing_amount="props">
 										<v-text-field
 											v-model="props.item.closing_amount"
-											:rules="[max25chars]"
+											:rules="[closingAmountRule]"
 											:label="frappe._('Edit')"
 											single-line
 											counter
@@ -52,8 +52,7 @@
 											density="compact"
 											variant="outlined"
 											color="primary"
-											:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-											class="dark-field"
+											class="pos-themed-input"
 											hide-details
 											:prefix="currencySymbol(pos_profile.currency)"
 										></v-text-field>
@@ -81,29 +80,29 @@
 				</v-card-text>
 
 				<v-divider></v-divider>
-				<v-card-actions class="dialog-actions-container">
-					<v-btn
-						theme="dark"
-						@click="submit_dialog"
-						class="pos-action-btn submit-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-check-circle-outline</v-icon>
-						<span>{{ __("Submit") }}</span>
-					</v-btn>
-					<v-spacer></v-spacer>
-					<v-btn
-						theme="dark"
-						@click="close_dialog"
-						class="pos-action-btn cancel-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-close-circle-outline</v-icon>
-						<span>{{ __("Close") }}</span>
-					</v-btn>
-				</v-card-actions>
+                                <v-card-actions class="dialog-actions-container">
+                                        <v-spacer></v-spacer>
+                                        <v-btn
+                                                theme="dark"
+                                                @click="close_dialog"
+                                                class="pos-action-btn cancel-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-close-circle-outline</v-icon>
+                                                <span>{{ __("Close") }}</span>
+                                        </v-btn>
+                                        <v-btn
+                                                theme="dark"
+                                                @click="submit_dialog"
+                                                class="pos-action-btn submit-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-check-circle-outline</v-icon>
+                                                <span>{{ __("Submit") }}</span>
+                                        </v-btn>
+                                </v-card-actions>
 			</v-card>
 		</v-dialog>
 	</v-row>
@@ -138,7 +137,30 @@ export default {
 				sortable: true,
 			},
 		],
-		max25chars: (v) => v.length <= 20 || "Input too long!", // TODO : should validate as number
+		closingAmountRule: (v) => {
+			if (v === "" || v === null || v === undefined) {
+				return true;
+			}
+
+			const value = typeof v === "number" ? v : Number(String(v).trim());
+
+			if (!Number.isFinite(value)) {
+				return "Please enter a valid number";
+			}
+
+			const stringValue = String(v);
+			const [integerPart, fractionalPart] = stringValue.split(".");
+
+			if (integerPart.replace(/^-/, "").length > 20) {
+				return "Number is too large";
+			}
+
+			if (fractionalPart && fractionalPart.length > 2) {
+				return "Maximum of 2 decimal places";
+			}
+
+			return true;
+		},
 		pagination: {},
 	}),
 	watch: {},
@@ -160,11 +182,7 @@ export default {
 		},
 	},
 
-	computed: {
-		isDarkTheme() {
-			return this.$theme.current === "dark";
-		},
-	},
+	computed: {},
 
 	created: function () {
 		this.eventBus.on("open_ClosingDialog", (data) => {
@@ -318,43 +336,22 @@ export default {
 	transform: none;
 }
 
-/* Dark theme overrides */
-:deep([data-theme="dark"]) .closing-dialog-card,
-:deep(.v-theme--dark) .closing-dialog-card,
-::v-deep([data-theme="dark"]) .closing-dialog-card,
-::v-deep(.v-theme--dark) .closing-dialog-card {
-	background: #1e1e1e !important;
+/* Theme-aware dialog styling */
+.closing-dialog-card,
+.closing-header,
+.white-background,
+.white-table,
+.dialog-actions-container {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .closing-header,
-:deep(.v-theme--dark) .closing-header,
-::v-deep([data-theme="dark"]) .closing-header,
-::v-deep(.v-theme--dark) .closing-header {
-	background: #1e1e1e !important;
-	color: #fff !important;
-	border-bottom: 1px solid #373737;
+.closing-header {
+	border-bottom: 1px solid var(--pos-border);
 }
 
-:deep([data-theme="dark"]) .white-background,
-:deep(.v-theme--dark) .white-background,
-::v-deep([data-theme="dark"]) .white-background,
-::v-deep(.v-theme--dark) .white-background {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .white-table,
-:deep(.v-theme--dark) .white-table,
-::v-deep([data-theme="dark"]) .white-table,
-::v-deep(.v-theme--dark) .white-table {
-	background-color: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .dialog-actions-container,
-:deep(.v-theme--dark) .dialog-actions-container,
-::v-deep([data-theme="dark"]) .dialog-actions-container,
-::v-deep(.v-theme--dark) .dialog-actions-container {
-	background: #1e1e1e !important;
-	border-top: 1px solid #373737;
+.dialog-actions-container {
+	border-top: 1px solid var(--pos-border);
 }
 
 /* And the responsive section: */

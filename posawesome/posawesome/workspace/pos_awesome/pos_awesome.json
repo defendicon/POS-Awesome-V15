@@ -62,7 +62,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Offers &amp; Coupons",
-   "link_count": 3,
+   "link_count": 4,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -72,6 +72,16 @@
    "label": "Offers",
    "link_count": 0,
    "link_to": "POS Offer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Promotional Schemes",
+   "link_count": 0,
+   "link_to": "Promotional Scheme",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

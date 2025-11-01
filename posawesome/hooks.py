@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from . import __version__ as app_version
+from posawesome.utils import get_build_version
 
 app_name = "posawesome"
 app_title = "POS Awesome"
@@ -17,12 +15,14 @@ app_license = "GPLv3"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/posawesome/css/posawesome.css"
 # app_include_js = "/assets/posawesome/js/posawesome.js"
+_asset_version = get_build_version()
+
 app_include_js = [
-    "/assets/posawesome/dist/js/posawesome.umd.js",
+    f"/assets/posawesome/dist/js/posawesome.umd.js?v={_asset_version}",
 ]
 
 app_include_css = [
-    "/assets/posawesome/dist/js/posawesome.css",
+    f"/assets/posawesome/dist/js/posawesome.css?v={_asset_version}",
 ]
 
 # include js, css files in header of web template
@@ -102,6 +102,11 @@ doc_events = {
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
     },
+    "POS Invoice": {
+        "validate": "posawesome.posawesome.api.invoice.validate",
+        "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+        "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
+    },
     "Customer": {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
@@ -148,9 +153,11 @@ doc_events = {
 # 	"Task": "posawesome.task.get_dashboard_data"
 # }
 
-# override_doctype_class = {
-# "doctype": "method",
-# }
+# Override standard DocTypes with custom classes
+override_doctype_class = {
+    "POS Invoice": "posawesome.posawesome.overrides.pos_invoice.CustomPOSInvoice",
+    "POS Invoice Merge Log": "posawesome.posawesome.overrides.pos_invoice_merge_log.CustomPOSInvoiceMergeLog",
+}
 
 # exempt linked doctypes from being automatically cancelled
 #
@@ -197,20 +204,33 @@ fixtures = [
                     "Customer-posa_discount",
                     "POS Profile-posa_apply_customer_discount",
                     "Sales Invoice-posa_offers",
+                    "POS Invoice-posa_offers",
                     "Sales Invoice-posa_coupons",
+                    "POS Invoice-posa_coupons",
                     "Sales Invoice Item-posa_offers",
+                    "POS Invoice Item-posa_offers",
                     "Sales Invoice Item-posa_row_id",
+                    "POS Invoice Item-posa_row_id",
                     "Sales Invoice Item-posa_offer_applied",
+                    "POS Invoice Item-posa_offer_applied",
                     "Sales Invoice Item-posa_is_offer",
+                    "POS Invoice Item-posa_is_offer",
                     "Sales Invoice Item-posa_is_replace",
+                    "POS Invoice Item-posa_is_replace",
                     "POS Profile-posa_auto_set_batch",
                     "POS Profile-posa_search_serial_no",
                     "Sales Invoice-posa_additional_notes_section",
+                    "POS Invoice-posa_additional_notes_section",
                     "Sales Invoice-posa_notes",
+                    "POS Invoice-posa_notes",
                     "Sales Invoice-posa_column_break_111",
+                    "POS Invoice-posa_column_break_111",
                     "Sales Invoice-posa_delivery_date",
+                    "POS Invoice-posa_delivery_date",
                     "Sales Invoice Item-posa_notes",
+                    "POS Invoice Item-posa_notes",
                     "Sales Invoice Item-posa_delivery_date",
+                    "POS Invoice Item-posa_delivery_date",
                     "Sales Order-posa_additional_notes_section",
                     "Sales Order-posa_notes",
                     "Sales Order Item-posa_notes",
@@ -248,6 +268,8 @@ fixtures = [
                     "Address-posa_delivery_charges",
                     "Sales Invoice-posa_delivery_charges",
                     "Sales Invoice-posa_delivery_charges_rate",
+                    "POS Invoice-posa_delivery_charges",
+                    "POS Invoice-posa_delivery_charges_rate",
                     "POS Profile-posa_auto_set_delivery_charges",
                     "POS Profile-posa_use_delivery_charges",
                     "POS Profile-hide_expected_amount",
@@ -278,7 +300,18 @@ fixtures = [
     },
     {
         "doctype": "Property Setter",
-        "filters": [["name", "in", ("Sales Invoice-posa_pos_opening_shift-no_copy", "POS Invoice-posa_pos_opening_shift-no_copy", "Sales Invoice Reference-sales_invoice-reqd")]],
+        "filters": [
+            [
+                "name",
+                "in",
+                (
+                    "Sales Invoice-posa_pos_opening_shift-no_copy",
+                    "POS Invoice-posa_pos_opening_shift-no_copy",
+                    "Sales Invoice Reference-sales_invoice-reqd",
+                    "Sales Invoice-update_outstanding_for_self-default",
+                ),
+            ]
+        ],
     },
     {
         "doctype": "Custom Field",

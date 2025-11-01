@@ -16,9 +16,7 @@ class POSCoupon(Document):
 
         if not self.coupon_code:
             if self.coupon_type == "Promotional":
-                self.coupon_code = "".join(
-                    i for i in self.coupon_name if not i.isdigit()
-                )[0:8].upper()
+                self.coupon_code = "".join(i for i in self.coupon_name if not i.isdigit())[0:8].upper()
             elif self.coupon_type == "Gift Card":
                 self.coupon_code = frappe.generate_hash()[:10].upper()
 
@@ -29,9 +27,7 @@ class POSCoupon(Document):
                 frappe.throw(_("Please select the customer."))
         pos_offer = frappe.get_doc("POS Offer", self.pos_offer)
         if self.company != pos_offer.company:
-            frappe.throw(
-                _("Please select the correct POS Offer with the same company.")
-            )
+            frappe.throw(_("Please select the correct POS Offer with the same company."))
         if not pos_offer.coupon_based:
             frappe.throw(_("Please select Coupon Code Based POS Offer."))
         if pos_offer.disable:
@@ -49,15 +45,11 @@ class POSCoupon(Document):
         ref_doc = None
         ref_code_exist = frappe.db.exists("Referral Code", self.referral_code)
         if not ref_code_exist:
-            ref_doc = frappe.get_doc(
-                "Referral Code", {"referral_code": self.referral_code}
-            )
+            ref_doc = frappe.get_doc("Referral Code", {"referral_code": self.referral_code})
         else:
             ref_doc = frappe.get_doc("Referral Code", self.referral_code)
         if not ref_doc:
-            frappe.throw(
-                _("Referral Code {0} is not exists").format(self.referral_code)
-            )
+            frappe.throw(_("Referral Code {0} is not exists").format(self.referral_code))
         if ref_doc.disabled:
             frappe.throw(_("Referral Code {0} is disabled").format(self.referral_code))
 

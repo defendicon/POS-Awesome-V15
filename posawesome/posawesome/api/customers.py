@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
 from frappe.utils.caching import redis_cache
+from .utils import fetch_sales_person_names
 
 
 def get_customer_groups(pos_profile):
@@ -19,12 +20,7 @@ def get_customer_groups(pos_profile):
         # Get items based on the item groups defined in the POS profile
         for data in pos_profile.get("customer_groups"):
             customer_groups.extend(
-                [
-                    "%s" % frappe.db.escape(d.get("name"))
-                    for d in get_child_nodes(
-                        "Customer Group", data.get("customer_group")
-                    )
-                ]
+                [d.get("name") for d in get_child_nodes("Customer Group", data.get("customer_group"))]
             )
 
     return list(set(customer_groups))
@@ -44,31 +40,24 @@ def get_customer_group_condition(pos_profile):
     cond = "disabled = 0"
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
-        cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
+        escaped_groups = [frappe.db.escape(g) for g in customer_groups]
+        cond = " customer_group in ({})".format(", ".join(escaped_groups))
 
-    return cond % tuple(customer_groups)
+    return cond
 
 
 @frappe.whitelist()
-def get_customer_names(
-    pos_profile, limit=None, offset=None, start_after=None, modified_after=None
-):
+def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
     _pos_profile = json.loads(pos_profile)
     ttl = _pos_profile.get("posa_server_cache_duration")
     if ttl:
         ttl = int(ttl) * 60
 
     @redis_cache(ttl=ttl or 1800)
-    def __get_customer_names(
-        pos_profile, limit=None, offset=None, start_after=None, modified_after=None
-    ):
-        return _get_customer_names(
-            pos_profile, limit, offset, start_after, modified_after
-        )
+    def __get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
+        return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
 
-    def _get_customer_names(
-        pos_profile, limit=None, offset=None, start_after=None, modified_after=None
-    ):
+    def _get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
         pos_profile = json.loads(pos_profile)
         filters = {"disabled": 0}
 
@@ -103,16 +92,20 @@ def get_customer_names(
         )
         return customers
 
-    if _pos_profile.get("posa_use_server_cache") and not (
-        limit or offset or start_after or modified_after
-    ):
-        return __get_customer_names(
-            pos_profile, limit, offset, start_after, modified_after
-        )
+    if _pos_profile.get("posa_use_server_cache") and not (limit or offset or start_after or modified_after):
+        return __get_customer_names(pos_profile, limit, offset, start_after, modified_after)
     else:
-        return _get_customer_names(
-            pos_profile, limit, offset, start_after, modified_after
-        )
+        return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
+
+
+@frappe.whitelist()
+def get_customers_count(pos_profile):
+    pos_profile = json.loads(pos_profile)
+    filters = {"disabled": 0}
+    customer_groups = get_customer_groups(pos_profile)
+    if customer_groups:
+        filters["customer_group"] = ["in", customer_groups]
+    return frappe.db.count("Customer", filters)
 
 
 @frappe.whitelist()
@@ -326,9 +319,7 @@ def set_customer_info(customer, fieldname, value=""):
     if fieldname == "loyalty_program":
         frappe.db.set_value("Customer", customer, "loyalty_program", value)
 
-    contact = (
-        frappe.get_cached_value("Customer", customer, "customer_primary_contact") or ""
-    )
+    contact = frappe.get_cached_value("Customer", customer, "customer_primary_contact") or ""
 
     if contact:
         contact_doc = frappe.get_doc("Contact", contact)
@@ -355,34 +346,31 @@ def set_customer_info(customer, fieldname, value=""):
 
         contact_doc.flags.ignore_mandatory = True
         contact_doc.save()
-        frappe.set_value(
-            "Customer", customer, "customer_primary_contact", contact_doc.name
-        )
+        frappe.set_value("Customer", customer, "customer_primary_contact", contact_doc.name)
 
 
 @frappe.whitelist()
 def get_customer_addresses(customer):
     return frappe.db.sql(
         """
-	SELECT
-	    address.name,
-	    address.address_line1,
-	    address.address_line2,
-	    address.address_title,
-	    address.city,
-	    address.state,
-	    address.country,
-	    address.address_type
-	FROM `tabAddress` as address
-	INNER JOIN `tabDynamic Link` AS link
-				ON address.name = link.parent
-	WHERE link.link_doctype = 'Customer'
-	    AND link.link_name = '{0}'
-	    AND address.disabled = 0
-	ORDER BY address.name
-	""".format(
-            customer
-        ),
+        SELECT
+            address.name,
+            address.address_line1,
+            address.address_line2,
+            address.address_title,
+            address.city,
+            address.state,
+            address.country,
+            address.address_type
+        FROM `tabAddress` as address
+        INNER JOIN `tabDynamic Link` AS link
+                                ON address.name = link.parent
+        WHERE link.link_doctype = 'Customer'
+            AND link.link_name = %s
+            AND address.disabled = 0
+        ORDER BY address.name
+        """,
+        (customer,),
         as_dict=1,
     )
 
@@ -401,9 +389,7 @@ def make_address(args):
             "pincode": args.get("pincode"),
             "country": args.get("country"),
             "address_type": "Shipping",
-            "links": [
-                {"link_doctype": args.get("doctype"), "link_name": args.get("customer")}
-            ],
+            "links": [{"link_doctype": args.get("doctype"), "link_name": args.get("customer")}],
         }
     ).insert()
 
@@ -412,21 +398,4 @@ def make_address(args):
 
 @frappe.whitelist()
 def get_sales_person_names():
-    import json
-
-    print("Fetching sales persons...")
-    try:
-        sales_persons = frappe.get_list(
-            "Sales Person",
-            filters={"enabled": 1},
-            fields=["name", "sales_person_name"],
-            limit_page_length=100000,
-        )
-        print(f"Found {len(sales_persons)} sales persons: {json.dumps(sales_persons)}")
-        return sales_persons
-    except Exception as e:
-        print(f"Error fetching sales persons: {str(e)}")
-        frappe.log_error(
-            f"Error fetching sales persons: {str(e)}", "POS Sales Person Error"
-        )
-        return []
+    return fetch_sales_person_names()

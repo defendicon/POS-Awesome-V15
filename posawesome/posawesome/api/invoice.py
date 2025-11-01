@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Youssef Restom and contributors
 # For license information, please see license.txt
 
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, add_days
-from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from frappe.utils import add_days, flt
+
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
+from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
+from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 
 
 def validate(doc, method):
@@ -33,14 +33,51 @@ def before_cancel(doc, method):
     update_coupon(doc, "cancelled")
 
 
+def on_cancel(doc, method):
+    cancel_posawesome_credit_journal_entries(doc)
+
+
+def cancel_posawesome_credit_journal_entries(doc):
+    remark = get_posawesome_credit_redeem_remark(doc.name)
+    linked_journal_entries = frappe.get_all(
+        "Journal Entry",
+        filters={"docstatus": 1, "user_remark": remark},
+        pluck="name",
+    )
+
+    for journal_entry in linked_journal_entries:
+        je_doc = frappe.get_doc("Journal Entry", journal_entry)
+
+        if je_doc.docstatus != 1:
+            continue
+
+        has_reference = any(
+            d.reference_type == doc.doctype and d.reference_name == doc.name for d in je_doc.accounts
+        )
+
+        if not has_reference:
+            continue
+
+        try:
+            je_doc.cancel()
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(),
+                "POSAwesome Credit Journal Cancellation Error",
+            )
+            frappe.throw(
+                _(
+                    "Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
+                ).format(journal_entry)
+            )
+
+
 def add_loyalty_point(invoice_doc):
-    for offer in invoice_doc.posa_offers:
+    for offer in getattr(invoice_doc, "posa_offers", []):
         if offer.offer == "Loyalty Point":
             original_offer = frappe.get_doc("POS Offer", offer.offer_name)
             if original_offer.loyalty_points > 0:
-                loyalty_program = frappe.get_value(
-                    "Customer", invoice_doc.customer, "loyalty_program"
-                )
+                loyalty_program = frappe.get_value("Customer", invoice_doc.customer, "loyalty_program")
                 if not loyalty_program:
                     loyalty_program = original_offer.loyalty_program
                 doc = frappe.get_doc(
@@ -62,29 +99,23 @@ def add_loyalty_point(invoice_doc):
 
 def create_sales_order(doc):
     if (
-        doc.posa_pos_opening_shift
+        getattr(doc, "posa_pos_opening_shift", None)
         and doc.pos_profile
         and doc.is_pos
-        and doc.posa_delivery_date
+        and getattr(doc, "posa_delivery_date", None)
         and not doc.update_stock
         and frappe.get_value("POS Profile", doc.pos_profile, "posa_allow_sales_order")
     ):
         sales_order_doc = make_sales_order(doc.name)
         if sales_order_doc:
-            sales_order_doc.posa_notes = doc.posa_notes
+            sales_order_doc.posa_notes = getattr(doc, "posa_notes", None)
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
             sales_order_doc.save()
             sales_order_doc.submit()
-            url = frappe.utils.get_url_to_form(
-                sales_order_doc.doctype, sales_order_doc.name
-            )
-            msgprint = "Sales Order Created at <a href='{0}'>{1}</a>".format(
-                url, sales_order_doc.name
-            )
-            frappe.msgprint(
-                _(msgprint), title="Sales Order Created", indicator="green", alert=True
-            )
+            url = frappe.utils.get_url_to_form(sales_order_doc.doctype, sales_order_doc.name)
+            msgprint = f"Sales Order Created at <a href='{url}'>{sales_order_doc.name}</a>"
+            frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green", alert=True)
             i = 0
             for item in sales_order_doc.items:
                 doc.items[i].sales_order = sales_order_doc.name
@@ -101,8 +132,8 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
     def update_item(obj, target, source_parent):
         target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
-        target.delivery_date = (
-            obj.posa_delivery_date or source_parent.posa_delivery_date
+        target.delivery_date = getattr(obj, "posa_delivery_date", None) or getattr(
+            source_parent, "posa_delivery_date", None
         )
 
     doclist = get_mapped_doc(
@@ -138,7 +169,7 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
 
 def update_coupon(doc, transaction_type):
-    for coupon in doc.posa_coupons:
+    for coupon in getattr(doc, "posa_coupons", []):
         if not coupon.applied:
             continue
         update_coupon_code_count(coupon.coupon, transaction_type)
@@ -148,9 +179,7 @@ def set_patient(doc):
     domain = get_company_domain(doc.company)
     if domain != "Healthcare":
         return
-    patient_list = frappe.get_all(
-        "Patient", filters={"customer": doc.customer}, page_length=1
-    )
+    patient_list = frappe.get_all("Patient", filters={"customer": doc.customer}, page_length=1)
     if len(patient_list) > 0:
         doc.patient = patient_list[0].name
 
@@ -158,9 +187,7 @@ def set_patient(doc):
 def auto_set_delivery_charges(doc):
     if not doc.pos_profile:
         return
-    if not frappe.get_cached_value(
-        "POS Profile", doc.pos_profile, "posa_auto_set_delivery_charges"
-    ):
+    if not frappe.get_cached_value("POS Profile", doc.pos_profile, "posa_auto_set_delivery_charges"):
         return
 
     delivery_charges = get_applicable_delivery_charges(
@@ -205,23 +232,23 @@ def calc_delivery_charges(doc):
 
     charges_doc = None
     if doc.posa_delivery_charges:
-        charges_doc = frappe.get_cached_doc(
-            "Delivery Charges", doc.posa_delivery_charges
-        )
+        charges_doc = frappe.get_cached_doc("Delivery Charges", doc.posa_delivery_charges)
         doc.posa_delivery_charges_rate = charges_doc.default_rate
-        charges_profile = next(
-            (i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None
-        )
+        charges_profile = next((i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None)
         if charges_profile:
             doc.posa_delivery_charges_rate = charges_profile.rate
+        conversion_rate = doc.conversion_rate or 1
+        doc.posa_delivery_charges_rate = flt(
+            doc.posa_delivery_charges_rate / conversion_rate,
+            doc.precision("posa_delivery_charges_rate"),
+        )
 
     if old_doc and old_doc.posa_delivery_charges:
         old_charges = next(
             (
                 i
                 for i in doc.taxes
-                if i.charge_type == "Actual"
-                and i.description == old_doc.posa_delivery_charges
+                if i.charge_type == "Actual" and i.description == old_doc.posa_delivery_charges
             ),
             None,
         )
@@ -251,9 +278,7 @@ def apply_tax_inclusive(doc):
     if not doc.pos_profile:
         return
     try:
-        tax_inclusive = frappe.get_cached_value(
-            "POS Profile", doc.pos_profile, "posa_tax_inclusive"
-        )
+        tax_inclusive = frappe.get_cached_value("POS Profile", doc.pos_profile, "posa_tax_inclusive")
     except Exception:
         tax_inclusive = 0
 
@@ -282,15 +307,7 @@ def validate_shift(doc):
             frappe.throw(_("POS Shift {0} is not open").format(shift.name))
         # check if shift is for the same profile
         if shift.pos_profile != doc.pos_profile:
-            frappe.throw(
-                _("POS Opening Shift {0} is not for the same POS Profile").format(
-                    shift.name
-                )
-            )
+            frappe.throw(_("POS Opening Shift {0} is not for the same POS Profile").format(shift.name))
         # check if shift is for the same company
         if shift.company != doc.company:
-            frappe.throw(
-                _("POS Opening Shift {0} is not for the same company").format(
-                    shift.name
-                )
-            )
+            frappe.throw(_("POS Opening Shift {0} is not for the same company").format(shift.name))

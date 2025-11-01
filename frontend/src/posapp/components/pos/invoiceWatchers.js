@@ -1,19 +1,102 @@
 import { clearPriceListCache } from "../../../offline/index.js";
+import { useCustomersStore } from "../../stores/customersStore.js";
 /* global frappe */
+
+const buildSnapshot = (items) => {
+	const snapshot = {
+		order: [],
+		qty: {},
+		stockQty: {},
+		meta: {},
+	};
+
+	(Array.isArray(items) ? items : []).forEach((item) => {
+		if (!item || !item.posa_row_id) {
+			return;
+		}
+		const rowId = item.posa_row_id;
+		snapshot.order.push(rowId);
+		snapshot.qty[rowId] = item.qty;
+		snapshot.stockQty[rowId] = item.stock_qty;
+		snapshot.meta[rowId] = {
+			item_code: item.item_code,
+			item_group: item.item_group,
+			brand: item.brand,
+			uom: item.uom,
+			conversion_factor: item.conversion_factor,
+			price_list_rate: item.price_list_rate,
+			stock_qty: item.stock_qty,
+			posa_is_offer: item.posa_is_offer,
+			posa_is_replace: item.posa_is_replace,
+		};
+	});
+
+	return snapshot;
+};
+
+const diffSnapshots = (previous, current) => {
+	const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
+	const changed = new Set();
+	const removedInfo = {};
+
+	const prevOrder = Array.isArray(prevSnapshot.order) ? prevSnapshot.order : [];
+	const currOrder = Array.isArray(current.order) ? current.order : [];
+	const prevSet = new Set(prevOrder);
+	const currSet = new Set(currOrder);
+
+	currOrder.forEach((rowId) => {
+		if (!prevSet.has(rowId)) {
+			changed.add(rowId);
+		}
+	});
+
+	prevOrder.forEach((rowId) => {
+		if (!currSet.has(rowId)) {
+			changed.add(rowId);
+			if (prevSnapshot.meta && prevSnapshot.meta[rowId]) {
+				removedInfo[rowId] = { ...prevSnapshot.meta[rowId] };
+			}
+		}
+	});
+
+	currOrder.forEach((rowId) => {
+		const previousQty = prevSnapshot.qty ? prevSnapshot.qty[rowId] : undefined;
+		if (previousQty !== current.qty[rowId]) {
+			changed.add(rowId);
+		}
+
+		const previousStockQty = prevSnapshot.stockQty ? prevSnapshot.stockQty[rowId] : undefined;
+		if (previousStockQty !== current.stockQty[rowId]) {
+			changed.add(rowId);
+		}
+
+		const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
+		const currMeta = current.meta ? current.meta[rowId] : undefined;
+		if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
+			changed.add(rowId);
+		}
+	});
+
+	return { changed, removedInfo };
+};
 
 export default {
 	// Watch for customer change and update related data
-	customer() {
-		this.close_payments();
-		this.eventBus.emit("set_customer", this.customer);
-		this.fetch_customer_details();
-		this.fetch_customer_balance();
-		this.set_delivery_charges();
-	},
-	// Watch for customer_info change and emit to edit form
-	customer_info() {
-		this.eventBus.emit("set_customer_info_to_edit", this.customer_info);
-	},
+        customer() {
+                this.close_payments();
+                const customersStore = useCustomersStore();
+                customersStore.setSelectedCustomer(this.customer || null);
+                this.fetch_customer_details();
+                this.fetch_customer_balance();
+                this.set_delivery_charges();
+                this.sync_invoice_customer_details();
+        },
+        // Watch for customer_info change and emit to edit form
+        customer_info() {
+                const customersStore = useCustomersStore();
+                customersStore.setCustomerInfo(this.customer_info || {});
+                this.sync_invoice_customer_details(this.customer_info);
+        },
 	// Watch for expanded row change and update item detail
 	expanded(data_value) {
 		if (data_value.length > 0) {
@@ -31,20 +114,64 @@ export default {
 		});
 	},
 	// Watch for items array changes (deep) and re-handle offers
-        items: {
-                deep: true,
-                handler() {
-                        if (this.isApplyingOffer) return;
-                        this.handelOffers();
-                        this.$forceUpdate();
+	items: {
+		deep: true,
+		handler(newItems) {
+			const snapshot = buildSnapshot(newItems);
+			this._offerSnapshots = this._offerSnapshots || {};
+			const previous = this._offerSnapshots.items;
+                        this._offerSnapshots.items = snapshot;
+
+                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+
+                        if (removedInfo && Object.keys(removedInfo).length) {
+				this._pendingRemovedRowInfo = {
+					...(this._pendingRemovedRowInfo || {}),
+					...removedInfo,
+                                };
+                        }
+
+                        if (!previous) {
+                                if (snapshot.order.length) {
+                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                }
+                        } else if (changed.size) {
+                                this.scheduleOfferRefresh(Array.from(changed));
+                        }
+
+                        if (typeof this.emitCartQuantities === "function") {
+                                this.emitCartQuantities();
+                        }
                 },
         },
         packed_items: {
                 deep: true,
-                handler() {
-                        if (this.isApplyingOffer) return;
-                        this.handelOffers();
-                        this.$forceUpdate();
+                handler(newItems) {
+			const snapshot = buildSnapshot(newItems);
+			this._offerSnapshots = this._offerSnapshots || {};
+			const previous = this._offerSnapshots.packed;
+                        this._offerSnapshots.packed = snapshot;
+
+                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+
+                        if (removedInfo && Object.keys(removedInfo).length) {
+				this._pendingRemovedRowInfo = {
+					...(this._pendingRemovedRowInfo || {}),
+					...removedInfo,
+                                };
+                        }
+
+                        if (!previous) {
+                                if (snapshot.order.length) {
+                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                }
+                        } else if (changed.size) {
+                                this.scheduleOfferRefresh(Array.from(changed));
+                        }
+
+                        if (typeof this.emitCartQuantities === "function") {
+                                this.emitCartQuantities();
+                        }
                 },
         },
 	// Watch for invoice type change and emit
@@ -52,20 +179,32 @@ export default {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
 	},
 	// Watch for additional discount and update percentage accordingly
-	additional_discount() {
-		if (!this.additional_discount || this.additional_discount == 0) {
-			this.additional_discount_percentage = 0;
-		} else if (this.pos_profile.posa_use_percentage_discount) {
-			// Prevent division by zero which causes NaN
-			if (this.Total && this.Total !== 0) {
-				this.additional_discount_percentage = (this.additional_discount / this.Total) * 100;
-			} else {
-				this.additional_discount_percentage = 0;
-			}
-		} else {
-			this.additional_discount_percentage = 0;
-		}
-	},
+        additional_discount() {
+                if (!this.additional_discount || this.additional_discount == 0) {
+                        this.additional_discount_percentage = 0;
+                } else if (this.pos_profile.posa_use_percentage_discount) {
+                        // Prevent division by zero which causes NaN
+                        const baseTotal = this.Total && this.Total !== 0
+                                ? this.isReturnInvoice
+                                        ? Math.abs(this.Total)
+                                        : this.Total
+                                : 0;
+
+                        if (baseTotal) {
+                                let computedPercentage = (this.additional_discount / baseTotal) * 100;
+
+                                if (this.isReturnInvoice) {
+                                        computedPercentage = -Math.abs(computedPercentage);
+                                }
+
+                                this.additional_discount_percentage = computedPercentage;
+                        } else {
+                                this.additional_discount_percentage = 0;
+                        }
+                } else {
+                        this.additional_discount_percentage = 0;
+                }
+        },
 	// Keep display date in sync with posting_date
 	posting_date: {
 		handler(newVal) {
@@ -101,6 +240,27 @@ export default {
 					}
 				},
 			});
+		}
+
+		if (Array.isArray(this.items)) {
+			this.items.forEach((item) => {
+				item._detailSynced = false;
+			});
+		}
+		if (Array.isArray(this.packed_items)) {
+			this.packed_items.forEach((item) => {
+				item._detailSynced = false;
+			});
+		}
+
+		if (typeof this.clearItemDetailCache === "function") {
+			this.clearItemDetailCache();
+		}
+		if (typeof this.clearItemStockCache === "function") {
+			this.clearItemStockCache();
+		}
+		if (this.available_stock_cache) {
+			this.available_stock_cache = {};
 		}
 	},
 

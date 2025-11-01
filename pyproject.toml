@@ -59,8 +59,12 @@ typing-modules = ["frappe.types.DF"]
 
 [tool.ruff.format]
 quote-style = "double"
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = true
+
+[tool.black]
+line-length = 110
+target-version = ["py310"]
 
 
 [project.urls]

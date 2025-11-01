@@ -92,31 +92,41 @@
 				</v-card-text>
 
 				<!-- Actions Section -->
-				<v-card-actions class="dialog-actions-container">
-					<v-btn
-						theme="dark"
-						@click="go_desk"
-						class="pos-action-btn cancel-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-close-circle-outline</v-icon>
-						<span>{{ __("Cancel") }}</span>
-					</v-btn>
-					<v-spacer />
-					<v-btn
-						theme="dark"
-						:disabled="is_loading"
-						:loading="is_loading"
-						@click="submit_dialog"
-						class="pos-action-btn submit-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-check-circle-outline</v-icon>
-						<span>{{ __("Submit") }}</span>
-					</v-btn>
-				</v-card-actions>
+                                <v-card-actions class="dialog-actions-container">
+                                        <v-btn
+                                                theme="dark"
+                                                @click="logout"
+                                                class="pos-action-btn logout-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-logout</v-icon>
+                                                <span>{{ __("Logout") }}</span>
+                                        </v-btn>
+                                        <v-spacer />
+                                        <v-btn
+                                                theme="dark"
+                                                @click="go_desk"
+                                                class="pos-action-btn cancel-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-close-circle-outline</v-icon>
+                                                <span>{{ __("Close") }}</span>
+                                        </v-btn>
+                                        <v-btn
+                                                theme="dark"
+                                                :disabled="is_loading"
+                                                :loading="is_loading"
+                                                @click="submit_dialog"
+                                                class="pos-action-btn submit-action-btn"
+                                                size="large"
+                                                elevation="2"
+                                        >
+                                                <v-icon start>mdi-check-circle-outline</v-icon>
+                                                <span>{{ __("Submit") }}</span>
+                                        </v-btn>
+                                </v-card-actions>
 			</v-card>
 		</v-dialog>
 	</v-row>
@@ -271,9 +281,22 @@ export default {
 				});
 		},
 
-		go_desk() {
-			frappe.set_route("/");
-			location.reload();
+                go_desk() {
+                        frappe.set_route("/");
+                        location.reload();
+                },
+
+		logout() {
+			const redirectTarget = "/app/posapp";
+			const loginPath = `/login?redirect-to=${encodeURIComponent(redirectTarget)}`;
+			frappe.call("logout").finally(() => {
+				const loginUrl =
+					frappe?.utils?.get_url?.(loginPath) ??
+					(frappe?.urllib?.get_base_url?.()
+						? `${frappe.urllib.get_base_url()}${loginPath}`
+						: loginPath);
+				window.location.href = loginUrl;
+			});
 		},
 	},
 
@@ -642,16 +665,25 @@ export default {
 }
 
 .cancel-action-btn {
-	background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
+        background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
 }
 
 .cancel-action-btn:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+}
+
+.logout-action-btn {
+        background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%) !important;
+}
+
+.logout-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
 }
 
 .submit-action-btn {
-	background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%) !important;
+        background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%) !important;
 }
 
 .submit-action-btn:hover {
@@ -664,35 +696,20 @@ export default {
 	transform: none;
 }
 
-/* Dark theme overrides */
-:deep([data-theme="dark"]) .opening-dialog-card,
-:deep(.v-theme--dark) .opening-dialog-card,
-::v-deep([data-theme="dark"]) .opening-dialog-card,
-::v-deep(.v-theme--dark) .opening-dialog-card {
-	background: #1e1e1e !important;
+/* Theme-aware dialog styling */
+.opening-dialog-card,
+.opening-dialog-header,
+.opening-dialog-content,
+.dialog-actions-container {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
 }
 
-:deep([data-theme="dark"]) .opening-dialog-header,
-:deep(.v-theme--dark) .opening-dialog-header,
-::v-deep([data-theme="dark"]) .opening-dialog-header,
-::v-deep(.v-theme--dark) .opening-dialog-header {
-	background: #1e1e1e !important;
-	color: #fff !important;
-	border-bottom: 1px solid #373737;
+.opening-dialog-header {
+	border-bottom: 1px solid var(--pos-border);
 }
 
-:deep([data-theme="dark"]) .opening-dialog-content,
-:deep(.v-theme--dark) .opening-dialog-content,
-::v-deep([data-theme="dark"]) .opening-dialog-content,
-::v-deep(.v-theme--dark) .opening-dialog-content {
-	background: #1e1e1e !important;
-}
-
-:deep([data-theme="dark"]) .dialog-actions-container,
-:deep(.v-theme--dark) .dialog-actions-container,
-::v-deep([data-theme="dark"]) .dialog-actions-container,
-::v-deep(.v-theme--dark) .dialog-actions-container {
-	background: #1e1e1e !important;
-	border-top: 1px solid #373737;
+.dialog-actions-container {
+	border-top: 1px solid var(--pos-border);
 }
 </style>

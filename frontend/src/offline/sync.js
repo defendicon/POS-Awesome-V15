@@ -96,15 +96,15 @@ export function saveOfflinePayment(entry) {
 		entry.args.payload.pos_profile = {
 			posa_use_pos_awesome_payments: profile.posa_use_pos_awesome_payments,
 			posa_allow_make_new_payments: profile.posa_allow_make_new_payments,
-                        posa_allow_reconcile_payments: profile.posa_allow_reconcile_payments,
-                        posa_allow_mpesa_reconcile_payments: profile.posa_allow_mpesa_reconcile_payments,
-                        posa_force_server_items: profile.posa_force_server_items,
-                        cost_center: profile.cost_center,
-                        posa_cash_mode_of_payment: profile.posa_cash_mode_of_payment,
-                        name: profile.name,
-                };
-        }
-        let cleanEntry;
+			posa_allow_reconcile_payments: profile.posa_allow_reconcile_payments,
+			posa_allow_mpesa_reconcile_payments: profile.posa_allow_mpesa_reconcile_payments,
+			posa_force_server_items: profile.posa_force_server_items,
+			cost_center: profile.cost_center,
+			posa_cash_mode_of_payment: profile.posa_cash_mode_of_payment,
+			name: profile.name,
+		};
+	}
+	let cleanEntry;
 	try {
 		cleanEntry = JSON.parse(JSON.stringify(entry));
 	} catch (e) {
