@@ -564,6 +564,7 @@ import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
+import { parseScaleBarcode } from "../../utils/scaleBarcode.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
@@ -1844,18 +1845,31 @@ export default {
 			}
 
 			// Derive the searchable code and detect scale barcode
-			const search = this.get_search(this.first_search);
-			const isScaleBarcode =
-				this.pos_profile?.posa_scale_barcode_start &&
-				this.first_search.startsWith(this.pos_profile.posa_scale_barcode_start);
-			this.search = search;
+                        const rawSearch = this.first_search || "";
+                        const parsedScale = parseScaleBarcode(
+                                rawSearch,
+                                this.pos_profile?.posa_scale_barcode_start,
+                        );
+                        const search =
+                                parsedScale.isScale && parsedScale.baseCode
+                                        ? parsedScale.baseCode
+                                        : this.get_search(rawSearch);
+                        this.search = search;
 
-			const qty = parseFloat(this.get_item_qty(this.first_search));
-			const new_item = { ...this.displayedItems[0] };
-			new_item.qty = flt(qty);
-			if (isScaleBarcode) {
-				new_item._barcode_qty = true;
-			}
+                        let qty = parsedScale.quantity;
+                        if (qty === null || Number.isNaN(qty)) {
+                                const fallbackQty = Number(this.qty != null ? this.qty : 1);
+                                qty = Number.isFinite(fallbackQty) ? Math.abs(fallbackQty) : 1;
+                        }
+                        if (this.hide_qty_decimals) {
+                                qty = Math.trunc(qty);
+                        }
+
+                        const new_item = { ...this.displayedItems[0] };
+                        new_item.qty = flt(qty);
+                        if (parsedScale.isScale) {
+                                new_item._barcode_qty = true;
+                        }
 
 			let match = false;
 			if (Array.isArray(new_item.item_barcode)) {
@@ -2029,45 +2043,34 @@ export default {
 			}),
 			300,
 		),
-		get_item_qty(first_search) {
-			const qtyVal = this.qty != null ? this.qty : 1;
-			let scal_qty = Math.abs(qtyVal);
-			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
-
-			if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-				// Determine item code length dynamically based on EAN-13 structure:
-				// prefix + item_code + 5 qty digits + 1 check digit
-				const item_code_len = first_search.length - prefix_len - 6;
-				let pesokg1 = first_search.substr(prefix_len + item_code_len, 5);
-				let pesokg;
-				if (pesokg1.startsWith("0000")) {
-					pesokg = "0.00" + pesokg1.substr(4);
-				} else if (pesokg1.startsWith("000")) {
-					pesokg = "0.0" + pesokg1.substr(3);
-				} else if (pesokg1.startsWith("00")) {
-					pesokg = "0." + pesokg1.substr(2);
-				} else if (pesokg1.startsWith("0")) {
-					pesokg = pesokg1.substr(1, 1) + "." + pesokg1.substr(2, pesokg1.length);
-				} else if (!pesokg1.startsWith("0")) {
-					pesokg = pesokg1.substr(0, 2) + "." + pesokg1.substr(2, pesokg1.length);
-				}
-				scal_qty = pesokg;
-			}
-			if (this.hide_qty_decimals) {
-				scal_qty = Math.trunc(scal_qty);
-			}
-			return scal_qty;
-		},
-		get_search(first_search) {
-			if (!first_search) return "";
-			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
-			if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-				return first_search;
-			}
-			// Calculate item code length from total barcode length
-			const item_code_len = first_search.length - prefix_len - 6;
-			return first_search.substr(0, prefix_len + item_code_len);
-		},
+                get_item_qty(first_search = "") {
+                        const parsedScale = parseScaleBarcode(
+                                typeof first_search === "string" ? first_search : String(first_search || ""),
+                                this.pos_profile?.posa_scale_barcode_start,
+                        );
+                        const fallbackRaw = Number(this.qty != null ? this.qty : 1);
+                        let resolvedQty =
+                                parsedScale.quantity !== null && !Number.isNaN(parsedScale.quantity)
+                                        ? parsedScale.quantity
+                                        : Number.isFinite(fallbackRaw)
+                                                ? Math.abs(fallbackRaw)
+                                                : 1;
+                        if (this.hide_qty_decimals) {
+                                resolvedQty = Math.trunc(resolvedQty);
+                        }
+                        return resolvedQty;
+                },
+                get_search(first_search) {
+                        if (!first_search) return "";
+                        const parsedScale = parseScaleBarcode(
+                                first_search,
+                                this.pos_profile?.posa_scale_barcode_start,
+                        );
+                        if (!parsedScale.isScale || !parsedScale.baseCode) {
+                                return first_search;
+                        }
+                        return parsedScale.baseCode;
+                },
                 esc_event() {
                         this.search = null;
                         this.first_search = null;
@@ -3092,15 +3095,22 @@ export default {
 			const mark = perfMarkStart("pos:scan-process");
 			this.pendingScanCode = scannedCode;
 			// Handle scale barcodes by extracting the item code and quantity
-			let searchCode = scannedCode;
-			let qtyFromBarcode = null;
-			if (
-				this.pos_profile?.posa_scale_barcode_start &&
-				scannedCode.startsWith(this.pos_profile.posa_scale_barcode_start)
-			) {
-				searchCode = this.get_search(scannedCode);
-				qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
-			}
+                        const parsedScale = parseScaleBarcode(
+                                scannedCode,
+                                this.pos_profile?.posa_scale_barcode_start,
+                        );
+                        let searchCode =
+                                parsedScale.isScale && parsedScale.baseCode
+                                        ? parsedScale.baseCode
+                                        : scannedCode;
+                        let qtyFromBarcode = parsedScale.quantity;
+                        if (qtyFromBarcode !== null) {
+                                if (Number.isNaN(qtyFromBarcode)) {
+                                        qtyFromBarcode = null;
+                                } else if (this.hide_qty_decimals) {
+                                        qtyFromBarcode = Math.trunc(qtyFromBarcode);
+                                }
+                        }
 
 			// First try to find exact match by processed code using the pre-built index
 			const barcodeIndex = this.ensureBarcodeIndex();
