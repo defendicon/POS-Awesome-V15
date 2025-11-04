@@ -80,37 +80,57 @@
 							</v-col>
 						</v-row>
 
-						<!-- Items Section -->
-						<v-divider class="my-4"></v-divider>
-						<v-row>
-							<v-col cols="12">
-								<h3 class="text-h6 mb-3">{{ __("Items") }}</h3>
-							</v-col>
-						</v-row>
+					<!-- Items Section -->
+					<v-divider class="my-4"></v-divider>
+					<v-row>
+						<v-col cols="12">
+							<h3 class="text-h6 mb-3">{{ __("Items") }}</h3>
+						</v-col>
+					</v-row>
 
-						<!-- Add Item Row -->
-						<v-row align="center" class="mb-2">
-							<v-col cols="12" md="5">
-								<v-autocomplete
-									v-model="newItem.item_code"
-									:items="items"
-									item-title="item_name"
-									item-value="item_code"
-									:label="__('Item')"
-									density="compact"
-									variant="outlined"
-									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
-									@update:model-value="onItemSelect"
-								>
-									<template v-slot:item="{ props, item }">
-										<v-list-item v-bind="props">
-											<template v-slot:title>
-												{{ item.raw.item_code }} - {{ item.raw.item_name }}
-											</template>
-										</v-list-item>
-									</template>
-								</v-autocomplete>
-							</v-col>
+					<!-- Barcode Scanner Row -->
+					<v-row class="mb-3">
+						<v-col cols="12">
+							<v-text-field
+								v-model="barcodeInput"
+								:label="__('Scan Barcode')"
+								density="compact"
+								variant="outlined"
+								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+								prepend-inner-icon="mdi-barcode-scan"
+								hint="Scan or enter barcode to add item"
+								persistent-hint
+								clearable
+								@keydown.enter="handleBarcodeScanned"
+								@click:clear="barcodeInput = ''"
+								ref="barcodeField"
+							></v-text-field>
+						</v-col>
+					</v-row>
+
+					<!-- Add Item Row -->
+					<v-row align="center" class="mb-2">
+						<v-col cols="12" md="5">
+							<v-autocomplete
+								v-model="newItem.item_code"
+								:items="items"
+								item-title="item_name"
+								item-value="item_code"
+								:label="__('Item')"
+								density="compact"
+								variant="outlined"
+								:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+								@update:model-value="onItemSelect"
+							>
+								<template v-slot:item="{ props, item }">
+									<v-list-item v-bind="props">
+										<template v-slot:title>
+											{{ item.raw.item_code }} - {{ item.raw.item_name }}
+										</template>
+									</v-list-item>
+								</template>
+							</v-autocomplete>
+						</v-col>
 
 							<v-col cols="12" md="2">
 								<v-text-field
@@ -233,6 +253,7 @@ export default {
 				qty: 1,
 				warehouse: "",
 			},
+			barcodeInput: "",
 			stockEntryTypes: [],
 			companies: [],
 			warehouses: [],
@@ -346,6 +367,47 @@ export default {
 						this.newItem.warehouse = this.stockEntry.to_warehouse;
 					}
 				}
+			}
+		},
+		async handleBarcodeScanned() {
+			if (!this.barcodeInput || this.barcodeInput.trim() === "") {
+				return;
+			}
+
+			try {
+				// Search for item by barcode
+				const response = await frappe.call({
+					method: "erpnext.stock.utils.scan_barcode",
+					args: {
+						search_value: this.barcodeInput.trim(),
+					},
+				});
+
+				if (response.message && response.message.item_code) {
+					const itemCode = response.message.item_code;
+					const item = this.items.find((i) => i.item_code === itemCode);
+					
+					if (item) {
+						// Set the item in the new item form
+						this.newItem.item_code = itemCode;
+						this.onItemSelect(itemCode);
+						
+						// Clear barcode input
+						this.barcodeInput = "";
+						
+						this.showMessage(`Item ${itemCode} found`, "success");
+					} else {
+						this.showMessage(`Item ${itemCode} not found in stock items`, "warning");
+						this.barcodeInput = "";
+					}
+				} else {
+					this.showMessage("No item found with this barcode", "warning");
+					this.barcodeInput = "";
+				}
+			} catch (error) {
+				console.error("Error scanning barcode:", error);
+				this.showMessage(error.message || "Failed to scan barcode", "error");
+				this.barcodeInput = "";
 			}
 		},
 		addItem() {

@@ -797,7 +797,7 @@ export default {
 .menu-item-title-compact {
 	font-weight: 600;
 	font-size: 14px;
-	color: #212121;
+	color: var(--pos-text-primary, #212121);
 	line-height: 1.2;
 	margin-bottom: 1px;
 }

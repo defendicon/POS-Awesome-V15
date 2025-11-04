@@ -14,6 +14,7 @@ def create_item(item_data):
 		item_data: dict containing item details
 			- item_code: Item Code (required)
 			- item_name: Item Name (optional, defaults to item_code)
+			- barcode: Barcode (optional)
 			- item_group: Item Group (required)
 			- stock_uom: Stock UOM (required)
 			- description: Description (optional)
@@ -78,6 +79,16 @@ def create_item(item_data):
 		
 		# Insert the document
 		item.insert(ignore_permissions=False)
+		
+		# Add barcode as a child table entry if provided
+		if item_data.get("barcode"):
+			barcode_doc = frappe.new_doc("Item Barcode")
+			barcode_doc.parent = item.name
+			barcode_doc.parenttype = "Item"
+			barcode_doc.parentfield = "barcodes"
+			barcode_doc.barcode = item_data.get("barcode")
+			barcode_doc.barcode_type = ""
+			barcode_doc.insert(ignore_permissions=False)
 		
 		frappe.db.commit()
 		

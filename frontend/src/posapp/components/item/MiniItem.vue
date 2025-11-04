@@ -40,6 +40,22 @@
 							</v-col>
 						</v-row>
 
+						<!-- Barcode -->
+						<v-row>
+							<v-col cols="12" md="6">
+								<v-text-field
+									v-model="item.barcode"
+									:label="__('Barcode')"
+									density="compact"
+									variant="outlined"
+									:bg-color="isDarkTheme ? '#1E1E1E' : 'white'"
+									prepend-inner-icon="mdi-barcode"
+									hint="Enter product barcode (optional)"
+									persistent-hint
+								></v-text-field>
+							</v-col>
+						</v-row>
+
 						<!-- Item Group and Stock UOM -->
 						<v-row>
 							<v-col cols="12" md="6">
@@ -211,6 +227,7 @@ export default {
 			item: {
 				item_code: "",
 				item_name: "",
+				barcode: "",
 				item_group: "",
 				stock_uom: "",
 				description: "",
@@ -304,6 +321,7 @@ export default {
 						item_data: {
 							item_code: this.item.item_code,
 							item_name: this.item.item_name || this.item.item_code,
+							barcode: this.item.barcode,
 							item_group: this.item.item_group,
 							stock_uom: this.item.stock_uom,
 							description: this.item.description,
@@ -335,6 +353,7 @@ export default {
 			this.item = {
 				item_code: "",
 				item_name: "",
+				barcode: "",
 				item_group: "",
 				stock_uom: this.uoms.length > 0 ? (this.uoms.find(uom => uom.name === "Nos") || this.uoms[0]).name : "",
 				description: "",
