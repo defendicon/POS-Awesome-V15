@@ -216,6 +216,11 @@ def get_items(
     item_groups: Optional[Sequence[str]] = None,
 ) -> List[Dict[str, Any]]:
     """Return a list of items matching the given criteria."""
+    if isinstance(item_groups, str):
+        try:
+            item_groups = json.loads(item_groups)
+        except Exception:
+            item_groups = []
 
     profile_ctx = _get_profile_context(pos_profile)
     groups_ctx = _prepare_item_groups(profile_ctx.profile_name, item_groups)

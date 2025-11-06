@@ -82,17 +82,22 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
 @frappe.whitelist()
 def check_opening_shift(user):
-    open_vouchers = frappe.db.get_all(
-        "POS Opening Shift",
-        filters={
-            "user": user,
-            "pos_closing_shift": ["is", "not set"],
-            "docstatus": 1,
-            "status": "Open",
-        },
-        fields=["name", "pos_profile"],
-        order_by="period_start_date desc",
-    )
+    if not frappe.db.exists("DocType", "POS Opening Shift"):
+        return ""
+
+    pos_opening_shift = frappe.qb.DocType("POS Opening Shift")
+    open_vouchers = (
+        frappe.qb.from_(pos_opening_shift)
+        .select(pos_opening_shift.name, pos_opening_shift.pos_profile)
+        .where(
+            (pos_opening_shift.user == user)
+            & (pos_opening_shift.pos_closing_shift.isnull())
+            & (pos_opening_shift.docstatus == 1)
+            & (pos_opening_shift.status == "Open")
+        )
+        .orderby(pos_opening_shift.period_start_date, order=frappe.qb.desc)
+    ).run(as_dict=True)
+
     data = ""
     if len(open_vouchers) > 0:
         data = {}
