@@ -13,29 +13,34 @@ HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 logger = logging.getLogger(__name__)
 
 
-def expand_item_groups(item_groups):
+def expand_item_groups(item_groups: list[str]) -> list[str]:
     """Expand any parent item groups to include their children.
 
     This function takes a list of item groups and expands any parent groups
     to include all their descendants, while keeping leaf groups as-is.
     """
     if not item_groups:
-        return item_groups
+        return []
 
     try:
         from erpnext.utilities.doctype.item_group.item_group import get_child_groups
     except Exception:
         get_child_groups = None
 
+    # Fetch `is_group` status for all groups in one query to avoid N+1
+    group_data = frappe.get_all(
+        "Item Group",
+        filters={"name": ["in", item_groups]},
+        fields=["name", "is_group"],
+    )
+    parent_groups = {d.name for d in group_data if d.is_group}
+
     expanded_groups = set()
     for group in item_groups:
         if not group:
             continue
 
-        # Check if this is a parent group
-        is_group = frappe.db.get_value("Item Group", group, "is_group")
-
-        if is_group:
+        if group in parent_groups:
             # If it's a parent group, get all its children
             if get_child_groups:
                 try:
@@ -82,7 +87,7 @@ def get_default_warehouse(company=None):
 def fetch_sales_person_names():
     """Return the list of enabled sales persons allowed for the active POS profile."""
 
-    logger.info("Fetching sales persons...")
+    logger.debug("Fetching sales persons...")
 
     try:
         profile = get_active_pos_profile()
@@ -105,7 +110,7 @@ def fetch_sales_person_names():
             limit_page_length=100000,
         )
 
-        logger.info(
+        logger.debug(
             "Found %s sales persons: %s",
             len(sales_persons),
             json.dumps(sales_persons),

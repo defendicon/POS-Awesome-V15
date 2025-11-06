@@ -15,174 +15,55 @@ import { useBatchSerial } from "../../composables/useBatchSerial.js";
 import { useDiscounts } from "../../composables/useDiscounts.js";
 import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useStockUtils } from "../../composables/useStockUtils.js";
+import { useItemCache } from "../../composables/useItemCache.js";
+import { useTaskQueue } from "../../composables/useTaskQueue.js";
 import stockCoordinator from "../../utils/stockCoordinator.js";
-
-const ITEM_DETAIL_CACHE_TTL = 5000;
-const STOCK_CACHE_TTL = 5000;
 
 const { setSerialNo, setBatchQty } = useBatchSerial();
 const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
 const { removeItem, addItem, getNewItem, clearInvoice } = useItemAddition();
 const { calcUom, calcStockQty } = useStockUtils();
+const {
+	_getItemDetailCacheKey,
+	_getCachedItemDetail,
+	_storeItemDetailCache,
+	clearItemDetailCache,
+	_getStockCacheKey,
+	_getCachedStockQty,
+	_storeStockQty,
+	clearItemStockCache,
+} = useItemCache();
+const {
+	_ensureTaskBucket,
+	_getItemTaskPromise,
+	_setItemTaskPromise,
+	resetItemTaskCache,
+	queueItemTask,
+	hasItemTaskPromise,
+	getItemTaskPromise,
+} = useTaskQueue();
 
 export default {
-	_ensureTaskBucket(rowId) {
-		if (!rowId) {
-			return null;
-		}
-		if (!this._itemTaskCache) {
-			this._itemTaskCache = new Map();
-		}
-		if (!this._itemTaskCache.has(rowId)) {
-			this._itemTaskCache.set(rowId, {});
-		}
-		return this._itemTaskCache.get(rowId);
-	},
-	_getItemTaskPromise(rowId, taskName) {
-		if (!rowId || !this._itemTaskCache) {
-			return null;
-		}
-		const bucket = this._itemTaskCache.get(rowId);
-		return bucket ? bucket[taskName] || null : null;
-	},
-	_setItemTaskPromise(rowId, taskName, promise) {
-		if (!rowId || !promise) {
-			return promise;
-		}
-		const bucket = this._ensureTaskBucket(rowId);
-		const trackedPromise = Promise.resolve(promise).finally(() => {
-			const activeBucket = this._itemTaskCache ? this._itemTaskCache.get(rowId) : null;
-			if (activeBucket) {
-				delete activeBucket[taskName];
-				if (!Object.keys(activeBucket).length) {
-					this._itemTaskCache.delete(rowId);
-				}
-			}
-		});
-		bucket[taskName] = trackedPromise;
-		return trackedPromise;
-	},
-	resetItemTaskCache(rowId, taskName = null) {
-		if (!this._itemTaskCache) {
-			return;
-		}
-		if (!rowId) {
-			this._itemTaskCache = new Map();
-			return;
-		}
-		if (taskName === null) {
-			this._itemTaskCache.delete(rowId);
-			return;
-		}
-		const bucket = this._itemTaskCache.get(rowId);
-		if (!bucket) {
-			return;
-		}
-		delete bucket[taskName];
-		if (!Object.keys(bucket).length) {
-			this._itemTaskCache.delete(rowId);
-		}
-	},
-	queueItemTask(itemOrRowId, taskName, taskFn, options = {}) {
-		const rowId = typeof itemOrRowId === "string" ? itemOrRowId : itemOrRowId?.posa_row_id;
-		const { force = false } = options;
-		const executeTask = () => Promise.resolve().then(() => taskFn());
-
-		if (!rowId) {
-			return executeTask();
-		}
-
-		if (force) {
-			this.resetItemTaskCache(rowId, taskName);
-		} else {
-			const existing = this._getItemTaskPromise(rowId, taskName);
-			if (existing) {
-				return existing;
-			}
-		}
-
-		const promise = executeTask();
-		return this._setItemTaskPromise(rowId, taskName, promise);
-	},
-	hasItemTaskPromise(rowId, taskName) {
-		return !!this._getItemTaskPromise(rowId, taskName);
-	},
-	getItemTaskPromise(rowId, taskName) {
-		return this._getItemTaskPromise(rowId, taskName);
-	},
-	_getItemDetailCacheKey(item) {
-		const code = item?.item_code;
-		const warehouse = item?.warehouse || this.pos_profile?.warehouse;
-		if (!code || !warehouse) {
-			return null;
-		}
-		return `${code}::${warehouse}`;
-	},
-	_getCachedItemDetail(key) {
-		if (!key) {
-			return null;
-		}
-		const cache = this.item_detail_cache || {};
-		const entry = cache[key];
-		if (!entry) {
-			return null;
-		}
-		if (Date.now() - entry.ts > ITEM_DETAIL_CACHE_TTL) {
-			delete cache[key];
-			return null;
-		}
-		return entry.data;
-	},
-	_storeItemDetailCache(key, data) {
-		if (!key || !data) {
-			return;
-		}
-		if (!this.item_detail_cache) {
-			this.item_detail_cache = {};
-		}
-		this.item_detail_cache[key] = {
-			ts: Date.now(),
-			data: JSON.parse(JSON.stringify(data)),
-		};
-	},
 	clearItemDetailCache() {
-		this.item_detail_cache = {};
+		this.item_detail_cache = clearItemDetailCache();
 	},
-	_getStockCacheKey(item) {
-		const code = item?.item_code;
-		const warehouse = item?.warehouse || this.pos_profile?.warehouse;
-		if (!code || !warehouse) {
-			return null;
-		}
-		return `${code}::${warehouse}`;
-	},
-	_getCachedStockQty(key) {
-		if (!key) {
-			return null;
-		}
-		const cache = this.item_stock_cache || {};
-		const entry = cache[key];
-		if (!entry) {
-			return null;
-		}
-		if (Date.now() - entry.ts > STOCK_CACHE_TTL) {
-			delete cache[key];
-			return null;
-		}
-		return entry.qty;
-	},
-	_storeStockQty(key, qty) {
-		if (!key) {
-			return;
-		}
-		if (!this.item_stock_cache) {
-			this.item_stock_cache = {};
-		}
-		this.item_stock_cache[key] = { ts: Date.now(), qty };
-	},
+
 	clearItemStockCache() {
-		this.item_stock_cache = {};
+		this.item_stock_cache = clearItemStockCache();
 	},
+
+	queueItemTask(itemOrRowId, taskName, taskFn, options = {}) {
+		return queueItemTask(itemOrRowId, taskName, taskFn, options, this._itemTaskCache);
+	},
+
+	hasItemTaskPromise(rowId, taskName) {
+		return hasItemTaskPromise(rowId, taskName, this._itemTaskCache);
+	},
+
+	getItemTaskPromise(rowId, taskName) {
+		return getItemTaskPromise(rowId, taskName, this._itemTaskCache);
+	},
+
 	remove_item(item) {
 		return removeItem(item, this);
 	},
@@ -316,6 +197,38 @@ export default {
 		this.cancel_dialog = false;
 	},
 
+	_normalizeReturnDoc(data) {
+		if (data?.is_return) {
+			this._normalizeReturnDocTotals(data);
+		}
+
+		if (data.is_return) {
+			console.log("Processing return invoice");
+			if (data.return_against) {
+				console.log("Return has reference to invoice:", data.return_against);
+				this.eventBus.emit("set_customer_readonly", true);
+			} else {
+				console.log("Return without invoice reference, customer can be selected");
+				this.eventBus.emit("set_customer_readonly", false);
+			}
+			this.invoiceType = "Return";
+			this.invoiceTypes = ["Return"];
+		} else if (data.doctype === "Quotation") {
+			this.invoiceType = "Quotation";
+			if (!this.invoiceTypes.includes("Quotation")) {
+				this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+			}
+		} else if (
+			data.doctype === "Sales Order" &&
+			this.pos_profile?.posa_create_only_sales_order
+		) {
+			this.invoiceType = "Order";
+			if (!this.invoiceTypes.includes("Order")) {
+				this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+			}
+		}
+	},
+
 	// Load an invoice (or return invoice) from data, set all fields accordingly
         async load_invoice(data = {}, options = {}) {
                 const { preserveAdditionalDiscountPercentage = false } = options || {};
@@ -336,38 +249,7 @@ export default {
 		});
 
                 this.clear_invoice();
-                if (data?.is_return) {
-                        this._normalizeReturnDocTotals(data);
-                }
-
-                if (data.is_return) {
-                        console.log("Processing return invoice");
-                        // For return without invoice case, check if there's a return_against
-                        // Only set customer readonly if this is a return with reference to an invoice
-			if (data.return_against) {
-				console.log("Return has reference to invoice:", data.return_against);
-				this.eventBus.emit("set_customer_readonly", true);
-			} else {
-				console.log("Return without invoice reference, customer can be selected");
-				// Allow customer selection for returns without invoice
-				this.eventBus.emit("set_customer_readonly", false);
-			}
-                        this.invoiceType = "Return";
-                        this.invoiceTypes = ["Return"];
-                } else if (data.doctype === "Quotation") {
-                        this.invoiceType = "Quotation";
-                        if (!this.invoiceTypes.includes("Quotation")) {
-                                this.invoiceTypes = ["Invoice", "Order", "Quotation"];
-                        }
-                } else if (
-                        data.doctype === "Sales Order" &&
-                        this.pos_profile?.posa_create_only_sales_order
-                ) {
-                        this.invoiceType = "Order";
-                        if (!this.invoiceTypes.includes("Order")) {
-                                this.invoiceTypes = ["Invoice", "Order", "Quotation"];
-                        }
-                }
+                this._normalizeReturnDoc(data);
 
                 this.invoice_doc = data;
                 this.items = data.items || [];
@@ -383,31 +265,7 @@ export default {
 			});
 		}
 
-		if (this.items.length > 0) {
-			this.items.forEach((item) => {
-				if (!item.posa_row_id) {
-					item.posa_row_id = this.makeid(20);
-				}
-				if (item.batch_no) {
-					this.set_batch_qty(item, item.batch_no);
-				}
-				if (!item.original_item_name) {
-					item.original_item_name = item.item_name;
-				}
-			});
-
-			const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
-
-			await this.update_items_details(this.items);
-
-			if (manualSnapshots.length) {
-				this._restoreManualSnapshots(this.items, manualSnapshots);
-			}
-
-			this.posa_offers = data.posa_offers || [];
-		} else {
-			console.log("Warning: No items in return invoice");
-		}
+		this._processInvoiceItems(data);
 
 		if (this.packed_items.length > 0) {
 			this.update_items_details(this.packed_items);
@@ -540,6 +398,34 @@ export default {
 			items: this.items.length,
 			customer: this.customer,
 		});
+	},
+
+	async _processInvoiceItems(data) {
+		if (this.items.length > 0) {
+			this.items.forEach((item) => {
+				if (!item.posa_row_id) {
+					item.posa_row_id = this.makeid(20);
+				}
+				if (item.batch_no) {
+					this.set_batch_qty(item, item.batch_no);
+				}
+				if (!item.original_item_name) {
+					item.original_item_name = item.item_name;
+				}
+			});
+
+			const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
+
+			await this.update_items_details(this.items);
+
+			if (manualSnapshots.length) {
+				this._restoreManualSnapshots(this.items, manualSnapshots);
+			}
+
+			this.posa_offers = data.posa_offers || [];
+		} else {
+			console.log("Warning: No items in return invoice");
+		}
 	},
 
 	// Save and clear the current invoice (draft logic)
@@ -2268,9 +2154,9 @@ export default {
 			return;
 		}
 
-		const cacheKey = this._getItemDetailCacheKey(item);
+		const cacheKey = _getItemDetailCacheKey(item, this.pos_profile);
 		if (!force_update) {
-			const cachedPayload = this._getCachedItemDetail(cacheKey);
+			const cachedPayload = _getCachedItemDetail(cacheKey, this.item_detail_cache);
 			if (cachedPayload) {
 				this._applyItemDetailPayload(item, cachedPayload, {
 					forceUpdate: force_update,
@@ -2328,7 +2214,7 @@ export default {
 			}
 
 			this._applyItemDetailPayload(item, data, { forceUpdate: force_update, fromCache: false });
-			this._storeItemDetailCache(cacheKey, data);
+			this.item_detail_cache = _storeItemDetailCache(cacheKey, data, this.item_detail_cache);
 			item._detailSynced = true;
 			if (typeof this.$forceUpdate === "function") {
 				this.$forceUpdate();
@@ -3005,8 +2891,8 @@ export default {
         async fetch_available_qty(item) {
                 if (!item || !item.item_code || !item.warehouse || item.is_stock_item === 0) return;
 
-		const key = this._getStockCacheKey(item);
-		const cachedQty = this._getCachedStockQty(key);
+		const key = _getStockCacheKey(item, this.pos_profile);
+		const cachedQty = _getCachedStockQty(key, this.item_stock_cache);
 		if (cachedQty !== null && cachedQty !== undefined) {
 			item.available_qty = cachedQty;
 			this.update_qty_limits(item);
@@ -3029,7 +2915,7 @@ export default {
 				});
 				const qty =
 					response.message && response.message.length ? flt(response.message[0].available_qty) : 0;
-				this._storeStockQty(key, qty);
+				this.item_stock_cache = _storeStockQty(key, qty, this.item_stock_cache);
 				if (this.available_stock_cache) {
 					this.available_stock_cache[key] = { qty, ts: Date.now() };
 				}

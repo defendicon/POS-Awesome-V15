@@ -21,37 +21,17 @@ def get_pos_coupon(coupon, customer, company):
 
 @frappe.whitelist()
 def get_active_gift_coupons(customer, company):
-    coupons = []
     today = getdate(nowdate())
-    coupons_data = frappe.get_all(
-        "POS Coupon",
-        filters={
-            "company": company,
-            "coupon_type": "Gift Card",
-            "customer": customer,
-            "used": 0,
-        },
-        fields=["coupon_code", "valid_from", "valid_upto"],
-    )
-    if len(coupons_data):
-        coupons = [
-            i.coupon_code
-            for i in coupons_data
-            if _is_coupon_active(i, today)
-        ]
-    return coupons
-
-
-def _is_coupon_active(coupon_data, today):
-    """Return True if the coupon is valid for the provided date."""
-
-    if coupon_data.valid_from and getdate(coupon_data.valid_from) > today:
-        return False
-
-    if coupon_data.valid_upto and getdate(coupon_data.valid_upto) < today:
-        return False
-
-    return True
+    filters = {
+        "company": company,
+        "coupon_type": "Gift Card",
+        "customer": customer,
+        "used": 0,
+        "valid_from": ["<=", today],
+        "valid_upto": [">=", today],
+    }
+    coupons_data = frappe.get_all("POS Coupon", filters=filters, pluck="coupon_code")
+    return coupons_data or []
 
 
 @frappe.whitelist()
@@ -102,39 +82,38 @@ def _get_promotional_scheme_offers(pos_profile):
         return []
 
     date = nowdate()
-    values = {"company": pos_profile.company, "date": date}
+    company = pos_profile.company
 
-    try:
-        promotional_schemes = frappe.db.sql(
-            """
-            SELECT name
-            FROM `tabPromotional Scheme`
-            WHERE
-                disable = 0
-                AND selling = 1
-                AND company = %(company)s
-                AND (valid_from IS NULL OR valid_from = '' OR valid_from <= %(date)s)
-                AND (valid_upto IS NULL OR valid_upto = '' OR valid_upto >= %(date)s)
-            """,
-            values=values,
-            as_dict=True,
-        )
-    except Exception:
-        frappe.log_error(frappe.get_traceback(), "POS Awesome - Failed to fetch Promotional Schemes")
-        return []
+    schemes = frappe.get_all(
+        "Promotional Scheme",
+        filters={
+            "disable": 0,
+            "selling": 1,
+            "company": company,
+            "valid_from": ["<=", date],
+            "valid_upto": [">=", date],
+        },
+        fields=[
+            "name",
+            "applicable_for",
+            "apply_rule_on_other",
+            "mixed_conditions",
+            "is_cumulative",
+            "price_discount_slabs",
+            "product_discount_slabs",
+            "apply_on",
+            "items",
+            "item_groups",
+            "brands",
+            "company",
+            "valid_from",
+            "valid_upto",
+        ],
+    )
 
     offers = []
-    for row in promotional_schemes:
-        try:
-            scheme = frappe.get_doc("Promotional Scheme", row.name)
-        except Exception:
-            frappe.log_error(
-                frappe.get_traceback(),
-                f"POS Awesome - Unable to load Promotional Scheme {row.name}",
-            )
-            continue
-
-        offers.extend(_prepare_promotional_scheme_offers(scheme, pos_profile))
+    for scheme in schemes:
+        offers.extend(_prepare_promotional_scheme_offers(frappe._dict(scheme), pos_profile))
 
     return offers
 
@@ -151,6 +130,32 @@ def _prepare_promotional_scheme_offers(scheme, pos_profile):
     offers.extend(_build_price_discount_offers(scheme, pos_profile))
     offers.extend(_build_product_discount_offers(scheme, pos_profile))
     return [offer for offer in offers if offer]
+
+
+def _build_offer_template(scheme, slab, pos_profile):
+    """Return a dictionary with the common offer fields."""
+    return {
+        "name": _make_offer_identifier(scheme.name, slab.name),
+        "row_id": _make_offer_identifier(scheme.name, slab.name),
+        "title": scheme.name,
+        "description": slab.rule_description or scheme.name,
+        "company": scheme.company,
+        "pos_profile": pos_profile.name,
+        "warehouse": slab.warehouse,
+        "apply_on": scheme.apply_on,
+        "auto": 1,
+        "coupon_based": 0,
+        "offer_applied": 0,
+        "min_qty": flt(slab.min_qty),
+        "max_qty": flt(slab.max_qty),
+        "min_amt": flt(slab.min_amount),
+        "max_amt": flt(slab.max_amount),
+        "valid_from": scheme.valid_from,
+        "valid_upto": scheme.valid_upto,
+        "promo_source": "Promotional Scheme",
+        "promotional_scheme": scheme.name,
+        "promotional_scheme_rule": slab.name,
+    }
 
 
 def _build_price_discount_offers(scheme, pos_profile):
@@ -174,35 +179,20 @@ def _build_price_discount_offers(scheme, pos_profile):
         if slab.warehouse and profile_warehouse and slab.warehouse != profile_warehouse:
             continue
 
-        offer_template = {
-            "name": _make_offer_identifier(scheme.name, slab.name),
-            "row_id": _make_offer_identifier(scheme.name, slab.name),
-            "title": scheme.name,
-            "description": slab.rule_description or scheme.name,
-            "company": scheme.company,
-            "pos_profile": pos_profile.name,
-            "warehouse": slab.warehouse,
-            "apply_on": scheme.apply_on,
-            "apply_type": scheme.apply_on if scheme.apply_on in ("Item Code", "Item Group") else "",
-            "offer": "Grand Total" if scheme.apply_on == "Transaction" else "Item Price",
-            "auto": 1,
-            "coupon_based": 0,
-            "offer_applied": 0,
-            "min_qty": flt(slab.min_qty),
-            "max_qty": flt(slab.max_qty),
-            "min_amt": flt(slab.min_amount),
-            "max_amt": flt(slab.max_amount),
-            "discount_type": _map_discount_type(slab.rate_or_discount),
-            "rate": flt(slab.rate),
-            "discount_amount": flt(slab.discount_amount),
-            "discount_percentage": flt(slab.discount_percentage),
-            "given_qty": 0,
-            "valid_from": scheme.valid_from,
-            "valid_upto": scheme.valid_upto,
-            "promo_source": "Promotional Scheme",
-            "promotional_scheme": scheme.name,
-            "promotional_scheme_rule": slab.name,
-        }
+        offer_template = _build_offer_template(scheme, slab, pos_profile)
+        offer_template.update(
+            {
+                "apply_type": scheme.apply_on
+                if scheme.apply_on in ("Item Code", "Item Group")
+                else "",
+                "offer": "Grand Total" if scheme.apply_on == "Transaction" else "Item Price",
+                "discount_type": _map_discount_type(slab.rate_or_discount),
+                "rate": flt(slab.rate),
+                "discount_amount": flt(slab.discount_amount),
+                "discount_percentage": flt(slab.discount_percentage),
+                "given_qty": 0,
+            }
+        )
 
         offer_template = _normalize_discount_fields(offer_template)
 
@@ -252,35 +242,18 @@ def _build_product_discount_offers(scheme, pos_profile):
         if flt(slab.free_qty) <= 0:
             continue
 
-        offer_template = {
-            "name": _make_offer_identifier(scheme.name, slab.name),
-            "row_id": _make_offer_identifier(scheme.name, slab.name),
-            "title": scheme.name,
-            "description": slab.rule_description or scheme.name,
-            "company": scheme.company,
-            "pos_profile": pos_profile.name,
-            "warehouse": slab.warehouse,
-            "apply_on": scheme.apply_on,
-            "offer": "Give Product",
-            "auto": 1,
-            "coupon_based": 0,
-            "offer_applied": 0,
-            "min_qty": flt(slab.min_qty),
-            "max_qty": flt(slab.max_qty),
-            "min_amt": flt(slab.min_amount),
-            "max_amt": flt(slab.max_amount),
-            "given_qty": flt(slab.free_qty),
-            "discount_type": "Rate" if flt(slab.free_item_rate) else "Discount Percentage",
-            "rate": flt(slab.free_item_rate),
-            "discount_amount": 0,
-            "discount_percentage": 100 if not flt(slab.free_item_rate) else 0,
-            "valid_from": scheme.valid_from,
-            "valid_upto": scheme.valid_upto,
-            "promo_source": "Promotional Scheme",
-            "promotional_scheme": scheme.name,
-            "promotional_scheme_rule": slab.name,
-            "round_free_qty": slab.round_free_qty,
-        }
+        offer_template = _build_offer_template(scheme, slab, pos_profile)
+        offer_template.update(
+            {
+                "offer": "Give Product",
+                "given_qty": flt(slab.free_qty),
+                "discount_type": "Rate" if flt(slab.free_item_rate) else "Discount Percentage",
+                "rate": flt(slab.free_item_rate),
+                "discount_amount": 0,
+                "discount_percentage": 100 if not flt(slab.free_item_rate) else 0,
+                "round_free_qty": slab.round_free_qty,
+            }
+        )
 
         if slab.free_item and not slab.same_item:
             offer_template["give_item"] = slab.free_item

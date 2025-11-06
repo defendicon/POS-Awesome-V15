@@ -37,21 +37,27 @@ class POSCoupon(Document):
         if pos_offer.valid_upto and pos_offer.valid_upto < getdate(self.valid_upto):
             self.valid_upto = pos_offer.valid_upto
 
+def _get_referral_doc(referral_code):
+    """Fetch and validate the referral code document."""
+    if not referral_code:
+        frappe.throw(_("Referral Code is required"))
+
+    if not frappe.db.exists("Referral Code", referral_code):
+        frappe.throw(_("Referral Code {0} does not exist").format(referral_code))
+
+    ref_doc = frappe.get_doc("Referral Code", referral_code)
+    if ref_doc.disabled:
+        frappe.throw(_("Referral Code {0} is disabled").format(referral_code))
+
+    return ref_doc
+
+
+class POSCoupon(Document):
     def create_coupon_from_referral(self):
         if not self.customer:
             frappe.throw(_("Customer is required"))
-        if not self.referral_code:
-            frappe.throw(_("Referral Code is required"))
-        ref_doc = None
-        ref_code_exist = frappe.db.exists("Referral Code", self.referral_code)
-        if not ref_code_exist:
-            ref_doc = frappe.get_doc("Referral Code", {"referral_code": self.referral_code})
-        else:
-            ref_doc = frappe.get_doc("Referral Code", self.referral_code)
-        if not ref_doc:
-            frappe.throw(_("Referral Code {0} is not exists").format(self.referral_code))
-        if ref_doc.disabled:
-            frappe.throw(_("Referral Code {0} is disabled").format(self.referral_code))
+
+        ref_doc = _get_referral_doc(self.referral_code)
 
         self.coupon_name = frappe.generate_hash()[:10].upper()
         self.coupon_type = "Gift Card"
@@ -62,15 +68,50 @@ class POSCoupon(Document):
         self.save(ignore_permissions=True)
 
         if ref_doc.primary_offer:
-            doc = frappe.new_doc("POS Coupon")
-            doc.coupon_name = frappe.generate_hash()[:10].upper()
-            doc.coupon_type = "Gift Card"
-            doc.company = ref_doc.company
-            doc.customer = ref_doc.customer
-            doc.pos_offer = ref_doc.primary_offer
-            doc.campaign = ref_doc.campaign
-            doc.referral_code = ref_doc.name
-            doc.save(ignore_permissions=True)
+            _create_coupon(
+                company=ref_doc.company,
+                customer=ref_doc.customer,
+                pos_offer=ref_doc.primary_offer,
+                campaign=ref_doc.campaign,
+                referral_code=ref_doc.name,
+            )
+
+
+def _create_coupon(company, customer, pos_offer, campaign, referral_code):
+    """Create a new POS Coupon document."""
+    doc = frappe.new_doc("POS Coupon")
+    doc.coupon_name = frappe.generate_hash()[:10].upper()
+    doc.coupon_type = "Gift Card"
+    doc.company = company
+    doc.customer = customer
+    doc.pos_offer = pos_offer
+    doc.campaign = campaign
+    doc.referral_code = referral_code
+    doc.save(ignore_permissions=True)
+
+
+def _validate_coupon(coupon, customer, company):
+    """Validate the coupon and return an error message if it's invalid."""
+    pos_offer = frappe.get_doc("POS Offer", coupon.pos_offer)
+    today = getdate(today())
+
+    validations = [
+        (lambda: coupon.valid_from and coupon.valid_from > today, "Sorry, this coupon code's validity has not started"),
+        (lambda: coupon.valid_upto and coupon.valid_upto < today, "Sorry, this coupon code's validity has expired"),
+        (lambda: coupon.used and coupon.maximum_use and coupon.used >= coupon.maximum_use, "Sorry, this coupon code is no longer valid"),
+        (lambda: pos_offer.disable, "Sorry, this coupon code is no longer valid"),
+        (lambda: pos_offer.valid_from and pos_offer.valid_from > today, "Sorry, this coupon code's validity has not started"),
+        (lambda: pos_offer.valid_upto and pos_offer.valid_upto < today, "Sorry, this coupon code's validity has expired"),
+        (lambda: customer and coupon.coupon_type == "Gift Card" and customer != coupon.customer, "Sorry, this coupon code cannot be used by this customer"),
+        (lambda: company and coupon.company != company, "Sorry, this coupon code cannot be used by this company"),
+        (lambda: customer and coupon.one_use and frappe.db.count("POS Coupon Detail", filters={"parentfield": "posa_coupons", "parenttype": "Sales Invoice", "docstatus": 1, "customer": customer}) > 0, "Sorry, {0} have used this coupon before".format(customer)),
+    ]
+
+    for condition, message in validations:
+        if condition():
+            return message
+
+    return None
 
 
 def check_coupon_code(coupon_code, customer=None, company=None):
@@ -80,54 +121,10 @@ def check_coupon_code(coupon_code, customer=None, company=None):
         return res
 
     coupon = frappe.get_doc("POS Coupon", {"coupon_code": coupon_code.upper()})
-    pos_offer = frappe.get_doc("POS Offer", coupon.pos_offer)
-
-    if coupon.valid_from:
-        if coupon.valid_from > getdate(today()):
-            res["msg"] = _("Sorry, this coupon code's validity has not started")
-            return res
-    if coupon.valid_upto:
-        if coupon.valid_upto < getdate(today()):
-            res["msg"] = _("Sorry, this coupon code's validity has expired")
-            return res
-    if coupon.used and coupon.maximum_use and coupon.used >= coupon.maximum_use:
-        res["msg"] = _("Sorry, this coupon code is no longer valid")
+    error_message = _validate_coupon(coupon, customer, company)
+    if error_message:
+        res["msg"] = _(error_message)
         return res
-
-    if pos_offer.disable:
-        res["msg"] = _("Sorry, this coupon code is no longer valid")
-        return res
-    if pos_offer.valid_from:
-        if pos_offer.valid_from > getdate(today()):
-            res["msg"] = _("Sorry, this coupon code's validity has not started")
-            return res
-    if pos_offer.valid_upto:
-        if pos_offer.valid_upto < getdate(today()):
-            res["msg"] = _("Sorry, this coupon code's validity has expired")
-            return res
-
-    if customer and coupon.coupon_type == "Gift Card":
-        if customer != coupon.customer:
-            res["msg"] = _("Sorry, this coupon code cannot be used by this customer")
-            return res
-
-    if company and coupon.company != company:
-        res["msg"] = _("Sorry, this coupon code cannot be used by this company")
-        return res
-
-    if customer and coupon.one_use:
-        count = frappe.db.count(
-            "POS Coupon Detail",
-            filters={
-                "parentfield": "posa_coupons",
-                "parenttype": "Sales Invoice",
-                "docstatus": 1,
-                "customer": customer,
-            },
-        )
-        if count > 0:
-            res["msg"] = _("Sorry, {0} have used this coupon before").format(customer)
-            return res
 
     res["coupon"] = coupon
     res["msg"] = "Apply"

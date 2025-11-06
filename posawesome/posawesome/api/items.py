@@ -73,7 +73,29 @@ def normalize_brand(brand: str) -> str:
     return cstr(brand).strip().lower()
 
 
-def _ensure_pos_profile(pos_profile):
+def _get_profile_from_value(value: Any) -> Optional[Dict[str, Any]]:
+    """Resolve a POS profile ``dict`` from a variety of raw inputs."""
+    if isinstance(value, dict):
+        return value
+
+    if isinstance(value, str):
+        raw_str = value.strip()
+        if not raw_str:
+            return get_active_pos_profile()
+        try:
+            decoded_value = json.loads(raw_str)
+        except Exception:
+            decoded_value = raw_str
+
+        if isinstance(decoded_value, dict):
+            return decoded_value
+        if isinstance(decoded_value, str) and decoded_value:
+            return frappe.get_doc("POS Profile", decoded_value).as_dict()
+
+    return get_active_pos_profile()
+
+
+def _ensure_pos_profile(pos_profile: Any) -> Tuple[Dict[str, Any], str]:
     """Return a ``(profile_dict, profile_json)`` tuple for the given input.
 
     The POS profile parameter can arrive as a JSON string, a python ``dict``,
@@ -84,42 +106,11 @@ def _ensure_pos_profile(pos_profile):
     user-facing validation error is raised.
     """
 
-    profile_dict = None
-    profile_json = None
-
-    if isinstance(pos_profile, dict):
-        profile_dict = pos_profile
-        profile_json = as_json(pos_profile)
-    elif isinstance(pos_profile, str):
-        raw_value = pos_profile.strip()
-        if raw_value:
-            try:
-                decoded_value = json.loads(raw_value)
-            except Exception:
-                decoded_value = raw_value
-
-            if isinstance(decoded_value, dict):
-                profile_dict = decoded_value
-                profile_json = raw_value
-            elif isinstance(decoded_value, str):
-                if decoded_value:
-                    profile_doc = frappe.get_doc("POS Profile", decoded_value)
-                    profile_dict = profile_doc.as_dict()
-                else:
-                    profile_dict = get_active_pos_profile()
-            elif decoded_value is None:
-                profile_dict = get_active_pos_profile()
-        else:
-            profile_dict = get_active_pos_profile()
-    elif pos_profile is None:
-        profile_dict = get_active_pos_profile()
-
-    if profile_dict and not profile_json:
-        profile_json = as_json(profile_dict)
-
-    if not profile_dict or not profile_json:
+    profile_dict = _get_profile_from_value(pos_profile)
+    if not profile_dict:
         frappe.throw(_("POS profile data is missing or invalid."))
 
+    profile_json = as_json(profile_dict)
     return profile_dict, profile_json
 
 
@@ -189,42 +180,64 @@ def get_available_qty(items):
     return result
 
 
+def _get_profile_context(pos_profile: Any) -> ProfileContext:
+    """Return the active profile metadata required by :func:`get_items`."""
+    profile_dict, profile_json = _ensure_pos_profile(pos_profile)
+
+    raw_ttl = profile_dict.get("posa_server_cache_duration")
+    try:
+        ttl = int(raw_ttl) * 60 if raw_ttl else None
+    except (TypeError, ValueError):
+        ttl = None
+
+    return ProfileContext(
+        pos_profile=profile_dict,
+        pos_profile_json=profile_json,
+        use_price_list_cache=bool(profile_dict.get("posa_use_server_cache")),
+        profile_name=profile_dict.get("name"),
+        warehouse=profile_dict.get("warehouse"),
+        cache_ttl=ttl,
+    )
+
+
 @frappe.whitelist()
 def get_items(
-    pos_profile,
-    price_list=None,
-    item_group="",
-    search_value="",
-    customer=None,
-    limit=None,
-    offset=None,
-    start_after=None,
-    modified_after=None,
-    include_description=False,
-    include_image=False,
-    item_groups=None,
-):
-    profile_ctx = _normalize_profile_context(pos_profile)
+    pos_profile: Any,
+    price_list: Optional[str] = None,
+    item_group: str = "",
+    search_value: str = "",
+    customer: Optional[str] = None,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    start_after: Optional[str] = None,
+    modified_after: Optional[str] = None,
+    include_description: bool = False,
+    include_image: bool = False,
+    item_groups: Optional[Sequence[str]] = None,
+) -> List[Dict[str, Any]]:
+    """Return a list of items matching the given criteria."""
+
+    profile_ctx = _get_profile_context(pos_profile)
     groups_ctx = _prepare_item_groups(profile_ctx.profile_name, item_groups)
 
     @redis_cache(ttl=profile_ctx.cache_ttl or 300)
     def __get_items(
-        _pos_profile_name,
-        _warehouse,
-        price_list,
-        customer,
-        search_value,
-        limit,
-        offset,
-        start_after,
-        modified_after,
-        item_group,
-        include_description,
-        include_image,
-        item_groups_tuple,
-    ):
+        _pos_profile_name: str,
+        _warehouse: Optional[str],
+        price_list: Optional[str],
+        customer: Optional[str],
+        search_value: str,
+        limit: Optional[int],
+        offset: Optional[int],
+        start_after: Optional[str],
+        modified_after: Optional[str],
+        item_group: str,
+        include_description: bool,
+        include_image: bool,
+        item_groups_tuple: Tuple[str, ...],
+    ) -> List[Dict[str, Any]]:
         return _execute_item_search(
-            profile_ctx.pos_profile_json,
+            profile_ctx.pos_profile,
             price_list,
             item_group,
             search_value,
@@ -256,7 +269,7 @@ def get_items(
         )
 
     return _execute_item_search(
-        profile_ctx.pos_profile_json,
+        profile_ctx.pos_profile,
         price_list,
         item_group,
         search_value,
@@ -268,26 +281,6 @@ def get_items(
         include_description,
         include_image,
         groups_ctx.groups,
-    )
-
-
-def _normalize_profile_context(pos_profile) -> ProfileContext:
-    """Return the active profile metadata required by :func:`get_items`."""
-
-    profile_dict, profile_json = _ensure_pos_profile(pos_profile)
-    ttl = profile_dict.get("posa_server_cache_duration")
-    try:
-        ttl = int(ttl) * 60 if ttl else None
-    except (TypeError, ValueError):
-        ttl = None
-
-    return ProfileContext(
-        pos_profile=profile_dict,
-        pos_profile_json=profile_json,
-        use_price_list_cache=bool(profile_dict.get("posa_use_server_cache")),
-        profile_name=profile_dict.get("name"),
-        warehouse=profile_dict.get("warehouse"),
-        cache_ttl=ttl,
     )
 
 
@@ -324,6 +317,37 @@ def _to_positive_int(value: Any) -> Optional[int]:
     return integer if integer >= 0 else None
 
 
+def _build_search_filters(
+    pos_profile: Dict[str, Any],
+    item_group: str,
+    start_after: Optional[str],
+    modified_after: Optional[str],
+    item_groups: Optional[Sequence[str]],
+) -> Dict[str, Any]:
+    """Return the base filters for the item search query."""
+    filters: Dict[str, Any] = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
+    if start_after:
+        filters["item_name"] = [">", start_after]
+    if modified_after:
+        try:
+            parsed_modified_after = get_datetime(modified_after)
+            filters["modified"] = [">", parsed_modified_after.isoformat()]
+        except Exception:
+            frappe.throw(_("modified_after must be a valid ISO datetime"))
+
+    if item_groups:
+        filters["item_group"] = ["in", list(item_groups)]
+    if item_group and item_group.upper() != "ALL":
+        filters["item_group"] = ["like", f"%{item_group}%"]
+
+    if not pos_profile.get("posa_show_template_items"):
+        filters.update(HAS_VARIANTS_EXCLUSION)
+    if pos_profile.get("posa_hide_variants_items"):
+        filters["variant_of"] = ["is", "not set"]
+
+    return filters
+
+
 def _build_search_plan(
     pos_profile: Dict[str, Any],
     item_group: str,
@@ -347,89 +371,99 @@ def _build_search_plan(
     limit = _to_positive_int(limit)
     offset = _to_positive_int(offset)
 
-    filters: Dict[str, Any] = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
-    if start_after:
-        filters["item_name"] = [">", start_after]
-    if modified_after:
-        try:
-            parsed_modified_after = get_datetime(modified_after)
-        except Exception:
-            frappe.throw(_("modified_after must be a valid ISO datetime"))
-        filters["modified"] = [">", parsed_modified_after.isoformat()]
+    filters = _build_search_filters(
+        pos_profile, item_group, start_after, modified_after, item_groups
+    )
 
-    if item_groups:
-        filters["item_group"] = ["in", list(item_groups)]
+    or_filters, item_code_for_search, search_words, normalized_search_value = _build_or_filters(
+        search_value, search_serial_no, search_batch_no, use_limit_search, filters
+    )
 
+
+def _build_or_filters(
+    search_value: str,
+    search_serial_no: bool,
+    search_batch_no: bool,
+    use_limit_search: bool,
+    filters: Dict[str, Any],
+) -> Tuple[List[Any], Optional[str], List[str], str]:
+    """Return OR filters and search metadata based on the search value."""
     or_filters: List[Any] = []
     item_code_for_search: Optional[str] = None
     search_words: List[str] = []
     normalized_search_value = ""
+
+    if not search_value:
+        return or_filters, item_code_for_search, search_words, normalized_search_value
+
+    raw_search_value = cstr(search_value).strip()
+    data = search_serial_or_batch_or_barcode_number(raw_search_value, search_serial_no, search_batch_no)
+
+    tokens = re.split(r"\s+", raw_search_value)
     longest_search_token = ""
-    raw_search_value = ""
+    seen: List[str] = []
+    for token in tokens:
+        cleaned = cstr(token).strip()
+        if not cleaned:
+            continue
+        if len(cleaned) > len(longest_search_token):
+            longest_search_token = cleaned
+        lowered = cleaned.lower()
+        if lowered not in seen:
+            seen.append(lowered)
+    search_words = seen
+    normalized_search_value = " ".join(search_words)
 
-    if search_value:
-        raw_search_value = cstr(search_value).strip()
-        data = search_serial_or_batch_or_barcode_number(raw_search_value, search_serial_no, search_batch_no)
+    resolved_item_code = data.get("item_code")
+    base_search_term = resolved_item_code or (longest_search_token or raw_search_value)
+    min_search_len = 2
 
-        tokens = re.split(r"\s+", raw_search_value)
-        seen: List[str] = []
-        for token in tokens:
-            cleaned = cstr(token).strip()
-            if not cleaned:
-                continue
-            if len(cleaned) > len(longest_search_token):
-                longest_search_token = cleaned
-            lowered = cleaned.lower()
-            if lowered not in seen:
-                seen.append(lowered)
-        search_words = seen
-        normalized_search_value = " ".join(search_words)
-
-        resolved_item_code = data.get("item_code")
-        base_search_term = resolved_item_code or (longest_search_token or raw_search_value)
-        min_search_len = 2
-
-        if use_limit_search:
-            if len(raw_search_value) >= min_search_len:
-                or_filters = [
-                    ["name", "like", f"{base_search_term}%"],
-                    ["item_name", "like", f"{base_search_term}%"],
-                    ["item_code", "like", f"%{base_search_term}%"],
-                ]
-                item_code_for_search = base_search_term
-
-            if len(raw_search_value) < min_search_len:
-                filters["item_code"] = base_search_term
-        elif resolved_item_code:
-            filters["item_code"] = resolved_item_code
-
-    if item_group and item_group.upper() != "ALL":
-        filters["item_group"] = ["like", f"%{item_group}%"]
-
-    if not posa_show_template_items:
-        filters.update(HAS_VARIANTS_EXCLUSION)
-
-    if pos_profile.get("posa_hide_variants_items"):
-        filters["variant_of"] = ["is", "not set"]
-
-    search_limit = 0
     if use_limit_search:
-        raw_search_limit = pos_profile.get("posa_search_limit")
-        search_limit = _to_positive_int(raw_search_limit) or 500
+        if len(raw_search_value) >= min_search_len:
+            or_filters = [
+                ["name", "like", f"{base_search_term}%"],
+                ["item_name", "like", f"{base_search_term}%"],
+                ["item_code", "like", f"%{base_search_term}%"],
+            ]
+            item_code_for_search = base_search_term
+        elif len(raw_search_value) < min_search_len:
+            filters["item_code"] = base_search_term
+    elif resolved_item_code:
+        filters["item_code"] = resolved_item_code
 
+    return or_filters, item_code_for_search, search_words, normalized_search_value
+
+
+def _build_pagination(
+    limit: Optional[int],
+    offset: Optional[int],
+    start_after: Optional[str],
+    search_value: str,
+    use_limit_search: bool,
+    force_reload: bool,
+    search_limit: int,
+) -> Tuple[Optional[int], Optional[int]]:
+    """Return pagination parameters for the item search query."""
     limit_page_length: Optional[int] = None
     limit_start: Optional[int] = None
-    order_by = "item_name asc"
 
     if limit is not None:
         limit_page_length = limit
         if offset and not start_after:
             limit_start = offset
-    elif use_limit_search and not pos_profile.get("posa_force_reload_items"):
+    elif use_limit_search and not force_reload:
         limit_page_length = search_limit
 
     if search_value and not use_limit_search and limit is None:
         limit_page_length = None
+
+    raw_search_limit = pos_profile.get("posa_search_limit")
+    search_limit = _to_positive_int(raw_search_limit) or 500
+    force_reload = pos_profile.get("posa_force_reload_items")
+
+    limit_page_length, limit_start = _build_pagination(
+        limit, offset, start_after, search_value, use_limit_search, force_reload, search_limit
+    )
 
     fields = [
         "name",
@@ -453,7 +487,7 @@ def _build_search_plan(
 
     initial_page_start = limit_start or 0
     page_size = limit_page_length or 100
-
+    order_by = "item_name asc"
     word_filter_active = bool(normalized_search_value) and len(normalized_search_value) >= 3
 
     return SearchPlan(
@@ -601,22 +635,6 @@ def _run_item_query(
             limit_page_length=plan.page_size,
             order_by=plan.order_by,
         )
-
-        if not items_data and plan.item_code_for_search and page_start == plan.initial_page_start:
-            items_data = frappe.get_all(
-                "Item",
-                filters=plan.filters,
-                or_filters=[
-                    ["name", "like", f"%{plan.item_code_for_search}%"],
-                    ["item_name", "like", f"%{plan.item_code_for_search}%"],
-                    ["item_code", "like", f"%{plan.item_code_for_search}%"],
-                ],
-                fields=plan.fields,
-                limit_start=page_start,
-                limit_page_length=plan.page_size,
-                order_by=plan.order_by,
-            )
-
         if not items_data:
             break
 
@@ -630,45 +648,42 @@ def _run_item_query(
 
         for item in items_data:
             detail = detail_map.get(item.get("item_code"), {})
-            row = _shape_item_row(dict(item), detail, plan)
-            if not row:
+            shaped = _shape_item_row(dict(item), detail, plan)
+            if not shaped:
                 continue
-            if not _matches_search_words(row, plan.search_words, plan.word_filter_active):
+
+            if not _matches_search_words(shaped, plan.search_words, plan.word_filter_active):
                 continue
-            result.append(row)
+
+            result.append(shaped)
             if plan.limit_page_length and len(result) >= plan.limit_page_length:
                 break
 
-        if plan.limit_page_length and len(result) >= plan.limit_page_length:
+        if (plan.limit_page_length and len(result) >= plan.limit_page_length) or len(
+            items_data
+        ) < plan.page_size:
             break
-
         page_start += len(items_data)
-        if len(items_data) < plan.page_size:
-            break
 
     return result[: plan.limit_page_length] if plan.limit_page_length else result
 
 
 def _execute_item_search(
-    pos_profile_json: str,
+    pos_profile: Dict[str, Any],
     price_list: Optional[str],
     item_group: str,
     search_value: str,
     customer: Optional[str],
-    limit,
-    offset,
-    start_after,
-    modified_after,
+    limit: Optional[int],
+    offset: Optional[int],
+    start_after: Optional[str],
+    modified_after: Optional[str],
     include_description: bool,
     include_image: bool,
     item_groups: Optional[Sequence[str]],
 ) -> List[Dict[str, Any]]:
     """Orchestrate the helpers responsible for executing the search query."""
-
-    pos_profile = json.loads(pos_profile_json)
-
-    if not price_list:
-        price_list = pos_profile.get("selling_price_list")
+    price_list = price_list or pos_profile.get("selling_price_list")
 
     plan = _build_search_plan(
         pos_profile,

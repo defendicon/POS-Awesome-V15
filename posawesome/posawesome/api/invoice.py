@@ -13,10 +13,13 @@ from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from posawesome.posawesome.doctype.pos_opening_shift.pos_opening_shift import (
+    validate_active_shift,
+)
 
 
 def validate(doc, method):
-    validate_shift(doc)
+    validate_active_shift(doc)
     set_patient(doc)
     auto_set_delivery_charges(doc)
     calc_delivery_charges(doc)
@@ -73,28 +76,61 @@ def cancel_posawesome_credit_journal_entries(doc):
 
 
 def add_loyalty_point(invoice_doc):
-    for offer in getattr(invoice_doc, "posa_offers", []):
-        if offer.offer == "Loyalty Point":
-            original_offer = frappe.get_doc("POS Offer", offer.offer_name)
-            if original_offer.loyalty_points > 0:
-                loyalty_program = frappe.get_value("Customer", invoice_doc.customer, "loyalty_program")
-                if not loyalty_program:
-                    loyalty_program = original_offer.loyalty_program
-                doc = frappe.get_doc(
-                    {
-                        "doctype": "Loyalty Point Entry",
-                        "loyalty_program": loyalty_program,
-                        "loyalty_program_tier": original_offer.name,
-                        "customer": invoice_doc.customer,
-                        "invoice_type": "Sales Invoice",
-                        "invoice": invoice_doc.name,
-                        "loyalty_points": original_offer.loyalty_points,
-                        "expiry_date": add_days(invoice_doc.posting_date, 10000),
-                        "posting_date": invoice_doc.posting_date,
-                        "company": invoice_doc.company,
-                    }
-                )
-                doc.insert(ignore_permissions=True)
+    loyalty_offers = [offer for offer in getattr(invoice_doc, "posa_offers", []) if offer.offer == "Loyalty Point"]
+    if not loyalty_offers:
+        return
+
+    offer_names = [offer.offer_name for offer in loyalty_offers]
+    offer_data = frappe.get_all(
+        "POS Offer",
+        filters={"name": ["in", offer_names], "loyalty_points": [">", 0]},
+        fields=["name", "loyalty_points", "loyalty_program"],
+    )
+    if not offer_data:
+        return
+
+    customer_loyalty_program = frappe.get_value("Customer", invoice_doc.customer, "loyalty_program")
+
+    for offer in offer_data:
+        loyalty_program = customer_loyalty_program or offer.loyalty_program
+        if not loyalty_program:
+            continue
+
+        frappe.get_doc(
+            {
+                "doctype": "Loyalty Point Entry",
+                "loyalty_program": loyalty_program,
+                "loyalty_program_tier": offer.name,
+                "customer": invoice_doc.customer,
+                "invoice_type": "Sales Invoice",
+                "invoice": invoice_doc.name,
+                "loyalty_points": offer.loyalty_points,
+                "expiry_date": add_days(invoice_doc.posting_date, 10000),
+                "posting_date": invoice_doc.posting_date,
+                "company": invoice_doc.company,
+            }
+        ).insert(ignore_permissions=True)
+
+
+def _create_sales_order_doc(doc):
+    """Create and submit the sales order document."""
+    sales_order_doc = make_sales_order(doc.name)
+    if not sales_order_doc:
+        return
+
+    sales_order_doc.posa_notes = getattr(doc, "posa_notes", None)
+    sales_order_doc.flags.ignore_permissions = True
+    sales_order_doc.flags.ignore_account_permission = True
+    sales_order_doc.save()
+    sales_order_doc.submit()
+
+    url = frappe.utils.get_url_to_form(sales_order_doc.doctype, sales_order_doc.name)
+    msgprint = f"Sales Order Created at <a href='{url}'>{sales_order_doc.name}</a>"
+    frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green", alert=True)
+
+    for i, item in enumerate(sales_order_doc.items):
+        doc.items[i].sales_order = sales_order_doc.name
+        doc.items[i].so_detail = item.name
 
 
 def create_sales_order(doc):
@@ -106,21 +142,7 @@ def create_sales_order(doc):
         and not doc.update_stock
         and frappe.get_value("POS Profile", doc.pos_profile, "posa_allow_sales_order")
     ):
-        sales_order_doc = make_sales_order(doc.name)
-        if sales_order_doc:
-            sales_order_doc.posa_notes = getattr(doc, "posa_notes", None)
-            sales_order_doc.flags.ignore_permissions = True
-            sales_order_doc.flags.ignore_account_permission = True
-            sales_order_doc.save()
-            sales_order_doc.submit()
-            url = frappe.utils.get_url_to_form(sales_order_doc.doctype, sales_order_doc.name)
-            msgprint = f"Sales Order Created at <a href='{url}'>{sales_order_doc.name}</a>"
-            frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green", alert=True)
-            i = 0
-            for item in sales_order_doc.items:
-                doc.items[i].sales_order = sales_order_doc.name
-                doc.items[i].so_detail = item.name
-                i += 1
+        _create_sales_order_doc(doc)
 
 
 def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
@@ -299,15 +321,3 @@ def apply_tax_inclusive(doc):
         doc.calculate_taxes_and_totals()
 
 
-def validate_shift(doc):
-    if doc.posa_pos_opening_shift and doc.pos_profile and doc.is_pos:
-        # check if shift is open
-        shift = frappe.get_cached_doc("POS Opening Shift", doc.posa_pos_opening_shift)
-        if shift.status != "Open":
-            frappe.throw(_("POS Shift {0} is not open").format(shift.name))
-        # check if shift is for the same profile
-        if shift.pos_profile != doc.pos_profile:
-            frappe.throw(_("POS Opening Shift {0} is not for the same POS Profile").format(shift.name))
-        # check if shift is for the same company
-        if shift.company != doc.company:
-            frappe.throw(_("POS Opening Shift {0} is not for the same company").format(shift.name))
