@@ -59,11 +59,7 @@
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
-				<div
-					class="pos-table__qty-counter"
-					:class="{ 'rtl-layout': isRTL, 'editing-qty': editingQtyItemId === item.posa_row_id }"
-					:title="`RTL: ${isRTL}`"
-				>
+				<div class="pos-table__qty-counter" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
 					<v-btn
 						:disabled="!!item.posa_is_replace"
 						size="small"
@@ -74,10 +70,7 @@
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
 					<div
-						v-if="editingQtyItemId !== item.posa_row_id"
 						class="pos-table__qty-display amount-value number-field-rtl"
-						@click.stop="editingQtyItemId = item.posa_row_id"
-						@dblclick.stop
 						:class="{
 							'negative-number': isNegative(item.qty),
 							'large-number': memoizedQtyLength(item.qty) > 6,
@@ -87,22 +80,6 @@
 					>
 						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
 					</div>
-					<v-text-field
-						v-else
-						:model-value="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
-						@change="handleQtyChange(item, $event)"
-						@blur="editingQtyItemId = null"
-						@keydown.enter="editingQtyItemId = null"
-						@click.stop
-						@dblclick.stop
-						:disabled="!!item.posa_is_replace"
-						density="compact"
-						variant="outlined"
-						hide-details
-						class="pos-table__qty-input"
-						:rules="[isNumber]"
-						autofocus
-					></v-text-field>
 					<v-btn
 						:disabled="
 							!!item.posa_is_replace ||
@@ -249,7 +226,7 @@
 											:model-value="
 												formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
 											"
-											@change="handleQtyChange(item, $event.target.value)"
+											@change="handleQtyChange(item, $event)"
 											:rules="[isNumber]"
 											:disabled="!!item.posa_is_replace"
 											prepend-inner-icon="mdi-numeric"
@@ -702,6 +679,7 @@ export default {
 		formatFloat: Function,
 		formatCurrency: Function,
 		currencySymbol: Function,
+		isNumber: Function,
 		setFormatedQty: Function,
 		setFormatedCurrency: Function,
 		calcPrices: Function,
@@ -727,7 +705,6 @@ export default {
 			editNameDialog: false,
 			editNameTarget: null,
 			editedName: "",
-			editingQtyItemId: null,
 			// Container awareness properties
 			containerWidth: 0,
 			containerHeight: 0,
@@ -1175,14 +1152,14 @@ export default {
 				this.editedName = item.item_name;
 			}
 		},
-		handleQtyChange(item, value) {
-			const newQty = parseFloat(value) || 0;
+		handleQtyChange(item, event) {
+			const newQty = parseFloat(event) || 0;
 			if (newQty === 0) {
 				// Remove the item when quantity is set to 0
 				this.removeItem(item);
 			} else {
 				// Use the existing setFormatedQty function for non-zero values
-				this.setFormatedQty(item, "qty", null, false, value);
+				this.setFormatedQty(item, "qty", null, false, event);
 			}
 		},
 		handleMinusClick(item) {
@@ -1204,10 +1181,6 @@ export default {
 		handleExpandedUpdate(val) {
 			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
 			this.$emit("update:expanded", mappedValues);
-		},
-
-		isNumber(value) {
-			return !isNaN(parseFloat(value)) && isFinite(value);
 		},
 	},
 
@@ -3026,13 +2999,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	transform: translateY(-1px);
 }
 
-.pos-table__qty-counter.editing-qty {
-	max-width: 100% !important;
-}
-.pos-table__qty-input {
-	min-width: 80px;
-}
-
 /* RTL support for quantity counter - Enhanced with multiple selectors */
 /* HTML order: - | qty | + */
 /* RTL desired: + | qty | - */
@@ -3102,34 +3068,6 @@ body[dir="rtl"] .number-field-rtl {
 	direction: ltr !important;
 	text-align: center !important;
 	unicode-bidi: embed !important;
-}
-
-.pos-table__qty-input {
-	min-width: 50px;
-	width: auto;
-	flex: 1 1 auto;
-	text-align: center;
-	font-weight: 600;
-	font-family:
-		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
-		sans-serif;
-	font-variant-numeric: lining-nums tabular-nums;
-	font-feature-settings:
-		"tnum" 1,
-		"lnum" 1,
-		"kern" 1;
-	color: var(--pos-primary);
-	font-size: 0.8rem;
-	transition: all 0.2s ease;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	letter-spacing: -0.02em;
-	word-spacing: -0.1em;
 }
 
 .pos-table__qty-display {
