@@ -276,10 +276,19 @@ export default {
 				}
 			}
 
-			const offers = sourceOffers.map((offer) => cache.get(offer.name)).filter((entry) => !!entry);
+                        const offers = sourceOffers.map((offer) => cache.get(offer.name)).filter((entry) => !!entry);
 
-			this.setItemGiveOffer(offers);
-			this.updatePosOffers(offers);
+                        this.setItemGiveOffer(offers);
+
+                        const appliedOfferMap = new Map(
+                                Array.isArray(this.posa_offers)
+                                        ? this.posa_offers.map((entry) => [entry.row_id, entry])
+                                        : [],
+                        );
+                        const offersToApply = offers.filter((offer) => offer && (offer.auto || appliedOfferMap.has(offer.row_id)));
+
+                        await this.updateInvoiceOffers(offersToApply);
+                        this.updatePosOffers(offers);
 		} catch (error) {
 			console.error("Failed to process offers:", error);
 		}
@@ -1312,7 +1321,11 @@ export default {
 			}
 		}
 
-		new_item.posa_row_id = this.makeid(20);
+                if (typeof this.enforceFreeItemPricing === "function") {
+                        this.enforceFreeItemPricing(new_item);
+                }
+
+                new_item.posa_row_id = this.makeid(20);
 
 		if ((!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no) {
 			// Store only the item's row ID for the expanded state

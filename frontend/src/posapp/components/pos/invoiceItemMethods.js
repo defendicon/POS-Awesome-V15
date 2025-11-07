@@ -383,13 +383,14 @@ export default {
 			});
 		}
 
-		if (this.items.length > 0) {
-			this.items.forEach((item) => {
-				if (!item.posa_row_id) {
-					item.posa_row_id = this.makeid(20);
-				}
-				if (item.batch_no) {
-					this.set_batch_qty(item, item.batch_no);
+                if (this.items.length > 0) {
+                        this.items.forEach((item) => {
+                                this.enforceFreeItemPricing(item);
+                                if (!item.posa_row_id) {
+                                        item.posa_row_id = this.makeid(20);
+                                }
+                                if (item.batch_no) {
+                                        this.set_batch_qty(item, item.batch_no);
 				}
 				if (!item.original_item_name) {
 					item.original_item_name = item.item_name;
@@ -409,14 +410,17 @@ export default {
 			console.log("Warning: No items in return invoice");
 		}
 
-		if (this.packed_items.length > 0) {
-			this.update_items_details(this.packed_items);
-			this.packed_items.forEach((pi) => {
-				if (!pi.posa_row_id) {
-					pi.posa_row_id = this.makeid(20);
-				}
-			});
-		}
+                if (this.packed_items.length > 0) {
+                        this.packed_items.forEach((pi) => {
+                                this.enforceFreeItemPricing(pi);
+                        });
+                        this.update_items_details(this.packed_items);
+                        this.packed_items.forEach((pi) => {
+                                if (!pi.posa_row_id) {
+                                        pi.posa_row_id = this.makeid(20);
+                                }
+                        });
+                }
 
 		this.customer = data.customer;
 		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
@@ -2546,19 +2550,84 @@ export default {
                 item.has_serial_no = data.has_serial_no;
                 item.has_batch_no = data.has_batch_no;
 
-		item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-		item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+                item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
-		console.log(`Updated rates for ${item.item_code} on expand:`, {
-			base_rate: item.base_rate,
-			rate: item.rate,
-			base_price_list_rate: item.base_price_list_rate,
+                this.enforceFreeItemPricing(item);
+
+                console.log(`Updated rates for ${item.item_code} on expand:`, {
+                        base_rate: item.base_rate,
+                        rate: item.rate,
+                        base_price_list_rate: item.base_price_list_rate,
 			price_list_rate: item.price_list_rate,
 			exchange_rate: this.exchange_rate,
 			selected_currency: this.selected_currency,
-			default_currency: this.pos_profile.currency,
-		});
-	},
+                        default_currency: this.pos_profile.currency,
+                });
+        },
+
+        enforceFreeItemPricing(item) {
+                if (!item) {
+                        return;
+                }
+
+                const flag = item.is_free_item;
+                const normalized =
+                        typeof flag === "string"
+                                ? flag.trim().toLowerCase()
+                                : typeof flag === "number"
+                                ? flag
+                                : flag === true
+                                ? 1
+                                : 0;
+
+                if (!(normalized === 1 || normalized === "1" || normalized === "yes" || normalized === "true")) {
+                        return;
+                }
+
+                const zeroFields = [
+                        "rate",
+                        "base_rate",
+                        "price_list_rate",
+                        "base_price_list_rate",
+                        "amount",
+                        "base_amount",
+                        "net_rate",
+                        "net_amount",
+                        "base_net_rate",
+                        "base_net_amount",
+                        "gross_rate",
+                        "gross_amount",
+                        "discount_amount",
+                        "base_discount_amount",
+                        "discount_amount_per_item",
+                        "tax_amount",
+                        "base_tax_amount",
+                ];
+
+                zeroFields.forEach((field) => {
+                        if (Object.prototype.hasOwnProperty.call(item, field)) {
+                                item[field] = 0;
+                        }
+                });
+
+                item.discount_percentage = 0;
+
+                if (!item.posa_offer_applied) {
+                        item.posa_offer_applied = 1;
+                }
+
+                if (typeof item.qty === "number") {
+                        item.amount = 0;
+                        item.base_amount = 0;
+                        if (Object.prototype.hasOwnProperty.call(item, "net_amount")) {
+                                item.net_amount = 0;
+                        }
+                        if (Object.prototype.hasOwnProperty.call(item, "gross_amount")) {
+                                item.gross_amount = 0;
+                        }
+                }
+        },
 	// Fetch customer details (info, price list, etc)
 	async fetch_customer_details() {
 		var vm = this;
