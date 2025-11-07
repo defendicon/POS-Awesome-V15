@@ -37,14 +37,23 @@
 					<v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
 						{{ __("Bundle") }}
 					</v-chip>
-					<v-chip v-if="item.name_overridden" color="primary" size="x-small" class="ml-1">
-						{{ __("Edited") }}
-					</v-chip>
-					<v-icon
-						v-if="pos_profile.posa_allow_line_item_name_override && !item.posa_is_replace"
-						size="x-small"
-						class="ml-1"
-						@click.stop="openNameDialog(item)"
+                                        <v-chip v-if="item.name_overridden" color="primary" size="x-small" class="ml-1">
+                                                {{ __("Edited") }}
+                                        </v-chip>
+                                        <v-chip
+                                                v-if="isFreeItem(item)"
+                                                color="success"
+                                                size="x-small"
+                                                class="ml-1 free-chip"
+                                                variant="elevated"
+                                        >
+                                                {{ __("Free") }}
+                                        </v-chip>
+                                        <v-icon
+                                                v-if="pos_profile.posa_allow_line_item_name_override && !item.posa_is_replace"
+                                                size="x-small"
+                                                class="ml-1"
+                                                @click.stop="openNameDialog(item)"
 						>mdi-pencil</v-icon
 					>
 					<v-icon
@@ -114,26 +123,40 @@
 			</template>
 
 			<!-- Rate column -->
-			<template v-slot:item.rate="{ item }">
-				<div class="currency-display right-aligned">
-					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
-					<span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
-						{{ formatCurrency(item.rate) }}
-					</span>
-				</div>
-			</template>
+                        <template v-slot:item.rate="{ item }">
+                                <div class="currency-display right-aligned" :class="{ 'free-value': isFreeItem(item) }">
+                                        <template v-if="isFreeItem(item)">
+                                                <span class="amount-value free-label">{{ __("Free") }}</span>
+                                                <span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+                                                <span class="amount-value right-aligned">{{ formatCurrency(0) }}</span>
+                                        </template>
+                                        <template v-else>
+                                                <span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+                                                <span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
+                                                        {{ formatCurrency(item.rate) }}
+                                                </span>
+                                        </template>
+                                </div>
+                        </template>
 
 			<!-- Amount column -->
-			<template v-slot:item.amount="{ item }">
-				<div class="currency-display right-aligned">
-					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
-					<span
-						class="amount-value"
-						:class="{ 'negative-number': isNegative(item.qty * item.rate) }"
-						>{{ formatCurrency(item.qty * item.rate) }}</span
-					>
-				</div>
-			</template>
+                        <template v-slot:item.amount="{ item }">
+                                <div class="currency-display right-aligned" :class="{ 'free-value': isFreeItem(item) }">
+                                        <template v-if="isFreeItem(item)">
+                                                <span class="amount-value free-label">{{ __("Free") }}</span>
+                                                <span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+                                                <span class="amount-value right-aligned">{{ formatCurrency(0) }}</span>
+                                        </template>
+                                        <template v-else>
+                                                <span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+                                                <span
+                                                        class="amount-value"
+                                                        :class="{ 'negative-number': isNegative(item.qty * item.rate) }"
+                                                        >{{ formatCurrency(item.qty * item.rate) }}</span
+                                                >
+                                        </template>
+                                </div>
+                        </template>
 
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
@@ -921,11 +944,30 @@ export default {
 			return this._rtlComputed;
 		},
 	},
-	methods: {
-		customItemFilter(value, search, item) {
-			if (search == null) {
-				return true;
-			}
+        methods: {
+                isFreeItem(item) {
+                        if (!item) {
+                                return false;
+                        }
+                        if (item.is_free_item) {
+                                return true;
+                        }
+                        const hasPrecision =
+                                this.pos_profile &&
+                                typeof this.pos_profile.currency_precision === "number";
+                        const precision = hasPrecision ? this.pos_profile.currency_precision : 2;
+                        const threshold = 1 / Math.pow(10, precision + 2);
+                        const rate = typeof item.rate === "number" ? item.rate : parseFloat(item.rate) || 0;
+                        const amount =
+                                typeof item.amount === "number"
+                                        ? item.amount
+                                        : parseFloat(item.qty * item.rate) || 0;
+                        return Math.abs(rate) <= threshold && Math.abs(amount) <= threshold;
+                },
+                customItemFilter(value, search, item) {
+                        if (search == null) {
+                                return true;
+                        }
 
 			const normalized = String(search).toLowerCase().trim();
 			if (!normalized) {
@@ -1293,12 +1335,28 @@ export default {
 
 /* Ensure items table can scroll when many rows exist */
 .items-table-container {
-	overflow-y: auto;
-	width: 100%;
-	max-width: 100%;
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
+        overflow-y: auto;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+}
+
+.free-chip {
+        font-weight: 600;
+        text-transform: uppercase;
+}
+
+.currency-display.free-value .free-label {
+        color: rgb(var(--v-theme-success));
+        font-weight: 600;
+        margin-right: 6px;
+}
+
+.currency-display.free-value .currency-symbol,
+.currency-display.free-value .amount-value.right-aligned {
+        opacity: 0.85;
 }
 
 /* Table wrapper styling */

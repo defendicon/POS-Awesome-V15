@@ -63,10 +63,27 @@ export default {
 		this._pendingOfferRowIds = new Set();
 		this._pendingRemovedRowInfo = {};
 	},
-	normalizeBrand(brand) {
-		return (brand || "").trim().toLowerCase();
-	},
-	async getItemBrand(item) {
+        normalizeBrand(brand) {
+                return (brand || "").trim().toLowerCase();
+        },
+        getOfferTargetItem(offer = {}) {
+                const candidates = [
+                        offer.item,
+                        offer.apply_item_code,
+                        offer.apply_item,
+                        offer.item_code,
+                        offer.applyItem,
+                ];
+                return candidates.find((code) => typeof code === "string" && code) || null;
+        },
+        isEffectivelyZero(value) {
+                const precision =
+                        typeof this.currency_precision === "number" ? this.currency_precision : 2;
+                const threshold = 1 / Math.pow(10, precision + 2);
+                const numericValue = typeof value === "number" ? value : parseFloat(value) || 0;
+                return Math.abs(numericValue) <= threshold;
+        },
+        async getItemBrand(item) {
 		let brand = this.normalizeBrand(item.brand);
 		if (brand) {
 			item.brand = brand;
@@ -211,12 +228,19 @@ export default {
 				return true;
 			}
 
-			switch (applyOn) {
-				case "Item Code":
-					if (meta.item_code === offer.item) {
-						return true;
-					}
-					break;
+                switch (applyOn) {
+                        case "Item Code":
+                                if (!offer) {
+                                        return true;
+                                }
+                                const targetCode = this.getOfferTargetItem(offer);
+                                if (!targetCode) {
+                                        return true;
+                                }
+                                if (meta.item_code === targetCode) {
+                                        return true;
+                                }
+                                break;
 				case "Item Group":
 					if (meta.item_group === offer.item_group) {
 						return true;
@@ -345,17 +369,27 @@ export default {
 		return null;
 	},
 
-	setItemGiveOffer(offers) {
-		// Set item give offer for replace
-		offers.forEach((offer) => {
-			if (offer.apply_on == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
-				offer.give_item = offer.item;
-				offer.apply_item_code = offer.item;
-			} else if (
-				offer.apply_on == "Item Group" &&
-				offer.apply_type == "Item Group" &&
-				offer.replace_cheapest_item
-			) {
+        setItemGiveOffer(offers) {
+                // Set item give offer for replace
+                offers.forEach((offer) => {
+                        const targetCode = this.getOfferTargetItem(offer);
+                        if (
+                                offer.apply_on == "Item Code" &&
+                                offer.apply_type == "Item Code" &&
+                                offer.replace_item
+                        ) {
+                                if (targetCode) {
+                                        offer.give_item = targetCode;
+                                        offer.apply_item_code = targetCode;
+                                        if (!offer.item) {
+                                                offer.item = targetCode;
+                                        }
+                                }
+                        } else if (
+                                offer.apply_on == "Item Group" &&
+                                offer.apply_type == "Item Group" &&
+                                offer.replace_cheapest_item
+                        ) {
 				const offerItemCode = this.getCheapestItem(offer).item_code;
 				offer.give_item = offerItemCode;
 				offer.apply_item_code = offerItemCode;
@@ -456,12 +490,23 @@ export default {
 			return null;
 		}
 
-		const bucket = context.itemCodeBuckets ? context.itemCodeBuckets.get(offer.item) : null;
-		if (!bucket) {
-			return null;
-		}
+                const targetCode = this.getOfferTargetItem(offer);
+                if (!targetCode) {
+                        return null;
+                }
 
-		const items = [];
+                const bucket = context.itemCodeBuckets
+                        ? context.itemCodeBuckets.get(targetCode)
+                        : null;
+                if (!bucket) {
+                        return null;
+                }
+
+                if (!offer.item) {
+                        offer.item = targetCode;
+                }
+
+                const items = [];
 		let totalQty = 0;
 		let totalAmount = 0;
 
@@ -856,8 +901,9 @@ export default {
 			} else if (Array.isArray(offer.items)) {
 				itemsRowID = offer.items;
 			}
-			if (offer.apply_on == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
-				const item = await this.ApplyOnGiveProduct(offer, offer.item);
+                        if (offer.apply_on == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
+                                const targetCode = this.getOfferTargetItem(offer);
+                                const item = await this.ApplyOnGiveProduct(offer, targetCode);
 				if (!item) {
 					this.isApplyingOffer = false;
 					return;
@@ -1044,8 +1090,8 @@ export default {
 		new_item.qty = offer.given_qty;
 		new_item.stock_qty = offer.given_qty;
 
-		// Handle rate based on currency
-		if (offer.discount_type === "Rate") {
+                // Handle rate based on currency
+                if (offer.discount_type === "Rate") {
 			// offer.rate is always in base currency (PKR)
 			new_item.base_rate = offer.rate;
 			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
@@ -1234,18 +1280,19 @@ export default {
 						}
 
 						// Compute base discount amounts and percentage
-						item.base_discount_amount = this.flt(
-							base_price - base_offer_rate,
-							this.currency_precision,
-						);
-						item.discount_percentage = base_price
-							? this.flt(
-									(item.base_discount_amount / base_price) * 100,
-									this.currency_precision,
-								)
-							: 0;
-					} else if (offer.discount_type === "Discount Percentage") {
-						item.discount_percentage = offer.discount_percentage;
+                                                item.base_discount_amount = this.flt(
+                                                        base_price - base_offer_rate,
+                                                        this.currency_precision,
+                                                );
+                                                item.discount_percentage = base_price
+                                                        ? this.flt(
+                                                                        (item.base_discount_amount / base_price) * 100,
+                                                                        this.currency_precision,
+                                                                )
+                                                        : 0;
+                                                item.is_free_item = this.isEffectivelyZero(item.rate) ? 1 : 0;
+                                        } else if (offer.discount_type === "Discount Percentage") {
+                                                item.discount_percentage = offer.discount_percentage;
 
 						// Calculate discount in base currency first
 						// Use normalized price * current conversion factor
@@ -1281,13 +1328,16 @@ export default {
 							);
 						} else {
 							item.rate = item.base_rate;
-							item.price_list_rate = base_price;
-							item.discount_amount = base_discount;
-						}
-					}
+                                                        item.price_list_rate = base_price;
+                                                        item.discount_amount = base_discount;
+                                                }
+                                                item.is_free_item = this.isEffectivelyZero(item.rate) ? 1 : 0;
+                                        } else {
+                                                item.is_free_item = this.isEffectivelyZero(item.rate) ? 1 : 0;
+                                        }
 
-					// Calculate final amounts
-					item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                                        // Calculate final amounts
+                                        item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 					item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
 					item.posa_offer_applied = 1;
@@ -1339,12 +1389,13 @@ export default {
 						item.price_list_rate = item.base_price_list_rate;
 					}
 
-					// Reset all discounts
-					item.discount_percentage = 0;
-					item.discount_amount = 0;
-					item.base_discount_amount = 0;
+                                        // Reset all discounts
+                                        item.discount_percentage = 0;
+                                        item.discount_amount = 0;
+                                        item.base_discount_amount = 0;
+                                        item.is_free_item = 0;
 
-					// Recalculate amounts
+                                        // Recalculate amounts
 					item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 					item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
