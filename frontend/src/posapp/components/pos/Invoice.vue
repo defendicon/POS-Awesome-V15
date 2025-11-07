@@ -1573,6 +1573,9 @@ export default {
                 if (typeof this.cancelScheduledOfferRefresh === "function") {
                         this.cancelScheduledOfferRefresh();
                 }
+                if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                        this.cancelScheduledPricingRuleRefresh();
+                }
                 if (this._suppressClosePaymentsTimer) {
                         clearTimeout(this._suppressClosePaymentsTimer);
                         this._suppressClosePaymentsTimer = null;

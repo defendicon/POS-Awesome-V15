@@ -35,23 +35,25 @@ const buildSnapshot = (items) => {
 };
 
 const diffSnapshots = (previous, current) => {
-	const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
-	const changed = new Set();
-	const removedInfo = {};
+        const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
+        const changed = new Set();
+        const qtyChanged = new Set();
+        const removedInfo = {};
 
 	const prevOrder = Array.isArray(prevSnapshot.order) ? prevSnapshot.order : [];
 	const currOrder = Array.isArray(current.order) ? current.order : [];
 	const prevSet = new Set(prevOrder);
 	const currSet = new Set(currOrder);
 
-	currOrder.forEach((rowId) => {
-		if (!prevSet.has(rowId)) {
-			changed.add(rowId);
-		}
-	});
+        currOrder.forEach((rowId) => {
+                if (!prevSet.has(rowId)) {
+                        changed.add(rowId);
+                        qtyChanged.add(rowId);
+                }
+        });
 
-	prevOrder.forEach((rowId) => {
-		if (!currSet.has(rowId)) {
+        prevOrder.forEach((rowId) => {
+                if (!currSet.has(rowId)) {
 			changed.add(rowId);
 			if (prevSnapshot.meta && prevSnapshot.meta[rowId]) {
 				removedInfo[rowId] = { ...prevSnapshot.meta[rowId] };
@@ -59,25 +61,27 @@ const diffSnapshots = (previous, current) => {
 		}
 	});
 
-	currOrder.forEach((rowId) => {
-		const previousQty = prevSnapshot.qty ? prevSnapshot.qty[rowId] : undefined;
-		if (previousQty !== current.qty[rowId]) {
-			changed.add(rowId);
-		}
+        currOrder.forEach((rowId) => {
+                const previousQty = prevSnapshot.qty ? prevSnapshot.qty[rowId] : undefined;
+                const currentQty = current.qty ? current.qty[rowId] : undefined;
+                if (previousQty !== currentQty) {
+                        changed.add(rowId);
+                        qtyChanged.add(rowId);
+                }
 
-		const previousStockQty = prevSnapshot.stockQty ? prevSnapshot.stockQty[rowId] : undefined;
-		if (previousStockQty !== current.stockQty[rowId]) {
-			changed.add(rowId);
-		}
+                const previousStockQty = prevSnapshot.stockQty ? prevSnapshot.stockQty[rowId] : undefined;
+                if (previousStockQty !== current.stockQty[rowId]) {
+                        changed.add(rowId);
+                }
 
-		const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
-		const currMeta = current.meta ? current.meta[rowId] : undefined;
-		if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
-			changed.add(rowId);
-		}
-	});
+                const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
+                const currMeta = current.meta ? current.meta[rowId] : undefined;
+                if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
+                        changed.add(rowId);
+                }
+        });
 
-	return { changed, removedInfo };
+        return { changed, removedInfo, qtyChanged };
 };
 
 export default {
@@ -122,7 +126,7 @@ export default {
 			const previous = this._offerSnapshots.items;
                         this._offerSnapshots.items = snapshot;
 
-                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+                        const { changed, removedInfo, qtyChanged } = diffSnapshots(previous, snapshot);
 
                         if (removedInfo && Object.keys(removedInfo).length) {
 				this._pendingRemovedRowInfo = {
@@ -137,6 +141,10 @@ export default {
                                 }
                         } else if (changed.size) {
                                 this.scheduleOfferRefresh(Array.from(changed));
+                        }
+
+                        if (qtyChanged.size && typeof this.schedulePricingRuleRefresh === "function") {
+                                this.schedulePricingRuleRefresh(Array.from(qtyChanged));
                         }
 
                         if (typeof this.emitCartQuantities === "function") {
@@ -152,7 +160,7 @@ export default {
 			const previous = this._offerSnapshots.packed;
                         this._offerSnapshots.packed = snapshot;
 
-                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+                        const { changed, removedInfo, qtyChanged } = diffSnapshots(previous, snapshot);
 
                         if (removedInfo && Object.keys(removedInfo).length) {
 				this._pendingRemovedRowInfo = {
@@ -167,6 +175,10 @@ export default {
                                 }
                         } else if (changed.size) {
                                 this.scheduleOfferRefresh(Array.from(changed));
+                        }
+
+                        if (qtyChanged.size && typeof this.schedulePricingRuleRefresh === "function") {
+                                this.schedulePricingRuleRefresh(Array.from(qtyChanged));
                         }
 
                         if (typeof this.emitCartQuantities === "function") {

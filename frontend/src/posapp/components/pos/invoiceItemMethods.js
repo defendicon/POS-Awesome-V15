@@ -83,10 +83,10 @@ export default {
 			this._itemTaskCache.delete(rowId);
 		}
 	},
-	queueItemTask(itemOrRowId, taskName, taskFn, options = {}) {
-		const rowId = typeof itemOrRowId === "string" ? itemOrRowId : itemOrRowId?.posa_row_id;
-		const { force = false } = options;
-		const executeTask = () => Promise.resolve().then(() => taskFn());
+        queueItemTask(itemOrRowId, taskName, taskFn, options = {}) {
+                const rowId = typeof itemOrRowId === "string" ? itemOrRowId : itemOrRowId?.posa_row_id;
+                const { force = false } = options;
+                const executeTask = () => Promise.resolve().then(() => taskFn());
 
 		if (!rowId) {
 			return executeTask();
@@ -101,20 +101,82 @@ export default {
 			}
 		}
 
-		const promise = executeTask();
-		return this._setItemTaskPromise(rowId, taskName, promise);
-	},
-	hasItemTaskPromise(rowId, taskName) {
-		return !!this._getItemTaskPromise(rowId, taskName);
-	},
-	getItemTaskPromise(rowId, taskName) {
-		return this._getItemTaskPromise(rowId, taskName);
-	},
-	_getItemDetailCacheKey(item) {
-		const code = item?.item_code;
-		const warehouse = item?.warehouse || this.pos_profile?.warehouse;
-		if (!code || !warehouse) {
-			return null;
+                const promise = executeTask();
+                return this._setItemTaskPromise(rowId, taskName, promise);
+        },
+        hasItemTaskPromise(rowId, taskName) {
+                return !!this._getItemTaskPromise(rowId, taskName);
+        },
+        getItemTaskPromise(rowId, taskName) {
+                return this._getItemTaskPromise(rowId, taskName);
+        },
+        schedulePricingRuleRefresh(changedRowIds = []) {
+                const rowIds = Array.isArray(changedRowIds) ? changedRowIds.filter(Boolean) : [];
+                if (!rowIds.length) {
+                        return;
+                }
+
+                if (!this._pendingPricingRuleRows) {
+                        this._pendingPricingRuleRows = new Set();
+                }
+
+                rowIds.forEach((rowId) => {
+                        this._pendingPricingRuleRows.add(rowId);
+                });
+
+                if (this._pricingRuleRefreshPending) {
+                        return;
+                }
+
+                this._pricingRuleRefreshPending = true;
+
+                const schedule =
+                        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+                                ? window.requestAnimationFrame.bind(window)
+                                : (cb) => setTimeout(cb, 16);
+
+                this._pricingRuleRefreshHandle = schedule(() => {
+                        this._pricingRuleRefreshHandle = null;
+                        this._pricingRuleRefreshPending = false;
+
+                        const pendingRows = this._pendingPricingRuleRows ? Array.from(this._pendingPricingRuleRows) : [];
+                        this._pendingPricingRuleRows = new Set();
+
+                        pendingRows.forEach((rowId) => {
+                                const item =
+                                        (Array.isArray(this.items)
+                                                ? this.items.find((it) => it?.posa_row_id === rowId)
+                                                : null) ||
+                                        (Array.isArray(this.packed_items)
+                                                ? this.packed_items.find((it) => it?.posa_row_id === rowId)
+                                                : null);
+
+                                if (!item) {
+                                        return;
+                                }
+
+                                this.queueItemTask(item, "pricing_rule_refresh", () => this.update_item_detail(item, true));
+                        });
+                });
+        },
+        cancelScheduledPricingRuleRefresh() {
+                if (this._pricingRuleRefreshHandle != null) {
+                        if (typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+                                window.cancelAnimationFrame(this._pricingRuleRefreshHandle);
+                        } else {
+                                clearTimeout(this._pricingRuleRefreshHandle);
+                        }
+                        this._pricingRuleRefreshHandle = null;
+                }
+
+                this._pricingRuleRefreshPending = false;
+                this._pendingPricingRuleRows = new Set();
+        },
+        _getItemDetailCacheKey(item) {
+                const code = item?.item_code;
+                const warehouse = item?.warehouse || this.pos_profile?.warehouse;
+                if (!code || !warehouse) {
+                        return null;
 		}
 		return `${code}::${warehouse}`;
 	},
@@ -663,7 +725,8 @@ export default {
                         doc.doctype = "Sales Invoice";
                 }
                 doc.is_pos = 1;
-                doc.ignore_pricing_rule = 1;
+                doc.ignore_pricing_rule = 0;
+                doc.apply_pricing_rule = 1;
                 doc.company = doc.company || this.pos_profile.company;
                 doc.pos_profile = doc.pos_profile || this.pos_profile.name;
                 doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
@@ -868,7 +931,8 @@ export default {
 		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
 		// Add flags to ensure proper rate handling
-		doc.ignore_pricing_rule = 1;
+                doc.ignore_pricing_rule = 0;
+                doc.apply_pricing_rule = 1;
 
 		// Preserve the real price list currency
 		doc.price_list_currency = this.price_list_currency || doc.currency;
@@ -2297,29 +2361,31 @@ export default {
 					warehouse: item.warehouse || this.pos_profile.warehouse,
 					doc: currentDoc,
 					price_list: this.selected_price_list || this.pos_profile.selling_price_list,
-					item: {
-						item_code: item.item_code,
-						customer: this.customer,
-						doctype: currentDoc.doctype,
-						name: currentDoc.name || `New ${currentDoc.doctype} 1`,
-						company: this.pos_profile.company,
-						conversion_rate: 1,
-						currency: this.pos_profile.currency,
-						qty: item.qty,
-						price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
-						child_docname: `New ${currentDoc.doctype} Item 1`,
-						cost_center: this.pos_profile.cost_center,
-						pos_profile: this.pos_profile.name,
-						uom: item.uom,
-						tax_category: "",
-						transaction_type: "selling",
-						update_stock: this.pos_profile.update_stock,
-						price_list: this.get_price_list(),
-						has_batch_no: item.has_batch_no,
-						has_serial_no: item.has_serial_no,
-						serial_no: item.serial_no,
-						batch_no: item.batch_no,
-						is_stock_item: item.is_stock_item,
+                                                item: {
+                                                        item_code: item.item_code,
+                                                        customer: this.customer,
+                                                        doctype: currentDoc.doctype,
+                                                        name: currentDoc.name || `New ${currentDoc.doctype} 1`,
+                                                        company: this.pos_profile.company,
+                                                        conversion_rate: 1,
+                                                        currency: this.pos_profile.currency,
+                                                        qty: item.qty,
+                                                        price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
+                                                        child_docname: `New ${currentDoc.doctype} Item 1`,
+                                                        cost_center: this.pos_profile.cost_center,
+                                                        pos_profile: this.pos_profile.name,
+                                                        uom: item.uom,
+                                                        tax_category: "",
+                                                        transaction_type: "selling",
+                                                        update_stock: this.pos_profile.update_stock,
+                                                        price_list: this.get_price_list(),
+                                                        ignore_pricing_rule: 0,
+                                                        apply_pricing_rule: 1,
+                                                        has_batch_no: item.has_batch_no,
+                                                        has_serial_no: item.has_serial_no,
+                                                        serial_no: item.serial_no,
+                                                        batch_no: item.batch_no,
+                                                        is_stock_item: item.is_stock_item,
 					},
 				},
 			});
