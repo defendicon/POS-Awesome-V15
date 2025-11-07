@@ -69,17 +69,16 @@
 					>
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
-					<div
-						class="pos-table__qty-display amount-value number-field-rtl"
-						:class="{
-							'negative-number': isNegative(item.qty),
-							'large-number': memoizedQtyLength(item.qty) > 6,
-						}"
-						:data-length="memoizedQtyLength(item.qty)"
-						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
-					>
-						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
-					</div>
+					<v-text-field
+						:model-value="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
+						@change="handleQtyChange(item, $event)"
+						:disabled="!!item.posa_is_replace"
+						density="compact"
+						variant="outlined"
+						hide-details
+						class="pos-table__qty-input"
+						:rules="[isNumber]"
+					></v-text-field>
 					<v-btn
 						:disabled="
 							!!item.posa_is_replace ||
@@ -679,7 +678,6 @@ export default {
 		formatFloat: Function,
 		formatCurrency: Function,
 		currencySymbol: Function,
-		isNumber: Function,
 		setFormatedQty: Function,
 		setFormatedCurrency: Function,
 		calcPrices: Function,
@@ -1181,6 +1179,10 @@ export default {
 		handleExpandedUpdate(val) {
 			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
 			this.$emit("update:expanded", mappedValues);
+		},
+
+		isNumber(value) {
+			return !isNaN(parseFloat(value)) && isFinite(value);
 		},
 	},
 
@@ -3068,6 +3070,35 @@ body[dir="rtl"] .number-field-rtl {
 	direction: ltr !important;
 	text-align: center !important;
 	unicode-bidi: embed !important;
+}
+
+.pos-table__qty-input {
+	min-width: 50px;
+	max-width: 100px;
+	width: auto;
+	flex: 1 1 auto;
+	text-align: center;
+	font-weight: 600;
+	font-family:
+		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+		sans-serif;
+	font-variant-numeric: lining-nums tabular-nums;
+	font-feature-settings:
+		"tnum" 1,
+		"lnum" 1,
+		"kern" 1;
+	color: var(--pos-primary);
+	font-size: 0.8rem;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	letter-spacing: -0.02em;
+	word-spacing: -0.1em;
 }
 
 .pos-table__qty-display {
