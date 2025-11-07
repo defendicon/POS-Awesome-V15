@@ -69,15 +69,32 @@
 					>
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
+					<div
+						v-if="editingQtyItemId !== item.posa_row_id"
+						class="pos-table__qty-display amount-value number-field-rtl"
+						@click.stop="editingQtyItemId = item.posa_row_id"
+						:class="{
+							'negative-number': isNegative(item.qty),
+							'large-number': memoizedQtyLength(item.qty) > 6,
+						}"
+						:data-length="memoizedQtyLength(item.qty)"
+						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
+					>
+						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
+					</div>
 					<v-text-field
+						v-else
 						:model-value="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
 						@change="handleQtyChange(item, $event)"
+						@blur="editingQtyItemId = null"
+						@keydown.enter="editingQtyItemId = null"
 						:disabled="!!item.posa_is_replace"
 						density="compact"
 						variant="outlined"
 						hide-details
 						class="pos-table__qty-input"
 						:rules="[isNumber]"
+						autofocus
 					></v-text-field>
 					<v-btn
 						:disabled="
@@ -703,6 +720,7 @@ export default {
 			editNameDialog: false,
 			editNameTarget: null,
 			editedName: "",
+			editingQtyItemId: null,
 			// Container awareness properties
 			containerWidth: 0,
 			containerHeight: 0,
