@@ -1453,7 +1453,30 @@ export default {
                         // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
                 },
                 handleSetOffers(data) {
-                        this.posOffers = data;
+                        const offers = Array.isArray(data) ? data : [];
+                        this.posOffers = offers;
+
+                        const activeRows = [...(this.items || []), ...(this.packed_items || [])]
+                                .map((item) => item && item.posa_row_id)
+                                .filter((rowId) => !!rowId);
+
+                        if (typeof this.scheduleOfferRefresh === "function") {
+                                this.scheduleOfferRefresh(activeRows);
+                        } else if (typeof this.handelOffers === "function") {
+                                this.handelOffers(activeRows);
+                        }
+
+                        if (typeof this.$nextTick === "function") {
+                                this.$nextTick(() => {
+                                        if (
+                                                typeof this.handelOffers === "function" &&
+                                                !this._offerRefreshPending &&
+                                                !this.isApplyingOffer
+                                        ) {
+                                                this.handelOffers(activeRows);
+                                        }
+                                });
+                        }
                 },
                 async handleUpdateInvoiceOffers(data) {
                         await this.updateInvoiceOffers(data);

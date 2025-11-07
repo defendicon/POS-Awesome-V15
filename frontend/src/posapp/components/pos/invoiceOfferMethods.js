@@ -223,12 +223,13 @@ export default {
 
 	async handelOffers(changedRowIds = [], removedRows = {}) {
 		try {
-			const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
-			if (!sourceOffers.length) {
-				this.updatePosOffers([]);
-				this._cachedOfferResults = new Map();
-				return;
-			}
+                        const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
+                        if (!sourceOffers.length) {
+                                await this.updateInvoiceOffers([]);
+                                this.updatePosOffers([]);
+                                this._cachedOfferResults = new Map();
+                                return;
+                        }
 
 			const allItems = [...(this.items || []), ...(this.packed_items || [])];
 			const itemMap = new Map();
