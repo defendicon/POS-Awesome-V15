@@ -1452,8 +1452,13 @@ export default {
                         this.new_order(data);
                         // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
                 },
-                handleSetOffers(data) {
-                        this.posOffers = data;
+                async handleSetOffers(data) {
+                        this.posOffers = Array.isArray(data) ? data : [];
+                        try {
+                                await this.handelOffers();
+                        } catch (error) {
+                                console.error("Failed to process offers after refresh", error);
+                        }
                 },
                 async handleUpdateInvoiceOffers(data) {
                         await this.updateInvoiceOffers(data);
