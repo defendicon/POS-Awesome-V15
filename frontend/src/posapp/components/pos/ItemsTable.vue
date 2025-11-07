@@ -59,7 +59,11 @@
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
-				<div class="pos-table__qty-counter" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
+				<div
+					class="pos-table__qty-counter"
+					:class="{ 'rtl-layout': isRTL, 'editing-qty': editingQtyItemId === item.posa_row_id }"
+					:title="`RTL: ${isRTL}`"
+				>
 					<v-btn
 						:disabled="!!item.posa_is_replace"
 						size="small"
@@ -73,6 +77,7 @@
 						v-if="editingQtyItemId !== item.posa_row_id"
 						class="pos-table__qty-display amount-value number-field-rtl"
 						@click.stop="editingQtyItemId = item.posa_row_id"
+						@dblclick.stop
 						:class="{
 							'negative-number': isNegative(item.qty),
 							'large-number': memoizedQtyLength(item.qty) > 6,
@@ -242,7 +247,7 @@
 											:model-value="
 												formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
 											"
-											@change="handleQtyChange(item, $event)"
+											@change="handleQtyChange(item, $event.target.value)"
 											:rules="[isNumber]"
 											:disabled="!!item.posa_is_replace"
 											prepend-inner-icon="mdi-numeric"
@@ -1168,14 +1173,14 @@ export default {
 				this.editedName = item.item_name;
 			}
 		},
-		handleQtyChange(item, event) {
-			const newQty = parseFloat(event.target.value) || 0;
+		handleQtyChange(item, value) {
+			const newQty = parseFloat(value) || 0;
 			if (newQty === 0) {
 				// Remove the item when quantity is set to 0
 				this.removeItem(item);
 			} else {
 				// Use the existing setFormatedQty function for non-zero values
-				this.setFormatedQty(item, "qty", null, false, event.target.value);
+				this.setFormatedQty(item, "qty", null, false, value);
 			}
 		},
 		handleMinusClick(item) {
@@ -3017,6 +3022,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 	background: var(--pos-hover-bg);
 	box-shadow: 0 4px 16px var(--pos-shadow);
 	transform: translateY(-1px);
+}
+
+.pos-table__qty-counter.editing-qty {
+	max-width: none;
 }
 
 /* RTL support for quantity counter - Enhanced with multiple selectors */
