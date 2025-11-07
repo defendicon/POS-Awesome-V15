@@ -3092,7 +3092,6 @@ body[dir="rtl"] .number-field-rtl {
 
 .pos-table__qty-input {
 	min-width: 50px;
-	max-width: 100px;
 	width: auto;
 	flex: 1 1 auto;
 	text-align: center;
