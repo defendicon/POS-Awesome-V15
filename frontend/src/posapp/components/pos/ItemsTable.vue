@@ -33,10 +33,19 @@
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
 				<div class="d-flex align-center">
-					<span>{{ item.item_name }}</span>
-					<v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
-						{{ __("Bundle") }}
-					</v-chip>
+                                        <span>{{ item.item_name }}</span>
+                                        <v-chip
+                                                v-if="item.is_free_item"
+                                                color="success"
+                                                size="x-small"
+                                                class="ml-1"
+                                                variant="tonal"
+                                        >
+                                                {{ __("Free") }}
+                                        </v-chip>
+                                        <v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
+                                                {{ __("Bundle") }}
+                                        </v-chip>
 					<v-chip v-if="item.name_overridden" color="primary" size="x-small" class="ml-1">
 						{{ __("Edited") }}
 					</v-chip>

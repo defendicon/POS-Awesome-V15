@@ -63,14 +63,127 @@ export default {
 		this._pendingOfferRowIds = new Set();
 		this._pendingRemovedRowInfo = {};
 	},
-	normalizeBrand(brand) {
-		return (brand || "").trim().toLowerCase();
-	},
-	async getItemBrand(item) {
-		let brand = this.normalizeBrand(item.brand);
-		if (brand) {
-			item.brand = brand;
-			return brand;
+        normalizeBrand(brand) {
+                return (brand || "").trim().toLowerCase();
+        },
+        normalizeBoolean(value) {
+                if (typeof value === "boolean") {
+                        return value;
+                }
+                if (value === null || value === undefined) {
+                        return false;
+                }
+                if (typeof value === "number") {
+                        return value !== 0;
+                }
+                if (typeof value === "string") {
+                        const normalized = value.trim().toLowerCase();
+                        if (!normalized) {
+                                return false;
+                        }
+                        return ["1", "true", "yes"].includes(normalized);
+                }
+
+                return false;
+        },
+        normalizeNumber(value) {
+                if (value === null || value === undefined || value === "") {
+                        return 0;
+                }
+
+                if (typeof value === "number") {
+                        return Number.isFinite(value) ? value : 0;
+                }
+
+                if (typeof value === "boolean") {
+                        return value ? 1 : 0;
+                }
+
+                if (typeof value === "string") {
+                        const parsed = Number(value);
+                        if (!Number.isNaN(parsed)) {
+                                return parsed;
+                        }
+                }
+
+                if (typeof this.flt === "function") {
+                        const converted = this.flt(value);
+                        return Number.isFinite(converted) ? converted : 0;
+                }
+
+                if (typeof flt === "function") {
+                        const converted = flt(value);
+                        return Number.isFinite(converted) ? converted : 0;
+                }
+
+                const parsed = Number(value);
+                return Number.isFinite(parsed) ? parsed : 0;
+        },
+        computeOfferFreeQuantity(offer, totalQty) {
+                const baseFreeQty = this.normalizeNumber(offer?.given_qty);
+                if (baseFreeQty <= 0) {
+                        return 0;
+                }
+
+                let effectiveQty = this.normalizeNumber(totalQty);
+                if (effectiveQty <= 0) {
+                        return 0;
+                }
+
+                const maxQty = this.normalizeNumber(offer?.max_qty);
+                if (maxQty > 0) {
+                        effectiveQty = Math.min(effectiveQty, maxQty);
+                }
+
+                const skipQty = this.normalizeNumber(offer?.apply_recursion_over);
+                if (skipQty > 0) {
+                        effectiveQty = Math.max(0, effectiveQty - skipQty);
+                }
+
+                if (effectiveQty <= 0) {
+                        return 0;
+                }
+
+                const isRecursive = this.normalizeBoolean(offer?.is_recursive);
+                const recurseFor = this.normalizeNumber(offer?.recurse_for);
+                const shouldRound = this.normalizeBoolean(offer?.round_free_qty);
+
+                let freeQty = baseFreeQty;
+
+                if (isRecursive && recurseFor > 0) {
+                        freeQty = (effectiveQty * baseFreeQty) / recurseFor;
+
+                        if (shouldRound) {
+                                const factor = Math.floor(effectiveQty / recurseFor);
+                                freeQty = factor * baseFreeQty;
+                        }
+                }
+
+                const normalizedFreeQty = this.normalizeNumber(freeQty);
+                if (normalizedFreeQty <= 0) {
+                        return 0;
+                }
+
+                const precisionCandidates = [this.float_precision, this.currency_precision, 6];
+                const precision = precisionCandidates.find(
+                        (value) => typeof value === "number" && Number.isFinite(value) && value >= 0,
+                );
+
+                if (typeof this.flt === "function") {
+                        return this.flt(normalizedFreeQty, precision ?? 6);
+                }
+
+                if (typeof flt === "function") {
+                        return flt(normalizedFreeQty, precision ?? 6);
+                }
+
+                return normalizedFreeQty;
+        },
+        async getItemBrand(item) {
+                let brand = this.normalizeBrand(item.brand);
+                if (brand) {
+                        item.brand = brand;
+                        return brand;
 		}
 
 		this.brand_cache = this.brand_cache || {};
@@ -387,50 +500,65 @@ export default {
 		return combined.find((el) => el.posa_row_id == row_id);
 	},
 
-	checkQtyAnountOffer(offer, qty, amount) {
-		let min_qty = false;
-		let max_qty = false;
-		let min_amt = false;
-		let max_amt = false;
-		const applys = [];
+        checkQtyAnountOffer(offer, qty, amount) {
+                const totalQty = this.normalizeNumber(qty);
+                const totalAmount = this.normalizeNumber(amount);
 
-		if (offer.min_qty || offer.min_qty == 0) {
-			if (qty >= offer.min_qty) {
-				min_qty = true;
-			}
-			applys.push(min_qty);
-		}
+                let min_qty = null;
+                let max_qty = null;
+                let min_amt = null;
+                let max_amt = null;
 
-		if (offer.max_qty > 0) {
-			if (qty <= offer.max_qty) {
-				max_qty = true;
-			}
-			applys.push(max_qty);
-		}
+                const checks = [];
 
-		if (offer.min_amt > 0) {
-			if (amount >= offer.min_amt) {
-				min_amt = true;
-			}
-			applys.push(min_amt);
-		}
+                if (offer.min_qty !== undefined && offer.min_qty !== null && offer.min_qty !== "") {
+                        const requiredQty = this.normalizeNumber(offer.min_qty);
+                        min_qty = totalQty >= requiredQty;
+                        checks.push(min_qty);
+                }
 
-		if (offer.max_amt > 0) {
-			if (amount <= offer.max_amt) {
-				max_amt = true;
-			}
-			applys.push(max_amt);
-		}
-		let apply = false;
-		if (!applys.includes(false)) {
-			apply = true;
-		}
-		const res = {
-			apply: apply,
-			conditions: { min_qty, max_qty, min_amt, max_amt },
-		};
-		return res;
-	},
+                const maxQty = this.normalizeNumber(offer.max_qty);
+                if (maxQty > 0) {
+                        max_qty = totalQty <= maxQty;
+                        checks.push(max_qty);
+                }
+
+                const minAmt = this.normalizeNumber(offer.min_amt);
+                if (minAmt > 0) {
+                        min_amt = totalAmount >= minAmt;
+                        checks.push(min_amt);
+                }
+
+                const maxAmt = this.normalizeNumber(offer.max_amt);
+                if (maxAmt > 0) {
+                        max_amt = totalAmount <= maxAmt;
+                        checks.push(max_amt);
+                }
+
+                const allConditionsMet = checks.every((condition) => condition !== false);
+
+                const res = {
+                        apply: allConditionsMet,
+                        conditions: { min_qty, max_qty, min_amt, max_amt },
+                        adjusted_given_qty: null,
+                };
+
+                if (!allConditionsMet) {
+                        return res;
+                }
+
+                if (offer.offer === "Give Product") {
+                        const computedQty = this.computeOfferFreeQuantity(offer, totalQty);
+                        if (computedQty <= 0) {
+                                res.apply = false;
+                                return res;
+                        }
+
+                        res.adjusted_given_qty = computedQty;
+                }
+
+                return res;
+        },
 
 	checkOfferCoupon(offer) {
 		if (offer.coupon_based) {
@@ -487,14 +615,18 @@ export default {
 			return null;
 		}
 
-		const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
-		if (!res.apply) {
-			return null;
-		}
+                const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
+                if (!res.apply) {
+                        return null;
+                }
 
-		offer.items = items;
-		return offer;
-	},
+                if (res.adjusted_given_qty != null) {
+                        offer.given_qty = res.adjusted_given_qty;
+                }
+
+                offer.items = items;
+                return offer;
+        },
 
 	getGroupOffer(offer, context = {}) {
 		if (!offer || offer.apply_on !== "Item Group") {
@@ -536,14 +668,18 @@ export default {
 			return null;
 		}
 
-		const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
-		if (!res.apply) {
-			return null;
-		}
+                const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
+                if (!res.apply) {
+                        return null;
+                }
 
-		offer.items = items;
-		return offer;
-	},
+                if (res.adjusted_given_qty != null) {
+                        offer.given_qty = res.adjusted_given_qty;
+                }
+
+                offer.items = items;
+                return offer;
+        },
 
 	getBrandOffer(offer, context = {}) {
 		if (!offer || offer.apply_on !== "Brand") {
@@ -590,14 +726,18 @@ export default {
 			return null;
 		}
 
-		const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
-		if (!res.apply) {
-			return null;
-		}
+                const res = this.checkQtyAnountOffer(offer, totalQty, totalAmount);
+                if (!res.apply) {
+                        return null;
+                }
 
-		offer.items = items;
-		return offer;
-	},
+                if (res.adjusted_given_qty != null) {
+                        offer.given_qty = res.adjusted_given_qty;
+                }
+
+                offer.items = items;
+                return offer;
+        },
 	getTransactionOffer(offer, context = {}) {
 		if (!offer || offer.apply_on !== "Transaction") {
 			return null;
@@ -612,14 +752,18 @@ export default {
 			return null;
 		}
 
-		const res = this.checkQtyAnountOffer(offer, bucket.qty, bucket.amount);
-		if (!res.apply) {
-			return null;
-		}
+                const res = this.checkQtyAnountOffer(offer, bucket.qty, bucket.amount);
+                if (!res.apply) {
+                        return null;
+                }
 
-		offer.items = bucket.items.map((item) => item.posa_row_id);
-		return offer;
-	},
+                if (res.adjusted_given_qty != null) {
+                        offer.given_qty = res.adjusted_given_qty;
+                }
+
+                offer.items = bucket.items.map((item) => item.posa_row_id);
+                return offer;
+        },
 
 	updatePosOffers(offers) {
 		this.eventBus.emit("update_pos_offers", offers);
@@ -1131,12 +1275,25 @@ export default {
 			(offer.discount_type === "Rate" && !offer.rate) ||
 			(offer.discount_type === "Discount Percentage" && offer.discount_percentage == 100);
 
-		new_item.is_free_item = is_free ? 1 : 0;
+                new_item.is_free_item = is_free ? 1 : 0;
 
-		// Set price list rate based on currency similar to invoice logic
-		if (is_free) {
-			new_item.base_price_list_rate = 0;
-			new_item.price_list_rate = 0;
+                if (is_free) {
+                        new_item.base_rate = 0;
+                        new_item.rate = 0;
+                        new_item.base_discount_amount = 0;
+                        new_item.discount_amount = 0;
+                        new_item.amount = 0;
+                        new_item.base_amount = 0;
+                        new_item.net_rate = 0;
+                        new_item.net_amount = 0;
+                        new_item.gross_rate = 0;
+                        new_item.gross_amount = 0;
+                }
+
+                // Set price list rate based on currency similar to invoice logic
+                if (is_free) {
+                        new_item.base_price_list_rate = 0;
+                        new_item.price_list_rate = 0;
 		} else {
 			// Use the item's price list rate if available
 			new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;

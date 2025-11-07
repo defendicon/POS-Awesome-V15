@@ -280,6 +280,9 @@ def _build_product_discount_offers(scheme, pos_profile):
             "promotional_scheme": scheme.name,
             "promotional_scheme_rule": slab.name,
             "round_free_qty": slab.round_free_qty,
+            "is_recursive": getattr(slab, "is_recursive", 0),
+            "recurse_for": flt(getattr(slab, "recurse_for", 0)),
+            "apply_recursion_over": flt(getattr(slab, "apply_recursion_over", 0)),
         }
 
         if slab.free_item and not slab.same_item:
