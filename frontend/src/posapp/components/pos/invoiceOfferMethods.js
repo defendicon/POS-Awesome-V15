@@ -380,20 +380,22 @@ export default {
                 }
         },
 
-	isOfferAffected(offer, changedSet, itemMap, removedInfo = {}) {
-		if (!offer) {
-			return false;
-		}
+        isOfferAffected(offer, changedSet, itemMap, removedInfo = {}) {
+                if (!offer) {
+                        return false;
+                }
 
-		if (!changedSet || !changedSet.size) {
-			return true;
-		}
+                if (!changedSet || !changedSet.size) {
+                        return true;
+                }
 
-		const applyOn = offer.apply_on;
-		const normalizedBrand = applyOn === "Brand" ? this.normalizeBrand(offer.brand) : null;
+                const applyOn = offer.apply_type || offer.apply_on;
+                const normalizedBrand = applyOn === "Brand" ? this.normalizeBrand(offer.brand) : null;
+                const targetItemCode = applyOn === "Item Code" ? offer.item || offer.apply_item_code : null;
+                const targetGroup = applyOn === "Item Group" ? offer.item_group || offer.apply_item_group : null;
 
-		for (const rowId of changedSet) {
-			const item = itemMap.get(rowId);
+                for (const rowId of changedSet) {
+                        const item = itemMap.get(rowId);
 			const fallback = removedInfo[rowId];
 			const meta = item
 				? {
@@ -419,51 +421,52 @@ export default {
 				return true;
 			}
 
-			switch (applyOn) {
-				case "Item Code":
-					if (meta.item_code === offer.item) {
-						return true;
-					}
-					break;
-				case "Item Group":
-					if (meta.item_group === offer.item_group) {
-						return true;
-					}
-					break;
-				case "Brand":
-					if (!normalizedBrand) {
-						return true;
-					}
-					if (!meta.brand) {
-						return true;
-					}
-					if (meta.brand === normalizedBrand) {
-						return true;
-					}
-					break;
-				case "Transaction":
-					return true;
-				default:
-					break;
-			}
-		}
+                        switch (applyOn) {
+                                case "Item Code":
+                                        if (targetItemCode && meta.item_code === targetItemCode) {
+                                                return true;
+                                        }
+                                        break;
+                                case "Item Group":
+                                        if (targetGroup && meta.item_group === targetGroup) {
+                                                return true;
+                                        }
+                                        break;
+                                case "Brand":
+                                        if (!normalizedBrand) {
+                                                return true;
+                                        }
+                                        if (!meta.brand) {
+                                                return true;
+                                        }
+                                        if (meta.brand === normalizedBrand) {
+                                                return true;
+                                        }
+                                        break;
+                                case "Transaction":
+                                        return true;
+                                default:
+                                        break;
+                        }
+                }
 
-		return false;
-	},
+                return false;
+        },
 
-	async buildOfferEvaluationContext(allItems, offers) {
-		const context = {
-			itemMap: new Map(),
-			itemCodeBuckets: new Map(),
-			itemGroupBuckets: new Map(),
-			brandBuckets: new Map(),
-			transactionBucket: { items: [], qty: 0, amount: 0 },
-		};
+        async buildOfferEvaluationContext(allItems, offers) {
+                const context = {
+                        itemMap: new Map(),
+                        itemCodeBuckets: new Map(),
+                        itemGroupBuckets: new Map(),
+                        brandBuckets: new Map(),
+                        transactionBucket: { items: [], qty: 0, amount: 0 },
+                };
 
-		const needItemCode = offers.some((offer) => offer.apply_on === "Item Code");
-		const needGroup = offers.some((offer) => offer.apply_on === "Item Group");
-		const needBrand = offers.some((offer) => offer.apply_on === "Brand");
-		const needTransaction = offers.some((offer) => offer.apply_on === "Transaction");
+                const resolveApplyOn = (offer) => offer.apply_type || offer.apply_on;
+                const needItemCode = offers.some((offer) => resolveApplyOn(offer) === "Item Code");
+                const needGroup = offers.some((offer) => resolveApplyOn(offer) === "Item Group");
+                const needBrand = offers.some((offer) => resolveApplyOn(offer) === "Brand");
+                const needTransaction = offers.some((offer) => resolveApplyOn(offer) === "Transaction");
 
 		const brandCandidates = [];
 
@@ -532,38 +535,41 @@ export default {
                 return context;
         },
 
-	evaluateOffer(offer, context = {}) {
-		if (!offer) {
-			return null;
-		}
+        evaluateOffer(offer, context = {}) {
+                if (!offer) {
+                        return null;
+                }
 
-		if (offer.apply_on === "Item Code") {
-			return this.getItemOffer({ ...offer }, context);
-		}
-		if (offer.apply_on === "Item Group") {
-			return this.getGroupOffer({ ...offer }, context);
-		}
-		if (offer.apply_on === "Brand") {
-			return this.getBrandOffer({ ...offer }, context);
-		}
-		if (offer.apply_on === "Transaction") {
-			return this.getTransactionOffer({ ...offer }, context);
-		}
-		return null;
-	},
+                const applyOn = offer.apply_type || offer.apply_on;
 
-	setItemGiveOffer(offers) {
-		// Set item give offer for replace
-		offers.forEach((offer) => {
-			if (offer.apply_on == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
-				offer.give_item = offer.item;
-				offer.apply_item_code = offer.item;
-			} else if (
-				offer.apply_on == "Item Group" &&
-				offer.apply_type == "Item Group" &&
-				offer.replace_cheapest_item
-			) {
-				const offerItemCode = this.getCheapestItem(offer).item_code;
+                if (applyOn === "Item Code") {
+                        return this.getItemOffer({ ...offer }, context);
+                }
+                if (applyOn === "Item Group") {
+                        return this.getGroupOffer({ ...offer }, context);
+                }
+                if (applyOn === "Brand") {
+                        return this.getBrandOffer({ ...offer }, context);
+                }
+                if (applyOn === "Transaction") {
+                        return this.getTransactionOffer({ ...offer }, context);
+                }
+                return null;
+        },
+
+        setItemGiveOffer(offers) {
+                // Set item give offer for replace
+                offers.forEach((offer) => {
+                        const applyOn = offer.apply_type || offer.apply_on;
+                        if (applyOn == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
+                                offer.give_item = offer.item;
+                                offer.apply_item_code = offer.item;
+                        } else if (
+                                applyOn == "Item Group" &&
+                                offer.apply_type == "Item Group" &&
+                                offer.replace_cheapest_item
+                        ) {
+                                const offerItemCode = this.getCheapestItem(offer).item_code;
 				offer.give_item = offerItemCode;
 				offer.apply_item_code = offerItemCode;
 			}
@@ -669,10 +675,11 @@ export default {
 		}
 	},
 
-	getItemOffer(offer, context = {}) {
-		if (!offer || offer.apply_on !== "Item Code") {
-			return null;
-		}
+        getItemOffer(offer, context = {}) {
+                const applyOn = offer?.apply_type || offer?.apply_on;
+                if (!offer || applyOn !== "Item Code") {
+                        return null;
+                }
 
 		if (!this.checkOfferCoupon(offer)) {
 			return null;
@@ -722,10 +729,11 @@ export default {
                 return offer;
         },
 
-	getGroupOffer(offer, context = {}) {
-		if (!offer || offer.apply_on !== "Item Group") {
-			return null;
-		}
+        getGroupOffer(offer, context = {}) {
+                const applyOn = offer?.apply_type || offer?.apply_on;
+                if (!offer || applyOn !== "Item Group") {
+                        return null;
+                }
 
 		if (!this.checkOfferCoupon(offer)) {
 			return null;
@@ -775,10 +783,11 @@ export default {
                 return offer;
         },
 
-	getBrandOffer(offer, context = {}) {
-		if (!offer || offer.apply_on !== "Brand") {
-			return null;
-		}
+        getBrandOffer(offer, context = {}) {
+                const applyOn = offer?.apply_type || offer?.apply_on;
+                if (!offer || applyOn !== "Brand") {
+                        return null;
+                }
 
 		if (!this.checkOfferCoupon(offer)) {
 			return null;
@@ -832,10 +841,11 @@ export default {
                 offer.items = items;
                 return offer;
         },
-	getTransactionOffer(offer, context = {}) {
-		if (!offer || offer.apply_on !== "Transaction") {
-			return null;
-		}
+        getTransactionOffer(offer, context = {}) {
+                const applyOn = offer?.apply_type || offer?.apply_on;
+                if (!offer || applyOn !== "Transaction") {
+                        return null;
+                }
 
 		if (!this.checkOfferCoupon(offer)) {
 			return null;
@@ -1102,8 +1112,9 @@ export default {
 			} else if (Array.isArray(offer.items)) {
 				itemsRowID = offer.items;
 			}
-			if (offer.apply_on == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
-				const item = await this.ApplyOnGiveProduct(offer, offer.item);
+                        const applyOn = offer.apply_type || offer.apply_on;
+                        if (applyOn == "Item Code" && offer.apply_type == "Item Code" && offer.replace_item) {
+                                const item = await this.ApplyOnGiveProduct(offer, offer.item);
 				if (!item) {
 					this.isApplyingOffer = false;
 					return;
@@ -1133,11 +1144,11 @@ export default {
 				}
 				this.items.unshift(item);
 				offer.give_item_row_id = item.posa_row_id;
-			} else if (
-				offer.apply_on == "Item Group" &&
-				offer.apply_type == "Item Group" &&
-				offer.replace_cheapest_item
-			) {
+                        } else if (
+                                applyOn == "Item Group" &&
+                                offer.apply_type == "Item Group" &&
+                                offer.replace_cheapest_item
+                        ) {
 				const itemsList = [];
 				itemsRowID.forEach((row_id) => {
 					const resolved = this.getItemFromRowID(row_id);
