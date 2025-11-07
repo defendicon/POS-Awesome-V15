@@ -93,6 +93,8 @@
 						@change="handleQtyChange(item, $event)"
 						@blur="editingQtyItemId = null"
 						@keydown.enter="editingQtyItemId = null"
+						@click.stop
+						@dblclick.stop
 						:disabled="!!item.posa_is_replace"
 						density="compact"
 						variant="outlined"
@@ -3025,7 +3027,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .pos-table__qty-counter.editing-qty {
-	max-width: none;
+	max-width: 100% !important;
+}
+.pos-table__qty-input {
+	min-width: 80px;
 }
 
 /* RTL support for quantity counter - Enhanced with multiple selectors */
