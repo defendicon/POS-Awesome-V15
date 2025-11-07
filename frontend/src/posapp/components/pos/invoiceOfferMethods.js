@@ -127,12 +127,13 @@ export default {
 
 	async handelOffers(changedRowIds = [], removedRows = {}) {
 		try {
-			const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
-			if (!sourceOffers.length) {
-				this.updatePosOffers([]);
-				this._cachedOfferResults = new Map();
-				return;
-			}
+                        const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
+                        if (!sourceOffers.length) {
+                                await this.updateInvoiceOffers([]);
+                                this.updatePosOffers([]);
+                                this._cachedOfferResults = new Map();
+                                return;
+                        }
 
 			const allItems = [...(this.items || []), ...(this.packed_items || [])];
 			const itemMap = new Map();
@@ -180,14 +181,24 @@ export default {
 				}
 			}
 
-			const offers = sourceOffers.map((offer) => cache.get(offer.name)).filter((entry) => !!entry);
+                        const offers = sourceOffers.map((offer) => cache.get(offer.name)).filter((entry) => !!entry);
 
-			this.setItemGiveOffer(offers);
-			this.updatePosOffers(offers);
-		} catch (error) {
-			console.error("Failed to process offers:", error);
-		}
-	},
+                        offers.forEach((offer) => {
+                                if (offer && offer.apply_on === "Item Code") {
+                                        offer.auto = true;
+                                        offer.offer_applied = true;
+                                }
+                        });
+
+                        this.setItemGiveOffer(offers);
+                        this.updatePosOffers(offers);
+                        await this.updateInvoiceOffers(
+                                offers.filter((offer) => offer && (offer.offer_applied || offer.auto)),
+                        );
+                } catch (error) {
+                        console.error("Failed to process offers:", error);
+                }
+        },
 
 	isOfferAffected(offer, changedSet, itemMap, removedInfo = {}) {
 		if (!offer) {
