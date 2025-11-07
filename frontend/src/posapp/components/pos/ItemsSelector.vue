@@ -427,16 +427,24 @@
 					</v-btn-toggle>
 				</v-col>
 				<v-col cols="5" class="dynamic-margin-xs">
-					<v-btn
-						size="small"
-						block
-						color="warning"
-						variant="text"
-						@click="show_offers"
-						class="action-btn-consistent"
-					>
-						{{ offersCount }} {{ __("Offers") }}
-					</v-btn>
+                                        <v-btn
+                                                size="small"
+                                                block
+                                                color="warning"
+                                                variant="text"
+                                                @click="show_offers"
+                                                class="action-btn-consistent"
+                                        >
+                                                <span>
+                                                        {{ combinedOffersCount }} {{ __("Offers") }}
+                                                        <span
+                                                                v-if="promotionalSchemesCount"
+                                                                class="text-caption text-medium-emphasis ms-1"
+                                                        >
+                                                                ({{ promotionalSchemesCount }} {{ __("Promotions") }})
+                                                        </span>
+                                                </span>
+                                        </v-btn>
 				</v-col>
 				<v-col cols="4" class="dynamic-margin-xs">
 					<v-btn
@@ -556,10 +564,12 @@ export default {
 		search_backup: "",
 		// Limit the displayed items to avoid overly large lists
 		itemsPerPage: 50,
-		offersCount: 0,
-		appliedOffersCount: 0,
-		couponsCount: 0,
-		appliedCouponsCount: 0,
+                offersCount: 0,
+                appliedOffersCount: 0,
+                promotionalSchemesCount: 0,
+                activePromotionalSchemesCount: 0,
+                couponsCount: 0,
+                appliedCouponsCount: 0,
 		new_line: false,
 		qty: 1,
 		refresh_interval: null,
@@ -3550,24 +3560,29 @@ export default {
 			}
 			return 260;
 		},
-		cardColumnWidth() {
-			const columns = Math.max(1, this.cardColumns);
-			const containerWidth = this.cardContainerWidth || 0;
-			if (!containerWidth) {
-				return 240;
-			}
+                cardColumnWidth() {
+                        const columns = Math.max(1, this.cardColumns);
+                        const containerWidth = this.cardContainerWidth || 0;
+                        if (!containerWidth) {
+                                return 240;
+                        }
 
-			const gapTotal = this.cardGap * (columns - 1);
-			const paddingTotal = this.cardPadding * 2;
-			const available = Math.max(0, containerWidth - gapTotal - paddingTotal);
-			const width = Math.floor(available / columns);
-			return Math.max(180, width);
-		},
-		displayedItems() {
-			const baseItems = Array.isArray(this.filteredItems) ? [...this.filteredItems] : [];
+                        const gapTotal = this.cardGap * (columns - 1);
+                        const paddingTotal = this.cardPadding * 2;
+                        const available = Math.max(0, containerWidth - gapTotal - paddingTotal);
+                        const width = Math.floor(available / columns);
+                        return Math.max(180, width);
+                },
+                combinedOffersCount() {
+                        const offers = Number(this.offersCount || 0);
+                        const promotions = Number(this.promotionalSchemesCount || 0);
+                        return offers + promotions;
+                },
+                displayedItems() {
+                        const baseItems = Array.isArray(this.filteredItems) ? [...this.filteredItems] : [];
 
-			if (!baseItems.length) {
-				return [];
+                        if (!baseItems.length) {
+                                return [];
 			}
 
 			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
@@ -3749,10 +3764,12 @@ export default {
 		this.eventBus.on("update_cur_items_details", () => {
 			this.update_cur_items_details();
 		});
-		this.eventBus.on("update_offers_counters", (data) => {
-			this.offersCount = data.offersCount;
-			this.appliedOffersCount = data.appliedOffersCount;
-		});
+                this.eventBus.on("update_offers_counters", (data) => {
+                        this.offersCount = data.offersCount;
+                        this.appliedOffersCount = data.appliedOffersCount;
+                        this.promotionalSchemesCount = data.promotionalSchemesCount || 0;
+                        this.activePromotionalSchemesCount = data.activePromotionalSchemesCount || 0;
+                });
                 this.eventBus.on("update_coupons_counters", (data) => {
                         this.couponsCount = data.couponsCount;
                         this.appliedCouponsCount = data.appliedCouponsCount;

@@ -119,6 +119,68 @@ export default {
                 const parsed = Number(value);
                 return Number.isFinite(parsed) ? parsed : 0;
         },
+        resolveOfferItemQty(item) {
+                if (!item) {
+                        return 0;
+                }
+
+                const hasStockQty =
+                        item.stock_qty !== undefined && item.stock_qty !== null && item.stock_qty !== "";
+                if (hasStockQty) {
+                        const stockQty = this.normalizeNumber(item.stock_qty);
+                        if (Math.abs(stockQty) > 0) {
+                                return stockQty;
+                        }
+                }
+
+                const qty = this.normalizeNumber(item.qty);
+                if (!qty) {
+                        return 0;
+                }
+
+                const conversion = this.normalizeNumber(item.conversion_factor || 1);
+                if (!conversion || conversion === 1) {
+                        return qty;
+                }
+
+                return qty * conversion;
+        },
+        resolveOfferItemRate(item) {
+                if (!item) {
+                        return 0;
+                }
+
+                const candidates = [
+                        item.original_price_list_rate,
+                        item.base_price_list_rate,
+                        item.price_list_rate,
+                        item.original_rate,
+                        item.base_rate,
+                        item.rate,
+                ];
+
+                for (const value of candidates) {
+                        const normalized = this.normalizeNumber(value);
+                        if (Math.abs(normalized) > 0) {
+                                return normalized;
+                        }
+                }
+
+                return 0;
+        },
+        resolveOfferItemAmount(item) {
+                const qty = this.resolveOfferItemQty(item);
+                if (!qty) {
+                        return 0;
+                }
+
+                const rate = this.resolveOfferItemRate(item);
+                if (!rate) {
+                        return 0;
+                }
+
+                return qty * rate;
+        },
         computeOfferFreeQuantity(offer, totalQty) {
                 const baseFreeQty = this.normalizeNumber(offer?.given_qty);
                 if (baseFreeQty <= 0) {
@@ -226,7 +288,7 @@ export default {
                         const sourceOffers = Array.isArray(this.posOffers) ? this.posOffers : [];
                         if (!sourceOffers.length) {
                                 await this.updateInvoiceOffers([]);
-                                this.updatePosOffers([]);
+                                this.updatePosOffers([], []);
                                 this._cachedOfferResults = new Map();
                                 return;
                         }
@@ -279,6 +341,15 @@ export default {
 
                         const offers = sourceOffers.map((offer) => cache.get(offer.name)).filter((entry) => !!entry);
 
+                        offers.forEach((offer) => {
+                                if (!offer) {
+                                        return;
+                                }
+                                if (this.normalizeBoolean(offer.auto)) {
+                                        offer.offer_applied = true;
+                                }
+                        });
+
                         this.setItemGiveOffer(offers);
 
                         const appliedOfferMap = new Map(
@@ -286,14 +357,28 @@ export default {
                                         ? this.posa_offers.map((entry) => [entry.row_id, entry])
                                         : [],
                         );
-                        const offersToApply = offers.filter((offer) => offer && (offer.auto || appliedOfferMap.has(offer.row_id)));
+                        const offersToApply = offers.filter((offer) => {
+                                if (!offer) {
+                                        return false;
+                                }
+
+                                const isAuto = this.normalizeBoolean(offer.auto);
+                                const isApplied = this.normalizeBoolean(offer.offer_applied);
+                                const alreadyApplied = appliedOfferMap.has(offer.row_id);
+
+                                if (isAuto && !isApplied) {
+                                        offer.offer_applied = true;
+                                }
+
+                                return isAuto || isApplied || alreadyApplied;
+                        });
 
                         await this.updateInvoiceOffers(offersToApply);
-                        this.updatePosOffers(offers);
-		} catch (error) {
-			console.error("Failed to process offers:", error);
-		}
-	},
+                        this.updatePosOffers(offers, sourceOffers);
+                } catch (error) {
+                        console.error("Failed to process offers:", error);
+                }
+        },
 
 	isOfferAffected(offer, changedSet, itemMap, removedInfo = {}) {
 		if (!offer) {
@@ -382,71 +467,70 @@ export default {
 
 		const brandCandidates = [];
 
-		(Array.isArray(allItems) ? allItems : []).forEach((item) => {
-			if (!item) {
-				return;
-			}
-			if (item.posa_row_id) {
-				context.itemMap.set(item.posa_row_id, item);
-			}
+                (Array.isArray(allItems) ? allItems : []).forEach((item) => {
+                        if (!item) {
+                                return;
+                        }
+                        if (item.posa_row_id) {
+                                context.itemMap.set(item.posa_row_id, item);
+                        }
 
-			const qty = item.stock_qty || 0;
-			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-			const amount = qty * rate;
+                        const qty = this.resolveOfferItemQty(item);
+                        const amount = this.resolveOfferItemAmount(item);
 
-			if (needItemCode && !item.posa_is_offer && item.item_code) {
-				let bucket = context.itemCodeBuckets.get(item.item_code);
-				if (!bucket) {
-					bucket = { items: [], qty: 0, amount: 0 };
-					context.itemCodeBuckets.set(item.item_code, bucket);
-				}
-				bucket.items.push(item);
-				bucket.qty += qty;
-				bucket.amount += amount;
-			}
+                        if (needItemCode && !item.posa_is_offer && item.item_code) {
+                                let bucket = context.itemCodeBuckets.get(item.item_code);
+                                if (!bucket) {
+                                        bucket = { items: [], qty: 0, amount: 0 };
+                                        context.itemCodeBuckets.set(item.item_code, bucket);
+                                }
+                                bucket.items.push(item);
+                                bucket.qty += qty;
+                                bucket.amount += amount;
+                        }
 
-			if (needGroup && !item.posa_is_offer && item.item_group) {
-				let bucket = context.itemGroupBuckets.get(item.item_group);
-				if (!bucket) {
+                        if (needGroup && !item.posa_is_offer && item.item_group) {
+                                let bucket = context.itemGroupBuckets.get(item.item_group);
+                                if (!bucket) {
 					bucket = { items: [], qty: 0, amount: 0 };
 					context.itemGroupBuckets.set(item.item_group, bucket);
-				}
-				bucket.items.push(item);
-				bucket.qty += qty;
-				bucket.amount += amount;
-			}
+                                }
+                                bucket.items.push(item);
+                                bucket.qty += qty;
+                                bucket.amount += amount;
+                        }
 
-			if (needBrand && !item.posa_is_offer && item.item_code) {
-				brandCandidates.push(item);
-			}
+                        if (needBrand && !item.posa_is_offer && item.item_code) {
+                                brandCandidates.push(item);
+                        }
 
-			if (needTransaction && !item.posa_is_offer && !item.posa_is_replace) {
-				context.transactionBucket.items.push(item);
-				context.transactionBucket.qty += qty;
-				context.transactionBucket.amount += amount;
-			}
-		});
+                        if (needTransaction && !item.posa_is_offer && !item.posa_is_replace) {
+                                context.transactionBucket.items.push(item);
+                                context.transactionBucket.qty += qty;
+                                context.transactionBucket.amount += amount;
+                        }
+                });
 
-		if (needBrand) {
-			for (const item of brandCandidates) {
+                if (needBrand) {
+                        for (const item of brandCandidates) {
 				const brand = await this.getItemBrand(item);
 				if (!brand) {
 					continue;
 				}
 				let bucket = context.brandBuckets.get(brand);
-				if (!bucket) {
-					bucket = { items: [], qty: 0, amount: 0 };
-					context.brandBuckets.set(brand, bucket);
-				}
-				bucket.items.push(item);
-				bucket.qty += item.stock_qty || 0;
-				const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-				bucket.amount += (item.stock_qty || 0) * rate;
-			}
-		}
+                                if (!bucket) {
+                                        bucket = { items: [], qty: 0, amount: 0 };
+                                        context.brandBuckets.set(brand, bucket);
+                                }
+                                bucket.items.push(item);
+                                const qty = this.resolveOfferItemQty(item);
+                                bucket.qty += qty;
+                                bucket.amount += this.resolveOfferItemAmount(item);
+                        }
+                }
 
-		return context;
-	},
+                return context;
+        },
 
 	evaluateOffer(offer, context = {}) {
 		if (!offer) {
@@ -599,14 +683,14 @@ export default {
 			return null;
 		}
 
-		const items = [];
-		let totalQty = 0;
-		let totalAmount = 0;
+                const items = [];
+                let totalQty = 0;
+                let totalAmount = 0;
 
-		bucket.items.forEach((item) => {
-			if (!item || item.posa_is_offer) {
-				return;
-			}
+                bucket.items.forEach((item) => {
+                        if (!item || item.posa_is_offer) {
+                                return;
+                        }
 			if (
 				offer.offer === "Item Price" &&
 				item.posa_offer_applied &&
@@ -614,12 +698,12 @@ export default {
 			) {
 				return;
 			}
-			const qty = item.stock_qty || 0;
-			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-			totalQty += qty;
-			totalAmount += qty * rate;
-			items.push(item.posa_row_id);
-		});
+                        const qty = this.resolveOfferItemQty(item);
+                        const amount = this.resolveOfferItemAmount(item);
+                        totalQty += qty;
+                        totalAmount += amount;
+                        items.push(item.posa_row_id);
+                });
 
 		if (!totalQty && !totalAmount) {
 			return null;
@@ -652,11 +736,11 @@ export default {
 			return null;
 		}
 
-		const items = [];
-		let totalQty = 0;
-		let totalAmount = 0;
+                const items = [];
+                let totalQty = 0;
+                let totalAmount = 0;
 
-		bucket.items.forEach((item) => {
+                bucket.items.forEach((item) => {
 			if (!item || item.posa_is_offer) {
 				return;
 			}
@@ -667,12 +751,12 @@ export default {
 			) {
 				return;
 			}
-			const qty = item.stock_qty || 0;
-			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-			totalQty += qty;
-			totalAmount += qty * rate;
-			items.push(item.posa_row_id);
-		});
+                        const qty = this.resolveOfferItemQty(item);
+                        const amount = this.resolveOfferItemAmount(item);
+                        totalQty += qty;
+                        totalAmount += amount;
+                        items.push(item.posa_row_id);
+                });
 
 		if (!totalQty && !totalAmount) {
 			return null;
@@ -710,11 +794,11 @@ export default {
 			return null;
 		}
 
-		const items = [];
-		let totalQty = 0;
-		let totalAmount = 0;
+                const items = [];
+                let totalQty = 0;
+                let totalAmount = 0;
 
-		bucket.items.forEach((item) => {
+                bucket.items.forEach((item) => {
 			if (!item || item.posa_is_offer) {
 				return;
 			}
@@ -725,12 +809,12 @@ export default {
 			) {
 				return;
 			}
-			const qty = item.stock_qty || 0;
-			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-			totalQty += qty;
-			totalAmount += qty * rate;
-			items.push(item.posa_row_id);
-		});
+                        const qty = this.resolveOfferItemQty(item);
+                        const amount = this.resolveOfferItemAmount(item);
+                        totalQty += qty;
+                        totalAmount += amount;
+                        items.push(item.posa_row_id);
+                });
 
 		if (!totalQty && !totalAmount) {
 			return null;
@@ -775,9 +859,17 @@ export default {
                 return offer;
         },
 
-	updatePosOffers(offers) {
-		this.eventBus.emit("update_pos_offers", offers);
-	},
+        updatePosOffers(offers, sourceOffers = undefined) {
+                if (sourceOffers === undefined) {
+                        this.eventBus.emit("update_pos_offers", offers);
+                        return;
+                }
+
+                this.eventBus.emit("update_pos_offers", {
+                        offers,
+                        sourceOffers,
+                });
+        },
 
 	async updateInvoiceOffers(offers) {
 		this.posa_offers.forEach((invoiceOffer) => {

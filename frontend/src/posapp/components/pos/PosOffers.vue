@@ -68,12 +68,58 @@
 					</template>
 				</v-data-table>
 			</div>
-		</v-card>
+                </v-card>
 
-		<v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
-			<v-row align="start" no-gutters>
-				<v-col cols="12">
-					<v-btn
+                <v-card
+                        v-if="promotionalSchemeCatalog.length"
+                        class="selection mx-auto mt-3 pos-themed-card"
+                        style="max-height: 40vh; overflow-y: auto"
+                >
+                        <v-card-title class="d-flex align-center justify-space-between">
+                                <span class="text-h6 text-primary">{{ __("Promotional Schemes") }}</span>
+                                <span class="text-caption text-medium-emphasis">
+                                        {{ promotionalSchemesAvailable }}
+                                        {{ promotionalSchemesAvailable === 1 ? __("Scheme") : __("Schemes") }}
+                                </span>
+                        </v-card-title>
+                        <v-divider></v-divider>
+                        <v-list density="compact">
+                                <v-list-item v-for="scheme in promotionalSchemeCatalog" :key="scheme.key">
+                                        <v-list-item-title class="text-body-2 text-high-emphasis d-flex align-center">
+                                                <span>{{ scheme.title }}</span>
+                                                <v-chip
+                                                        v-if="scheme.is_active"
+                                                        size="x-small"
+                                                        color="success"
+                                                        variant="elevated"
+                                                        class="ms-2"
+                                                >
+                                                        {{ __("Active") }}
+                                                </v-chip>
+                                        </v-list-item-title>
+                                        <v-list-item-subtitle class="text-caption text-medium-emphasis">
+                                                <template v-if="scheme.description">
+                                                        {{ scheme.description }}<br />
+                                                </template>
+                                                <span v-if="scheme.apply_on_label">{{ __("Apply On") }}: {{ scheme.apply_on_label }}</span>
+                                                <span v-if="scheme.target">
+                                                        &nbsp;•&nbsp;{{ __("Target") }}: {{ scheme.target }}
+                                                </span>
+                                                <span v-if="scheme.min_qty != null && scheme.min_qty !== 0">
+                                                        &nbsp;•&nbsp;{{ __("Min Qty") }}: {{ scheme.min_qty }}
+                                                </span>
+                                                <span v-if="scheme.given_qty != null && scheme.given_qty !== 0">
+                                                        &nbsp;•&nbsp;{{ __("Free Qty") }}: {{ scheme.given_qty }}
+                                                </span>
+                                        </v-list-item-subtitle>
+                                </v-list-item>
+                        </v-list>
+                </v-card>
+
+                <v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
+                        <v-row align="start" no-gutters>
+                                <v-col cols="12">
+                                        <v-btn
 						block
 						class="pa-1"
 						size="large"
@@ -100,21 +146,24 @@ export default {
 		const { selectedCustomer } = storeToRefs(customersStore);
 		return { selectedCustomer };
 	},
-	data: () => ({
-		loading: false,
-		pos_profile: "",
-		pos_offers: [],
-		allItems: [],
-		groupItemCache: {},
-		discount_percentage_offer_name: null,
-		itemsPerPage: 1000,
-		expanded: [],
-		singleExpand: true,
-		items_headers: [
-			{ title: __("Name"), value: "name", align: "start" },
-			{ title: __("Apply On"), value: "apply_on", align: "start" },
-			{ title: __("Offer"), value: "offer", align: "start" },
-			{ title: __("Applied"), value: "offer_applied", align: "start" },
+        data: () => ({
+                loading: false,
+                pos_profile: "",
+                pos_offers: [],
+                allItems: [],
+                groupItemCache: {},
+                discount_percentage_offer_name: null,
+                itemsPerPage: 1000,
+                expanded: [],
+                singleExpand: true,
+                promotionalSchemesAvailable: 0,
+                promotionalSchemesApplicable: 0,
+                promotionalSchemeCatalog: [],
+                items_headers: [
+                        { title: __("Name"), value: "name", align: "start" },
+                        { title: __("Apply On"), value: "apply_on", align: "start" },
+                        { title: __("Offer"), value: "offer", align: "start" },
+                        { title: __("Applied"), value: "offer_applied", align: "start" },
 		],
 	}),
 
@@ -186,21 +235,86 @@ export default {
 			}
 			return result;
 		},
-		updatePosOffers(offers) {
-			const toRemove = [];
-			this.pos_offers.forEach((pos_offer) => {
-				const offer = offers.find((offer) => offer.name === pos_offer.name);
-				if (!offer) {
-					toRemove.push(pos_offer.row_id);
-				}
-			});
-			this.removeOffers(toRemove);
-			offers.forEach((offer) => {
-				const pos_offer = this.pos_offers.find((pos_offer) => offer.name === pos_offer.name);
-				if (pos_offer) {
-					pos_offer.items = offer.items;
-					if (pos_offer.offer === "Grand Total" && !this.discount_percentage_offer_name) {
-						pos_offer.offer_applied = !!pos_offer.auto;
+                updatePosOffers(payload) {
+                        let offers = [];
+                        let sourceOffers = [];
+
+                        if (Array.isArray(payload)) {
+                                offers = payload;
+                                sourceOffers = payload;
+                        } else if (payload && typeof payload === "object") {
+                                offers = Array.isArray(payload.offers) ? payload.offers : [];
+                                sourceOffers = Array.isArray(payload.sourceOffers) ? payload.sourceOffers : offers;
+                        }
+
+                        const promotionalSourceOffers = Array.isArray(sourceOffers)
+                                ? sourceOffers.filter((offer) => offer && offer.promo_source === "Promotional Scheme")
+                                : [];
+                        const promotionalApplicable = Array.isArray(offers)
+                                ? offers.filter((offer) => offer && offer.promo_source === "Promotional Scheme")
+                                : [];
+
+                        this.promotionalSchemesAvailable = promotionalSourceOffers.length;
+                        this.promotionalSchemesApplicable = promotionalApplicable.length;
+
+                        const promoCatalog = [];
+                        const seenPromotions = new Set();
+                        promotionalSourceOffers.forEach((offer) => {
+                                if (!offer) {
+                                        return;
+                                }
+                                const key = offer.promotional_scheme_rule || offer.name || offer.row_id;
+                                if (key && seenPromotions.has(key)) {
+                                        return;
+                                }
+                                if (key) {
+                                        seenPromotions.add(key);
+                                }
+
+                                const targetField =
+                                        offer.item ||
+                                        offer.item_group ||
+                                        offer.brand ||
+                                        offer.apply_item_code ||
+                                        offer.apply_item_group ||
+                                        offer.give_item ||
+                                        "";
+
+                                const isActive = promotionalApplicable.some(
+                                        (active) =>
+                                                active &&
+                                                ((active.promotional_scheme_rule &&
+                                                        active.promotional_scheme_rule === offer.promotional_scheme_rule) ||
+                                                        active.name === offer.name),
+                                );
+
+                                promoCatalog.push({
+                                        key: key || Math.random().toString(36).substring(2, 10),
+                                        title: offer.title || offer.name || key,
+                                        description: offer.description || "",
+                                        apply_on_label: offer.apply_on ? __(offer.apply_on) : "",
+                                        target: targetField,
+                                        min_qty: offer.min_qty ?? null,
+                                        given_qty: offer.given_qty ?? null,
+                                        is_active: isActive,
+                                });
+                        });
+                        this.promotionalSchemeCatalog = promoCatalog;
+
+                        const toRemove = [];
+                        this.pos_offers.forEach((pos_offer) => {
+                                const offer = offers.find((offer) => offer && offer.name === pos_offer.name);
+                                if (!offer) {
+                                        toRemove.push(pos_offer.row_id);
+                                }
+                        });
+                        this.removeOffers(toRemove);
+                        offers.forEach((offer) => {
+                                const pos_offer = this.pos_offers.find((pos_offer) => offer.name === pos_offer.name);
+                                if (pos_offer) {
+                                        pos_offer.items = offer.items;
+                                        if (pos_offer.offer === "Grand Total" && !this.discount_percentage_offer_name) {
+                                                pos_offer.offer_applied = !!pos_offer.auto;
 					}
 					if (
 						offer.apply_on == "Item Group" &&
@@ -241,13 +355,15 @@ export default {
 						}
 					}
 					this.pos_offers.push(newOffer);
-					this.eventBus.emit("show_message", {
-						title: __("New Offer Available"),
-						color: "warning",
-					});
-				}
-			});
-		},
+                                        this.eventBus.emit("show_message", {
+                                                title: __("New Offer Available"),
+                                                color: "warning",
+                                        });
+                                }
+                        });
+                        this.updateCounters();
+                        this.updatePosCoupuns();
+                },
 		removeOffers(offers_id_list) {
 			this.pos_offers = this.pos_offers.filter((offer) => !offers_id_list.includes(offer.row_id));
 		},
@@ -295,12 +411,14 @@ export default {
 			}
 			return [];
 		},
-		updateCounters() {
-			this.eventBus.emit("update_offers_counters", {
-				offersCount: this.offersCount,
-				appliedOffersCount: this.appliedOffersCount,
-			});
-		},
+                updateCounters() {
+                        this.eventBus.emit("update_offers_counters", {
+                                offersCount: this.offersCount,
+                                appliedOffersCount: this.appliedOffersCount,
+                                promotionalSchemesCount: this.promotionalSchemesAvailable,
+                                activePromotionalSchemesCount: this.promotionalSchemesApplicable,
+                        });
+                },
 		updatePosCoupuns() {
 			const applyedOffers = this.pos_offers.filter(
 				(offer) => offer.offer_applied && offer.coupon_based,
