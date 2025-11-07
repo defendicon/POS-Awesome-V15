@@ -237,7 +237,7 @@ def _build_product_discount_offers(scheme, pos_profile):
     if not slabs:
         return []
 
-    targets = _get_scheme_targets(scheme)
+    default_targets = _get_scheme_targets(scheme)
     profile_warehouse = getattr(pos_profile, "warehouse", None)
 
     offers = []
@@ -295,33 +295,74 @@ def _build_product_discount_offers(scheme, pos_profile):
             offers.append(offer_template)
             continue
 
-        if not targets:
+        slab_targets = _get_product_discount_targets(scheme, slab, default_targets)
+        if not slab_targets:
             continue
 
-        for target in targets:
+        for target in slab_targets:
             new_offer = offer_template.copy()
-            new_offer["name"] = _make_offer_identifier(scheme.name, target, slab.name)
+            target_value = target.get("value")
+            target_type = target.get("type") or scheme.apply_on
+
+            new_offer["name"] = _make_offer_identifier(scheme.name, target_value, slab.name)
             new_offer["row_id"] = new_offer["name"]
 
-            if scheme.apply_on == "Item Code":
-                new_offer["item"] = target
+            if target_type == "Item Code":
+                new_offer["item"] = target_value
                 new_offer["apply_type"] = "Item Code"
-                new_offer["apply_item_code"] = target
+                new_offer["apply_item_code"] = target_value
                 new_offer["replace_item"] = 1 if slab.same_item else 0
-            elif scheme.apply_on == "Item Group":
-                new_offer["item_group"] = target
+            elif target_type == "Item Group":
+                new_offer["item_group"] = target_value
                 new_offer["apply_type"] = "Item Group"
-                new_offer["apply_item_group"] = target
+                new_offer["apply_item_group"] = target_value
                 if slab.same_item:
                     new_offer["replace_cheapest_item"] = 1
-            elif scheme.apply_on == "Brand":
-                new_offer["brand"] = target
+            elif target_type == "Brand":
+                new_offer["brand"] = target_value
+                new_offer["apply_type"] = "Brand"
                 if slab.same_item:
                     new_offer["replace_cheapest_item"] = 1
 
             offers.append(new_offer)
 
     return offers
+
+
+def _get_product_discount_targets(scheme, slab, default_targets):
+    targets = []
+
+    buying_item_code = cstr(getattr(slab, "buying_item_code", "")).strip()
+    buying_item_group = cstr(getattr(slab, "buying_item_group", "")).strip()
+    buying_brand = cstr(getattr(slab, "buying_brand", "")).strip()
+
+    if buying_item_code:
+        targets.append({"type": "Item Code", "value": buying_item_code})
+
+    if buying_item_group:
+        targets.append({"type": "Item Group", "value": buying_item_group})
+
+    if buying_brand:
+        targets.append({"type": "Brand", "value": buying_brand})
+
+    if not targets:
+        apply_on = scheme.apply_on
+        if apply_on == "Transaction":
+            return []
+
+        for value in default_targets:
+            targets.append({"type": apply_on, "value": value})
+
+    # remove duplicates while preserving order
+    seen = set()
+    unique_targets = []
+    for entry in targets:
+        key = (entry.get("type"), cstr(entry.get("value")))
+        if key[1] and key not in seen:
+            seen.add(key)
+            unique_targets.append(entry)
+
+    return unique_targets
 
 
 def _get_scheme_targets(scheme):
