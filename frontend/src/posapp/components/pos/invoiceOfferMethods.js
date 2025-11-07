@@ -163,14 +163,43 @@ export default {
 				}
 			}
 
-			const offers = sourceOffers.map((offer) => cache.get(offer.name)).filter((entry) => !!entry);
+                        const evaluatedOffers = sourceOffers
+                                .map((offer) => cache.get(offer.name))
+                                .filter((entry) => !!entry);
 
-			this.setItemGiveOffer(offers);
-			this.updatePosOffers(offers);
-		} catch (error) {
-			console.error("Failed to process offers:", error);
-		}
-	},
+                        this.setItemGiveOffer(evaluatedOffers);
+
+                        const evaluatedByName = new Map();
+                        evaluatedOffers.forEach((offer) => {
+                                if (offer && offer.name) {
+                                        evaluatedByName.set(offer.name, offer);
+                                }
+                        });
+
+                        const offersForDisplay = sourceOffers.map((offer) => {
+                                const evaluated = offer && offer.name ? evaluatedByName.get(offer.name) : null;
+                                if (evaluated) {
+                                        return {
+                                                ...offer,
+                                                ...evaluated,
+                                        };
+                                }
+
+                                return {
+                                        ...offer,
+                                        items:
+                                                Array.isArray(offer?.items) || typeof offer?.items === "string"
+                                                        ? offer.items
+                                                        : [],
+                                        offer_applied: !!offer?.offer_applied,
+                                };
+                        });
+
+                        this.updatePosOffers(offersForDisplay);
+                } catch (error) {
+                        console.error("Failed to process offers:", error);
+                }
+        },
 
 	isOfferAffected(offer, changedSet, itemMap, removedInfo = {}) {
 		if (!offer) {
