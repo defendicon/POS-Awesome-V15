@@ -1213,17 +1213,13 @@ export default {
                         }
 
                         if (rule.is_free_item_rule) {
-                                const freeItemCode = rule.free_item || rule.item_code;
-                                if (!freeItemCode) {
-                                        this.eventBus.emit("show_message", {
-                                                title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
-                                                color: "warning",
-                                        });
+                                const evaluation = this._evaluateFreeItemPricingRule(rule);
+                                if (!evaluation) {
                                         return;
                                 }
 
-                                const qty = Math.abs(this.flt(rule.free_qty || 0)) || 1;
-                                const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, qty);
+                                const { freeItemCode, freeQty, multiplier, aggregated } = evaluation;
+                                const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, freeQty);
                                 if (!newItem) {
                                         return;
                                 }
@@ -1242,9 +1238,19 @@ export default {
                                         this.calc_stock_qty(newItem, newItem.qty);
                                 }
 
+                                const recordRuleData = {
+                                        ...rule,
+                                        posa_applied_multiplier: multiplier,
+                                        posa_applied_free_qty: freeQty,
+                                        posa_base_qty: aggregated?.qty ?? null,
+                                        posa_base_amount: aggregated?.amount ?? null,
+                                };
+
                                 this._registerPricingRuleRecord(rule, newItem, {
                                         type: "free_item",
-                                        rule_data: rule,
+                                        free_item: freeItemCode,
+                                        free_qty: freeQty,
+                                        rule_data: recordRuleData,
                                 });
                                 this.emitPricingRulesState();
                         } else if (rule.is_price_discount) {
@@ -1578,6 +1584,104 @@ export default {
                 };
         },
 
+        _evaluateFreeItemPricingRule(rule) {
+                if (!rule) {
+                        return null;
+                }
+
+                const matchingItems = this._findItemsMatchingPricingRule(rule);
+                if (!matchingItems.length) {
+                        this.eventBus.emit("show_message", {
+                                title: __("No items match pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return null;
+                }
+
+                const minQty = Math.abs(this.flt(rule.min_qty || 0));
+                const minAmt = Math.abs(this.flt(rule.min_amt || 0));
+                const allowMultiple = Boolean(rule.apply_multiple_pricing_rules);
+
+                const aggregated = matchingItems.reduce(
+                        (acc, item) => {
+                                const qty = Math.abs(this.flt(item.qty));
+                                const rateSource = item.price_list_rate || item.rate || 0;
+                                const amount = Math.abs(this.flt(rateSource * qty, this.currency_precision));
+                                return {
+                                        qty: acc.qty + qty,
+                                        amount: acc.amount + amount,
+                                };
+                        },
+                        { qty: 0, amount: 0 },
+                );
+
+                if (minQty && aggregated.qty < minQty) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Minimum quantity not met for pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return null;
+                }
+
+                if (minAmt && aggregated.amount < minAmt) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Minimum amount not met for pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return null;
+                }
+
+                let applications = 1;
+                if (allowMultiple) {
+                        const multipliers = [];
+                        if (minQty) {
+                                multipliers.push(Math.floor(aggregated.qty / minQty));
+                        }
+                        if (minAmt) {
+                                multipliers.push(Math.floor(aggregated.amount / minAmt));
+                        }
+                        if (multipliers.length) {
+                                applications = Math.max(Math.min(...multipliers), 0);
+                        }
+                        if (!applications || applications < 1) {
+                                applications = 1;
+                        }
+                }
+
+                const baseFreeQty = Math.abs(this.flt(rule.free_qty || 0));
+                const freeQtyPerApplication = baseFreeQty || 1;
+                const totalFreeQty = allowMultiple
+                        ? freeQtyPerApplication * applications
+                        : freeQtyPerApplication;
+
+                if (!totalFreeQty || totalFreeQty <= 0) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Pricing rule {0} has no free quantity", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return null;
+                }
+
+                const resolvedFreeItemCode =
+                        rule.free_item || (rule.same_item ? matchingItems[0]?.item_code : rule.item_code);
+
+                if (!resolvedFreeItemCode) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return null;
+                }
+
+                return {
+                        freeItemCode: resolvedFreeItemCode,
+                        freeQty: totalFreeQty,
+                        multiplier: allowMultiple ? applications : 1,
+                        aggregated,
+                        matchingItems,
+                };
+        },
+
         _applyDiscountPricingRule(rule) {
                 const matchingItems = this._findItemsMatchingPricingRule(rule);
                 if (!matchingItems.length) {
@@ -1747,6 +1851,14 @@ export default {
                                   free_item: entry.free_item,
                                   free_qty: entry.free_qty,
                                   type: entry.type,
+                                  multiplier:
+                                          entry.rule_data?.posa_applied_multiplier !== undefined
+                                                  ? entry.rule_data?.posa_applied_multiplier
+                                                  : entry.type === "free_item"
+                                                          ? 1
+                                                          : null,
+                                  base_qty: entry.rule_data?.posa_base_qty ?? null,
+                                  base_amount: entry.rule_data?.posa_base_amount ?? null,
                           }))
                         : [];
                 this.eventBus.emit("sync_pricing_rules", { applied });
@@ -2987,8 +3099,9 @@ export default {
 		}
 	},
 
-	_applyItemDetailPayload(item, data, options = {}) {
-		const { forceUpdate = false } = options;
+        _applyItemDetailPayload(item, data, options = {}) {
+                const { forceUpdate = false } = options;
+                const isVirtualPricingRuleItem = Boolean(item?.posa_pricing_rule_virtual);
 
 		if (!item.warehouse) {
 			item.warehouse = this.pos_profile.warehouse;
@@ -3021,8 +3134,13 @@ export default {
 			item.uom = data.uom;
 		}
 
-		item.allow_change_warehouse = data.allow_change_warehouse;
-		item.locked_price = data.locked_price;
+                if (isVirtualPricingRuleItem) {
+                        item.allow_change_warehouse = false;
+                        item.locked_price = true;
+                } else {
+                        item.allow_change_warehouse = data.allow_change_warehouse;
+                        item.locked_price = data.locked_price;
+                }
 		item.description = data.description;
 		item.item_tax_template = data.item_tax_template;
 		item.discount_percentage = data.discount_percentage;
@@ -3090,7 +3208,7 @@ export default {
 			this.set_batch_qty(item, null, false);
 		}
 
-		if (!item.locked_price) {
+                if (!item.locked_price) {
 			if (forceUpdate || !item.base_rate) {
 				if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
 					item.base_price_list_rate = data.price_list_rate;
@@ -3187,19 +3305,23 @@ export default {
                 item.has_serial_no = data.has_serial_no;
                 item.has_batch_no = data.has_batch_no;
 
-		item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-		item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+                item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
-		console.log(`Updated rates for ${item.item_code} on expand:`, {
-			base_rate: item.base_rate,
-			rate: item.rate,
-			base_price_list_rate: item.base_price_list_rate,
+                console.log(`Updated rates for ${item.item_code} on expand:`, {
+                        base_rate: item.base_rate,
+                        rate: item.rate,
+                        base_price_list_rate: item.base_price_list_rate,
 			price_list_rate: item.price_list_rate,
 			exchange_rate: this.exchange_rate,
 			selected_currency: this.selected_currency,
-			default_currency: this.pos_profile.currency,
-		});
-	},
+                        default_currency: this.pos_profile.currency,
+                });
+
+                if (isVirtualPricingRuleItem) {
+                        this._markVirtualFreeItem(item);
+                }
+        },
 	// Fetch customer details (info, price list, etc)
 	async fetch_customer_details() {
 		var vm = this;

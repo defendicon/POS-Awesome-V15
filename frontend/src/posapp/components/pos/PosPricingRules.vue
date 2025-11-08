@@ -142,7 +142,16 @@ export default {
                 refreshRuleState(name, applied) {
                         this.pricing_rules = this.pricing_rules.map((entry) => {
                                 if (entry.name === name) {
-                                        return { ...entry, applied };
+                                        const updated = {
+                                                ...entry,
+                                                applied,
+                                                applied_free_qty: applied ? entry.applied_free_qty : 0,
+                                                applied_multiplier: applied ? entry.applied_multiplier : null,
+                                        };
+                                        return {
+                                                ...updated,
+                                                benefit_display: this.buildBenefitDisplay(updated),
+                                        };
                                 }
                                 return entry;
                         });
@@ -167,6 +176,8 @@ export default {
                                 conditions_display: conditions,
                                 applied: Boolean(safeRule.applied),
                                 is_free_item_rule: Boolean(safeRule.is_free_item_rule),
+                                applied_free_qty: this.flt(safeRule.applied_free_qty || 0),
+                                applied_multiplier: safeRule.multiplier || safeRule.applied_multiplier || null,
                         };
                 },
                 buildAppliesDisplay(rule) {
@@ -202,9 +213,13 @@ export default {
                 },
                 buildBenefitDisplay(rule) {
                         if (rule.is_free_item_rule) {
-                                const qty = this.flt(rule.free_qty || 0);
+                                const appliedQty = rule.applied ? this.flt(rule.applied_free_qty || 0) : 0;
+                                const qty = appliedQty || this.flt(rule.free_qty || 0);
                                 const itemName = rule.free_item_name || rule.free_item || __("Free Item");
                                 if (qty) {
+                                        if (rule.applied && rule.applied_multiplier && rule.applied_multiplier > 1) {
+                                                return __("{0} x {1} ({2}×)", [qty, itemName, rule.applied_multiplier]);
+                                        }
                                         return __("{0} x {1}", [qty, itemName]);
                                 }
                                 return itemName;
@@ -242,13 +257,23 @@ export default {
                         const appliedMap = new Map();
                         applied.forEach((row) => {
                                 if (row?.name) {
-                                        appliedMap.set(row.name, true);
+                                        appliedMap.set(row.name, row);
                                 }
                         });
-                        this.pricing_rules = this.pricing_rules.map((rule) => ({
-                                ...rule,
-                                applied: appliedMap.has(rule.name),
-                        }));
+                        this.pricing_rules = this.pricing_rules.map((rule) => {
+                                const appliedRow = appliedMap.get(rule.name);
+                                const applied = Boolean(appliedRow);
+                                const updated = {
+                                        ...rule,
+                                        applied,
+                                        applied_free_qty: appliedRow?.free_qty || 0,
+                                        applied_multiplier: appliedRow?.multiplier || null,
+                                };
+                                return {
+                                        ...updated,
+                                        benefit_display: this.buildBenefitDisplay(updated),
+                                };
+                        });
                         this.updateCounters();
                 },
                 updateCounters() {
