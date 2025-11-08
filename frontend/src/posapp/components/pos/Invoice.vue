@@ -1493,6 +1493,9 @@ export default {
 
                         try {
                                 await this.load_invoice(data);
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
                         } finally {
                                 if (resumePricingRules) {
                                         const resume = () => {
@@ -1523,6 +1526,9 @@ export default {
 
                         try {
                                 await this.new_order(data);
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
                         } finally {
                                 if (resumePricingRules) {
                                         const resume = () => {
@@ -1574,6 +1580,9 @@ export default {
 
                         try {
                                 await this.load_invoice(data.invoice_doc);
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
                         } finally {
                                 if (resumePricingRules) {
                                         const resume = () => {
@@ -1594,6 +1603,9 @@ export default {
                                         if (item.qty > 0) item.qty = -Math.abs(item.qty);
                                         if (item.stock_qty > 0) item.stock_qty = -Math.abs(item.stock_qty);
                                 });
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
                         }
                         if (data.return_doc) {
                                 console.log("Return against existing invoice:", data.return_doc.name);

@@ -197,6 +197,149 @@ export default {
                 });
         },
 
+        rehydratePricingRuleFreebieState(options = {}) {
+                const items = Array.isArray(this.items) ? this.items : [];
+                if (!items.length) {
+                        return;
+                }
+
+                const mergeDuplicates = options && options.mergeDuplicates !== false;
+                const shouldEmitCounters = options && options.emitCounters !== false;
+                const freebiesByKey = new Map();
+                const duplicates = [];
+                let mutated = false;
+
+                items.forEach((item) => {
+                        if (!item || !item.is_free_item) {
+                                return;
+                        }
+
+                        const parsedRules = parseAppliedRules(item.pricing_rules);
+                        const ruleIdRaw = firstAppliedRule(
+                                item.posa_pricing_rule_freebie,
+                                parsedRules,
+                                item.pricing_rule,
+                                item.rule,
+                                item.applied_pricing_rule,
+                                item.applied_pricing_rules,
+                        );
+                        const ruleId = ruleIdRaw ? `${ruleIdRaw}` : null;
+                        if (!ruleId) {
+                                return;
+                        }
+
+                        if (item.is_free_item !== 1) {
+                                item.is_free_item = 1;
+                                mutated = true;
+                        }
+
+                        if (item.posa_pricing_rule_freebie !== ruleId) {
+                                item.posa_pricing_rule_freebie = ruleId;
+                                mutated = true;
+                        }
+
+                        if (!parsedRules.length || !parsedRules.includes(ruleId)) {
+                                item.pricing_rules = JSON.stringify([ruleId]);
+                                mutated = true;
+                        } else {
+                                const serialized = JSON.stringify(parsedRules);
+                                if (item.pricing_rules !== serialized) {
+                                        item.pricing_rules = serialized;
+                                        mutated = true;
+                                }
+                        }
+
+                        const key = item.posa_pricing_rule_key || this.getPricingRuleFreebieKey(item, ruleId);
+                        if (key && item.posa_pricing_rule_key !== key) {
+                                item.posa_pricing_rule_key = key;
+                                mutated = true;
+                        }
+
+                        if (!mergeDuplicates) {
+                                return;
+                        }
+
+                        const compositeKey = key
+                                ? `${ruleId}::${key}`
+                                : [
+                                          ruleId,
+                                          item.item_code || "",
+                                          item.batch_no || "",
+                                          item.serial_no || "",
+                                          item.uom || "",
+                                          item.warehouse || "",
+                                          item.conversion_factor !== undefined && item.conversion_factor !== null
+                                                  ? `${flt(item.conversion_factor) || 1}`
+                                                  : "",
+                                  ].join("::");
+
+                        const existing = freebiesByKey.get(compositeKey);
+                        if (!existing) {
+                                freebiesByKey.set(compositeKey, item);
+                                return;
+                        }
+
+                        if (existing === item) {
+                                return;
+                        }
+
+                        const qty = flt(existing.qty || 0) + flt(item.qty || 0);
+                        const stockQty = flt(existing.stock_qty || 0) + flt(item.stock_qty || 0);
+                        if (!Number.isNaN(qty)) {
+                                existing.qty = qty;
+                                mutated = true;
+                        }
+                        if (!Number.isNaN(stockQty)) {
+                                existing.stock_qty = stockQty;
+                                mutated = true;
+                        }
+                        if (!existing.conversion_factor && item.conversion_factor) {
+                                existing.conversion_factor = item.conversion_factor;
+                                mutated = true;
+                        }
+                        if (!existing.batch_no && item.batch_no) {
+                                existing.batch_no = item.batch_no;
+                                mutated = true;
+                        }
+                        if (!existing.serial_no && item.serial_no) {
+                                existing.serial_no = item.serial_no;
+                                mutated = true;
+                        }
+                        if (!existing.warehouse && item.warehouse) {
+                                existing.warehouse = item.warehouse;
+                                mutated = true;
+                        }
+
+                        existing.amount = this.flt(existing.qty * (existing.rate || 0), this.currency_precision);
+                        const baseRate =
+                                existing.base_rate !== undefined && existing.base_rate !== null
+                                        ? existing.base_rate
+                                        : existing.rate || 0;
+                        existing.base_amount = this.flt(existing.qty * baseRate, this.currency_precision);
+                        if (typeof this.calc_item_price === "function") {
+                                this.calc_item_price(existing);
+                        }
+
+                        duplicates.push(item);
+                });
+
+                if (mergeDuplicates && duplicates.length && typeof this.remove_item === "function") {
+                        duplicates.forEach((item) => this.remove_item(item));
+                        mutated = true;
+                }
+
+                if (mutated) {
+                        if (typeof this.$forceUpdate === "function") {
+                                this.$forceUpdate();
+                        }
+                        if (shouldEmitCounters && typeof this.emitPricingRuleCounters === "function") {
+                                this.emitPricingRuleCounters();
+                        }
+                } else if (options && options.emitCounters === true && typeof this.emitPricingRuleCounters === "function") {
+                        this.emitPricingRuleCounters();
+                }
+        },
+
         handleRequestPricingRuleContext() {
                 if (!this.pos_profile || typeof this.pos_profile !== "object" || !this.pos_profile.name) {
                         this.pricingRuleContextPending = true;
