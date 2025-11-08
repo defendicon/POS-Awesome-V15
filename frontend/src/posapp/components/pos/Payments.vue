@@ -796,11 +796,11 @@ export default {
 		return { invoiceStore, selectedCustomer, customerInfoFromStore: customerInfo };
 	},
 	data() {
-		return {
-			loading: false, // UI loading state
-			pos_profile: "", // POS profile settings
-			pos_settings: "", // POS settings
-			stock_settings: "", // Stock settings
+                return {
+                        loading: false, // UI loading state
+                        pos_profile: "", // POS profile settings
+                        pos_settings: "", // POS settings
+                        stock_settings: "", // Stock settings
 			invoiceType: "Invoice", // Type of invoice
 			is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
@@ -826,10 +826,11 @@ export default {
 			mpesa_modes: [], // List of available M-Pesa modes
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
-			addresses: [], // List of customer addresses
-			is_user_editing_paid_change: false, // User interaction flag
+                        addresses: [], // List of customer addresses
+                        is_user_editing_paid_change: false, // User interaction flag
                         highlightSubmit: false, // Highlight state for submit button
                         last_payment_change_was_cash: null, // Track last edited payment type
+                        activePricingRuleSubmissionGuards: 0, // Track active submission guards for pricing rules
                 };
         },
 	computed: {
@@ -1236,11 +1237,11 @@ export default {
 			});
 		},
 		// Highlight and focus the submit button when payment screen opens
-		handleShowPayment(data) {
-			if (data === "true") {
-				this.$nextTick(() => {
-					setTimeout(() => {
-						const btn = this.$refs.submitButton;
+                handleShowPayment(data) {
+                        if (data === "true") {
+                                this.$nextTick(() => {
+                                        setTimeout(() => {
+                                                const btn = this.$refs.submitButton;
 						const el = btn && btn.$el ? btn.$el : btn;
 						if (el) {
 							el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1251,13 +1252,53 @@ export default {
 				});
 			} else {
 				this.highlightSubmit = false;
-			}
-		},
-		// Reset all cash payments to zero
-		reset_cash_payments() {
-			this.invoice_doc.payments.forEach((payment) => {
-				if (payment.mode_of_payment.toLowerCase() === "cash") {
-					payment.amount = 0;
+                        }
+                },
+                ensurePricingRulesSuppressedForSubmission(options = {}) {
+                        const wasSuppressed = this.activePricingRuleSubmissionGuards > 0;
+                        this.activePricingRuleSubmissionGuards += 1;
+
+                        if (wasSuppressed) {
+                                return;
+                        }
+
+                        this.eventBus.emit("suppress_pricing_rule_refresh", {
+                                cancelScheduled: true,
+                                reason: "invoice_submission",
+                                ...options,
+                        });
+                },
+                resumePricingRulesAfterSubmission(options = {}) {
+                        const force = Boolean(options && options.force);
+
+                        if (force) {
+                                this.activePricingRuleSubmissionGuards = 0;
+                        } else if (this.activePricingRuleSubmissionGuards > 0) {
+                                this.activePricingRuleSubmissionGuards -= 1;
+                        }
+
+                        if (this.activePricingRuleSubmissionGuards > 0 && !force) {
+                                return;
+                        }
+
+                        const rest = { ...(options || {}) };
+                        if (Object.prototype.hasOwnProperty.call(rest, "force")) {
+                                delete rest.force;
+                        }
+                        const payload = {
+                                cancelPending: true,
+                                flushPending: false,
+                                reason: "invoice_submission",
+                                ...rest,
+                        };
+
+                        this.eventBus.emit("resume_pricing_rule_refresh", payload);
+                },
+                // Reset all cash payments to zero
+                reset_cash_payments() {
+                        this.invoice_doc.payments.forEach((payment) => {
+                                if (payment.mode_of_payment.toLowerCase() === "cash") {
+                                        payment.amount = 0;
 				}
 			});
 		},
@@ -1453,11 +1494,13 @@ export default {
 			this.submit_invoice(print);
 		},
 		// Submit invoice to backend after all validations
-		submit_invoice(print) {
-			// For return invoices, ensure payments are negative one last time
-			if (this.invoice_doc.is_return) {
-				this.ensureReturnPaymentsAreNegative();
-			}
+                submit_invoice(print) {
+                        this.ensurePricingRulesSuppressedForSubmission();
+
+                        // For return invoices, ensure payments are negative one last time
+                        if (this.invoice_doc.is_return) {
+                                this.ensureReturnPaymentsAreNegative();
+                        }
 			let totalPayedAmount = 0;
 			this.invoice_doc.payments.forEach((payment) => {
 				payment.amount = this.flt(payment.amount);
@@ -1499,132 +1542,147 @@ export default {
 				customer_credit_dict: this.customer_credit_dict,
 				is_cashback: this.is_cashback,
 			};
-			const vm = this;
+                        const vm = this;
 
-			if (isOffline()) {
-				try {
-					saveOfflineInvoice({ data: data, invoice: this.invoice_doc });
-					this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
-					vm.eventBus.emit("show_message", {
-						title: __("Invoice saved offline"),
-						color: "warning",
-					});
-					if (print) {
-						this.print_offline_invoice(this.invoice_doc);
-					}
-					vm.eventBus.emit("clear_invoice");
-					vm.eventBus.emit("focus_item_search");
-					vm.eventBus.emit("reset_posting_date");
-					vm.back_to_invoice();
-					vm.loading = false;
-					return;
-				} catch (error) {
-					vm.eventBus.emit("show_message", {
-						title: __("Cannot Save Offline Invoice: ") + (error.message || __("Unknown error")),
-						color: "error",
-					});
-					vm.loading = false;
-					return;
-				}
-			}
-			frappe.call({
-				method:
-					this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-						? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-						: this.invoiceType === "Quotation"
-							? "posawesome.posawesome.api.quotations.submit_quotation"
-							: "posawesome.posawesome.api.invoices.submit_invoice",
-				args: {
-					data: data,
-					invoice: this.invoice_doc,
-					order: this.invoice_doc,
-				},
-				callback: function (r) {
-					if (r.exc) {
-						console.error("Error submitting invoice:", r.exc);
-						// Show detailed error message to help debugging
-						let errorMsg = r.exc.toString();
-						if (errorMsg.includes("Amount must be negative")) {
-							vm.eventBus.emit("show_message", {
-								title: __("Fixing payment amounts for return invoice..."),
-								color: "warning",
-							});
-							// Force fix the amounts
-							vm.invoice_doc.payments.forEach((payment) => {
-								if (payment.amount > 0) {
-									payment.amount = -Math.abs(payment.amount);
-								}
-								if (payment.base_amount > 0) {
-									payment.base_amount = -Math.abs(payment.base_amount);
-								}
-							});
-							// Retry submission once
-							console.log("Retrying submission with fixed payment amounts");
-							setTimeout(() => {
-								vm.submit_invoice(print);
-							}, 500);
-						} else {
-							vm.eventBus.emit("show_message", {
-								title: __("Error submitting invoice: ") + errorMsg,
-								color: "error",
-							});
-						}
-						vm.loading = false;
-						return;
-					}
-					if (!r.message) {
-						vm.eventBus.emit("show_message", {
-							title: __("Error submitting invoice: No response from server"),
-							color: "error",
-						});
-						vm.loading = false;
-						return;
-					}
-					if (print) {
-						vm.load_print_page();
-					}
-					vm.customer_credit_dict = [];
-					vm.redeem_customer_credit = false;
-					vm.is_cashback = true;
-					vm.is_credit_return = false;
-					vm.sales_person = "";
-					vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
+                        if (isOffline()) {
+                                try {
+                                        saveOfflineInvoice({ data: data, invoice: this.invoice_doc });
+                                        this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
                                         vm.eventBus.emit("show_message", {
-                                                title:
-                                                        vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
-                                                                ? __("Sales Order {0} is Submitted", [r.message.name])
-                                                                : vm.invoiceType === "Quotation"
-                                                                        ? __("Quotation {0} is Submitted", [r.message.name])
-                                                                        : __("Invoice {0} is Submitted", [r.message.name]),
-                                                color: "success",
+                                                title: __("Invoice saved offline"),
+                                                color: "warning",
                                         });
-                                        frappe.utils.play_sound("submit");
-                                        // Update local stock quantities immediately after successful
-                                        // invoice submission so item availability reflects changes
-                                        const submittedItems = Array.isArray(vm.invoice_doc.items)
-                                                ? vm.invoice_doc.items
-                                                : [];
-                                        updateLocalStock(submittedItems);
-                                        stockCoordinator.applyInvoiceConsumption(submittedItems, {
-                                                source: "invoice",
-                                        });
-                                        const submittedCodes = submittedItems
-                                                .map((item) => (item ? item.item_code : null))
-                                                .filter((code) => code !== undefined && code !== null);
-                                        vm.eventBus.emit("invoice_stock_adjusted", {
-                                                items: submittedItems,
-                                                item_codes: submittedCodes,
-                                                timestamp: Date.now(),
-                                        });
-                                        vm.addresses = [];
+                                        if (print) {
+                                                this.print_offline_invoice(this.invoice_doc);
+                                        }
                                         vm.eventBus.emit("clear_invoice");
                                         vm.eventBus.emit("focus_item_search");
                                         vm.eventBus.emit("reset_posting_date");
                                         vm.back_to_invoice();
-					vm.loading = false;
-				},
-			});
-		},
+                                        return;
+                                } catch (error) {
+                                        vm.eventBus.emit("show_message", {
+                                                title: __("Cannot Save Offline Invoice: ") + (error.message || __("Unknown error")),
+                                                color: "error",
+                                        });
+                                        return;
+                                } finally {
+                                        this.resumePricingRulesAfterSubmission({ cancelPending: true, flushPending: false });
+                                        vm.loading = false;
+                                }
+                        }
+                        const finalizeSubmission = () => {
+                                vm.resumePricingRulesAfterSubmission({ cancelPending: true, flushPending: false });
+                                vm.loading = false;
+                        };
+
+                        frappe.call({
+                                method:
+                                        this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+                                                ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
+                                                : this.invoiceType === "Quotation"
+                                                        ? "posawesome.posawesome.api.quotations.submit_quotation"
+                                                        : "posawesome.posawesome.api.invoices.submit_invoice",
+                                args: {
+                                        data: data,
+                                        invoice: this.invoice_doc,
+                                        order: this.invoice_doc,
+                                },
+                                callback: function (r) {
+                                        try {
+                                                if (r.exc) {
+                                                        console.error("Error submitting invoice:", r.exc);
+                                                        // Show detailed error message to help debugging
+                                                        let errorMsg = r.exc.toString();
+                                                        if (errorMsg.includes("Amount must be negative")) {
+                                                                vm.eventBus.emit("show_message", {
+                                                                        title: __("Fixing payment amounts for return invoice..."),
+                                                                        color: "warning",
+                                                                });
+                                                                // Force fix the amounts
+                                                                vm.invoice_doc.payments.forEach((payment) => {
+                                                                        if (payment.amount > 0) {
+                                                                                payment.amount = -Math.abs(payment.amount);
+                                                                        }
+                                                                        if (payment.base_amount > 0) {
+                                                                                payment.base_amount = -Math.abs(payment.base_amount);
+                                                                        }
+                                                                });
+                                                                // Retry submission once
+                                                                console.log("Retrying submission with fixed payment amounts");
+                                                                setTimeout(() => {
+                                                                        vm.submit_invoice(print);
+                                                                }, 500);
+                                                        } else {
+                                                                vm.eventBus.emit("show_message", {
+                                                                        title: __("Error submitting invoice: ") + errorMsg,
+                                                                        color: "error",
+                                                                });
+                                                        }
+                                                        return;
+                                                }
+                                                if (!r.message) {
+                                                        vm.eventBus.emit("show_message", {
+                                                                title: __("Error submitting invoice: No response from server"),
+                                                                color: "error",
+                                                        });
+                                                        return;
+                                                }
+                                                if (print) {
+                                                        vm.load_print_page();
+                                                }
+                                                vm.customer_credit_dict = [];
+                                                vm.redeem_customer_credit = false;
+                                                vm.is_cashback = true;
+                                                vm.is_credit_return = false;
+                                                vm.sales_person = "";
+                                                vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
+                                                vm.eventBus.emit("show_message", {
+                                                        title:
+                                                                vm.invoiceType === "Order" && vm.pos_profile.posa_create_only_sales_order
+                                                                        ? __("Sales Order {0} is Submitted", [r.message.name])
+                                                                        : vm.invoiceType === "Quotation"
+                                                                                ? __("Quotation {0} is Submitted", [r.message.name])
+                                                                                : __("Invoice {0} is Submitted", [r.message.name]),
+                                                        color: "success",
+                                                });
+                                                frappe.utils.play_sound("submit");
+                                                // Update local stock quantities immediately after successful
+                                                // invoice submission so item availability reflects changes
+                                                const submittedItems = Array.isArray(vm.invoice_doc.items)
+                                                        ? vm.invoice_doc.items
+                                                        : [];
+                                                updateLocalStock(submittedItems);
+                                                stockCoordinator.applyInvoiceConsumption(submittedItems, {
+                                                        source: "invoice",
+                                                });
+                                                const submittedCodes = submittedItems
+                                                        .map((item) => (item ? item.item_code : null))
+                                                        .filter((code) => code !== undefined && code !== null);
+                                                vm.eventBus.emit("invoice_stock_adjusted", {
+                                                        items: submittedItems,
+                                                        item_codes: submittedCodes,
+                                                        timestamp: Date.now(),
+                                                });
+                                                vm.addresses = [];
+                                                vm.eventBus.emit("clear_invoice");
+                                                vm.eventBus.emit("focus_item_search");
+                                                vm.eventBus.emit("reset_posting_date");
+                                                vm.back_to_invoice();
+                                        } finally {
+                                                finalizeSubmission();
+                                        }
+                                },
+                                error: function (error) {
+                                        console.error("Invoice submission failed", error);
+                                        finalizeSubmission();
+                                        vm.eventBus.emit("show_message", {
+                                                title: __("Error submitting invoice"),
+                                                color: "error",
+                                        });
+                                },
+                        });
+                },
 		// Set full amount for a payment method (or negative for returns)
 		set_full_amount(idx) {
 			const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
@@ -2350,29 +2408,31 @@ export default {
 				this.set_mpesa_payment(data);
 			});
 			// Clear any stored invoice when parent emits clear_invoice
-			this.eventBus.on("clear_invoice", () => {
-				this.invoice_doc = "";
-				this.is_return = false;
-				this.is_credit_return = false;
-			});
+                        this.eventBus.on("clear_invoice", () => {
+                                this.invoice_doc = "";
+                                this.is_return = false;
+                                this.is_credit_return = false;
+                                this.resumePricingRulesAfterSubmission({ force: true });
+                        });
 			// Scroll to top when payment view is shown
 			this.eventBus.on("show_payment", this.handleShowPayment);
 		});
 	},
 	// Lifecycle hook: beforeUnmount
-	beforeUnmount() {
-		// Remove all event listeners
-		this.eventBus.off("send_invoice_doc_payment");
-		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("add_the_new_address");
-		this.eventBus.off("update_invoice_type");
-		this.eventBus.off("set_pos_settings");
-		this.eventBus.off("set_mpesa_payment");
-		this.eventBus.off("clear_invoice");
-		this.eventBus.off("network-online", this.syncPendingInvoices);
-		this.eventBus.off("server-online", this.syncPendingInvoices);
-		this.eventBus.off("show_payment", this.handleShowPayment);
-	},
+        beforeUnmount() {
+                // Remove all event listeners
+                this.eventBus.off("send_invoice_doc_payment");
+                this.eventBus.off("register_pos_profile");
+                this.eventBus.off("add_the_new_address");
+                this.eventBus.off("update_invoice_type");
+                this.eventBus.off("set_pos_settings");
+                this.eventBus.off("set_mpesa_payment");
+                this.eventBus.off("clear_invoice");
+                this.eventBus.off("network-online", this.syncPendingInvoices);
+                this.eventBus.off("server-online", this.syncPendingInvoices);
+                this.eventBus.off("show_payment", this.handleShowPayment);
+                this.resumePricingRulesAfterSubmission({ force: true });
+        },
 	// Lifecycle hook: unmounted
 	unmounted() {
 		// Remove keyboard shortcut listener

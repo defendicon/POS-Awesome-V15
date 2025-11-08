@@ -1458,6 +1458,24 @@ export default {
                         this._pricingRuleOriginals = new WeakMap();
                         this.eventBus.emit("focus_item_search");
                 },
+                handleSuppressPricingRuleRefresh(options = {}) {
+                        if (typeof this.suppressPricingRuleRefresh === "function") {
+                                this.suppressPricingRuleRefresh();
+                        }
+
+                        if (
+                                options &&
+                                options.cancelScheduled &&
+                                typeof this.cancelScheduledPricingRuleRefresh === "function"
+                        ) {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+                },
+                handleResumePricingRuleRefresh(options = {}) {
+                        if (typeof this.resumePricingRuleRefresh === "function") {
+                                this.resumePricingRuleRefresh(options || {});
+                        }
+                },
                 async handleLoadInvoice(data) {
                         this._pricingRuleOriginals = new WeakMap();
                         if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
@@ -1639,6 +1657,8 @@ export default {
                         request_pricing_rule_context: this.handleRequestPricingRuleContext,
                         apply_pricing_rule_updates: this.handleApplyPricingRuleUpdates,
                         reset_pricing_rules: this.handleResetPricingRules,
+                        suppress_pricing_rule_refresh: this.handleSuppressPricingRuleRefresh,
+                        resume_pricing_rule_refresh: this.handleResumePricingRuleRefresh,
                 };
 
                 Object.entries(this._busHandlers).forEach(([eventName, handler]) => {
