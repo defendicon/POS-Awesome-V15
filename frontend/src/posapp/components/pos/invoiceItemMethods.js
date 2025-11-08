@@ -184,9 +184,31 @@ export default {
 		this.item_stock_cache = {};
 	},
         remove_item(item) {
-                if (item && item.pricing_rule && item.posa_pricing_rule_virtual) {
-                        this._removePricingRuleRecord(item.pricing_rule);
-                        this.emitPricingRulesState();
+                if (item && item.pricing_rule) {
+                        if (item.posa_pricing_rule_virtual) {
+                                this._removePricingRuleRecord(item.pricing_rule);
+                                this.emitPricingRulesState();
+                        } else {
+                                const recordIndex = Array.isArray(this.pos_pricing_rules)
+                                        ? this.pos_pricing_rules.findIndex((entry) => entry.name === item.pricing_rule)
+                                        : -1;
+                                if (recordIndex > -1) {
+                                        const record = this.pos_pricing_rules[recordIndex];
+                                        if (record.type === "discount") {
+                                                const updated = Array.isArray(record.affected_items)
+                                                        ? record.affected_items.filter((row) => row.row_id !== item.posa_row_id)
+                                                        : [];
+                                                this.pos_pricing_rules.splice(recordIndex, 1, {
+                                                        ...record,
+                                                        affected_items: updated,
+                                                });
+                                                if (!updated.length) {
+                                                        this._removePricingRuleRecord(item.pricing_rule);
+                                                }
+                                                this.emitPricingRulesState();
+                                        }
+                                }
+                        }
                 }
                 return removeItem(item, this);
         },
@@ -322,6 +344,12 @@ export default {
 
 	// Load an invoice (or return invoice) from data, set all fields accordingly
         async load_invoice(data = {}, options = {}) {
+                const previousPricingRules = Array.isArray(this.pos_pricing_rules)
+                        ? this.pos_pricing_rules.map((entry) => ({
+                                  name: entry.name,
+                                  rule_data: entry.rule_data || null,
+                          }))
+                        : [];
                 const { preserveAdditionalDiscountPercentage = false } = options || {};
                 const usePercentageDiscount = Boolean(this.pos_profile?.posa_use_percentage_discount);
                 const previousDiscountPercentage = usePercentageDiscount
@@ -409,16 +437,27 @@ export default {
                         }
 
                         this.posa_offers = data.posa_offers || [];
+                        const ruleDataMap = new Map(previousPricingRules.map((row) => [row.name, row.rule_data]));
                         this.pos_pricing_rules = Array.isArray(data.posa_pricing_rules)
-                                ? data.posa_pricing_rules.map((entry) => ({
-                                          name: entry.pricing_rule || entry.name,
-                                          label: entry.label || entry.pricing_rule || entry.name,
-                                          free_item: entry.free_item,
-                                          free_qty: entry.free_qty,
-                                          row_id: entry.row_id,
-                                  }))
+                                ? data.posa_pricing_rules.map((entry) => {
+                                          const name = entry.pricing_rule || entry.name;
+                                          return {
+                                                  name,
+                                                  label: entry.label || entry.pricing_rule || entry.name,
+                                                  free_item: entry.free_item,
+                                                  free_qty: entry.free_qty,
+                                                  row_id: entry.row_id,
+                                                  type:
+                                                          entry.free_item && entry.free_qty
+                                                                  ? "free_item"
+                                                                  : "discount",
+                                                  affected_items: [],
+                                                  rule_data: ruleDataMap.get(name) || null,
+                                          };
+                                  })
                                 : [];
                         this.emitPricingRulesState();
+                        await this._restoreVirtualPricingRuleItemsFromRecords();
                 } else {
                         console.log("Warning: No items in return invoice");
                         this.pos_pricing_rules = [];
@@ -1173,37 +1212,53 @@ export default {
                                 return;
                         }
 
-                        const freeItemCode = rule.free_item || rule.item_code;
-                        if (!freeItemCode) {
+                        if (rule.is_free_item_rule) {
+                                const freeItemCode = rule.free_item || rule.item_code;
+                                if (!freeItemCode) {
+                                        this.eventBus.emit("show_message", {
+                                                title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
+                                                color: "warning",
+                                        });
+                                        return;
+                                }
+
+                                const qty = Math.abs(this.flt(rule.free_qty || 0)) || 1;
+                                const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, qty);
+                                if (!newItem) {
+                                        return;
+                                }
+
+                                this.items.unshift(newItem);
+
+                                try {
+                                        await this.update_item_detail(newItem, true);
+                                } catch (error) {
+                                        console.warn("Unable to update virtual pricing rule item details", error);
+                                }
+
+                                this._markVirtualFreeItem(newItem);
+
+                                if (typeof this.calc_stock_qty === "function") {
+                                        this.calc_stock_qty(newItem, newItem.qty);
+                                }
+
+                                this._registerPricingRuleRecord(rule, newItem, {
+                                        type: "free_item",
+                                        rule_data: rule,
+                                });
+                                this.emitPricingRulesState();
+                        } else if (rule.is_price_discount) {
+                                const applied = this._applyDiscountPricingRule(rule);
+                                if (!applied) {
+                                        return;
+                                }
+                        } else {
                                 this.eventBus.emit("show_message", {
-                                        title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
+                                        title: __("Pricing rule {0} is not supported", [rule.title || rule.name]),
                                         color: "warning",
                                 });
                                 return;
                         }
-
-                        const qty = Math.abs(this.flt(rule.free_qty || 0)) || 1;
-                        const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, qty);
-                        if (!newItem) {
-                                return;
-                        }
-
-                        this.items.unshift(newItem);
-
-                        try {
-                                await this.update_item_detail(newItem, true);
-                        } catch (error) {
-                                console.warn("Unable to update virtual pricing rule item details", error);
-                        }
-
-                        this._markVirtualFreeItem(newItem);
-
-                        if (typeof this.calc_stock_qty === "function") {
-                                this.calc_stock_qty(newItem, newItem.qty);
-                        }
-
-                        this._registerPricingRuleRecord(rule, newItem);
-                        this.emitPricingRulesState();
 
                         if (typeof this.$forceUpdate === "function") {
                                 this.$forceUpdate();
@@ -1224,16 +1279,33 @@ export default {
 
                 const record = this.pos_pricing_rules.find((entry) => entry.name === ruleName);
                 if (record) {
-                        const item = this.items.find((it) => it.posa_row_id === record.row_id);
-                        if (item) {
-                                removeItem(item, this);
+                        if (record.type === "discount") {
+                                const affected = Array.isArray(record.affected_items) ? record.affected_items : [];
+                                affected.forEach((entry) => {
+                                        const target = this.items.find((it) => it.posa_row_id === entry.row_id);
+                                        if (!target) {
+                                                return;
+                                        }
+                                        this._restorePricingRuleSnapshot(target, entry.snapshot);
+                                        if (target.pricing_rule === ruleName && !entry.snapshot?.pricing_rule) {
+                                                delete target.pricing_rule;
+                                                delete target.pricing_rule_label;
+                                        }
+                                });
+                        } else {
+                                const item = this.items.find((it) => it.posa_row_id === record.row_id);
+                                if (item) {
+                                        removeItem(item, this);
+                                }
                         }
                 } else {
-                        const fallback = this.items.find(
-                                (it) => it.pricing_rule === ruleName && it.posa_pricing_rule_virtual,
-                        );
+                        const fallback = this.items.find((it) => it.pricing_rule === ruleName);
                         if (fallback) {
-                                removeItem(fallback, this);
+                                if (fallback.posa_pricing_rule_virtual) {
+                                        removeItem(fallback, this);
+                                } else {
+                                        this._resetItemPricingToDefault(fallback);
+                                }
                         }
                 }
 
@@ -1310,20 +1382,351 @@ export default {
                 item.disable_increment = true;
         },
 
-        _registerPricingRuleRecord(rule, item) {
-                if (!rule || !item) {
+        _findItemsMatchingPricingRule(rule) {
+                if (!rule) {
+                        return [];
+                }
+
+                const applyOn = (rule.apply_on || "").toLowerCase();
+                const itemCode = rule.item_code || null;
+                const itemGroup = rule.item_group || null;
+                const brand = rule.brand || null;
+
+                return (Array.isArray(this.items) ? this.items : []).filter((item) => {
+                        if (!item || item.posa_pricing_rule_virtual) {
+                                return false;
+                        }
+
+                        if (itemCode && item.item_code !== itemCode) {
+                                return false;
+                        }
+
+                        if (applyOn === "item group" && itemGroup && item.item_group !== itemGroup) {
+                                return false;
+                        }
+
+                        if (applyOn === "brand" && brand && item.brand !== brand) {
+                                return false;
+                        }
+
+                        return true;
+                });
+        },
+
+        _snapshotItemForPricingRule(item) {
+                if (!item) {
+                        return null;
+                }
+
+                return {
+                        rate: item.rate,
+                        base_rate: item.base_rate,
+                        discount_amount: item.discount_amount,
+                        base_discount_amount: item.base_discount_amount,
+                        discount_percentage: item.discount_percentage,
+                        amount: item.amount,
+                        base_amount: item.base_amount,
+                        pricing_rule: item.pricing_rule,
+                        pricing_rule_label: item.pricing_rule_label,
+                };
+        },
+
+        _restorePricingRuleSnapshot(item, snapshot) {
+                if (!item) {
                         return;
                 }
-                const entry = {
+
+                if (snapshot) {
+                        item.rate = snapshot.rate;
+                        item.base_rate = snapshot.base_rate;
+                        item.discount_amount = snapshot.discount_amount;
+                        item.base_discount_amount = snapshot.base_discount_amount;
+                        item.discount_percentage = snapshot.discount_percentage;
+                        item.pricing_rule = snapshot.pricing_rule;
+                        item.pricing_rule_label = snapshot.pricing_rule_label;
+                } else {
+                        this._resetItemPricingToDefault(item);
+                        return;
+                }
+
+                const qty = this.flt(item.qty);
+                item.amount = this.flt(qty * this.flt(item.rate), this.currency_precision);
+                item.base_amount = this.flt(qty * this.flt(item.base_rate), this.currency_precision);
+        },
+
+        _resetItemPricingToDefault(item) {
+                if (!item) {
+                        return;
+                }
+
+                const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                const exchangeRate = this.exchange_rate || 1;
+
+                const resolvedBasePrice = this.flt(
+                        item.base_price_list_rate !== undefined && item.base_price_list_rate !== null
+                                ? item.base_price_list_rate
+                                : item.base_rate || 0,
+                        this.currency_precision,
+                );
+
+                const resolvedPrice = this.flt(
+                        item.price_list_rate !== undefined && item.price_list_rate !== null
+                                ? item.price_list_rate
+                                : this.selected_currency !== baseCurrency
+                                        ? resolvedBasePrice / exchangeRate
+                                        : resolvedBasePrice,
+                        this.currency_precision,
+                );
+
+                item.discount_amount = 0;
+                item.base_discount_amount = 0;
+                item.discount_percentage = 0;
+                item.rate = resolvedPrice;
+                item.base_rate = this.selected_currency !== baseCurrency
+                        ? this.flt(resolvedPrice * exchangeRate, this.currency_precision)
+                        : resolvedBasePrice;
+                item.amount = this.flt(this.flt(item.qty) * item.rate, this.currency_precision);
+                item.base_amount = this.flt(this.flt(item.qty) * item.base_rate, this.currency_precision);
+                delete item.pricing_rule;
+                delete item.pricing_rule_label;
+        },
+
+        _applyDiscountValuesToItem(item, rule) {
+                if (!item || !rule) {
+                        return null;
+                }
+
+                const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                const exchangeRate = this.exchange_rate || 1;
+                const rateOrDiscount = (rule.rate_or_discount || "").toLowerCase();
+
+                const basePriceListRate = this.flt(
+                        item.base_price_list_rate !== undefined && item.base_price_list_rate !== null
+                                ? item.base_price_list_rate
+                                : this.selected_currency !== baseCurrency
+                                        ? this.flt((item.price_list_rate || item.rate || 0) * exchangeRate, this.currency_precision)
+                                        : item.price_list_rate || item.rate || 0,
+                        this.currency_precision,
+                );
+
+                const priceListRate = this.flt(
+                        item.price_list_rate !== undefined && item.price_list_rate !== null
+                                ? item.price_list_rate
+                                : this.selected_currency !== baseCurrency
+                                        ? basePriceListRate / exchangeRate
+                                        : basePriceListRate,
+                        this.currency_precision,
+                );
+
+                let discountPercentage = 0;
+                let discountAmount = 0;
+                let baseDiscountAmount = 0;
+
+                if (rateOrDiscount === "rate" && rule.rate) {
+                        const baseTargetRate = this.flt(rule.rate, this.currency_precision);
+                        const targetRate = this.selected_currency !== baseCurrency
+                                ? this.flt(baseTargetRate / exchangeRate, this.currency_precision)
+                                : baseTargetRate;
+                        discountAmount = this.flt(Math.max(0, priceListRate - targetRate), this.currency_precision);
+                        baseDiscountAmount = this.flt(
+                                Math.max(0, basePriceListRate - baseTargetRate),
+                                this.currency_precision,
+                        );
+                        discountPercentage = priceListRate
+                                ? this.flt((discountAmount / priceListRate) * 100, this.float_precision)
+                                : 0;
+                } else if (rateOrDiscount === "discount amount" && rule.discount_amount) {
+                        baseDiscountAmount = this.flt(
+                                Math.min(rule.discount_amount, basePriceListRate),
+                                this.currency_precision,
+                        );
+                        discountAmount = this.selected_currency !== baseCurrency
+                                ? this.flt(baseDiscountAmount / exchangeRate, this.currency_precision)
+                                : baseDiscountAmount;
+                        discountPercentage = priceListRate
+                                ? this.flt((discountAmount / priceListRate) * 100, this.float_precision)
+                                : 0;
+                } else {
+                        discountPercentage = this.flt(rule.discount_percentage || 0, this.float_precision);
+                        discountAmount = this.flt((priceListRate * discountPercentage) / 100, this.currency_precision);
+                        baseDiscountAmount = this.flt(
+                                (basePriceListRate * discountPercentage) / 100,
+                                this.currency_precision,
+                        );
+                }
+
+                discountPercentage = Math.min(Math.max(discountPercentage, 0), 100);
+                discountAmount = Math.min(discountAmount, priceListRate);
+                baseDiscountAmount = Math.min(baseDiscountAmount, basePriceListRate);
+
+                const resolvedRate = this.flt(priceListRate - discountAmount, this.currency_precision);
+                const resolvedBaseRate = this.flt(basePriceListRate - baseDiscountAmount, this.currency_precision);
+
+                item.discount_percentage = discountPercentage;
+                item.discount_amount = discountAmount;
+                item.base_discount_amount = baseDiscountAmount;
+                item.rate = resolvedRate;
+                item.base_rate = resolvedBaseRate;
+                item.amount = this.flt(this.flt(item.qty) * item.rate, this.currency_precision);
+                item.base_amount = this.flt(this.flt(item.qty) * item.base_rate, this.currency_precision);
+                item.pricing_rule = rule.name;
+                item.pricing_rule_label = rule.title || rule.name;
+
+                return {
+                        discountAmount,
+                        discountPercentage,
+                };
+        },
+
+        _applyDiscountPricingRule(rule) {
+                const matchingItems = this._findItemsMatchingPricingRule(rule);
+                if (!matchingItems.length) {
+                        this.eventBus.emit("show_message", {
+                                title: __("No items match pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return false;
+                }
+
+                const minQty = Math.abs(this.flt(rule.min_qty || 0));
+                const minAmt = Math.abs(this.flt(rule.min_amt || 0));
+
+                const aggregated = matchingItems.reduce(
+                        (acc, item) => {
+                                const qty = Math.abs(this.flt(item.qty));
+                                const amount = Math.abs(
+                                        this.flt((item.price_list_rate || item.rate || 0) * qty, this.currency_precision),
+                                );
+                                return {
+                                        qty: acc.qty + qty,
+                                        amount: acc.amount + amount,
+                                };
+                        },
+                        { qty: 0, amount: 0 },
+                );
+
+                if (minQty && aggregated.qty < minQty) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Minimum quantity not met for pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return false;
+                }
+
+                if (minAmt && aggregated.amount < minAmt) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Minimum amount not met for pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return false;
+                }
+
+                const affected = [];
+                matchingItems.forEach((item) => {
+                        const snapshot = this._snapshotItemForPricingRule(item);
+                        const result = this._applyDiscountValuesToItem(item, rule);
+                        if (result) {
+                                affected.push({
+                                        row_id: item.posa_row_id,
+                                        snapshot,
+                                });
+                        }
+                });
+
+                if (!affected.length) {
+                        this.eventBus.emit("show_message", {
+                                title: __("Unable to apply pricing rule {0}", [rule.title || rule.name]),
+                                color: "warning",
+                        });
+                        return false;
+                }
+
+                this._registerPricingRuleRecord(rule, null, {
+                        type: "discount",
+                        affected_items: affected,
+                        rule_data: rule,
+                });
+                this.emitPricingRulesState();
+                return true;
+        },
+
+        async _restoreVirtualPricingRuleItemsFromRecords() {
+                if (!Array.isArray(this.pos_pricing_rules) || !this.pos_pricing_rules.length) {
+                        return;
+                }
+
+                for (const record of this.pos_pricing_rules) {
+                        if (record.type !== "free_item" || !record.free_item) {
+                                continue;
+                        }
+
+                        const existing = this.items.find(
+                                (item) =>
+                                        item &&
+                                        item.posa_pricing_rule_virtual &&
+                                        item.pricing_rule === record.name,
+                        );
+                        if (existing) {
+                                if (record.row_id && existing.posa_row_id !== record.row_id) {
+                                        existing.posa_row_id = record.row_id;
+                                }
+                                this._markVirtualFreeItem(existing);
+                                continue;
+                        }
+
+                        const payloadRule = record.rule_data || {
+                                name: record.name,
+                                title: record.label || record.name,
+                                free_item: record.free_item,
+                                free_qty: record.free_qty,
+                        };
+                        const qty = Math.abs(this.flt(record.free_qty || payloadRule.free_qty || 0)) || 1;
+                        const virtual = this._createVirtualPricingRuleItem(payloadRule, record.free_item, qty);
+                        if (!virtual) {
+                                continue;
+                        }
+                        if (record.row_id) {
+                                virtual.posa_row_id = record.row_id;
+                        }
+                        this.items.unshift(virtual);
+                        try {
+                                await this.update_item_detail(virtual, true);
+                        } catch (error) {
+                                console.warn("Unable to refresh restored pricing rule item", error);
+                        }
+                        this._markVirtualFreeItem(virtual);
+                        if (typeof this.calc_stock_qty === "function") {
+                                this.calc_stock_qty(virtual, virtual.qty);
+                        }
+                }
+        },
+
+        _registerPricingRuleRecord(rule, item, options = {}) {
+                if (!rule) {
+                        return;
+                }
+
+                const payload = {
                         name: rule.name,
                         label: rule.title || rule.name,
-                        free_item: rule.free_item || item.item_code,
-                        free_qty: item.qty,
-                        row_id: item.posa_row_id,
+                        free_item: options.free_item !== undefined ? options.free_item : rule.free_item || item?.item_code || null,
+                        free_qty:
+                                options.free_qty !== undefined
+                                        ? options.free_qty
+                                        : item?.qty ?? rule.free_qty ?? 0,
+                        row_id: options.row_id !== undefined ? options.row_id : item?.posa_row_id || null,
+                        type: options.type || (item ? "free_item" : "discount"),
+                        affected_items: options.affected_items
+                                ? JSON.parse(JSON.stringify(options.affected_items))
+                                : [],
+                        rule_data: options.rule_data
+                                ? JSON.parse(JSON.stringify(options.rule_data))
+                                : JSON.parse(JSON.stringify(rule)),
                 };
+
                 this.pos_pricing_rules = Array.isArray(this.pos_pricing_rules)
-                        ? [...this.pos_pricing_rules.filter((row) => row.name !== entry.name), entry]
-                        : [entry];
+                        ? [...this.pos_pricing_rules.filter((row) => row.name !== payload.name), payload]
+                        : [payload];
         },
 
         _removePricingRuleRecord(ruleName) {
@@ -1343,6 +1746,7 @@ export default {
                                   row_id: entry.row_id,
                                   free_item: entry.free_item,
                                   free_qty: entry.free_qty,
+                                  type: entry.type,
                           }))
                         : [];
                 this.eventBus.emit("sync_pricing_rules", { applied });
