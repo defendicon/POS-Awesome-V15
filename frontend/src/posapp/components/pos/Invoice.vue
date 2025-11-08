@@ -342,6 +342,7 @@ import invoiceComputed from "./invoiceComputed";
 import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
+import pricingRuleMethods from "./invoicePricingRuleMethods.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
@@ -374,25 +375,26 @@ export default {
 			show_packed_dialog: false, // Packing list dialog visibility
 			posOffers: [], // All available offers
 			posa_offers: [], // Offers applied to this invoice
-			posa_coupons: [], // Coupons applied
-			isApplyingOffer: false, // Flag to prevent offer watcher loops
-			allItems: [], // All items for offer logic
-			discount_percentage_offer_name: null, // Track which offer is applied
-			invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
-			invoiceType: "Invoice", // Current invoice type
-			itemsPerPage: 1000, // Items per page in table
-			itemSearch: "", // Search query for added items
-			expanded: [], // Array of expanded row IDs
-			singleExpand: true, // Only one row expanded at a time
-			cancel_dialog: false, // Cancel dialog visibility
-			float_precision: 6, // Float precision for calculations
-			currency_precision: 6, // Currency precision for display
-			new_line: false, // Add new line for item
-                        available_stock_cache: {},
-                        item_detail_cache: {},
-                        item_stock_cache: {},
-                        brand_cache: {},
-                        stockUnsubscribe: null,
+                        posa_coupons: [], // Coupons applied
+                        isApplyingOffer: false, // Flag to prevent offer watcher loops
+                        allItems: [], // All items for offer logic
+                        discount_percentage_offer_name: null, // Track which offer is applied
+                        invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
+                        invoiceType: "Invoice", // Current invoice type
+                        itemsPerPage: 1000, // Items per page in table
+                        itemSearch: "", // Search query for added items
+                        expanded: [], // Array of expanded row IDs
+                        singleExpand: true, // Only one row expanded at a time
+                        cancel_dialog: false, // Cancel dialog visibility
+                        float_precision: 6, // Float precision for calculations
+                        currency_precision: 6, // Currency precision for display
+                        new_line: false, // Add new line for item
+                        _pricingRuleOriginals: new WeakMap(),
+			available_stock_cache: {},
+			item_detail_cache: {},
+			item_stock_cache: {},
+			brand_cache: {},
+			stockUnsubscribe: null,
 			delivery_charges: [], // List of delivery charges
 			base_delivery_charges_rate: 0, // Delivery charge in company currency
 			delivery_charges_rate: 0, // Selected delivery charge rate
@@ -429,6 +431,7 @@ export default {
                         invoiceHeight: null,
                         paymentVisible: false, // Track current payment view state
                         _busHandlers: {},
+                        pricingRuleContextPending: false,
                 };
         },
 
@@ -471,8 +474,9 @@ export default {
 
         methods: {
                 ...shortcutMethods,
-		...offerMethods,
-		...invoiceItemMethods,
+                ...offerMethods,
+                ...invoiceItemMethods,
+                ...pricingRuleMethods,
                 focusCustomerSearchField() {
                         const customerComponent = this.$refs.customerComponent;
                         if (!customerComponent) {
@@ -1440,16 +1444,103 @@ export default {
 
                         this.fetch_price_lists();
                         this.update_price_list();
+
+                        this.pricingRuleContextPending = false;
+                        this.$nextTick(() => {
+                                this.handleRequestPricingRuleContext();
+                                if (typeof this.schedulePricingRuleRefresh === "function") {
+                                        this.schedulePricingRuleRefresh();
+                                }
+                        });
                 },
                 handleClearInvoice() {
                         this.clear_invoice();
+                        this._pricingRuleOriginals = new WeakMap();
                         this.eventBus.emit("focus_item_search");
                 },
-                handleLoadInvoice(data) {
-                        this.load_invoice(data);
+                handleSuppressPricingRuleRefresh(options = {}) {
+                        if (typeof this.suppressPricingRuleRefresh === "function") {
+                                this.suppressPricingRuleRefresh();
+                        }
+
+                        if (
+                                options &&
+                                options.cancelScheduled &&
+                                typeof this.cancelScheduledPricingRuleRefresh === "function"
+                        ) {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
                 },
-                handleLoadOrder(data) {
-                        this.new_order(data);
+                handleResumePricingRuleRefresh(options = {}) {
+                        if (typeof this.resumePricingRuleRefresh === "function") {
+                                this.resumePricingRuleRefresh(options || {});
+                        }
+                },
+                async handleLoadInvoice(data) {
+                        this._pricingRuleOriginals = new WeakMap();
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+
+                        let resumePricingRules = null;
+                        if (
+                                typeof this.suppressPricingRuleRefresh === "function" &&
+                                typeof this.resumePricingRuleRefresh === "function"
+                        ) {
+                                this.suppressPricingRuleRefresh();
+                                resumePricingRules = () => this.resumePricingRuleRefresh({ cancelPending: true });
+                        }
+
+                        try {
+                                await this.load_invoice(data);
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
+                        } finally {
+                                if (resumePricingRules) {
+                                        const resume = () => {
+                                                resumePricingRules();
+                                        };
+                                        if (typeof this.$nextTick === "function") {
+                                                this.$nextTick(resume);
+                                        } else {
+                                                resume();
+                                        }
+                                }
+                        }
+                },
+                async handleLoadOrder(data) {
+                        this._pricingRuleOriginals = new WeakMap();
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+
+                        let resumePricingRules = null;
+                        if (
+                                typeof this.suppressPricingRuleRefresh === "function" &&
+                                typeof this.resumePricingRuleRefresh === "function"
+                        ) {
+                                this.suppressPricingRuleRefresh();
+                                resumePricingRules = () => this.resumePricingRuleRefresh({ cancelPending: true });
+                        }
+
+                        try {
+                                await this.new_order(data);
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
+                        } finally {
+                                if (resumePricingRules) {
+                                        const resume = () => {
+                                                resumePricingRules();
+                                        };
+                                        if (typeof this.$nextTick === "function") {
+                                                this.$nextTick(resume);
+                                        } else {
+                                                resume();
+                                        }
+                                }
+                        }
                         // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
                 },
                 handleSetOffers(data) {
@@ -1471,9 +1562,39 @@ export default {
                         });
                         this.primeInvoiceStockState();
                 },
-                handleLoadReturnInvoice(data) {
+                async handleLoadReturnInvoice(data) {
                         console.log("Invoice component received load_return_invoice event with data:", data);
-                        this.load_invoice(data.invoice_doc);
+                        this._pricingRuleOriginals = new WeakMap();
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+
+                        let resumePricingRules = null;
+                        if (
+                                typeof this.suppressPricingRuleRefresh === "function" &&
+                                typeof this.resumePricingRuleRefresh === "function"
+                        ) {
+                                this.suppressPricingRuleRefresh();
+                                resumePricingRules = () => this.resumePricingRuleRefresh({ cancelPending: true });
+                        }
+
+                        try {
+                                await this.load_invoice(data.invoice_doc);
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
+                        } finally {
+                                if (resumePricingRules) {
+                                        const resume = () => {
+                                                resumePricingRules();
+                                        };
+                                        if (typeof this.$nextTick === "function") {
+                                                this.$nextTick(resume);
+                                        } else {
+                                                resume();
+                                        }
+                                }
+                        }
                         this.invoiceType = "Return";
                         this.invoiceTypes = ["Return"];
                         this.invoice_doc.is_return = 1;
@@ -1482,6 +1603,9 @@ export default {
                                         if (item.qty > 0) item.qty = -Math.abs(item.qty);
                                         if (item.stock_qty > 0) item.stock_qty = -Math.abs(item.stock_qty);
                                 });
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true });
+                                }
                         }
                         if (data.return_doc) {
                                 console.log("Return against existing invoice:", data.return_doc.name);
@@ -1542,6 +1666,11 @@ export default {
                         reset_posting_date: this.handleResetPostingDate,
                         calc_uom: this.calc_uom,
                         show_payment: this.handleShowPayment,
+                        request_pricing_rule_context: this.handleRequestPricingRuleContext,
+                        apply_pricing_rule_updates: this.handleApplyPricingRuleUpdates,
+                        reset_pricing_rules: this.handleResetPricingRules,
+                        suppress_pricing_rule_refresh: this.handleSuppressPricingRuleRefresh,
+                        resume_pricing_rule_refresh: this.handleResumePricingRuleRefresh,
                 };
 
                 Object.entries(this._busHandlers).forEach(([eventName, handler]) => {
@@ -1572,6 +1701,9 @@ export default {
                 this._busHandlers = {};
                 if (typeof this.cancelScheduledOfferRefresh === "function") {
                         this.cancelScheduledOfferRefresh();
+                }
+                if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                        this.cancelScheduledPricingRuleRefresh();
                 }
                 if (this._suppressClosePaymentsTimer) {
                         clearTimeout(this._suppressClosePaymentsTimer);

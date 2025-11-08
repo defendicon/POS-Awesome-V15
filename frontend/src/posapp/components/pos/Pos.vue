@@ -13,13 +13,13 @@
 		<Variants></Variants>
 		<OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
 		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row">
-			<v-col
-				v-show="!payment && !showOffers && !coupons"
-				xl="5"
-				lg="5"
-				md="5"
-				sm="5"
-				cols="12"
+                        <v-col
+                                v-show="!payment && !showOffers && !coupons && !pricingRules"
+                                xl="5"
+                                lg="5"
+                                md="5"
+                                sm="5"
+                                cols="12"
 				class="pos dynamic-col"
 			>
 				<ItemsSelector></ItemsSelector>
@@ -27,9 +27,12 @@
 			<v-col v-show="showOffers" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
 				<PosOffers></PosOffers>
 			</v-col>
-			<v-col v-show="coupons" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
-				<PosCoupons></PosCoupons>
-			</v-col>
+                        <v-col v-show="pricingRules" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
+                                <PosPricingRules></PosPricingRules>
+                        </v-col>
+                        <v-col v-show="coupons" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
+                                <PosCoupons></PosCoupons>
+                        </v-col>
 			<v-col v-show="payment" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
 				<Payments></Payments>
 			</v-col>
@@ -48,6 +51,7 @@ import OpeningDialog from "./OpeningDialog.vue";
 import Payments from "./Payments.vue";
 import PosOffers from "./PosOffers.vue";
 import PosCoupons from "./PosCoupons.vue";
+import PosPricingRules from "./PosPricingRules.vue";
 import Drafts from "./Drafts.vue";
 import SalesOrders from "./SalesOrders.vue";
 import ClosingDialog from "./ClosingDialog.vue";
@@ -87,12 +91,13 @@ export default {
 		return { ...responsive, ...rtl, ...shift, ...offers };
 	},
 	data: function () {
-		return {
-			dialog: false,
+                return {
+                        dialog: false,
 
-			payment: false,
-			showOffers: false,
-			coupons: false,
+                        payment: false,
+                        showOffers: false,
+                        pricingRules: false,
+                        coupons: false,
 			itemsLoaded: false,
 			customersLoaded: false,
 		};
@@ -106,10 +111,11 @@ export default {
 		Drafts,
 		ClosingDialog,
 
-		Returns,
-		PosOffers,
-		PosCoupons,
-		NewAddress,
+                Returns,
+                PosOffers,
+                PosCoupons,
+                PosPricingRules,
+                NewAddress,
 		Variants,
 		MpesaPayments,
 		SalesOrders,
@@ -152,21 +158,30 @@ export default {
 					this.get_offers(data.pos_profile.name, data.pos_profile);
 				}
 			});
-			this.eventBus.on("show_payment", (data) => {
-				this.payment = data === "true";
-				this.showOffers = false;
-				this.coupons = false;
-			});
-			this.eventBus.on("show_offers", (data) => {
-				this.showOffers = data === "true";
-				this.payment = false;
-				this.coupons = false;
-			});
-			this.eventBus.on("show_coupons", (data) => {
-				this.coupons = data === "true";
-				this.showOffers = false;
-				this.payment = false;
-			});
+                        this.eventBus.on("show_payment", (data) => {
+                                this.payment = data === "true";
+                                this.showOffers = false;
+                                this.pricingRules = false;
+                                this.coupons = false;
+                        });
+                        this.eventBus.on("show_offers", (data) => {
+                                this.showOffers = data === "true";
+                                this.payment = false;
+                                this.pricingRules = false;
+                                this.coupons = false;
+                        });
+                        this.eventBus.on("show_pricing_rules", (data) => {
+                                this.pricingRules = data === "true";
+                                this.showOffers = false;
+                                this.payment = false;
+                                this.coupons = false;
+                        });
+                        this.eventBus.on("show_coupons", (data) => {
+                                this.coupons = data === "true";
+                                this.showOffers = false;
+                                this.pricingRules = false;
+                                this.payment = false;
+                        });
 			this.eventBus.on("open_closing_dialog", () => {
 				this.get_closing_data();
 			});
@@ -185,8 +200,9 @@ export default {
 		this.eventBus.off("register_pos_data");
 		this.eventBus.off("register_pos_profile");
 		this.eventBus.off("LoadPosProfile");
-		this.eventBus.off("show_offers");
-		this.eventBus.off("show_coupons");
+                this.eventBus.off("show_offers");
+                this.eventBus.off("show_pricing_rules");
+                this.eventBus.off("show_coupons");
 		this.eventBus.off("open_closing_dialog");
 		this.eventBus.off("submit_closing_pos");
 		this.eventBus.off("items_loaded");

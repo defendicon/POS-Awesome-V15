@@ -643,13 +643,16 @@ export default {
 		return old_invoice;
 	},
 
-	// Build the invoice document object for backend submission
-	get_invoice_doc() {
-		let doc = {};
-		const sourceDoc = this.invoice_doc || {};
+        // Build the invoice document object for backend submission
+        get_invoice_doc() {
+                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: false, emitCounters: false });
+                }
+                let doc = {};
+                const sourceDoc = this.invoice_doc || {};
 
-		if (sourceDoc.name) {
-			doc = { ...sourceDoc };
+                if (sourceDoc.name) {
+                        doc = { ...sourceDoc };
 		}
 
 		// Always set these fields first
@@ -987,29 +990,29 @@ export default {
 	},
 
 	// Prepare items array for invoice doc
-	get_invoice_items() {
-		const items_list = [];
-		const isReturn = this.isReturnInvoice;
-		const usesPosInvoice = this.pos_profile.create_pos_invoice_instead_of_sales_invoice;
+        get_invoice_items() {
+                const items_list = [];
+                const isReturn = this.isReturnInvoice;
+                const usesPosInvoice = this.pos_profile.create_pos_invoice_instead_of_sales_invoice;
 
-		this.items.forEach((item) => {
-			const new_item = {
-				item_code: item.item_code,
-				// Retain the item name for offline invoices
-				// Fallback to item_code if item_name is not available
-				item_name: item.item_name || item.item_code,
-				name_overridden: item.name_overridden ? 1 : 0,
-				posa_row_id: item.posa_row_id,
-				posa_offers: item.posa_offers,
-				posa_offer_applied: item.posa_offer_applied,
-				posa_is_offer: item.posa_is_offer,
-				posa_is_replace: item.posa_is_replace,
-				is_free_item: item.is_free_item,
-				qty: flt(item.qty),
-				uom: item.uom,
-				conversion_factor: item.conversion_factor,
-				serial_no: item.serial_no,
-				// Link to original invoice item when doing returns
+                this.items.forEach((item) => {
+                        const new_item = {
+                                item_code: item.item_code,
+                                // Retain the item name for offline invoices
+                                // Fallback to item_code if item_name is not available
+                                item_name: item.item_name || item.item_code,
+                                name_overridden: item.name_overridden ? 1 : 0,
+                                posa_row_id: item.posa_row_id,
+                                posa_offers: item.posa_offers,
+                                posa_offer_applied: item.posa_offer_applied,
+                                posa_is_offer: item.posa_is_offer,
+                                posa_is_replace: item.posa_is_replace,
+                                is_free_item: item.is_free_item ? 1 : 0,
+                                qty: flt(item.qty),
+                                uom: item.uom,
+                                conversion_factor: item.conversion_factor,
+                                serial_no: item.serial_no,
+                                // Link to original invoice item when doing returns
 				// Needed for backend validation that the item exists in
 				// the referenced Sales or POS Invoice
 				...(item.sales_invoice_item && { sales_invoice_item: item.sales_invoice_item }),
@@ -1058,22 +1061,53 @@ export default {
 				new_item.amount = flt(item.qty) * new_item.rate;
 				new_item.base_amount = new_item.amount;
 				new_item.discount_amount = flt(item.discount_amount);
-				new_item.base_discount_amount = item.base_discount_amount || flt(item.discount_amount);
-			}
+                                new_item.base_discount_amount = item.base_discount_amount || flt(item.discount_amount);
+                        }
 
-			// For returns, ensure all amounts are negative
-			if (isReturn) {
+                        // For returns, ensure all amounts are negative
+                        if (isReturn) {
 				new_item.qty = -Math.abs(new_item.qty);
 				new_item.amount = -Math.abs(new_item.amount);
 				new_item.base_amount = -Math.abs(new_item.base_amount);
 				new_item.discount_amount = -Math.abs(new_item.discount_amount);
-				new_item.base_discount_amount = -Math.abs(new_item.base_discount_amount);
-			}
+                                new_item.base_discount_amount = -Math.abs(new_item.base_discount_amount);
+                        }
 
-			items_list.push(new_item);
-		});
+                        const pricingRules = item.pricing_rules;
+                        if (Array.isArray(pricingRules)) {
+                                new_item.pricing_rules = JSON.stringify(pricingRules);
+                        } else if (pricingRules !== undefined && pricingRules !== null) {
+                                if (typeof pricingRules === "string") {
+                                        new_item.pricing_rules = pricingRules;
+                                } else {
+                                        new_item.pricing_rules = JSON.stringify([pricingRules]);
+                                }
+                        }
 
-		return items_list;
+                        if (item.pricing_rule && !new_item.pricing_rule) {
+                                new_item.pricing_rule = item.pricing_rule;
+                        }
+                        if (item.applied_pricing_rule && !new_item.applied_pricing_rule) {
+                                new_item.applied_pricing_rule = item.applied_pricing_rule;
+                        }
+                        if (item.applied_pricing_rules && !new_item.applied_pricing_rules) {
+                                new_item.applied_pricing_rules = item.applied_pricing_rules;
+                        }
+
+                        if (item.posa_pricing_rule_freebie) {
+                                new_item.posa_pricing_rule_freebie = item.posa_pricing_rule_freebie;
+                        }
+                        if (item.posa_pricing_rule_key) {
+                                new_item.posa_pricing_rule_key = item.posa_pricing_rule_key;
+                        }
+                        if (item.posa_pricing_rule_source_row) {
+                                new_item.posa_pricing_rule_source_row = item.posa_pricing_rule_source_row;
+                        }
+
+                        items_list.push(new_item);
+                });
+
+                return items_list;
 	},
 
 	// Prepare items array for order doc
