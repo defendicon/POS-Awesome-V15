@@ -29,6 +29,10 @@
                                                                 {{ __("Apply") }}
                                                         </v-btn>
                                                 </template>
+                                                <template #item.min_qty="{ item }">
+                                                        <span v-if="item.min_qty">{{ item.min_qty }}</span>
+                                                        <span v-else>—</span>
+                                                </template>
                                                 <template #item.discount="{ item }">
                                                         <span v-if="item.discount_percentage">
                                                                 {{ item.discount_percentage }}%
@@ -100,6 +104,7 @@ export default {
                         headers: [
                                 { title: __("Name"), value: "title", align: "start" },
                                 { title: __("Apply On"), value: "apply_on", align: "start" },
+                                { title: __("Min Qty"), value: "min_qty", align: "end" },
                                 { title: __("Discount"), value: "discount", align: "end" },
                                 { title: __("Priority"), value: "priority", align: "end" },
                                 { title: __("Actions"), value: "actions", align: "end", sortable: false },

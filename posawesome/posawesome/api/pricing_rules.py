@@ -31,10 +31,18 @@ def _prepare_context(context_json: str) -> Dict:
     context.setdefault("doctype", "Sales Invoice")
     context.setdefault("child_doctype", "Sales Invoice Item")
     context.setdefault("transaction_date", today())
-    context.setdefault("currency", frappe.get_cached_value("Company", context.get("company"), "default_currency") if context.get("company") else None)
+    context.setdefault(
+        "currency",
+        frappe.get_cached_value("Company", context.get("company"), "default_currency")
+        if context.get("company")
+        else None,
+    )
     context.setdefault("conversion_rate", context.get("conversion_rate") or 1)
     context.setdefault("plc_conversion_rate", context.get("plc_conversion_rate") or 1)
     context.setdefault("price_list_currency", context.get("price_list_currency") or context.get("currency"))
+    context.setdefault("transaction_type", "selling")
+    context.setdefault("ignore_pricing_rule", 0)
+    context.setdefault("is_pos", 1)
 
     raw_items = context.get("items") or []
     prepared_items = []
@@ -64,6 +72,9 @@ def _prepare_context(context_json: str) -> Dict:
         "plc_conversion_rate": context.get("plc_conversion_rate"),
         "selling_price_list": context.get("price_list"),
         "is_return": cint(context.get("is_return")),
+        "transaction_type": context.get("transaction_type") or "selling",
+        "ignore_pricing_rule": cint(context.get("ignore_pricing_rule")),
+        "is_pos": cint(context.get("is_pos")),
         "items": [],
     }
 
@@ -141,7 +152,7 @@ def _build_item_args(context: Dict, item: Dict) -> Dict:
         "supplier_group": context.get("supplier_group"),
         "is_return": cint(context.get("is_return")),
         "update_stock": cint(context.get("update_stock")),
-        "transaction_type": context.get("transaction_type"),
+        "transaction_type": context.get("transaction_type") or "selling",
     }
     return frappe._dict(args)
 
@@ -166,6 +177,7 @@ def _as_serializable_rule(rule) -> Dict:
         "margin_rate_or_amount": flt(doc.get("margin_rate_or_amount")),
         "priority": cint(doc.get("priority")),
         "apply_multiple_pricing_rules": cint(doc.get("apply_multiple_pricing_rules")),
+        "min_qty": flt(doc.get("min_qty")) if doc.get("min_qty") else None,
         "company": doc.get("company"),
         "currency": doc.get("currency"),
         "valid_from": doc.get("valid_from"),

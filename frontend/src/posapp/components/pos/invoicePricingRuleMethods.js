@@ -73,6 +73,7 @@ export default {
 
                 const appliedRules = this.collectAppliedPricingRules(items);
 
+                const transactionType = "selling";
                 const context = {
                         doctype: docType,
                         child_doctype: childDoctype,
@@ -89,6 +90,8 @@ export default {
                         campaign: this.invoice_doc?.campaign || this.pos_profile.campaign || null,
                         sales_partner: this.invoice_doc?.sales_partner || null,
                         ignore_pricing_rule: 0,
+                        transaction_type: transactionType,
+                        is_pos: 1,
                         pos_profile: this.pos_profile.name,
                         coupon_code: this.invoice_doc?.coupon_code || null,
                         is_return: this.isReturnInvoice ? 1 : 0,
@@ -104,6 +107,9 @@ export default {
                                 price_list_currency: priceListCurrency,
                                 plc_conversion_rate: plcConversionRate,
                                 selling_price_list: priceList,
+                                transaction_type: transactionType,
+                                ignore_pricing_rule: 0,
+                                is_pos: 1,
                                 is_return: this.isReturnInvoice ? 1 : 0,
                                 items: items.map((item) => ({
                                         doctype: childDoctype,
@@ -245,6 +251,7 @@ export default {
                 });
 
                 this.$forceUpdate();
+                this.emitPricingRuleCounters();
         },
 
         handleResetPricingRules() {
@@ -272,5 +279,6 @@ export default {
                 });
 
                 this.$forceUpdate();
+                this.emitPricingRuleCounters();
         },
 };
