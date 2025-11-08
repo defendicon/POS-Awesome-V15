@@ -214,6 +214,64 @@ def _parse_rule_identifier(pricing_rule) -> str:
     return pricing_rule
 
 
+def _extract_rule_identifiers(*candidates) -> List[str]:
+    identifiers: List[str] = []
+
+    def _walk(value):
+        if not value:
+            return
+
+        if isinstance(value, (list, tuple, set)):
+            for entry in value:
+                _walk(entry)
+            return
+
+        if isinstance(value, dict):
+            for key in (
+                "pricing_rule",
+                "pricing_rules",
+                "pricing_rule_name",
+                "rule",
+                "name",
+            ):
+                if value.get(key):
+                    _walk(value.get(key))
+            return
+
+        if isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return
+
+            try:
+                loaded = json.loads(stripped)
+            except Exception:
+                loaded = None
+
+            if isinstance(loaded, (list, tuple, set, dict)):
+                _walk(loaded)
+                return
+
+            if isinstance(loaded, str) and loaded != stripped:
+                _walk(loaded)
+                return
+
+            if "," in stripped:
+                for part in stripped.split(","):
+                    _walk(part)
+                return
+
+            identifiers.append(stripped)
+            return
+
+        identifiers.append(str(value))
+
+    for candidate in candidates:
+        _walk(candidate)
+
+    return [identifier for identifier in identifiers if identifier]
+
+
 @frappe.whitelist()
 def get_pos_pricing_rules(context: str) -> List[Dict]:
     """Return applicable pricing rules for the provided POS invoice context."""
@@ -254,6 +312,39 @@ def apply_pos_pricing_rule(context: str, pricing_rule: str) -> List[Dict]:
             continue
 
         detail = frappe._dict(detail)
+        matched_identifiers = {
+            _parse_rule_identifier(identifier)
+            for identifier in _extract_rule_identifiers(
+                detail.get("pricing_rule"),
+                detail.get("pricing_rules"),
+                detail.get("pricing_rule_name"),
+                detail.get("rule"),
+                detail.get("applied_pricing_rule"),
+                detail.get("applied_pricing_rules"),
+            )
+            if _parse_rule_identifier(identifier)
+        }
+
+        has_free_item_data = bool(detail.get("free_item_data"))
+        has_rate_or_discount_change = any(
+            key in detail and detail.get(key) is not None
+            for key in (
+                "discount_percentage",
+                "discount_amount",
+                "price_list_rate",
+                "rate",
+                "margin_type",
+                "margin_rate_or_amount",
+            )
+        )
+
+        if (
+            rule_identifier not in matched_identifiers
+            and not has_free_item_data
+            and not has_rate_or_discount_change
+        ):
+            continue
+
         detail["posa_row_id"] = child.get("name")
         results.append(detail)
 
