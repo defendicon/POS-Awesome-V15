@@ -328,105 +328,130 @@ export default {
                         preserveAdditionalDiscountPercentage &&
                         Number.isFinite(previousDiscountPercentage);
 
+                const wasApplyingOffer = Boolean(this.isApplyingOffer);
+                const suppressPricingRules =
+                        typeof this.suppressPricingRuleRefresh === "function" &&
+                        typeof this.resumePricingRuleRefresh === "function";
+                const cancelOfferRefresh = typeof this.cancelScheduledOfferRefresh === "function";
+                const cancelPricingRefresh = typeof this.cancelScheduledPricingRuleRefresh === "function";
+                let pricingRulesSuppressed = false;
+
+                if (cancelOfferRefresh) {
+                        this.cancelScheduledOfferRefresh();
+                }
+                if (cancelPricingRefresh) {
+                        this.cancelScheduledPricingRuleRefresh();
+                }
+
+                if (suppressPricingRules) {
+                        this.suppressPricingRuleRefresh();
+                        pricingRulesSuppressed = true;
+                }
+
+                this.isApplyingOffer = true;
+
                 console.log("load_invoice called with data:", {
                         is_return: data.is_return,
                         return_against: data.return_against,
                         customer: data.customer,
                         items_count: data.items ? data.items.length : 0,
-		});
+                });
 
-                this.clear_invoice();
-                if (data?.is_return) {
-                        this._normalizeReturnDocTotals(data);
-                }
-
-                if (data.is_return) {
-                        console.log("Processing return invoice");
-                        // For return without invoice case, check if there's a return_against
-                        // Only set customer readonly if this is a return with reference to an invoice
-			if (data.return_against) {
-				console.log("Return has reference to invoice:", data.return_against);
-				this.eventBus.emit("set_customer_readonly", true);
-			} else {
-				console.log("Return without invoice reference, customer can be selected");
-				// Allow customer selection for returns without invoice
-				this.eventBus.emit("set_customer_readonly", false);
-			}
-                        this.invoiceType = "Return";
-                        this.invoiceTypes = ["Return"];
-                } else if (data.doctype === "Quotation") {
-                        this.invoiceType = "Quotation";
-                        if (!this.invoiceTypes.includes("Quotation")) {
-                                this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+                try {
+                        this.clear_invoice();
+                        if (data?.is_return) {
+                                this._normalizeReturnDocTotals(data);
                         }
-                } else if (
-                        data.doctype === "Sales Order" &&
-                        this.pos_profile?.posa_create_only_sales_order
-                ) {
-                        this.invoiceType = "Order";
-                        if (!this.invoiceTypes.includes("Order")) {
-                                this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+
+                        if (data.is_return) {
+                                console.log("Processing return invoice");
+                                // For return without invoice case, check if there's a return_against
+                                // Only set customer readonly if this is a return with reference to an invoice
+                                if (data.return_against) {
+                                        console.log("Return has reference to invoice:", data.return_against);
+                                        this.eventBus.emit("set_customer_readonly", true);
+                                } else {
+                                        console.log("Return without invoice reference, customer can be selected");
+                                        // Allow customer selection for returns without invoice
+                                        this.eventBus.emit("set_customer_readonly", false);
+                                }
+                                this.invoiceType = "Return";
+                                this.invoiceTypes = ["Return"];
+                        } else if (data.doctype === "Quotation") {
+                                this.invoiceType = "Quotation";
+                                if (!this.invoiceTypes.includes("Quotation")) {
+                                        this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+                                }
+                        } else if (
+                                data.doctype === "Sales Order" &&
+                                this.pos_profile?.posa_create_only_sales_order
+                        ) {
+                                this.invoiceType = "Order";
+                                if (!this.invoiceTypes.includes("Order")) {
+                                        this.invoiceTypes = ["Invoice", "Order", "Quotation"];
+                                }
                         }
-                }
 
-                this.invoice_doc = data;
-                this.items = data.items || [];
-		this.packed_items = data.packed_items || [];
-		console.log("Items set:", this.items.length, "items");
+                        this.invoice_doc = data;
+                        this.items = data.items || [];
+                        this.packed_items = data.packed_items || [];
+                        console.log("Items set:", this.items.length, "items");
 
-		if (data.is_return && data.return_against) {
-			this.items.forEach((item) => {
-				item.locked_price = true;
-			});
-			this.packed_items.forEach((pi) => {
-				pi.locked_price = true;
-			});
-		}
+                        if (data.is_return && data.return_against) {
+                                this.items.forEach((item) => {
+                                        item.locked_price = true;
+                                });
+                                this.packed_items.forEach((pi) => {
+                                        pi.locked_price = true;
+                                });
+                        }
 
-		if (this.items.length > 0) {
-			this.items.forEach((item) => {
-				if (!item.posa_row_id) {
-					item.posa_row_id = this.makeid(20);
-				}
-				if (item.batch_no) {
-					this.set_batch_qty(item, item.batch_no);
-				}
-				if (!item.original_item_name) {
-					item.original_item_name = item.item_name;
-				}
-			});
+                        if (this.items.length > 0) {
+                                this.items.forEach((item) => {
+                                        if (!item.posa_row_id) {
+                                                item.posa_row_id = this.makeid(20);
+                                        }
+                                        if (item.batch_no) {
+                                                this.set_batch_qty(item, item.batch_no);
+                                        }
+                                        if (!item.original_item_name) {
+                                                item.original_item_name = item.item_name;
+                                        }
+                                });
 
-			const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
+                                const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
 
-			await this.update_items_details(this.items);
+                                await this.update_items_details(this.items);
 
-			if (manualSnapshots.length) {
-				this._restoreManualSnapshots(this.items, manualSnapshots);
-			}
+                                if (manualSnapshots.length) {
+                                        this._restoreManualSnapshots(this.items, manualSnapshots);
+                                }
 
-			this.posa_offers = data.posa_offers || [];
-		} else {
-			console.log("Warning: No items in return invoice");
-		}
+                                this.posa_offers = data.posa_offers || [];
+                        } else {
+                                console.log("Warning: No items in return invoice");
+                        }
 
-		if (this.packed_items.length > 0) {
-			this.update_items_details(this.packed_items);
-			this.packed_items.forEach((pi) => {
-				if (!pi.posa_row_id) {
-					pi.posa_row_id = this.makeid(20);
-				}
-			});
-		}
+                        if (this.packed_items.length > 0) {
+                                this.update_items_details(this.packed_items);
+                                this.packed_items.forEach((pi) => {
+                                        if (!pi.posa_row_id) {
+                                                pi.posa_row_id = this.makeid(20);
+                                        }
+                                });
+                        }
 
-		this.customer = data.customer;
-		this.posting_date = this.formatDateForBackend(data.posting_date || frappe.datetime.nowdate());
-                const docDiscountAmount = flt(data.discount_amount);
-                const docDiscountPercentage =
-                        data.additional_discount_percentage !== undefined &&
-                        data.additional_discount_percentage !== null
-                                ? flt(data.additional_discount_percentage)
-                                : 0;
-                const docIsReturn = Boolean(data.is_return);
+                        this.customer = data.customer;
+                        this.posting_date = this.formatDateForBackend(
+                                data.posting_date || frappe.datetime.nowdate(),
+                        );
+                        const docDiscountAmount = flt(data.discount_amount);
+                        const docDiscountPercentage =
+                                data.additional_discount_percentage !== undefined &&
+                                data.additional_discount_percentage !== null
+                                        ? flt(data.additional_discount_percentage)
+                                        : 0;
+                        const docIsReturn = Boolean(data.is_return);
 
                 if (usePercentageDiscount) {
                         let resolvedPercentage = 0;
@@ -534,13 +559,19 @@ export default {
 			this.eventBus.emit("set_pos_coupons", data.posa_coupons);
 		}
 
-		console.log("load_invoice completed, invoice state:", {
-			invoiceType: this.invoiceType,
-			is_return: this.invoice_doc.is_return,
-			items: this.items.length,
-			customer: this.customer,
-		});
-	},
+                console.log("load_invoice completed, invoice state:", {
+                        invoiceType: this.invoiceType,
+                        is_return: this.invoice_doc.is_return,
+                        items: this.items.length,
+                        customer: this.customer,
+                });
+                } finally {
+                        this.isApplyingOffer = wasApplyingOffer;
+                        if (pricingRulesSuppressed) {
+                                this.resumePricingRuleRefresh({ cancelPending: true, flushPending: false });
+                        }
+                }
+        },
 
 	// Save and clear the current invoice (draft logic)
 	async save_and_clear_invoice() {
