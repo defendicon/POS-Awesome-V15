@@ -639,17 +639,207 @@ export default {
 
                 this.removePricingRuleFreeItems(ruleId);
 
-                if (!Array.isArray(freebies) || !freebies.length) {
+                const aggregatedFreebies = this.aggregatePricingRuleFreebies(freebies);
+                if (!aggregatedFreebies.length) {
                         return;
                 }
 
-                for (const detail of freebies) {
+                for (const detail of aggregatedFreebies) {
                         try {
                                 await this.addFreeItemFromPricingRule(ruleId, detail);
                         } catch (error) {
                                 console.error("Failed to add free item from pricing rule", ruleId, error);
                         }
                 }
+        },
+
+        aggregatePricingRuleFreebies(freebies = []) {
+                if (!Array.isArray(freebies) || !freebies.length) {
+                        return [];
+                }
+
+                const groups = new Map();
+
+                freebies.forEach((candidate) => {
+                        const normalized = this.normalizePricingRuleFreebie(candidate);
+                        if (!normalized) {
+                                return;
+                        }
+
+                        const { key, detail, qty, stockQty } = normalized;
+                        if (!groups.has(key)) {
+                                groups.set(key, {
+                                        detail,
+                                        qty,
+                                        stockQty,
+                                });
+                                return;
+                        }
+
+                        const entry = groups.get(key);
+                        entry.qty += qty;
+
+                        const nextStock =
+                                (Number.isFinite(entry.stockQty) ? entry.stockQty : 0) +
+                                (Number.isFinite(stockQty) ? stockQty : 0);
+                        entry.stockQty = nextStock || entry.qty * (entry.detail.conversion_factor || 1);
+
+                        entry.detail = {
+                                ...entry.detail,
+                                qty: entry.qty,
+                        };
+
+                        if (entry.detail.quantity !== undefined) {
+                                entry.detail.quantity = entry.qty;
+                        }
+                        if (entry.detail.free_qty !== undefined) {
+                                entry.detail.free_qty = entry.qty;
+                        }
+
+                        const effectiveStock = entry.stockQty;
+                        if (entry.detail.stock_qty !== undefined) {
+                                entry.detail.stock_qty = effectiveStock;
+                        }
+                        if (entry.detail.free_stock_qty !== undefined) {
+                                entry.detail.free_stock_qty = effectiveStock;
+                        }
+                });
+
+                return Array.from(groups.values()).map(({ detail, qty, stockQty }) => {
+                        const aggregated = {
+                                ...detail,
+                                qty,
+                        };
+
+                        if (aggregated.quantity !== undefined) {
+                                aggregated.quantity = qty;
+                        }
+                        if (aggregated.free_qty !== undefined) {
+                                aggregated.free_qty = qty;
+                        }
+
+                        const effectiveStock =
+                                Number.isFinite(stockQty) && stockQty !== null
+                                        ? stockQty
+                                        : qty * (aggregated.conversion_factor || 1);
+
+                        aggregated.stock_qty = effectiveStock;
+                        if (aggregated.free_stock_qty !== undefined) {
+                                aggregated.free_stock_qty = effectiveStock;
+                        }
+
+                        return aggregated;
+                });
+        },
+
+        normalizePricingRuleFreebie(detail) {
+                if (!detail) {
+                        return null;
+                }
+
+                const itemCode =
+                        detail.item_code || detail.free_item_code || detail.free_item || detail.item_code;
+                if (!itemCode) {
+                        return null;
+                }
+
+                const rawQty =
+                        detail.qty !== undefined && detail.qty !== null
+                                ? detail.qty
+                                : detail.free_qty !== undefined && detail.free_qty !== null
+                                ? detail.free_qty
+                                : detail.quantity !== undefined && detail.quantity !== null
+                                ? detail.quantity
+                                : 0;
+
+                const qty = Math.abs(flt(rawQty || 0));
+                if (!qty) {
+                        return null;
+                }
+
+                const conversionFactorRaw =
+                        detail.conversion_factor !== undefined && detail.conversion_factor !== null
+                                ? detail.conversion_factor
+                                : detail.free_conversion_factor !== undefined && detail.free_conversion_factor !== null
+                                ? detail.free_conversion_factor
+                                : null;
+                const conversionFactor = conversionFactorRaw ? flt(conversionFactorRaw) || 1 : 1;
+
+                const stockCandidate =
+                        detail.stock_qty !== undefined && detail.stock_qty !== null
+                                ? detail.stock_qty
+                                : detail.free_stock_qty !== undefined && detail.free_stock_qty !== null
+                                ? detail.free_stock_qty
+                                : null;
+                const stockQty = stockCandidate !== null ? flt(stockCandidate) : qty * conversionFactor;
+
+                const batchNo = detail.batch_no || detail.free_batch_no || "";
+                const serialNo = detail.serial_no || detail.free_serial_no || "";
+                const sourceRow =
+                        detail.source_row ||
+                        detail.child_docname ||
+                        detail.parent_detail_docname ||
+                        detail.posa_row_id ||
+                        "";
+                const warehouse = detail.warehouse || detail.free_warehouse || "";
+                const uom = detail.uom || detail.free_uom || detail.stock_uom || "";
+                const stockUom = detail.stock_uom || detail.free_stock_uom || uom || "";
+
+                const normalizedDetail = {
+                        ...detail,
+                        item_code: itemCode,
+                        qty,
+                        stock_qty: stockQty,
+                        conversion_factor: conversionFactor,
+                };
+
+                if (detail.quantity !== undefined) {
+                        normalizedDetail.quantity = qty;
+                }
+                if (detail.free_qty !== undefined) {
+                        normalizedDetail.free_qty = qty;
+                }
+                if (detail.free_stock_qty !== undefined) {
+                        normalizedDetail.free_stock_qty = stockQty;
+                }
+                if (detail.free_conversion_factor !== undefined) {
+                        normalizedDetail.free_conversion_factor = conversionFactor;
+                }
+                if (uom) {
+                        normalizedDetail.uom = uom;
+                }
+                if (stockUom) {
+                        normalizedDetail.stock_uom = stockUom;
+                }
+                if (batchNo) {
+                        normalizedDetail.batch_no = batchNo;
+                }
+                if (serialNo) {
+                        normalizedDetail.serial_no = serialNo;
+                }
+                if (warehouse) {
+                        normalizedDetail.warehouse = warehouse;
+                }
+                if (sourceRow) {
+                        normalizedDetail.source_row = sourceRow;
+                }
+
+                const key = [
+                        itemCode,
+                        sourceRow || "",
+                        batchNo || "",
+                        serialNo || "",
+                        normalizedDetail.uom || "",
+                        normalizedDetail.warehouse || "",
+                ].join("::");
+
+                return {
+                        key,
+                        detail: normalizedDetail,
+                        qty,
+                        stockQty,
+                        conversionFactor,
+                };
         },
 
         async addFreeItemFromPricingRule(ruleId, detail) {
