@@ -383,20 +383,40 @@ export default {
 			});
 		}
 
-		if (this.items.length > 0) {
-			this.items.forEach((item) => {
-				if (!item.posa_row_id) {
-					item.posa_row_id = this.makeid(20);
-				}
-				if (item.batch_no) {
-					this.set_batch_qty(item, item.batch_no);
-				}
-				if (!item.original_item_name) {
-					item.original_item_name = item.item_name;
-				}
-			});
+                if (this.items.length > 0) {
+                        this.items.forEach((item) => {
+                                if (!item.posa_row_id) {
+                                        item.posa_row_id = this.makeid(20);
+                                }
+                                if (item.batch_no) {
+                                        this.set_batch_qty(item, item.batch_no);
+                                }
+                                if (!item.original_item_name) {
+                                        item.original_item_name = item.item_name;
+                                }
+                                if (item.pricing_rules !== undefined) {
+                                        const parsed = this._parsePricingRuleList(item.pricing_rules);
+                                        item._applied_pricing_rules = parsed;
+                                        item.has_pricing_rule = parsed.length ? 1 : item.has_pricing_rule ? 1 : 0;
+                                }
+                                if (item.base_rate !== undefined && item.base_rate !== null) {
+                                        item.base_rate = this.flt(item.base_rate, this.currency_precision);
+                                }
+                                if (item.base_price_list_rate !== undefined && item.base_price_list_rate !== null) {
+                                        item.base_price_list_rate = this.flt(
+                                                item.base_price_list_rate,
+                                                this.currency_precision,
+                                        );
+                                }
+                                if (item.base_discount_amount !== undefined && item.base_discount_amount !== null) {
+                                        item.base_discount_amount = this.flt(
+                                                item.base_discount_amount,
+                                                this.currency_precision,
+                                        );
+                                }
+                        });
 
-			const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
+                        const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
 
 			await this.update_items_details(this.items);
 
@@ -993,22 +1013,24 @@ export default {
 		const usesPosInvoice = this.pos_profile.create_pos_invoice_instead_of_sales_invoice;
 
 		this.items.forEach((item) => {
-			const new_item = {
-				item_code: item.item_code,
-				// Retain the item name for offline invoices
-				// Fallback to item_code if item_name is not available
-				item_name: item.item_name || item.item_code,
-				name_overridden: item.name_overridden ? 1 : 0,
-				posa_row_id: item.posa_row_id,
-				posa_offers: item.posa_offers,
-				posa_offer_applied: item.posa_offer_applied,
-				posa_is_offer: item.posa_is_offer,
-				posa_is_replace: item.posa_is_replace,
-				is_free_item: item.is_free_item,
-				qty: flt(item.qty),
-				uom: item.uom,
-				conversion_factor: item.conversion_factor,
-				serial_no: item.serial_no,
+                        const new_item = {
+                                item_code: item.item_code,
+                                // Retain the item name for offline invoices
+                                // Fallback to item_code if item_name is not available
+                                item_name: item.item_name || item.item_code,
+                                name_overridden: item.name_overridden ? 1 : 0,
+                                posa_row_id: item.posa_row_id,
+                                posa_offers: item.posa_offers,
+                                posa_offer_applied: item.posa_offer_applied,
+                                posa_is_offer: item.posa_is_offer,
+                                posa_is_replace: item.posa_is_replace,
+                                is_free_item: item.is_free_item,
+                                pricing_rules: item.pricing_rules || "",
+                                posa_pricing_parent_row_id: item.posa_pricing_parent_row_id || null,
+                                qty: flt(item.qty),
+                                uom: item.uom,
+                                conversion_factor: item.conversion_factor,
+                                serial_no: item.serial_no,
 				// Link to original invoice item when doing returns
 				// Needed for backend validation that the item exists in
 				// the referenced Sales or POS Invoice
@@ -1017,8 +1039,11 @@ export default {
 				discount_percentage: flt(item.discount_percentage),
 				batch_no: item.batch_no,
 				posa_notes: item.posa_notes,
-				posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
-			};
+                                posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
+                                base_rate: item.base_rate,
+                                base_price_list_rate: item.base_price_list_rate,
+                                base_discount_amount: item.base_discount_amount,
+                        };
 			if (isReturn) {
 				const refField = usesPosInvoice ? "pos_invoice_item" : "sales_invoice_item";
 				if (!new_item[refField] && item.name) {
@@ -2444,104 +2469,140 @@ export default {
 		if (data.batch_no_data) {
 			item.batch_no_data = data.batch_no_data;
 		}
-		if (
-			item.has_batch_no &&
-			this.pos_profile.posa_auto_set_batch &&
-			!item.batch_no &&
-			Array.isArray(data.batch_no_data) &&
-			data.batch_no_data.length > 0
-		) {
-			item.batch_no_data = data.batch_no_data;
-			this.set_batch_qty(item, null, false);
-		}
+                if (
+                        item.has_batch_no &&
+                        this.pos_profile.posa_auto_set_batch &&
+                        !item.batch_no &&
+                        Array.isArray(data.batch_no_data) &&
+                        data.batch_no_data.length > 0
+                ) {
+                        item.batch_no_data = data.batch_no_data;
+                        this.set_batch_qty(item, null, false);
+                }
 
-		if (!item.locked_price) {
-			if (forceUpdate || !item.base_rate) {
-				if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
-					item.base_price_list_rate = data.price_list_rate;
-					if (!item.posa_offer_applied) {
-						item.base_rate = data.price_list_rate;
-					}
-				}
-			}
+                let backendBasePriceList = Number.isFinite(Number(data.price_list_rate))
+                        ? this.flt(data.price_list_rate, this.currency_precision)
+                        : null;
+                let backendBaseRate = Number.isFinite(Number(data.rate))
+                        ? this.flt(data.rate, this.currency_precision)
+                        : null;
+                const backendDiscountAmount =
+                        data.discount_amount !== undefined && data.discount_amount !== null
+                                ? this.flt(data.discount_amount, this.currency_precision)
+                                : null;
 
-			if (!item.posa_offer_applied) {
-				const companyCurrency = this.pos_profile.currency;
-				const baseCurrency = companyCurrency;
+                if (Object.prototype.hasOwnProperty.call(data, "discount_percentage")) {
+                        item.discount_percentage = this.flt(
+                                data.discount_percentage || 0,
+                                this.currency_precision,
+                        );
+                }
 
-				if (
-					this.selected_currency === this.price_list_currency &&
-					this.selected_currency !== companyCurrency
-				) {
-					const conv = this.conversion_rate || 1;
-					item.price_list_rate = this.flt(
-						item.base_price_list_rate / conv,
-						this.currency_precision,
-					);
+                if ("pricing_rules" in data || "has_pricing_rule" in data) {
+                        const parsedRules = this._parsePricingRuleList(data.pricing_rules);
+                        if (parsedRules.length) {
+                                item.pricing_rules = JSON.stringify(parsedRules);
+                                item._applied_pricing_rules = parsedRules;
+                                item.has_pricing_rule = 1;
+                        } else {
+                                item.pricing_rules = data.pricing_rules || "";
+                                item._applied_pricing_rules = [];
+                                item.has_pricing_rule = data.has_pricing_rule ? 1 : 0;
+                        }
+                }
 
-					if (!item._manual_rate_set) {
-						item.rate = this.flt(item.base_rate / conv, this.currency_precision);
-					}
-				} else if (this.selected_currency !== baseCurrency) {
-					const exchange_rate = this.exchange_rate || 1;
-					item.price_list_rate = this.flt(
-						item.base_price_list_rate * exchange_rate,
-						this.currency_precision,
-					);
+                if (!item.locked_price) {
+                        const manualOverride = Boolean(item._manual_rate_set || item.posa_offer_applied);
 
-					item.rate = this.flt(item.base_rate * exchange_rate, this.currency_precision);
-				} else {
-					item.price_list_rate = item.base_price_list_rate;
+                        if (backendBasePriceList !== null) {
+                                item.base_price_list_rate = backendBasePriceList;
+                        } else if (Number.isFinite(Number(item.base_price_list_rate))) {
+                                item.base_price_list_rate = this.flt(
+                                        item.base_price_list_rate,
+                                        this.currency_precision,
+                                );
+                        } else {
+                                item.base_price_list_rate = 0;
+                        }
 
-					if (!item._manual_rate_set) {
-						item.rate = item.base_rate;
-					}
-				}
-			} else {
-				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-				if (this.selected_currency !== baseCurrency) {
-					item.price_list_rate = this.flt(
-						item.base_rate * this.exchange_rate,
-						this.currency_precision,
-					);
-				} else {
-					item.price_list_rate = item.base_rate;
-				}
-			}
+                        const resolvedBasePriceList = Number.isFinite(Number(item.base_price_list_rate))
+                                ? this.flt(item.base_price_list_rate, this.currency_precision)
+                                : 0;
 
-			if (
-				!item.posa_offer_applied &&
-				this.pos_profile.posa_apply_customer_discount &&
-				this.customer_info.posa_discount > 0 &&
-				this.customer_info.posa_discount <= 100 &&
-				item.posa_is_offer == 0 &&
-				!item.posa_is_replace
-			) {
-				const discount_percent =
-					item.max_discount > 0
-						? Math.min(item.max_discount, this.customer_info.posa_discount)
-						: this.customer_info.posa_discount;
+                        if (!manualOverride) {
+                                const shouldUpdateBaseRate =
+                                        backendBaseRate !== null ||
+                                        forceUpdate ||
+                                        !Number.isFinite(Number(item.base_rate));
 
-				item.discount_percentage = discount_percent;
+                                if (shouldUpdateBaseRate) {
+                                        const newBaseRate =
+                                                backendBaseRate !== null ? backendBaseRate : resolvedBasePriceList;
+                                        item.base_rate = this.flt(newBaseRate, this.currency_precision);
+                                } else if (!Number.isFinite(Number(item.base_rate))) {
+                                        item.base_rate = resolvedBasePriceList;
+                                }
+                        }
 
-				const discount_amount = this.flt(
-					(item.price_list_rate * discount_percent) / 100,
-					this.currency_precision,
-				);
-				item.discount_amount = discount_amount;
+                        if (!manualOverride) {
+                                if (backendDiscountAmount !== null) {
+                                        item.base_discount_amount = backendDiscountAmount;
+                                } else {
+                                        const computedDiscount = this.flt(
+                                                resolvedBasePriceList - (Number(item.base_rate) || 0),
+                                                this.currency_precision,
+                                        );
+                                        item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
+                                }
+                        }
 
-				item.base_discount_amount = this.flt(
-					(item.base_price_list_rate * discount_percent) / 100,
-					this.currency_precision,
-				);
+                        if (
+                                backendDiscountAmount === null &&
+                                !manualOverride &&
+                                !Object.prototype.hasOwnProperty.call(data, "discount_percentage")
+                        ) {
+                                const basePrice = Number(resolvedBasePriceList) || 0;
+                                const baseRateValue = Number(item.base_rate) || 0;
+                                item.discount_percentage = basePrice
+                                        ? this.flt(((basePrice - baseRateValue) / basePrice) * 100, this.currency_precision)
+                                        : 0;
+                        }
 
-				item.rate = this.flt(item.price_list_rate - discount_amount, this.currency_precision);
-				item.base_rate = this.flt(
-					item.base_price_list_rate - item.base_discount_amount,
-					this.currency_precision,
-				);
-			}
-		}
+                        this._updateDisplayedPricingFromBase(item, { manualOverride });
+
+                        const canApplyCustomerDiscount =
+                                !item.posa_offer_applied &&
+                                backendDiscountAmount === null &&
+                                (!Array.isArray(item._applied_pricing_rules) || !item._applied_pricing_rules.length) &&
+                                this.pos_profile.posa_apply_customer_discount &&
+                                this.customer_info.posa_discount > 0 &&
+                                this.customer_info.posa_discount <= 100 &&
+                                item.posa_is_offer == 0 &&
+                                !item.posa_is_replace;
+
+                        if (canApplyCustomerDiscount) {
+                                const discount_percent =
+                                        item.max_discount > 0
+                                                ? Math.min(item.max_discount, this.customer_info.posa_discount)
+                                                : this.customer_info.posa_discount;
+
+                                item.discount_percentage = discount_percent;
+
+                                const discountFraction = this.flt(discount_percent, this.currency_precision) / 100;
+                                const baseDiscount = this.flt(
+                                        resolvedBasePriceList * discountFraction,
+                                        this.currency_precision,
+                                );
+
+                                item.base_discount_amount = baseDiscount;
+                                item.base_rate = this.flt(
+                                        resolvedBasePriceList - baseDiscount,
+                                        this.currency_precision,
+                                );
+
+                                this._updateDisplayedPricingFromBase(item, { manualOverride: false });
+                        }
+                }
 
                 item.last_purchase_rate = data.last_purchase_rate;
                 item.projected_qty = data.projected_qty;
@@ -2552,10 +2613,12 @@ export default {
                 item.has_serial_no = data.has_serial_no;
                 item.has_batch_no = data.has_batch_no;
 
-		item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-		item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
+                item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
-		console.log(`Updated rates for ${item.item_code} on expand:`, {
+                this._syncPricingRuleFreeItems(item, data);
+
+                console.log(`Updated rates for ${item.item_code} on expand:`, {
 			base_rate: item.base_rate,
 			rate: item.rate,
 			base_price_list_rate: item.base_price_list_rate,
@@ -2872,6 +2935,293 @@ export default {
                 }
 
                 return result;
+        },
+
+        _updateDisplayedPricingFromBase(item, options = {}) {
+                if (!item) {
+                        return;
+                }
+
+                const { manualOverride = false } = options || {};
+                const companyCurrency = this.pos_profile?.currency;
+                const selectedCurrency = this.selected_currency || companyCurrency;
+                const priceListCurrency = this.price_list_currency || selectedCurrency;
+
+                const basePriceList = Number.isFinite(Number(item.base_price_list_rate))
+                        ? Number(item.base_price_list_rate)
+                        : 0;
+                const baseRate = Number.isFinite(Number(item.base_rate)) ? Number(item.base_rate) : basePriceList;
+                const baseDiscount = Number.isFinite(Number(item.base_discount_amount))
+                        ? Number(item.base_discount_amount)
+                        : this.flt(basePriceList - baseRate, this.currency_precision);
+
+                let priceListRate = this.flt(basePriceList, this.currency_precision);
+                let rate = this.flt(baseRate, this.currency_precision);
+                let discountAmount = this.flt(baseDiscount, this.currency_precision);
+
+                if (selectedCurrency === priceListCurrency && selectedCurrency && selectedCurrency !== companyCurrency) {
+                        const conversion = this.conversion_rate || 1;
+                        priceListRate = this.flt(basePriceList / conversion, this.currency_precision);
+                        rate = this.flt(baseRate / conversion, this.currency_precision);
+                        discountAmount = this.flt(baseDiscount / conversion, this.currency_precision);
+                } else if (selectedCurrency && companyCurrency && selectedCurrency !== companyCurrency) {
+                        const exchange = this.exchange_rate || 1;
+                        priceListRate = this.flt(basePriceList * exchange, this.currency_precision);
+                        rate = this.flt(baseRate * exchange, this.currency_precision);
+                        discountAmount = this.flt(baseDiscount * exchange, this.currency_precision);
+                }
+
+                if (!manualOverride) {
+                        item.price_list_rate = priceListRate;
+                        item.rate = rate;
+                }
+
+                item.discount_amount = discountAmount;
+                item.base_discount_amount = this.flt(baseDiscount, this.currency_precision);
+        },
+
+        _parsePricingRuleList(value) {
+                if (!value) {
+                        return [];
+                }
+
+                if (Array.isArray(value)) {
+                        return value.filter(Boolean);
+                }
+
+                if (typeof value === "string") {
+                        const trimmed = value.trim();
+                        if (!trimmed) {
+                                return [];
+                        }
+
+                        try {
+                                const parsed = JSON.parse(trimmed);
+                                if (Array.isArray(parsed)) {
+                                        return parsed.filter(Boolean);
+                                }
+                        } catch (error) {
+                                console.warn("Unable to parse pricing_rules payload", error);
+                        }
+
+                        return trimmed
+                                .split(",")
+                                .map((entry) => entry.trim())
+                                .filter(Boolean);
+                }
+
+                return [];
+        },
+
+        _buildFreeItemKey(entry) {
+                if (!entry) {
+                        return null;
+                }
+
+                const itemCode = (entry.item_code || entry.item || "").toString().trim();
+                const rule = (entry.pricing_rules || entry.pricing_rule || "").toString().trim();
+                if (!itemCode) {
+                        return null;
+                }
+
+                return `${itemCode.toLowerCase()}::${rule.toLowerCase()}`;
+        },
+
+        _createFreeItemFromData(parentItem, entry) {
+                if (!entry || !parentItem) {
+                        return null;
+                }
+
+                const qty = Number(entry.qty !== undefined ? entry.qty : entry.free_qty) || 0;
+                const basePriceListRate = Number(
+                        entry.price_list_rate !== undefined ? entry.price_list_rate : entry.rate,
+                ) || 0;
+                const baseRate = Number(entry.rate !== undefined ? entry.rate : basePriceListRate) || 0;
+                const baseDiscount = Number(
+                        entry.discount_amount !== undefined ? entry.discount_amount : basePriceListRate - baseRate,
+                ) || 0;
+                const discountPct = Number(entry.discount_percentage ?? 0) || 0;
+
+                let rowId = null;
+                if (typeof this.makeid === "function") {
+                        rowId = this.makeid(20);
+                } else if (
+                        typeof frappe !== "undefined" &&
+                        frappe.utils &&
+                        typeof frappe.utils.get_random === "function"
+                ) {
+                        rowId = frappe.utils.get_random(20);
+                } else {
+                        rowId = `${Date.now()}${Math.random().toString(16).slice(2, 10)}`;
+                }
+
+                const newItem = {
+                        posa_row_id: rowId,
+                        posa_pricing_parent_row_id: parentItem.posa_row_id || null,
+                        item_code: entry.item_code,
+                        item_name: entry.item_name || entry.item_code,
+                        description: entry.description || parentItem.description || "",
+                        qty: this.flt(qty, this.currency_precision),
+                        uom: entry.uom || parentItem.uom,
+                        stock_uom: entry.stock_uom || parentItem.stock_uom,
+                        conversion_factor: entry.conversion_factor || parentItem.conversion_factor || 1,
+                        warehouse: parentItem.warehouse,
+                        is_free_item: 1,
+                        pricing_rules: entry.pricing_rules || parentItem.pricing_rules || "",
+                        discount_percentage: discountPct,
+                        posa_offer_applied: 0,
+                        posa_is_offer: 0,
+                        posa_is_replace: 0,
+                        posa_offers: [],
+                        locked_price: true,
+                        base_price_list_rate: this.flt(basePriceListRate, this.currency_precision),
+                        base_rate: this.flt(baseRate, this.currency_precision),
+                        base_discount_amount: this.flt(baseDiscount, this.currency_precision),
+                        serial_no: entry.serial_no || "",
+                        batch_no: entry.batch_no || null,
+                        has_batch_no: Boolean(entry.batch_no),
+                        has_serial_no: Boolean(entry.serial_no),
+                        allow_change_warehouse: 0,
+                };
+
+                this._updateDisplayedPricingFromBase(newItem, { manualOverride: false });
+
+                newItem.amount = this.flt(newItem.qty * (newItem.rate || 0), this.currency_precision);
+                newItem.base_amount = this.flt(
+                        newItem.qty * (newItem.base_rate || 0),
+                        this.currency_precision,
+                );
+
+                return newItem;
+        },
+
+        _updateFreeItemFromData(targetItem, entry) {
+                if (!targetItem || !entry) {
+                        return;
+                }
+
+                const resolvedQty = Number(
+                        entry.qty !== undefined ? entry.qty : entry.free_qty !== undefined ? entry.free_qty : targetItem.qty,
+                ) || 0;
+                targetItem.qty = this.flt(resolvedQty, this.currency_precision);
+
+                const resolvedPriceList = Number(
+                        entry.price_list_rate !== undefined
+                                ? entry.price_list_rate
+                                : entry.rate !== undefined
+                                ? entry.rate
+                                : targetItem.base_price_list_rate,
+                ) || 0;
+                targetItem.base_price_list_rate = this.flt(resolvedPriceList, this.currency_precision);
+
+                const resolvedBaseRate = Number(
+                        entry.rate !== undefined ? entry.rate : targetItem.base_rate || resolvedPriceList,
+                ) || 0;
+                targetItem.base_rate = this.flt(resolvedBaseRate, this.currency_precision);
+
+                const baseDiscount = Number(
+                        entry.discount_amount !== undefined
+                                ? entry.discount_amount
+                                : resolvedPriceList - resolvedBaseRate,
+                ) || 0;
+                targetItem.base_discount_amount = this.flt(baseDiscount, this.currency_precision);
+                targetItem.discount_percentage = Number(entry.discount_percentage ?? targetItem.discount_percentage ?? 0) || 0;
+                targetItem.pricing_rules = entry.pricing_rules || targetItem.pricing_rules || "";
+                targetItem.uom = entry.uom || targetItem.uom;
+                targetItem.conversion_factor = entry.conversion_factor || targetItem.conversion_factor || 1;
+                targetItem.batch_no = entry.batch_no || targetItem.batch_no || null;
+                targetItem.serial_no = entry.serial_no || targetItem.serial_no || "";
+
+                this._updateDisplayedPricingFromBase(targetItem, { manualOverride: false });
+
+                targetItem.amount = this.flt(targetItem.qty * (targetItem.rate || 0), this.currency_precision);
+                targetItem.base_amount = this.flt(
+                        targetItem.qty * (targetItem.base_rate || 0),
+                        this.currency_precision,
+                );
+        },
+
+        _syncPricingRuleFreeItems(item, payload) {
+                if (!item || !payload) {
+                        return;
+                }
+
+                const parentRowId = item.posa_row_id;
+                if (!parentRowId) {
+                        return;
+                }
+
+                if (Array.isArray(this.items)) {
+                        this.items.forEach((row) => {
+                                if (!row || !row.is_free_item || row.posa_pricing_parent_row_id) {
+                                        return;
+                                }
+                                if (
+                                        row.item_code === item.item_code &&
+                                        row.pricing_rules &&
+                                        item.pricing_rules &&
+                                        row.pricing_rules === item.pricing_rules
+                                ) {
+                                        row.posa_pricing_parent_row_id = parentRowId;
+                                }
+                        });
+                }
+
+                const freeEntries = Array.isArray(payload.free_item_data) ? payload.free_item_data : [];
+                const desiredKeys = new Set();
+                const existingMap = new Map();
+                let modified = false;
+
+                this.items.forEach((row) => {
+                        if (!row || !row.is_free_item) {
+                                return;
+                        }
+                        if (row.posa_pricing_parent_row_id !== parentRowId) {
+                                return;
+                        }
+                        const key = this._buildFreeItemKey(row);
+                        if (key) {
+                                existingMap.set(key, row);
+                        }
+                });
+
+                freeEntries.forEach((entry) => {
+                        const key = this._buildFreeItemKey(entry);
+                        if (!key) {
+                                return;
+                        }
+                        desiredKeys.add(key);
+                        const existing = existingMap.get(key);
+                        if (existing) {
+                                this._updateFreeItemFromData(existing, entry);
+                                modified = true;
+                        } else {
+                                const newItem = this._createFreeItemFromData(item, entry);
+                                if (newItem) {
+                                        this.items.push(newItem);
+                                        modified = true;
+                                }
+                        }
+                });
+
+                for (let i = this.items.length - 1; i >= 0; i -= 1) {
+                        const row = this.items[i];
+                        if (!row || !row.is_free_item) {
+                                continue;
+                        }
+                        if (row.posa_pricing_parent_row_id !== parentRowId) {
+                                continue;
+                        }
+                        const key = this._buildFreeItemKey(row);
+                        if (!key || !desiredKeys.has(key)) {
+                                this.items.splice(i, 1);
+                                modified = true;
+                        }
+                }
+
+                if (modified && typeof this.emitCartQuantities === "function") {
+                        this.emitCartQuantities();
+                }
         },
 
         // Apply cached price list rates to existing invoice items
