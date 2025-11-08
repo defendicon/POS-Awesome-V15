@@ -340,8 +340,9 @@ def update_invoice(data):
                     "is_free_item": d.get("is_free_item"),
                 }
 
-    invoice_doc.ignore_pricing_rule = 1
-    invoice_doc.flags.ignore_pricing_rule = True
+    ignore_pricing_rule = cint(getattr(invoice_doc, "ignore_pricing_rule", 0))
+    invoice_doc.ignore_pricing_rule = ignore_pricing_rule
+    invoice_doc.flags.ignore_pricing_rule = bool(ignore_pricing_rule)
 
     # Set missing values first
     invoice_doc.set_missing_values()

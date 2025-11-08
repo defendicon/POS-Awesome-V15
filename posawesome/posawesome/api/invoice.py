@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, flt
+from frappe.utils import add_days, flt, cint
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
 from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
@@ -125,7 +125,9 @@ def create_sales_order(doc):
 
 def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
     def set_missing_values(source, target):
-        target.ignore_pricing_rule = 1
+        source_ignore_flag = cint(getattr(source, "ignore_pricing_rule", 0))
+        target.ignore_pricing_rule = source_ignore_flag
+        target.flags.ignore_pricing_rule = bool(source_ignore_flag)
         target.flags.ignore_permissions = ignore_permissions
         target.run_method("set_missing_values")
         target.run_method("calculate_taxes_and_totals")

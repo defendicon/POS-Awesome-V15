@@ -663,7 +663,7 @@ export default {
                         doc.doctype = "Sales Invoice";
                 }
                 doc.is_pos = 1;
-                doc.ignore_pricing_rule = 1;
+                doc.ignore_pricing_rule = 0;
                 doc.company = doc.company || this.pos_profile.company;
                 doc.pos_profile = doc.pos_profile || this.pos_profile.name;
                 doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
@@ -867,8 +867,8 @@ export default {
 		doc.posa_authorization_code = sourceDoc.posa_authorization_code ?? null;
 		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
-		// Add flags to ensure proper rate handling
-		doc.ignore_pricing_rule = 1;
+                // Add flags to ensure proper rate handling
+                doc.ignore_pricing_rule = 0;
 
 		// Preserve the real price list currency
 		doc.price_list_currency = this.price_list_currency || doc.currency;
@@ -2297,32 +2297,38 @@ export default {
 					warehouse: item.warehouse || this.pos_profile.warehouse,
 					doc: currentDoc,
 					price_list: this.selected_price_list || this.pos_profile.selling_price_list,
-					item: {
-						item_code: item.item_code,
-						customer: this.customer,
-						doctype: currentDoc.doctype,
-						name: currentDoc.name || `New ${currentDoc.doctype} 1`,
-						company: this.pos_profile.company,
-						conversion_rate: 1,
-						currency: this.pos_profile.currency,
-						qty: item.qty,
-						price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
-						child_docname: `New ${currentDoc.doctype} Item 1`,
-						cost_center: this.pos_profile.cost_center,
-						pos_profile: this.pos_profile.name,
-						uom: item.uom,
-						tax_category: "",
-						transaction_type: "selling",
-						update_stock: this.pos_profile.update_stock,
-						price_list: this.get_price_list(),
-						has_batch_no: item.has_batch_no,
-						has_serial_no: item.has_serial_no,
-						serial_no: item.serial_no,
-						batch_no: item.batch_no,
-						is_stock_item: item.is_stock_item,
-					},
-				},
-			});
+                                                item: {
+                                                        item_code: item.item_code,
+                                                        customer: this.customer,
+                                                        doctype: currentDoc.doctype,
+                                                        name: currentDoc.name || `New ${currentDoc.doctype} 1`,
+                                                        company: this.pos_profile.company,
+                                                        conversion_rate: 1,
+                                                        currency: this.pos_profile.currency,
+                                                        qty: item.qty,
+                                                        price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
+                                                        child_docname: `New ${currentDoc.doctype} Item 1`,
+                                                        cost_center: this.pos_profile.cost_center,
+                                                        pos_profile: this.pos_profile.name,
+                                                        uom: item.uom,
+                                                        tax_category: "",
+                                                        transaction_type: "selling",
+                                                        update_stock: this.pos_profile.update_stock,
+                                                        price_list: this.get_price_list(),
+                                                        has_batch_no: item.has_batch_no,
+                                                        has_serial_no: item.has_serial_no,
+                                                        serial_no: item.serial_no,
+                                                        batch_no: item.batch_no,
+                                                        is_stock_item: item.is_stock_item,
+                                                        ignore_pricing_rule:
+                                                                item.locked_price ||
+                                                                item.posa_offer_applied ||
+                                                                item._manual_rate_set
+                                                                        ? 1
+                                                                        : 0,
+                                                },
+                                        },
+                                });
 
 			const data = response?.message;
 			if (!data) {
