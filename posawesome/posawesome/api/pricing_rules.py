@@ -338,11 +338,7 @@ def apply_pos_pricing_rule(context: str, pricing_rule: str) -> List[Dict]:
             )
         )
 
-        if (
-            rule_identifier not in matched_identifiers
-            and not has_free_item_data
-            and not has_rate_or_discount_change
-        ):
+        if rule_identifier not in matched_identifiers:
             continue
 
         detail["posa_row_id"] = child.get("name")

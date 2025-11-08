@@ -220,6 +220,8 @@ export default {
                 const baseCurrency = this.price_list_currency || this.pos_profile.currency;
                 const selectedCurrency = this.selected_currency || baseCurrency;
                 const exchangeRate = this.exchange_rate || 1;
+                const requestedRuleRaw = firstAppliedRule(payload?.pricing_rule);
+                const requestedRule = requestedRuleRaw ? `${requestedRuleRaw}` : null;
 
                 const itemMap = new Map();
                 (this.items || []).forEach((item) => {
@@ -287,7 +289,7 @@ export default {
                         }
 
                         if (detail.free_item_data) {
-                                const ruleId = firstAppliedRule(
+                                let ruleId = firstAppliedRule(
                                         detail.pricing_rule,
                                         detail.pricing_rules,
                                         detail.pricing_rule_name,
@@ -295,6 +297,13 @@ export default {
                                         detail.free_item_data,
                                         payload.pricing_rule,
                                 );
+                                if (requestedRule) {
+                                        const normalisedRuleId = ruleId ? `${ruleId}` : null;
+                                        if (normalisedRuleId && normalisedRuleId !== requestedRule) {
+                                                return;
+                                        }
+                                        ruleId = normalisedRuleId || requestedRule;
+                                }
                                 if (ruleId && !freebiesByRule.has(ruleId)) {
                                         freebiesByRule.set(ruleId, []);
                                 }
@@ -321,7 +330,6 @@ export default {
                         }
                 });
 
-                const requestedRule = firstAppliedRule(payload?.pricing_rule);
                 if (requestedRule && !freebiesByRule.has(requestedRule)) {
                         freebiesByRule.set(requestedRule, []);
                 }
