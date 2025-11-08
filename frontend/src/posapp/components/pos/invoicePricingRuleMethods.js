@@ -212,16 +212,27 @@ export default {
         },
 
         async handleApplyPricingRuleUpdates(payload) {
-                if (!payload || !Array.isArray(payload.updates)) {
+                if (!payload) {
                         return;
                 }
 
-                const updates = payload.updates;
+                const updates = Array.isArray(payload.updates) ? payload.updates : [];
+                const baseActiveRules = Array.isArray(payload.active_rule_ids)
+                        ? payload.active_rule_ids
+                        : [];
+                const touchedRuleIds = new Set(
+                        baseActiveRules
+                                .map((ruleId) => (ruleId !== undefined && ruleId !== null ? `${ruleId}` : null))
+                                .filter(Boolean),
+                );
                 const baseCurrency = this.price_list_currency || this.pos_profile.currency;
                 const selectedCurrency = this.selected_currency || baseCurrency;
                 const exchangeRate = this.exchange_rate || 1;
                 const requestedRuleRaw = firstAppliedRule(payload?.pricing_rule);
                 const requestedRule = requestedRuleRaw ? `${requestedRuleRaw}` : null;
+                const shouldCleanupInactive = payload?.pricing_rule
+                        ? payload.cleanup_inactive === true
+                        : true;
 
                 const itemMap = new Map();
                 (this.items || []).forEach((item) => {
@@ -230,6 +241,8 @@ export default {
                 });
 
                 const freebiesByRule = new Map();
+                this._pricingRuleOriginals =
+                        this._pricingRuleOriginals instanceof WeakMap ? this._pricingRuleOriginals : new WeakMap();
 
                 updates.forEach((detail) => {
                         const rowId = detail.posa_row_id || detail.child_docname || detail.name || detail.item_code;
@@ -237,6 +250,31 @@ export default {
                         if (!item) {
                                 return;
                         }
+
+                        if (!this._pricingRuleOriginals.has(item)) {
+                                this._pricingRuleOriginals.set(item, {
+                                        base_price_list_rate: item.base_price_list_rate,
+                                        base_rate: item.base_rate,
+                                        price_list_rate: item.price_list_rate,
+                                        rate: item.rate,
+                                        discount_percentage: item.discount_percentage,
+                                        discount_amount: item.discount_amount,
+                                });
+                        }
+
+                        const detailRuleIds = extractRuleIds(
+                                detail.pricing_rule,
+                                detail.pricing_rules,
+                                detail.pricing_rule_name,
+                                detail.rule,
+                                detail.applied_pricing_rule,
+                                detail.applied_pricing_rules,
+                        );
+                        detailRuleIds.forEach((ruleId) => {
+                                if (ruleId) {
+                                        touchedRuleIds.add(`${ruleId}`);
+                                }
+                        });
 
                         if (detail.pricing_rules !== undefined) {
                                 item.pricing_rules = detail.pricing_rules;
@@ -334,6 +372,10 @@ export default {
                         freebiesByRule.set(requestedRule, []);
                 }
 
+                if (requestedRule) {
+                        touchedRuleIds.add(requestedRule);
+                }
+
                 for (const [ruleId, freebies] of freebiesByRule.entries()) {
                         try {
                                 await this.syncFreeItemsForPricingRule(ruleId, freebies);
@@ -342,8 +384,106 @@ export default {
                         }
                 }
 
+                if (shouldCleanupInactive) {
+                        this.cleanupInactivePricingRules(touchedRuleIds);
+                }
+
                 this.$forceUpdate();
                 this.emitPricingRuleCounters();
+        },
+
+        cleanupInactivePricingRules(activeRuleIds = new Set(), options = {}) {
+                const activeSet = activeRuleIds instanceof Set
+                        ? new Set(Array.from(activeRuleIds).map((id) => `${id}`))
+                        : new Set(
+                                  (Array.isArray(activeRuleIds) ? activeRuleIds : [])
+                                          .map((id) => (id !== undefined && id !== null ? `${id}` : null))
+                                          .filter(Boolean),
+                          );
+                const shouldEmit = Boolean(options.emitCounters);
+
+                const previouslyApplied = this.collectAppliedPricingRules();
+                previouslyApplied.forEach((ruleId) => {
+                        if (!activeSet.has(`${ruleId}`)) {
+                                this.removePricingRuleFreeItems(ruleId);
+                        }
+                });
+
+                (this.items || []).forEach((item) => {
+                        if (!item) {
+                                return;
+                        }
+
+                        const applied = parseAppliedRules(item.pricing_rules);
+                        if (!applied.length) {
+                                return;
+                        }
+
+                        const stillActive = applied.filter((ruleId) => activeSet.has(`${ruleId}`));
+
+                        if (stillActive.length) {
+                                item.pricing_rules = JSON.stringify(stillActive);
+                                return;
+                        }
+
+                        item.pricing_rules = "";
+                        const originalsMap = this._pricingRuleOriginals instanceof WeakMap ? this._pricingRuleOriginals : null;
+                        const original = originalsMap ? originalsMap.get(item) : null;
+                        const hasOriginal = original && typeof original === "object";
+
+                        if (hasOriginal) {
+                                if (original.base_price_list_rate !== undefined && original.base_price_list_rate !== null) {
+                                        item.base_price_list_rate = original.base_price_list_rate;
+                                }
+                                if (original.base_rate !== undefined && original.base_rate !== null) {
+                                        item.base_rate = original.base_rate;
+                                }
+                                if (original.price_list_rate !== undefined && original.price_list_rate !== null) {
+                                        item.price_list_rate = original.price_list_rate;
+                                }
+                                if (original.rate !== undefined && original.rate !== null) {
+                                        item.rate = original.rate;
+                                } else if (original.base_rate !== undefined && original.base_rate !== null) {
+                                        item.rate = original.base_rate;
+                                }
+                                item.discount_percentage =
+                                        original.discount_percentage !== undefined &&
+                                        original.discount_percentage !== null
+                                                ? original.discount_percentage
+                                                : 0;
+                                item.discount_amount =
+                                        original.discount_amount !== undefined && original.discount_amount !== null
+                                                ? original.discount_amount
+                                                : 0;
+                        } else {
+                                item.discount_percentage = 0;
+                                item.discount_amount = 0;
+
+                                if (item.base_price_list_rate !== undefined && item.base_price_list_rate !== null) {
+                                        item.price_list_rate = item.base_price_list_rate;
+                                }
+                                if (item.base_rate !== undefined && item.base_rate !== null) {
+                                        item.rate = item.base_rate;
+                                } else if (item.price_list_rate !== undefined && item.price_list_rate !== null) {
+                                        item.rate = item.price_list_rate;
+                                        item.base_rate = item.price_list_rate;
+                                }
+                        }
+
+                        this.calc_item_price(item);
+                        item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                        item.base_amount = this.flt(
+                                item.qty * (item.base_rate !== undefined && item.base_rate !== null ? item.base_rate : item.rate),
+                                this.currency_precision,
+                        );
+                        if (originalsMap) {
+                                originalsMap.delete(item);
+                        }
+                });
+
+                if (shouldEmit) {
+                        this.emitPricingRuleCounters();
+                }
         },
 
         handleResetPricingRules() {
@@ -379,6 +519,8 @@ export default {
                         );
                 });
 
+                this._pricingRuleOriginals = new WeakMap();
+
                 this.$forceUpdate();
                 this.emitPricingRuleCounters();
         },
@@ -393,6 +535,101 @@ export default {
                 removable.forEach((item) => {
                         this.remove_item(item);
                 });
+        },
+
+        schedulePricingRuleRefresh(changedRowIds = []) {
+                if (typeof changedRowIds === "boolean") {
+                        changedRowIds = [];
+                } else if (changedRowIds && typeof changedRowIds === "object" && !Array.isArray(changedRowIds)) {
+                        const options = changedRowIds || {};
+                        changedRowIds = Array.isArray(options.rowIds) ? options.rowIds : [];
+                }
+
+                if (this._pricingRuleAutoApplying) {
+                        this._pricingRuleRefreshRequested = true;
+                        return;
+                }
+
+                if (this._pricingRuleRefreshPending) {
+                        return;
+                }
+
+                this._pricingRuleRefreshPending = true;
+                const scheduler =
+                        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+                                ? window.requestAnimationFrame.bind(window)
+                                : (cb) => setTimeout(cb, 16);
+
+                this._pricingRuleRefreshHandle = scheduler(() => {
+                        this._pricingRuleRefreshHandle = null;
+                        this._pricingRuleRefreshPending = false;
+                        this.processPendingPricingRuleRefresh();
+                });
+        },
+
+        cancelScheduledPricingRuleRefresh() {
+                if (this._pricingRuleRefreshHandle != null) {
+                        if (typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+                                window.cancelAnimationFrame(this._pricingRuleRefreshHandle);
+                        } else {
+                                clearTimeout(this._pricingRuleRefreshHandle);
+                        }
+                        this._pricingRuleRefreshHandle = null;
+                }
+
+                this._pricingRuleRefreshPending = false;
+                this._pricingRuleRefreshRequested = false;
+        },
+
+        async processPendingPricingRuleRefresh() {
+                if (this._pricingRuleAutoApplying) {
+                        this._pricingRuleRefreshRequested = true;
+                        return;
+                }
+
+                const context = this.buildPricingRuleContext();
+                if (!context || !this.pos_profile || !this.pos_profile.name) {
+                        return;
+                }
+
+                const items = Array.isArray(context.items) ? context.items : [];
+                if (!items.length) {
+                        if (this._pricingRuleOriginals instanceof WeakMap) {
+                                this._pricingRuleOriginals = new WeakMap();
+                        }
+                        this.cleanupInactivePricingRules(new Set(), { emitCounters: true });
+                        this.$forceUpdate();
+                        return;
+                }
+
+                this._pricingRuleAutoApplying = true;
+
+                try {
+                        const { message } = await frappe.call({
+                                method: "posawesome.posawesome.api.pricing_rules.auto_apply_pos_pricing_rules",
+                                args: { context: JSON.stringify(context) },
+                        });
+
+                        const response = message || {};
+                        const updates = Array.isArray(response.updates) ? response.updates : [];
+                        const activeRules = Array.isArray(response.active_pricing_rules)
+                                ? response.active_pricing_rules
+                                : [];
+
+                        await this.handleApplyPricingRuleUpdates({
+                                updates,
+                                active_rule_ids: activeRules,
+                        });
+                } catch (error) {
+                        console.error("Failed to auto apply pricing rules", error);
+                } finally {
+                        this._pricingRuleAutoApplying = false;
+                }
+
+                if (this._pricingRuleRefreshRequested) {
+                        this._pricingRuleRefreshRequested = false;
+                        this.schedulePricingRuleRefresh();
+                }
         },
 
         async syncFreeItemsForPricingRule(ruleId, freebies = []) {

@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List
+from typing import Dict, List, Set
 
 import frappe
 from frappe import _
@@ -272,6 +272,27 @@ def _extract_rule_identifiers(*candidates) -> List[str]:
     return [identifier for identifier in identifiers if identifier]
 
 
+def _collect_matched_identifiers(detail) -> Set[str]:
+    if not detail:
+        return set()
+
+    identifiers = _extract_rule_identifiers(
+        detail.get("pricing_rule"),
+        detail.get("pricing_rules"),
+        detail.get("pricing_rule_name"),
+        detail.get("rule"),
+        detail.get("applied_pricing_rule"),
+        detail.get("applied_pricing_rules"),
+        detail.get("free_item_data"),
+    )
+
+    return {
+        _parse_rule_identifier(identifier)
+        for identifier in identifiers
+        if _parse_rule_identifier(identifier)
+    }
+
+
 @frappe.whitelist()
 def get_pos_pricing_rules(context: str) -> List[Dict]:
     """Return applicable pricing rules for the provided POS invoice context."""
@@ -312,31 +333,7 @@ def apply_pos_pricing_rule(context: str, pricing_rule: str) -> List[Dict]:
             continue
 
         detail = frappe._dict(detail)
-        matched_identifiers = {
-            _parse_rule_identifier(identifier)
-            for identifier in _extract_rule_identifiers(
-                detail.get("pricing_rule"),
-                detail.get("pricing_rules"),
-                detail.get("pricing_rule_name"),
-                detail.get("rule"),
-                detail.get("applied_pricing_rule"),
-                detail.get("applied_pricing_rules"),
-            )
-            if _parse_rule_identifier(identifier)
-        }
-
-        has_free_item_data = bool(detail.get("free_item_data"))
-        has_rate_or_discount_change = any(
-            key in detail and detail.get(key) is not None
-            for key in (
-                "discount_percentage",
-                "discount_amount",
-                "price_list_rate",
-                "rate",
-                "margin_type",
-                "margin_rate_or_amount",
-            )
-        )
+        matched_identifiers = _collect_matched_identifiers(detail)
 
         if rule_identifier not in matched_identifiers:
             continue
@@ -345,3 +342,43 @@ def apply_pos_pricing_rule(context: str, pricing_rule: str) -> List[Dict]:
         results.append(detail)
 
     return results
+
+
+@frappe.whitelist()
+def auto_apply_pos_pricing_rules(context: str) -> Dict[str, List]:
+    """Evaluate pricing rules for all items and return the aggregated updates."""
+
+    _ensure_pricing_rule_dependencies_available()
+    parsed_context = _prepare_context(context)
+    doc = frappe.get_doc(parsed_context.get("doc_dict"))
+    doc.name = parsed_context.get("doc_name") or doc.get("name") or "POS-PRICING"
+    parsed_context["doc_name"] = doc.name
+
+    updates: List[Dict] = []
+    active_rules: Set[str] = set()
+
+    for child in doc.items:
+        args = _build_item_args(parsed_context, child.as_dict())
+        try:
+            detail = get_pricing_rule_for_item(args, doc=doc.as_dict(), for_validate=True)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "POS Awesome: failed to auto apply pricing rule")
+            continue
+
+        if not detail:
+            continue
+
+        detail = frappe._dict(detail)
+        matched_identifiers = _collect_matched_identifiers(detail)
+
+        if not matched_identifiers and not detail.get("free_item_data"):
+            continue
+
+        detail["posa_row_id"] = child.get("name")
+        updates.append(detail)
+        active_rules.update(matched_identifiers)
+
+    return {
+        "updates": updates,
+        "active_pricing_rules": sorted(active_rules),
+    }

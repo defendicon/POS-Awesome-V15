@@ -378,22 +378,12 @@ export default {
 			posa_coupons: [], // Coupons applied
 			isApplyingOffer: false, // Flag to prevent offer watcher loops
 			allItems: [], // All items for offer logic
-			discount_percentage_offer_name: null, // Track which offer is applied
-			invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
-			invoiceType: "Invoice", // Current invoice type
-			itemsPerPage: 1000, // Items per page in table
-			itemSearch: "", // Search query for added items
-			expanded: [], // Array of expanded row IDs
-			singleExpand: true, // Only one row expanded at a time
-			cancel_dialog: false, // Cancel dialog visibility
-			float_precision: 6, // Float precision for calculations
-			currency_precision: 6, // Currency precision for display
-			new_line: false, // Add new line for item
-                        available_stock_cache: {},
-                        item_detail_cache: {},
-                        item_stock_cache: {},
-                        brand_cache: {},
-                        stockUnsubscribe: null,
+			_pricingRuleOriginals: new WeakMap(),
+			available_stock_cache: {},
+			item_detail_cache: {},
+			item_stock_cache: {},
+			brand_cache: {},
+			stockUnsubscribe: null,
 			delivery_charges: [], // List of delivery charges
 			base_delivery_charges_rate: 0, // Delivery charge in company currency
 			delivery_charges_rate: 0, // Selected delivery charge rate
@@ -1447,16 +1437,22 @@ export default {
                         this.pricingRuleContextPending = false;
                         this.$nextTick(() => {
                                 this.handleRequestPricingRuleContext();
+                                if (typeof this.schedulePricingRuleRefresh === "function") {
+                                        this.schedulePricingRuleRefresh();
+                                }
                         });
                 },
                 handleClearInvoice() {
                         this.clear_invoice();
+                        this._pricingRuleOriginals = new WeakMap();
                         this.eventBus.emit("focus_item_search");
                 },
                 handleLoadInvoice(data) {
+                        this._pricingRuleOriginals = new WeakMap();
                         this.load_invoice(data);
                 },
                 handleLoadOrder(data) {
+                        this._pricingRuleOriginals = new WeakMap();
                         this.new_order(data);
                         // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
                 },
@@ -1481,6 +1477,7 @@ export default {
                 },
                 handleLoadReturnInvoice(data) {
                         console.log("Invoice component received load_return_invoice event with data:", data);
+                        this._pricingRuleOriginals = new WeakMap();
                         this.load_invoice(data.invoice_doc);
                         this.invoiceType = "Return";
                         this.invoiceTypes = ["Return"];
@@ -1583,6 +1580,9 @@ export default {
                 this._busHandlers = {};
                 if (typeof this.cancelScheduledOfferRefresh === "function") {
                         this.cancelScheduledOfferRefresh();
+                }
+                if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                        this.cancelScheduledPricingRuleRefresh();
                 }
                 if (this._suppressClosePaymentsTimer) {
                         clearTimeout(this._suppressClosePaymentsTimer);

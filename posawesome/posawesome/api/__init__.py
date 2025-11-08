@@ -35,7 +35,11 @@ from .offers import (
     get_offers,
     get_pos_coupon,
 )
-from .pricing_rules import apply_pos_pricing_rule, get_pos_pricing_rules
+from .pricing_rules import (
+    apply_pos_pricing_rule,
+    auto_apply_pos_pricing_rules,
+    get_pos_pricing_rules,
+)
 from .payments import (
     create_payment_request,
     get_available_credit,

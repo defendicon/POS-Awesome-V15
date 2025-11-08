@@ -90,12 +90,18 @@ export default {
                 this.fetch_customer_balance();
                 this.set_delivery_charges();
                 this.sync_invoice_customer_details();
+                if (typeof this.schedulePricingRuleRefresh === "function") {
+                        this.schedulePricingRuleRefresh();
+                }
         },
         // Watch for customer_info change and emit to edit form
         customer_info() {
                 const customersStore = useCustomersStore();
                 customersStore.setCustomerInfo(this.customer_info || {});
                 this.sync_invoice_customer_details(this.customer_info);
+                if (typeof this.schedulePricingRuleRefresh === "function") {
+                        this.schedulePricingRuleRefresh();
+                }
         },
 	// Watch for expanded row change and update item detail
 	expanded(data_value) {
@@ -134,9 +140,15 @@ export default {
                         if (!previous) {
                                 if (snapshot.order.length) {
                                         this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                        if (typeof this.schedulePricingRuleRefresh === "function") {
+                                                this.schedulePricingRuleRefresh([...new Set(snapshot.order)]);
+                                        }
                                 }
                         } else if (changed.size) {
                                 this.scheduleOfferRefresh(Array.from(changed));
+                                if (typeof this.schedulePricingRuleRefresh === "function") {
+                                        this.schedulePricingRuleRefresh(Array.from(changed));
+                                }
                         }
 
                         if (typeof this.emitCartQuantities === "function") {
@@ -164,9 +176,15 @@ export default {
                         if (!previous) {
                                 if (snapshot.order.length) {
                                         this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                        if (typeof this.schedulePricingRuleRefresh === "function") {
+                                                this.schedulePricingRuleRefresh([...new Set(snapshot.order)]);
+                                        }
                                 }
                         } else if (changed.size) {
                                 this.scheduleOfferRefresh(Array.from(changed));
+                                if (typeof this.schedulePricingRuleRefresh === "function") {
+                                        this.schedulePricingRuleRefresh(Array.from(changed));
+                                }
                         }
 
                         if (typeof this.emitCartQuantities === "function") {
@@ -206,12 +224,15 @@ export default {
                 }
         },
 	// Keep display date in sync with posting_date
-	posting_date: {
-		handler(newVal) {
-			this.posting_date_display = this.formatDateForDisplay(newVal);
-		},
-		immediate: true,
-	},
+        posting_date: {
+                handler(newVal) {
+                        this.posting_date_display = this.formatDateForDisplay(newVal);
+                        if (typeof this.schedulePricingRuleRefresh === "function") {
+                                this.schedulePricingRuleRefresh();
+                        }
+                },
+                immediate: true,
+        },
 	// Update posting_date when user changes the display value
 	posting_date_display(newVal) {
 		this.posting_date = this.formatDateForBackend(newVal);
@@ -227,11 +248,11 @@ export default {
 		this.apply_cached_price_list(applied);
 
 		// If multi-currency is enabled, sync currency with the price list currency
-		if (this.pos_profile.posa_allow_multi_currency && applied) {
-			frappe.call({
-				method: "posawesome.posawesome.api.invoices.get_price_list_currency",
-				args: { price_list: applied },
-				callback: (r) => {
+                if (this.pos_profile.posa_allow_multi_currency && applied) {
+                        frappe.call({
+                                method: "posawesome.posawesome.api.invoices.get_price_list_currency",
+                                args: { price_list: applied },
+                                callback: (r) => {
 					if (r.message) {
 						// Store price list currency for later use
 						this.price_list_currency = r.message;
@@ -259,23 +280,32 @@ export default {
 		if (typeof this.clearItemStockCache === "function") {
 			this.clearItemStockCache();
 		}
-		if (this.available_stock_cache) {
-			this.available_stock_cache = {};
-		}
-	},
+                if (this.available_stock_cache) {
+                        this.available_stock_cache = {};
+                }
+                if (typeof this.schedulePricingRuleRefresh === "function") {
+                        this.schedulePricingRuleRefresh();
+                }
+        },
 
 	// Reactively update item prices when currency changes
-	selected_currency() {
-		clearPriceListCache();
-		if (this.items && this.items.length) {
-			this.update_item_rates();
-		}
-	},
+        selected_currency() {
+                clearPriceListCache();
+                if (this.items && this.items.length) {
+                        this.update_item_rates();
+                }
+                if (typeof this.schedulePricingRuleRefresh === "function") {
+                        this.schedulePricingRuleRefresh();
+                }
+        },
 
-	// Reactively update item prices when exchange rate changes
-	exchange_rate() {
-		if (this.items && this.items.length) {
-			this.update_item_rates();
-		}
-	},
+        // Reactively update item prices when exchange rate changes
+        exchange_rate() {
+                if (this.items && this.items.length) {
+                        this.update_item_rates();
+                }
+                if (typeof this.schedulePricingRuleRefresh === "function") {
+                        this.schedulePricingRuleRefresh();
+                }
+        },
 };
