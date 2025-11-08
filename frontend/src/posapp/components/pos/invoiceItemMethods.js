@@ -140,6 +140,36 @@ export default {
 
                 return fallback;
         },
+        _toBaseCurrency(value, fallback = null) {
+                const numeric = this._coerceNumber(value, null);
+                if (numeric === null) {
+                        return fallback;
+                }
+
+                const companyCurrency = this.pos_profile?.currency;
+                const selectedCurrency = this.selected_currency || companyCurrency;
+                const priceListCurrency = this.price_list_currency || selectedCurrency;
+                const fltFn = typeof this.flt === "function" ? this.flt : flt;
+
+                if (
+                        selectedCurrency === priceListCurrency &&
+                        selectedCurrency &&
+                        selectedCurrency !== companyCurrency
+                ) {
+                        const conversion = this._coerceNumber(this.conversion_rate, 1) || 1;
+                        return fltFn(numeric * conversion, this.currency_precision);
+                }
+
+                if (selectedCurrency && companyCurrency && selectedCurrency !== companyCurrency) {
+                        const exchange = this._coerceNumber(this.exchange_rate, 1) || 1;
+                        if (!exchange) {
+                                return fallback;
+                        }
+                        return fltFn(numeric / exchange, this.currency_precision);
+                }
+
+                return fltFn(numeric, this.currency_precision);
+        },
         _getItemDetailCacheKey(item) {
                 const code = item?.item_code;
                 const warehouse = item?.warehouse || this.pos_profile?.warehouse;
@@ -2633,25 +2663,9 @@ export default {
                 const backendPriceListRateValue = this._coerceNumber(data.price_list_rate, null);
                 const backendRateValue = this._coerceNumber(data.rate, null);
                 const backendDiscountAmountValue = this._coerceNumber(data.discount_amount, null);
-                const backendBasePriceListValue = this._coerceNumber(
-                        data.base_price_list_rate,
-                        this._coerceNumber(
-                                backendPriceListRateValue,
-                                this._coerceNumber(item.base_price_list_rate, null),
-                        ),
-                );
-                const backendBaseRateValue = this._coerceNumber(
-                        data.base_rate,
-                        backendRateValue !== null
-                                ? backendRateValue
-                                : this._coerceNumber(item.base_rate, null),
-                );
-                const backendBaseDiscountValue = this._coerceNumber(
-                        data.base_discount_amount,
-                        backendBasePriceListValue !== null && backendBaseRateValue !== null
-                                ? backendBasePriceListValue - backendBaseRateValue
-                                : this._coerceNumber(item.base_discount_amount, 0),
-                );
+                const backendBasePriceListValue = this._coerceNumber(data.base_price_list_rate, null);
+                const backendBaseRateValue = this._coerceNumber(data.base_rate, null);
+                const backendBaseDiscountValue = this._coerceNumber(data.base_discount_amount, null);
 
                 if (backendDiscountAmountValue !== null) {
                         item.discount_amount = this.flt(backendDiscountAmountValue, this.currency_precision);
@@ -2680,50 +2694,125 @@ export default {
                 if (!item.locked_price) {
                         const manualOverride = Boolean(item._manual_rate_set || item.posa_offer_applied);
 
-                        if (backendBasePriceListValue !== null) {
-                                item.base_price_list_rate = this.flt(
-                                        backendBasePriceListValue,
-                                        this.currency_precision,
-                                );
-                        } else if (item.base_price_list_rate !== undefined) {
-                                item.base_price_list_rate = this.flt(
-                                        this._coerceNumber(item.base_price_list_rate, 0),
-                                        this.currency_precision,
-                                );
+                        const existingBasePriceListValue = this._coerceNumber(
+                                item.base_price_list_rate,
+                                null,
+                        );
+                        const existingPriceListRateValue = this._coerceNumber(
+                                item.price_list_rate,
+                                null,
+                        );
+                        const existingBaseRateValue = this._coerceNumber(item.base_rate, null);
+                        const existingRateValue = this._coerceNumber(item.rate, null);
+                        const existingBaseDiscountValue = this._coerceNumber(
+                                item.base_discount_amount,
+                                null,
+                        );
+                        const hasExplicitDiscountInfo =
+                                backendBaseDiscountValue !== null ||
+                                backendDiscountAmountValue !== null ||
+                                Object.prototype.hasOwnProperty.call(data, "discount_percentage");
+
+                        let resolvedBasePriceListValue = backendBasePriceListValue;
+                        if (resolvedBasePriceListValue === null && existingBasePriceListValue !== null) {
+                                resolvedBasePriceListValue = existingBasePriceListValue;
+                        }
+                        if (resolvedBasePriceListValue === null && backendPriceListRateValue !== null) {
+                                const converted = this._toBaseCurrency(backendPriceListRateValue, null);
+                                if (converted !== null) {
+                                        resolvedBasePriceListValue = converted;
+                                }
+                        }
+                        if (resolvedBasePriceListValue === null && existingPriceListRateValue !== null) {
+                                const converted = this._toBaseCurrency(existingPriceListRateValue, null);
+                                if (converted !== null) {
+                                        resolvedBasePriceListValue = converted;
+                                }
+                        }
+                        if (resolvedBasePriceListValue === null && existingBaseDiscountValue !== null) {
+                                const derivedFromDiscount =
+                                        existingBaseRateValue !== null
+                                                ? existingBaseRateValue + existingBaseDiscountValue
+                                                : null;
+                                if (derivedFromDiscount !== null) {
+                                        resolvedBasePriceListValue = derivedFromDiscount;
+                                }
+                        }
+                        if (resolvedBasePriceListValue === null) {
+                                resolvedBasePriceListValue = 0;
                         }
 
-                        const resolvedBasePriceListValue = this._coerceNumber(
-                                item.base_price_list_rate,
-                                this._coerceNumber(item.price_list_rate, 0),
-                        );
                         const resolvedBasePriceList = this.flt(
                                 resolvedBasePriceListValue,
                                 this.currency_precision,
                         );
+                        item.base_price_list_rate = resolvedBasePriceList;
 
-                        if (backendBaseRateValue !== null) {
-                                item.base_rate = this.flt(backendBaseRateValue, this.currency_precision);
-                        } else if (item.base_rate !== undefined) {
-                                item.base_rate = this.flt(
-                                        this._coerceNumber(item.base_rate, resolvedBasePriceList),
-                                        this.currency_precision,
-                                );
+                        let resolvedBaseRateValue = backendBaseRateValue;
+                        if (
+                                resolvedBaseRateValue === null &&
+                                backendBaseDiscountValue !== null &&
+                                resolvedBasePriceListValue !== null
+                        ) {
+                                resolvedBaseRateValue =
+                                        resolvedBasePriceListValue - backendBaseDiscountValue;
+                        }
+                        if (
+                                resolvedBaseRateValue === null &&
+                                existingBaseRateValue !== null &&
+                                (existingBaseRateValue > 0 || hasExplicitDiscountInfo || resolvedBasePriceListValue <= 0)
+                        ) {
+                                resolvedBaseRateValue = existingBaseRateValue;
+                        }
+                        if (resolvedBaseRateValue === null && backendRateValue !== null) {
+                                const converted = this._toBaseCurrency(backendRateValue, null);
+                                if (converted !== null) {
+                                        resolvedBaseRateValue = converted;
+                                }
+                        }
+                        if (resolvedBaseRateValue === null && existingRateValue !== null) {
+                                const converted = this._toBaseCurrency(existingRateValue, null);
+                                if (converted !== null) {
+                                        resolvedBaseRateValue = converted;
+                                }
+                        }
+                        if (resolvedBaseRateValue === null && resolvedBasePriceListValue !== null) {
+                                resolvedBaseRateValue = resolvedBasePriceListValue;
+                        }
+                        if (resolvedBaseRateValue === null) {
+                                resolvedBaseRateValue = 0;
                         }
 
-                        if (backendBaseDiscountValue !== null) {
-                                const sanitized = backendBaseDiscountValue > 0 ? backendBaseDiscountValue : 0;
-                                item.base_discount_amount = this.flt(sanitized, this.currency_precision);
-                        } else {
-                                const baseRateValue = this._coerceNumber(
-                                        item.base_rate,
-                                        resolvedBasePriceList,
-                                );
-                                const computedDiscount = this.flt(
-                                        resolvedBasePriceList - baseRateValue,
-                                        this.currency_precision,
-                                );
-                                item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
+                        const resolvedBaseRate = this.flt(
+                                resolvedBaseRateValue,
+                                this.currency_precision,
+                        );
+                        item.base_rate = resolvedBaseRate;
+
+                        let resolvedBaseDiscountValue = backendBaseDiscountValue;
+                        if (resolvedBaseDiscountValue === null && backendDiscountAmountValue !== null) {
+                                const converted = this._toBaseCurrency(backendDiscountAmountValue, null);
+                                if (converted !== null) {
+                                        resolvedBaseDiscountValue = converted;
+                                }
                         }
+                        if (
+                                resolvedBaseDiscountValue === null &&
+                                resolvedBasePriceListValue !== null &&
+                                resolvedBaseRateValue !== null
+                        ) {
+                                const diff = resolvedBasePriceListValue - resolvedBaseRateValue;
+                                resolvedBaseDiscountValue = diff > 0 ? diff : 0;
+                        }
+
+                        const sanitizedBaseDiscount =
+                                resolvedBaseDiscountValue && resolvedBaseDiscountValue > 0
+                                        ? resolvedBaseDiscountValue
+                                        : 0;
+                        item.base_discount_amount = this.flt(
+                                sanitizedBaseDiscount,
+                                this.currency_precision,
+                        );
 
                         if (!manualOverride && backendRateValue !== null) {
                                 item.rate = this.flt(backendRateValue, this.currency_precision);
@@ -2742,30 +2831,23 @@ export default {
                                 !manualOverride &&
                                 !Object.prototype.hasOwnProperty.call(data, "discount_percentage")
                         ) {
-                                const baseRateValue = this._coerceNumber(
-                                        item.base_rate,
-                                        resolvedBasePriceList,
-                                );
-                                const computedDiscount = this.flt(
-                                        resolvedBasePriceList - baseRateValue,
-                                        this.currency_precision,
-                                );
-                                const resolvedDiscountPct = resolvedBasePriceList
-                                        ? this.flt((computedDiscount / resolvedBasePriceList) * 100, this.float_precision)
+                                const computedDiscountPct = resolvedBasePriceList
+                                        ? this.flt(
+                                                  (sanitizedBaseDiscount / resolvedBasePriceList) * 100,
+                                                  this.float_precision,
+                                          )
                                         : 0;
-                                item.discount_percentage = resolvedDiscountPct;
+                                item.discount_percentage = computedDiscountPct;
                         }
 
                         if (manualOverride && backendBaseDiscountValue === null) {
-                                const baseRateValue = this._coerceNumber(
-                                        item.base_rate,
-                                        resolvedBasePriceList,
-                                );
-                                const computedDiscount = this.flt(
-                                        resolvedBasePriceList - baseRateValue,
-                                        this.currency_precision,
-                                );
-                                item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
+                                const computedDiscountPct = resolvedBasePriceList
+                                        ? this.flt(
+                                                  (sanitizedBaseDiscount / resolvedBasePriceList) * 100,
+                                                  this.float_precision,
+                                          )
+                                        : 0;
+                                item.discount_percentage = computedDiscountPct;
                         }
 
                         this._updateDisplayedPricingFromBase(item, { manualOverride });
