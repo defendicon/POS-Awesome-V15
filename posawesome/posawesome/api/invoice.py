@@ -13,9 +13,12 @@ from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from posawesome.posawesome.api.pricing_rules import normalize_pricing_rule_freebies
 
 
 def validate(doc, method):
+    # Consolidate any pricing-rule freebies before running additional validations.
+    normalize_pricing_rule_freebies(doc)
     validate_shift(doc)
     set_patient(doc)
     auto_set_delivery_charges(doc)
@@ -24,6 +27,8 @@ def validate(doc, method):
 
 
 def before_submit(doc, method):
+    # Ensure pricing-rule freebies stay consolidated before submission.
+    normalize_pricing_rule_freebies(doc)
     add_loyalty_point(doc)
     create_sales_order(doc)
     update_coupon(doc, "used")
