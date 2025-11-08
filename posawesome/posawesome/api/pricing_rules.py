@@ -409,14 +409,61 @@ def normalize_pricing_rule_freebies(doc) -> bool:
         return False
 
     mutated = False
-    seen = {}
-    to_remove = []
+    freebies = []
 
     for child in list(doc.items):
         if not _is_pricing_rule_freebie(child):
             continue
 
-        rule_id = _resolve_freebie_rule_identifier(child)
+        entry = {
+            "child": child,
+            "rule_id": _resolve_freebie_rule_identifier(child),
+            "base_key": "::".join(_build_freebie_key_parts(child, "")),
+        }
+        freebies.append(entry)
+
+    if not freebies:
+        return False
+
+    # Ensure freebies that share the same underlying characteristics adopt
+    # a single rule identifier before running the consolidation logic. ERPNext
+    # may regenerate free rows without POS metadata which leaves the rule id
+    # blank. We reuse any available identifier from the matching rows so both
+    # copies collapse into one later on.
+    by_base_key = {}
+    for entry in freebies:
+        by_base_key.setdefault(entry["base_key"], []).append(entry)
+
+    for candidates in by_base_key.values():
+        resolved = [c for c in candidates if c["rule_id"]]
+        if not resolved:
+            continue
+
+        resolved.sort(
+            key=lambda c: 0
+            if _child_value(c["child"], "posa_pricing_rule_freebie")
+            else 1
+        )
+        canonical_rule = resolved[0]["rule_id"]
+
+        for entry in candidates:
+            if entry["rule_id"] == canonical_rule:
+                continue
+
+            child = entry["child"]
+            try:
+                child.posa_pricing_rule_freebie = canonical_rule
+            except Exception:
+                pass
+            entry["rule_id"] = canonical_rule
+            mutated = True
+
+    seen = {}
+    to_remove = []
+
+    for entry in freebies:
+        child = entry["child"]
+        rule_id = entry["rule_id"] or _resolve_freebie_rule_identifier(child)
         if not rule_id:
             continue
 
