@@ -375,10 +375,21 @@ export default {
 			show_packed_dialog: false, // Packing list dialog visibility
 			posOffers: [], // All available offers
 			posa_offers: [], // Offers applied to this invoice
-			posa_coupons: [], // Coupons applied
-			isApplyingOffer: false, // Flag to prevent offer watcher loops
-			allItems: [], // All items for offer logic
-			_pricingRuleOriginals: new WeakMap(),
+                        posa_coupons: [], // Coupons applied
+                        isApplyingOffer: false, // Flag to prevent offer watcher loops
+                        allItems: [], // All items for offer logic
+                        discount_percentage_offer_name: null, // Track which offer is applied
+                        invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
+                        invoiceType: "Invoice", // Current invoice type
+                        itemsPerPage: 1000, // Items per page in table
+                        itemSearch: "", // Search query for added items
+                        expanded: [], // Array of expanded row IDs
+                        singleExpand: true, // Only one row expanded at a time
+                        cancel_dialog: false, // Cancel dialog visibility
+                        float_precision: 6, // Float precision for calculations
+                        currency_precision: 6, // Currency precision for display
+                        new_line: false, // Add new line for item
+                        _pricingRuleOriginals: new WeakMap(),
 			available_stock_cache: {},
 			item_detail_cache: {},
 			item_stock_cache: {},
