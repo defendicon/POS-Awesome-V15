@@ -677,7 +677,7 @@ export default {
         // Build the invoice document object for backend submission
         get_invoice_doc() {
                 if (typeof this.rehydratePricingRuleFreebieState === "function") {
-                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: false, emitCounters: false });
+                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true, emitCounters: false });
                 }
                 let doc = {};
                 const sourceDoc = this.invoice_doc || {};
@@ -957,9 +957,12 @@ export default {
 	},
 
 	// Get invoice doc from order doc (for sales order to invoice conversion)
-	async get_invoice_from_order_doc() {
-		let doc = {};
-		if (this.invoice_doc.doctype == "Sales Order") {
+        async get_invoice_from_order_doc() {
+                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true, emitCounters: false });
+                }
+                let doc = {};
+                if (this.invoice_doc.doctype == "Sales Order") {
 			await frappe.call({
 				method: "posawesome.posawesome.api.invoices.create_sales_invoice_from_order",
 				args: {
@@ -1028,6 +1031,7 @@ export default {
 
                 this.items.forEach((item) => {
                         const new_item = {
+                                ...(item.name ? { name: item.name } : {}),
                                 item_code: item.item_code,
                                 // Retain the item name for offline invoices
                                 // Fallback to item_code if item_name is not available
@@ -1144,10 +1148,11 @@ export default {
 	// Prepare items array for order doc
 	get_order_items() {
 		const items_list = [];
-		this.items.forEach((item) => {
-			const new_item = {
-				item_code: item.item_code,
-				// Retain item name to show on offline order documents
+                this.items.forEach((item) => {
+                        const new_item = {
+                                ...(item.name ? { name: item.name } : {}),
+                                item_code: item.item_code,
+                                // Retain item name to show on offline order documents
 				// Use item_code if item_name is missing
 				item_name: item.item_name || item.item_code,
 				name_overridden: item.name_overridden ? 1 : 0,
