@@ -2463,7 +2463,25 @@ export default {
                                                         conversion_rate: 1,
                                                         currency: this.pos_profile.currency,
                                                         qty: item.qty,
-                                                        price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
+                                                        price_list_rate: item.price_list_rate ?? item.base_price_list_rate ?? 0,
+                                                        base_price_list_rate:
+                                                                item.base_price_list_rate ?? item.price_list_rate ?? 0,
+                                                        rate: item.rate ?? item.base_rate ?? 0,
+                                                        base_rate: item.base_rate ?? item.rate ?? 0,
+                                                        discount_percentage: item.discount_percentage ?? 0,
+                                                        discount_amount:
+                                                                item.discount_amount ??
+                                                                item.base_discount_amount ??
+                                                                0,
+                                                        base_discount_amount:
+                                                                item.base_discount_amount ??
+                                                                item.discount_amount ??
+                                                                0,
+                                                        pricing_rules:
+                                                                Array.isArray(item._applied_pricing_rules) &&
+                                                                item._applied_pricing_rules.length
+                                                                        ? item._applied_pricing_rules.join(",")
+                                                                        : item.pricing_rules || "",
                                                         child_docname: `New ${currentDoc.doctype} Item 1`,
                                                         cost_center: this.pos_profile.cost_center,
                                                         pos_profile: this.pos_profile.name,
@@ -2612,21 +2630,32 @@ export default {
                         this.set_batch_qty(item, null, false);
                 }
 
-                const backendBasePriceListValue = this._coerceNumber(data.price_list_rate, null);
-                let backendBasePriceList =
-                        backendBasePriceListValue !== null
-                                ? this.flt(backendBasePriceListValue, this.currency_precision)
-                                : null;
-                const backendBaseRateValue = this._coerceNumber(data.rate, null);
-                let backendBaseRate =
-                        backendBaseRateValue !== null
-                                ? this.flt(backendBaseRateValue, this.currency_precision)
-                                : null;
+                const backendPriceListRateValue = this._coerceNumber(data.price_list_rate, null);
+                const backendRateValue = this._coerceNumber(data.rate, null);
                 const backendDiscountAmountValue = this._coerceNumber(data.discount_amount, null);
-                const backendDiscountAmount =
-                        backendDiscountAmountValue !== null
-                                ? this.flt(backendDiscountAmountValue, this.currency_precision)
-                                : null;
+                const backendBasePriceListValue = this._coerceNumber(
+                        data.base_price_list_rate,
+                        this._coerceNumber(
+                                backendPriceListRateValue,
+                                this._coerceNumber(item.base_price_list_rate, null),
+                        ),
+                );
+                const backendBaseRateValue = this._coerceNumber(
+                        data.base_rate,
+                        backendRateValue !== null
+                                ? backendRateValue
+                                : this._coerceNumber(item.base_rate, null),
+                );
+                const backendBaseDiscountValue = this._coerceNumber(
+                        data.base_discount_amount,
+                        backendBasePriceListValue !== null && backendBaseRateValue !== null
+                                ? backendBasePriceListValue - backendBaseRateValue
+                                : this._coerceNumber(item.base_discount_amount, 0),
+                );
+
+                if (backendDiscountAmountValue !== null) {
+                        item.discount_amount = this.flt(backendDiscountAmountValue, this.currency_precision);
+                }
 
                 if (Object.prototype.hasOwnProperty.call(data, "discount_percentage")) {
                         item.discount_percentage = this.flt(
@@ -2651,86 +2680,100 @@ export default {
                 if (!item.locked_price) {
                         const manualOverride = Boolean(item._manual_rate_set || item.posa_offer_applied);
 
-                        if (backendBasePriceList !== null) {
-                                item.base_price_list_rate = backendBasePriceList;
-                        } else {
-                                const existingBasePriceList = this._coerceNumber(
-                                        item.base_price_list_rate,
-                                        0,
-                                );
+                        if (backendBasePriceListValue !== null) {
                                 item.base_price_list_rate = this.flt(
-                                        existingBasePriceList,
+                                        backendBasePriceListValue,
+                                        this.currency_precision,
+                                );
+                        } else if (item.base_price_list_rate !== undefined) {
+                                item.base_price_list_rate = this.flt(
+                                        this._coerceNumber(item.base_price_list_rate, 0),
                                         this.currency_precision,
                                 );
                         }
 
                         const resolvedBasePriceListValue = this._coerceNumber(
                                 item.base_price_list_rate,
-                                0,
+                                this._coerceNumber(item.price_list_rate, 0),
                         );
                         const resolvedBasePriceList = this.flt(
                                 resolvedBasePriceListValue,
                                 this.currency_precision,
                         );
 
-                        if (!manualOverride) {
-                                const existingBaseRateValue = this._coerceNumber(
-                                        item.base_rate,
-                                        null,
+                        if (backendBaseRateValue !== null) {
+                                item.base_rate = this.flt(backendBaseRateValue, this.currency_precision);
+                        } else if (item.base_rate !== undefined) {
+                                item.base_rate = this.flt(
+                                        this._coerceNumber(item.base_rate, resolvedBasePriceList),
+                                        this.currency_precision,
                                 );
-                                const shouldUpdateBaseRate =
-                                        backendBaseRate !== null ||
-                                        forceUpdate ||
-                                        existingBaseRateValue === null;
-
-                                if (shouldUpdateBaseRate) {
-                                        const newBaseRate =
-                                                backendBaseRate !== null ? backendBaseRate : resolvedBasePriceList;
-                                        item.base_rate = this.flt(newBaseRate, this.currency_precision);
-                                } else {
-                                        item.base_rate = this.flt(
-                                                existingBaseRateValue,
-                                                this.currency_precision,
-                                        );
-                                }
                         }
 
-                        if (!manualOverride) {
-                                if (backendDiscountAmount !== null) {
-                                        item.base_discount_amount = backendDiscountAmount;
-                                } else {
-                                        const baseRateValue = this._coerceNumber(
-                                                item.base_rate,
-                                                resolvedBasePriceList,
-                                        );
-                                        const computedDiscount = this.flt(
-                                                resolvedBasePriceList - baseRateValue,
-                                                this.currency_precision,
-                                        );
-                                        item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
-                                }
-                        }
-
-                        if (
-                                backendDiscountAmount === null &&
-                                !manualOverride &&
-                                !Object.prototype.hasOwnProperty.call(data, "discount_percentage")
-                        ) {
-                                const basePrice = resolvedBasePriceList;
+                        if (backendBaseDiscountValue !== null) {
+                                const sanitized = backendBaseDiscountValue > 0 ? backendBaseDiscountValue : 0;
+                                item.base_discount_amount = this.flt(sanitized, this.currency_precision);
+                        } else {
                                 const baseRateValue = this._coerceNumber(
                                         item.base_rate,
                                         resolvedBasePriceList,
                                 );
-                                item.discount_percentage = basePrice
-                                        ? this.flt(((basePrice - baseRateValue) / basePrice) * 100, this.currency_precision)
+                                const computedDiscount = this.flt(
+                                        resolvedBasePriceList - baseRateValue,
+                                        this.currency_precision,
+                                );
+                                item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
+                        }
+
+                        if (!manualOverride && backendRateValue !== null) {
+                                item.rate = this.flt(backendRateValue, this.currency_precision);
+                        }
+
+                        if (!manualOverride && backendPriceListRateValue !== null) {
+                                item.price_list_rate = this.flt(
+                                        backendPriceListRateValue,
+                                        this.currency_precision,
+                                );
+                        }
+
+                        if (
+                                backendBaseDiscountValue === null &&
+                                backendDiscountAmountValue === null &&
+                                !manualOverride &&
+                                !Object.prototype.hasOwnProperty.call(data, "discount_percentage")
+                        ) {
+                                const baseRateValue = this._coerceNumber(
+                                        item.base_rate,
+                                        resolvedBasePriceList,
+                                );
+                                const computedDiscount = this.flt(
+                                        resolvedBasePriceList - baseRateValue,
+                                        this.currency_precision,
+                                );
+                                const resolvedDiscountPct = resolvedBasePriceList
+                                        ? this.flt((computedDiscount / resolvedBasePriceList) * 100, this.float_precision)
                                         : 0;
+                                item.discount_percentage = resolvedDiscountPct;
+                        }
+
+                        if (manualOverride && backendBaseDiscountValue === null) {
+                                const baseRateValue = this._coerceNumber(
+                                        item.base_rate,
+                                        resolvedBasePriceList,
+                                );
+                                const computedDiscount = this.flt(
+                                        resolvedBasePriceList - baseRateValue,
+                                        this.currency_precision,
+                                );
+                                item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
                         }
 
                         this._updateDisplayedPricingFromBase(item, { manualOverride });
 
                         const canApplyCustomerDiscount =
                                 !item.posa_offer_applied &&
-                                backendDiscountAmount === null &&
+                                backendBaseDiscountValue === null &&
+                                backendDiscountAmountValue === null &&
                                 (!Array.isArray(item._applied_pricing_rules) || !item._applied_pricing_rules.length) &&
                                 this.pos_profile.posa_apply_customer_discount &&
                                 this.customer_info.posa_discount > 0 &&
@@ -3105,7 +3148,10 @@ export default {
                 const selectedCurrency = this.selected_currency || companyCurrency;
                 const priceListCurrency = this.price_list_currency || selectedCurrency;
 
-                const basePriceListValue = this._coerceNumber(item.base_price_list_rate, 0);
+                const basePriceListValue = this._coerceNumber(
+                        item.base_price_list_rate,
+                        this._coerceNumber(item.price_list_rate, 0),
+                );
                 const baseRateValue = this._coerceNumber(item.base_rate, basePriceListValue);
                 const fallbackDiscountValue = basePriceListValue - baseRateValue;
                 const baseDiscountValue = this._coerceNumber(
@@ -3198,16 +3244,23 @@ export default {
                         entry.qty !== undefined ? entry.qty : entry.free_qty,
                         0,
                 );
+                const parentBasePriceList = this._coerceNumber(
+                        parentItem.base_price_list_rate,
+                        this._coerceNumber(parentItem.price_list_rate, 0),
+                );
                 const basePriceListRateValue = this._coerceNumber(
-                        entry.price_list_rate !== undefined ? entry.price_list_rate : entry.rate,
-                        0,
+                        entry.base_price_list_rate,
+                        this._coerceNumber(
+                                entry.price_list_rate,
+                                parentBasePriceList,
+                        ),
                 );
                 const baseRateValue = this._coerceNumber(
-                        entry.rate !== undefined ? entry.rate : basePriceListRateValue,
-                        basePriceListRateValue,
+                        entry.base_rate,
+                        this._coerceNumber(entry.rate, basePriceListRateValue),
                 );
                 const baseDiscountValue = this._coerceNumber(
-                        entry.discount_amount,
+                        entry.base_discount_amount,
                         basePriceListRateValue - baseRateValue,
                 );
                 const discountPct = this._coerceNumber(entry.discount_percentage, 0);
@@ -3288,30 +3341,27 @@ export default {
                 );
                 targetItem.qty = this.flt(resolvedQty, this.currency_precision);
 
-                const rawPriceList =
-                        entry.price_list_rate !== undefined
-                                ? entry.price_list_rate
-                                : entry.rate !== undefined
-                                ? entry.rate
-                                : targetItem.base_price_list_rate;
-                const resolvedPriceListValue = this._coerceNumber(
-                        rawPriceList,
-                        this._coerceNumber(targetItem.base_price_list_rate, 0),
+                const resolvedBasePriceListValue = this._coerceNumber(
+                        entry.base_price_list_rate,
+                        this._coerceNumber(
+                                entry.price_list_rate,
+                                this._coerceNumber(targetItem.base_price_list_rate, 0),
+                        ),
                 );
                 targetItem.base_price_list_rate = this.flt(
-                        resolvedPriceListValue,
+                        resolvedBasePriceListValue,
                         this.currency_precision,
                 );
 
                 const resolvedBaseRateValue = this._coerceNumber(
-                        entry.rate !== undefined ? entry.rate : targetItem.base_rate,
-                        resolvedPriceListValue,
+                        entry.base_rate,
+                        this._coerceNumber(entry.rate, resolvedBasePriceListValue),
                 );
                 targetItem.base_rate = this.flt(resolvedBaseRateValue, this.currency_precision);
 
                 const baseDiscountValue = this._coerceNumber(
-                        entry.discount_amount,
-                        resolvedPriceListValue - resolvedBaseRateValue,
+                        entry.base_discount_amount,
+                        resolvedBasePriceListValue - resolvedBaseRateValue,
                 );
                 targetItem.base_discount_amount = this.flt(
                         baseDiscountValue,
