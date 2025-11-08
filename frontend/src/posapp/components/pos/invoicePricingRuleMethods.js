@@ -637,7 +637,7 @@ export default {
                         return;
                 }
 
-                const aggregatedFreebies = this.aggregatePricingRuleFreebies(freebies);
+                const aggregatedFreebies = this.aggregatePricingRuleFreebies(ruleId, freebies);
 
                 const existingItems = (this.items || []).filter(
                         (item) => item && item.is_free_item && item.posa_pricing_rule_freebie === ruleId,
@@ -652,7 +652,8 @@ export default {
 
                 const existingByKey = new Map();
                 existingItems.forEach((item) => {
-                        const key = item.posa_pricing_rule_key || this.getPricingRuleFreebieKey(item);
+                        const key =
+                                item.posa_pricing_rule_key || this.getPricingRuleFreebieKey(item, ruleId);
                         if (!key) {
                                 return;
                         }
@@ -667,7 +668,8 @@ export default {
                 const retainedKeys = new Set();
 
                 for (const detail of aggregatedFreebies) {
-                        const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail);
+                        const key =
+                                detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail, ruleId);
                         if (!key) {
                                 continue;
                         }
@@ -705,7 +707,7 @@ export default {
                 }
         },
 
-        aggregatePricingRuleFreebies(freebies = []) {
+        aggregatePricingRuleFreebies(ruleId, freebies = []) {
                 if (!Array.isArray(freebies) || !freebies.length) {
                         return [];
                 }
@@ -713,7 +715,7 @@ export default {
                 const groups = new Map();
 
                 freebies.forEach((candidate) => {
-                        const normalized = this.normalizePricingRuleFreebie(candidate);
+                        const normalized = this.normalizePricingRuleFreebie(ruleId, candidate);
                         if (!normalized) {
                                 return;
                         }
@@ -792,7 +794,7 @@ export default {
                 });
         },
 
-        normalizePricingRuleFreebie(detail) {
+        normalizePricingRuleFreebie(ruleId, detail) {
                 if (!detail) {
                         return null;
                 }
@@ -853,13 +855,16 @@ export default {
                         conversion_factor: conversionFactor,
                 };
 
-                const key = this.getPricingRuleFreebieKey({
-                        ...normalizedDetail,
-                        item_code: itemCode,
-                        qty,
-                        stock_qty: stockQty,
-                        conversion_factor: conversionFactor,
-                });
+                const key = this.getPricingRuleFreebieKey(
+                        {
+                                ...normalizedDetail,
+                                item_code: itemCode,
+                                qty,
+                                stock_qty: stockQty,
+                                conversion_factor: conversionFactor,
+                        },
+                        ruleId,
+                );
                 if (key) {
                         normalizedDetail.posa_pricing_rule_key = key;
                 }
@@ -893,6 +898,7 @@ export default {
                 }
                 if (sourceRow) {
                         normalizedDetail.source_row = sourceRow;
+                        normalizedDetail.posa_pricing_rule_source_row = sourceRow;
                 }
 
                 return {
@@ -904,7 +910,7 @@ export default {
                 };
         },
 
-        getPricingRuleFreebieKey(detail = {}) {
+        getPricingRuleFreebieKey(detail = {}, ruleId = "") {
                 if (!detail) {
                         return "";
                 }
@@ -915,22 +921,38 @@ export default {
                         return "";
                 }
 
-                const sourceRow =
-                        detail.posa_pricing_rule_source_row ||
-                        detail.source_row ||
-                        detail.child_docname ||
-                        detail.parent_detail_docname ||
-                        detail.posa_row_id ||
-                        "";
-
                 const batchNo = detail.batch_no || detail.free_batch_no || "";
                 const serialNo = detail.serial_no || detail.free_serial_no || "";
                 const uom = detail.uom || detail.free_uom || detail.stock_uom || "";
                 const warehouse = detail.warehouse || detail.free_warehouse || "";
+                const conversionFactorRaw =
+                        detail.conversion_factor !== undefined && detail.conversion_factor !== null
+                                ? detail.conversion_factor
+                                : detail.free_conversion_factor !== undefined && detail.free_conversion_factor !== null
+                                ? detail.free_conversion_factor
+                                : null;
+                const conversionFactor = conversionFactorRaw ? flt(conversionFactorRaw) || 1 : 1;
 
-                return [itemCode, sourceRow || "", batchNo || "", serialNo || "", uom || "", warehouse || ""].join(
-                        "::",
-                );
+                const resolvedRuleId =
+                        firstAppliedRule(
+                                ruleId,
+                                detail.posa_pricing_rule_freebie,
+                                detail.pricing_rule,
+                                detail.rule,
+                                detail.pricing_rules,
+                        ) || "";
+
+                const parts = [
+                        resolvedRuleId || "",
+                        itemCode,
+                        batchNo || "",
+                        serialNo || "",
+                        uom || "",
+                        warehouse || "",
+                        `${conversionFactor || 1}`,
+                ];
+
+                return parts.join("::");
         },
 
         async addFreeItemFromPricingRule(ruleId, detail) {
@@ -957,7 +979,7 @@ export default {
                                 .map((item) => item.posa_row_id),
                 );
 
-                const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail);
+                const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail, ruleId);
 
                 let baseItem = null;
                 if (typeof this.resolveOfferItem === "function") {
@@ -1088,7 +1110,7 @@ export default {
                 const conversionFactor = conversionFactorRaw ? flt(conversionFactorRaw) || 1 : 1;
                 const stockQty = stockQtyValue !== null ? stockQtyValue : qty * conversionFactor;
 
-                const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail);
+                const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail, ruleId);
 
                 const baseRate = flt(
                         detail.rate !== undefined
