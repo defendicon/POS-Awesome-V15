@@ -189,6 +189,8 @@ def _as_serializable_rule(rule) -> Dict:
 def _collect_pricing_rules(context: Dict, doc) -> List[Dict]:
     rules: Dict[str, Dict] = {}
     for item in context.get("items", []):
+        if _is_pricing_rule_freebie(item):
+            continue
         args = _build_item_args(context, item)
         try:
             item_rules = get_pricing_rules(args, doc)
@@ -293,6 +295,27 @@ def _collect_matched_identifiers(detail) -> Set[str]:
     }
 
 
+def _is_pricing_rule_freebie(item) -> bool:
+    if not item:
+        return False
+
+    try:
+        flag = item.get("is_free_item")
+    except AttributeError:
+        flag = None
+
+    if flag is not None:
+        try:
+            return bool(cint(flag))
+        except Exception:
+            return bool(flag)
+
+    try:
+        return bool(item.get("posa_pricing_rule_freebie"))
+    except AttributeError:
+        return False
+
+
 @frappe.whitelist()
 def get_pos_pricing_rules(context: str) -> List[Dict]:
     """Return applicable pricing rules for the provided POS invoice context."""
@@ -324,6 +347,8 @@ def apply_pos_pricing_rule(context: str, pricing_rule: str) -> List[Dict]:
     rule_identifier = _parse_rule_identifier(pricing_rule)
 
     for child in doc.items:
+        if _is_pricing_rule_freebie(child):
+            continue
         args = _build_item_args(parsed_context, child.as_dict())
         args.pricing_rules = json.dumps([rule_identifier])
         try:
@@ -358,6 +383,8 @@ def auto_apply_pos_pricing_rules(context: str) -> Dict[str, List]:
     active_rules: Set[str] = set()
 
     for child in doc.items:
+        if _is_pricing_rule_freebie(child):
+            continue
         args = _build_item_args(parsed_context, child.as_dict())
         try:
             detail = get_pricing_rule_for_item(args, doc=doc.as_dict(), for_validate=True)
