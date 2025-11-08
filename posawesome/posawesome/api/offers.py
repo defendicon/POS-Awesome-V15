@@ -93,6 +93,40 @@ def get_offers(profile):
 
 
 @frappe.whitelist()
+def get_pricing_rules(profile):
+    pos_profile = frappe.get_doc("POS Profile", profile)
+    today = getdate(nowdate())
+
+    filters = {"selling": 1, "disable": 0}
+
+    try:
+        rules = frappe.get_all(
+            "Pricing Rule",
+            filters=filters,
+            fields=["*"],
+            order_by="priority desc, modified desc",
+        )
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            "POS Awesome - Failed to fetch pricing rules",
+        )
+        return []
+
+    prepared = []
+    for raw_rule in rules or []:
+        rule = frappe._dict(raw_rule)
+        if not _pricing_rule_matches_profile(rule, pos_profile, today):
+            continue
+
+        serialized = _serialize_pricing_rule(rule, pos_profile)
+        if serialized:
+            prepared.append(serialized)
+
+    return prepared
+
+
+@frappe.whitelist()
 def get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name=None):
     return _get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name)
 
@@ -371,3 +405,103 @@ def _make_offer_identifier(*parts):
     if not cleaned:
         cleaned = [frappe.generate_hash(length=10)]
     return "ps-" + "-".join(cleaned)
+
+
+def _pricing_rule_matches_profile(rule, pos_profile, today):
+    company = rule.get("company")
+    if company and company != pos_profile.company:
+        return False
+
+    valid_from = rule.get("valid_from")
+    if valid_from and getdate(valid_from) > today:
+        return False
+
+    valid_upto = rule.get("valid_upto")
+    if valid_upto and getdate(valid_upto) < today:
+        return False
+
+    rule_pos_profile = rule.get("pos_profile")
+    if rule_pos_profile and rule_pos_profile != pos_profile.name:
+        return False
+
+    profile_price_list = getattr(pos_profile, "selling_price_list", None)
+    rule_price_list = rule.get("price_list") or rule.get("for_price_list")
+    if rule_price_list and profile_price_list and rule_price_list != profile_price_list:
+        return False
+
+    profile_warehouse = getattr(pos_profile, "warehouse", None)
+    rule_warehouse = rule.get("warehouse")
+    if rule_warehouse and profile_warehouse and rule_warehouse != profile_warehouse:
+        return False
+
+    return True
+
+
+def _serialize_pricing_rule(rule, pos_profile):
+    name = rule.get("name")
+    if not name:
+        return None
+
+    price_or_product_discount = (rule.get("price_or_product_discount") or "").strip()
+    rate_or_discount = (rule.get("rate_or_discount") or "").strip()
+
+    free_qty = flt(rule.get("free_qty") or 0)
+    discount_amount = flt(rule.get("discount_amount") or 0)
+    discount_percentage = flt(rule.get("discount_percentage") or 0)
+    rate = flt(rule.get("rate") or 0)
+
+    entry = {
+        "name": name,
+        "title": rule.get("pricing_rule_name")
+        or rule.get("title")
+        or rule.get("label")
+        or name,
+        "description": rule.get("description") or rule.get("rule_description") or "",
+        "company": rule.get("company"),
+        "pos_profile": pos_profile.name,
+        "price_or_product_discount": price_or_product_discount,
+        "apply_on": rule.get("apply_on"),
+        "applicable_for": rule.get("applicable_for"),
+        "customer": rule.get("customer"),
+        "customer_group": rule.get("customer_group"),
+        "territory": rule.get("territory"),
+        "sales_partner": rule.get("sales_partner"),
+        "item_code": rule.get("item_code"),
+        "item_group": rule.get("item_group"),
+        "brand": rule.get("brand"),
+        "warehouse": rule.get("warehouse"),
+        "valid_from": cstr(rule.get("valid_from")) if rule.get("valid_from") else None,
+        "valid_upto": cstr(rule.get("valid_upto")) if rule.get("valid_upto") else None,
+        "min_qty": flt(rule.get("min_qty") or 0),
+        "max_qty": flt(rule.get("max_qty") or 0),
+        "min_amt": flt(rule.get("min_amt") or 0),
+        "max_amt": flt(rule.get("max_amt") or 0),
+        "priority": rule.get("priority"),
+        "apply_discount_on": rule.get("apply_discount_on"),
+        "rate_or_discount": rate_or_discount,
+        "discount_percentage": discount_percentage,
+        "discount_amount": discount_amount,
+        "rate": rate,
+        "currency": rule.get("currency"),
+        "free_item": rule.get("free_item"),
+        "free_item_name": rule.get("free_item_name"),
+        "free_item_uom": rule.get("free_item_uom"),
+        "free_qty": free_qty,
+        "same_item": 1 if rule.get("same_item") else 0,
+        "apply_multiple_pricing_rules": 1 if rule.get("apply_multiple_pricing_rules") else 0,
+        "rule_description": rule.get("rule_description") or "",
+    }
+
+    entry["is_product_discount"] = price_or_product_discount.lower() in {
+        "product",
+        "product discount",
+        "free item",
+    }
+    entry["is_price_discount"] = price_or_product_discount.lower() in {
+        "price",
+        "price discount",
+        "discount",
+    }
+    entry["is_free_item_rule"] = bool(entry["free_item"] and entry["free_qty"])
+
+    return entry

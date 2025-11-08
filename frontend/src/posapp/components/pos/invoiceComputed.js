@@ -16,9 +16,12 @@ export default {
 			qty = storeValue;
 		} else {
 			qty = 0;
-			this.items.forEach((item) => {
-				qty += flt(item.qty);
-			});
+                        this.items.forEach((item) => {
+                                if (item.posa_pricing_rule_virtual) {
+                                        return;
+                                }
+                                qty += flt(item.qty);
+                        });
 		}
 
 		const result = this.flt(qty, this.float_precision);
@@ -36,12 +39,15 @@ export default {
 			sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
 		} else {
 			sum = 0;
-			this.items.forEach((item) => {
-				// For returns, use absolute value for correct calculation
-				const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-				const rate = flt(item.rate);
-				sum += qty * rate;
-			});
+                        this.items.forEach((item) => {
+                                if (item.posa_pricing_rule_virtual) {
+                                        return;
+                                }
+                                // For returns, use absolute value for correct calculation
+                                const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                                const rate = flt(item.rate);
+                                sum += qty * rate;
+                        });
 		}
 
 		const result = this.flt(sum, this.currency_precision);
@@ -57,12 +63,15 @@ export default {
 		let sum = typeof storeValue === "number" && !Number.isNaN(storeValue) ? storeValue : 0;
 
 		if (!(typeof storeValue === "number" && !Number.isNaN(storeValue))) {
-			this.items.forEach((item) => {
-				// For returns, use absolute value for correct calculation
-				const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
-				const rate = flt(item.rate);
-				sum += qty * rate;
-			});
+                        this.items.forEach((item) => {
+                                if (item.posa_pricing_rule_virtual) {
+                                        return;
+                                }
+                                // For returns, use absolute value for correct calculation
+                                const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
+                                const rate = flt(item.rate);
+                                sum += qty * rate;
+                        });
 		} else if (this.isReturnInvoice) {
 			sum = Math.abs(sum);
 		}
@@ -94,11 +103,14 @@ export default {
 			sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
 		} else {
 			sum = 0;
-			this.items.forEach((item) => {
-				// For returns, use absolute value for correct calculation
-				if (this.isReturnInvoice) {
-					sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
-				} else {
+                        this.items.forEach((item) => {
+                                if (item.posa_pricing_rule_virtual) {
+                                        return;
+                                }
+                                // For returns, use absolute value for correct calculation
+                                if (this.isReturnInvoice) {
+                                        sum += Math.abs(flt(item.qty)) * flt(item.discount_amount);
+                                } else {
 					sum += flt(item.qty) * flt(item.discount_amount);
 				}
 			});

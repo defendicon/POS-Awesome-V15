@@ -372,10 +372,11 @@ export default {
 			total_tax: 0,
 			packed_dialog_items: [], // Packed items displayed in dialog
 			show_packed_dialog: false, // Packing list dialog visibility
-			posOffers: [], // All available offers
-			posa_offers: [], // Offers applied to this invoice
-			posa_coupons: [], // Coupons applied
-			isApplyingOffer: false, // Flag to prevent offer watcher loops
+                        posOffers: [], // All available offers
+                        posa_offers: [], // Offers applied to this invoice
+                        posa_coupons: [], // Coupons applied
+                        pos_pricing_rules: [], // Pricing rules applied virtually
+                        isApplyingOffer: false, // Flag to prevent offer watcher loops
 			allItems: [], // All items for offer logic
 			discount_percentage_offer_name: null, // Track which offer is applied
 			invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
@@ -1536,6 +1537,7 @@ export default {
                         set_offers: this.handleSetOffers,
                         update_invoice_offers: this.handleUpdateInvoiceOffers,
                         update_invoice_coupons: this.handleUpdateInvoiceCoupons,
+                        toggle_pricing_rule: this.handleTogglePricingRule,
                         set_all_items: this.handleSetAllItems,
                         load_return_invoice: this.handleLoadReturnInvoice,
                         set_new_line: this.handleSetNewLine,
@@ -1554,6 +1556,7 @@ export default {
                         this.fetch_available_currencies();
                 }
 
+                this.emitPricingRulesState();
                 this.emitCartQuantities();
                 this.$nextTick(() => {
                         this.primeInvoiceStockState();

@@ -420,35 +420,47 @@
 						readonly
 					></v-text-field>
 				</v-col>
-				<v-col cols="3" class="dynamic-margin-xs">
-					<v-btn-toggle v-model="items_view" color="primary" group density="compact" rounded>
-						<v-btn size="small" value="list">{{ __("List") }}</v-btn>
-						<v-btn size="small" value="card">{{ __("Card") }}</v-btn>
-					</v-btn-toggle>
-				</v-col>
-				<v-col cols="5" class="dynamic-margin-xs">
-					<v-btn
-						size="small"
-						block
-						color="warning"
-						variant="text"
-						@click="show_offers"
-						class="action-btn-consistent"
-					>
-						{{ offersCount }} {{ __("Offers") }}
-					</v-btn>
-				</v-col>
-				<v-col cols="4" class="dynamic-margin-xs">
-					<v-btn
-						size="small"
-						block
-						color="primary"
-						variant="text"
+                                <v-col cols="3" class="dynamic-margin-xs">
+                                        <v-btn-toggle v-model="items_view" color="primary" group density="compact" rounded>
+                                                <v-btn size="small" value="list">{{ __("List") }}</v-btn>
+                                                <v-btn size="small" value="card">{{ __("Card") }}</v-btn>
+                                        </v-btn-toggle>
+                                </v-col>
+                                <v-col cols="3" class="dynamic-margin-xs">
+                                        <v-btn
+                                                size="small"
+                                                block
+                                                color="warning"
+                                                variant="text"
+                                                @click="show_offers"
+                                                class="action-btn-consistent"
+                                        >
+                                                {{ offersCount }} {{ __("Offers") }}
+                                        </v-btn>
+                                </v-col>
+                                <v-col cols="3" class="dynamic-margin-xs">
+                                        <v-btn
+                                                size="small"
+                                                block
+                                                color="secondary"
+                                                variant="text"
+                                                @click="show_pricing_rules"
+                                                class="action-btn-consistent"
+                                        >
+                                                {{ pricingRulesCount }} {{ __("Pricing Rules") }}
+                                        </v-btn>
+                                </v-col>
+                                <v-col cols="3" class="dynamic-margin-xs">
+                                        <v-btn
+                                                size="small"
+                                                block
+                                                color="primary"
+                                                variant="text"
 						@click="show_coupons"
 						class="action-btn-consistent"
-						>{{ couponsCount }} {{ __("Coupons") }}</v-btn
-					>
-				</v-col>
+                                                >{{ couponsCount }} {{ __("Coupons") }}</v-btn
+                                        >
+                                </v-col>
 			</v-row>
 		</v-card>
 
@@ -556,10 +568,12 @@ export default {
 		search_backup: "",
 		// Limit the displayed items to avoid overly large lists
 		itemsPerPage: 50,
-		offersCount: 0,
-		appliedOffersCount: 0,
-		couponsCount: 0,
-		appliedCouponsCount: 0,
+            offersCount: 0,
+            appliedOffersCount: 0,
+            pricingRulesCount: 0,
+            appliedPricingRulesCount: 0,
+            couponsCount: 0,
+            appliedCouponsCount: 0,
 		new_line: false,
 		qty: 1,
 		refresh_interval: null,
@@ -1338,12 +1352,15 @@ export default {
 			}
 		},
 
-		show_offers() {
-			this.eventBus.emit("show_offers", "true");
-		},
-		show_coupons() {
-			this.eventBus.emit("show_coupons", "true");
-		},
+        show_offers() {
+                this.eventBus.emit("show_offers", "true");
+        },
+        show_pricing_rules() {
+                this.eventBus.emit("show_pricing_rules", "true");
+        },
+        show_coupons() {
+                this.eventBus.emit("show_coupons", "true");
+        },
                 async initializeItems() {
                         await this.ensureStorageHealth();
                         if (
@@ -3756,10 +3773,14 @@ export default {
 		this.eventBus.on("update_cur_items_details", () => {
 			this.update_cur_items_details();
 		});
-		this.eventBus.on("update_offers_counters", (data) => {
-			this.offersCount = data.offersCount;
-			this.appliedOffersCount = data.appliedOffersCount;
-		});
+                this.eventBus.on("update_offers_counters", (data) => {
+                        this.offersCount = data.offersCount;
+                        this.appliedOffersCount = data.appliedOffersCount;
+                });
+                this.eventBus.on("update_pricing_rules_counters", (data) => {
+                        this.pricingRulesCount = data.pricingRulesCount;
+                        this.appliedPricingRulesCount = data.appliedPricingRulesCount;
+                });
                 this.eventBus.on("update_coupons_counters", (data) => {
                         this.couponsCount = data.couponsCount;
                         this.appliedCouponsCount = data.appliedCouponsCount;
@@ -3959,6 +3980,7 @@ export default {
                 this.eventBus.off("register_pos_profile");
                 this.eventBus.off("update_cur_items_details");
                 this.eventBus.off("update_offers_counters");
+                this.eventBus.off("update_pricing_rules_counters");
                 this.eventBus.off("update_coupons_counters");
                 this.eventBus.off("cart_quantities_updated", this.handleCartQuantitiesUpdated);
                 this.eventBus.off("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);

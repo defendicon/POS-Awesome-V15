@@ -183,9 +183,13 @@ export default {
 	clearItemStockCache() {
 		this.item_stock_cache = {};
 	},
-	remove_item(item) {
-		return removeItem(item, this);
-	},
+        remove_item(item) {
+                if (item && item.pricing_rule && item.posa_pricing_rule_virtual) {
+                        this._removePricingRuleRecord(item.pricing_rule);
+                        this.emitPricingRulesState();
+                }
+                return removeItem(item, this);
+        },
 
 	async add_item(item, options = {}) {
 		const res = await addItem(item, this);
@@ -398,16 +402,28 @@ export default {
 
 			const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
 
-			await this.update_items_details(this.items);
+                        await this.update_items_details(this.items);
 
-			if (manualSnapshots.length) {
-				this._restoreManualSnapshots(this.items, manualSnapshots);
-			}
+                        if (manualSnapshots.length) {
+                                this._restoreManualSnapshots(this.items, manualSnapshots);
+                        }
 
-			this.posa_offers = data.posa_offers || [];
-		} else {
-			console.log("Warning: No items in return invoice");
-		}
+                        this.posa_offers = data.posa_offers || [];
+                        this.pos_pricing_rules = Array.isArray(data.posa_pricing_rules)
+                                ? data.posa_pricing_rules.map((entry) => ({
+                                          name: entry.pricing_rule || entry.name,
+                                          label: entry.label || entry.pricing_rule || entry.name,
+                                          free_item: entry.free_item,
+                                          free_qty: entry.free_qty,
+                                          row_id: entry.row_id,
+                                  }))
+                                : [];
+                        this.emitPricingRulesState();
+                } else {
+                        console.log("Warning: No items in return invoice");
+                        this.pos_pricing_rules = [];
+                        this.emitPricingRulesState();
+                }
 
 		if (this.packed_items.length > 0) {
 			this.update_items_details(this.packed_items);
@@ -708,11 +724,19 @@ export default {
 		doc.is_return = isReturn ? 1 : 0;
 
 		// Calculate amounts in selected currency
-		const items = this.get_invoice_items();
-		doc.items = items;
-		doc.packed_items = (this.packed_items || []).map((pi) => ({
-			parent_item: pi.parent_item,
-			item_code: pi.item_code,
+                const items = this.get_invoice_items();
+                doc.items = items;
+                doc.posa_pricing_rules = Array.isArray(this.pos_pricing_rules)
+                        ? this.pos_pricing_rules.map((entry) => ({
+                                  pricing_rule: entry.name,
+                                  free_item: entry.free_item,
+                                  free_qty: entry.free_qty,
+                                  row_id: entry.row_id,
+                          }))
+                        : [];
+                doc.packed_items = (this.packed_items || []).map((pi) => ({
+                        parent_item: pi.parent_item,
+                        item_code: pi.item_code,
 			item_name: pi.item_name,
 			qty: flt(pi.qty),
 			uom: pi.uom,
@@ -989,13 +1013,16 @@ export default {
 	// Prepare items array for invoice doc
 	get_invoice_items() {
 		const items_list = [];
-		const isReturn = this.isReturnInvoice;
-		const usesPosInvoice = this.pos_profile.create_pos_invoice_instead_of_sales_invoice;
+                const isReturn = this.isReturnInvoice;
+                const usesPosInvoice = this.pos_profile.create_pos_invoice_instead_of_sales_invoice;
 
-		this.items.forEach((item) => {
-			const new_item = {
-				item_code: item.item_code,
-				// Retain the item name for offline invoices
+                this.items.forEach((item) => {
+                        if (item.posa_pricing_rule_virtual) {
+                                return;
+                        }
+                        const new_item = {
+                                item_code: item.item_code,
+                                // Retain the item name for offline invoices
 				// Fallback to item_code if item_name is not available
 				item_name: item.item_name || item.item_code,
 				name_overridden: item.name_overridden ? 1 : 0,
@@ -1077,12 +1104,15 @@ export default {
 	},
 
 	// Prepare items array for order doc
-	get_order_items() {
-		const items_list = [];
-		this.items.forEach((item) => {
-			const new_item = {
-				item_code: item.item_code,
-				// Retain item name to show on offline order documents
+        get_order_items() {
+                const items_list = [];
+                this.items.forEach((item) => {
+                        if (item.posa_pricing_rule_virtual) {
+                                return;
+                        }
+                        const new_item = {
+                                item_code: item.item_code,
+                                // Retain item name to show on offline order documents
 				// Use item_code if item_name is missing
 				item_name: item.item_name || item.item_code,
 				name_overridden: item.name_overridden ? 1 : 0,
@@ -1105,16 +1135,223 @@ export default {
 				posa_delivery_date: item.posa_delivery_date,
 				price_list_rate: item.price_list_rate,
 			};
-			items_list.push(new_item);
-		});
+                        items_list.push(new_item);
+                });
 
-		return items_list;
-	},
+                return items_list;
+        },
 
-	// Prepare payments array for invoice doc
-	get_payments() {
-		const payments = [];
-		// Use this.subtotal which is already in selected currency and includes all calculations
+        handleTogglePricingRule(payload = {}) {
+                const { rule, applied } = payload || {};
+                const ruleName = rule && rule.name;
+                if (!ruleName) {
+                        return;
+                }
+
+                if (applied) {
+                        this.applyPricingRule(rule);
+                } else {
+                        this.removePricingRule(ruleName);
+                }
+        },
+
+        async applyPricingRule(rule) {
+                try {
+                        if (!rule || !rule.name) {
+                                return;
+                        }
+
+                        if (this.pos_pricing_rules.some((entry) => entry.name === rule.name)) {
+                                return;
+                        }
+
+                        if (this.isReturnInvoice) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Pricing rules are not applied on return invoices"),
+                                        color: "warning",
+                                });
+                                return;
+                        }
+
+                        const freeItemCode = rule.free_item || rule.item_code;
+                        if (!freeItemCode) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                                return;
+                        }
+
+                        const qty = Math.abs(this.flt(rule.free_qty || 0)) || 1;
+                        const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, qty);
+                        if (!newItem) {
+                                return;
+                        }
+
+                        this.items.unshift(newItem);
+
+                        try {
+                                await this.update_item_detail(newItem, true);
+                        } catch (error) {
+                                console.warn("Unable to update virtual pricing rule item details", error);
+                        }
+
+                        this._markVirtualFreeItem(newItem);
+
+                        if (typeof this.calc_stock_qty === "function") {
+                                this.calc_stock_qty(newItem, newItem.qty);
+                        }
+
+                        this._registerPricingRuleRecord(rule, newItem);
+                        this.emitPricingRulesState();
+
+                        if (typeof this.$forceUpdate === "function") {
+                                this.$forceUpdate();
+                        }
+                } catch (error) {
+                        console.error("Failed to apply pricing rule", error);
+                        this.eventBus.emit("show_message", {
+                                title: __("Unable to apply pricing rule"),
+                                color: "error",
+                        });
+                }
+        },
+
+        removePricingRule(ruleName) {
+                if (!ruleName) {
+                        return;
+                }
+
+                const record = this.pos_pricing_rules.find((entry) => entry.name === ruleName);
+                if (record) {
+                        const item = this.items.find((it) => it.posa_row_id === record.row_id);
+                        if (item) {
+                                removeItem(item, this);
+                        }
+                } else {
+                        const fallback = this.items.find(
+                                (it) => it.pricing_rule === ruleName && it.posa_pricing_rule_virtual,
+                        );
+                        if (fallback) {
+                                removeItem(fallback, this);
+                        }
+                }
+
+                this._removePricingRuleRecord(ruleName);
+                this.emitPricingRulesState();
+
+                if (typeof this.$forceUpdate === "function") {
+                        this.$forceUpdate();
+                }
+        },
+
+        _createVirtualPricingRuleItem(rule, itemCode, qty) {
+                const label = rule.title || rule.name;
+                const baseItem = {
+                        item_code: itemCode,
+                        item_name: rule.free_item_name || rule.free_item || rule.item_name || itemCode,
+                        qty,
+                        rate: 0,
+                        price_list_rate: 0,
+                        base_rate: 0,
+                        base_price_list_rate: 0,
+                        discount_amount: 0,
+                        base_discount_amount: 0,
+                        stock_uom: rule.free_item_uom || rule.uom,
+                        uom: rule.free_item_uom || rule.uom,
+                        posa_is_offer: 1,
+                        posa_offer_applied: 1,
+                        posa_offers: JSON.stringify([]),
+                        allow_change_warehouse: 0,
+                        has_batch_no: 0,
+                        has_serial_no: 0,
+                };
+
+                const newItem = this.get_new_item(baseItem);
+                newItem.qty = qty;
+                newItem.stock_qty = qty;
+                newItem.is_free_item = 1;
+                newItem.posa_pricing_rule_virtual = 1;
+                newItem.pricing_rule = rule.name;
+                newItem.pricing_rule_label = label;
+                newItem.posa_offer_applied = 1;
+                newItem.allow_change_warehouse = false;
+                newItem.locked_price = true;
+                newItem.disable_increment = true;
+                newItem.discount_amount = 0;
+                newItem.base_discount_amount = 0;
+                newItem.rate = 0;
+                newItem.base_rate = 0;
+                newItem.price_list_rate = 0;
+                newItem.base_price_list_rate = 0;
+                newItem.amount = 0;
+                newItem.base_amount = 0;
+                newItem.posa_notes = label ? __("Applied via {0}", [label]) : "";
+                return newItem;
+        },
+
+        _markVirtualFreeItem(item) {
+                if (!item) {
+                        return;
+                }
+                item.is_free_item = 1;
+                item.posa_pricing_rule_virtual = 1;
+                item.posa_offer_applied = 1;
+                item.rate = 0;
+                item.base_rate = 0;
+                item.price_list_rate = 0;
+                item.base_price_list_rate = 0;
+                item.discount_amount = 0;
+                item.base_discount_amount = 0;
+                item.amount = 0;
+                item.base_amount = 0;
+                item.locked_price = true;
+                item.allow_change_warehouse = false;
+                item.disable_increment = true;
+        },
+
+        _registerPricingRuleRecord(rule, item) {
+                if (!rule || !item) {
+                        return;
+                }
+                const entry = {
+                        name: rule.name,
+                        label: rule.title || rule.name,
+                        free_item: rule.free_item || item.item_code,
+                        free_qty: item.qty,
+                        row_id: item.posa_row_id,
+                };
+                this.pos_pricing_rules = Array.isArray(this.pos_pricing_rules)
+                        ? [...this.pos_pricing_rules.filter((row) => row.name !== entry.name), entry]
+                        : [entry];
+        },
+
+        _removePricingRuleRecord(ruleName) {
+                if (!ruleName || !Array.isArray(this.pos_pricing_rules)) {
+                        return;
+                }
+                const filtered = this.pos_pricing_rules.filter((entry) => entry.name !== ruleName);
+                if (filtered.length !== this.pos_pricing_rules.length) {
+                        this.pos_pricing_rules = filtered;
+                }
+        },
+
+        emitPricingRulesState() {
+                const applied = Array.isArray(this.pos_pricing_rules)
+                        ? this.pos_pricing_rules.map((entry) => ({
+                                  name: entry.name,
+                                  row_id: entry.row_id,
+                                  free_item: entry.free_item,
+                                  free_qty: entry.free_qty,
+                          }))
+                        : [];
+                this.eventBus.emit("sync_pricing_rules", { applied });
+        },
+
+        // Prepare payments array for invoice doc
+        get_payments() {
+                const payments = [];
+                // Use this.subtotal which is already in selected currency and includes all calculations
 		const total_amount = this.subtotal;
 		let remaining_amount = total_amount;
 

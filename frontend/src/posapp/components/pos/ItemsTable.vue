@@ -32,27 +32,36 @@
 		>
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
-				<div class="d-flex align-center">
-					<span>{{ item.item_name }}</span>
-					<v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
-						{{ __("Bundle") }}
-					</v-chip>
-					<v-chip v-if="item.name_overridden" color="primary" size="x-small" class="ml-1">
-						{{ __("Edited") }}
-					</v-chip>
-					<v-icon
-						v-if="pos_profile.posa_allow_line_item_name_override && !item.posa_is_replace"
-						size="x-small"
-						class="ml-1"
-						@click.stop="openNameDialog(item)"
-						>mdi-pencil</v-icon
-					>
-					<v-icon
-						v-if="item.name_overridden"
-						size="x-small"
-						class="ml-1"
-						@click.stop="resetItemName(item)"
-						>mdi-undo</v-icon
+                                <div class="d-flex align-center">
+                                        <span>{{ item.item_name }}</span>
+                                        <v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
+                                                {{ __("Bundle") }}
+                                        </v-chip>
+                                        <v-chip v-if="item.name_overridden" color="primary" size="x-small" class="ml-1">
+                                                {{ __("Edited") }}
+                                        </v-chip>
+                                        <v-chip
+                                                v-if="item.is_free_item"
+                                                color="success"
+                                                size="x-small"
+                                                class="ml-1"
+                                                variant="tonal"
+                                        >
+                                                {{ __("Free") }}
+                                        </v-chip>
+                                        <v-icon
+                                                v-if="pos_profile.posa_allow_line_item_name_override && !item.posa_is_replace && !item.posa_pricing_rule_virtual"
+                                                size="x-small"
+                                                class="ml-1"
+                                                @click.stop="openNameDialog(item)"
+                                                >mdi-pencil</v-icon
+                                        >
+                                        <v-icon
+                                                v-if="item.name_overridden && !item.posa_pricing_rule_virtual"
+                                                size="x-small"
+                                                class="ml-1"
+                                                @click.stop="resetItemName(item)"
+                                                >mdi-undo</v-icon
 					>
 				</div>
 			</template>
@@ -60,13 +69,13 @@
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
 				<div class="pos-table__qty-counter" :class="{ 'rtl-layout': isRTL }" :title="`RTL: ${isRTL}`">
-					<v-btn
-						:disabled="!!item.posa_is_replace"
-						size="small"
-						variant="flat"
-						class="pos-table__qty-btn pos-table__qty-btn--minus minus-btn qty-control-btn"
-						@click.stop="handleMinusClick(item)"
-					>
+                                        <v-btn
+                                                :disabled="!!item.posa_is_replace || !!item.posa_pricing_rule_virtual"
+                                                size="small"
+                                                variant="flat"
+                                                class="pos-table__qty-btn pos-table__qty-btn--minus minus-btn qty-control-btn"
+                                                @click.stop="handleMinusClick(item)"
+                                        >
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
 					<div
@@ -78,10 +87,10 @@
 						}"
 						:data-length="memoizedQtyLength(item.qty)"
 						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
-						@click.stop="openQtyEdit(item)"
-					>
-						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
-					</div>
+                                                @click.stop="!item.posa_pricing_rule_virtual && openQtyEdit(item)"
+                                        >
+                                                {{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
+                                        </div>
 					<v-text-field
 						v-else
 						:model-value="editing_qty_value"
@@ -96,13 +105,14 @@
 						:autofocus="true"
 						type="number"
 					></v-text-field>
-					<v-btn
-						:disabled="
-							!!item.posa_is_replace ||
-							((!stock_settings.allow_negative_stock || blockSaleBeyondAvailableQty) &&
-								item.max_qty !== undefined &&
-								item.qty >= item.max_qty)
-						"
+                                        <v-btn
+                                                :disabled="
+                                                        !!item.posa_is_replace ||
+                                                        !!item.posa_pricing_rule_virtual ||
+                                                        ((!stock_settings.allow_negative_stock || blockSaleBeyondAvailableQty) &&
+                                                                item.max_qty !== undefined &&
+                                                                item.qty >= item.max_qty)
+                                                "
 						size="small"
 						variant="flat"
 						class="pos-table__qty-btn pos-table__qty-btn--plus plus-btn qty-control-btn"
@@ -191,7 +201,7 @@
 			<!-- Actions -->
 			<template v-slot:item.actions="{ item }">
 				<v-btn
-					:disabled="!!item.posa_is_replace"
+                                                                                        :disabled="!!item.posa_is_replace || !!item.posa_pricing_rule_virtual"
 					size="small"
 					variant="flat"
 					class="pos-table__delete-btn delete-action-btn"
@@ -270,10 +280,11 @@
 											item-value="uom"
 											hide-details
 											@update:model-value="calcUom(item, $event)"
-											:disabled="
-												!!item.posa_is_replace ||
-												(isReturnInvoice && invoice_doc.return_against)
-											"
+                                                                                        :disabled="
+                                                                                                !!item.posa_is_replace ||
+                                                                                                !!item.posa_pricing_rule_virtual ||
+                                                                                                (isReturnInvoice && invoice_doc.return_against)
+                                                                                        "
 											prepend-inner-icon="mdi-weight"
 										></v-select>
 									</div>

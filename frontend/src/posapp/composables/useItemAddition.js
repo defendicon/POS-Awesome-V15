@@ -519,11 +519,15 @@ export function useItemAddition() {
 	const clearInvoice = (context) => {
 		context.items = [];
 		context.packed_items = [];
-		context.posa_offers = [];
-		context.expanded = [];
-		context.eventBus.emit("set_pos_coupons", []);
-		context.posa_coupons = [];
-		context.invoice_doc = "";
+                context.posa_offers = [];
+                context.expanded = [];
+                context.eventBus.emit("set_pos_coupons", []);
+                context.posa_coupons = [];
+                context.pos_pricing_rules = [];
+                if (typeof context.emitPricingRulesState === "function") {
+                        context.emitPricingRulesState();
+                }
+                context.invoice_doc = "";
 		context.return_doc = "";
 		context.discount_amount = 0;
 		context.additional_discount = 0;
