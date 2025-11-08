@@ -27,8 +27,38 @@ function parseAppliedRules(value) {
         return [];
 }
 
+function extractRuleIds(candidate) {
+        if (!candidate) {
+                return [];
+        }
+        if (Array.isArray(candidate)) {
+                return candidate
+                        .flatMap((entry) => extractRuleIds(entry))
+                        .map((entry) => entry)
+                        .filter(Boolean);
+        }
+        if (typeof candidate === "object") {
+                const ref = candidate.pricing_rule || candidate.name || candidate.rule;
+                return extractRuleIds(ref);
+        }
+        return parseAppliedRules(candidate);
+}
+
+function firstAppliedRule(...candidates) {
+        for (const candidate of candidates) {
+                const parsed = extractRuleIds(candidate);
+                if (parsed.length) {
+                        return parsed[0];
+                }
+        }
+        return null;
+}
+
 export default {
         buildPricingRuleContext() {
+                if (!this.pos_profile || typeof this.pos_profile !== "object" || !this.pos_profile.name) {
+                        return null;
+                }
                 const docType = this.invoiceType === "Quotation"
                         ? "Quotation"
                         : this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
@@ -168,11 +198,20 @@ export default {
         },
 
         handleRequestPricingRuleContext() {
+                if (!this.pos_profile || typeof this.pos_profile !== "object" || !this.pos_profile.name) {
+                        this.pricingRuleContextPending = true;
+                        return;
+                }
                 const context = this.buildPricingRuleContext();
+                if (!context) {
+                        this.pricingRuleContextPending = true;
+                        return;
+                }
+                this.pricingRuleContextPending = false;
                 this.eventBus.emit("pricing_rule_context", context);
         },
 
-        handleApplyPricingRuleUpdates(payload) {
+        async handleApplyPricingRuleUpdates(payload) {
                 if (!payload || !Array.isArray(payload.updates)) {
                         return;
                 }
@@ -187,6 +226,8 @@ export default {
                         const key = item.posa_row_id || item.name || item.item_code;
                         itemMap.set(key, item);
                 });
+
+                const freebiesByRule = new Map();
 
                 updates.forEach((detail) => {
                         const rowId = detail.posa_row_id || detail.child_docname || detail.name || detail.item_code;
@@ -216,6 +257,9 @@ export default {
                         if (detail.margin_rate_or_amount !== undefined) {
                                 item.margin_rate_or_amount = flt(detail.margin_rate_or_amount);
                         }
+                        if (detail.is_free_item !== undefined) {
+                                item.is_free_item = detail.is_free_item ? 1 : 0;
+                        }
 
                         if (selectedCurrency !== baseCurrency) {
                                 if (item.base_price_list_rate !== undefined) {
@@ -242,19 +286,68 @@ export default {
                                 item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
                         }
 
-                        if (detail.free_item_data && detail.free_item_data.length) {
-                                this.eventBus.emit("show_message", {
-                                        title: __("The selected pricing rule includes free items. Please review them manually."),
-                                        color: "warning",
-                                });
+                        if (detail.free_item_data) {
+                                const ruleId = firstAppliedRule(
+                                        detail.pricing_rule,
+                                        detail.pricing_rules,
+                                        detail.pricing_rule_name,
+                                        detail.rule,
+                                        detail.free_item_data,
+                                        payload.pricing_rule,
+                                );
+                                if (ruleId && !freebiesByRule.has(ruleId)) {
+                                        freebiesByRule.set(ruleId, []);
+                                }
+                                if (ruleId) {
+                                        const existing = freebiesByRule.get(ruleId) || [];
+                                        const dataArray = Array.isArray(detail.free_item_data)
+                                                ? detail.free_item_data
+                                                : [];
+                                        dataArray.forEach((entry) => {
+                                                if (!entry) {
+                                                        return;
+                                                }
+                                                existing.push({
+                                                        ...entry,
+                                                        source_row:
+                                                                detail.posa_row_id ||
+                                                                detail.child_docname ||
+                                                                detail.name ||
+                                                                detail.item_code,
+                                                });
+                                        });
+                                        freebiesByRule.set(ruleId, existing);
+                                }
                         }
                 });
+
+                const requestedRule = firstAppliedRule(payload?.pricing_rule);
+                if (requestedRule && !freebiesByRule.has(requestedRule)) {
+                        freebiesByRule.set(requestedRule, []);
+                }
+
+                for (const [ruleId, freebies] of freebiesByRule.entries()) {
+                        try {
+                                await this.syncFreeItemsForPricingRule(ruleId, freebies);
+                        } catch (error) {
+                                console.error("Failed to synchronise free items for pricing rule", ruleId, error);
+                        }
+                }
 
                 this.$forceUpdate();
                 this.emitPricingRuleCounters();
         },
 
         handleResetPricingRules() {
+                if (typeof this.remove_item === "function") {
+                        const freebies = (this.items || []).filter(
+                                (item) => item && item.is_free_item && item.posa_pricing_rule_freebie,
+                        );
+                        freebies.forEach((item) => {
+                                this.remove_item(item);
+                        });
+                }
+
                 (this.items || []).forEach((item) => {
                         if (!item) {
                                 return;
@@ -280,5 +373,163 @@ export default {
 
                 this.$forceUpdate();
                 this.emitPricingRuleCounters();
+        },
+
+        removePricingRuleFreeItems(ruleId) {
+                if (!ruleId || typeof this.remove_item !== "function") {
+                        return;
+                }
+                const removable = (this.items || []).filter(
+                        (item) => item && item.is_free_item && item.posa_pricing_rule_freebie === ruleId,
+                );
+                removable.forEach((item) => {
+                        this.remove_item(item);
+                });
+        },
+
+        async syncFreeItemsForPricingRule(ruleId, freebies = []) {
+                if (!ruleId) {
+                        return;
+                }
+
+                this.removePricingRuleFreeItems(ruleId);
+
+                if (!Array.isArray(freebies) || !freebies.length) {
+                        return;
+                }
+
+                for (const detail of freebies) {
+                        try {
+                                await this.addFreeItemFromPricingRule(ruleId, detail);
+                        } catch (error) {
+                                console.error("Failed to add free item from pricing rule", ruleId, error);
+                        }
+                }
+        },
+
+        async addFreeItemFromPricingRule(ruleId, detail) {
+                if (!ruleId || !detail || !detail.item_code) {
+                        return null;
+                }
+
+                const quantity = flt(detail.qty || detail.free_qty || detail.quantity || 0);
+                const qty = quantity ? Math.abs(quantity) : 0;
+                if (!qty) {
+                        return null;
+                }
+
+                const rawStockQty =
+                        detail.stock_qty !== undefined ? detail.stock_qty : detail.free_stock_qty || detail.stock_qty;
+                const stockQtyValue = rawStockQty !== undefined ? flt(rawStockQty) : null;
+                const conversionFactorRaw = detail.conversion_factor || detail.free_conversion_factor;
+                const conversionFactor = conversionFactorRaw ? flt(conversionFactorRaw) || 1 : 1;
+                const stockQty = stockQtyValue !== null ? stockQtyValue : qty * conversionFactor;
+
+                const beforeIds = new Set(
+                        (this.items || [])
+                                .filter((item) => item && item.posa_pricing_rule_freebie === ruleId)
+                                .map((item) => item.posa_row_id),
+                );
+
+                let baseItem = null;
+                if (typeof this.resolveOfferItem === "function") {
+                        try {
+                                baseItem = await this.resolveOfferItem(detail.item_code);
+                        } catch (error) {
+                                console.error("Failed to resolve pricing rule free item", detail.item_code, error);
+                        }
+                }
+
+                const payload = baseItem ? { ...baseItem } : { item_code: detail.item_code };
+                payload.item_name =
+                        detail.item_name || detail.free_item_name || payload.item_name || detail.item_code;
+                payload.description = detail.description || payload.description || payload.item_name;
+                payload.qty = qty;
+                payload.stock_qty = stockQty;
+                payload.uom = detail.uom || payload.uom || detail.stock_uom || payload.stock_uom;
+                payload.stock_uom = detail.stock_uom || payload.stock_uom || payload.uom;
+                payload.conversion_factor = conversionFactor || 1;
+                payload.warehouse = detail.warehouse || payload.warehouse || this.pos_profile?.warehouse;
+
+                const baseRate = flt(
+                        detail.rate !== undefined
+                                ? detail.rate
+                                : detail.base_rate !== undefined
+                                ? detail.base_rate
+                                : 0,
+                );
+                const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                const exchangeRate = this.exchange_rate || 1;
+                const isForeignCurrency = this.selected_currency && baseCurrency && this.selected_currency !== baseCurrency;
+                const displayRate = isForeignCurrency
+                        ? this.flt(baseRate * exchangeRate, this.currency_precision)
+                        : baseRate;
+
+                payload.base_rate = baseRate;
+                payload.base_price_list_rate = baseRate;
+                payload.rate = displayRate;
+                payload.price_list_rate = displayRate;
+                payload.discount_amount = 0;
+                payload.discount_percentage = 0;
+                payload.pricing_rules = JSON.stringify([ruleId]);
+                payload.posa_is_offer = 1;
+                payload.posa_is_replace = payload.posa_is_replace || "";
+                payload.is_free_item = 1;
+                payload.posa_pricing_rule_freebie = ruleId;
+                payload.posa_pricing_rule_source_row =
+                        detail.source_row || detail.child_docname || detail.parent_detail_docname || null;
+
+                if (detail.batch_no) {
+                        payload.batch_no = detail.batch_no;
+                        payload.has_batch_no = 1;
+                }
+                if (detail.serial_no) {
+                        payload.serial_no = detail.serial_no;
+                }
+
+                const originalNewLine = this.new_line;
+                try {
+                        this.new_line = true;
+                        await this.add_item(payload, { skipNotification: true });
+                } finally {
+                        this.new_line = originalNewLine;
+                }
+
+                const addedItem = (this.items || []).find((item) => {
+                        if (!item || item.posa_pricing_rule_freebie !== ruleId) {
+                                return false;
+                        }
+                        if (beforeIds.has(item.posa_row_id)) {
+                                return false;
+                        }
+                        if (payload.posa_pricing_rule_source_row) {
+                                return item.posa_pricing_rule_source_row === payload.posa_pricing_rule_source_row;
+                        }
+                        return true;
+                });
+
+                if (addedItem) {
+                        addedItem.is_free_item = 1;
+                        addedItem.pricing_rules = JSON.stringify([ruleId]);
+                        addedItem.posa_pricing_rule_freebie = ruleId;
+                        addedItem.posa_pricing_rule_source_row = payload.posa_pricing_rule_source_row;
+                        addedItem.discount_amount = 0;
+                        addedItem.discount_percentage = 0;
+                        addedItem.base_rate = baseRate;
+                        addedItem.base_price_list_rate = baseRate;
+                        addedItem.rate = displayRate;
+                        addedItem.price_list_rate = displayRate;
+                        addedItem.amount = this.flt(addedItem.qty * addedItem.rate, this.currency_precision);
+                        addedItem.base_amount = this.flt(
+                                addedItem.qty * (addedItem.base_rate !== undefined ? addedItem.base_rate : addedItem.rate),
+                                this.currency_precision,
+                        );
+                        if (detail.batch_no && this.setBatchQty) {
+                                this.setBatchQty(addedItem, detail.batch_no, false);
+                        }
+                        this.calc_item_price(addedItem);
+                }
+
+                return addedItem || null;
         },
 };

@@ -430,6 +430,7 @@ export default {
                         invoiceHeight: null,
                         paymentVisible: false, // Track current payment view state
                         _busHandlers: {},
+                        pricingRuleContextPending: false,
                 };
         },
 
@@ -1442,6 +1443,11 @@ export default {
 
                         this.fetch_price_lists();
                         this.update_price_list();
+
+                        this.pricingRuleContextPending = false;
+                        this.$nextTick(() => {
+                                this.handleRequestPricingRuleContext();
+                        });
                 },
                 handleClearInvoice() {
                         this.clear_invoice();
