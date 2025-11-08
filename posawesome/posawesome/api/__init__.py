@@ -35,6 +35,7 @@ from .offers import (
     get_offers,
     get_pos_coupon,
 )
+from .pricing_rules import get_pricing_rules, set_pricing_rule_status
 from .payments import (
     create_payment_request,
     get_available_credit,
