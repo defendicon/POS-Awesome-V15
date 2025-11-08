@@ -653,9 +653,15 @@ export default {
                 const existingByKey = new Map();
                 existingItems.forEach((item) => {
                         const key = item.posa_pricing_rule_key || this.getPricingRuleFreebieKey(item);
-                        if (key) {
-                                existingByKey.set(key, item);
+                        if (!key) {
+                                return;
                         }
+
+                        if (!existingByKey.has(key)) {
+                                existingByKey.set(key, []);
+                        }
+
+                        existingByKey.get(key).push(item);
                 });
 
                 const retainedKeys = new Set();
@@ -666,7 +672,8 @@ export default {
                                 continue;
                         }
 
-                        const existingItem = existingByKey.get(key);
+                        const existingCandidates = existingByKey.get(key) || [];
+                        const existingItem = existingCandidates.length ? existingCandidates[0] : null;
                         if (existingItem) {
                                 try {
                                         this.updateFreeItemFromPricingRule(existingItem, detail, ruleId);
@@ -686,10 +693,14 @@ export default {
                 }
 
                 if (typeof this.remove_item === "function" && existingByKey.size) {
-                        existingByKey.forEach((item, key) => {
-                                if (!retainedKeys.has(key)) {
-                                        this.remove_item(item);
-                                }
+                        existingByKey.forEach((items, key) => {
+                                const shouldRetain = retainedKeys.has(key);
+
+                                items.forEach((item, index) => {
+                                        if (!shouldRetain || index > 0) {
+                                                this.remove_item(item);
+                                        }
+                                });
                         });
                 }
         },
