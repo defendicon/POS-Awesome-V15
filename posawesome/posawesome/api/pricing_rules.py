@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 import frappe
 from frappe import _
@@ -320,6 +320,239 @@ def _is_pricing_rule_freebie(item) -> bool:
         return bool(item.get("posa_pricing_rule_freebie"))
     except AttributeError:
         return False
+
+
+def _resolve_freebie_rule_identifier(item) -> str:
+    if not item:
+        return ""
+
+    identifiers = _extract_rule_identifiers(
+        getattr(item, "posa_pricing_rule_freebie", None),
+        item.get("posa_pricing_rule_freebie") if hasattr(item, "get") else None,
+        item.get("pricing_rule") if hasattr(item, "get") else None,
+        item.get("pricing_rules") if hasattr(item, "get") else None,
+        item.get("pricing_rule_name") if hasattr(item, "get") else None,
+        item.get("rule") if hasattr(item, "get") else None,
+        item.get("applied_pricing_rule") if hasattr(item, "get") else None,
+        item.get("applied_pricing_rules") if hasattr(item, "get") else None,
+    )
+
+    for identifier in identifiers:
+        parsed = _parse_rule_identifier(identifier)
+        if parsed:
+            return parsed
+
+    return ""
+
+
+def _child_value(item, fieldname: str, default=None):
+    if hasattr(item, "get"):
+        try:
+            value = item.get(fieldname)
+        except Exception:
+            value = None
+        else:
+            if value is not None:
+                return value
+
+    return getattr(item, fieldname, default)
+
+
+def _build_freebie_key_parts(item, rule_id: str) -> Tuple[str, ...]:
+    if not item:
+        return (rule_id or "",)
+
+    item_code = _child_value(item, "item_code")
+    if not item_code:
+        item_code = _child_value(item, "free_item_code") or _child_value(item, "free_item")
+
+    batch_no = _child_value(item, "batch_no") or _child_value(item, "free_batch_no")
+    serial_no = _child_value(item, "serial_no") or _child_value(item, "free_serial_no")
+    uom = (
+        _child_value(item, "uom")
+        or _child_value(item, "stock_uom")
+        or _child_value(item, "free_uom")
+    )
+    warehouse = _child_value(item, "warehouse") or _child_value(item, "free_warehouse")
+
+    raw_factor = _child_value(item, "conversion_factor")
+    if raw_factor is None:
+        raw_factor = _child_value(item, "free_conversion_factor")
+    conversion_factor = flt(raw_factor or 1) or 1
+
+    parts = (
+        str(rule_id or ""),
+        str(item_code or ""),
+        str(batch_no or ""),
+        str(serial_no or ""),
+        str(uom or ""),
+        str(warehouse or ""),
+        str(conversion_factor or 1),
+    )
+
+    return parts
+
+
+def _build_freebie_composite_key(item, rule_id: str) -> str:
+    explicit_key = _child_value(item, "posa_pricing_rule_key")
+
+    if explicit_key:
+        return str(explicit_key)
+
+    return "::".join(_build_freebie_key_parts(item, rule_id))
+
+
+def normalize_pricing_rule_freebies(doc) -> bool:
+    """Merge duplicate pricing rule freebies on the provided document."""
+
+    if not doc or not getattr(doc, "items", None):
+        return False
+
+    mutated = False
+    seen = {}
+    to_remove = []
+
+    for child in list(doc.items):
+        if not _is_pricing_rule_freebie(child):
+            continue
+
+        rule_id = _resolve_freebie_rule_identifier(child)
+        if not rule_id:
+            continue
+
+        if _child_value(child, "is_free_item") != 1:
+            try:
+                child.is_free_item = 1
+            except Exception:
+                pass
+            mutated = True
+
+        if _child_value(child, "posa_pricing_rule_freebie") != rule_id:
+            try:
+                child.posa_pricing_rule_freebie = rule_id
+            except Exception:
+                pass
+            mutated = True
+
+        composite = _build_freebie_composite_key(child, rule_id)
+
+        identifiers = set(
+            _extract_rule_identifiers(
+                _child_value(child, "pricing_rules"),
+                _child_value(child, "applied_pricing_rules"),
+                _child_value(child, "pricing_rule"),
+                _child_value(child, "rule"),
+            )
+        )
+        identifiers.add(rule_id)
+
+        serialized = json.dumps(sorted(identifiers))
+        current_serialized = _child_value(child, "pricing_rules")
+        if current_serialized != serialized:
+            try:
+                child.pricing_rules = serialized
+            except Exception:
+                pass
+            mutated = True
+
+        if _child_value(child, "applied_pricing_rules") != serialized:
+            try:
+                child.applied_pricing_rules = serialized
+            except Exception:
+                pass
+            mutated = True
+
+        if _child_value(child, "applied_pricing_rule") != rule_id:
+            try:
+                child.applied_pricing_rule = rule_id
+            except Exception:
+                pass
+            mutated = True
+
+        existing = seen.get(composite)
+        if not existing:
+            seen[composite] = child
+            continue
+
+        qty = flt(_child_value(existing, "qty") or 0)
+        stock_qty = flt(_child_value(existing, "stock_qty") or 0)
+
+        incoming_qty = flt(_child_value(child, "qty") or 0)
+        incoming_stock_qty = _child_value(child, "stock_qty")
+        if incoming_stock_qty is None:
+            incoming_stock_qty = incoming_qty * flt(_child_value(child, "conversion_factor") or 1)
+
+        if incoming_qty > 0 and (qty <= 0 or incoming_qty >= qty):
+            existing.qty = incoming_qty
+        else:
+            existing.qty = qty
+
+        if incoming_stock_qty and flt(incoming_stock_qty) > 0 and (
+            stock_qty <= 0 or flt(incoming_stock_qty) >= stock_qty
+        ):
+            existing.stock_qty = flt(incoming_stock_qty)
+        else:
+            existing.stock_qty = stock_qty
+
+        rate = flt(_child_value(existing, "rate") or 0)
+        base_rate = flt(_child_value(existing, "base_rate")) or rate
+
+        try:
+            amount_precision = existing.precision("amount")
+        except Exception:
+            amount_precision = 2
+
+        try:
+            base_amount_precision = existing.precision("base_amount")
+        except Exception:
+            base_amount_precision = 2
+
+        existing.amount = flt(existing.qty * rate, amount_precision)
+        existing.base_amount = flt(existing.qty * base_rate, base_amount_precision)
+        if hasattr(existing, "net_amount"):
+            try:
+                net_precision = existing.precision("net_amount")
+            except Exception:
+                net_precision = amount_precision
+            existing.net_amount = flt(existing.amount, net_precision)
+        if hasattr(existing, "base_net_amount"):
+            try:
+                base_net_precision = existing.precision("base_net_amount")
+            except Exception:
+                base_net_precision = base_amount_precision
+            existing.base_net_amount = flt(existing.base_amount, base_net_precision)
+
+        existing_serialized = _child_value(existing, "pricing_rules")
+        if existing_serialized != serialized:
+            try:
+                existing.pricing_rules = serialized
+            except Exception:
+                pass
+
+        if _child_value(existing, "applied_pricing_rules") != serialized:
+            try:
+                existing.applied_pricing_rules = serialized
+            except Exception:
+                pass
+
+        if _child_value(existing, "applied_pricing_rule") != rule_id:
+            try:
+                existing.applied_pricing_rule = rule_id
+            except Exception:
+                pass
+
+        to_remove.append(child)
+        mutated = True
+
+    for duplicate in to_remove:
+        try:
+            doc.remove(duplicate)
+        except Exception:
+            items = [item for item in doc.items if item != duplicate]
+            doc.set("items", items)
+        mutated = True
+
+    return mutated
 
 
 @frappe.whitelist()

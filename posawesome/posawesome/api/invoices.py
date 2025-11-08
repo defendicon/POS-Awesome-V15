@@ -31,6 +31,7 @@ from posawesome.posawesome.api.utilities import (
     ensure_child_doctype,
     set_batch_nos_for_bundels,
 )  # Updated imports
+from posawesome.posawesome.api.pricing_rules import normalize_pricing_rule_freebies
 
 from .items import get_stock_availability
 
@@ -346,6 +347,8 @@ def update_invoice(data):
     # Set missing values first
     invoice_doc.set_missing_values()
 
+    normalize_pricing_rule_freebies(invoice_doc)
+
     # Reapply any custom item names after defaults are set
     _apply_item_name_overrides(invoice_doc, overrides)
 
@@ -453,6 +456,7 @@ def update_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.docstatus = 0
+    normalize_pricing_rule_freebies(invoice_doc)
     invoice_doc.save()
 
     # Return both the invoice doc and the updated data
@@ -611,6 +615,7 @@ def submit_invoice(invoice, data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
+    normalize_pricing_rule_freebies(invoice_doc)
     invoice_doc.save()
 
     if data.get("due_date"):
@@ -682,6 +687,7 @@ def submit_in_background_job(kwargs):
     items.append(grand_total)
 
     invoice_doc.remarks = "\n".join(items)
+    normalize_pricing_rule_freebies(invoice_doc)
     invoice_doc.save()
 
     invoice_doc.submit()
@@ -939,6 +945,7 @@ def update_invoice_from_order(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
     invoice_doc.update(data)
+    normalize_pricing_rule_freebies(invoice_doc)
     invoice_doc.save()
     return invoice_doc
 
