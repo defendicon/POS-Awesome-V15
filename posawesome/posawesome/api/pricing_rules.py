@@ -59,6 +59,8 @@ def _prepare_context(context_json: str) -> Dict:
         row.setdefault("rate", flt(row.get("rate")))
         row.setdefault("discount_percentage", flt(row.get("discount_percentage")))
         row.setdefault("discount_amount", flt(row.get("discount_amount")))
+        if row.get("is_free_item") is not None:
+            row["is_free_item"] = cint(row.get("is_free_item"))
         prepared_items.append(row)
 
     context["items"] = prepared_items
@@ -100,6 +102,10 @@ def _prepare_context(context_json: str) -> Dict:
                 "serial_no": row.get("serial_no"),
                 "batch_no": row.get("batch_no"),
                 "pricing_rules": row.get("pricing_rules"),
+                "is_free_item": row.get("is_free_item"),
+                "posa_pricing_rule_freebie": row.get("posa_pricing_rule_freebie"),
+                "posa_pricing_rule_key": row.get("posa_pricing_rule_key"),
+                "posa_pricing_rule_source_row": row.get("posa_pricing_rule_source_row"),
                 "parenttype": context.doctype,
             }
         )
