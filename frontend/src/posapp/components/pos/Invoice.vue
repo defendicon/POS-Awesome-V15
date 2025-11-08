@@ -1458,13 +1458,65 @@ export default {
                         this._pricingRuleOriginals = new WeakMap();
                         this.eventBus.emit("focus_item_search");
                 },
-                handleLoadInvoice(data) {
+                async handleLoadInvoice(data) {
                         this._pricingRuleOriginals = new WeakMap();
-                        this.load_invoice(data);
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+
+                        let resumePricingRules = null;
+                        if (
+                                typeof this.suppressPricingRuleRefresh === "function" &&
+                                typeof this.resumePricingRuleRefresh === "function"
+                        ) {
+                                this.suppressPricingRuleRefresh();
+                                resumePricingRules = () => this.resumePricingRuleRefresh({ cancelPending: true });
+                        }
+
+                        try {
+                                await this.load_invoice(data);
+                        } finally {
+                                if (resumePricingRules) {
+                                        const resume = () => {
+                                                resumePricingRules();
+                                        };
+                                        if (typeof this.$nextTick === "function") {
+                                                this.$nextTick(resume);
+                                        } else {
+                                                resume();
+                                        }
+                                }
+                        }
                 },
-                handleLoadOrder(data) {
+                async handleLoadOrder(data) {
                         this._pricingRuleOriginals = new WeakMap();
-                        this.new_order(data);
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+
+                        let resumePricingRules = null;
+                        if (
+                                typeof this.suppressPricingRuleRefresh === "function" &&
+                                typeof this.resumePricingRuleRefresh === "function"
+                        ) {
+                                this.suppressPricingRuleRefresh();
+                                resumePricingRules = () => this.resumePricingRuleRefresh({ cancelPending: true });
+                        }
+
+                        try {
+                                await this.new_order(data);
+                        } finally {
+                                if (resumePricingRules) {
+                                        const resume = () => {
+                                                resumePricingRules();
+                                        };
+                                        if (typeof this.$nextTick === "function") {
+                                                this.$nextTick(resume);
+                                        } else {
+                                                resume();
+                                        }
+                                }
+                        }
                         // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
                 },
                 handleSetOffers(data) {
@@ -1486,10 +1538,36 @@ export default {
                         });
                         this.primeInvoiceStockState();
                 },
-                handleLoadReturnInvoice(data) {
+                async handleLoadReturnInvoice(data) {
                         console.log("Invoice component received load_return_invoice event with data:", data);
                         this._pricingRuleOriginals = new WeakMap();
-                        this.load_invoice(data.invoice_doc);
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
+
+                        let resumePricingRules = null;
+                        if (
+                                typeof this.suppressPricingRuleRefresh === "function" &&
+                                typeof this.resumePricingRuleRefresh === "function"
+                        ) {
+                                this.suppressPricingRuleRefresh();
+                                resumePricingRules = () => this.resumePricingRuleRefresh({ cancelPending: true });
+                        }
+
+                        try {
+                                await this.load_invoice(data.invoice_doc);
+                        } finally {
+                                if (resumePricingRules) {
+                                        const resume = () => {
+                                                resumePricingRules();
+                                        };
+                                        if (typeof this.$nextTick === "function") {
+                                                this.$nextTick(resume);
+                                        } else {
+                                                resume();
+                                        }
+                                }
+                        }
                         this.invoiceType = "Return";
                         this.invoiceTypes = ["Return"];
                         this.invoice_doc.is_return = 1;

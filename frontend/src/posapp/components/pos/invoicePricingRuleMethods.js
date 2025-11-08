@@ -537,12 +537,76 @@ export default {
                 });
         },
 
+        isPricingRuleRefreshSuppressed() {
+                return Number.isFinite(this._pricingRuleRefreshSuppressCount)
+                        ? this._pricingRuleRefreshSuppressCount > 0
+                        : false;
+        },
+
+        suppressPricingRuleRefresh() {
+                const count = Number.isFinite(this._pricingRuleRefreshSuppressCount)
+                        ? this._pricingRuleRefreshSuppressCount
+                        : 0;
+                this._pricingRuleRefreshSuppressCount = count + 1;
+        },
+
+        resumePricingRuleRefresh(options = {}) {
+                const { cancelPending = false, flushPending = true } = options || {};
+                const count = Number.isFinite(this._pricingRuleRefreshSuppressCount)
+                        ? this._pricingRuleRefreshSuppressCount
+                        : 0;
+
+                if (count > 0) {
+                        this._pricingRuleRefreshSuppressCount = count - 1;
+                } else {
+                        this._pricingRuleRefreshSuppressCount = 0;
+                }
+
+                if (this.isPricingRuleRefreshSuppressed()) {
+                        return;
+                }
+
+                if (cancelPending) {
+                        this.cancelScheduledPricingRuleRefresh();
+                        this._pricingRuleRefreshRequestedDuringSuppression = false;
+                        this._pricingRuleRefreshSuppressedRows = null;
+                        return;
+                }
+
+                const shouldFlush = flushPending !== false && this._pricingRuleRefreshRequestedDuringSuppression;
+                const suppressedRows = this._pricingRuleRefreshSuppressedRows;
+                this._pricingRuleRefreshRequestedDuringSuppression = false;
+                this._pricingRuleRefreshSuppressedRows = null;
+
+                if (shouldFlush) {
+                        const rowIds = Array.isArray(suppressedRows)
+                                ? suppressedRows
+                                : suppressedRows instanceof Set
+                                ? Array.from(suppressedRows)
+                                : [];
+                        this.schedulePricingRuleRefresh(rowIds);
+                }
+        },
+
         schedulePricingRuleRefresh(changedRowIds = []) {
                 if (typeof changedRowIds === "boolean") {
                         changedRowIds = [];
                 } else if (changedRowIds && typeof changedRowIds === "object" && !Array.isArray(changedRowIds)) {
                         const options = changedRowIds || {};
                         changedRowIds = Array.isArray(options.rowIds) ? options.rowIds : [];
+                }
+
+                if (this.isPricingRuleRefreshSuppressed()) {
+                        this._pricingRuleRefreshRequestedDuringSuppression = true;
+                        if (Array.isArray(changedRowIds) && changedRowIds.length) {
+                                const existing = this._pricingRuleRefreshSuppressedRows;
+                                if (existing instanceof Set) {
+                                        changedRowIds.forEach((id) => existing.add(id));
+                                } else {
+                                        this._pricingRuleRefreshSuppressedRows = new Set(changedRowIds);
+                                }
+                        }
+                        return;
                 }
 
                 if (this._pricingRuleAutoApplying) {
@@ -579,9 +643,16 @@ export default {
 
                 this._pricingRuleRefreshPending = false;
                 this._pricingRuleRefreshRequested = false;
+                this._pricingRuleRefreshRequestedDuringSuppression = false;
+                this._pricingRuleRefreshSuppressedRows = null;
         },
 
         async processPendingPricingRuleRefresh() {
+                if (this.isPricingRuleRefreshSuppressed()) {
+                        this._pricingRuleRefreshRequestedDuringSuppression = true;
+                        return;
+                }
+
                 if (this._pricingRuleAutoApplying) {
                         this._pricingRuleRefreshRequested = true;
                         return;
