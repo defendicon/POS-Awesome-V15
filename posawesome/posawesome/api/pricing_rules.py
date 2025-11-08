@@ -35,29 +35,12 @@ def get_pricing_rules(profile: str | None = None, company: str | None = None):
     if target_company:
         filters["company"] = target_company
 
+    fields = _resolve_fields()
+
     rules = frappe.get_all(
         "Pricing Rule",
         filters=filters,
-        fields=[
-            "name",
-            "title",
-            "company",
-            "selling",
-            "apply_on",
-            "applicable_for",
-            "price_or_product_discount",
-            "rate_or_discount",
-            "min_qty",
-            "max_qty",
-            "min_amount",
-            "max_amount",
-            "valid_from",
-            "valid_upto",
-            "for_price_list",
-            "currency",
-            "priority",
-            "disable",
-        ],
+        fields=fields,
         order_by="modified desc",
     )
 
@@ -65,6 +48,50 @@ def get_pricing_rules(profile: str | None = None, company: str | None = None):
         rule["disable"] = cint(rule.get("disable"))
 
     return rules
+
+
+def _resolve_fields() -> list[str]:
+    """Return the list of Pricing Rule fields supported by the current schema."""
+
+    desired_fields = [
+        "name",
+        "title",
+        "company",
+        "selling",
+        "apply_on",
+        "applicable_for",
+        "price_or_product_discount",
+        "rate_or_discount",
+        "min_qty",
+        "max_qty",
+        "min_amount",
+        "max_amount",
+        "valid_from",
+        "valid_upto",
+        "for_price_list",
+        "currency",
+        "priority",
+        "disable",
+    ]
+
+    existing_columns = set(frappe.db.get_table_columns("Pricing Rule") or [])
+    fields = [field for field in desired_fields if field in existing_columns]
+
+    if fields:
+        return fields
+
+    # Fallback to the minimal set of columns used by the POS frontend.
+    minimal_fields = [
+        "name",
+        "title",
+        "apply_on",
+        "price_or_product_discount",
+        "valid_from",
+        "valid_upto",
+        "disable",
+    ]
+
+    return [field for field in minimal_fields if field in existing_columns] or ["name"]
 
 
 @frappe.whitelist()
