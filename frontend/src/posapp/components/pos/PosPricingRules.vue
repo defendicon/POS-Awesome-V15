@@ -122,6 +122,11 @@ export default {
                 formatRuleCurrency(value) {
                         return this.formatCurrency(value);
                 },
+                handlePanelToggle(state) {
+                        if (state === "true") {
+                                this.refreshContext();
+                        }
+                },
                 refreshContext() {
                         this.eventBus.emit("request_pricing_rule_context");
                 },
@@ -207,6 +212,7 @@ export default {
         created() {
                 this.$nextTick(() => {
                         this.eventBus.on("pricing_rule_context", this.handlePricingRuleContext);
+                        this.eventBus.on("show_pricing_rules", this.handlePanelToggle);
                         this.profileHandler = (data) => {
                                 this.pos_profile = data.pos_profile;
                         };
@@ -216,6 +222,7 @@ export default {
         },
         beforeUnmount() {
                 this.eventBus.off("pricing_rule_context", this.handlePricingRuleContext);
+                this.eventBus.off("show_pricing_rules", this.handlePanelToggle);
                 if (this.profileHandler) {
                         this.eventBus.off("register_pos_profile", this.profileHandler);
                         this.profileHandler = null;
