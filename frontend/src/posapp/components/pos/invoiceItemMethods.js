@@ -107,14 +107,44 @@ export default {
 	hasItemTaskPromise(rowId, taskName) {
 		return !!this._getItemTaskPromise(rowId, taskName);
 	},
-	getItemTaskPromise(rowId, taskName) {
-		return this._getItemTaskPromise(rowId, taskName);
-	},
-	_getItemDetailCacheKey(item) {
-		const code = item?.item_code;
-		const warehouse = item?.warehouse || this.pos_profile?.warehouse;
-		if (!code || !warehouse) {
-			return null;
+        getItemTaskPromise(rowId, taskName) {
+                return this._getItemTaskPromise(rowId, taskName);
+        },
+        _coerceNumber(value, fallback = null) {
+                if (value === null || value === undefined) {
+                        return fallback;
+                }
+
+                if (typeof value === "number") {
+                        return Number.isFinite(value) ? value : fallback;
+                }
+
+                if (typeof value === "boolean") {
+                        return value ? 1 : 0;
+                }
+
+                if (typeof value === "string") {
+                        const normalized = value.replace(/,/g, "").trim();
+                        if (!normalized) {
+                                return fallback;
+                        }
+
+                        const sanitized = normalized.replace(/[^0-9.+\-Ee]/g, "");
+                        if (!sanitized) {
+                                return fallback;
+                        }
+
+                        const parsed = Number(sanitized);
+                        return Number.isFinite(parsed) ? parsed : fallback;
+                }
+
+                return fallback;
+        },
+        _getItemDetailCacheKey(item) {
+                const code = item?.item_code;
+                const warehouse = item?.warehouse || this.pos_profile?.warehouse;
+                if (!code || !warehouse) {
+                        return null;
 		}
 		return `${code}::${warehouse}`;
 	},
@@ -2480,15 +2510,20 @@ export default {
                         this.set_batch_qty(item, null, false);
                 }
 
-                let backendBasePriceList = Number.isFinite(Number(data.price_list_rate))
-                        ? this.flt(data.price_list_rate, this.currency_precision)
-                        : null;
-                let backendBaseRate = Number.isFinite(Number(data.rate))
-                        ? this.flt(data.rate, this.currency_precision)
-                        : null;
+                const backendBasePriceListValue = this._coerceNumber(data.price_list_rate, null);
+                let backendBasePriceList =
+                        backendBasePriceListValue !== null
+                                ? this.flt(backendBasePriceListValue, this.currency_precision)
+                                : null;
+                const backendBaseRateValue = this._coerceNumber(data.rate, null);
+                let backendBaseRate =
+                        backendBaseRateValue !== null
+                                ? this.flt(backendBaseRateValue, this.currency_precision)
+                                : null;
+                const backendDiscountAmountValue = this._coerceNumber(data.discount_amount, null);
                 const backendDiscountAmount =
-                        data.discount_amount !== undefined && data.discount_amount !== null
-                                ? this.flt(data.discount_amount, this.currency_precision)
+                        backendDiscountAmountValue !== null
+                                ? this.flt(backendDiscountAmountValue, this.currency_precision)
                                 : null;
 
                 if (Object.prototype.hasOwnProperty.call(data, "discount_percentage")) {
@@ -2516,31 +2551,45 @@ export default {
 
                         if (backendBasePriceList !== null) {
                                 item.base_price_list_rate = backendBasePriceList;
-                        } else if (Number.isFinite(Number(item.base_price_list_rate))) {
-                                item.base_price_list_rate = this.flt(
+                        } else {
+                                const existingBasePriceList = this._coerceNumber(
                                         item.base_price_list_rate,
+                                        0,
+                                );
+                                item.base_price_list_rate = this.flt(
+                                        existingBasePriceList,
                                         this.currency_precision,
                                 );
-                        } else {
-                                item.base_price_list_rate = 0;
                         }
 
-                        const resolvedBasePriceList = Number.isFinite(Number(item.base_price_list_rate))
-                                ? this.flt(item.base_price_list_rate, this.currency_precision)
-                                : 0;
+                        const resolvedBasePriceListValue = this._coerceNumber(
+                                item.base_price_list_rate,
+                                0,
+                        );
+                        const resolvedBasePriceList = this.flt(
+                                resolvedBasePriceListValue,
+                                this.currency_precision,
+                        );
 
                         if (!manualOverride) {
+                                const existingBaseRateValue = this._coerceNumber(
+                                        item.base_rate,
+                                        null,
+                                );
                                 const shouldUpdateBaseRate =
                                         backendBaseRate !== null ||
                                         forceUpdate ||
-                                        !Number.isFinite(Number(item.base_rate));
+                                        existingBaseRateValue === null;
 
                                 if (shouldUpdateBaseRate) {
                                         const newBaseRate =
                                                 backendBaseRate !== null ? backendBaseRate : resolvedBasePriceList;
                                         item.base_rate = this.flt(newBaseRate, this.currency_precision);
-                                } else if (!Number.isFinite(Number(item.base_rate))) {
-                                        item.base_rate = resolvedBasePriceList;
+                                } else {
+                                        item.base_rate = this.flt(
+                                                existingBaseRateValue,
+                                                this.currency_precision,
+                                        );
                                 }
                         }
 
@@ -2548,8 +2597,12 @@ export default {
                                 if (backendDiscountAmount !== null) {
                                         item.base_discount_amount = backendDiscountAmount;
                                 } else {
+                                        const baseRateValue = this._coerceNumber(
+                                                item.base_rate,
+                                                resolvedBasePriceList,
+                                        );
                                         const computedDiscount = this.flt(
-                                                resolvedBasePriceList - (Number(item.base_rate) || 0),
+                                                resolvedBasePriceList - baseRateValue,
                                                 this.currency_precision,
                                         );
                                         item.base_discount_amount = computedDiscount > 0 ? computedDiscount : 0;
@@ -2561,8 +2614,11 @@ export default {
                                 !manualOverride &&
                                 !Object.prototype.hasOwnProperty.call(data, "discount_percentage")
                         ) {
-                                const basePrice = Number(resolvedBasePriceList) || 0;
-                                const baseRateValue = Number(item.base_rate) || 0;
+                                const basePrice = resolvedBasePriceList;
+                                const baseRateValue = this._coerceNumber(
+                                        item.base_rate,
+                                        resolvedBasePriceList,
+                                );
                                 item.discount_percentage = basePrice
                                         ? this.flt(((basePrice - baseRateValue) / basePrice) * 100, this.currency_precision)
                                         : 0;
@@ -2947,17 +3003,21 @@ export default {
                 const selectedCurrency = this.selected_currency || companyCurrency;
                 const priceListCurrency = this.price_list_currency || selectedCurrency;
 
-                const basePriceList = Number.isFinite(Number(item.base_price_list_rate))
-                        ? Number(item.base_price_list_rate)
-                        : 0;
-                const baseRate = Number.isFinite(Number(item.base_rate)) ? Number(item.base_rate) : basePriceList;
-                const baseDiscount = Number.isFinite(Number(item.base_discount_amount))
-                        ? Number(item.base_discount_amount)
-                        : this.flt(basePriceList - baseRate, this.currency_precision);
+                const basePriceListValue = this._coerceNumber(item.base_price_list_rate, 0);
+                const baseRateValue = this._coerceNumber(item.base_rate, basePriceListValue);
+                const fallbackDiscountValue = basePriceListValue - baseRateValue;
+                const baseDiscountValue = this._coerceNumber(
+                        item.base_discount_amount,
+                        fallbackDiscountValue,
+                );
 
-                let priceListRate = this.flt(basePriceList, this.currency_precision);
-                let rate = this.flt(baseRate, this.currency_precision);
-                let discountAmount = this.flt(baseDiscount, this.currency_precision);
+                const basePriceList = this.flt(basePriceListValue, this.currency_precision);
+                const baseRate = this.flt(baseRateValue, this.currency_precision);
+                const baseDiscount = this.flt(baseDiscountValue, this.currency_precision);
+
+                let priceListRate = basePriceList;
+                let rate = baseRate;
+                let discountAmount = baseDiscount;
 
                 if (selectedCurrency === priceListCurrency && selectedCurrency && selectedCurrency !== companyCurrency) {
                         const conversion = this.conversion_rate || 1;
@@ -2977,7 +3037,7 @@ export default {
                 }
 
                 item.discount_amount = discountAmount;
-                item.base_discount_amount = this.flt(baseDiscount, this.currency_precision);
+                item.base_discount_amount = baseDiscount;
         },
 
         _parsePricingRuleList(value) {
@@ -3032,15 +3092,23 @@ export default {
                         return null;
                 }
 
-                const qty = Number(entry.qty !== undefined ? entry.qty : entry.free_qty) || 0;
-                const basePriceListRate = Number(
+                const qty = this._coerceNumber(
+                        entry.qty !== undefined ? entry.qty : entry.free_qty,
+                        0,
+                );
+                const basePriceListRateValue = this._coerceNumber(
                         entry.price_list_rate !== undefined ? entry.price_list_rate : entry.rate,
-                ) || 0;
-                const baseRate = Number(entry.rate !== undefined ? entry.rate : basePriceListRate) || 0;
-                const baseDiscount = Number(
-                        entry.discount_amount !== undefined ? entry.discount_amount : basePriceListRate - baseRate,
-                ) || 0;
-                const discountPct = Number(entry.discount_percentage ?? 0) || 0;
+                        0,
+                );
+                const baseRateValue = this._coerceNumber(
+                        entry.rate !== undefined ? entry.rate : basePriceListRateValue,
+                        basePriceListRateValue,
+                );
+                const baseDiscountValue = this._coerceNumber(
+                        entry.discount_amount,
+                        basePriceListRateValue - baseRateValue,
+                );
+                const discountPct = this._coerceNumber(entry.discount_percentage, 0);
 
                 let rowId = null;
                 if (typeof this.makeid === "function") {
@@ -3074,9 +3142,15 @@ export default {
                         posa_is_replace: 0,
                         posa_offers: [],
                         locked_price: true,
-                        base_price_list_rate: this.flt(basePriceListRate, this.currency_precision),
-                        base_rate: this.flt(baseRate, this.currency_precision),
-                        base_discount_amount: this.flt(baseDiscount, this.currency_precision),
+                        base_price_list_rate: this.flt(
+                                basePriceListRateValue,
+                                this.currency_precision,
+                        ),
+                        base_rate: this.flt(baseRateValue, this.currency_precision),
+                        base_discount_amount: this.flt(
+                                baseDiscountValue,
+                                this.currency_precision,
+                        ),
                         serial_no: entry.serial_no || "",
                         batch_no: entry.batch_no || null,
                         has_batch_no: Boolean(entry.batch_no),
@@ -3100,32 +3174,51 @@ export default {
                         return;
                 }
 
-                const resolvedQty = Number(
-                        entry.qty !== undefined ? entry.qty : entry.free_qty !== undefined ? entry.free_qty : targetItem.qty,
-                ) || 0;
+                const rawQty =
+                        entry.qty !== undefined
+                                ? entry.qty
+                                : entry.free_qty !== undefined
+                                ? entry.free_qty
+                                : targetItem.qty;
+                const resolvedQty = this._coerceNumber(
+                        rawQty,
+                        this._coerceNumber(targetItem.qty, 0),
+                );
                 targetItem.qty = this.flt(resolvedQty, this.currency_precision);
 
-                const resolvedPriceList = Number(
+                const rawPriceList =
                         entry.price_list_rate !== undefined
                                 ? entry.price_list_rate
                                 : entry.rate !== undefined
                                 ? entry.rate
-                                : targetItem.base_price_list_rate,
-                ) || 0;
-                targetItem.base_price_list_rate = this.flt(resolvedPriceList, this.currency_precision);
+                                : targetItem.base_price_list_rate;
+                const resolvedPriceListValue = this._coerceNumber(
+                        rawPriceList,
+                        this._coerceNumber(targetItem.base_price_list_rate, 0),
+                );
+                targetItem.base_price_list_rate = this.flt(
+                        resolvedPriceListValue,
+                        this.currency_precision,
+                );
 
-                const resolvedBaseRate = Number(
-                        entry.rate !== undefined ? entry.rate : targetItem.base_rate || resolvedPriceList,
-                ) || 0;
-                targetItem.base_rate = this.flt(resolvedBaseRate, this.currency_precision);
+                const resolvedBaseRateValue = this._coerceNumber(
+                        entry.rate !== undefined ? entry.rate : targetItem.base_rate,
+                        resolvedPriceListValue,
+                );
+                targetItem.base_rate = this.flt(resolvedBaseRateValue, this.currency_precision);
 
-                const baseDiscount = Number(
-                        entry.discount_amount !== undefined
-                                ? entry.discount_amount
-                                : resolvedPriceList - resolvedBaseRate,
-                ) || 0;
-                targetItem.base_discount_amount = this.flt(baseDiscount, this.currency_precision);
-                targetItem.discount_percentage = Number(entry.discount_percentage ?? targetItem.discount_percentage ?? 0) || 0;
+                const baseDiscountValue = this._coerceNumber(
+                        entry.discount_amount,
+                        resolvedPriceListValue - resolvedBaseRateValue,
+                );
+                targetItem.base_discount_amount = this.flt(
+                        baseDiscountValue,
+                        this.currency_precision,
+                );
+                targetItem.discount_percentage = this._coerceNumber(
+                        entry.discount_percentage,
+                        targetItem.discount_percentage || 0,
+                );
                 targetItem.pricing_rules = entry.pricing_rules || targetItem.pricing_rules || "";
                 targetItem.uom = entry.uom || targetItem.uom;
                 targetItem.conversion_factor = entry.conversion_factor || targetItem.conversion_factor || 1;
