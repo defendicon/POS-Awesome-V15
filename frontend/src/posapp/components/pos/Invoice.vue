@@ -342,6 +342,7 @@ import invoiceComputed from "./invoiceComputed";
 import invoiceWatchers from "./invoiceWatchers";
 import offerMethods from "./invoiceOfferMethods";
 import shortcutMethods from "./invoiceShortcuts";
+import pricingRuleMethods from "./invoicePricingRuleMethods.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
@@ -471,8 +472,9 @@ export default {
 
         methods: {
                 ...shortcutMethods,
-		...offerMethods,
-		...invoiceItemMethods,
+                ...offerMethods,
+                ...invoiceItemMethods,
+                ...pricingRuleMethods,
                 focusCustomerSearchField() {
                         const customerComponent = this.$refs.customerComponent;
                         if (!customerComponent) {
@@ -1542,6 +1544,9 @@ export default {
                         reset_posting_date: this.handleResetPostingDate,
                         calc_uom: this.calc_uom,
                         show_payment: this.handleShowPayment,
+                        request_pricing_rule_context: this.handleRequestPricingRuleContext,
+                        apply_pricing_rule_updates: this.handleApplyPricingRuleUpdates,
+                        reset_pricing_rules: this.handleResetPricingRules,
                 };
 
                 Object.entries(this._busHandlers).forEach(([eventName, handler]) => {
