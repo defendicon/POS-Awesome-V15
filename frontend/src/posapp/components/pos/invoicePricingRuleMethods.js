@@ -1215,25 +1215,30 @@ export default {
                 payload.conversion_factor = conversionFactor || 1;
                 payload.warehouse = detail.warehouse || payload.warehouse || this.pos_profile?.warehouse;
 
-                const baseRate = flt(
-                        detail.rate !== undefined
+                const baseListRate = flt(
+                        detail.base_price_list_rate !== undefined && detail.base_price_list_rate !== null
+                                ? detail.base_price_list_rate
+                                : detail.price_list_rate !== undefined && detail.price_list_rate !== null
+                                ? detail.price_list_rate
+                                : detail.rate !== undefined && detail.rate !== null
                                 ? detail.rate
-                                : detail.base_rate !== undefined
+                                : detail.base_rate !== undefined && detail.base_rate !== null
                                 ? detail.base_rate
                                 : 0,
                 );
                 const baseCurrency = this.price_list_currency || this.pos_profile.currency;
                 const exchangeRate = this.exchange_rate || 1;
                 const isForeignCurrency = this.selected_currency && baseCurrency && this.selected_currency !== baseCurrency;
-                const displayRate = isForeignCurrency
-                        ? this.flt(baseRate * exchangeRate, this.currency_precision)
-                        : baseRate;
+                const displayListRate = isForeignCurrency
+                        ? this.flt(baseListRate * exchangeRate, this.currency_precision)
+                        : baseListRate;
 
-                payload.base_rate = baseRate;
-                payload.base_price_list_rate = baseRate;
-                payload.rate = displayRate;
-                payload.price_list_rate = displayRate;
+                payload.base_rate = 0;
+                payload.base_price_list_rate = baseListRate;
+                payload.rate = 0;
+                payload.price_list_rate = displayListRate;
                 payload.discount_amount = 0;
+                payload.base_discount_amount = 0;
                 payload.discount_percentage = 0;
                 payload.pricing_rules = JSON.stringify([ruleId]);
                 payload.posa_is_offer = 1;
@@ -1284,16 +1289,14 @@ export default {
                                 addedItem.posa_pricing_rule_key = key;
                         }
                         addedItem.discount_amount = 0;
+                        addedItem.base_discount_amount = 0;
                         addedItem.discount_percentage = 0;
-                        addedItem.base_rate = baseRate;
-                        addedItem.base_price_list_rate = baseRate;
-                        addedItem.rate = displayRate;
-                        addedItem.price_list_rate = displayRate;
-                        addedItem.amount = this.flt(addedItem.qty * addedItem.rate, this.currency_precision);
-                        addedItem.base_amount = this.flt(
-                                addedItem.qty * (addedItem.base_rate !== undefined ? addedItem.base_rate : addedItem.rate),
-                                this.currency_precision,
-                        );
+                        addedItem.base_rate = 0;
+                        addedItem.base_price_list_rate = baseListRate;
+                        addedItem.rate = 0;
+                        addedItem.price_list_rate = displayListRate;
+                        addedItem.amount = 0;
+                        addedItem.base_amount = 0;
                         if (detail.batch_no && this.setBatchQty) {
                                 this.setBatchQty(addedItem, detail.batch_no, false);
                         }
@@ -1326,12 +1329,18 @@ export default {
 
                 const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail, ruleId);
 
-                const baseRate = flt(
-                        detail.rate !== undefined
+                const baseListRate = flt(
+                        detail.base_price_list_rate !== undefined && detail.base_price_list_rate !== null
+                                ? detail.base_price_list_rate
+                                : detail.price_list_rate !== undefined && detail.price_list_rate !== null
+                                ? detail.price_list_rate
+                                : detail.rate !== undefined && detail.rate !== null
                                 ? detail.rate
-                                : detail.base_rate !== undefined
+                                : detail.base_rate !== undefined && detail.base_rate !== null
                                 ? detail.base_rate
-                                : item.base_rate !== undefined
+                                : item.base_price_list_rate !== undefined && item.base_price_list_rate !== null
+                                ? item.base_price_list_rate
+                                : item.base_rate !== undefined && item.base_rate !== null
                                 ? item.base_rate
                                 : 0,
                 );
@@ -1339,9 +1348,9 @@ export default {
                 const exchangeRate = this.exchange_rate || 1;
                 const isForeignCurrency =
                         this.selected_currency && baseCurrency && this.selected_currency !== baseCurrency;
-                const displayRate = isForeignCurrency
-                        ? this.flt(baseRate * exchangeRate, this.currency_precision)
-                        : baseRate;
+                const displayListRate = isForeignCurrency
+                        ? this.flt(baseListRate * exchangeRate, this.currency_precision)
+                        : baseListRate;
 
                 item.qty = qty;
                 item.stock_qty = stockQty;
@@ -1363,17 +1372,15 @@ export default {
                         item.posa_pricing_rule_key = key;
                 }
 
-                item.base_rate = baseRate;
-                item.base_price_list_rate = baseRate;
-                item.rate = displayRate;
-                item.price_list_rate = displayRate;
+                item.base_rate = 0;
+                item.base_price_list_rate = baseListRate;
+                item.rate = 0;
+                item.price_list_rate = displayListRate;
                 item.discount_amount = 0;
+                item.base_discount_amount = 0;
                 item.discount_percentage = 0;
-                item.amount = this.flt(item.qty * item.rate, this.currency_precision);
-                item.base_amount = this.flt(
-                        item.qty * (item.base_rate !== undefined ? item.base_rate : item.rate),
-                        this.currency_precision,
-                );
+                item.amount = 0;
+                item.base_amount = 0;
 
                 if (detail.batch_no && this.setBatchQty) {
                         this.setBatchQty(item, detail.batch_no, false);

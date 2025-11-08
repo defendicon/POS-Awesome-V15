@@ -1441,14 +1441,17 @@ export default {
 
 			const doc = r?.message;
 			if (doc) {
-				if (manualOverrides.length) {
-					this._applyManualRateOverridesToDoc(doc, manualOverrides);
-				}
+                                if (manualOverrides.length) {
+                                        this._applyManualRateOverridesToDoc(doc, manualOverrides);
+                                }
                                 await this.load_invoice(doc, {
                                         preserveAdditionalDiscountPercentage: true,
                                 });
-				return doc;
-			}
+                                if (typeof this.rehydratePricingRuleFreebieState === "function") {
+                                        this.rehydratePricingRuleFreebieState({ mergeDuplicates: true, emitCounters: false });
+                                }
+                                return doc;
+                        }
 			return null;
 		} catch (error) {
 			console.error("Error reloading current invoice from backend:", error);
