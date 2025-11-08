@@ -884,12 +884,19 @@ export default {
                         }
 
                         const multiplier = item.qty || 0;
+                        const affected = [];
                         this.packed_items
                                 .filter((it) => it.bundle_id === item.bundle_id)
                                 .forEach((ch) => {
                                         ch.qty = multiplier * (ch.child_qty_per_bundle || 1);
                                         this.calc_stock_qty(ch, ch.qty);
+                                        affected.push(ch);
                                 });
+
+                        if (typeof this.schedulePricingRefresh === "function") {
+                                const targets = [item, ...affected];
+                                this.schedulePricingRefresh(targets, { delay: 100 });
+                        }
                 },
                 // Override setFormatedFloat for qty field to handle stock limits and return mode
                 setFormatedQty(item, field_name, precision, no_negative, value) {
@@ -932,6 +939,9 @@ export default {
                         this.calc_stock_qty(item, item[field_name]);
                         if (field_name === "qty") {
                                 this.updateBundleChildrenQty(item);
+                                if (typeof this.schedulePricingRefresh === "function") {
+                                        this.schedulePricingRefresh(null, { delay: 80 });
+                                }
                         }
                         return parsedValue;
                 },
@@ -1362,11 +1372,14 @@ export default {
                         this.calc_stock_qty(item, item.qty);
                         this.updateBundleChildrenQty(item);
                         this.$forceUpdate();
+                        if (typeof this.schedulePricingRefresh === "function") {
+                                this.schedulePricingRefresh(null, { delay: 80 });
+                        }
                 },
 
                 // Decrease quantity of an item (handles return logic)
                 subtract_one(item) {
-			if (this.isReturnInvoice) {
+                        if (this.isReturnInvoice) {
 				// For returns, move quantity toward zero
 				item.qty++;
 			} else {
@@ -1378,6 +1391,9 @@ export default {
                         this.calc_stock_qty(item, item.qty);
                         this.updateBundleChildrenQty(item);
                         this.$forceUpdate();
+                        if (typeof this.schedulePricingRefresh === "function") {
+                                this.schedulePricingRefresh(null, { delay: 80 });
+                        }
                 },
 
 		// Handle item reordering from drag and drop
@@ -1620,6 +1636,9 @@ export default {
                 this._busHandlers = {};
                 if (typeof this.cancelScheduledOfferRefresh === "function") {
                         this.cancelScheduledOfferRefresh();
+                }
+                if (typeof this.cancelScheduledPricingRefresh === "function") {
+                        this.cancelScheduledPricingRefresh();
                 }
                 if (this._suppressClosePaymentsTimer) {
                         clearTimeout(this._suppressClosePaymentsTimer);

@@ -37,20 +37,23 @@ export function useItemAddition() {
 	};
 
 	// Remove item from invoice
-	const removeItem = (item, context) => {
-		const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
-		if (index >= 0) {
-			context.items.splice(index, 1);
-		}
-		if (item.is_bundle) {
-			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
-		}
-		// Remove from expanded if present
-		context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
-		if (item?.posa_row_id && typeof context?.resetItemTaskCache === "function") {
-			context.resetItemTaskCache(item.posa_row_id);
-		}
-	};
+        const removeItem = (item, context) => {
+                const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
+                if (index >= 0) {
+                        context.items.splice(index, 1);
+                }
+                if (item.is_bundle) {
+                        context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
+                }
+                // Remove from expanded if present
+                context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
+                if (item?.posa_row_id && typeof context?.resetItemTaskCache === "function") {
+                        context.resetItemTaskCache(item.posa_row_id);
+                }
+                if (typeof context.schedulePricingRefresh === "function") {
+                        context.schedulePricingRefresh(null, { delay: 80 });
+                }
+        };
 
 	const { getBundleComponents } = useBundles();
 
@@ -410,18 +413,22 @@ export function useItemAddition() {
 				moveItemToTop(context, cur_item);
 			}
 		}
-		if (context.forceUpdate) {
-			runAsyncTask(() => context.forceUpdate(), "force_update");
-		}
+                if (context.forceUpdate) {
+                        runAsyncTask(() => context.forceUpdate(), "force_update");
+                }
 
-		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
-			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
-		) {
-			context.expanded = [new_item.posa_row_id];
-		}
-	});
+                // Only try to expand if new_item exists and should be expanded
+                if (
+                        new_item &&
+                        ((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
+                ) {
+                        context.expanded = [new_item.posa_row_id];
+                }
+
+                if (typeof context.schedulePricingRefresh === "function") {
+                        context.schedulePricingRefresh(null, { delay: 80 });
+                }
+        });
 
 	// Create a new item object with default and calculated fields
 	const getNewItem = (item, context) => {

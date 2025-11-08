@@ -163,21 +163,115 @@ export default {
 		}
 		return entry.data;
 	},
-	_storeItemDetailCache(key, data) {
-		if (!key || !data) {
-			return;
-		}
-		if (!this.item_detail_cache) {
-			this.item_detail_cache = {};
-		}
-		this.item_detail_cache[key] = {
-			ts: Date.now(),
-			data: JSON.parse(JSON.stringify(data)),
-		};
-	},
-	clearItemDetailCache() {
-		this.item_detail_cache = {};
-	},
+        _storeItemDetailCache(key, data) {
+                if (!key || !data) {
+                        return;
+                }
+                if (!this.item_detail_cache) {
+                        this.item_detail_cache = {};
+                }
+                this.item_detail_cache[key] = {
+                        ts: Date.now(),
+                        data: JSON.parse(JSON.stringify(data)),
+                };
+        },
+        _deleteItemDetailCacheKey(key) {
+                if (!key || !this.item_detail_cache) {
+                        return;
+                }
+
+                if (Object.prototype.hasOwnProperty.call(this.item_detail_cache, key)) {
+                        delete this.item_detail_cache[key];
+                }
+        },
+        clearItemDetailCache() {
+                this.item_detail_cache = {};
+        },
+        _invalidateItemPricing(item) {
+                if (!item) {
+                        return;
+                }
+
+                const cacheKey = this._getItemDetailCacheKey(item);
+                if (cacheKey) {
+                        this._deleteItemDetailCacheKey(cacheKey);
+                }
+
+                item._detailSynced = false;
+        },
+        schedulePricingRefresh(targets = null, options = {}) {
+                const includeFreeItems = Boolean(options?.includeFreeItems);
+                const immediate = Boolean(options?.immediate);
+                const delay = typeof options?.delay === "number" ? options.delay : 75;
+
+                const collectTargets = () => {
+                        if (Array.isArray(targets)) {
+                                return targets.filter((entry) => entry && typeof entry === "object");
+                        }
+
+                        if (targets && typeof targets === "object") {
+                                return [targets];
+                        }
+
+                        return Array.isArray(this.items) ? this.items.filter((entry) => entry && typeof entry === "object") : [];
+                };
+
+                const itemsToRefresh = collectTargets().filter((item) => includeFreeItems || !item.is_free_item);
+
+                if (!itemsToRefresh.length) {
+                        return;
+                }
+
+                this._pendingPricingRefresh = this._pendingPricingRefresh || new Map();
+
+                itemsToRefresh.forEach((item) => {
+                        if (!item?.posa_row_id) {
+                                return;
+                        }
+                        this._invalidateItemPricing(item);
+                        this._pendingPricingRefresh.set(item.posa_row_id, item);
+                });
+
+                const triggerRefresh = async () => {
+                        const entries = Array.from(this._pendingPricingRefresh?.values() || []);
+                        if (this._pendingPricingRefresh) {
+                                this._pendingPricingRefresh.clear();
+                        }
+                        this._pricingRefreshTimer = null;
+
+                        if (!entries.length || isOffline()) {
+                                return;
+                        }
+
+                        const tasks = entries.map((item) => this.update_item_detail(item, true));
+                        try {
+                                await Promise.allSettled(tasks);
+                        } catch (error) {
+                                console.error("Failed to refresh pricing for POS items", error);
+                        }
+                };
+
+                if (this._pricingRefreshTimer) {
+                        return;
+                }
+
+                if (immediate) {
+                        triggerRefresh();
+                        return;
+                }
+
+                this._pricingRefreshTimer = setTimeout(triggerRefresh, Math.max(0, delay));
+        },
+        cancelScheduledPricingRefresh() {
+                if (this._pricingRefreshTimer) {
+                        clearTimeout(this._pricingRefreshTimer);
+                        this._pricingRefreshTimer = null;
+                }
+
+                if (this._pendingPricingRefresh) {
+                        this._pendingPricingRefresh.clear();
+                }
+        },
 	_getStockCacheKey(item) {
 		const code = item?.item_code;
 		const warehouse = item?.warehouse || this.pos_profile?.warehouse;
@@ -213,14 +307,18 @@ export default {
 	clearItemStockCache() {
 		this.item_stock_cache = {};
 	},
-	remove_item(item) {
-		return removeItem(item, this);
-	},
+        remove_item(item) {
+                const result = removeItem(item, this);
+                if (typeof this.schedulePricingRefresh === "function") {
+                        this.schedulePricingRefresh(null, { delay: 80 });
+                }
+                return result;
+        },
 
-	async add_item(item, options = {}) {
-		const res = await addItem(item, this);
+        async add_item(item, options = {}) {
+                const res = await addItem(item, this);
 
-		const shouldNotify =
+                const shouldNotify =
 			options?.notifyOnSuccess === true && !options?.skipNotification && this.eventBus?.emit;
 
 		if (shouldNotify) {
@@ -244,11 +342,15 @@ export default {
 					color: "success",
 					groupId: "invoice-item-added",
 				});
-			}
-		}
+                        }
+                }
 
-		return res;
-	},
+                if (typeof this.schedulePricingRefresh === "function") {
+                        this.schedulePricingRefresh(null, { delay: 80 });
+                }
+
+                return res;
+        },
 
 	// Create a new item object with default and calculated fields
 	get_new_item(item) {
