@@ -637,19 +637,60 @@ export default {
                         return;
                 }
 
-                this.removePricingRuleFreeItems(ruleId);
-
                 const aggregatedFreebies = this.aggregatePricingRuleFreebies(freebies);
+
+                const existingItems = (this.items || []).filter(
+                        (item) => item && item.is_free_item && item.posa_pricing_rule_freebie === ruleId,
+                );
+
                 if (!aggregatedFreebies.length) {
+                        if (typeof this.remove_item === "function") {
+                                existingItems.forEach((item) => this.remove_item(item));
+                        }
                         return;
                 }
 
+                const existingByKey = new Map();
+                existingItems.forEach((item) => {
+                        const key = item.posa_pricing_rule_key || this.getPricingRuleFreebieKey(item);
+                        if (key) {
+                                existingByKey.set(key, item);
+                        }
+                });
+
+                const retainedKeys = new Set();
+
                 for (const detail of aggregatedFreebies) {
+                        const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail);
+                        if (!key) {
+                                continue;
+                        }
+
+                        const existingItem = existingByKey.get(key);
+                        if (existingItem) {
+                                try {
+                                        this.updateFreeItemFromPricingRule(existingItem, detail, ruleId);
+                                        retainedKeys.add(key);
+                                } catch (error) {
+                                        console.error("Failed to update free item from pricing rule", ruleId, error);
+                                }
+                                continue;
+                        }
+
                         try {
                                 await this.addFreeItemFromPricingRule(ruleId, detail);
+                                retainedKeys.add(key);
                         } catch (error) {
                                 console.error("Failed to add free item from pricing rule", ruleId, error);
                         }
+                }
+
+                if (typeof this.remove_item === "function" && existingByKey.size) {
+                        existingByKey.forEach((item, key) => {
+                                if (!retainedKeys.has(key)) {
+                                        this.remove_item(item);
+                                }
+                        });
                 }
         },
 
@@ -672,6 +713,7 @@ export default {
                                         detail,
                                         qty,
                                         stockQty,
+                                        key,
                                 });
                                 return;
                         }
@@ -689,6 +731,8 @@ export default {
                                 qty: entry.qty,
                         };
 
+                        entry.key = key;
+
                         if (entry.detail.quantity !== undefined) {
                                 entry.detail.quantity = entry.qty;
                         }
@@ -705,11 +749,16 @@ export default {
                         }
                 });
 
-                return Array.from(groups.values()).map(({ detail, qty, stockQty }) => {
+                return Array.from(groups.values()).map(({ detail, qty, stockQty, key }) => {
                         const aggregated = {
                                 ...detail,
                                 qty,
                         };
+
+                        const detailKey = detail.posa_pricing_rule_key || key;
+                        if (detailKey) {
+                                aggregated.posa_pricing_rule_key = detailKey;
+                        }
 
                         if (aggregated.quantity !== undefined) {
                                 aggregated.quantity = qty;
@@ -793,6 +842,17 @@ export default {
                         conversion_factor: conversionFactor,
                 };
 
+                const key = this.getPricingRuleFreebieKey({
+                        ...normalizedDetail,
+                        item_code: itemCode,
+                        qty,
+                        stock_qty: stockQty,
+                        conversion_factor: conversionFactor,
+                });
+                if (key) {
+                        normalizedDetail.posa_pricing_rule_key = key;
+                }
+
                 if (detail.quantity !== undefined) {
                         normalizedDetail.quantity = qty;
                 }
@@ -824,15 +884,6 @@ export default {
                         normalizedDetail.source_row = sourceRow;
                 }
 
-                const key = [
-                        itemCode,
-                        sourceRow || "",
-                        batchNo || "",
-                        serialNo || "",
-                        normalizedDetail.uom || "",
-                        normalizedDetail.warehouse || "",
-                ].join("::");
-
                 return {
                         key,
                         detail: normalizedDetail,
@@ -840,6 +891,35 @@ export default {
                         stockQty,
                         conversionFactor,
                 };
+        },
+
+        getPricingRuleFreebieKey(detail = {}) {
+                if (!detail) {
+                        return "";
+                }
+
+                const itemCode =
+                        detail.item_code || detail.free_item_code || detail.free_item || detail.item_code;
+                if (!itemCode) {
+                        return "";
+                }
+
+                const sourceRow =
+                        detail.posa_pricing_rule_source_row ||
+                        detail.source_row ||
+                        detail.child_docname ||
+                        detail.parent_detail_docname ||
+                        detail.posa_row_id ||
+                        "";
+
+                const batchNo = detail.batch_no || detail.free_batch_no || "";
+                const serialNo = detail.serial_no || detail.free_serial_no || "";
+                const uom = detail.uom || detail.free_uom || detail.stock_uom || "";
+                const warehouse = detail.warehouse || detail.free_warehouse || "";
+
+                return [itemCode, sourceRow || "", batchNo || "", serialNo || "", uom || "", warehouse || ""].join(
+                        "::",
+                );
         },
 
         async addFreeItemFromPricingRule(ruleId, detail) {
@@ -865,6 +945,8 @@ export default {
                                 .filter((item) => item && item.posa_pricing_rule_freebie === ruleId)
                                 .map((item) => item.posa_row_id),
                 );
+
+                const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail);
 
                 let baseItem = null;
                 if (typeof this.resolveOfferItem === "function") {
@@ -913,6 +995,9 @@ export default {
                 payload.posa_pricing_rule_freebie = ruleId;
                 payload.posa_pricing_rule_source_row =
                         detail.source_row || detail.child_docname || detail.parent_detail_docname || null;
+                if (key) {
+                        payload.posa_pricing_rule_key = key;
+                }
 
                 if (detail.batch_no) {
                         payload.batch_no = detail.batch_no;
@@ -948,6 +1033,9 @@ export default {
                         addedItem.pricing_rules = JSON.stringify([ruleId]);
                         addedItem.posa_pricing_rule_freebie = ruleId;
                         addedItem.posa_pricing_rule_source_row = payload.posa_pricing_rule_source_row;
+                        if (key) {
+                                addedItem.posa_pricing_rule_key = key;
+                        }
                         addedItem.discount_amount = 0;
                         addedItem.discount_percentage = 0;
                         addedItem.base_rate = baseRate;
@@ -966,5 +1054,84 @@ export default {
                 }
 
                 return addedItem || null;
+        },
+
+        updateFreeItemFromPricingRule(item, detail, ruleId) {
+                if (!item || !detail) {
+                        return;
+                }
+
+                const quantity = flt(detail.qty || detail.free_qty || detail.quantity || 0);
+                const qty = quantity ? Math.abs(quantity) : 0;
+                if (!qty) {
+                        if (typeof this.remove_item === "function") {
+                                this.remove_item(item);
+                        }
+                        return;
+                }
+
+                const rawStockQty =
+                        detail.stock_qty !== undefined ? detail.stock_qty : detail.free_stock_qty || detail.stock_qty;
+                const stockQtyValue = rawStockQty !== undefined ? flt(rawStockQty) : null;
+                const conversionFactorRaw = detail.conversion_factor || detail.free_conversion_factor;
+                const conversionFactor = conversionFactorRaw ? flt(conversionFactorRaw) || 1 : 1;
+                const stockQty = stockQtyValue !== null ? stockQtyValue : qty * conversionFactor;
+
+                const key = detail.posa_pricing_rule_key || this.getPricingRuleFreebieKey(detail);
+
+                const baseRate = flt(
+                        detail.rate !== undefined
+                                ? detail.rate
+                                : detail.base_rate !== undefined
+                                ? detail.base_rate
+                                : item.base_rate !== undefined
+                                ? item.base_rate
+                                : 0,
+                );
+                const baseCurrency = this.price_list_currency || this.pos_profile?.currency;
+                const exchangeRate = this.exchange_rate || 1;
+                const isForeignCurrency =
+                        this.selected_currency && baseCurrency && this.selected_currency !== baseCurrency;
+                const displayRate = isForeignCurrency
+                        ? this.flt(baseRate * exchangeRate, this.currency_precision)
+                        : baseRate;
+
+                item.qty = qty;
+                item.stock_qty = stockQty;
+                item.conversion_factor = conversionFactor || 1;
+                item.uom = detail.uom || item.uom || detail.stock_uom || item.stock_uom;
+                item.stock_uom = detail.stock_uom || item.stock_uom || item.uom;
+                item.warehouse = detail.warehouse || item.warehouse || this.pos_profile?.warehouse;
+                item.batch_no = detail.batch_no || item.batch_no || "";
+                if (item.batch_no) {
+                        item.has_batch_no = 1;
+                }
+                item.serial_no = detail.serial_no || item.serial_no || "";
+                item.is_free_item = 1;
+                item.pricing_rules = JSON.stringify([ruleId]);
+                item.posa_pricing_rule_freebie = ruleId;
+                item.posa_pricing_rule_source_row =
+                        detail.source_row || detail.child_docname || detail.parent_detail_docname || item.posa_pricing_rule_source_row || null;
+                if (key) {
+                        item.posa_pricing_rule_key = key;
+                }
+
+                item.base_rate = baseRate;
+                item.base_price_list_rate = baseRate;
+                item.rate = displayRate;
+                item.price_list_rate = displayRate;
+                item.discount_amount = 0;
+                item.discount_percentage = 0;
+                item.amount = this.flt(item.qty * item.rate, this.currency_precision);
+                item.base_amount = this.flt(
+                        item.qty * (item.base_rate !== undefined ? item.base_rate : item.rate),
+                        this.currency_precision,
+                );
+
+                if (detail.batch_no && this.setBatchQty) {
+                        this.setBatchQty(item, detail.batch_no, false);
+                }
+
+                this.calc_item_price(item);
         },
 };
