@@ -143,6 +143,12 @@ export default {
                                                 disable: targetDisable,
                                         },
                                 });
+                                this.eventBus.emit("pricing_rules_status_changed", {
+                                        rule: rule.name,
+                                        disable: targetDisable,
+                                        enabled,
+                                        profile: this.pos_profile?.name || null,
+                                });
                                 this.eventBus.emit("show_message", {
                                         title: enabled ? __("Pricing rule enabled") : __("Pricing rule disabled"),
                                         color: enabled ? "success" : "warning",

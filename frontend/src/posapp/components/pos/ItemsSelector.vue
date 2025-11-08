@@ -1362,6 +1362,57 @@ export default {
                 show_pricing_rules() {
                         this.eventBus.emit("show_pricing_rules", "true");
                 },
+                async handlePricingRulesStatusChanged() {
+                        const collections = [];
+                        if (Array.isArray(this.displayedItems) && this.displayedItems.length) {
+                                collections.push(this.displayedItems);
+                        }
+                        if (Array.isArray(this.highlighted_items) && this.highlighted_items.length) {
+                                collections.push(this.highlighted_items);
+                        }
+                        if (!collections.length && Array.isArray(this.items) && this.items.length) {
+                                collections.push(this.items.slice(0, Math.min(this.items.length, 50)));
+                        }
+
+                        const uniqueTargets = [];
+                        const seen = new Set();
+                        collections.forEach((group) => {
+                                group.forEach((item) => {
+                                        if (!item) {
+                                                return;
+                                        }
+                                        const key = item.posa_row_id || item.item_code;
+                                        if (!key || seen.has(key)) {
+                                                return;
+                                        }
+                                        seen.add(key);
+                                        uniqueTargets.push(item);
+                                });
+                        });
+
+                        try {
+                                await clearPriceListCache();
+                        } catch (error) {
+                                console.error("Failed to clear price list cache after pricing rule change", error);
+                        }
+
+                        if (!uniqueTargets.length) {
+                                return;
+                        }
+
+                        try {
+                                await this.update_items_details(uniqueTargets, { forceRefresh: true });
+                                if (typeof this.$forceUpdate === "function") {
+                                        this.$forceUpdate();
+                                }
+                        } catch (error) {
+                                console.error("Failed to refresh item details after pricing rule change", error);
+                                this.eventBus.emit("show_message", {
+                                        title: __("Failed to refresh pricing"),
+                                        color: "error",
+                                });
+                        }
+                },
                 async initializeItems() {
                         await this.ensureStorageHealth();
                         if (
@@ -3788,6 +3839,7 @@ export default {
                         this.pricingRulesCount = data?.total ?? 0;
                         this.enabledPricingRulesCount = data?.enabled ?? 0;
                 });
+                this.eventBus.on("pricing_rules_status_changed", this.handlePricingRulesStatusChanged);
                 this.eventBus.on("cart_quantities_updated", this.handleCartQuantitiesUpdated);
                 this.eventBus.on("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);
                 this.eventBus.on("update_customer_price_list", (data) => {
@@ -3985,6 +4037,7 @@ export default {
                 this.eventBus.off("update_offers_counters");
                 this.eventBus.off("update_coupons_counters");
                 this.eventBus.off("update_pricing_rules_counters");
+                this.eventBus.off("pricing_rules_status_changed", this.handlePricingRulesStatusChanged);
                 this.eventBus.off("cart_quantities_updated", this.handleCartQuantitiesUpdated);
                 this.eventBus.off("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);
                 this.eventBus.off("update_customer_price_list");

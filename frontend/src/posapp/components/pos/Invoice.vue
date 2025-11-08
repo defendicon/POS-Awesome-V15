@@ -1517,6 +1517,53 @@ export default {
                 handleShowPayment(data) {
                         this.paymentVisible = data === "true";
                 },
+                async handlePricingRulesStatusChange() {
+                        if (typeof this.clearItemDetailCache === "function") {
+                                this.clearItemDetailCache();
+                        }
+
+                        const targets = [];
+                        const seen = new Set();
+                        const collect = (collection) => {
+                                if (!Array.isArray(collection)) {
+                                        return;
+                                }
+                                collection.forEach((item) => {
+                                        if (!item) {
+                                                return;
+                                        }
+                                        const key = item.posa_row_id || item.item_code;
+                                        if (!key || seen.has(key)) {
+                                                return;
+                                        }
+                                        seen.add(key);
+                                        targets.push(item);
+                                });
+                        };
+
+                        collect(this.items);
+                        collect(this.packed_items);
+
+                        if (!targets.length) {
+                                return;
+                        }
+
+                        try {
+                                await Promise.all(targets.map((item) => this.update_item_detail(item, true)));
+                                if (typeof this.emitCartQuantities === "function") {
+                                        this.emitCartQuantities();
+                                }
+                                if (typeof this.$forceUpdate === "function") {
+                                        this.$forceUpdate();
+                                }
+                        } catch (error) {
+                                console.error("Failed to refresh invoice pricing after rule change", error);
+                                this.eventBus.emit("show_message", {
+                                        title: __("Failed to refresh pricing"),
+                                        color: "error",
+                                });
+                        }
+                },
         },
 
         mounted() {
@@ -1542,6 +1589,7 @@ export default {
                         reset_posting_date: this.handleResetPostingDate,
                         calc_uom: this.calc_uom,
                         show_payment: this.handleShowPayment,
+                        pricing_rules_status_changed: this.handlePricingRulesStatusChange,
                 };
 
                 Object.entries(this._busHandlers).forEach(([eventName, handler]) => {
