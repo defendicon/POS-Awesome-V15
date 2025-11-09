@@ -110,6 +110,20 @@ export default {
 	getItemTaskPromise(rowId, taskName) {
 		return this._getItemTaskPromise(rowId, taskName);
 	},
+	arePricingRulesEnabled() {
+		const flag = this.pos_profile?.posa_enable_pricing_rules;
+		if (flag === undefined || flag === null) {
+			return false;
+		}
+		if (typeof flag === "string") {
+			const normalized = flag.toLowerCase ? flag.toLowerCase().trim() : flag.trim();
+			if (!normalized) {
+				return false;
+			}
+			return normalized === "1" || normalized === "true";
+		}
+		return Boolean(flag);
+	},
 	_getItemDetailCacheKey(item) {
 		const code = item?.item_code;
 		const warehouse = item?.warehouse || this.pos_profile?.warehouse;
@@ -663,7 +677,7 @@ export default {
                         doc.doctype = "Sales Invoice";
                 }
                 doc.is_pos = 1;
-                doc.ignore_pricing_rule = 1;
+                doc.ignore_pricing_rule = this.arePricingRulesEnabled() ? 0 : 1;
                 doc.company = doc.company || this.pos_profile.company;
                 doc.pos_profile = doc.pos_profile || this.pos_profile.name;
                 doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
@@ -868,7 +882,7 @@ export default {
 		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
 		// Add flags to ensure proper rate handling
-		doc.ignore_pricing_rule = 1;
+		doc.ignore_pricing_rule = this.arePricingRulesEnabled() ? 0 : 1;
 
 		// Preserve the real price list currency
 		doc.price_list_currency = this.price_list_currency || doc.currency;

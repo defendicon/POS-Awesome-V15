@@ -128,6 +128,16 @@ def _merge_duplicate_taxes(invoice_doc):
         invoice_doc.calculate_taxes_and_totals()
 
 
+def _pricing_rules_enabled(profile_name: str | None) -> bool:
+    if not profile_name:
+        return False
+    try:
+        flag = frappe.db.get_value("POS Profile", profile_name, "posa_enable_pricing_rules")
+    except Exception:
+        return False
+    return bool(cint(flag or 0))
+
+
 def _should_block(pos_profile):
     allow_negative = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)
     if allow_negative:
@@ -340,11 +350,16 @@ def update_invoice(data):
                     "is_free_item": d.get("is_free_item"),
                 }
 
-    invoice_doc.ignore_pricing_rule = 1
-    invoice_doc.flags.ignore_pricing_rule = True
+    pricing_rules_enabled = _pricing_rules_enabled(invoice_doc.get("pos_profile") or pos_profile)
+    invoice_doc.ignore_pricing_rule = 0 if pricing_rules_enabled else 1
+    invoice_doc.flags.ignore_pricing_rule = not pricing_rules_enabled
 
     # Set missing values first
     invoice_doc.set_missing_values()
+
+    if pricing_rules_enabled:
+        invoice_doc.apply_pricing_rule()
+        invoice_doc.calculate_taxes_and_totals()
 
     # Reapply any custom item names after defaults are set
     _apply_item_name_overrides(invoice_doc, overrides)

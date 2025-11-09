@@ -88,8 +88,12 @@ def get_offers(profile):
     )
 
     promotional_scheme_offers = _get_promotional_scheme_offers(pos_profile) or []
+    pricing_rule_offers = _get_pricing_rule_offers(pos_profile) or []
 
-    return data + promotional_scheme_offers
+    offers = list(data or [])
+    offers.extend(promotional_scheme_offers)
+    offers.extend(pricing_rule_offers)
+    return offers
 
 
 @frappe.whitelist()
@@ -138,6 +142,255 @@ def _get_promotional_scheme_offers(pos_profile):
 
     return offers
 
+
+def _get_pricing_rule_offers(pos_profile):
+    if not frappe.db.table_exists("Pricing Rule"):
+        return []
+
+    if not _is_truthy(getattr(pos_profile, "posa_enable_pricing_rules", 0)):
+        return []
+
+    supported_apply_on = {"Item Code", "Item Group", "Brand", "Transaction"}
+    today = getdate(nowdate())
+
+    base_filters = {
+        "disable": 0,
+        "docstatus": ("<", 2),
+        "selling": 1,
+        "company": pos_profile.company,
+    }
+
+    try:
+        rules = frappe.get_all(
+            "Pricing Rule",
+            filters=base_filters,
+            fields=[
+                "name",
+                "title",
+                "rule_description",
+                "apply_on",
+                "price_or_product_discount",
+                "for_price_list",
+                "warehouse",
+                "min_qty",
+                "max_qty",
+                "min_amt",
+                "max_amt",
+                "rate_or_discount",
+                "discount_percentage",
+                "discount_amount",
+                "rate",
+                "coupon_code_based",
+                "valid_from",
+                "valid_upto",
+                "priority",
+                "applicable_for",
+                "condition",
+                "mixed_conditions",
+                "apply_rule_on_other",
+                "is_cumulative",
+                "is_recursive",
+                "apply_multiple_pricing_rules",
+                "same_item",
+                "free_item",
+                "free_qty",
+                "round_free_qty",
+            ],
+            order_by="priority asc, name asc",
+        )
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            "POS Awesome - Failed to fetch Pricing Rules for offers",
+        )
+        return []
+
+    offers = []
+    price_list = getattr(pos_profile, "selling_price_list", None)
+
+    for rule_meta in rules:
+        try:
+            apply_on = rule_meta.apply_on
+            if apply_on not in supported_apply_on:
+                continue
+
+            if rule_meta.mixed_conditions or rule_meta.apply_rule_on_other:
+                continue
+
+            if rule_meta.applicable_for:
+                continue
+
+            if rule_meta.condition:
+                continue
+
+            if rule_meta.is_cumulative or rule_meta.is_recursive:
+                continue
+
+            if rule_meta.apply_multiple_pricing_rules:
+                continue
+
+            if rule_meta.valid_from and getdate(rule_meta.valid_from) > today:
+                continue
+
+            if rule_meta.valid_upto and getdate(rule_meta.valid_upto) < today:
+                continue
+
+            if rule_meta.for_price_list:
+                if not price_list or rule_meta.for_price_list != price_list:
+                    continue
+
+            rule_doc = frappe.get_doc("Pricing Rule", rule_meta.name)
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(),
+                f"POS Awesome - Unable to load Pricing Rule {rule_meta.name}",
+            )
+            continue
+
+        offers.extend(_convert_pricing_rule_to_offers(rule_doc, pos_profile))
+
+    return offers
+
+
+def _convert_pricing_rule_to_offers(rule, pos_profile):
+    apply_on = rule.get("apply_on")
+    offer_type = _infer_pricing_rule_offer_type(rule)
+
+    base_offer = {
+        "name": _make_offer_identifier("pricing-rule", rule.name),
+        "row_id": _make_offer_identifier("pricing-rule", rule.name),
+        "title": rule.get("title") or rule.name,
+        "description": rule.get("rule_description") or rule.get("title") or rule.name,
+        "company": rule.get("company"),
+        "pos_profile": pos_profile.name,
+        "warehouse": rule.get("warehouse"),
+        "apply_on": apply_on,
+        "apply_type": apply_on if apply_on in ("Item Code", "Item Group", "Brand") else "",
+        "offer": offer_type,
+        "auto": 1,
+        "coupon_based": 1 if rule.get("coupon_code_based") else 0,
+        "offer_applied": 0,
+        "price_or_product_discount": rule.get("price_or_product_discount"),
+        "min_qty": flt(rule.get("min_qty")),
+        "max_qty": flt(rule.get("max_qty")),
+        "min_amt": flt(rule.get("min_amt")),
+        "max_amt": flt(rule.get("max_amt")),
+        "discount_type": _map_discount_type(rule.get("rate_or_discount")),
+        "rate": flt(rule.get("rate")),
+        "discount_amount": flt(rule.get("discount_amount")),
+        "discount_percentage": flt(rule.get("discount_percentage")),
+        "given_qty": flt(rule.get("free_qty")),
+        "valid_from": rule.get("valid_from"),
+        "valid_upto": rule.get("valid_upto"),
+        "promo_source": "Pricing Rule",
+        "pricing_rule": rule.name,
+        "round_free_qty": rule.get("round_free_qty"),
+        "source": "Pricing Rule",
+        "priority": rule.get("priority"),
+    }
+
+    if offer_type == "Give Product":
+        same_item = bool(rule.get("same_item"))
+        free_item = rule.get("free_item")
+
+        if not same_item and free_item:
+            base_offer["give_item"] = free_item
+            base_offer["apply_item_code"] = free_item
+
+        if not base_offer["discount_percentage"] and not base_offer["discount_amount"] and not base_offer["rate"]:
+            base_offer["discount_type"] = "Discount Percentage"
+            base_offer["discount_percentage"] = 100
+    else:
+        base_offer["given_qty"] = 0
+        base_offer.pop("give_item", None)
+
+    base_offer = _normalize_discount_fields(base_offer)
+
+    targets = _gather_pricing_rule_targets(rule)
+
+    offers = []
+    if apply_on == "Transaction":
+        base_offer["name"] = _make_offer_identifier("pricing-rule", rule.name, "transaction")
+        base_offer["row_id"] = base_offer["name"]
+        offers.append(base_offer)
+        return offers
+
+    if not targets:
+        return offers
+
+    same_item = bool(rule.get("same_item"))
+
+    for target in targets:
+        offer_entry = base_offer.copy()
+        offer_entry["name"] = _make_offer_identifier("pricing-rule", rule.name, target)
+        offer_entry["row_id"] = offer_entry["name"]
+
+        if apply_on == "Item Code":
+            offer_entry["item"] = target
+            offer_entry["apply_item_code"] = target
+            offer_entry["apply_type"] = "Item Code"
+            if offer_type == "Give Product" and same_item:
+                offer_entry["replace_item"] = 1
+        elif apply_on == "Item Group":
+            offer_entry["item_group"] = target
+            offer_entry["apply_item_group"] = target
+            offer_entry["apply_type"] = "Item Group"
+            if offer_type == "Give Product" and same_item:
+                offer_entry["replace_cheapest_item"] = 1
+        elif apply_on == "Brand":
+            offer_entry["brand"] = target
+            offer_entry["apply_type"] = "Brand"
+            if offer_type == "Give Product" and same_item:
+                offer_entry["replace_cheapest_item"] = 1
+
+        offers.append(offer_entry)
+
+    return offers
+
+
+def _gather_pricing_rule_targets(rule):
+    apply_on = rule.get("apply_on")
+    targets = []
+
+    if apply_on == "Item Code":
+        targets = [row.item_code for row in getattr(rule, "items", []) if getattr(row, "item_code", None)]
+    elif apply_on == "Item Group":
+        targets = [row.item_group for row in getattr(rule, "item_groups", []) if getattr(row, "item_group", None)]
+    elif apply_on == "Brand":
+        targets = [row.brand for row in getattr(rule, "brands", []) if getattr(row, "brand", None)]
+
+    seen = set()
+    unique_targets = []
+    for target in targets:
+        key = cstr(target)
+        if key and key not in seen:
+            seen.add(key)
+            unique_targets.append(key)
+
+    return unique_targets
+
+
+def _infer_pricing_rule_offer_type(rule):
+    if (rule.get("price_or_product_discount") or "").lower() == "product":
+        return "Give Product"
+
+    if rule.get("apply_on") == "Transaction":
+        return "Grand Total"
+
+    return "Item Price"
+
+
+def _is_truthy(value):
+    if value is None:
+        return False
+
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if not normalized:
+            return False
+        return normalized in {"1", "true", "yes", "y"}
+
+    return bool(value)
 
 def _prepare_promotional_scheme_offers(scheme, pos_profile):
     # Skip schemes with party specific or unsupported configurations for POS logic
