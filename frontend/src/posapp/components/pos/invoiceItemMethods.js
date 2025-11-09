@@ -607,6 +607,8 @@ export default {
                         if (typeof this.$forceUpdate === "function") {
                                 this.$forceUpdate();
                         }
+
+                        this.ensureOfferRatePersistence(item);
                 } catch (error) {
                         console.error("Failed to apply pricing rules locally", error);
                 }
@@ -3367,16 +3369,85 @@ export default {
 		item.amount = this.flt(item.qty * item.rate, this.currency_precision);
 		item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 
-		console.log(`Updated rates for ${item.item_code} on expand:`, {
-			base_rate: item.base_rate,
-			rate: item.rate,
+                console.log(`Updated rates for ${item.item_code} on expand:`, {
+                        base_rate: item.base_rate,
+                        rate: item.rate,
 			base_price_list_rate: item.base_price_list_rate,
 			price_list_rate: item.price_list_rate,
 			exchange_rate: this.exchange_rate,
 			selected_currency: this.selected_currency,
 			default_currency: this.pos_profile.currency,
-		});
-	},
+                });
+        },
+        ensureOfferRatePersistence(item) {
+                if (typeof this.ApplyOnPrice !== "function") {
+                        return;
+                }
+
+                if (!item || !item.posa_offer_applied) {
+                        return;
+                }
+
+                let appliedOfferIds = [];
+                if (item.posa_offers) {
+                        try {
+                                const parsed = typeof item.posa_offers === "string" ? JSON.parse(item.posa_offers) : item.posa_offers;
+                                if (Array.isArray(parsed)) {
+                                        appliedOfferIds = parsed.filter((rowId) => !!rowId);
+                                }
+                        } catch (error) {
+                                console.warn("Failed to parse posa_offers for item", error);
+                        }
+                }
+
+                if (!appliedOfferIds.length) {
+                        return;
+                }
+
+                const invoiceOffers = Array.isArray(this.posa_offers) ? this.posa_offers : [];
+                const offerCatalog = Array.isArray(this.posOffers) ? this.posOffers : [];
+
+                appliedOfferIds.forEach((rowId) => {
+                        if (!rowId) {
+                                return;
+                        }
+
+                        const invoiceOffer = invoiceOffers.find((entry) => entry && entry.row_id === rowId);
+
+                        let resolvedOffer =
+                                offerCatalog.find((entry) => entry && entry.row_id === rowId) ||
+                                (invoiceOffer &&
+                                        invoiceOffer.offer_name
+                                                ? offerCatalog.find(
+                                                          (entry) => entry && entry.name === invoiceOffer.offer_name,
+                                                  )
+                                                : null);
+
+                        if (!resolvedOffer && invoiceOffer) {
+                                resolvedOffer = { ...invoiceOffer };
+                                if (typeof resolvedOffer.items === "string") {
+                                        try {
+                                                const parsedItems = JSON.parse(resolvedOffer.items);
+                                                if (Array.isArray(parsedItems)) {
+                                                        resolvedOffer.items = parsedItems;
+                                                }
+                                        } catch (error) {
+                                                console.warn("Failed to parse stored offer items", error);
+                                        }
+                                }
+                        }
+
+                        if (!resolvedOffer || resolvedOffer.offer !== "Item Price") {
+                                return;
+                        }
+
+                        if (!Array.isArray(resolvedOffer.items)) {
+                                return;
+                        }
+
+                        this.ApplyOnPrice(resolvedOffer, { reapplyExisting: true });
+                });
+        },
 	// Fetch customer details (info, price list, etc)
 	async fetch_customer_details() {
 		var vm = this;
