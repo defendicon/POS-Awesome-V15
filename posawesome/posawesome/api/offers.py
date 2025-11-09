@@ -55,11 +55,19 @@ def _is_coupon_active(coupon_data, today):
 
 
 @frappe.whitelist()
-def get_offers(profile):
+def get_offers(profile, customer=None, customer_group=None, territory=None):
     pos_profile = frappe.get_doc("POS Profile", profile)
     company = pos_profile.company
     warehouse = pos_profile.warehouse
     date = nowdate()
+
+    party_filters = _normalize_party_filters(
+        {
+            "customer": customer,
+            "customer_group": customer_group,
+            "territory": territory,
+        }
+    )
 
     values = {
         "company": company,
@@ -88,7 +96,7 @@ def get_offers(profile):
     )
 
     promotional_scheme_offers = _get_promotional_scheme_offers(pos_profile) or []
-    pricing_rule_offers = _get_pricing_rule_offers(pos_profile) or []
+    pricing_rule_offers = _get_pricing_rule_offers(pos_profile, party_filters) or []
 
     offers = list(data or [])
     offers.extend(promotional_scheme_offers)
@@ -143,7 +151,7 @@ def _get_promotional_scheme_offers(pos_profile):
     return offers
 
 
-def _get_pricing_rule_offers(pos_profile):
+def _get_pricing_rule_offers(pos_profile, party_filters=None):
     if not frappe.db.table_exists("Pricing Rule"):
         return []
 
@@ -152,6 +160,7 @@ def _get_pricing_rule_offers(pos_profile):
 
     supported_apply_on = {"Item Code", "Item Group", "Brand", "Transaction"}
     today = getdate(nowdate())
+    party_filters = party_filters or {}
 
     base_filters = {
         "disable": 0,
@@ -185,6 +194,9 @@ def _get_pricing_rule_offers(pos_profile):
                 "valid_upto",
                 "priority",
                 "applicable_for",
+                "customer",
+                "customer_group",
+                "territory",
                 "condition",
                 "mixed_conditions",
                 "apply_rule_on_other",
@@ -217,7 +229,7 @@ def _get_pricing_rule_offers(pos_profile):
             if rule_meta.mixed_conditions or rule_meta.apply_rule_on_other:
                 continue
 
-            if rule_meta.applicable_for:
+            if not _pricing_rule_matches_party(rule_meta, party_filters):
                 continue
 
             if rule_meta.condition:
@@ -287,6 +299,10 @@ def _convert_pricing_rule_to_offers(rule, pos_profile):
         "round_free_qty": rule.get("round_free_qty"),
         "source": "Pricing Rule",
         "priority": rule.get("priority"),
+        "applicable_for": rule.get("applicable_for"),
+        "customer": rule.get("customer"),
+        "customer_group": rule.get("customer_group"),
+        "territory": rule.get("territory"),
     }
 
     if offer_type == "Give Product":
@@ -378,6 +394,29 @@ def _infer_pricing_rule_offer_type(rule):
         return "Grand Total"
 
     return "Item Price"
+
+
+def _pricing_rule_matches_party(rule_meta, party_filters):
+    applicable_for = cstr(rule_meta.applicable_for or "").strip()
+    if not applicable_for:
+        return True
+
+    if not party_filters:
+        return False
+
+    if applicable_for == "Customer":
+        rule_customer = cstr(rule_meta.customer or "").strip()
+        return bool(rule_customer) and rule_customer == party_filters.get("customer")
+
+    if applicable_for == "Customer Group":
+        rule_group = cstr(rule_meta.customer_group or "").strip()
+        return bool(rule_group) and rule_group == party_filters.get("customer_group")
+
+    if applicable_for == "Territory":
+        rule_territory = cstr(rule_meta.territory or "").strip()
+        return bool(rule_territory) and rule_territory == party_filters.get("territory")
+
+    return False
 
 
 def _is_truthy(value):
@@ -624,3 +663,17 @@ def _make_offer_identifier(*parts):
     if not cleaned:
         cleaned = [frappe.generate_hash(length=10)]
     return "ps-" + "-".join(cleaned)
+
+
+def _normalize_party_filters(filters):
+    normalized = {}
+    if not filters:
+        return normalized
+
+    for key in ("customer", "customer_group", "territory"):
+        value = filters.get(key)
+        text = cstr(value or "").strip()
+        if text:
+            normalized[key] = text
+
+    return normalized
