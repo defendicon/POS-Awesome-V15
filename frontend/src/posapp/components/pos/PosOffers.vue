@@ -197,11 +197,17 @@ export default {
 			this.removeOffers(toRemove);
 			offers.forEach((offer) => {
 				const pos_offer = this.pos_offers.find((pos_offer) => offer.name === pos_offer.name);
-				if (pos_offer) {
-					pos_offer.items = offer.items;
-					if (pos_offer.offer === "Grand Total" && !this.discount_percentage_offer_name) {
-						pos_offer.offer_applied = !!pos_offer.auto;
-					}
+                                if (pos_offer) {
+                                        pos_offer.items = offer.items;
+                                        if (
+                                                Object.prototype.hasOwnProperty.call(offer, "offer_applied") &&
+                                                pos_offer.offer_applied !== offer.offer_applied
+                                        ) {
+                                                pos_offer.offer_applied = !!offer.offer_applied;
+                                        }
+                                        if (pos_offer.offer === "Grand Total" && !this.discount_percentage_offer_name) {
+                                                pos_offer.offer_applied = !!pos_offer.auto;
+                                        }
 					if (
 						offer.apply_on == "Item Group" &&
 						offer.apply_type == "Item Group" &&
