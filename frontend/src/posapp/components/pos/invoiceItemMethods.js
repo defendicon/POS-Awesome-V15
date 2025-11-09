@@ -184,6 +184,10 @@ export default {
 		this.item_stock_cache = {};
 	},
         remove_item(item) {
+                if (!item) {
+                        return removeItem(item, this);
+                }
+
                 if (item && item.pricing_rule) {
                         if (item.posa_pricing_rule_virtual) {
                                 this._removePricingRuleRecord(item.pricing_rule);
@@ -210,7 +214,62 @@ export default {
                                 }
                         }
                 }
-                return removeItem(item, this);
+
+                const impactedRuleNames = new Set();
+                if (!item.posa_pricing_rule_virtual) {
+                        const rowId = typeof item.posa_row_id === "string" ? item.posa_row_id : "";
+                        if (rowId) {
+                                const records = Array.isArray(this.pos_pricing_rules) ? [...this.pos_pricing_rules] : [];
+                                records.forEach((record) => {
+                                        if (
+                                                !record ||
+                                                record.type !== "free_item" ||
+                                                !Array.isArray(record.qualifying_rows) ||
+                                                !record.qualifying_rows.length
+                                        ) {
+                                                return;
+                                        }
+
+                                        if (!record.qualifying_rows.includes(rowId)) {
+                                                return;
+                                        }
+
+                                        const remaining = record.qualifying_rows
+                                                .map((value) => {
+                                                        if (typeof value === "string") {
+                                                                return value.trim();
+                                                        }
+                                                        if (value === null || value === undefined) {
+                                                                return "";
+                                                        }
+                                                        return `${value}`.trim();
+                                                })
+                                                .filter((value) => value && value !== rowId);
+
+                                        if (!remaining.length) {
+                                                impactedRuleNames.add(record.name);
+                                        } else {
+                                                this._refreshPricingRuleRecord(record.name, {
+                                                        matchingRowIds: remaining,
+                                                });
+                                        }
+                                });
+                        }
+                }
+
+                const response = removeItem(item, this);
+
+                impactedRuleNames.forEach((ruleName) => {
+                        if (ruleName) {
+                                this.removePricingRule(ruleName);
+                        }
+                });
+
+                if (!item.posa_pricing_rule_virtual && typeof this.schedulePricingRuleRefresh === "function") {
+                        this.schedulePricingRuleRefresh();
+                }
+
+                return response;
         },
 
 	async add_item(item, options = {}) {
@@ -1261,8 +1320,15 @@ export default {
                                         return false;
                                 }
 
-                                const { freeItemCode, freeQty, multiplier, aggregated, base_qty, base_amount } =
-                                        evaluationResult;
+                                const {
+                                        freeItemCode,
+                                        freeQty,
+                                        multiplier,
+                                        aggregated,
+                                        base_qty,
+                                        base_amount,
+                                        matchingItems,
+                                } = evaluationResult;
                                 const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, freeQty);
                                 if (!newItem) {
                                         return false;
@@ -1292,6 +1358,12 @@ export default {
                                         posa_cycle_amount: base_amount ?? null,
                                 };
 
+                                const matchingRowIds = Array.isArray(matchingItems)
+                                        ? matchingItems
+                                                  .map((entry) => entry?.posa_row_id)
+                                                  .filter((rowId) => typeof rowId === "string" && rowId)
+                                        : [];
+
                                 this._registerPricingRuleRecord(rule, newItem, {
                                         type: "free_item",
                                         free_item: freeItemCode,
@@ -1299,6 +1371,7 @@ export default {
                                         rule_data: recordRuleData,
                                         base_qty: base_qty,
                                         base_amount: base_amount,
+                                        qualifying_rows: matchingRowIds,
                                 });
                                 this.emitPricingRulesState();
                         } else if (rule.is_price_discount) {
@@ -2137,6 +2210,11 @@ export default {
 
                                 const desiredQty = Math.abs(flt(evaluation.freeQty || 0));
                                 const desiredMultiplier = evaluation.multiplier || null;
+                                const matchingRowIds = Array.isArray(evaluation.matchingItems)
+                                        ? evaluation.matchingItems
+                                                  .map((item) => item?.posa_row_id)
+                                                  .filter((rowId) => typeof rowId === "string" && rowId)
+                                        : [];
 
                                 if (!record) {
                                         await this.applyPricingRule(rule, {
@@ -2165,6 +2243,7 @@ export default {
                                                 aggregated: evaluation.aggregated,
                                                 baseQty: evaluation.base_qty,
                                                 baseAmount: evaluation.base_amount,
+                                                matchingRowIds,
                                         });
 
                                         if (!updated) {
@@ -2183,6 +2262,7 @@ export default {
                                         aggregated: evaluation.aggregated,
                                         baseQty: evaluation.base_qty,
                                         baseAmount: evaluation.base_amount,
+                                        matchingRowIds,
                                 });
                                 continue;
                         }
@@ -2291,6 +2371,19 @@ export default {
                 if (details.baseAmount !== undefined) {
                         updatedRecord.base_amount = details.baseAmount;
                 }
+                if (Array.isArray(details.matchingRowIds)) {
+                        updatedRecord.qualifying_rows = details.matchingRowIds
+                                .map((rowId) => {
+                                        if (typeof rowId === "string") {
+                                                return rowId.trim();
+                                        }
+                                        if (rowId === null || rowId === undefined) {
+                                                return "";
+                                        }
+                                        return `${rowId}`.trim();
+                                })
+                                .filter((rowId) => !!rowId);
+                }
 
                 this.pos_pricing_rules.splice(index, 1, updatedRecord);
                 this._pricingRuleRecordDirty = true;
@@ -2301,7 +2394,7 @@ export default {
                         return false;
                 }
 
-                const { freeQty, multiplier, aggregated } = details || {};
+                const { freeQty, multiplier, aggregated, matchingRowIds } = details || {};
                 if (freeQty === undefined || freeQty === null) {
                         return false;
                 }
@@ -2356,6 +2449,7 @@ export default {
                                 aggregated,
                                 baseQty: details.baseQty,
                                 baseAmount: details.baseAmount,
+                                matchingRowIds,
                         });
                         return true;
                 }
@@ -2374,6 +2468,7 @@ export default {
                         aggregated,
                         baseQty: details.baseQty,
                         baseAmount: details.baseAmount,
+                        matchingRowIds,
                 });
 
                 if (typeof this.$forceUpdate === "function") {
@@ -2502,6 +2597,22 @@ export default {
                                         desiredMultiplier = evaluation.multiplier || null;
                                         aggregated = evaluation.aggregated || null;
                                         desiredFreeItemCode = evaluation.freeItemCode || null;
+                                        if (Array.isArray(evaluation.matchingItems)) {
+                                                const matchingRowIds = evaluation.matchingItems
+                                                        .map((entry) => {
+                                                                if (entry?.posa_row_id && typeof entry.posa_row_id === "string") {
+                                                                        return entry.posa_row_id.trim();
+                                                                }
+                                                                if (entry?.posa_row_id !== undefined && entry?.posa_row_id !== null) {
+                                                                        return `${entry.posa_row_id}`.trim();
+                                                                }
+                                                                return "";
+                                                        })
+                                                        .filter((rowId) => !!rowId);
+                                                if (matchingRowIds.length) {
+                                                        updatedRecord.qualifying_rows = matchingRowIds;
+                                                }
+                                        }
                                         if (evaluation.base_qty !== undefined) {
                                                 slot.record.base_qty = evaluation.base_qty;
                                         }
@@ -2668,6 +2779,20 @@ export default {
                         base_qty: options.base_qty !== undefined ? options.base_qty : null,
                         base_amount: options.base_amount !== undefined ? options.base_amount : null,
                 };
+
+                if (Array.isArray(options.qualifying_rows)) {
+                        payload.qualifying_rows = options.qualifying_rows
+                                .map((rowId) => {
+                                        if (typeof rowId === "string") {
+                                                return rowId.trim();
+                                        }
+                                        if (rowId === null || rowId === undefined) {
+                                                return "";
+                                        }
+                                        return `${rowId}`.trim();
+                                })
+                                .filter((rowId) => !!rowId);
+                }
 
                 this.pos_pricing_rules = Array.isArray(this.pos_pricing_rules)
                         ? [...this.pos_pricing_rules.filter((row) => row.name !== payload.name), payload]

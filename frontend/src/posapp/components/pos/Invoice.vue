@@ -935,6 +935,12 @@ export default {
                         this.calc_stock_qty(item, item[field_name]);
                         if (field_name === "qty") {
                                 this.updateBundleChildrenQty(item);
+                                if (
+                                        !item.posa_pricing_rule_virtual &&
+                                        typeof this.schedulePricingRuleRefresh === "function"
+                                ) {
+                                        this.schedulePricingRuleRefresh(item.posa_row_id);
+                                }
                         }
                         return parsedValue;
                 },
@@ -1364,6 +1370,9 @@ export default {
                         }
                         this.calc_stock_qty(item, item.qty);
                         this.updateBundleChildrenQty(item);
+                        if (!item.posa_pricing_rule_virtual && typeof this.schedulePricingRuleRefresh === "function") {
+                                this.schedulePricingRuleRefresh(item.posa_row_id);
+                        }
                         this.$forceUpdate();
                 },
 
@@ -1380,6 +1389,9 @@ export default {
                         }
                         this.calc_stock_qty(item, item.qty);
                         this.updateBundleChildrenQty(item);
+                        if (!item.posa_pricing_rule_virtual && typeof this.schedulePricingRuleRefresh === "function") {
+                                this.schedulePricingRuleRefresh(item.posa_row_id);
+                        }
                         this.$forceUpdate();
                 },
 
