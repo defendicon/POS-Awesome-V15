@@ -1191,40 +1191,80 @@ export default {
                 }
 
                 if (applied) {
+                        this._releaseSuppressedPricingRule(ruleName);
                         this.applyPricingRule(rule);
                 } else {
+                        this._suppressPricingRule(ruleName);
                         this.removePricingRule(ruleName);
                 }
         },
 
-        async applyPricingRule(rule) {
+        _ensureSuppressedPricingRuleSet() {
+                if (!(this._manuallySuppressedPricingRules instanceof Set)) {
+                        this._manuallySuppressedPricingRules = new Set();
+                }
+        },
+
+        _suppressPricingRule(ruleName) {
+                if (!ruleName) {
+                        return;
+                }
+                this._ensureSuppressedPricingRuleSet();
+                this._manuallySuppressedPricingRules.add(ruleName);
+        },
+
+        _releaseSuppressedPricingRule(ruleName) {
+                if (!ruleName || !(this._manuallySuppressedPricingRules instanceof Set)) {
+                        return;
+                }
+                this._manuallySuppressedPricingRules.delete(ruleName);
+        },
+
+        _isPricingRuleSuppressed(ruleName) {
+                if (!ruleName || !(this._manuallySuppressedPricingRules instanceof Set)) {
+                        return false;
+                }
+                return this._manuallySuppressedPricingRules.has(ruleName);
+        },
+
+        async applyPricingRule(rule, options = {}) {
                 try {
                         if (!rule || !rule.name) {
-                                return;
+                                return false;
                         }
 
-                        if (this.pos_pricing_rules.some((entry) => entry.name === rule.name)) {
-                                return;
+                        const { silent = false, force = false, evaluation = null } = options || {};
+                        const existingIndex = Array.isArray(this.pos_pricing_rules)
+                                ? this.pos_pricing_rules.findIndex((entry) => entry.name === rule.name)
+                                : -1;
+
+                        if (existingIndex !== -1) {
+                                if (!force) {
+                                        return false;
+                                }
+                                this.removePricingRule(rule.name);
                         }
 
                         if (this.isReturnInvoice) {
-                                this.eventBus.emit("show_message", {
-                                        title: __("Pricing rules are not applied on return invoices"),
-                                        color: "warning",
-                                });
-                                return;
+                                if (!silent) {
+                                        this.eventBus.emit("show_message", {
+                                                title: __("Pricing rules are not applied on return invoices"),
+                                                color: "warning",
+                                        });
+                                }
+                                return false;
                         }
 
                         if (rule.is_free_item_rule) {
-                                const evaluation = this._evaluateFreeItemPricingRule(rule);
-                                if (!evaluation) {
-                                        return;
+                                const evaluationResult = evaluation || this._evaluateFreeItemPricingRule(rule, { silent });
+                                if (!evaluationResult) {
+                                        return false;
                                 }
 
-                                const { freeItemCode, freeQty, multiplier, aggregated } = evaluation;
+                                const { freeItemCode, freeQty, multiplier, aggregated } = evaluationResult;
                                 const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, freeQty);
                                 if (!newItem) {
-                                        return;
+                                        return false;
                                 }
 
                                 this.items.unshift(newItem);
@@ -1257,27 +1297,34 @@ export default {
                                 });
                                 this.emitPricingRulesState();
                         } else if (rule.is_price_discount) {
-                                const applied = this._applyDiscountPricingRule(rule);
+                                const applied = this._applyDiscountPricingRule(rule, {
+                                        silent,
+                                        evaluation,
+                                });
                                 if (!applied) {
-                                        return;
+                                        return false;
                                 }
                         } else {
-                                this.eventBus.emit("show_message", {
-                                        title: __("Pricing rule {0} is not supported", [rule.title || rule.name]),
-                                        color: "warning",
-                                });
-                                return;
+                                if (!silent) {
+                                        this.eventBus.emit("show_message", {
+                                                title: __("Pricing rule {0} is not supported", [rule.title || rule.name]),
+                                                color: "warning",
+                                        });
+                                }
+                                return false;
                         }
 
                         if (typeof this.$forceUpdate === "function") {
                                 this.$forceUpdate();
                         }
+                        return true;
                 } catch (error) {
                         console.error("Failed to apply pricing rule", error);
                         this.eventBus.emit("show_message", {
                                 title: __("Unable to apply pricing rule"),
                                 color: "error",
                         });
+                        return false;
                 }
         },
 
@@ -1607,17 +1654,20 @@ export default {
                 };
         },
 
-        _evaluateFreeItemPricingRule(rule) {
+        _evaluateFreeItemPricingRule(rule, options = {}) {
                 if (!rule) {
                         return null;
                 }
 
+                const { silent = false } = options || {};
                 const matchingItems = this._findItemsMatchingPricingRule(rule);
                 if (!matchingItems.length) {
-                        this.eventBus.emit("show_message", {
-                                title: __("No items match pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("No items match pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
                         return null;
                 }
 
@@ -1639,18 +1689,22 @@ export default {
                 );
 
                 if (minQty && aggregated.qty < minQty) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Minimum quantity not met for pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Minimum quantity not met for pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
                         return null;
                 }
 
                 if (minAmt && aggregated.amount < minAmt) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Minimum amount not met for pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Minimum amount not met for pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
                         return null;
                 }
 
@@ -1678,10 +1732,12 @@ export default {
                         : freeQtyPerApplication;
 
                 if (!totalFreeQty || totalFreeQty <= 0) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Pricing rule {0} has no free quantity", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Pricing rule {0} has no free quantity", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
                         return null;
                 }
 
@@ -1689,10 +1745,12 @@ export default {
                         rule.free_item || (rule.same_item ? matchingItems[0]?.item_code : rule.item_code);
 
                 if (!resolvedFreeItemCode) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Pricing rule {0} has no free item", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
                         return null;
                 }
 
@@ -1705,14 +1763,21 @@ export default {
                 };
         },
 
-        _applyDiscountPricingRule(rule) {
+        _evaluateDiscountPricingRule(rule, options = {}) {
+                if (!rule) {
+                        return null;
+                }
+
+                const { silent = false } = options || {};
                 const matchingItems = this._findItemsMatchingPricingRule(rule);
                 if (!matchingItems.length) {
-                        this.eventBus.emit("show_message", {
-                                title: __("No items match pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
-                        return false;
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("No items match pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
+                        return null;
                 }
 
                 const minQty = Math.abs(this.flt(rule.min_qty || 0));
@@ -1733,21 +1798,36 @@ export default {
                 );
 
                 if (minQty && aggregated.qty < minQty) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Minimum quantity not met for pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
-                        return false;
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Minimum quantity not met for pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
+                        return null;
                 }
 
                 if (minAmt && aggregated.amount < minAmt) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Minimum amount not met for pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Minimum amount not met for pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
+                        return null;
+                }
+
+                return { matchingItems, aggregated };
+        },
+
+        _applyDiscountPricingRule(rule, options = {}) {
+                const { silent = false, evaluation = null } = options || {};
+                const context = evaluation || this._evaluateDiscountPricingRule(rule, { silent });
+                if (!context) {
                         return false;
                 }
 
+                const { matchingItems, aggregated } = context;
                 const affected = [];
                 matchingItems.forEach((item) => {
                         const snapshot = this._snapshotItemForPricingRule(item);
@@ -1761,20 +1841,269 @@ export default {
                 });
 
                 if (!affected.length) {
-                        this.eventBus.emit("show_message", {
-                                title: __("Unable to apply pricing rule {0}", [rule.title || rule.name]),
-                                color: "warning",
-                        });
+                        if (!silent) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Unable to apply pricing rule {0}", [rule.title || rule.name]),
+                                        color: "warning",
+                                });
+                        }
                         return false;
                 }
+
+                const rulePayload = {
+                        ...rule,
+                        posa_base_qty: aggregated?.qty ?? null,
+                        posa_base_amount: aggregated?.amount ?? null,
+                };
 
                 this._registerPricingRuleRecord(rule, null, {
                         type: "discount",
                         affected_items: affected,
-                        rule_data: rule,
+                        rule_data: rulePayload,
                 });
                 this.emitPricingRulesState();
                 return true;
+        },
+
+        ingestPricingRuleCatalog(rules = []) {
+                const sanitized = Array.isArray(rules)
+                        ? rules
+                                  .filter((entry) => entry && entry.name)
+                                  .map((entry) => ({ ...entry }))
+                        : [];
+                this.pricing_rule_catalog = sanitized;
+                this.pricing_rule_catalog_ready = true;
+                this.schedulePricingRuleRefresh();
+        },
+
+        schedulePricingRuleRefresh(changedRowIds = []) {
+                this._pendingPricingRuleRows = this._pendingPricingRuleRows || new Set();
+                const rows = Array.isArray(changedRowIds) ? changedRowIds : [changedRowIds];
+                rows.forEach((rowId) => {
+                        if (rowId) {
+                                this._pendingPricingRuleRows.add(rowId);
+                        }
+                });
+
+                if (this._pricingRuleRefreshPending) {
+                        return;
+                }
+
+                this._pricingRuleRefreshPending = true;
+                const schedule =
+                        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+                                ? window.requestAnimationFrame.bind(window)
+                                : (cb) => setTimeout(cb, 16);
+
+                this._pricingRuleRefreshHandle = schedule(() => {
+                        this._pricingRuleRefreshHandle = null;
+                        this._pricingRuleRefreshPending = false;
+                        const affectedRows = this._pendingPricingRuleRows ? Array.from(this._pendingPricingRuleRows) : [];
+                        this._pendingPricingRuleRows = new Set();
+                        this._queueAutoApplyPricingRules({ affectedRows });
+                });
+        },
+
+        cancelScheduledPricingRuleRefresh() {
+                if (this._pricingRuleRefreshHandle != null) {
+                        if (typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+                                window.cancelAnimationFrame(this._pricingRuleRefreshHandle);
+                        } else {
+                                clearTimeout(this._pricingRuleRefreshHandle);
+                        }
+                        this._pricingRuleRefreshHandle = null;
+                }
+                this._pricingRuleRefreshPending = false;
+                this._pendingPricingRuleRows = new Set();
+        },
+
+        _queueAutoApplyPricingRules(context = {}) {
+                const run = () => this._autoApplyPricingRules(context);
+                this._pricingRuleEvaluationQueue = (this._pricingRuleEvaluationQueue || Promise.resolve())
+                        .then(run)
+                        .catch((error) => {
+                                console.error("Failed to auto-apply pricing rules", error);
+                        });
+                return this._pricingRuleEvaluationQueue;
+        },
+
+        async _autoApplyPricingRules(context = {}) {
+                const { affectedRows = [] } = context || {};
+                void affectedRows;
+                if (this.isReturnInvoice) {
+                        return;
+                }
+
+                if (!this.pricing_rule_catalog_ready) {
+                        return;
+                }
+
+                const catalog = Array.isArray(this.pricing_rule_catalog) ? this.pricing_rule_catalog : [];
+                if (!catalog.length) {
+                        return;
+                }
+
+                const epsilon = 0.000001;
+                const appliedRecords = Array.isArray(this.pos_pricing_rules) ? [...this.pos_pricing_rules] : [];
+                const appliedMap = new Map(appliedRecords.map((record) => [record.name, record]));
+                const catalogNames = new Set(catalog.map((rule) => rule.name).filter(Boolean));
+                this._pricingRuleRecordDirty = false;
+
+                for (const rule of catalog) {
+                        if (!rule || !rule.name) {
+                                continue;
+                        }
+
+                        if (this._isPricingRuleSuppressed(rule.name)) {
+                                continue;
+                        }
+
+                        if (rule.is_free_item_rule) {
+                                const evaluation = this._evaluateFreeItemPricingRule(rule, { silent: true });
+                                const record = appliedMap.get(rule.name);
+                                if (!evaluation) {
+                                        if (record) {
+                                                this.removePricingRule(rule.name);
+                                        }
+                                        this._releaseSuppressedPricingRule(rule.name);
+                                        continue;
+                                }
+
+                                const desiredQty = Math.abs(flt(evaluation.freeQty || 0));
+                                const desiredMultiplier = evaluation.multiplier || null;
+
+                                if (!record) {
+                                        await this.applyPricingRule(rule, {
+                                                silent: true,
+                                                evaluation,
+                                        });
+                                        continue;
+                                }
+
+                                const currentQty = Math.abs(
+                                        flt(
+                                                record.rule_data?.posa_applied_free_qty ??
+                                                        record.free_qty ??
+                                                        0,
+                                        ),
+                                );
+                                const currentMultiplier = record.rule_data?.posa_applied_multiplier ?? null;
+
+                                if (
+                                        Math.abs(currentQty - desiredQty) > epsilon ||
+                                        (desiredMultiplier && desiredMultiplier !== currentMultiplier)
+                                ) {
+                                        await this.applyPricingRule(rule, {
+                                                silent: true,
+                                                evaluation,
+                                                force: true,
+                                        });
+                                        continue;
+                                }
+
+                                this._refreshPricingRuleRecord(rule.name, {
+                                        freeQty: desiredQty,
+                                        multiplier: desiredMultiplier,
+                                        aggregated: evaluation.aggregated,
+                                });
+                                continue;
+                        }
+
+                        if (rule.is_price_discount) {
+                                const evaluation = this._evaluateDiscountPricingRule(rule, { silent: true });
+                                const record = appliedMap.get(rule.name);
+
+                                if (!evaluation) {
+                                        if (record) {
+                                                this.removePricingRule(rule.name);
+                                        }
+                                        this._releaseSuppressedPricingRule(rule.name);
+                                        continue;
+                                }
+
+                                const desiredQty = flt(evaluation.aggregated?.qty || 0);
+                                const desiredAmount = flt(evaluation.aggregated?.amount || 0);
+                                const currentQty = flt(record?.rule_data?.posa_base_qty ?? 0);
+                                const currentAmount = flt(record?.rule_data?.posa_base_amount ?? 0);
+
+                                const mismatch = evaluation.matchingItems.some(
+                                        (item) => item && item.pricing_rule !== rule.name,
+                                );
+
+                                if (
+                                        !record ||
+                                        Math.abs(currentQty - desiredQty) > epsilon ||
+                                        Math.abs(currentAmount - desiredAmount) > epsilon ||
+                                        mismatch
+                                ) {
+                                        await this.applyPricingRule(rule, {
+                                                silent: true,
+                                                evaluation,
+                                                force: Boolean(record),
+                                        });
+                                        continue;
+                                }
+
+                                this._refreshPricingRuleRecord(rule.name, {
+                                        aggregated: evaluation.aggregated,
+                                });
+                        }
+                }
+
+                for (const record of appliedRecords) {
+                        if (record?.name && !catalogNames.has(record.name)) {
+                                this.removePricingRule(record.name);
+                                this._releaseSuppressedPricingRule(record.name);
+                        }
+                }
+
+                if (this._pricingRuleRecordDirty) {
+                        this._pricingRuleRecordDirty = false;
+                        this.emitPricingRulesState();
+                }
+        },
+
+        _refreshPricingRuleRecord(ruleName, details = {}) {
+                if (!ruleName || !Array.isArray(this.pos_pricing_rules)) {
+                        return;
+                }
+
+                const index = this.pos_pricing_rules.findIndex((entry) => entry && entry.name === ruleName);
+                if (index === -1) {
+                        return;
+                }
+
+                const record = this.pos_pricing_rules[index];
+                const nextRuleData = {
+                        ...(record.rule_data || {}),
+                };
+
+                if (details.freeQty !== undefined) {
+                        nextRuleData.posa_applied_free_qty = details.freeQty;
+                }
+                if (details.multiplier !== undefined) {
+                        nextRuleData.posa_applied_multiplier = details.multiplier;
+                }
+                if (details.aggregated && typeof details.aggregated === "object") {
+                        if (details.aggregated.qty !== undefined) {
+                                nextRuleData.posa_base_qty = details.aggregated.qty;
+                        }
+                        if (details.aggregated.amount !== undefined) {
+                                nextRuleData.posa_base_amount = details.aggregated.amount;
+                        }
+                }
+
+                const updatedRecord = {
+                        ...record,
+                        rule_data: nextRuleData,
+                };
+
+                if (details.freeQty !== undefined) {
+                        updatedRecord.free_qty = details.freeQty;
+                }
+
+                this.pos_pricing_rules.splice(index, 1, updatedRecord);
+                this._pricingRuleRecordDirty = true;
         },
 
         _syncDocItemsWithPricingRuleRecords() {

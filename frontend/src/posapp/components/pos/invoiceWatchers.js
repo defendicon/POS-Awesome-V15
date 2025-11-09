@@ -133,10 +133,18 @@ export default {
 
                         if (!previous) {
                                 if (snapshot.order.length) {
-                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                        const affected = [...new Set(snapshot.order)];
+                                        this.scheduleOfferRefresh(affected);
+                                        if (typeof this.schedulePricingRuleRefresh === "function") {
+                                                this.schedulePricingRuleRefresh(affected);
+                                        }
                                 }
                         } else if (changed.size) {
-                                this.scheduleOfferRefresh(Array.from(changed));
+                                const affected = Array.from(changed);
+                                this.scheduleOfferRefresh(affected);
+                                if (typeof this.schedulePricingRuleRefresh === "function") {
+                                        this.schedulePricingRuleRefresh(affected);
+                                }
                         }
 
                         if (typeof this.emitCartQuantities === "function") {
@@ -163,10 +171,18 @@ export default {
 
                         if (!previous) {
                                 if (snapshot.order.length) {
-                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+                                        const affected = [...new Set(snapshot.order)];
+                                        this.scheduleOfferRefresh(affected);
+                                        if (typeof this.schedulePricingRuleRefresh === "function") {
+                                                this.schedulePricingRuleRefresh(affected);
+                                        }
                                 }
                         } else if (changed.size) {
-                                this.scheduleOfferRefresh(Array.from(changed));
+                                const affected = Array.from(changed);
+                                this.scheduleOfferRefresh(affected);
+                                if (typeof this.schedulePricingRuleRefresh === "function") {
+                                        this.schedulePricingRuleRefresh(affected);
+                                }
                         }
 
                         if (typeof this.emitCartQuantities === "function") {

@@ -376,6 +376,8 @@ export default {
                         posa_offers: [], // Offers applied to this invoice
                         posa_coupons: [], // Coupons applied
                         pos_pricing_rules: [], // Pricing rules applied virtually
+                        pricing_rule_catalog: [], // Available pricing rules from server
+                        pricing_rule_catalog_ready: false,
                         isApplyingOffer: false, // Flag to prevent offer watcher loops
 			allItems: [], // All items for offer logic
 			discount_percentage_offer_name: null, // Track which offer is applied
@@ -473,7 +475,7 @@ export default {
         methods: {
                 ...shortcutMethods,
 		...offerMethods,
-		...invoiceItemMethods,
+                ...invoiceItemMethods,
                 focusCustomerSearchField() {
                         const customerComponent = this.$refs.customerComponent;
                         if (!customerComponent) {
@@ -1421,6 +1423,12 @@ export default {
                                 this.float_precision = prec;
                                 this.currency_precision = prec;
                         }
+                        this.pricing_rule_catalog = [];
+                        this.pricing_rule_catalog_ready = false;
+                        this._manuallySuppressedPricingRules = new Set();
+                        if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                                this.cancelScheduledPricingRuleRefresh();
+                        }
                         this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
                         this.initializeItemsHeaders();
 
@@ -1455,6 +1463,11 @@ export default {
                 },
                 handleSetOffers(data) {
                         this.posOffers = data;
+                },
+                handleSetPricingRules(rules) {
+                        if (typeof this.ingestPricingRuleCatalog === "function") {
+                                this.ingestPricingRuleCatalog(Array.isArray(rules) ? rules : []);
+                        }
                 },
                 async handleUpdateInvoiceOffers(data) {
                         await this.updateInvoiceOffers(data);
@@ -1535,6 +1548,7 @@ export default {
                         load_invoice: this.handleLoadInvoice,
                         load_order: this.handleLoadOrder,
                         set_offers: this.handleSetOffers,
+                        set_pricing_rules: this.handleSetPricingRules,
                         update_invoice_offers: this.handleUpdateInvoiceOffers,
                         update_invoice_coupons: this.handleUpdateInvoiceCoupons,
                         toggle_pricing_rule: this.handleTogglePricingRule,
@@ -1567,6 +1581,10 @@ export default {
                 if (typeof this.stockUnsubscribe === "function") {
                         this.stockUnsubscribe();
                         this.stockUnsubscribe = null;
+                }
+
+                if (typeof this.cancelScheduledPricingRuleRefresh === "function") {
+                        this.cancelScheduledPricingRuleRefresh();
                 }
 
                 Object.entries(this._busHandlers || {}).forEach(([eventName, handler]) => {

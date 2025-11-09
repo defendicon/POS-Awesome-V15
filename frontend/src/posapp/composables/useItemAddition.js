@@ -527,9 +527,13 @@ export function useItemAddition() {
                 if (typeof context.emitPricingRulesState === "function") {
                         context.emitPricingRulesState();
                 }
+                if (typeof context.cancelScheduledPricingRuleRefresh === "function") {
+                        context.cancelScheduledPricingRuleRefresh();
+                }
+                context._manuallySuppressedPricingRules = new Set();
                 context.invoice_doc = "";
-		context.return_doc = "";
-		context.discount_amount = 0;
+                context.return_doc = "";
+                context.discount_amount = 0;
 		context.additional_discount = 0;
 		context.additional_discount_percentage = 0;
 		context.delivery_charges_rate = 0;
