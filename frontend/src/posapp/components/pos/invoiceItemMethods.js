@@ -110,20 +110,20 @@ export default {
 	getItemTaskPromise(rowId, taskName) {
 		return this._getItemTaskPromise(rowId, taskName);
 	},
-	arePricingRulesEnabled() {
-		const flag = this.pos_profile?.posa_enable_pricing_rules;
-		if (flag === undefined || flag === null) {
-			return false;
-		}
-		if (typeof flag === "string") {
-			const normalized = flag.toLowerCase ? flag.toLowerCase().trim() : flag.trim();
-			if (!normalized) {
-				return false;
-			}
-			return normalized === "1" || normalized === "true";
-		}
-		return Boolean(flag);
-	},
+        arePricingRulesEnabled() {
+                const flag = this.pos_profile?.posa_enable_pricing_rules;
+                if (flag === undefined || flag === null) {
+                        return true;
+                }
+                if (typeof flag === "string") {
+                        const normalized = flag.toLowerCase ? flag.toLowerCase().trim() : flag.trim();
+                        if (!normalized) {
+                                return true;
+                        }
+                        return normalized === "1" || normalized === "true";
+                }
+                return Boolean(flag);
+        },
 	_getItemDetailCacheKey(item) {
 		const code = item?.item_code;
 		const warehouse = item?.warehouse || this.pos_profile?.warehouse;

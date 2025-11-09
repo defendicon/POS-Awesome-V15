@@ -130,11 +130,24 @@ def _merge_duplicate_taxes(invoice_doc):
 
 def _pricing_rules_enabled(profile_name: str | None) -> bool:
     if not profile_name:
-        return False
+        return True
+
+    try:
+        has_column = frappe.db.has_column("POS Profile", "posa_enable_pricing_rules")
+    except Exception:
+        has_column = False
+
+    if not has_column:
+        return True
+
     try:
         flag = frappe.db.get_value("POS Profile", profile_name, "posa_enable_pricing_rules")
     except Exception:
-        return False
+        return True
+
+    if flag in (None, ""):
+        return True
+
     return bool(cint(flag or 0))
 
 
