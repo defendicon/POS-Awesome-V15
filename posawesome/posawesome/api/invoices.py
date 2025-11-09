@@ -271,102 +271,18 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
     return {"valid": True}
 
 
-@frappe.whitelist()
-def update_invoice(data):
-    data = json.loads(data)
-    # Determine doctype based on POS Profile setting
-    pos_profile = data.get("pos_profile")
-    doctype = "Sales Invoice"
-    if pos_profile and frappe.db.get_value(
-        "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
-    ):
-        doctype = "POS Invoice"
+def _apply_currency_conversions(invoice_doc, selected_currency=None, price_list_currency=None):
+    company_currency = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
 
-    # Ensure the document type is set for new invoices to prevent validation errors
-    data.setdefault("doctype", doctype)
-
-    if data.get("name"):
-        invoice_doc = frappe.get_doc(doctype, data.get("name"))
-        invoice_doc.update(data)
-    else:
-        invoice_doc = frappe.get_doc(data)
-
-    # Set currency from data before set_missing_values
-    # Validate return items if this is a return invoice
-    if (data.get("is_return") or invoice_doc.is_return) and invoice_doc.get("return_against"):
-        validation = validate_return_items(
-            invoice_doc.return_against,
-            [d.as_dict() for d in invoice_doc.items],
-            doctype=invoice_doc.doctype,
-        )
-        if not validation.get("valid"):
-            frappe.throw(validation.get("message"))
-    selected_currency = data.get("currency")
-    price_list_currency = data.get("price_list_currency")
-    if not price_list_currency and invoice_doc.get("selling_price_list"):
-        price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
-
-    # Ensure customer exists before setting missing values
-    customer_name = invoice_doc.get("customer")
-    if customer_name and not frappe.db.exists("Customer", customer_name):
-        try:
-            cust = frappe.get_doc(
-                {
-                    "doctype": "Customer",
-                    "customer_name": customer_name,
-                    "customer_group": "All Customer Groups",
-                    "territory": "All Territories",
-                    "customer_type": "Individual",
-                }
-            )
-            cust.flags.ignore_permissions = True
-            cust.insert()
-            invoice_doc.customer = cust.name
-            invoice_doc.customer_name = cust.customer_name
-        except Exception as e:
-            frappe.log_error(f"Failed to create customer {customer_name}: {e}")
-
-    # Preserve provided item names for manual overrides
-    overrides = {d.idx: {"item_name": d.item_name} for d in invoice_doc.items}
-    locked_items = {}
-    if invoice_doc.is_return:
-        for d in invoice_doc.items:
-            if d.get("locked_price"):
-                locked_items[d.idx] = {
-                    "rate": d.rate,
-                    "price_list_rate": d.price_list_rate,
-                    "discount_percentage": d.discount_percentage,
-                    "discount_amount": d.discount_amount,
-                    "is_free_item": d.get("is_free_item"),
-                }
-
-    invoice_doc.ignore_pricing_rule = 1
-    invoice_doc.flags.ignore_pricing_rule = True
-
-    # Set missing values first
-    invoice_doc.set_missing_values()
-
-    # Reapply any custom item names after defaults are set
-    _apply_item_name_overrides(invoice_doc, overrides)
-
-    # Remove duplicate taxes from item and profile templates
-    _merge_duplicate_taxes(invoice_doc)
-
-    if locked_items:
-        for item in invoice_doc.items:
-            locked = locked_items.get(item.idx)
-            if locked:
-                item.update(locked)
-        invoice_doc.calculate_taxes_and_totals()
-
-    # Ensure selected currency is preserved after set_missing_values
     if selected_currency:
         invoice_doc.currency = selected_currency
-        company_currency = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
-    price_list_currency = price_list_currency or company_currency
 
-    conversion_rate = 1
+    price_list_currency = price_list_currency or invoice_doc.get("price_list_currency") or company_currency
+
+    conversion_rate = invoice_doc.conversion_rate or 1
+    plc_conversion_rate = invoice_doc.plc_conversion_rate or 1
     exchange_rate_date = invoice_doc.posting_date
+
     if invoice_doc.currency != company_currency:
         conversion_rate, exchange_rate_date = get_latest_rate(
             invoice_doc.currency,
@@ -396,42 +312,157 @@ def update_invoice(data):
         invoice_doc.plc_conversion_rate = plc_conversion_rate
         invoice_doc.price_list_currency = price_list_currency
 
-        # Update rates and amounts for all items using multiplication
-        for item in invoice_doc.items:
+        multiplier = conversion_rate
+        ratio = conversion_rate / (plc_conversion_rate or 1)
+        for item in invoice_doc.get("items", []):
             if item.price_list_rate:
                 item.base_price_list_rate = flt(
-                    item.price_list_rate * (conversion_rate / plc_conversion_rate),
+                    item.price_list_rate * ratio,
                     item.precision("base_price_list_rate"),
                 )
             if item.rate:
-                item.base_rate = flt(item.rate * conversion_rate, item.precision("base_rate"))
+                item.base_rate = flt(item.rate * multiplier, item.precision("base_rate"))
             if item.amount:
-                item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
+                item.base_amount = flt(item.amount * multiplier, item.precision("base_amount"))
 
-        # Update payment amounts
-        for payment in invoice_doc.payments:
-            payment.base_amount = flt(payment.amount * conversion_rate, payment.precision("base_amount"))
+        for payment in invoice_doc.get("payments", []):
+            payment.base_amount = flt(
+                payment.amount * multiplier,
+                payment.precision("base_amount"),
+            )
 
-        # Update invoice level amounts
-        invoice_doc.base_total = flt(invoice_doc.total * conversion_rate, invoice_doc.precision("base_total"))
+        invoice_doc.base_total = flt(
+            invoice_doc.total * multiplier,
+            invoice_doc.precision("base_total"),
+        )
         invoice_doc.base_net_total = flt(
-            invoice_doc.net_total * conversion_rate,
+            invoice_doc.net_total * multiplier,
             invoice_doc.precision("base_net_total"),
         )
         invoice_doc.base_grand_total = flt(
-            invoice_doc.grand_total * conversion_rate,
+            invoice_doc.grand_total * multiplier,
             invoice_doc.precision("base_grand_total"),
         )
         invoice_doc.base_rounded_total = flt(
-            invoice_doc.rounded_total * conversion_rate,
+            invoice_doc.rounded_total * multiplier,
             invoice_doc.precision("base_rounded_total"),
         )
         invoice_doc.base_in_words = money_in_words(invoice_doc.base_rounded_total, company_currency)
+    else:
+        invoice_doc.conversion_rate = conversion_rate
+        invoice_doc.plc_conversion_rate = plc_conversion_rate or 1
+        invoice_doc.price_list_currency = price_list_currency or company_currency
 
-        # Update data to be sent back to frontend
-        data["conversion_rate"] = conversion_rate
-        data["plc_conversion_rate"] = plc_conversion_rate
-        data["exchange_rate_date"] = exchange_rate_date
+    return {
+        "conversion_rate": invoice_doc.conversion_rate,
+        "plc_conversion_rate": invoice_doc.plc_conversion_rate,
+        "exchange_rate_date": exchange_rate_date,
+    }
+
+
+def _prepare_invoice_doc(data):
+    pos_profile = data.get("pos_profile")
+    doctype = "Sales Invoice"
+    if pos_profile and frappe.db.get_value(
+        "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
+    ):
+        doctype = "POS Invoice"
+
+    data.setdefault("doctype", doctype)
+
+    if data.get("name"):
+        invoice_doc = frappe.get_doc(doctype, data.get("name"))
+        invoice_doc.update(data)
+    else:
+        invoice_doc = frappe.get_doc(data)
+
+    customer_name = invoice_doc.get("customer")
+    if customer_name and not frappe.db.exists("Customer", customer_name):
+        try:
+            cust = frappe.get_doc(
+                {
+                    "doctype": "Customer",
+                    "customer_name": customer_name,
+                    "customer_group": "All Customer Groups",
+                    "territory": "All Territories",
+                    "customer_type": "Individual",
+                }
+            )
+            cust.flags.ignore_permissions = True
+            cust.insert()
+            invoice_doc.customer = cust.name
+            invoice_doc.customer_name = cust.customer_name
+        except Exception as e:
+            frappe.log_error(f"Failed to create customer {customer_name}: {e}")
+
+    overrides = {d.idx: {"item_name": d.item_name} for d in invoice_doc.get("items", [])}
+    locked_items = {}
+    if invoice_doc.is_return:
+        for d in invoice_doc.items:
+            if d.get("locked_price"):
+                locked_items[d.idx] = {
+                    "rate": d.rate,
+                    "price_list_rate": d.price_list_rate,
+                    "discount_percentage": d.discount_percentage,
+                    "discount_amount": d.discount_amount,
+                    "is_free_item": d.get("is_free_item"),
+                }
+
+    ignore_pricing_rule = data.get("ignore_pricing_rule")
+    if ignore_pricing_rule is None:
+        ignore_pricing_rule = getattr(invoice_doc, "ignore_pricing_rule", 0)
+    ignore_pricing_rule = cint(ignore_pricing_rule)
+    invoice_doc.ignore_pricing_rule = ignore_pricing_rule
+    invoice_doc.flags.ignore_pricing_rule = bool(ignore_pricing_rule)
+
+    invoice_doc.flags.ignore_permissions = True
+    invoice_doc.set_missing_values()
+    _apply_item_name_overrides(invoice_doc, overrides)
+    _merge_duplicate_taxes(invoice_doc)
+
+    if locked_items:
+        for item in invoice_doc.items:
+            locked = locked_items.get(item.idx)
+            if locked:
+                item.update(locked)
+
+    invoice_doc.calculate_taxes_and_totals()
+
+    return invoice_doc
+
+
+@frappe.whitelist()
+def update_invoice(data):
+    data = json.loads(data)
+    payload = data.copy()
+    payload["ignore_pricing_rule"] = 1
+    invoice_doc = _prepare_invoice_doc(payload)
+    invoice_doc.ignore_pricing_rule = 1
+    invoice_doc.flags.ignore_pricing_rule = True
+
+    if (data.get("is_return") or invoice_doc.is_return) and invoice_doc.get("return_against"):
+        validation = validate_return_items(
+            invoice_doc.return_against,
+            [d.as_dict() for d in invoice_doc.items],
+            doctype=invoice_doc.doctype,
+        )
+        if not validation.get("valid"):
+            frappe.throw(validation.get("message"))
+
+    selected_currency = data.get("currency")
+    price_list_currency = data.get("price_list_currency")
+    if not price_list_currency and invoice_doc.get("selling_price_list"):
+        price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
+
+    company_currency = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
+    price_list_currency = price_list_currency or company_currency
+
+    currency_meta = _apply_currency_conversions(
+        invoice_doc,
+        selected_currency=selected_currency,
+        price_list_currency=price_list_currency,
+    )
+    data.update(currency_meta)
 
     inclusive = frappe.get_cached_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive")
     if invoice_doc.get("taxes"):
@@ -441,7 +472,6 @@ def update_invoice(data):
             else:
                 tax.included_in_print_rate = 1 if inclusive else 0
 
-    # For return invoices, payments should be negative amounts
     if invoice_doc.is_return:
         for payment in invoice_doc.payments:
             payment.amount = -abs(payment.amount)
@@ -455,12 +485,68 @@ def update_invoice(data):
     invoice_doc.docstatus = 0
     invoice_doc.save()
 
-    # Return both the invoice doc and the updated data
     response = invoice_doc.as_dict()
-    response["conversion_rate"] = invoice_doc.conversion_rate
-    response["plc_conversion_rate"] = invoice_doc.plc_conversion_rate
-    response["exchange_rate_date"] = exchange_rate_date
+    response.update(currency_meta)
     return response
+
+
+@frappe.whitelist()
+def simulate_invoice_pricing(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+
+    if not data:
+        return {}
+
+    invoice_doc = _prepare_invoice_doc(data)
+
+    currency_meta = _apply_currency_conversions(
+        invoice_doc,
+        selected_currency=data.get("currency"),
+        price_list_currency=data.get("price_list_currency"),
+    )
+
+    inclusive = frappe.get_cached_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive")
+    if invoice_doc.get("taxes"):
+        for tax in invoice_doc.taxes:
+            if tax.charge_type == "Actual":
+                tax.included_in_print_rate = 0
+            else:
+                tax.included_in_print_rate = 1 if inclusive else 0
+
+    if invoice_doc.is_return:
+        for payment in invoice_doc.get("payments", []):
+            payment.amount = -abs(payment.amount)
+            payment.base_amount = -abs(payment.base_amount or payment.amount)
+
+        invoice_doc.paid_amount = flt(sum(p.amount for p in invoice_doc.get("payments", [])))
+        invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.get("payments", [])))
+
+    totals = {
+        "total": invoice_doc.total,
+        "net_total": invoice_doc.net_total,
+        "base_total": invoice_doc.base_total,
+        "base_net_total": invoice_doc.base_net_total,
+        "grand_total": invoice_doc.grand_total,
+        "base_grand_total": invoice_doc.base_grand_total,
+        "rounded_total": invoice_doc.rounded_total,
+        "base_rounded_total": invoice_doc.base_rounded_total,
+        "discount_amount": invoice_doc.discount_amount,
+        "base_discount_amount": invoice_doc.base_discount_amount,
+        "additional_discount_percentage": invoice_doc.additional_discount_percentage,
+        "total_taxes_and_charges": invoice_doc.total_taxes_and_charges,
+        "base_total_taxes_and_charges": invoice_doc.base_total_taxes_and_charges,
+    }
+    totals.update(currency_meta)
+
+    return {
+        "items": [d.as_dict() for d in invoice_doc.get("items", [])],
+        "taxes": [d.as_dict() for d in invoice_doc.get("taxes", [])],
+        "totals": totals,
+        "posa_offers": invoice_doc.get("posa_offers"),
+        "posa_coupons": invoice_doc.get("posa_coupons"),
+        "ignore_pricing_rule": invoice_doc.ignore_pricing_rule,
+    }
 
 
 @frappe.whitelist()

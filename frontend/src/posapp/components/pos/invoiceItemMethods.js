@@ -26,10 +26,39 @@ const { removeItem, addItem, getNewItem, clearInvoice } = useItemAddition();
 const { calcUom, calcStockQty } = useStockUtils();
 
 export default {
-	_ensureTaskBucket(rowId) {
-		if (!rowId) {
-			return null;
-		}
+        _normalizeBinaryFlag(value, fallback = 0) {
+                if (value === undefined || value === null) {
+                        return fallback;
+                }
+                if (typeof value === "number") {
+                        return value ? 1 : 0;
+                }
+                if (typeof value === "boolean") {
+                        return value ? 1 : 0;
+                }
+                if (typeof value === "string") {
+                        const normalized = value.trim().toLowerCase();
+                        if (!normalized.length) {
+                                return fallback;
+                        }
+                        if (["1", "true", "yes"].includes(normalized)) {
+                                return 1;
+                        }
+                        if (["0", "false", "no"].includes(normalized)) {
+                                return 0;
+                        }
+                        const parsed = Number.parseInt(normalized, 10);
+                        if (!Number.isNaN(parsed)) {
+                                return parsed ? 1 : 0;
+                        }
+                        return fallback;
+                }
+                return fallback;
+        },
+        _ensureTaskBucket(rowId) {
+                if (!rowId) {
+                        return null;
+                }
 		if (!this._itemTaskCache) {
 			this._itemTaskCache = new Map();
 		}
@@ -867,8 +896,12 @@ export default {
 		doc.posa_authorization_code = sourceDoc.posa_authorization_code ?? null;
 		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
-		// Add flags to ensure proper rate handling
-		doc.ignore_pricing_rule = 1;
+                // Add flags to ensure proper rate handling
+                const ignoreSeed =
+                        doc.ignore_pricing_rule !== undefined
+                                ? doc.ignore_pricing_rule
+                                : this.invoice_doc?.ignore_pricing_rule;
+                doc.ignore_pricing_rule = this._normalizeBinaryFlag(ignoreSeed, 1);
 
 		// Preserve the real price list currency
 		doc.price_list_currency = this.price_list_currency || doc.currency;
@@ -1272,16 +1305,19 @@ export default {
 		}
 	},
 
-	// Process and save invoice (handles update or create)
-	async process_invoice() {
-		const doc = this.get_invoice_doc();
-		try {
-			const updated_doc = await this.update_invoice(doc);
-			if (updated_doc && updated_doc.posting_date) {
-				this.posting_date = this.formatDateForBackend(updated_doc.posting_date);
-			}
-			return updated_doc;
-		} catch (error) {
+        // Process and save invoice (handles update or create)
+        async process_invoice() {
+                const doc = this.get_invoice_doc();
+                try {
+                        const usePreview = this._shouldPreviewErpPricing(doc);
+                        const updated_doc = usePreview
+                                ? await this.simulate_invoice_pricing(doc)
+                                : await this.update_invoice(doc);
+                        if (updated_doc && updated_doc.posting_date) {
+                                this.posting_date = this.formatDateForBackend(updated_doc.posting_date);
+                        }
+                        return updated_doc;
+                } catch (error) {
 			console.error("Error in process_invoice:", error);
 			this.eventBus.emit("show_message", {
 				title: __(error.message || "Error processing invoice"),
@@ -1701,10 +1737,10 @@ export default {
 			.filter((entry) => entry !== null);
 	},
 
-	_restoreManualSnapshots(items, snapshots) {
-		if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length) {
-			return;
-		}
+        _restoreManualSnapshots(items, snapshots) {
+                if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length) {
+                        return;
+                }
 
 		const remaining = [...snapshots];
 
@@ -1746,14 +1782,193 @@ export default {
 					item.base_amount = this.flt(item.qty * item.base_rate, this.currency_precision);
 				}
 			}
-		});
-	},
+                });
+        },
 
-	// Show payment dialog after validation and processing
-	async show_payment() {
-		if (this._suppressClosePaymentsTimer) {
-			clearTimeout(this._suppressClosePaymentsTimer);
-			this._suppressClosePaymentsTimer = null;
+        _shouldPreviewErpPricing(doc) {
+                if (!doc) {
+                        return false;
+                }
+
+                const previewFlag =
+                        this.pos_profile?.posa_enable_erp_pricing_preview ??
+                        this.pos_profile?.posa_preview_erp_pricing ??
+                        this.pos_profile?.posa_use_pricing_rules_preview ??
+                        0;
+                const previewEnabled = this._normalizeBinaryFlag(previewFlag, 0) === 1;
+
+                if (!previewEnabled) {
+                        return false;
+                }
+
+                const ignoreFlag = this._normalizeBinaryFlag(doc.ignore_pricing_rule, 1);
+                if (ignoreFlag !== 0) {
+                        return false;
+                }
+
+                if (doc.name) {
+                        return false;
+                }
+
+                return true;
+        },
+
+        async _applyPricingSimulationResult(doc, simulation) {
+                if (!simulation || typeof simulation !== "object") {
+                        return this.invoice_doc;
+                }
+
+                const serverItems = Array.isArray(simulation.items) ? simulation.items : [];
+                const requestItems = Array.isArray(doc?.items) ? doc.items : [];
+                const manualSnapshots = this._snapshotManualValuesFromDocItems(this.items);
+
+                const localByIdx = new Map();
+                requestItems.forEach((item) => {
+                        if (item && item.idx !== undefined && item.idx !== null) {
+                                localByIdx.set(item.idx, item);
+                        }
+                });
+                this.items.forEach((item) => {
+                        if (item && item.idx !== undefined && item.idx !== null && !localByIdx.has(item.idx)) {
+                                localByIdx.set(item.idx, item);
+                        }
+                });
+
+                const mergedItems = serverItems.map((serverItem) => {
+                        const idx = serverItem?.idx;
+                        const local = idx !== undefined && idx !== null ? localByIdx.get(idx) : null;
+                        const merged = { ...(local || {}), ...(serverItem || {}) };
+                        if (!merged.posa_row_id) {
+                                merged.posa_row_id = local?.posa_row_id || this.makeid(20);
+                        }
+                        if (local?.serial_no_selected?.length) {
+                                merged.serial_no_selected = [...local.serial_no_selected];
+                                merged.serial_no_selected_count = local.serial_no_selected_count;
+                        }
+                        return merged;
+                });
+
+                const totals = simulation.totals || {};
+                const baseDoc = this.invoice_doc ? { ...this.invoice_doc } : {};
+                const updatedDoc = {
+                        ...baseDoc,
+                        ...(doc || {}),
+                        ...totals,
+                        items: mergedItems.map((item) => ({ ...item })),
+                        taxes: Array.isArray(simulation.taxes)
+                                ? simulation.taxes.map((tax) => ({ ...tax }))
+                                : [],
+                };
+
+                const ignoreValue =
+                        simulation.ignore_pricing_rule !== undefined
+                                ? simulation.ignore_pricing_rule
+                                : this._normalizeBinaryFlag(doc?.ignore_pricing_rule, 1);
+                updatedDoc.ignore_pricing_rule = this._normalizeBinaryFlag(ignoreValue, 1);
+
+                if (totals.conversion_rate !== undefined) {
+                        updatedDoc.conversion_rate = totals.conversion_rate;
+                        this.conversion_rate = totals.conversion_rate;
+                }
+                if (totals.plc_conversion_rate !== undefined) {
+                        updatedDoc.plc_conversion_rate = totals.plc_conversion_rate;
+                }
+                if (totals.exchange_rate_date) {
+                        updatedDoc.exchange_rate_date = totals.exchange_rate_date;
+                        this.exchange_rate_date = totals.exchange_rate_date;
+                }
+
+                if (simulation.posa_offers !== undefined) {
+                        updatedDoc.posa_offers = simulation.posa_offers;
+                        this.posa_offers = Array.isArray(simulation.posa_offers)
+                                ? simulation.posa_offers
+                                : this.posa_offers;
+                }
+
+                if (simulation.posa_coupons !== undefined) {
+                        updatedDoc.posa_coupons = simulation.posa_coupons;
+                        this.posa_coupons = Array.isArray(simulation.posa_coupons)
+                                ? simulation.posa_coupons
+                                : this.posa_coupons;
+                        if (this.eventBus?.emit) {
+                                this.eventBus.emit("set_pos_coupons", updatedDoc.posa_coupons);
+                        }
+                }
+
+                updatedDoc.payments = Array.isArray(doc?.payments)
+                        ? doc.payments
+                        : Array.isArray(baseDoc?.payments)
+                                ? baseDoc.payments
+                                : [];
+
+                if (totals.discount_amount !== undefined) {
+                        const discountValue = this.flt(totals.discount_amount, this.currency_precision);
+                        this.discount_amount = discountValue;
+                        this.additional_discount = discountValue;
+                        updatedDoc.discount_amount = discountValue;
+                }
+
+                if (totals.additional_discount_percentage !== undefined) {
+                        const percentage = this.flt(totals.additional_discount_percentage, this.float_precision);
+                        this.additional_discount_percentage = percentage;
+                        updatedDoc.additional_discount_percentage = percentage;
+                }
+
+                this.invoice_doc = updatedDoc;
+                this.items = mergedItems;
+                this.invoice_doc.taxes = updatedDoc.taxes;
+
+                if (mergedItems.length) {
+                        await this.update_items_details(mergedItems);
+                        if (manualSnapshots.length) {
+                                this._restoreManualSnapshots(this.items, manualSnapshots);
+                        }
+                }
+
+                if (typeof this.$forceUpdate === "function") {
+                        this.$forceUpdate();
+                }
+
+                return this.invoice_doc;
+        },
+
+        async simulate_invoice_pricing(doc) {
+                if (isOffline()) {
+                        this.invoice_doc = Object.assign({}, this.invoice_doc || {}, doc);
+                        return this.invoice_doc;
+                }
+
+                try {
+                        const response = await frappe.call({
+                                method: "posawesome.posawesome.api.invoices.simulate_invoice_pricing",
+                                args: {
+                                        data: doc,
+                                },
+                        });
+
+                        const message = response?.message;
+                        if (!message) {
+                                return this.invoice_doc;
+                        }
+
+                        return await this._applyPricingSimulationResult(doc, message);
+                } catch (error) {
+                        console.error("Error simulating invoice pricing:", error);
+                        if (this.eventBus?.emit) {
+                                this.eventBus.emit("show_message", {
+                                        title: __("Failed to preview ERP pricing"),
+                                        color: "error",
+                                });
+                        }
+                        throw error;
+                }
+        },
+
+        // Show payment dialog after validation and processing
+        async show_payment() {
+                if (this._suppressClosePaymentsTimer) {
+                        clearTimeout(this._suppressClosePaymentsTimer);
+                        this._suppressClosePaymentsTimer = null;
 		}
 		this._suppressClosePayments = true;
 
