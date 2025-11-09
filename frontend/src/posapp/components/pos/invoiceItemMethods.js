@@ -55,6 +55,36 @@ export default {
                 }
                 return fallback;
         },
+        _resolveIgnorePricingRuleSeed(doc = null) {
+                if (doc && doc.ignore_pricing_rule !== undefined && doc.ignore_pricing_rule !== null) {
+                        return doc.ignore_pricing_rule;
+                }
+                if (
+                        this.invoice_doc &&
+                        this.invoice_doc.ignore_pricing_rule !== undefined &&
+                        this.invoice_doc.ignore_pricing_rule !== null
+                ) {
+                        return this.invoice_doc.ignore_pricing_rule;
+                }
+                if (this.ignore_pricing_rule !== undefined && this.ignore_pricing_rule !== null) {
+                        return this.ignore_pricing_rule;
+                }
+                if (this.pos_profile) {
+                        if (
+                                this.pos_profile.ignore_pricing_rule !== undefined &&
+                                this.pos_profile.ignore_pricing_rule !== null
+                        ) {
+                                return this.pos_profile.ignore_pricing_rule;
+                        }
+                        if (
+                                this.pos_profile.posa_ignore_pricing_rule !== undefined &&
+                                this.pos_profile.posa_ignore_pricing_rule !== null
+                        ) {
+                                return this.pos_profile.posa_ignore_pricing_rule;
+                        }
+                }
+                return undefined;
+        },
         _ensureTaskBucket(rowId) {
                 if (!rowId) {
                         return null;
@@ -692,7 +722,6 @@ export default {
                         doc.doctype = "Sales Invoice";
                 }
                 doc.is_pos = 1;
-                doc.ignore_pricing_rule = 1;
                 doc.company = doc.company || this.pos_profile.company;
                 doc.pos_profile = doc.pos_profile || this.pos_profile.name;
                 doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
@@ -897,11 +926,8 @@ export default {
 		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
                 // Add flags to ensure proper rate handling
-                const ignoreSeed =
-                        doc.ignore_pricing_rule !== undefined
-                                ? doc.ignore_pricing_rule
-                                : this.invoice_doc?.ignore_pricing_rule;
-                doc.ignore_pricing_rule = this._normalizeBinaryFlag(ignoreSeed, 1);
+                const ignoreSeed = this._resolveIgnorePricingRuleSeed(doc);
+                doc.ignore_pricing_rule = this._normalizeBinaryFlag(ignoreSeed, 0);
 
 		// Preserve the real price list currency
 		doc.price_list_currency = this.price_list_currency || doc.currency;
@@ -1801,7 +1827,8 @@ export default {
                         return false;
                 }
 
-                const ignoreFlag = this._normalizeBinaryFlag(doc.ignore_pricing_rule, 1);
+                const ignoreSeed = this._resolveIgnorePricingRuleSeed(doc);
+                const ignoreFlag = this._normalizeBinaryFlag(ignoreSeed, 0);
                 if (ignoreFlag !== 0) {
                         return false;
                 }
@@ -1860,11 +1887,11 @@ export default {
                                 : [],
                 };
 
-                const ignoreValue =
+                const ignoreSeed =
                         simulation.ignore_pricing_rule !== undefined
                                 ? simulation.ignore_pricing_rule
-                                : this._normalizeBinaryFlag(doc?.ignore_pricing_rule, 1);
-                updatedDoc.ignore_pricing_rule = this._normalizeBinaryFlag(ignoreValue, 1);
+                                : this._resolveIgnorePricingRuleSeed(doc);
+                updatedDoc.ignore_pricing_rule = this._normalizeBinaryFlag(ignoreSeed, 0);
 
                 if (totals.conversion_rate !== undefined) {
                         updatedDoc.conversion_rate = totals.conversion_rate;

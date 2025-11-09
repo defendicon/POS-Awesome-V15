@@ -434,11 +434,7 @@ def _prepare_invoice_doc(data):
 @frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
-    payload = data.copy()
-    payload["ignore_pricing_rule"] = 1
-    invoice_doc = _prepare_invoice_doc(payload)
-    invoice_doc.ignore_pricing_rule = 1
-    invoice_doc.flags.ignore_pricing_rule = True
+    invoice_doc = _prepare_invoice_doc(data)
 
     if (data.get("is_return") or invoice_doc.is_return) and invoice_doc.get("return_against"):
         validation = validate_return_items(
