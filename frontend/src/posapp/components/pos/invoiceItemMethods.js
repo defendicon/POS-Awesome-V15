@@ -1504,6 +1504,10 @@ export default {
                                 return false;
                         }
 
+                        if (item.is_free_item) {
+                                return false;
+                        }
+
                         const normalizedItemCode = item.item_code ? `${item.item_code}`.trim() : "";
                         if (itemTargets.size && (!normalizedItemCode || !itemTargets.has(normalizedItemCode))) {
                                 return false;
@@ -2233,11 +2237,51 @@ export default {
                         ensureRowId(item);
 
                         const updatedRecord = { ...slot.record };
+
+                        const cloneRule = (source) => {
+                                if (!source) {
+                                        return null;
+                                }
+                                try {
+                                        return JSON.parse(JSON.stringify(source));
+                                } catch (error) {
+                                        console.warn("Failed to clone pricing rule data", error);
+                                        return { ...source };
+                                }
+                        };
+
+                        const ruleSource =
+                                cloneRule(updatedRecord.rule_data) ||
+                                cloneRule(
+                                        Array.isArray(this.pricing_rule_catalog)
+                                                ? this.pricing_rule_catalog.find(
+                                                          (entry) => entry && entry.name === updatedRecord.name,
+                                                  )
+                                                : null,
+                                );
+
+                        let desiredQty = null;
+                        let desiredMultiplier = null;
+                        let aggregated = null;
+                        let desiredFreeItemCode = null;
+
+                        if (ruleSource && typeof this._evaluateFreeItemPricingRule === "function") {
+                                const evaluation = this._evaluateFreeItemPricingRule(ruleSource, { silent: true });
+                                if (evaluation) {
+                                        desiredQty = Math.abs(toNumber(evaluation.freeQty));
+                                        desiredMultiplier = evaluation.multiplier || null;
+                                        aggregated = evaluation.aggregated || null;
+                                        desiredFreeItemCode = evaluation.freeItemCode || null;
+                                }
+                        }
+
                         const resolvedQty = Math.abs(
                                 toNumber(
-                                        updatedRecord.free_qty !== undefined && updatedRecord.free_qty !== null
-                                                ? updatedRecord.free_qty
-                                                : updatedRecord.rule_data?.posa_applied_free_qty ?? item.qty ?? 0,
+                                        desiredQty !== null && desiredQty !== undefined && !Number.isNaN(desiredQty)
+                                                ? desiredQty
+                                                : updatedRecord.free_qty !== undefined && updatedRecord.free_qty !== null
+                                                        ? updatedRecord.free_qty
+                                                        : updatedRecord.rule_data?.posa_applied_free_qty ?? item.qty ?? 0,
                                 ),
                         );
 
@@ -2248,12 +2292,24 @@ export default {
 
                         if (resolvedQty > 0) {
                                 updatedRecord.free_qty = resolvedQty;
-                                if (updatedRecord.rule_data) {
-                                        updatedRecord.rule_data = {
-                                                ...updatedRecord.rule_data,
-                                                posa_applied_free_qty: resolvedQty,
-                                        };
+                                const nextRuleData = cloneRule(updatedRecord.rule_data) || {};
+                                nextRuleData.posa_applied_free_qty = resolvedQty;
+                                if (desiredMultiplier !== null && desiredMultiplier !== undefined) {
+                                        nextRuleData.posa_applied_multiplier = desiredMultiplier;
                                 }
+                                if (aggregated && typeof aggregated === "object") {
+                                        if (aggregated.qty !== undefined) {
+                                                nextRuleData.posa_base_qty = aggregated.qty;
+                                        }
+                                        if (aggregated.amount !== undefined) {
+                                                nextRuleData.posa_base_amount = aggregated.amount;
+                                        }
+                                }
+                                updatedRecord.rule_data = nextRuleData;
+                        }
+
+                        if (desiredFreeItemCode) {
+                                updatedRecord.free_item = desiredFreeItemCode;
                         }
 
                         if (updatedRecord.row_id !== item.posa_row_id) {
