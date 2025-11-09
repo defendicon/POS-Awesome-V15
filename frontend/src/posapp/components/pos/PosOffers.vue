@@ -218,8 +218,8 @@ export default {
 					if (offer.apply_type == "Item Code") {
 						newOffer.give_item = offer.apply_item_code || "Nothing";
 					}
-					if (offer.offer_applied) {
-						newOffer.offer_applied == !!offer.offer_applied;
+                                        if (offer.offer_applied) {
+                                                newOffer.offer_applied = !!offer.offer_applied;
 					} else {
 						if (
 							offer.apply_type == "Item Group" &&
