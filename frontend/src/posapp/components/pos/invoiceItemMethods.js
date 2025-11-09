@@ -1261,7 +1261,8 @@ export default {
                                         return false;
                                 }
 
-                                const { freeItemCode, freeQty, multiplier, aggregated } = evaluationResult;
+                                const { freeItemCode, freeQty, multiplier, aggregated, base_qty, base_amount } =
+                                        evaluationResult;
                                 const newItem = this._createVirtualPricingRuleItem(rule, freeItemCode, freeQty);
                                 if (!newItem) {
                                         return false;
@@ -1287,6 +1288,8 @@ export default {
                                         posa_applied_free_qty: freeQty,
                                         posa_base_qty: aggregated?.qty ?? null,
                                         posa_base_amount: aggregated?.amount ?? null,
+                                        posa_cycle_qty: base_qty ?? null,
+                                        posa_cycle_amount: base_amount ?? null,
                                 };
 
                                 this._registerPricingRuleRecord(rule, newItem, {
@@ -1294,6 +1297,8 @@ export default {
                                         free_item: freeItemCode,
                                         free_qty: freeQty,
                                         rule_data: recordRuleData,
+                                        base_qty: base_qty,
+                                        base_amount: base_amount,
                                 });
                                 this.emitPricingRulesState();
                         } else if (rule.is_price_discount) {
@@ -1709,7 +1714,36 @@ export default {
                         return null;
                 }
 
-                const { silent = false } = options || {};
+                const { silent = false, record = null } = options || {};
+                const recordContext = (() => {
+                        if (record) {
+                                return record;
+                        }
+
+                        if (!rule || typeof rule !== "object") {
+                                return null;
+                        }
+
+                        const candidate = {};
+                        if (rule.rule_data && typeof rule.rule_data === "object") {
+                                candidate.rule_data = rule.rule_data;
+                        }
+                        if (rule.free_qty !== undefined) {
+                                candidate.free_qty = rule.free_qty;
+                        }
+                        if (rule.multiplier !== undefined) {
+                                candidate.multiplier = rule.multiplier;
+                        }
+                        if (rule.base_qty !== undefined) {
+                                candidate.base_qty = rule.base_qty;
+                        }
+                        if (rule.base_amount !== undefined) {
+                                candidate.base_amount = rule.base_amount;
+                        }
+
+                        return Object.keys(candidate).length ? candidate : null;
+                })();
+
                 const matchingItems = this._findItemsMatchingPricingRule(rule);
                 if (!matchingItems.length) {
                         if (!silent) {
@@ -1723,7 +1757,11 @@ export default {
 
                 const minQty = Math.abs(this.flt(rule.min_qty || 0));
                 const minAmt = Math.abs(this.flt(rule.min_amt || 0));
-                const allowMultiple = Boolean(rule.apply_multiple_pricing_rules);
+                const allowMultiple = Boolean(
+                        rule.apply_multiple_pricing_rules ||
+                                rule.rule_data?.apply_multiple_pricing_rules ||
+                                recordContext?.rule_data?.apply_multiple_pricing_rules,
+                );
 
                 const aggregated = matchingItems.reduce(
                         (acc, item) => {
@@ -1759,24 +1797,97 @@ export default {
                 }
 
                 let applications = 1;
+                let fallbackFreeQtyPerApplication = null;
+                let baseQtyPerApplication = minQty > 0 ? minQty : null;
+                let baseAmountPerApplication = minAmt > 0 ? minAmt : null;
                 if (allowMultiple) {
                         const multipliers = [];
                         if (minQty) {
                                 multipliers.push(Math.floor(aggregated.qty / minQty));
+                                baseQtyPerApplication = minQty;
                         }
                         if (minAmt) {
                                 multipliers.push(Math.floor(aggregated.amount / minAmt));
+                                baseAmountPerApplication = minAmt;
                         }
+
+                        if (!multipliers.length && recordContext) {
+                                const data =
+                                        recordContext.rule_data && typeof recordContext.rule_data === "object"
+                                                ? recordContext.rule_data
+                                                : {};
+                                const resolveNumber = (value) => Math.abs(this.flt(value || 0));
+                                const recordMultiplier = resolveNumber(
+                                        data.posa_applied_multiplier ??
+                                                data.multiplier ??
+                                                recordContext.multiplier ??
+                                                0,
+                                );
+                                const multiplierBaseline = recordMultiplier > 0 ? recordMultiplier : 1;
+
+                                const recordCycleQty = resolveNumber(
+                                        data.posa_cycle_qty ?? recordContext.base_qty ?? 0,
+                                );
+                                const recordCycleAmount = resolveNumber(
+                                        data.posa_cycle_amount ?? recordContext.base_amount ?? 0,
+                                );
+                                const recordAggregatedQty = resolveNumber(data.posa_base_qty ?? 0);
+                                const recordAggregatedAmount = resolveNumber(data.posa_base_amount ?? 0);
+                                const recordFreeQty = resolveNumber(
+                                        data.posa_applied_free_qty ??
+                                                recordContext.free_qty ??
+                                                rule.free_qty ??
+                                                0,
+                                );
+
+                                const derivedQtyPerApplication =
+                                        recordCycleQty && multiplierBaseline
+                                                ? recordCycleQty / multiplierBaseline
+                                                : recordAggregatedQty && multiplierBaseline
+                                                        ? recordAggregatedQty / multiplierBaseline
+                                                        : 0;
+                                const derivedAmountPerApplication =
+                                        recordCycleAmount && multiplierBaseline
+                                                ? recordCycleAmount / multiplierBaseline
+                                                : recordAggregatedAmount && multiplierBaseline
+                                                        ? recordAggregatedAmount / multiplierBaseline
+                                                        : 0;
+
+                                if (derivedQtyPerApplication > 0) {
+                                        multipliers.push(
+                                                Math.floor(aggregated.qty / derivedQtyPerApplication),
+                                        );
+                                        baseQtyPerApplication = derivedQtyPerApplication;
+                                }
+
+                                if (derivedAmountPerApplication > 0) {
+                                        multipliers.push(
+                                                Math.floor(aggregated.amount / derivedAmountPerApplication),
+                                        );
+                                        baseAmountPerApplication = derivedAmountPerApplication;
+                                }
+
+                                if (recordFreeQty > 0 && multiplierBaseline > 0) {
+                                        const computed = recordFreeQty / multiplierBaseline;
+                                        if (computed > 0) {
+                                                fallbackFreeQtyPerApplication = computed;
+                                        }
+                                }
+                        }
+
                         if (multipliers.length) {
                                 applications = Math.max(Math.min(...multipliers), 0);
-                        }
-                        if (!applications || applications < 1) {
-                                applications = 1;
+                                if (!applications || applications < 1) {
+                                        return null;
+                                }
                         }
                 }
 
                 const baseFreeQty = Math.abs(this.flt(rule.free_qty || 0));
-                const freeQtyPerApplication = baseFreeQty || 1;
+                const freeQtyPerApplication =
+                        fallbackFreeQtyPerApplication !== null
+                                ? fallbackFreeQtyPerApplication
+                                : baseFreeQty || 1;
                 const totalFreeQty = allowMultiple
                         ? freeQtyPerApplication * applications
                         : freeQtyPerApplication;
@@ -1808,6 +1919,8 @@ export default {
                         freeItemCode: resolvedFreeItemCode,
                         freeQty: totalFreeQty,
                         multiplier: allowMultiple ? applications : 1,
+                        base_qty: baseQtyPerApplication,
+                        base_amount: baseAmountPerApplication,
                         aggregated,
                         matchingItems,
                 };
@@ -2009,8 +2122,11 @@ export default {
                         }
 
                         if (rule.is_free_item_rule) {
-                                const evaluation = this._evaluateFreeItemPricingRule(rule, { silent: true });
                                 const record = appliedMap.get(rule.name);
+                                const evaluation = this._evaluateFreeItemPricingRule(rule, {
+                                        silent: true,
+                                        record,
+                                });
                                 if (!evaluation) {
                                         if (record) {
                                                 this.removePricingRule(rule.name);
@@ -2047,6 +2163,8 @@ export default {
                                                 freeQty: desiredQty,
                                                 multiplier: desiredMultiplier,
                                                 aggregated: evaluation.aggregated,
+                                                baseQty: evaluation.base_qty,
+                                                baseAmount: evaluation.base_amount,
                                         });
 
                                         if (!updated) {
@@ -2063,6 +2181,8 @@ export default {
                                         freeQty: desiredQty,
                                         multiplier: desiredMultiplier,
                                         aggregated: evaluation.aggregated,
+                                        baseQty: evaluation.base_qty,
+                                        baseAmount: evaluation.base_amount,
                                 });
                                 continue;
                         }
@@ -2150,6 +2270,12 @@ export default {
                                 nextRuleData.posa_base_amount = details.aggregated.amount;
                         }
                 }
+                if (details.baseQty !== undefined) {
+                        nextRuleData.posa_cycle_qty = details.baseQty;
+                }
+                if (details.baseAmount !== undefined) {
+                        nextRuleData.posa_cycle_amount = details.baseAmount;
+                }
 
                 const updatedRecord = {
                         ...record,
@@ -2158,6 +2284,12 @@ export default {
 
                 if (details.freeQty !== undefined) {
                         updatedRecord.free_qty = details.freeQty;
+                }
+                if (details.baseQty !== undefined) {
+                        updatedRecord.base_qty = details.baseQty;
+                }
+                if (details.baseAmount !== undefined) {
+                        updatedRecord.base_amount = details.baseAmount;
                 }
 
                 this.pos_pricing_rules.splice(index, 1, updatedRecord);
@@ -2218,7 +2350,13 @@ export default {
 
                 const currentQty = resolveNumber(target.qty, true) || 0;
                 if (Math.abs(currentQty - desiredQty) <= epsilon) {
-                        this._refreshPricingRuleRecord(ruleName, { freeQty: desiredQty, multiplier, aggregated });
+                        this._refreshPricingRuleRecord(ruleName, {
+                                freeQty: desiredQty,
+                                multiplier,
+                                aggregated,
+                                baseQty: details.baseQty,
+                                baseAmount: details.baseAmount,
+                        });
                         return true;
                 }
 
@@ -2230,7 +2368,13 @@ export default {
                         this.calc_stock_qty(target, target.qty);
                 }
 
-                this._refreshPricingRuleRecord(ruleName, { freeQty: desiredQty, multiplier, aggregated });
+                this._refreshPricingRuleRecord(ruleName, {
+                        freeQty: desiredQty,
+                        multiplier,
+                        aggregated,
+                        baseQty: details.baseQty,
+                        baseAmount: details.baseAmount,
+                });
 
                 if (typeof this.$forceUpdate === "function") {
                         this.$forceUpdate();
@@ -2349,12 +2493,21 @@ export default {
                         let desiredFreeItemCode = null;
 
                         if (ruleSource && typeof this._evaluateFreeItemPricingRule === "function") {
-                                const evaluation = this._evaluateFreeItemPricingRule(ruleSource, { silent: true });
+                                const evaluation = this._evaluateFreeItemPricingRule(ruleSource, {
+                                        silent: true,
+                                        record: slot.record,
+                                });
                                 if (evaluation) {
                                         desiredQty = Math.abs(toNumber(evaluation.freeQty));
                                         desiredMultiplier = evaluation.multiplier || null;
                                         aggregated = evaluation.aggregated || null;
                                         desiredFreeItemCode = evaluation.freeItemCode || null;
+                                        if (evaluation.base_qty !== undefined) {
+                                                slot.record.base_qty = evaluation.base_qty;
+                                        }
+                                        if (evaluation.base_amount !== undefined) {
+                                                slot.record.base_amount = evaluation.base_amount;
+                                        }
                                 }
                         }
 
@@ -2512,6 +2665,8 @@ export default {
                         rule_data: options.rule_data
                                 ? JSON.parse(JSON.stringify(options.rule_data))
                                 : JSON.parse(JSON.stringify(rule)),
+                        base_qty: options.base_qty !== undefined ? options.base_qty : null,
+                        base_amount: options.base_amount !== undefined ? options.base_amount : null,
                 };
 
                 this.pos_pricing_rules = Array.isArray(this.pos_pricing_rules)
