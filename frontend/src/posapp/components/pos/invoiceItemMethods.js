@@ -1828,13 +1828,65 @@ export default {
                         return null;
                 }
 
+                const normalizeFlag = (value) => {
+                        if (value === undefined || value === null) {
+                                return null;
+                        }
+
+                        if (typeof value === "boolean") {
+                                return value;
+                        }
+
+                        if (typeof value === "number") {
+                                return value !== 0;
+                        }
+
+                        if (typeof value === "string") {
+                                const normalized = value.trim().toLowerCase();
+                                if (!normalized) {
+                                        return null;
+                                }
+
+                                if (["1", "true", "yes", "y", "on", "enable", "enabled"].includes(normalized)) {
+                                        return true;
+                                }
+
+                                if (["0", "false", "no", "n", "off", "disable", "disabled"].includes(normalized)) {
+                                        return false;
+                                }
+                        }
+
+                        return null;
+                };
+
+                const resolveFlag = (...candidates) => {
+                        for (const candidate of candidates) {
+                                const normalized = normalizeFlag(candidate);
+                                if (normalized !== null) {
+                                        return normalized;
+                                }
+                        }
+                        return false;
+                };
+
                 const minQty = Math.abs(this.flt(rule.min_qty || 0));
                 const minAmt = Math.abs(this.flt(rule.min_amt || 0));
-                const allowMultiple = Boolean(
-                        rule.apply_multiple_pricing_rules ||
-                                rule.rule_data?.apply_multiple_pricing_rules ||
-                                recordContext?.rule_data?.apply_multiple_pricing_rules,
+                let allowMultiple = resolveFlag(
+                        rule.apply_multiple_pricing_rules,
+                        rule.rule_data?.apply_multiple_pricing_rules,
+                        recordContext?.rule_data?.apply_multiple_pricing_rules,
+                        recordContext?.apply_multiple_pricing_rules,
+                        recordContext?.rule_data?.posa_apply_multiple_pricing_rules,
                 );
+
+                if (!allowMultiple) {
+                        const recordMultiplier = recordContext?.rule_data?.posa_applied_multiplier ??
+                                recordContext?.multiplier ??
+                                recordContext?.rule_data?.multiplier;
+                        if (recordMultiplier && Math.abs(this.flt(recordMultiplier)) > 1) {
+                                allowMultiple = true;
+                        }
+                }
 
                 const aggregated = matchingItems.reduce(
                         (acc, item) => {
