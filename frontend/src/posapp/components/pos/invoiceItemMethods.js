@@ -456,8 +456,11 @@ export default {
                                           };
                                   })
                                 : [];
+
+                        this._syncDocItemsWithPricingRuleRecords();
                         this.emitPricingRulesState();
                         await this._restoreVirtualPricingRuleItemsFromRecords();
+                        this.emitPricingRulesState();
                 } else {
                         console.log("Warning: No items in return invoice");
                         this.pos_pricing_rules = [];
@@ -1394,9 +1397,22 @@ export default {
                 }
 
                 const applyOn = (rule.apply_on || "").toLowerCase();
+                const applicableFor = (rule.applicable_for || "").toLowerCase();
                 const itemCode = rule.item_code || null;
                 const itemGroup = rule.item_group || null;
                 const brand = rule.brand || null;
+
+                const expectsSpecificTarget = ["item code", "item group", "brand"].includes(applyOn);
+                const hasSpecificTarget = Boolean(itemCode || itemGroup || brand);
+
+                // Some ERPNext configurations use applicable_for to describe the same
+                // target semantics as apply_on. Account for that by falling back when
+                // apply_on is empty but applicable_for is populated with an item scope.
+                const derivedScope = (expectsSpecificTarget || hasSpecificTarget)
+                        ? applyOn
+                        : ["item code", "item group", "brand"].includes(applicableFor)
+                                ? applicableFor
+                                : "";
 
                 return (Array.isArray(this.items) ? this.items : []).filter((item) => {
                         if (!item || item.posa_pricing_rule_virtual) {
@@ -1407,11 +1423,18 @@ export default {
                                 return false;
                         }
 
-                        if (applyOn === "item group" && itemGroup && item.item_group !== itemGroup) {
+                        if ((applyOn === "item group" || derivedScope === "item group") && itemGroup && item.item_group !== itemGroup) {
                                 return false;
                         }
 
-                        if (applyOn === "brand" && brand && item.brand !== brand) {
+                        if ((applyOn === "brand" || derivedScope === "brand") && brand && item.brand !== brand) {
+                                return false;
+                        }
+
+                        if (!hasSpecificTarget && (expectsSpecificTarget || derivedScope)) {
+                                // The rule expects a specific item, group, or brand but
+                                // no explicit target has been provided – treat as non-match
+                                // so the discount does not blanket every row.
                                 return false;
                         }
 
@@ -1754,6 +1777,135 @@ export default {
                 return true;
         },
 
+        _syncDocItemsWithPricingRuleRecords() {
+                if (!Array.isArray(this.items) || !this.items.length) {
+                        return;
+                }
+
+                if (!Array.isArray(this.pos_pricing_rules) || !this.pos_pricing_rules.length) {
+                        return;
+                }
+
+                const freeRuleSlots = [];
+                this.pos_pricing_rules.forEach((record, index) => {
+                        if (record && record.type === "free_item") {
+                                freeRuleSlots.push({ record, index });
+                        }
+                });
+
+                if (!freeRuleSlots.length) {
+                        return;
+                }
+
+                const byName = new Map();
+                const byItemCode = new Map();
+
+                freeRuleSlots.forEach((slot) => {
+                        if (!slot || !slot.record) {
+                                return;
+                        }
+                        byName.set(slot.record.name, slot);
+                        const code = slot.record.free_item;
+                        if (code) {
+                                const existing = byItemCode.get(code) || [];
+                                existing.push(slot);
+                                byItemCode.set(code, existing);
+                        }
+                });
+
+                const toNumber = (value) => {
+                        if (typeof this.flt === "function") {
+                                const numeric = this.flt(value);
+                                return Number.isFinite(numeric) ? numeric : 0;
+                        }
+                        const parsed = parseFloat(value);
+                        return Number.isFinite(parsed) ? parsed : 0;
+                };
+
+                const ensureRowId = (item) => {
+                        if (!item.posa_row_id) {
+                                if (typeof this.makeid === "function") {
+                                        item.posa_row_id = this.makeid(20);
+                                } else {
+                                        item.posa_row_id = `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+                                }
+                        }
+                };
+
+                this.items.forEach((item) => {
+                        if (!item) {
+                                return;
+                        }
+
+                        const ruleName = item.pricing_rule || item.pricing_rule_name;
+                        let slot = ruleName ? byName.get(ruleName) : null;
+
+                        if (!slot && item.is_free_item) {
+                                const candidates = byItemCode.get(item.item_code) || [];
+                                if (candidates.length === 1) {
+                                        slot = candidates[0];
+                                } else if (candidates.length > 1) {
+                                        slot = candidates.find((entry) => entry.record?.row_id && entry.record.row_id === item.posa_row_id) ||
+                                                candidates.find((entry) => !entry.record?.row_id) ||
+                                                candidates[0];
+                                }
+                        }
+
+                        if (!slot || !slot.record) {
+                                return;
+                        }
+
+                        ensureRowId(item);
+
+                        const updatedRecord = { ...slot.record };
+                        const resolvedQty = Math.abs(
+                                toNumber(
+                                        updatedRecord.free_qty !== undefined && updatedRecord.free_qty !== null
+                                                ? updatedRecord.free_qty
+                                                : updatedRecord.rule_data?.posa_applied_free_qty ?? item.qty ?? 0,
+                                ),
+                        );
+
+                        if (resolvedQty > 0 && Math.abs(toNumber(item.qty)) !== resolvedQty) {
+                                item.qty = resolvedQty;
+                                item.stock_qty = resolvedQty;
+                        }
+
+                        if (resolvedQty > 0) {
+                                updatedRecord.free_qty = resolvedQty;
+                                if (updatedRecord.rule_data) {
+                                        updatedRecord.rule_data = {
+                                                ...updatedRecord.rule_data,
+                                                posa_applied_free_qty: resolvedQty,
+                                        };
+                                }
+                        }
+
+                        if (updatedRecord.row_id !== item.posa_row_id) {
+                                updatedRecord.row_id = item.posa_row_id;
+                        }
+
+                        slot.record = updatedRecord;
+                        this.pos_pricing_rules.splice(slot.index, 1, updatedRecord);
+                        byName.set(updatedRecord.name, slot);
+                        if (updatedRecord.free_item) {
+                                const existing = byItemCode.get(updatedRecord.free_item) || [];
+                                if (!existing.includes(slot)) {
+                                        existing.push(slot);
+                                        byItemCode.set(updatedRecord.free_item, existing);
+                                }
+                        }
+
+                        this._markVirtualFreeItem(item);
+                        item.pricing_rule = updatedRecord.name;
+                        item.pricing_rule_label = updatedRecord.label || updatedRecord.name;
+
+                        if (typeof this.calc_stock_qty === "function") {
+                                this.calc_stock_qty(item, item.qty);
+                        }
+                });
+        },
+
         async _restoreVirtualPricingRuleItemsFromRecords() {
                 if (!Array.isArray(this.pos_pricing_rules) || !this.pos_pricing_rules.length) {
                         return;
@@ -1774,7 +1926,22 @@ export default {
                                 if (record.row_id && existing.posa_row_id !== record.row_id) {
                                         existing.posa_row_id = record.row_id;
                                 }
+                                const resolvedQty = Math.abs(
+                                        this.flt(
+                                                record.rule_data?.posa_applied_free_qty ??
+                                                        record.free_qty ??
+                                                        record.rule_data?.free_qty ??
+                                                        0,
+                                        ) || 0,
+                                );
+                                if (resolvedQty > 0 && Math.abs(this.flt(existing.qty)) !== resolvedQty) {
+                                        existing.qty = resolvedQty;
+                                        existing.stock_qty = resolvedQty;
+                                }
                                 this._markVirtualFreeItem(existing);
+                                if (typeof this.calc_stock_qty === "function") {
+                                        this.calc_stock_qty(existing, existing.qty);
+                                }
                                 continue;
                         }
 
@@ -1784,7 +1951,12 @@ export default {
                                 free_item: record.free_item,
                                 free_qty: record.free_qty,
                         };
-                        const qty = Math.abs(this.flt(record.free_qty || payloadRule.free_qty || 0)) || 1;
+                        const rawQty =
+                                record.rule_data?.posa_applied_free_qty ??
+                                record.free_qty ??
+                                payloadRule.free_qty ??
+                                0;
+                        const qty = Math.abs(this.flt(rawQty)) || 1;
                         const virtual = this._createVirtualPricingRuleItem(payloadRule, record.free_item, qty);
                         if (!virtual) {
                                 continue;
