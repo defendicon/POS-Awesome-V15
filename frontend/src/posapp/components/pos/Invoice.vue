@@ -1453,7 +1453,9 @@ export default {
                         // this.eventBus.emit("set_pos_coupons", data.posa_coupons);
                 },
                 handleSetOffers(data) {
-                        this.posOffers = data;
+                        this.posOffers = Array.isArray(data) ? data : [];
+                        this._cachedOfferResults = new Map();
+                        this.handelOffers();
                 },
                 async handleUpdateInvoiceOffers(data) {
                         await this.updateInvoiceOffers(data);
