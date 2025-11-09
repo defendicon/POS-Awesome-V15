@@ -151,17 +151,16 @@
 			<!-- Discount percentage column -->
                         <template v-slot:item.discount_value="{ item }">
                                 <div class="currency-display right-aligned">
-                                        <span class="amount-value">
-                                                {{
-                                                        formatFloat(
-                                                                Math.abs(
-                                                                        item.discount_percentage ||
-                                                                                (item.price_list_rate
-                                                                                        ? (item.discount_amount / item.price_list_rate) * 100
-                                                                                        : 0),
-                                                                ),
-                                                        )
-                                                }}%
+                                        <span
+                                                class="amount-value"
+                                                :class="{ 'preview-value': isPreviewDiscount(item) }"
+                                                :title="
+                                                        isPreviewDiscount(item)
+                                                                ? __('Pending pricing rule discount')
+                                                                : null
+                                                "
+                                        >
+                                                {{ formatFloat(getDisplayedDiscountPercentage(item)) }}%
                                         </span>
                                 </div>
                         </template>
@@ -170,7 +169,17 @@
 			<template v-slot:item.discount_amount="{ item }">
 				<div class="currency-display right-aligned">
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
-                                        <span class="amount-value">{{ formatCurrency(Math.abs(item.discount_amount || 0)) }}</span>
+                                        <span
+                                                class="amount-value"
+                                                :class="{ 'preview-value': isPreviewDiscount(item) }"
+                                                :title="
+                                                        isPreviewDiscount(item)
+                                                                ? __('Pending pricing rule discount')
+                                                                : null
+                                                "
+                                        >
+                                                {{ formatCurrency(getDisplayedDiscountAmount(item)) }}
+                                        </span>
                                 </div>
                         </template>
 
@@ -932,11 +941,79 @@ export default {
 			return this._rtlComputed;
 		},
 	},
-	methods: {
-		customItemFilter(value, search, item) {
-			if (search == null) {
-				return true;
-			}
+        methods: {
+                getDisplayedDiscountPercentage(item) {
+                        if (!item) {
+                                return 0;
+                        }
+
+                        const explicitPercentage = Number.parseFloat(item.discount_percentage ?? 0);
+                        if (Number.isFinite(explicitPercentage) && Math.abs(explicitPercentage) > 0) {
+                                return Math.abs(explicitPercentage);
+                        }
+
+                        const previewPercentage = Number.parseFloat(item?.posa_pricing_preview?.discount_percentage ?? 0);
+                        if (Number.isFinite(previewPercentage) && Math.abs(previewPercentage) > 0) {
+                                return Math.abs(previewPercentage);
+                        }
+
+                        const priceListRate = Number.parseFloat(item?.price_list_rate ?? 0);
+                        if (Number.isFinite(priceListRate) && Math.abs(priceListRate) > 0) {
+                                const discountAmount = Math.abs(Number.parseFloat(item?.discount_amount ?? 0));
+                                if (discountAmount > 0) {
+                                        const derived = (discountAmount / Math.abs(priceListRate)) * 100;
+                                        if (Number.isFinite(derived) && derived > 0) {
+                                                return derived;
+                                        }
+                                }
+                        }
+
+                        return 0;
+                },
+                getDisplayedDiscountAmount(item) {
+                        if (!item) {
+                                return 0;
+                        }
+
+                        const explicitAmount = Math.abs(Number.parseFloat(item.discount_amount ?? 0));
+                        if (Number.isFinite(explicitAmount) && explicitAmount > 0) {
+                                return explicitAmount;
+                        }
+
+                        const previewAmount = Math.abs(Number.parseFloat(item?.posa_pricing_preview?.discount_amount ?? 0));
+                        if (Number.isFinite(previewAmount) && previewAmount > 0) {
+                                return previewAmount;
+                        }
+
+                        return 0;
+                },
+                isPreviewDiscount(item) {
+                        if (!item) {
+                                return false;
+                        }
+
+                        const explicitAmount = Math.abs(Number.parseFloat(item.discount_amount ?? 0));
+                        const explicitPercentage = Math.abs(Number.parseFloat(item.discount_percentage ?? 0));
+                        if ((Number.isFinite(explicitAmount) && explicitAmount > 0) || (Number.isFinite(explicitPercentage) && explicitPercentage > 0)) {
+                                return false;
+                        }
+
+                        const preview = item.posa_pricing_preview || null;
+                        if (!preview) {
+                                return false;
+                        }
+
+                        const previewAmount = Math.abs(Number.parseFloat(preview.discount_amount ?? 0));
+                        const previewPercentage = Math.abs(Number.parseFloat(preview.discount_percentage ?? 0));
+                        return (
+                                (Number.isFinite(previewAmount) && previewAmount > 0) ||
+                                (Number.isFinite(previewPercentage) && previewPercentage > 0)
+                        );
+                },
+                customItemFilter(value, search, item) {
+                        if (search == null) {
+                                return true;
+                        }
 
 			const normalized = String(search).toLowerCase().trim();
 			if (!normalized) {
@@ -1315,15 +1392,20 @@ export default {
 /* Table wrapper styling */
 .pos-table :deep(.v-data-table__wrapper),
 .pos-table :deep(.v-table__wrapper) {
-	border-radius: 0;
-	height: 100%;
-	width: 100%;
-	max-width: 100%;
+        border-radius: 0;
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
 	overflow-y: auto;
 	scrollbar-width: thin;
 	margin: 0;
 	padding: 0;
 	border: none;
+}
+
+.preview-value {
+        opacity: 0.75;
+        font-style: italic;
 }
 
 /* Enhanced table header styling with global theme support */

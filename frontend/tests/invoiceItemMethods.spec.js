@@ -205,5 +205,51 @@ describe("invoiceItemMethods._applyPricingToLine", () => {
                 expect(item.base_discount_amount).toBeCloseTo(10);
                 expect(item.amount).toBeCloseTo(90);
                 expect(item.base_amount).toBeCloseTo(90);
+                expect(item.posa_pricing_preview).toBeNull();
+        });
+
+        it("stores a pricing preview when the rate is locked", () => {
+                const context = {
+                        ...createContext(),
+                        _fromBaseCurrency: invoiceItemMethods._fromBaseCurrency,
+                        _resolveBaseRate: invoiceItemMethods._resolveBaseRate,
+                        _updatePricingBadge: vi.fn(),
+                };
+
+                const item = {
+                        item_code: "ITEM-PREVIEW",
+                        qty: 2,
+                        price_list_rate: 200,
+                        base_price_list_rate: 200,
+                        rate: 200,
+                        base_rate: 200,
+                        discount_amount: 0,
+                        base_discount_amount: 0,
+                        stock_qty: 2,
+                        conversion_factor: 1,
+                        locked_price: 0,
+                        posa_offer_applied: 0,
+                        _manual_rate_set: true,
+                };
+
+                applyLocalPricingRules.mockReturnValue({
+                        rate: 150,
+                        discountPerUnit: 50,
+                        applied: [{ name: "RULE-PREVIEW" }],
+                });
+
+                invoiceItemMethods._applyPricingToLine.call(context, item, {}, {}, new Map());
+
+                expect(item.rate).toBe(200);
+                expect(item.base_rate).toBe(200);
+                expect(item.discount_amount).toBe(0);
+                expect(item.base_discount_amount).toBe(0);
+                expect(item.posa_pricing_preview).toMatchObject({
+                        discount_amount: 50,
+                        base_discount_amount: 50,
+                        discount_percentage: 25,
+                        rate: 150,
+                        base_rate: 150,
+                });
         });
 });

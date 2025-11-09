@@ -195,6 +195,7 @@ export default {
                 this._updatePricingBadge(item, pricing.applied);
 
                 if (allowRateUpdate) {
+                        item.posa_pricing_preview = null;
                         const proposedRate = Number.isFinite(pricing.rate) ? pricing.rate : baseRate;
                         const proposedDiscount = Number.isFinite(pricing.discountPerUnit)
                                 ? pricing.discountPerUnit
@@ -239,6 +240,40 @@ export default {
                         item.base_amount = this.flt
                                 ? this.flt(baseAmount, this.currency_precision)
                                 : baseAmount;
+                } else {
+                        const baseDiscount = Math.abs(Number.parseFloat(pricing.discountPerUnit || 0)) || 0;
+                        if (baseDiscount > 0 && Number.isFinite(baseRate) && baseRate > 0) {
+                                const convertedDiscount = this._fromBaseCurrency(baseDiscount);
+                                const previewRateBase = Number.isFinite(pricing.rate) ? pricing.rate : baseRate;
+                                const previewRate = this._fromBaseCurrency(previewRateBase);
+                                const rawPercentage = baseRate ? (baseDiscount / baseRate) * 100 : 0;
+
+                                const normalizedBaseDiscount = this.flt
+                                        ? this.flt(baseDiscount, this.currency_precision)
+                                        : baseDiscount;
+                                const normalizedDiscount = this.flt
+                                        ? this.flt(Math.abs(convertedDiscount), this.currency_precision)
+                                        : Math.abs(convertedDiscount);
+                                const normalizedPercentage = this.flt
+                                        ? this.flt(Math.abs(rawPercentage), this.float_precision)
+                                        : Math.abs(rawPercentage);
+                                const normalizedPreviewRate = this.flt
+                                        ? this.flt(previewRate, this.currency_precision)
+                                        : previewRate;
+                                const normalizedPreviewBaseRate = this.flt
+                                        ? this.flt(previewRateBase, this.currency_precision)
+                                        : previewRateBase;
+
+                                item.posa_pricing_preview = {
+                                        discount_amount: normalizedDiscount,
+                                        base_discount_amount: normalizedBaseDiscount,
+                                        discount_percentage: normalizedPercentage,
+                                        rate: normalizedPreviewRate,
+                                        base_rate: normalizedPreviewBaseRate,
+                                };
+                        } else {
+                                item.posa_pricing_preview = null;
+                        }
                 }
 
                 const freebies = computeFreeItems({ item, qty, stockQty, ctx, indexes });
