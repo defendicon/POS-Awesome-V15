@@ -2043,11 +2043,19 @@ export default {
                                         Math.abs(currentQty - desiredQty) > epsilon ||
                                         (desiredMultiplier && desiredMultiplier !== currentMultiplier)
                                 ) {
-                                        await this.applyPricingRule(rule, {
-                                                silent: true,
-                                                evaluation,
-                                                force: true,
+                                        const updated = this._updateExistingVirtualPricingRuleItem(rule.name, {
+                                                freeQty: desiredQty,
+                                                multiplier: desiredMultiplier,
+                                                aggregated: evaluation.aggregated,
                                         });
+
+                                        if (!updated) {
+                                                await this.applyPricingRule(rule, {
+                                                        silent: true,
+                                                        evaluation,
+                                                        force: true,
+                                                });
+                                        }
                                         continue;
                                 }
 
@@ -2154,6 +2162,81 @@ export default {
 
                 this.pos_pricing_rules.splice(index, 1, updatedRecord);
                 this._pricingRuleRecordDirty = true;
+        },
+
+        _updateExistingVirtualPricingRuleItem(ruleName, details = {}) {
+                if (!ruleName || !Array.isArray(this.items) || !this.items.length) {
+                        return false;
+                }
+
+                const { freeQty, multiplier, aggregated } = details || {};
+                if (freeQty === undefined || freeQty === null) {
+                        return false;
+                }
+
+                const resolveNumber = (value, absolute = false) => {
+                        const parsed = typeof this.flt === "function" ? this.flt(value) : parseFloat(value);
+                        if (!Number.isFinite(parsed)) {
+                                return null;
+                        }
+                        return absolute ? Math.abs(parsed) : parsed;
+                };
+
+                const desiredQty = resolveNumber(freeQty, true);
+                if (desiredQty === null) {
+                        return false;
+                }
+
+                const record = Array.isArray(this.pos_pricing_rules)
+                        ? this.pos_pricing_rules.find((entry) => entry && entry.name === ruleName)
+                        : null;
+                if (!record) {
+                        return false;
+                }
+
+                const epsilon = 0.000001;
+                const target = (() => {
+                        if (record.row_id) {
+                                const matchByRow = this.items.find((item) => item && item.posa_row_id === record.row_id);
+                                if (matchByRow) {
+                                        return matchByRow;
+                                }
+                        }
+
+                        const matchByRule = this.items.find(
+                                (item) =>
+                                        item &&
+                                        item.posa_pricing_rule_virtual &&
+                                        item.pricing_rule === ruleName,
+                        );
+                        return matchByRule || null;
+                })();
+
+                if (!target) {
+                        return false;
+                }
+
+                const currentQty = resolveNumber(target.qty, true) || 0;
+                if (Math.abs(currentQty - desiredQty) <= epsilon) {
+                        this._refreshPricingRuleRecord(ruleName, { freeQty: desiredQty, multiplier, aggregated });
+                        return true;
+                }
+
+                target.qty = desiredQty;
+                target.stock_qty = desiredQty;
+                this._markVirtualFreeItem(target);
+
+                if (typeof this.calc_stock_qty === "function") {
+                        this.calc_stock_qty(target, target.qty);
+                }
+
+                this._refreshPricingRuleRecord(ruleName, { freeQty: desiredQty, multiplier, aggregated });
+
+                if (typeof this.$forceUpdate === "function") {
+                        this.$forceUpdate();
+                }
+
+                return true;
         },
 
         _syncDocItemsWithPricingRuleRecords() {
