@@ -39,6 +39,10 @@ from .payments import (
     create_payment_request,
     get_available_credit,
 )
+from .pricing_rules import (
+    get_active_pricing_rules,
+    reconcile_line_prices,
+)
 from .sales_orders import (
     search_orders,
     submit_sales_order,
