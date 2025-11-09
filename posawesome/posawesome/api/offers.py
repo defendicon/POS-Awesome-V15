@@ -113,13 +113,16 @@ def get_pricing_rules(profile):
         )
         return []
 
+    rule_names = [rule.get("name") for rule in rules or [] if rule.get("name")]
+    child_targets = _load_pricing_rule_child_targets(rule_names)
+
     prepared = []
     for raw_rule in rules or []:
         rule = frappe._dict(raw_rule)
         if not _pricing_rule_matches_profile(rule, pos_profile, today):
             continue
 
-        serialized = _serialize_pricing_rule(rule, pos_profile)
+        serialized = _serialize_pricing_rule(rule, pos_profile, child_targets)
         if serialized:
             prepared.append(serialized)
 
@@ -437,7 +440,7 @@ def _pricing_rule_matches_profile(rule, pos_profile, today):
     return True
 
 
-def _serialize_pricing_rule(rule, pos_profile):
+def _serialize_pricing_rule(rule, pos_profile, child_targets=None):
     name = rule.get("name")
     if not name:
         return None
@@ -449,6 +452,11 @@ def _serialize_pricing_rule(rule, pos_profile):
     discount_amount = flt(rule.get("discount_amount") or 0)
     discount_percentage = flt(rule.get("discount_percentage") or 0)
     rate = flt(rule.get("rate") or 0)
+
+    child_targets = child_targets or {}
+    item_targets = child_targets.get("items", {}).get(name, [])
+    group_targets = child_targets.get("item_groups", {}).get(name, [])
+    brand_targets = child_targets.get("brands", {}).get(name, [])
 
     entry = {
         "name": name,
@@ -492,6 +500,12 @@ def _serialize_pricing_rule(rule, pos_profile):
         "rule_description": rule.get("rule_description") or "",
     }
 
+    entry["target_items"] = _deduplicate_targets([rule.get("item_code"), *item_targets])
+    entry["target_item_groups"] = _deduplicate_targets(
+        [rule.get("item_group"), *group_targets]
+    )
+    entry["target_brands"] = _deduplicate_targets([rule.get("brand"), *brand_targets])
+
     entry["is_product_discount"] = price_or_product_discount.lower() in {
         "product",
         "product discount",
@@ -505,3 +519,53 @@ def _serialize_pricing_rule(rule, pos_profile):
     entry["is_free_item_rule"] = bool(entry["free_item"] and entry["free_qty"])
 
     return entry
+
+
+def _load_pricing_rule_child_targets(rule_names):
+    if not rule_names:
+        return {"items": {}, "item_groups": {}, "brands": {}}
+
+    return {
+        "items": _group_pricing_rule_children(
+            "Pricing Rule Item Code", "item_code", rule_names
+        ),
+        "item_groups": _group_pricing_rule_children(
+            "Pricing Rule Item Group", "item_group", rule_names
+        ),
+        "brands": _group_pricing_rule_children(
+            "Pricing Rule Brand", "brand", rule_names
+        ),
+    }
+
+
+def _group_pricing_rule_children(doctype, fieldname, parents):
+    if not parents:
+        return {}
+
+    rows = frappe.get_all(
+        doctype,
+        filters={"parent": ("in", parents)},
+        fields=["parent", fieldname],
+    )
+
+    grouped = {}
+    for row in rows or []:
+        parent = row.get("parent")
+        value = row.get(fieldname)
+        if not parent or not value:
+            continue
+        grouped.setdefault(parent, []).append(value)
+
+    return grouped
+
+
+def _deduplicate_targets(candidates):
+    seen = set()
+    result = []
+    for value in candidates or []:
+        normalized = cstr(value).strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        result.append(normalized)
+    return result

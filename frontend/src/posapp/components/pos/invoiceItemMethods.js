@@ -1445,44 +1445,90 @@ export default {
 
                 const applyOn = (rule.apply_on || "").toLowerCase();
                 const applicableFor = (rule.applicable_for || "").toLowerCase();
-                const itemCode = rule.item_code || null;
-                const itemGroup = rule.item_group || null;
-                const brand = rule.brand || null;
+                const buildTargetSet = (sources = []) => {
+                        const set = new Set();
+                        const addValue = (value) => {
+                                if (value === undefined || value === null) {
+                                        return;
+                                }
+                                if (Array.isArray(value)) {
+                                        value.forEach(addValue);
+                                        return;
+                                }
+                                const normalized = `${value}`.trim();
+                                if (normalized) {
+                                        set.add(normalized);
+                                }
+                        };
+                        sources.forEach(addValue);
+                        return set;
+                };
+
+                const itemTargets = buildTargetSet([
+                        rule.target_items,
+                        rule.rule_data?.target_items,
+                        rule.item_code,
+                ]);
+                const groupTargets = buildTargetSet([
+                        rule.target_item_groups,
+                        rule.rule_data?.target_item_groups,
+                        rule.item_group,
+                ]);
+                const brandTargets = buildTargetSet([
+                        rule.target_brands,
+                        rule.rule_data?.target_brands,
+                        rule.brand,
+                ]);
 
                 const expectsSpecificTarget = ["item code", "item group", "brand"].includes(applyOn);
-                const hasSpecificTarget = Boolean(itemCode || itemGroup || brand);
+                const hasSpecificTarget = Boolean(
+                        itemTargets.size || groupTargets.size || brandTargets.size,
+                );
 
                 // Some ERPNext configurations use applicable_for to describe the same
                 // target semantics as apply_on. Account for that by falling back when
                 // apply_on is empty but applicable_for is populated with an item scope.
-                const derivedScope = (expectsSpecificTarget || hasSpecificTarget)
+                const derivedScope = expectsSpecificTarget
                         ? applyOn
                         : ["item code", "item group", "brand"].includes(applicableFor)
                                 ? applicableFor
                                 : "";
 
-                return (Array.isArray(this.items) ? this.items : []).filter((item) => {
+                if (!hasSpecificTarget && (expectsSpecificTarget || derivedScope)) {
+                        return [];
+                }
+
+                const items = Array.isArray(this.items) ? this.items : [];
+                return items.filter((item) => {
                         if (!item || item.posa_pricing_rule_virtual) {
                                 return false;
                         }
 
-                        if (itemCode && item.item_code !== itemCode) {
+                        const normalizedItemCode = item.item_code ? `${item.item_code}`.trim() : "";
+                        if (itemTargets.size && (!normalizedItemCode || !itemTargets.has(normalizedItemCode))) {
                                 return false;
                         }
 
-                        if ((applyOn === "item group" || derivedScope === "item group") && itemGroup && item.item_group !== itemGroup) {
-                                return false;
+                        const normalizedGroup = item.item_group ? `${item.item_group}`.trim() : "";
+                        const shouldMatchGroup = applyOn === "item group" || derivedScope === "item group";
+                        if (shouldMatchGroup) {
+                                if (!groupTargets.size) {
+                                        return false;
+                                }
+                                if (!normalizedGroup || !groupTargets.has(normalizedGroup)) {
+                                        return false;
+                                }
                         }
 
-                        if ((applyOn === "brand" || derivedScope === "brand") && brand && item.brand !== brand) {
-                                return false;
-                        }
-
-                        if (!hasSpecificTarget && (expectsSpecificTarget || derivedScope)) {
-                                // The rule expects a specific item, group, or brand but
-                                // no explicit target has been provided – treat as non-match
-                                // so the discount does not blanket every row.
-                                return false;
+                        const normalizedBrand = item.brand ? `${item.brand}`.trim() : "";
+                        const shouldMatchBrand = applyOn === "brand" || derivedScope === "brand";
+                        if (shouldMatchBrand) {
+                                if (!brandTargets.size) {
+                                        return false;
+                                }
+                                if (!normalizedBrand || !brandTargets.has(normalizedBrand)) {
+                                        return false;
+                                }
                         }
 
                         return true;
