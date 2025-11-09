@@ -2673,11 +2673,16 @@ export default {
                                                 item.currency = resolvedCurrency;
                                         }
                                 });
+
+                                // Reapply pricing rules after server updates so that any
+                                // discounts based on quantity remain in effect even if the
+                                // refreshed price list rate differs from the discounted rate.
+                                await this.applyPricingRulesForCart();
                         }
                 } catch (error) {
-			console.error("Error updating items:", error);
-			this.eventBus.emit("show_message", {
-				title: __("Error updating item details"),
+                        console.error("Error updating items:", error);
+                        this.eventBus.emit("show_message", {
+                                title: __("Error updating item details"),
 				color: "error",
 			});
 		}
