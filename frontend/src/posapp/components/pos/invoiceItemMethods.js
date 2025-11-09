@@ -1966,15 +1966,15 @@ export default {
                                 );
 
                                 const derivedQtyPerApplication =
-                                        recordCycleQty && multiplierBaseline
-                                                ? recordCycleQty / multiplierBaseline
-                                                : recordAggregatedQty && multiplierBaseline
+                                        recordCycleQty && recordCycleQty > 0
+                                                ? recordCycleQty
+                                                : recordAggregatedQty && multiplierBaseline > 0
                                                         ? recordAggregatedQty / multiplierBaseline
                                                         : 0;
                                 const derivedAmountPerApplication =
-                                        recordCycleAmount && multiplierBaseline
-                                                ? recordCycleAmount / multiplierBaseline
-                                                : recordAggregatedAmount && multiplierBaseline
+                                        recordCycleAmount && recordCycleAmount > 0
+                                                ? recordCycleAmount
+                                                : recordAggregatedAmount && multiplierBaseline > 0
                                                         ? recordAggregatedAmount / multiplierBaseline
                                                         : 0;
 
