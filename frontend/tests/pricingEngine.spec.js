@@ -152,6 +152,39 @@ describe("pricingEngine - applyLocalPricingRules", () => {
                 expect(result.rate).toBeCloseTo(90);
         });
 
+        it("uses stock quantity when min qty is defined per stock uom", () => {
+                const rule = {
+                        name: "STOCK-THRESH",
+                        price_or_discount: "Discount",
+                        discount_type: "Rate",
+                        rate_or_discount: 10,
+                        min_qty: 10,
+                        min_qty_as_per_stock_uom: 1,
+                        specificity: 3,
+                        priority: 5,
+                };
+                const indexes = buildIndexes({ items: { "ITEM-STOCK": [rule] } });
+                const discounted = applyLocalPricingRules({
+                        item: { item_code: "ITEM-STOCK", conversion_factor: 12 },
+                        qty: 1,
+                        stockQty: 12,
+                        baseRate: 100,
+                        ctx: {},
+                        indexes,
+                });
+                expect(discounted.rate).toBeCloseTo(90);
+
+                const notDiscounted = applyLocalPricingRules({
+                        item: { item_code: "ITEM-STOCK", conversion_factor: 12 },
+                        qty: 1,
+                        stockQty: 6,
+                        baseRate: 100,
+                        ctx: {},
+                        indexes,
+                });
+                expect(notDiscounted.rate).toBeCloseTo(100);
+        });
+
         it("filters by customer and price list", () => {
                 const rule = {
                         name: "CUSTOM-RULE",
@@ -328,6 +361,38 @@ describe("pricingEngine - computeFreeItems", () => {
                         indexes,
                 });
                 expect(freebies).toHaveLength(0);
+        });
+
+        it("qualifies freebies using stock quantity when requested", () => {
+                const rule = {
+                        name: "FREE-STOCK",
+                        is_free_item_rule: 1,
+                        min_qty: 10,
+                        min_qty_as_per_stock_uom: 1,
+                        free_qty: 1,
+                        specificity: 3,
+                        priority: 5,
+                        same_item: 1,
+                };
+                const indexes = buildIndexes({ items: { "ITEM-STOCK": [rule] } });
+                const freebies = computeFreeItems({
+                        item: { item_code: "ITEM-STOCK", conversion_factor: 12 },
+                        qty: 1,
+                        stockQty: 12,
+                        ctx: {},
+                        indexes,
+                });
+                expect(freebies).toHaveLength(1);
+                expect(freebies[0].qty).toBe(1);
+
+                const none = computeFreeItems({
+                        item: { item_code: "ITEM-STOCK", conversion_factor: 12 },
+                        qty: 1,
+                        stockQty: 6,
+                        ctx: {},
+                        indexes,
+                });
+                expect(none).toHaveLength(0);
         });
 });
 

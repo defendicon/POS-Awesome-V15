@@ -176,8 +176,21 @@ export default {
                 const allowRateUpdate = !item.locked_price && !item.posa_offer_applied && !item._manual_rate_set;
                 const signedQty = Number.parseFloat(item.qty || 0) || 0;
                 const qty = Math.abs(signedQty);
+                const rawStockQty = Number.parseFloat(item.stock_qty);
+                let stockQty = Number.isFinite(rawStockQty) ? Math.abs(rawStockQty) : NaN;
+                if (!Number.isFinite(stockQty) || stockQty === 0) {
+                        const conversion = Number.parseFloat(item.conversion_factor || 1) || 1;
+                        const computedStock = signedQty * conversion;
+                        const normalizedStock = Number.isFinite(computedStock)
+                                ? Math.abs(computedStock)
+                                : 0;
+                        stockQty = normalizedStock || qty;
+                }
+                if (!Number.isFinite(stockQty) || stockQty === 0) {
+                        stockQty = qty;
+                }
                 const baseRate = this._resolveBaseRate(item);
-                const pricing = applyLocalPricingRules({ item, qty, baseRate, ctx, indexes });
+                const pricing = applyLocalPricingRules({ item, qty, stockQty, baseRate, ctx, indexes });
 
                 this._updatePricingBadge(item, pricing.applied);
 
@@ -228,7 +241,7 @@ export default {
                                 : baseAmount;
                 }
 
-                const freebies = computeFreeItems({ item, qty, ctx, indexes });
+                const freebies = computeFreeItems({ item, qty, stockQty, ctx, indexes });
                 if (Array.isArray(freebies)) {
                         freebies.forEach((entry) => {
                                 const key = `${entry.rule}::${entry.item_code}::${item.posa_row_id}`;

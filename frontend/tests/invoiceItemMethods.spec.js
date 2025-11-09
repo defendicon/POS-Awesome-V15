@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../src/posapp/utils/stockCoordinator.js", () => ({
         default: {
@@ -175,6 +175,8 @@ describe("invoiceItemMethods._applyPricingToLine", () => {
                         base_price_list_rate: 100,
                         rate: 100,
                         base_rate: 100,
+                        stock_qty: 12,
+                        conversion_factor: 12,
                         locked_price: 0,
                         posa_offer_applied: 0,
                         _manual_rate_set: false,
@@ -187,6 +189,14 @@ describe("invoiceItemMethods._applyPricingToLine", () => {
                 });
 
                 invoiceItemMethods._applyPricingToLine.call(context, item, {}, {}, new Map());
+
+                const pricingArgs = applyLocalPricingRules.mock.calls[0][0];
+                expect(pricingArgs.qty).toBeCloseTo(1);
+                expect(pricingArgs.stockQty).toBeCloseTo(12);
+
+                const freebiesArgs = computeFreeItems.mock.calls[0][0];
+                expect(freebiesArgs.qty).toBeCloseTo(1);
+                expect(freebiesArgs.stockQty).toBeCloseTo(12);
 
                 expect(item.base_rate).toBeCloseTo(90);
                 expect(item.rate).toBeCloseTo(90);
