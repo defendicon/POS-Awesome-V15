@@ -727,6 +727,19 @@ export default {
                                 return;
                         }
 
+                        const manualOverrideActive = item._manual_rate_set === true;
+
+                        if (manualOverrideActive) {
+                                const rulesProvided = Object.prototype.hasOwnProperty.call(update, "pricing_rules");
+                                if (rulesProvided) {
+                                        const appliedRules = Array.isArray(update.pricing_rule_details)
+                                                ? update.pricing_rule_details
+                                                : [];
+                                        this._updatePricingBadge(item, appliedRules);
+                                }
+                                return;
+                        }
+
                         const baseRate = Number.parseFloat(update.rate ?? item.base_rate ?? 0) || 0;
                         const basePriceListRate =
                                 Number.parseFloat(update.price_list_rate ?? item.base_price_list_rate ?? 0) || 0;
