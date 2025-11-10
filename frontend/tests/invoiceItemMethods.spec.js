@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../src/posapp/utils/stockCoordinator.js", () => ({
         default: {
@@ -153,6 +153,62 @@ describe("invoiceItemMethods._applyItemDetailPayload", () => {
         });
 });
 
+describe("invoiceItemMethods._serverUpdateHasMeaningfulPricing", () => {
+        const method = invoiceItemMethods._serverUpdateHasMeaningfulPricing;
+
+        it("returns false when update does not change pricing", () => {
+                const item = {
+                        base_rate: 100,
+                        base_price_list_rate: 100,
+                        base_discount_amount: 0,
+                        discount_percentage: 0,
+                };
+
+                const result = method.call({}, { rate: 100, price_list_rate: 100 }, item);
+                expect(result).toBe(false);
+        });
+
+        it("returns true when pricing rules are attached", () => {
+                const item = {
+                        base_rate: 100,
+                        base_price_list_rate: 100,
+                        base_discount_amount: 0,
+                        discount_percentage: 0,
+                };
+
+                const result = method.call(
+                        {},
+                        { pricing_rules: ["RULE-1"], rate: 100, price_list_rate: 100 },
+                        item,
+                );
+                expect(result).toBe(true);
+        });
+
+        it("returns true when the server rate differs", () => {
+                const item = {
+                        base_rate: 100,
+                        base_price_list_rate: 100,
+                        base_discount_amount: 0,
+                        discount_percentage: 0,
+                };
+
+                const result = method.call({}, { rate: 90, price_list_rate: 100 }, item);
+                expect(result).toBe(true);
+        });
+
+        it("returns true when the server discount changes", () => {
+                const item = {
+                        base_rate: 100,
+                        base_price_list_rate: 100,
+                        base_discount_amount: 10,
+                        discount_percentage: 10,
+                };
+
+                const result = method.call({}, { discount_amount: 5, discount_percentage: 5 }, item);
+                expect(result).toBe(true);
+        });
+});
+
 describe("invoiceItemMethods._applyPricingToLine", () => {
         beforeEach(() => {
                 applyLocalPricingRules.mockReset();
@@ -165,6 +221,7 @@ describe("invoiceItemMethods._applyPricingToLine", () => {
                         ...createContext(),
                         _fromBaseCurrency: invoiceItemMethods._fromBaseCurrency,
                         _resolveBaseRate: invoiceItemMethods._resolveBaseRate,
+                        _resolvePricingQty: invoiceItemMethods._resolvePricingQty,
                         _updatePricingBadge: vi.fn(),
                 };
 

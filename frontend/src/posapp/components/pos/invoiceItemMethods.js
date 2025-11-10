@@ -205,6 +205,60 @@ export default {
                 item.pricing_rule_details = applied;
                 item.pricing_rules = JSON.stringify(names);
         },
+        _serverUpdateHasMeaningfulPricing(update, item) {
+                if (!update || !item) {
+                        return false;
+                }
+
+                const arrayHasContent = (value) => Array.isArray(value) && value.some(Boolean);
+                if (arrayHasContent(update.pricing_rules) || arrayHasContent(update.pricing_rule_details)) {
+                        return true;
+                }
+
+                const parse = (value) => {
+                        if (value === undefined || value === null || value === "") {
+                                return null;
+                        }
+
+                        const number = Number.parseFloat(value);
+                        return Number.isFinite(number) ? number : null;
+                };
+
+                const differs = (candidate, baseline) => {
+                        if (candidate === null) {
+                                return false;
+                        }
+
+                        const EPSILON = 0.000001;
+                        if (baseline === null) {
+                                return Math.abs(candidate) > EPSILON;
+                        }
+
+                        return Math.abs(candidate - baseline) > EPSILON;
+                };
+
+                const currentBaseRate = parse(item.base_rate);
+                if (differs(parse(update.rate), currentBaseRate)) {
+                        return true;
+                }
+
+                const currentBasePriceList = parse(item.base_price_list_rate);
+                if (differs(parse(update.price_list_rate), currentBasePriceList)) {
+                        return true;
+                }
+
+                const currentBaseDiscount = parse(item.base_discount_amount);
+                if (differs(parse(update.discount_amount), currentBaseDiscount)) {
+                        return true;
+                }
+
+                const currentDiscountPercentage = parse(item.discount_percentage);
+                if (differs(parse(update.discount_percentage), currentDiscountPercentage)) {
+                        return true;
+                }
+
+                return false;
+        },
         _applyPricingToLine(item, ctx, indexes, freebiesMap) {
                 if (!item) {
                         return;
@@ -728,8 +782,11 @@ export default {
                         }
 
                         const manualOverrideActive = item._manual_rate_set === true;
+                        const allowManualBypass = manualOverrideActive
+                                ? this._serverUpdateHasMeaningfulPricing(update, item)
+                                : false;
 
-                        if (manualOverrideActive) {
+                        if (manualOverrideActive && !allowManualBypass) {
                                 const rulesProvided = Object.prototype.hasOwnProperty.call(update, "pricing_rules");
                                 if (rulesProvided) {
                                         const appliedRules = Array.isArray(update.pricing_rule_details)
