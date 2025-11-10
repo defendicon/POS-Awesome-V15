@@ -462,6 +462,16 @@ export function useItemAddition() {
 		new_item.discount_percentage = 0;
 		new_item.discount_amount_per_item = 0;
 		new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;
+		
+		// Ensure rate is set from price_list_rate if rate is not available
+		// This ensures rates are visible immediately when items are added
+		if (!item.rate && new_item.price_list_rate) {
+			new_item.rate = new_item.price_list_rate;
+		} else if (item.rate !== undefined && item.rate !== null) {
+			new_item.rate = item.rate;
+		} else {
+			new_item.rate = new_item.price_list_rate || 0;
+		}
 
 		// Setup base rates properly for multi-currency
 		const baseCurrency = context.price_list_currency || context.pos_profile.currency;
@@ -470,15 +480,15 @@ export function useItemAddition() {
 			new_item.base_price_list_rate =
 				item.base_price_list_rate !== undefined
 					? item.base_price_list_rate
-					: item.rate / context.exchange_rate;
+					: (new_item.rate || 0) / (context.exchange_rate || 1);
 			new_item.base_rate =
-				item.base_rate !== undefined ? item.base_rate : item.rate / context.exchange_rate;
+				item.base_rate !== undefined ? item.base_rate : (new_item.rate || 0) / (context.exchange_rate || 1);
 			new_item.base_discount_amount = 0;
 		} else {
 			// In base currency, base rates = displayed rates
 			new_item.base_price_list_rate =
-				item.base_price_list_rate !== undefined ? item.base_price_list_rate : item.rate;
-			new_item.base_rate = item.base_rate !== undefined ? item.base_rate : item.rate;
+				item.base_price_list_rate !== undefined ? item.base_price_list_rate : (new_item.rate || 0);
+			new_item.base_rate = item.base_rate !== undefined ? item.base_rate : (new_item.rate || 0);
 			new_item.base_discount_amount = 0;
 		}
 
@@ -489,6 +499,20 @@ export function useItemAddition() {
 		if (new_item.item_uoms.length === 0 && new_item.stock_uom) {
 			new_item.item_uoms.push({ uom: new_item.stock_uom, conversion_factor: 1 });
 		}
+		
+		// Calculate amount and base_amount if rate is available
+		if (new_item.rate !== undefined && new_item.rate !== null && new_item.qty !== undefined) {
+			new_item.amount = (new_item.qty || 0) * (new_item.rate || 0);
+			if (new_item.base_rate !== undefined && new_item.base_rate !== null) {
+				new_item.base_amount = (new_item.qty || 0) * (new_item.base_rate || 0);
+			} else {
+				new_item.base_amount = new_item.amount;
+			}
+		} else {
+			new_item.amount = 0;
+			new_item.base_amount = 0;
+		}
+		
 		new_item.actual_batch_qty = "";
 		new_item.batch_no_expiry_date = item.batch_no_expiry_date || null;
 		new_item.conversion_factor = 1;

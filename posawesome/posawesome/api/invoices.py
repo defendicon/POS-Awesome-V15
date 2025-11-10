@@ -290,6 +290,16 @@ def update_invoice(data):
     else:
         invoice_doc = frappe.get_doc(data)
 
+    # Copy location from POS Profile to Sales Invoice if not already set
+    if pos_profile and not invoice_doc.get("location"):
+        # Check if POS Profile has location field (could be custom field)
+        if frappe.db.has_column("POS Profile", "location"):
+            location = frappe.db.get_value("POS Profile", pos_profile, "location")
+            if location:
+                # Only set location if the invoice doctype supports it
+                if frappe.db.has_column(doctype, "location"):
+                    invoice_doc.location = location
+
     # Set currency from data before set_missing_values
     # Validate return items if this is a return invoice
     if (data.get("is_return") or invoice_doc.is_return) and invoice_doc.get("return_against"):
