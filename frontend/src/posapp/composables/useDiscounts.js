@@ -54,8 +54,9 @@ export function useDiscounts() {
 
 		try {
 			// Flag to track manual rate changes
-			if (fieldId === "rate") {
-				item._manual_rate_set = true;
+                        if (fieldId === "rate") {
+                                item._manual_rate_set = true;
+                                item._manual_rate_source = "user";
 			}
 
 			// Handle negative values

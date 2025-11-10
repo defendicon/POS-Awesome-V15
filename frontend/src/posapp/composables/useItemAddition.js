@@ -449,8 +449,9 @@ export function useItemAddition() {
 			item.posa_is_replace = "";
 		}
 
-		// Initialize flag for tracking manual rate changes
-		new_item._manual_rate_set = false;
+                // Initialize flag for tracking manual rate changes
+                new_item._manual_rate_set = false;
+                new_item._manual_rate_source = null;
 
 		// Set negative quantity for return invoices
 		if (context.isReturnInvoice && item.qty > 0) {

@@ -1180,7 +1180,9 @@ export default {
                                 if (!Array.isArray(item_offers)) return;
 
                                 if (!item_offers.includes(offer.row_id)) {
-                                        const manualOverride = item._manual_rate_set === true;
+                                        const manualOverride =
+                                                item._manual_rate_set === true &&
+                                                item._manual_rate_source === "user";
 
                                         if (manualOverride) {
                                                 // Preserve manually entered prices but still mark offer usage
@@ -1344,7 +1346,9 @@ export default {
                                 if (!Array.isArray(item_offers)) return;
 
                                 if (item_offers.includes(offer.row_id)) {
-                                        const manualOverride = item._manual_rate_set === true;
+                                        const manualOverride =
+                                                item._manual_rate_set === true &&
+                                                item._manual_rate_source === "user";
                                         if (manualOverride) {
                                                 const remaining_offers = item_offers.filter((id) => id !== offer.row_id);
                                                 item.posa_offers = JSON.stringify(remaining_offers);

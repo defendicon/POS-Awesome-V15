@@ -3164,7 +3164,8 @@ export default {
 							newItem.price_list_rate = price;
 							newItem.base_rate = price;
 							newItem.base_price_list_rate = price;
-							newItem._manual_rate_set = true;
+                                                        newItem._manual_rate_set = true;
+                                                        newItem._manual_rate_source = "system";
 							newItem.skip_force_update = true;
 						}
 					} catch (e) {

@@ -533,6 +533,7 @@ export default {
                         freeLine.is_free_item = 1;
                         freeLine.locked_price = true;
                         freeLine._manual_rate_set = true;
+                        freeLine._manual_rate_source = "system";
                         freeLine.source_rule = data.rule;
                         freeLine.auto_free_source = key;
                         freeLine.parent_row_id = data.parentRowId;
@@ -2329,7 +2330,8 @@ export default {
 			return;
 		}
 
-		item._manual_rate_set = true;
+                item._manual_rate_set = true;
+                item._manual_rate_source = "user";
 
 		if (values.uom) {
 			item.uom = values.uom;
