@@ -3775,6 +3775,9 @@ export default {
 
 	// Calculate prices and discounts for an item based on field change
         calc_prices(item, value, $event) {
+                if ($event?.target?.id) {
+                        item._manual_rate_set = true;
+                }
                 const outcome = calcPrices(item, value, $event, this);
                 this.applyPricingRulesForCart();
                 return outcome;
