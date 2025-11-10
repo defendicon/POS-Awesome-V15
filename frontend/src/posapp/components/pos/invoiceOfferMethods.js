@@ -1170,21 +1170,56 @@ export default {
 		if (!offer) return;
 
 		const combined = [...this.items, ...this.packed_items];
-		combined.forEach((item) => {
-			// Check if offer.items exists and is valid
-			if (!item || !offer.items || !Array.isArray(offer.items)) return;
+                combined.forEach((item) => {
+                        // Check if offer.items exists and is valid
+                        if (!item || !offer.items || !Array.isArray(offer.items)) return;
 
-			if (offer.items.includes(item.posa_row_id)) {
-				// Ensure posa_offers is initialized and valid
-				const item_offers = item.posa_offers ? JSON.parse(item.posa_offers) : [];
-				if (!Array.isArray(item_offers)) return;
+                        if (offer.items.includes(item.posa_row_id)) {
+                                // Ensure posa_offers is initialized and valid
+                                const item_offers = item.posa_offers ? JSON.parse(item.posa_offers) : [];
+                                if (!Array.isArray(item_offers)) return;
 
-				if (!item_offers.includes(offer.row_id)) {
-					// Store original rates only if this is the first offer being applied
-					if (!item.posa_offer_applied) {
-						// Store original prices normalized to conversion factor 1
-						const cf = flt(item.conversion_factor || 1);
-						item.original_base_rate = item.base_rate / cf;
+                                if (!item_offers.includes(offer.row_id)) {
+                                        const manualOverride = item._manual_rate_set === true;
+
+                                        if (manualOverride) {
+                                                // Preserve manually entered prices but still mark offer usage
+                                                item.posa_offer_applied = 1;
+
+                                                const qty = Number(item.qty) || 0;
+                                                const rate = Number(item.rate) || 0;
+
+                                                item.amount = this.flt(qty * rate, this.currency_precision);
+
+                                                const baseRate = Number(item.base_rate);
+                                                if (Number.isFinite(baseRate)) {
+                                                        item.base_amount = this.flt(qty * baseRate, this.currency_precision);
+                                                } else {
+                                                        const baseCurrency =
+                                                                this.price_list_currency || this.pos_profile.currency;
+                                                        if (this.selected_currency !== baseCurrency) {
+                                                                const exchange = Number(this.exchange_rate) || 1;
+                                                                item.base_amount = this.flt(
+                                                                        exchange
+                                                                                ? item.amount / exchange
+                                                                                : item.amount,
+                                                                        this.currency_precision,
+                                                                );
+                                                        } else {
+                                                                item.base_amount = item.amount;
+                                                        }
+                                                }
+
+                                                this.$forceUpdate();
+
+                                                return;
+                                        }
+
+                                        // Store original rates only if this is the first offer being applied
+                                        if (!item.posa_offer_applied) {
+                                                // Store original prices normalized to conversion factor 1
+                                                const cf = flt(item.conversion_factor || 1);
+                                                item.original_base_rate = item.base_rate / cf;
 						item.original_base_price_list_rate = item.base_price_list_rate / cf;
 						item.original_rate = item.rate / cf;
 						item.original_price_list_rate = item.price_list_rate / cf;
@@ -1301,19 +1336,30 @@ export default {
 		if (!offer) return;
 
 		const combined = [...this.items, ...this.packed_items];
-		combined.forEach((item) => {
-			if (!item || !item.posa_offers) return;
+                combined.forEach((item) => {
+                        if (!item || !item.posa_offers) return;
 
-			try {
-				const item_offers = JSON.parse(item.posa_offers);
-				if (!Array.isArray(item_offers)) return;
+                        try {
+                                const item_offers = JSON.parse(item.posa_offers);
+                                if (!Array.isArray(item_offers)) return;
 
-				if (item_offers.includes(offer.row_id)) {
-					// Check if we have original rates stored
-					if (!item.original_base_rate) {
-						console.warn("Original rates not found, fetching from server");
-						this.update_item_detail(item);
-						return;
+                                if (item_offers.includes(offer.row_id)) {
+                                        const manualOverride = item._manual_rate_set === true;
+                                        if (manualOverride) {
+                                                const remaining_offers = item_offers.filter((id) => id !== offer.row_id);
+                                                item.posa_offers = JSON.stringify(remaining_offers);
+                                                if (remaining_offers.length === 0) {
+                                                        item.posa_offer_applied = 0;
+                                                }
+                                                this.$forceUpdate();
+                                                return;
+                                        }
+
+                                        // Check if we have original rates stored
+                                        if (!item.original_base_rate) {
+                                                console.warn("Original rates not found, fetching from server");
+                                                this.update_item_detail(item);
+                                                return;
 					}
 
 					// Get current conversion factor
