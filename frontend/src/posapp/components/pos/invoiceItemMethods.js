@@ -3899,28 +3899,54 @@ export default {
 			],
 			primary_action_label: __("Update"),
 			primary_action(values) {
-				const rate = flt(values.new_rate);
-				frappe.call({
-					method: "posawesome.posawesome.api.items.update_price_list_rate",
-					args: {
-						item_code: item.item_code,
-						price_list: vm.get_price_list(),
-						rate: rate,
-						uom: item.uom,
-					},
-					callback(r) {
-						if (!r.exc) {
-							item.price_list_rate = rate;
-							item.base_price_list_rate = rate;
-							if (!item._manual_rate_set) {
-								item.rate = rate;
-								item.base_rate = rate;
-							}
-							vm.calc_item_price(item);
-							vm.eventBus.emit("show_message", {
-								title: r.message || __("Item price updated"),
-								color: "success",
-							});
+                                const rate = flt(values.new_rate);
+                                frappe.call({
+                                        method: "posawesome.posawesome.api.items.update_price_list_rate",
+                                        args: {
+                                                item_code: item.item_code,
+                                                price_list: vm.get_price_list(),
+                                                rate: rate,
+                                                uom: item.uom,
+                                        },
+                                        callback(r) {
+                                                if (!r.exc) {
+                                                        const priceCurrency =
+                                                                vm.selected_currency ||
+                                                                vm.price_list_currency ||
+                                                                vm.pos_profile?.currency;
+                                                        const hadManualOverride = item._manual_rate_set === true;
+
+                                                        if (typeof vm._applyPriceListRate === "function") {
+                                                                try {
+                                                                        if (hadManualOverride) {
+                                                                                item._manual_rate_set = false;
+                                                                        }
+
+                                                                        vm._applyPriceListRate(item, rate, priceCurrency);
+                                                                } finally {
+                                                                        item._manual_rate_set = true;
+                                                                }
+                                                        } else {
+                                                                const conversion =
+                                                                        typeof vm._computePriceConversion === "function"
+                                                                                ? vm._computePriceConversion(rate, priceCurrency)
+                                                                                : {
+                                                                                          price_list_rate: rate,
+                                                                                          base_price_list_rate: rate,
+                                                                                  };
+
+                                                                item.price_list_rate = conversion.price_list_rate ?? rate;
+                                                                item.base_price_list_rate = conversion.base_price_list_rate ?? rate;
+                                                                item.rate = conversion.price_list_rate ?? rate;
+                                                                item.base_rate = conversion.base_price_list_rate ?? rate;
+                                                        }
+
+                                                        item._manual_rate_set = true;
+                                                        vm.calc_item_price(item);
+                                                        vm.eventBus.emit("show_message", {
+                                                                title: r.message || __("Item price updated"),
+                                                                color: "success",
+                                                        });
 						}
 					},
 				});
