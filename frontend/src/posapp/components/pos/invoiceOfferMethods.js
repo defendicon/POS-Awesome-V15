@@ -1289,11 +1289,47 @@ export default {
 
                         if (!alreadyApplied) {
                                 if (!item.posa_offer_applied) {
-                                        const cf = flt(item.conversion_factor || 1);
-                                        item.original_base_rate = item.base_rate / cf;
-                                        item.original_base_price_list_rate = item.base_price_list_rate / cf;
-                                        item.original_rate = item.rate / cf;
-                                        item.original_price_list_rate = item.price_list_rate / cf;
+                                        const cfRaw = flt(item.conversion_factor || 1);
+                                        const cf = cfRaw > 0 ? cfRaw : 1;
+                                        const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                                        const isForeignCurrency =
+                                                baseCurrency &&
+                                                this.selected_currency &&
+                                                this.selected_currency !== baseCurrency &&
+                                                this.exchange_rate;
+
+                                        const resolveBaseValue = (baseValue, displayedValue) => {
+                                                if (baseValue !== undefined && baseValue !== null) {
+                                                        return baseValue;
+                                                }
+
+                                                if (displayedValue === undefined || displayedValue === null) {
+                                                        return 0;
+                                                }
+
+                                                if (isForeignCurrency) {
+                                                        return displayedValue / this.exchange_rate;
+                                                }
+
+                                                return displayedValue;
+                                        };
+
+                                        const baseRate = resolveBaseValue(item.base_rate, item.rate);
+                                        const basePriceListRate = resolveBaseValue(
+                                                item.base_price_list_rate,
+                                                item.price_list_rate,
+                                        );
+
+                                        item.original_base_rate = this.flt(baseRate / cf, this.currency_precision);
+                                        item.original_base_price_list_rate = this.flt(
+                                                basePriceListRate / cf,
+                                                this.currency_precision,
+                                        );
+                                        item.original_rate = this.flt((item.rate || 0) / cf, this.currency_precision);
+                                        item.original_price_list_rate = this.flt(
+                                                (item.price_list_rate || 0) / cf,
+                                                this.currency_precision,
+                                        );
                                 }
                         }
 
