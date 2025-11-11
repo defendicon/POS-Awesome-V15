@@ -22,7 +22,7 @@ export function useCartValidation() {
 	 * @param {Object} stockSettings - Stock settings
 	 * @param {Object} eventBus - Event bus for notifications
 	 * @param {boolean} blockSaleBeyondAvailableQty - Block sales beyond available quantity
-	 * @returns {Promise<boolean>} - Returns true if item can be added, false otherwise
+	 * @returns {Promise<Object>} - Returns { isValid: boolean, adjustedQty?: number } - adjustedQty is set when stock is insufficient
 	 */
 	async function validateCartItem(
 		item,
@@ -50,7 +50,7 @@ export function useCartValidation() {
 						color: "warning",
 					});
 				}
-				return false;
+				return { isValid: false };
 			}
 
 			// Step 3: Zero stock validation (if enabled)
@@ -61,7 +61,7 @@ export function useCartValidation() {
 						color: "error",
 					});
 				}
-				return false;
+				return { isValid: false };
 			}
 
                         const isStockItem = parseBooleanSetting(item?.is_stock_item);
@@ -71,50 +71,58 @@ export function useCartValidation() {
                                 // Allow negative stock items when Allow Negative Stock is enabled
                                 // This overrides POS Profile's block setting when negative stock is explicitly allowed
                                 const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
+                                // Check if requested quantity exceeds available stock (supports fractional quantities like 0.93)
                                 const exceedsAvailable =
-                                        typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
-                                const blockSale = !allowNegativeStock && exceedsAvailable;
+                                        typeof item.actual_qty === "number" && requestedQty > item.actual_qty && item.actual_qty > 0;
 
-                                if (blockSale) {
-                                        if (eventBus) {
-                                                eventBus.emit("show_message", {
-                                                        title: formatStockShortageError(
-                                                                item.item_name || item.item_code,
-                                                                item.actual_qty,
-                                                                requestedQty,
-                                                        ),
-                                                        color: "error",
-                                                });
-                                        }
-                                        return false;
+                                // If stock is insufficient and negative stock is not allowed, auto-adjust to available quantity
+                                // This works for any positive quantity including fractional values (e.g., 0.93)
+                                if (exceedsAvailable && !allowNegativeStock) {
+                                        // Auto-adjust to available quantity instead of blocking
+                                        return {
+                                                isValid: true,
+                                                adjustedQty: item.actual_qty,
+                                        };
                                 }
 
                                 // Step 5: Server-side stock validation
                                 const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
 
                                 if (!stockValidationResult.isValid) {
+                                        // Check if we can auto-adjust based on server response
+                                        const availableQty = stockValidationResult.data?.available_qty ?? item.actual_qty;
+                                        
+                                        // If available quantity > 0 (including fractional like 0.93) and less than requested, auto-adjust
+                                        if (availableQty > 0 && requestedQty > availableQty && !allowNegativeStock) {
+                                                return {
+                                                        isValid: true,
+                                                        adjustedQty: availableQty,
+                                                };
+                                        }
+                                        
+                                        // Otherwise, show error and block
                                         if (eventBus) {
                                                 eventBus.emit("show_message", {
                                                         title: formatStockShortageError(
                                                                 stockValidationResult.data?.item_name ||
                                                                         item.item_name ||
                                                                         item.item_code,
-                                                                stockValidationResult.data?.available_qty ?? item.actual_qty,
+                                                                availableQty,
                                                                 stockValidationResult.data?.requested_qty ?? requestedQty,
                                                         ),
                                                         color: "error",
                                                 });
                                         }
-                                        return false;
+                                        return { isValid: false };
                                 }
                         }
-                        return true;
+                        return { isValid: true };
 		} catch (error) {
 			console.error("Cart validation error:", error);
 			validationError.value = error.message;
 
 			// Fallback validation for network/API errors
-			return performFallbackValidation(
+			const fallbackResult = performFallbackValidation(
 				item,
 				requestedQty,
 				stockSettings,
@@ -122,6 +130,12 @@ export function useCartValidation() {
 				blockSaleBeyondAvailableQty,
 				showNegativeStockWarning,
 			);
+			
+			// Ensure fallback returns object format
+			if (typeof fallbackResult === "boolean") {
+				return { isValid: fallbackResult };
+			}
+			return fallbackResult;
 		} finally {
 			isValidating.value = false;
 		}
@@ -184,7 +198,7 @@ export function useCartValidation() {
 	 * @param {Object} stockSettings - Stock settings
 	 * @param {Object} eventBus - Event bus for notifications
 	 * @param {boolean} blockSaleBeyondAvailableQty - Block sales beyond available quantity
-	 * @returns {boolean} - Returns true if item can be added, false otherwise
+	 * @returns {Object} - Returns { isValid: boolean, adjustedQty?: number }
 	 */
 	function performFallbackValidation(
 		item,
@@ -214,29 +228,24 @@ export function useCartValidation() {
                                                 color: "error",
                                         });
                                 }
-                                return false;
+                                return { isValid: false };
                         }
 
-                        // Check if requested quantity exceeds available stock
+                        // Check if requested quantity exceeds available stock (supports fractional quantities like 0.93)
                         const exceedsAvailable =
-                                typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
-                        const blockSale = !allowNegativeStock && exceedsAvailable;
-                        if (blockSale) {
-                                if (eventBus) {
-                                        eventBus.emit("show_message", {
-                                                title: formatStockShortageError(
-                                                        item.item_name || item.item_code,
-                                                        item.actual_qty,
-                                                        requestedQty,
-                                                ),
-                                                color: "error",
-                                        });
-                                }
-                                return false;
+                                typeof item.actual_qty === "number" && requestedQty > item.actual_qty && item.actual_qty > 0;
+                        
+                        // If stock is insufficient and negative stock is not allowed, auto-adjust to available quantity
+                        // This works for any positive quantity including fractional values (e.g., 0.93)
+                        if (exceedsAvailable && !allowNegativeStock) {
+                                return {
+                                        isValid: true,
+                                        adjustedQty: item.actual_qty,
+                                };
                         }
                 }
 
-                return true;
+                return { isValid: true };
 	}
 
 	/**
@@ -260,7 +269,7 @@ export function useCartValidation() {
 		const invalidItems = [];
 
 		for (const item of items) {
-			const isValid = await validateCartItem(
+			const validationResult = await validateCartItem(
 				item.item || item,
 				item.qty || 1,
 				posProfile,
@@ -270,8 +279,19 @@ export function useCartValidation() {
 				showNegativeStockWarning,
 			);
 
+			// Handle both old boolean format and new object format for backward compatibility
+			const isValid = typeof validationResult === "boolean" ? validationResult : validationResult.isValid;
+			
 			if (isValid) {
-				validItems.push(item);
+				// If quantity was adjusted, update the item quantity
+				if (validationResult && typeof validationResult === "object" && validationResult.adjustedQty !== undefined) {
+					validItems.push({
+						...item,
+						qty: validationResult.adjustedQty,
+					});
+				} else {
+					validItems.push(item);
+				}
 			} else {
 				invalidItems.push(item);
 			}

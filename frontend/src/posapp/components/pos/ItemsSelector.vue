@@ -1733,7 +1733,7 @@ export default {
 
 			// Validate item before adding to cart
 			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
-			const isValid = await this.cartValidation.validateCartItem(
+			const validationResult = await this.cartValidation.validateCartItem(
 				item,
 				requestedQty,
 				this.pos_profile,
@@ -1743,13 +1743,30 @@ export default {
 				!suppressNegativeWarning,
 			);
 
+			// Handle both old boolean format and new object format for backward compatibility
+			const isValid = typeof validationResult === "boolean" ? validationResult : validationResult.isValid;
+			const finalQty = validationResult && typeof validationResult === "object" && validationResult.adjustedQty !== undefined
+				? validationResult.adjustedQty
+				: requestedQty;
+
 			if (!isValid) {
 				// Validation failed, error message already shown by validator
 				return;
 			}
 
-			// Prepare item for cart
-			await this.prepareItemForCart(item, requestedQty);
+			// Show notification if quantity was auto-adjusted due to insufficient stock
+			if (validationResult && typeof validationResult === "object" && validationResult.adjustedQty !== undefined && requestedQty !== finalQty) {
+				this.eventBus.emit("show_message", {
+					title: __("{0} has only {1} in stock. Quantity adjusted to {1}.", [
+						item.item_name || item.item_code,
+						finalQty,
+					]),
+					color: "orange",
+				});
+			}
+
+			// Prepare item for cart with adjusted quantity if stock was insufficient
+			await this.prepareItemForCart(item, finalQty);
 
 			// Add item to cart
 			const payload = { ...item };
