@@ -447,17 +447,15 @@ export default {
                         line.is_free_item = 1;
                         line.locked_price = true;
 
+                        const docQty = Number.parseFloat(line.qty || 0) || 0;
                         const rate = Number.isFinite(data.rate) ? data.rate : 0;
-                        const priceListRate = Number.isFinite(data.price_list_rate)
-                                ? data.price_list_rate
-                                : rate;
-                        const baseRate = this._toBaseCurrency
-                                ? this._toBaseCurrency(rate)
-                                : rate;
+                        const catalogItem = itemsStore?.getItemByCode?.(line.item_code) || null;
+                        const priceListRate = catalogItem?.price_list_rate ?? data.price_list_rate ?? rate;
+
+                        const baseRate = this._toBaseCurrency ? this._toBaseCurrency(rate) : rate;
                         const basePriceListRate = this._toBaseCurrency
                                 ? this._toBaseCurrency(priceListRate)
                                 : priceListRate;
-                        const docQty = Number.parseFloat(line.qty || 0) || 0;
 
                         line.rate = rate;
                         line.base_rate = baseRate;
@@ -515,8 +513,10 @@ export default {
                         const quantity = this.flt ? this.flt(data.qty, this.float_precision) : data.qty;
                         const rate = Number.isFinite(data.rate) ? data.rate : 0;
                         const baseRate = this._toBaseCurrency ? this._toBaseCurrency(rate) : rate;
-                        const priceListRate = data.price_list_rate ?? rate;
-                        const basePriceListRate = data.base_price_list_rate ?? baseRate;
+                        const priceListRate =
+                                catalogItem?.price_list_rate ?? data.price_list_rate ?? rate;
+                        const basePriceListRate =
+                                catalogItem?.base_price_list_rate ?? data.base_price_list_rate ?? baseRate;
 
                         const template = {
                                 ...(catalogItem || {}),
