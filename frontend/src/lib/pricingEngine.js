@@ -357,7 +357,14 @@ export const computeFreeItems = ({ item, qty, docQty, ctx, indexes }) => {
                 const uom = sameItem ? item.stock_uom || item.uom : null;
                 const conversionFactor = sameItem ? 1 : null;
                 const slab = selectSlab(rule, effectiveQty);
-                const rate = resolveSlabValue(rule, slab);
+                let rate;
+                if (slab && slab.rate !== undefined && slab.rate !== null) {
+                        rate = Number.parseFloat(slab.rate);
+                } else if (rule.rate !== undefined && rule.rate !== null) {
+                        rate = Number.parseFloat(rule.rate);
+                } else {
+                        rate = resolveSlabValue(rule, slab);
+                }
 
                 freebies.push({
                         item_code: sameItem ? item.item_code : rule.free_item || item.item_code,
