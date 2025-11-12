@@ -1044,72 +1044,71 @@ export default {
 		new_item.qty = offer.given_qty;
 		new_item.stock_qty = offer.given_qty;
 
-		// Handle rate based on currency
+		// Start with original prices
+		const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+		const isDifferentCurrency = this.selected_currency !== baseCurrency;
+
+		const original_base_price = this.flt(
+			item.base_price_list_rate !== undefined
+				? item.base_price_list_rate
+				: isDifferentCurrency
+					? (item.price_list_rate || item.rate) / this.exchange_rate
+					: item.price_list_rate || item.rate,
+			this.currency_precision,
+		);
+
+		let base_discount = 0;
+		let discount_percentage = 0;
+		let final_base_rate = original_base_price;
+
+		// Calculate discount in base currency
 		if (offer.discount_type === "Rate") {
-			// offer.rate is always in base currency (PKR)
-			new_item.base_rate = offer.rate;
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			if (this.selected_currency !== baseCurrency) {
-				// If exchange rate is 300 PKR = 1 USD
-				// Convert PKR to USD by multiplying
-				new_item.rate = this.flt(offer.rate * this.exchange_rate, this.currency_precision);
-			} else {
-				new_item.rate = offer.rate;
-			}
+			final_base_rate = this.flt(offer.rate, this.currency_precision);
+			base_discount = this.flt(original_base_price - final_base_rate, this.currency_precision);
 		} else if (offer.discount_type === "Discount Percentage") {
-			// Apply percentage discount on item's base rate
-			const base_price = item.base_rate || item.rate / this.exchange_rate;
-			const base_discount = this.flt(
-				(base_price * offer.discount_percentage) / 100,
+			discount_percentage = this.flt(offer.discount_percentage, this.currency_precision);
+			base_discount = this.flt(
+				(original_base_price * discount_percentage) / 100,
 				this.currency_precision,
 			);
-			new_item.base_discount_amount = base_discount;
-			new_item.base_rate = this.flt(base_price - base_discount, this.currency_precision);
+			final_base_rate = this.flt(original_base_price - base_discount, this.currency_precision);
+		} else if (offer.discount_type === "Discount Amount") {
+			base_discount = this.flt(offer.discount_amount, this.currency_precision);
+			final_base_rate = this.flt(original_base_price - base_discount, this.currency_precision);
+		}
 
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			if (this.selected_currency !== baseCurrency) {
-				new_item.discount_amount = this.flt(
-					base_discount * this.exchange_rate,
-					this.currency_precision,
-				);
-				new_item.rate = this.flt(new_item.base_rate * this.exchange_rate, this.currency_precision);
-			} else {
-				new_item.discount_amount = base_discount;
-				new_item.rate = new_item.base_rate;
-			}
+		// Ensure final rate is not negative
+		final_base_rate = Math.max(0, final_base_rate);
+		base_discount = original_base_price - final_base_rate;
+
+		// Recalculate percentage if discount was by Rate or Amount
+		if (original_base_price > 0 && offer.discount_type !== "Discount Percentage") {
+			discount_percentage = this.flt(
+				(base_discount / original_base_price) * 100,
+				this.currency_precision,
+			);
+		}
+
+		// Set all pricing fields
+		new_item.base_rate = final_base_rate;
+		new_item.base_price_list_rate = original_base_price;
+		new_item.base_discount_amount = base_discount;
+		new_item.discount_percentage = discount_percentage;
+
+		// Convert to selected currency if needed
+		if (isDifferentCurrency) {
+			new_item.rate = this.flt(final_base_rate * this.exchange_rate, this.currency_precision);
+			new_item.price_list_rate = this.flt(
+				original_base_price * this.exchange_rate,
+				this.currency_precision,
+			);
+			new_item.discount_amount = this.flt(base_discount * this.exchange_rate, this.currency_precision);
 		} else {
-			// Use item's original rate
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			if (this.selected_currency !== baseCurrency) {
-				new_item.base_rate = item.base_rate || item.rate / this.exchange_rate;
-				new_item.rate = item.rate;
-			} else {
-				new_item.base_rate = item.rate;
-				new_item.rate = item.rate;
-			}
+			new_item.rate = final_base_rate;
+			new_item.price_list_rate = original_base_price;
+			new_item.discount_amount = base_discount;
 		}
 
-		// Handle discount amount based on currency
-		if (offer.discount_type === "Discount Amount") {
-			// offer.discount_amount is always in base currency (PKR)
-			new_item.base_discount_amount = offer.discount_amount;
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			if (this.selected_currency !== baseCurrency) {
-				// Convert PKR to USD by multiplying
-				new_item.discount_amount = this.flt(
-					offer.discount_amount * this.exchange_rate,
-					this.currency_precision,
-				);
-			} else {
-				new_item.discount_amount = offer.discount_amount;
-			}
-		} else if (offer.discount_type !== "Discount Percentage") {
-			new_item.base_discount_amount = 0;
-			new_item.discount_amount = 0;
-		}
-
-		new_item.discount_percentage =
-			offer.discount_type === "Discount Percentage" ? offer.discount_percentage : 0;
 		new_item.discount_amount_per_item = 0;
 		new_item.uom = item.uom ? item.uom : item.stock_uom;
 		new_item.actual_batch_qty = "";
@@ -1126,33 +1125,13 @@ export default {
 		new_item.posa_notes = "";
 		new_item.posa_delivery_date = "";
 
-		// Handle free items
-		const is_free =
-			(offer.discount_type === "Rate" && !offer.rate) ||
-			(offer.discount_type === "Discount Percentage" && offer.discount_percentage == 100);
-
+		const is_free = new_item.base_rate <= 0;
 		new_item.is_free_item = is_free ? 1 : 0;
 
-		// Set price list rate based on currency similar to invoice logic
+		// If free, ensure rates are 0. The calculation above should already handle this, but as a safeguard.
 		if (is_free) {
-			new_item.base_price_list_rate = 0;
-			new_item.price_list_rate = 0;
-		} else {
-			// Use the item's price list rate if available
-			new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;
-			// Determine base price list rate just like invoice items
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			if (this.selected_currency !== baseCurrency) {
-				new_item.base_price_list_rate = this.flt(
-					item.base_price_list_rate !== undefined
-						? item.base_price_list_rate
-						: item.rate / this.exchange_rate,
-					this.currency_precision,
-				);
-			} else {
-				new_item.base_price_list_rate =
-					item.base_price_list_rate !== undefined ? item.base_price_list_rate : item.rate;
-			}
+			new_item.base_rate = 0;
+			new_item.rate = 0;
 		}
 
 		new_item.posa_row_id = this.makeid(20);
