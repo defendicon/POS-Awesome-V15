@@ -23,7 +23,7 @@
 
 			<v-img
 				:src="posLogo"
-				alt="CNITpos"
+				alt="IBS POS"
 				:max-width="isMobile ? 24 : 32"
 				:class="['pos-navbar-logo', isRtl ? 'rtl-logo' : 'ltr-logo']"
 				loading="lazy"
@@ -42,10 +42,10 @@
 				role="button"
 			>
 				<template v-if="isMobile">
-					<span class="pos-navbar-title-compact">{{ __("CNITpos") }}</span>
+					<span class="pos-navbar-title-compact">{{ __("IBS POS") }}</span>
 				</template>
 				<template v-else>
-					<span class="pos-navbar-title-bold">{{ __("CNITpos") }}</span>
+					<span class="pos-navbar-title-bold">{{ __("IBS POS") }}</span>
 				</template>
 			</v-toolbar-title>
 		</div>
