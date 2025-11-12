@@ -1791,42 +1791,11 @@ export default {
 				return;
 			}
 
-			let invoice_doc;
-			if (
-				this.invoiceType === "Order" &&
-				this.pos_profile.posa_create_only_sales_order &&
-				!this.new_delivery_date &&
-				!(this.invoice_doc && this.invoice_doc.posa_delivery_date)
-			) {
-				console.log("Building local Sales Order doc for payment");
-				invoice_doc = this.get_invoice_doc();
-			} else if (
-				this.invoice_doc &&
-				this.invoice_doc.doctype === "Sales Order" &&
-				this.invoiceType === "Invoice"
-			) {
-				console.log("Processing Sales Order payment");
-				invoice_doc = await this.process_invoice_from_order();
-			} else {
-				console.log("Processing regular invoice");
-				invoice_doc = await this.process_invoice();
-			}
+			const invoice_doc = this.get_invoice_doc();
 
 			if (!invoice_doc) {
-				console.log("Failed to process invoice");
+				console.log("Failed to build invoice document");
 				return;
-			}
-
-			// Reload current invoice from backend (no selection dialog) to ensure items/totals are up-to-date
-			if (!isOffline() && invoice_doc.name) {
-				console.log("Reloading current invoice from backend");
-				const refreshed = await this.reload_current_invoice_from_backend();
-				if (refreshed) {
-					invoice_doc = refreshed;
-					console.log("Refreshed invoice:", invoice_doc);
-				} else {
-					console.log("Failed to refresh invoice");
-				}
 			}
 
 			// Update invoice_doc with current currency info
