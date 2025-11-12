@@ -169,6 +169,28 @@ const resolveSlabValue = (rule, slab) => {
         return Number.parseFloat(rule.rate_or_discount || 0);
 };
 
+const isRuleTrulyFree = (rule) => {
+        if (!rule) {
+                return false;
+        }
+
+        const value = Number.parseFloat(rule.rate_or_discount || 0);
+        const priceMode = String(rule.price_or_discount || "").toLowerCase();
+        const discountType = String(rule.discount_type || "").toLowerCase();
+
+        // An explicit rate of 0 is a free item
+        if (priceMode === "price" && value === 0) {
+                return true;
+        }
+
+        // A 100% discount is a free item
+        if (priceMode !== "price" && discountType === "percentage" && value === 100) {
+                return true;
+        }
+
+        return false;
+};
+
 const applyOneRule = (currentRate, rule, qty, baseRate) => {
         const slab = selectSlab(rule, qty);
         const value = resolveSlabValue(rule, slab);
@@ -184,11 +206,11 @@ const applyOneRule = (currentRate, rule, qty, baseRate) => {
         const isMargin = discountType === "margin" || !!rule.margin_type;
         const isPriceOverride = priceMode === "price" && (rawType === "rate" || rawType === "price" || (!rawType && discountType === "rate"));
 
-        let type = rule.discount_type || rule.rate_or_discount_type || rule.price_or_discount;
-
-        if (rule.is_free_item_rule) {
-                return { newRate: currentRate, discount: 0, detail: null };
+        if (isRuleTrulyFree(rule)) {
+                return { newRate: 0, discount: currentRate, detail: null };
         }
+
+        let type = rule.discount_type || rule.rate_or_discount_type || rule.price_or_discount;
 
         if (isPriceOverride) {
                 if (isAmount) {
