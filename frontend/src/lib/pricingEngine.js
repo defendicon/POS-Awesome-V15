@@ -186,8 +186,8 @@ const applyOneRule = (currentRate, rule, qty, baseRate) => {
 
         let type = rule.discount_type || rule.rate_or_discount_type || rule.price_or_discount;
 
-        if (rule.is_free_item_rule) {
-                return { newRate: currentRate, discount: 0, detail: null };
+        if (rule.is_free_item_rule && isRuleTrulyFree(rule, slab)) {
+                return { newRate: 0, discount: currentRate, detail: null };
         }
 
         if (isPriceOverride) {
@@ -228,6 +228,23 @@ const applyOneRule = (currentRate, rule, qty, baseRate) => {
 };
 
 const isFreeRule = (rule) => rule && (rule.is_free_item_rule || (rule.price_or_discount || "").toLowerCase() === "product");
+
+const isRuleTrulyFree = (rule, slab) => {
+        const value = resolveSlabValue(rule, slab);
+        if (value === 0) return true;
+
+        const rawType = String(rule.rate_or_discount_type || "").toLowerCase();
+        const priceMode = String(rule.price_or_discount || "").toLowerCase();
+        const discountType = String(rule.discount_type || "").toLowerCase();
+
+        const isPriceOverride = priceMode === "price" && (rawType === "rate" || rawType === "price" || (!rawType && discountType === "rate"));
+        if (isPriceOverride && value === 0) return true;
+
+        const isPercentage = rawType === "discount percentage" || discountType === "percentage";
+        if (isPercentage && value === 100) return true;
+
+        return false;
+};
 
 export const applyLocalPricingRules = ({ item, qty, docQty, baseRate, ctx, indexes }) => {
         const rawRuleQty = Number.parseFloat(qty ?? item?.qty ?? 0);
