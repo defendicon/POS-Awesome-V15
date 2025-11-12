@@ -446,14 +446,27 @@ export default {
                         }
                         line.is_free_item = 1;
                         line.locked_price = true;
-                        line.rate = 0;
-                        line.base_rate = 0;
-                        line.price_list_rate = 0;
-                        line.base_price_list_rate = 0;
+
+                        const rate = Number.isFinite(data.rate) ? data.rate : 0;
+                        const priceListRate = Number.isFinite(data.price_list_rate)
+                                ? data.price_list_rate
+                                : rate;
+                        const baseRate = this._toBaseCurrency
+                                ? this._toBaseCurrency(rate)
+                                : rate;
+                        const basePriceListRate = this._toBaseCurrency
+                                ? this._toBaseCurrency(priceListRate)
+                                : priceListRate;
+                        const docQty = Number.parseFloat(line.qty || 0) || 0;
+
+                        line.rate = rate;
+                        line.base_rate = baseRate;
+                        line.price_list_rate = priceListRate;
+                        line.base_price_list_rate = basePriceListRate;
                         line.discount_amount = 0;
                         line.base_discount_amount = 0;
-                        line.amount = 0;
-                        line.base_amount = 0;
+                        line.amount = this.flt ? this.flt(rate * docQty) : rate * docQty;
+                        line.base_amount = this.flt ? this.flt(baseRate * docQty) : baseRate * docQty;
                         line.source_rule = data.rule;
                         line.pricing_rule_badge = buildFreeBadgeMeta(data);
                 };
@@ -500,14 +513,18 @@ export default {
                                                         ? 1
                                                         : null;
                         const quantity = this.flt ? this.flt(data.qty, this.float_precision) : data.qty;
+                        const rate = Number.isFinite(data.rate) ? data.rate : 0;
+                        const baseRate = this._toBaseCurrency ? this._toBaseCurrency(rate) : rate;
+                        const priceListRate = data.price_list_rate ?? rate;
+                        const basePriceListRate = data.base_price_list_rate ?? baseRate;
 
                         const template = {
                                 ...(catalogItem || {}),
                                 item_code: data.item_code,
                                 item_name: catalogItem?.item_name || data.item_code,
                                 qty: quantity,
-                                rate: 0,
-                                price_list_rate: 0,
+                                rate,
+                                price_list_rate: priceListRate,
                                 uom: resolvedUom || (catalogItem ? catalogItem.uom : undefined),
                         };
                         const freeLine = this.get_new_item(template);
@@ -522,12 +539,12 @@ export default {
                         if (Number.isFinite(parsedStockQty)) {
                                 freeLine.stock_qty = parsedStockQty;
                         }
-                        freeLine.rate = 0;
-                        freeLine.base_rate = 0;
-                        freeLine.price_list_rate = 0;
-                        freeLine.base_price_list_rate = 0;
-                        freeLine.amount = 0;
-                        freeLine.base_amount = 0;
+                        freeLine.rate = rate;
+                        freeLine.base_rate = baseRate;
+                        freeLine.price_list_rate = priceListRate;
+                        freeLine.base_price_list_rate = basePriceListRate;
+                        freeLine.amount = this.flt ? this.flt(rate * quantity) : rate * quantity;
+                        freeLine.base_amount = this.flt ? this.flt(baseRate * quantity) : baseRate * quantity;
                         freeLine.discount_amount = 0;
                         freeLine.base_discount_amount = 0;
                         freeLine.is_free_item = 1;

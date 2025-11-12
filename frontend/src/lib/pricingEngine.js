@@ -356,6 +356,8 @@ export const computeFreeItems = ({ item, qty, docQty, ctx, indexes }) => {
                 const sameItem = !!rule.same_item;
                 const uom = sameItem ? item.stock_uom || item.uom : null;
                 const conversionFactor = sameItem ? 1 : null;
+                const slab = selectSlab(rule, effectiveQty);
+                const rate = resolveSlabValue(rule, slab);
 
                 freebies.push({
                         item_code: sameItem ? item.item_code : rule.free_item || item.item_code,
@@ -371,6 +373,7 @@ export const computeFreeItems = ({ item, qty, docQty, ctx, indexes }) => {
                         free_qty_per_threshold: freePerThreshold,
                         uom,
                         conversion_factor: conversionFactor,
+                        rate: Number.isFinite(rate) ? rate : undefined,
                 });
 
                 if (rule.stop_further_rules) {
