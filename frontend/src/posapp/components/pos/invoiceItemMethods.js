@@ -3784,6 +3784,19 @@ export default {
 	// Calculate prices and discounts for an item based on field change
         calc_prices(item, value, $event) {
                 const outcome = calcPrices(item, value, $event, this);
+                if (outcome && outcome.price_list_rate !== undefined) {
+                        outcome.price_list_rate = this.flt(outcome.price_list_rate, this.currency_precision);
+                        item.price_list_rate = outcome.price_list_rate;
+                        const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+                        if (this.selected_currency !== baseCurrency) {
+                                item.base_price_list_rate = this.flt(
+                                        outcome.price_list_rate / this.exchange_rate,
+                                        this.currency_precision,
+                                );
+                        } else {
+                                item.base_price_list_rate = outcome.price_list_rate;
+                        }
+                }
                 this.applyPricingRulesForCart();
                 return outcome;
         },

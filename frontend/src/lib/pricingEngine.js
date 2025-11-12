@@ -277,7 +277,7 @@ export const applyLocalPricingRules = ({ item, qty, docQty, baseRate, ctx, index
                 .sort(ruleSort);
 
         if (!filtered.length) {
-                return { rate: round(startRate), discountPerUnit: 0, applied: [] };
+                return { rate: round(startRate), price_list_rate: round(startRate), discountPerUnit: 0, applied: [] };
         }
 
         const applied = [];
@@ -299,6 +299,7 @@ export const applyLocalPricingRules = ({ item, qty, docQty, baseRate, ctx, index
 
         return {
                 rate: round(rate),
+                price_list_rate: round(startRate),
                 discountPerUnit: round(startRate - rate),
                 applied,
         };
