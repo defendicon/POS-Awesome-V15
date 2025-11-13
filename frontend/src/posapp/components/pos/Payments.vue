@@ -446,7 +446,7 @@
 							maxlength="32"
 						></v-text-field>
 					</v-col>
-				</v-row>
+					</row>
 
 				<!-- Customer Purchase Order (if enabled in POS profile) -->
 				<div v-if="pos_profile.posa_allow_customer_purchase_order">
