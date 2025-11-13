@@ -59,18 +59,27 @@
 									</template>
 									<template v-slot:item.difference="{ item }">
 										{{ currencySymbol(pos_profile.currency) }}
-										{{
-											item.difference = formatCurrency(
-												item.expected_amount - item.closing_amount,
-											)
-										}}</template
-									>
+										{{ calculateDifference(item) }}
+									</template>
 									<template v-slot:item.opening_amount="{ item }">
 										{{ currencySymbol(pos_profile.currency) }}
 										{{ formatCurrency(item.opening_amount) }}</template
 									>
 									<template v-slot:item.expected_amount="{ item }">
-										<div>
+										<div
+											v-if="
+												!item.currency_breakdown ||
+												item.currency_breakdown.length <= 1
+											"
+										>
+											{{
+												formatCurrency(
+													item.expected_amount,
+													pos_profile.currency,
+												)
+											}}
+										</div>
+										<div v-else>
 											<div
 												v-for="b in item.currency_breakdown"
 												:key="b.currency"
@@ -81,14 +90,8 @@
 													formatCurrency(b.amount, b.currency)
 												}}</span>
 											</div>
-											<v-divider
-												v-if="item.currency_breakdown.length > 1"
-												class="total-divider"
-											></v-divider>
-											<div
-												v-if="item.currency_breakdown.length > 1"
-												class="total-line"
-											>
+											<v-divider class="total-divider"></v-divider>
+											<div class="total-line">
 												<span class="currency-tag total-tag">{{
 													__("Total")
 												}}</span>
@@ -194,6 +197,11 @@ export default {
 	watch: {},
 
 	methods: {
+		calculateDifference(item) {
+			const difference = item.expected_amount - item.closing_amount;
+			item.difference = difference;
+			return this.formatCurrency(difference);
+		},
 		close_dialog() {
 			this.closingDialog = false;
 		},
