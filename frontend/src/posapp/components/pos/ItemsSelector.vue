@@ -3808,6 +3808,7 @@ export default {
                 // Initialize the Pinia store with existing POS profile data
                 if (this.pos_profile && this.pos_profile.name) {
                         await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
+						console.log("SDADSADASDSADAS");
 			console.log("Pinia store initialized successfully");
 		} else {
 			console.warn("No POS Profile available for store initialization");

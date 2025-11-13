@@ -251,7 +251,7 @@ export default {
 	},
 	computed: {
 		isDarkTheme() {
-			return this.$vuetify.theme.current.dark;
+			return this.$theme?.isDark?.value ?? false;
 		},
 	},
 	mounted() {

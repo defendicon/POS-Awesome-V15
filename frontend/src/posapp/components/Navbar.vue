@@ -243,7 +243,16 @@ export default {
 	},
 	computed: {
 		appBarColor() {
-			return this.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
+			const isDark = this.$theme?.isDark?.value ?? false;
+			const surfaceColor =
+				this.$theme?.themeColors?.value?.surface ??
+				this.$vuetify?.theme?.global?.current?.value?.colors?.surface;
+
+			if (isDark) {
+				return surfaceColor || "#1E1E1E";
+			}
+
+			return surfaceColor || "#ffffff";
 		},
 	},
 	mounted() {
