@@ -581,6 +581,50 @@ def make_closing_shift_from_opening(opening_shift):
                 )
             )
 
+    payment_breakdown = {}
+
+    def update_payment_breakdown(mode_of_payment, currency, amount):
+        if not mode_of_payment:
+            return
+
+        row = payment_breakdown.setdefault(mode_of_payment, defaultdict(float))
+        row[currency] += flt(amount)
+
+    cash_mode_of_payment = (
+        frappe.db.get_value("POS Profile", opening_shift.get("pos_profile"), "posa_cash_mode_of_payment") or "Cash"
+    )
+
+    for d in invoices:
+        currency = d.get("currency") or company_currency
+        for payment in d.get("payments", []):
+            update_payment_breakdown(payment.mode_of_payment, currency, payment.amount)
+
+        change_amount = d.get("change_amount") or 0
+        if change_amount:
+            update_payment_breakdown(cash_mode_of_payment, currency, -change_amount)
+
+    for py in pos_payments:
+        payment_doc = frappe.get_cached_doc("Payment Entry", py.name)
+        currency = (
+            payment_doc.get("paid_from_account_currency")
+            or payment_doc.get("paid_to_account_currency")
+            or payment_doc.get("party_account_currency")
+            or payment_doc.get("currency")
+            or company_currency
+        )
+        mode_of_payment = py.mode_of_payment or payment_doc.get("mode_of_payment")
+        paid_amount = flt(py.paid_amount or 0)
+        update_payment_breakdown(mode_of_payment, currency, paid_amount)
+
+    for p in payments:
+        breakdown = payment_breakdown.get(p.mode_of_payment)
+        if breakdown:
+            p.currency_breakdown = [
+                frappe._dict({"currency": c, "amount": a}) for c, a in sorted(breakdown.items())
+            ]
+        else:
+            p.currency_breakdown = []
+
     closing_shift.set("pos_transactions", pos_transactions)
     closing_shift.set("payment_reconciliation", payments)
     closing_shift.set("taxes", taxes)

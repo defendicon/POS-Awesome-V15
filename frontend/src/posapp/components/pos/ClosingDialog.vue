@@ -70,9 +70,37 @@
 										{{ formatCurrency(item.opening_amount) }}</template
 									>
 									<template v-slot:item.expected_amount="{ item }">
-										{{ currencySymbol(pos_profile.currency) }}
-										{{ formatCurrency(item.expected_amount) }}</template
-									>
+										<div>
+											<div
+												v-for="b in item.currency_breakdown"
+												:key="b.currency"
+												class="currency-line"
+											>
+												<span class="currency-tag">{{ b.currency }}</span>
+												<span class="currency-amount">{{
+													formatCurrency(b.amount, b.currency)
+												}}</span>
+											</div>
+											<v-divider
+												v-if="item.currency_breakdown.length > 1"
+												class="total-divider"
+											></v-divider>
+											<div
+												v-if="item.currency_breakdown.length > 1"
+												class="total-line"
+											>
+												<span class="currency-tag total-tag">{{
+													__("Total")
+												}}</span>
+												<span class="currency-amount total-amount">{{
+													formatCurrency(
+														item.expected_amount,
+														pos_profile.currency,
+													)
+												}}</span>
+											</div>
+										</div>
+									</template>
 								</v-data-table>
 							</v-col>
 						</v-row>
@@ -364,5 +392,48 @@ export default {
 	.pos-action-btn {
 		width: 100%;
 	}
+}
+.currency-line {
+	display: flex;
+	justify-content: space-between;
+	padding: 4px 0;
+	font-size: 0.9rem;
+}
+
+.currency-tag {
+	font-weight: 500;
+	color: #555;
+	background-color: #f0f0f0;
+	padding: 2px 8px;
+	border-radius: 4px;
+}
+
+.currency-amount {
+	font-weight: 600;
+	color: #333;
+}
+
+.total-divider {
+	margin: 8px 0;
+}
+
+.total-line {
+	display: flex;
+	justify-content: space-between;
+	font-size: 1rem;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid #eee;
+}
+
+.total-tag {
+	font-weight: 700;
+	color: #000;
+	background-color: transparent;
+}
+
+.total-amount {
+	font-weight: 700;
+	color: #1976d2; /* Primary color for emphasis */
 }
 </style>
