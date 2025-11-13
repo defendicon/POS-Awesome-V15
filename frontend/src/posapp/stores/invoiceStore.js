@@ -108,11 +108,9 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 		const rowId = currentItem.posa_row_id;
 		if (rowId !== item.posa_row_id) {
-			// If rowId changes, it's a replacement, not an update.
 			removeItemByRowId(rowId);
 			upsertItem(item);
 		} else {
-			// If rowId is the same, it's a direct update.
 			_subtractItemFromTotals(currentItem);
 			_addItemToTotals(item);
 			itemsMap.value.set(rowId, cloneItem(item));
@@ -128,10 +126,18 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 		if (existingItem) {
 			_subtractItemFromTotals(existingItem);
+			itemsMap.value.delete(rowId);
 		}
 
 		const newItem = existingItem ? { ...existingItem, ...item } : cloneItem(item);
-		itemsMap.value.set(rowId, newItem);
+		const newMap = new Map();
+		newMap.set(rowId, newItem);
+
+		for (const [key, value] of itemsMap.value.entries()) {
+			newMap.set(key, value);
+		}
+
+		itemsMap.value = newMap;
 		_addItemToTotals(newItem);
 
 		touch();
@@ -163,22 +169,19 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const clear = () => {
 		invoiceDoc.value = null;
 		packedItems.value = [];
-		clearItems(); // This already resets totals and touches
+		clearItems();
 	};
 
 	return {
-		// State
 		invoiceDoc,
-		itemsMap, // Exposing Map for direct access if needed
+		itemsMap,
 		packedItems,
 		metadata,
-		// Getters
 		items,
 		totalQty,
 		grossTotal,
 		discountTotal,
 		itemsCount,
-		// Actions
 		setInvoiceDoc,
 		mergeInvoiceDoc,
 		setItems,
