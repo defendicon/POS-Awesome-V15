@@ -766,6 +766,7 @@
 
 <script>
 /* global frappe, __, get_currency_symbol */
+import _ from "lodash";
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
 import { parseBooleanSetting } from "../../utils/stock.js";
