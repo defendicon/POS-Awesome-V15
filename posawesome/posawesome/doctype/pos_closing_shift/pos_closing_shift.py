@@ -636,6 +636,7 @@ def make_closing_shift_from_opening(opening_shift):
         else:
             p.currency_breakdown = []
 
+    invoice_summary.currency_totals = dict(invoice_summary.currency_totals)
     closing_shift.set("pos_transactions", pos_transactions)
     closing_shift.set("payment_reconciliation", payments)
     closing_shift.set("taxes", taxes)

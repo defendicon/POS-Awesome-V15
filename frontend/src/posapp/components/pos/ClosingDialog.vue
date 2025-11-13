@@ -24,22 +24,23 @@
 						<v-row>
 							<v-col cols="12" class="pa-1">
 								<!-- Invoice Summary Section -->
-								<div class="table-header mb-4">
-									<h4 class="text-h6 text-grey-darken-2 mb-1">
-										{{ __("Invoice Summary") }}
-									</h4>
-									<p class="text-body-2 text-grey">
-										{{ __("Summary of invoices in this shift") }}
-									</p>
-								</div>
-								<v-card class="mb-6" outlined>
-									<v-list dense>
-										<v-list-item>
-											<v-list-item-content
-												><v-list-item-title>{{
-													__("Total Invoices")
-												}}</v-list-item-title></v-list-item-content
-											>
+								<div v-if="dialog_data.invoice_summary">
+									<div class="table-header mb-4">
+										<h4 class="text-h6 text-grey-darken-2 mb-1">
+											{{ __("Invoice Summary") }}
+										</h4>
+										<p class="text-body-2 text-grey">
+											{{ __("Summary of invoices in this shift") }}
+										</p>
+									</div>
+									<v-card class="mb-6" outlined>
+										<v-list dense>
+											<v-list-item>
+												<v-list-item-content
+													><v-list-item-title>{{
+														__("Total Invoices")
+													}}</v-list-item-title></v-list-item-content
+												>
 											<v-list-item-action>{{
 												dialog_data.invoice_summary.total_invoices
 											}}</v-list-item-action>
@@ -72,6 +73,7 @@
 										</v-list-item>
 									</v-list>
 								</v-card>
+								</div>
 								<div class="table-header mb-4">
 									<h4 class="text-h6 text-grey-darken-2 mb-1">
 										{{ __("Payment Reconciliation") }}
