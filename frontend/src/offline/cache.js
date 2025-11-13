@@ -246,14 +246,33 @@ export async function setCustomerStorage(customers) {
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		const clean = customers.map((c) => ({
-			name: c.name,
-			customer_name: c.customer_name,
-			mobile_no: c.mobile_no,
-			email_id: c.email_id,
-			primary_address: c.primary_address,
-			tax_id: c.tax_id,
-		}));
+		const clean = customers.map((c) => {
+			const terms = new Set();
+			const add = (val) => {
+				if (!val) return;
+				String(val)
+					.toLowerCase()
+					.split(/\s+/)
+					.filter(Boolean)
+					.forEach((term) => terms.add(term));
+			};
+			add(c.customer_name);
+			add(c.name);
+			add(c.mobile_no);
+			add(c.email_id);
+			add(c.tax_id);
+
+			return {
+				name: c.name,
+				customer_name: c.customer_name,
+				mobile_no: c.mobile_no,
+				email_id: c.email_id,
+				primary_address: c.primary_address,
+				tax_id: c.tax_id,
+				_search_terms: Array.from(terms),
+			};
+		});
+
 		const CHUNK_SIZE = 1000;
 		await db.transaction("rw", db.table("customers"), async () => {
 			for (let i = 0; i < clean.length; i += CHUNK_SIZE) {

@@ -148,29 +148,21 @@ export const useCustomersStore = defineStore("customers", () => {
 
 		let collection = db.table("customers");
 		const normalizedTerm = normalizeSearchTerm(searchTerm.value);
+
 		if (normalizedTerm) {
 			const searchParts = normalizedTerm.toLowerCase().split(/\s+/).filter(Boolean);
-			collection = collection.filter((customer) => {
-				if (!customer) {
-					return false;
+			if (searchParts.length > 0) {
+				// This is the magic: Use the multi-entry index for an "AND" search.
+				// It finds customers that have *all* the search terms in their _search_terms array.
+				collection = collection.where("_search_terms").equals(searchParts[0]);
+				if (searchParts.length > 1) {
+					for (let i = 1; i < searchParts.length; i++) {
+						collection = collection.and((customer) =>
+							customer._search_terms.includes(searchParts[i]),
+						);
+					}
 				}
-
-				const values = [
-					customer.customer_name,
-					customer.name,
-					customer.mobile_no,
-					customer.email_id,
-					customer.tax_id,
-				]
-					.filter((value) => value !== null && value !== undefined)
-					.map((value) => String(value).toLowerCase());
-
-				if (!searchParts.length) {
-					return true;
-				}
-
-				return searchParts.every((part) => values.some((value) => value.includes(part)));
-			});
+			}
 		}
 
 		const offset = page.value * PAGE_SIZE;

@@ -225,11 +225,13 @@ export const useItemsStore = defineStore("items", () => {
 		// Load item groups
 		await loadItemGroups();
 
-		// Assess cache health
-		await assessCacheHealth();
+		// Assess cache health but don't block
+		assessCacheHealth();
 
-		// Load cached items if available
-		await loadCachedItems();
+		// Defer heavy item loading until after initial UI render
+		setTimeout(() => {
+			loadCachedItems();
+		}, 100);
 	};
 
 	const loadItemGroups = async () => {
@@ -1167,16 +1169,6 @@ export const useItemsStore = defineStore("items", () => {
 				enabled: shouldPaginate,
 				total: resolvedCount,
 			});
-
-			if (!shouldPaginate) {
-				const cachedItems = await getAllStoredItems().catch(() => []);
-				if (Array.isArray(cachedItems) && cachedItems.length) {
-					setItems(cachedItems, { replace: true, totalCount: resolvedCount });
-					cachedPagination.value.offset = cachedItems.length;
-					itemsLoaded.value = true;
-				}
-				return;
-			}
 
 			const initialItems = await searchStoredItems({
 				search: "",
