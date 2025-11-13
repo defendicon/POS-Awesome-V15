@@ -505,7 +505,7 @@ import stockCoordinator from "../../utils/stockCoordinator.js";
 import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
-import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
+import { withPerf, perfMarkStart, perfMarkEnd } from "../../utils/perf.js";
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
@@ -513,6 +513,7 @@ import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
+import { FastScanPipeline } from "../../utils/fastScanPipeline.js";
 
 export default {
 	mixins: [format],
@@ -617,17 +618,18 @@ export default {
 		pendingItemSearch: null,
 		loadProgress: 0,
 		totalItemCount: 0,
-		scanErrorDialog: false,
-		scanErrorMessage: "",
-		scanErrorDetails: "",
-		scanErrorCode: "",
-		scannerLocked: false,
-		cameraScannerActive: false,
-		scanAudioContext: null,
-		pendingScanCode: "",
-		awaitingScanResult: false,
-		scanDebounceId: null,
-		scanQueuedCode: "",
+                scanErrorDialog: false,
+                scanErrorMessage: "",
+                scanErrorDetails: "",
+                scanErrorCode: "",
+                scannerLocked: false,
+                cameraScannerActive: false,
+                scanAudioContext: null,
+                pendingScanCode: "",
+                awaitingScanResult: false,
+                scanPipeline: null,
+                lastScanFeedbackTs: 0,
+                scanFeedbackInterval: 150,
 		refreshInFlight: false,
 		clearingSearch: false,
 	}),
@@ -840,10 +842,81 @@ export default {
 		},
 	},
 
-	methods: {
-		// Performance optimization: Memoized search function
-		memoizedSearch(searchTerm, itemGroup) {
-			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
+        methods: {
+                initializeFastScanPipeline() {
+                        if (this.scanPipeline) {
+                                this.scanPipeline.destroy();
+                                this.scanPipeline = null;
+                        }
+
+                        this.scanPipeline = new FastScanPipeline({
+                                frameBudget: 6,
+                                maxBatch: 3,
+                                handler: async (rawCode) => {
+                                        const normalized =
+                                                typeof rawCode === "string"
+                                                        ? rawCode.trim()
+                                                        : rawCode == null
+                                                                ? ""
+                                                                : String(rawCode).trim();
+
+                                        if (!normalized) {
+                                                return;
+                                        }
+
+                                        const mark = perfMarkStart("pos:scan-handler");
+                                        try {
+                                                this.pendingScanCode = normalized;
+                                                this.search_from_scanner = true;
+                                                this.showScanFeedback(normalized);
+                                                await this.processScannedItem(normalized);
+                                        } catch (error) {
+                                                throw error;
+                                        } finally {
+                                                perfMarkEnd("pos:scan-handler", mark);
+                                        }
+                                },
+                                onError: (code, error) => {
+                                        this.handleScanPipelineError(error, code);
+                                },
+                        });
+                },
+
+                showScanFeedback(code) {
+                        const now =
+                                typeof performance !== "undefined" && typeof performance.now === "function"
+                                        ? performance.now()
+                                        : Date.now();
+
+                        if (now - this.lastScanFeedbackTs < this.scanFeedbackInterval) {
+                                return;
+                        }
+
+                        this.lastScanFeedbackTs = now;
+
+                        if (this.eventBus?.emit) {
+                                this.eventBus.emit("show_message", {
+                                        title: this.__("Scanning for: {0}", [code]),
+                                        summary: this.__("Scanning items"),
+                                        detail: code,
+                                        color: "info",
+                                        timeout: 1600,
+                                        groupId: "scanner-progress",
+                                });
+                        } else if (frappe?.show_alert) {
+                                frappe.show_alert(
+                                        {
+                                                message: `Scanning for: ${code}`,
+                                                indicator: "blue",
+                                        },
+                                        2,
+                                );
+                        }
+                },
+
+                // Performance optimization: Memoized search function
+                memoizedSearch(searchTerm, itemGroup) {
+                        const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
 
 			// Check if we have a cached result
 			if (this.searchCache && this.searchCache.has(cacheKey)) {
@@ -2869,84 +2942,36 @@ export default {
 				this.$refs.cameraScanner.startScanning();
 			}
 		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				if (frappe?.show_alert) {
-					frappe.show_alert(
-						{
-							message: this.__("Acknowledge the error to resume scanning."),
-							indicator: "red",
-						},
-						3,
-					);
-				}
-				return;
-			}
+                onBarcodeScanned(scannedCode) {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                if (frappe?.show_alert) {
+                                        frappe.show_alert(
+                                                {
+                                                        message: this.__("Acknowledge the error to resume scanning."),
+                                                        indicator: "red",
+                                                },
+                                                3,
+                                        );
+                                }
+                                return;
+                        }
 
-			if (this.search_onchange.cancel) {
-				this.search_onchange.cancel();
-			}
+                        if (!this.scanPipeline) {
+                                this.initializeFastScanPipeline();
+                        }
 
-			// Clear the search field immediately to allow for rapid scanning
-			this.search_input = "";
+                        if (this.search_onchange.cancel) {
+                                this.search_onchange.cancel();
+                        }
 
-			const runScanPipeline = async (code) => {
-				const mark = perfMarkStart("pos:scan-handler");
-				try {
-					console.log("Barcode scanned:", code);
-					this.pendingScanCode = code;
+                        this.search_input = "";
 
-					// mark this search as coming from a scanner
-					this.search_from_scanner = true;
-
-					// Show scanning feedback
-					if (this.eventBus?.emit) {
-						this.eventBus.emit("show_message", {
-							title: this.__("Scanning for: {0}", [code]),
-							summary: this.__("Scanning items"),
-							detail: code,
-							color: "info",
-							timeout: 2000,
-							groupId: "scanner-progress",
-						});
-					} else if (frappe?.show_alert) {
-						frappe.show_alert(
-							{
-								message: `Scanning for: ${code}`,
-								indicator: "blue",
-							},
-							2,
-						);
-					}
-
-					// Enhanced item search and submission logic
-					await this.processScannedItem(code);
-				} catch (error) {
-					this.handleScanPipelineError(error, code);
-				} finally {
-					perfMarkEnd("pos:scan-handler", mark);
-				}
-			};
-
-			if (this.scanDebounceId) {
-				clearTimeout(this.scanDebounceId);
-			}
-			this.scanQueuedCode = scannedCode;
-			this.scanDebounceId = setTimeout(() => {
-				this.scanDebounceId = null;
-				const code = this.scanQueuedCode || scannedCode;
-				this.scanQueuedCode = "";
-				scheduleFrame(() => {
-					const maybePromise = runScanPipeline(code);
-					if (maybePromise && typeof maybePromise.catch === "function") {
-						maybePromise.catch((error) => {
-							this.handleScanPipelineError(error, code);
-						});
-					}
-				});
-			}, 12);
-		},
+                        this.scanPipeline.enqueue(scannedCode);
+                        if (!this.scanPipeline.processing) {
+                                this.scanPipeline.flush();
+                        }
+                },
                 async processScannedItem(scannedCode) {
                         const mark = perfMarkStart("pos:scan-process");
                         this.pendingScanCode = scannedCode;
@@ -3759,6 +3784,8 @@ export default {
         async created() {
                 console.log("ItemsSelector created - starting initialization with Pinia store");
 
+                this.initializeFastScanPipeline();
+
                 this.stockUnsubscribe = stockCoordinator.subscribe(this.handleStockSnapshotUpdate);
 
                 // Initialize the Pinia store with existing POS profile data
@@ -4042,11 +4069,16 @@ export default {
 		this.eventBus.off("force_reload_items");
 		this.eventBus.off("focus_item_search");
 		window.removeEventListener("resize", this.checkItemContainerOverflow);
-		if (this.metricsRaf) {
-			cancelAnimationFrame(this.metricsRaf);
-			this.metricsRaf = null;
-		}
-	},
+                if (this.metricsRaf) {
+                        cancelAnimationFrame(this.metricsRaf);
+                        this.metricsRaf = null;
+                }
+
+                if (this.scanPipeline) {
+                        this.scanPipeline.destroy();
+                        this.scanPipeline = null;
+                }
+        },
 };
 </script>
 
