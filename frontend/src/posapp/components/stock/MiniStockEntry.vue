@@ -274,7 +274,8 @@ export default {
 	},
 	computed: {
 		isDarkTheme() {
-			return this.$theme?.isDark?.value ?? false;
+			const themeMode = this.$theme?.theme?.value ?? "light";
+			return themeMode === "dark";
 		},
 	},
 	mounted() {
