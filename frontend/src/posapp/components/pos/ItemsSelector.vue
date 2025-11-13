@@ -1857,6 +1857,13 @@ export default {
 			}
 		},
 		onEnter() {
+			if (
+				this.pos_profile.auto_add_item_to_cart &&
+				/^\d+$/.test(this.first_search) &&
+				this.first_search.length < 7
+			) {
+				return;
+			}
 			if (this.search_onchange.cancel) {
 				this.search_onchange.cancel();
 			}
