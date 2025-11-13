@@ -1,43 +1,68 @@
 /**
  * Centralized invoice state management using Pinia.
  * Handles large invoice datasets efficiently and keeps totals in sync.
+ * Uses a Map for items to achieve O(1) complexity for updates, additions, and removals.
  */
-
 import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 
+// Helper to ensure a value is a valid, finite number.
 const toNumber = (value) => {
-	if (value == null) {
-		return 0;
-	}
-
-	if (typeof value === "number") {
-		return Number.isFinite(value) ? value : 0;
-	}
-
+	if (value == null) return 0;
+	if (typeof value === "number") return Number.isFinite(value) ? value : 0;
 	if (typeof value === "string") {
 		const normalized = value.trim();
-		if (!normalized) {
-			return 0;
-		}
+		if (!normalized) return 0;
 		const parsed = Number.parseFloat(normalized);
 		return Number.isFinite(parsed) ? parsed : 0;
 	}
-
 	return 0;
 };
 
+// Creates a shallow clone of an item.
 const cloneItem = (item) => ({ ...item });
 
 export const useInvoiceStore = defineStore("invoice", () => {
+	// --- State ---
 	const invoiceDoc = ref(null);
-	const items = ref([]);
+	const itemsMap = ref(new Map()); // Primary data structure for O(1) access
 	const packedItems = ref([]);
 	const metadata = ref({
 		lastUpdated: Date.now(),
 		changeVersion: 0,
 	});
 
+	// Running totals, updated incrementally
+	const totalQty = ref(0);
+	const grossTotal = ref(0);
+	const discountTotal = ref(0);
+
+	// --- Private Helpers ---
+
+	// Increments running totals based on an item's properties.
+	const _addItemToTotals = (item) => {
+		const qty = toNumber(item.qty);
+		totalQty.value += qty;
+		grossTotal.value += qty * toNumber(item.rate);
+		discountTotal.value += Math.abs(qty) * toNumber(item.discount_amount || 0);
+	};
+
+	// Decrements running totals based on an item's properties.
+	const _subtractItemFromTotals = (item) => {
+		const qty = toNumber(item.qty);
+		totalQty.value -= qty;
+		grossTotal.value -= qty * toNumber(item.rate);
+		discountTotal.value -= Math.abs(qty) * toNumber(item.discount_amount || 0);
+	};
+
+	// Resets all running totals to zero.
+	const _resetTotals = () => {
+		totalQty.value = 0;
+		grossTotal.value = 0;
+		discountTotal.value = 0;
+	};
+
+	// Bumps the metadata version to trigger reactivity.
 	const touch = () => {
 		metadata.value = {
 			lastUpdated: Date.now(),
@@ -45,20 +70,15 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		};
 	};
 
-	const normalizeDoc = (doc) => {
-		if (!doc) {
-			return null;
-		}
+	// --- Getters (Computed) ---
 
-		if (typeof doc === "string") {
-			return doc.trim() ? { name: doc } : null;
-		}
+	const items = computed(() => Array.from(itemsMap.value.values()));
+	const itemsCount = computed(() => itemsMap.value.size);
 
-		return { ...doc };
-	};
+	// --- Actions ---
 
 	const setInvoiceDoc = (doc) => {
-		invoiceDoc.value = normalizeDoc(doc);
+		invoiceDoc.value = doc && typeof doc === "string" && doc.trim() ? { name: doc } : doc ? { ...doc } : null;
 		touch();
 	};
 
@@ -69,59 +89,68 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	};
 
 	const setItems = (list) => {
-		items.value = Array.isArray(list) ? list.map(cloneItem) : [];
+		itemsMap.value.clear();
+		_resetTotals();
+		if (Array.isArray(list)) {
+			list.forEach((item) => {
+				if (item && item.posa_row_id) {
+					itemsMap.value.set(item.posa_row_id, cloneItem(item));
+					_addItemToTotals(item);
+				}
+			});
+		}
 		touch();
 	};
 
 	const replaceItemAt = (index, item) => {
-		if (index < 0 || index >= items.value.length) {
-			return;
-		}
+		const currentItem = items.value[index];
+		if (!currentItem || !item) return;
 
-		const updated = items.value.slice();
-		updated[index] = cloneItem(item);
-		items.value = updated;
-		touch();
+		const rowId = currentItem.posa_row_id;
+		if (rowId !== item.posa_row_id) {
+			// If rowId changes, it's a replacement, not an update.
+			removeItemByRowId(rowId);
+			upsertItem(item);
+		} else {
+			// If rowId is the same, it's a direct update.
+			_subtractItemFromTotals(currentItem);
+			_addItemToTotals(item);
+			itemsMap.value.set(rowId, cloneItem(item));
+			touch();
+		}
 	};
 
 	const upsertItem = (item) => {
-		if (!item) {
-			return;
-		}
+		if (!item || !item.posa_row_id) return;
 
 		const rowId = item.posa_row_id;
-		if (!rowId) {
-			items.value = [...items.value, cloneItem(item)];
-			touch();
-			return;
+		const existingItem = itemsMap.value.get(rowId);
+
+		if (existingItem) {
+			_subtractItemFromTotals(existingItem);
 		}
 
-		const index = items.value.findIndex((entry) => entry.posa_row_id === rowId);
-		if (index === -1) {
-			items.value = [...items.value, cloneItem(item)];
-		} else {
-			const updated = items.value.slice();
-			updated[index] = { ...updated[index], ...item };
-			items.value = updated;
-		}
+		const newItem = existingItem ? { ...existingItem, ...item } : cloneItem(item);
+		itemsMap.value.set(rowId, newItem);
+		_addItemToTotals(newItem);
+
 		touch();
 	};
 
 	const removeItemByRowId = (rowId) => {
-		if (!rowId) {
-			return;
-		}
+		if (!rowId || !itemsMap.value.has(rowId)) return;
 
-		const filtered = items.value.filter((item) => item.posa_row_id !== rowId);
-		if (filtered.length !== items.value.length) {
-			items.value = filtered;
-			touch();
-		}
+		const itemToRemove = itemsMap.value.get(rowId);
+		_subtractItemFromTotals(itemToRemove);
+		itemsMap.value.delete(rowId);
+
+		touch();
 	};
 
 	const clearItems = () => {
-		if (items.value.length) {
-			items.value = [];
+		if (itemsMap.value.size > 0) {
+			itemsMap.value.clear();
+			_resetTotals();
 			touch();
 		}
 	};
@@ -133,56 +162,23 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 	const clear = () => {
 		invoiceDoc.value = null;
-		items.value = [];
 		packedItems.value = [];
-		touch();
+		clearItems(); // This already resets totals and touches
 	};
 
-	const totalQty = computed(() => {
-		return items.value.reduce((sum, item) => sum + toNumber(item.qty), 0);
-	});
-
-	const grossTotal = computed(() => {
-		return items.value.reduce((sum, item) => sum + toNumber(item.qty) * toNumber(item.rate), 0);
-	});
-
-	const discountTotal = computed(() => {
-		return items.value.reduce((sum, item) => {
-			const qty = Math.abs(toNumber(item.qty));
-			return sum + qty * toNumber(item.discount_amount || 0);
-		}, 0);
-	});
-
-	const itemsCount = computed(() => items.value.length);
-
-	const itemsMap = computed(() => {
-		const map = new Map();
-		items.value.forEach((item, index) => {
-			if (item && item.posa_row_id) {
-				map.set(item.posa_row_id, { index, item });
-			}
-		});
-		return map;
-	});
-
-	watch(
-		items,
-		() => {
-			touch();
-		},
-		{ deep: true },
-	);
-
 	return {
+		// State
 		invoiceDoc,
-		items,
+		itemsMap, // Exposing Map for direct access if needed
 		packedItems,
 		metadata,
+		// Getters
+		items,
 		totalQty,
 		grossTotal,
 		discountTotal,
 		itemsCount,
-		itemsMap,
+		// Actions
 		setInvoiceDoc,
 		mergeInvoiceDoc,
 		setItems,
