@@ -4,8 +4,27 @@ import { ref, computed } from "vue";
 const isDarkMode = ref(false);
 const theme = ref("light");
 
-// Theme preference storage key
+// Theme preference storage key and valid options
 const THEME_STORAGE_KEY = "posawesome_theme_preference";
+const THEME_PREFERENCE_VALUES = ["light", "dark", "automatic"];
+
+const normalizeThemePreference = (input) => {
+	if (!input) {
+		return "light";
+	}
+
+	const normalized = String(input).trim().toLowerCase();
+
+	if (normalized === "auto") {
+		return "automatic";
+	}
+
+	if (THEME_PREFERENCE_VALUES.includes(normalized)) {
+		return normalized;
+	}
+
+	return "light";
+};
 
 // Global Vuetify instance reference (set during app initialization)
 let vuetifyInstance = null;
@@ -47,20 +66,25 @@ export function useTheme() {
 
 	// Set theme and update all systems
 	const setTheme = (newTheme) => {
-		const resolvedTheme = newTheme === "automatic" ? getSystemTheme() : newTheme;
+		const preference = normalizeThemePreference(newTheme);
+		const resolvedTheme = preference === "automatic" ? getSystemTheme() : preference;
 
 		theme.value = resolvedTheme;
 		isDarkMode.value = resolvedTheme === "dark";
 
 		// Update Vuetify theme if available
 		if (vuetifyInstance?.theme?.global) {
-			vuetifyInstance.theme.global.name.value = resolvedTheme;
+			const availableThemes = Object.keys(vuetifyInstance.theme.global.themes?.value || {});
+			const vuetifyThemeName = availableThemes.includes(resolvedTheme)
+				? resolvedTheme
+				: availableThemes[0] || resolvedTheme;
+			vuetifyInstance.theme.global.name.value = vuetifyThemeName;
 		}
 
 		// Update DOM attributes
 		const root = document.documentElement;
 		root.setAttribute("data-theme", resolvedTheme);
-		root.setAttribute("data-theme-mode", newTheme);
+		root.setAttribute("data-theme-mode", preference);
 
 		// Update CSS custom properties for immediate effect
 		updateCSSProperties(resolvedTheme);
@@ -69,10 +93,10 @@ export function useTheme() {
 		forceStyleRefresh();
 
 		// Save preference
-		localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+		localStorage.setItem(THEME_STORAGE_KEY, preference);
 
 		// Sync with Frappe if available
-		syncWithFrappe(newTheme);
+		syncWithFrappe(preference);
 	};
 
 	// Toggle between light and dark themes
@@ -184,10 +208,13 @@ export function useTheme() {
 			mutations.forEach((mutation) => {
 				if (mutation.type === "attributes") {
 					const root = document.documentElement;
-					const newTheme = root.getAttribute("data-theme-mode") || root.getAttribute("data-theme");
+					const preference =
+						normalizeThemePreference(
+							root.getAttribute("data-theme-mode") || root.getAttribute("data-theme")
+						);
 
-					if (newTheme && newTheme !== theme.value) {
-						const resolvedTheme = newTheme === "automatic" ? getSystemTheme() : newTheme;
+					if (preference && preference !== theme.value) {
+						const resolvedTheme = preference === "automatic" ? getSystemTheme() : preference;
 
 						if (resolvedTheme !== theme.value) {
 							theme.value = resolvedTheme;
