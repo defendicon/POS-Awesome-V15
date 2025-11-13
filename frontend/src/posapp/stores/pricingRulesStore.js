@@ -179,23 +179,9 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
                 clearPricingRulesSnapshot();
         };
 
-        const ensureActiveRules = async (ctx = {}, options = {}) => {
-                hydrateFromCache();
-                const desiredKey = buildContextKey(ctx);
-                const force = options.force === true;
-
-                if (!force && contextKey.value === desiredKey && hasSnapshot.value && !isStale.value) {
-                        return;
-                }
-
-                if (isOffline()) {
-                        // Preserve cached snapshot when offline even if stale
-                        return;
-                }
-
-                if (!ctx.company || !ctx.price_list || !ctx.currency) {
-                        return;
-                }
+        const _backgroundFetchRules = async (ctx, desiredKey) => {
+                if (loading.value) return; // Prevent concurrent fetches
+                if (!ctx.company || !ctx.price_list || !ctx.currency) return;
 
                 loading.value = true;
                 try {
@@ -212,14 +198,35 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
                                 },
                         });
                         const snapshot = Array.isArray(response?.message) ? response.message : [];
+                        // Set snapshot and save to IndexedDB for the *next* session
                         setSnapshot(snapshot, desiredKey);
                 } catch (error) {
-                        console.error("Failed to fetch pricing rules", error);
-                        if (force) {
-                                clearSnapshot();
-                        }
+                        console.error("Background fetch of pricing rules failed:", error);
                 } finally {
                         loading.value = false;
+                }
+        };
+
+        const ensureActiveRules = async (ctx = {}, options = {}) => {
+                hydrateFromCache(); // Ensure memory is populated from IndexedDB if not already
+                const desiredKey = buildContextKey(ctx);
+                const force = options.force === true;
+
+                // Offline-First: If we have rules in memory, use them immediately.
+                if (hasSnapshot.value && !force) {
+                        // Check if a background sync is needed
+                        if (contextKey.value !== desiredKey || isStale.value) {
+                                if (!isOffline()) {
+                                        _backgroundFetchRules(ctx, desiredKey);
+                                }
+                        }
+                        return; // Never block
+                }
+
+                // If no rules are in memory (e.g., first load), and we are online,
+                // perform an initial blocking fetch to get the first set of rules.
+                if (!isOffline()) {
+                        await _backgroundFetchRules(ctx, desiredKey);
                 }
         };
 

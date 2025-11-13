@@ -33,6 +33,12 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const invoiceDoc = ref(null);
 	const items = ref([]);
 	const packedItems = ref([]);
+
+	// Running totals for O(1) access
+	const totalQty = ref(0);
+	const grossTotal = ref(0);
+	const discountTotal = ref(0);
+
 	const metadata = ref({
 		lastUpdated: Date.now(),
 		changeVersion: 0,
@@ -43,6 +49,28 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			lastUpdated: Date.now(),
 			changeVersion: metadata.value.changeVersion + 1,
 		};
+	};
+
+	// Private method to recalculate all totals from scratch.
+	// Used when the entire item list is replaced.
+	const _recalculateTotals = () => {
+		let newTotalQty = 0;
+		let newGrossTotal = 0;
+		let newDiscountTotal = 0;
+
+		for (const item of items.value) {
+			const qty = toNumber(item.qty);
+			const rate = toNumber(item.rate);
+			const discount = toNumber(item.discount_amount);
+
+			newTotalQty += qty;
+			newGrossTotal += qty * rate;
+			newDiscountTotal += Math.abs(qty) * discount;
+		}
+
+		totalQty.value = newTotalQty;
+		grossTotal.value = newGrossTotal;
+		discountTotal.value = newDiscountTotal;
 	};
 
 	const normalizeDoc = (doc) => {
@@ -70,6 +98,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 	const setItems = (list) => {
 		items.value = Array.isArray(list) ? list.map(cloneItem) : [];
+		_recalculateTotals();
 		touch();
 	};
 
@@ -78,8 +107,23 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			return;
 		}
 
+		const oldItem = items.value[index];
+		const newItem = cloneItem(item);
+
+		// Incrementally update totals
+		const qtyDiff = toNumber(newItem.qty) - toNumber(oldItem.qty);
+		const grossDiff =
+			toNumber(newItem.qty) * toNumber(newItem.rate) - toNumber(oldItem.qty) * toNumber(oldItem.rate);
+		const discountDiff =
+			Math.abs(toNumber(newItem.qty)) * toNumber(newItem.discount_amount) -
+			Math.abs(toNumber(oldItem.qty)) * toNumber(oldItem.discount_amount);
+
+		totalQty.value += qtyDiff;
+		grossTotal.value += grossDiff;
+		discountTotal.value += discountDiff;
+
 		const updated = items.value.slice();
-		updated[index] = cloneItem(item);
+		updated[index] = newItem;
 		items.value = updated;
 		touch();
 	};
@@ -91,17 +135,43 @@ export const useInvoiceStore = defineStore("invoice", () => {
 
 		const rowId = item.posa_row_id;
 		if (!rowId) {
-			items.value = [...items.value, cloneItem(item)];
+			// This is a new item
+			const newItem = cloneItem(item);
+			totalQty.value += toNumber(newItem.qty);
+			grossTotal.value += toNumber(newItem.qty) * toNumber(newItem.rate);
+			discountTotal.value += Math.abs(toNumber(newItem.qty)) * toNumber(newItem.discount_amount);
+			items.value = [...items.value, newItem];
 			touch();
 			return;
 		}
 
 		const index = items.value.findIndex((entry) => entry.posa_row_id === rowId);
 		if (index === -1) {
-			items.value = [...items.value, cloneItem(item)];
+			// Item not found, treat as new
+			const newItem = cloneItem(item);
+			totalQty.value += toNumber(newItem.qty);
+			grossTotal.value += toNumber(newItem.qty) * toNumber(newItem.rate);
+			discountTotal.value += Math.abs(toNumber(newItem.qty)) * toNumber(newItem.discount_amount);
+			items.value = [...items.value, newItem];
 		} else {
+			// This is an update
+			const oldItem = items.value[index];
+			const newItem = { ...oldItem, ...item };
+
+			const qtyDiff = toNumber(newItem.qty) - toNumber(oldItem.qty);
+			const grossDiff =
+				toNumber(newItem.qty) * toNumber(newItem.rate) -
+				toNumber(oldItem.qty) * toNumber(oldItem.rate);
+			const discountDiff =
+				Math.abs(toNumber(newItem.qty)) * toNumber(newItem.discount_amount) -
+				Math.abs(toNumber(oldItem.qty)) * toNumber(oldItem.discount_amount);
+
+			totalQty.value += qtyDiff;
+			grossTotal.value += grossDiff;
+			discountTotal.value += discountDiff;
+
 			const updated = items.value.slice();
-			updated[index] = { ...updated[index], ...item };
+			updated[index] = newItem;
 			items.value = updated;
 		}
 		touch();
@@ -112,9 +182,21 @@ export const useInvoiceStore = defineStore("invoice", () => {
 			return;
 		}
 
-		const filtered = items.value.filter((item) => item.posa_row_id !== rowId);
-		if (filtered.length !== items.value.length) {
-			items.value = filtered;
+		if (!rowId) {
+			return;
+		}
+
+		const index = items.value.findIndex((item) => item.posa_row_id === rowId);
+		if (index !== -1) {
+			const removedItem = items.value[index];
+			totalQty.value -= toNumber(removedItem.qty);
+			grossTotal.value -= toNumber(removedItem.qty) * toNumber(removedItem.rate);
+			discountTotal.value -=
+				Math.abs(toNumber(removedItem.qty)) * toNumber(removedItem.discount_amount);
+
+			const updated = items.value.slice();
+			updated.splice(index, 1);
+			items.value = updated;
 			touch();
 		}
 	};
@@ -122,6 +204,9 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const clearItems = () => {
 		if (items.value.length) {
 			items.value = [];
+			totalQty.value = 0;
+			grossTotal.value = 0;
+			discountTotal.value = 0;
 			touch();
 		}
 	};
@@ -135,23 +220,11 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		invoiceDoc.value = null;
 		items.value = [];
 		packedItems.value = [];
+		totalQty.value = 0;
+		grossTotal.value = 0;
+		discountTotal.value = 0;
 		touch();
 	};
-
-	const totalQty = computed(() => {
-		return items.value.reduce((sum, item) => sum + toNumber(item.qty), 0);
-	});
-
-	const grossTotal = computed(() => {
-		return items.value.reduce((sum, item) => sum + toNumber(item.qty) * toNumber(item.rate), 0);
-	});
-
-	const discountTotal = computed(() => {
-		return items.value.reduce((sum, item) => {
-			const qty = Math.abs(toNumber(item.qty));
-			return sum + qty * toNumber(item.discount_amount || 0);
-		}, 0);
-	});
 
 	const itemsCount = computed(() => items.value.length);
 
@@ -164,14 +237,6 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		});
 		return map;
 	});
-
-	watch(
-		items,
-		() => {
-			touch();
-		},
-		{ deep: true },
-	);
 
 	return {
 		invoiceDoc,

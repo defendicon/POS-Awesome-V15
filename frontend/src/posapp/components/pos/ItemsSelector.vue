@@ -59,7 +59,8 @@
 								:label="frappe._('Search Items')"
 								hint="Search by item code, serial number, batch no or barcode"
 								hide-details
-								v-model="search_input"
+								:model-value="search_input"
+								@update:model-value="onSearchInput"
 								@keydown.esc="esc_event"
 								@keydown.enter="onEnter"
 								@click:clear="clearSearch"
@@ -633,10 +634,6 @@ export default {
 	}),
 
 	watch: {
-		search_input(newValue) {
-			this.first_search = newValue;
-			this.search_onchange();
-		},
 		customer: _.debounce(function () {
 			if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
@@ -1857,31 +1854,50 @@ export default {
 			}
 		},
 		onEnter() {
-			if (this.search_onchange.cancel) {
-				this.search_onchange.cancel();
+			// Trigger the debounced search immediately
+			if (this.manualSearchDebounced && this.manualSearchDebounced.flush) {
+				this.manualSearchDebounced.flush();
 			}
-			this._performSearch();
 		},
-		search_onchange: _.debounce(function () {
-			this._performSearch();
+
+		// Debounced search for manual input
+		manualSearchDebounced: _.debounce(function (searchTerm) {
+			this._performSearch(searchTerm);
 		}, 300),
 
-		async _performSearch() {
+		onSearchInput(newValue) {
+			// Update the visual input immediately for responsiveness
+			this.search_input = newValue;
+
+			// Trim the input to check for barcode patterns
+			const trimmedValue = (newValue || "").trim();
+
+			// Barcode Fast Path: If it looks like a barcode, process it immediately.
+			// This regex is aggressive: it assumes any numeric string of 7+ digits is a barcode.
+			// This is a common heuristic in POS systems.
+			if (/^\d{7,}$/.test(trimmedValue)) {
+				// Cancel any pending manual search
+				if (this.manualSearchDebounced && this.manualSearchDebounced.cancel) {
+					this.manualSearchDebounced.cancel();
+				}
+				this.onBarcodeScanned(trimmedValue);
+				return;
+			}
+
+			// Manual Search Path: If it's not a barcode, use the debounced search.
+			this.manualSearchDebounced(trimmedValue);
+		},
+
+		async _performSearch(searchTerm) {
 			const vm = this;
 
 			vm.cancelItemDetailsRequest();
 
 			// Determine the actual query string and trim whitespace
-			const trimmedQuery = (vm.first_search || "").trim();
+			const trimmedQuery = (searchTerm || "").trim();
 
 			// Keep first_search in sync with the value we are about to search for
 			vm.first_search = trimmedQuery;
-
-			// If the input is a numeric string longer than 6 characters, treat it as a barcode
-			if (/^\d{7,}$/.test(trimmedQuery)) {
-				vm.onBarcodeScanned(trimmedQuery);
-				return;
-			}
 
 			// Require a minimum of three characters before running a search
 			if (!trimmedQuery || trimmedQuery.length < 3) {
@@ -2872,80 +2888,50 @@ export default {
 		onBarcodeScanned(scannedCode) {
 			if (this.scannerLocked) {
 				this.playScanTone("error");
-				if (frappe?.show_alert) {
-					frappe.show_alert(
-						{
-							message: this.__("Acknowledge the error to resume scanning."),
-							indicator: "red",
-						},
-						3,
-					);
-				}
 				return;
 			}
 
-			if (this.search_onchange.cancel) {
-				this.search_onchange.cancel();
-			}
-
-			// Clear the search field immediately to allow for rapid scanning
+			// Immediately clear the input for the next scan
 			this.search_input = "";
 
-			const runScanPipeline = async (code) => {
-				const mark = perfMarkStart("pos:scan-handler");
-				try {
-					console.log("Barcode scanned:", code);
-					this.pendingScanCode = code;
+			// Use requestAnimationFrame to ensure the UI updates before we do heavy work
+			requestAnimationFrame(() => {
+				const item = this.lookupItemByBarcode(scannedCode);
 
-					// mark this search as coming from a scanner
-					this.search_from_scanner = true;
-
-					// Show scanning feedback
-					if (this.eventBus?.emit) {
-						this.eventBus.emit("show_message", {
-							title: this.__("Scanning for: {0}", [code]),
-							summary: this.__("Scanning items"),
-							detail: code,
-							color: "info",
-							timeout: 2000,
-							groupId: "scanner-progress",
-						});
-					} else if (frappe?.show_alert) {
-						frappe.show_alert(
-							{
-								message: `Scanning for: ${code}`,
-								indicator: "blue",
-							},
-							2,
-						);
-					}
-
-					// Enhanced item search and submission logic
-					await this.processScannedItem(code);
-				} catch (error) {
-					this.handleScanPipelineError(error, code);
-				} finally {
-					perfMarkEnd("pos:scan-handler", mark);
+				if (item) {
+					this.addScannedItemToInvoice(item, scannedCode);
+				} else {
+					// If not found in the local index, fall back to the server.
+					// This is the slower path, but necessary for items not yet cached.
+					this.fetchItemByBarcode(scannedCode);
 				}
-			};
+			});
+		},
 
-			if (this.scanDebounceId) {
-				clearTimeout(this.scanDebounceId);
-			}
-			this.scanQueuedCode = scannedCode;
-			this.scanDebounceId = setTimeout(() => {
-				this.scanDebounceId = null;
-				const code = this.scanQueuedCode || scannedCode;
-				this.scanQueuedCode = "";
-				scheduleFrame(() => {
-					const maybePromise = runScanPipeline(code);
-					if (maybePromise && typeof maybePromise.catch === "function") {
-						maybePromise.catch((error) => {
-							this.handleScanPipelineError(error, code);
-						});
-					}
+		async fetchItemByBarcode(scannedCode) {
+			try {
+				const res = await frappe.call({
+					method: "posawesome.posawesome.api.items.get_item_detail",
+					args: {
+						item: JSON.stringify({ item_code: scannedCode }),
+						warehouse: this.pos_profile.warehouse,
+						price_list: this.active_price_list,
+						company: this.pos_profile.company,
+					},
 				});
-			}, 12);
+
+				if (res && res.message) {
+					const newItem = res.message;
+					// Add the new item to the store and index it for future scans
+					this.items.push(newItem);
+					this.indexItem(newItem);
+					this.addScannedItemToInvoice(newItem, scannedCode);
+				} else {
+					this.handleItemNotFound(scannedCode);
+				}
+			} catch (error) {
+				this.handleScanPipelineError(error, scannedCode);
+			}
 		},
                 async processScannedItem(scannedCode) {
                         const mark = perfMarkStart("pos:scan-process");

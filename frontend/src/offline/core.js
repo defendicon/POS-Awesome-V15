@@ -33,6 +33,32 @@ db.version(7)
 					: [];
 			}),
 	);
+db.version(8)
+	.stores({
+		customers: "&name,customer_name,mobile_no,email_id,tax_id,*_search_terms",
+	})
+	.upgrade((tx) =>
+		tx
+			.table("customers")
+			.toCollection()
+			.modify((customer) => {
+				const terms = new Set();
+				const add = (val) => {
+					if (!val) return;
+					String(val)
+						.toLowerCase()
+						.split(/\s+/)
+						.filter(Boolean)
+						.forEach((term) => terms.add(term));
+				};
+				add(customer.customer_name);
+				add(customer.name);
+				add(customer.mobile_no);
+				add(customer.email_id);
+				add(customer.tax_id);
+				customer._search_terms = Array.from(terms);
+			}),
+	);
 
 export const KEY_TABLE_MAP = {
 	offline_invoices: "queue",

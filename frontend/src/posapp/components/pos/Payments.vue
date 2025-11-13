@@ -807,6 +807,10 @@ export default {
 			redeemed_customer_credit: 0, // Customer credit to redeem
 			credit_change: 0, // Change to be given as credit
 			paid_change: 0, // Change to be given as paid
+			total_payments: 0,
+			diff_payment: 0,
+			change_due: 0,
+			shouldAutoApplyCreditChange: false,
 			is_credit_sale: false, // Is this a credit sale?
 			is_write_off_change: false, // Write-off for change enabled
 			is_cashback: true, // Cashback enabled
@@ -841,6 +845,18 @@ export default {
 				this.invoiceStore.setInvoiceDoc(value);
 			},
 		},
+		paymentWatcher() {
+			// This watcher is triggered when the user changes any value that affects the invoice total.
+			// It is debounced to avoid recalculating the totals too frequently.
+			return JSON.stringify({
+				payments: this.invoice_doc ? this.invoice_doc.payments : [],
+				loyalty_amount: this.loyalty_amount,
+				redeemed_customer_credit: this.redeemed_customer_credit,
+				// The watcher is also triggered when the invoice total changes.
+				// This is important because the invoice total can change due to discounts, etc.
+				grand_total: this.invoice_doc ? this.invoice_doc.grand_total : 0,
+			});
+		},
 		// Get currency symbol for given or current currency
 		currencySymbol() {
 			return (currency) => {
@@ -859,142 +875,6 @@ export default {
 			const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
 			return !allowNegative && Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
-		// Calculate total payments (all methods, loyalty, credit)
-		total_payments() {
-			let total = 0;
-			if (this.invoice_doc && this.invoice_doc.payments) {
-				this.invoice_doc.payments.forEach((payment) => {
-					// Payment amount is already in selected currency
-					total += parseFloat(formatUtils.fromArabicNumerals(String(payment.amount))) || 0;
-				});
-			}
-
-			// Add loyalty amount (convert if needed)
-			const doc = this.invoice_doc;
-
-			if (this.loyalty_amount && doc) {
-				// Loyalty points are stored in base currency (PKR)
-				if (doc.currency && doc.currency !== this.pos_profile.currency) {
-					// Convert to selected currency (e.g. USD) by dividing
-					total += this.flt(
-						this.loyalty_amount / (doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				} else {
-					total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
-				}
-			}
-
-			// Add redeemed customer credit (convert if needed)
-			if (this.redeemed_customer_credit && doc) {
-				// Customer credit is stored in base currency (PKR)
-				if (doc.currency && doc.currency !== this.pos_profile.currency) {
-					// Convert to selected currency (e.g. USD) by dividing
-					total += this.flt(
-						this.redeemed_customer_credit / (doc.conversion_rate || 1),
-						this.currency_precision,
-					);
-				} else {
-					total +=
-						parseFloat(formatUtils.fromArabicNumerals(String(this.redeemed_customer_credit))) ||
-						0;
-				}
-			}
-
-			return this.flt(total, this.currency_precision);
-		},
-
-		// Calculate difference between invoice total and payments
-		diff_payment() {
-                        if (!this.invoice_doc) return 0;
-
-			// For multi-currency, use grand_total instead of rounded_total
-			let invoice_total;
-			if (
-				this.pos_profile.posa_allow_multi_currency &&
-				this.invoice_doc.currency !== this.pos_profile.currency
-			) {
-				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
-			} else {
-				invoice_total = this.flt(
-					this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
-					this.currency_precision,
-				);
-			}
-
-			// Calculate difference (all amounts are in selected currency)
-			let diff = this.flt(invoice_total - this.total_payments, this.currency_precision);
-
-			// For returns, ensure difference is not negative
-                        if (this.invoice_doc.is_return) {
-                                return diff >= 0 ? diff : 0;
-                        }
-
-                        return diff;
-                },
-
-                // Calculate change to be given back to customer
-                change_due() {
-                        if (!this.invoice_doc) {
-                                return 0;
-                        }
-
-			// For multi-currency, use grand_total instead of rounded_total
-			let invoice_total;
-			if (
-				this.pos_profile.posa_allow_multi_currency &&
-				this.invoice_doc.currency !== this.pos_profile.currency
-			) {
-				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
-			} else {
-				invoice_total = this.flt(
-					this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
-					this.currency_precision,
-				);
-			}
-
-			// Calculate change (all amounts are in selected currency)
-                        let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
-
-                        // Ensure change is not negative
-                        return change > 0 ? change : 0;
-                },
-
-                shouldAutoApplyCreditChange() {
-                        if (!this.invoice_doc || this.invoice_doc.is_return) {
-                                return false;
-                        }
-
-                        if (this.change_due <= 0) {
-                                return false;
-                        }
-
-                        const payments = Array.isArray(this.invoice_doc.payments)
-                                ? this.invoice_doc.payments
-                                : [];
-
-                        const totals = payments.reduce(
-                                (accumulator, payment) => {
-                                        if (!payment) {
-                                                return accumulator;
-                                        }
-
-                                        const amount = this.flt(payment.amount || 0, this.currency_precision);
-
-                                        if (this.isCashLikePayment(payment)) {
-                                                accumulator.cash += amount;
-                                        } else {
-                                                accumulator.nonCash += amount;
-                                        }
-
-                                        return accumulator;
-                                },
-                                { cash: 0, nonCash: 0 },
-                        );
-
-                        return totals.nonCash > 0 && totals.cash === 0;
-                },
-
 		// Label for the difference field (To Be Paid/Change)
 		diff_label() {
 			return this.diff_payment > 0
@@ -1054,6 +934,10 @@ export default {
 		},
 	},
 	watch: {
+		paymentWatcher: {
+			handler: 'recalculateTotals',
+			immediate: true,
+		},
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
                         if (this.is_user_editing_paid_change) {
@@ -1227,6 +1111,82 @@ export default {
 		},
 	},
 	methods: {
+		recalculateTotals: _.debounce(function () {
+			if (!this.invoice_doc) return;
+
+			let total = 0;
+			if (this.invoice_doc.payments) {
+				this.invoice_doc.payments.forEach((payment) => {
+					total += parseFloat(formatUtils.fromArabicNumerals(String(payment.amount))) || 0;
+				});
+			}
+
+			const doc = this.invoice_doc;
+			if (this.loyalty_amount && doc) {
+				if (doc.currency && doc.currency !== this.pos_profile.currency) {
+					total += this.flt(
+						this.loyalty_amount / (doc.conversion_rate || 1),
+						this.currency_precision,
+					);
+				} else {
+					total += parseFloat(formatUtils.fromArabicNumerals(String(this.loyalty_amount))) || 0;
+				}
+			}
+
+			if (this.redeemed_customer_credit && doc) {
+				if (doc.currency && doc.currency !== this.pos_profile.currency) {
+					total += this.flt(
+						this.redeemed_customer_credit / (doc.conversion_rate || 1),
+						this.currency_precision,
+					);
+				} else {
+					total +=
+						parseFloat(formatUtils.fromArabicNumerals(String(this.redeemed_customer_credit))) ||
+						0;
+				}
+			}
+			this.total_payments = this.flt(total, this.currency_precision);
+
+			let invoice_total;
+			if (
+				this.pos_profile.posa_allow_multi_currency &&
+				this.invoice_doc.currency !== this.pos_profile.currency
+			) {
+				invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
+			} else {
+				invoice_total = this.flt(
+					this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
+					this.currency_precision,
+				);
+			}
+
+			let diff = this.flt(invoice_total - this.total_payments, this.currency_precision);
+			if (this.invoice_doc.is_return) {
+				this.diff_payment = diff >= 0 ? diff : 0;
+			} else {
+				this.diff_payment = diff;
+			}
+
+			let change = this.flt(this.total_payments - invoice_total, this.currency_precision);
+			this.change_due = change > 0 ? change : 0;
+
+			const payments = this.invoice_doc.payments || [];
+			const totals = payments.reduce(
+				(accumulator, payment) => {
+					if (!payment) return accumulator;
+					const amount = this.flt(payment.amount || 0, this.currency_precision);
+					if (this.isCashLikePayment(payment)) {
+						accumulator.cash += amount;
+					} else {
+						accumulator.nonCash += amount;
+					}
+					return accumulator;
+				},
+				{ cash: 0, nonCash: 0 },
+			);
+			this.shouldAutoApplyCreditChange =
+				!this.invoice_doc.is_return && this.change_due > 0 && totals.nonCash > 0 && totals.cash === 0;
+		}, 50),
 		// Go back to invoice view and reset customer readonly
 		back_to_invoice() {
 			this.eventBus.emit("show_payment", "false");
