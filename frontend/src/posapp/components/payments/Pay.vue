@@ -1018,40 +1018,58 @@ export default {
 				this.get_draft_mpesa_payments_register();
 			};
 
-			try {
-				if (!customer) {
-					frappe.throw(__("Please select a customer"));
-				}
+                        try {
+                                if (!customer) {
+                                        frappe.throw(__("Please select a customer"));
+                                }
 
-				if (this.selected_invoices.length == 0) {
-					frappe.throw(__("Please select an invoice"));
-				}
+                                const total_payments =
+                                        this.total_selected_payments +
+                                        this.total_selected_mpesa_payments +
+                                        this.total_payment_methods;
 
-				const total_payments =
-					this.total_selected_payments +
-					this.total_selected_mpesa_payments +
-					this.total_payment_methods;
+                                if (total_payments <= 0) {
+                                        frappe.throw(__("Please make a payment or select an payment"));
+                                }
 
-				if (total_payments <= 0) {
-					frappe.throw(__("Please make a payment or select an payment"));
-				}
+                                const hasNewPayments = flt(this.total_payment_methods) > 0;
+                                const hasAllocatedSelections =
+                                        flt(this.total_selected_payments) > 0 ||
+                                        flt(this.total_selected_mpesa_payments) > 0;
 
-				this.payment_methods.forEach((payment) => {
-					payment.amount = flt(payment.amount);
-				});
+                                if (!hasNewPayments && this.selected_invoices.length === 0 && hasAllocatedSelections) {
+                                        frappe.throw(__("Please select an invoice"));
+                                }
 
-				const payload = {
-					customer,
-					company: this.company,
-					currency: this.pos_profile.currency,
-					pos_opening_shift_name: this.pos_opening_shift.name,
-					pos_profile_name: this.pos_profile.name,
-					pos_profile: this.pos_profile,
-					payment_methods: this.payment_methods,
-					selected_invoices: this.selected_invoices,
-					selected_payments: this.selected_payments,
-					total_selected_invoices: flt(this.total_selected_invoices),
-					selected_mpesa_payments: this.selected_mpesa_payments,
+                                let selectedInvoices = this.selected_invoices.map((invoice) => ({ ...invoice }));
+
+                                if (hasNewPayments && selectedInvoices.length === 0) {
+                                        selectedInvoices = this.outstanding_invoices
+                                                .filter((invoice) => flt(invoice?.outstanding_amount) > 0)
+                                                .map((invoice) => ({ ...invoice }));
+                                }
+
+                                const totalSelectedInvoicesAmount = selectedInvoices.reduce(
+                                        (acc, invoice) => acc + flt(invoice?.outstanding_amount || 0),
+                                        0,
+                                );
+
+                                this.payment_methods.forEach((payment) => {
+                                        payment.amount = flt(payment.amount);
+                                });
+
+                                const payload = {
+                                        customer,
+                                        company: this.company,
+                                        currency: this.pos_profile.currency,
+                                        pos_opening_shift_name: this.pos_opening_shift.name,
+                                        pos_profile_name: this.pos_profile.name,
+                                        pos_profile: this.pos_profile,
+                                        payment_methods: this.payment_methods,
+                                        selected_invoices: selectedInvoices,
+                                        selected_payments: this.selected_payments,
+                                        total_selected_invoices: flt(totalSelectedInvoicesAmount),
+                                        selected_mpesa_payments: this.selected_mpesa_payments,
 					total_selected_payments: flt(this.total_selected_payments),
 					total_payment_methods: flt(this.total_payment_methods),
 					total_selected_mpesa_payments: flt(this.total_selected_mpesa_payments),

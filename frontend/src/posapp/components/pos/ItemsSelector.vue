@@ -59,29 +59,15 @@
 								:label="frappe._('Search Items')"
 								hint="Search by item code, serial number, batch no or barcode"
 								hide-details
-								v-model="debounce_search"
+								v-model="search_input"
 								@keydown.esc="esc_event"
-								@keydown.enter="search_onchange"
+								@keydown.enter="onEnter"
 								@click:clear="clearSearch"
 								prepend-inner-icon="mdi-magnify"
 								@focus="handleItemSearchFocus"
 								ref="debounce_search"
 							>
 								<template v-slot:append-inner>
-									<v-btn
-										:icon="showManualScanInput ? 'mdi-barcode-off' : 'mdi-barcode-scan'"
-										size="small"
-										color="primary"
-										:variant="showManualScanInput ? 'tonal' : 'text'"
-										class="mr-1"
-										@click.stop="toggleManualScanInput"
-										:title="
-											showManualScanInput
-												? __('Hide Manual Entry')
-												: __('Show Manual Entry')
-										"
-									>
-									</v-btn>
 									<v-btn
 										v-if="pos_profile.posa_enable_camera_scanning"
 										icon="mdi-camera"
@@ -99,47 +85,6 @@
 									</v-btn>
 								</template>
 							</v-text-field>
-							<v-expand-transition>
-								<div v-if="showManualScanInput" class="manual-scan-container mt-2">
-									<div class="manual-scan-text mb-3">
-										<div class="text-subtitle-2 font-weight-medium">
-											{{ __("Manual or Hardware Scanner Input") }}
-										</div>
-										<div class="text-body-2 text-medium-emphasis">
-											{{
-												__(
-													"Scan with a hardware scanner or type the code, then press Enter.",
-												)
-											}}
-										</div>
-									</div>
-									<v-text-field
-										density="comfortable"
-										variant="outlined"
-										color="primary"
-										clearable
-										hide-details
-										:label="__('Enter Code Manually')"
-										v-model="manualScanValue"
-										@keydown.enter.prevent="submitManualScan"
-										@click:clear="manualScanValue = ''"
-										autocomplete="off"
-										ref="manualScanInput"
-										prepend-inner-icon="mdi-barcode-scan"
-									>
-										<template #append-inner>
-											<v-btn
-												icon="mdi-check"
-												variant="tonal"
-												color="primary"
-												size="small"
-												@click="submitManualScan"
-												:title="__('Submit Code')"
-											></v-btn>
-										</template>
-									</v-text-field>
-								</div>
-							</v-expand-transition>
 						</v-col>
 						<v-col cols="3" class="pb-0" v-if="pos_profile.posa_input_qty">
 							<v-text-field
@@ -607,6 +552,7 @@ export default {
 		customer: "",
 		items_view: "list",
 		first_search: "",
+		search_input: "",
 		search_backup: "",
 		// Limit the displayed items to avoid overly large lists
 		itemsPerPage: 50,
@@ -677,8 +623,6 @@ export default {
 		scanErrorCode: "",
 		scannerLocked: false,
 		cameraScannerActive: false,
-		showManualScanInput: false,
-		manualScanValue: "",
 		scanAudioContext: null,
 		pendingScanCode: "",
 		awaitingScanResult: false,
@@ -689,15 +633,9 @@ export default {
 	}),
 
 	watch: {
-		showManualScanInput(newVal) {
-			if (newVal) {
-				this.queueManualScanFocus();
-			} else {
-				this.manualScanValue = "";
-				if (!this.cameraScannerActive) {
-					this.$nextTick(() => this.focusItemSearch());
-				}
-			}
+		search_input(newValue) {
+			this.first_search = newValue;
+			this.search_onchange();
 		},
 		customer: _.debounce(function () {
 			if (this.pos_profile.posa_force_reload_items) {
@@ -1838,19 +1776,20 @@ export default {
 				item.qty = qtyVal;
 			}
 		},
-		async enter_event() {
-			if (!this.displayedItems.length || !this.first_search) {
+		async enter_event(scannedCode) {
+			const searchTerm = scannedCode || this.first_search;
+			if (!this.displayedItems.length || !searchTerm) {
 				return;
 			}
 
 			// Derive the searchable code and detect scale barcode
-			const search = this.get_search(this.first_search);
+			const search = this.get_search(searchTerm);
 			const isScaleBarcode =
 				this.pos_profile?.posa_scale_barcode_start &&
-				this.first_search.startsWith(this.pos_profile.posa_scale_barcode_start);
+				searchTerm.startsWith(this.pos_profile.posa_scale_barcode_start);
 			this.search = search;
 
-			const qty = parseFloat(this.get_item_qty(this.first_search));
+			const qty = parseFloat(this.get_item_qty(searchTerm));
 			const new_item = { ...this.displayedItems[0] };
 			new_item.qty = flt(qty);
 			if (isScaleBarcode) {
@@ -1959,6 +1898,19 @@ export default {
 				}
 			}
 		},
+		onEnter() {
+			const trimmedQuery = (this.search_input || "").trim();
+
+			// If the input is a numeric string longer than 6 characters, treat it as a barcode
+			if (/^\d{7,}$/.test(trimmedQuery)) {
+				this.onBarcodeScanned(trimmedQuery);
+				// Immediately clear the search field
+				this.search_input = "";
+				return;
+			}
+			// Otherwise, trigger the standard search
+			this.search_onchange();
+		},
 		search_onchange: _.debounce(
 			withPerf("pos:search-trigger", async function (newSearchTerm) {
 				const vm = this;
@@ -1978,6 +1930,12 @@ export default {
 
 				// Keep first_search in sync with the value we are about to search for
 				vm.first_search = trimmedQuery;
+
+				// If the input is a numeric string longer than 6 characters, treat it as a barcode
+				if (/^\d{7,}$/.test(trimmedQuery)) {
+					vm.onBarcodeScanned(trimmedQuery);
+					return;
+				}
 
 				// Require a minimum of three characters before running a search
 				if (!trimmedQuery || trimmedQuery.length < 3) {
@@ -2034,7 +1992,10 @@ export default {
 			let scal_qty = Math.abs(qtyVal);
 			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
 
-			if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+			if (
+				this.pos_profile.posa_scale_barcode_start &&
+				first_search.startsWith(this.pos_profile.posa_scale_barcode_start)
+			) {
 				// Determine item code length dynamically based on EAN-13 structure:
 				// prefix + item_code + 5 qty digits + 1 check digit
 				const item_code_len = first_search.length - prefix_len - 6;
@@ -2061,7 +2022,10 @@ export default {
 		get_search(first_search) {
 			if (!first_search) return "";
 			const prefix_len = this.pos_profile.posa_scale_barcode_start?.length || 0;
-			if (!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+			if (
+				!this.pos_profile.posa_scale_barcode_start ||
+				!first_search.startsWith(this.pos_profile.posa_scale_barcode_start)
+			) {
 				return first_search;
 			}
 			// Calculate item code length from total barcode length
@@ -2692,7 +2656,7 @@ export default {
 						details: this.__("Please verify the barcode or search manually."),
 					});
 				} else {
-					this.enter_event();
+					this.enter_event(sCode);
 				}
 
 				// clear search field for next scan and refocus input
@@ -2945,53 +2909,8 @@ export default {
 			this.focusItemSearch();
 		},
 
-		toggleManualScanInput() {
-			this.showManualScanInput = !this.showManualScanInput;
-			if (this.showManualScanInput) {
-				this.queueManualScanFocus();
-			} else {
-				this.focusItemSearch();
-			}
-		},
-
-		submitManualScan() {
-			const code = (this.manualScanValue ?? "").toString().trim();
-			if (!code) {
-				return;
-			}
-			if (this.scannerLocked) {
-				this.onBarcodeScanned(code);
-				this.queueManualScanFocus();
-				return;
-			}
-			this.manualScanValue = "";
-			this.onBarcodeScanned(code);
-			this.queueManualScanFocus();
-		},
-
-		focusManualScanInput() {
-			const input = this.$refs.manualScanInput;
-			if (input && typeof input.focus === "function") {
-				input.focus();
-			}
-		},
-
-		queueManualScanFocus() {
-			this.$nextTick(() => {
-				const scheduler =
-					typeof requestAnimationFrame === "function"
-						? requestAnimationFrame
-						: (cb) => setTimeout(cb, 16);
-				scheduler(() => {
-					this.focusManualScanInput();
-				});
-			});
-		},
-
 		onScannerOpened() {
 			this.cameraScannerActive = true;
-			this.showManualScanInput = false;
-			this.manualScanValue = "";
 			this.blurItemSearch();
 		},
 
@@ -3024,6 +2943,9 @@ export default {
 				return;
 			}
 
+			// Clear the search field immediately to allow for rapid scanning
+			this.search_input = "";
+
 			const runScanPipeline = async (code) => {
 				const mark = perfMarkStart("pos:scan-handler");
 				try {
@@ -3032,14 +2954,6 @@ export default {
 
 					// mark this search as coming from a scanner
 					this.search_from_scanner = true;
-
-					// Clear any previous search
-					this.search = "";
-					this.first_search = "";
-
-					// Set the scanned code as search term
-					this.first_search = code;
-					this.search = code;
 
 					// Show scanning feedback
 					if (this.eventBus?.emit) {
@@ -3128,17 +3042,38 @@ export default {
 
 			// If not found locally, attempt to fetch from server using processed code
 			try {
-				const res = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_items_from_barcode",
-					args: {
-						selling_price_list: this.active_price_list,
-						currency: this.pos_profile.currency,
-						barcode: searchCode,
-					},
-				});
+				let newItem = null;
+				if (qtyFromBarcode !== null) {
+					// Scale barcodes use a direct, faster lookup
+					const res = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_item_detail",
+						args: {
+							item: JSON.stringify({ item_code: searchCode }),
+							warehouse: this.pos_profile.warehouse,
+							price_list: this.active_price_list,
+							company: this.pos_profile.company,
+						},
+					});
+					if (res && res.message) {
+						newItem = res.message;
+					}
+				} else {
+					// Regular barcodes and searches use the generic search
+					const res = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_items",
+						args: {
+							pos_profile: this.pos_profile,
+							price_list: this.active_price_list,
+							search_value: searchCode,
+						},
+					});
 
-				if (res && res.message) {
-					const newItem = res.message;
+					if (res && res.message && res.message.length > 0) {
+						newItem = res.message[0];
+					}
+				}
+
+				if (newItem) {
 					this.items.push(newItem);
 					this.indexItem(newItem);
 
