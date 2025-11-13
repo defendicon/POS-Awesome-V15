@@ -483,7 +483,18 @@ def make_closing_shift_from_opening(opening_shift):
 
     invoice_field = "pos_invoice" if doctype == "POS Invoice" else "sales_invoice"
 
+    invoice_summary = frappe._dict(
+        total_invoices=len(invoices),
+        other_currency_invoices_count=0,
+        currency_totals=defaultdict(float),
+    )
+
     for d in invoices:
+        currency = d.get("currency") or company_currency
+        if currency != company_currency:
+            invoice_summary.other_currency_invoices_count += 1
+        invoice_summary.currency_totals[currency] += flt(d.get("grand_total"))
+
         conversion_rate = d.get("conversion_rate")
         pos_transactions.append(
             frappe._dict(
@@ -629,6 +640,7 @@ def make_closing_shift_from_opening(opening_shift):
     closing_shift.set("payment_reconciliation", payments)
     closing_shift.set("taxes", taxes)
     closing_shift.set("pos_payments", pos_payments_table)
+    closing_shift.set("invoice_summary", invoice_summary)
 
     return closing_shift
 
