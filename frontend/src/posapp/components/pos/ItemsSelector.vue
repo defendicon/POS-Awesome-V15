@@ -2956,21 +2956,16 @@ export default {
                         let priceFromBarcode = null;
                         let scaleResponse = null;
 
-                        if (
-                                this.pos_profile?.posa_scale_barcode_start &&
-                                scannedCode.startsWith(this.pos_profile.posa_scale_barcode_start)
-                        ) {
-                                try {
-                                        const res = await frappe.call({
-                                                method: "posawesome.posawesome.api.items.parse_scale_barcode",
-                                                args: { barcode: scannedCode },
-                                        });
-                                        if (res && res.message) {
-                                                scaleResponse = res.message;
-                                        }
-                                } catch (error) {
-                                        console.error("Failed to parse scale barcode via API:", error);
+                        try {
+                                const res = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.parse_scale_barcode",
+                                        args: { barcode: scannedCode },
+                                });
+                                if (res && res.message) {
+                                        scaleResponse = res.message;
                                 }
+                        } catch (error) {
+                                console.error("Failed to parse scale barcode via API:", error);
                         }
 
                         if (scaleResponse && scaleResponse.item_code) {
