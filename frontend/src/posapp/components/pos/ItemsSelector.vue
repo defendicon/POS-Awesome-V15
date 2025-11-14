@@ -1878,7 +1878,7 @@ export default {
 			vm.first_search = trimmedQuery;
 
 			// If the input is a numeric string longer than 6 characters, treat it as a barcode
-			if (/^\d{7,}$/.test(trimmedQuery)) {
+			if (/^\d{7,}$/.test(trimmedQuery) || vm.lookupItemByBarcode(trimmedQuery)) {
 				vm.onBarcodeScanned(trimmedQuery);
 				return;
 			}
