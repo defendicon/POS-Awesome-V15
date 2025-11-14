@@ -50,23 +50,24 @@
 				<div class="sticky-header">
 					<v-row class="items">
 						<v-col class="pb-0">
-							<v-text-field
-								density="compact"
-								clearable
-								autofocus
-								variant="solo"
-								color="primary"
+                                                        <v-text-field
+                                                                density="compact"
+                                                                clearable
+                                                                autofocus
+                                                                variant="solo"
+                                                                color="primary"
 								:label="frappe._('Search Items')"
 								hint="Search by item code, serial number, batch no or barcode"
 								hide-details
 								v-model="search_input"
 								@keydown.esc="esc_event"
-								@keydown.enter="onEnter"
-								@click:clear="clearSearch"
-								prepend-inner-icon="mdi-magnify"
-								@focus="handleItemSearchFocus"
-								ref="debounce_search"
-							>
+                                                                @keydown.enter="onEnter"
+                                                                @click:clear="clearSearch"
+                                                                prepend-inner-icon="mdi-magnify"
+                                                                @focus="handleItemSearchFocus"
+                                                                @paste="handleSearchPaste"
+                                                                ref="debounce_search"
+                                                        >
 								<template v-slot:append-inner>
 									<v-btn
 										v-if="pos_profile.posa_enable_camera_scanning"
@@ -629,14 +630,15 @@ export default {
                 scaleBarcodeSettingsLoaded: false,
                 scannerLocked: false,
 		cameraScannerActive: false,
-		scanAudioContext: null,
-		pendingScanCode: "",
-		awaitingScanResult: false,
-		scanDebounceId: null,
-		scanQueuedCode: "",
-		refreshInFlight: false,
-		clearingSearch: false,
-	}),
+                scanAudioContext: null,
+                pendingScanCode: "",
+                awaitingScanResult: false,
+                scanDebounceId: null,
+                scanQueuedCode: "",
+                pasteScanTimeout: null,
+                refreshInFlight: false,
+                clearingSearch: false,
+        }),
 
 	watch: {
 		search_input(newValue) {
@@ -1963,11 +1965,11 @@ export default {
 			// Keep first_search in sync with the value we are about to search for
 			vm.first_search = trimmedQuery;
 
-			// If the input is a numeric string longer than 6 characters, treat it as a barcode
-			if (/^\d{7,}$/.test(trimmedQuery)) {
-				vm.onBarcodeScanned(trimmedQuery);
-				return;
-			}
+                        // Treat strings that look like barcodes as full scans
+                        if (this.isLikelyBarcode(trimmedQuery)) {
+                                vm.onBarcodeScanned(trimmedQuery);
+                                return;
+                        }
 
 			// Require a minimum of three characters before running a search
 			if (!trimmedQuery || trimmedQuery.length < 3) {
@@ -2942,20 +2944,67 @@ export default {
 			this.focusItemSearch();
 		},
 
-		startCameraScanning() {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				return;
-			}
-			if (this.$refs.cameraScanner) {
-				this.$refs.cameraScanner.startScanning();
-			}
-		},
-		onBarcodeScanned(scannedCode) {
-			if (this.scannerLocked) {
-				this.playScanTone("error");
-				if (frappe?.show_alert) {
-					frappe.show_alert(
+                startCameraScanning() {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                return;
+                        }
+                        if (this.$refs.cameraScanner) {
+                                this.$refs.cameraScanner.startScanning();
+                        }
+                },
+                handleSearchPaste(event) {
+                        this.$nextTick(() => {
+                                const clipboardText =
+                                        event?.clipboardData && typeof event.clipboardData.getData === "function"
+                                                ? event.clipboardData.getData("text") || ""
+                                                : "";
+
+                                const sanitized = String(clipboardText || this.search_input || "")
+                                        .replace(/\r?\n/g, "")
+                                        .trim();
+
+                                if (!this.isLikelyBarcode(sanitized)) {
+                                        return;
+                                }
+
+                                if (this.search_onchange?.cancel) {
+                                        this.search_onchange.cancel();
+                                }
+
+                                if (this.pasteScanTimeout) {
+                                        clearTimeout(this.pasteScanTimeout);
+                                }
+
+                                this.pasteScanTimeout = setTimeout(() => {
+                                        this.pasteScanTimeout = null;
+                                        this.search_from_scanner = true;
+                                        this.onBarcodeScanned(sanitized);
+                                }, 300);
+                        });
+                },
+                isLikelyBarcode(candidate) {
+                        if (!candidate) {
+                                return false;
+                        }
+
+                        const trimmed = String(candidate).trim();
+
+                        if (!trimmed || trimmed.length < 4) {
+                                return false;
+                        }
+
+                        if (/\s/.test(trimmed)) {
+                                return false;
+                        }
+
+                        return /^[\w\-./]+$/i.test(trimmed);
+                },
+                onBarcodeScanned(scannedCode) {
+                        if (this.scannerLocked) {
+                                this.playScanTone("error");
+                                if (frappe?.show_alert) {
+                                        frappe.show_alert(
 						{
 							message: this.__("Acknowledge the error to resume scanning."),
 							indicator: "red",
@@ -4099,12 +4148,17 @@ export default {
                 if (this.itemDetailsRetryTimeout) {
                         clearTimeout(this.itemDetailsRetryTimeout);
                 }
-		this.itemDetailsRetryCount = 0;
+                this.itemDetailsRetryCount = 0;
 
-		// Call cleanup function for abort controller
-		if (this.cleanupBeforeDestroy) {
-			this.cleanupBeforeDestroy();
-		}
+                if (this.pasteScanTimeout) {
+                        clearTimeout(this.pasteScanTimeout);
+                        this.pasteScanTimeout = null;
+                }
+
+                // Call cleanup function for abort controller
+                if (this.cleanupBeforeDestroy) {
+                        this.cleanupBeforeDestroy();
+                }
 
 		// Detach scanner if it was attached
 		if (document._scannerAttached) {

@@ -97,6 +97,7 @@ After clearing site data go to browser settings and delete cache and images data
 33. Payments Reconciliation
 34. A lot more bug fixes from the version 14
 35. Offline invoices that fail to submit are saved as draft documents
+36. Pasted barcodes auto-submit after 300ms, even when the scanner or keyboard doesn't send Enter
 
 
 ### Shortcuts:
