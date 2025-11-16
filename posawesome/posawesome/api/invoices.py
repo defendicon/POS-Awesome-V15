@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -225,20 +226,33 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     base_change_amount = flt(paid_change * conversion_rate)
 
     invoice_doc = frappe.get_doc(invoice_doc.doctype, invoice_doc.name)
-    invoice_outstanding = frappe.db.get_value(
-        invoice_doc.doctype, invoice_doc.name, "outstanding_amount"
+    invoice_outstanding = flt(
+        frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "outstanding_amount")
+        or invoice_doc.get("outstanding_amount")
+        or 0
     )
-    invoice_outstanding = (
-        invoice_doc.get("outstanding_amount")
-        if invoice_outstanding is None
-        else invoice_outstanding
-    )
-    invoice_outstanding = flt(invoice_outstanding)
-    allocated_amount = 0
-    if invoice_outstanding > 0:
-        allocated_amount = min(base_change_amount, invoice_outstanding)
 
-    pe = frappe.new_doc("Payment Entry")
+    # Build a Payment Entry using ERPNext's helper to mirror the standard workflow
+    try:
+        pe = get_payment_entry(invoice_doc.doctype, invoice_doc.name, bank_account=cash_account_name)
+    except Exception:
+        pe = frappe.new_doc("Payment Entry")
+        pe.set("references", [])
+        pe.append(
+            "references",
+            {
+                "reference_doctype": "Sales Invoice",
+                "reference_name": invoice_doc.name,
+                "outstanding_amount": invoice_outstanding,
+                "allocated_amount": 0,
+                "total_amount": invoice_doc.get("base_grand_total")
+                or invoice_doc.get("grand_total"),
+                "due_date": invoice_doc.get("due_date")
+                or invoice_doc.get("posting_date")
+                or nowdate(),
+            },
+        )
+
     pe.payment_type = "Pay"
     pe.company = invoice_doc.company
     pe.mode_of_payment = selected_mode_of_payment
@@ -251,41 +265,50 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     pe.reference_date = invoice_doc.get("posting_date") or nowdate()
     pe.paid_amount = base_change_amount
     pe.received_amount = base_change_amount
-
-    reference_row = {
-        "reference_doctype": "Sales Invoice",
-        "reference_name": invoice_doc.name,
-        "allocated_amount": allocated_amount,
-        "total_amount": invoice_doc.get("base_grand_total")
-        or invoice_doc.get("grand_total"),
-        "outstanding_amount": invoice_outstanding,
-        "due_date": invoice_doc.get("due_date")
-        or invoice_doc.get("posting_date")
-        or nowdate(),
-    }
-
-    # Seed references explicitly so helper routines keep the linkage intact
-    pe.set("references", [])
-    pe.append("references", reference_row)
-
     pe.remarks = _("Change return for {0}").format(invoice_doc.name)
+
+    pe.setup_party_account_field()
+    pe.set_missing_values()
+    pe.set_missing_ref_details()
+
+    # Align references with the invoice and cap allocation by outstanding
+    total_allocation = 0
+    for ref in pe.get("references", []):
+        ref.reference_doctype = invoice_doc.doctype
+        ref.reference_name = invoice_doc.name
+        if invoice_outstanding or invoice_outstanding == 0:
+            ref.outstanding_amount = invoice_outstanding
+        ref.total_amount = ref.total_amount or invoice_doc.get("base_grand_total") or invoice_doc.get("grand_total")
+        ref.due_date = ref.due_date or invoice_doc.get("due_date") or invoice_doc.get("posting_date") or nowdate()
+
+        allowed = min(base_change_amount, flt(ref.outstanding_amount or 0))
+        if allowed < 0:
+            allowed = 0
+        ref.allocated_amount = allowed
+        total_allocation += allowed
+
+    if not pe.get("references"):
+        pe.append(
+            "references",
+            {
+                "reference_doctype": invoice_doc.doctype,
+                "reference_name": invoice_doc.name,
+                "outstanding_amount": invoice_outstanding,
+                "allocated_amount": min(base_change_amount, invoice_outstanding),
+                "total_amount": invoice_doc.get("base_grand_total")
+                or invoice_doc.get("grand_total"),
+                "due_date": invoice_doc.get("due_date")
+                or invoice_doc.get("posting_date")
+                or nowdate(),
+            },
+        )
+        total_allocation = min(base_change_amount, invoice_outstanding)
+
+    pe.unallocated_amount = max(0, base_change_amount - total_allocation)
 
     ensure_child_doctype(pe, "references", "Payment Entry Reference")
     pe.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-
-    try:
-        pe.setup_party_account_field()
-        pe.set_missing_values()
-        pe.set_missing_ref_details()
-        pe.allocate_payment_amounts()
-    except Exception:
-        pass
-
-    # Force the reference row to remain attached with the intended invoice link
-    pe.set("references", [])
-    pe.append("references", reference_row)
-    ensure_child_doctype(pe, "references", "Payment Entry Reference")
 
     pe.set_amounts()
     pe.save()
