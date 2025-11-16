@@ -31,10 +31,53 @@ def before_submit(doc, method):
 
 def before_cancel(doc, method):
     update_coupon(doc, "cancelled")
+    cancel_posawesome_credit_journal_entries(doc)
+    cancel_change_return_journal_entries(doc)
 
 
 def on_cancel(doc, method):
     cancel_posawesome_credit_journal_entries(doc)
+    cancel_change_return_journal_entries(doc)
+
+
+def cancel_change_return_journal_entries(doc):
+    linked_entries = []
+
+    if getattr(doc, "posa_change_journal_entry", None):
+        linked_entries.append(doc.posa_change_journal_entry)
+
+    linked_entries.extend(
+        frappe.get_all(
+            "Journal Entry Account",
+            filters={
+                "reference_type": doc.doctype,
+                "reference_name": doc.name,
+            },
+            pluck="parent",
+        )
+    )
+
+    for entry in set(linked_entries):
+        if not entry:
+            continue
+        je_doc = frappe.get_doc("Journal Entry", entry)
+        if je_doc.docstatus != 1:
+            continue
+        try:
+            je_doc.cancel()
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(),
+                "POSAwesome Change Return Journal Cancellation Error",
+            )
+            frappe.throw(
+                _(
+                    "Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
+                ).format(entry)
+            )
+
+    if getattr(doc, "posa_change_journal_entry", None):
+        doc.db_set("posa_change_journal_entry", None, update_modified=False)
 
 
 def cancel_posawesome_credit_journal_entries(doc):

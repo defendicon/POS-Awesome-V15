@@ -231,6 +231,105 @@ def _strip_client_freebies_from_payload(payload):
         payload["items"] = cleaned
 
 
+def _get_account_name(account_or_mapping):
+    if isinstance(account_or_mapping, (dict, frappe._dict)):
+        return account_or_mapping.get("account")
+    return account_or_mapping
+
+
+def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
+    if paid_change <= 0 or cint(invoice_doc.get("is_return")):
+        return None
+
+    cash_account_name = _get_account_name(cash_account)
+    if not cash_account_name:
+        return None
+
+    customer_account = invoice_doc.get("debit_to")
+    if not customer_account and invoice_doc.get("customer"):
+        customer_account = get_party_account(
+            "Customer", invoice_doc.get("customer"), invoice_doc.get("company")
+        )
+
+    if not customer_account:
+        frappe.throw(_("Unable to determine customer account for change return entry."))
+
+    company_currency = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
+    cash_account_currency = (
+        frappe.db.get_value("Account", cash_account_name, "account_currency") or company_currency
+    )
+    customer_account_currency = (
+        frappe.db.get_value("Account", customer_account, "account_currency") or company_currency
+    )
+
+    posting_date = invoice_doc.get("posting_date") or nowdate()
+    conversion_rate = flt(invoice_doc.get("conversion_rate") or 1)
+    base_amount = flt(paid_change * conversion_rate)
+
+    def _account_exchange_rate(account_currency):
+        if account_currency == company_currency:
+            return 1
+        return flt(
+            get_exchange_rate(
+                account_currency,
+                company_currency,
+                posting_date,
+                "for_selling",
+            )
+        ) or 1
+
+    customer_exchange_rate = _account_exchange_rate(customer_account_currency)
+    cash_exchange_rate = _account_exchange_rate(cash_account_currency)
+
+    customer_amount = flt(base_amount / customer_exchange_rate)
+    cash_amount = flt(base_amount / cash_exchange_rate)
+
+    je = frappe.new_doc("Journal Entry")
+    je.company = invoice_doc.get("company")
+    je.voucher_type = "Journal Entry"
+    je.posting_date = posting_date
+    je.multi_currency = (
+        cash_account_currency != company_currency
+        or customer_account_currency != company_currency
+        or invoice_doc.get("currency") != company_currency
+    )
+    je.user_remark = _("Change returned for {0}").format(invoice_doc.name)
+
+    je.append(
+        "accounts",
+        {
+            "account": customer_account,
+            "party_type": "Customer",
+            "party": invoice_doc.get("customer"),
+            "debit_in_account_currency": customer_amount,
+            "exchange_rate": customer_exchange_rate,
+            "reference_type": invoice_doc.doctype,
+            "reference_name": invoice_doc.name,
+        },
+    )
+
+    je.append(
+        "accounts",
+        {
+            "account": cash_account_name,
+            "credit_in_account_currency": cash_amount,
+            "exchange_rate": cash_exchange_rate,
+            "reference_type": invoice_doc.doctype,
+            "reference_name": invoice_doc.name,
+        },
+    )
+
+    je.flags.ignore_permissions = True
+    je.flags.ignore_account_permission = True
+    je.save()
+    je.submit()
+
+    if hasattr(invoice_doc, "posa_change_journal_entry"):
+        invoice_doc.db_set("posa_change_journal_entry", je.name, update_modified=False)
+
+    return je
+
+
 def _should_block(pos_profile):
     allow_negative = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)
     if allow_negative:
@@ -792,6 +891,7 @@ def submit_invoice(invoice, data):
             )
     else:
         invoice_doc.submit()
+        _create_change_return_journal_entry(invoice_doc, cash_account, paid_change)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
@@ -823,6 +923,7 @@ def submit_in_background_job(kwargs):
     invoice_doc.save()
 
     invoice_doc.submit()
+    _create_change_return_journal_entry(invoice_doc, cash_account, invoice_doc.get("paid_change"))
     redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
 
