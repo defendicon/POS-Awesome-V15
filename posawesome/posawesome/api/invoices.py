@@ -252,20 +252,21 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     pe.paid_amount = base_change_amount
     pe.received_amount = base_change_amount
 
-    pe.append(
-        "references",
-        {
-            "reference_doctype": invoice_doc.doctype,
-            "reference_name": invoice_doc.name,
-            "allocated_amount": allocated_amount,
-            "total_amount": invoice_doc.get("base_grand_total")
-            or invoice_doc.get("grand_total"),
-            "outstanding_amount": invoice_outstanding,
-            "due_date": invoice_doc.get("due_date")
-            or invoice_doc.get("posting_date")
-            or nowdate(),
-        },
-    )
+    reference_row = {
+        "reference_doctype": "Sales Invoice",
+        "reference_name": invoice_doc.name,
+        "allocated_amount": allocated_amount,
+        "total_amount": invoice_doc.get("base_grand_total")
+        or invoice_doc.get("grand_total"),
+        "outstanding_amount": invoice_outstanding,
+        "due_date": invoice_doc.get("due_date")
+        or invoice_doc.get("posting_date")
+        or nowdate(),
+    }
+
+    # Seed references explicitly so helper routines keep the linkage intact
+    pe.set("references", [])
+    pe.append("references", reference_row)
 
     pe.remarks = _("Change return for {0}").format(invoice_doc.name)
 
@@ -278,19 +279,13 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
         pe.set_missing_values()
         pe.set_missing_ref_details()
         pe.allocate_payment_amounts()
-        # Re-assert the explicit reference to avoid any helper cleanup
-        if pe.references:
-            ref_row = pe.references[0]
-            ref_row.reference_doctype = invoice_doc.doctype
-            ref_row.reference_name = invoice_doc.name
-            ref_row.allocated_amount = allocated_amount
-            ref_row.total_amount = (
-                invoice_doc.get("base_grand_total") or invoice_doc.get("grand_total")
-            )
-            ref_row.outstanding_amount = invoice_outstanding
-            ref_row.due_date = invoice_doc.get("due_date") or ref_row.due_date
     except Exception:
         pass
+
+    # Force the reference row to remain attached with the intended invoice link
+    pe.set("references", [])
+    pe.append("references", reference_row)
+    ensure_child_doctype(pe, "references", "Payment Entry Reference")
 
     pe.set_amounts()
     pe.save()
