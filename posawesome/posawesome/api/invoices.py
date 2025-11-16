@@ -237,6 +237,33 @@ def _get_account_name(account_or_mapping):
     return account_or_mapping
 
 
+def _resolve_change_source_account(invoice_doc, cash_account_name):
+    """
+    Pick the first non-cash payment account to fund change return.
+
+    This avoids touching the customer ledger; if no non-cash payment exists,
+    we don't create a change-return journal entry.
+    """
+
+    for payment in invoice_doc.get("payments", []):
+        if not payment:
+            continue
+
+        if cstr(payment.get("type") or "").lower() == "cash":
+            continue
+
+        account = payment.get("account")
+        if not account and payment.get("mode_of_payment"):
+            account = _get_account_name(
+                get_bank_cash_account(payment.get("mode_of_payment"), invoice_doc.company)
+            )
+
+        if account and account != cash_account_name:
+            return account
+
+    return None
+
+
 def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
     if paid_change <= 0 or cint(invoice_doc.get("is_return")):
         return None
@@ -245,21 +272,16 @@ def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
     if not cash_account_name:
         return None
 
-    customer_account = invoice_doc.get("debit_to")
-    if not customer_account and invoice_doc.get("customer"):
-        customer_account = get_party_account(
-            "Customer", invoice_doc.get("customer"), invoice_doc.get("company")
-        )
-
-    if not customer_account:
-        frappe.throw(_("Unable to determine customer account for change return entry."))
+    source_account = _resolve_change_source_account(invoice_doc, cash_account_name)
+    if not source_account:
+        return None
 
     company_currency = frappe.get_cached_value("Company", invoice_doc.company, "default_currency")
     cash_account_currency = (
         frappe.db.get_value("Account", cash_account_name, "account_currency") or company_currency
     )
-    customer_account_currency = (
-        frappe.db.get_value("Account", customer_account, "account_currency") or company_currency
+    source_account_currency = (
+        frappe.db.get_value("Account", source_account, "account_currency") or company_currency
     )
 
     posting_date = invoice_doc.get("posting_date") or nowdate()
@@ -278,10 +300,10 @@ def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
             )
         ) or 1
 
-    customer_exchange_rate = _account_exchange_rate(customer_account_currency)
+    source_exchange_rate = _account_exchange_rate(source_account_currency)
     cash_exchange_rate = _account_exchange_rate(cash_account_currency)
 
-    customer_amount = flt(base_amount / customer_exchange_rate)
+    source_amount = flt(base_amount / source_exchange_rate)
     cash_amount = flt(base_amount / cash_exchange_rate)
 
     je = frappe.new_doc("Journal Entry")
@@ -290,7 +312,7 @@ def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
     je.posting_date = posting_date
     je.multi_currency = (
         cash_account_currency != company_currency
-        or customer_account_currency != company_currency
+        or source_account_currency != company_currency
         or invoice_doc.get("currency") != company_currency
     )
     je.user_remark = _("Change returned for {0}").format(invoice_doc.name)
@@ -298,13 +320,9 @@ def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
     je.append(
         "accounts",
         {
-            "account": customer_account,
-            "party_type": "Customer",
-            "party": invoice_doc.get("customer"),
-            "debit_in_account_currency": customer_amount,
-            "exchange_rate": customer_exchange_rate,
-            "reference_type": invoice_doc.doctype,
-            "reference_name": invoice_doc.name,
+            "account": source_account,
+            "debit_in_account_currency": source_amount,
+            "exchange_rate": source_exchange_rate,
         },
     )
 
