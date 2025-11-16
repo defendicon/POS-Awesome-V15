@@ -238,19 +238,26 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     pe.reference_no = invoice_doc.name
     pe.reference_date = pe.posting_date
 
+    invoice_outstanding = frappe.db.get_value(
+        invoice_doc.doctype, invoice_doc.name, "outstanding_amount"
+    )
+    invoice_outstanding = (
+        invoice_doc.get("outstanding_amount")
+        if invoice_outstanding is None
+        else invoice_outstanding
+    )
+    invoice_outstanding = max(flt(invoice_outstanding), 0)
+    allocated_amount = min(base_change_amount, invoice_outstanding)
+
     pe.append(
         "references",
         {
             "reference_doctype": invoice_doc.doctype,
             "reference_name": invoice_doc.name,
-            "allocated_amount": base_change_amount,
-            "total_amount": invoice_doc.get("outstanding_amount")
-            if invoice_doc.get("outstanding_amount") is not None
-            else invoice_doc.get("base_grand_total")
+            "allocated_amount": allocated_amount,
+            "total_amount": invoice_doc.get("base_grand_total")
             or invoice_doc.get("grand_total"),
-            "outstanding_amount": invoice_doc.get("outstanding_amount")
-            if invoice_doc.get("outstanding_amount") is not None
-            else base_change_amount,
+            "outstanding_amount": invoice_outstanding,
             "due_date": invoice_doc.get("due_date") or pe.posting_date,
         },
     )
