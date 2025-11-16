@@ -233,14 +233,10 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     pe.posting_date = invoice_doc.get("posting_date") or nowdate()
     pe.paid_from = cash_account_name
     pe.paid_to = party_account
-    pe.paid_amount = base_change_amount
-    pe.received_amount = base_change_amount
     pe.reference_no = invoice_doc.name
     pe.reference_date = pe.posting_date
 
-    if not invoice_doc.get("outstanding_amount"):
-        invoice_doc.reload()
-
+    invoice_doc.reload()
     invoice_outstanding = frappe.db.get_value(
         invoice_doc.doctype, invoice_doc.name, "outstanding_amount"
     )
@@ -271,9 +267,20 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
 
     pe.setup_party_account_field()
     pe.set_missing_values()
+
+    try:
+        pe.set_missing_ref_details()
+    except Exception:
+        pass
+
+    try:
+        pe.allocate_payment_amounts()
+    except Exception:
+        pass
+
     pe.set_amounts()
-    pe.paid_amount = base_change_amount
-    pe.received_amount = base_change_amount
+    pe.paid_amount = allocated_amount or base_change_amount
+    pe.received_amount = allocated_amount or base_change_amount
 
     pe.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
