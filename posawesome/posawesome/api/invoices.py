@@ -25,6 +25,7 @@ from frappe.utils import (
 from frappe.utils.background_jobs import enqueue
 
 from posawesome.posawesome.api.payments import (
+    get_overpayment_cash_return_remark,
     redeeming_customer_credit,
 )  # Updated import
 from posawesome.posawesome.api.utilities import (
@@ -88,6 +89,20 @@ def _is_stock_item(item):
     return bool(cint(frappe.get_cached_value("Item", item_code, "is_stock_item") or 0))
 
 
+def _is_cash_like_payment(payment):
+    """Identify cash-like payments based on mode or explicit type."""
+
+    if not payment:
+        return False
+
+    pay_type = cstr(payment.get("type") or "").lower()
+    if pay_type == "cash":
+        return True
+
+    mode_of_payment = cstr(payment.get("mode_of_payment") or "").lower()
+    return "cash" in mode_of_payment
+
+
 def _collect_stock_errors(items):
     """Return list of items exceeding available stock."""
     errors = []
@@ -108,6 +123,164 @@ def _collect_stock_errors(items):
                 }
             )
     return errors
+
+
+def _get_account_for_mode_of_payment(mode_of_payment, company):
+    """Return the linked account for a given mode of payment."""
+
+    if not mode_of_payment:
+        return None
+
+    account = get_bank_cash_account(mode_of_payment, company)
+    if not account:
+        return None
+
+    if isinstance(account, (dict, frappe._dict)):
+        return account.get("account")
+
+    return account
+
+
+def _get_base_change_amount(invoice_doc, data=None):
+    """Calculate overpayment in company currency."""
+
+    conversion_rate = flt(invoice_doc.conversion_rate) or 1
+    invoice_total_base = flt(
+        invoice_doc.base_rounded_total or invoice_doc.base_grand_total or 0,
+        invoice_doc.precision("base_grand_total"),
+    )
+
+    total_paid_base = 0
+    for payment in invoice_doc.get("payments", []):
+        if not payment:
+            continue
+
+        payment_amount = flt(payment.get("base_amount") or 0)
+        if not payment_amount:
+            payment_amount = flt(payment.get("amount") or 0) * conversion_rate
+
+        total_paid_base += payment_amount
+
+    change_base_amount = flt(max(total_paid_base - invoice_total_base, 0))
+
+    if data:
+        paid_change = flt(data.get("paid_change") or 0)
+        if paid_change:
+            paid_change_base = paid_change * conversion_rate
+            change_base_amount = min(change_base_amount, paid_change_base) or change_base_amount
+
+    return change_base_amount
+
+
+def _set_cash_change_on_invoice(invoice_doc, data):
+    """Store change amount on the invoice when cash is used for returns."""
+
+    if not data or invoice_doc.is_return:
+        return
+
+    change_amount = flt(data.get("paid_change") or 0)
+    conversion_rate = flt(invoice_doc.conversion_rate) or 1
+
+    if data.get("return_change_from_cash") and change_amount > 0:
+        invoice_doc.change_amount = change_amount
+        invoice_doc.base_change_amount = flt(
+            change_amount * conversion_rate, invoice_doc.precision("base_grand_total")
+        )
+        return
+
+    if data.get("return_change_from_cash") is not None:
+        invoice_doc.change_amount = 0
+        invoice_doc.base_change_amount = 0
+
+
+def _create_cash_return_journal_entry(invoice_doc, data):
+    """Create Journal Entry to move overpayment from non-cash to cash account."""
+
+    if not data or invoice_doc.is_return or not data.get("return_change_from_cash"):
+        return
+
+    change_base_amount = _get_base_change_amount(invoice_doc, data)
+    if change_base_amount <= 0:
+        return
+
+    payments = invoice_doc.get("payments", []) or []
+    non_cash_payment = None
+    for payment in payments:
+        if not payment or flt(payment.get("amount") or 0) <= 0:
+            continue
+        if not _is_cash_like_payment(payment):
+            non_cash_payment = payment
+            break
+
+    if not non_cash_payment:
+        return
+
+    cash_mode_of_payment = None
+    if invoice_doc.pos_profile:
+        cash_mode_of_payment = frappe.db.get_value(
+            "POS Profile", invoice_doc.pos_profile, "posa_cash_mode_of_payment"
+        )
+
+    if not cash_mode_of_payment:
+        return
+
+    source_account = _get_account_for_mode_of_payment(non_cash_payment.get("mode_of_payment"), invoice_doc.company)
+    target_account = _get_account_for_mode_of_payment(cash_mode_of_payment, invoice_doc.company)
+
+    if not source_account or not target_account or source_account == target_account:
+        return
+
+    remark = get_overpayment_cash_return_remark(invoice_doc.name)
+    already_exists = frappe.get_all(
+        "Journal Entry", filters={"docstatus": 1, "user_remark": remark}, pluck="name"
+    )
+    if already_exists:
+        return
+
+    jv_doc = frappe.get_doc(
+        {
+            "doctype": "Journal Entry",
+            "voucher_type": "Journal Entry",
+            "posting_date": invoice_doc.posting_date or nowdate(),
+            "company": invoice_doc.company,
+            "user_remark": remark,
+        }
+    )
+
+    debit_row = jv_doc.append("accounts", {})
+    debit_row.update(
+        {
+            "account": source_account,
+            "debit_in_account_currency": change_base_amount,
+            "reference_type": invoice_doc.doctype,
+            "reference_name": invoice_doc.name,
+            "cost_center": invoice_doc.get("cost_center") or None,
+        }
+    )
+
+    credit_row = jv_doc.append("accounts", {})
+    credit_row.update(
+        {
+            "account": target_account,
+            "credit_in_account_currency": change_base_amount,
+            "reference_type": invoice_doc.doctype,
+            "reference_name": invoice_doc.name,
+            "cost_center": invoice_doc.get("cost_center") or None,
+        }
+    )
+
+    ensure_child_doctype(jv_doc, "accounts", "Journal Entry Account")
+
+    jv_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    jv_doc.set_missing_values()
+
+    try:
+        jv_doc.save()
+        jv_doc.submit()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "POSAwesome Overpayment Cash Return Error")
+        frappe.throw(_("Unable to create Journal Entry for overpayment cash return."))
 
 
 def _merge_duplicate_taxes(invoice_doc):
@@ -717,6 +890,8 @@ def submit_invoice(invoice, data):
 
     _validate_stock_on_invoice(invoice_doc)
 
+    _set_cash_change_on_invoice(invoice_doc, data)
+
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
@@ -764,6 +939,7 @@ def submit_invoice(invoice, data):
     else:
         invoice_doc.submit()
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+        _create_cash_return_journal_entry(invoice_doc, data)
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
@@ -795,6 +971,7 @@ def submit_in_background_job(kwargs):
 
     invoice_doc.submit()
     redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+    _create_cash_return_journal_entry(invoice_doc, data)
 
 
 @frappe.whitelist()

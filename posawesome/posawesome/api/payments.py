@@ -19,6 +19,10 @@ def get_posawesome_credit_redeem_remark(invoice_name):
     return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
 
 
+def get_overpayment_cash_return_remark(invoice_name):
+    return _("POS Awesome overpayment cash return for Sales Invoice {0}").format(invoice_name)
+
+
 @frappe.whitelist()
 def create_payment_request(doc):
     doc = json.loads(doc)

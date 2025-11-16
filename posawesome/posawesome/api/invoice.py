@@ -8,7 +8,10 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, flt
 
 from posawesome.posawesome.api.utilities import get_company_domain  # Updated import
-from posawesome.posawesome.api.payments import get_posawesome_credit_redeem_remark
+from posawesome.posawesome.api.payments import (
+    get_overpayment_cash_return_remark,
+    get_posawesome_credit_redeem_remark,
+)
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
@@ -35,6 +38,7 @@ def before_cancel(doc, method):
 
 def on_cancel(doc, method):
     cancel_posawesome_credit_journal_entries(doc)
+    cancel_overpayment_cash_return_entries(doc)
 
 
 def cancel_posawesome_credit_journal_entries(doc):
@@ -64,6 +68,33 @@ def cancel_posawesome_credit_journal_entries(doc):
             frappe.log_error(
                 frappe.get_traceback(),
                 "POSAwesome Credit Journal Cancellation Error",
+            )
+            frappe.throw(
+                _(
+                    "Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
+                ).format(journal_entry)
+            )
+
+
+def cancel_overpayment_cash_return_entries(doc):
+    remark = get_overpayment_cash_return_remark(doc.name)
+    linked_journal_entries = frappe.get_all(
+        "Journal Entry",
+        filters={"docstatus": 1, "user_remark": remark},
+        pluck="name",
+    )
+
+    for journal_entry in linked_journal_entries:
+        je_doc = frappe.get_doc("Journal Entry", journal_entry)
+
+        if je_doc.docstatus != 1:
+            continue
+
+        try:
+            je_doc.cancel()
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(), "POSAwesome Overpayment Cash Return Cancellation Error"
             )
             frappe.throw(
                 _(

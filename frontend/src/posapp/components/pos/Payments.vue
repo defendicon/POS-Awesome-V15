@@ -44,11 +44,11 @@
 						></v-text-field>
 					</v-col>
 
-					<!-- Paid Change (if applicable) -->
+                                        <!-- Paid Change (if applicable) -->
                                         <v-col cols="7" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
-						<v-text-field
-							variant="solo"
-							color="primary"
+                                                <v-text-field
+                                                        variant="solo"
+                                                        color="primary"
 							:label="frappe._('Paid Change')"
 							class="sleek-field pos-themed-input"
 							:model-value="formatCurrency(paid_change)"
@@ -57,11 +57,11 @@
 							density="compact"
 							readonly
 							type="text"
-							@click="showPaidChange"
-						></v-text-field>
-					</v-col>
+                                                        @click="showPaidChange"
+                                                ></v-text-field>
+                                        </v-col>
 
-					<!-- Credit Change (if applicable) -->
+                                        <!-- Credit Change (if applicable) -->
                                         <v-col cols="5" v-if="invoice_doc && change_due > 0 && !invoice_doc.is_return">
                                                 <v-text-field
                                                         variant="solo"
@@ -74,11 +74,27 @@
                                                         type="text"
                                                         @change="
                                                                 setFormatedCurrency(this, 'credit_change', null, false, $event);
-								updateCreditChange(this.credit_change);
-							"
-						></v-text-field>
-					</v-col>
-				</v-row>
+                                                                updateCreditChange(this.credit_change);
+                                                        "
+                                                ></v-text-field>
+                                        </v-col>
+
+                                        <!-- Overpayment return toggle -->
+                                        <v-col cols="12" v-if="show_cash_return_option">
+                                                <v-radio-group
+                                                        v-model="return_change_from_cash"
+                                                        hide-details
+                                                        color="primary"
+                                                        class="my-0"
+                                                >
+                                                        <v-radio
+                                                                :label="frappe._('Return overpayment from cash')"
+                                                                :value="true"
+                                                        ></v-radio>
+                                                        <v-radio :label="frappe._('Keep existing behavior')" :value="false"></v-radio>
+                                                </v-radio-group>
+                                        </v-col>
+                                </v-row>
 
 				<v-divider></v-divider>
 
@@ -823,13 +839,14 @@ export default {
 			credit_due_days: null, // Number of days until due
 			credit_due_presets: [7, 14, 30], // Preset options for due days
 			customer_info: "", // Customer info
-			mpesa_modes: [], // List of available M-Pesa modes
-			sales_persons: [], // List of sales persons
-			sales_person: "", // Selected sales person
-			addresses: [], // List of customer addresses
-			is_user_editing_paid_change: false, // User interaction flag
+                        mpesa_modes: [], // List of available M-Pesa modes
+                        sales_persons: [], // List of sales persons
+                        sales_person: "", // Selected sales person
+                        addresses: [], // List of customer addresses
+                        is_user_editing_paid_change: false, // User interaction flag
                         highlightSubmit: false, // Highlight state for submit button
                         last_payment_change_was_cash: null, // Track last edited payment type
+                        return_change_from_cash: false, // Flag to return overpayment from cash
                 };
         },
 	computed: {
@@ -958,6 +975,32 @@ export default {
 
                         // Ensure change is not negative
                         return change > 0 ? change : 0;
+                },
+
+                has_non_cash_payment() {
+                        if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+                                return false;
+                        }
+
+                        return this.invoice_doc.payments.some((payment) => {
+                                return (
+                                        payment &&
+                                        this.flt(payment.amount || 0, this.currency_precision) > 0 &&
+                                        !this.isCashLikePayment(payment)
+                                );
+                        });
+                },
+
+                show_cash_return_option() {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return false;
+                        }
+
+                        if (this.change_due <= 0) {
+                                return false;
+                        }
+
+                        return this.has_non_cash_payment;
                 },
 
                 shouldAutoApplyCreditChange() {
@@ -1096,11 +1139,39 @@ export default {
                                 this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
                         }
                 },
-		// Watch loyalty_amount to handle loyalty points redemption
-		loyalty_amount(value) {
-			if (!this.invoice_doc) {
-				return;
-			}
+                show_cash_return_option(isAvailable) {
+                        if (!isAvailable && this.return_change_from_cash) {
+                                this.return_change_from_cash = false;
+                        }
+                },
+                return_change_from_cash(enabled) {
+                        const changeLimit = Math.max(-this.diff_payment, 0);
+
+                        if (!enabled) {
+                                if (this.shouldAutoApplyCreditChange && changeLimit > 0) {
+                                        this.updateCreditChange(changeLimit);
+                                }
+                                return;
+                        }
+
+                        if (changeLimit <= 0) {
+                                this.return_change_from_cash = false;
+                                return;
+                        }
+
+                        this.paid_change = changeLimit;
+                        this.credit_change = 0;
+
+                        if (this.invoice_doc) {
+                                this.invoice_doc.paid_change = changeLimit;
+                                this.invoice_doc.credit_change = 0;
+                        }
+                },
+                // Watch loyalty_amount to handle loyalty points redemption
+                loyalty_amount(value) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
 			if (value > this.available_points_amount) {
 				this.invoice_doc.loyalty_amount = 0;
 				this.invoice_doc.redeem_loyalty_points = 0;
@@ -1506,14 +1577,15 @@ export default {
 				this.paid_change = paidChange;
 			}
 
-			let data = {
-				total_change: changeLimit,
-				paid_change: paidChange,
-				credit_change: creditChange,
-				redeemed_customer_credit: this.redeemed_customer_credit,
-				customer_credit_dict: this.customer_credit_dict,
-				is_cashback: this.is_cashback,
-			};
+                        let data = {
+                                total_change: changeLimit,
+                                paid_change: paidChange,
+                                credit_change: creditChange,
+                                redeemed_customer_credit: this.redeemed_customer_credit,
+                                customer_credit_dict: this.customer_credit_dict,
+                                is_cashback: this.is_cashback,
+                                return_change_from_cash: this.return_change_from_cash,
+                        };
 
 			if (isOffline()) {
 				try {
