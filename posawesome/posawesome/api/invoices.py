@@ -82,22 +82,35 @@ def _get_payment_account(payment, company):
 
 
 def create_change_return_journal_entry(invoice_doc, data, cash_account=None, cash_mode_of_payment=None):
-    change_return_enabled = True if data is None else data.get("change_return_from_cash", True)
-    if not change_return_enabled or not data:
+    payload = data or {}
+
+    change_return_enabled = payload.get("change_return_from_cash", True)
+    if not change_return_enabled:
         return
 
-    paid_change = flt(data.get("paid_change") or 0)
+    paid_change = flt(payload.get("paid_change") or invoice_doc.get("paid_change") or 0)
     if paid_change <= 0 or invoice_doc.is_return:
         return
 
     cash_account_name = _get_account_name(cash_account)
+    fallback_cash_mop = cash_mode_of_payment
+
+    if not cash_account_name and invoice_doc.get("pos_profile"):
+        fallback_cash_mop = fallback_cash_mop or frappe.db.get_value(
+            "POS Profile", invoice_doc.pos_profile, "posa_cash_mode_of_payment"
+        )
+
+    if not cash_account_name and fallback_cash_mop:
+        cash_account = get_bank_cash_account(fallback_cash_mop, invoice_doc.company)
+        cash_account_name = _get_account_name(cash_account)
+
     if not cash_account_name:
         return
 
     conversion_rate = invoice_doc.conversion_rate or 1
     base_change_amount = flt(paid_change * conversion_rate)
 
-    cash_mode_lower = cstr(cash_mode_of_payment).lower()
+    cash_mode_lower = cstr(fallback_cash_mop).lower()
 
     non_cash_payments = []
     for payment in invoice_doc.payments:
