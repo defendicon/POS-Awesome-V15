@@ -4,10 +4,7 @@
 import json
 
 import frappe
-from erpnext.accounts.doctype.payment_entry.payment_entry import (
-    get_outstanding_reference_amount,
-    get_payment_entry,
-)
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.accounts.party import get_party_account
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -285,16 +282,16 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
 
     pe.set_missing_ref_details(force=True)
 
-    latest_outstanding = get_outstanding_reference_amount(
-        target_reference.reference_doctype,
-        target_reference.reference_name,
-        pe.company,
-        pe.party_type,
-        pe.party,
+    latest_outstanding = flt(
+        invoice_doc.get("outstanding_amount")
+        or frappe.db.get_value(
+            invoice_doc.doctype, invoice_doc.name, "outstanding_amount"
+        )
+        or 0
     )
 
-    if latest_outstanding and latest_outstanding > 0:
-        target_reference.allocated_amount = min(base_change_amount, flt(latest_outstanding))
+    if latest_outstanding > 0:
+        target_reference.allocated_amount = min(base_change_amount, latest_outstanding)
     else:
         target_reference.allocated_amount = 0
 
