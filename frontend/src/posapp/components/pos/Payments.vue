@@ -977,6 +977,38 @@ export default {
                         return change > 0 ? change : 0;
                 },
 
+                overpayment_amount() {
+                        if (!this.invoice_doc) {
+                                return 0;
+                        }
+
+                        let invoice_total;
+                        if (
+                                this.pos_profile.posa_allow_multi_currency &&
+                                this.invoice_doc.currency !== this.pos_profile.currency
+                        ) {
+                                invoice_total = this.flt(this.invoice_doc.grand_total, this.currency_precision);
+                        } else {
+                                invoice_total = this.flt(
+                                        this.invoice_doc.rounded_total || this.invoice_doc.grand_total,
+                                        this.currency_precision,
+                                );
+                        }
+
+                        const creditChange = this.credit_change
+                                ? this.flt(this.credit_change, this.currency_precision)
+                                : 0;
+                        const paidChange = this.paid_change ? this.flt(this.paid_change, this.currency_precision) : 0;
+
+                        const tenderedTotal = this.flt(
+                                this.total_payments - creditChange - paidChange,
+                                this.currency_precision,
+                        );
+
+                        const overpayment = this.flt(tenderedTotal - invoice_total, this.currency_precision);
+                        return overpayment > 0 ? overpayment : 0;
+                },
+
                 has_non_cash_payment() {
                         if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
                                 return false;
@@ -996,7 +1028,7 @@ export default {
                                 return false;
                         }
 
-                        if (this.change_due <= 0) {
+                        if (this.overpayment_amount <= 0) {
                                 return false;
                         }
 
@@ -1099,6 +1131,10 @@ export default {
 	watch: {
 		// Watch diff_payment to update paid_change
                 diff_payment(newVal) {
+                        if (this.return_change_from_cash) {
+                                return;
+                        }
+
                         if (this.is_user_editing_paid_change) {
                                 return;
                         }
@@ -1121,7 +1157,7 @@ export default {
                 },
                 // Watch paid_change to validate and update credit_change
                 paid_change(newVal) {
-                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        const changeLimit = this.overpayment_amount;
                         if (newVal > changeLimit) {
                                 this.paid_change = changeLimit;
                                 this.credit_change = 0;
@@ -1145,7 +1181,7 @@ export default {
                         }
                 },
                 return_change_from_cash(enabled) {
-                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        const changeLimit = this.overpayment_amount;
 
                         if (!enabled) {
                                 if (this.shouldAutoApplyCreditChange && changeLimit > 0) {
@@ -1448,7 +1484,7 @@ export default {
 					}
 				}
 				// Validate paid_change
-				const changeLimit = Math.max(-this.diff_payment, 0);
+                                const changeLimit = this.overpayment_amount;
 				if (this.paid_change > changeLimit) {
 					this.eventBus.emit("show_message", {
 						title: `Paid change cannot be greater than total change!`,
@@ -1559,7 +1595,7 @@ export default {
 					row.credit_to_redeem = this.flt(row.credit_to_redeem);
 				});
 			}
-			const changeLimit = !this.invoice_doc.is_return ? Math.max(-this.diff_payment, 0) : 0;
+                        const changeLimit = !this.invoice_doc.is_return ? this.overpayment_amount : 0;
 			const paidChange = !this.invoice_doc.is_return
 				? this.flt(Math.min(this.paid_change, changeLimit), this.currency_precision)
 				: 0;
@@ -2276,7 +2312,7 @@ export default {
                         return mode.includes("cash");
                 },
                 updateCreditChange(rawValue) {
-                        const changeLimit = Math.max(-this.diff_payment, 0);
+                        const changeLimit = !this.invoice_doc?.is_return ? this.overpayment_amount : 0;
                         let requestedCredit = this.flt(Math.abs(rawValue) || 0, this.currency_precision);
 
                         if (requestedCredit > changeLimit) {
