@@ -238,7 +238,6 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
             invoice_doc.doctype,
             invoice_doc.name,
             bank_account=cash_account_name,
-            payment_type="Pay",
             party_amount=paid_change,
         )
     except Exception:
@@ -277,31 +276,43 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     pe.set_missing_values()
     pe.set_missing_ref_details()
 
-    # Align references with the invoice and cap allocation by outstanding
+    # Align references with the invoice and cap allocation by the latest outstanding
     latest_outstanding = flt(
         frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "outstanding_amount")
     )
-    allocated_amount = max(0, min(base_change_amount, latest_outstanding))
+    allocated_amount = 0
 
-    # Rebuild the reference rows after helper calculations to ensure they persist
-    pe.set("references", [])
-    pe.append(
-        "references",
-        {
-            "reference_doctype": invoice_doc.doctype,
-            "reference_name": invoice_doc.name,
-            "outstanding_amount": latest_outstanding,
-            "allocated_amount": allocated_amount,
-            "total_amount": invoice_doc.get("base_grand_total")
-            or invoice_doc.get("grand_total"),
-            "due_date": invoice_doc.get("due_date")
-            or invoice_doc.get("posting_date")
-            or nowdate(),
-        },
+    target_reference = None
+    for ref in pe.get("references", []):
+        if ref.reference_doctype == invoice_doc.doctype and ref.reference_name == invoice_doc.name:
+            target_reference = ref
+            break
+
+    if not target_reference:
+        pe.append(
+            "references",
+            {
+                "reference_doctype": invoice_doc.doctype,
+                "reference_name": invoice_doc.name,
+            },
+        )
+        target_reference = pe.references[-1]
+
+    if latest_outstanding:
+        allocated_amount = min(base_change_amount, abs(latest_outstanding))
+
+    target_reference.reference_doctype = invoice_doc.doctype
+    target_reference.reference_name = invoice_doc.name
+    target_reference.outstanding_amount = latest_outstanding
+    target_reference.allocated_amount = allocated_amount
+    target_reference.total_amount = (
+        invoice_doc.get("base_grand_total") or invoice_doc.get("grand_total")
+    )
+    target_reference.due_date = (
+        invoice_doc.get("due_date") or invoice_doc.get("posting_date") or nowdate()
     )
 
     pe.set_missing_ref_details(force=True)
-    pe.unallocated_amount = max(0, base_change_amount - allocated_amount)
 
     ensure_child_doctype(pe, "references", "Payment Entry Reference")
     pe.flags.ignore_permissions = True
