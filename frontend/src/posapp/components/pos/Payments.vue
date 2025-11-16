@@ -996,7 +996,7 @@ export default {
                         }
 
                         const creditChange = this.credit_change
-                                ? this.flt(this.credit_change, this.currency_precision)
+                                ? Math.abs(this.flt(this.credit_change, this.currency_precision))
                                 : 0;
                         const paidChange = this.paid_change ? this.flt(this.paid_change, this.currency_precision) : 0;
 
