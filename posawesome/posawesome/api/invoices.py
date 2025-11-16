@@ -59,6 +59,119 @@ def _apply_item_name_overrides(invoice_doc, overrides=None):
             item.name_overridden = 0
 
 
+def _get_account_name(account_details):
+    if isinstance(account_details, (dict, frappe._dict)):
+        return account_details.get("account")
+
+    return account_details
+
+
+def _get_base_payment_amount(payment, conversion_rate):
+    if payment.get("base_amount") is not None:
+        return flt(payment.get("base_amount"))
+
+    return flt(payment.get("amount") or 0) * flt(conversion_rate or 1)
+
+
+def _get_payment_account(payment, company):
+    if payment.get("account"):
+        return payment.get("account")
+
+    account_details = get_bank_cash_account(payment.get("mode_of_payment"), company)
+    return _get_account_name(account_details)
+
+
+def create_change_return_journal_entry(invoice_doc, data, cash_account=None, cash_mode_of_payment=None):
+    change_return_enabled = True if data is None else data.get("change_return_from_cash", True)
+    if not change_return_enabled or not data:
+        return
+
+    paid_change = flt(data.get("paid_change") or 0)
+    if paid_change <= 0 or invoice_doc.is_return:
+        return
+
+    cash_account_name = _get_account_name(cash_account)
+    if not cash_account_name:
+        return
+
+    conversion_rate = invoice_doc.conversion_rate or 1
+    base_change_amount = flt(paid_change * conversion_rate)
+
+    cash_mode_lower = cstr(cash_mode_of_payment).lower()
+
+    non_cash_payments = []
+    for payment in invoice_doc.payments:
+        if not payment.get("mode_of_payment"):
+            continue
+
+        if cash_mode_lower and cstr(payment.mode_of_payment).lower() == cash_mode_lower:
+            continue
+
+        if cstr(payment.get("type")).lower() == "cash":
+            continue
+
+        base_amount = _get_base_payment_amount(payment, conversion_rate)
+        if base_amount <= 0:
+            continue
+
+        payment_account = _get_payment_account(payment, invoice_doc.company)
+        if not payment_account:
+            continue
+
+        non_cash_payments.append({"account": payment_account, "base_amount": base_amount})
+
+    total_base = sum(row["base_amount"] for row in non_cash_payments)
+    if not total_base:
+        return
+
+    precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency") or 2
+    je_doc = frappe.new_doc("Journal Entry")
+    je_doc.voucher_type = "Journal Entry"
+    je_doc.posting_date = invoice_doc.get("posting_date") or nowdate()
+    je_doc.company = invoice_doc.company
+    je_doc.user_remark = _("Change returned from cash for {0}").format(invoice_doc.name)
+
+    remaining = base_change_amount
+    for idx, row in enumerate(non_cash_payments):
+        amount = base_change_amount * (row["base_amount"] / total_base)
+        if idx == len(non_cash_payments) - 1:
+            amount = remaining
+
+        amount = flt(amount, precision)
+        remaining = flt(remaining - amount, precision)
+
+        if amount <= 0:
+            continue
+
+        debit_row = je_doc.append("accounts", {})
+        debit_row.update(
+            {
+                "account": row["account"],
+                "debit_in_account_currency": amount,
+                "reference_type": invoice_doc.doctype,
+                "reference_name": invoice_doc.name,
+            }
+        )
+
+        credit_row = je_doc.append("accounts", {})
+        credit_row.update(
+            {
+                "account": cash_account_name,
+                "credit_in_account_currency": amount,
+                "reference_type": invoice_doc.doctype,
+                "reference_name": invoice_doc.name,
+            }
+        )
+
+    ensure_child_doctype(je_doc, "accounts", "Journal Entry Account")
+
+    je_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    je_doc.set_missing_values()
+    je_doc.save()
+    je_doc.submit()
+
+
 def _get_available_stock(item):
     """Return available stock qty for an item row."""
     warehouse = item.get("warehouse")
@@ -601,10 +714,20 @@ def submit_invoice(invoice, data):
         for i in invoice_doc.payments
         if "cash" in i.mode_of_payment.lower() and i.type == "Cash"
     ]
+    cash_mode_of_payment = None
     if len(mop_cash_list) > 0:
-        cash_account = get_bank_cash_account(mop_cash_list[0], invoice_doc.company)
+        cash_mode_of_payment = mop_cash_list[0]
+        cash_account = get_bank_cash_account(cash_mode_of_payment, invoice_doc.company)
     else:
-        cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
+        cash_mode_of_payment = (
+            frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment")
+            or "Cash"
+        )
+        cash_account = get_bank_cash_account(cash_mode_of_payment, invoice_doc.company)
+        if not cash_account:
+            cash_account = {
+                "account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")
+            }
 
     # Update remarks with items details
     items = []
@@ -758,11 +881,18 @@ def submit_invoice(invoice, data):
                     "is_payment_entry": is_payment_entry,
                     "total_cash": total_cash,
                     "cash_account": cash_account,
+                    "cash_mode_of_payment": cash_mode_of_payment,
                     "payments": payments,
                 },
             )
     else:
         invoice_doc.submit()
+        create_change_return_journal_entry(
+            invoice_doc,
+            data,
+            cash_account=cash_account,
+            cash_mode_of_payment=cash_mode_of_payment,
+        )
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
@@ -775,6 +905,7 @@ def submit_in_background_job(kwargs):
     is_payment_entry = kwargs.get("is_payment_entry")
     total_cash = kwargs.get("total_cash")
     cash_account = kwargs.get("cash_account")
+    cash_mode_of_payment = kwargs.get("cash_mode_of_payment")
     payments = kwargs.get("payments")
 
     invoice_doc = frappe.get_doc(doctype, invoice)
@@ -794,6 +925,12 @@ def submit_in_background_job(kwargs):
     invoice_doc.save()
 
     invoice_doc.submit()
+    create_change_return_journal_entry(
+        invoice_doc,
+        data,
+        cash_account=cash_account,
+        cash_mode_of_payment=cash_mode_of_payment,
+    )
     redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
 

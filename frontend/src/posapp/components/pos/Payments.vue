@@ -490,11 +490,11 @@
 				<v-divider></v-divider>
 
 				<!-- Switches for Write Off and Credit Sale -->
-				<v-row class="pa-1" align="start" no-gutters>
-					<v-col
-						cols="6"
-						v-if="
-							invoice_doc &&
+                                <v-row class="pa-1" align="start" no-gutters>
+                                        <v-col
+                                                cols="6"
+                                                v-if="
+                                                        invoice_doc &&
 							pos_profile.posa_allow_write_off_change &&
 							credit_change > 0 &&
 							!invoice_doc.is_return
@@ -504,20 +504,38 @@
 							v-model="is_write_off_change"
 							flat
 							:label="frappe._('Write Off Difference Amount')"
-							class="my-0 pa-1"
-						></v-switch>
-					</v-col>
-					<v-col
-						cols="6"
+                                                        class="my-0 pa-1"
+                                                ></v-switch>
+                                        </v-col>
+                                        <v-col
+                                                cols="6"
 						v-if="invoice_doc && pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
 					>
-						<v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
-					</v-col>
-					<v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
-						<v-switch
-							v-model="is_cashback"
-							flat
-							:label="frappe._('Cashback?')"
+                                                <v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
+                                        </v-col>
+                                        <v-col
+                                                cols="12"
+                                                v-if="invoice_doc && !invoice_doc.is_return && change_due > 0"
+                                        >
+                                                <v-radio-group
+                                                        v-model="change_return_from_cash"
+                                                        inline
+                                                        hide-details
+                                                        :label="frappe._('Overpayment Change Return')"
+                                                        class="my-0 pa-1"
+                                                >
+                                                        <v-radio :label="frappe._('Return from Cash')" :value="true"></v-radio>
+                                                        <v-radio
+                                                                :label="frappe._('Do Not Return from Cash')"
+                                                                :value="false"
+                                                        ></v-radio>
+                                                </v-radio-group>
+                                        </v-col>
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
+                                                <v-switch
+                                                        v-model="is_cashback"
+                                                        flat
+                                                        :label="frappe._('Cashback?')"
 							class="my-0 pa-1"
 						></v-switch>
 					</v-col>
@@ -805,14 +823,15 @@ export default {
 			is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
 			redeemed_customer_credit: 0, // Customer credit to redeem
-			credit_change: 0, // Change to be given as credit
-			paid_change: 0, // Change to be given as paid
-			is_credit_sale: false, // Is this a credit sale?
-			is_write_off_change: false, // Write-off for change enabled
-			is_cashback: true, // Cashback enabled
-			is_credit_return: false, // Is this a credit return?
-			redeem_customer_credit: false, // Redeem customer credit?
-			customer_credit_dict: [], // List of available customer credits
+                        credit_change: 0, // Change to be given as credit
+                        paid_change: 0, // Change to be given as paid
+                        is_credit_sale: false, // Is this a credit sale?
+                        is_write_off_change: false, // Write-off for change enabled
+                        change_return_from_cash: true, // Default overpayment change from cash
+                        is_cashback: true, // Cashback enabled
+                        is_credit_return: false, // Is this a credit return?
+                        redeem_customer_credit: false, // Redeem customer credit?
+                        customer_credit_dict: [], // List of available customer credits
 			paid_change_rules: [], // Validation rules for paid change
 			phone_dialog: false, // Show phone payment dialog
 			custom_days_dialog: false, // Show custom days dialog
@@ -965,6 +984,10 @@ export default {
                                 return false;
                         }
 
+                        if (this.change_return_from_cash) {
+                                return false;
+                        }
+
                         if (this.change_due <= 0) {
                                 return false;
                         }
@@ -1061,11 +1084,14 @@ export default {
                         }
 
                         const lastEditWasCash = this.last_payment_change_was_cash;
+                        const shouldAutoCreditChange =
+                                !this.change_return_from_cash &&
+                                (this.shouldAutoApplyCreditChange || lastEditWasCash === false);
 
                         if (newVal < 0) {
                                 const changeDue = -newVal;
 
-                                if (this.shouldAutoApplyCreditChange || lastEditWasCash === false) {
+                                if (shouldAutoCreditChange) {
                                         this.updateCreditChange(changeDue);
                                 } else {
                                         this.paid_change = changeDue;
@@ -1075,6 +1101,22 @@ export default {
                         }
 
                         this.last_payment_change_was_cash = null;
+                },
+                change_return_from_cash(newVal) {
+                        if (!this.invoice_doc || this.invoice_doc.is_return) {
+                                return;
+                        }
+
+                        const changeDue = Math.max(-this.diff_payment, 0);
+
+                        if (newVal) {
+                                this.paid_change = changeDue;
+                                this.credit_change = 0;
+                                this.invoice_doc.paid_change = changeDue;
+                                this.invoice_doc.credit_change = 0;
+                        } else if (changeDue > 0 && this.shouldAutoApplyCreditChange) {
+                                this.updateCreditChange(changeDue);
+                        }
                 },
                 // Watch paid_change to validate and update credit_change
                 paid_change(newVal) {
@@ -1506,14 +1548,15 @@ export default {
 				this.paid_change = paidChange;
 			}
 
-			let data = {
-				total_change: changeLimit,
-				paid_change: paidChange,
-				credit_change: creditChange,
-				redeemed_customer_credit: this.redeemed_customer_credit,
-				customer_credit_dict: this.customer_credit_dict,
-				is_cashback: this.is_cashback,
-			};
+                        let data = {
+                                total_change: changeLimit,
+                                paid_change: paidChange,
+                                credit_change: creditChange,
+                                redeemed_customer_credit: this.redeemed_customer_credit,
+                                customer_credit_dict: this.customer_credit_dict,
+                                is_cashback: this.is_cashback,
+                                change_return_from_cash: this.change_return_from_cash,
+                        };
 
 			if (isOffline()) {
 				try {
@@ -2274,11 +2317,12 @@ export default {
 	mounted() {
 		this.$nextTick(() => {
 			// Listen to various event bus events for POS actions
-			this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
-				this.invoice_doc = invoice_doc;
-				const default_payment = this.invoice_doc.payments.find((payment) => payment.default === 1);
-				this.is_credit_sale = false;
-				this.is_write_off_change = false;
+                                this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
+                                        this.invoice_doc = invoice_doc;
+                                        this.change_return_from_cash = true;
+                                        const default_payment = this.invoice_doc.payments.find((payment) => payment.default === 1);
+                                        this.is_credit_sale = false;
+                                        this.is_write_off_change = false;
 				if (invoice_doc.is_return) {
 					this.is_return = true;
 					this.is_credit_return = false;
