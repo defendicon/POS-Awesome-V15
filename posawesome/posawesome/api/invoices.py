@@ -575,6 +575,7 @@ def submit_invoice(invoice, data):
     invoice = json.loads(invoice)
     _strip_client_freebies_from_payload(invoice)
     pos_profile = invoice.get("pos_profile")
+    paid_change = flt(data.get("paid_change") or 0)
     doctype = "Sales Invoice"
     if pos_profile and frappe.db.get_value(
         "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
@@ -596,15 +597,52 @@ def submit_invoice(invoice, data):
     _apply_item_name_overrides(invoice_doc)
     if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
-    mop_cash_list = [
-        i.mode_of_payment
-        for i in invoice_doc.payments
-        if "cash" in i.mode_of_payment.lower() and i.type == "Cash"
-    ]
-    if len(mop_cash_list) > 0:
-        cash_account = get_bank_cash_account(mop_cash_list[0], invoice_doc.company)
-    else:
+
+    cash_mode_of_payment = None
+    cash_payment_row = None
+    for payment in invoice_doc.get("payments", []):
+        if not payment:
+            continue
+        if "cash" in cstr(payment.get("mode_of_payment") or "").lower() and cstr(
+            payment.get("type") or ""
+        ).lower() == "cash":
+            cash_mode_of_payment = payment.get("mode_of_payment")
+            cash_payment_row = payment
+            break
+
+    if not cash_mode_of_payment and pos_profile:
+        cash_mode_of_payment = (
+            frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment") or "Cash"
+        )
+
+    if paid_change > 0 and not cint(invoice_doc.get("is_return")):
+        conversion_rate = flt(invoice_doc.get("conversion_rate") or 1)
+        invoice_doc.change_amount = paid_change
+        invoice_doc.base_change_amount = flt(paid_change * conversion_rate)
+
+        if not cash_payment_row:
+            cash_payment_row = invoice_doc.append("payments", {})
+            cash_payment_row.mode_of_payment = cash_mode_of_payment or "Cash"
+            cash_payment_row.type = "Cash"
+            cash_payment_row.amount = 0
+            cash_payment_row.base_amount = 0
+            cash_mode_of_payment = cash_payment_row.mode_of_payment
+
+        cash_payment_row.change_amount = paid_change
+        cash_payment_row.base_change_amount = flt(paid_change * conversion_rate)
+
+    cash_account = None
+    if cash_mode_of_payment:
+        cash_account = get_bank_cash_account(cash_mode_of_payment, invoice_doc.company)
+    if not cash_account:
         cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
+
+    if paid_change > 0 and cash_payment_row:
+        cash_account_name = (
+            cash_account.get("account") if isinstance(cash_account, (dict, frappe._dict)) else cash_account
+        )
+        if cash_account_name:
+            cash_payment_row.account = cash_account_name
 
     # Update remarks with items details
     items = []
@@ -621,18 +659,6 @@ def submit_invoice(invoice, data):
 
     # creating advance payment
     if data.get("credit_change"):
-        cash_mode_of_payment = None
-        for payment in invoice_doc.payments:
-            if payment.get("type") == "Cash" and payment.get("mode_of_payment"):
-                cash_mode_of_payment = payment.get("mode_of_payment")
-                break
-
-        if not cash_mode_of_payment and pos_profile:
-            cash_mode_of_payment = (
-                frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment")
-                or "Cash"
-            )
-
         posting_date = invoice_doc.get("posting_date") or nowdate()
         reference_no = invoice_doc.get("posa_pos_opening_shift")
 

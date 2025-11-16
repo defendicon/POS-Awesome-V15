@@ -513,27 +513,42 @@
 					>
 						<v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
 					</v-col>
-					<v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
-						<v-switch
-							v-model="is_cashback"
-							flat
-							:label="frappe._('Cashback?')"
-							class="my-0 pa-1"
-						></v-switch>
-					</v-col>
-					<v-col cols="6" v-if="invoice_doc && invoice_doc.is_return">
-						<v-switch
-							v-model="is_credit_return"
-							flat
-							:label="frappe._('Credit Return?')"
-							class="my-0 pa-1"
-						></v-switch>
-					</v-col>
-					<v-col cols="6" v-if="is_credit_sale">
-						<VueDatePicker
-							v-model="new_credit_due_date"
-							model-type="format"
-							format="dd-MM-yyyy"
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return && pos_profile.use_cashback">
+                                                <v-switch
+                                                        v-model="is_cashback"
+                                                        flat
+                                                        :label="frappe._('Cashback?')"
+                                                        class="my-0 pa-1"
+                                                ></v-switch>
+                                        </v-col>
+                                        <v-col cols="6" v-if="invoice_doc && invoice_doc.is_return">
+                                                <v-switch
+                                                        v-model="is_credit_return"
+                                                        flat
+                                                        :label="frappe._('Credit Return?')"
+                                                        class="my-0 pa-1"
+                                                ></v-switch>
+                                        </v-col>
+                                        <v-col
+                                                cols="6"
+                                                v-if="
+                                                        invoice_doc &&
+                                                        !invoice_doc.is_return &&
+                                                        pos_profile && pos_profile.posa_cash_mode_of_payment
+                                                "
+                                        >
+                                                <v-switch
+                                                        v-model="prefer_cash_change"
+                                                        flat
+                                                        :label="frappe._('Prefer Cash Change (uses Cash Mode)')"
+                                                        class="my-0 pa-1"
+                                                ></v-switch>
+                                        </v-col>
+                                        <v-col cols="6" v-if="is_credit_sale">
+                                                <VueDatePicker
+                                                        v-model="new_credit_due_date"
+                                                        model-type="format"
+                                                        format="dd-MM-yyyy"
 							:min-date="new Date()"
 							auto-apply
 							class="sleek-field pos-themed-input"
@@ -807,14 +822,15 @@ export default {
 			redeemed_customer_credit: 0, // Customer credit to redeem
 			credit_change: 0, // Change to be given as credit
 			paid_change: 0, // Change to be given as paid
-			is_credit_sale: false, // Is this a credit sale?
-			is_write_off_change: false, // Write-off for change enabled
-			is_cashback: true, // Cashback enabled
-			is_credit_return: false, // Is this a credit return?
-			redeem_customer_credit: false, // Redeem customer credit?
-			customer_credit_dict: [], // List of available customer credits
-			paid_change_rules: [], // Validation rules for paid change
-			phone_dialog: false, // Show phone payment dialog
+                        is_credit_sale: false, // Is this a credit sale?
+                        is_write_off_change: false, // Write-off for change enabled
+                        is_cashback: true, // Cashback enabled
+                        is_credit_return: false, // Is this a credit return?
+                        redeem_customer_credit: false, // Redeem customer credit?
+                        customer_credit_dict: [], // List of available customer credits
+                        paid_change_rules: [], // Validation rules for paid change
+                        prefer_cash_change: false, // Prefer giving change in cash when possible when a cash mode exists
+                        phone_dialog: false, // Show phone payment dialog
 			custom_days_dialog: false, // Show custom days dialog
 			custom_days_value: null, // Custom days entry
 			new_delivery_date: null, // New delivery date value
@@ -973,6 +989,8 @@ export default {
                                 ? this.invoice_doc.payments
                                 : [];
 
+                        const hasCashLikeMode = payments.some((payment) => this.isCashLikePayment(payment));
+
                         const totals = payments.reduce(
                                 (accumulator, payment) => {
                                         if (!payment) {
@@ -991,6 +1009,10 @@ export default {
                                 },
                                 { cash: 0, nonCash: 0 },
                         );
+
+                        if (this.prefer_cash_change && hasCashLikeMode) {
+                                return false;
+                        }
 
                         return totals.nonCash > 0 && totals.cash === 0;
                 },
@@ -1065,7 +1087,11 @@ export default {
                         if (newVal < 0) {
                                 const changeDue = -newVal;
 
-                                if (this.shouldAutoApplyCreditChange || lastEditWasCash === false) {
+                                const shouldForceCredit =
+                                        this.shouldAutoApplyCreditChange ||
+                                        (!this.prefer_cash_change && lastEditWasCash === false);
+
+                                if (shouldForceCredit) {
                                         this.updateCreditChange(changeDue);
                                 } else {
                                         this.paid_change = changeDue;
@@ -1096,11 +1122,31 @@ export default {
                                 this.invoice_doc.credit_change = creditAmount > 0 ? creditAmount : 0;
                         }
                 },
-		// Watch loyalty_amount to handle loyalty points redemption
-		loyalty_amount(value) {
-			if (!this.invoice_doc) {
-				return;
-			}
+                prefer_cash_change() {
+                        if (this.is_user_editing_paid_change) {
+                                return;
+                        }
+
+                        this.persistCashChangePreference(this.pos_profile, this.prefer_cash_change);
+
+                        if (!this.invoice_doc || this.invoice_doc.is_return || this.change_due <= 0) {
+                                return;
+                        }
+
+                        const changeDue = this.change_due;
+
+                        if (this.shouldAutoApplyCreditChange) {
+                                this.updateCreditChange(changeDue);
+                        } else {
+                                this.updateCreditChange(0);
+                                this.paid_change = changeDue;
+                        }
+                },
+                // Watch loyalty_amount to handle loyalty points redemption
+                loyalty_amount(value) {
+                        if (!this.invoice_doc) {
+                                return;
+                        }
 			if (value > this.available_points_amount) {
 				this.invoice_doc.loyalty_amount = 0;
 				this.invoice_doc.redeem_loyalty_points = 0;
@@ -2203,6 +2249,26 @@ export default {
                         const mode = String(payment.mode_of_payment || "").toLowerCase();
                         return mode.includes("cash");
                 },
+                getCashChangePreference(posProfile) {
+                        const profileName = posProfile?.name;
+                        const storedValue = profileName
+                                ? localStorage.getItem(`prefer_cash_change_${profileName}`)
+                                : null;
+
+                        if (storedValue !== null) {
+                                return storedValue === "true";
+                        }
+
+                        return Boolean(posProfile?.posa_cash_mode_of_payment);
+                },
+                persistCashChangePreference(posProfile, value) {
+                        const profileName = posProfile?.name;
+                        if (!profileName) {
+                                return;
+                        }
+
+                        localStorage.setItem(`prefer_cash_change_${profileName}`, value ? "true" : "false");
+                },
                 updateCreditChange(rawValue) {
                         const changeLimit = Math.max(-this.diff_payment, 0);
                         let requestedCredit = this.flt(Math.abs(rawValue) || 0, this.currency_precision);
@@ -2311,11 +2377,14 @@ export default {
 				}
 				this.get_sales_person_names();
 			});
-			this.eventBus.on("register_pos_profile", (data) => {
-				this.pos_profile = data.pos_profile;
-				this.stock_settings = data.stock_settings || {};
-				this.get_mpesa_modes();
-			});
+                        this.eventBus.on("register_pos_profile", (data) => {
+                                this.pos_profile = data.pos_profile;
+                                this.stock_settings = data.stock_settings || {};
+                                this.prefer_cash_change = this.getCashChangePreference(
+                                        this.pos_profile,
+                                );
+                                this.get_mpesa_modes();
+                        });
 			this.eventBus.on("add_the_new_address", (data) => {
 				const normalized = this.normalizeAddress(data);
 				if (normalized) {

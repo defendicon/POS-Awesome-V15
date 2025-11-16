@@ -440,7 +440,7 @@
 		"columns": 0,
 		"default": null,
 		"depends_on": null,
-		"description": "For POS Closing Shift Payment Reconciliation",
+                "description": "For POS Closing Shift Payment Reconciliation and to prefer returning change in cash using this Mode of Payment.",
 		"docstatus": 0,
 		"doctype": "Custom Field",
 		"dt": "POS Profile",
