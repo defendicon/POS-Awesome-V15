@@ -31,6 +31,7 @@ def before_submit(doc, method):
 
 def before_cancel(doc, method):
     update_coupon(doc, "cancelled")
+    cancel_change_return_payment_entries(doc)
 
 
 def on_cancel(doc, method):
@@ -69,6 +70,46 @@ def cancel_posawesome_credit_journal_entries(doc):
                 _(
                     "Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
                 ).format(journal_entry)
+            )
+
+
+def cancel_change_return_payment_entries(doc):
+    change_return_payments = frappe.get_all(
+        "Payment Entry",
+        filters={
+            "docstatus": 1,
+            "payment_type": "Pay",
+            "party_type": "Customer",
+            "reference_no": doc.name,
+        },
+        pluck="name",
+    )
+
+    if not change_return_payments:
+        return
+
+    for payment_name in change_return_payments:
+        payment_doc = frappe.get_doc("Payment Entry", payment_name)
+
+        has_reference = any(
+            ref.reference_doctype == doc.doctype and ref.reference_name == doc.name
+            for ref in payment_doc.get("references", [])
+        )
+
+        if not has_reference:
+            continue
+
+        try:
+            payment_doc.cancel()
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(),
+                "POSAwesome Change Return Payment Cancellation Error",
+            )
+            frappe.throw(
+                _(
+                    "Unable to cancel Payment Entry {0} linked to this invoice. Please cancel it manually and try again."
+                ).format(payment_name)
             )
 
 

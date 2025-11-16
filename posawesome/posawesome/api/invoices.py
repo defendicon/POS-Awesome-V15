@@ -238,6 +238,9 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     pe.reference_no = invoice_doc.name
     pe.reference_date = pe.posting_date
 
+    if not invoice_doc.get("outstanding_amount"):
+        invoice_doc.reload()
+
     invoice_outstanding = frappe.db.get_value(
         invoice_doc.doctype, invoice_doc.name, "outstanding_amount"
     )
@@ -247,11 +250,9 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
         else invoice_outstanding
     )
     invoice_outstanding = flt(invoice_outstanding)
-    allocated_amount = (
-        min(base_change_amount, invoice_outstanding)
-        if invoice_outstanding > 0
-        else 0
-    )
+    allocated_amount = 0
+    if invoice_outstanding > 0:
+        allocated_amount = min(base_change_amount, invoice_outstanding)
 
     pe.append(
         "references",
@@ -265,6 +266,8 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
             "due_date": invoice_doc.get("due_date") or pe.posting_date,
         },
     )
+
+    pe.remarks = _("Change return for {0}").format(invoice_doc.name)
 
     pe.setup_party_account_field()
     pe.set_missing_values()
