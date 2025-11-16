@@ -238,35 +238,33 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
     if invoice_outstanding > 0:
         allocated_amount = min(base_change_amount, invoice_outstanding)
 
-    pe = frappe.get_doc(
+    pe = frappe.new_doc("Payment Entry")
+    pe.payment_type = "Pay"
+    pe.company = invoice_doc.company
+    pe.mode_of_payment = selected_mode_of_payment
+    pe.party_type = "Customer"
+    pe.party = invoice_doc.get("customer")
+    pe.posting_date = invoice_doc.get("posting_date") or nowdate()
+    pe.paid_from = cash_account_name
+    pe.paid_to = party_account
+    pe.reference_no = invoice_doc.name
+    pe.reference_date = invoice_doc.get("posting_date") or nowdate()
+    pe.paid_amount = base_change_amount
+    pe.received_amount = base_change_amount
+
+    pe.append(
+        "references",
         {
-            "doctype": "Payment Entry",
-            "payment_type": "Pay",
-            "company": invoice_doc.company,
-            "mode_of_payment": selected_mode_of_payment,
-            "party_type": "Customer",
-            "party": invoice_doc.get("customer"),
-            "posting_date": invoice_doc.get("posting_date") or nowdate(),
-            "paid_from": cash_account_name,
-            "paid_to": party_account,
-            "reference_no": invoice_doc.name,
-            "reference_date": invoice_doc.get("posting_date") or nowdate(),
-            "paid_amount": base_change_amount,
-            "received_amount": base_change_amount,
-            "references": [
-                {
-                    "reference_doctype": invoice_doc.doctype,
-                    "reference_name": invoice_doc.name,
-                    "allocated_amount": allocated_amount,
-                    "total_amount": invoice_doc.get("base_grand_total")
-                    or invoice_doc.get("grand_total"),
-                    "outstanding_amount": invoice_outstanding,
-                    "due_date": invoice_doc.get("due_date")
-                    or invoice_doc.get("posting_date")
-                    or nowdate(),
-                }
-            ],
-        }
+            "reference_doctype": invoice_doc.doctype,
+            "reference_name": invoice_doc.name,
+            "allocated_amount": allocated_amount,
+            "total_amount": invoice_doc.get("base_grand_total")
+            or invoice_doc.get("grand_total"),
+            "outstanding_amount": invoice_outstanding,
+            "due_date": invoice_doc.get("due_date")
+            or invoice_doc.get("posting_date")
+            or nowdate(),
+        },
     )
 
     pe.remarks = _("Change return for {0}").format(invoice_doc.name)
