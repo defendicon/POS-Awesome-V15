@@ -246,8 +246,13 @@ def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cas
         if invoice_outstanding is None
         else invoice_outstanding
     )
-    invoice_outstanding = max(flt(invoice_outstanding), 0)
-    allocated_amount = min(base_change_amount, invoice_outstanding)
+    invoice_outstanding = flt(invoice_outstanding)
+    absolute_outstanding = abs(invoice_outstanding)
+    allocated_amount = (
+        base_change_amount
+        if not absolute_outstanding
+        else min(base_change_amount, absolute_outstanding)
+    )
 
     pe.append(
         "references",
