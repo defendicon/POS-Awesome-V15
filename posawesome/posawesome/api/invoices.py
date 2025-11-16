@@ -185,6 +185,88 @@ def create_change_return_journal_entry(invoice_doc, data, cash_account=None, cas
     je_doc.submit()
 
 
+def create_change_return_payment_entry(invoice_doc, data, cash_account=None, cash_mode_of_payment=None):
+    payload = data or {}
+
+    change_return_enabled = payload.get("change_return_from_cash", True)
+    if not change_return_enabled:
+        return
+
+    paid_change = flt(payload.get("paid_change") or invoice_doc.get("paid_change") or 0)
+    if paid_change <= 0 or invoice_doc.is_return:
+        return
+
+    cash_account_name = _get_account_name(cash_account)
+    fallback_cash_mop = cash_mode_of_payment
+
+    if not cash_account_name and invoice_doc.get("pos_profile"):
+        fallback_cash_mop = fallback_cash_mop or frappe.db.get_value(
+            "POS Profile", invoice_doc.pos_profile, "posa_cash_mode_of_payment"
+        )
+
+    if not cash_account_name and fallback_cash_mop:
+        cash_account = get_bank_cash_account(fallback_cash_mop, invoice_doc.company)
+        cash_account_name = _get_account_name(cash_account)
+
+    if not cash_account_name:
+        return
+
+    party_account = invoice_doc.get("debit_to")
+    if not party_account and invoice_doc.get("customer"):
+        party_account = get_party_account(
+            "Customer", invoice_doc.get("customer"), invoice_doc.get("company")
+        )
+
+    if not party_account:
+        return
+
+    selected_mode_of_payment = fallback_cash_mop or cash_mode_of_payment or "Cash"
+    conversion_rate = invoice_doc.conversion_rate or 1
+    base_change_amount = flt(paid_change * conversion_rate)
+
+    pe = frappe.new_doc("Payment Entry")
+    pe.payment_type = "Pay"
+    pe.company = invoice_doc.company
+    pe.mode_of_payment = selected_mode_of_payment
+    pe.party_type = "Customer"
+    pe.party = invoice_doc.get("customer")
+    pe.posting_date = invoice_doc.get("posting_date") or nowdate()
+    pe.paid_from = cash_account_name
+    pe.paid_to = party_account
+    pe.paid_amount = base_change_amount
+    pe.received_amount = base_change_amount
+    pe.reference_no = invoice_doc.name
+    pe.reference_date = pe.posting_date
+
+    pe.append(
+        "references",
+        {
+            "reference_doctype": invoice_doc.doctype,
+            "reference_name": invoice_doc.name,
+            "allocated_amount": base_change_amount,
+            "total_amount": invoice_doc.get("outstanding_amount")
+            if invoice_doc.get("outstanding_amount") is not None
+            else invoice_doc.get("base_grand_total")
+            or invoice_doc.get("grand_total"),
+            "outstanding_amount": invoice_doc.get("outstanding_amount")
+            if invoice_doc.get("outstanding_amount") is not None
+            else base_change_amount,
+            "due_date": invoice_doc.get("due_date") or pe.posting_date,
+        },
+    )
+
+    pe.setup_party_account_field()
+    pe.set_missing_values()
+    pe.set_amounts()
+    pe.paid_amount = base_change_amount
+    pe.received_amount = base_change_amount
+
+    pe.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    pe.save()
+    pe.submit()
+
+
 def _get_available_stock(item):
     """Return available stock qty for an item row."""
     warehouse = item.get("warehouse")
@@ -906,6 +988,12 @@ def submit_invoice(invoice, data):
             cash_account=cash_account,
             cash_mode_of_payment=cash_mode_of_payment,
         )
+        create_change_return_payment_entry(
+            invoice_doc,
+            data,
+            cash_account=cash_account,
+            cash_mode_of_payment=cash_mode_of_payment,
+        )
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
@@ -939,6 +1027,12 @@ def submit_in_background_job(kwargs):
 
     invoice_doc.submit()
     create_change_return_journal_entry(
+        invoice_doc,
+        data,
+        cash_account=cash_account,
+        cash_mode_of_payment=cash_mode_of_payment,
+    )
+    create_change_return_payment_entry(
         invoice_doc,
         data,
         cash_account=cash_account,
