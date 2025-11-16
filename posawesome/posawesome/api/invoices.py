@@ -314,8 +314,6 @@ def _create_change_return_journal_entry(invoice_doc, cash_account, paid_change):
             "account": cash_account_name,
             "credit_in_account_currency": cash_amount,
             "exchange_rate": cash_exchange_rate,
-            "reference_type": invoice_doc.doctype,
-            "reference_name": invoice_doc.name,
         },
     )
 
