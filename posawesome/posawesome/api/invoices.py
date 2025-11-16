@@ -641,8 +641,11 @@ def submit_invoice(invoice, data):
         cash_account_name = (
             cash_account.get("account") if isinstance(cash_account, (dict, frappe._dict)) else cash_account
         )
-        if cash_account_name:
-            cash_payment_row.account = cash_account_name
+        if not cash_account_name:
+            frappe.throw(_("Unable to determine cash account for change payment."))
+
+        cash_payment_row.account = cash_account_name
+        invoice_doc.account_for_change_amount = cash_account_name
 
     # Update remarks with items details
     items = []
