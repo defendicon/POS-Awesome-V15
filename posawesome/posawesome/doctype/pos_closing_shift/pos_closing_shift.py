@@ -1033,6 +1033,12 @@ def make_closing_shift_from_opening(opening_shift):
 
     invoice_field = "pos_invoice" if doctype == "POS Invoice" else "sales_invoice"
 
+    cash_mode_of_payment = frappe.get_value(
+        "POS Profile", opening_shift.get("pos_profile"), "posa_cash_mode_of_payment"
+    )
+    if not cash_mode_of_payment:
+        cash_mode_of_payment = "Cash"
+
     for d in invoices:
         conversion_rate = d.get("conversion_rate")
         pos_transactions.append(
@@ -1075,13 +1081,6 @@ def make_closing_shift_from_opening(opening_shift):
         for p in d.payments:
             existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
             if existing_pay:
-                cash_mode_of_payment = frappe.get_value(
-                    "POS Profile",
-                    opening_shift.get("pos_profile"),
-                    "posa_cash_mode_of_payment",
-                )
-                if not cash_mode_of_payment:
-                    cash_mode_of_payment = "Cash"
                 conversion_rate = d.get("conversion_rate")
                 if existing_pay[0].mode_of_payment == cash_mode_of_payment:
                     amount = get_base_value(p, "amount", "base_amount", conversion_rate) - get_base_value(
@@ -1091,14 +1090,21 @@ def make_closing_shift_from_opening(opening_shift):
                     amount = get_base_value(p, "amount", "base_amount", conversion_rate)
                 existing_pay[0].expected_amount += flt(amount)
             else:
+                expected_amount = get_base_value(
+                    p, "amount", "base_amount", d.get("conversion_rate")
+                )
+
+                if p.mode_of_payment == cash_mode_of_payment:
+                    expected_amount -= get_base_value(
+                        d, "change_amount", "base_change_amount", conversion_rate
+                    )
+
                 payments.append(
                     frappe._dict(
                         {
                             "mode_of_payment": p.mode_of_payment,
                             "opening_amount": 0,
-                            "expected_amount": get_base_value(
-                                p, "amount", "base_amount", d.get("conversion_rate")
-                            ),
+                            "expected_amount": expected_amount,
                         }
                     )
                 )
