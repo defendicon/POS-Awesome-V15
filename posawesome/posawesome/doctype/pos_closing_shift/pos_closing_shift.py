@@ -313,14 +313,19 @@ class POSClosingShift(Document):
             mop = detail.mode_of_payment
             breakdown = payment_breakdown_copy.pop(mop, None)
             currencies = []
+            expected_amount = flt(detail.expected_amount)
+            base_total = expected_amount - flt(detail.opening_amount)
+            difference = flt(detail.difference)
+
             if breakdown:
                 currencies = [
                     frappe._dict({"currency": currency, "amount": amount})
                     for currency, amount in sorted(breakdown["currencies"].items())
                     if amount
                 ]
-
-            base_total = flt(detail.expected_amount) - flt(detail.opening_amount)
+                base_total = flt(breakdown["base"])
+                expected_amount = flt(detail.opening_amount) + base_total
+                difference = flt(detail.closing_amount) - expected_amount
 
             mode_summaries.append(
                 frappe._dict(
@@ -328,8 +333,8 @@ class POSClosingShift(Document):
                         "mode_of_payment": mop,
                         "base_amount": base_total,
                         "opening_amount": flt(detail.opening_amount),
-                        "expected_amount": flt(detail.expected_amount),
-                        "difference": flt(detail.difference),
+                        "expected_amount": expected_amount,
+                        "difference": difference,
                         "currency_breakdown": currencies,
                     }
                 )
