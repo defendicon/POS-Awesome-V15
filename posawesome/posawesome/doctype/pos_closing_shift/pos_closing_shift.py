@@ -68,11 +68,33 @@ class POSClosingShift(Document):
         self.update_payment_reconciliation()
 
     def update_payment_reconciliation(self):
-        # update the difference values in Payment Reconciliation child table
-        # get default precision for site
+        company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+        payment_breakdown, _, _ = self._get_payment_and_sales_breakdowns(company_currency)
+
         precision = frappe.get_cached_value("System Settings", None, "currency_precision") or 3
-        for d in self.payment_reconciliation:
-            d.difference = +flt(d.closing_amount, precision) - flt(d.expected_amount, precision)
+        breakdown_copy = {
+            mop: {"base": data["base"], "currencies": data["currencies"].copy()}
+            for mop, data in payment_breakdown.items()
+        }
+
+        for d in self.get("payment_reconciliation", []):
+            breakdown = breakdown_copy.pop(d.mode_of_payment, None)
+            if breakdown:
+                d.expected_amount = flt(d.opening_amount, precision) + flt(breakdown["base"], precision)
+            d.difference = flt(d.closing_amount, precision) - flt(d.expected_amount, precision)
+
+        for mop, breakdown in breakdown_copy.items():
+            expected_amount = flt(breakdown["base"], precision)
+            self.append(
+                "payment_reconciliation",
+                {
+                    "mode_of_payment": mop,
+                    "opening_amount": 0,
+                    "expected_amount": expected_amount,
+                    "closing_amount": 0,
+                    "difference": -expected_amount,
+                },
+            )
 
     def on_submit(self):
         opening_entry = frappe.get_doc("POS Opening Shift", self.pos_opening_shift)
@@ -224,6 +246,85 @@ class POSClosingShift(Document):
     def get_payment_reconciliation_details(self):
         company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
 
+        payment_breakdown, sales_breakdown, net_breakdown = self._get_payment_and_sales_breakdowns(
+            company_currency
+        )
+
+        mode_summaries = []
+        payment_breakdown_copy = payment_breakdown.copy()
+        for detail in self.get("payment_reconciliation", []):
+            mop = detail.mode_of_payment
+            breakdown = payment_breakdown_copy.pop(mop, None)
+            currencies = []
+            expected_amount = flt(detail.expected_amount)
+            base_total = expected_amount - flt(detail.opening_amount)
+            difference = flt(detail.difference)
+
+            if breakdown:
+                currencies = [
+                    frappe._dict({"currency": currency, "amount": amount})
+                    for currency, amount in sorted(breakdown["currencies"].items())
+                    if amount
+                ]
+                base_total = flt(breakdown["base"])
+                expected_amount = flt(detail.opening_amount) + base_total
+                difference = flt(detail.closing_amount) - expected_amount
+
+            mode_summaries.append(
+                frappe._dict(
+                    {
+                        "mode_of_payment": mop,
+                        "base_amount": base_total,
+                        "opening_amount": flt(detail.opening_amount),
+                        "expected_amount": expected_amount,
+                        "difference": difference,
+                        "currency_breakdown": currencies,
+                    }
+                )
+            )
+
+        for mop, breakdown in payment_breakdown_copy.items():
+            mode_summaries.append(
+                frappe._dict(
+                    {
+                        "mode_of_payment": mop,
+                        "base_amount": breakdown["base"],
+                        "opening_amount": 0,
+                        "expected_amount": breakdown["base"],
+                        "difference": 0,
+                        "currency_breakdown": [
+                            frappe._dict({"currency": currency, "amount": amount})
+                            for currency, amount in sorted(breakdown["currencies"].items())
+                            if amount
+                        ],
+                    }
+                )
+            )
+
+        sales_currency_breakdown = [
+            frappe._dict({"currency": currency, "amount": amount})
+            for currency, amount in sorted(sales_breakdown.items())
+            if amount
+        ]
+        net_currency_breakdown = [
+            frappe._dict({"currency": currency, "amount": amount})
+            for currency, amount in sorted(net_breakdown.items())
+            if amount
+        ]
+
+        return frappe.render_template(
+            "posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html",
+            {
+                "data": self,
+                "currency": company_currency,
+                "company_currency": company_currency,
+                "mode_summaries": mode_summaries,
+                "sales_currency_breakdown": sales_currency_breakdown,
+                "net_currency_breakdown": net_currency_breakdown,
+            },
+        )
+
+    def _get_payment_and_sales_breakdowns(self, company_currency):
         sales_breakdown = defaultdict(float)
         net_breakdown = defaultdict(float)
         payment_breakdown = {}
@@ -307,79 +408,7 @@ class POSClosingShift(Document):
 
             update_payment_breakdown(mode_of_payment, base_amount, currency, paid_amount)
 
-        mode_summaries = []
-        payment_breakdown_copy = payment_breakdown.copy()
-        for detail in self.get("payment_reconciliation", []):
-            mop = detail.mode_of_payment
-            breakdown = payment_breakdown_copy.pop(mop, None)
-            currencies = []
-            expected_amount = flt(detail.expected_amount)
-            base_total = expected_amount - flt(detail.opening_amount)
-            difference = flt(detail.difference)
-
-            if breakdown:
-                currencies = [
-                    frappe._dict({"currency": currency, "amount": amount})
-                    for currency, amount in sorted(breakdown["currencies"].items())
-                    if amount
-                ]
-                base_total = flt(breakdown["base"])
-                expected_amount = flt(detail.opening_amount) + base_total
-                difference = flt(detail.closing_amount) - expected_amount
-
-            mode_summaries.append(
-                frappe._dict(
-                    {
-                        "mode_of_payment": mop,
-                        "base_amount": base_total,
-                        "opening_amount": flt(detail.opening_amount),
-                        "expected_amount": expected_amount,
-                        "difference": difference,
-                        "currency_breakdown": currencies,
-                    }
-                )
-            )
-
-        for mop, breakdown in payment_breakdown_copy.items():
-            mode_summaries.append(
-                frappe._dict(
-                    {
-                        "mode_of_payment": mop,
-                        "base_amount": breakdown["base"],
-                        "opening_amount": 0,
-                        "expected_amount": breakdown["base"],
-                        "difference": 0,
-                        "currency_breakdown": [
-                            frappe._dict({"currency": currency, "amount": amount})
-                            for currency, amount in sorted(breakdown["currencies"].items())
-                            if amount
-                        ],
-                    }
-                )
-            )
-
-        sales_currency_breakdown = [
-            frappe._dict({"currency": currency, "amount": amount})
-            for currency, amount in sorted(sales_breakdown.items())
-            if amount
-        ]
-        net_currency_breakdown = [
-            frappe._dict({"currency": currency, "amount": amount})
-            for currency, amount in sorted(net_breakdown.items())
-            if amount
-        ]
-
-        return frappe.render_template(
-            "posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html",
-            {
-                "data": self,
-                "currency": company_currency,
-                "company_currency": company_currency,
-                "mode_summaries": mode_summaries,
-                "sales_currency_breakdown": sales_currency_breakdown,
-                "net_currency_breakdown": net_currency_breakdown,
-            },
-        )
+        return payment_breakdown, sales_breakdown, net_breakdown
 
 
 @frappe.whitelist()
