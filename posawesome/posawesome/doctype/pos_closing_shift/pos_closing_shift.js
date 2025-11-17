@@ -141,25 +141,36 @@ async function add_to_payments(d, frm, conversion_rate) {
 	const payments = Array.isArray(d.payments) ? d.payments : [];
 	const cash_mode_of_payment = await get_cash_mode_of_payment(frm);
 
-	payments.forEach((p) => {
-		const payment = frm.doc.payment_reconciliation.find(
-			(pay) => pay.mode_of_payment === p.mode_of_payment,
-		);
-		if (payment) {
-			let amount = get_base_value(p, "amount", "base_amount", conversion_rate);
+        payments.forEach((p) => {
+                const payment = frm.doc.payment_reconciliation.find(
+                        (pay) => pay.mode_of_payment === p.mode_of_payment,
+                );
+                if (payment) {
+                        let amount = get_base_value(p, "amount", "base_amount", conversion_rate);
 
 			if (payment.mode_of_payment === cash_mode_of_payment) {
 				amount -= get_base_value(d, "change_amount", "base_change_amount", conversion_rate);
 			}
-			payment.expected_amount += flt(amount);
-		} else {
-			frm.add_child("payment_reconciliation", {
-				mode_of_payment: p.mode_of_payment,
-				opening_amount: 0,
-				expected_amount: get_base_value(p, "amount", "base_amount", conversion_rate),
-			});
-		}
-	});
+                        payment.expected_amount += flt(amount);
+                } else {
+                        let expected_amount = get_base_value(p, "amount", "base_amount", conversion_rate);
+
+                        if (p.mode_of_payment === cash_mode_of_payment) {
+                                expected_amount -= get_base_value(
+                                        d,
+                                        "change_amount",
+                                        "base_change_amount",
+                                        conversion_rate,
+                                );
+                        }
+
+                        frm.add_child("payment_reconciliation", {
+                                mode_of_payment: p.mode_of_payment,
+                                opening_amount: 0,
+                                expected_amount: flt(expected_amount),
+                        });
+                }
+        });
 }
 
 function add_pos_payment_to_payments(p, frm) {
