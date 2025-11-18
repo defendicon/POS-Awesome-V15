@@ -1578,8 +1578,8 @@ export default {
         margin: 0;
         position: relative;
         /* Allow scrolling when expanded content exceeds the viewport so sections like
-           the Batch selector remain accessible */
-        max-height: min(70vh, calc(var(--container-height, 720px) - 40px));
+           the Batch selector remain accessible while preserving a generous viewable area */
+        max-height: min(85vh, calc(var(--container-height, 900px) - 40px));
         overflow-y: auto;
         overflow-x: visible;
 }
