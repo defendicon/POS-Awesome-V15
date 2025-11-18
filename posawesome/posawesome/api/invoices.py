@@ -17,6 +17,7 @@ from frappe.utils import (
     cint,
     cstr,
     flt,
+    formatdate,
     getdate,
     money_in_words,
     nowdate,
@@ -33,6 +34,7 @@ from posawesome.posawesome.api.utilities import (
 )  # Updated imports
 
 from .items import get_stock_availability
+from .utils import get_expired_batch_policy, is_batch_expired
 
 
 def _sanitize_item_name(name: str) -> str:
@@ -252,6 +254,52 @@ def _validate_stock_on_invoice(invoice_doc):
         frappe.throw(frappe.as_json({"errors": errors}), frappe.ValidationError)
 
 
+def _validate_expired_batches(invoice_doc):
+    today = getdate(nowdate())
+    policy = get_expired_batch_policy(invoice_doc.get("pos_profile"))
+    behaviour = (policy.get("behaviour") or "Warn and Allow with Confirmation").strip()
+    show_expired = bool(policy.get("show_expired_batches"))
+
+    warnings = []
+    for item in invoice_doc.items:
+        if not item.get("batch_no"):
+            continue
+
+        batch_doc = frappe.get_cached_doc("Batch", item.batch_no)
+        if batch_doc.disabled:
+            frappe.throw(_("Batch {0} is disabled.").format(item.batch_no))
+
+        if not is_batch_expired(batch_doc, today=today):
+            item.posa_allow_expired_batch = 0
+            continue
+
+        expiry_label = formatdate(batch_doc.expiry_date) if batch_doc.expiry_date else ""
+
+        if not show_expired or behaviour == "Block Expired Batches":
+            frappe.throw(
+                _("Batch {0} expired on {1} and cannot be used for this invoice.").format(
+                    item.batch_no, expiry_label
+                )
+            )
+
+        if behaviour == "Warn and Allow with Confirmation":
+            if not cint(getattr(item, "posa_allow_expired_batch", 0)):
+                frappe.throw(
+                    _("Batch {0} expired on {1}. Please confirm override before submitting.").format(
+                        item.batch_no, expiry_label
+                    )
+                )
+
+            warnings.append(
+                _("Batch {0} (expired on {1}) was allowed after confirmation.").format(
+                    item.batch_no, expiry_label
+                )
+            )
+
+    if warnings:
+        frappe.msgprint("\n".join(warnings), indicator="orange", alert=True)
+
+
 def _auto_set_return_batches(invoice_doc):
     """Assign batch numbers for return invoices without a source invoice.
 
@@ -273,6 +321,10 @@ def _auto_set_return_batches(invoice_doc):
         return
 
     allow_free = cint(frappe.db.get_value("POS Profile", profile, "posa_allow_free_batch_return") or 0)
+    batch_policy = get_expired_batch_policy(profile)
+    batch_behaviour = (batch_policy.get("behaviour") or "Warn and Allow with Confirmation").strip()
+    show_expired_batches = bool(batch_policy.get("show_expired_batches"))
+    today = getdate(nowdate())
 
     for d in invoice_doc.items:
         if not d.get("item_code") or not d.get("warehouse"):
@@ -282,9 +334,32 @@ def _auto_set_return_batches(invoice_doc):
         if has_batch and not d.get("batch_no"):
             batch_list = get_batch_qty(item_code=d.item_code, warehouse=d.warehouse) or []
             batch_list = [b for b in batch_list if flt(b.get("qty")) > 0]
-            if batch_list:
+
+            valid_batches = []
+            expired_available = []
+            for batch in batch_list:
+                batch_doc = frappe.get_cached_doc("Batch", batch.get("batch_no"))
+                if batch_doc.disabled:
+                    continue
+                expired = is_batch_expired(batch_doc, today=today)
+                if expired:
+                    expired_available.append(batch)
+                    if not show_expired_batches or batch_behaviour == "Block Expired Batches":
+                        continue
+                    # Avoid auto-assignment of expired batches when confirmation is required
+                    continue
+
+                valid_batches.append(batch)
+
+            if valid_batches:
                 # FIFO: batches are already sorted by posting/expiry in ERPNext
-                d.batch_no = batch_list[0].get("batch_no")
+                d.batch_no = valid_batches[0].get("batch_no")
+            elif expired_available and batch_behaviour == "Warn and Allow with Confirmation" and not allow_free:
+                frappe.throw(
+                    _("Only expired batches are available in {0} for {1}. Please select and confirm manually.").format(
+                        d.warehouse, d.item_code
+                    )
+                )
             elif not allow_free:
                 frappe.throw(_("No batches available in {0} for {1}.").format(d.warehouse, d.item_code))
 
@@ -830,6 +905,7 @@ def submit_invoice(invoice, data):
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
 
     _validate_stock_on_invoice(invoice_doc)
+    _validate_expired_batches(invoice_doc)
 
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True

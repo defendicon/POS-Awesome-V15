@@ -598,35 +598,62 @@
 										></v-text-field>
 									</div>
 									<div class="form-field">
-										<v-autocomplete
-											v-model="item.batch_no"
-											:items="item.batch_no_data"
-											item-title="batch_no"
-											variant="outlined"
-											density="compact"
-											color="primary"
-											class="pos-themed-input"
-											:label="frappe._('Batch No')"
-											@update:model-value="setBatchQty(item, $event)"
-											hide-details
-											prepend-inner-icon="mdi-package-variant-closed"
-										>
-											<template v-slot:item="{ props, item }">
-												<v-list-item v-bind="props">
-													<v-list-item-title
-														v-html="item.raw.batch_no"
-													></v-list-item-title>
-													<v-list-item-subtitle
-														v-html="
-															`Available QTY  '${item.raw.batch_qty}' - Expiry Date ${item.raw.expiry_date}`
-														"
-													></v-list-item-subtitle>
-												</v-list-item>
-											</template>
-										</v-autocomplete>
-									</div>
-								</div>
-							</div>
+                                                                                <v-autocomplete
+                                                                                        v-model="item.batch_no"
+                                                                                        :items="item.batch_no_data"
+                                                                                        item-title="batch_no"
+                                                                                        variant="outlined"
+                                                                                        density="compact"
+                                                                                        color="primary"
+                                                                                        class="pos-themed-input"
+                                                                                        :label="frappe._('Batch No')"
+                                                                                        @update:model-value="setBatchQty(item, $event)"
+                                                                                        hide-details
+                                                                                        prepend-inner-icon="mdi-package-variant-closed"
+                                                                                >
+                                                                                        <template v-slot:item="{ props, item }">
+                                                                                                <v-list-item v-bind="props" :disabled="item.raw.is_blocked || item.raw.is_disabled">
+                                                                                                        <v-list-item-title
+                                                                                                                v-html="item.raw.batch_no"
+                                                                                                        ></v-list-item-title>
+                                                                                                        <v-list-item-subtitle>
+                                                                                                                <span
+                                                                                                                        v-html="
+                                                                                                                                `Available QTY  '${item.raw.batch_qty}' - Expiry Date ${item.raw.expiry_date}`
+                                                                                                                        "
+                                                                                                                ></span>
+                                                                                                                <v-chip
+                                                                                                                        v-if="item.raw.is_expired"
+                                                                                                                        color="warning"
+                                                                                                                        size="x-small"
+                                                                                                                        class="ml-2"
+                                                                                                                >
+                                                                                                                        {{ __("Expired") }}
+                                                                                                                </v-chip>
+                                                                                                                <v-chip
+                                                                                                                        v-if="item.raw.is_blocked"
+                                                                                                                        color="error"
+                                                                                                                        size="x-small"
+                                                                                                                        class="ml-1"
+                                                                                                                >
+                                                                                                                        {{ __("Blocked") }}
+                                                                                                                </v-chip>
+                                                                                                                <v-chip
+                                                                                                                        v-else-if="item.raw.requires_confirmation"
+                                                                                                                        color="warning"
+                                                                                                                        variant="tonal"
+                                                                                                                        size="x-small"
+                                                                                                                        class="ml-1"
+                                                                                                                >
+                                                                                                                        {{ __("Confirm to use") }}
+                                                                                                                </v-chip>
+                                                                                                        </v-list-item-subtitle>
+                                                                                                </v-list-item>
+                                                                                        </template>
+                                                                                </v-autocomplete>
+                                                                        </div>
+                                                                </div>
+                                                        </div>
 
 							<!-- Delivery Date Section -->
 							<div

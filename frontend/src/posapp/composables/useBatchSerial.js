@@ -39,8 +39,13 @@ export function useBatchSerial() {
 			});
 		});
 
-		const batch_no_data = Object.values(used_batches)
-			.filter((batch) => batch.remaining_qty > 0)
+                const batch_no_data = Object.values(used_batches)
+                        .filter(
+                                (batch) =>
+                                        batch.remaining_qty > 0 &&
+                                        !batch.is_blocked &&
+                                        !batch.is_disabled,
+                        )
 			.sort((a, b) => {
 				if (a.expiry_date && b.expiry_date) {
 					return new Date(a.expiry_date) - new Date(b.expiry_date);

@@ -5,12 +5,46 @@ import logging
 from functools import cache
 
 import frappe
+from frappe.utils import cint, getdate, nowdate
 
 # Reusable ORM filter to exclude template items
 HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 
 
 logger = logging.getLogger(__name__)
+
+
+def get_expired_batch_policy(pos_profile: str | None) -> dict:
+    """Return the expired batch handling policy for the given POS Profile.
+
+    The returned dictionary contains two keys:
+
+    - ``show_expired_batches``: whether expired batches should be visible in lookups
+    - ``behaviour``: one of ``Warn and Allow with Confirmation`` or
+      ``Block Expired Batches``
+    """
+
+    if not pos_profile or not frappe.db.exists("POS Profile", pos_profile):
+        return {
+            "show_expired_batches": False,
+            "behaviour": "Warn and Allow with Confirmation",
+        }
+
+    profile = frappe.get_cached_doc("POS Profile", pos_profile)
+    behaviour = profile.get("posa_expired_batch_behaviour") or "Warn and Allow with Confirmation"
+
+    return {
+        "show_expired_batches": bool(cint(profile.get("posa_show_expired_batches"))),
+        "behaviour": behaviour,
+    }
+
+
+def is_batch_expired(batch_doc, today=None):
+    """Check if the given batch document is expired based on its expiry_date."""
+
+    today = today or getdate(nowdate())
+    expiry_date = batch_doc.get("expiry_date")
+    return bool(expiry_date) and getdate(expiry_date) <= today
 
 
 def expand_item_groups(item_groups):

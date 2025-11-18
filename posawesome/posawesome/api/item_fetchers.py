@@ -9,6 +9,8 @@ import frappe
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from frappe.utils import flt, nowdate
+
+from .utils import get_expired_batch_policy, is_batch_expired
 from frappe.utils.caching import redis_cache
 
 
@@ -211,6 +213,7 @@ def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
         batch_list = get_batch_qty(item_code=item_code, warehouse=warehouse) or []
         for batch in batch_list:
             if batch.get("batch_no") and flt(batch.get("qty")) > 0:
+                batch_doc = frappe.get_cached_doc("Batch", batch.get("batch_no"))
                 rows.append(
                     frappe._dict(
                         {
@@ -220,6 +223,8 @@ def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
                             "expiry_date": batch.get("expiry_date"),
                             "batch_price": batch.get("posa_batch_price"),
                             "manufacturing_date": batch.get("manufacturing_date"),
+                            "is_expired": is_batch_expired(batch_doc),
+                            "is_disabled": bool(batch_doc.disabled),
                         }
                     )
                 )
@@ -358,6 +363,11 @@ class ItemDetailAggregator:
         self.warehouse = pos_profile.get("warehouse")
         self.price_list_currency = self._determine_price_list_currency()
         self.exchange_rate = self._compute_exchange_rate()
+        self.profile_name = (
+            pos_profile.get("name")
+            or pos_profile.get("profile_name")
+            or pos_profile.get("pos_profile")
+        )
 
     def _resolve_ttl(self) -> Optional[int]:
         """Convert the POS profile cache duration to seconds."""
@@ -431,6 +441,24 @@ class ItemDetailAggregator:
         batch_rows = get_batches(self.warehouse, _normalize_codes(batch_items), ttl=self.cache_ttl)
         serial_rows = get_serials(self.warehouse, _normalize_codes(serial_items), ttl=self.cache_ttl)
 
+        batch_policy = get_expired_batch_policy(self.profile_name)
+        batch_behaviour = (batch_policy.get("behaviour") or "Warn and Allow with Confirmation").strip()
+        show_expired_batches = bool(batch_policy.get("show_expired_batches"))
+
+        filtered_batch_rows = []
+        for row in batch_rows:
+            expired = bool(row.get("is_expired"))
+            if row.get("is_disabled"):
+                continue
+            if expired and not show_expired_batches:
+                continue
+
+            row.is_blocked = expired and batch_behaviour == "Block Expired Batches"
+            row.requires_confirmation = expired and batch_behaviour == "Warn and Allow with Confirmation"
+            filtered_batch_rows.append(row)
+
+        batch_rows = filtered_batch_rows
+
         price_map: Dict[str, Dict[str, frappe._dict]] = {}
         for row in price_rows:
             price_map.setdefault(row.item_code, {})[row.get("uom") or "None"] = row
@@ -457,6 +485,10 @@ class ItemDetailAggregator:
                     "expiry_date": row.expiry_date,
                     "batch_price": row.batch_price,
                     "manufacturing_date": row.manufacturing_date,
+                    "is_expired": row.get("is_expired"),
+                    "is_blocked": row.get("is_blocked"),
+                    "requires_confirmation": row.get("requires_confirmation"),
+                    "is_disabled": row.get("is_disabled"),
                 }
             )
 

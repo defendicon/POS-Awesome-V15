@@ -22,7 +22,9 @@ from .utils import (
     HAS_VARIANTS_EXCLUSION,
     expand_item_groups,
     get_active_pos_profile,
+    get_expired_batch_policy,
     get_item_groups,
+    is_batch_expired,
 )
 
 
@@ -806,27 +808,44 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=None):
     item = json.loads(item)
     today = nowdate()
+    today_date = get_datetime(today).date()
     item_code = item.get("item_code")
     batch_no_data = []
     serial_no_data = []
+
+    profile_name = item.get("pos_profile")
+    batch_policy = get_expired_batch_policy(profile_name)
+    behaviour = (batch_policy.get("behaviour") or "Warn and Allow with Confirmation").strip()
+    show_expired = bool(batch_policy.get("show_expired_batches"))
     if warehouse and item.get("has_batch_no"):
         batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
         if batch_list:
             for batch in batch_list:
                 if batch.qty > 0 and batch.batch_no:
                     batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
-                    if (
-                        str(batch_doc.expiry_date) > str(today) or batch_doc.expiry_date in ["", None]
-                    ) and batch_doc.disabled == 0:
-                        batch_no_data.append(
-                            {
-                                "batch_no": batch.batch_no,
-                                "batch_qty": batch.qty,
-                                "expiry_date": batch_doc.expiry_date,
-                                "batch_price": batch_doc.posa_batch_price,
-                                "manufacturing_date": batch_doc.manufacturing_date,
-                            }
-                        )
+                    expired = is_batch_expired(batch_doc, today=today_date)
+                    if batch_doc.disabled:
+                        continue
+
+                    if expired and not show_expired:
+                        continue
+
+                    is_blocked = expired and behaviour == "Block Expired Batches"
+                    requires_confirmation = expired and behaviour == "Warn and Allow with Confirmation"
+
+                    batch_no_data.append(
+                        {
+                            "batch_no": batch.batch_no,
+                            "batch_qty": batch.qty,
+                            "expiry_date": batch_doc.expiry_date,
+                            "batch_price": batch_doc.posa_batch_price,
+                            "manufacturing_date": batch_doc.manufacturing_date,
+                            "is_expired": expired,
+                            "is_blocked": is_blocked,
+                            "requires_confirmation": requires_confirmation,
+                            "is_disabled": False,
+                        }
+                    )
     if warehouse and item.get("has_serial_no"):
         serial_no_data = frappe.get_all(
             "Serial No",

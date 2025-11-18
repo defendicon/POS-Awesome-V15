@@ -4318,10 +4318,67 @@ export default {
 		return setSerialNo(item, this);
 	},
 
-	// Set batch number for an item (and update batch data)
-	set_batch_qty(item, value, update = true) {
-		return setBatchQty(item, value, update, this);
-	},
+        // Set batch number for an item (and update batch data)
+        async set_batch_qty(item, value, update = true) {
+                const previousBatch = item.batch_no;
+                const selectedBatch =
+                        Array.isArray(item.batch_no_data) &&
+                        item.batch_no_data.find((batch) => batch && batch.batch_no === value);
+
+                if (!value) {
+                        item.posa_allow_expired_batch = 0;
+                        return setBatchQty(item, value, update, this);
+                }
+
+                if (selectedBatch && selectedBatch.is_disabled) {
+                        frappe.msgprint({
+                                title: __("Invalid Batch"),
+                                message: __("The selected batch is disabled and cannot be used."),
+                                indicator: "red",
+                        });
+                        item.batch_no = previousBatch;
+                        return;
+                }
+
+                if (selectedBatch && selectedBatch.is_blocked) {
+                        frappe.msgprint({
+                                title: __("Expired Batch Blocked"),
+                                message: __(
+                                        "Batch {0} expired on {1} and is blocked by the POS Profile.",
+                                        [value, selectedBatch.expiry_date || "--"],
+                                ),
+                                indicator: "red",
+                        });
+                        item.batch_no = previousBatch;
+                        return;
+                }
+
+                if (selectedBatch && selectedBatch.requires_confirmation && !item.posa_allow_expired_batch) {
+                        const confirmed = await new Promise((resolve) => {
+                                frappe.confirm(
+                                        __("Batch {0} expired on {1}. Proceed with caution?", [
+                                                value,
+                                                selectedBatch.expiry_date || "--",
+                                        ]),
+                                        () => resolve(true),
+                                        () => resolve(false),
+                                );
+                        });
+
+                        if (!confirmed) {
+                                item.batch_no = previousBatch;
+                                return;
+                        }
+
+                        item.posa_allow_expired_batch = 1;
+                } else if (selectedBatch && selectedBatch.is_expired) {
+                        item.posa_allow_expired_batch = 1;
+                } else {
+                        item.posa_allow_expired_batch = 0;
+                }
+
+                return setBatchQty(item, value, update, this);
+        },
 
 	schedulePricingRuleApplication: debounce(function (force = false) {
 		this.applyPricingRulesForCart(force);
