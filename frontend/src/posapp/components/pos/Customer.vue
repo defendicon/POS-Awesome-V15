@@ -15,9 +15,7 @@
 			:items="filteredCustomers"
 			item-title="customer_name"
 			item-value="name"
-			:no-data-text="
-				isCustomerBackgroundLoading ? __('Loading customer data...') : __('Customers not found')
-			"
+                        :no-data-text="noDataText"
 			hide-details
 			:customFilter="() => true"
 			:disabled="effectiveReadonly || loadingCustomers"
@@ -162,26 +160,37 @@ export default {
 		const customersStore = useCustomersStore();
 		const {
 			customers,
-			filteredCustomers,
-			loadingCustomers,
-			isCustomerBackgroundLoading,
-			selectedCustomer,
-			customerInfo,
-		} = storeToRefs(customersStore);
+                        filteredCustomers,
+                        loadingCustomers,
+                        isSearching,
+                        isCustomerBackgroundLoading,
+                        selectedCustomer,
+                        customerInfo,
+                } = storeToRefs(customersStore);
 
 		const internalCustomer = ref(null);
 		const tempSelectedCustomer = ref(null);
 		const isMenuOpen = ref(false);
 		const customerDropdown = ref(null);
-		const readonlyState = ref(false);
+                const readonlyState = ref(false);
 
-		let scrollContainer = null;
+                let scrollContainer = null;
 
 		const effectiveReadonly = computed(() => readonlyState.value && navigator.onLine);
 
-		const searchDebounce = _.debounce((term) => {
-			customersStore.queueSearch(term || "");
-		}, 300);
+                const searchDebounce = _.debounce((term) => {
+                        customersStore.queueSearch(term || "");
+                }, 300);
+
+                const noDataText = computed(() => {
+                        if (loadingCustomers.value || isSearching.value) {
+                                return __("Searching customers...");
+                        }
+                        if (isCustomerBackgroundLoading.value) {
+                                return __("Loading customer data...");
+                        }
+                        return __("Customers not found");
+                });
 
 		watch(
 			selectedCustomer,
@@ -404,10 +413,11 @@ export default {
 		return {
 			customerDropdown,
 			filteredCustomers,
-			loadingCustomers,
-			isCustomerBackgroundLoading,
-			internalCustomer,
-			effectiveReadonly,
+                        loadingCustomers,
+                        isCustomerBackgroundLoading,
+                        noDataText,
+                        internalCustomer,
+                        effectiveReadonly,
 			onCustomerMenuToggle,
 			onCustomerChange,
 			onCustomerSearch,

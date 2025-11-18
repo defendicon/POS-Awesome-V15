@@ -97,10 +97,11 @@ export const useCustomersStore = defineStore("customers", () => {
 	const customerInfo = ref({});
 	const searchTerm = ref("");
 	const page = ref(0);
-	const hasMore = ref(true);
-	const nextCustomerStart = ref(null);
-	const loadingCustomers = ref(false);
-	const customersLoaded = ref(false);
+        const hasMore = ref(true);
+        const nextCustomerStart = ref(null);
+        const loadingCustomers = ref(false);
+        const isSearching = ref(false);
+        const customersLoaded = ref(false);
 	const isCustomerBackgroundLoading = ref(false);
 	const pendingCustomerSearch = ref(null);
 	const loadProgress = ref(0);
@@ -143,52 +144,58 @@ export const useCustomersStore = defineStore("customers", () => {
 		refreshToken.value += 1;
 	}
 
-	async function performSearch({ append = false } = {}) {
-		await ensureDatabase();
+        async function performSearch({ append = false } = {}) {
+                await ensureDatabase();
 
-		let collection = db.table("customers");
-		const normalizedTerm = normalizeSearchTerm(searchTerm.value);
-		if (normalizedTerm) {
-			const searchParts = normalizedTerm.toLowerCase().split(/\s+/).filter(Boolean);
-			collection = collection.filter((customer) => {
-				if (!customer) {
-					return false;
-				}
+                isSearching.value = true;
 
-				const values = [
-					customer.customer_name,
-					customer.name,
-					customer.mobile_no,
-					customer.email_id,
-					customer.tax_id,
-				]
-					.filter((value) => value !== null && value !== undefined)
-					.map((value) => String(value).toLowerCase());
+                try {
+                        let collection = db.table("customers");
+                        const normalizedTerm = normalizeSearchTerm(searchTerm.value);
+                        if (normalizedTerm) {
+                                const searchParts = normalizedTerm.toLowerCase().split(/\s+/).filter(Boolean);
+                                collection = collection.filter((customer) => {
+                                        if (!customer) {
+                                                return false;
+                                        }
 
-				if (!searchParts.length) {
-					return true;
-				}
+                                        const values = [
+                                                customer.customer_name,
+                                                customer.name,
+                                                customer.mobile_no,
+                                                customer.email_id,
+                                                customer.tax_id,
+                                        ]
+                                                .filter((value) => value !== null && value !== undefined)
+                                                .map((value) => String(value).toLowerCase());
 
-				return searchParts.every((part) => values.some((value) => value.includes(part)));
-			});
-		}
+                                        if (!searchParts.length) {
+                                                return true;
+                                        }
 
-		const offset = page.value * PAGE_SIZE;
-		const results = await collection.offset(offset).limit(PAGE_SIZE).toArray();
+                                        return searchParts.every((part) => values.some((value) => value.includes(part)));
+                                });
+                        }
 
-		if (append) {
-			customers.value = [...customers.value, ...results];
-		} else {
-			customers.value = results;
-		}
+                        const offset = page.value * PAGE_SIZE;
+                        const results = await collection.offset(offset).limit(PAGE_SIZE).toArray();
 
-		hasMore.value = results.length === PAGE_SIZE;
-		if (hasMore.value) {
-			page.value += 1;
-		}
+                        if (append) {
+                                customers.value = [...customers.value, ...results];
+                        } else {
+                                customers.value = results;
+                        }
 
-		return results.length;
-	}
+                        hasMore.value = results.length === PAGE_SIZE;
+                        if (hasMore.value) {
+                                page.value += 1;
+                        }
+
+                        return results.length;
+                } finally {
+                        isSearching.value = false;
+                }
+        }
 
 	async function searchCustomers(term = "", append = false) {
 		if (!append) {
@@ -439,11 +446,12 @@ export const useCustomersStore = defineStore("customers", () => {
 		selectedCustomer,
 		customerInfo,
 		searchTerm,
-		page,
-		hasMore,
-		nextCustomerStart,
-		loadingCustomers,
-		customersLoaded,
+                page,
+                hasMore,
+                nextCustomerStart,
+                loadingCustomers,
+                isSearching,
+                customersLoaded,
 		isCustomerBackgroundLoading,
 		pendingCustomerSearch,
 		loadProgress,
