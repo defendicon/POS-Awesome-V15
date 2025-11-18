@@ -1560,10 +1560,10 @@ export default {
 
 /* Main expanded content container */
 .expanded-content {
-	padding: 24px;
-	width: 100% !important;
-	max-width: 100% !important;
-	box-sizing: border-box;
+        padding: 24px;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
 	background: var(--pos-card-bg);
 	border-radius: 0 0 8px 8px;
 	border: 1px solid var(--pos-border);
@@ -1574,10 +1574,14 @@ export default {
 	container-type: inline-size;
 	container-name: expanded-content;
 
-	/* Ensure full width utilization */
-	margin: 0;
-	position: relative;
-	overflow: visible;
+        /* Ensure full width utilization */
+        margin: 0;
+        position: relative;
+        /* Allow scrolling when expanded content exceeds the viewport so sections like
+           the Batch selector remain accessible */
+        max-height: min(70vh, calc(var(--container-height, 720px) - 40px));
+        overflow-y: auto;
+        overflow-x: visible;
 }
 
 @keyframes expandIn {
