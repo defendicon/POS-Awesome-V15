@@ -1029,7 +1029,7 @@ export default {
 					frappe.throw(__("Please select an invoice"));
 				}
 
-				let selectedInvoices = this.selected_invoices.map((invoice) => ({ ...invoice }));
+                                let selectedInvoices = this.selected_invoices.map((invoice) => ({ ...invoice }));
 
 				if (hasNewPayments && selectedInvoices.length === 0) {
 					selectedInvoices = this.outstanding_invoices
@@ -1037,31 +1037,71 @@ export default {
 						.map((invoice) => ({ ...invoice }));
 				}
 
-				const totalSelectedInvoicesAmount = selectedInvoices.reduce(
-					(acc, invoice) => acc + flt(invoice?.outstanding_amount || 0),
-					0,
-				);
+                                const totalSelectedInvoicesAmount = selectedInvoices.reduce(
+                                        (acc, invoice) => acc + flt(invoice?.outstanding_amount || 0),
+                                        0,
+                                );
 
-				this.payment_methods.forEach((payment) => {
-					payment.amount = flt(payment.amount);
-				});
+                                this.payment_methods.forEach((payment) => {
+                                        payment.amount = flt(payment.amount);
+                                });
 
-				const payload = {
-					customer,
-					company: this.company,
-					currency: this.pos_profile.currency,
-					pos_opening_shift_name: this.pos_opening_shift.name,
-					pos_profile_name: this.pos_profile.name,
-					pos_profile: this.pos_profile,
-					payment_methods: this.payment_methods,
-					selected_invoices: selectedInvoices,
-					selected_payments: this.selected_payments,
-					total_selected_invoices: flt(totalSelectedInvoicesAmount),
-					selected_mpesa_payments: this.selected_mpesa_payments,
-					total_selected_payments: flt(this.total_selected_payments),
-					total_payment_methods: flt(this.total_payment_methods),
-					total_selected_mpesa_payments: flt(this.total_selected_mpesa_payments),
-				};
+                                const trimmedPaymentMethods = (this.payment_methods || [])
+                                        .filter((payment) => payment.amount)
+                                        .map((payment) => ({
+                                                mode_of_payment: payment.mode_of_payment,
+                                                amount: payment.amount,
+                                        }));
+
+                                const trimmedInvoices = selectedInvoices.map((invoice) => ({
+                                        voucher_no: invoice.voucher_no || invoice.name,
+                                        name: invoice.voucher_no || invoice.name,
+                                        outstanding_amount: flt(invoice?.outstanding_amount),
+                                        currency: invoice?.currency,
+                                }));
+
+                                const trimmedSelectedPayments = (this.selected_payments || []).map((payment) => ({
+                                        name: payment.name,
+                                        is_credit_note: payment.is_credit_note,
+                                        voucher_type: payment.voucher_type,
+                                        posting_date: payment.posting_date,
+                                        unallocated_amount: flt(payment.unallocated_amount),
+                                        mode_of_payment: payment.mode_of_payment,
+                                        currency: payment.currency,
+                                        reference_invoice: payment.reference_invoice,
+                                }));
+
+                                const trimmedMpesaPayments = (this.selected_mpesa_payments || []).map((payment) => ({
+                                        name: payment.name,
+                                }));
+
+                                const slimPosProfile = {
+                                        name: this.pos_profile.name,
+                                        currency: this.pos_profile.currency,
+                                        posa_use_pos_awesome_payments: this.pos_profile.posa_use_pos_awesome_payments,
+                                        posa_allow_make_new_payments: this.pos_profile.posa_allow_make_new_payments,
+                                        posa_allow_reconcile_payments: this.pos_profile.posa_allow_reconcile_payments,
+                                        posa_allow_mpesa_reconcile_payments: this.pos_profile
+                                                .posa_allow_mpesa_reconcile_payments,
+                                        cost_center: this.pos_profile.cost_center,
+                                };
+
+                                const payload = {
+                                        customer,
+                                        company: this.company,
+                                        currency: this.pos_profile.currency,
+                                        pos_opening_shift_name: this.pos_opening_shift.name,
+                                        pos_profile_name: this.pos_profile.name,
+                                        pos_profile: slimPosProfile,
+                                        payment_methods: trimmedPaymentMethods,
+                                        selected_invoices: trimmedInvoices,
+                                        selected_payments: trimmedSelectedPayments,
+                                        total_selected_invoices: flt(totalSelectedInvoicesAmount),
+                                        selected_mpesa_payments: trimmedMpesaPayments,
+                                        total_selected_payments: flt(this.total_selected_payments),
+                                        total_payment_methods: flt(this.total_payment_methods),
+                                        total_selected_mpesa_payments: flt(this.total_selected_mpesa_payments),
+                                };
 
 				if (isOffline()) {
 					try {

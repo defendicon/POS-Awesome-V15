@@ -1495,28 +1495,151 @@ export default {
 				this.invoice_doc.credit_change = creditChange;
 			}
 
-			if (!this.invoice_doc.is_return) {
-				this.credit_change = creditChange ? -creditChange : 0;
-				this.paid_change = paidChange;
-			}
+                        if (!this.invoice_doc.is_return) {
+                                this.credit_change = creditChange ? -creditChange : 0;
+                                this.paid_change = paidChange;
+                        }
 
-			let data = {
-				total_change: changeLimit,
-				paid_change: paidChange,
-				credit_change: creditChange,
-				redeemed_customer_credit: this.redeemed_customer_credit,
-				customer_credit_dict: this.customer_credit_dict,
+                        const pickFields = (record, allowedFields) => {
+                                return allowedFields.reduce((acc, field) => {
+                                        if (record[field] !== undefined) {
+                                                acc[field] = record[field];
+                                        }
+                                        return acc;
+                                }, {});
+                        };
+
+                        const sanitizeItemsForSubmit = (items) => {
+                                const allowedItemFields = [
+                                        "name",
+                                        "doctype",
+                                        "idx",
+                                        "item_code",
+                                        "item_name",
+                                        "item_group",
+                                        "description",
+                                        "barcode",
+                                        "brand",
+                                        "uom",
+                                        "stock_uom",
+                                        "conversion_factor",
+                                        "qty",
+                                        "rate",
+                                        "price_list_rate",
+                                        "base_price_list_rate",
+                                        "amount",
+                                        "base_amount",
+                                        "net_rate",
+                                        "net_amount",
+                                        "base_net_rate",
+                                        "base_net_amount",
+                                        "discount_percentage",
+                                        "discount_amount",
+                                        "margin_rate_or_amount",
+                                        "margin_type",
+                                        "warehouse",
+                                        "batch_no",
+                                        "serial_no",
+                                        "income_account",
+                                        "expense_account",
+                                        "cost_center",
+                                        "is_free_item",
+                                        "auto_free_source",
+                                        "allow_zero_valuation_rate",
+                                        "delivery_date",
+                                        "pricing_rules",
+                                        "item_tax_template",
+                                        "tax_category",
+                                        "rate_with_margin",
+                                        "posa_row_id",
+                                ];
+
+                                return (items || []).map((item) => pickFields(item || {}, allowedItemFields));
+                        };
+
+                        const sanitizePaymentsForSubmit = (payments) => {
+                                const allowedPaymentFields = [
+                                        "name",
+                                        "doctype",
+                                        "idx",
+                                        "mode_of_payment",
+                                        "type",
+                                        "amount",
+                                        "base_amount",
+                                        "default",
+                                        "account",
+                                        "reference_no",
+                                        "reference_date",
+                                        "pos_profile",
+                                        "card_type",
+                                        "card_number",
+                                        "payer",
+                                        "payer_name",
+                                        "contact_email",
+                                        "mobile_no",
+                                        "clearance_date",
+                                        "exchange_rate",
+                                        "account_currency",
+                                ];
+
+                                return (payments || []).map((payment) => pickFields(payment || {}, allowedPaymentFields));
+                        };
+
+                        const sanitizeTaxesForSubmit = (taxes) => {
+                                const allowedTaxFields = [
+                                        "name",
+                                        "doctype",
+                                        "idx",
+                                        "charge_type",
+                                        "account_head",
+                                        "description",
+                                        "rate",
+                                        "tax_amount",
+                                        "base_tax_amount",
+                                        "tax_amount_after_discount_amount",
+                                        "base_tax_amount_after_discount_amount",
+                                        "total",
+                                        "tax_amount_for_current_item",
+                                        "base_total",
+                                        "base_tax_amount_for_current_item",
+                                        "account_currency",
+                                        "cost_center",
+                                ];
+
+                                return (taxes || []).map((tax) => pickFields(tax || {}, allowedTaxFields));
+                        };
+
+                        const sanitizedInvoice = {
+                                ...(this.invoice_doc || {}),
+                                items: sanitizeItemsForSubmit(this.invoice_doc?.items),
+                                payments: sanitizePaymentsForSubmit(this.invoice_doc?.payments),
+                        };
+
+                        if (Array.isArray(this.invoice_doc?.taxes)) {
+                                sanitizedInvoice.taxes = sanitizeTaxesForSubmit(this.invoice_doc.taxes);
+                        }
+
+                        ["__last_sync_on", "__onload", "_dirty", "__unsaved", "_edited"]
+                                .filter((key) => key in sanitizedInvoice)
+                                .forEach((key) => delete sanitizedInvoice[key]);
+
+                        let data = {
+                                total_change: changeLimit,
+                                paid_change: paidChange,
+                                credit_change: creditChange,
+                                redeemed_customer_credit: this.redeemed_customer_credit,
+                                customer_credit_dict: this.customer_credit_dict,
 				is_cashback: this.is_cashback,
-			};
+                        };
 
-			if (isOffline()) {
-				try {
-					saveOfflineInvoice({ data: data, invoice: this.invoice_doc });
-					this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
-					this.eventBus.emit("show_message", {
-						title: __("Invoice saved offline"),
-						color: "warning",
-					});
+                        if (isOffline()) {
+                                try {
+                                        saveOfflineInvoice({ data: data, invoice: sanitizedInvoice });
+                                        this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
+                                        this.eventBus.emit("show_message", {
+                                                title: __("Invoice saved offline"),
+                                                color: "warning",
+                                        });
 					if (print) {
 						this.print_offline_invoice(this.invoice_doc);
 					}
@@ -1535,19 +1658,19 @@ export default {
 			}
 
 			try {
-				const r = await frappe.call({
-					method:
-						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-							? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-							: this.invoiceType === "Quotation"
-								? "posawesome.posawesome.api.quotations.submit_quotation"
-								: "posawesome.posawesome.api.invoices.submit_invoice",
-					args: {
-						data: data,
-						invoice: this.invoice_doc,
-						order: this.invoice_doc,
-					},
-				});
+                                const r = await frappe.call({
+                                        method:
+                                                this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+                                                        ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
+                                                        : this.invoiceType === "Quotation"
+                                                                ? "posawesome.posawesome.api.quotations.submit_quotation"
+                                                                : "posawesome.posawesome.api.invoices.submit_invoice",
+                                        args: {
+                                                data: data,
+                                                invoice: sanitizedInvoice,
+                                                order: sanitizedInvoice,
+                                        },
+                                });
 
 				if (!r.message) {
 					this.eventBus.emit("show_message", {
