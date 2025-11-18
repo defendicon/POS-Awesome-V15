@@ -1,4 +1,6 @@
 import { ref } from "vue";
+import { batchStatus } from "../utils/batch.js";
+import { parseBooleanSetting } from "../utils/stock.js";
 
 export function useBatchSerial() {
 	// Set serial numbers for an item (and update qty)
@@ -18,123 +20,192 @@ export function useBatchSerial() {
 	};
 
 	// Set batch number for an item (and update batch data)
-	const setBatchQty = (item, value, update = true, context) => {
-		console.log("Setting batch quantity:", item, value);
-		const existing_items = context.items.filter(
-			(element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
-		);
-		const used_batches = {};
-		item.batch_no_data.forEach((batch) => {
-			used_batches[batch.batch_no] = {
-				...batch,
-				used_qty: 0,
-				remaining_qty: batch.batch_qty,
-			};
-			existing_items.forEach((element) => {
-				if (element.batch_no && element.batch_no == batch.batch_no) {
-					used_batches[batch.batch_no].used_qty += element.qty;
-					used_batches[batch.batch_no].remaining_qty -= element.qty;
-					used_batches[batch.batch_no].batch_qty -= element.qty;
-				}
-			});
-		});
+        const setBatchQty = (item, value, update = true, context) => {
+                console.log("Setting batch quantity:", item, value);
+                const allowExpired = parseBooleanSetting(context?.pos_profile?.posa_allow_expired_batches);
+                const showExpired = parseBooleanSetting(context?.pos_profile?.posa_show_expired_batches);
+                const nearExpiryMonths = Number(context?.pos_profile?.posa_near_expiry_months || 0);
+                const today = new Date();
 
-		const batch_no_data = Object.values(used_batches)
-			.filter((batch) => batch.remaining_qty > 0)
-			.sort((a, b) => {
-				if (a.expiry_date && b.expiry_date) {
-					return new Date(a.expiry_date) - new Date(b.expiry_date);
-				} else if (a.expiry_date) {
-					return -1;
-				} else if (b.expiry_date) {
-					return 1;
-				} else if (a.manufacturing_date && b.manufacturing_date) {
-					return new Date(a.manufacturing_date) - new Date(b.manufacturing_date);
-				} else if (a.manufacturing_date) {
-					return -1;
-				} else if (b.manufacturing_date) {
-					return 1;
-				} else {
-					return b.remaining_qty - a.remaining_qty;
-				}
-			});
+                const translate = (text, args) => {
+                        if (context && typeof context.__ === "function") {
+                                return context.__(text, args);
+                        }
+                        return text;
+                };
 
-		if (batch_no_data.length > 0) {
-			let batch_to_use = null;
-			if (value) {
-				batch_to_use = batch_no_data.find((batch) => batch.batch_no == value);
-			}
-			if (!batch_to_use) {
-				batch_to_use = batch_no_data[0];
-			}
+                const notify = (message, color = "warning") => {
+                        if (context?.eventBus?.emit) {
+                                context.eventBus.emit("show_message", { title: message, color });
+                        } else if (typeof frappe !== "undefined" && frappe?.show_alert) {
+                                frappe.show_alert({ message, indicator: color });
+                        }
+                };
 
-			item.batch_no = batch_to_use.batch_no;
-			item.actual_batch_qty = batch_to_use.batch_qty;
-			item.batch_no_expiry_date = batch_to_use.expiry_date;
+                const customWarning = context?.pos_profile?.posa_expired_batch_warning_message;
 
-			if (batch_to_use.batch_price) {
-				// Store batch price in base currency
-				item.base_batch_price = batch_to_use.batch_price;
+                const existing_items = context.items.filter(
+                        (element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
+                );
+                const used_batches = {};
+                item.batch_no_data.forEach((batch) => {
+                        const status = batchStatus(batch, {
+                                monthsThreshold: nearExpiryMonths,
+                                today,
+                        });
+                        if (status.expired && !(allowExpired || showExpired)) {
+                                return;
+                        }
 
-				// Convert batch price to selected currency if needed
-				const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-				if (context.selected_currency !== baseCurrency) {
-					item.batch_price = context.flt(
-						batch_to_use.batch_price / context.exchange_rate,
-						context.currency_precision,
-					);
-				} else {
-					item.batch_price = batch_to_use.batch_price;
-				}
+                        used_batches[batch.batch_no] = {
+                                ...batch,
+                                used_qty: 0,
+                                remaining_qty: batch.batch_qty,
+                                is_expired: status.expired,
+                                is_near_expiry: status.nearExpiry,
+                        };
+                        existing_items.forEach((element) => {
+                                if (element.batch_no && element.batch_no == batch.batch_no) {
+                                        used_batches[batch.batch_no].used_qty += element.qty;
+                                        used_batches[batch.batch_no].remaining_qty -= element.qty;
+                                        used_batches[batch.batch_no].batch_qty -= element.qty;
+                                }
+                        });
+                });
 
-				// Set rates based on batch price
-				item.base_price_list_rate = item.base_batch_price;
-				item.base_rate = item.base_batch_price;
+                const batch_no_data = Object.values(used_batches)
+                        .map((batch) => ({
+                                ...batch,
+                                disabled: batch.is_expired && !allowExpired,
+                        }))
+                        .filter((batch) => batch.remaining_qty > 0 && (showExpired || allowExpired || !batch.is_expired))
+                        .sort((a, b) => {
+                                if (a.expiry_date && b.expiry_date) {
+                                        return new Date(a.expiry_date) - new Date(b.expiry_date);
+                                } else if (a.expiry_date) {
+                                        return -1;
+                                } else if (b.expiry_date) {
+                                        return 1;
+                                } else if (a.manufacturing_date && b.manufacturing_date) {
+                                        return new Date(a.manufacturing_date) - new Date(b.manufacturing_date);
+                                } else if (a.manufacturing_date) {
+                                        return -1;
+                                } else if (b.manufacturing_date) {
+                                        return 1;
+                                } else {
+                                        return b.remaining_qty - a.remaining_qty;
+                                }
+                        });
 
-				if (context.selected_currency !== baseCurrency) {
-					item.price_list_rate = item.batch_price;
-					item.rate = item.batch_price;
-				} else {
-					item.price_list_rate = item.base_batch_price;
-					item.rate = item.base_batch_price;
-				}
+                const selectableBatches = batch_no_data.filter((batch) => !batch.disabled);
 
-				// Reset discounts since we're using batch price
-				item.discount_percentage = 0;
-				item.discount_amount = 0;
-				item.base_discount_amount = 0;
+                if (batch_no_data.length > 0) {
+                        let batch_to_use = null;
+                        if (value) {
+                                batch_to_use = batch_no_data.find((batch) => batch.batch_no == value);
+                        }
+                        const fallbackPool = selectableBatches.length > 0 ? selectableBatches : batch_no_data;
+                        if (!batch_to_use && fallbackPool.length) {
+                                batch_to_use = fallbackPool[0];
+                        }
 
-				// Calculate final amounts
-				item.amount = context.flt(item.qty * item.rate, context.currency_precision);
-				item.base_amount = context.flt(item.qty * item.base_rate, context.currency_precision);
+                        if (batch_to_use?.disabled) {
+                                const message = customWarning
+                                        ? customWarning
+                                                  .replace("{batch_no}", batch_to_use.batch_no)
+                                                  .replace(
+                                                          "{expiry_date}",
+                                                          batch_to_use.expiry_date || translate("Unknown"),
+                                                  )
+                                        : translate("Batch {0} is expired and blocked for sale.", [
+                                                  batch_to_use.batch_no,
+                                          ]);
+                                notify(message, "error");
+                                batch_to_use = null;
+                        }
 
-				console.log("Updated batch prices:", {
-					base_batch_price: item.base_batch_price,
-					batch_price: item.batch_price,
-					rate: item.rate,
-					base_rate: item.base_rate,
-					price_list_rate: item.price_list_rate,
-					exchange_rate: context.exchange_rate,
-				});
-			} else if (update && context.update_item_detail) {
-				item.batch_price = null;
-				item.base_batch_price = null;
-				context.update_item_detail(item);
-			}
-		} else {
-			item.batch_no = null;
-			item.actual_batch_qty = null;
-			item.batch_no_expiry_date = null;
-			item.batch_price = null;
-			item.base_batch_price = null;
-		}
+                        if (batch_to_use) {
+                                item.batch_no = batch_to_use.batch_no;
+                                item.actual_batch_qty = batch_to_use.batch_qty;
+                                item.batch_no_expiry_date = batch_to_use.expiry_date;
+                        } else {
+                                item.batch_no = null;
+                                item.actual_batch_qty = null;
+                                item.batch_no_expiry_date = null;
+                        }
 
-		// Update batch_no_data
-		item.batch_no_data = batch_no_data;
+                        if (batch_to_use?.batch_price) {
+                                // Store batch price in base currency
+                                item.base_batch_price = batch_to_use.batch_price;
 
-		// Force UI update
-		if (context.forceUpdate) context.forceUpdate();
-	};
+                                // Convert batch price to selected currency if needed
+                                const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+                                if (context.selected_currency !== baseCurrency) {
+                                        item.batch_price = context.flt(
+                                                batch_to_use.batch_price / context.exchange_rate,
+                                                context.currency_precision,
+                                        );
+                                } else {
+                                        item.batch_price = batch_to_use.batch_price;
+                                }
+
+                                // Set rates based on batch price
+                                item.base_price_list_rate = item.base_batch_price;
+                                item.base_rate = item.base_batch_price;
+
+                                if (context.selected_currency !== baseCurrency) {
+                                        item.price_list_rate = item.batch_price;
+                                        item.rate = item.batch_price;
+                                } else {
+                                        item.price_list_rate = item.base_batch_price;
+                                        item.rate = item.base_batch_price;
+                                }
+
+                                // Reset discounts since we're using batch price
+                                item.discount_percentage = 0;
+                                item.discount_amount = 0;
+                                item.base_discount_amount = 0;
+
+                                // Calculate final amounts
+                                item.amount = context.flt(item.qty * item.rate, context.currency_precision);
+                                item.base_amount = context.flt(item.qty * item.base_rate, context.currency_precision);
+
+                                console.log("Updated batch prices:", {
+                                        base_batch_price: item.base_batch_price,
+                                        batch_price: item.batch_price,
+                                        rate: item.rate,
+                                        base_rate: item.base_rate,
+                                        price_list_rate: item.price_list_rate,
+                                        exchange_rate: context.exchange_rate,
+                                });
+                        } else if (update && context.update_item_detail) {
+                                item.batch_price = null;
+                                item.base_batch_price = null;
+                                context.update_item_detail(item);
+                        }
+                } else {
+                        item.batch_no = null;
+                        item.actual_batch_qty = null;
+                        item.batch_no_expiry_date = null;
+                        item.batch_price = null;
+                        item.base_batch_price = null;
+
+                        if (!allowExpired && !showExpired && item.has_batch_no) {
+                                notify(
+                                        translate(
+                                                "No valid batches are available for {0}.",
+                                                [item.item_name || item.item_code],
+                                        ),
+                                );
+                        }
+                }
+
+                // Update batch_no_data
+                item.batch_no_data = batch_no_data;
+
+                // Force UI update
+                if (context.forceUpdate) context.forceUpdate();
+        };
 
 	return {
 		setSerialNo,

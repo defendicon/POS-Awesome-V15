@@ -5,12 +5,59 @@ import logging
 from functools import cache
 
 import frappe
+from frappe.utils import getdate, nowdate
 
 # Reusable ORM filter to exclude template items
 HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 
 
 logger = logging.getLogger(__name__)
+
+
+def is_batch_expired(expiry_date, today=None):
+    """Return ``True`` when ``expiry_date`` is before *today*.
+
+    The check is tolerant to ``None``/blank values and string input. Missing
+    expiry dates are treated as *not* expired to avoid blocking open-dated
+    batches.
+    """
+
+    if not expiry_date:
+        return False
+
+    try:
+        expiry = getdate(expiry_date)
+        reference = getdate(today or nowdate())
+    except Exception:
+        return False
+
+    return expiry < reference
+
+
+def is_batch_near_expiry(expiry_date, months_threshold=0, today=None):
+    """Flag batches that are approaching expiry within the configured window."""
+
+    if not expiry_date or not months_threshold:
+        return False
+
+    try:
+        expiry = getdate(expiry_date)
+        reference = getdate(today or nowdate())
+    except Exception:
+        return False
+
+    if expiry < reference:
+        return False
+
+    try:
+        from dateutil.relativedelta import relativedelta
+    except Exception:
+        # Fall back to a simple month approximation (30 days each)
+        delta_days = int(months_threshold) * 30
+        return (expiry - reference).days <= delta_days
+
+    window_end = reference + relativedelta(months=int(months_threshold))
+    return reference <= expiry <= window_end
 
 
 def expand_item_groups(item_groups):

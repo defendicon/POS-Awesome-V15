@@ -55,15 +55,28 @@
 						@click.stop="openNameDialog(item)"
 						>mdi-pencil</v-icon
 					>
-					<v-icon
-						v-if="item.name_overridden"
-						size="x-small"
-						class="ml-1"
-						@click.stop="resetItemName(item)"
-						>mdi-undo</v-icon
-					>
-				</div>
-			</template>
+                                        <v-icon
+                                                v-if="item.name_overridden"
+                                                size="x-small"
+                                                class="ml-1"
+                                                @click.stop="resetItemName(item)"
+                                                >mdi-undo</v-icon
+                                        >
+                                </div>
+                                <div class="d-flex align-center mt-1" v-if="shouldShowBatchInfo(item)">
+                                        <v-chip size="x-small" variant="tonal" class="ma-0 pa-1" color="primary">
+                                                {{ __("Batch") }}: {{ item.batch_no || __('Not set') }}
+                                        </v-chip>
+                                        <v-chip
+                                                size="x-small"
+                                                variant="tonal"
+                                                class="ma-0 pa-1 ml-1"
+                                                :color="batchStatusColor(item)"
+                                        >
+                                                {{ __("Expiry") }}: {{ batchExpiryText(item) }}
+                                        </v-chip>
+                                </div>
+                        </template>
 
 			<!-- Quantity column -->
 			<template v-slot:item.qty="{ item }">
@@ -611,22 +624,52 @@
 											hide-details
 											prepend-inner-icon="mdi-package-variant-closed"
 										>
-											<template v-slot:item="{ props, item }">
-												<v-list-item v-bind="props">
-													<v-list-item-title
-														v-html="item.raw.batch_no"
-													></v-list-item-title>
-													<v-list-item-subtitle
-														v-html="
-															`Available QTY  '${item.raw.batch_qty}' - Expiry Date ${item.raw.expiry_date}`
-														"
-													></v-list-item-subtitle>
-												</v-list-item>
-											</template>
-										</v-autocomplete>
-									</div>
-								</div>
-							</div>
+                                                                                        <template v-slot:item="{ props, item }">
+                                                                                                <v-list-item
+                                                                                                        v-bind="props"
+                                                                                                        :class="{
+                                                                                                                'text-error': item.raw.is_expired,
+                                                                                                                'text-warning': item.raw.is_near_expiry,
+                                                                                                        }"
+                                                                                                >
+                                                                                                        <v-list-item-title
+                                                                                                                v-html="item.raw.batch_no"
+                                                                                                        ></v-list-item-title>
+                                                                                                        <v-list-item-subtitle>
+                                                                                                                <div class="d-flex align-center flex-wrap">
+                                                                                                                        <span class="mr-2">
+                                                                                                                                {{ __("Available QTY") }}
+                                                                                                                                {{ item.raw.batch_qty }}
+                                                                                                                                -
+                                                                                                                                {{ __("Expiry Date") }}
+                                                                                                                                {{ item.raw.expiry_date || __('No expiry') }}
+                                                                                                                        </span>
+                                                                                                                        <v-chip
+                                                                                                                                v-if="item.raw.is_expired"
+                                                                                                                                color="error"
+                                                                                                                                size="x-small"
+                                                                                                                                class="ma-0 ml-1"
+                                                                                                                                label
+                                                                                                                        >
+                                                                                                                                {{ __('Expired') }}
+                                                                                                                        </v-chip>
+                                                                                                                        <v-chip
+                                                                                                                                v-else-if="item.raw.is_near_expiry"
+                                                                                                                                color="warning"
+                                                                                                                                size="x-small"
+                                                                                                                                class="ma-0 ml-1"
+                                                                                                                                label
+                                                                                                                        >
+                                                                                                                                {{ __('Near expiry') }}
+                                                                                                                        </v-chip>
+                                                                                                                </div>
+                                                                                                        </v-list-item-subtitle>
+                                                                                                </v-list-item>
+                                                                                        </template>
+                                                                                </v-autocomplete>
+                                                                        </div>
+                                                                </div>
+                                                        </div>
 
 							<!-- Delivery Date Section -->
 							<div
@@ -694,6 +737,7 @@
 import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
+import { batchStatus } from "../../utils/batch.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 export default {
 	name: "ItemsTable",
@@ -920,25 +964,31 @@ export default {
 				console.error("Failed to load item selector settings:", e);
 			}
 			return false;
-		},
-		isRTL() {
-			if (this._rtlComputed !== undefined) {
-				return this._rtlComputed;
-			}
+                },
+                isRTL() {
+                        if (this._rtlComputed !== undefined) {
+                                return this._rtlComputed;
+                        }
 
 			const htmlDir = document.documentElement.getAttribute("dir");
 			const bodyDir = document.body.getAttribute("dir");
 			const computedDir = window.getComputedStyle(document.documentElement).direction;
 			const lang = document.documentElement.getAttribute("lang") || navigator.language;
-			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
-			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
+                        const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
+                        const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
 
-			this._rtlComputed =
-				htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
+                        this._rtlComputed =
+                                htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
 
-			return this._rtlComputed;
-		},
-	},
+                        return this._rtlComputed;
+                },
+                nearExpiryMonths() {
+                        return Number(this.pos_profile?.posa_near_expiry_months || 0);
+                },
+                showBatchInline() {
+                        return parseBooleanSetting(this.pos_profile?.posa_show_batch_expiry_in_item_column);
+                },
+        },
 	methods: {
 		customItemFilter(value, search, item) {
 			if (search == null) {
@@ -991,17 +1041,53 @@ export default {
 			collect(raw?.item_barcode);
 			collect(raw?.barcodes);
 
-			if (!haystacks.length) {
-				return false;
-			}
+                        if (!haystacks.length) {
+                                return false;
+                        }
 
-			return terms.every((term) => haystacks.some((text) => text.includes(term)));
-		},
+                        return terms.every((term) => haystacks.some((text) => text.includes(term)));
+                },
 
-		// Container awareness methods
-		updateContainerDimensions() {
-			if (this.$refs.tableContainer) {
-				const rect = this.$refs.tableContainer.getBoundingClientRect();
+                shouldShowBatchInfo(item) {
+                        return (
+                                this.showBatchInline &&
+                                item &&
+                                item.has_batch_no &&
+                                (item.batch_no || item.batch_no_expiry_date)
+                        );
+                },
+
+                batchStatusMeta(item) {
+                        const expiryDate = item?.batch_no_expiry_date || item?.expiry_date;
+                        return batchStatus(
+                                {
+                                        expiry_date: expiryDate,
+                                },
+                                { monthsThreshold: this.nearExpiryMonths, today: new Date() },
+                        );
+                },
+
+                batchStatusColor(item) {
+                        const status = this.batchStatusMeta(item);
+                        if (status.expired) return "error";
+                        if (status.nearExpiry) return "warning";
+                        return "success";
+                },
+
+                batchExpiryText(item) {
+                        if (item?.batch_no_expiry_date) {
+                                return item.batch_no_expiry_date;
+                        }
+                        if (typeof this.__ === "function") {
+                                return this.__("No expiry");
+                        }
+                        return "No expiry";
+                },
+
+                // Container awareness methods
+                updateContainerDimensions() {
+                        if (this.$refs.tableContainer) {
+                                const rect = this.$refs.tableContainer.getBoundingClientRect();
 				this.containerWidth = rect.width;
 				this.containerHeight = rect.height;
 				this.updateBreakpoint();

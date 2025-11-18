@@ -8,7 +8,9 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tupl
 import frappe
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import get_batch_qty
-from frappe.utils import flt, nowdate
+from frappe.utils import cint, flt, nowdate
+
+from posawesome.posawesome.api.utils import is_batch_expired, is_batch_near_expiry
 from frappe.utils.caching import redis_cache
 
 
@@ -200,37 +202,62 @@ def get_uoms(item_codes: Sequence[str], ttl: Optional[int] = None):
     return cached(tuple(item_codes))
 
 
-def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
+def _fetch_batches(
+    warehouse: str,
+    item_codes: Tuple[str, ...],
+    *,
+    include_expired: bool = False,
+    near_expiry_months: int = 0,
+):
     """Collect positive batch quantities per item for the given warehouse."""
 
     if not item_codes or not warehouse:
         return []
 
     rows = []
+    today = nowdate()
     for item_code in item_codes:
         batch_list = get_batch_qty(item_code=item_code, warehouse=warehouse) or []
         for batch in batch_list:
-            if batch.get("batch_no") and flt(batch.get("qty")) > 0:
-                rows.append(
-                    frappe._dict(
-                        {
-                            "item_code": item_code,
-                            "batch_no": batch.get("batch_no"),
-                            "batch_qty": batch.get("qty"),
-                            "expiry_date": batch.get("expiry_date"),
-                            "batch_price": batch.get("posa_batch_price"),
-                            "manufacturing_date": batch.get("manufacturing_date"),
-                        }
-                    )
+            if not batch.get("batch_no") or flt(batch.get("qty")) <= 0:
+                continue
+
+            expiry_date = batch.get("expiry_date")
+            expired = is_batch_expired(expiry_date, today=today)
+            if expired and not include_expired:
+                continue
+
+            rows.append(
+                frappe._dict(
+                    {
+                        "item_code": item_code,
+                        "batch_no": batch.get("batch_no"),
+                        "batch_qty": batch.get("qty"),
+                        "expiry_date": expiry_date,
+                        "batch_price": batch.get("posa_batch_price"),
+                        "manufacturing_date": batch.get("manufacturing_date"),
+                        "is_expired": expired,
+                        "is_near_expiry": is_batch_near_expiry(
+                            expiry_date, months_threshold=near_expiry_months, today=today
+                        ),
+                    }
                 )
+            )
     return rows
 
 
-def get_batches(warehouse: Optional[str], item_codes: Sequence[str], ttl: Optional[int] = None):
+def get_batches(
+    warehouse: Optional[str],
+    item_codes: Sequence[str],
+    ttl: Optional[int] = None,
+    *,
+    include_expired: bool = False,
+    near_expiry_months: int = 0,
+):
     """Fetch batch availability constrained to the provided warehouse."""
 
     cached = _cache_wrapper(_batch_cache, ttl, _fetch_batches)
-    return cached(warehouse, tuple(item_codes))
+    return cached(warehouse, tuple(item_codes), include_expired=include_expired, near_expiry_months=near_expiry_months)
 
 
 def _fetch_serials(warehouse: str, item_codes: Tuple[str, ...]):
@@ -428,7 +455,19 @@ class ItemDetailAggregator:
 
         batch_items = [row.name for row in meta_rows if row.get("has_batch_no")]
         serial_items = [row.name for row in meta_rows if row.get("has_serial_no")]
-        batch_rows = get_batches(self.warehouse, _normalize_codes(batch_items), ttl=self.cache_ttl)
+        include_expired_batches = bool(
+            cint(self.pos_profile.get("posa_allow_expired_batches"))
+            or cint(self.pos_profile.get("posa_show_expired_batches"))
+        )
+        near_expiry_months = cint(self.pos_profile.get("posa_near_expiry_months") or 0)
+
+        batch_rows = get_batches(
+            self.warehouse,
+            _normalize_codes(batch_items),
+            ttl=self.cache_ttl,
+            include_expired=include_expired_batches,
+            near_expiry_months=near_expiry_months,
+        )
         serial_rows = get_serials(self.warehouse, _normalize_codes(serial_items), ttl=self.cache_ttl)
 
         price_map: Dict[str, Dict[str, frappe._dict]] = {}

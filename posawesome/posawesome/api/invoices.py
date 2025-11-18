@@ -31,6 +31,7 @@ from posawesome.posawesome.api.utilities import (
     ensure_child_doctype,
     set_batch_nos_for_bundels,
 )  # Updated imports
+from posawesome.posawesome.api.utils import is_batch_expired
 
 from .items import get_stock_availability
 
@@ -250,6 +251,34 @@ def _validate_stock_on_invoice(invoice_doc):
     errors = _collect_stock_errors(items_to_check)
     if errors and _should_block(invoice_doc.pos_profile):
         frappe.throw(frappe.as_json({"errors": errors}), frappe.ValidationError)
+
+
+def _validate_expired_batches(invoice_doc):
+    profile = getattr(invoice_doc, "pos_profile", None)
+    allow_expired = False
+
+    if profile:
+        allow_expired = bool(
+            cint(frappe.db.get_value("POS Profile", profile, "posa_allow_expired_batches") or 0)
+        )
+
+    if allow_expired:
+        return
+
+    posting_date = getattr(invoice_doc, "posting_date", None) or nowdate()
+
+    for row in invoice_doc.items:
+        batch_no = row.get("batch_no")
+        if not batch_no:
+            continue
+
+        batch_doc = frappe.get_cached_doc("Batch", batch_no)
+        if is_batch_expired(batch_doc.expiry_date, today=posting_date):
+            frappe.throw(
+                _(
+                    "Batch {0} for item {1} expired on {2} and cannot be sold."
+                ).format(batch_no, row.get("item_code"), batch_doc.expiry_date or _("Unknown"))
+            )
 
 
 def _auto_set_return_batches(invoice_doc):
@@ -829,6 +858,7 @@ def submit_invoice(invoice, data):
     #     set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
 
+    _validate_expired_batches(invoice_doc)
     _validate_stock_on_invoice(invoice_doc)
 
     invoice_doc.flags.ignore_permissions = True

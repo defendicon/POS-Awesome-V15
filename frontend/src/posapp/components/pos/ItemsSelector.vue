@@ -512,6 +512,7 @@ import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils
 import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
+import { batchStatus } from "../../utils/batch.js";
 import placeholderImage from "./placeholder-image.png";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
@@ -3488,20 +3489,75 @@ export default {
 				}
 			}
 
-			if (effectivePrice !== null && !Number.isNaN(effectivePrice)) {
-				const parsedPrice = parseFloat(effectivePrice);
-				if (!Number.isNaN(parsedPrice)) {
-					newItem.rate = parsedPrice;
-					newItem.price_list_rate = parsedPrice;
+                        if (effectivePrice !== null && !Number.isNaN(effectivePrice)) {
+                                const parsedPrice = parseFloat(effectivePrice);
+                                if (!Number.isNaN(parsedPrice)) {
+                                        newItem.rate = parsedPrice;
+                                        newItem.price_list_rate = parsedPrice;
 					newItem.base_rate = parsedPrice;
 					newItem.base_price_list_rate = parsedPrice;
 					newItem._manual_rate_set = true;
-					newItem.skip_force_update = true;
-				}
-			}
+                                        newItem.skip_force_update = true;
+                                }
+                        }
 
-			const requestedQtyRaw =
-				qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
+                        const allowExpired = parseBooleanSetting(this.pos_profile?.posa_allow_expired_batches);
+                        const nearExpiryMonths = Number(this.pos_profile?.posa_near_expiry_months || 0);
+                        const scannedBatch = Array.isArray(newItem.batch_no_data)
+                                ? newItem.batch_no_data.find((b) => b.batch_no === scannedCode)
+                                : null;
+
+                        if (scannedBatch) {
+                                const status = batchStatus(scannedBatch, {
+                                        monthsThreshold: nearExpiryMonths,
+                                        today: new Date(),
+                                });
+
+                                if (status.expired && !allowExpired) {
+                                        const customWarning = this.pos_profile?.posa_expired_batch_warning_message;
+                                        let message = this.__("Batch {0} expired on {1}.", [
+                                                scannedBatch.batch_no,
+                                                scannedBatch.expiry_date || this.__("Unknown"),
+                                        ]);
+
+                                        if (customWarning) {
+                                                message = customWarning
+                                                        .replace("{batch_no}", scannedBatch.batch_no)
+                                                        .replace(
+                                                                "{expiry_date}",
+                                                                scannedBatch.expiry_date || this.__("Unknown"),
+                                                        );
+                                        }
+
+                                        this.showScanError({
+                                                message,
+                                                code: scannedCode,
+                                        });
+                                        this.scannerLocked = false;
+                                        this.pendingScanCode = "";
+                                        return;
+                                }
+
+                                if (status.expired && allowExpired) {
+                                        this.eventBus?.emit?.("show_message", {
+                                                title: this.__("Expired batch {0} scanned", [scannedBatch.batch_no]),
+                                                color: "warning",
+                                        });
+                                } else if (status.nearExpiry) {
+                                        this.eventBus?.emit?.("show_message", {
+                                                title: this.__("Batch {0} is near expiry ({1})", [
+                                                        scannedBatch.batch_no,
+                                                        scannedBatch.expiry_date || "-",
+                                                ]),
+                                                color: "warning",
+                                        });
+                                }
+
+                                newItem.to_set_batch_no = scannedBatch.batch_no;
+                        }
+
+                        const requestedQtyRaw =
+                                qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
 			const requestedQty = Math.abs(requestedQtyRaw || 1);
 			const availableQty =
 				typeof newItem.available_qty === "number"

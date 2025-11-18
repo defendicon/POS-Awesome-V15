@@ -23,6 +23,8 @@ from .utils import (
     expand_item_groups,
     get_active_pos_profile,
     get_item_groups,
+    is_batch_expired,
+    is_batch_near_expiry,
 )
 
 
@@ -809,15 +811,28 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     item_code = item.get("item_code")
     batch_no_data = []
     serial_no_data = []
+    profile_name = item.get("pos_profile") or getattr(doc, "pos_profile", None)
+    allow_expired = False
+    show_expired = False
+    near_expiry_months = 0
+
+    if profile_name:
+        profile = frappe.get_cached_doc("POS Profile", profile_name)
+        allow_expired = bool(cint(profile.get("posa_allow_expired_batches")))
+        show_expired = bool(cint(profile.get("posa_show_expired_batches")))
+        near_expiry_months = cint(profile.get("posa_near_expiry_months") or 0)
+
     if warehouse and item.get("has_batch_no"):
         batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
         if batch_list:
             for batch in batch_list:
                 if batch.qty > 0 and batch.batch_no:
                     batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
-                    if (
-                        str(batch_doc.expiry_date) > str(today) or batch_doc.expiry_date in ["", None]
-                    ) and batch_doc.disabled == 0:
+                    expired = is_batch_expired(batch_doc.expiry_date, today=today)
+                    near_expiry = is_batch_near_expiry(
+                        batch_doc.expiry_date, months_threshold=near_expiry_months, today=today
+                    )
+                    if (not expired or allow_expired or show_expired) and batch_doc.disabled == 0:
                         batch_no_data.append(
                             {
                                 "batch_no": batch.batch_no,
@@ -825,6 +840,8 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
                                 "expiry_date": batch_doc.expiry_date,
                                 "batch_price": batch_doc.posa_batch_price,
                                 "manufacturing_date": batch_doc.manufacturing_date,
+                                "is_expired": expired,
+                                "is_near_expiry": near_expiry,
                             }
                         )
     if warehouse and item.get("has_serial_no"):
@@ -1147,8 +1164,20 @@ def get_item_attributes(item_code):
 
 
 @frappe.whitelist()
-def search_serial_or_batch_or_barcode_number(search_value, search_serial_no=None, search_batch_no=None):
+def search_serial_or_batch_or_barcode_number(
+    search_value, search_serial_no=None, search_batch_no=None, pos_profile=None
+):
     """Search for items by serial number, batch number, or barcode."""
+    allow_expired = False
+    show_expired = False
+    if pos_profile:
+        try:
+            profile = frappe.get_cached_doc("POS Profile", pos_profile)
+            allow_expired = bool(cint(profile.get("posa_allow_expired_batches")))
+            show_expired = bool(cint(profile.get("posa_show_expired_batches")))
+        except Exception:
+            pass
+
     # Search by barcode
     barcode_data = frappe.db.get_value(
         "Item Barcode",
@@ -1168,9 +1197,15 @@ def search_serial_or_batch_or_barcode_number(search_value, search_serial_no=None
             as_dict=True,
         )
         if batch_data:
+            batch_doc = frappe.get_cached_doc("Batch", batch_data.batch_no)
+            expired = is_batch_expired(batch_doc.expiry_date)
+            if expired and not (allow_expired or show_expired):
+                return {}
             return {
                 "item_code": batch_data.item_code,
                 "batch_no": batch_data.batch_no,
+                "is_expired": expired,
+                "expiry_date": batch_doc.expiry_date,
             }
 
     # Search by serial number if enabled
