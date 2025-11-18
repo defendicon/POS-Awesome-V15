@@ -110,7 +110,7 @@ export const useCustomersStore = defineStore("customers", () => {
 	const posProfile = ref(null);
 	const refreshToken = ref(0);
 
-	const filteredCustomers = computed(() => (isCustomerBackgroundLoading.value ? [] : customers.value));
+        const filteredCustomers = computed(() => customers.value);
 
 	const isLoadComplete = computed(() => customersLoaded.value && loadProgress.value >= 100);
 

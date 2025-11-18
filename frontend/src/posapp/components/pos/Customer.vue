@@ -183,12 +183,16 @@ export default {
                 }, 300);
 
                 const noDataText = computed(() => {
-                        if (loadingCustomers.value || isSearching.value) {
-                                return __("Searching customers...");
+                        const hasResults = filteredCustomers.value && filteredCustomers.value.length;
+                        const isBusy =
+                                loadingCustomers.value ||
+                                isSearching.value ||
+                                isCustomerBackgroundLoading.value;
+
+                        if (isBusy || hasResults) {
+                                return "";
                         }
-                        if (isCustomerBackgroundLoading.value) {
-                                return __("Loading customer data...");
-                        }
+
                         return __("Customers not found");
                 });
 
