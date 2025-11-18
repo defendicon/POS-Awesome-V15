@@ -611,19 +611,25 @@
 										></v-text-field>
 									</div>
 									<div class="form-field">
-										<v-autocomplete
-											v-model="item.batch_no"
-											:items="item.batch_no_data"
-											item-title="batch_no"
-											variant="outlined"
-											density="compact"
-											color="primary"
-											class="pos-themed-input"
-											:label="frappe._('Batch No')"
-											@update:model-value="setBatchQty(item, $event)"
-											hide-details
-											prepend-inner-icon="mdi-package-variant-closed"
-										>
+                                                                                <v-autocomplete
+                                                                                        v-model="item.batch_no"
+                                                                                        :items="item.batch_no_data"
+                                                                                        item-title="batch_no"
+                                                                                        item-value="batch_no"
+                                                                                        variant="outlined"
+                                                                                        density="compact"
+                                                                                        color="primary"
+                                                                                        class="pos-themed-input"
+                                                                                        :label="frappe._('Batch No')"
+                                                                                        @update:model-value="setBatchQty(item, $event)"
+                                                                                        :hide-details="!item.batch_validation_message"
+                                                                                        :error-messages="
+                                                                                                item.batch_validation_message
+                                                                                                        ? [item.batch_validation_message]
+                                                                                                        : []
+                                                                                        "
+                                                                                        prepend-inner-icon="mdi-package-variant-closed"
+                                                                                >
                                                                                         <template v-slot:item="{ props, item }">
                                                                                                 <v-list-item
                                                                                                         v-bind="props"

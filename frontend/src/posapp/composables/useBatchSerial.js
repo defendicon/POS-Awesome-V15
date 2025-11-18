@@ -19,13 +19,19 @@ export function useBatchSerial() {
 		}
 	};
 
-	// Set batch number for an item (and update batch data)
+        // Set batch number for an item (and update batch data)
         const setBatchQty = (item, value, update = true, context) => {
                 console.log("Setting batch quantity:", item, value);
                 const allowExpired = parseBooleanSetting(context?.pos_profile?.posa_allow_expired_batches);
                 const showExpired = parseBooleanSetting(context?.pos_profile?.posa_show_expired_batches);
                 const nearExpiryMonths = Number(context?.pos_profile?.posa_near_expiry_months || 0);
                 const today = new Date();
+
+                const setBatchMessage = (message = "") => {
+                        item.batch_validation_message = message;
+                };
+
+                setBatchMessage("");
 
                 const translate = (text, args) => {
                         if (context && typeof context.__ === "function") {
@@ -118,6 +124,7 @@ export function useBatchSerial() {
                                                   batch_to_use.batch_no,
                                           ]);
                                 notify(message, "error");
+                                setBatchMessage(message);
                                 batch_to_use = null;
                         }
 
@@ -125,10 +132,14 @@ export function useBatchSerial() {
                                 item.batch_no = batch_to_use.batch_no;
                                 item.actual_batch_qty = batch_to_use.batch_qty;
                                 item.batch_no_expiry_date = batch_to_use.expiry_date;
+                                setBatchMessage("");
                         } else {
                                 item.batch_no = null;
                                 item.actual_batch_qty = null;
                                 item.batch_no_expiry_date = null;
+                                if (!item.batch_validation_message) {
+                                        setBatchMessage(translate("Please choose a valid batch."));
+                                }
                         }
 
                         if (batch_to_use?.batch_price) {
@@ -188,12 +199,11 @@ export function useBatchSerial() {
                         item.base_batch_price = null;
 
                         if (!allowExpired && !showExpired && item.has_batch_no) {
-                                notify(
-                                        translate(
-                                                "No valid batches are available for {0}.",
-                                                [item.item_name || item.item_code],
-                                        ),
-                                );
+                                const message = translate("No valid batches are available for {0}.", [
+                                        item.item_name || item.item_code,
+                                ]);
+                                notify(message);
+                                setBatchMessage(message);
                         }
                 }
 
