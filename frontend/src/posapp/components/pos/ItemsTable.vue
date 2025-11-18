@@ -1579,7 +1579,8 @@ export default {
         position: relative;
         /* Allow scrolling when expanded content exceeds the viewport so sections like
            the Batch selector remain accessible while preserving a generous viewable area */
-        max-height: min(92vh, max(600px, calc(var(--container-height, 900px) - 20px)));
+        min-height: clamp(520px, 80vh, 900px);
+        max-height: min(96vh, max(780px, calc(var(--container-height, 1100px) - 12px)));
         overflow-y: auto;
         overflow-x: visible;
 }
