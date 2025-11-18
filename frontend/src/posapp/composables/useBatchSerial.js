@@ -53,9 +53,6 @@ export function useBatchSerial() {
                                 monthsThreshold: nearExpiryMonths,
                                 today,
                         });
-                        if (status.expired && !(allowExpired || showExpired)) {
-                                return;
-                        }
 
                         used_batches[batch.batch_no] = {
                                 ...batch,
@@ -78,7 +75,7 @@ export function useBatchSerial() {
                                 ...batch,
                                 disabled: batch.is_expired && !allowExpired,
                         }))
-                        .filter((batch) => batch.remaining_qty > 0 && (showExpired || allowExpired || !batch.is_expired))
+                        .filter((batch) => batch.remaining_qty > 0)
                         .sort((a, b) => {
                                 if (a.expiry_date && b.expiry_date) {
                                         return new Date(a.expiry_date) - new Date(b.expiry_date);
