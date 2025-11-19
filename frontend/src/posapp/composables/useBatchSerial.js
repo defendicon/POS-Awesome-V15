@@ -54,24 +54,29 @@ export function useBatchSerial() {
                 const existing_items = context.items.filter(
                         (element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
                 );
-		const used_batches = {};
-		item.batch_no_data.forEach((batch) => {
-			used_batches[batch.batch_no] = {
-				...batch,
-				used_qty: 0,
-				remaining_qty: batch.batch_qty,
-			};
-			existing_items.forEach((element) => {
-				if (element.batch_no && element.batch_no == batch.batch_no) {
-					used_batches[batch.batch_no].used_qty += element.qty;
-					used_batches[batch.batch_no].remaining_qty -= element.qty;
-					used_batches[batch.batch_no].batch_qty -= element.qty;
-				}
-			});
-		});
+                const used_batches = {};
+                item.batch_no_data.forEach((batch) => {
+                        used_batches[batch.batch_no] = {
+                                ...batch,
+                                used_qty: 0,
+                                remaining_qty: batch.batch_qty,
+                        };
+                        existing_items.forEach((element) => {
+                                if (element.batch_no && element.batch_no == batch.batch_no) {
+                                        used_batches[batch.batch_no].used_qty += element.qty;
+                                        used_batches[batch.batch_no].remaining_qty -= element.qty;
+                                        used_batches[batch.batch_no].batch_qty -= element.qty;
+                                }
+                        });
+                });
 
                 const batch_no_data = Object.values(used_batches)
-                        .filter((batch) => batch.remaining_qty > 0)
+                        .map((batch) => ({
+                                ...batch,
+                                remaining_qty: Math.max(batch.remaining_qty, 0),
+                                is_expired: isBatchExpired(batch),
+                        }))
+                        .filter((batch) => batch.remaining_qty > 0 || batch.is_expired)
                         .sort((a, b) => {
                                 const aExpired = isBatchExpired(a);
                                 const bExpired = isBatchExpired(b);
