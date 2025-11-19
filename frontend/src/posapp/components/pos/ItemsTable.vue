@@ -552,9 +552,9 @@
 								</div>
 								<div class="form-row">
 									<div class="form-field full-width">
-										<v-autocomplete
-											v-model="item.serial_no_selected"
-											:items="item.serial_no_data"
+                                                                                <v-autocomplete
+                                                                                        v-model="item.serial_no_selected"
+                                                                                        :items="getSerialOptions(item)"
 											item-title="serial_no"
 											item-value="serial_no"
 											variant="outlined"
@@ -959,8 +959,15 @@ export default {
 			return this._rtlComputed;
 		},
 	},
-	methods: {
-		customItemFilter(value, search, item) {
+        methods: {
+                getSerialOptions(item) {
+                        if (Array.isArray(item?.filtered_serial_no_data)) {
+                                return item.filtered_serial_no_data;
+                        }
+                        return Array.isArray(item?.serial_no_data) ? item.serial_no_data : [];
+                },
+
+                customItemFilter(value, search, item) {
 			if (search == null) {
 				return true;
 			}

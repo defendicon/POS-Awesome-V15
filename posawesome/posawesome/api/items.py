@@ -834,7 +834,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
                 "status": "Active",
                 "warehouse": warehouse,
             },
-            fields=["name as serial_no"],
+            fields=["name as serial_no", "batch_no"],
         )
 
     item["selling_price_list"] = price_list

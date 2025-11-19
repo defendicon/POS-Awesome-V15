@@ -1,6 +1,28 @@
-import { ref } from "vue";
-
 export function useBatchSerial() {
+        const normalizeSerialSelection = (item) => {
+                if (!Array.isArray(item.serial_no_selected)) {
+                        item.serial_no_selected = [];
+                }
+                return item.serial_no_selected;
+        };
+
+        const applySerialBatchFilter = (item) => {
+                const serials = Array.isArray(item.serial_no_data) ? item.serial_no_data : [];
+                if (!item?.has_serial_no) {
+                        item.filtered_serial_no_data = serials;
+                        return serials;
+                }
+
+                if (!item.has_batch_no || !item.batch_no) {
+                        item.filtered_serial_no_data = serials;
+                        return serials;
+                }
+
+                const filtered = serials.filter((serial) => serial?.batch_no === item.batch_no);
+                item.filtered_serial_no_data = filtered;
+                return filtered;
+        };
+
         const isBatchExpired = (batch) => {
                 if (!batch || !batch.expiry_date) return false;
 
@@ -12,24 +34,28 @@ export function useBatchSerial() {
         };
 
         // Set serial numbers for an item (and update qty)
-        const setSerialNo = (item, forceUpdate) => {
-                console.log(item);
-                if (!item.has_serial_no) return;
-                item.serial_no = "";
-		item.serial_no_selected.forEach((element) => {
-			item.serial_no += element + "\n";
-		});
-		item.serial_no_selected_count = item.serial_no_selected.length;
-		if (item.serial_no_selected_count != item.stock_qty) {
-			item.qty = item.serial_no_selected_count;
-			// Note: calc_stock_qty would need to be passed as a parameter or imported
-			if (forceUpdate) forceUpdate();
-		}
-	};
+        const setSerialNo = (item, context) => {
+                if (!item?.has_serial_no) return;
+
+                const filteredSerials = applySerialBatchFilter(item);
+                const validSerials = new Set(filteredSerials.map((serial) => serial?.serial_no).filter(Boolean));
+
+                const currentSelection = normalizeSerialSelection(item);
+                const sanitizedSelection = currentSelection.filter((serial) => validSerials.has(serial));
+                if (sanitizedSelection.length !== currentSelection.length) {
+                        item.serial_no_selected = sanitizedSelection;
+                }
+
+                item.serial_no = item.serial_no_selected.join("\n");
+                item.serial_no_selected_count = item.serial_no_selected.length;
+                if (item.serial_no_selected_count != item.stock_qty) {
+                        item.qty = item.serial_no_selected_count;
+                        if (context?.forceUpdate) context.forceUpdate();
+                }
+        };
 
         // Set batch number for an item (and update batch data)
         const setBatchQty = (item, value, update = true, context) => {
-                console.log("Setting batch quantity:", item, value);
                 const existing_items = context.items.filter(
                         (element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
                 );
@@ -169,12 +195,27 @@ export function useBatchSerial() {
                 // Update batch_no_data with the full list so the UI can show every batch
                 item.batch_no_data = normalized_batch_data;
 
-                // Force UI update
-                if (context.forceUpdate) context.forceUpdate();
-	};
+                if (item.has_serial_no) {
+                        const filteredSerials = applySerialBatchFilter(item);
+                        const validSerials = new Set(
+                                filteredSerials.map((serial) => serial?.serial_no).filter(Boolean),
+                        );
+                        const currentSelection = normalizeSerialSelection(item);
+                        const sanitizedSelection = currentSelection.filter((serial) => validSerials.has(serial));
+                        if (sanitizedSelection.length !== currentSelection.length) {
+                                item.serial_no_selected = sanitizedSelection;
+                        }
+                        setSerialNo(item, context);
+                } else {
+                        item.filtered_serial_no_data = Array.isArray(item.serial_no_data) ? item.serial_no_data : [];
+                }
 
-	return {
-		setSerialNo,
-		setBatchQty,
+                // Force UI update
+                if (context?.forceUpdate) context.forceUpdate();
+        };
+
+        return {
+                setSerialNo,
+                setBatchQty,
 	};
 }

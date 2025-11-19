@@ -329,7 +329,7 @@ def _fetch_serials(warehouse: str, item_codes: Tuple[str, ...]):
         return []
     return frappe.get_all(
         "Serial No",
-        fields=["name as serial_no", "item_code"],
+        fields=["name as serial_no", "item_code", "batch_no"],
         filters={
             "item_code": ["in", item_codes],
             "warehouse": warehouse,
@@ -553,7 +553,9 @@ class ItemDetailAggregator:
 
         serial_map: Dict[str, List[Dict[str, object]]] = {}
         for row in serial_rows:
-            serial_map.setdefault(row.item_code, []).append({"serial_no": row.serial_no})
+            serial_map.setdefault(row.item_code, []).append(
+                {"serial_no": row.serial_no, "batch_no": row.batch_no}
+            )
 
         return ItemLookupData(
             price_map=price_map,
