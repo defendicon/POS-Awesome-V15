@@ -810,25 +810,33 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     batch_no_data = []
     serial_no_data = []
     if warehouse and item.get("has_batch_no"):
-        batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
+        batch_list = frappe.get_all(
+            "Bin",
+            fields=["batch_no", "actual_qty as qty"],
+            filters={
+                "item_code": item_code,
+                "warehouse": warehouse,
+                "actual_qty": [">", 0],
+                "batch_no": ["is", "set"],
+            },
+        )
         if batch_list:
             for batch in batch_list:
-                if batch.qty > 0 and batch.batch_no:
-                    batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
-                    if batch_doc.disabled == 0:
-                        batch_no_data.append(
-                            {
-                                "batch_no": batch.batch_no,
-                                "batch_qty": batch.qty,
-                                "expiry_date": batch_doc.expiry_date,
-                                "batch_price": batch_doc.posa_batch_price,
-                                "manufacturing_date": batch_doc.manufacturing_date,
-                                "is_expired": bool(
-                                    batch_doc.expiry_date
-                                    and str(batch_doc.expiry_date) <= str(today)
-                                ),
-                            }
-                        )
+                batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
+                if batch_doc.disabled == 0:
+                    batch_no_data.append(
+                        {
+                            "batch_no": batch.batch_no,
+                            "batch_qty": batch.qty,
+                            "expiry_date": batch_doc.expiry_date,
+                            "batch_price": batch_doc.posa_batch_price,
+                            "manufacturing_date": batch_doc.manufacturing_date,
+                            "is_expired": bool(
+                                batch_doc.expiry_date
+                                and str(batch_doc.expiry_date) <= str(today)
+                            ),
+                        }
+                    )
     if warehouse and item.get("has_serial_no"):
         serial_no_data = frappe.get_all(
             "Serial No",
