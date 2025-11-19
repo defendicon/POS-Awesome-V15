@@ -810,32 +810,21 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     batch_no_data = []
     serial_no_data = []
     if warehouse and item.get("has_batch_no"):
-        batch_list = frappe.db.sql(
-            """
-            SELECT
-                bin.batch_no,
-                bin.actual_qty as qty
-            FROM
-                `tabBin` as bin
-            LEFT JOIN
-                `tabBatch` as batch ON bin.batch_no = batch.name
-            WHERE
-                bin.item_code = %(item_code)s
-                AND bin.warehouse = %(warehouse)s
-                AND bin.actual_qty > 0
-                AND bin.batch_no IS NOT NULL
-        """,
-            values={"item_code": item_code, "warehouse": warehouse},
-            as_dict=1,
+        batches = frappe.get_all(
+            "Batch", fields=["name"], filters={"item": item_code}
         )
-        if batch_list:
-            for batch in batch_list:
-                batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
+        for batch in batches:
+            batch_no = batch.get("name")
+            if not batch_no:
+                continue
+            qty = get_batch_qty(batch_no, warehouse)
+            if qty > 0:
+                batch_doc = frappe.get_cached_doc("Batch", batch_no)
                 if batch_doc.disabled == 0:
                     batch_no_data.append(
                         {
-                            "batch_no": batch.batch_no,
-                            "batch_qty": batch.qty,
+                            "batch_no": batch_no,
+                            "batch_qty": qty,
                             "expiry_date": batch_doc.expiry_date,
                             "batch_price": batch_doc.posa_batch_price,
                             "manufacturing_date": batch_doc.manufacturing_date,
