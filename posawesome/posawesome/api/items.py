@@ -810,15 +810,23 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     batch_no_data = []
     serial_no_data = []
     if warehouse and item.get("has_batch_no"):
-        batch_list = frappe.get_all(
-            "Stock Ledger Entry",
-            fields=["batch_no", "actual_qty as qty"],
-            filters={
-                "item_code": item_code,
-                "warehouse": warehouse,
-                "actual_qty": [">", 0],
-                "batch_no": ["is", "set"],
-            },
+        batch_list = frappe.db.sql(
+            """
+            SELECT
+                bin.batch_no,
+                bin.actual_qty as qty
+            FROM
+                `tabBin` as bin
+            LEFT JOIN
+                `tabBatch` as batch ON bin.batch_no = batch.name
+            WHERE
+                bin.item_code = %(item_code)s
+                AND bin.warehouse = %(warehouse)s
+                AND bin.actual_qty > 0
+                AND bin.batch_no IS NOT NULL
+        """,
+            values={"item_code": item_code, "warehouse": warehouse},
+            as_dict=1,
         )
         if batch_list:
             for batch in batch_list:
