@@ -28,32 +28,36 @@ export function useBatchSerial() {
 	};
 
 	// Set batch number for an item (and update batch data)
-	const setBatchQty = (item, value, update = true, context) => {
-		console.log("Setting batch quantity:", item, value);
-		const existing_items = context.items.filter(
-			(element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
-		);
-		const used_batches = {};
-		item.batch_no_data.forEach((batch) => {
-			used_batches[batch.batch_no] = {
-				...batch,
-				used_qty: 0,
-				remaining_qty: batch.batch_qty,
-			};
-			existing_items.forEach((element) => {
-				if (element.batch_no && element.batch_no == batch.batch_no) {
-					used_batches[batch.batch_no].used_qty += element.qty;
-					used_batches[batch.batch_no].remaining_qty -= element.qty;
-					used_batches[batch.batch_no].batch_qty -= element.qty;
-				}
-			});
-		});
+        const setBatchQty = (item, value, update = true, context) => {
+                console.log("Setting batch quantity:", item, value);
+                const existing_items = context.items.filter(
+                        (element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
+                );
+                const used_batches = {};
+                item.batch_no_data.forEach((batch) => {
+                        used_batches[batch.batch_no] = {
+                                ...batch,
+                                used_qty: 0,
+                                remaining_qty: batch.batch_qty,
+                        };
+                        existing_items.forEach((element) => {
+                                if (element.batch_no && element.batch_no == batch.batch_no) {
+                                        used_batches[batch.batch_no].used_qty += element.qty;
+                                        used_batches[batch.batch_no].remaining_qty -= element.qty;
+                                        used_batches[batch.batch_no].batch_qty -= element.qty;
+                                }
+                        });
+                });
 
-                const batch_no_data = Object.values(used_batches)
-                        .filter((batch) => batch.remaining_qty > 0)
+                const normalized_batch_data = Object.values(used_batches)
+                        .map((batch) => ({
+                                ...batch,
+                                is_expired:
+                                        typeof batch.is_expired === "boolean" ? batch.is_expired : isBatchExpired(batch),
+                        }))
                         .sort((a, b) => {
-                                const aExpired = isBatchExpired(a);
-                                const bExpired = isBatchExpired(b);
+                                const aExpired = a.is_expired;
+                                const bExpired = b.is_expired;
 
                                 if (aExpired !== bExpired) {
                                         return aExpired ? 1 : -1;
@@ -76,21 +80,24 @@ export function useBatchSerial() {
                                 }
                         });
 
-                        if (batch_no_data.length > 0) {
-                                let batch_to_use = null;
-                                if (value) {
-                                        batch_to_use = batch_no_data.find((batch) => batch.batch_no == value);
-                                }
-			if (!batch_to_use) {
-				batch_to_use = batch_no_data[0];
-			}
+                const selectable_batches = normalized_batch_data.filter((batch) => batch.remaining_qty > 0);
+                const selection_pool = selectable_batches.length > 0 ? selectable_batches : normalized_batch_data;
+
+                if (selection_pool.length > 0) {
+                        let batch_to_use = null;
+                        if (value) {
+                                batch_to_use = normalized_batch_data.find((batch) => batch.batch_no == value);
+                        }
+                        if (!batch_to_use) {
+                                batch_to_use = selection_pool[0];
+                        }
 
                         item.batch_no = batch_to_use.batch_no;
                         item.actual_batch_qty = batch_to_use.batch_qty;
                         item.batch_no_expiry_date = batch_to_use.expiry_date;
-                        item.batch_no_is_expired = isBatchExpired(batch_to_use);
+                        item.batch_no_is_expired = batch_to_use.is_expired;
 
-			if (batch_to_use.batch_price) {
+                        if (batch_to_use.batch_price) {
 				// Store batch price in base currency
 				item.base_batch_price = batch_to_use.batch_price;
 
@@ -148,11 +155,11 @@ export function useBatchSerial() {
                         item.base_batch_price = null;
                 }
 
-		// Update batch_no_data
-		item.batch_no_data = batch_no_data;
+                // Update batch_no_data with the full list so the UI can show every batch
+                item.batch_no_data = normalized_batch_data;
 
-		// Force UI update
-		if (context.forceUpdate) context.forceUpdate();
+                // Force UI update
+                if (context.forceUpdate) context.forceUpdate();
 	};
 
 	return {
