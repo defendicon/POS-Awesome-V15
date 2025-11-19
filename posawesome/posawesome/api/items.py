@@ -817,7 +817,11 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
             batch_no = batch.get("name")
             if not batch_no:
                 continue
-            qty = get_batch_qty(batch_no, warehouse)
+            qty = frappe.db.get_value(
+                "Bin",
+                {"batch_no": batch_no, "warehouse": warehouse},
+                "actual_qty",
+            )
             if qty > 0:
                 batch_doc = frappe.get_cached_doc("Batch", batch_no)
                 if batch_doc.disabled == 0:
