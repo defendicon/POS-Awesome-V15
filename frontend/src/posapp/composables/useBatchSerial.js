@@ -27,12 +27,33 @@ export function useBatchSerial() {
 		}
 	};
 
-	// Set batch number for an item (and update batch data)
-	const setBatchQty = (item, value, update = true, context) => {
-		console.log("Setting batch quantity:", item, value);
-		const existing_items = context.items.filter(
-			(element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
-		);
+        // Set batch number for an item (and update batch data)
+        const setBatchQty = (item, value, update = true, context) => {
+                console.log("Setting batch quantity:", item, value);
+
+                const needsBatchFetch = !Array.isArray(item.batch_no_data) || item.batch_no_data.length === 0;
+
+                // If batch data isn't loaded yet, fetch fresh item details so the dropdown can populate
+                if (needsBatchFetch) {
+                        if (!item._batchDataLoading && context?.update_item_detail) {
+                                item._batchDataLoading = true;
+
+                                Promise.resolve(context.update_item_detail(item, true)).finally(() => {
+                                        item._batchDataLoading = false;
+
+                                        if (Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0) {
+                                                setBatchQty(item, value, update, context);
+                                        }
+                                });
+                        }
+
+                        item.batch_no_data = Array.isArray(item.batch_no_data) ? item.batch_no_data : [];
+                        return;
+                }
+
+                const existing_items = context.items.filter(
+                        (element) => element.item_code == item.item_code && element.posa_row_id != item.posa_row_id,
+                );
 		const used_batches = {};
 		item.batch_no_data.forEach((batch) => {
 			used_batches[batch.batch_no] = {
