@@ -811,7 +811,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     serial_no_data = []
     if warehouse and item.get("has_batch_no"):
         batch_list = frappe.get_all(
-            "Bin",
+            "Stock Ledger Entry",
             fields=["batch_no", "actual_qty as qty"],
             filters={
                 "item_code": item_code,
