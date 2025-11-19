@@ -517,11 +517,12 @@ export function useItemAddition() {
 		if (new_item.item_uoms.length === 0 && new_item.stock_uom) {
 			new_item.item_uoms.push({ uom: new_item.stock_uom, conversion_factor: 1 });
 		}
-		new_item.actual_batch_qty = "";
-		new_item.batch_no_expiry_date = item.batch_no_expiry_date || null;
-		new_item.conversion_factor = 1;
-		new_item.posa_offers = JSON.stringify([]);
-		new_item.posa_offer_applied = 0;
+                new_item.actual_batch_qty = "";
+                new_item.batch_no_expiry_date = item.batch_no_expiry_date || null;
+                new_item.batch_no_is_expired = item.batch_no_is_expired || false;
+                new_item.conversion_factor = 1;
+                new_item.posa_offers = JSON.stringify([]);
+                new_item.posa_offer_applied = 0;
 		new_item.posa_is_offer = item.posa_is_offer;
 		new_item.posa_is_replace = item.posa_is_replace || null;
 		new_item.is_free_item = 0;

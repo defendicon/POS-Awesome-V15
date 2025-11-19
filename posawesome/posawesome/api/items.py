@@ -815,9 +815,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
             for batch in batch_list:
                 if batch.qty > 0 and batch.batch_no:
                     batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
-                    if (
-                        str(batch_doc.expiry_date) > str(today) or batch_doc.expiry_date in ["", None]
-                    ) and batch_doc.disabled == 0:
+                    if batch_doc.disabled == 0:
                         batch_no_data.append(
                             {
                                 "batch_no": batch.batch_no,
@@ -825,6 +823,10 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
                                 "expiry_date": batch_doc.expiry_date,
                                 "batch_price": batch_doc.posa_batch_price,
                                 "manufacturing_date": batch_doc.manufacturing_date,
+                                "is_expired": bool(
+                                    batch_doc.expiry_date
+                                    and str(batch_doc.expiry_date) <= str(today)
+                                ),
                             }
                         )
     if warehouse and item.get("has_serial_no"):

@@ -450,6 +450,7 @@ class ItemDetailAggregator:
 
         batch_map: Dict[str, List[Dict[str, object]]] = {}
         for row in batch_rows:
+            is_expired = bool(row.expiry_date and str(row.expiry_date) <= str(self.today))
             batch_map.setdefault(row.item_code, []).append(
                 {
                     "batch_no": row.batch_no,
@@ -457,6 +458,7 @@ class ItemDetailAggregator:
                     "expiry_date": row.expiry_date,
                     "batch_price": row.batch_price,
                     "manufacturing_date": row.manufacturing_date,
+                    "is_expired": is_expired,
                 }
             )
 

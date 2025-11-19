@@ -1,11 +1,21 @@
 import { ref } from "vue";
 
 export function useBatchSerial() {
-	// Set serial numbers for an item (and update qty)
-	const setSerialNo = (item, forceUpdate) => {
-		console.log(item);
-		if (!item.has_serial_no) return;
-		item.serial_no = "";
+        const isBatchExpired = (batch) => {
+                if (!batch || !batch.expiry_date) return false;
+
+                const today = new Date();
+                const expiryDate = new Date(batch.expiry_date);
+
+                // Treat the batch as expired when the expiry date is today or in the past
+                return expiryDate.setHours(0, 0, 0, 0) <= today.setHours(0, 0, 0, 0);
+        };
+
+        // Set serial numbers for an item (and update qty)
+        const setSerialNo = (item, forceUpdate) => {
+                console.log(item);
+                if (!item.has_serial_no) return;
+                item.serial_no = "";
 		item.serial_no_selected.forEach((element) => {
 			item.serial_no += element + "\n";
 		});
@@ -39,38 +49,46 @@ export function useBatchSerial() {
 			});
 		});
 
-		const batch_no_data = Object.values(used_batches)
-			.filter((batch) => batch.remaining_qty > 0)
-			.sort((a, b) => {
-				if (a.expiry_date && b.expiry_date) {
-					return new Date(a.expiry_date) - new Date(b.expiry_date);
-				} else if (a.expiry_date) {
-					return -1;
-				} else if (b.expiry_date) {
-					return 1;
-				} else if (a.manufacturing_date && b.manufacturing_date) {
-					return new Date(a.manufacturing_date) - new Date(b.manufacturing_date);
-				} else if (a.manufacturing_date) {
-					return -1;
-				} else if (b.manufacturing_date) {
-					return 1;
-				} else {
-					return b.remaining_qty - a.remaining_qty;
-				}
-			});
+                const batch_no_data = Object.values(used_batches)
+                        .filter((batch) => batch.remaining_qty > 0)
+                        .sort((a, b) => {
+                                const aExpired = isBatchExpired(a);
+                                const bExpired = isBatchExpired(b);
 
-		if (batch_no_data.length > 0) {
-			let batch_to_use = null;
-			if (value) {
-				batch_to_use = batch_no_data.find((batch) => batch.batch_no == value);
-			}
+                                if (aExpired !== bExpired) {
+                                        return aExpired ? 1 : -1;
+                                }
+
+                                if (a.expiry_date && b.expiry_date) {
+                                        return new Date(a.expiry_date) - new Date(b.expiry_date);
+                                } else if (a.expiry_date) {
+                                        return -1;
+                                } else if (b.expiry_date) {
+                                        return 1;
+                                } else if (a.manufacturing_date && b.manufacturing_date) {
+                                        return new Date(a.manufacturing_date) - new Date(b.manufacturing_date);
+                                } else if (a.manufacturing_date) {
+                                        return -1;
+                                } else if (b.manufacturing_date) {
+                                        return 1;
+                                } else {
+                                        return b.remaining_qty - a.remaining_qty;
+                                }
+                        });
+
+                        if (batch_no_data.length > 0) {
+                                let batch_to_use = null;
+                                if (value) {
+                                        batch_to_use = batch_no_data.find((batch) => batch.batch_no == value);
+                                }
 			if (!batch_to_use) {
 				batch_to_use = batch_no_data[0];
 			}
 
-			item.batch_no = batch_to_use.batch_no;
-			item.actual_batch_qty = batch_to_use.batch_qty;
-			item.batch_no_expiry_date = batch_to_use.expiry_date;
+                        item.batch_no = batch_to_use.batch_no;
+                        item.actual_batch_qty = batch_to_use.batch_qty;
+                        item.batch_no_expiry_date = batch_to_use.expiry_date;
+                        item.batch_no_is_expired = isBatchExpired(batch_to_use);
 
 			if (batch_to_use.batch_price) {
 				// Store batch price in base currency
@@ -121,13 +139,14 @@ export function useBatchSerial() {
 				item.base_batch_price = null;
 				context.update_item_detail(item);
 			}
-		} else {
-			item.batch_no = null;
-			item.actual_batch_qty = null;
-			item.batch_no_expiry_date = null;
-			item.batch_price = null;
-			item.base_batch_price = null;
-		}
+                } else {
+                        item.batch_no = null;
+                        item.actual_batch_qty = null;
+                        item.batch_no_expiry_date = null;
+                        item.batch_no_is_expired = false;
+                        item.batch_price = null;
+                        item.base_batch_price = null;
+                }
 
 		// Update batch_no_data
 		item.batch_no_data = batch_no_data;
