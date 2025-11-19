@@ -1486,7 +1486,7 @@ export default {
 	padding: 0 !important;
 	width: 100% !important;
 	max-width: 100% !important;
-	overflow: hidden;
+	overflow: visible;
 	box-sizing: border-box;
 	/* Ensure it spans the full table width including expand column */
 	position: relative;
@@ -1511,8 +1511,7 @@ export default {
 	/* Ensure full width utilization */
 	margin: 0;
 	position: relative;
-	overflow-y: auto;
-	max-height: 60vh;
+	overflow: visible;
 }
 
 @keyframes expandIn {
