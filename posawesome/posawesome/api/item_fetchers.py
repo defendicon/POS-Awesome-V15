@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tupl
 
 import frappe
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.batch.batch import get_batch_qty
 from frappe.utils import flt, nowdate
 from frappe.utils.caching import redis_cache
 
@@ -201,28 +200,64 @@ def get_uoms(item_codes: Sequence[str], ttl: Optional[int] = None):
 
 
 def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
-    """Collect positive batch quantities per item for the given warehouse."""
+    """Collect batch information (including expired entries) for the given warehouse."""
 
     if not item_codes or not warehouse:
         return []
 
+    batch_docs = frappe.get_all(
+        "Batch",
+        filters={"item": ["in", item_codes], "disabled": 0},
+        fields=[
+            "name as batch_no",
+            "item as item_code",
+            "expiry_date",
+            "manufacturing_date",
+            "posa_batch_price",
+        ],
+        order_by="expiry_date asc, creation asc",
+    )
+    if not batch_docs:
+        return []
+
+    qty_rows = frappe.db.sql(
+        """
+        SELECT
+            item_code,
+            batch_no,
+            SUM(actual_qty) AS qty
+        FROM `tabStock Ledger Entry`
+        WHERE
+            warehouse = %(warehouse)s
+            AND item_code in %(item_codes)s
+            AND batch_no is not null
+            AND is_cancelled = 0
+        GROUP BY item_code, batch_no
+        """,
+        {"warehouse": warehouse, "item_codes": item_codes},
+        as_dict=True,
+    )
+
+    qty_map = {
+        (row.item_code, row.batch_no): flt(row.qty) for row in qty_rows if row.batch_no
+    }
+
     rows = []
-    for item_code in item_codes:
-        batch_list = get_batch_qty(item_code=item_code, warehouse=warehouse) or []
-        for batch in batch_list:
-            if batch.get("batch_no") and flt(batch.get("qty")) > 0:
-                rows.append(
-                    frappe._dict(
-                        {
-                            "item_code": item_code,
-                            "batch_no": batch.get("batch_no"),
-                            "batch_qty": batch.get("qty"),
-                            "expiry_date": batch.get("expiry_date"),
-                            "batch_price": batch.get("posa_batch_price"),
-                            "manufacturing_date": batch.get("manufacturing_date"),
-                        }
-                    )
-                )
+    for doc in batch_docs:
+        qty = qty_map.get((doc.item_code, doc.batch_no), 0)
+        rows.append(
+            frappe._dict(
+                {
+                    "item_code": doc.item_code,
+                    "batch_no": doc.batch_no,
+                    "batch_qty": qty,
+                    "expiry_date": doc.expiry_date,
+                    "batch_price": doc.posa_batch_price,
+                    "manufacturing_date": doc.manufacturing_date,
+                }
+            )
+        )
+
     return rows
 
 
