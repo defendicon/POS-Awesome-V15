@@ -1125,6 +1125,27 @@ export default {
 				this.invoice_doc.loyalty_points = parseInt(
 					baseAmount / (this.customer_info.conversion_factor || 1),
 				);
+
+				if (!this.is_credit_sale && this.invoice_doc.payments) {
+					const default_payment = this.invoice_doc.payments.find((p) => p.default === 1);
+					if (default_payment) {
+						const invoice_total =
+							this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+						const other_payments = this.invoice_doc.payments.reduce((sum, p) => {
+							if (p !== default_payment) {
+								return sum + this.flt(p.amount);
+							}
+							return sum;
+						}, 0);
+						const loyalty = this.flt(this.invoice_doc.loyalty_amount);
+						const credit = this.flt(this.redeemed_customer_credit);
+
+						let new_amount = invoice_total - loyalty - credit - other_payments;
+						if (new_amount < 0) new_amount = 0;
+
+						default_payment.amount = this.flt(new_amount, this.currency_precision);
+					}
+				}
 			}
 		},
 		// Watch redeemed_customer_credit to validate
