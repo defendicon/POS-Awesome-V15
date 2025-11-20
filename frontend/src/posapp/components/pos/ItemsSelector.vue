@@ -3451,6 +3451,25 @@ export default {
 							newItem.base_price_list_rate = price;
 							newItem._manual_rate_set = true;
 							newItem.skip_force_update = true;
+						} else {
+							const uomInfo =
+								newItem.item_uoms && newItem.item_uoms.find((u) => u.uom === barcodeMatch.posa_uom);
+							if (uomInfo && uomInfo.conversion_factor) {
+								const factor = parseFloat(uomInfo.conversion_factor);
+								const currentConversion = newItem.conversion_factor || 1;
+								const baseRateSingleUnit =
+									(newItem.price_list_rate || newItem.rate || 0) / currentConversion;
+
+								const newPrice = baseRateSingleUnit * factor;
+
+								newItem.rate = newPrice;
+								newItem.price_list_rate = newPrice;
+								newItem.base_rate = newPrice;
+								newItem.base_price_list_rate = newPrice;
+								newItem.conversion_factor = factor;
+								newItem._manual_rate_set = true;
+								newItem.skip_force_update = true;
+							}
 						}
 					} catch (e) {
 						console.error("Failed to fetch UOM price", e);
