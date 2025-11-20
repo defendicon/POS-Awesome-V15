@@ -95,16 +95,7 @@
 								hide-details
 								:model-value="formatCurrency(payment.amount)"
 								@change="handlePaymentAmountChange(payment, $event)"
-								:rules="[
-									isNumber,
-									(v) =>
-										!payment.mode_of_payment.toLowerCase().includes('cash') ||
-										this.is_credit_sale ||
-										v >=
-											(this.invoice_doc.rounded_total ||
-												this.invoice_doc.grand_total) ||
-										'Cash payment cannot be less than invoice total when credit sale is off',
-								]"
+								:rules="[isNumber]"
 								:prefix="currencySymbol(invoice_doc.currency)"
 								@focus="set_rest_amount(payment.idx)"
 								:readonly="invoice_doc.is_return"
@@ -2181,6 +2172,55 @@ export default {
 		handlePaymentAmountChange(payment, event) {
 			this.last_payment_change_was_cash = this.isCashLikePayment(payment);
 			format.methods.setFormatedCurrency.call(this, payment, "amount", null, false, event);
+
+			this.$nextTick(() => {
+				// Auto-subtract from other payments if we have an excess
+				const invoice_total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+
+				// Calculate current total paid
+				let current_total_paid = 0;
+				if (this.invoice_doc && this.invoice_doc.payments) {
+					this.invoice_doc.payments.forEach((p) => {
+						current_total_paid +=
+							parseFloat(formatUtils.fromArabicNumerals(String(p.amount))) || 0;
+					});
+				}
+				current_total_paid = this.flt(current_total_paid, this.currency_precision);
+
+				const excess = this.flt(current_total_paid - invoice_total, this.currency_precision);
+
+				if (excess > 0) {
+					// Find other payments with amount > 0 to reduce
+					// We filter out the current payment being edited to avoid circular issues
+					const otherPayments = this.invoice_doc.payments.filter(
+						(p) => p !== payment && this.flt(p.amount) > 0,
+					);
+
+					// Sort by amount descending to reduce larger chunks first
+					otherPayments.sort((a, b) => this.flt(b.amount) - this.flt(a.amount));
+
+					let remaining_excess = excess;
+
+					for (const other of otherPayments) {
+						if (remaining_excess <= 0) break;
+
+						const otherAmount = this.flt(other.amount, this.currency_precision);
+						const reduction = Math.min(otherAmount, remaining_excess);
+						const newAmount = this.flt(otherAmount - reduction, this.currency_precision);
+
+						other.amount = newAmount;
+						if (other.base_amount !== undefined) {
+							// Approximate base amount update, though submit logic recalculates it
+							other.base_amount = this.flt(
+								newAmount / (this.exchange_rate || 1),
+								this.currency_precision,
+							);
+						}
+
+						remaining_excess = this.flt(remaining_excess - reduction, this.currency_precision);
+					}
+				}
+			});
 		},
 		isCashLikePayment(payment) {
 			if (!payment) {

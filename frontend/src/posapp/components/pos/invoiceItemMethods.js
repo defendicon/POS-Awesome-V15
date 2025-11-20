@@ -2225,9 +2225,15 @@ export default {
 		const total_amount = this.subtotal;
 		let remaining_amount = total_amount;
 
+		// Find the index of the default payment method
+		const defaultPaymentIndex = this.pos_profile.payments.findIndex(
+			(payment) => payment.default === 1,
+		);
+		const targetIndex = defaultPaymentIndex >= 0 ? defaultPaymentIndex : 0;
+
 		this.pos_profile.payments.forEach((payment, index) => {
-			// For the first payment method, assign the full remaining amount
-			const payment_amount = index === 0 ? remaining_amount : payment.amount || 0;
+			// For the default payment method (or first if no default), assign the full remaining amount
+			const payment_amount = index === targetIndex ? remaining_amount : payment.amount || 0;
 
 			// For return invoices, ensure payment amounts are negative
 			const adjusted_amount = this.isReturnInvoice ? -Math.abs(payment_amount) : payment_amount;
@@ -2254,7 +2260,10 @@ export default {
 				conversion_rate: this.conversion_rate || 1,
 			});
 
-			remaining_amount -= payment_amount;
+			// Only subtract if we actually used the remaining amount
+			if (index === targetIndex) {
+				remaining_amount -= payment_amount;
+			}
 		});
 
 		console.log("Generated payments:", {
