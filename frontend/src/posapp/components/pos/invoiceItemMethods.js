@@ -2225,6 +2225,9 @@ export default {
 		const total_amount = this.subtotal;
 		let remaining_amount = total_amount;
 
+		if (this.loyalty_amount) remaining_amount -= this.loyalty_amount;
+		if (this.redeemed_customer_credit) remaining_amount -= this.redeemed_customer_credit;
+
 		// Find the index of the default payment method
 		const defaultPaymentIndex = this.pos_profile.payments.findIndex(
 			(payment) => payment.default === 1,
@@ -3858,6 +3861,7 @@ export default {
 				method: "posawesome.posawesome.api.customers.get_customer_info",
 				args: {
 					customer: vm.customer,
+					_timestamp: Date.now(),
 				},
 			});
 			const message = r.message;
