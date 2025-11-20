@@ -163,7 +163,12 @@
 							density="compact"
 							variant="solo"
 							color="primary"
-							:label="frappe._('You can redeem up to')"
+							:label="
+								frappe._('You can redeem up to') +
+								(customer_info.loyalty_points
+									? ` (${customer_info.loyalty_points} pts)`
+									: '')
+							"
 							class="sleek-field pos-themed-input"
 							hide-details
 							:model-value="formatFloat(available_points_amount)"
@@ -1093,7 +1098,9 @@ export default {
 			if (!this.invoice_doc) {
 				return;
 			}
-			if (value > this.available_points_amount) {
+			const amount = parseFloat(value) || 0;
+			// Use epsilon to handle floating point comparison issues
+			if (amount > this.available_points_amount + 0.001) {
 				this.invoice_doc.loyalty_amount = 0;
 				this.invoice_doc.redeem_loyalty_points = 0;
 				this.invoice_doc.loyalty_points = 0;
@@ -1105,8 +1112,19 @@ export default {
 			} else {
 				this.invoice_doc.loyalty_amount = this.flt(this.loyalty_amount);
 				this.invoice_doc.redeem_loyalty_points = 1;
-				this.invoice_doc.loyalty_points =
-					this.flt(this.loyalty_amount) / this.customer_info.conversion_factor;
+
+				// Calculate points to redeem, handling currency conversion if needed
+				let baseAmount = amount;
+				const docCurrency = this.invoice_doc.currency;
+				const baseCurrency = this.pos_profile.currency;
+
+				if (docCurrency && baseCurrency && docCurrency !== baseCurrency) {
+					baseAmount = amount * (this.invoice_doc.conversion_rate || 1);
+				}
+
+				this.invoice_doc.loyalty_points = parseInt(
+					baseAmount / (this.customer_info.conversion_factor || 1),
+				);
 			}
 		},
 		// Watch redeemed_customer_credit to validate
