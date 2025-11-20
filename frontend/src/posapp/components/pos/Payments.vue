@@ -102,7 +102,13 @@
 							></v-text-field>
 						</v-col>
 						<v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
-							<v-btn block color="primary" theme="dark" @click="set_full_amount(payment.idx)">
+							<v-btn
+								block
+								color="primary"
+								theme="dark"
+								class="payment-method-btn"
+								@click="set_full_amount(payment.idx)"
+							>
 								{{ payment.mode_of_payment }}
 							</v-btn>
 						</v-col>
@@ -2469,5 +2475,22 @@ export default {
 .submit-highlight {
 	box-shadow: 0 0 0 4px rgb(var(--v-theme-primary));
 	transition: box-shadow 0.3s ease-in-out;
+}
+
+.payment-method-btn:hover,
+.payment-method-btn:focus,
+.payment-method-btn:focus-visible,
+.payment-method-btn:active {
+	background-color: rgb(var(--v-theme-primary)) !important;
+	color: rgb(var(--v-theme-on-primary)) !important;
+	box-shadow: none;
+}
+
+.payment-method-btn::before,
+.payment-method-btn:hover::before,
+.payment-method-btn:focus::before,
+.payment-method-btn:focus-visible::before,
+.payment-method-btn:active::before {
+	opacity: 0 !important;
 }
 </style>
