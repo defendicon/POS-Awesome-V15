@@ -570,26 +570,26 @@ export const useItemsStore = defineStore("items", () => {
 				},
 			});
 
-                        if (response && response.message) {
-                                const newItem = response.message;
+			if (response && response.message) {
+				const newItem = response.message;
 
-                                if (newItem.scale_qty !== undefined && newItem.scale_qty !== null) {
-                                        const parsedQty = parseFloat(newItem.scale_qty);
-                                        if (!Number.isNaN(parsedQty)) {
-                                                newItem._scale_qty = parsedQty;
-                                        }
-                                }
+				if (newItem.scale_qty !== undefined && newItem.scale_qty !== null) {
+					const parsedQty = parseFloat(newItem.scale_qty);
+					if (!Number.isNaN(parsedQty)) {
+						newItem._scale_qty = parsedQty;
+					}
+				}
 
-                                if (newItem.scale_price !== undefined && newItem.scale_price !== null) {
-                                        const parsedPrice = parseFloat(newItem.scale_price);
-                                        if (!Number.isNaN(parsedPrice)) {
-                                                newItem._scale_price = parsedPrice;
-                                        }
-                                }
+				if (newItem.scale_price !== undefined && newItem.scale_price !== null) {
+					const parsedPrice = parseFloat(newItem.scale_price);
+					if (!Number.isNaN(parsedPrice)) {
+						newItem._scale_price = parsedPrice;
+					}
+				}
 
-                                // Add to current items
-                                items.value.push(newItem);
-                                updateIndexes([newItem]);
+				// Add to current items
+				items.value.push(newItem);
+				updateIndexes([newItem]);
 
 				// Re-filter if needed
 				if (searchTerm.value) {

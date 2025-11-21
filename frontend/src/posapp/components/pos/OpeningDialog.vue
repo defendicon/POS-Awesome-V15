@@ -92,41 +92,41 @@
 				</v-card-text>
 
 				<!-- Actions Section -->
-                                <v-card-actions class="dialog-actions-container">
-                                        <v-btn
-                                                theme="dark"
-                                                @click="logout"
-                                                class="pos-action-btn logout-action-btn"
-                                                size="large"
-                                                elevation="2"
-                                        >
-                                                <v-icon start>mdi-logout</v-icon>
-                                                <span>{{ __("Logout") }}</span>
-                                        </v-btn>
-                                        <v-spacer />
-                                        <v-btn
-                                                theme="dark"
-                                                @click="go_desk"
-                                                class="pos-action-btn cancel-action-btn"
-                                                size="large"
-                                                elevation="2"
-                                        >
-                                                <v-icon start>mdi-close-circle-outline</v-icon>
-                                                <span>{{ __("Close") }}</span>
-                                        </v-btn>
-                                        <v-btn
-                                                theme="dark"
-                                                :disabled="is_loading"
-                                                :loading="is_loading"
-                                                @click="submit_dialog"
-                                                class="pos-action-btn submit-action-btn"
-                                                size="large"
-                                                elevation="2"
-                                        >
-                                                <v-icon start>mdi-check-circle-outline</v-icon>
-                                                <span>{{ __("Submit") }}</span>
-                                        </v-btn>
-                                </v-card-actions>
+				<v-card-actions class="dialog-actions-container">
+					<v-btn
+						theme="dark"
+						@click="logout"
+						class="pos-action-btn logout-action-btn"
+						size="large"
+						elevation="2"
+					>
+						<v-icon start>mdi-logout</v-icon>
+						<span>{{ __("Logout") }}</span>
+					</v-btn>
+					<v-spacer />
+					<v-btn
+						theme="dark"
+						@click="go_desk"
+						class="pos-action-btn cancel-action-btn"
+						size="large"
+						elevation="2"
+					>
+						<v-icon start>mdi-close-circle-outline</v-icon>
+						<span>{{ __("Close") }}</span>
+					</v-btn>
+					<v-btn
+						theme="dark"
+						:disabled="is_loading"
+						:loading="is_loading"
+						@click="submit_dialog"
+						class="pos-action-btn submit-action-btn"
+						size="large"
+						elevation="2"
+					>
+						<v-icon start>mdi-check-circle-outline</v-icon>
+						<span>{{ __("Submit") }}</span>
+					</v-btn>
+				</v-card-actions>
 			</v-card>
 		</v-dialog>
 	</v-row>
@@ -281,10 +281,10 @@ export default {
 				});
 		},
 
-                go_desk() {
-                        frappe.set_route("/");
-                        location.reload();
-                },
+		go_desk() {
+			frappe.set_route("/");
+			location.reload();
+		},
 
 		logout() {
 			const redirectTarget = "/app/posapp";
@@ -665,25 +665,25 @@ export default {
 }
 
 .cancel-action-btn {
-        background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
+	background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
 }
 
 .cancel-action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
 }
 
 .logout-action-btn {
-        background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%) !important;
+	background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%) !important;
 }
 
 .logout-action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
 }
 
 .submit-action-btn {
-        background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%) !important;
+	background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%) !important;
 }
 
 .submit-action-btn:hover {

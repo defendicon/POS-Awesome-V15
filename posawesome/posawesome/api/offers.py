@@ -34,11 +34,7 @@ def get_active_gift_coupons(customer, company):
         fields=["coupon_code", "valid_from", "valid_upto"],
     )
     if len(coupons_data):
-        coupons = [
-            i.coupon_code
-            for i in coupons_data
-            if _is_coupon_active(i, today)
-        ]
+        coupons = [i.coupon_code for i in coupons_data if _is_coupon_active(i, today)]
     return coupons
 
 

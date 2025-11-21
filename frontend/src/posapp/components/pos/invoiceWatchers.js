@@ -82,25 +82,25 @@ const diffSnapshots = (previous, current) => {
 
 export default {
 	// Watch for customer change and update related data
-        customer(newValue, oldValue) {
-                if (newValue === oldValue) {
-                        return;
-                }
-                console.log('Customer watcher triggered:', { newValue, oldValue });
-                this.close_payments();
-                const customersStore = useCustomersStore();
-                customersStore.setSelectedCustomer(this.customer || null);
-                this.fetch_customer_details();
-                this.fetch_customer_balance();
-                this.set_delivery_charges();
-                this.sync_invoice_customer_details();
-        },
-        // Watch for customer_info change and emit to edit form
-        customer_info() {
-                const customersStore = useCustomersStore();
-                customersStore.setCustomerInfo(this.customer_info || {});
-                this.sync_invoice_customer_details(this.customer_info);
-        },
+	customer(newValue, oldValue) {
+		if (newValue === oldValue) {
+			return;
+		}
+		console.log("Customer watcher triggered:", { newValue, oldValue });
+		this.close_payments();
+		const customersStore = useCustomersStore();
+		customersStore.setSelectedCustomer(this.customer || null);
+		this.fetch_customer_details();
+		this.fetch_customer_balance();
+		this.set_delivery_charges();
+		this.sync_invoice_customer_details();
+	},
+	// Watch for customer_info change and emit to edit form
+	customer_info() {
+		const customersStore = useCustomersStore();
+		customersStore.setCustomerInfo(this.customer_info || {});
+		this.sync_invoice_customer_details(this.customer_info);
+	},
 	// Watch for expanded row change and update item detail
 	expanded(data_value) {
 		if (data_value.length > 0) {
@@ -124,91 +124,92 @@ export default {
 			const snapshot = buildSnapshot(newItems);
 			this._offerSnapshots = this._offerSnapshots || {};
 			const previous = this._offerSnapshots.items;
-                        this._offerSnapshots.items = snapshot;
+			this._offerSnapshots.items = snapshot;
 
-                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+			const { changed, removedInfo } = diffSnapshots(previous, snapshot);
 
-                        if (removedInfo && Object.keys(removedInfo).length) {
+			if (removedInfo && Object.keys(removedInfo).length) {
 				this._pendingRemovedRowInfo = {
 					...(this._pendingRemovedRowInfo || {}),
 					...removedInfo,
-                                };
-                        }
+				};
+			}
 
-                        if (!previous) {
-                                if (snapshot.order.length) {
-                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-                                }
-                        } else if (changed.size) {
-                                this.scheduleOfferRefresh(Array.from(changed));
-                        }
+			if (!previous) {
+				if (snapshot.order.length) {
+					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+				}
+			} else if (changed.size) {
+				this.scheduleOfferRefresh(Array.from(changed));
+			}
 
-                        if (typeof this.emitCartQuantities === "function") {
-                                this.emitCartQuantities();
-                        }
-                },
-        },
-        packed_items: {
-                deep: true,
-                handler(newItems) {
+			if (typeof this.emitCartQuantities === "function") {
+				this.emitCartQuantities();
+			}
+		},
+	},
+	packed_items: {
+		deep: true,
+		handler(newItems) {
 			const snapshot = buildSnapshot(newItems);
 			this._offerSnapshots = this._offerSnapshots || {};
 			const previous = this._offerSnapshots.packed;
-                        this._offerSnapshots.packed = snapshot;
+			this._offerSnapshots.packed = snapshot;
 
-                        const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+			const { changed, removedInfo } = diffSnapshots(previous, snapshot);
 
-                        if (removedInfo && Object.keys(removedInfo).length) {
+			if (removedInfo && Object.keys(removedInfo).length) {
 				this._pendingRemovedRowInfo = {
 					...(this._pendingRemovedRowInfo || {}),
 					...removedInfo,
-                                };
-                        }
+				};
+			}
 
-                        if (!previous) {
-                                if (snapshot.order.length) {
-                                        this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-                                }
-                        } else if (changed.size) {
-                                this.scheduleOfferRefresh(Array.from(changed));
-                        }
+			if (!previous) {
+				if (snapshot.order.length) {
+					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
+				}
+			} else if (changed.size) {
+				this.scheduleOfferRefresh(Array.from(changed));
+			}
 
-                        if (typeof this.emitCartQuantities === "function") {
-                                this.emitCartQuantities();
-                        }
-                },
-        },
+			if (typeof this.emitCartQuantities === "function") {
+				this.emitCartQuantities();
+			}
+		},
+	},
 	// Watch for invoice type change and emit
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
 	},
 	// Watch for additional discount and update percentage accordingly
-        additional_discount() {
-                if (!this.additional_discount || this.additional_discount == 0) {
-                        this.additional_discount_percentage = 0;
-                } else if (this.pos_profile.posa_use_percentage_discount) {
-                        // Prevent division by zero which causes NaN
-                        const baseTotal = this.Total && this.Total !== 0
-                                ? this.isReturnInvoice
-                                        ? Math.abs(this.Total)
-                                        : this.Total
-                                : 0;
+	additional_discount() {
+		if (!this.additional_discount || this.additional_discount == 0) {
+			this.additional_discount_percentage = 0;
+		} else if (this.pos_profile.posa_use_percentage_discount) {
+			// Prevent division by zero which causes NaN
+			const baseTotal =
+				this.Total && this.Total !== 0
+					? this.isReturnInvoice
+						? Math.abs(this.Total)
+						: this.Total
+					: 0;
 
-                        if (baseTotal) {
-                                let computedPercentage = (this.additional_discount / baseTotal) * 100;
+			if (baseTotal) {
+				let computedPercentage = (this.additional_discount / baseTotal) * 100;
 
-                                if (this.isReturnInvoice) {
-                                        computedPercentage = -Math.abs(computedPercentage);
-                                }
+				if (this.isReturnInvoice) {
+					computedPercentage = -Math.abs(computedPercentage);
+				}
 
-                                this.additional_discount_percentage = computedPercentage;
-                        } else {
-                                this.additional_discount_percentage = 0;
-                        }
-                } else {
-                        this.additional_discount_percentage = 0;
-                }
-        },
+				this.additional_discount_percentage = computedPercentage;
+			} else {
+				this.additional_discount_percentage = 0;
+			}
+		} else {
+			this.additional_discount_percentage = 0;
+		}
+	},
 	// Keep display date in sync with posting_date
 	posting_date: {
 		handler(newVal) {

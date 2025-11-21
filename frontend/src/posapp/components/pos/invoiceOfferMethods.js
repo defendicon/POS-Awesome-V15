@@ -63,48 +63,43 @@ export default {
 		this._pendingOfferRowIds = new Set();
 		this._pendingRemovedRowInfo = {};
 	},
-        normalizeBrand(brand) {
-                return (brand || "").trim().toLowerCase();
-        },
-        _resolveOfferQty(item) {
-                if (!item) {
-                        return 0;
-                }
+	normalizeBrand(brand) {
+		return (brand || "").trim().toLowerCase();
+	},
+	_resolveOfferQty(item) {
+		if (!item) {
+			return 0;
+		}
 
-                const parse = (value) => {
-                        const numeric = Number.parseFloat(value);
-                        return Number.isFinite(numeric) ? numeric : null;
-                };
+		const parse = (value) => {
+			const numeric = Number.parseFloat(value);
+			return Number.isFinite(numeric) ? numeric : null;
+		};
 
-                const preferred = [
-                        item.stock_qty,
-                        item.base_qty,
-                        item.base_quantity,
-                        item.transfer_qty,
-                ];
+		const preferred = [item.stock_qty, item.base_qty, item.base_quantity, item.transfer_qty];
 
-                for (const candidate of preferred) {
-                        const parsed = parse(candidate);
-                        if (parsed !== null && parsed !== 0) {
-                                return parsed;
-                        }
-                }
+		for (const candidate of preferred) {
+			const parsed = parse(candidate);
+			if (parsed !== null && parsed !== 0) {
+				return parsed;
+			}
+		}
 
-                const qty = parse(item.qty);
-                if (qty === null) {
-                        return 0;
-                }
+		const qty = parse(item.qty);
+		if (qty === null) {
+			return 0;
+		}
 
-                const factors = [item.conversion_factor, item.uom_conversion_factor];
-                for (const raw of factors) {
-                        const factor = parse(raw);
-                        if (factor !== null && factor !== 0 && factor !== 1) {
-                                return qty * factor;
-                        }
-                }
+		const factors = [item.conversion_factor, item.uom_conversion_factor];
+		for (const raw of factors) {
+			const factor = parse(raw);
+			if (factor !== null && factor !== 0 && factor !== 1) {
+				return qty * factor;
+			}
+		}
 
-                return qty;
-        },
+		return qty;
+	},
 	async getItemBrand(item) {
 		let brand = this.normalizeBrand(item.brand);
 		if (brand) {
@@ -306,7 +301,7 @@ export default {
 				context.itemMap.set(item.posa_row_id, item);
 			}
 
-                        const qty = this._resolveOfferQty(item);
+			const qty = this._resolveOfferQty(item);
 			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 			const amount = qty * rate;
 
@@ -355,10 +350,10 @@ export default {
 					context.brandBuckets.set(brand, bucket);
 				}
 				bucket.items.push(item);
-                                const qty = this._resolveOfferQty(item);
-                                bucket.qty += qty;
-                                const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
-                                bucket.amount += qty * rate;
+				const qty = this._resolveOfferQty(item);
+				bucket.qty += qty;
+				const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
+				bucket.amount += qty * rate;
 			}
 		}
 
@@ -516,7 +511,7 @@ export default {
 			) {
 				return;
 			}
-                        const qty = this._resolveOfferQty(item);
+			const qty = this._resolveOfferQty(item);
 			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 			totalQty += qty;
 			totalAmount += qty * rate;
@@ -565,7 +560,7 @@ export default {
 			) {
 				return;
 			}
-                        const qty = this._resolveOfferQty(item);
+			const qty = this._resolveOfferQty(item);
 			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 			totalQty += qty;
 			totalAmount += qty * rate;
@@ -619,7 +614,7 @@ export default {
 			) {
 				return;
 			}
-                        const qty = this._resolveOfferQty(item);
+			const qty = this._resolveOfferQty(item);
 			const rate = item.original_price_list_rate ?? item.price_list_rate ?? 0;
 			totalQty += qty;
 			totalAmount += qty * rate;
@@ -1436,22 +1431,20 @@ export default {
 
 			// Update invoice level discount fields so the value
 			// is reflected in the UI and saved correctly
-                        this.additional_discount = this.discount_amount;
-                        if (this.Total && this.Total !== 0) {
-                                const baseTotal = this.isReturnInvoice
-                                        ? Math.abs(this.Total)
-                                        : this.Total;
+			this.additional_discount = this.discount_amount;
+			if (this.Total && this.Total !== 0) {
+				const baseTotal = this.isReturnInvoice ? Math.abs(this.Total) : this.Total;
 
-                                let computedPercentage = (this.discount_amount / baseTotal) * 100;
+				let computedPercentage = (this.discount_amount / baseTotal) * 100;
 
-                                if (this.isReturnInvoice) {
-                                        computedPercentage = -Math.abs(computedPercentage);
-                                }
+				if (this.isReturnInvoice) {
+					computedPercentage = -Math.abs(computedPercentage);
+				}
 
-                                this.additional_discount_percentage = computedPercentage;
-                        } else {
-                                this.additional_discount_percentage = 0;
-                        }
+				this.additional_discount_percentage = computedPercentage;
+			} else {
+				this.additional_discount_percentage = 0;
+			}
 		}
 	},
 
@@ -1568,9 +1561,9 @@ export default {
 			"&no_letterhead=" +
 			letter_head;
 
-                if (this.pos_profile.posa_silent_print) {
-                        silentPrint(url, { allowOfflineFallback: isOffline() });
-                } else {
+		if (this.pos_profile.posa_silent_print) {
+			silentPrint(url, { allowOfflineFallback: isOffline() });
+		} else {
 			const printWindow = window.open(url, "Print");
 			printWindow.addEventListener(
 				"load",

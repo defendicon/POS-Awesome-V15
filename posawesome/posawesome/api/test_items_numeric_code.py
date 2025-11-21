@@ -50,15 +50,17 @@ class TestNumericItemCodes(FrappeTestCase):
         barcode = "123456789"
 
         if not frappe.db.exists("Item", item_code):
-            frappe.get_doc({
-                "doctype": "Item",
-                "item_code": item_code,
-                "item_name": "Test Item Whitespace",
-                "stock_uom": "Nos",
-                "item_group": "All Item Groups",
-                "is_sales_item": 1,
-                "barcodes": [{"barcode": barcode}]
-            }).insert(ignore_permissions=True)
+            frappe.get_doc(
+                {
+                    "doctype": "Item",
+                    "item_code": item_code,
+                    "item_name": "Test Item Whitespace",
+                    "stock_uom": "Nos",
+                    "item_group": "All Item Groups",
+                    "is_sales_item": 1,
+                    "barcodes": [{"barcode": barcode}],
+                }
+            ).insert(ignore_permissions=True)
 
         pos_profile = json.dumps({"name": "TestProfile"})
 

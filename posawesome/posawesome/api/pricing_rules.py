@@ -131,7 +131,9 @@ def _normalise_rule(doc: frappe._dict) -> frappe._dict:
         price_or_discount=price_or_product_discount,
         discount_type=discount_type,
         rate_or_discount_type=rate_or_discount,
-        rate_or_discount=flt(doc.get("rate") or doc.get("discount_percentage") or doc.get("discount_amount") or 0),
+        rate_or_discount=flt(
+            doc.get("rate") or doc.get("discount_percentage") or doc.get("discount_amount") or 0
+        ),
         free_item_rate=flt(doc.get("free_item_rate") or 0),
         currency=doc.get("currency"),
         price_list=doc.get("for_price_list"),
@@ -148,7 +150,11 @@ def _normalise_rule(doc: frappe._dict) -> frappe._dict:
         is_free_item_rule=1 if price_or_product_discount == "Product" else 0,
         same_item=cint(doc.get("same_item") or 0),
         free_item=doc.get("free_item"),
-        free_qty=flt(doc.get("free_qty") or 0) if cint(doc.get("is_recursive") or doc.get("apply_per_threshold") or 0) else 1,
+        free_qty=(
+            flt(doc.get("free_qty") or 0)
+            if cint(doc.get("is_recursive") or doc.get("apply_per_threshold") or 0)
+            else 1
+        ),
         free_qty_per_unit=flt(doc.get("free_qty_per_unit") or 0),
         apply_per_threshold=cint(doc.get("is_recursive") or doc.get("apply_per_threshold") or 0),
         max_free_qty=flt(doc.get("max_free_qty")) if doc.get("max_free_qty") is not None else None,
@@ -441,8 +447,12 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
                 "discount_amount": flt(data.get("discount_amount") or 0),
                 "discount_percentage": flt(data.get("discount_percentage") or 0),
                 "base_rate": flt(data.get("base_rate") or data.get("rate") or 0),
-                "base_price_list_rate": flt(data.get("base_price_list_rate") or data.get("price_list_rate") or 0),
-                "base_discount_amount": flt(data.get("base_discount_amount") or data.get("discount_amount") or 0),
+                "base_price_list_rate": flt(
+                    data.get("base_price_list_rate") or data.get("price_list_rate") or 0
+                ),
+                "base_discount_amount": flt(
+                    data.get("base_discount_amount") or data.get("discount_amount") or 0
+                ),
                 "same_item": cint(data.get("same_item") or 0),
                 "uom": data.get("uom"),
                 "is_free": 1,
@@ -464,4 +474,3 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         )
 
     return {"updates": updates, "free_lines": expected_free_lines}
-

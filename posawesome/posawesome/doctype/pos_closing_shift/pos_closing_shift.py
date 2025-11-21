@@ -510,9 +510,7 @@ def get_closing_shift_overview(pos_opening_shift):
     overpayment_change_totals_by_currency = {}
     total_change_totals_by_currency = {}
 
-    cash_mode_of_payment = frappe.db.get_value(
-        "POS Profile", pos_profile, "posa_cash_mode_of_payment"
-    )
+    cash_mode_of_payment = frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment")
     if not cash_mode_of_payment:
         cash_mode_of_payment = "Cash"
 
@@ -660,9 +658,7 @@ def get_closing_shift_overview(pos_opening_shift):
 
     for invoice in invoices:
         conversion_rate = invoice.get("conversion_rate")
-        base_grand_total = get_base_value(
-            invoice, "grand_total", "base_grand_total", conversion_rate
-        )
+        base_grand_total = get_base_value(invoice, "grand_total", "base_grand_total", conversion_rate)
         company_currency_total += base_grand_total
         if base_grand_total >= 0:
             gross_company_currency_total += base_grand_total
@@ -709,9 +705,7 @@ def get_closing_shift_overview(pos_opening_shift):
             change_entry["total"] += change_amount
 
             change_base_amount = flt(
-                get_base_value(
-                    invoice, "change_amount", "base_change_amount", conversion_rate
-                )
+                get_base_value(invoice, "change_amount", "base_change_amount", conversion_rate)
             )
             change_company_currency_total += change_base_amount
             change_entry["company_currency_total"] += change_base_amount
@@ -814,9 +808,7 @@ def get_closing_shift_overview(pos_opening_shift):
             mode = payment.get("mode_of_payment")
             payment_currency = resolve_payment_currency(payment, invoice_currency)
             amount = flt(payment.get("amount") or 0)
-            base_amount = get_base_value(
-                payment, "amount", "base_amount", conversion_rate
-            )
+            base_amount = get_base_value(payment, "amount", "base_amount", conversion_rate)
             accumulate_payment(
                 payments_by_mode,
                 mode,
@@ -881,11 +873,7 @@ def get_closing_shift_overview(pos_opening_shift):
             if payment_currency != company_currency:
                 rate = None
                 if refund_amount:
-                    rate = (
-                        abs(refund_base_amount) / abs(refund_amount)
-                        if refund_base_amount
-                        else None
-                    )
+                    rate = abs(refund_base_amount) / abs(refund_amount) if refund_base_amount else None
                 if not rate and entry_rate:
                     rate = flt(entry_rate)
                 if rate:
@@ -898,15 +886,11 @@ def get_closing_shift_overview(pos_opening_shift):
 
         if references:
             for reference in references:
-                allocated_amount = multiplier * abs(
-                    flt(reference.get("allocated_amount") or 0)
-                )
+                allocated_amount = multiplier * abs(flt(reference.get("allocated_amount") or 0))
                 if not allocated_amount:
                     continue
 
-                allocated_base = multiplier * abs(
-                    reference_base_amount(reference, entry_rate)
-                )
+                allocated_base = multiplier * abs(reference_base_amount(reference, entry_rate))
                 allocated_amount_sum += allocated_amount
                 allocated_base_sum += allocated_base
 
@@ -938,10 +922,10 @@ def get_closing_shift_overview(pos_opening_shift):
             residual_amount = multiplier * abs(flt(unallocated_amount))
             residual_base = multiplier * abs(
                 get_base_value(
-                entry,
-                "unallocated_amount",
-                "base_unallocated_amount",
-                entry_rate,
+                    entry,
+                    "unallocated_amount",
+                    "base_unallocated_amount",
+                    entry_rate,
                 )
             )
 
@@ -960,15 +944,11 @@ def get_closing_shift_overview(pos_opening_shift):
             if row["mode_of_payment"] != cash_mode_of_payment:
                 continue
 
-            overpayment_change_row = overpayment_change_totals_by_currency.get(
-                row["currency"]
-            )
+            overpayment_change_row = overpayment_change_totals_by_currency.get(row["currency"])
             if overpayment_change_row:
                 row["total"] -= flt(overpayment_change_row.get("total"))
 
-                base_overpayment_change = overpayment_change_row.get(
-                    "company_currency_total"
-                )
+                base_overpayment_change = overpayment_change_row.get("company_currency_total")
                 if base_overpayment_change:
                     row["company_currency_total"] -= flt(base_overpayment_change)
 
@@ -983,17 +963,11 @@ def get_closing_shift_overview(pos_opening_shift):
                         "total": flt(row["total"]),
                         "company_currency_total": flt(row["company_currency_total"]),
                         "exchange_rates": sorted(
-                            {
-                                flt(rate)
-                                for rate in (row.get("exchange_rates") or [])
-                                if flt(rate)
-                            }
+                            {flt(rate) for rate in (row.get("exchange_rates") or []) if flt(rate)}
                         ),
                     },
                 )
-                cash_expected_company_currency_total += flt(
-                    row["company_currency_total"]
-                )
+                cash_expected_company_currency_total += flt(row["company_currency_total"])
 
     average_invoice_value = 0
     if sale_invoices_count:
@@ -1007,9 +981,7 @@ def get_closing_shift_overview(pos_opening_shift):
                 exchange_rates = sorted({flt(rate) for rate in exchange_rates if flt(rate)})
             else:
                 exchange_rates = [
-                    flt(rate)
-                    for rate in exchange_rates
-                    if rate not in (None, "") and flt(rate)
+                    flt(rate) for rate in exchange_rates if rate not in (None, "") and flt(rate)
                 ]
                 exchange_rates = sorted(set(exchange_rates))
 
@@ -1032,9 +1004,7 @@ def get_closing_shift_overview(pos_opening_shift):
                 exchange_rates = sorted({flt(rate) for rate in exchange_rates if flt(rate)})
             else:
                 exchange_rates = [
-                    flt(rate)
-                    for rate in exchange_rates
-                    if rate not in (None, "") and flt(rate)
+                    flt(rate) for rate in exchange_rates if rate not in (None, "") and flt(rate)
                 ]
                 exchange_rates = sorted(set(exchange_rates))
 
@@ -1075,8 +1045,7 @@ def get_closing_shift_overview(pos_opening_shift):
         },
         "change_returned": {
             "company_currency_total": flt(
-                change_company_currency_total
-                + overpayment_change_company_currency_total
+                change_company_currency_total + overpayment_change_company_currency_total
             ),
             "by_currency": prepare_currency_rows(total_change_totals_by_currency),
             "invoice_change": {
@@ -1084,12 +1053,8 @@ def get_closing_shift_overview(pos_opening_shift):
                 "by_currency": prepare_currency_rows(change_totals_by_currency),
             },
             "overpayment_change": {
-                "company_currency_total": flt(
-                    overpayment_change_company_currency_total
-                ),
-                "by_currency": prepare_currency_rows(
-                    overpayment_change_totals_by_currency
-                ),
+                "company_currency_total": flt(overpayment_change_company_currency_total),
+                "by_currency": prepare_currency_rows(overpayment_change_totals_by_currency),
             },
         },
         "cash_expected": {

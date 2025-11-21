@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tupl
 
 import frappe
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.batch.batch import get_batch_qty
 from frappe.utils import flt, nowdate
 from frappe.utils.caching import redis_cache
 
@@ -200,29 +199,119 @@ def get_uoms(item_codes: Sequence[str], ttl: Optional[int] = None):
     return cached(tuple(item_codes))
 
 
+def _normalize_warehouses(warehouse: Optional[str]) -> Tuple[str, ...]:
+    """Return a tuple of concrete warehouses for the provided warehouse or group."""
+
+    if not warehouse:
+        return tuple()
+
+    if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+        descendants = frappe.db.get_descendants("Warehouse", warehouse) or []
+        if not descendants:
+            return tuple()
+        return tuple(sorted({w for w in descendants if w}))
+
+    return (warehouse,)
+
+
 def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
-    """Collect positive batch quantities per item for the given warehouse."""
+    """Collect batch information (including expired entries) for the given warehouse."""
 
     if not item_codes or not warehouse:
         return []
 
+    warehouses = _normalize_warehouses(warehouse)
+    if not warehouses:
+        return []
+
+    batch_docs = frappe.get_all(
+        "Batch",
+        filters={"item": ["in", item_codes], "disabled": 0},
+        fields=[
+            "name as batch_no",
+            "item as item_code",
+            "expiry_date",
+            "manufacturing_date",
+            "posa_batch_price",
+        ],
+        order_by="expiry_date asc, creation asc",
+    )
+    if not batch_docs:
+        return []
+
+    qty_map: Dict[Tuple[str, str], float] = {}
+
+    # Primary source of batch quantities: Serial and Batch Entry records linked to SLEs.
+    bundle_rows = frappe.db.sql(
+        """
+        SELECT
+            sbb.item_code,
+            sbe.batch_no,
+            SUM(sbe.qty) AS qty
+        FROM `tabSerial and Batch Entry` sbe
+        INNER JOIN `tabSerial and Batch Bundle` sbb
+            ON sbb.name = sbe.parent
+        INNER JOIN `tabStock Ledger Entry` sle
+            ON sle.serial_and_batch_bundle = sbb.name
+        WHERE
+            sbe.batch_no IS NOT NULL
+            AND sbb.item_code IN %(item_codes)s
+            AND sbb.warehouse IN %(warehouses)s
+            AND sle.is_cancelled = 0
+        GROUP BY sbb.item_code, sbe.batch_no
+        """,
+        {"item_codes": item_codes, "warehouses": warehouses},
+        as_dict=True,
+    )
+
+    for row in bundle_rows:
+        if not row.batch_no:
+            continue
+        key = (row.item_code, row.batch_no)
+        qty_map[key] = qty_map.get(key, 0) + flt(row.qty)
+
+    # Backward compatibility for ledgers created before Serial and Batch Bundle existed.
+    legacy_rows = frappe.db.sql(
+        """
+        SELECT
+            item_code,
+            batch_no,
+            SUM(actual_qty) AS qty
+        FROM `tabStock Ledger Entry`
+        WHERE
+            serial_and_batch_bundle IS NULL
+            AND warehouse IN %(warehouses)s
+            AND item_code IN %(item_codes)s
+            AND batch_no IS NOT NULL
+            AND is_cancelled = 0
+        GROUP BY item_code, batch_no
+        """,
+        {"item_codes": item_codes, "warehouses": warehouses},
+        as_dict=True,
+    )
+
+    for row in legacy_rows:
+        if not row.batch_no:
+            continue
+        key = (row.item_code, row.batch_no)
+        qty_map[key] = qty_map.get(key, 0) + flt(row.qty)
+
     rows = []
-    for item_code in item_codes:
-        batch_list = get_batch_qty(item_code=item_code, warehouse=warehouse) or []
-        for batch in batch_list:
-            if batch.get("batch_no") and flt(batch.get("qty")) > 0:
-                rows.append(
-                    frappe._dict(
-                        {
-                            "item_code": item_code,
-                            "batch_no": batch.get("batch_no"),
-                            "batch_qty": batch.get("qty"),
-                            "expiry_date": batch.get("expiry_date"),
-                            "batch_price": batch.get("posa_batch_price"),
-                            "manufacturing_date": batch.get("manufacturing_date"),
-                        }
-                    )
-                )
+    for doc in batch_docs:
+        qty = qty_map.get((doc.item_code, doc.batch_no), 0)
+        rows.append(
+            frappe._dict(
+                {
+                    "item_code": doc.item_code,
+                    "batch_no": doc.batch_no,
+                    "batch_qty": qty,
+                    "expiry_date": doc.expiry_date,
+                    "batch_price": doc.posa_batch_price,
+                    "manufacturing_date": doc.manufacturing_date,
+                }
+            )
+        )
+
     return rows
 
 
@@ -240,7 +329,7 @@ def _fetch_serials(warehouse: str, item_codes: Tuple[str, ...]):
         return []
     return frappe.get_all(
         "Serial No",
-        fields=["name as serial_no", "item_code"],
+        fields=["name as serial_no", "item_code", "batch_no"],
         filters={
             "item_code": ["in", item_codes],
             "warehouse": warehouse,
@@ -313,7 +402,9 @@ def merge_item_row(
 
     meta = lookup_data.meta_map.get(item_code, frappe._dict())
     uoms = _ensure_stock_uom(lookup_data.uom_map.get(item_code, []), meta.get("stock_uom"))
-    price_row = _select_price(lookup_data.price_map.get(item_code, {}), item.get("uom"), meta.get("stock_uom"))
+    price_row = _select_price(
+        lookup_data.price_map.get(item_code, {}), item.get("uom"), meta.get("stock_uom")
+    )
     price_currency = price_row.get("currency") if price_row else None
 
     row = dict(item)
@@ -373,7 +464,9 @@ class ItemDetailAggregator:
 
         if not self.price_list:
             return self.pos_profile.get("currency")
-        return frappe.db.get_value("Price List", self.price_list, "currency") or self.pos_profile.get("currency")
+        return frappe.db.get_value("Price List", self.price_list, "currency") or self.pos_profile.get(
+            "currency"
+        )
 
     def _compute_exchange_rate(self) -> float:
         """Compute the price list to company currency exchange rate."""
@@ -446,6 +539,7 @@ class ItemDetailAggregator:
 
         batch_map: Dict[str, List[Dict[str, object]]] = {}
         for row in batch_rows:
+            is_expired = bool(row.expiry_date and str(row.expiry_date) <= str(self.today))
             batch_map.setdefault(row.item_code, []).append(
                 {
                     "batch_no": row.batch_no,
@@ -453,12 +547,15 @@ class ItemDetailAggregator:
                     "expiry_date": row.expiry_date,
                     "batch_price": row.batch_price,
                     "manufacturing_date": row.manufacturing_date,
+                    "is_expired": is_expired,
                 }
             )
 
         serial_map: Dict[str, List[Dict[str, object]]] = {}
         for row in serial_rows:
-            serial_map.setdefault(row.item_code, []).append({"serial_no": row.serial_no})
+            serial_map.setdefault(row.item_code, []).append(
+                {"serial_no": row.serial_no, "batch_no": row.batch_no}
+            )
 
         return ItemLookupData(
             price_map=price_map,
@@ -485,7 +582,12 @@ class ItemDetailAggregator:
             if not item.get("item_code") or item.get("has_variants"):
                 continue
             result.append(
-                merge_item_row(item, lookup_data, self.price_list_currency or self.pos_profile.get("currency"), self.exchange_rate)
+                merge_item_row(
+                    item,
+                    lookup_data,
+                    self.price_list_currency or self.pos_profile.get("currency"),
+                    self.exchange_rate,
+                )
             )
         return result
 

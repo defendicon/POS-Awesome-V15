@@ -347,9 +347,7 @@ def get_available_credit(customer, company):
             as_dict=True,
         )
 
-        allocations = {
-            row.reference_name: flt(row.allocated_amount) for row in payment_allocations
-        }
+        allocations = {row.reference_name: flt(row.allocated_amount) for row in payment_allocations}
 
     for row in outstanding_invoices:
         outstanding_amount = -(row.outstanding_amount)

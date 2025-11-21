@@ -13,10 +13,10 @@ export {
 
 // Cache exports
 export {
-        memory,
-        memoryInitPromise,
-        getStoredItems,
-        getStoredItemsCount,
+	memory,
+	memoryInitPromise,
+	getStoredItems,
+	getStoredItemsCount,
 	saveItems,
 	clearStoredItems,
 	getCustomerStorage,
@@ -52,13 +52,13 @@ export {
 	MAX_QUEUE_ITEMS,
 	resetOfflineState,
 	reduceCacheUsage,
-        clearAllCache,
-        forceClearAllCache,
-        getCacheUsageEstimate,
-        isCacheReady,
-        savePricingRulesSnapshot,
-        getCachedPricingRulesSnapshot,
-        clearPricingRulesSnapshot,
+	clearAllCache,
+	forceClearAllCache,
+	getCacheUsageEstimate,
+	isCacheReady,
+	savePricingRulesSnapshot,
+	getCachedPricingRulesSnapshot,
+	clearPricingRulesSnapshot,
 } from "./cache.js";
 
 // Stock exports

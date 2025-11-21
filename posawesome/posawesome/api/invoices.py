@@ -157,12 +157,7 @@ def _deduplicate_free_items(invoice_doc):
     for item in items:
         if cint(item.get("is_free_item")):
             key = (
-                cstr(
-                    item.get("source_rule")
-                    or item.get("pricing_rule")
-                    or item.get("pricing_rules")
-                    or ""
-                ),
+                cstr(item.get("source_rule") or item.get("pricing_rule") or item.get("pricing_rules") or ""),
                 cstr(item.get("item_code") or ""),
                 cstr(item.get("warehouse") or ""),
                 cstr(item.get("uom") or ""),
@@ -771,6 +766,20 @@ def submit_invoice(invoice, data):
 
     _deduplicate_free_items(invoice_doc)
 
+    if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
+        invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
+
+    if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
+        if not invoice_doc.loyalty_redemption_account:
+            invoice_doc.loyalty_redemption_account = frappe.db.get_value(
+                "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
+            )
+
+        if not invoice_doc.loyalty_redemption_cost_center:
+            invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center or frappe.db.get_value(
+                "POS Profile", pos_profile, "cost_center"
+            )
+
     # Ensure item name overrides are respected on submit
     _apply_item_name_overrides(invoice_doc)
     if invoice.get("posa_delivery_date"):
@@ -911,6 +920,19 @@ def submit_in_background_job(kwargs):
     items.append(grand_total)
 
     invoice_doc.remarks = "\n".join(items)
+
+    if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
+        invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
+
+    if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
+        if not invoice_doc.loyalty_redemption_account:
+            invoice_doc.loyalty_redemption_account = frappe.db.get_value(
+                "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
+            )
+
+        if not invoice_doc.loyalty_redemption_cost_center:
+            invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
+
     invoice_doc.save()
 
     invoice_doc.submit()

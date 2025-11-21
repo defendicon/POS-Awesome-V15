@@ -2,48 +2,44 @@
 
 export function useDiscounts() {
 	// Update additional discount amount based on percentage
-        const updateDiscountAmount = (context) => {
-                let value = flt(context.additional_discount_percentage);
-                const usePercentage = Boolean(context.pos_profile?.posa_use_percentage_discount);
-                // If value is too large, reset to 0
-                if (value < -100 || value > 100) {
-                        context.additional_discount_percentage = 0;
-                        context.additional_discount = 0;
-                        return;
-                }
+	const updateDiscountAmount = (context) => {
+		let value = flt(context.additional_discount_percentage);
+		const usePercentage = Boolean(context.pos_profile?.posa_use_percentage_discount);
+		// If value is too large, reset to 0
+		if (value < -100 || value > 100) {
+			context.additional_discount_percentage = 0;
+			context.additional_discount = 0;
+			return;
+		}
 
-                // Calculate discount amount based on percentage
-                if (context.Total && context.Total !== 0) {
-                        if (usePercentage && context.isReturnInvoice && value > 0) {
-                                value = -Math.abs(value);
-                                context.additional_discount_percentage = value;
-                        }
+		// Calculate discount amount based on percentage
+		if (context.Total && context.Total !== 0) {
+			if (usePercentage && context.isReturnInvoice && value > 0) {
+				value = -Math.abs(value);
+				context.additional_discount_percentage = value;
+			}
 
-                        if (usePercentage) {
-                                const baseTotal = context.isReturnInvoice
-                                        ? Math.abs(context.Total)
-                                        : context.Total;
+			if (usePercentage) {
+				const baseTotal = context.isReturnInvoice ? Math.abs(context.Total) : context.Total;
 
-                                const percentMagnitude = Math.abs(value);
-                                let discountAmount = (baseTotal * percentMagnitude) / 100;
+				const percentMagnitude = Math.abs(value);
+				let discountAmount = (baseTotal * percentMagnitude) / 100;
 
-                                if (value < 0 || context.isReturnInvoice) {
-                                        discountAmount = -Math.abs(discountAmount);
-                                } else {
-                                        discountAmount = Math.abs(discountAmount);
-                                }
+				if (value < 0 || context.isReturnInvoice) {
+					discountAmount = -Math.abs(discountAmount);
+				} else {
+					discountAmount = Math.abs(discountAmount);
+				}
 
-                                context.additional_discount = discountAmount;
-                        } else {
-                                const signedTotal = context.isReturnInvoice
-                                        ? -Math.abs(context.Total)
-                                        : context.Total;
-                                context.additional_discount = (signedTotal * value) / 100;
-                        }
-                } else {
-                        context.additional_discount = 0;
-                }
-        };
+				context.additional_discount = discountAmount;
+			} else {
+				const signedTotal = context.isReturnInvoice ? -Math.abs(context.Total) : context.Total;
+				context.additional_discount = (signedTotal * value) / 100;
+			}
+		} else {
+			context.additional_discount = 0;
+		}
+	};
 
 	// Calculate prices and discounts for an item based on field change
 	const calcPrices = (item, value, $event, context) => {

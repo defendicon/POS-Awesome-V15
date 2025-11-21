@@ -68,12 +68,12 @@ export default {
 		}
 
 		// Subtract additional discount
-                const additional_discount = this.flt(this.additional_discount);
-                if (this.isReturnInvoice) {
-                        sum += additional_discount;
-                } else {
-                        sum -= additional_discount;
-                }
+		const additional_discount = this.flt(this.additional_discount);
+		if (this.isReturnInvoice) {
+			sum += additional_discount;
+		} else {
+			sum -= additional_discount;
+		}
 
 		// Add delivery charges
 		const delivery_charges = this.flt(this.delivery_charges_rate);
@@ -90,18 +90,18 @@ export default {
 		const storeValue = store?.discountTotal?.value ?? store?.discountTotal;
 		let sum;
 
-                if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-                        sum = Math.abs(storeValue);
-                } else {
-                        sum = 0;
-                        this.items.forEach((item) => {
-                                const qty = flt(item.qty);
-                                const discount = flt(item.discount_amount);
-                                sum += Math.abs(qty * discount);
-                        });
-                }
+		if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
+			sum = Math.abs(storeValue);
+		} else {
+			sum = 0;
+			this.items.forEach((item) => {
+				const qty = flt(item.qty);
+				const discount = flt(item.discount_amount);
+				sum += Math.abs(qty * discount);
+			});
+		}
 
-                const result = this.flt(sum, this.float_precision);
+		const result = this.flt(sum, this.float_precision);
 		perfMarkEnd("pos:totals-discount", mark);
 		return result;
 	},

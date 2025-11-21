@@ -1199,24 +1199,24 @@ export async function forceClearAllCache() {
 	memory.customer_storage = [];
 	memory.pos_opening_storage = null;
 	memory.opening_dialog_storage = null;
-        memory.sales_persons_storage = [];
-        memory.price_list_cache = {};
-        memory.item_details_cache = {};
-        memory.tax_template_cache = {};
-        memory.tax_inclusive = false;
-        memory.manual_offline = false;
-        memory.translation_cache = {};
-        memory.pricing_rules_snapshot = [];
-        memory.pricing_rules_context = null;
-        memory.pricing_rules_last_sync = null;
-        memory.pricing_rules_stale_at = null;
-        memory.print_template = "";
-        memory.terms_and_conditions = "";
-        memory.cache_ready = false;
+	memory.sales_persons_storage = [];
+	memory.price_list_cache = {};
+	memory.item_details_cache = {};
+	memory.tax_template_cache = {};
+	memory.tax_inclusive = false;
+	memory.manual_offline = false;
+	memory.translation_cache = {};
+	memory.pricing_rules_snapshot = [];
+	memory.pricing_rules_context = null;
+	memory.pricing_rules_last_sync = null;
+	memory.pricing_rules_stale_at = null;
+	memory.print_template = "";
+	memory.terms_and_conditions = "";
+	memory.cache_ready = false;
 
-        try {
-                await Dexie.delete("posawesome_offline");
-        } catch (e) {
-                console.error("Failed to clear IndexedDB cache", e);
-        }
+	try {
+		await Dexie.delete("posawesome_offline");
+	} catch (e) {
+		console.error("Failed to clear IndexedDB cache", e);
+	}
 }

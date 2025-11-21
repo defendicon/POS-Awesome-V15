@@ -147,29 +147,29 @@ function flushPersistQueue() {
 export function persist(key, value) {
 	// Run health check in background; ignore errors
 	checkDbHealth().catch(() => {});
-        if (persistWorker) {
-                let cleanValue = value;
-                try {
-                        cleanValue =
-                                typeof structuredClone === "function"
-                                        ? structuredClone(value)
-                                        : JSON.parse(JSON.stringify(value));
-                } catch (e) {
-                        console.error("Failed to serialize", key, e);
-                        try {
-                                cleanValue = JSON.parse(JSON.stringify(value));
-                        } catch (fallbackError) {
-                                console.error("Failed to JSON.stringify", key, fallbackError);
-                                return;
-                        }
-                }
-                try {
-                        persistWorker.postMessage({ type: "persist", key, value: cleanValue });
-                } catch (e) {
-                        console.error(`Failed to postMessage for ${key}`, e);
-                }
-                return;
-        }
+	if (persistWorker) {
+		let cleanValue = value;
+		try {
+			cleanValue =
+				typeof structuredClone === "function"
+					? structuredClone(value)
+					: JSON.parse(JSON.stringify(value));
+		} catch (e) {
+			console.error("Failed to serialize", key, e);
+			try {
+				cleanValue = JSON.parse(JSON.stringify(value));
+			} catch (fallbackError) {
+				console.error("Failed to JSON.stringify", key, fallbackError);
+				return;
+			}
+		}
+		try {
+			persistWorker.postMessage({ type: "persist", key, value: cleanValue });
+		} catch (e) {
+			console.error(`Failed to postMessage for ${key}`, e);
+		}
+		return;
+	}
 
 	const table = tableForKey(key);
 	withWriteLock(() =>

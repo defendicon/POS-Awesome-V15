@@ -64,51 +64,49 @@ export function useCartValidation() {
 				return false;
 			}
 
-                        const isStockItem = parseBooleanSetting(item?.is_stock_item);
+			const isStockItem = parseBooleanSetting(item?.is_stock_item);
 
-                        if (isStockItem) {
-                                // Step 4: Client-side quantity validation (before server call)
-                                // Allow negative stock items when Allow Negative Stock is enabled
-                                // This overrides POS Profile's block setting when negative stock is explicitly allowed
-                                const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
-                                const exceedsAvailable =
-                                        typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
-                                const blockSale = !allowNegativeStock && exceedsAvailable;
+			if (isStockItem) {
+				// Step 4: Client-side quantity validation (before server call)
+				// Allow negative stock items when Allow Negative Stock is enabled
+				// This overrides POS Profile's block setting when negative stock is explicitly allowed
+				const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
+				const exceedsAvailable =
+					typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
+				const blockSale = !allowNegativeStock && exceedsAvailable;
 
-                                if (blockSale) {
-                                        if (eventBus) {
-                                                eventBus.emit("show_message", {
-                                                        title: formatStockShortageError(
-                                                                item.item_name || item.item_code,
-                                                                item.actual_qty,
-                                                                requestedQty,
-                                                        ),
-                                                        color: "error",
-                                                });
-                                        }
-                                        return false;
-                                }
+				if (blockSale) {
+					if (eventBus) {
+						eventBus.emit("show_message", {
+							title: formatStockShortageError(
+								item.item_name || item.item_code,
+								item.actual_qty,
+								requestedQty,
+							),
+							color: "error",
+						});
+					}
+					return false;
+				}
 
-                                // Step 5: Server-side stock validation
-                                const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
+				// Step 5: Server-side stock validation
+				const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
 
-                                if (!stockValidationResult.isValid) {
-                                        if (eventBus) {
-                                                eventBus.emit("show_message", {
-                                                        title: formatStockShortageError(
-                                                                stockValidationResult.data?.item_name ||
-                                                                        item.item_name ||
-                                                                        item.item_code,
-                                                                stockValidationResult.data?.available_qty ?? item.actual_qty,
-                                                                stockValidationResult.data?.requested_qty ?? requestedQty,
-                                                        ),
-                                                        color: "error",
-                                                });
-                                        }
-                                        return false;
-                                }
-                        }
-                        return true;
+				if (!stockValidationResult.isValid) {
+					if (eventBus) {
+						eventBus.emit("show_message", {
+							title: formatStockShortageError(
+								stockValidationResult.data?.item_name || item.item_name || item.item_code,
+								stockValidationResult.data?.available_qty ?? item.actual_qty,
+								stockValidationResult.data?.requested_qty ?? requestedQty,
+							),
+							color: "error",
+						});
+					}
+					return false;
+				}
+			}
+			return true;
 		} catch (error) {
 			console.error("Cart validation error:", error);
 			validationError.value = error.message;
@@ -196,47 +194,46 @@ export function useCartValidation() {
 	) {
 		console.warn("Using fallback validation due to server validation failure");
 
-                const isStockItem = parseBooleanSetting(item?.is_stock_item);
+		const isStockItem = parseBooleanSetting(item?.is_stock_item);
 
-                if (isStockItem) {
-                        // Allow negative stock items when Allow Negative Stock is enabled
-                        const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
+		if (isStockItem) {
+			// Allow negative stock items when Allow Negative Stock is enabled
+			const allowNegativeStock = parseBooleanSetting(stockSettings?.allow_negative_stock);
 
-                        // Simple negative stock check - only block if negative stock is not allowed
-                        if (item.actual_qty < 0 && !allowNegativeStock) {
-                                if (eventBus) {
-                                        eventBus.emit("show_message", {
-                                                title: formatStockShortageError(
-                                                        item.item_name || item.item_code,
-                                                        item.actual_qty,
-                                                        requestedQty,
-                                                ),
-                                                color: "error",
-                                        });
-                                }
-                                return false;
-                        }
+			// Simple negative stock check - only block if negative stock is not allowed
+			if (item.actual_qty < 0 && !allowNegativeStock) {
+				if (eventBus) {
+					eventBus.emit("show_message", {
+						title: formatStockShortageError(
+							item.item_name || item.item_code,
+							item.actual_qty,
+							requestedQty,
+						),
+						color: "error",
+					});
+				}
+				return false;
+			}
 
-                        // Check if requested quantity exceeds available stock
-                        const exceedsAvailable =
-                                typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
-                        const blockSale = !allowNegativeStock && exceedsAvailable;
-                        if (blockSale) {
-                                if (eventBus) {
-                                        eventBus.emit("show_message", {
-                                                title: formatStockShortageError(
-                                                        item.item_name || item.item_code,
-                                                        item.actual_qty,
-                                                        requestedQty,
-                                                ),
-                                                color: "error",
-                                        });
-                                }
-                                return false;
-                        }
-                }
+			// Check if requested quantity exceeds available stock
+			const exceedsAvailable = typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
+			const blockSale = !allowNegativeStock && exceedsAvailable;
+			if (blockSale) {
+				if (eventBus) {
+					eventBus.emit("show_message", {
+						title: formatStockShortageError(
+							item.item_name || item.item_code,
+							item.actual_qty,
+							requestedQty,
+						),
+						color: "error",
+					});
+				}
+				return false;
+			}
+		}
 
-                return true;
+		return true;
 	}
 
 	/**

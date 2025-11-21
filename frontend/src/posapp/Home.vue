@@ -363,14 +363,14 @@ export default {
 				"&no_letterhead=" +
 				letter_head;
 
-                        const printOptions = { allowOfflineFallback: isOffline() };
-                        if (this.posProfile.posa_silent_print) {
-                                silentPrint(url, printOptions);
-                        } else {
-                                const printWindow = window.open(url, "Print");
-                                watchPrintWindow(printWindow, printOptions);
-                        }
-                },
+			const printOptions = { allowOfflineFallback: isOffline() };
+			if (this.posProfile.posa_silent_print) {
+				silentPrint(url, printOptions);
+			} else {
+				const printWindow = window.open(url, "Print");
+				watchPrintWindow(printWindow, printOptions);
+			}
+		},
 
 		async handleSyncInvoices() {
 			const pending = getPendingOfflineInvoiceCount();
@@ -419,11 +419,11 @@ export default {
 			this.$theme.toggle();
 		},
 
-                handleLogout() {
-                        frappe.call("logout").finally(() => {
-                                window.location.href = "/app";
-                        });
-                },
+		handleLogout() {
+			frappe.call("logout").finally(() => {
+				window.location.href = "/app";
+			});
+		},
 
 		handleRefreshCacheUsage() {
 			this.cacheUsageLoading = true;

@@ -355,7 +355,11 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
         outstanding_invoices,
         key=lambda inv: (
             getdate(inv.get("posting_date")) if inv.get("posting_date") else getdate(nowdate()),
-            getdate(inv.get("due_date")) if inv.get("due_date") else getdate(inv.get("posting_date") or nowdate()),
+            (
+                getdate(inv.get("due_date"))
+                if inv.get("due_date")
+                else getdate(inv.get("posting_date") or nowdate())
+            ),
             inv.get("voucher_no"),
         ),
     )
@@ -570,7 +574,9 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
 
         if not entry_list:
             skipped_payments.append(
-                _("No outstanding invoices were available to reconcile Payment Entry {0}.").format(payment_name)
+                _("No outstanding invoices were available to reconcile Payment Entry {0}.").format(
+                    payment_name
+                )
             )
             continue
 
@@ -609,7 +615,9 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
         )
 
     remaining_outstanding = sum(
-        flt(inv.get("outstanding_amount") or 0) for inv in outstanding_invoices if flt(inv.get("outstanding_amount") or 0) > 0
+        flt(inv.get("outstanding_amount") or 0)
+        for inv in outstanding_invoices
+        if flt(inv.get("outstanding_amount") or 0) > 0
     )
     outstanding_count = len(
         [inv for inv in outstanding_invoices if flt(inv.get("outstanding_amount") or 0) > 0]
@@ -632,9 +640,7 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
     )
 
     if skipped_payments:
-        summary_parts.append(
-            _("{0} payment(s) were skipped.").format(len(skipped_payments))
-        )
+        summary_parts.append(_("{0} payment(s) were skipped.").format(len(skipped_payments)))
 
     return {
         "summary": " ".join(summary_parts),
@@ -727,9 +733,7 @@ def process_pos_payment(payload):
                     credit_note_doc = frappe.get_doc("Sales Invoice", payment_name)
                     outstanding_credit = abs(flt(credit_note_doc.outstanding_amount))
                     if outstanding_credit <= 0:
-                        errors.append(
-                            _("Credit note {0} is already fully allocated").format(payment_name)
-                        )
+                        errors.append(_("Credit note {0} is already fully allocated").format(payment_name))
                         continue
 
                     total_outstanding = sum(inv["outstanding_amount"] for inv in remaining_invoices)
@@ -797,9 +801,7 @@ def process_pos_payment(payload):
 
                     allocated_credit = outstanding_credit - remaining_credit
                     if allocated_credit <= 0:
-                        errors.append(
-                            _("No allocation made for credit note {0}").format(payment_name)
-                        )
+                        errors.append(_("No allocation made for credit note {0}").format(payment_name))
                         continue
 
                     reconcile_dr_cr_note(note_entries, company)

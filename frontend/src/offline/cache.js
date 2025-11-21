@@ -33,13 +33,13 @@ export const memory = {
 	sales_persons_storage: [],
 	item_details_cache: {},
 	tax_template_cache: {},
-        translation_cache: {},
-        coupons_cache: {},
-        item_groups_cache: [],
-        pricing_rules_snapshot: [],
-        pricing_rules_context: null,
-        pricing_rules_last_sync: null,
-        pricing_rules_stale_at: null,
+	translation_cache: {},
+	coupons_cache: {},
+	item_groups_cache: [],
+	pricing_rules_snapshot: [],
+	pricing_rules_context: null,
+	pricing_rules_last_sync: null,
+	pricing_rules_stale_at: null,
 	items_last_sync: null,
 	customers_last_sync: null,
 	// Track the current cache schema version
@@ -113,10 +113,10 @@ export function resetOfflineState() {
 }
 
 export function reduceCacheUsage() {
-        clearPriceListCache();
-        memory.item_details_cache = {};
-        memory.uom_cache = {};
-        memory.offers_cache = [];
+	clearPriceListCache();
+	memory.item_details_cache = {};
+	memory.uom_cache = {};
+	memory.offers_cache = [];
 	memory.customer_balance_cache = {};
 	memory.local_stock_cache = {};
 	memory.stock_cache_ready = false;
@@ -129,54 +129,52 @@ export function reduceCacheUsage() {
 	persist("local_stock_cache", memory.local_stock_cache);
 	persist("stock_cache_ready", memory.stock_cache_ready);
 	persist("coupons_cache", memory.coupons_cache);
-        persist("item_groups_cache", memory.item_groups_cache);
+	persist("item_groups_cache", memory.item_groups_cache);
 }
 
 function sanitiseSnapshot(snapshot = []) {
-        if (!Array.isArray(snapshot)) {
-                return [];
-        }
-        try {
-                return JSON.parse(JSON.stringify(snapshot));
-        } catch (error) {
-                console.error("Failed to sanitise pricing rules snapshot", error);
-                return [];
-        }
+	if (!Array.isArray(snapshot)) {
+		return [];
+	}
+	try {
+		return JSON.parse(JSON.stringify(snapshot));
+	} catch (error) {
+		console.error("Failed to sanitise pricing rules snapshot", error);
+		return [];
+	}
 }
 
 export function savePricingRulesSnapshot(snapshot = [], context = null, staleAt = null) {
-        memory.pricing_rules_snapshot = sanitiseSnapshot(snapshot);
-        memory.pricing_rules_context = context || null;
-        memory.pricing_rules_last_sync = new Date().toISOString();
-        memory.pricing_rules_stale_at = staleAt || null;
+	memory.pricing_rules_snapshot = sanitiseSnapshot(snapshot);
+	memory.pricing_rules_context = context || null;
+	memory.pricing_rules_last_sync = new Date().toISOString();
+	memory.pricing_rules_stale_at = staleAt || null;
 
-        persist("pricing_rules_snapshot", memory.pricing_rules_snapshot);
-        persist("pricing_rules_context", memory.pricing_rules_context);
-        persist("pricing_rules_last_sync", memory.pricing_rules_last_sync);
-        persist("pricing_rules_stale_at", memory.pricing_rules_stale_at);
+	persist("pricing_rules_snapshot", memory.pricing_rules_snapshot);
+	persist("pricing_rules_context", memory.pricing_rules_context);
+	persist("pricing_rules_last_sync", memory.pricing_rules_last_sync);
+	persist("pricing_rules_stale_at", memory.pricing_rules_stale_at);
 }
 
 export function getCachedPricingRulesSnapshot() {
-        return {
-                snapshot: Array.isArray(memory.pricing_rules_snapshot)
-                        ? memory.pricing_rules_snapshot
-                        : [],
-                context: memory.pricing_rules_context || null,
-                lastSync: memory.pricing_rules_last_sync || null,
-                staleAt: memory.pricing_rules_stale_at || null,
-        };
+	return {
+		snapshot: Array.isArray(memory.pricing_rules_snapshot) ? memory.pricing_rules_snapshot : [],
+		context: memory.pricing_rules_context || null,
+		lastSync: memory.pricing_rules_last_sync || null,
+		staleAt: memory.pricing_rules_stale_at || null,
+	};
 }
 
 export function clearPricingRulesSnapshot() {
-        memory.pricing_rules_snapshot = [];
-        memory.pricing_rules_context = null;
-        memory.pricing_rules_last_sync = null;
-        memory.pricing_rules_stale_at = null;
+	memory.pricing_rules_snapshot = [];
+	memory.pricing_rules_context = null;
+	memory.pricing_rules_last_sync = null;
+	memory.pricing_rules_stale_at = null;
 
-        persist("pricing_rules_snapshot", memory.pricing_rules_snapshot);
-        persist("pricing_rules_context", memory.pricing_rules_context);
-        persist("pricing_rules_last_sync", memory.pricing_rules_last_sync);
-        persist("pricing_rules_stale_at", memory.pricing_rules_stale_at);
+	persist("pricing_rules_snapshot", memory.pricing_rules_snapshot);
+	persist("pricing_rules_context", memory.pricing_rules_context);
+	persist("pricing_rules_last_sync", memory.pricing_rules_last_sync);
+	persist("pricing_rules_stale_at", memory.pricing_rules_stale_at);
 }
 
 // --- Generic getters and setters for cached data ----------------------------
@@ -544,40 +542,40 @@ export async function clearAllCache() {
 	memory.pos_last_sync_totals = { pending: 0, synced: 0, drafted: 0 };
 	memory.uom_cache = {};
 	memory.offers_cache = [];
-        memory.coupons_cache = {};
-        memory.customer_balance_cache = {};
-        memory.local_stock_cache = {};
-        memory.stock_cache_ready = false;
-        memory.customer_storage = [];
-        memory.items_last_sync = null;
-        memory.customers_last_sync = null;
-        memory.pos_opening_storage = null;
-        memory.opening_dialog_storage = null;
-        memory.sales_persons_storage = [];
-        memory.item_details_cache = {};
-        memory.tax_template_cache = {};
-        memory.item_groups_cache = [];
-        memory.translation_cache = {};
-        memory.pricing_rules_snapshot = [];
-        memory.pricing_rules_context = null;
-        memory.pricing_rules_last_sync = null;
-        memory.pricing_rules_stale_at = null;
-        memory.print_template = "";
-        memory.terms_and_conditions = "";
-        memory.cache_version = CACHE_VERSION;
-        memory.tax_inclusive = false;
-        memory.manual_offline = false;
-        memory.cache_ready = false;
+	memory.coupons_cache = {};
+	memory.customer_balance_cache = {};
+	memory.local_stock_cache = {};
+	memory.stock_cache_ready = false;
+	memory.customer_storage = [];
+	memory.items_last_sync = null;
+	memory.customers_last_sync = null;
+	memory.pos_opening_storage = null;
+	memory.opening_dialog_storage = null;
+	memory.sales_persons_storage = [];
+	memory.item_details_cache = {};
+	memory.tax_template_cache = {};
+	memory.item_groups_cache = [];
+	memory.translation_cache = {};
+	memory.pricing_rules_snapshot = [];
+	memory.pricing_rules_context = null;
+	memory.pricing_rules_last_sync = null;
+	memory.pricing_rules_stale_at = null;
+	memory.print_template = "";
+	memory.terms_and_conditions = "";
+	memory.cache_version = CACHE_VERSION;
+	memory.tax_inclusive = false;
+	memory.manual_offline = false;
+	memory.cache_ready = false;
 
-        await clearPriceListCache();
+	await clearPriceListCache();
 
-        persist("cache_version", CACHE_VERSION);
-        persist("cache_ready", false);
+	persist("cache_version", CACHE_VERSION);
+	persist("cache_ready", false);
 }
 
 // Faster cache clearing without reopening the database
 export async function forceClearAllCache() {
-        terminatePersistWorker();
+	terminatePersistWorker();
 	if (typeof localStorage !== "undefined") {
 		Object.keys(localStorage).forEach((key) => {
 			if (key.startsWith("posa_")) {
@@ -601,39 +599,39 @@ export async function forceClearAllCache() {
 	memory.customers_last_sync = null;
 	memory.pos_opening_storage = null;
 	memory.opening_dialog_storage = null;
-        memory.sales_persons_storage = [];
-        memory.item_details_cache = {};
-        memory.tax_template_cache = {};
-        memory.item_groups_cache = [];
-        memory.translation_cache = {};
-        memory.pricing_rules_snapshot = [];
-        memory.pricing_rules_context = null;
-        memory.pricing_rules_last_sync = null;
-        memory.pricing_rules_stale_at = null;
-        memory.print_template = "";
-        memory.terms_and_conditions = "";
-        memory.cache_version = CACHE_VERSION;
-        memory.tax_inclusive = false;
-        memory.manual_offline = false;
-        memory.cache_ready = false;
+	memory.sales_persons_storage = [];
+	memory.item_details_cache = {};
+	memory.tax_template_cache = {};
+	memory.item_groups_cache = [];
+	memory.translation_cache = {};
+	memory.pricing_rules_snapshot = [];
+	memory.pricing_rules_context = null;
+	memory.pricing_rules_last_sync = null;
+	memory.pricing_rules_stale_at = null;
+	memory.print_template = "";
+	memory.terms_and_conditions = "";
+	memory.cache_version = CACHE_VERSION;
+	memory.tax_inclusive = false;
+	memory.manual_offline = false;
+	memory.cache_ready = false;
 
-        if (typeof localStorage !== "undefined") {
-                localStorage.setItem("posa_cache_version", CACHE_VERSION);
-        }
+	if (typeof localStorage !== "undefined") {
+		localStorage.setItem("posa_cache_version", CACHE_VERSION);
+	}
 
-        await clearPriceListCache();
+	await clearPriceListCache();
 
-        // Delete the IndexedDB database in the background
-        try {
-                await Dexie.delete("posawesome_offline");
-                await db.open();
-                initPersistWorker();
-        } catch (e) {
-                console.error("Failed to clear IndexedDB cache", e);
-        }
+	// Delete the IndexedDB database in the background
+	try {
+		await Dexie.delete("posawesome_offline");
+		await db.open();
+		initPersistWorker();
+	} catch (e) {
+		console.error("Failed to clear IndexedDB cache", e);
+	}
 
-        persist("cache_version", CACHE_VERSION);
-        persist("cache_ready", false);
+	persist("cache_version", CACHE_VERSION);
+	persist("cache_ready", false);
 }
 
 /**
