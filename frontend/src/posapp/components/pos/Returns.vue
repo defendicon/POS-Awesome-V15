@@ -175,27 +175,44 @@
 						<v-col cols="12" class="pa-0 mt-1" v-if="dialog_data && dialog_data.length > 0">
 							<v-data-table
 								:headers="headers"
-								:items="dialog_data"
-								item-key="name"
-								class="elevation-1"
-								show-select
-								v-model="selected"
-								select-strategy="single"
-								return-object
-								:footer-props="{
-									'items-per-page-options': [10, 25, 50, 100],
-									'items-per-page-text': 'Invoices per page',
-								}"
-								:items-per-page="25"
-							>
-								<template v-slot:item.posting_date="{ item }">
-									{{ formatDateDisplay(item.posting_date) }}
-								</template>
-								<template v-slot:item.grand_total="{ item }">
-									{{ currencySymbol(item.currency) }}
-									{{ formatCurrency(item.grand_total) }}
-								</template>
-							</v-data-table>
+                                                        :items="dialog_data"
+                                                        item-key="name"
+                                                        class="elevation-1"
+                                                        show-select
+                                                        v-model="selected"
+                                                        select-strategy="single"
+                                                        return-object
+                                                        :item-class="returnRowClass"
+                                                        :footer-props="{
+                                                                'items-per-page-options': [10, 25, 50, 100],
+                                                                'items-per-page-text': 'Invoices per page',
+                                                        }"
+                                                        :items-per-page="25"
+                                                >
+                                                        <template v-slot:item.posting_date="{ item }">
+                                                                {{ formatDateDisplay(item.posting_date) }}
+                                                        </template>
+                                                        <template v-slot:item.posa_return_valid_upto="{ item }">
+                                                                <div class="d-flex align-center">
+                                                                        <span v-if="item.posa_return_valid_upto">
+                                                                                {{ formatDateDisplay(item.posa_return_valid_upto) }}
+                                                                        </span>
+                                                                        <v-chip
+                                                                                v-if="item.posa_return_expired"
+                                                                                color="error"
+                                                                                size="small"
+                                                                                class="ml-2"
+                                                                                label
+                                                                        >
+                                                                                {{ __("Return window passed") }}
+                                                                        </v-chip>
+                                                                </div>
+                                                        </template>
+                                                        <template v-slot:item.grand_total="{ item }">
+                                                                {{ currencySymbol(item.currency) }}
+                                                                {{ formatCurrency(item.grand_total) }}
+                                                        </template>
+                                                </v-data-table>
 
 							<!-- Load More button at the bottom of results -->
 							<div class="text-center mt-3" v-if="has_more_invoices">
@@ -268,22 +285,28 @@ export default {
 				align: "start",
 				sortable: true,
 			},
-			{
-				title: __("Date"),
-				align: "start",
-				sortable: true,
-				value: "posting_date",
-			},
-			{
-				title: __("Invoice"),
-				value: "name",
-				align: "start",
-				sortable: true,
-			},
-			{
-				title: __("Amount"),
-				value: "grand_total",
-				align: "end",
+                        {
+                                title: __("Date"),
+                                align: "start",
+                                sortable: true,
+                                value: "posting_date",
+                        },
+                        {
+                                title: __("Invoice"),
+                                value: "name",
+                                align: "start",
+                                sortable: true,
+                        },
+                        {
+                                title: __("Return Valid Until"),
+                                value: "posa_return_valid_upto",
+                                align: "start",
+                                sortable: false,
+                        },
+                        {
+                                title: __("Amount"),
+                                value: "grand_total",
+                                align: "end",
 				sortable: false,
 			},
 		],
@@ -296,11 +319,17 @@ export default {
 		to_date() {
 			this.formatToDate();
 		},
-	},
-	methods: {
-		formatDateDisplay(dateStr) {
-			if (!dateStr) return "";
-			try {
+        },
+        methods: {
+                returnRowClass(item) {
+                        if (!item || typeof item !== "object") {
+                                return "";
+                        }
+                        return item.posa_return_expired ? "return-expired-row" : "";
+                },
+                formatDateDisplay(dateStr) {
+                        if (!dateStr) return "";
+                        try {
 				const western = formatUtils.fromArabicNumerals(String(dateStr));
 				const parts = western.split("-");
 				if (parts.length === 3) {
@@ -655,9 +684,15 @@ export default {
 			this.pos_profile = data.pos_profile;
 		});
 	},
-	beforeUnmount() {
-		this.eventBus.off("open_returns");
-		this.eventBus.off("register_pos_profile");
-	},
+        beforeUnmount() {
+                this.eventBus.off("open_returns");
+                this.eventBus.off("register_pos_profile");
+        },
 };
 </script>
+
+<style scoped>
+.return-expired-row {
+        background-color: #ffebee !important;
+}
+</style>

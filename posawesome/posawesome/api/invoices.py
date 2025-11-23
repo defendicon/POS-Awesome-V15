@@ -1187,10 +1187,13 @@ def search_invoices_for_return(
     for invoice in invoices_list:
         invoice_doc = frappe.get_doc(doctype, invoice.name)
 
-        if enforce_return_validity:
-            validity_date = invoice_doc.get("posa_return_valid_upto")
-            if validity_date and getdate(nowdate()) > getdate(validity_date):
-                continue
+        validity_date = invoice_doc.get("posa_return_valid_upto")
+        expired = False
+
+        if enforce_return_validity and validity_date:
+            expired = getdate(nowdate()) > getdate(validity_date)
+
+        invoice_doc.posa_return_expired = cint(expired)
 
         # Check if any items have already been returned
         has_returns = frappe.get_all(
@@ -1225,6 +1228,8 @@ def search_invoices_for_return(
                 # Create a copy of invoice with filtered items
                 filtered_invoice = frappe.get_doc(doctype, invoice.name)
                 filtered_invoice.items = filtered_items
+                filtered_invoice.posa_return_expired = cint(expired)
+                filtered_invoice.posa_return_valid_upto = validity_date
                 data.append(filtered_invoice)
         else:
             data.append(invoice_doc)
