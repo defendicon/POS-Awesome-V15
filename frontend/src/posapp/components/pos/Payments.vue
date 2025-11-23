@@ -1064,7 +1064,10 @@ export default {
                         );
                 },
                 returnValidityEnabled() {
-                        return Boolean(this.pos_settings?.posa_enable_return_validity);
+                        return Boolean(
+                                this.pos_profile?.posa_enable_return_validity ||
+                                        this.pos_settings?.posa_enable_return_validity,
+                        );
                 },
                 returnValidityMinDate() {
                         const postingDate = this.invoice_doc?.posting_date || frappe.datetime?.nowdate?.();
@@ -2167,7 +2170,9 @@ export default {
                         if (Number.isNaN(parsed.getTime())) {
                                 return null;
                         }
-                        const daysSetting = parseInt(this.pos_settings?.posa_return_validity_days ?? 0, 10);
+                        const profileDays = parseInt(this.pos_profile?.posa_return_validity_days ?? 0, 10);
+                        const settingsDays = parseInt(this.pos_settings?.posa_return_validity_days ?? 0, 10);
+                        const daysSetting = Number.isFinite(profileDays) && profileDays > 0 ? profileDays : settingsDays;
                         if (Number.isFinite(daysSetting) && daysSetting > 0) {
                                 parsed.setDate(parsed.getDate() + daysSetting);
                         }

@@ -37,10 +37,29 @@ from posawesome.posawesome.api.utilities import (
 from .items import get_stock_availability
 
 
-def _get_return_validity_settings():
-    settings = frappe.get_cached_doc("POS Settings")
-    enable_validity = cint(getattr(settings, "posa_enable_return_validity", 0))
-    default_days = cint(getattr(settings, "posa_return_validity_days", 0)) if enable_validity else 0
+def _get_return_validity_settings(pos_profile: str | None = None):
+    """Return whether return validity is enabled and the default days window.
+
+    Positional profile-specific configuration takes precedence over the
+    global POS Settings toggle, falling back to the global values when the
+    profile does not opt in.
+    """
+
+    enable_validity = 0
+    default_days = 0
+
+    if pos_profile:
+        profile = frappe.get_cached_doc("POS Profile", pos_profile)
+        enable_validity = cint(getattr(profile, "posa_enable_return_validity", 0))
+        if enable_validity:
+            default_days = cint(getattr(profile, "posa_return_validity_days", 0))
+
+    if not enable_validity:
+        settings = frappe.get_cached_doc("POS Settings")
+        enable_validity = cint(getattr(settings, "posa_enable_return_validity", 0))
+        if enable_validity:
+            default_days = cint(getattr(settings, "posa_return_validity_days", 0))
+
     return enable_validity, default_days
 
 
@@ -419,7 +438,7 @@ def update_invoice(data):
     # Ensure the document type is set for new invoices to prevent validation errors
     data.setdefault("doctype", doctype)
 
-    return_validity_enabled, default_validity_days = _get_return_validity_settings()
+    return_validity_enabled, default_validity_days = _get_return_validity_settings(pos_profile)
 
     if data.get("name"):
         invoice_doc = frappe.get_doc(doctype, data.get("name"))
@@ -1033,6 +1052,7 @@ def search_invoices_for_return(
     min_amount=None,
     max_amount=None,
     page=1,
+    pos_profile=None,
     doctype="Sales Invoice",
 ):
     """
@@ -1056,7 +1076,7 @@ def search_invoices_for_return(
         - invoices: List of invoice documents
         - has_more: Boolean indicating if there are more invoices to load
     """
-    enforce_return_validity, _ = _get_return_validity_settings()
+    enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
     # Start with base filters
     filters = {

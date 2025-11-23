@@ -505,13 +505,14 @@ export default {
 				tax_id: vm.tax_id,
 				from_date: formattedFromDate,
 				to_date: formattedToDate,
-				min_amount: minAmount,
-				max_amount: maxAmount,
-				company: vm.company,
-				page: vm.page,
-				doctype:
-					vm.pos_profile && vm.pos_profile.create_pos_invoice_instead_of_sales_invoice
-						? "POS Invoice"
+                                min_amount: minAmount,
+                                max_amount: maxAmount,
+                                company: vm.company,
+                                page: vm.page,
+                                pos_profile: vm.pos_profile?.name,
+                                doctype:
+                                        vm.pos_profile && vm.pos_profile.create_pos_invoice_instead_of_sales_invoice
+                                                ? "POS Invoice"
 						: "Sales Invoice",
 			};
 
