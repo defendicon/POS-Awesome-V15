@@ -296,6 +296,10 @@ fixtures = [
                     "POS Profile-posa_enable_camera_scanning",
                     "POS Profile-posa_camera_scan_type",
                     "POS Profile-posa_language",
+                    "POS Settings-posa_enable_return_validity",
+                    "POS Settings-posa_return_validity_days",
+                    "POS Invoice-posa_return_valid_upto",
+                    "Sales Invoice-posa_return_valid_upto",
                 ),
             ]
         ],

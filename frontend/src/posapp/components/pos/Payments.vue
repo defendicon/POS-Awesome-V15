@@ -328,20 +328,36 @@
 					</v-col>
 
 					<!-- Delivery Date and Address (if applicable) -->
-					<v-col cols="6" v-if="pos_profile.posa_allow_sales_order && invoiceType === 'Order'">
-						<VueDatePicker
-							v-model="new_delivery_date"
-							model-type="format"
-							format="dd-MM-yyyy"
-							:min-date="new Date()"
-							auto-apply
-							class="sleek-field pos-themed-input"
-							@update:model-value="update_delivery_date()"
-						/>
-					</v-col>
-					<!-- Shipping Address Selection (if delivery date is set) -->
-					<v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
-						<v-autocomplete
+                                        <v-col cols="6" v-if="pos_profile.posa_allow_sales_order && invoiceType === 'Order'">
+                                                <VueDatePicker
+                                                        v-model="new_delivery_date"
+                                                        model-type="format"
+                                                        format="dd-MM-yyyy"
+                                                        :min-date="new Date()"
+                                                        auto-apply
+                                                        class="sleek-field pos-themed-input"
+                                                        @update:model-value="update_delivery_date()"
+                                                />
+                                        </v-col>
+                                        <v-col
+                                                cols="6"
+                                                v-if="returnValidityEnabled && invoice_doc && !invoice_doc.is_return"
+                                        >
+                                                <VueDatePicker
+                                                        v-model="return_valid_upto_date"
+                                                        model-type="format"
+                                                        format="dd-MM-yyyy"
+                                                        :min-date="returnValidityMinDate"
+                                                        :enable-time-picker="false"
+                                                        auto-apply
+                                                        class="sleek-field pos-themed-input"
+                                                        :placeholder="frappe._('Return Valid Until')"
+                                                        @update:model-value="updateReturnValidUpto"
+                                                />
+                                        </v-col>
+                                        <!-- Shipping Address Selection (if delivery date is set) -->
+                                        <v-col cols="12" v-if="invoice_doc && invoice_doc.posa_delivery_date">
+                                                <v-autocomplete
 							density="compact"
 							clearable
 							auto-select-first
@@ -793,12 +809,12 @@ export default {
 	},
 	data() {
 		return {
-			loading: false, // UI loading state
-			pos_profile: "", // POS profile settings
-			pos_settings: "", // POS settings
-			stock_settings: "", // Stock settings
-			invoiceType: "Invoice", // Type of invoice
-			is_return: false, // Is this a return invoice?
+                        loading: false, // UI loading state
+                        pos_profile: "", // POS profile settings
+                        pos_settings: {}, // POS settings
+                        stock_settings: "", // Stock settings
+                        invoiceType: "Invoice", // Type of invoice
+                        is_return: false, // Is this a return invoice?
 			loyalty_amount: 0, // Loyalty points to redeem
 			redeemed_customer_credit: 0, // Customer credit to redeem
 			credit_change: 0, // Change to be given as credit
@@ -813,12 +829,13 @@ export default {
 			phone_dialog: false, // Show phone payment dialog
 			custom_days_dialog: false, // Show custom days dialog
 			custom_days_value: null, // Custom days entry
-			new_delivery_date: null, // New delivery date value
-			new_po_date: null, // New PO date value
-			new_credit_due_date: null, // New credit due date value
-			credit_due_days: null, // Number of days until due
-			credit_due_presets: [7, 14, 30], // Preset options for due days
-			customer_info: "", // Customer info
+                        new_delivery_date: null, // New delivery date value
+                        new_po_date: null, // New PO date value
+                        new_credit_due_date: null, // New credit due date value
+                        credit_due_days: null, // Number of days until due
+                        credit_due_presets: [7, 14, 30], // Preset options for due days
+                        return_valid_upto_date: null, // Return valid until display date
+                        customer_info: "", // Customer info
 			mpesa_modes: [], // List of available M-Pesa modes
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
@@ -1039,14 +1056,28 @@ export default {
 			return !doc || !doc.posa_delivery_date;
 		},
 		// Should request payment field be shown?
-		request_payment_field() {
-			return (
-				this.pos_settings?.invoice_fields?.some(
-					(el) => el.fieldtype === "Button" && el.fieldname === "request_for_payment",
-				) || false
-			);
-		},
-	},
+                request_payment_field() {
+                        return (
+                                this.pos_settings?.invoice_fields?.some(
+                                        (el) => el.fieldtype === "Button" && el.fieldname === "request_for_payment",
+                                ) || false
+                        );
+                },
+                returnValidityEnabled() {
+                        return Boolean(this.pos_settings?.posa_enable_return_validity);
+                },
+                returnValidityMinDate() {
+                        const postingDate = this.invoice_doc?.posting_date || frappe.datetime?.nowdate?.();
+                        if (!postingDate) {
+                                return new Date();
+                        }
+                        const parsed = new Date(postingDate);
+                        if (Number.isNaN(parsed.getTime())) {
+                                return new Date();
+                        }
+                        return parsed;
+                },
+        },
 	watch: {
 		// Watch diff_payment to update paid_change
 		diff_payment(newVal) {
@@ -2107,11 +2138,11 @@ export default {
 			this.invoice_doc.due_date = this.formatDate(this.new_credit_due_date);
 		},
 		// Apply preset or typed number of days to set due date
-		applyDuePreset(days) {
-			if (days === null || days === "") {
-				return;
-			}
-			const westernDays = formatUtils.fromArabicNumerals(String(days));
+                applyDuePreset(days) {
+                        if (days === null || days === "") {
+                                return;
+                        }
+                        const westernDays = formatUtils.fromArabicNumerals(String(days));
 			if (isNaN(westernDays)) {
 				return;
 			}
@@ -2123,15 +2154,67 @@ export default {
 			this.update_credit_due_date();
 		},
 		// Apply days entered in dialog
-		applyCustomDays() {
-			this.applyDuePreset(this.custom_days_value);
-			this.custom_days_dialog = false;
-		},
-		// Format date to YYYY-MM-DD
-		formatDate(date) {
-			if (!date) return null;
-			if (typeof date === "string") {
-				const western = formatUtils.fromArabicNumerals(date);
+                applyCustomDays() {
+                        this.applyDuePreset(this.custom_days_value);
+                        this.custom_days_dialog = false;
+                },
+                calculateReturnValidUntil(baseDate) {
+                        const formattedBase = this.formatDate(baseDate);
+                        if (!formattedBase) {
+                                return null;
+                        }
+                        const parsed = new Date(formattedBase);
+                        if (Number.isNaN(parsed.getTime())) {
+                                return null;
+                        }
+                        const daysSetting = parseInt(this.pos_settings?.posa_return_validity_days ?? 0, 10);
+                        if (Number.isFinite(daysSetting) && daysSetting > 0) {
+                                parsed.setDate(parsed.getDate() + daysSetting);
+                        }
+                        const year = parsed.getFullYear();
+                        const month = `0${parsed.getMonth() + 1}`.slice(-2);
+                        const day = `0${parsed.getDate()}`.slice(-2);
+                        return `${year}-${month}-${day}`;
+                },
+                initializeReturnValidity(invoice_doc) {
+                        if (!this.returnValidityEnabled || !invoice_doc || invoice_doc.is_return) {
+                                this.return_valid_upto_date = null;
+                                if (invoice_doc) {
+                                        invoice_doc.posa_return_valid_upto = null;
+                                }
+                                return;
+                        }
+
+                        const existing = invoice_doc.posa_return_valid_upto;
+                        const proposedDate =
+                                existing ||
+                                this.calculateReturnValidUntil(
+                                        invoice_doc.posting_date || frappe.datetime.nowdate(),
+                                );
+
+                        if (proposedDate) {
+                                const backendDate = this.formatDate(proposedDate);
+                                invoice_doc.posa_return_valid_upto = backendDate;
+                                this.return_valid_upto_date = this.formatDateDisplay(backendDate);
+                        }
+                },
+                updateReturnValidUpto(value) {
+                        if (!this.returnValidityEnabled) {
+                                return;
+                        }
+                        const formatted = this.formatDate(value);
+                        this.return_valid_upto_date = this.formatDateDisplay(formatted);
+                        if (this.invoice_doc) {
+                                this.invoice_doc.posa_return_valid_upto = formatted;
+                        } else {
+                                this.invoiceStore.mergeInvoiceDoc({ posa_return_valid_upto: formatted });
+                        }
+                },
+                // Format date to YYYY-MM-DD
+                formatDate(date) {
+                        if (!date) return null;
+                        if (typeof date === "string") {
+                                const western = formatUtils.fromArabicNumerals(date);
 				if (/^\d{4}-\d{2}-\d{2}$/.test(western)) {
 					return western;
 				}
@@ -2375,19 +2458,20 @@ export default {
 							default_payment.base_amount = -Math.abs(amount);
 						}
 					}
-				} else if (default_payment) {
-					// For regular invoices, set positive amount
-					default_payment.amount = this.flt(
-						invoice_doc.rounded_total || invoice_doc.grand_total,
-						this.currency_precision,
-					);
-					this.is_credit_return = false;
-				}
-				this.loyalty_amount = 0;
-				this.redeemed_customer_credit = 0;
-				// Only get addresses if customer exists
-				if (invoice_doc.customer) {
-					this.get_addresses();
+                                } else if (default_payment) {
+                                        // For regular invoices, set positive amount
+                                        default_payment.amount = this.flt(
+                                                invoice_doc.rounded_total || invoice_doc.grand_total,
+                                                this.currency_precision,
+                                        );
+                                        this.is_credit_return = false;
+                                }
+                                this.initializeReturnValidity(invoice_doc);
+                                this.loyalty_amount = 0;
+                                this.redeemed_customer_credit = 0;
+                                // Only get addresses if customer exists
+                                if (invoice_doc.customer) {
+                                        this.get_addresses();
 				}
 				this.get_sales_person_names();
 			});
@@ -2419,25 +2503,30 @@ export default {
 					this.update_delivery_date();
 				}
 				// Handle return invoices properly
-				if (this.invoice_doc && data === "Return") {
-					this.invoice_doc.is_return = 1;
-					// Ensure payments are negative for returns
-					this.ensureReturnPaymentsAreNegative();
-					this.is_credit_return = false;
-				}
-			});
-			this.eventBus.on("set_pos_settings", (data) => {
-				this.pos_settings = data;
-			});
+                                if (this.invoice_doc && data === "Return") {
+                                        this.invoice_doc.is_return = 1;
+                                        // Ensure payments are negative for returns
+                                        this.ensureReturnPaymentsAreNegative();
+                                        this.is_credit_return = false;
+                                        this.return_valid_upto_date = null;
+                                }
+                        });
+                        this.eventBus.on("set_pos_settings", (data) => {
+                                this.pos_settings = data || {};
+                                if (this.invoice_doc && !this.invoice_doc.is_return) {
+                                        this.initializeReturnValidity(this.invoice_doc);
+                                }
+                        });
 			this.eventBus.on("set_mpesa_payment", (data) => {
 				this.set_mpesa_payment(data);
 			});
 			// Clear any stored invoice when parent emits clear_invoice
-			this.eventBus.on("clear_invoice", () => {
-				this.invoice_doc = "";
-				this.is_return = false;
-				this.is_credit_return = false;
-			});
+                        this.eventBus.on("clear_invoice", () => {
+                                this.invoice_doc = "";
+                                this.is_return = false;
+                                this.is_credit_return = false;
+                                this.return_valid_upto_date = null;
+                        });
 			// Scroll to top when payment view is shown
 			this.eventBus.on("show_payment", this.handleShowPayment);
 		});
