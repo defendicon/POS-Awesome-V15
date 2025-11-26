@@ -956,16 +956,17 @@ export default {
 						return true;
 					}
 
-					// Hide columns based on container width
-					if (this.containerWidth < 500) {
-						// Ultra-compact: only essential columns
-						return ["item_name", "qty", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 700) {
-						// Compact: essential + rate
+					// Aggressive column hiding for smaller screens
+					if (this.breakpoint === "xs") {
+						return ["item_name", "qty", "amount"].includes(header.key);
+					}
+					if (this.breakpoint === "sm") {
 						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 900) {
-						// Medium: hide advanced columns
-						return !["discount_value", "price_list_rate"].includes(header.key);
+					}
+					if (this.breakpoint === "md") {
+						return !["price_list_rate", "discount_value", "posa_is_offer"].includes(
+							header.key,
+						);
 					}
 
 					// Large: show all columns
@@ -1634,7 +1635,8 @@ export default {
 	position: sticky;
 	top: 0;
 	z-index: 3;
-	white-space: nowrap;
+	white-space: normal; /* Allow header text to wrap */
+	word-break: break-word; /* Break long words */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	max-width: 150px;
@@ -2288,6 +2290,19 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	padding: var(--cell-padding);
 	height: var(--cell-height);
 	vertical-align: middle;
+}
+
+/* Dynamic font sizing for smaller viewports */
+.responsive-table-container.breakpoint-xs .pos-table :deep(th),
+.responsive-table-container.breakpoint-xs .pos-table :deep(td) {
+	font-size: 0.7rem;
+	padding: 6px 4px;
+}
+
+.responsive-table-container.breakpoint-sm .pos-table :deep(th),
+.responsive-table-container.breakpoint-sm .pos-table :deep(td) {
+	font-size: 0.75rem;
+	padding: 8px 6px;
 }
 
 /* Compact view adjustments */
