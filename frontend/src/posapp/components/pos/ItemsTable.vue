@@ -1173,7 +1173,7 @@ export default {
 			// Adjusted ratios and min/max values for a more compact layout
 			const baseWidths = {
 				item_name: { min: 120, max: 220, ratio: 0.28 },
-				qty: { min: 100, max: 140, ratio: 0.14 },
+				qty: { min: 90, max: 120, ratio: 0.13 },
 				uom: { min: 65, max: 85, ratio: 0.08 },
 				rate: { min: 80, max: 110, ratio: 0.11 },
 				amount: { min: 80, max: 110, ratio: 0.11 },
@@ -1194,7 +1194,7 @@ export default {
 			// Reduced min-widths to allow for more flexible shrinking
 			const minWidths = {
 				item_name: 100,
-				qty: 90,
+				qty: 80,
 				uom: 60,
 				rate: 70,
 				amount: 70,
@@ -2815,16 +2815,18 @@ body[dir="rtl"] .amount-value.right-aligned {
 /* Column width constraints and alignment - Adjusted for compact layout */
 .pos-table :deep(th[data-column-key="item_name"]),
 .pos-table :deep(td[data-column-key="item_name"]) {
-	min-width: 120px; /* Reduced min-width */
-	max-width: 220px; /* Reduced max-width */
+	min-width: 120px;
+	max-width: 240px;
 	text-align: left;
-	font-size: 0.78rem; /* Slightly smaller font */
+	font-size: 0.78rem;
+	white-space: normal; /* Allow text wrapping */
+	word-break: break-word; /* Break long words */
 }
 
 .pos-table :deep(th[data-column-key="qty"]),
 .pos-table :deep(td[data-column-key="qty"]) {
-	min-width: 110px; /* Reduced min-width */
-	max-width: 140px; /* Reduced max-width */
+	min-width: 100px;
+	max-width: 120px;
 	text-align: center;
 }
 
@@ -3320,8 +3322,8 @@ body[dir="rtl"] .amount-value.right-aligned {
 	gap: 3px;
 	padding: 2px;
 	/* More flexible sizing for larger numbers */
-	min-width: 100px;
-	max-width: 120px;
+	min-width: 90px;
+	max-width: 110px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
