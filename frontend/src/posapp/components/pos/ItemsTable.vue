@@ -139,44 +139,34 @@
 			</template>
 			<!-- UOM column -->
 			<template v-slot:item.uom="{ item }">
-				<div class="pos-table__editor-box" @click.stop>
+				<div class="pos-table__editor-box uom-editor" @click.stop>
 					<v-btn
 						size="x-small"
 						variant="flat"
-						class="pos-table__editor-btn"
+						class="pos-table__editor-btn uom-arrow"
 						@click.stop="changeUom(item, -1)"
 						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
 					>
 						<v-icon size="small">mdi-chevron-left</v-icon>
 					</v-btn>
-					<div
-						v-if="editing_uom_row_id !== item.posa_row_id"
-						class="pos-table__editor-display"
-						@click.stop="openUomEdit(item)"
-					>
-						{{ item.uom }}
-					</div>
 					<v-select
-						v-else
-						ref="uomInput"
-						:menu-props="{ 'onUpdate:modelValue': (value) => isUomMenuOpen = value, 'model-value': isUomMenuOpen }"
-						v-model="editing_uom_value"
+						:class="{ 'uom-display-mode': editing_uom_row_id !== item.posa_row_id }"
+						:model-value="item.uom"
+						@update:model-value="handleUomSelect(item, $event)"
 						:items="item.item_uoms"
 						item-title="uom"
 						item-value="uom"
 						density="compact"
 						variant="outlined"
-						class="pos-table__editor-input"
-						@blur="closeUomEdit(item)"
-						@update:model-value="handleUomSelect(item, $event)"
+						class="pos-table__editor-input uom-select"
 						hide-details
-						:autofocus="true"
-						@keydown.enter.prevent="closeUomEdit(item)"
+						@focus="openUomEdit(item)"
+						@blur="closeUomEdit(item)"
 					></v-select>
 					<v-btn
 						size="x-small"
 						variant="flat"
-						class="pos-table__editor-btn"
+						class="pos-table__editor-btn uom-arrow"
 						@click.stop="changeUom(item, 1)"
 						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
 					>
@@ -894,14 +884,12 @@ export default {
 			editing_qty_row_id: null,
 			editing_qty_value: null,
 			editing_uom_row_id: null,
-			editing_uom_value: null,
 			editing_rate_row_id: null,
 			editing_rate_value: null,
 			editing_discount_percent_row_id: null,
 			editing_discount_percent_value: null,
 			editing_discount_amount_row_id: null,
 			editing_discount_amount_value: null,
-			isUomMenuOpen: false,
 		};
 	},
 	computed: {
@@ -1414,28 +1402,17 @@ export default {
 			}
 		},
 		openUomEdit(item) {
-			if (this.editing_uom_row_id !== item.posa_row_id) {
-				this.editing_uom_row_id = item.posa_row_id;
-				this.editing_uom_value = item.uom;
-				this.$nextTick(() => {
-					this.isUomMenuOpen = true;
-				});
-			}
+			this.editing_uom_row_id = item.posa_row_id;
 		},
 
 		closeUomEdit(item) {
-			if (this.editing_uom_row_id === item.posa_row_id) {
-				this.editing_uom_row_id = null;
-				this.editing_uom_value = null;
-				this.isUomMenuOpen = false;
-			}
+			this.editing_uom_row_id = null;
 		},
 
 		handleUomSelect(item, newUom) {
 			if (newUom && newUom !== item.uom) {
 				this.calcUom(item, newUom);
 			}
-			this.closeUomEdit(item);
 		},
 
 		changeUom(item, direction) {
@@ -3682,5 +3659,37 @@ body[dir="rtl"] .number-field-rtl {
 }
 .pos-table__editor-input :deep(input) {
 	text-align: center;
+}
+
+.uom-editor {
+	gap: 2px;
+}
+.uom-arrow {
+	flex-shrink: 0;
+}
+.uom-select {
+	min-width: 60px;
+}
+
+.uom-display-mode :deep(.v-field__outline) {
+	display: none;
+}
+.uom-display-mode :deep(.v-field) {
+	background-color: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+.uom-display-mode :deep(.v-field__input) {
+	justify-content: center;
+	padding: 0;
+	font-weight: 600;
+	color: var(--pos-primary);
+}
+.uom-display-mode :deep(.v-select__selection-text) {
+	text-align: center;
+	color: var(--pos-primary);
+}
+.uom-display-mode :deep(.v-field__append-inner) {
+	display: none;
 }
 </style>
