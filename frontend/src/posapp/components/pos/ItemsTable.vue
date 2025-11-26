@@ -956,17 +956,16 @@ export default {
 						return true;
 					}
 
-					// Aggressive column hiding for smaller screens
-					if (this.breakpoint === "xs") {
-						return ["item_name", "qty", "amount"].includes(header.key);
-					}
-					if (this.breakpoint === "sm") {
+					// Hide columns based on container width
+					if (this.containerWidth < 500) {
+						// Ultra-compact: only essential columns
+						return ["item_name", "qty", "amount", "actions"].includes(header.key);
+					} else if (this.containerWidth < 700) {
+						// Compact: essential + rate
 						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
-					}
-					if (this.breakpoint === "md") {
-						return !["price_list_rate", "discount_value", "posa_is_offer"].includes(
-							header.key,
-						);
+					} else if (this.containerWidth < 900) {
+						// Medium: hide advanced columns
+						return !["discount_value", "price_list_rate"].includes(header.key);
 					}
 
 					// Large: show all columns
@@ -974,6 +973,8 @@ export default {
 				})
 				.map((header) => ({
 					...header,
+					width: this.calculateColumnWidth(header),
+					minWidth: this.calculateMinColumnWidth(header),
 				}));
 		},
 
@@ -1001,20 +1002,12 @@ export default {
 		virtualScrollConfig() {
 			const itemCount = this.items?.length || 0;
 			const containerHeight = this.containerHeight;
-			let itemHeight = 60; // Default height
 
-			// Increase row height on smaller screens to accommodate wrapped text
-			if (this.breakpoint === "xs" || this.breakpoint === "sm") {
-				itemHeight = 75;
-			} else if (this.tableDensity === "comfortable") {
-				itemHeight = 72;
-			} else if (this.tableDensity === "compact") {
-				itemHeight = 48;
-			}
-
+			// Dynamic configuration based on dataset size and container
 			return {
-				itemHeight: itemHeight,
-				itemsPerPage: Math.max(20, Math.ceil(containerHeight / itemHeight) + 5),
+				itemHeight:
+					this.tableDensity === "compact" ? 48 : this.tableDensity === "comfortable" ? 72 : 60,
+				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
 				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
 			};
 		},
@@ -1176,6 +1169,42 @@ export default {
 			}
 		},
 
+		calculateColumnWidth(header) {
+			const baseWidths = {
+				item_name: { min: 140, max: 220, ratio: 0.28 },
+				qty: { min: 110, max: 150, ratio: 0.14 },
+				uom: { min: 70, max: 90, ratio: 0.08 },
+				rate: { min: 90, max: 120, ratio: 0.11 },
+				amount: { min: 90, max: 120, ratio: 0.11 },
+				discount_value: { min: 70, max: 100, ratio: 0.09 },
+				discount_amount: { min: 80, max: 110, ratio: 0.1 },
+				price_list_rate: { min: 100, max: 130, ratio: 0.12 },
+				actions: { min: 70, max: 90, ratio: 0.07 },
+				posa_is_offer: { min: 50, max: 70, ratio: 0.05 },
+			};
+
+			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
+			const calculatedWidth = this.containerWidth * config.ratio;
+
+			return Math.max(config.min, Math.min(config.max, calculatedWidth));
+		},
+
+		calculateMinColumnWidth(header) {
+			const minWidths = {
+				item_name: 110,
+				qty: 90,
+				uom: 60,
+				rate: 70,
+				amount: 70,
+				discount_value: 60,
+				discount_amount: 70,
+				price_list_rate: 80,
+				actions: 50,
+				posa_is_offer: 40,
+			};
+
+			return minWidths[header.key] || 50;
+		},
 
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== "undefined") {
@@ -1587,23 +1616,25 @@ export default {
 /* Enhanced table header styling with global theme support */
 .pos-table :deep(th) {
 	font-weight: 600;
-	font-size: 0.75rem;
+	font-size: 0.7rem; /* Further reduced font size */
 	text-transform: uppercase;
-	letter-spacing: 0.2px;
-	padding: 12px 6px;
+	letter-spacing: 0.3px;
+	padding: 10px 8px; /* Reduced padding */
 	border-bottom: 1px solid var(--pos-border);
 	background-color: var(--pos-table-header-bg);
 	color: var(--pos-text-primary);
 	position: sticky;
 	top: 0;
 	z-index: 3;
-	white-space: normal; /* Allow header text to wrap */
-	word-break: break-word; /* Break long words */
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 150px;
+	min-width: 80px;
 	text-align: center;
 	vertical-align: middle !important;
-	line-height: 1.3 !important;
-	height: auto; /* Allow height to expand for wrapped text */
-	min-height: 48px; /* Ensure a minimum height */
+	line-height: 1.2 !important;
+	height: 40px;
 	/* Enhanced transitions and stability */
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background-clip: padding-box;
@@ -1674,7 +1705,7 @@ export default {
 
 /* Table cell styling */
 .pos-table :deep(td) {
-	padding: 8px 12px;
+	padding: 16px 12px;
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
@@ -1690,7 +1721,6 @@ export default {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	overflow: hidden; /* Prevent content from overflowing the cell */
 }
 
 /* =================================================================
@@ -2251,19 +2281,6 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	vertical-align: middle;
 }
 
-/* Dynamic font sizing for smaller viewports */
-.responsive-table-container.breakpoint-xs .pos-table :deep(th),
-.responsive-table-container.breakpoint-xs .pos-table :deep(td) {
-	font-size: 0.7rem;
-	padding: 6px 4px;
-}
-
-.responsive-table-container.breakpoint-sm .pos-table :deep(th),
-.responsive-table-container.breakpoint-sm .pos-table :deep(td) {
-	font-size: 0.75rem;
-	padding: 8px 6px;
-}
-
 /* Compact view adjustments */
 .responsive-table-container.compact-view .pos-table {
 	border-radius: 0;
@@ -2360,48 +2377,44 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	font-size: 0.8rem;
 }
 
-/* Flexbox layout for the table */
+/* Full width enforcement for all nested elements */
+.pos-table :deep(.v-data-table),
+.pos-table :deep(.v-data-table-virtual),
+.pos-table :deep(.v-table) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+}
+
+.pos-table :deep(.v-data-table__wrapper) {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: none !important;
+}
+
 .pos-table :deep(table) {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	height: 100%;
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	border-collapse: collapse !important;
+	table-layout: auto !important;
 }
 
 .pos-table :deep(thead),
-.pos-table :deep(tbody),
+.pos-table :deep(tbody) {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
 .pos-table :deep(tr) {
-	display: flex;
-	width: 100%;
-}
-
-.pos-table :deep(th),
-.pos-table :deep(td) {
-	flex: 1 1 0; /* Default flex properties */
-	min-width: 0; /* Allow columns to shrink below their content size */
-}
-
-/* Flex properties for each column */
-.pos-table :deep([data-column-key="item_name"]) {
-	flex: 4 1 0;
-}
-.pos-table :deep([data-column-key="qty"]) {
-	flex: 2 1 0;
-}
-.pos-table :deep([data-column-key="uom"]) {
-	flex: 1 1 0;
-}
-.pos-table :deep([data-column-key="rate"]),
-.pos-table :deep([data-column-key="amount"]),
-.pos-table :deep([data-column-key="price_list_rate"]) {
-	flex: 1.5 1 0;
-}
-.pos-table :deep([data-column-key="discount_value"]),
-.pos-table :deep([data-column-key="discount_amount"]) {
-	flex: 1.5 1 0;
-}
-.pos-table :deep([data-column-key="actions"]) {
-	flex: 1 1 0;
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 /* Remove any card or container margins around the table */
@@ -2797,21 +2810,18 @@ body[dir="rtl"] .amount-value.right-aligned {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-/* Column width constraints and alignment - Adjusted for compact layout */
+/* Column width constraints and alignment */
 .pos-table :deep(th[data-column-key="item_name"]),
 .pos-table :deep(td[data-column-key="item_name"]) {
-	min-width: 150px;
-	max-width: 280px;
+	min-width: 200px;
+	max-width: 250px;
 	text-align: left;
-	font-size: 0.8rem;
-	white-space: normal; /* Allow text wrapping */
-	word-break: break-word; /* Break long words */
 }
 
 .pos-table :deep(th[data-column-key="qty"]),
 .pos-table :deep(td[data-column-key="qty"]) {
-	min-width: 120px;
-	max-width: 150px;
+	min-width: 140px;
+	max-width: 160px;
 	text-align: center;
 }
 
@@ -2820,7 +2830,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	min-width: 80px;
 	max-width: 100px;
 	text-align: center;
-	font-size: 0.75rem;
 }
 
 .pos-table :deep(th[data-column-key="rate"]),
@@ -2830,7 +2839,6 @@ body[dir="rtl"] .amount-value.right-aligned {
 	min-width: 100px;
 	max-width: 130px;
 	text-align: center !important;
-	font-size: 0.8rem;
 }
 
 /* Ensure consistent header padding for rate/amount columns */
@@ -3263,9 +3271,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-	width: 28px !important;
-	height: 28px !important;
-	min-width: 28px !important;
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
 	border-radius: 8px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
@@ -3304,11 +3312,11 @@ body[dir="rtl"] .amount-value.right-aligned {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 3px;
-	padding: 2px;
+	gap: 6px;
+	padding: 4px;
 	/* More flexible sizing for larger numbers */
-	min-width: 90px;
-	max-width: 110px;
+	min-width: 130px;
+	max-width: 180px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
@@ -3602,10 +3610,10 @@ body[dir="rtl"] .number-field-rtl {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 3px;
-	padding: 2px;
-	min-width: 100px;
-	max-width: 140px;
+	gap: 6px;
+	padding: 4px;
+	min-width: 130px;
+	max-width: 180px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
@@ -3624,24 +3632,24 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-display {
-	min-width: 40px;
-	max-width: 80px;
+	min-width: 50px;
+	max-width: 100px;
 	width: auto;
 	flex: 1 1 auto;
 	text-align: center;
 	font-weight: 600;
-	padding: 4px 2px;
+	padding: 6px 4px;
 	border-radius: 6px;
 	background: var(--pos-primary-container);
 	border: 1px solid var(--pos-primary-variant);
 	color: var(--pos-primary);
-	font-size: 0.75rem;
+	font-size: 0.8rem;
 	transition: all 0.2s ease;
 	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 28px;
+	height: 32px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -3649,13 +3657,13 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-btn {
-	width: 28px !important;
-	height: 28px !important;
-	min-width: 28px !important;
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
 	border-radius: 8px !important;
 }
 .pos-table__editor-input {
-	max-width: 100px;
+	max-width: 120px;
 }
 .pos-table__editor-input :deep(input) {
 	text-align: center;
@@ -3668,7 +3676,7 @@ body[dir="rtl"] .number-field-rtl {
 	flex-shrink: 0;
 }
 .uom-select {
-	min-width: 50px;
+	min-width: 60px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
