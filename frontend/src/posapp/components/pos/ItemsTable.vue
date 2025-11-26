@@ -1002,12 +1002,20 @@ export default {
 		virtualScrollConfig() {
 			const itemCount = this.items?.length || 0;
 			const containerHeight = this.containerHeight;
+			let itemHeight = 60; // Default height
 
-			// Dynamic configuration based on dataset size and container
+			// Increase row height on smaller screens to accommodate wrapped text
+			if (this.breakpoint === "xs" || this.breakpoint === "sm") {
+				itemHeight = 75;
+			} else if (this.tableDensity === "comfortable") {
+				itemHeight = 72;
+			} else if (this.tableDensity === "compact") {
+				itemHeight = 48;
+			}
+
 			return {
-				itemHeight:
-					this.tableDensity === "compact" ? 48 : this.tableDensity === "comfortable" ? 72 : 60,
-				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
+				itemHeight: itemHeight,
+				itemsPerPage: Math.max(20, Math.ceil(containerHeight / itemHeight) + 5),
 				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
 			};
 		},
@@ -1170,18 +1178,17 @@ export default {
 		},
 
 		calculateColumnWidth(header) {
-			// Adjusted ratios and min/max values for a more compact layout
 			const baseWidths = {
-				item_name: { min: 120, max: 220, ratio: 0.28 },
-				qty: { min: 90, max: 120, ratio: 0.13 },
-				uom: { min: 65, max: 85, ratio: 0.08 },
-				rate: { min: 80, max: 110, ratio: 0.11 },
-				amount: { min: 80, max: 110, ratio: 0.11 },
-				discount_value: { min: 70, max: 100, ratio: 0.09 },
-				discount_amount: { min: 80, max: 110, ratio: 0.1 },
-				price_list_rate: { min: 90, max: 120, ratio: 0.12 },
-				actions: { min: 60, max: 80, ratio: 0.07 },
-				posa_is_offer: { min: 50, max: 70, ratio: 0.05 },
+				item_name: { min: 150, max: 280, ratio: 0.3 },
+				qty: { min: 120, max: 150, ratio: 0.15 },
+				uom: { min: 80, max: 100, ratio: 0.1 },
+				rate: { min: 100, max: 130, ratio: 0.12 },
+				amount: { min: 100, max: 130, ratio: 0.12 },
+				discount_value: { min: 80, max: 110, ratio: 0.1 },
+				discount_amount: { min: 90, max: 120, ratio: 0.11 },
+				price_list_rate: { min: 110, max: 140, ratio: 0.13 },
+				actions: { min: 80, max: 100, ratio: 0.08 },
+				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
 			};
 
 			const config = baseWidths[header.key] || { min: 60, max: 100, ratio: 0.1 };
@@ -1191,18 +1198,17 @@ export default {
 		},
 
 		calculateMinColumnWidth(header) {
-			// Reduced min-widths to allow for more flexible shrinking
 			const minWidths = {
-				item_name: 100,
-				qty: 80,
-				uom: 60,
-				rate: 70,
-				amount: 70,
-				discount_value: 60,
-				discount_amount: 70,
-				price_list_rate: 80,
-				actions: 50,
-				posa_is_offer: 40,
+				item_name: 120,
+				qty: 100,
+				uom: 80,
+				rate: 80,
+				amount: 80,
+				discount_value: 70,
+				discount_amount: 80,
+				price_list_rate: 90,
+				actions: 60,
+				posa_is_offer: 50,
 			};
 
 			return minWidths[header.key] || 50;
@@ -1707,7 +1713,7 @@ export default {
 
 /* Table cell styling */
 .pos-table :deep(td) {
-	padding: 16px 12px;
+	padding: 8px 12px;
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;
@@ -1723,6 +1729,7 @@ export default {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
+	overflow: hidden; /* Prevent content from overflowing the cell */
 }
 
 /* =================================================================
@@ -2815,37 +2822,37 @@ body[dir="rtl"] .amount-value.right-aligned {
 /* Column width constraints and alignment - Adjusted for compact layout */
 .pos-table :deep(th[data-column-key="item_name"]),
 .pos-table :deep(td[data-column-key="item_name"]) {
-	min-width: 120px;
-	max-width: 240px;
+	min-width: 150px;
+	max-width: 280px;
 	text-align: left;
-	font-size: 0.78rem;
+	font-size: 0.8rem;
 	white-space: normal; /* Allow text wrapping */
 	word-break: break-word; /* Break long words */
 }
 
 .pos-table :deep(th[data-column-key="qty"]),
 .pos-table :deep(td[data-column-key="qty"]) {
-	min-width: 100px;
-	max-width: 120px;
+	min-width: 120px;
+	max-width: 150px;
 	text-align: center;
 }
 
 .pos-table :deep(th[data-column-key="uom"]),
 .pos-table :deep(td[data-column-key="uom"]) {
-	min-width: 65px;
-	max-width: 85px;
+	min-width: 80px;
+	max-width: 100px;
 	text-align: center;
-	font-size: 0.72rem;
+	font-size: 0.75rem;
 }
 
 .pos-table :deep(th[data-column-key="rate"]),
 .pos-table :deep(td[data-column-key="rate"]),
 .pos-table :deep(th[data-column-key="amount"]),
 .pos-table :deep(td[data-column-key="amount"]) {
-	min-width: 80px; /* Reduced min-width */
-	max-width: 110px; /* Reduced max-width */
+	min-width: 100px;
+	max-width: 130px;
 	text-align: center !important;
-	font-size: 0.78rem; /* Slightly smaller font */
+	font-size: 0.8rem;
 }
 
 /* Ensure consistent header padding for rate/amount columns */
