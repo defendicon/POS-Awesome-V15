@@ -5,6 +5,9 @@ import { isOffline } from "../../offline/index.js";
 export function useStockUtils() {
 	// Calculate UOM conversion and update item rates
 	const calcUom = async (item, value, context) => {
+		if (!item || !value) return;
+		item.uom = value;
+
 		let new_uom = item.item_uoms.find((element) => element.uom == value);
 
 		// try cached uoms when not found on item
