@@ -1618,10 +1618,10 @@ export default {
 /* Enhanced table header styling with global theme support */
 .pos-table :deep(th) {
 	font-weight: 600;
-	font-size: 0.8rem;
+	font-size: 0.75rem;
 	text-transform: uppercase;
-	letter-spacing: 0.3px;
-	padding: 12px;
+	letter-spacing: 0.2px;
+	padding: 8px 6px;
 	border-bottom: 1px solid var(--pos-border);
 	background-color: var(--pos-table-header-bg);
 	color: var(--pos-text-primary);
@@ -1636,7 +1636,7 @@ export default {
 	text-align: center;
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
-	height: 40px;
+	height: 36px;
 	/* Enhanced transitions and stability */
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background-clip: padding-box;
@@ -3276,9 +3276,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
+	width: 28px !important;
+	height: 28px !important;
+	min-width: 28px !important;
 	border-radius: 8px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
@@ -3317,11 +3317,11 @@ body[dir="rtl"] .amount-value.right-aligned {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
-	padding: 4px;
+	gap: 3px;
+	padding: 2px;
 	/* More flexible sizing for larger numbers */
-	min-width: 130px;
-	max-width: 180px;
+	min-width: 100px;
+	max-width: 120px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
@@ -3615,10 +3615,10 @@ body[dir="rtl"] .number-field-rtl {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
-	padding: 4px;
-	min-width: 130px;
-	max-width: 180px;
+	gap: 3px;
+	padding: 2px;
+	min-width: 100px;
+	max-width: 140px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
@@ -3637,24 +3637,24 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-display {
-	min-width: 50px;
-	max-width: 100px;
+	min-width: 40px;
+	max-width: 80px;
 	width: auto;
 	flex: 1 1 auto;
 	text-align: center;
 	font-weight: 600;
-	padding: 6px 4px;
+	padding: 4px 2px;
 	border-radius: 6px;
 	background: var(--pos-primary-container);
 	border: 1px solid var(--pos-primary-variant);
 	color: var(--pos-primary);
-	font-size: 0.8rem;
+	font-size: 0.75rem;
 	transition: all 0.2s ease;
 	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 32px;
+	height: 28px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -3662,13 +3662,13 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
+	width: 28px !important;
+	height: 28px !important;
+	min-width: 28px !important;
 	border-radius: 8px !important;
 }
 .pos-table__editor-input {
-	max-width: 120px;
+	max-width: 100px;
 }
 .pos-table__editor-input :deep(input) {
 	text-align: center;
