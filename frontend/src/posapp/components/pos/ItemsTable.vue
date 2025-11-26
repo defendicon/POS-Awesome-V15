@@ -956,16 +956,17 @@ export default {
 						return true;
 					}
 
-					// Hide columns based on container width
-					if (this.containerWidth < 500) {
-						// Ultra-compact: only essential columns
-						return ["item_name", "qty", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 700) {
-						// Compact: essential + rate
+					// Aggressive column hiding for smaller screens
+					if (this.breakpoint === "xs") {
+						return ["item_name", "qty", "amount"].includes(header.key);
+					}
+					if (this.breakpoint === "sm") {
 						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 900) {
-						// Medium: hide advanced columns
-						return !["discount_value", "price_list_rate"].includes(header.key);
+					}
+					if (this.breakpoint === "md") {
+						return !["price_list_rate", "discount_value", "posa_is_offer"].includes(
+							header.key,
+						);
 					}
 
 					// Large: show all columns
@@ -973,6 +974,8 @@ export default {
 				})
 				.map((header) => ({
 					...header,
+					width: this.calculateColumnWidth(header),
+					minWidth: this.calculateMinColumnWidth(header),
 				}));
 		},
 
@@ -1000,12 +1003,18 @@ export default {
 		virtualScrollConfig() {
 			const itemCount = this.items?.length || 0;
 			const containerHeight = this.containerHeight;
+			let itemHeight = 75; // Increased default height for wrapped text
 
-			// Dynamic configuration based on dataset size and container
+			// Adjust height based on density, but keep it generous
+			if (this.tableDensity === "compact") {
+				itemHeight = 60;
+			} else if (this.tableDensity === "comfortable") {
+				itemHeight = 85;
+			}
+
 			return {
-				itemHeight:
-					this.tableDensity === "compact" ? 48 : this.tableDensity === "comfortable" ? 72 : 60,
-				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
+				itemHeight: itemHeight,
+				itemsPerPage: Math.max(20, Math.ceil(containerHeight / itemHeight) + 5),
 				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
 			};
 		},
@@ -1167,6 +1176,42 @@ export default {
 			}
 		},
 
+		calculateColumnWidth(header) {
+			const baseWidths = {
+				item_name: { min: 150, max: 280, ratio: 0.3 },
+				qty: { min: 120, max: 150, ratio: 0.15 },
+				uom: { min: 80, max: 100, ratio: 0.1 },
+				rate: { min: 100, max: 130, ratio: 0.12 },
+				amount: { min: 100, max: 130, ratio: 0.12 },
+				discount_value: { min: 80, max: 110, ratio: 0.1 },
+				discount_amount: { min: 90, max: 120, ratio: 0.11 },
+				price_list_rate: { min: 110, max: 140, ratio: 0.13 },
+				actions: { min: 80, max: 100, ratio: 0.08 },
+				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
+			};
+
+			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
+			const calculatedWidth = this.containerWidth * config.ratio;
+
+			return Math.max(config.min, Math.min(config.max, calculatedWidth));
+		},
+
+		calculateMinColumnWidth(header) {
+			const minWidths = {
+				item_name: 120,
+				qty: 100,
+				uom: 80,
+				rate: 80,
+				amount: 80,
+				discount_value: 70,
+				discount_amount: 80,
+				price_list_rate: 90,
+				actions: 60,
+				posa_is_offer: 50,
+			};
+
+			return minWidths[header.key] || 60;
+		},
 
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== "undefined") {
@@ -2357,20 +2402,24 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .pos-table :deep(table) {
-	display: grid;
-	grid-template-columns:
-		minmax(150px, 3fr)
-		minmax(120px, 1.5fr)
-		minmax(80px, 1fr)
-		repeat(5, minmax(90px, 1.2fr))
-		minmax(80px, 1fr);
-	width: 100%;
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	border-collapse: collapse !important;
+	table-layout: fixed !important;
 }
 
 .pos-table :deep(thead),
-.pos-table :deep(tbody),
+.pos-table :deep(tbody) {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
 .pos-table :deep(tr) {
-	display: contents; /* Allow rows to be part of the grid */
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 /* Remove any card or container margins around the table */
