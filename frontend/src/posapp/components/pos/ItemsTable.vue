@@ -973,8 +973,6 @@ export default {
 				})
 				.map((header) => ({
 					...header,
-					width: this.calculateColumnWidth(header),
-					minWidth: this.calculateMinColumnWidth(header),
 				}));
 		},
 
@@ -1169,42 +1167,6 @@ export default {
 			}
 		},
 
-		calculateColumnWidth(header) {
-			const baseWidths = {
-				item_name: { min: 140, max: 220, ratio: 0.28 },
-				qty: { min: 110, max: 150, ratio: 0.14 },
-				uom: { min: 70, max: 90, ratio: 0.08 },
-				rate: { min: 90, max: 120, ratio: 0.11 },
-				amount: { min: 90, max: 120, ratio: 0.11 },
-				discount_value: { min: 70, max: 100, ratio: 0.09 },
-				discount_amount: { min: 80, max: 110, ratio: 0.1 },
-				price_list_rate: { min: 100, max: 130, ratio: 0.12 },
-				actions: { min: 70, max: 90, ratio: 0.07 },
-				posa_is_offer: { min: 50, max: 70, ratio: 0.05 },
-			};
-
-			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
-			const calculatedWidth = this.containerWidth * config.ratio;
-
-			return Math.max(config.min, Math.min(config.max, calculatedWidth));
-		},
-
-		calculateMinColumnWidth(header) {
-			const minWidths = {
-				item_name: 110,
-				qty: 90,
-				uom: 60,
-				rate: 70,
-				amount: 70,
-				discount_value: 60,
-				discount_amount: 70,
-				price_list_rate: 80,
-				actions: 50,
-				posa_is_offer: 40,
-			};
-
-			return minWidths[header.key] || 50;
-		},
 
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== "undefined") {
@@ -1616,25 +1578,23 @@ export default {
 /* Enhanced table header styling with global theme support */
 .pos-table :deep(th) {
 	font-weight: 600;
-	font-size: 0.7rem; /* Further reduced font size */
+	font-size: 0.75rem;
 	text-transform: uppercase;
-	letter-spacing: 0.3px;
-	padding: 10px 8px; /* Reduced padding */
+	letter-spacing: 0.2px;
+	padding: 12px 6px;
 	border-bottom: 1px solid var(--pos-border);
 	background-color: var(--pos-table-header-bg);
 	color: var(--pos-text-primary);
 	position: sticky;
 	top: 0;
 	z-index: 3;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 150px;
-	min-width: 80px;
+	white-space: normal; /* Allow header text to wrap */
+	word-break: break-word; /* Break long words */
 	text-align: center;
 	vertical-align: middle !important;
-	line-height: 1.2 !important;
-	height: 40px;
+	line-height: 1.3 !important;
+	height: auto; /* Allow height to expand for wrapped text */
+	min-height: 48px; /* Ensure a minimum height */
 	/* Enhanced transitions and stability */
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background-clip: padding-box;
@@ -2397,24 +2357,20 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .pos-table :deep(table) {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin: 0 !important;
-	border-collapse: collapse !important;
-	table-layout: auto !important;
+	display: grid;
+	grid-template-columns:
+		minmax(150px, 3fr)
+		minmax(120px, 1.5fr)
+		minmax(80px, 1fr)
+		repeat(5, minmax(90px, 1.2fr))
+		minmax(80px, 1fr);
+	width: 100%;
 }
 
 .pos-table :deep(thead),
-.pos-table :deep(tbody) {
-	width: 100% !important;
-	max-width: 100% !important;
-}
-
+.pos-table :deep(tbody),
 .pos-table :deep(tr) {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin: 0 !important;
-	padding: 0 !important;
+	display: contents; /* Allow rows to be part of the grid */
 }
 
 /* Remove any card or container margins around the table */
@@ -2813,9 +2769,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 /* Column width constraints and alignment */
 .pos-table :deep(th[data-column-key="item_name"]),
 .pos-table :deep(td[data-column-key="item_name"]) {
-	min-width: 200px;
-	max-width: 250px;
 	text-align: left;
+	white-space: normal; /* Allow text wrapping */
+	word-break: break-word; /* Break long words */
 }
 
 .pos-table :deep(th[data-column-key="qty"]),
