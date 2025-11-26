@@ -1170,38 +1170,42 @@ export default {
 		},
 
 		calculateColumnWidth(header) {
+			// Adjusted ratios and min/max values for a more compact layout
 			const baseWidths = {
-				item_name: { min: 150, max: 250, ratio: 0.3 },
-				qty: { min: 120, max: 160, ratio: 0.15 },
-				rate: { min: 100, max: 130, ratio: 0.12 },
-				amount: { min: 100, max: 130, ratio: 0.12 },
-				discount_value: { min: 80, max: 110, ratio: 0.1 },
-				discount_amount: { min: 90, max: 120, ratio: 0.11 },
-				price_list_rate: { min: 110, max: 140, ratio: 0.13 },
-				actions: { min: 80, max: 100, ratio: 0.08 },
-				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
+				item_name: { min: 120, max: 220, ratio: 0.28 },
+				qty: { min: 100, max: 140, ratio: 0.14 },
+				uom: { min: 60, max: 90, ratio: 0.08 },
+				rate: { min: 80, max: 110, ratio: 0.11 },
+				amount: { min: 80, max: 110, ratio: 0.11 },
+				discount_value: { min: 70, max: 100, ratio: 0.09 },
+				discount_amount: { min: 80, max: 110, ratio: 0.1 },
+				price_list_rate: { min: 90, max: 120, ratio: 0.12 },
+				actions: { min: 60, max: 80, ratio: 0.07 },
+				posa_is_offer: { min: 50, max: 70, ratio: 0.05 },
 			};
 
-			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
+			const config = baseWidths[header.key] || { min: 60, max: 100, ratio: 0.1 };
 			const calculatedWidth = this.containerWidth * config.ratio;
 
 			return Math.max(config.min, Math.min(config.max, calculatedWidth));
 		},
 
 		calculateMinColumnWidth(header) {
+			// Reduced min-widths to allow for more flexible shrinking
 			const minWidths = {
-				item_name: 120,
-				qty: 100,
-				rate: 80,
-				amount: 80,
-				discount_value: 70,
-				discount_amount: 80,
-				price_list_rate: 90,
-				actions: 60,
-				posa_is_offer: 50,
+				item_name: 100,
+				qty: 90,
+				uom: 50,
+				rate: 70,
+				amount: 70,
+				discount_value: 60,
+				discount_amount: 70,
+				price_list_rate: 80,
+				actions: 50,
+				posa_is_offer: 40,
 			};
 
-			return minWidths[header.key] || 60;
+			return minWidths[header.key] || 50;
 		},
 
 		setupResizeObserver() {
@@ -2399,7 +2403,7 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	max-width: 100% !important;
 	margin: 0 !important;
 	border-collapse: collapse !important;
-	table-layout: auto !important;
+	table-layout: fixed !important; /* Changed to fixed */
 }
 
 .pos-table :deep(thead),
@@ -2808,35 +2812,38 @@ body[dir="rtl"] .amount-value.right-aligned {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-/* Column width constraints and alignment */
+/* Column width constraints and alignment - Adjusted for compact layout */
 .pos-table :deep(th[data-column-key="item_name"]),
 .pos-table :deep(td[data-column-key="item_name"]) {
-	min-width: 200px;
-	max-width: 250px;
+	min-width: 120px; /* Reduced min-width */
+	max-width: 220px; /* Reduced max-width */
 	text-align: left;
+	font-size: 0.78rem; /* Slightly smaller font */
 }
 
 .pos-table :deep(th[data-column-key="qty"]),
 .pos-table :deep(td[data-column-key="qty"]) {
-	min-width: 140px;
-	max-width: 160px;
+	min-width: 110px; /* Reduced min-width */
+	max-width: 140px; /* Reduced max-width */
 	text-align: center;
 }
 
 .pos-table :deep(th[data-column-key="uom"]),
 .pos-table :deep(td[data-column-key="uom"]) {
-	min-width: 80px;
-	max-width: 100px;
+	min-width: 60px; /* Reduced min-width */
+	max-width: 90px; /* Reduced max-width */
 	text-align: center;
+	font-size: 0.75rem; /* Smaller font for a small column */
 }
 
 .pos-table :deep(th[data-column-key="rate"]),
 .pos-table :deep(td[data-column-key="rate"]),
 .pos-table :deep(th[data-column-key="amount"]),
 .pos-table :deep(td[data-column-key="amount"]) {
-	min-width: 100px;
-	max-width: 130px;
+	min-width: 80px; /* Reduced min-width */
+	max-width: 110px; /* Reduced max-width */
 	text-align: center !important;
+	font-size: 0.78rem; /* Slightly smaller font */
 }
 
 /* Ensure consistent header padding for rate/amount columns */
