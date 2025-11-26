@@ -974,8 +974,6 @@ export default {
 				})
 				.map((header) => ({
 					...header,
-					width: this.calculateColumnWidth(header),
-					minWidth: this.calculateMinColumnWidth(header),
 				}));
 		},
 
@@ -1178,42 +1176,6 @@ export default {
 			}
 		},
 
-		calculateColumnWidth(header) {
-			const baseWidths = {
-				item_name: { min: 150, max: 280, ratio: 0.3 },
-				qty: { min: 120, max: 150, ratio: 0.15 },
-				uom: { min: 80, max: 100, ratio: 0.1 },
-				rate: { min: 100, max: 130, ratio: 0.12 },
-				amount: { min: 100, max: 130, ratio: 0.12 },
-				discount_value: { min: 80, max: 110, ratio: 0.1 },
-				discount_amount: { min: 90, max: 120, ratio: 0.11 },
-				price_list_rate: { min: 110, max: 140, ratio: 0.13 },
-				actions: { min: 80, max: 100, ratio: 0.08 },
-				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
-			};
-
-			const config = baseWidths[header.key] || { min: 60, max: 100, ratio: 0.1 };
-			const calculatedWidth = this.containerWidth * config.ratio;
-
-			return Math.max(config.min, Math.min(config.max, calculatedWidth));
-		},
-
-		calculateMinColumnWidth(header) {
-			const minWidths = {
-				item_name: 120,
-				qty: 100,
-				uom: 80,
-				rate: 80,
-				amount: 80,
-				discount_value: 70,
-				discount_amount: 80,
-				price_list_rate: 90,
-				actions: 60,
-				posa_is_offer: 50,
-			};
-
-			return minWidths[header.key] || 50;
-		},
 
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== "undefined") {
@@ -1628,7 +1590,7 @@ export default {
 	font-size: 0.75rem;
 	text-transform: uppercase;
 	letter-spacing: 0.2px;
-	padding: 8px 6px;
+	padding: 12px 6px;
 	border-bottom: 1px solid var(--pos-border);
 	background-color: var(--pos-table-header-bg);
 	color: var(--pos-text-primary);
@@ -1637,14 +1599,11 @@ export default {
 	z-index: 3;
 	white-space: normal; /* Allow header text to wrap */
 	word-break: break-word; /* Break long words */
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 150px;
-	min-width: 80px;
 	text-align: center;
 	vertical-align: middle !important;
-	line-height: 1.2 !important;
-	height: 36px;
+	line-height: 1.3 !important;
+	height: auto; /* Allow height to expand for wrapped text */
+	min-height: 48px; /* Ensure a minimum height */
 	/* Enhanced transitions and stability */
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background-clip: padding-box;
@@ -2401,44 +2360,48 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	font-size: 0.8rem;
 }
 
-/* Full width enforcement for all nested elements */
-.pos-table :deep(.v-data-table),
-.pos-table :deep(.v-data-table-virtual),
-.pos-table :deep(.v-table) {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	border-radius: 0 !important;
-}
-
-.pos-table :deep(.v-data-table__wrapper) {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	border: none !important;
-}
-
+/* Flexbox layout for the table */
 .pos-table :deep(table) {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin: 0 !important;
-	border-collapse: collapse !important;
-	table-layout: fixed !important; /* Changed to fixed */
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
 }
 
 .pos-table :deep(thead),
-.pos-table :deep(tbody) {
-	width: 100% !important;
-	max-width: 100% !important;
+.pos-table :deep(tbody),
+.pos-table :deep(tr) {
+	display: flex;
+	width: 100%;
 }
 
-.pos-table :deep(tr) {
-	width: 100% !important;
-	max-width: 100% !important;
-	margin: 0 !important;
-	padding: 0 !important;
+.pos-table :deep(th),
+.pos-table :deep(td) {
+	flex: 1 1 0; /* Default flex properties */
+	min-width: 0; /* Allow columns to shrink below their content size */
+}
+
+/* Flex properties for each column */
+.pos-table :deep([data-column-key="item_name"]) {
+	flex: 4 1 0;
+}
+.pos-table :deep([data-column-key="qty"]) {
+	flex: 2 1 0;
+}
+.pos-table :deep([data-column-key="uom"]) {
+	flex: 1 1 0;
+}
+.pos-table :deep([data-column-key="rate"]),
+.pos-table :deep([data-column-key="amount"]),
+.pos-table :deep([data-column-key="price_list_rate"]) {
+	flex: 1.5 1 0;
+}
+.pos-table :deep([data-column-key="discount_value"]),
+.pos-table :deep([data-column-key="discount_amount"]) {
+	flex: 1.5 1 0;
+}
+.pos-table :deep([data-column-key="actions"]) {
+	flex: 1 1 0;
 }
 
 /* Remove any card or container margins around the table */
