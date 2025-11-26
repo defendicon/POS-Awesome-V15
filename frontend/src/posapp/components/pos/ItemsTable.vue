@@ -1174,7 +1174,7 @@ export default {
 			const baseWidths = {
 				item_name: { min: 120, max: 220, ratio: 0.28 },
 				qty: { min: 100, max: 140, ratio: 0.14 },
-				uom: { min: 60, max: 90, ratio: 0.08 },
+				uom: { min: 50, max: 70, ratio: 0.07 },
 				rate: { min: 80, max: 110, ratio: 0.11 },
 				amount: { min: 80, max: 110, ratio: 0.11 },
 				discount_value: { min: 70, max: 100, ratio: 0.09 },
@@ -1195,7 +1195,7 @@ export default {
 			const minWidths = {
 				item_name: 100,
 				qty: 90,
-				uom: 50,
+				uom: 40,
 				rate: 70,
 				amount: 70,
 				discount_value: 60,
@@ -2830,10 +2830,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 .pos-table :deep(th[data-column-key="uom"]),
 .pos-table :deep(td[data-column-key="uom"]) {
-	min-width: 60px; /* Reduced min-width */
-	max-width: 90px; /* Reduced max-width */
+	min-width: 50px;
+	max-width: 70px;
 	text-align: center;
-	font-size: 0.75rem; /* Smaller font for a small column */
+	font-size: 0.7rem;
 }
 
 .pos-table :deep(th[data-column-key="rate"]),
@@ -3681,7 +3681,7 @@ body[dir="rtl"] .number-field-rtl {
 	flex-shrink: 0;
 }
 .uom-select {
-	min-width: 60px;
+	min-width: 50px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
