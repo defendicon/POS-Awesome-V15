@@ -137,15 +137,82 @@
 					</v-btn>
 				</div>
 			</template>
+			<!-- UOM column -->
+			<template v-slot:item.uom="{ item }">
+				<div class="pos-table__uom-selector" @click.stop>
+					<v-btn
+						size="x-small"
+						variant="flat"
+						class="pos-table__uom-btn"
+						@click.stop="changeUom(item, -1)"
+						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+					>
+						<v-icon size="small">mdi-chevron-left</v-icon>
+					</v-btn>
+					<div
+						v-if="editing_uom_row_id !== item.posa_row_id"
+						class="pos-table__uom-display"
+						@click.stop="openUomEdit(item)"
+					>
+						{{ item.uom }}
+					</div>
+					<v-select
+						v-else
+						v-model="editing_uom_value"
+						:items="item.item_uoms"
+						item-title="uom"
+						item-value="uom"
+						density="compact"
+						variant="outlined"
+						class="pos-table__uom-input"
+						@blur="closeUomEdit(item)"
+						hide-details
+						:autofocus="true"
+						@keydown.enter.prevent="closeUomEdit(item)"
+					></v-select>
+					<v-btn
+						size="x-small"
+						variant="flat"
+						class="pos-table__uom-btn"
+						@click.stop="changeUom(item, 1)"
+						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+					>
+						<v-icon size="small">mdi-chevron-right</v-icon>
+					</v-btn>
+				</div>
+			</template>
 
 			<!-- Rate column -->
 			<template v-slot:item.rate="{ item }">
-				<div class="currency-display right-aligned">
+				<div
+					v-if="editing_rate_row_id !== item.posa_row_id"
+					class="currency-display right-aligned"
+					@click.stop="openRateEdit(item)"
+				>
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
 						{{ formatCurrency(item.rate) }}
 					</span>
 				</div>
+				<v-text-field
+					v-else
+					:model-value="editing_rate_value"
+					@update:model-value="editing_rate_value = $event"
+					density="compact"
+					variant="outlined"
+					class="pos-table__rate-input"
+					@blur="closeRateEdit(item)"
+					@keydown.enter.prevent="closeRateEdit(item)"
+					@click.stop
+					ref="rateInput"
+					:autofocus="true"
+					type="number"
+					:disabled="
+						!pos_profile.posa_allow_user_to_edit_rate ||
+						!!item.posa_is_replace ||
+						!!item.posa_offer_applied
+					"
+				></v-text-field>
 			</template>
 
 			<!-- Amount column -->
@@ -162,7 +229,11 @@
 
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
-				<div class="currency-display right-aligned">
+				<div
+					v-if="editing_discount_percent_row_id !== item.posa_row_id"
+					class="currency-display right-aligned"
+					@click.stop="openDiscountPercentEdit(item)"
+				>
 					<span class="amount-value">
 						{{
 							formatFloat(
@@ -176,16 +247,58 @@
 						}}%
 					</span>
 				</div>
+				<v-text-field
+					v-else
+					:model-value="editing_discount_percent_value"
+					@update:model-value="editing_discount_percent_value = $event"
+					density="compact"
+					variant="outlined"
+					class="pos-table__discount-input"
+					@blur="closeDiscountPercentEdit(item)"
+					@keydown.enter.prevent="closeDiscountPercentEdit(item)"
+					@click.stop
+					ref="discountPercentInput"
+					:autofocus="true"
+					type="number"
+					:disabled="
+						!pos_profile.posa_allow_user_to_edit_item_discount ||
+						!!item.posa_is_replace ||
+						!!item.posa_offer_applied
+					"
+				></v-text-field>
 			</template>
 
 			<!-- Discount amount column -->
 			<template v-slot:item.discount_amount="{ item }">
-				<div class="currency-display right-aligned">
+				<div
+					v-if="editing_discount_amount_row_id !== item.posa_row_id"
+					class="currency-display right-aligned"
+					@click.stop="openDiscountAmountEdit(item)"
+				>
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span class="amount-value">{{
 						formatCurrency(Math.abs(item.discount_amount || 0))
 					}}</span>
 				</div>
+				<v-text-field
+					v-else
+					:model-value="editing_discount_amount_value"
+					@update:model-value="editing_discount_amount_value = $event"
+					density="compact"
+					variant="outlined"
+					class="pos-table__discount-input"
+					@blur="closeDiscountAmountEdit(item)"
+					@keydown.enter.prevent="closeDiscountAmountEdit(item)"
+					@click.stop
+					ref="discountAmountInput"
+					:autofocus="true"
+					type="number"
+					:disabled="
+						!pos_profile.posa_allow_user_to_edit_item_discount ||
+						!!item.posa_is_replace ||
+						!!item.posa_offer_applied
+					"
+				></v-text-field>
 			</template>
 
 			<!-- Price list rate column -->
@@ -322,10 +435,7 @@
 											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(item.rate)"
-											@change="[
-												setFormatedCurrency(item, 'rate', null, false, $event),
-												calcPrices(item, $event.target.value, $event),
-											]"
+											@change="calcPrices(item, $event.target.value, $event)"
 											:disabled="
 												!pos_profile.posa_allow_user_to_edit_rate ||
 												!!item.posa_is_replace ||
@@ -346,16 +456,7 @@
 											:model-value="
 												formatFloat(Math.abs(item.discount_percentage || 0))
 											"
-											@change="[
-												setFormatedCurrency(
-													item,
-													'discount_percentage',
-													null,
-													false,
-													$event,
-												),
-												calcPrices(item, $event.target.value, $event),
-											]"
+											@change="calcPrices(item, $event.target.value, $event)"
 											:disabled="
 												!pos_profile.posa_allow_user_to_edit_item_discount ||
 												!!item.posa_is_replace ||
@@ -374,16 +475,7 @@
 											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
-											@change="[
-												setFormatedCurrency(
-													item,
-													'discount_amount',
-													null,
-													false,
-													$event,
-												),
-												calcPrices(item, $event.target.value, $event),
-											]"
+											@change="calcPrices(item, $event.target.value, $event)"
 											:disabled="
 												!pos_profile.posa_allow_user_to_edit_item_discount ||
 												!!item.posa_is_replace ||
@@ -771,6 +863,14 @@ export default {
 			lastUpdateTime: 0,
 			editing_qty_row_id: null,
 			editing_qty_value: null,
+			editing_uom_row_id: null,
+			editing_uom_value: null,
+			editing_rate_row_id: null,
+			editing_rate_value: null,
+			editing_discount_percent_row_id: null,
+			editing_discount_percent_value: null,
+			editing_discount_amount_row_id: null,
+			editing_discount_amount_value: null,
 		};
 	},
 	computed: {
@@ -1280,6 +1380,114 @@ export default {
 				}
 				this.editing_qty_row_id = null;
 				this.editing_qty_value = null;
+			}
+		},
+		openUomEdit(item) {
+			if (this.editing_uom_row_id !== item.posa_row_id) {
+				this.editing_uom_row_id = item.posa_row_id;
+				this.editing_uom_value = item.uom;
+			}
+		},
+
+		closeUomEdit(item) {
+			if (this.editing_uom_row_id === item.posa_row_id) {
+				if (this.editing_uom_value && this.editing_uom_value !== item.uom) {
+					this.calcUom(item, this.editing_uom_value);
+				}
+				this.editing_uom_row_id = null;
+				this.editing_uom_value = null;
+			}
+		},
+
+		changeUom(item, direction) {
+			const uoms = item.item_uoms.map((u) => u.uom);
+			const currentIndex = uoms.indexOf(item.uom);
+			let newIndex = currentIndex + direction;
+
+			if (newIndex < 0) {
+				newIndex = uoms.length - 1;
+			} else if (newIndex >= uoms.length) {
+				newIndex = 0;
+			}
+
+			const newUom = uoms[newIndex];
+			if (newUom !== item.uom) {
+				this.calcUom(item, newUom);
+			}
+		},
+		openRateEdit(item) {
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_rate ||
+				item.posa_is_replace ||
+				item.posa_offer_applied
+			) {
+				return;
+			}
+			this.editing_rate_row_id = item.posa_row_id;
+			this.editing_rate_value = item.rate;
+			this.$nextTick(() => {
+				this.$refs.rateInput?.focus();
+			});
+		},
+
+		closeRateEdit(item) {
+			if (this.editing_rate_row_id === item.posa_row_id) {
+				const newRate = parseFloat(this.editing_rate_value);
+				if (Number.isFinite(newRate) && newRate !== item.rate) {
+					this.calcPrices(item, newRate, { target: { id: "rate" } });
+				}
+				this.editing_rate_row_id = null;
+				this.editing_rate_value = null;
+			}
+		},
+		openDiscountPercentEdit(item) {
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
+				item.posa_is_replace ||
+				item.posa_offer_applied
+			) {
+				return;
+			}
+			this.editing_discount_percent_row_id = item.posa_row_id;
+			this.editing_discount_percent_value = item.discount_percentage;
+			this.$nextTick(() => {
+				this.$refs.discountPercentInput?.focus();
+			});
+		},
+
+		closeDiscountPercentEdit(item) {
+			if (this.editing_discount_percent_row_id === item.posa_row_id) {
+				const newDiscount = parseFloat(this.editing_discount_percent_value);
+				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_percentage) {
+					this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
+				}
+				this.editing_discount_percent_row_id = null;
+				this.editing_discount_percent_value = null;
+			}
+		},
+		openDiscountAmountEdit(item) {
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
+				item.posa_is_replace ||
+				item.posa_offer_applied
+			) {
+				return;
+			}
+			this.editing_discount_amount_row_id = item.posa_row_id;
+			this.editing_discount_amount_value = item.discount_amount;
+			this.$nextTick(() => {
+				this.$refs.discountAmountInput?.focus();
+			});
+		},
+
+		closeDiscountAmountEdit(item) {
+			if (this.editing_discount_amount_row_id === item.posa_row_id) {
+				const newDiscount = parseFloat(this.editing_discount_amount_value);
+				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_amount) {
+					this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
+				}
+				this.editing_discount_amount_row_id = null;
+				this.editing_discount_amount_value = null;
 			}
 		},
 	},
@@ -3366,5 +3574,40 @@ body[dir="rtl"] .number-field-rtl {
 .pos-table__qty-input :deep(.v-field__input) {
 	padding: 0;
 	min-height: 32px;
+}
+.pos-table__uom-selector {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+}
+.pos-table__uom-display {
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+.pos-table__uom-display:hover {
+	background-color: var(--pos-hover-bg);
+}
+.pos-table__uom-input {
+	max-width: 120px;
+}
+.pos-table__uom-btn {
+	min-width: 24px !important;
+	width: 24px !important;
+	height: 24px !important;
+}
+.pos-table__rate-input {
+	max-width: 120px;
+}
+.pos-table__rate-input :deep(input) {
+	text-align: right;
+}
+.pos-table__discount-input {
+	max-width: 100px;
+}
+.pos-table__discount-input :deep(input) {
+	text-align: right;
 }
 </style>
