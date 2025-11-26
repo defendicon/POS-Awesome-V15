@@ -139,11 +139,11 @@
 			</template>
 			<!-- UOM column -->
 			<template v-slot:item.uom="{ item }">
-				<div class="pos-table__uom-selector" @click.stop>
+				<div class="pos-table__editor-box" @click.stop>
 					<v-btn
 						size="x-small"
 						variant="flat"
-						class="pos-table__uom-btn"
+						class="pos-table__editor-btn"
 						@click.stop="changeUom(item, -1)"
 						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
 					>
@@ -151,7 +151,7 @@
 					</v-btn>
 					<div
 						v-if="editing_uom_row_id !== item.posa_row_id"
-						class="pos-table__uom-display"
+						class="pos-table__editor-display"
 						@click.stop="openUomEdit(item)"
 					>
 						{{ item.uom }}
@@ -164,7 +164,7 @@
 						item-value="uom"
 						density="compact"
 						variant="outlined"
-						class="pos-table__uom-input"
+						class="pos-table__editor-input"
 						@blur="closeUomEdit(item)"
 						hide-details
 						:autofocus="true"
@@ -173,7 +173,7 @@
 					<v-btn
 						size="x-small"
 						variant="flat"
-						class="pos-table__uom-btn"
+						class="pos-table__editor-btn"
 						@click.stop="changeUom(item, 1)"
 						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
 					>
@@ -184,35 +184,37 @@
 
 			<!-- Rate column -->
 			<template v-slot:item.rate="{ item }">
-				<div
-					v-if="editing_rate_row_id !== item.posa_row_id"
-					class="currency-display right-aligned"
-					@click.stop="openRateEdit(item)"
-				>
-					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
-					<span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
-						{{ formatCurrency(item.rate) }}
-					</span>
+				<div class="pos-table__editor-box">
+					<div
+						v-if="editing_rate_row_id !== item.posa_row_id"
+						class="pos-table__editor-display"
+						@click.stop="openRateEdit(item)"
+					>
+						<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+						<span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
+							{{ formatCurrency(item.rate) }}
+						</span>
+					</div>
+					<v-text-field
+						v-else
+						:model-value="editing_rate_value"
+						@update:model-value="editing_rate_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__editor-input"
+						@blur="closeRateEdit(item)"
+						@keydown.enter.prevent="closeRateEdit(item)"
+						@click.stop
+						ref="rateInput"
+						:autofocus="true"
+						type="number"
+						:disabled="
+							!pos_profile.posa_allow_user_to_edit_rate ||
+							!!item.posa_is_replace ||
+							!!item.posa_offer_applied
+						"
+					></v-text-field>
 				</div>
-				<v-text-field
-					v-else
-					:model-value="editing_rate_value"
-					@update:model-value="editing_rate_value = $event"
-					density="compact"
-					variant="outlined"
-					class="pos-table__rate-input"
-					@blur="closeRateEdit(item)"
-					@keydown.enter.prevent="closeRateEdit(item)"
-					@click.stop
-					ref="rateInput"
-					:autofocus="true"
-					type="number"
-					:disabled="
-						!pos_profile.posa_allow_user_to_edit_rate ||
-						!!item.posa_is_replace ||
-						!!item.posa_offer_applied
-					"
-				></v-text-field>
 			</template>
 
 			<!-- Amount column -->
@@ -229,76 +231,80 @@
 
 			<!-- Discount percentage column -->
 			<template v-slot:item.discount_value="{ item }">
-				<div
-					v-if="editing_discount_percent_row_id !== item.posa_row_id"
-					class="currency-display right-aligned"
-					@click.stop="openDiscountPercentEdit(item)"
-				>
-					<span class="amount-value">
-						{{
-							formatFloat(
-								Math.abs(
-									item.discount_percentage ||
-										(item.price_list_rate
-											? (item.discount_amount / item.price_list_rate) * 100
-											: 0),
-								),
-							)
-						}}%
-					</span>
+				<div class="pos-table__editor-box">
+					<div
+						v-if="editing_discount_percent_row_id !== item.posa_row_id"
+						class="pos-table__editor-display"
+						@click.stop="openDiscountPercentEdit(item)"
+					>
+						<span class="amount-value">
+							{{
+								formatFloat(
+									Math.abs(
+										item.discount_percentage ||
+											(item.price_list_rate
+												? (item.discount_amount / item.price_list_rate) * 100
+												: 0),
+									),
+								)
+							}}%
+						</span>
+					</div>
+					<v-text-field
+						v-else
+						:model-value="editing_discount_percent_value"
+						@update:model-value="editing_discount_percent_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__editor-input"
+						@blur="closeDiscountPercentEdit(item)"
+						@keydown.enter.prevent="closeDiscountPercentEdit(item)"
+						@click.stop
+						ref="discountPercentInput"
+						:autofocus="true"
+						type="number"
+						:disabled="
+							!pos_profile.posa_allow_user_to_edit_item_discount ||
+							!!item.posa_is_replace ||
+							!!item.posa_offer_applied
+						"
+					></v-text-field>
 				</div>
-				<v-text-field
-					v-else
-					:model-value="editing_discount_percent_value"
-					@update:model-value="editing_discount_percent_value = $event"
-					density="compact"
-					variant="outlined"
-					class="pos-table__discount-input"
-					@blur="closeDiscountPercentEdit(item)"
-					@keydown.enter.prevent="closeDiscountPercentEdit(item)"
-					@click.stop
-					ref="discountPercentInput"
-					:autofocus="true"
-					type="number"
-					:disabled="
-						!pos_profile.posa_allow_user_to_edit_item_discount ||
-						!!item.posa_is_replace ||
-						!!item.posa_offer_applied
-					"
-				></v-text-field>
 			</template>
 
 			<!-- Discount amount column -->
 			<template v-slot:item.discount_amount="{ item }">
-				<div
-					v-if="editing_discount_amount_row_id !== item.posa_row_id"
-					class="currency-display right-aligned"
-					@click.stop="openDiscountAmountEdit(item)"
-				>
-					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
-					<span class="amount-value">{{
-						formatCurrency(Math.abs(item.discount_amount || 0))
-					}}</span>
+				<div class="pos-table__editor-box">
+					<div
+						v-if="editing_discount_amount_row_id !== item.posa_row_id"
+						class="pos-table__editor-display"
+						@click.stop="openDiscountAmountEdit(item)"
+					>
+						<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+						<span class="amount-value">{{
+							formatCurrency(Math.abs(item.discount_amount || 0))
+						}}</span>
+					</div>
+					<v-text-field
+						v-else
+						:model-value="editing_discount_amount_value"
+						@update:model-value="editing_discount_amount_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__editor-input"
+						@blur="closeDiscountAmountEdit(item)"
+						@keydown.enter.prevent="closeDiscountAmountEdit(item)"
+						@click.stop
+						ref="discountAmountInput"
+						:autofocus="true"
+						type="number"
+						:disabled="
+							!pos_profile.posa_allow_user_to_edit_item_discount ||
+							!!item.posa_is_replace ||
+							!!item.posa_offer_applied
+						"
+					></v-text-field>
 				</div>
-				<v-text-field
-					v-else
-					:model-value="editing_discount_amount_value"
-					@update:model-value="editing_discount_amount_value = $event"
-					density="compact"
-					variant="outlined"
-					class="pos-table__discount-input"
-					@blur="closeDiscountAmountEdit(item)"
-					@keydown.enter.prevent="closeDiscountAmountEdit(item)"
-					@click.stop
-					ref="discountAmountInput"
-					:autofocus="true"
-					type="number"
-					:disabled="
-						!pos_profile.posa_allow_user_to_edit_item_discount ||
-						!!item.posa_is_replace ||
-						!!item.posa_offer_applied
-					"
-				></v-text-field>
 			</template>
 
 			<!-- Price list rate column -->
@@ -435,7 +441,10 @@
 											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(item.rate)"
-											@change="calcPrices(item, $event.target.value, $event)"
+											@change="[
+												setFormatedCurrency(item, 'rate', null, false, $event),
+												calcPrices(item, $event.target.value, $event),
+											]"
 											:disabled="
 												!pos_profile.posa_allow_user_to_edit_rate ||
 												!!item.posa_is_replace ||
@@ -456,7 +465,16 @@
 											:model-value="
 												formatFloat(Math.abs(item.discount_percentage || 0))
 											"
-											@change="calcPrices(item, $event.target.value, $event)"
+											@change="[
+												setFormatedCurrency(
+													item,
+													'discount_percentage',
+													null,
+													false,
+													$event,
+												),
+												calcPrices(item, $event.target.value, $event),
+											]"
 											:disabled="
 												!pos_profile.posa_allow_user_to_edit_item_discount ||
 												!!item.posa_is_replace ||
@@ -475,7 +493,16 @@
 											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
-											@change="calcPrices(item, $event.target.value, $event)"
+											@change="[
+												setFormatedCurrency(
+													item,
+													'discount_amount',
+													null,
+													false,
+													$event,
+												),
+												calcPrices(item, $event.target.value, $event),
+											]"
 											:disabled="
 												!pos_profile.posa_allow_user_to_edit_item_discount ||
 												!!item.posa_is_replace ||
@@ -1434,6 +1461,7 @@ export default {
 			if (this.editing_rate_row_id === item.posa_row_id) {
 				const newRate = parseFloat(this.editing_rate_value);
 				if (Number.isFinite(newRate) && newRate !== item.rate) {
+					this.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
 					this.calcPrices(item, newRate, { target: { id: "rate" } });
 				}
 				this.editing_rate_row_id = null;
@@ -1459,6 +1487,9 @@ export default {
 			if (this.editing_discount_percent_row_id === item.posa_row_id) {
 				const newDiscount = parseFloat(this.editing_discount_percent_value);
 				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_percentage) {
+					this.setFormatedCurrency(item, "discount_percentage", null, false, {
+						target: { value: newDiscount },
+					});
 					this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
 				}
 				this.editing_discount_percent_row_id = null;
@@ -1484,6 +1515,9 @@ export default {
 			if (this.editing_discount_amount_row_id === item.posa_row_id) {
 				const newDiscount = parseFloat(this.editing_discount_amount_value);
 				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_amount) {
+					this.setFormatedCurrency(item, "discount_amount", null, false, {
+						target: { value: newDiscount },
+					});
 					this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
 				}
 				this.editing_discount_amount_row_id = null;
@@ -3575,39 +3609,66 @@ body[dir="rtl"] .number-field-rtl {
 	padding: 0;
 	min-height: 32px;
 }
-.pos-table__uom-selector {
+.pos-table__editor-box {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
+	gap: 6px;
+	padding: 4px;
+	min-width: 130px;
+	max-width: 180px;
+	width: auto;
+	height: auto;
+	background: var(--pos-surface-variant);
+	border-radius: 12px;
+	border: 1px solid var(--pos-border-light);
+	transition: all 0.3s ease;
+	margin: 0 auto;
+	flex-shrink: 0;
+	box-sizing: border-box;
 }
-.pos-table__uom-display {
-	cursor: pointer;
-	padding: 4px 8px;
-	border-radius: 4px;
-	transition: background-color 0.2s;
+
+.pos-table__editor-box:hover {
+	background: var(--pos-hover-bg);
+	box-shadow: 0 4px 16px var(--pos-shadow);
+	transform: translateY(-1px);
 }
-.pos-table__uom-display:hover {
-	background-color: var(--pos-hover-bg);
-}
-.pos-table__uom-input {
-	max-width: 120px;
-}
-.pos-table__uom-btn {
-	min-width: 24px !important;
-	width: 24px !important;
-	height: 24px !important;
-}
-.pos-table__rate-input {
-	max-width: 120px;
-}
-.pos-table__rate-input :deep(input) {
-	text-align: right;
-}
-.pos-table__discount-input {
+
+.pos-table__editor-display {
+	min-width: 50px;
 	max-width: 100px;
+	width: auto;
+	flex: 1 1 auto;
+	text-align: center;
+	font-weight: 600;
+	padding: 6px 4px;
+	border-radius: 6px;
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-primary-variant);
+	color: var(--pos-primary);
+	font-size: 0.8rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: pointer;
 }
-.pos-table__discount-input :deep(input) {
-	text-align: right;
+
+.pos-table__editor-btn {
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	border-radius: 8px !important;
+}
+.pos-table__editor-input {
+	max-width: 120px;
+}
+.pos-table__editor-input :deep(input) {
+	text-align: center;
 }
 </style>
