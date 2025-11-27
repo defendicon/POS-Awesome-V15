@@ -882,17 +882,21 @@ export default {
 			qtyLengthCache: new Map(),
 			expandedCache: new Map(),
 			lastUpdateTime: 0,
-			editing_qty_row_id: null,
-			editing_qty_value: null,
-			editing_uom_row_id: null,
-			editing_rate_row_id: null,
-			editing_rate_value: null,
-			editing_discount_percent_row_id: null,
-			editing_discount_percent_value: null,
-			editing_discount_amount_row_id: null,
-			editing_discount_amount_value: null,
-		};
-	},
+                        editing_qty_row_id: null,
+                        editing_qty_value: null,
+                        editing_qty_previous_value: null,
+                        editing_uom_row_id: null,
+                        editing_rate_row_id: null,
+                        editing_rate_value: null,
+                        editing_rate_previous_value: null,
+                        editing_discount_percent_row_id: null,
+                        editing_discount_percent_value: null,
+                        editing_discount_percent_previous_value: null,
+                        editing_discount_amount_row_id: null,
+                        editing_discount_amount_value: null,
+                        editing_discount_amount_previous_value: null,
+                };
+        },
 	computed: {
 		items() {
 			return this.invoiceStore.items;
@@ -1380,28 +1384,31 @@ export default {
 			this.$emit("update:expanded", mappedValues);
 		},
 
-		openQtyEdit(item) {
-			if (this.editing_qty_row_id !== item.posa_row_id) {
-				this.editing_qty_row_id = item.posa_row_id;
-				this.editing_qty_value = item.qty;
-				this.$nextTick(() => {
-					this.$refs.qtyInput?.focus();
-				});
-			}
-		},
+                openQtyEdit(item) {
+                        if (this.editing_qty_row_id !== item.posa_row_id) {
+                                this.editing_qty_row_id = item.posa_row_id;
+                                this.editing_qty_previous_value = item.qty;
+                                this.editing_qty_value = "";
+                                this.$nextTick(() => {
+                                        this.$refs.qtyInput?.focus();
+                                });
+                        }
+                },
 
-		closeQtyEdit(item) {
-			if (this.editing_qty_row_id === item.posa_row_id) {
-				const newQty = parseFloat(this.editing_qty_value);
-				if (!newQty || newQty <= 0) {
-					this.setFormatedQty(item, "qty", null, false, 1);
-				} else {
-					this.setFormatedQty(item, "qty", null, false, newQty);
-				}
-				this.editing_qty_row_id = null;
-				this.editing_qty_value = null;
-			}
-		},
+                closeQtyEdit(item) {
+                        if (this.editing_qty_row_id === item.posa_row_id) {
+                                const previousQty = this.editing_qty_previous_value ?? item.qty;
+                                const newQty = parseFloat(this.editing_qty_value);
+                                if (Number.isFinite(newQty) && newQty > 0 && newQty !== item.qty) {
+                                        this.setFormatedQty(item, "qty", null, false, newQty);
+                                } else {
+                                        this.setFormatedQty(item, "qty", null, false, previousQty);
+                                }
+                                this.editing_qty_row_id = null;
+                                this.editing_qty_value = null;
+                                this.editing_qty_previous_value = null;
+                        }
+                },
 		openUomEdit(item) {
 			this.editing_uom_row_id = item.posa_row_id;
 		},
@@ -1437,61 +1444,38 @@ export default {
 				this.calcUom(item, newUom);
 			}
 		},
-		openRateEdit(item) {
-			if (
-				!this.pos_profile.posa_allow_user_to_edit_rate ||
+                openRateEdit(item) {
+                        if (
+                                !this.pos_profile.posa_allow_user_to_edit_rate ||
 				item.posa_is_replace ||
 				item.posa_offer_applied
 			) {
 				return;
 			}
-			this.editing_rate_row_id = item.posa_row_id;
-			this.editing_rate_value = item.rate;
-			this.$nextTick(() => {
-				this.$refs.rateInput?.focus();
-			});
+                        this.editing_rate_row_id = item.posa_row_id;
+                        this.editing_rate_previous_value = item.rate;
+                        this.editing_rate_value = "";
+                        this.$nextTick(() => {
+                                this.$refs.rateInput?.focus();
+                        });
 		},
 
-		closeRateEdit(item) {
-			if (this.editing_rate_row_id === item.posa_row_id) {
-				const newRate = parseFloat(this.editing_rate_value);
-				if (Number.isFinite(newRate) && newRate !== item.rate) {
-					this.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
-					this.calcPrices(item, newRate, { target: { id: "rate" } });
-				}
-				this.editing_rate_row_id = null;
-				this.editing_rate_value = null;
-			}
-		},
-		openDiscountPercentEdit(item) {
-			if (
-				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
-				item.posa_is_replace ||
-				item.posa_offer_applied
-			) {
-				return;
-			}
-			this.editing_discount_percent_row_id = item.posa_row_id;
-			this.editing_discount_percent_value = item.discount_percentage;
-			this.$nextTick(() => {
-				this.$refs.discountPercentInput?.focus();
-			});
-		},
-
-		closeDiscountPercentEdit(item) {
-			if (this.editing_discount_percent_row_id === item.posa_row_id) {
-				const newDiscount = parseFloat(this.editing_discount_percent_value);
-				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_percentage) {
-					this.setFormatedCurrency(item, "discount_percentage", null, false, {
-						target: { value: newDiscount },
-					});
-					this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
-				}
-				this.editing_discount_percent_row_id = null;
-				this.editing_discount_percent_value = null;
-			}
-		},
-		openDiscountAmountEdit(item) {
+                closeRateEdit(item) {
+                        if (this.editing_rate_row_id === item.posa_row_id) {
+                                const previousRate = this.editing_rate_previous_value ?? item.rate;
+                                const newRate = parseFloat(this.editing_rate_value);
+                                if (Number.isFinite(newRate) && newRate !== item.rate) {
+                                        this.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
+                                        this.calcPrices(item, newRate, { target: { id: "rate" } });
+                                } else {
+                                        this.editing_rate_value = previousRate;
+                                }
+                                this.editing_rate_row_id = null;
+                                this.editing_rate_value = null;
+                                this.editing_rate_previous_value = null;
+                        }
+                },
+                openDiscountPercentEdit(item) {
 			if (
 				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
 				item.posa_is_replace ||
@@ -1499,26 +1483,66 @@ export default {
 			) {
 				return;
 			}
-			this.editing_discount_amount_row_id = item.posa_row_id;
-			this.editing_discount_amount_value = item.discount_amount;
-			this.$nextTick(() => {
-				this.$refs.discountAmountInput?.focus();
-			});
+                        this.editing_discount_percent_row_id = item.posa_row_id;
+                        this.editing_discount_percent_previous_value = item.discount_percentage;
+                        this.editing_discount_percent_value = "";
+                        this.$nextTick(() => {
+                                this.$refs.discountPercentInput?.focus();
+                        });
 		},
 
-		closeDiscountAmountEdit(item) {
-			if (this.editing_discount_amount_row_id === item.posa_row_id) {
-				const newDiscount = parseFloat(this.editing_discount_amount_value);
-				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_amount) {
-					this.setFormatedCurrency(item, "discount_amount", null, false, {
-						target: { value: newDiscount },
-					});
-					this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
-				}
-				this.editing_discount_amount_row_id = null;
-				this.editing_discount_amount_value = null;
+                closeDiscountPercentEdit(item) {
+                        if (this.editing_discount_percent_row_id === item.posa_row_id) {
+                                const previousPercent =
+                                        this.editing_discount_percent_previous_value ?? item.discount_percentage;
+                                const newDiscount = parseFloat(this.editing_discount_percent_value);
+                                if (Number.isFinite(newDiscount) && newDiscount !== item.discount_percentage) {
+                                        this.setFormatedCurrency(item, "discount_percentage", null, false, {
+                                                target: { value: newDiscount },
+                                        });
+                                        this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
+                                } else {
+                                        this.editing_discount_percent_value = previousPercent;
+                                }
+                                this.editing_discount_percent_row_id = null;
+                                this.editing_discount_percent_value = null;
+                                this.editing_discount_percent_previous_value = null;
+                        }
+                },
+                openDiscountAmountEdit(item) {
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
+				item.posa_is_replace ||
+				item.posa_offer_applied
+			) {
+				return;
 			}
+                        this.editing_discount_amount_row_id = item.posa_row_id;
+                        this.editing_discount_amount_previous_value = item.discount_amount;
+                        this.editing_discount_amount_value = "";
+                        this.$nextTick(() => {
+                                this.$refs.discountAmountInput?.focus();
+                        });
 		},
+
+                closeDiscountAmountEdit(item) {
+                        if (this.editing_discount_amount_row_id === item.posa_row_id) {
+                                const previousAmount =
+                                        this.editing_discount_amount_previous_value ?? item.discount_amount;
+                                const newDiscount = parseFloat(this.editing_discount_amount_value);
+                                if (Number.isFinite(newDiscount) && newDiscount !== item.discount_amount) {
+                                        this.setFormatedCurrency(item, "discount_amount", null, false, {
+                                                target: { value: newDiscount },
+                                        });
+                                        this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
+                                } else {
+                                        this.editing_discount_amount_value = previousAmount;
+                                }
+                                this.editing_discount_amount_row_id = null;
+                                this.editing_discount_amount_value = null;
+                                this.editing_discount_amount_previous_value = null;
+                        }
+                },
 	},
 
 	mounted() {
@@ -2542,40 +2566,50 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 		max-width: 150px;
 	}
 
-	.pos-table :deep(th[data-column-key="qty"]) {
-		min-width: 100px;
-		max-width: 120px;
-	}
+        .pos-table :deep(th[data-column-key="qty"]) {
+                min-width: 100px;
+                max-width: 120px;
+        }
 
-	.pos-table :deep(th[data-column-key="rate"]),
-	.pos-table :deep(th[data-column-key="amount"]) {
-		min-width: 70px;
-		max-width: 90px;
-	}
+        .pos-table :deep(th[data-column-key="rate"]),
+        .pos-table :deep(th[data-column-key="amount"]) {
+                min-width: 70px;
+                max-width: 90px;
+        }
 
-	.pos-table__qty-counter {
-		min-width: 110px;
-		width: 110px;
-		height: auto;
-		gap: 4px;
-		padding: 2px;
-	}
+        .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-box) {
+                min-width: 72px;
+                max-width: 96px;
+        }
 
-	.qty-control-btn {
-		width: 28px !important;
-		height: 28px !important;
-		min-width: 28px !important;
-		border-radius: 6px !important;
-	}
+        .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-display) {
+                min-width: 30px;
+                max-width: 60px;
+        }
 
-	.pos-table__qty-display {
-		min-width: 35px;
-		max-width: 70px;
-		padding: 4px 3px;
-		font-size: 0.75rem;
-		height: 28px;
-		letter-spacing: -0.03em;
-	}
+        .pos-table__qty-counter {
+                min-width: 90px;
+                width: 90px;
+                height: auto;
+                gap: 3px;
+                padding: 1px;
+        }
+
+        .qty-control-btn {
+                width: 24px !important;
+                height: 24px !important;
+                min-width: 24px !important;
+                border-radius: 5px !important;
+        }
+
+        .pos-table__qty-display {
+                min-width: 30px;
+                max-width: 60px;
+                padding: 3px 2px;
+                font-size: 0.72rem;
+                height: 24px;
+                letter-spacing: -0.03em;
+        }
 
 	.action-button-group {
 		flex-direction: column;
@@ -3580,8 +3614,8 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-input {
-max-width: 36px;
-margin: 0 auto;
+        max-width: 36px;
+        margin: 0 auto;
 }
 .pos-table__qty-input :deep(input) {
 	text-align: center;
@@ -3594,33 +3628,33 @@ margin: 0 auto;
 	margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-height: 15px;
+        height: 15px;
 }
 .pos-table__qty-input :deep(.v-field__field) {
-height: 15px;
-padding: 0 3px;
+        height: 15px;
+        padding: 0 3px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
-padding: 0;
-min-height: 15px;
+        padding: 0;
+        min-height: 15px;
 }
 .pos-table__editor-box {
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 2px;
-padding: 1px;
-min-width: 60px;
-max-width: 80px;
-width: auto;
-height: auto;
-background: var(--pos-surface-variant);
-border-radius: 6px;
-border: 1px solid var(--pos-border-light);
-transition: all 0.3s ease;
-margin: 0 auto;
-	flex-shrink: 0;
-	box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 1px;
+        min-width: 60px;
+        max-width: 80px;
+        width: auto;
+        height: auto;
+        background: var(--pos-surface-variant);
+        border-radius: 6px;
+        border: 1px solid var(--pos-border-light);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+        flex-shrink: 0;
+        box-sizing: border-box;
 }
 
 .pos-table__editor-box:hover {
@@ -3630,45 +3664,51 @@ margin: 0 auto;
 }
 
 .pos-table__editor-display {
-min-width: 25px;
-max-width: 50px;
-width: auto;
-flex: 1 1 auto;
-text-align: center;
-font-weight: 600;
-padding: 3px 2px;
-border-radius: 3px;
-background: var(--pos-primary-container);
-border: 1px solid var(--pos-primary-variant);
-color: var(--pos-primary);
-font-size: 0.8rem;
-transition: all 0.2s ease;
-box-shadow: 0 1px 3px var(--pos-shadow-light);
-display: flex;
-align-items: center;
-justify-content: center;
-height: 16px;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-cursor: pointer;
+        min-width: 25px;
+        max-width: 50px;
+        width: auto;
+        flex: 1 1 auto;
+        text-align: center;
+        font-weight: 600;
+        padding: 3px 2px;
+        border-radius: 3px;
+        background: var(--pos-primary-container);
+        border: 1px solid var(--pos-primary-variant);
+        color: var(--pos-primary);
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px var(--pos-shadow-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 16px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
 }
 
 .pos-table__editor-btn {
-width: 16px !important;
-height: 16px !important;
-min-width: 16px !important;
-border-radius: 4px !important;
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        border-radius: 4px !important;
 }
 .pos-table__editor-input {
-max-width: 60px;
+        max-width: 60px;
 }
 .pos-table__editor-input :deep(input) {
-	text-align: center;
+        text-align: center;
+        -moz-appearance: textfield;
+}
+.pos-table__editor-input :deep(input::-webkit-outer-spin-button),
+.pos-table__editor-input :deep(input::-webkit-inner-spin-button) {
+        -webkit-appearance: none;
+        margin: 0;
 }
 
 .uom-editor {
-	gap: 2px;
+        gap: 2px;
 }
 .uom-arrow {
 	flex-shrink: 0;
