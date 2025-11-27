@@ -55,6 +55,7 @@ workbox.core.clientsClaim();
 const SW_REVISION = __BUILD_VERSION__;
 workbox.precaching.precacheAndRoute([
 	{ url: "/assets/posawesome/dist/js/posawesome.umd.js", revision: SW_REVISION },
+	{ url: "/assets/posawesome/dist/js/posawesome.css", revision: SW_REVISION },
 	{ url: "/assets/posawesome/dist/js/offline/index.js", revision: SW_REVISION },
 	{ url: "/manifest.json", revision: SW_REVISION },
 	{ url: "/offline.html", revision: SW_REVISION },

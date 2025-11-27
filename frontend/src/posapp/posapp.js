@@ -15,6 +15,15 @@ import * as directives from "vuetify/directives";
 import Home from "./Home.vue";
 import { attachProfilerHelpers, initLongTaskObserver, isPerfEnabled } from "./utils/perf.js";
 
+// Import local fonts and icons
+import "@mdi/font/css/materialdesignicons.css";
+import "@fontsource/roboto/100.css";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import "@fontsource/roboto/900.css";
+
 attachProfilerHelpers();
 
 // Expose Dexie globally for libraries that expect a global Dexie instance

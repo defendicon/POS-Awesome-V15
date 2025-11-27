@@ -11,6 +11,8 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.9",
+    "@mdi/font": "^7.4.47",
     "@techstark/opencv-js": "^4.11.0-release.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vuepic/vue-datepicker": "11.0.2",
@@ -40,8 +42,8 @@
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.4",
-    "vue-eslint-parser": "^10.2.0",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "vue-eslint-parser": "^10.2.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

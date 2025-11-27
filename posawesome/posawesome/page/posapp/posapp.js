@@ -13,17 +13,6 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	$("head").append(
 		"<link href='/assets/posawesome/node_modules/vuetify/dist/vuetify.min.css' rel='stylesheet'>",
 	);
-	$("head").append(
-		"<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css'>",
-	);
-	$("head").append("<link rel='preconnect' href='https://fonts.googleapis.com'>");
-	$("head").append("<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>");
-	$("head").append(
-		"<link rel='preload' href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900' as='style'>",
-	);
-	$("head").append(
-		"<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900'>",
-	);
 
 	// Listen for POS Profile registration
 	frappe.realtime.on("pos_profile_registered", () => {
