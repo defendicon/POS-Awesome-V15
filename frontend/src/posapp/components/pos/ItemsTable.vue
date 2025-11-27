@@ -1563,12 +1563,13 @@ export default {
 
 /* Ensure items table can scroll when many rows exist */
 .items-table-container {
-	overflow-y: auto;
-	width: 100%;
-	max-width: 100%;
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: auto;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
 }
 
 /* Table wrapper styling */
@@ -1579,6 +1580,7 @@ export default {
         width: 100%;
         max-width: 100%;
         overflow-y: auto;
+        overflow-x: auto;
         scrollbar-width: thin;
         margin: 0;
         padding: 0;
