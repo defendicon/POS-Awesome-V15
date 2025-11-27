@@ -2360,39 +2360,39 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .responsive-table-container.compact-view .pos-table__qty-counter {
-	min-width: 110px;
-	max-width: 140px;
-	width: auto;
-	gap: 4px;
+        min-width: 70px;
+        max-width: 90px;
+        width: auto;
+        gap: 3px;
 }
 
 .responsive-table-container.compact-view .qty-control-btn {
-	width: 28px !important;
-	height: 28px !important;
-	min-width: 28px !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
 }
 
 .responsive-table-container.compact-view .pos-table__qty-display {
-	min-width: 35px;
-	max-width: 65px;
-	height: 28px;
-	font-size: 0.7rem;
-	padding: 4px 3px;
-	letter-spacing: -0.03em;
+        min-width: 22px;
+        max-width: 40px;
+        height: 18px;
+        font-size: 0.7rem;
+        padding: 3px 2px;
+        letter-spacing: -0.03em;
 }
 
 /* Medium view adjustments */
 .responsive-table-container.medium-view .pos-table__qty-counter {
-	min-width: 130px;
-	max-width: 160px;
-	width: auto;
+        min-width: 80px;
+        max-width: 110px;
+        width: auto;
 }
 
 /* Large view adjustments */
 .responsive-table-container.large-view .pos-table__qty-counter {
-	min-width: 140px;
-	max-width: 180px;
-	width: auto;
+        min-width: 90px;
+        max-width: 120px;
+        width: auto;
 }
 
 /* Enhanced expanded content responsiveness */
@@ -2624,29 +2624,29 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 		max-width: 90px;
 	}
 
-	.pos-table__qty-counter {
-		min-width: 110px;
-		width: 110px;
-		height: auto;
-		gap: 4px;
-		padding: 2px;
-	}
+        .pos-table__qty-counter {
+                min-width: 70px;
+                width: 70px;
+                height: auto;
+                gap: 3px;
+                padding: 2px;
+        }
 
-	.qty-control-btn {
-		width: 28px !important;
-		height: 28px !important;
-		min-width: 28px !important;
-		border-radius: 6px !important;
-	}
+        .qty-control-btn {
+                width: 18px !important;
+                height: 18px !important;
+                min-width: 18px !important;
+                border-radius: 5px !important;
+        }
 
-	.pos-table__qty-display {
-		min-width: 35px;
-		max-width: 70px;
-		padding: 4px 3px;
-		font-size: 0.75rem;
-		height: 28px;
-		letter-spacing: -0.03em;
-	}
+        .pos-table__qty-display {
+                min-width: 22px;
+                max-width: 40px;
+                padding: 3px 2px;
+                font-size: 0.72rem;
+                height: 18px;
+                letter-spacing: -0.03em;
+        }
 
 	.action-button-group {
 		flex-direction: column;
@@ -3340,10 +3340,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
-	border-radius: 8px !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        border-radius: 6px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
 		0 2px 8px var(--pos-shadow-light),
@@ -3381,11 +3381,11 @@ body[dir="rtl"] .amount-value.right-aligned {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 5px;
-        padding: 3px;
+        gap: 3px;
+        padding: 2px;
         /* More flexible sizing for larger numbers */
-        min-width: 98px;
-        max-width: 135px;
+        min-width: 60px;
+        max-width: 90px;
         width: auto;
         height: auto;
         background: var(--pos-surface-variant);
@@ -3478,32 +3478,32 @@ body[dir="rtl"] .number-field-rtl {
 
 .pos-table__qty-display {
         /* Dynamic width based on content with proper constraints */
-        min-width: 38px;
-        max-width: 75px;
+        min-width: 22px;
+        max-width: 45px;
         width: auto;
         flex: 1 1 auto;
         text-align: center;
         font-weight: 600;
-        padding: 4px 3px;
-        border-radius: 6px;
+        padding: 3px 2px;
+        border-radius: 4px;
         background: var(--pos-primary-container);
         border: 1px solid var(--pos-primary-variant);
         font-family:
-		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
-		sans-serif;
+                "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+                sans-serif;
 	font-variant-numeric: lining-nums tabular-nums;
 	font-feature-settings:
 		"tnum" 1,
 		"lnum" 1,
 		"kern" 1;
 	color: var(--pos-primary);
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px var(--pos-shadow-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 24px;
+        height: 18px;
         /* Handle overflow gracefully */
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3515,10 +3515,10 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
-        min-width: 53px;
-        max-width: 90px;
-        font-size: 0.75rem;
-        padding: 4px 2px;
+        min-width: 32px;
+        max-width: 55px;
+        font-size: 0.7rem;
+        padding: 3px 2px;
         letter-spacing: -0.04em;
 }
 
@@ -3531,35 +3531,35 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
-        min-width: 113px;
-        max-width: 150px;
+        min-width: 80px;
+        max-width: 110px;
 }
 
 /* Responsive text sizing based on number length */
 .pos-table__qty-display[data-length="1"],
 .pos-table__qty-display[data-length="2"] {
-        font-size: 0.85rem;
-        min-width: 30px;
+        font-size: 0.8rem;
+        min-width: 20px;
 }
 
 .pos-table__qty-display[data-length="3"],
 .pos-table__qty-display[data-length="4"] {
         font-size: 0.8rem;
-        min-width: 38px;
+        min-width: 26px;
 }
 
 .pos-table__qty-display[data-length="5"],
 .pos-table__qty-display[data-length="6"] {
         font-size: 0.75rem;
-        min-width: 45px;
+        min-width: 32px;
 }
 
 .pos-table__qty-display[data-length="7"],
 .pos-table__qty-display[data-length="8"],
 .pos-table__qty-display[data-length="9"] {
         font-size: 0.7rem;
-        min-width: 53px;
-        max-width: 75px;
+        min-width: 40px;
+        max-width: 55px;
 }
 
 .qty-control-btn:hover {
@@ -3739,13 +3739,28 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .uom-editor {
-	gap: 2px;
+        gap: 2px;
+        padding: 1px;
+        min-width: 55px;
+        max-width: 75px;
+        border-radius: 10px;
 }
 .uom-arrow {
-	flex-shrink: 0;
+        flex-shrink: 0;
 }
 .uom-select {
-	min-width: 60px;
+        min-width: 36px;
+}
+
+.uom-editor .pos-table__editor-btn {
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        border-radius: 6px !important;
+}
+
+.uom-editor .pos-table__editor-input {
+        max-width: 55px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
