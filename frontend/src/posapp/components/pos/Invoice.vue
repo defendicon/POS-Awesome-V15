@@ -507,19 +507,19 @@ export default {
 			// Define all available columns
 			this.available_columns = [
 				{ title: __("Name"), align: "start", sortable: true, key: "item_name", required: true },
-				{ title: __("QTY"), key: "qty", align: "center", required: true },
-				{ title: __("UOM"), key: "uom", align: "center", required: false },
-				{
-					title: __("Price List Rate"),
-					key: "price_list_rate",
-					align: "end",
-					required: false,
-					width: "120px",
-				},
-				{ title: __("Discount %"), key: "discount_value", align: "end", required: false },
-				{ title: __("Discount Amount"), key: "discount_amount", align: "end", required: false },
-				{ title: __("Rate"), key: "rate", align: "center", required: true },
-				{ title: __("Amount"), key: "amount", align: "center", required: true },
+                                { title: __("QTY"), key: "qty", align: "center", required: true },
+                                { title: __("UOM"), key: "uom", align: "center", required: true },
+                                {
+                                        title: __("Price List Rate"),
+                                        key: "price_list_rate",
+                                        align: "end",
+                                        required: true,
+                                        width: "120px",
+                                },
+                                { title: __("Discount %"), key: "discount_value", align: "end", required: true },
+                                { title: __("Discount Amount"), key: "discount_amount", align: "end", required: true },
+                                { title: __("Rate"), key: "rate", align: "center", required: true },
+                                { title: __("Amount"), key: "amount", align: "center", required: true },
 				{ title: __("Offer?"), key: "posa_is_offer", align: "center", required: false },
 				{ title: __("Actions"), key: "actions", align: "center", required: true, sortable: false },
 			];

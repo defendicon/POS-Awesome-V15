@@ -9,27 +9,28 @@
 		@dragenter="onDragEnterFromSelector"
 		@dragleave="onDragLeaveFromSelector"
 	>
-		<v-data-table-virtual
-			:headers="responsiveHeaders"
-			:items="items"
-			:expanded="expanded"
-			show-expand
-			item-value="posa_row_id"
-			class="pos-table elevation-2 pos-themed-card"
-			:class="tableClasses"
-			:items-per-page="virtualScrollConfig.itemsPerPage"
-			:item-height="virtualScrollConfig.itemHeight"
-			:buffer-size="virtualScrollConfig.bufferSize"
-			expand-on-click
-			:density="tableDensity"
-			hide-default-footer
-			:single-expand="true"
-			:header-props="dynamicHeaderProps"
-			:no-data-text="__('No items in cart')"
-			@update:expanded="handleExpandedUpdate"
-			:search="itemSearch"
-			:custom-filter="customItemFilter"
-		>
+                <v-data-table-virtual
+                        :headers="responsiveHeaders"
+                        :items="items"
+                        :expanded="expanded"
+                        show-expand
+                        item-value="posa_row_id"
+                        class="pos-table elevation-2 pos-themed-card headerless-table"
+                        :class="tableClasses"
+                        :items-per-page="virtualScrollConfig.itemsPerPage"
+                        :item-height="virtualScrollConfig.itemHeight"
+                        :buffer-size="virtualScrollConfig.bufferSize"
+                        expand-on-click
+                        :density="tableDensity"
+                        hide-default-footer
+                        hide-default-header
+                        :single-expand="true"
+                        :header-props="dynamicHeaderProps"
+                        :no-data-text="__('No items in cart')"
+                        @update:expanded="handleExpandedUpdate"
+                        :search="itemSearch"
+                        :custom-filter="customItemFilter"
+                >
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
 				<div class="d-flex align-center">
@@ -941,42 +942,15 @@ export default {
 		},
 
 		// Responsive headers based on container size
-		responsiveHeaders() {
-			if (!this.headers || this.headers.length === 0) return [];
+                responsiveHeaders() {
+                        if (!this.headers || this.headers.length === 0) return [];
 
-			return this.headers
-				.filter((header) => {
-					// Always show required columns
-					if (
-						header.required ||
-						header.key === "item_name" ||
-						header.key === "qty" ||
-						header.key === "actions"
-					) {
-						return true;
-					}
-
-					// Hide columns based on container width
-					if (this.containerWidth < 500) {
-						// Ultra-compact: only essential columns
-						return ["item_name", "qty", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 700) {
-						// Compact: essential + rate
-						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 900) {
-						// Medium: hide advanced columns
-						return !["discount_value", "price_list_rate"].includes(header.key);
-					}
-
-					// Large: show all columns
-					return true;
-				})
-				.map((header) => ({
-					...header,
-					width: this.calculateColumnWidth(header),
-					minWidth: this.calculateMinColumnWidth(header),
-				}));
-		},
+                        return this.headers.map((header) => ({
+                                ...header,
+                                width: this.calculateColumnWidth(header),
+                                minWidth: this.calculateMinColumnWidth(header),
+                        }));
+                },
 
 		// Dynamic table density based on container size
 		tableDensity() {
@@ -1600,20 +1574,33 @@ export default {
 /* Table wrapper styling */
 .pos-table :deep(.v-data-table__wrapper),
 .pos-table :deep(.v-table__wrapper) {
-	border-radius: 0;
-	height: 100%;
-	width: 100%;
-	max-width: 100%;
-	overflow-y: auto;
-	scrollbar-width: thin;
-	margin: 0;
-	padding: 0;
-	border: none;
+        border-radius: 0;
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        margin: 0;
+        padding: 0;
+        border: none;
+}
+
+.headerless-table :deep(thead) {
+        display: none;
+}
+
+.headerless-table :deep(.v-data-table__wrapper),
+.headerless-table :deep(.v-table__wrapper) {
+        padding-top: 0;
+}
+
+.headerless-table :deep(td:last-child) > div {
+        justify-content: flex-end;
 }
 
 /* Enhanced table header styling with global theme support */
 .pos-table :deep(th) {
-	font-weight: 600;
+        font-weight: 600;
 	font-size: 0.8rem;
 	text-transform: uppercase;
 	letter-spacing: 0.3px;
