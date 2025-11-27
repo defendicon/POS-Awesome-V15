@@ -1492,8 +1492,8 @@ export default {
 
                 applyUomChange(item, newUom) {
                         if (newUom && newUom !== item.uom) {
-                                this.calcUom(item, newUom);
                                 this.resetItemDiscounts(item);
+                                this.calcUom(item, newUom);
                         }
                 },
 
