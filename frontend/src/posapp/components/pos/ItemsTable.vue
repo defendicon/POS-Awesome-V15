@@ -1145,15 +1145,15 @@ export default {
 
                 calculateColumnWidth(header) {
                         const baseWidths = {
-                                item_name: { min: 110, max: 190, ratio: 0.23 },
-                                qty: { min: 90, max: 130, ratio: 0.12 },
-                                rate: { min: 80, max: 110, ratio: 0.1 },
-                                amount: { min: 80, max: 110, ratio: 0.1 },
-                                discount_value: { min: 60, max: 90, ratio: 0.08 },
-                                discount_amount: { min: 70, max: 100, ratio: 0.09 },
-                                price_list_rate: { min: 85, max: 115, ratio: 0.1 },
-                                actions: { min: 55, max: 75, ratio: 0.06 },
-                                posa_is_offer: { min: 50, max: 70, ratio: 0.05 },
+                                item_name: { min: 95, max: 170, ratio: 0.2 },
+                                qty: { min: 72, max: 115, ratio: 0.11 },
+                                rate: { min: 70, max: 100, ratio: 0.09 },
+                                amount: { min: 70, max: 100, ratio: 0.09 },
+                                discount_value: { min: 52, max: 82, ratio: 0.07 },
+                                discount_amount: { min: 60, max: 90, ratio: 0.08 },
+                                price_list_rate: { min: 76, max: 105, ratio: 0.09 },
+                                actions: { min: 48, max: 68, ratio: 0.05 },
+                                posa_is_offer: { min: 46, max: 64, ratio: 0.045 },
                         };
 
 			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
@@ -1164,19 +1164,19 @@ export default {
 
                 calculateMinColumnWidth(header) {
                         const minWidths = {
-                                item_name: 95,
-                                qty: 85,
-                                rate: 65,
-                                amount: 65,
-                                discount_value: 55,
-                                discount_amount: 65,
-                                price_list_rate: 75,
-                                actions: 50,
-                                posa_is_offer: 40,
+                                item_name: 90,
+                                qty: 72,
+                                rate: 64,
+                                amount: 64,
+                                discount_value: 50,
+                                discount_amount: 60,
+                                price_list_rate: 70,
+                                actions: 46,
+                                posa_is_offer: 42,
                         };
 
                         return minWidths[header.key] || 55;
-		},
+                },
 
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== "undefined") {
@@ -1693,9 +1693,9 @@ export default {
 
 /* Table cell styling */
 .pos-table :deep(td) {
-        padding: 8px 6px;
+        padding: 4px 3px;
         vertical-align: middle;
-        height: 48px;
+        height: 42px;
         text-align: center;
         color: var(--pos-text-primary);
         position: relative;
@@ -3259,10 +3259,10 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-        width: 28px !important;
-        height: 28px !important;
-        min-width: 28px !important;
-        border-radius: 8px !important;
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        border-radius: 7px !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow:
 		0 2px 8px var(--pos-shadow-light),
@@ -3296,26 +3296,27 @@ body[dir="rtl"] .amount-value.right-aligned {
 	z-index: 1;
 }
 
+
 .pos-table__qty-counter {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 3px;
+        gap: 3px;
+        padding: 2px;
         /* More flexible sizing for larger numbers */
-        min-width: clamp(84px, 22vw, 130px);
-        max-width: clamp(108px, 28vw, 150px);
+        min-width: clamp(68px, 18vw, 110px);
+        max-width: clamp(90px, 24vw, 128px);
         width: 100%;
         height: auto;
         background: var(--pos-surface-variant);
-        border-radius: 12px;
-	backdrop-filter: blur(10px);
-	border: 1px solid var(--pos-border-light);
-	transition: all 0.3s ease;
-	margin: 0 auto;
-	/* Allow container to grow with content */
-	flex-shrink: 0;
-	box-sizing: border-box;
+        border-radius: 10px;
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--pos-border-light);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+        /* Allow container to grow with content */
+        flex-shrink: 0;
+        box-sizing: border-box;
 }
 
 .pos-table__qty-counter:hover {
@@ -3397,48 +3398,48 @@ body[dir="rtl"] .number-field-rtl {
 
 .pos-table__qty-display {
         /* Dynamic width based on content with proper constraints */
-        min-width: 50px;
-        max-width: 100px;
+        min-width: 44px;
+        max-width: 90px;
         width: auto;
-	flex: 1 1 auto;
-	text-align: center;
-	font-weight: 600;
-	padding: 6px 4px;
-	border-radius: 6px;
-	background: var(--pos-primary-container);
-	border: 1px solid var(--pos-primary-variant);
-	font-family:
-		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
-		sans-serif;
-	font-variant-numeric: lining-nums tabular-nums;
+        flex: 1 1 auto;
+        text-align: center;
+        font-weight: 600;
+        padding: 4px 3px;
+        border-radius: 6px;
+        background: var(--pos-primary-container);
+        border: 1px solid var(--pos-primary-variant);
+        font-family:
+                "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+                sans-serif;
+        font-variant-numeric: lining-nums tabular-nums;
         font-feature-settings:
                 "tnum" 1,
                 "lnum" 1,
                 "kern" 1;
         color: var(--pos-primary);
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px var(--pos-shadow-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 32px;
-	/* Handle overflow gracefully */
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	/* Better number display */
-	letter-spacing: -0.02em;
-	word-spacing: -0.1em;
+        height: 28px;
+        /* Handle overflow gracefully */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        /* Better number display */
+        letter-spacing: -0.02em;
+        word-spacing: -0.1em;
 }
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
-        min-width: 70px;
-        max-width: 120px;
-        font-size: 0.75rem;
-        padding: 6px 3px;
-	letter-spacing: -0.04em;
+        min-width: 60px;
+        max-width: 110px;
+        font-size: 0.7rem;
+        padding: 4px 3px;
+        letter-spacing: -0.04em;
 }
 
 /* Special handling for negative numbers */
@@ -3450,35 +3451,35 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
-        min-width: 130px;
-        max-width: 170px;
+        min-width: 110px;
+        max-width: 150px;
 }
 
 /* Responsive text sizing based on number length */
 .pos-table__qty-display[data-length="1"],
 .pos-table__qty-display[data-length="2"] {
-	font-size: 0.85rem;
-	min-width: 40px;
+        font-size: 0.8rem;
+        min-width: 36px;
 }
 
 .pos-table__qty-display[data-length="3"],
 .pos-table__qty-display[data-length="4"] {
-	font-size: 0.8rem;
-	min-width: 50px;
+        font-size: 0.76rem;
+        min-width: 44px;
 }
 
 .pos-table__qty-display[data-length="5"],
 .pos-table__qty-display[data-length="6"] {
-	font-size: 0.75rem;
-	min-width: 60px;
+        font-size: 0.72rem;
+        min-width: 52px;
 }
 
 .pos-table__qty-display[data-length="7"],
 .pos-table__qty-display[data-length="8"],
 .pos-table__qty-display[data-length="9"] {
-	font-size: 0.7rem;
-	min-width: 70px;
-	max-width: 100px;
+        font-size: 0.68rem;
+        min-width: 60px;
+        max-width: 94px;
 }
 
 .qty-control-btn:hover {
@@ -3518,12 +3519,12 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Delete action button styling */
 .delete-action-btn {
-	min-width: 44px !important;
-	height: 44px !important;
-	border-radius: 12px !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow:
-		0 4px 12px var(--pos-shadow),
+        min-width: 38px !important;
+        height: 38px !important;
+        border-radius: 10px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow:
+                0 4px 12px var(--pos-shadow),
 		0 2px 4px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	background: var(--pos-button-error-bg) !important;
@@ -3570,47 +3571,47 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-input {
-	max-width: 80px;
-	margin: 0 auto;
+        max-width: 72px;
+        margin: 0 auto;
 }
 .pos-table__qty-input :deep(input) {
-	text-align: center;
-	font-weight: 600;
-	-moz-appearance: textfield;
+        text-align: center;
+        font-weight: 600;
+        -moz-appearance: textfield;
 }
 .pos-table__qty-input :deep(input::-webkit-outer-spin-button),
 .pos-table__qty-input :deep(input::-webkit-inner-spin-button) {
-	-webkit-appearance: none;
-	margin: 0;
+        -webkit-appearance: none;
+        margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-	height: 32px;
+        height: 28px;
 }
 .pos-table__qty-input :deep(.v-field__field) {
-	height: 32px;
-	padding: 0 8px;
+        height: 28px;
+        padding: 0 6px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
-	padding: 0;
-	min-height: 32px;
+        padding: 0;
+        min-height: 28px;
 }
 .pos-table__editor-box {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 3px 4px;
-        min-width: clamp(100px, 28vw, 150px);
-        max-width: clamp(120px, 32vw, 170px);
+        gap: 3px;
+        padding: 2px 3px;
+        min-width: clamp(84px, 24vw, 130px);
+        max-width: clamp(104px, 28vw, 150px);
         width: 100%;
         height: auto;
         background: var(--pos-surface-variant);
-        border-radius: 12px;
-	border: 1px solid var(--pos-border-light);
-	transition: all 0.3s ease;
-	margin: 0 auto;
-	flex-shrink: 0;
-	box-sizing: border-box;
+        border-radius: 10px;
+        border: 1px solid var(--pos-border-light);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+        flex-shrink: 0;
+        box-sizing: border-box;
 }
 
 .pos-table__editor-box:hover {
@@ -3620,43 +3621,43 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-display {
-        min-width: 50px;
-        max-width: 100px;
+        min-width: 46px;
+        max-width: 90px;
         width: auto;
         flex: 1 1 auto;
         text-align: center;
         font-weight: 600;
-        padding: 5px 4px;
+        padding: 4px 3px;
         border-radius: 6px;
         background: var(--pos-primary-container);
         border: 1px solid var(--pos-primary-variant);
         color: var(--pos-primary);
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         transition: all 0.2s ease;
-	box-shadow: 0 1px 3px var(--pos-shadow-light);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	cursor: pointer;
+        box-shadow: 0 1px 3px var(--pos-shadow-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
 }
 
 .pos-table__editor-btn {
-        width: 30px !important;
-        height: 30px !important;
-        min-width: 30px !important;
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px !important;
         border-radius: 8px !important;
 }
 .pos-table__editor-input {
-        max-width: 100px;
-        min-width: 70px;
+        max-width: 90px;
+        min-width: 60px;
         flex: 1 1 0;
 }
 .pos-table__editor-input :deep(input) {
-	text-align: center;
+        text-align: center;
 }
 
 .uom-editor {
@@ -3666,7 +3667,7 @@ body[dir="rtl"] .number-field-rtl {
 	flex-shrink: 0;
 }
 .uom-select {
-        min-width: 54px;
+        min-width: 48px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
