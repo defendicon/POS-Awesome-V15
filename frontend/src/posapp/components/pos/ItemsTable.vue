@@ -3679,10 +3679,10 @@ body[dir="rtl"] .number-field-rtl {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 3px;
-        padding: 2px;
-        min-width: 90px;
-        max-width: 120px;
+        gap: 2px;
+        padding: 1px;
+        min-width: 60px;
+        max-width: 90px;
         width: auto;
         height: auto;
         background: var(--pos-surface-variant);
@@ -3702,23 +3702,23 @@ body[dir="rtl"] .number-field-rtl {
 
 .pos-table__editor-display {
         min-width: 38px;
-        max-width: 75px;
+        max-width: 60px;
         width: auto;
         flex: 1 1 auto;
         text-align: center;
         font-weight: 600;
-        padding: 4px 3px;
-        border-radius: 6px;
+        padding: 3px 2px;
+        border-radius: 5px;
         background: var(--pos-primary-container);
         border: 1px solid var(--pos-primary-variant);
         color: var(--pos-primary);
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px var(--pos-shadow-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 24px;
+        height: 18px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -3726,16 +3726,16 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-btn {
-        width: 24px !important;
-        height: 24px !important;
-        min-width: 24px !important;
-        border-radius: 8px !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        border-radius: 6px !important;
 }
 .pos-table__editor-input {
-        max-width: 90px;
+        max-width: 70px;
 }
 .pos-table__editor-input :deep(input) {
-	text-align: center;
+        text-align: center;
 }
 
 .uom-editor {
@@ -3772,14 +3772,18 @@ body[dir="rtl"] .number-field-rtl {
 	box-shadow: none !important;
 }
 .uom-display-mode :deep(.v-field__input) {
-	justify-content: center;
-	padding: 0;
-	font-weight: 600;
-	color: var(--pos-primary);
+        justify-content: center;
+        padding: 0;
+        font-weight: 600;
+        font-size: 0.7rem;
+        color: var(--pos-primary);
 }
 .uom-display-mode :deep(.v-select__selection-text) {
-	text-align: center;
-	color: var(--pos-primary);
+        text-align: center;
+        color: var(--pos-primary);
+        font-size: 0.7rem;
+        overflow: visible;
+        text-overflow: clip;
 }
 .uom-display-mode :deep(.v-field__append-inner) {
 	display: none;
