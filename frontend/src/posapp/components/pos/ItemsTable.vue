@@ -9,27 +9,261 @@
 		@dragenter="onDragEnterFromSelector"
 		@dragleave="onDragLeaveFromSelector"
 	>
-		<v-data-table-virtual
-			:headers="responsiveHeaders"
-			:items="items"
-			:expanded="expanded"
-			show-expand
-			item-value="posa_row_id"
-			class="pos-table elevation-2 pos-themed-card"
-			:class="tableClasses"
-			:items-per-page="virtualScrollConfig.itemsPerPage"
-			:item-height="virtualScrollConfig.itemHeight"
-			:buffer-size="virtualScrollConfig.bufferSize"
-			expand-on-click
-			:density="tableDensity"
-			hide-default-footer
-			:single-expand="true"
-			:header-props="dynamicHeaderProps"
-			:no-data-text="__('No items in cart')"
-			@update:expanded="handleExpandedUpdate"
-			:search="itemSearch"
-			:custom-filter="customItemFilter"
-		>
+                <v-data-table-virtual
+                        :headers="responsiveHeaders"
+                        :items="items"
+                        :expanded="expanded"
+                        show-expand
+                        item-value="posa_row_id"
+                        class="pos-table elevation-2 pos-themed-card"
+                        :class="tableClasses"
+                        :items-per-page="virtualScrollConfig.itemsPerPage"
+                        :item-height="virtualScrollConfig.itemHeight"
+                        :buffer-size="virtualScrollConfig.bufferSize"
+                        expand-on-click
+                        :density="tableDensity"
+                        hide-default-footer
+                        :hide-default-header="useCompactRow"
+                        :single-expand="true"
+                        :header-props="dynamicHeaderProps"
+                        :no-data-text="__('No items in cart')"
+                        @update:expanded="handleExpandedUpdate"
+                        :search="itemSearch"
+                        :custom-filter="customItemFilter"
+                >
+                        <!-- Compact/mobile friendly row -->
+                        <template v-if="useCompactRow" #item.compact_row="{ item }">
+                                <div class="compact-item-row" :class="{ 'rtl-layout': isRTL }">
+                                        <div class="compact-item-row__top">
+                                                <div class="compact-item-row__title">
+                                                        <span class="item-name">{{ item.item_name }}</span>
+                                                        <v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
+                                                                {{ __("Bundle") }}
+                                                        </v-chip>
+                                                        <v-chip v-if="item.name_overridden" color="primary" size="x-small" class="ml-1">
+                                                                {{ __("Edited") }}
+                                                        </v-chip>
+                                                        <v-chip
+                                                                v-if="item.batch_no_is_expired"
+                                                                color="error"
+                                                                size="x-small"
+                                                                variant="flat"
+                                                                class="ml-1"
+                                                        >
+                                                                {{ __("Expired") }}
+                                                        </v-chip>
+                                                        <v-tooltip v-if="item.pricing_rule_badge" location="bottom">
+                                                                <template #activator="{ props }">
+                                                                        <v-chip v-bind="props" color="primary" size="x-small" class="ml-1">
+                                                                                {{ item.pricing_rule_badge.label }}
+                                                                        </v-chip>
+                                                                </template>
+                                                                <span>{{ item.pricing_rule_badge.tooltip }}</span>
+                                                        </v-tooltip>
+                                                </div>
+                                                <div class="compact-item-row__price">
+                                                        <span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+                                                        <span
+                                                                class="amount-value"
+                                                                :class="{ 'negative-number': isNegative(item.qty * item.rate) }"
+                                                        >
+                                                                {{ formatCurrency(item.qty * item.rate) }}
+                                                        </span>
+                                                        <v-btn
+                                                                :disabled="!!item.posa_is_replace"
+                                                                size="small"
+                                                                variant="flat"
+                                                                class="pos-table__delete-btn delete-action-btn ml-2"
+                                                                @click.stop="removeItem(item)"
+                                                        >
+                                                                <v-icon size="small">mdi-delete-outline</v-icon>
+                                                        </v-btn>
+                                                </div>
+                                        </div>
+
+                                        <div class="compact-item-row__controls">
+                                                <div class="compact-field">
+                                                        <label>{{ __("Qty") }}</label>
+                                                        <div class="pos-table__qty-counter" :class="{ 'rtl-layout': isRTL }">
+                                                                <v-btn
+                                                                        :disabled="
+                                                                                !!item.posa_is_replace ||
+                                                                                (isReturnInvoice &&
+                                                                                        (item.is_free_item || item.posa_is_offer || item.posa_is_replace))
+                                                                        "
+                                                                        size="small"
+                                                                        variant="flat"
+                                                                        class="pos-table__qty-btn pos-table__qty-btn--minus minus-btn qty-control-btn"
+                                                                        @click.stop="handleMinusClick(item)"
+                                                                >
+                                                                        <v-icon size="small">mdi-minus</v-icon>
+                                                                </v-btn>
+                                                                <div
+                                                                        v-if="editing_qty_row_id !== item.posa_row_id"
+                                                                        class="pos-table__qty-display amount-value number-field-rtl"
+                                                                        :class="{
+                                                                                'negative-number': isNegative(item.qty),
+                                                                                'large-number': memoizedQtyLength(item.qty) > 6,
+                                                                        }"
+                                                                        :data-length="memoizedQtyLength(item.qty)"
+                                                                        :title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
+                                                                        @click.stop="openQtyEdit(item)"
+                                                                >
+                                                                        {{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
+                                                                </div>
+                                                                <v-text-field
+                                                                        v-else
+                                                                        :model-value="editing_qty_value"
+                                                                        @update:model-value="editing_qty_value = $event"
+                                                                        density="compact"
+                                                                        variant="outlined"
+                                                                        class="pos-table__qty-input"
+                                                                        @blur="closeQtyEdit(item)"
+                                                                        @keydown.enter.prevent="closeQtyEdit(item)"
+                                                                        @click.stop
+                                                                        ref="qtyInput"
+                                                                        :autofocus="true"
+                                                                        type="number"
+                                                                        :disabled="
+                                                                                isReturnInvoice &&
+                                                                                (item.is_free_item || item.posa_is_offer || item.posa_is_replace)
+                                                                        "
+                                                                ></v-text-field>
+                                                                <v-btn
+                                                                        :disabled="
+                                                                                !!item.posa_is_replace ||
+                                                                                (isReturnInvoice &&
+                                                                                        (item.is_free_item || item.posa_is_offer || item.posa_is_replace))
+                                                                        "
+                                                                        size="small"
+                                                                        variant="flat"
+                                                                        class="pos-table__qty-btn pos-table__qty-btn--plus plus-btn qty-control-btn"
+                                                                        @click.stop="handlePlusClick(item)"
+                                                                >
+                                                                        <v-icon size="small">mdi-plus</v-icon>
+                                                                </v-btn>
+                                                        </div>
+                                                </div>
+
+                                                <div class="compact-field">
+                                                        <label>{{ __("UOM") }}</label>
+                                                        <div class="pos-table__editor-box uom-editor" @click.stop>
+                                                                <v-btn
+                                                                        size="x-small"
+                                                                        variant="flat"
+                                                                        class="pos-table__editor-btn uom-arrow"
+                                                                        @click.stop="changeUom(item, -1)"
+                                                                        :disabled="!item.item_uoms || item.item_uoms.length <= 1"
+                                                                >
+                                                                        <v-icon size="small">mdi-chevron-left</v-icon>
+                                                                </v-btn>
+                                                                <v-select
+                                                                        ref="uomSelect"
+                                                                        :class="{ 'uom-display-mode': editing_uom_row_id !== item.posa_row_id }"
+                                                                        :model-value="item.uom"
+                                                                        @update:model-value="handleUomSelect(item, $event)"
+                                                                        :items="item.item_uoms"
+                                                                        item-title="uom"
+                                                                        item-value="uom"
+                                                                        density="compact"
+                                                                        variant="outlined"
+                                                                        class="pos-table__editor-input uom-select"
+                                                                        hide-details
+                                                                        @focus="openUomEdit(item)"
+                                                                        @blur="closeUomEdit(item)"
+                                                                ></v-select>
+                                                                <v-btn
+                                                                        size="x-small"
+                                                                        variant="flat"
+                                                                        class="pos-table__editor-btn uom-arrow"
+                                                                        @click.stop="changeUom(item, 1)"
+                                                                        :disabled="!item.item_uoms || item.item_uoms.length <= 1"
+                                                                >
+                                                                        <v-icon size="small">mdi-chevron-right</v-icon>
+                                                                </v-btn>
+                                                        </div>
+                                                </div>
+
+                                                <div class="compact-field">
+                                                        <label>{{ __("Rate") }}</label>
+                                                        <div class="pos-table__editor-box">
+                                                                <div
+                                                                        v-if="editing_rate_row_id !== item.posa_row_id"
+                                                                        class="pos-table__editor-display"
+                                                                        @click.stop="openRateEdit(item)"
+                                                                >
+                                                                        <span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
+                                                                        <span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
+                                                                                {{ formatCurrency(item.rate) }}
+                                                                        </span>
+                                                                </div>
+                                                                <v-text-field
+                                                                        v-else
+                                                                        :model-value="editing_rate_value"
+                                                                        @update:model-value="editing_rate_value = $event"
+                                                                        density="compact"
+                                                                        variant="outlined"
+                                                                        class="pos-table__editor-input"
+                                                                        @blur="closeRateEdit(item)"
+                                                                        @keydown.enter.prevent="closeRateEdit(item)"
+                                                                        @click.stop
+                                                                        ref="rateInput"
+                                                                        :autofocus="true"
+                                                                        type="number"
+                                                                        :disabled="
+                                                                                !pos_profile.posa_allow_user_to_edit_rate ||
+                                                                                !!item.posa_is_replace ||
+                                                                                !!item.posa_offer_applied
+                                                                        "
+                                                                ></v-text-field>
+                                                        </div>
+                                                </div>
+
+                                                <div class="compact-field">
+                                                        <label>{{ __("Disc %") }}</label>
+                                                        <div class="pos-table__editor-box">
+                                                                <div
+                                                                        v-if="editing_discount_percent_row_id !== item.posa_row_id"
+                                                                        class="pos-table__editor-display"
+                                                                        @click.stop="openDiscountPercentEdit(item)"
+                                                                >
+                                                                        <span class="amount-value">
+                                                                                {{
+                                                                                        formatFloat(
+                                                                                                Math.abs(
+                                                                                                        item.discount_percentage ||
+                                                                                                                (item.price_list_rate
+                                                                                                                        ? (item.discount_amount / item.price_list_rate) * 100
+                                                                                                                        : 0),
+                                                                                                ),
+                                                                                        )
+                                                                                }}%
+                                                                        </span>
+                                                                </div>
+                                                                <v-text-field
+                                                                        v-else
+                                                                        :model-value="editing_discount_percent_value"
+                                                                        @update:model-value="editing_discount_percent_value = $event"
+                                                                        density="compact"
+                                                                        variant="outlined"
+                                                                        class="pos-table__editor-input"
+                                                                        @blur="closeDiscountPercentEdit(item)"
+                                                                        @keydown.enter.prevent="closeDiscountPercentEdit(item)"
+                                                                        @click.stop
+                                                                        ref="discountPercentInput"
+                                                                        :autofocus="true"
+                                                                        type="number"
+                                                                        :disabled="
+                                                                                !pos_profile.posa_allow_user_to_edit_item_discount ||
+                                                                                !!item.posa_is_replace ||
+                                                                                !!item.posa_offer_applied
+                                                                        "
+                                                                ></v-text-field>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
+                        </template>
 			<!-- Item name column -->
 			<template v-slot:item.item_name="{ item }">
 				<div class="d-flex align-center">
@@ -910,73 +1144,89 @@ export default {
 			};
 		},
 
-		containerClasses() {
-			return {
-				[`breakpoint-${this.breakpoint}`]: true,
-				"compact-view": this.containerWidth < 600,
-				"medium-view": this.containerWidth >= 600 && this.containerWidth < 900,
-				"large-view": this.containerWidth >= 900,
-				"expanded-active": this.expanded.length > 0,
+                containerClasses() {
+                        return {
+                                [`breakpoint-${this.breakpoint}`]: true,
+                                "compact-view": this.containerWidth < 600,
+                                "medium-view": this.containerWidth >= 600 && this.containerWidth < 900,
+                                "large-view": this.containerWidth >= 900,
+                                "expanded-active": this.expanded.length > 0,
+                        };
+                },
+
+                tableClasses() {
+                        return {
+                                [`container-${this.breakpoint}`]: true,
+                                "responsive-table": true,
+                        };
+                },
+
+                useCompactRow() {
+                        return this.containerWidth < 650;
+                },
+
+                expandedContentClasses() {
+                        return {
+                                [`expanded-${this.breakpoint}`]: true,
+                                "compact-expanded": this.containerWidth < 600,
 			};
 		},
 
-		tableClasses() {
-			return {
-				[`container-${this.breakpoint}`]: true,
-				"responsive-table": true,
-			};
-		},
-
-		expandedContentClasses() {
-			return {
-				[`expanded-${this.breakpoint}`]: true,
-				"compact-expanded": this.containerWidth < 600,
-			};
-		},
-
-		blockSaleBeyondAvailableQty() {
-			if (["Order", "Quotation"].includes(this.invoiceType)) return false;
-			const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
-			return !allowNegative && !!this.pos_profile?.posa_block_sale_beyond_available_qty;
-		},
+                blockSaleBeyondAvailableQty() {
+                        if (["Order", "Quotation"].includes(this.invoiceType)) return false;
+                        const allowNegative = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
+                        return !allowNegative && !!this.pos_profile?.posa_block_sale_beyond_available_qty;
+                },
 
 		// Responsive headers based on container size
-		responsiveHeaders() {
-			if (!this.headers || this.headers.length === 0) return [];
+                responsiveHeaders() {
+                        if (!this.headers || this.headers.length === 0) return [];
 
-			return this.headers
-				.filter((header) => {
-					// Always show required columns
-					if (
-						header.required ||
-						header.key === "item_name" ||
-						header.key === "qty" ||
-						header.key === "actions"
-					) {
-						return true;
-					}
+                        if (this.useCompactRow) {
+                                return [
+                                        {
+                                                text: __("Item"),
+                                                value: "compact_row",
+                                                key: "compact_row",
+                                                sortable: false,
+                                                width: "100%",
+                                        },
+                                ];
+                        }
 
-					// Hide columns based on container width
-					if (this.containerWidth < 500) {
-						// Ultra-compact: only essential columns
-						return ["item_name", "qty", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 700) {
-						// Compact: essential + rate
-						return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
-					} else if (this.containerWidth < 900) {
-						// Medium: hide advanced columns
-						return !["discount_value", "price_list_rate"].includes(header.key);
-					}
+                        return this.headers
+                                .filter((header) => {
+                                        // Always show required columns
+                                        if (
+                                                header.required ||
+                                                header.key === "item_name" ||
+                                                header.key === "qty" ||
+                                                header.key === "actions"
+                                        ) {
+                                                return true;
+                                        }
 
-					// Large: show all columns
-					return true;
-				})
-				.map((header) => ({
-					...header,
-					width: this.calculateColumnWidth(header),
-					minWidth: this.calculateMinColumnWidth(header),
-				}));
-		},
+                                        // Hide columns based on container width
+                                        if (this.containerWidth < 500) {
+                                                // Ultra-compact: only essential columns
+                                                return ["item_name", "qty", "amount", "actions"].includes(header.key);
+                                        } else if (this.containerWidth < 700) {
+                                                // Compact: essential + rate
+                                                return ["item_name", "qty", "rate", "amount", "actions"].includes(header.key);
+                                        } else if (this.containerWidth < 900) {
+                                                // Medium: hide advanced columns
+                                                return !["discount_value", "price_list_rate"].includes(header.key);
+                                        }
+
+                                        // Large: show all columns
+                                        return true;
+                                })
+                                .map((header) => ({
+                                        ...header,
+                                        width: this.calculateColumnWidth(header),
+                                        minWidth: this.calculateMinColumnWidth(header),
+                                }));
+                },
 
 		// Dynamic table density based on container size
 		tableDensity() {
@@ -3696,6 +3946,82 @@ body[dir="rtl"] .number-field-rtl {
 	color: var(--pos-primary);
 }
 .uom-display-mode :deep(.v-field__append-inner) {
-	display: none;
+        display: none;
+}
+
+/* Compact row layout for mobile/single-column view */
+.compact-item-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+}
+
+.compact-item-row__top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+}
+
+.compact-item-row__title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: var(--pos-text-primary);
+}
+
+.compact-item-row__title .item-name {
+        font-size: 0.98rem;
+}
+
+.compact-item-row__price {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        color: var(--pos-text-primary);
+}
+
+.compact-item-row__controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+}
+
+.compact-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 140px;
+        flex: 1 1 180px;
+}
+
+.compact-field label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--pos-text-secondary);
+        font-weight: 600;
+}
+
+.compact-item-row :deep(.pos-table__editor-input .v-field__input) {
+        text-align: center;
+}
+
+.compact-item-row .pos-table__editor-box,
+.compact-item-row .pos-table__qty-counter {
+        width: 100%;
+}
+
+.compact-item-row .pos-table__qty-counter {
+        justify-content: flex-start;
+}
+
+.compact-item-row .pos-table__editor-display {
+        min-height: 38px;
 }
 </style>
