@@ -2313,39 +2313,39 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .responsive-table-container.compact-view .pos-table__qty-counter {
-	min-width: 110px;
-	max-width: 140px;
-	width: auto;
-	gap: 4px;
+        min-width: 83px;
+        max-width: 105px;
+        width: auto;
+        gap: 3px;
 }
 
 .responsive-table-container.compact-view .qty-control-btn {
-	width: 28px !important;
-	height: 28px !important;
-	min-width: 28px !important;
+        width: 21px !important;
+        height: 21px !important;
+        min-width: 21px !important;
 }
 
 .responsive-table-container.compact-view .pos-table__qty-display {
-	min-width: 35px;
-	max-width: 65px;
-	height: 28px;
-	font-size: 0.7rem;
-	padding: 4px 3px;
-	letter-spacing: -0.03em;
+        min-width: 26px;
+        max-width: 49px;
+        height: 21px;
+        font-size: 0.68rem;
+        padding: 3px 2px;
+        letter-spacing: -0.03em;
 }
 
 /* Medium view adjustments */
 .responsive-table-container.medium-view .pos-table__qty-counter {
-	min-width: 130px;
-	max-width: 160px;
-	width: auto;
+        min-width: 98px;
+        max-width: 120px;
+        width: auto;
 }
 
 /* Large view adjustments */
 .responsive-table-container.large-view .pos-table__qty-counter {
-	min-width: 140px;
-	max-width: 180px;
-	width: auto;
+        min-width: 105px;
+        max-width: 135px;
+        width: auto;
 }
 
 /* Enhanced expanded content responsiveness */
@@ -2567,47 +2567,55 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	}
 
         .pos-table :deep(th[data-column-key="qty"]) {
-                min-width: 100px;
-                max-width: 120px;
+                min-width: 75px;
+                max-width: 90px;
         }
 
-        .pos-table :deep(th[data-column-key="rate"]),
+        .pos-table :deep(th[data-column-key="rate"]) {
+                min-width: 88px;
+                max-width: 112px;
+        }
+
         .pos-table :deep(th[data-column-key="amount"]) {
                 min-width: 70px;
                 max-width: 90px;
         }
 
         .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-box) {
-                min-width: 72px;
-                max-width: 96px;
+                min-width: 90px;
+                max-width: 120px;
         }
 
         .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-display) {
-                min-width: 30px;
-                max-width: 60px;
+                min-width: 38px;
+                max-width: 75px;
+        }
+
+        .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-input) {
+                max-width: 75px;
         }
 
         .pos-table__qty-counter {
-                min-width: 90px;
-                width: 90px;
+                min-width: 68px;
+                width: 68px;
                 height: auto;
-                gap: 3px;
+                gap: 2px;
                 padding: 1px;
         }
 
         .qty-control-btn {
-                width: 24px !important;
-                height: 24px !important;
-                min-width: 24px !important;
-                border-radius: 5px !important;
+                width: 18px !important;
+                height: 18px !important;
+                min-width: 18px !important;
+                border-radius: 4px !important;
         }
 
         .pos-table__qty-display {
-                min-width: 30px;
-                max-width: 60px;
-                padding: 3px 2px;
-                font-size: 0.72rem;
-                height: 24px;
+                min-width: 23px;
+                max-width: 45px;
+                padding: 2px 2px;
+                font-size: 0.68rem;
+                height: 18px;
                 letter-spacing: -0.03em;
         }
 
@@ -3303,13 +3311,13 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-        width: 24px !important;
-        height: 24px !important;
-        min-width: 24px !important;
-        border-radius: 7px !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow:
-		0 2px 8px var(--pos-shadow-light),
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        border-radius: 5px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow:
+                0 2px 8px var(--pos-shadow-light),
 		0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
@@ -3344,17 +3352,17 @@ body[dir="rtl"] .amount-value.right-aligned {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 3px;
+        gap: 3px;
+        padding: 2px;
         /* More flexible sizing for larger numbers */
-        min-width: 98px;
-        max-width: 135px;
-	width: auto;
-	height: auto;
-	background: var(--pos-surface-variant);
-	border-radius: 12px;
-	backdrop-filter: blur(10px);
-	border: 1px solid var(--pos-border-light);
+        min-width: 74px;
+        max-width: 101px;
+        width: auto;
+        height: auto;
+        background: var(--pos-surface-variant);
+        border-radius: 9px;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
 	margin: 0 auto;
 	/* Allow container to grow with content */
@@ -3440,33 +3448,33 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-display {
-	/* Dynamic width based on content with proper constraints */
-	min-width: 50px;
-	max-width: 100px;
-	width: auto;
-	flex: 1 1 auto;
-	text-align: center;
-	font-weight: 600;
-	padding: 6px 4px;
-	border-radius: 6px;
-	background: var(--pos-primary-container);
-	border: 1px solid var(--pos-primary-variant);
-	font-family:
-		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
-		sans-serif;
-	font-variant-numeric: lining-nums tabular-nums;
-	font-feature-settings:
-		"tnum" 1,
-		"lnum" 1,
-		"kern" 1;
-	color: var(--pos-primary);
-	font-size: 0.8rem;
-	transition: all 0.2s ease;
-	box-shadow: 0 1px 3px var(--pos-shadow-light);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
+        /* Dynamic width based on content with proper constraints */
+        min-width: 38px;
+        max-width: 75px;
+        width: auto;
+        flex: 1 1 auto;
+        text-align: center;
+        font-weight: 600;
+        padding: 4px 3px;
+        border-radius: 6px;
+        background: var(--pos-primary-container);
+        border: 1px solid var(--pos-primary-variant);
+        font-family:
+                "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+                sans-serif;
+        font-variant-numeric: lining-nums tabular-nums;
+        font-feature-settings:
+                "tnum" 1,
+                "lnum" 1,
+                "kern" 1;
+        color: var(--pos-primary);
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px var(--pos-shadow-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 24px;
 	/* Handle overflow gracefully */
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -3478,11 +3486,11 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
-	min-width: 70px;
-	max-width: 120px;
-	font-size: 0.75rem;
-	padding: 6px 3px;
-	letter-spacing: -0.04em;
+        min-width: 53px;
+        max-width: 90px;
+        font-size: 0.72rem;
+        padding: 4px 3px;
+        letter-spacing: -0.04em;
 }
 
 /* Special handling for negative numbers */
@@ -3494,35 +3502,35 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
-	min-width: 150px;
-	max-width: 200px;
+        min-width: 112px;
+        max-width: 150px;
 }
 
 /* Responsive text sizing based on number length */
 .pos-table__qty-display[data-length="1"],
 .pos-table__qty-display[data-length="2"] {
-	font-size: 0.85rem;
-	min-width: 40px;
+        font-size: 0.85rem;
+        min-width: 30px;
 }
 
 .pos-table__qty-display[data-length="3"],
 .pos-table__qty-display[data-length="4"] {
-	font-size: 0.8rem;
-	min-width: 50px;
+        font-size: 0.8rem;
+        min-width: 38px;
 }
 
 .pos-table__qty-display[data-length="5"],
 .pos-table__qty-display[data-length="6"] {
-	font-size: 0.75rem;
-	min-width: 60px;
+        font-size: 0.75rem;
+        min-width: 45px;
 }
 
 .pos-table__qty-display[data-length="7"],
 .pos-table__qty-display[data-length="8"],
 .pos-table__qty-display[data-length="9"] {
-	font-size: 0.7rem;
-	min-width: 70px;
-	max-width: 100px;
+        font-size: 0.7rem;
+        min-width: 53px;
+        max-width: 75px;
 }
 
 .qty-control-btn:hover {
@@ -3628,15 +3636,15 @@ body[dir="rtl"] .number-field-rtl {
 	margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-        height: 15px;
+        height: 12px;
 }
 .pos-table__qty-input :deep(.v-field__field) {
-        height: 15px;
-        padding: 0 3px;
+        height: 12px;
+        padding: 0 2px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
         padding: 0;
-        min-height: 15px;
+        min-height: 12px;
 }
 .pos-table__editor-box {
         display: flex;
