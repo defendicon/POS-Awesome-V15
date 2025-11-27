@@ -33,8 +33,10 @@
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
 				resize: 'vertical',
-				overflow: 'auto',
+				overflow: 'hidden',
 				position: 'relative',
+				display: 'flex',
+				flexDirection: 'column',
 			}"
 		>
 			<v-progress-linear
@@ -46,8 +48,8 @@
 			></v-progress-linear>
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
-			<div class="dynamic-padding">
-				<div class="sticky-header">
+			<div class="dynamic-padding" style="height: 100%; display: flex; flex-direction: column; overflow: hidden;">
+				<div class="sticky-header" style="position: relative; z-index: 2;">
 					<v-row class="items">
 						<v-col class="pb-0">
 							<v-text-field
@@ -214,31 +216,37 @@
 						</v-col>
 					</v-row>
 				</div>
-				<v-row class="items">
-					<v-col cols="12" class="pt-0 mt-0">
-						<div v-if="items_view == 'card'" class="items-card-container">
-							<div v-if="loading" class="items-card-grid">
-								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
-							</div>
-							<RecycleScroller
-								v-else
-								ref="itemsContainer"
-								class="virtual-scroller"
-								:list-class="['items-card-grid', { 'item-container': isOverflowing }]"
-								:items="displayedItems"
-								key-field="item_code"
-								:item-size="cardRowHeight"
-								:grid-items="cardColumns"
-								:item-secondary-size="cardColumnWidth"
-								:buffer="virtualScrollBuffer"
-								:emit-update="true"
-								@update="onVirtualRangeUpdate"
-							>
+				<div class="items-list-wrapper" style="flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column;">
+					<v-row class="items" style="height: 100%; margin: 0; overflow: hidden;">
+						<v-col cols="12" class="pt-0 mt-0" style="height: 100%; padding: 0;">
+							<div v-if="items_view == 'card'" class="items-card-container" style="height: 100%;">
+								<div v-if="loading" class="items-card-grid">
+									<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
+								</div>
+								<RecycleScroller
+									v-else
+									ref="itemsContainer"
+									class="virtual-scroller"
+									style="height: 100%;"
+									:list-class="['items-virtual-list', { 'item-container': isOverflowing }]"
+									:items="displayedItems"
+									key-field="item_code"
+									:item-size="cardSlotHeight"
+									:grid-items="cardColumns"
+									:item-secondary-size="cardSlotWidth"
+									:buffer="virtualScrollBuffer"
+									:emit-update="true"
+									@update="onVirtualRangeUpdate"
+								>
 								<template #default="{ item }">
 									<div
 										v-if="item"
 										:key="item.item_code"
 										class="card-item-card"
+										:style="{
+											width: cardColumnWidth + 'px',
+											height: cardRowHeight + 'px',
+										}"
 										@click="select_item($event, item)"
 										:draggable="true"
 										@dragstart="onDragStart($event, item)"
@@ -338,13 +346,14 @@
 									</div>
 								</template>
 							</RecycleScroller>
+							</div>
 						</div>
-						<div v-else class="items-table-container">
+						<div v-else class="items-table-container" style="height: 100%;">
 							<v-data-table-virtual
 								:headers="headers"
 								:items="displayedItems"
 								class="sleek-data-table overflow-y-auto"
-								:style="{ height: 'calc(100% - 80px)' }"
+								:style="{ height: '100%' }"
 								item-key="item_code"
 								fixed-header
 								height="100%"
@@ -398,6 +407,7 @@
 						</div>
 					</v-col>
 				</v-row>
+				</div>
 			</div>
 		</v-card>
 		<v-card class="cards mb-0 mt-3 dynamic-padding resizable" style="resize: vertical; overflow: auto">
@@ -1227,18 +1237,12 @@ export default {
 				return;
 			}
 
-			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
-			if (isNaN(containerHeight)) {
-				this.isOverflowing = false;
-				return;
-			}
+			// In Flex layout, height is handled by CSS (flex: 1).
+			// We just need to detect overflow for visual cues if any.
+			const scrollHeight = el.scrollHeight;
+			const clientHeight = el.clientHeight;
 
-			const stickyHeader = el.closest(".dynamic-padding")?.querySelector(".sticky-header");
-			const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-			const availableHeight = containerHeight - headerHeight;
-
-			el.style.maxHeight = `${availableHeight}px`;
-			this.isOverflowing = el.scrollHeight > availableHeight;
+			this.isOverflowing = scrollHeight > clientHeight;
 			this.scheduleCardMetricsUpdate();
 		},
 
@@ -3906,12 +3910,18 @@ export default {
 		},
 		cardRowHeight() {
 			if (this.windowWidth <= 768) {
-				return 220;
+				return 260;
 			}
 			if (this.windowWidth <= 1200) {
-				return 240;
+				return 280;
 			}
-			return 260;
+			return 300;
+		},
+		cardSlotHeight() {
+			return this.cardRowHeight + this.cardGap;
+		},
+		cardSlotWidth() {
+			return this.cardColumnWidth + this.cardGap;
 		},
 		cardColumnWidth() {
 			const columns = Math.max(1, this.cardColumns);
@@ -4554,7 +4564,7 @@ export default {
 	grid-template-columns: repeat(3, 1fr);
 	gap: 16px;
 	padding: 16px;
-	height: calc(100% - 80px);
+	height: 100%;
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
@@ -4565,7 +4575,7 @@ export default {
 }
 
 .virtual-scroller {
-	height: calc(100% - 80px);
+	height: 100%;
 	overflow-y: auto;
 	position: relative;
 }
@@ -4590,6 +4600,24 @@ export default {
 .items-card-grid::-webkit-scrollbar-thumb {
 	background-color: rgba(0, 0, 0, 0.2);
 	border-radius: 4px;
+}
+
+.virtual-scroller :deep(.items-virtual-list) {
+	padding: 16px;
+	contain: layout style;
+	box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+	.virtual-scroller :deep(.items-virtual-list) {
+		padding: 12px;
+	}
+}
+
+@media (max-width: 768px) {
+	.virtual-scroller :deep(.items-virtual-list) {
+		padding: 10px;
+	}
 }
 
 .card-item-card {
