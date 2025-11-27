@@ -414,7 +414,7 @@
 											item-title="uom"
 											item-value="uom"
 											hide-details
-											@update:model-value="calcUom(item, $event)"
+                                                                                    @update:model-value="handleUomChange(item, $event)"
 											:disabled="
 												!!item.posa_is_replace ||
 												(isReturnInvoice && invoice_doc.return_against)
@@ -427,10 +427,10 @@
 
 							<!-- Pricing Section -->
 							<div class="form-section">
-								<div class="section-header">
-									<v-icon size="small" class="section-icon">mdi-currency-usd</v-icon>
-									<span class="section-title">{{ __("Pricing & Discounts") }}</span>
-								</div>
+                                                                <div class="section-header">
+                                                                        <v-icon size="small" class="section-icon">mdi-currency-usd</v-icon>
+                                                                        <span class="section-title">{{ __("Pricing & Disc.") }}</span>
+                                                                </div>
 								<div class="form-row">
 									<div class="form-field">
 										<v-text-field
@@ -459,8 +459,8 @@
 											density="compact"
 											variant="outlined"
 											color="primary"
-											id="discount_percentage"
-											:label="frappe._('Discount %')"
+                                                                                        id="discount_percentage"
+                                                                                        :label="frappe._('Disc. %')"
 											class="pos-themed-input"
 											hide-details
 											:model-value="
@@ -489,8 +489,8 @@
 											density="compact"
 											variant="outlined"
 											color="primary"
-											id="discount_amount"
-											:label="frappe._('Discount Amount')"
+                                                                                        id="discount_amount"
+                                                                                        :label="frappe._('Disc. Amount')"
 											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
@@ -1419,6 +1419,29 @@ export default {
                         }
                 },
 
+                resetItemDiscounts(item) {
+                        const zeroValue = 0;
+
+                        this.setFormatedCurrency(item, "discount_percentage", null, false, {
+                                target: { value: zeroValue },
+                        });
+                        this.setFormatedCurrency(item, "discount_amount", null, false, {
+                                target: { value: zeroValue },
+                        });
+                        this.calcPrices(item, zeroValue, { target: { id: "discount_percentage" } });
+                        this.calcPrices(item, zeroValue, { target: { id: "discount_amount" } });
+
+                        if (this.editing_discount_percent_row_id === item.posa_row_id) {
+                                this.editing_discount_percent_value = this.formatWithoutDecimals(zeroValue);
+                                this.editing_original_values.discount_percent = zeroValue;
+                        }
+
+                        if (this.editing_discount_amount_row_id === item.posa_row_id) {
+                                this.editing_discount_amount_value = this.formatWithoutDecimals(zeroValue);
+                                this.editing_original_values.discount_amount = zeroValue;
+                        }
+                },
+
                 openQtyEdit(item) {
                         if (this.editing_qty_row_id !== item.posa_row_id) {
                                 this.editing_qty_row_id = item.posa_row_id;
@@ -1450,24 +1473,33 @@ export default {
                         this.editing_uom_row_id = item.posa_row_id;
                 },
 
-		closeUomEdit(item) {
-			this.editing_uom_row_id = null;
-		},
+                closeUomEdit(item) {
+                        this.editing_uom_row_id = null;
+                },
 
-		handleUomSelect(item, newUom) {
-			if (newUom && newUom !== item.uom) {
-				this.calcUom(item, newUom);
-			}
-			// Find the correct component instance to blur
-			const uomSelectComponent = this.$refs.uomSelect.find(
-				(ref) => ref.$el.id.includes(item.posa_row_id),
-			);
-			uomSelectComponent?.blur();
-		},
+                handleUomChange(item, newUom) {
+                        this.applyUomChange(item, newUom);
+                },
 
-		changeUom(item, direction) {
-			const uoms = item.item_uoms.map((u) => u.uom);
-			const currentIndex = uoms.indexOf(item.uom);
+                handleUomSelect(item, newUom) {
+                        this.applyUomChange(item, newUom);
+                        // Find the correct component instance to blur
+                        const uomSelectComponent = this.$refs.uomSelect.find(
+                                (ref) => ref.$el.id.includes(item.posa_row_id),
+                        );
+                        uomSelectComponent?.blur();
+                },
+
+                applyUomChange(item, newUom) {
+                        if (newUom && newUom !== item.uom) {
+                                this.calcUom(item, newUom);
+                                this.resetItemDiscounts(item);
+                        }
+                },
+
+                changeUom(item, direction) {
+                        const uoms = item.item_uoms.map((u) => u.uom);
+                        const currentIndex = uoms.indexOf(item.uom);
 			let newIndex = currentIndex + direction;
 
 			if (newIndex < 0) {
@@ -1476,11 +1508,9 @@ export default {
 				newIndex = 0;
 			}
 
-			const newUom = uoms[newIndex];
-			if (newUom !== item.uom) {
-				this.calcUom(item, newUom);
-			}
-		},
+                        const newUom = uoms[newIndex];
+                        this.applyUomChange(item, newUom);
+                },
 		openRateEdit(item) {
                         if (
                                 !this.pos_profile.posa_allow_user_to_edit_rate ||
