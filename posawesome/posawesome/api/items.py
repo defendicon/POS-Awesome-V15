@@ -445,6 +445,7 @@ def _build_search_plan(
         "has_serial_no",
         "max_discount",
         "brand",
+        "allow_negative_stock",
     ]
     if include_description:
         fields.append("description")
@@ -732,6 +733,7 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
         "has_serial_no",
         "max_discount",
         "brand",
+        "allow_negative_stock",
     ]
 
     items_data = frappe.get_all(
@@ -898,6 +900,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     res["max_discount"] = max_discount
     res["batch_no_data"] = batch_no_data
     res["serial_no_data"] = serial_no_data
+    res["allow_negative_stock"] = frappe.db.get_value("Item", item_code, "allow_negative_stock")
 
     # Add UOMs data directly from item document
     uoms = frappe.get_all(

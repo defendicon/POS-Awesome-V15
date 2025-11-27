@@ -3403,6 +3403,7 @@ export default {
 					item.item_uoms = updated_item.item_uoms;
 					item.has_batch_no = updated_item.has_batch_no;
 					item.has_serial_no = updated_item.has_serial_no;
+					item.allow_negative_stock = updated_item.allow_negative_stock;
 					item.batch_no_data = updated_item.batch_no_data;
 					item.serial_no_data = updated_item.serial_no_data;
 
@@ -3599,6 +3600,7 @@ export default {
 		item.warehouse = data.warehouse || item.warehouse;
 		item.has_batch_no = data.has_batch_no;
 		item.has_serial_no = data.has_serial_no;
+		item.allow_negative_stock = data.allow_negative_stock;
 		item.serial_no = data.serial_no;
 		item.batch_no = data.batch_no;
 		item.is_stock_item = data.is_stock_item;
@@ -4232,8 +4234,17 @@ export default {
 
 		const blockSale =
 			this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty;
+		const allowNegativeStock =
+			item.allow_negative_stock === 1 ||
+			item.allow_negative_stock === true ||
+			item.allow_negative_stock === "1";
 		let clamped = false;
-		if (blockSale && item.max_qty !== undefined && flt(item.qty) > item.max_qty) {
+		if (
+			blockSale &&
+			!allowNegativeStock &&
+			item.max_qty !== undefined &&
+			flt(item.qty) > item.max_qty
+		) {
 			this.eventBus.emit("show_message", {
 				title: __("Quantity exceeds available stock"),
 				text: __("The quantity for {0} has been adjusted to the maximum available stock.", [
@@ -4272,7 +4283,14 @@ export default {
 			// Set increment disable flag based on stock limits
 			const blockSale =
 				this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty;
-			if (blockSale) {
+			const allowNegativeStock =
+				item.allow_negative_stock === 1 ||
+				item.allow_negative_stock === true ||
+				item.allow_negative_stock === "1";
+
+			if (allowNegativeStock) {
+				item.disable_increment = false;
+			} else if (blockSale) {
 				item.disable_increment = item.qty >= item.max_qty;
 			} else {
 				item.disable_increment =
