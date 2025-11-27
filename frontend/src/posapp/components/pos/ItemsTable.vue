@@ -1143,18 +1143,18 @@ export default {
 			}
 		},
 
-		calculateColumnWidth(header) {
-			const baseWidths = {
-				item_name: { min: 150, max: 250, ratio: 0.3 },
-				qty: { min: 120, max: 160, ratio: 0.15 },
-				rate: { min: 100, max: 130, ratio: 0.12 },
-				amount: { min: 100, max: 130, ratio: 0.12 },
-				discount_value: { min: 80, max: 110, ratio: 0.1 },
-				discount_amount: { min: 90, max: 120, ratio: 0.11 },
-				price_list_rate: { min: 110, max: 140, ratio: 0.13 },
-				actions: { min: 80, max: 100, ratio: 0.08 },
-				posa_is_offer: { min: 60, max: 80, ratio: 0.06 },
-			};
+                calculateColumnWidth(header) {
+                        const baseWidths = {
+                                item_name: { min: 130, max: 220, ratio: 0.26 },
+                                qty: { min: 110, max: 150, ratio: 0.14 },
+                                rate: { min: 90, max: 120, ratio: 0.11 },
+                                amount: { min: 90, max: 120, ratio: 0.11 },
+                                discount_value: { min: 70, max: 100, ratio: 0.09 },
+                                discount_amount: { min: 80, max: 110, ratio: 0.1 },
+                                price_list_rate: { min: 95, max: 125, ratio: 0.11 },
+                                actions: { min: 70, max: 90, ratio: 0.07 },
+                                posa_is_offer: { min: 55, max: 75, ratio: 0.06 },
+                        };
 
 			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
 			const calculatedWidth = this.containerWidth * config.ratio;
@@ -1162,18 +1162,18 @@ export default {
 			return Math.max(config.min, Math.min(config.max, calculatedWidth));
 		},
 
-		calculateMinColumnWidth(header) {
-			const minWidths = {
-				item_name: 120,
-				qty: 100,
-				rate: 80,
-				amount: 80,
-				discount_value: 70,
-				discount_amount: 80,
-				price_list_rate: 90,
-				actions: 60,
-				posa_is_offer: 50,
-			};
+                calculateMinColumnWidth(header) {
+                        const minWidths = {
+                                item_name: 110,
+                                qty: 95,
+                                rate: 70,
+                                amount: 70,
+                                discount_value: 65,
+                                discount_amount: 75,
+                                price_list_rate: 85,
+                                actions: 55,
+                                posa_is_offer: 45,
+                        };
 
 			return minWidths[header.key] || 60;
 		},
@@ -1564,7 +1564,7 @@ export default {
 /* Ensure items table can scroll when many rows exist */
 .items-table-container {
         overflow-y: auto;
-        overflow-x: auto;
+        overflow-x: hidden;
         width: 100%;
         max-width: 100%;
         margin: 0;
@@ -1580,7 +1580,7 @@ export default {
         width: 100%;
         max-width: 100%;
         overflow-y: auto;
-        overflow-x: auto;
+        overflow-x: hidden;
         scrollbar-width: thin;
         margin: 0;
         padding: 0;
@@ -1692,12 +1692,12 @@ export default {
 
 /* Table cell styling */
 .pos-table :deep(td) {
-	padding: 16px 12px;
-	vertical-align: middle;
-	height: 60px;
-	text-align: center;
-	color: var(--pos-text-primary);
-	position: relative;
+        padding: 12px 10px;
+        vertical-align: middle;
+        height: 56px;
+        text-align: center;
+        color: var(--pos-text-primary);
+        position: relative;
 }
 
 /* Ensure all cell contents fill the cell */
@@ -3258,12 +3258,12 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
-	border-radius: 8px !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow:
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow:
 		0 2px 8px var(--pos-shadow-light),
 		0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
@@ -3296,18 +3296,18 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .pos-table__qty-counter {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 4px;
-	/* More flexible sizing for larger numbers */
-	min-width: 130px;
-	max-width: 180px;
-	width: auto;
-	height: auto;
-	background: var(--pos-surface-variant);
-	border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 3px;
+        /* More flexible sizing for larger numbers */
+        min-width: clamp(96px, 26vw, 140px);
+        max-width: clamp(120px, 32vw, 170px);
+        width: 100%;
+        height: auto;
+        background: var(--pos-surface-variant);
+        border-radius: 12px;
 	backdrop-filter: blur(10px);
 	border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
@@ -3594,17 +3594,17 @@ body[dir="rtl"] .number-field-rtl {
 	min-height: 32px;
 }
 .pos-table__editor-box {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 4px;
-	min-width: 130px;
-	max-width: 180px;
-	width: auto;
-	height: auto;
-	background: var(--pos-surface-variant);
-	border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 3px 4px;
+        min-width: clamp(100px, 28vw, 150px);
+        max-width: clamp(120px, 32vw, 170px);
+        width: 100%;
+        height: auto;
+        background: var(--pos-surface-variant);
+        border-radius: 12px;
 	border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
 	margin: 0 auto;
@@ -3650,7 +3650,9 @@ body[dir="rtl"] .number-field-rtl {
 	border-radius: 8px !important;
 }
 .pos-table__editor-input {
-	max-width: 120px;
+        max-width: 110px;
+        min-width: 80px;
+        flex: 1 1 0;
 }
 .pos-table__editor-input :deep(input) {
 	text-align: center;
