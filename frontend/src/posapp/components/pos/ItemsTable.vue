@@ -1145,15 +1145,15 @@ export default {
 
                 calculateColumnWidth(header) {
                         const baseWidths = {
-                                item_name: { min: 130, max: 220, ratio: 0.26 },
-                                qty: { min: 110, max: 150, ratio: 0.14 },
-                                rate: { min: 90, max: 120, ratio: 0.11 },
-                                amount: { min: 90, max: 120, ratio: 0.11 },
-                                discount_value: { min: 70, max: 100, ratio: 0.09 },
-                                discount_amount: { min: 80, max: 110, ratio: 0.1 },
-                                price_list_rate: { min: 95, max: 125, ratio: 0.11 },
-                                actions: { min: 70, max: 90, ratio: 0.07 },
-                                posa_is_offer: { min: 55, max: 75, ratio: 0.06 },
+                                item_name: { min: 110, max: 190, ratio: 0.23 },
+                                qty: { min: 90, max: 130, ratio: 0.12 },
+                                rate: { min: 80, max: 110, ratio: 0.1 },
+                                amount: { min: 80, max: 110, ratio: 0.1 },
+                                discount_value: { min: 60, max: 90, ratio: 0.08 },
+                                discount_amount: { min: 70, max: 100, ratio: 0.09 },
+                                price_list_rate: { min: 85, max: 115, ratio: 0.1 },
+                                actions: { min: 55, max: 75, ratio: 0.06 },
+                                posa_is_offer: { min: 50, max: 70, ratio: 0.05 },
                         };
 
 			const config = baseWidths[header.key] || { min: 80, max: 120, ratio: 0.1 };
@@ -1164,18 +1164,18 @@ export default {
 
                 calculateMinColumnWidth(header) {
                         const minWidths = {
-                                item_name: 110,
-                                qty: 95,
-                                rate: 70,
-                                amount: 70,
-                                discount_value: 65,
-                                discount_amount: 75,
-                                price_list_rate: 85,
-                                actions: 55,
-                                posa_is_offer: 45,
+                                item_name: 95,
+                                qty: 85,
+                                rate: 65,
+                                amount: 65,
+                                discount_value: 55,
+                                discount_amount: 65,
+                                price_list_rate: 75,
+                                actions: 50,
+                                posa_is_offer: 40,
                         };
 
-			return minWidths[header.key] || 60;
+                        return minWidths[header.key] || 55;
 		},
 
 		setupResizeObserver() {
@@ -1546,19 +1546,20 @@ export default {
 <style scoped>
 /* Modern table styling with clean design */
 .pos-table {
-	border-radius: 8px;
-	overflow: hidden;
-	box-shadow: 0 2px 8px var(--pos-shadow);
-	border: 1px solid var(--pos-border);
-	height: 100%;
-	width: 100%;
-	max-width: 100%;
-	display: flex;
-	flex-direction: column;
-	transition: all 0.3s ease;
-	background: var(--pos-card-bg);
-	margin: 0;
-	padding: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px var(--pos-shadow);
+        border: 1px solid var(--pos-border);
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        background: var(--pos-card-bg);
+        margin: 0;
+        padding: 0;
+        font-size: clamp(0.72rem, 1.8vw, 0.88rem);
 }
 
 /* Ensure items table can scroll when many rows exist */
@@ -1603,13 +1604,13 @@ export default {
 /* Enhanced table header styling with global theme support */
 .pos-table :deep(th) {
         font-weight: 600;
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.3px;
-	padding: 12px;
-	border-bottom: 1px solid var(--pos-border);
-	background-color: var(--pos-table-header-bg);
-	color: var(--pos-text-primary);
+        font-size: clamp(0.72rem, 1.7vw, 0.84rem);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--pos-border);
+        background-color: var(--pos-table-header-bg);
+        color: var(--pos-text-primary);
 	position: sticky;
 	top: 0;
 	z-index: 3;
@@ -1618,13 +1619,13 @@ export default {
 	text-overflow: ellipsis;
 	max-width: 150px;
 	min-width: 80px;
-	text-align: center;
-	vertical-align: middle !important;
-	line-height: 1.2 !important;
-	height: 40px;
-	/* Enhanced transitions and stability */
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	background-clip: padding-box;
+        text-align: center;
+        vertical-align: middle !important;
+        line-height: 1.2 !important;
+        height: 38px;
+        /* Enhanced transitions and stability */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background-clip: padding-box;
 	border-radius: 0;
 	user-select: none;
 	cursor: default;
@@ -1692,9 +1693,9 @@ export default {
 
 /* Table cell styling */
 .pos-table :deep(td) {
-        padding: 12px 10px;
+        padding: 8px 6px;
         vertical-align: middle;
-        height: 56px;
+        height: 48px;
         text-align: center;
         color: var(--pos-text-primary);
         position: relative;
@@ -3258,9 +3259,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-        width: 30px !important;
-        height: 30px !important;
-        min-width: 30px !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
         border-radius: 8px !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow:
@@ -3302,8 +3303,8 @@ body[dir="rtl"] .amount-value.right-aligned {
         gap: 4px;
         padding: 3px;
         /* More flexible sizing for larger numbers */
-        min-width: clamp(96px, 26vw, 140px);
-        max-width: clamp(120px, 32vw, 170px);
+        min-width: clamp(84px, 22vw, 130px);
+        max-width: clamp(108px, 28vw, 150px);
         width: 100%;
         height: auto;
         background: var(--pos-surface-variant);
@@ -3395,10 +3396,10 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-display {
-	/* Dynamic width based on content with proper constraints */
-	min-width: 50px;
-	max-width: 100px;
-	width: auto;
+        /* Dynamic width based on content with proper constraints */
+        min-width: 50px;
+        max-width: 100px;
+        width: auto;
 	flex: 1 1 auto;
 	text-align: center;
 	font-weight: 600;
@@ -3410,18 +3411,18 @@ body[dir="rtl"] .number-field-rtl {
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
 	font-variant-numeric: lining-nums tabular-nums;
-	font-feature-settings:
-		"tnum" 1,
-		"lnum" 1,
-		"kern" 1;
-	color: var(--pos-primary);
-	font-size: 0.8rem;
-	transition: all 0.2s ease;
-	box-shadow: 0 1px 3px var(--pos-shadow-light);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
+        font-feature-settings:
+                "tnum" 1,
+                "lnum" 1,
+                "kern" 1;
+        color: var(--pos-primary);
+        font-size: 0.78rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px var(--pos-shadow-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
 	/* Handle overflow gracefully */
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -3433,10 +3434,10 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
-	min-width: 70px;
-	max-width: 120px;
-	font-size: 0.75rem;
-	padding: 6px 3px;
+        min-width: 70px;
+        max-width: 120px;
+        font-size: 0.75rem;
+        padding: 6px 3px;
 	letter-spacing: -0.04em;
 }
 
@@ -3449,8 +3450,8 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
-	min-width: 150px;
-	max-width: 200px;
+        min-width: 130px;
+        max-width: 170px;
 }
 
 /* Responsive text sizing based on number length */
@@ -3619,19 +3620,19 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-display {
-	min-width: 50px;
-	max-width: 100px;
-	width: auto;
-	flex: 1 1 auto;
-	text-align: center;
-	font-weight: 600;
-	padding: 6px 4px;
-	border-radius: 6px;
-	background: var(--pos-primary-container);
-	border: 1px solid var(--pos-primary-variant);
-	color: var(--pos-primary);
-	font-size: 0.8rem;
-	transition: all 0.2s ease;
+        min-width: 50px;
+        max-width: 100px;
+        width: auto;
+        flex: 1 1 auto;
+        text-align: center;
+        font-weight: 600;
+        padding: 5px 4px;
+        border-radius: 6px;
+        background: var(--pos-primary-container);
+        border: 1px solid var(--pos-primary-variant);
+        color: var(--pos-primary);
+        font-size: 0.78rem;
+        transition: all 0.2s ease;
 	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
@@ -3644,14 +3645,14 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
-	border-radius: 8px !important;
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        border-radius: 8px !important;
 }
 .pos-table__editor-input {
-        max-width: 110px;
-        min-width: 80px;
+        max-width: 100px;
+        min-width: 70px;
         flex: 1 1 0;
 }
 .pos-table__editor-input :deep(input) {
@@ -3665,7 +3666,7 @@ body[dir="rtl"] .number-field-rtl {
 	flex-shrink: 0;
 }
 .uom-select {
-	min-width: 60px;
+        min-width: 54px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
