@@ -45,7 +45,7 @@ export function useStockUtils() {
 
 		// Try to fetch rate for this UOM from price list
 		const priceList = context.get_price_list ? context.get_price_list() : null;
-		let uomRate = null;
+                let uomRate = null;
 		if (priceList && context.getCachedPriceListItems) {
 			const cached = context.getCachedPriceListItems(priceList) || [];
 			const match = cached.find((p) => p.item_code === item.item_code && p.uom === new_uom.uom);
@@ -71,7 +71,7 @@ export function useStockUtils() {
 			}
 		}
 
-                if (uomRate) {
+                if (uomRate !== null && uomRate !== undefined) {
                         item._manual_rate_set = true;
                         item._manual_rate_set_from_uom = true;
 
@@ -117,31 +117,31 @@ export function useStockUtils() {
 				}
 			}
 
-			item.base_price_list_rate = base_price;
-			item.base_rate = base_rate;
-			item.base_discount_amount = base_discount;
+                        item.base_price_list_rate = base_price;
+                        item.base_rate = base_rate;
+                        item.base_discount_amount = base_discount;
 
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
-				item.price_list_rate = context.flt(
-					base_price * context.exchange_rate,
-					context.currency_precision,
-				);
-				item.rate = context.flt(base_rate * context.exchange_rate, context.currency_precision);
-				item.discount_amount = context.flt(
-					base_discount * context.exchange_rate,
-					context.currency_precision,
-				);
-			} else {
-				item.price_list_rate = base_price;
-				item.rate = base_rate;
-				item.discount_amount = base_discount;
-			}
+                        const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+                        if (context.selected_currency !== baseCurrency) {
+                                item.price_list_rate = context.flt(
+                                        base_price * context.exchange_rate,
+                                        context.currency_precision,
+                                );
+                                item.rate = context.flt(base_rate * context.exchange_rate, context.currency_precision);
+                                item.discount_amount = context.flt(
+                                        base_discount * context.exchange_rate,
+                                        context.currency_precision,
+                                );
+                        } else {
+                                item.price_list_rate = base_price;
+                                item.rate = base_rate;
+                                item.discount_amount = base_discount;
+                        }
 
-			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
-			if (context.forceUpdate) context.forceUpdate();
-			return;
-		}
+                        if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+                        if (context.forceUpdate) context.forceUpdate();
+                        return;
+                }
 
 		// No explicit UOM price found, allow normal recalculation but
 		// lock the rate when the user selected a non-stock UOM so the
@@ -151,11 +151,11 @@ export function useStockUtils() {
                 item._manual_rate_set = shouldPreserveManualRate;
                 item._manual_rate_set_from_uom = shouldPreserveManualRate;
 
-		// Reset discount if not offer
-		if (!item.posa_offer_applied) {
-			item.discount_amount = 0;
-			item.discount_percentage = 0;
-		}
+                // Reset discount if not offer
+                if (!item.posa_offer_applied) {
+                        item.discount_amount = 0;
+                        item.discount_percentage = 0;
+                }
 
 		// Store original base rates if not already stored
 		if (!item.original_base_rate && !item.posa_offer_applied) {
@@ -163,8 +163,8 @@ export function useStockUtils() {
 			item.original_base_price_list_rate = item.base_price_list_rate / old_conversion_factor;
 		}
 
-		// Update rates based on new conversion factor
-		if (item.posa_offer_applied) {
+                // Update rates based on new conversion factor
+                if (item.posa_offer_applied) {
 			// For items with offer, recalculate from original offer rate
 			const offer =
 				context.posOffers && Array.isArray(context.posOffers)
@@ -268,29 +268,49 @@ export function useStockUtils() {
 					item.rate = item.base_rate;
 				}
 			}
-		} else {
-			// For regular items, use standard conversion
-			if (item.batch_price) {
-				item.base_rate = item.batch_price * item.conversion_factor;
-				item.base_price_list_rate = item.base_rate;
-			} else if (item.original_base_rate) {
-				item.base_rate = item.original_base_rate * item.conversion_factor;
-				item.base_price_list_rate = item.original_base_price_list_rate * item.conversion_factor;
-			}
+                } else {
+                        // For regular items, scale from the best available base price
+                        const toNumber = (value) => {
+                                const numeric = Number.parseFloat(value);
+                                return Number.isFinite(numeric) ? numeric : null;
+                        };
 
-			// Convert to selected currency
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
-				item.rate = context.flt(item.base_rate / context.exchange_rate, context.currency_precision);
-				item.price_list_rate = context.flt(
-					item.base_price_list_rate / context.exchange_rate,
-					context.currency_precision,
-				);
-			} else {
-				item.rate = item.base_rate;
-				item.price_list_rate = item.base_price_list_rate;
-			}
-		}
+                        const basePriceSource =
+                                toNumber(item.original_base_price_list_rate) ??
+                                toNumber(item.base_price_list_rate) ??
+                                toNumber(item.original_base_rate) ??
+                                toNumber(item.base_rate) ??
+                                toNumber(item.price_list_rate) ??
+                                toNumber(item.rate) ??
+                                0;
+
+                        const converted_base_price = context.flt(
+                                basePriceSource * item.conversion_factor,
+                                context.currency_precision,
+                        );
+
+                        item.base_rate = converted_base_price;
+                        item.base_price_list_rate = converted_base_price;
+                        item.base_discount_amount = 0;
+
+                        // Convert to selected currency
+                        const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+                        if (context.selected_currency !== baseCurrency) {
+                                item.rate = context.flt(
+                                        converted_base_price * context.exchange_rate,
+                                        context.currency_precision,
+                                );
+                                item.price_list_rate = context.flt(
+                                        converted_base_price * context.exchange_rate,
+                                        context.currency_precision,
+                                );
+                                item.discount_amount = 0;
+                        } else {
+                                item.rate = converted_base_price;
+                                item.price_list_rate = converted_base_price;
+                                item.discount_amount = 0;
+                        }
+                }
 
 		// Update item details
 		if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
