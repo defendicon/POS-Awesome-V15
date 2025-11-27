@@ -3580,8 +3580,8 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-input {
-	max-width: 80px;
-	margin: 0 auto;
+max-width: 72px;
+margin: 0 auto;
 }
 .pos-table__qty-input :deep(input) {
 	text-align: center;
@@ -3594,25 +3594,25 @@ body[dir="rtl"] .number-field-rtl {
 	margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-	height: 32px;
+        height: 30px;
 }
 .pos-table__qty-input :deep(.v-field__field) {
-	height: 32px;
-	padding: 0 8px;
+        height: 30px;
+        padding: 0 6px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
-	padding: 0;
-	min-height: 32px;
+        padding: 0;
+        min-height: 30px;
 }
 .pos-table__editor-box {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 4px;
-	min-width: 130px;
-	max-width: 180px;
-	width: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 2px;
+        min-width: 120px;
+        max-width: 160px;
+        width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
 	border-radius: 12px;
