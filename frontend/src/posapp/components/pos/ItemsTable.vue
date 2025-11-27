@@ -1194,7 +1194,7 @@ export default {
                                 ];
                         }
 
-                        return this.headers
+                        const visibleMetas = this.headers
                                 .filter((header) => {
                                         // Always show required columns
                                         if (
@@ -1221,11 +1221,70 @@ export default {
                                         // Large: show all columns
                                         return true;
                                 })
-                                .map((header) => ({
-                                        ...header,
-                                        width: this.calculateColumnWidth(header),
-                                        minWidth: this.calculateMinColumnWidth(header),
-                                }));
+                                .reduce((visible, header) => {
+                                        const preferredWidth = this.calculateColumnWidth(header);
+                                        const minWidth = this.calculateMinColumnWidth(header);
+
+                                        visible.push({
+                                                header,
+                                                preferredWidth,
+                                                minWidth,
+                                                finalWidth: Math.max(minWidth, preferredWidth),
+                                        });
+
+                                        return visible;
+                                }, []);
+
+                        const availableWidth = Math.max(this.containerWidth - 48, 320);
+                        const preferredTotal = visibleMetas.reduce((total, item) => total + item.finalWidth, 0);
+                        const minTotal = visibleMetas.reduce((total, item) => total + item.minWidth, 0);
+
+                        // When even min widths exceed the container, clamp everything to an even share
+                        if (minTotal > availableWidth) {
+                                const forcedWidth = Math.max(60, availableWidth / visibleMetas.length);
+                                visibleMetas.forEach((item) => {
+                                        item.finalWidth = forcedWidth;
+                                });
+                        } else if (preferredTotal > availableWidth) {
+                                // Softly shrink columns that have room above their minimum size
+                                const overflow = preferredTotal - availableWidth;
+                                const shrinkable = visibleMetas.filter((item) => item.finalWidth > item.minWidth);
+                                const shrinkableTotal = shrinkable.reduce(
+                                        (total, item) => total + (item.finalWidth - item.minWidth),
+                                        0,
+                                );
+
+                                if (shrinkableTotal > 0) {
+                                        const shrinkRatio = overflow / shrinkableTotal;
+                                        shrinkable.forEach((item) => {
+                                                const reduction = (item.finalWidth - item.minWidth) * shrinkRatio;
+                                                item.finalWidth = Math.max(item.minWidth, item.finalWidth - reduction);
+                                        });
+                                }
+
+                                // Final balancing pass in case rounding still leaves overflow
+                                const balancedTotal = visibleMetas.reduce((total, item) => total + item.finalWidth, 0);
+
+                                if (balancedTotal > availableWidth) {
+                                        const balanceRatio = availableWidth / balancedTotal;
+                                        visibleMetas.forEach((item) => {
+                                                const balancedWidth = item.finalWidth * balanceRatio;
+                                                const minimumCap = item.minWidth * 0.75;
+                                                item.finalWidth = Math.max(minimumCap, balancedWidth);
+                                        });
+                                }
+                        }
+
+                        return visibleMetas.map((meta) => {
+                                const width = Math.round(meta.finalWidth);
+                                const minWidth = Math.round(Math.min(meta.finalWidth, meta.minWidth));
+
+                                return {
+                                        ...meta.header,
+                                        width,
+                                        minWidth,
+                                };
+                        });
                 },
 
 		// Dynamic table density based on container size
