@@ -223,11 +223,7 @@ export default {
 			return;
 		}
 
-                const manualFromUom = item._manual_rate_set_from_uom === true;
-                const allowRateUpdate =
-                        !item.locked_price &&
-                        !item.posa_offer_applied &&
-                        (!item._manual_rate_set || manualFromUom);
+		const allowRateUpdate = !item.locked_price && !item.posa_offer_applied && !item._manual_rate_set;
 		const rawDocQty = Number.parseFloat(item.qty || 0);
 		const signedDocQty = Number.isFinite(rawDocQty) ? rawDocQty : 0;
 		const docQty = Math.abs(signedDocQty);
@@ -1041,7 +1037,7 @@ export default {
 			const discountPercentage =
 				Number.parseFloat(update.discount_percentage ?? item.discount_percentage ?? 0) || 0;
 
-                        const manualOverride = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
+			const manualOverride = item._manual_rate_set === true;
 			const priceLocked = item.locked_price === true;
 			const offerApplied =
 				item.posa_offer_applied === true ||
@@ -2764,12 +2760,11 @@ export default {
 	},
 
 	_assignManualOverrideValues(item, values = {}) {
-                if (!item || !values) {
-                        return;
-                }
+		if (!item || !values) {
+			return;
+		}
 
-                item._manual_rate_set = true;
-                item._manual_rate_set_from_uom = false;
+		item._manual_rate_set = true;
 
 		if (values.uom) {
 			item.uom = values.uom;
@@ -3415,21 +3410,17 @@ export default {
 						item.price_list_currency = updated_item.price_list_currency;
 					}
 
-                                        if (updated_item.rate !== undefined || updated_item.price_list_rate !== undefined) {
-                                                const force = this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-                                                const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
-                                                const priceCurrency =
-                                                        updated_item.currency ||
-                                                        updated_item.price_list_currency ||
-                                                        item.price_list_currency ||
-                                                        this.selected_currency;
-                                                const manualFromUom = item._manual_rate_set_from_uom === true;
-                                                const manualLocked = item._manual_rate_set === true;
-                                                const shouldOverrideRate =
-                                                        !item.locked_price &&
-                                                        !item.posa_offer_applied &&
-                                                        !manualLocked &&
-                                                        !manualFromUom;
+					if (updated_item.rate !== undefined || updated_item.price_list_rate !== undefined) {
+						const force = this.pos_profile?.posa_force_price_from_customer_price_list !== false;
+						const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
+						const priceCurrency =
+							updated_item.currency ||
+							updated_item.price_list_currency ||
+							item.price_list_currency ||
+							this.selected_currency;
+						const manualLocked = item._manual_rate_set === true;
+						const shouldOverrideRate =
+							!item.locked_price && !item.posa_offer_applied && !manualLocked;
 
 						if (shouldOverrideRate) {
 							if (force || price) {
@@ -3478,9 +3469,9 @@ export default {
 			return;
 		}
 
-                if (item._manual_rate_set && item._manual_rate_set_from_uom !== true && !force_update) {
-                        return;
-                }
+		if (item._manual_rate_set && !force_update) {
+			return;
+		}
 
 		if (force_update) {
 			item._detailSynced = false;
@@ -3567,9 +3558,7 @@ export default {
 	},
 
 	_applyItemDetailPayload(item, data, options = {}) {
-                const { forceUpdate = false } = options;
-
-                const manualFromUom = item?._manual_rate_set_from_uom === true;
+		const { forceUpdate = false } = options;
 
 		if (!item.warehouse) {
 			item.warehouse = this.pos_profile.warehouse;
@@ -3671,7 +3660,7 @@ export default {
 			this.set_batch_qty(item, null, false);
 		}
 
-                if (!item.locked_price && !manualFromUom) {
+		if (!item.locked_price) {
 			if (forceUpdate || !item.base_rate) {
 				if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
 					item.base_price_list_rate = data.price_list_rate;
@@ -3695,9 +3684,9 @@ export default {
 						this.currency_precision,
 					);
 
-                                        if (!item._manual_rate_set || item._manual_rate_set_from_uom === true) {
-                                                item.rate = this.flt(item.base_rate / conv, this.currency_precision);
-                                        }
+					if (!item._manual_rate_set) {
+						item.rate = this.flt(item.base_rate / conv, this.currency_precision);
+					}
 				} else if (this.selected_currency !== baseCurrency) {
 					const exchange_rate = this.exchange_rate || 1;
 					item.price_list_rate = this.flt(
@@ -3709,9 +3698,9 @@ export default {
 				} else {
 					item.price_list_rate = item.base_price_list_rate;
 
-                                        if (!item._manual_rate_set || item._manual_rate_set_from_uom === true) {
-                                                item.rate = item.base_rate;
-                                        }
+					if (!item._manual_rate_set) {
+						item.rate = item.base_rate;
+					}
 				}
 			} else {
 				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
@@ -3725,10 +3714,10 @@ export default {
 				}
 			}
 
-                        const serverDiscountPercentage = Number.parseFloat(data.discount_percentage);
-                        const hasServerPercentage =
-                                Number.isFinite(serverDiscountPercentage) && serverDiscountPercentage !== 0;
-                        if (hasServerPercentage && !item.posa_offer_applied && (!item._manual_rate_set || manualFromUom)) {
+			const serverDiscountPercentage = Number.parseFloat(data.discount_percentage);
+			const hasServerPercentage =
+				Number.isFinite(serverDiscountPercentage) && serverDiscountPercentage !== 0;
+			if (hasServerPercentage && !item.posa_offer_applied && !item._manual_rate_set) {
 				const existingDiscount = Number(item.discount_amount) || 0;
 				const EPSILON = 0.000001;
 				if (Math.abs(existingDiscount) < EPSILON) {
@@ -4034,7 +4023,7 @@ export default {
 
 		const rate = Number.isFinite(Number(newRate)) ? Number(newRate) : 0;
 		const resolvedCurrency = priceCurrency || this.selected_currency;
-                const manualOverride = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
+		const manualOverride = item._manual_rate_set === true;
 		const companyCurrency = this.pos_profile?.currency;
 
 		if (!item.original_currency) {
@@ -4227,14 +4216,12 @@ export default {
 	},
 
 	// Update UOM (unit of measure) for an item and recalculate prices
-        async calc_uom(item, value) {
-                if (!item) {
-                        return;
-                }
-                const result = await this.queueItemTask(item, "calc_uom", () => calcUom(item, value, this));
-                this.schedulePricingRuleApplication(true);
-                return result;
-        },
+	calc_uom(item, value) {
+		if (!item) {
+			return;
+		}
+		return this.queueItemTask(item, "calc_uom", () => calcUom(item, value, this));
+	},
 
 	// Calculate stock quantity for an item (simplified - validation handled centrally)
 	calc_stock_qty(item, value) {

@@ -103,16 +103,15 @@
 					>
 						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
 					</div>
-                                        <v-text-field
-                                                v-else
-                                                :model-value="editing_qty_value"
-                                                @update:model-value="updateEditingValue('qty', $event)"
-                                                density="compact"
-                                                variant="outlined"
-                                                class="pos-table__qty-input"
-                                                @focus="handleInputFocus('qty')"
-                                                @blur="closeQtyEdit(item)"
-                                                @keydown.enter.prevent="closeQtyEdit(item)"
+					<v-text-field
+						v-else
+						:model-value="editing_qty_value"
+						@update:model-value="editing_qty_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__qty-input"
+						@blur="closeQtyEdit(item)"
+						@keydown.enter.prevent="closeQtyEdit(item)"
 						@click.stop
 						ref="qtyInput"
 						:autofocus="true"
@@ -190,26 +189,24 @@
 							{{ formatCurrency(item.rate) }}
 						</span>
 					</div>
-                                        <v-text-field
-                                                v-else
-                                                :model-value="editing_rate_value"
-                                                @update:model-value="updateEditingValue('rate', $event)"
-                                                density="compact"
-                                                variant="outlined"
-                                                class="pos-table__editor-input"
-                                                @focus="handleInputFocus('rate')"
-                                                @blur="closeRateEdit(item)"
-                                                @keydown.enter.prevent="closeRateEdit(item)"
-                                                @click.stop
-                                                ref="rateInput"
-                                                :autofocus="true"
-                                                type="text"
-                                                inputmode="decimal"
-                                                :disabled="
-                                                        !pos_profile.posa_allow_user_to_edit_rate ||
-                                                        !!item.posa_is_replace ||
-                                                        !!item.posa_offer_applied
-                                                "
+					<v-text-field
+						v-else
+						:model-value="editing_rate_value"
+						@update:model-value="editing_rate_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__editor-input"
+						@blur="closeRateEdit(item)"
+						@keydown.enter.prevent="closeRateEdit(item)"
+						@click.stop
+						ref="rateInput"
+						:autofocus="true"
+						type="number"
+						:disabled="
+							!pos_profile.posa_allow_user_to_edit_rate ||
+							!!item.posa_is_replace ||
+							!!item.posa_offer_applied
+						"
 					></v-text-field>
 				</div>
 			</template>
@@ -247,26 +244,24 @@
 							}}%
 						</span>
 					</div>
-                                        <v-text-field
-                                                v-else
-                                                :model-value="editing_discount_percent_value"
-                                                @update:model-value="updateEditingValue('discount_percent', $event)"
-                                                density="compact"
-                                                variant="outlined"
-                                                class="pos-table__editor-input"
-                                                @focus="handleInputFocus('discount_percent')"
-                                                @blur="closeDiscountPercentEdit(item)"
-                                                @keydown.enter.prevent="closeDiscountPercentEdit(item)"
-                                                @click.stop
-                                                ref="discountPercentInput"
-                                                :autofocus="true"
-                                                type="text"
-                                                inputmode="decimal"
-                                                :disabled="
-                                                        !pos_profile.posa_allow_user_to_edit_item_discount ||
-                                                        !!item.posa_is_replace ||
-                                                        !!item.posa_offer_applied
-                                                "
+					<v-text-field
+						v-else
+						:model-value="editing_discount_percent_value"
+						@update:model-value="editing_discount_percent_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__editor-input"
+						@blur="closeDiscountPercentEdit(item)"
+						@keydown.enter.prevent="closeDiscountPercentEdit(item)"
+						@click.stop
+						ref="discountPercentInput"
+						:autofocus="true"
+						type="number"
+						:disabled="
+							!pos_profile.posa_allow_user_to_edit_item_discount ||
+							!!item.posa_is_replace ||
+							!!item.posa_offer_applied
+						"
 					></v-text-field>
 				</div>
 			</template>
@@ -284,26 +279,24 @@
 							formatCurrency(Math.abs(item.discount_amount || 0))
 						}}</span>
 					</div>
-                                        <v-text-field
-                                                v-else
-                                                :model-value="editing_discount_amount_value"
-                                                @update:model-value="updateEditingValue('discount_amount', $event)"
-                                                density="compact"
-                                                variant="outlined"
-                                                class="pos-table__editor-input"
-                                                @focus="handleInputFocus('discount_amount')"
-                                                @blur="closeDiscountAmountEdit(item)"
-                                                @keydown.enter.prevent="closeDiscountAmountEdit(item)"
-                                                @click.stop
-                                                ref="discountAmountInput"
-                                                :autofocus="true"
-                                                type="text"
-                                                inputmode="decimal"
-                                                :disabled="
-                                                        !pos_profile.posa_allow_user_to_edit_item_discount ||
-                                                        !!item.posa_is_replace ||
-                                                        !!item.posa_offer_applied
-                                                "
+					<v-text-field
+						v-else
+						:model-value="editing_discount_amount_value"
+						@update:model-value="editing_discount_amount_value = $event"
+						density="compact"
+						variant="outlined"
+						class="pos-table__editor-input"
+						@blur="closeDiscountAmountEdit(item)"
+						@keydown.enter.prevent="closeDiscountAmountEdit(item)"
+						@click.stop
+						ref="discountAmountInput"
+						:autofocus="true"
+						type="number"
+						:disabled="
+							!pos_profile.posa_allow_user_to_edit_item_discount ||
+							!!item.posa_is_replace ||
+							!!item.posa_offer_applied
+						"
 					></v-text-field>
 				</div>
 			</template>
@@ -414,7 +407,7 @@
 											item-title="uom"
 											item-value="uom"
 											hide-details
-                                                                                    @update:model-value="handleUomChange(item, $event)"
+											@update:model-value="calcUom(item, $event)"
 											:disabled="
 												!!item.posa_is_replace ||
 												(isReturnInvoice && invoice_doc.return_against)
@@ -427,10 +420,10 @@
 
 							<!-- Pricing Section -->
 							<div class="form-section">
-                                                                <div class="section-header">
-                                                                        <v-icon size="small" class="section-icon">mdi-currency-usd</v-icon>
-                                                                        <span class="section-title">{{ __("Pricing & Disc.") }}</span>
-                                                                </div>
+								<div class="section-header">
+									<v-icon size="small" class="section-icon">mdi-currency-usd</v-icon>
+									<span class="section-title">{{ __("Pricing & Discounts") }}</span>
+								</div>
 								<div class="form-row">
 									<div class="form-field">
 										<v-text-field
@@ -459,8 +452,8 @@
 											density="compact"
 											variant="outlined"
 											color="primary"
-                                                                                        id="discount_percentage"
-                                                                                        :label="frappe._('Disc. %')"
+											id="discount_percentage"
+											:label="frappe._('Discount %')"
 											class="pos-themed-input"
 											hide-details
 											:model-value="
@@ -489,8 +482,8 @@
 											density="compact"
 											variant="outlined"
 											color="primary"
-                                                                                        id="discount_amount"
-                                                                                        :label="frappe._('Disc. Amount')"
+											id="discount_amount"
+											:label="frappe._('Discount Amount')"
 											class="pos-themed-input"
 											hide-details
 											:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
@@ -892,20 +885,14 @@ export default {
 			editing_qty_row_id: null,
 			editing_qty_value: null,
 			editing_uom_row_id: null,
-                        editing_rate_row_id: null,
-                        editing_rate_value: null,
-                        editing_discount_percent_row_id: null,
-                        editing_discount_percent_value: null,
-                        editing_discount_amount_row_id: null,
-                        editing_discount_amount_value: null,
-                        editing_original_values: {
-                                qty: null,
-                                rate: null,
-                                discount_percent: null,
-                                discount_amount: null,
-                        },
-                };
-        },
+			editing_rate_row_id: null,
+			editing_rate_value: null,
+			editing_discount_percent_row_id: null,
+			editing_discount_percent_value: null,
+			editing_discount_amount_row_id: null,
+			editing_discount_amount_value: null,
+		};
+	},
 	computed: {
 		items() {
 			return this.invoiceStore.items;
@@ -1388,118 +1375,55 @@ export default {
 		},
 
 		// Optimized expanded update handler
-                handleExpandedUpdate(val) {
-                        const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
-                        this.$emit("update:expanded", mappedValues);
-                },
+		handleExpandedUpdate(val) {
+			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
+			this.$emit("update:expanded", mappedValues);
+		},
 
-                formatWithoutDecimals(value) {
-                        if (value === null || value === undefined || value === "") {
-                                return "";
-                        }
+		openQtyEdit(item) {
+			if (this.editing_qty_row_id !== item.posa_row_id) {
+				this.editing_qty_row_id = item.posa_row_id;
+				this.editing_qty_value = item.qty;
+				this.$nextTick(() => {
+					this.$refs.qtyInput?.focus();
+				});
+			}
+		},
 
-                        const numericValue = parseFloat(value);
+		closeQtyEdit(item) {
+			if (this.editing_qty_row_id === item.posa_row_id) {
+				const newQty = parseFloat(this.editing_qty_value);
+				if (!newQty || newQty <= 0) {
+					this.setFormatedQty(item, "qty", null, false, 1);
+				} else {
+					this.setFormatedQty(item, "qty", null, false, newQty);
+				}
+				this.editing_qty_row_id = null;
+				this.editing_qty_value = null;
+			}
+		},
+		openUomEdit(item) {
+			this.editing_uom_row_id = item.posa_row_id;
+		},
 
-                        if (!Number.isFinite(numericValue)) {
-                                return "";
-                        }
+		closeUomEdit(item) {
+			this.editing_uom_row_id = null;
+		},
 
-                        return Math.trunc(numericValue).toString();
-                },
+		handleUomSelect(item, newUom) {
+			if (newUom && newUom !== item.uom) {
+				this.calcUom(item, newUom);
+			}
+			// Find the correct component instance to blur
+			const uomSelectComponent = this.$refs.uomSelect.find(
+				(ref) => ref.$el.id.includes(item.posa_row_id),
+			);
+			uomSelectComponent?.blur();
+		},
 
-                updateEditingValue(field, value) {
-                        const normalizedField = `editing_${field}_value`;
-                        this[normalizedField] = this.formatWithoutDecimals(value);
-                },
-
-                handleInputFocus(field) {
-                        const key = `editing_${field}_value`;
-                        if (this[key] !== "") {
-                                this[key] = "";
-                        }
-                },
-
-                resetItemDiscounts(item) {
-                        const zeroValue = 0;
-
-                        this.setFormatedCurrency(item, "discount_percentage", null, false, {
-                                target: { value: zeroValue },
-                        });
-                        this.setFormatedCurrency(item, "discount_amount", null, false, {
-                                target: { value: zeroValue },
-                        });
-                        this.calcPrices(item, zeroValue, { target: { id: "discount_percentage" } });
-                        this.calcPrices(item, zeroValue, { target: { id: "discount_amount" } });
-
-                        if (this.editing_discount_percent_row_id === item.posa_row_id) {
-                                this.editing_discount_percent_value = this.formatWithoutDecimals(zeroValue);
-                                this.editing_original_values.discount_percent = zeroValue;
-                        }
-
-                        if (this.editing_discount_amount_row_id === item.posa_row_id) {
-                                this.editing_discount_amount_value = this.formatWithoutDecimals(zeroValue);
-                                this.editing_original_values.discount_amount = zeroValue;
-                        }
-                },
-
-                openQtyEdit(item) {
-                        if (this.editing_qty_row_id !== item.posa_row_id) {
-                                this.editing_qty_row_id = item.posa_row_id;
-                                this.editing_original_values.qty = item.qty;
-                                this.editing_qty_value = this.formatWithoutDecimals(item.qty);
-                                this.$nextTick(() => {
-                                        this.$refs.qtyInput?.focus();
-                                });
-                        }
-                },
-
-                closeQtyEdit(item) {
-                        if (this.editing_qty_row_id === item.posa_row_id) {
-                                const rawQty = this.editing_qty_value;
-                                const newQty = parseFloat(rawQty);
-                                const originalQty = this.editing_original_values.qty;
-
-                                if (rawQty === "" || !Number.isFinite(newQty) || newQty <= 0) {
-                                        this.setFormatedQty(item, "qty", null, false, originalQty);
-                                } else {
-                                        this.setFormatedQty(item, "qty", null, false, newQty);
-                                }
-                                this.editing_qty_row_id = null;
-                                this.editing_qty_value = null;
-                                this.editing_original_values.qty = null;
-                        }
-                },
-                openUomEdit(item) {
-                        this.editing_uom_row_id = item.posa_row_id;
-                },
-
-                closeUomEdit(item) {
-                        this.editing_uom_row_id = null;
-                },
-
-                handleUomChange(item, newUom) {
-                        this.applyUomChange(item, newUom);
-                },
-
-                handleUomSelect(item, newUom) {
-                        this.applyUomChange(item, newUom);
-                        // Find the correct component instance to blur
-                        const uomSelectComponent = this.$refs.uomSelect.find(
-                                (ref) => ref.$el.id.includes(item.posa_row_id),
-                        );
-                        uomSelectComponent?.blur();
-                },
-
-                applyUomChange(item, newUom) {
-                        if (newUom && newUom !== item.uom) {
-                                this.resetItemDiscounts(item);
-                                this.calcUom(item, newUom);
-                        }
-                },
-
-                changeUom(item, direction) {
-                        const uoms = item.item_uoms.map((u) => u.uom);
-                        const currentIndex = uoms.indexOf(item.uom);
+		changeUom(item, direction) {
+			const uoms = item.item_uoms.map((u) => u.uom);
+			const currentIndex = uoms.indexOf(item.uom);
 			let newIndex = currentIndex + direction;
 
 			if (newIndex < 0) {
@@ -1508,121 +1432,93 @@ export default {
 				newIndex = 0;
 			}
 
-                        const newUom = uoms[newIndex];
-                        this.applyUomChange(item, newUom);
-                },
+			const newUom = uoms[newIndex];
+			if (newUom !== item.uom) {
+				this.calcUom(item, newUom);
+			}
+		},
 		openRateEdit(item) {
-                        if (
-                                !this.pos_profile.posa_allow_user_to_edit_rate ||
-                                item.posa_is_replace ||
-                                item.posa_offer_applied
-                        ) {
-                                return;
-                        }
-                        this.editing_rate_row_id = item.posa_row_id;
-                        this.editing_original_values.rate = item.rate;
-                        this.editing_rate_value = this.formatWithoutDecimals(item.rate);
-                        this.$nextTick(() => {
-                                this.$refs.rateInput?.focus();
-                        });
-                },
-
-                closeRateEdit(item) {
-                        if (this.editing_rate_row_id === item.posa_row_id) {
-                                const rawRate = this.editing_rate_value;
-                                const newRate = parseFloat(rawRate);
-                                const originalRate = this.editing_original_values.rate;
-
-                                if (!rawRate || !Number.isFinite(newRate)) {
-                                        this.setFormatedCurrency(item, "rate", null, false, { target: { value: originalRate } });
-                                        this.calcPrices(item, originalRate, { target: { id: "rate" } });
-                                } else if (newRate !== item.rate) {
-                                        this.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
-                                        this.calcPrices(item, newRate, { target: { id: "rate" } });
-                                }
-                                this.editing_rate_row_id = null;
-                                this.editing_rate_value = null;
-                                this.editing_original_values.rate = null;
-                        }
-                },
-                openDiscountPercentEdit(item) {
-                        if (
-                                !this.pos_profile.posa_allow_user_to_edit_item_discount ||
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_rate ||
 				item.posa_is_replace ||
-                                item.posa_offer_applied
-                        ) {
-                                return;
-                        }
-                        this.editing_discount_percent_row_id = item.posa_row_id;
-                        this.editing_original_values.discount_percent = item.discount_percentage;
-                        this.editing_discount_percent_value = this.formatWithoutDecimals(
-                                item.discount_percentage,
-                        );
-                        this.$nextTick(() => {
-                                this.$refs.discountPercentInput?.focus();
-                        });
-                },
+				item.posa_offer_applied
+			) {
+				return;
+			}
+			this.editing_rate_row_id = item.posa_row_id;
+			this.editing_rate_value = item.rate;
+			this.$nextTick(() => {
+				this.$refs.rateInput?.focus();
+			});
+		},
 
-                closeDiscountPercentEdit(item) {
-                        if (this.editing_discount_percent_row_id === item.posa_row_id) {
-                                const rawDiscount = this.editing_discount_percent_value;
-                                const newDiscount = parseFloat(rawDiscount);
-                                const originalDiscount = this.editing_original_values.discount_percent;
-
-                                if (!rawDiscount || !Number.isFinite(newDiscount)) {
-                                        this.setFormatedCurrency(item, "discount_percentage", null, false, {
-                                                target: { value: originalDiscount },
-                                        });
-                                        this.calcPrices(item, originalDiscount, { target: { id: "discount_percentage" } });
-                                } else if (newDiscount !== item.discount_percentage) {
-                                        this.setFormatedCurrency(item, "discount_percentage", null, false, {
-                                                target: { value: newDiscount },
-                                        });
-                                        this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
-                                }
-                                this.editing_discount_percent_row_id = null;
-                                this.editing_discount_percent_value = null;
-                                this.editing_original_values.discount_percent = null;
-                        }
-                },
-                openDiscountAmountEdit(item) {
-                        if (
-                                !this.pos_profile.posa_allow_user_to_edit_item_discount ||
+		closeRateEdit(item) {
+			if (this.editing_rate_row_id === item.posa_row_id) {
+				const newRate = parseFloat(this.editing_rate_value);
+				if (Number.isFinite(newRate) && newRate !== item.rate) {
+					this.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
+					this.calcPrices(item, newRate, { target: { id: "rate" } });
+				}
+				this.editing_rate_row_id = null;
+				this.editing_rate_value = null;
+			}
+		},
+		openDiscountPercentEdit(item) {
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
 				item.posa_is_replace ||
-                                item.posa_offer_applied
-                        ) {
-                                return;
-                        }
-                        this.editing_discount_amount_row_id = item.posa_row_id;
-                        this.editing_original_values.discount_amount = item.discount_amount;
-                        this.editing_discount_amount_value = this.formatWithoutDecimals(item.discount_amount);
-                        this.$nextTick(() => {
-                                this.$refs.discountAmountInput?.focus();
-                        });
-                },
+				item.posa_offer_applied
+			) {
+				return;
+			}
+			this.editing_discount_percent_row_id = item.posa_row_id;
+			this.editing_discount_percent_value = item.discount_percentage;
+			this.$nextTick(() => {
+				this.$refs.discountPercentInput?.focus();
+			});
+		},
 
-                closeDiscountAmountEdit(item) {
-                        if (this.editing_discount_amount_row_id === item.posa_row_id) {
-                                const rawDiscount = this.editing_discount_amount_value;
-                                const newDiscount = parseFloat(rawDiscount);
-                                const originalDiscount = this.editing_original_values.discount_amount;
+		closeDiscountPercentEdit(item) {
+			if (this.editing_discount_percent_row_id === item.posa_row_id) {
+				const newDiscount = parseFloat(this.editing_discount_percent_value);
+				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_percentage) {
+					this.setFormatedCurrency(item, "discount_percentage", null, false, {
+						target: { value: newDiscount },
+					});
+					this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
+				}
+				this.editing_discount_percent_row_id = null;
+				this.editing_discount_percent_value = null;
+			}
+		},
+		openDiscountAmountEdit(item) {
+			if (
+				!this.pos_profile.posa_allow_user_to_edit_item_discount ||
+				item.posa_is_replace ||
+				item.posa_offer_applied
+			) {
+				return;
+			}
+			this.editing_discount_amount_row_id = item.posa_row_id;
+			this.editing_discount_amount_value = item.discount_amount;
+			this.$nextTick(() => {
+				this.$refs.discountAmountInput?.focus();
+			});
+		},
 
-                                if (!rawDiscount || !Number.isFinite(newDiscount)) {
-                                        this.setFormatedCurrency(item, "discount_amount", null, false, {
-                                                target: { value: originalDiscount },
-                                        });
-                                        this.calcPrices(item, originalDiscount, { target: { id: "discount_amount" } });
-                                } else if (newDiscount !== item.discount_amount) {
-                                        this.setFormatedCurrency(item, "discount_amount", null, false, {
-                                                target: { value: newDiscount },
-                                        });
-                                        this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
-                                }
-                                this.editing_discount_amount_row_id = null;
-                                this.editing_discount_amount_value = null;
-                                this.editing_original_values.discount_amount = null;
-                        }
-                },
+		closeDiscountAmountEdit(item) {
+			if (this.editing_discount_amount_row_id === item.posa_row_id) {
+				const newDiscount = parseFloat(this.editing_discount_amount_value);
+				if (Number.isFinite(newDiscount) && newDiscount !== item.discount_amount) {
+					this.setFormatedCurrency(item, "discount_amount", null, false, {
+						target: { value: newDiscount },
+					});
+					this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
+				}
+				this.editing_discount_amount_row_id = null;
+				this.editing_discount_amount_value = null;
+			}
+		},
 	},
 
 	mounted() {
@@ -2393,39 +2289,39 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .responsive-table-container.compact-view .pos-table__qty-counter {
-        min-width: 77px;
-        max-width: 99px;
-        width: auto;
-        gap: 3.3px;
+	min-width: 110px;
+	max-width: 140px;
+	width: auto;
+	gap: 4px;
 }
 
 .responsive-table-container.compact-view .qty-control-btn {
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;
+	width: 28px !important;
+	height: 28px !important;
+	min-width: 28px !important;
 }
 
 .responsive-table-container.compact-view .pos-table__qty-display {
-        min-width: 24px;
-        max-width: 44px;
-        height: 20px;
-        font-size: 0.77rem;
-        padding: 3.3px 2.2px;
-        letter-spacing: -0.03em;
+	min-width: 35px;
+	max-width: 65px;
+	height: 28px;
+	font-size: 0.7rem;
+	padding: 4px 3px;
+	letter-spacing: -0.03em;
 }
 
 /* Medium view adjustments */
 .responsive-table-container.medium-view .pos-table__qty-counter {
-        min-width: 88px;
-        max-width: 121px;
-        width: auto;
+	min-width: 130px;
+	max-width: 160px;
+	width: auto;
 }
 
 /* Large view adjustments */
 .responsive-table-container.large-view .pos-table__qty-counter {
-        min-width: 99px;
-        max-width: 132px;
-        width: auto;
+	min-width: 140px;
+	max-width: 180px;
+	width: auto;
 }
 
 /* Enhanced expanded content responsiveness */
@@ -2657,29 +2553,29 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 		max-width: 90px;
 	}
 
-        .pos-table__qty-counter {
-                min-width: 77px;
-                width: 77px;
-                height: auto;
-                gap: 3.3px;
-                padding: 2.2px;
-        }
+	.pos-table__qty-counter {
+		min-width: 110px;
+		width: 110px;
+		height: auto;
+		gap: 4px;
+		padding: 2px;
+	}
 
-        .qty-control-btn {
-                width: 20px !important;
-                height: 20px !important;
-                min-width: 20px !important;
-                border-radius: 6px !important;
-        }
+	.qty-control-btn {
+		width: 28px !important;
+		height: 28px !important;
+		min-width: 28px !important;
+		border-radius: 6px !important;
+	}
 
-        .pos-table__qty-display {
-                min-width: 24px;
-                max-width: 44px;
-                padding: 3.3px 2.2px;
-                font-size: 0.79rem;
-                height: 20px;
-                letter-spacing: -0.03em;
-        }
+	.pos-table__qty-display {
+		min-width: 35px;
+		max-width: 70px;
+		padding: 4px 3px;
+		font-size: 0.75rem;
+		height: 28px;
+		letter-spacing: -0.03em;
+	}
 
 	.action-button-group {
 		flex-direction: column;
@@ -3373,13 +3269,13 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;
-        border-radius: 7px !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow:
-                0 2px 8px var(--pos-shadow-light),
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	border-radius: 8px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow:
+		0 2px 8px var(--pos-shadow-light),
 		0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
@@ -3411,21 +3307,21 @@ body[dir="rtl"] .amount-value.right-aligned {
 }
 
 .pos-table__qty-counter {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 3.3px;
-        padding: 2.2px;
-        /* More flexible sizing for larger numbers */
-        min-width: 66px;
-        max-width: 99px;
-        width: auto;
-        height: auto;
-        background: var(--pos-surface-variant);
-        border-radius: 13px;
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--pos-border-light);
-        transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 4px;
+	/* More flexible sizing for larger numbers */
+	min-width: 130px;
+	max-width: 180px;
+	width: auto;
+	height: auto;
+	background: var(--pos-surface-variant);
+	border-radius: 12px;
+	backdrop-filter: blur(10px);
+	border: 1px solid var(--pos-border-light);
+	transition: all 0.3s ease;
 	margin: 0 auto;
 	/* Allow container to grow with content */
 	flex-shrink: 0;
@@ -3510,49 +3406,49 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-display {
-        /* Dynamic width based on content with proper constraints */
-        min-width: 24px;
-        max-width: 50px;
-        width: auto;
-        flex: 1 1 auto;
-        text-align: center;
-        font-weight: 600;
-        padding: 3.3px 2.2px;
-        border-radius: 5px;
-        background: var(--pos-primary-container);
-        border: 1px solid var(--pos-primary-variant);
-        font-family:
-                "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
-                sans-serif;
+	/* Dynamic width based on content with proper constraints */
+	min-width: 50px;
+	max-width: 100px;
+	width: auto;
+	flex: 1 1 auto;
+	text-align: center;
+	font-weight: 600;
+	padding: 6px 4px;
+	border-radius: 6px;
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-primary-variant);
+	font-family:
+		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+		sans-serif;
 	font-variant-numeric: lining-nums tabular-nums;
 	font-feature-settings:
 		"tnum" 1,
 		"lnum" 1,
 		"kern" 1;
 	color: var(--pos-primary);
-        font-size: 0.82rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 3px var(--pos-shadow-light);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 20px;
-        /* Handle overflow gracefully */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        /* Better number display */
-        letter-spacing: -0.02em;
-        word-spacing: -0.1em;
+	font-size: 0.8rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	/* Handle overflow gracefully */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	/* Better number display */
+	letter-spacing: -0.02em;
+	word-spacing: -0.1em;
 }
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
-        min-width: 35px;
-        max-width: 61px;
-        font-size: 0.77rem;
-        padding: 3.3px 2.2px;
-        letter-spacing: -0.04em;
+	min-width: 70px;
+	max-width: 120px;
+	font-size: 0.75rem;
+	padding: 6px 3px;
+	letter-spacing: -0.04em;
 }
 
 /* Special handling for negative numbers */
@@ -3564,35 +3460,35 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
-        min-width: 88px;
-        max-width: 121px;
+	min-width: 150px;
+	max-width: 200px;
 }
 
 /* Responsive text sizing based on number length */
 .pos-table__qty-display[data-length="1"],
 .pos-table__qty-display[data-length="2"] {
-        font-size: 0.8rem;
-        min-width: 20px;
+	font-size: 0.85rem;
+	min-width: 40px;
 }
 
 .pos-table__qty-display[data-length="3"],
 .pos-table__qty-display[data-length="4"] {
-        font-size: 0.8rem;
-        min-width: 26px;
+	font-size: 0.8rem;
+	min-width: 50px;
 }
 
 .pos-table__qty-display[data-length="5"],
 .pos-table__qty-display[data-length="6"] {
-        font-size: 0.75rem;
-        min-width: 32px;
+	font-size: 0.75rem;
+	min-width: 60px;
 }
 
 .pos-table__qty-display[data-length="7"],
 .pos-table__qty-display[data-length="8"],
 .pos-table__qty-display[data-length="9"] {
-        font-size: 0.7rem;
-        min-width: 40px;
-        max-width: 55px;
+	font-size: 0.7rem;
+	min-width: 70px;
+	max-width: 100px;
 }
 
 .qty-control-btn:hover {
@@ -3684,47 +3580,47 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-input {
-        max-width: 60px;
-        margin: 0 auto;
+	max-width: 80px;
+	margin: 0 auto;
 }
 .pos-table__qty-input :deep(input) {
-        text-align: center;
-        font-weight: 600;
-        -moz-appearance: textfield;
+	text-align: center;
+	font-weight: 600;
+	-moz-appearance: textfield;
 }
 .pos-table__qty-input :deep(input::-webkit-outer-spin-button),
 .pos-table__qty-input :deep(input::-webkit-inner-spin-button) {
-        -webkit-appearance: none;
-        margin: 0;
+	-webkit-appearance: none;
+	margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-        height: 25px;
+	height: 32px;
 }
 .pos-table__qty-input :deep(.v-field__field) {
-        height: 25px;
-        padding: 0 4.5px;
+	height: 32px;
+	padding: 0 8px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
-        padding: 0;
-        min-height: 25px;
+	padding: 0;
+	min-height: 32px;
 }
 .pos-table__editor-box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 2.2px;
-        padding: 1.1px;
-        min-width: 66px;
-        max-width: 99px;
-        width: auto;
-        height: auto;
-        background: var(--pos-surface-variant);
-        border-radius: 13px;
-        border: 1px solid var(--pos-border-light);
-        transition: all 0.3s ease;
-        margin: 0 auto;
-        flex-shrink: 0;
-        box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 4px;
+	min-width: 130px;
+	max-width: 180px;
+	width: auto;
+	height: auto;
+	background: var(--pos-surface-variant);
+	border-radius: 12px;
+	border: 1px solid var(--pos-border-light);
+	transition: all 0.3s ease;
+	margin: 0 auto;
+	flex-shrink: 0;
+	box-sizing: border-box;
 }
 
 .pos-table__editor-box:hover {
@@ -3734,72 +3630,51 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-display {
-        min-width: 42px;
-        max-width: 66px;
-        width: auto;
-        flex: 1 1 auto;
-        text-align: center;
-        font-weight: 600;
-        padding: 3.3px 2.2px;
-        border-radius: 6px;
-        background: var(--pos-primary-container);
-        border: 1px solid var(--pos-primary-variant);
-        color: var(--pos-primary);
-        font-size: 0.82rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 3px var(--pos-shadow-light);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 20px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        cursor: pointer;
+	min-width: 50px;
+	max-width: 100px;
+	width: auto;
+	flex: 1 1 auto;
+	text-align: center;
+	font-weight: 600;
+	padding: 6px 4px;
+	border-radius: 6px;
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-primary-variant);
+	color: var(--pos-primary);
+	font-size: 0.8rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: pointer;
 }
 
 .pos-table__editor-btn {
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;
-        border-radius: 7px !important;
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	border-radius: 8px !important;
 }
 .pos-table__editor-input {
-        max-width: 77px;
+	max-width: 120px;
 }
 .pos-table__editor-input :deep(input) {
-        text-align: center;
-        -moz-appearance: textfield;
-}
-.pos-table__editor-input :deep(input::-webkit-outer-spin-button),
-.pos-table__editor-input :deep(input::-webkit-inner-spin-button) {
-        -webkit-appearance: none;
-        margin: 0;
+	text-align: center;
 }
 
 .uom-editor {
-        gap: 2.2px;
-        padding: 1.1px;
-        min-width: 61px;
-        max-width: 83px;
-        border-radius: 11px;
+	gap: 2px;
 }
 .uom-arrow {
-        flex-shrink: 0;
+	flex-shrink: 0;
 }
 .uom-select {
-        min-width: 40px;
-}
-
-.uom-editor .pos-table__editor-btn {
-        width: 18px !important;
-        height: 18px !important;
-        min-width: 18px !important;
-        border-radius: 7px !important;
-}
-
-.uom-editor .pos-table__editor-input {
-        max-width: 61px;
+	min-width: 60px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
@@ -3811,18 +3686,14 @@ body[dir="rtl"] .number-field-rtl {
 	box-shadow: none !important;
 }
 .uom-display-mode :deep(.v-field__input) {
-        justify-content: center;
-        padding: 0;
-        font-weight: 600;
-        font-size: 0.7rem;
-        color: var(--pos-primary);
+	justify-content: center;
+	padding: 0;
+	font-weight: 600;
+	color: var(--pos-primary);
 }
 .uom-display-mode :deep(.v-select__selection-text) {
-        text-align: center;
-        color: var(--pos-primary);
-        font-size: 0.7rem;
-        overflow: visible;
-        text-overflow: clip;
+	text-align: center;
+	color: var(--pos-primary);
 }
 .uom-display-mode :deep(.v-field__append-inner) {
 	display: none;

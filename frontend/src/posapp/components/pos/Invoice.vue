@@ -517,7 +517,7 @@ export default {
 					width: "120px",
 				},
                                 { title: __("Disc. %"), key: "discount_value", align: "end", required: false },
-                                { title: __("Disc. Amount"), key: "discount_amount", align: "end", required: false },
+                                { title: __("Disc. Amt."), key: "discount_amount", align: "end", required: false },
 				{ title: __("Rate"), key: "rate", align: "center", required: true },
 				{ title: __("Amount"), key: "amount", align: "center", required: true },
 				{ title: __("Offer?"), key: "posa_is_offer", align: "center", required: false },
