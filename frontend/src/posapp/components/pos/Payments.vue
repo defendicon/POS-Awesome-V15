@@ -1547,14 +1547,21 @@ export default {
 				},
 			});
 		},
-		// Set remaining amount for a payment method (allows partial payments across multiple methods)
+		// Set full amount for a payment method (clears other payments first)
 		set_full_amount(idx) {
 			const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
-			const remainingAmount = this.diff_payment;
+			let totalAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
 
-			console.log("Setting remaining amount for payment method idx:", idx);
+			console.log("Setting full amount for payment method idx:", idx);
 			console.log("Current payments:", JSON.stringify(this.invoice_doc.payments));
-			console.log("Remaining amount:", remainingAmount);
+
+			// Reset all payment amounts first
+			this.invoice_doc.payments.forEach((payment) => {
+				payment.amount = 0;
+				if (payment.base_amount !== undefined) {
+					payment.base_amount = 0;
+				}
+			});
 
 			// Get the clicked payment method's name from the button text
 			const clickedButton = event?.target?.textContent?.trim();
@@ -1567,35 +1574,20 @@ export default {
 
 			if (clickedPayment) {
 				console.log("Found clicked payment:", clickedPayment.mode_of_payment);
-				
-				// If there's a remaining amount (positive for sales, negative for returns), add it to the clicked payment method
-				// This allows users to split payments across multiple methods
-				if ((!isReturn && remainingAmount > 0) || (isReturn && remainingAmount !== 0)) {
-					let amountToAdd = remainingAmount;
-					
-					// Add to existing amount (allows building up payments)
-					const currentAmount = parseFloat(formatUtils.fromArabicNumerals(String(clickedPayment.amount))) || 0;
-					const newAmount = currentAmount + amountToAdd;
-					
-					clickedPayment.amount = newAmount;
-					if (clickedPayment.base_amount !== undefined) {
-						// Calculate base amount if needed (for multi-currency)
-						if (this.invoice_doc.currency !== this.pos_profile.currency) {
-							clickedPayment.base_amount = newAmount * (this.invoice_doc.conversion_rate || 1);
-						} else {
-							clickedPayment.base_amount = newAmount;
-						}
+				// Set full amount only for clicked payment method
+				let amount = isReturn ? -Math.abs(totalAmount) : totalAmount;
+				clickedPayment.amount = amount;
+				if (clickedPayment.base_amount !== undefined) {
+					// Calculate base amount if needed (for multi-currency)
+					if (this.invoice_doc.currency !== this.pos_profile.currency) {
+						clickedPayment.base_amount = isReturn 
+							? -Math.abs(amount * (this.invoice_doc.conversion_rate || 1))
+							: amount * (this.invoice_doc.conversion_rate || 1);
+					} else {
+						clickedPayment.base_amount = amount;
 					}
-					console.log("Added amount to payment:", clickedPayment.mode_of_payment, "amount added:", amountToAdd, "new total:", newAmount);
-				} else if (!isReturn && remainingAmount <= 0) {
-					// If no remaining amount (payment is complete or overpaid), set to full invoice amount (for new payments)
-					let totalAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-					clickedPayment.amount = totalAmount;
-					if (clickedPayment.base_amount !== undefined) {
-						clickedPayment.base_amount = totalAmount;
-					}
-					console.log("Set full amount for payment:", clickedPayment.mode_of_payment, "amount:", totalAmount);
 				}
+				console.log("Set full amount for payment:", clickedPayment.mode_of_payment, "amount:", amount);
 			} else {
 				console.log("No payment found for button text:", clickedButton);
 			}

@@ -4105,7 +4105,7 @@ export default {
 }
 
 .card-item-content {
-	padding: 12px 16px 16px;
+	padding: 0;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
@@ -4477,7 +4477,7 @@ export default {
 	}
 
 	.card-item-content {
-		padding: 10px 12px 12px;
+		padding: 0;
 	}
 
 	.card-item-name {
