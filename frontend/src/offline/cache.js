@@ -9,8 +9,49 @@ import {
 import { clearPriceListCache } from "./items.js";
 import Dexie from "dexie/dist/dexie.mjs";
 
+const CACHE_STRUCTURE = {
+        items: ["item_code", "item_name", "item_group", "barcodes", "serials", "batches"],
+        item_prices: ["price_list", "item_code", "price_list_rate", "timestamp"],
+        customers: ["name", "customer_name", "mobile_no", "email_id", "tax_id"],
+        local_stock: ["key", "value"],
+        coupons: ["code", "valid_from", "valid_upto"],
+        item_groups: ["name", "parent_item_group"],
+        translations: ["key", "language"],
+        pricing_rules: ["snapshot", "context", "stale_at"],
+};
+
+function hashStructure(structure) {
+        const json = JSON.stringify(structure);
+        let hash = 0;
+        for (let i = 0; i < json.length; i++) {
+                const chr = json.charCodeAt(i);
+                hash = (hash << 5) - hash + chr;
+                hash |= 0; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+}
+
+function computeCacheVersion() {
+        const structureHash = hashStructure(CACHE_STRUCTURE);
+        if (typeof localStorage === "undefined") {
+                return structureHash;
+        }
+
+        const storedHash = localStorage.getItem("posa_cache_structure_hash");
+        const storedVersion = parseInt(localStorage.getItem("posa_cache_version") || "1", 10) || 1;
+
+        if (!storedHash || storedHash !== String(structureHash)) {
+                const nextVersion = storedVersion + 1;
+                localStorage.setItem("posa_cache_structure_hash", String(structureHash));
+                localStorage.setItem("posa_cache_version", String(nextVersion));
+                return nextVersion;
+        }
+
+        return storedVersion;
+}
+
 // Increment this number whenever the cache data structure changes
-export const CACHE_VERSION = 1;
+export const CACHE_VERSION = computeCacheVersion();
 
 export const MAX_QUEUE_ITEMS = 1000;
 
