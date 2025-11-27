@@ -2464,10 +2464,25 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 /* Smooth transitions during resize */
 .pos-table :deep(th),
 .pos-table :deep(td) {
-	transition:
-		padding 0.2s ease,
-		font-size 0.2s ease,
-		width 0.2s ease;
+        transition:
+                padding 0.2s ease,
+                font-size 0.2s ease,
+                width 0.2s ease;
+}
+
+/* Expanded rate editor defaults */
+.pos-table :deep(td[data-column-key="rate"] .pos-table__editor-box) {
+        min-width: 75px;
+        max-width: 100px;
+}
+
+.pos-table :deep(td[data-column-key="rate"] .pos-table__editor-display) {
+        min-width: 31px;
+        max-width: 63px;
+}
+
+.pos-table :deep(td[data-column-key="rate"] .pos-table__editor-input) {
+        max-width: 75px;
 }
 
 /* Enhanced responsive design */
@@ -2572,8 +2587,8 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
         }
 
         .pos-table :deep(th[data-column-key="rate"]) {
-                min-width: 88px;
-                max-width: 112px;
+                min-width: 110px;
+                max-width: 140px;
         }
 
         .pos-table :deep(th[data-column-key="amount"]) {
@@ -2582,17 +2597,17 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
         }
 
         .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-box) {
-                min-width: 90px;
-                max-width: 120px;
+                min-width: 113px;
+                max-width: 150px;
         }
 
         .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-display) {
-                min-width: 38px;
-                max-width: 75px;
+                min-width: 48px;
+                max-width: 94px;
         }
 
         .pos-table :deep(td[data-column-key="rate"] .pos-table__editor-input) {
-                max-width: 75px;
+                max-width: 94px;
         }
 
         .pos-table__qty-counter {
@@ -2876,9 +2891,9 @@ body[dir="rtl"] .amount-value.right-aligned {
 .pos-table :deep(td[data-column-key="rate"]),
 .pos-table :deep(th[data-column-key="amount"]),
 .pos-table :deep(td[data-column-key="amount"]) {
-	min-width: 100px;
-	max-width: 130px;
-	text-align: center !important;
+        min-width: 125px;
+        max-width: 163px;
+        text-align: center !important;
 }
 
 /* Ensure consistent header padding for rate/amount columns */
