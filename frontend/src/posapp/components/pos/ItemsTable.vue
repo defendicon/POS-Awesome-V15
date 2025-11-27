@@ -200,15 +200,16 @@
                                                 @focus="handleInputFocus('rate')"
                                                 @blur="closeRateEdit(item)"
                                                 @keydown.enter.prevent="closeRateEdit(item)"
-						@click.stop
-						ref="rateInput"
-						:autofocus="true"
-						type="number"
-						:disabled="
-							!pos_profile.posa_allow_user_to_edit_rate ||
-							!!item.posa_is_replace ||
-							!!item.posa_offer_applied
-						"
+                                                @click.stop
+                                                ref="rateInput"
+                                                :autofocus="true"
+                                                type="text"
+                                                inputmode="decimal"
+                                                :disabled="
+                                                        !pos_profile.posa_allow_user_to_edit_rate ||
+                                                        !!item.posa_is_replace ||
+                                                        !!item.posa_offer_applied
+                                                "
 					></v-text-field>
 				</div>
 			</template>
@@ -256,15 +257,16 @@
                                                 @focus="handleInputFocus('discount_percent')"
                                                 @blur="closeDiscountPercentEdit(item)"
                                                 @keydown.enter.prevent="closeDiscountPercentEdit(item)"
-						@click.stop
-						ref="discountPercentInput"
-						:autofocus="true"
-						type="number"
-						:disabled="
-							!pos_profile.posa_allow_user_to_edit_item_discount ||
-							!!item.posa_is_replace ||
-							!!item.posa_offer_applied
-						"
+                                                @click.stop
+                                                ref="discountPercentInput"
+                                                :autofocus="true"
+                                                type="text"
+                                                inputmode="decimal"
+                                                :disabled="
+                                                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                                                        !!item.posa_is_replace ||
+                                                        !!item.posa_offer_applied
+                                                "
 					></v-text-field>
 				</div>
 			</template>
@@ -292,15 +294,16 @@
                                                 @focus="handleInputFocus('discount_amount')"
                                                 @blur="closeDiscountAmountEdit(item)"
                                                 @keydown.enter.prevent="closeDiscountAmountEdit(item)"
-						@click.stop
-						ref="discountAmountInput"
-						:autofocus="true"
-						type="number"
-						:disabled="
-							!pos_profile.posa_allow_user_to_edit_item_discount ||
-							!!item.posa_is_replace ||
-							!!item.posa_offer_applied
-						"
+                                                @click.stop
+                                                ref="discountAmountInput"
+                                                :autofocus="true"
+                                                type="text"
+                                                inputmode="decimal"
+                                                :disabled="
+                                                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                                                        !!item.posa_is_replace ||
+                                                        !!item.posa_offer_applied
+                                                "
 					></v-text-field>
 				</div>
 			</template>
@@ -2360,38 +2363,38 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 }
 
 .responsive-table-container.compact-view .pos-table__qty-counter {
-        min-width: 70px;
-        max-width: 90px;
+        min-width: 77px;
+        max-width: 99px;
         width: auto;
-        gap: 3px;
+        gap: 3.3px;
 }
 
 .responsive-table-container.compact-view .qty-control-btn {
-        width: 18px !important;
-        height: 18px !important;
-        min-width: 18px !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
 }
 
 .responsive-table-container.compact-view .pos-table__qty-display {
-        min-width: 22px;
-        max-width: 40px;
-        height: 18px;
-        font-size: 0.7rem;
-        padding: 3px 2px;
+        min-width: 24px;
+        max-width: 44px;
+        height: 20px;
+        font-size: 0.77rem;
+        padding: 3.3px 2.2px;
         letter-spacing: -0.03em;
 }
 
 /* Medium view adjustments */
 .responsive-table-container.medium-view .pos-table__qty-counter {
-        min-width: 80px;
-        max-width: 110px;
+        min-width: 88px;
+        max-width: 121px;
         width: auto;
 }
 
 /* Large view adjustments */
 .responsive-table-container.large-view .pos-table__qty-counter {
-        min-width: 90px;
-        max-width: 120px;
+        min-width: 99px;
+        max-width: 132px;
         width: auto;
 }
 
@@ -2625,26 +2628,26 @@ body[dir="rtl"] .expanded-content .pos-table__qty-display {
 	}
 
         .pos-table__qty-counter {
-                min-width: 70px;
-                width: 70px;
+                min-width: 77px;
+                width: 77px;
                 height: auto;
-                gap: 3px;
-                padding: 2px;
+                gap: 3.3px;
+                padding: 2.2px;
         }
 
         .qty-control-btn {
-                width: 18px !important;
-                height: 18px !important;
-                min-width: 18px !important;
-                border-radius: 5px !important;
+                width: 20px !important;
+                height: 20px !important;
+                min-width: 20px !important;
+                border-radius: 6px !important;
         }
 
         .pos-table__qty-display {
-                min-width: 22px;
-                max-width: 40px;
-                padding: 3px 2px;
-                font-size: 0.72rem;
-                height: 18px;
+                min-width: 24px;
+                max-width: 44px;
+                padding: 3.3px 2.2px;
+                font-size: 0.79rem;
+                height: 20px;
                 letter-spacing: -0.03em;
         }
 
@@ -3340,13 +3343,13 @@ body[dir="rtl"] .amount-value.right-aligned {
 
 /* QTY Counter Styling */
 .qty-control-btn {
-        width: 18px !important;
-        height: 18px !important;
-        min-width: 18px !important;
-        border-radius: 6px !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow:
-		0 2px 8px var(--pos-shadow-light),
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        border-radius: 7px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow:
+                0 2px 8px var(--pos-shadow-light),
 		0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
@@ -3381,18 +3384,18 @@ body[dir="rtl"] .amount-value.right-aligned {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 3px;
-        padding: 2px;
+        gap: 3.3px;
+        padding: 2.2px;
         /* More flexible sizing for larger numbers */
-        min-width: 60px;
-        max-width: 90px;
+        min-width: 66px;
+        max-width: 99px;
         width: auto;
         height: auto;
         background: var(--pos-surface-variant);
-        border-radius: 12px;
+        border-radius: 13px;
         backdrop-filter: blur(10px);
-	border: 1px solid var(--pos-border-light);
-	transition: all 0.3s ease;
+        border: 1px solid var(--pos-border-light);
+        transition: all 0.3s ease;
 	margin: 0 auto;
 	/* Allow container to grow with content */
 	flex-shrink: 0;
@@ -3478,14 +3481,14 @@ body[dir="rtl"] .number-field-rtl {
 
 .pos-table__qty-display {
         /* Dynamic width based on content with proper constraints */
-        min-width: 22px;
-        max-width: 45px;
+        min-width: 24px;
+        max-width: 50px;
         width: auto;
         flex: 1 1 auto;
         text-align: center;
         font-weight: 600;
-        padding: 3px 2px;
-        border-radius: 4px;
+        padding: 3.3px 2.2px;
+        border-radius: 5px;
         background: var(--pos-primary-container);
         border: 1px solid var(--pos-primary-variant);
         font-family:
@@ -3497,13 +3500,13 @@ body[dir="rtl"] .number-field-rtl {
 		"lnum" 1,
 		"kern" 1;
 	color: var(--pos-primary);
-        font-size: 0.75rem;
+        font-size: 0.82rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px var(--pos-shadow-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 18px;
+        height: 20px;
         /* Handle overflow gracefully */
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3515,10 +3518,10 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Special handling for very large numbers */
 .pos-table__qty-display.large-number {
-        min-width: 32px;
-        max-width: 55px;
-        font-size: 0.7rem;
-        padding: 3px 2px;
+        min-width: 35px;
+        max-width: 61px;
+        font-size: 0.77rem;
+        padding: 3.3px 2.2px;
         letter-spacing: -0.04em;
 }
 
@@ -3531,8 +3534,8 @@ body[dir="rtl"] .number-field-rtl {
 
 /* Dynamic container expansion for larger numbers */
 .pos-table__qty-counter:has(.large-number) {
-        min-width: 80px;
-        max-width: 110px;
+        min-width: 88px;
+        max-width: 121px;
 }
 
 /* Responsive text sizing based on number length */
@@ -3651,7 +3654,7 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__qty-input {
-        max-width: 54px;
+        max-width: 60px;
         margin: 0 auto;
 }
 .pos-table__qty-input :deep(input) {
@@ -3661,32 +3664,32 @@ body[dir="rtl"] .number-field-rtl {
 }
 .pos-table__qty-input :deep(input::-webkit-outer-spin-button),
 .pos-table__qty-input :deep(input::-webkit-inner-spin-button) {
-	-webkit-appearance: none;
-	margin: 0;
+        -webkit-appearance: none;
+        margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-        height: 23px;
+        height: 25px;
 }
 .pos-table__qty-input :deep(.v-field__field) {
-        height: 23px;
-        padding: 0 4px;
+        height: 25px;
+        padding: 0 4.5px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
         padding: 0;
-        min-height: 23px;
+        min-height: 25px;
 }
 .pos-table__editor-box {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 2px;
-        padding: 1px;
-        min-width: 60px;
-        max-width: 90px;
+        gap: 2.2px;
+        padding: 1.1px;
+        min-width: 66px;
+        max-width: 99px;
         width: auto;
         height: auto;
         background: var(--pos-surface-variant);
-        border-radius: 12px;
+        border-radius: 13px;
         border: 1px solid var(--pos-border-light);
         transition: all 0.3s ease;
         margin: 0 auto;
@@ -3701,24 +3704,24 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-display {
-        min-width: 38px;
-        max-width: 60px;
+        min-width: 42px;
+        max-width: 66px;
         width: auto;
         flex: 1 1 auto;
         text-align: center;
         font-weight: 600;
-        padding: 3px 2px;
-        border-radius: 5px;
+        padding: 3.3px 2.2px;
+        border-radius: 6px;
         background: var(--pos-primary-container);
         border: 1px solid var(--pos-primary-variant);
         color: var(--pos-primary);
-        font-size: 0.75rem;
+        font-size: 0.82rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px var(--pos-shadow-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 18px;
+        height: 20px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -3726,41 +3729,47 @@ body[dir="rtl"] .number-field-rtl {
 }
 
 .pos-table__editor-btn {
-        width: 18px !important;
-        height: 18px !important;
-        min-width: 18px !important;
-        border-radius: 6px !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        border-radius: 7px !important;
 }
 .pos-table__editor-input {
-        max-width: 70px;
+        max-width: 77px;
 }
 .pos-table__editor-input :deep(input) {
         text-align: center;
+        -moz-appearance: textfield;
+}
+.pos-table__editor-input :deep(input::-webkit-outer-spin-button),
+.pos-table__editor-input :deep(input::-webkit-inner-spin-button) {
+        -webkit-appearance: none;
+        margin: 0;
 }
 
 .uom-editor {
-        gap: 2px;
-        padding: 1px;
-        min-width: 55px;
-        max-width: 75px;
-        border-radius: 10px;
+        gap: 2.2px;
+        padding: 1.1px;
+        min-width: 61px;
+        max-width: 83px;
+        border-radius: 11px;
 }
 .uom-arrow {
         flex-shrink: 0;
 }
 .uom-select {
-        min-width: 36px;
+        min-width: 40px;
 }
 
 .uom-editor .pos-table__editor-btn {
-        width: 16px !important;
-        height: 16px !important;
-        min-width: 16px !important;
-        border-radius: 6px !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        border-radius: 7px !important;
 }
 
 .uom-editor .pos-table__editor-input {
-        max-width: 55px;
+        max-width: 61px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
