@@ -4216,12 +4216,14 @@ export default {
 	},
 
 	// Update UOM (unit of measure) for an item and recalculate prices
-	calc_uom(item, value) {
-		if (!item) {
-			return;
-		}
-		return this.queueItemTask(item, "calc_uom", () => calcUom(item, value, this));
-	},
+        async calc_uom(item, value) {
+                if (!item) {
+                        return;
+                }
+                const result = await this.queueItemTask(item, "calc_uom", () => calcUom(item, value, this));
+                this.schedulePricingRuleApplication(true);
+                return result;
+        },
 
 	// Calculate stock quantity for an item (simplified - validation handled centrally)
 	calc_stock_qty(item, value) {
