@@ -192,126 +192,6 @@
 	box-sizing: border-box;
 }
 
-/* =================================================================
-   QUANTITY COUNTER COMPONENT
-   ================================================================= */
-
-.pos-table__qty-counter {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 4px;
-	min-width: 130px;
-	max-width: 180px;
-	width: auto;
-	height: auto;
-	background: var(--pos-input-bg);
-	border-radius: 12px;
-	backdrop-filter: blur(10px);
-	border: 1px solid var(--pos-border);
-	transition: all 0.3s ease;
-	margin: 0 auto;
-	flex-shrink: 0;
-	box-sizing: border-box;
-}
-
-.pos-table__qty-counter:hover {
-	background: var(--pos-hover-bg);
-	box-shadow: 0 4px 16px var(--pos-shadow);
-	transform: translateY(-1px);
-}
-
-.pos-table__qty-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
-	border-radius: 8px !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow:
-		0 2px 8px var(--pos-shadow),
-		0 1px 3px var(--pos-shadow-light) !important;
-	font-weight: 600 !important;
-	backdrop-filter: blur(10px) !important;
-	position: relative !important;
-	overflow: hidden !important;
-	flex-shrink: 0;
-}
-
-.pos-table__qty-btn::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: var(--pos-pressed-bg);
-	transition: transform 0.3s ease;
-	transform: translateX(-100%);
-	z-index: 0;
-}
-
-.pos-table__qty-btn:hover::before {
-	transform: translateX(0);
-}
-
-.pos-table__qty-btn .v-icon {
-	position: relative;
-	z-index: 1;
-}
-
-.pos-table__qty-btn--minus {
-	background: var(--pos-warning-container) !important;
-	color: var(--pos-warning) !important;
-	border: 2px solid var(--pos-warning) !important;
-}
-
-.pos-table__qty-btn--minus .v-icon {
-	color: var(--pos-warning) !important;
-	position: relative;
-	z-index: 2;
-	transition: color 0.3s ease;
-}
-
-.pos-table__qty-btn--minus:hover {
-	background: var(--pos-warning) !important;
-	color: white !important;
-	box-shadow:
-		0 6px 20px var(--pos-shadow),
-		0 4px 8px var(--pos-shadow-light) !important;
-	transform: translateY(-2px) scale(1.05) !important;
-}
-
-.pos-table__qty-btn--minus:hover .v-icon {
-	color: white !important;
-}
-
-.pos-table__qty-btn--plus {
-	background: linear-gradient(145deg, #d1fae5, #34d399) !important;
-	color: #065f46 !important;
-	border: 2px solid rgba(52, 211, 153, 0.3) !important;
-}
-
-.pos-table__qty-btn--plus .v-icon {
-	color: #065f46 !important;
-	position: relative;
-	z-index: 2;
-	transition: color 0.3s ease;
-}
-
-.pos-table__qty-btn--plus:hover {
-	background: linear-gradient(145deg, #34d399, #10b981) !important;
-	color: white !important;
-	box-shadow:
-		0 6px 20px rgba(52, 211, 153, 0.25),
-		0 4px 8px rgba(0, 0, 0, 0.08) !important;
-	transform: translateY(-2px) scale(1.05) !important;
-}
-
-.pos-table__qty-btn--plus:hover .v-icon {
-	color: white !important;
-}
-
 /* Delete button styling */
 .pos-table__delete-btn {
 	width: 32px !important;
@@ -460,6 +340,96 @@
 }
 
 /* =================================================================
+   EXPANDED CONTENT LAYOUT - SINGLE COLUMN VERTICAL STACK
+   ================================================================= */
+
+/* Main form container - single column stack */
+.item-details-form {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+/* Form sections - optimized for vertical stacking */
+.form-section {
+	width: 100%;
+	padding: 24px;
+	box-sizing: border-box;
+
+	background: var(--pos-card-bg);
+	border-radius: 12px;
+	border: 1px solid var(--pos-border);
+	box-shadow: 0 2px 8px var(--pos-shadow);
+
+	/* Smooth transitions */
+	transition: all 0.3s ease;
+}
+
+.form-section:hover {
+	box-shadow: 0 4px 16px var(--pos-shadow-dark);
+	transform: translateY(-2px);
+}
+
+/* Section headers - clean and modern */
+.section-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid var(--pos-primary);
+	position: relative;
+}
+
+.section-header::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 60px;
+	height: 2px;
+	background: linear-gradient(90deg, var(--pos-primary), var(--pos-primary-container));
+	border-radius: 1px;
+}
+
+.section-icon {
+	color: var(--pos-primary);
+	background: var(--pos-primary-container);
+	padding: 8px;
+	border-radius: 10px;
+}
+
+.section-title {
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--pos-text-primary);
+}
+
+/* Form rows - flexible and responsive */
+.form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	width: 100%;
+}
+
+.form-field {
+	flex: 1;
+	min-width: 250px;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.form-field.full-width {
+	flex-basis: 100%;
+	min-width: 100%;
+}
+
+/* =================================================================
    RESPONSIVE DESIGN
    ================================================================= */
 
@@ -499,12 +469,6 @@
 }
 
 /* Container-aware responsive adjustments */
-.responsive-table-container.compact-view .pos-table__qty-counter {
-	min-width: 110px;
-	max-width: 140px;
-	gap: 4px;
-}
-
 .responsive-table-container.compact-view .pos-table__qty-display {
 	min-width: 35px;
 	max-width: 65px;
@@ -512,44 +476,6 @@
 	font-size: 0.7rem;
 	padding: 4px 3px;
 	letter-spacing: -0.03em;
-}
-
-.responsive-table-container.compact-view .pos-table__qty-btn {
-	width: 28px !important;
-	height: 28px !important;
-	min-width: 28px !important;
-}
-
-/* =================================================================
-   RTL SUPPORT
-   ================================================================= */
-
-[dir="rtl"] .pos-table__qty-counter--rtl,
-[lang^="ar"] .pos-table__qty-counter,
-[lang^="he"] .pos-table__qty-counter,
-[lang^="fa"] .pos-table__qty-counter {
-	flex-direction: row !important;
-}
-
-[dir="rtl"] .pos-table__qty-counter--rtl .pos-table__qty-btn--plus,
-[lang^="ar"] .pos-table__qty-counter .pos-table__qty-btn--plus,
-[lang^="he"] .pos-table__qty-counter .pos-table__qty-btn--plus,
-[lang^="fa"] .pos-table__qty-counter .pos-table__qty-btn--plus {
-	order: 3 !important;
-}
-
-[dir="rtl"] .pos-table__qty-counter--rtl .pos-table__qty-display,
-[lang^="ar"] .pos-table__qty-counter .pos-table__qty-display,
-[lang^="he"] .pos-table__qty-counter .pos-table__qty-display,
-[lang^="fa"] .pos-table__qty-counter .pos-table__qty-display {
-	order: 2 !important;
-}
-
-[dir="rtl"] .pos-table__qty-counter--rtl .pos-table__qty-btn--minus,
-[lang^="ar"] .pos-table__qty-counter .pos-table__qty-btn--minus,
-[lang^="he"] .pos-table__qty-counter .pos-table__qty-btn--minus,
-[lang^="fa"] .pos-table__qty-counter .pos-table__qty-btn--minus {
-	order: 1 !important;
 }
 
 /* =================================================================
@@ -561,54 +487,6 @@
 /* =================================================================
    IMPROVED BUTTON TEXT VISIBILITY FOR DARK/LIGHT THEMES
    ================================================================= */
-
-/* Enhanced text visibility for minus button */
-[data-theme="dark"] .pos-table__qty-btn--minus,
-.v-theme--dark .pos-table__qty-btn--minus {
-	background: rgba(251, 191, 36, 0.2) !important;
-	color: #fbbf24 !important;
-	border: 2px solid #fbbf24 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--minus .v-icon,
-.v-theme--dark .pos-table__qty-btn--minus .v-icon {
-	color: #fbbf24 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--minus:hover,
-.v-theme--dark .pos-table__qty-btn--minus:hover {
-	background: #fbbf24 !important;
-	color: #1f2937 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--minus:hover .v-icon,
-.v-theme--dark .pos-table__qty-btn--minus:hover .v-icon {
-	color: #1f2937 !important;
-}
-
-/* Enhanced text visibility for plus button in dark mode */
-[data-theme="dark"] .pos-table__qty-btn--plus,
-.v-theme--dark .pos-table__qty-btn--plus {
-	background: rgba(34, 197, 94, 0.2) !important;
-	color: #22c55e !important;
-	border: 2px solid #22c55e !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--plus .v-icon,
-.v-theme--dark .pos-table__qty-btn--plus .v-icon {
-	color: #22c55e !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--plus:hover,
-.v-theme--dark .pos-table__qty-btn--plus:hover {
-	background: #22c55e !important;
-	color: #1f2937 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--plus:hover .v-icon,
-.v-theme--dark .pos-table__qty-btn--plus:hover .v-icon {
-	color: #1f2937 !important;
-}
 
 /* Ensure disabled buttons maintain proper contrast */
 .pos-table__qty-btn:disabled {
