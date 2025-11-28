@@ -658,6 +658,7 @@
 <script>
 /* global process */
 import _ from "lodash";
+import QRCode from "qrcode";
 import { logComponentRender } from "../../utils/perf.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
@@ -1181,6 +1182,106 @@ export default {
 		handleExpandedUpdate(val) {
 			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
 			this.$emit("update:expanded", mappedValues);
+		},
+
+		// Print QR Code for item
+		async printQRCode(item) {
+			try {
+				// Get the barcode or item code to encode in QR code
+				let qrData = item.item_code || "";
+				
+				// Try to get barcode from item if available
+				if (item.barcode) {
+					qrData = item.barcode;
+				} else if (item.item_barcode && Array.isArray(item.item_barcode) && item.item_barcode.length > 0) {
+					qrData = item.item_barcode[0].barcode || item.item_code;
+				} else if (item.barcodes && Array.isArray(item.barcodes) && item.barcodes.length > 0) {
+					qrData = String(item.barcodes[0]);
+				}
+
+				if (!qrData) {
+					frappe.msgprint(__("No barcode or item code available to generate QR code"));
+					return;
+				}
+
+				// Generate QR code as data URL
+				const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
+					width: 300,
+					margin: 2,
+					color: {
+						dark: "#000000",
+						light: "#FFFFFF",
+					},
+				});
+
+				// Translate strings before inserting into HTML
+				const qrCodeTitle = __("QR Code");
+				const itemCodeLabel = __("Item Code");
+				const barcodeLabel = __("Barcode");
+
+				// Create print HTML - using string concatenation to avoid Vue template parsing
+				const barcodeSection = qrData !== item.item_code 
+					? "<div class=\"barcode\">" + barcodeLabel + ": " + qrData + "</div>" 
+					: "";
+				
+				// Build HTML string - split script tag to avoid Vue parser issues
+				const scriptOpen = "<scr" + "ipt>";
+				const scriptClose = "</scr" + "ipt>";
+				const bodyClose = "</bod" + "y>";
+				const htmlClose = "</htm" + "l>";
+				
+				const printHTML = "<!DOCTYPE html>" +
+					"<html>" +
+					"<head>" +
+					"<meta charset=\"UTF-8\">" +
+					"<title>" + qrCodeTitle + " - " + (item.item_name || item.item_code) + "</title>" +
+					"<style>" +
+					"@page { size: A4; margin: 20mm; }" +
+					"body { font-family: Arial, sans-serif; display: flex; flex-direction: column; " +
+					"align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }" +
+					".qr-container { text-align: center; padding: 20px; border: 2px solid #000; " +
+					"border-radius: 8px; background: white; }" +
+					".item-info { margin-top: 15px; font-size: 14px; }" +
+					".item-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }" +
+					".item-code { font-size: 12px; color: #666; margin-bottom: 5px; }" +
+					".barcode { font-size: 12px; color: #333; font-family: monospace; }" +
+					"@media print { body { margin: 0; padding: 0; } }" +
+					"</style>" +
+					"</head>" +
+					"<body>" +
+					"<div class=\"qr-container\">" +
+					"<img src=\"" + qrCodeDataUrl + "\" alt=\"" + qrCodeTitle + "\" style=\"max-width: 300px; height: auto;\" />" +
+					"<div class=\"item-info\">" +
+					"<div class=\"item-name\">" + (item.item_name || item.item_code) + "</div>" +
+					"<div class=\"item-code\">" + itemCodeLabel + ": " + item.item_code + "</div>" +
+					barcodeSection +
+					"</div>" +
+					"</div>" +
+					scriptOpen +
+					"window.onload = function() { window.print(); };" +
+					scriptClose +
+					bodyClose +
+					htmlClose;
+
+				// Open print window
+				const printWindow = window.open("", "_blank");
+				if (printWindow) {
+					printWindow.document.write(printHTML);
+					printWindow.document.close();
+					
+					// Wait for images to load before printing
+					printWindow.onload = function() {
+						setTimeout(() => {
+							printWindow.print();
+						}, 250);
+					};
+				} else {
+					frappe.msgprint(__("Please allow pop-ups to print QR code"));
+				}
+			} catch (error) {
+				console.error("Error generating QR code:", error);
+				frappe.msgprint(__("Error generating QR code: {0}", [error.message || error]));
+			}
 		},
 	},
 
@@ -3189,6 +3290,55 @@ body[dir="rtl"] .number-field-rtl {
 		0 6px 20px var(--pos-shadow),
 		0 4px 8px var(--pos-shadow-light) !important;
 	transform: translateY(-2px) scale(1.05) !important;
+}
+
+/* Action buttons container */
+.pos-table :deep(td[data-column-key="actions"]) {
+	padding: 8px !important;
+}
+
+.pos-table :deep(td[data-column-key="actions"]) .d-flex {
+	gap: 4px;
+	justify-content: center;
+	align-items: center;
+}
+
+/* Action buttons container */
+.action-buttons-container {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 4px;
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+/* Print QR Code button styling */
+.pos-table__print-qr-btn {
+	min-width: 44px !important;
+	height: 44px !important;
+	border-radius: 12px !important;
+	transition: all 0.3s ease;
+	box-shadow: 0 3px 8px var(--pos-shadow) !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+	background-color: rgb(var(--v-theme-primary)) !important;
+	color: white !important;
+}
+
+.pos-table__print-qr-btn:hover {
+	transform: translateY(-2px) scale(1.05);
+	box-shadow: 0 8px 24px var(--pos-shadow-dark) !important;
+	opacity: 0.9 !important;
+}
+
+.pos-table__print-qr-btn .v-icon {
+	display: inline-block !important;
+	visibility: visible !important;
+	color: white !important;
 }
 
 /* Delete action button styling */
