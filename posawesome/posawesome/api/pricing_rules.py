@@ -395,7 +395,10 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
     updates: List[dict] = []
     freebies: Dict[Tuple[str, str], frappe._dict] = {}
 
-    from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+    from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
+        apply_pricing_rule_on_transaction,
+        get_pricing_rule_for_item,
+    )
 
     for raw_line in lines:
         line = frappe._dict(raw_line)
@@ -431,9 +434,27 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
                     "qty": args.qty,
                     "pricing_rules": ",".join(applied_rules),
                     "is_free_item": 0,
+                    "rate": rate,
+                    "amount": rate * args.qty,
+                    "net_amount": rate * args.qty,
+                    "price_list_rate": price_list_rate,
                 }
             )
         )
+
+    # Calculate totals for transaction-level pricing rules
+    total = sum(flt(d.get("amount")) for d in doc.get("items"))
+    doc.total = total
+    doc.net_total = total
+
+    apply_pricing_rule_on_transaction(doc)
+
+    invoice_updates = {
+        "discount_amount": flt(doc.get("discount_amount")),
+        "additional_discount_percentage": flt(doc.get("additional_discount_percentage")),
+        "pricing_rules": doc.get("pricing_rules"),
+        "apply_discount_on": doc.get("apply_discount_on"),
+    }
 
     expected_free_lines = []
     for (item_code, rule_name), data in freebies.items():
@@ -473,4 +494,4 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
             }
         )
 
-    return {"updates": updates, "free_lines": expected_free_lines}
+    return {"updates": updates, "free_lines": expected_free_lines, "invoice_updates": invoice_updates}
