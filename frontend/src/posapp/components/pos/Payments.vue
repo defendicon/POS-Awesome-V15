@@ -113,6 +113,27 @@
 							</v-btn>
 						</v-col>
 
+						<!-- Cash Denomination Buttons -->
+						<v-col
+							cols="12"
+							v-if="payment.default === 1 && isCashLikePayment(payment) && getVisibleDenominations(payment).length"
+							class="py-0 px-2 mt-n1 mb-2"
+						>
+							<div class="d-flex flex-wrap gap-2">
+								<v-btn
+									v-for="d in getVisibleDenominations(payment)"
+									:key="d"
+									size="x-small"
+									class="mr-1 mb-1"
+									color="secondary"
+									variant="tonal"
+									@click="setPaymentToDenomination(payment, d)"
+								>
+									{{ formatCurrency(d) }}
+								</v-btn>
+							</div>
+						</v-col>
+
 						<!-- M-Pesa Payment Button (if payment is M-Pesa) -->
 						<v-col cols="12" v-if="is_mpesa_c2b_payment(payment)" class="pl-3">
 							<v-btn block color="success" theme="dark" @click="mpesa_c2b_dialog(payment)">
@@ -781,6 +802,7 @@
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
 import { parseBooleanSetting } from "../../utils/stock.js";
+import { getSmartTenderSuggestions, defaultDenominations } from "../../../utils/smartTender.js";
 import {
 	saveOfflineInvoice,
 	syncOfflineInvoices,
@@ -843,6 +865,7 @@ export default {
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 			last_payment_change_was_cash: null, // Track last edited payment type
+			currencyDenominations: defaultDenominations,
 		};
 	},
 	computed: {
@@ -2304,53 +2327,76 @@ export default {
 			format.methods.setFormatedCurrency.call(this, payment, "amount", null, false, event);
 
 			this.$nextTick(() => {
-				// Auto-subtract from other payments if we have an excess
-				const invoice_total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-
-				// Calculate current total paid
-				let current_total_paid = 0;
-				if (this.invoice_doc && this.invoice_doc.payments) {
-					this.invoice_doc.payments.forEach((p) => {
-						current_total_paid +=
-							parseFloat(formatUtils.fromArabicNumerals(String(p.amount))) || 0;
-					});
-				}
-				current_total_paid = this.flt(current_total_paid, this.currency_precision);
-
-				const excess = this.flt(current_total_paid - invoice_total, this.currency_precision);
-
-				if (excess > 0) {
-					// Find other payments with amount > 0 to reduce
-					// We filter out the current payment being edited to avoid circular issues
-					const otherPayments = this.invoice_doc.payments.filter(
-						(p) => p !== payment && this.flt(p.amount) > 0,
-					);
-
-					// Sort by amount descending to reduce larger chunks first
-					otherPayments.sort((a, b) => this.flt(b.amount) - this.flt(a.amount));
-
-					let remaining_excess = excess;
-
-					for (const other of otherPayments) {
-						if (remaining_excess <= 0) break;
-
-						const otherAmount = this.flt(other.amount, this.currency_precision);
-						const reduction = Math.min(otherAmount, remaining_excess);
-						const newAmount = this.flt(otherAmount - reduction, this.currency_precision);
-
-						other.amount = newAmount;
-						if (other.base_amount !== undefined) {
-							// Approximate base amount update, though submit logic recalculates it
-							other.base_amount = this.flt(
-								newAmount / (this.exchange_rate || 1),
-								this.currency_precision,
-							);
-						}
-
-						remaining_excess = this.flt(remaining_excess - reduction, this.currency_precision);
-					}
-				}
+				this.autoBalancePayments(payment);
 			});
+		},
+		setPaymentToDenomination(payment, amount) {
+			payment.amount = amount;
+			if (payment.base_amount !== undefined) {
+				const conversion_rate = this.invoice_doc.conversion_rate || 1;
+				payment.base_amount = this.flt(amount * conversion_rate, this.currency_precision);
+			}
+			this.last_payment_change_was_cash = this.isCashLikePayment(payment);
+			this.$nextTick(() => {
+				this.autoBalancePayments(payment);
+			});
+		},
+		autoBalancePayments(excludePayment) {
+			// Auto-subtract from other payments if we have an excess
+			const invoice_total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+
+			// Calculate current total paid
+			let current_total_paid = 0;
+			if (this.invoice_doc && this.invoice_doc.payments) {
+				this.invoice_doc.payments.forEach((p) => {
+					current_total_paid += parseFloat(formatUtils.fromArabicNumerals(String(p.amount))) || 0;
+				});
+			}
+			current_total_paid = this.flt(current_total_paid, this.currency_precision);
+
+			const excess = this.flt(current_total_paid - invoice_total, this.currency_precision);
+
+			if (excess > 0) {
+				// Find other payments with amount > 0 to reduce
+				// We filter out the current payment being edited to avoid circular issues
+				const otherPayments = this.invoice_doc.payments.filter(
+					(p) => p !== excludePayment && this.flt(p.amount) > 0,
+				);
+
+				// Sort by amount descending to reduce larger chunks first
+				otherPayments.sort((a, b) => this.flt(b.amount) - this.flt(a.amount));
+
+				let remaining_excess = excess;
+
+				for (const other of otherPayments) {
+					if (remaining_excess <= 0) break;
+
+					const otherAmount = this.flt(other.amount, this.currency_precision);
+					const reduction = Math.min(otherAmount, remaining_excess);
+					const newAmount = this.flt(otherAmount - reduction, this.currency_precision);
+
+					other.amount = newAmount;
+					if (other.base_amount !== undefined) {
+						// Approximate base amount update, though submit logic recalculates it
+						other.base_amount = this.flt(
+							newAmount / (this.exchange_rate || 1),
+							this.currency_precision,
+						);
+					}
+
+					remaining_excess = this.flt(remaining_excess - reduction, this.currency_precision);
+				}
+			}
+		},
+		getVisibleDenominations(payment) {
+			if (!this.invoice_doc) return [];
+			const currency = this.invoice_doc.currency;
+			const total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+			const allDenominations = this.currencyDenominations[currency] || [];
+
+			if (!allDenominations.length) return [];
+
+			return getSmartTenderSuggestions(total, allDenominations, 4);
 		},
 		isCashLikePayment(payment) {
 			if (!payment) {
