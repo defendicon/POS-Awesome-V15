@@ -116,7 +116,7 @@
 						<!-- Cash Denomination Buttons -->
 						<v-col
 							cols="12"
-							v-if="isCashLikePayment(payment) && getVisibleDenominations(payment).length"
+							v-if="payment.default === 1 && isCashLikePayment(payment) && getVisibleDenominations(payment).length"
 							class="py-0 px-2 mt-n1 mb-2"
 						>
 							<div class="d-flex flex-wrap gap-2">
@@ -2402,13 +2402,26 @@ export default {
 			const total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
 			const allDenominations = this.currencyDenominations[currency] || [];
 
-			if (!allDenominations.length) return [];
+			let visible = [];
 
-			return allDenominations.filter((d) => {
-				if (total <= 100) return true; // Show all if amount is small
-				if (total <= 500) return d > 100; // If amount > 100, show > 100
-				return d > 500; // If amount > 500, show > 500
-			});
+			if (allDenominations.length) {
+				visible = allDenominations.filter((d) => {
+					if (total <= 100) return true; // Show all if amount is small
+					if (total <= 500) return d > 100; // If amount > 100, show > 100
+					return d > 500; // If amount > 500, show > 500
+				});
+			}
+
+			// Add "Next Round Figure" (e.g. 280 -> 300, 340 -> 400)
+			if (total > 0) {
+				const nextRound = Math.ceil(total / 100) * 100;
+				if (nextRound > total) {
+					visible.push(nextRound);
+				}
+			}
+
+			// Dedup and sort
+			return [...new Set(visible)].sort((a, b) => a - b);
 		},
 		isCashLikePayment(payment) {
 			if (!payment) {
