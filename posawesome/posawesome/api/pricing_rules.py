@@ -431,9 +431,33 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
                     "qty": args.qty,
                     "pricing_rules": ",".join(applied_rules),
                     "is_free_item": 0,
+                    "rate": rate,
+                    "amount": rate * args.qty,
+                    "net_amount": rate * args.qty,
+                    "price_list_rate": price_list_rate,
                 }
             )
         )
+
+    # Calculate totals for transaction-level pricing rules
+    total = sum(flt(d.get("amount")) for d in doc.get("items"))
+    doc.total = total
+    doc.net_total = total
+
+    invoice_updates = {}
+    try:
+        # Apply transaction-level rules using the controller method
+        doc_obj = frappe.get_doc(doc)
+        if hasattr(doc_obj, "apply_pricing_rule"):
+            doc_obj.apply_pricing_rule()
+            invoice_updates = {
+                "discount_amount": flt(doc_obj.discount_amount),
+                "additional_discount_percentage": flt(doc_obj.additional_discount_percentage),
+                "pricing_rules": doc_obj.pricing_rules,
+                "apply_discount_on": doc_obj.apply_discount_on,
+            }
+    except Exception as e:
+        frappe.log_error(f"Failed to apply transaction pricing rules: {str(e)}")
 
     expected_free_lines = []
     for (item_code, rule_name), data in freebies.items():
@@ -473,4 +497,4 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
             }
         )
 
-    return {"updates": updates, "free_lines": expected_free_lines}
+    return {"updates": updates, "free_lines": expected_free_lines, "invoice_updates": invoice_updates}

@@ -875,6 +875,44 @@ export default {
 		const message = response?.message || {};
 		const updates = Array.isArray(message.updates) ? message.updates : [];
 		const serverFree = Array.isArray(message.free_lines) ? message.free_lines : [];
+		const invoiceUpdates = message.invoice_updates || {};
+
+		const serverDiscountAmount = Number.parseFloat(invoiceUpdates.discount_amount || 0);
+		const serverDiscountPercentage = Number.parseFloat(invoiceUpdates.additional_discount_percentage || 0);
+		const serverRules = invoiceUpdates.pricing_rules;
+
+		if (serverRules) {
+			// Rule applied by server
+			if (this.pos_profile?.posa_use_percentage_discount) {
+				if (serverDiscountPercentage > 0) {
+					this.additional_discount_percentage = serverDiscountPercentage;
+				} else if (serverDiscountAmount > 0 && this.Total > 0) {
+					this.additional_discount_percentage = (serverDiscountAmount / this.Total) * 100;
+				} else {
+					this.additional_discount_percentage = 0;
+				}
+				this.update_discount_umount();
+			} else {
+				this.additional_discount = serverDiscountAmount;
+				this.additional_discount_percentage = serverDiscountPercentage;
+				this.update_discount_umount();
+			}
+			if (this.invoice_doc) {
+				this.invoice_doc.pricing_rules = serverRules;
+			} else {
+				this.invoiceStore.mergeInvoiceDoc({ pricing_rules: serverRules });
+			}
+		} else if (this.invoice_doc?.pricing_rules) {
+			// No rules from server, but we had rules before. Clear them.
+			this.additional_discount = 0;
+			this.additional_discount_percentage = 0;
+			this.update_discount_umount();
+			if (this.invoice_doc) {
+				this.invoice_doc.pricing_rules = null;
+			} else {
+				this.invoiceStore.mergeInvoiceDoc({ pricing_rules: null });
+			}
+		}
 
 		serverFree.forEach((entry) => {
 			if (!entry || !entry.item_code) {
