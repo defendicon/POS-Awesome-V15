@@ -611,6 +611,69 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
+	const refreshModifiedItems = async () => {
+		if (!itemsLoaded.value) return { size: 0, count: 0 };
+
+		const lastSync = getItemsLastSync();
+		if (!lastSync) return { size: 0, count: 0 };
+
+		try {
+			const args = {
+				pos_profile: JSON.stringify(posProfile.value),
+				price_list: activePriceList.value,
+				item_group: "",
+				search_value: "",
+				customer: customer.value,
+				include_image: 0,
+				item_groups: posProfile.value?.item_groups?.map((g) => g.item_group) || [],
+				modified_after: lastSync,
+				limit: 500,
+			};
+
+			const response = await frappe.call({
+				method: "posawesome.posawesome.api.items.get_items",
+				args,
+			});
+
+			const size = JSON.stringify(response).length;
+			const fetchedItems = response.message || [];
+
+			if (fetchedItems.length > 0) {
+				updateItemsInPlace(fetchedItems);
+				setItemsLastSync(new Date().toISOString());
+			}
+
+			return { size, count: fetchedItems.length };
+		} catch (error) {
+			console.error("Failed to refresh modified items:", error);
+			return { size: 0, count: 0, error };
+		}
+	};
+
+	const updateItemsInPlace = (updates) => {
+		let needsReindex = false;
+		const additions = [];
+
+		updates.forEach((update) => {
+			const existing = itemsMap.value.get(update.item_code);
+			if (existing) {
+				Object.assign(existing, update);
+			} else {
+				additions.push(update);
+			}
+		});
+
+		if (additions.length > 0) {
+			items.value.push(...additions);
+			updateIndexes(additions);
+			needsReindex = true;
+		}
+
+		if (needsReindex && !searchTerm.value) {
+			filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
+		}
+	};
+
 	// Helper functions
 	const setItems = (newItems, { append = false, totalCount: totalOverride } = {}) => {
 		const normalizedGroup =
@@ -1405,6 +1468,7 @@ export const useItemsStore = defineStore("items", () => {
 		getItemByCode,
 		getItemByBarcode,
 		addScannedItem,
+		refreshModifiedItems,
 		clearLimitSearchResults,
 		clearAllCaches,
 		clearSearchCache,

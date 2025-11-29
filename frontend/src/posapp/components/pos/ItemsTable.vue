@@ -1421,8 +1421,8 @@ export default {
 				this.calcUom(item, newUom);
 			}
 			// Find the correct component instance to blur
-			const uomSelectComponent = this.$refs.uomSelect.find(
-				(ref) => ref.$el.id.includes(item.posa_row_id),
+			const uomSelectComponent = this.$refs.uomSelect.find((ref) =>
+				ref.$el.id.includes(item.posa_row_id),
 			);
 			uomSelectComponent?.blur();
 		},

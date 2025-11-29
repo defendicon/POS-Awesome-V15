@@ -5,164 +5,164 @@ import { withWriteLock } from "./db-utils.js";
 export const db = new Dexie("posawesome_offline");
 
 const BASE_SCHEMA = {
-        keyval: "&key",
-        queue: "&key",
-        cache: "&key",
-        items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
-        item_prices: "&[price_list+item_code],price_list,item_code",
-        customers: "&name,customer_name,mobile_no,email_id,tax_id",
-        local_stock: "&key",
-        coupons: "&key",
-        item_groups: "&key",
-        translations: "&key",
-        pricing_rules: "&key",
-        settings: "&key",
-        sync_state: "&key",
+	keyval: "&key",
+	queue: "&key",
+	cache: "&key",
+	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+	item_prices: "&[price_list+item_code],price_list,item_code",
+	customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	local_stock: "&key",
+	coupons: "&key",
+	item_groups: "&key",
+	translations: "&key",
+	pricing_rules: "&key",
+	settings: "&key",
+	sync_state: "&key",
 };
 
 const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
 
 db.version(7)
-        .stores({
-                keyval: "&key",
-                queue: "&key",
-                cache: "&key",
-                items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
-                item_prices: "&[price_list+item_code],price_list,item_code",
-                customers: "&name,customer_name,mobile_no,email_id,tax_id",
-        })
-        .upgrade((tx) =>
-                tx
-                        .table("items")
-                        .toCollection()
-                        .modify((item) => {
-                                item.barcodes = Array.isArray(item.item_barcode)
-                                        ? item.item_barcode.map((b) => b.barcode).filter(Boolean)
-                                        : item.item_barcode
-                                                ? [String(item.item_barcode)]
-                                                : [];
-                                item.name_keywords = item.item_name
-                                        ? item.item_name.toLowerCase().split(/\s+/).filter(Boolean)
-                                        : [];
-                                item.serials = Array.isArray(item.serial_no_data)
-                                        ? item.serial_no_data.map((s) => s.serial_no).filter(Boolean)
-                                        : [];
-                                item.batches = Array.isArray(item.batch_no_data)
-                                        ? item.batch_no_data.map((b) => b.batch_no).filter(Boolean)
-                                        : [];
-                        }),
-        );
+	.stores({
+		keyval: "&key",
+		queue: "&key",
+		cache: "&key",
+		items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+		item_prices: "&[price_list+item_code],price_list,item_code",
+		customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	})
+	.upgrade((tx) =>
+		tx
+			.table("items")
+			.toCollection()
+			.modify((item) => {
+				item.barcodes = Array.isArray(item.item_barcode)
+					? item.item_barcode.map((b) => b.barcode).filter(Boolean)
+					: item.item_barcode
+						? [String(item.item_barcode)]
+						: [];
+				item.name_keywords = item.item_name
+					? item.item_name.toLowerCase().split(/\s+/).filter(Boolean)
+					: [];
+				item.serials = Array.isArray(item.serial_no_data)
+					? item.serial_no_data.map((s) => s.serial_no).filter(Boolean)
+					: [];
+				item.batches = Array.isArray(item.batch_no_data)
+					? item.batch_no_data.map((b) => b.batch_no).filter(Boolean)
+					: [];
+			}),
+	);
 
 db.version(8)
-        .stores({
-                keyval: "&key",
-                queue: "&key",
-                cache: "&key",
-                items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
-                item_prices: "&[price_list+item_code],price_list,item_code",
-                customers: "&name,customer_name,mobile_no,email_id,tax_id",
-                local_stock: "&key",
-                coupons: "&key",
-                item_groups: "&key",
-                translations: "&key",
-                pricing_rules: "&key",
-        })
-        .upgrade(async (tx) => {
-                const migrateKey = async (key, targetTable) => {
-                        try {
-                                const entry = await tx.table("keyval").get(key);
-                                if (entry) {
-                                        await tx.table(targetTable).put(entry);
-                                }
-                        } catch (err) {
-                                console.warn(`Failed to migrate ${key} to ${targetTable}`, err);
-                        }
-                };
+	.stores({
+		keyval: "&key",
+		queue: "&key",
+		cache: "&key",
+		items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+		item_prices: "&[price_list+item_code],price_list,item_code",
+		customers: "&name,customer_name,mobile_no,email_id,tax_id",
+		local_stock: "&key",
+		coupons: "&key",
+		item_groups: "&key",
+		translations: "&key",
+		pricing_rules: "&key",
+	})
+	.upgrade(async (tx) => {
+		const migrateKey = async (key, targetTable) => {
+			try {
+				const entry = await tx.table("keyval").get(key);
+				if (entry) {
+					await tx.table(targetTable).put(entry);
+				}
+			} catch (err) {
+				console.warn(`Failed to migrate ${key} to ${targetTable}`, err);
+			}
+		};
 
-                await Promise.all([
-                        migrateKey("local_stock_cache", "local_stock"),
-                        migrateKey("coupons_cache", "coupons"),
-                        migrateKey("item_groups_cache", "item_groups"),
-                        migrateKey("translation_cache", "translations"),
-                        migrateKey("pricing_rules_snapshot", "pricing_rules"),
-                        migrateKey("pricing_rules_context", "pricing_rules"),
-                        migrateKey("pricing_rules_last_sync", "pricing_rules"),
-                        migrateKey("pricing_rules_stale_at", "pricing_rules"),
-                ]);
-        });
+		await Promise.all([
+			migrateKey("local_stock_cache", "local_stock"),
+			migrateKey("coupons_cache", "coupons"),
+			migrateKey("item_groups_cache", "item_groups"),
+			migrateKey("translation_cache", "translations"),
+			migrateKey("pricing_rules_snapshot", "pricing_rules"),
+			migrateKey("pricing_rules_context", "pricing_rules"),
+			migrateKey("pricing_rules_last_sync", "pricing_rules"),
+			migrateKey("pricing_rules_stale_at", "pricing_rules"),
+		]);
+	});
 
 db.version(9)
-        .stores(BASE_SCHEMA)
-        .upgrade(async (tx) => {
-                const migrateKey = async (key, targetTable) => {
-                        try {
-                                const entry = await tx.table("keyval").get(key);
-                                if (entry) {
-                                        await tx.table(targetTable).put(entry);
-                                }
-                        } catch (err) {
-                                console.warn(`Failed to migrate ${key} to ${targetTable}`, err);
-                        }
-                };
+	.stores(BASE_SCHEMA)
+	.upgrade(async (tx) => {
+		const migrateKey = async (key, targetTable) => {
+			try {
+				const entry = await tx.table("keyval").get(key);
+				if (entry) {
+					await tx.table(targetTable).put(entry);
+				}
+			} catch (err) {
+				console.warn(`Failed to migrate ${key} to ${targetTable}`, err);
+			}
+		};
 
-                const settingsKeys = [
-                        "cache_version",
-                        "cache_ready",
-                        "stock_cache_ready",
-                        "manual_offline",
-                        "schema_signature",
-                ];
+		const settingsKeys = [
+			"cache_version",
+			"cache_ready",
+			"stock_cache_ready",
+			"manual_offline",
+			"schema_signature",
+		];
 
-                const syncStateKeys = [
-                        "items_last_sync",
-                        "customers_last_sync",
-                        "payment_methods_last_sync",
-                        "pos_last_sync_totals",
-                ];
+		const syncStateKeys = [
+			"items_last_sync",
+			"customers_last_sync",
+			"payment_methods_last_sync",
+			"pos_last_sync_totals",
+		];
 
-                await Promise.all([
-                        migrateKey("local_stock_cache", "local_stock"),
-                        migrateKey("coupons_cache", "coupons"),
-                        migrateKey("item_groups_cache", "item_groups"),
-                        migrateKey("translation_cache", "translations"),
-                        migrateKey("pricing_rules_snapshot", "pricing_rules"),
-                        migrateKey("pricing_rules_context", "pricing_rules"),
-                        migrateKey("pricing_rules_last_sync", "pricing_rules"),
-                        migrateKey("pricing_rules_stale_at", "pricing_rules"),
-                        ...settingsKeys.map((key) => migrateKey(key, "settings")),
-                        ...syncStateKeys.map((key) => migrateKey(key, "sync_state")),
-                ]);
+		await Promise.all([
+			migrateKey("local_stock_cache", "local_stock"),
+			migrateKey("coupons_cache", "coupons"),
+			migrateKey("item_groups_cache", "item_groups"),
+			migrateKey("translation_cache", "translations"),
+			migrateKey("pricing_rules_snapshot", "pricing_rules"),
+			migrateKey("pricing_rules_context", "pricing_rules"),
+			migrateKey("pricing_rules_last_sync", "pricing_rules"),
+			migrateKey("pricing_rules_stale_at", "pricing_rules"),
+			...settingsKeys.map((key) => migrateKey(key, "settings")),
+			...syncStateKeys.map((key) => migrateKey(key, "sync_state")),
+		]);
 
-                try {
-                        await tx.table("settings").put({ key: "schema_signature", value: SCHEMA_SIGNATURE });
-                } catch (err) {
-                        console.warn("Failed to persist schema signature", err);
-                }
-        });
+		try {
+			await tx.table("settings").put({ key: "schema_signature", value: SCHEMA_SIGNATURE });
+		} catch (err) {
+			console.warn("Failed to persist schema signature", err);
+		}
+	});
 
 export const KEY_TABLE_MAP = {
-        offline_invoices: "queue",
-        offline_customers: "queue",
-        offline_payments: "queue",
-        item_details_cache: "cache",
-        customer_storage: "cache",
-        local_stock_cache: "local_stock",
-        coupons_cache: "coupons",
-        item_groups_cache: "item_groups",
-        translation_cache: "translations",
-        pricing_rules_snapshot: "pricing_rules",
-        pricing_rules_context: "pricing_rules",
-        pricing_rules_last_sync: "pricing_rules",
-        pricing_rules_stale_at: "pricing_rules",
-        cache_version: "settings",
-        cache_ready: "settings",
-        stock_cache_ready: "settings",
-        manual_offline: "settings",
-        schema_signature: "settings",
-        items_last_sync: "sync_state",
-        customers_last_sync: "sync_state",
-        payment_methods_last_sync: "sync_state",
-        pos_last_sync_totals: "sync_state",
+	offline_invoices: "queue",
+	offline_customers: "queue",
+	offline_payments: "queue",
+	item_details_cache: "cache",
+	customer_storage: "cache",
+	local_stock_cache: "local_stock",
+	coupons_cache: "coupons",
+	item_groups_cache: "item_groups",
+	translation_cache: "translations",
+	pricing_rules_snapshot: "pricing_rules",
+	pricing_rules_context: "pricing_rules",
+	pricing_rules_last_sync: "pricing_rules",
+	pricing_rules_stale_at: "pricing_rules",
+	cache_version: "settings",
+	cache_ready: "settings",
+	stock_cache_ready: "settings",
+	manual_offline: "settings",
+	schema_signature: "settings",
+	items_last_sync: "sync_state",
+	customers_last_sync: "sync_state",
+	payment_methods_last_sync: "sync_state",
+	pos_last_sync_totals: "sync_state",
 };
 
 const LARGE_KEYS = new Set(["items", "item_details_cache", "local_stock_cache"]);
@@ -172,40 +172,44 @@ export function tableForKey(key) {
 }
 
 function isCorruptionError(err) {
-        if (!err) return false;
-        const msg = err.message ? err.message.toLowerCase() : "";
-        return (
-                ["VersionError", "InvalidStateError", "NotFoundError"].includes(err.name) || msg.includes("corrupt")
-        );
+	if (!err) return false;
+	const msg = err.message ? err.message.toLowerCase() : "";
+	return (
+		["VersionError", "InvalidStateError", "NotFoundError"].includes(err.name) || msg.includes("corrupt")
+	);
 }
 
 async function ensureSchemaSignature() {
-        try {
-                const settingsTable = db.table("settings");
-                const stored = await settingsTable.get("schema_signature");
-                if (!stored || stored.value !== SCHEMA_SIGNATURE) {
-                        const cacheTables = [
-                                "cache",
-                                "items",
-                                "item_prices",
-                                "customers",
-                                "local_stock",
-                                "coupons",
-                                "item_groups",
-                                "translations",
-                                "pricing_rules",
-                                "settings",
-                                "sync_state",
-                        ];
+	try {
+		const settingsTable = db.table("settings");
+		const stored = await settingsTable.get("schema_signature");
+		if (!stored || stored.value !== SCHEMA_SIGNATURE) {
+			const cacheTables = [
+				"cache",
+				"items",
+				"item_prices",
+				"customers",
+				"local_stock",
+				"coupons",
+				"item_groups",
+				"translations",
+				"pricing_rules",
+				"settings",
+				"sync_state",
+			];
 
-                        await db.transaction("rw", cacheTables.map((tbl) => db.table(tbl)), async () => {
-                                await Promise.all(cacheTables.map((tbl) => db.table(tbl).clear()));
-                                await settingsTable.put({ key: "schema_signature", value: SCHEMA_SIGNATURE });
-                        });
-                }
-        } catch (err) {
-                console.warn("Failed to verify schema signature", err);
-        }
+			await db.transaction(
+				"rw",
+				cacheTables.map((tbl) => db.table(tbl)),
+				async () => {
+					await Promise.all(cacheTables.map((tbl) => db.table(tbl).clear()));
+					await settingsTable.put({ key: "schema_signature", value: SCHEMA_SIGNATURE });
+				},
+			);
+		}
+	} catch (err) {
+		console.warn("Failed to verify schema signature", err);
+	}
 }
 
 export async function checkDbHealth() {
@@ -341,13 +345,13 @@ export function persist(key, value) {
 }
 
 export const initPromise = new Promise((resolve) => {
-        const init = async () => {
-                try {
-                        await db.open();
-                        await ensureSchemaSignature();
-                        // Initialization will be handled by the cache.js module
-                        resolve();
-                } catch (e) {
+	const init = async () => {
+		try {
+			await db.open();
+			await ensureSchemaSignature();
+			// Initialization will be handled by the cache.js module
+			resolve();
+		} catch (e) {
 			console.error("Failed to initialize offline DB", e);
 			resolve(); // Resolve anyway to prevent blocking
 		}

@@ -19,6 +19,8 @@
 </template>
 
 <script>
+import { useDataSync } from "../../composables/useDataSync";
+
 // Avoid relying on `import.meta` so the file can be bundled with older
 // JavaScript targets without warnings from esbuild. Debug logging can be
 // toggled by changing this flag during development.
@@ -33,6 +35,14 @@ export default {
 		isIpHost: Boolean,
 		syncTotals: Object,
 		cacheReady: Boolean,
+	},
+	setup() {
+		const { lastSyncSize, estimatedHourlyUsage, isSyncing } = useDataSync(30);
+		return {
+			lastSyncSize,
+			estimatedHourlyUsage,
+			isSyncing,
+		};
 	},
 	computed: {
 		/**
@@ -160,17 +170,23 @@ export default {
 			const syncedCount = synced || 0;
 			const draftedCount = drafted || 0;
 
+			let status = "";
 			if (!this.networkOnline) {
 				// In offline mode, show all available information
 				if (pendingCount > 0 || syncedCount > 0 || draftedCount > 0) {
-					return `Pending: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
+					status = `Pending: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
 				} else {
-					return "Offline Mode";
+					status = "Offline Mode";
 				}
+			} else {
+				// Online mode - show full status
+				status = `To Sync: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
 			}
 
-			// Online mode - show full status
-			return `To Sync: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
+			if (this.networkOnline) {
+				status += ` | Usage: ${this.lastSyncSize} (Est: ${this.estimatedHourlyUsage}/hr)`;
+			}
+			return status;
 		},
 	},
 };

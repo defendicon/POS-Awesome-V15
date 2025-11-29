@@ -878,7 +878,9 @@ export default {
 		const invoiceUpdates = message.invoice_updates || {};
 
 		const serverDiscountAmount = Number.parseFloat(invoiceUpdates.discount_amount || 0);
-		const serverDiscountPercentage = Number.parseFloat(invoiceUpdates.additional_discount_percentage || 0);
+		const serverDiscountPercentage = Number.parseFloat(
+			invoiceUpdates.additional_discount_percentage || 0,
+		);
 		const serverRules = invoiceUpdates.pricing_rules;
 
 		if (serverRules) {
@@ -2001,13 +2003,13 @@ export default {
 
 		// Add offer details
 		doc.posa_offers = this.posa_offers;
-                doc.posa_coupons = this.posa_coupons;
-                doc.posa_delivery_charges = this.selected_delivery_charge?.name || null;
-                doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
-                doc.posa_notes = sourceDoc.posa_notes ?? null;
-                doc.posa_authorization_code = sourceDoc.posa_authorization_code ?? null;
-                doc.posa_return_valid_upto = sourceDoc.posa_return_valid_upto ?? null;
-                doc.posting_date = this.formatDateForBackend(this.posting_date_display);
+		doc.posa_coupons = this.posa_coupons;
+		doc.posa_delivery_charges = this.selected_delivery_charge?.name || null;
+		doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
+		doc.posa_notes = sourceDoc.posa_notes ?? null;
+		doc.posa_authorization_code = sourceDoc.posa_authorization_code ?? null;
+		doc.posa_return_valid_upto = sourceDoc.posa_return_valid_upto ?? null;
+		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
 		// Add flags to ensure proper rate handling
 		doc.ignore_pricing_rule = 0;
@@ -4277,12 +4279,7 @@ export default {
 			item.allow_negative_stock === true ||
 			item.allow_negative_stock === "1";
 		let clamped = false;
-		if (
-			blockSale &&
-			!allowNegativeStock &&
-			item.max_qty !== undefined &&
-			flt(item.qty) > item.max_qty
-		) {
+		if (blockSale && !allowNegativeStock && item.max_qty !== undefined && flt(item.qty) > item.max_qty) {
 			this.eventBus.emit("show_message", {
 				title: __("Quantity exceeds available stock"),
 				text: __("The quantity for {0} has been adjusted to the maximum available stock.", [

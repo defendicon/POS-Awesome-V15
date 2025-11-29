@@ -3438,71 +3438,68 @@ export default {
 			// Clone the item to avoid mutating list data
 			const newItem = { ...item };
 
-                        // If the scanned barcode has a specific UOM, apply it
-                        if (Array.isArray(newItem.item_barcode)) {
-                                const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-                                if (barcodeMatch && barcodeMatch.posa_uom) {
-                                        newItem.uom = barcodeMatch.posa_uom;
+			// If the scanned barcode has a specific UOM, apply it
+			if (Array.isArray(newItem.item_barcode)) {
+				const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
+				if (barcodeMatch && barcodeMatch.posa_uom) {
+					newItem.uom = barcodeMatch.posa_uom;
 
-                                        // Try fetching the rate for this UOM from the active price list
-                                        try {
-                                                const res = await frappe.call({
-                                                        method: "posawesome.posawesome.api.items.get_price_for_uom",
-                                                        args: {
-                                                                item_code: newItem.item_code,
-                                                                price_list: this.active_price_list,
-                                                                uom: barcodeMatch.posa_uom,
-                                                        },
-                                                });
+					// Try fetching the rate for this UOM from the active price list
+					try {
+						const res = await frappe.call({
+							method: "posawesome.posawesome.api.items.get_price_for_uom",
+							args: {
+								item_code: newItem.item_code,
+								price_list: this.active_price_list,
+								uom: barcodeMatch.posa_uom,
+							},
+						});
 
-                                                const uomInfo =
-                                                        newItem.item_uoms &&
-                                                        newItem.item_uoms.find((u) => u.uom === barcodeMatch.posa_uom);
-                                                const conversionFactor =
-                                                        uomInfo && uomInfo.conversion_factor
-                                                                ? parseFloat(uomInfo.conversion_factor)
-                                                                : null;
-                                                const currentConversion = newItem.conversion_factor || 1;
-                                                const baseUnitRate =
-                                                        parseFloat(
-                                                                (newItem.base_price_list_rate ||
-                                                                        newItem.base_rate ||
-                                                                        newItem.price_list_rate ||
-                                                                        newItem.rate ||
-                                                                        0) /
-                                                                        (currentConversion || 1),
-                                                        ) || 0;
+						const uomInfo =
+							newItem.item_uoms &&
+							newItem.item_uoms.find((u) => u.uom === barcodeMatch.posa_uom);
+						const conversionFactor =
+							uomInfo && uomInfo.conversion_factor
+								? parseFloat(uomInfo.conversion_factor)
+								: null;
+						const currentConversion = newItem.conversion_factor || 1;
+						const baseUnitRate =
+							parseFloat(
+								(newItem.base_price_list_rate ||
+									newItem.base_rate ||
+									newItem.price_list_rate ||
+									newItem.rate ||
+									0) / (currentConversion || 1),
+							) || 0;
 
-                                                if (res.message) {
-                                                        const price = parseFloat(res.message);
-                                                        newItem.rate = price;
-                                                        newItem.price_list_rate = price;
-                                                        const basePrice = conversionFactor
-                                                                ? price / conversionFactor
-                                                                : price;
-                                                        newItem.base_rate = basePrice;
-                                                        newItem.base_price_list_rate = basePrice;
-                                                        if (conversionFactor) {
-                                                                newItem.conversion_factor = conversionFactor;
-                                                        }
-                                                        newItem._manual_rate_set = true;
-                                                        newItem.skip_force_update = true;
-                                                } else if (conversionFactor) {
-                                                        const newPrice = baseUnitRate * conversionFactor;
+						if (res.message) {
+							const price = parseFloat(res.message);
+							newItem.rate = price;
+							newItem.price_list_rate = price;
+							const basePrice = conversionFactor ? price / conversionFactor : price;
+							newItem.base_rate = basePrice;
+							newItem.base_price_list_rate = basePrice;
+							if (conversionFactor) {
+								newItem.conversion_factor = conversionFactor;
+							}
+							newItem._manual_rate_set = true;
+							newItem.skip_force_update = true;
+						} else if (conversionFactor) {
+							const newPrice = baseUnitRate * conversionFactor;
 
-                                                        newItem.rate = newPrice;
-                                                        newItem.price_list_rate = newPrice;
-                                                        newItem.base_rate = baseUnitRate;
-                                                        newItem.base_price_list_rate = baseUnitRate;
-                                                        newItem.conversion_factor = conversionFactor;
-                                                        newItem._manual_rate_set = true;
-                                                        newItem.skip_force_update = true;
-                                                }
-                                        } catch (e) {
-                                                console.error("Failed to fetch UOM price", e);
-                                        }
-                                }
-                        }
+							newItem.rate = newPrice;
+							newItem.price_list_rate = newPrice;
+							newItem.base_rate = baseUnitRate;
+							newItem.base_price_list_rate = baseUnitRate;
+							newItem.conversion_factor = conversionFactor;
+							newItem._manual_rate_set = true;
+							newItem.skip_force_update = true;
+						}
+					} catch (e) {
+						console.error("Failed to fetch UOM price", e);
+					}
+				}
+			}
 
 			let effectiveQty = qtyFromBarcode;
 			if (
