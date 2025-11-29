@@ -428,7 +428,14 @@
 					></v-text-field>
 				</v-col>
 				<v-col cols="3" class="dynamic-margin-xs">
-					<v-btn-toggle v-model="items_view" color="primary" group density="compact" rounded>
+					<v-btn-toggle
+						v-model="items_view"
+						color="primary"
+						group
+						density="compact"
+						rounded
+						class="view-toggle-btn"
+					>
 						<v-btn size="small" value="list">{{ __("List") }}</v-btn>
 						<v-btn size="small" value="card">{{ __("Card") }}</v-btn>
 					</v-btn-toggle>

@@ -213,13 +213,13 @@
 					<template v-slot:prepend>
 						<div class="menu-icon-wrapper-compact info-icon">
 							<v-icon color="white" size="16">{{
-								$theme.isDark ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
+								$theme.isDark.value ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
 							}}</v-icon>
 						</div>
 					</template>
 					<div class="menu-content-compact">
 						<v-list-item-title class="menu-item-title-compact">{{
-							$theme.isDark ? __("Light Mode") : __("Dark Mode")
+							$theme.isDark.value ? __("Light Mode") : __("Dark Mode")
 						}}</v-list-item-title>
 						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
 							__("Switch theme appearance")

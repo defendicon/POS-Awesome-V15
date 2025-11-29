@@ -38,6 +38,7 @@
 								format="dd-MM-yyyy"
 								:enable-time-picker="false"
 								auto-apply
+								class="pos-themed-input"
 								@update:model-value="formatFromDate()"
 							/>
 						</v-col>
@@ -48,6 +49,7 @@
 								format="dd-MM-yyyy"
 								:enable-time-picker="false"
 								auto-apply
+								class="pos-themed-input"
 								@update:model-value="formatToDate()"
 							/>
 						</v-col>
