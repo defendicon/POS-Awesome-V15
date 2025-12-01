@@ -35,12 +35,12 @@
 
 			<!-- Slot for CPU gadget -->
 			<template #cpu-gadget>
-				<ServerUsageGadget />
+				<ServerUsageGadget v-if="posProfile.posa_show_cpu_load_gadget" />
 			</template>
 
 			<!-- Slot for Database Usage Gadget -->
 			<template #db-usage-gadget>
-				<DatabaseUsageGadget />
+				<DatabaseUsageGadget v-if="posProfile.posa_show_database_usage_gadget" />
 			</template>
 
 			<!-- Slot for menu -->

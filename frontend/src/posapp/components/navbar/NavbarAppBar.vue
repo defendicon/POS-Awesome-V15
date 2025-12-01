@@ -98,12 +98,12 @@
 				</div>
 
 				<!-- Database Usage Gadget -->
-				<div class="gadget-wrapper db-gadget">
+				<div v-if="$slots['db-usage-gadget']" class="gadget-wrapper db-gadget">
 					<slot name="db-usage-gadget"></slot>
 				</div>
 
 				<!-- CPU Load Gadget -->
-				<div class="gadget-wrapper cpu-gadget">
+				<div v-if="$slots['cpu-gadget']" class="gadget-wrapper cpu-gadget">
 					<slot name="cpu-gadget"></slot>
 				</div>
 
