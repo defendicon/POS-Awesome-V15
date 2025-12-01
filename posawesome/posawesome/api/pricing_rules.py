@@ -342,7 +342,7 @@ def _extract_qty_context(line: frappe._dict) -> Tuple[float, float, float]:
 def _build_pricing_args(
     line: frappe._dict, ctx: frappe._dict, qty_context: Tuple[float, float, float] | None = None
 ) -> frappe._dict:
-    qty, effective_stock_qty, _ = qty_context or _extract_qty_context(line)
+    qty, effective_stock_qty, conversion_factor = qty_context or _extract_qty_context(line)
 
     return frappe._dict(
         doctype="Sales Invoice Item",
@@ -359,6 +359,8 @@ def _build_pricing_args(
         company=ctx.company,
         conversion_rate=flt(ctx.get("conversion_rate") or 1),
         plc_conversion_rate=flt(ctx.get("conversion_rate") or 1),
+        conversion_factor=conversion_factor,
+        uom_conversion_factor=conversion_factor,
         customer=ctx.get("customer"),
         customer_group=ctx.get("customer_group"),
         territory=ctx.get("territory"),
@@ -420,7 +422,11 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         if details.get("pricing_rules"):
             applied_rules = _as_list(frappe.parse_json(details.get("pricing_rules")))
 
-        raw_price_list_rate = flt(details.get("price_list_rate") or args.price_list_rate)
+        raw_price_list_rate = flt(
+            details.get("price_list_rate")
+            or details.get("for_price_list_rate")
+            or args.price_list_rate
+        )
         raw_discount_amount = flt(details.get("discount_amount") or 0)
         discount_percentage = flt(details.get("discount_percentage") or 0)
 
@@ -429,18 +435,23 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         discount_amount = raw_discount_amount
         rate = raw_rate
 
+        target_price_list_rate = flt(line.get("base_price_list_rate") or line.get("price_list_rate") or 0)
+
         should_scale = (
             conversion_factor not in (0, 1)
-            and args.price_list_rate
+            and target_price_list_rate
             and raw_price_list_rate
-            and abs((args.price_list_rate / raw_price_list_rate) - conversion_factor)
+            and abs((target_price_list_rate / raw_price_list_rate) - conversion_factor)
             <= 0.0001 * conversion_factor
         )
 
         if should_scale:
-            price_list_rate = args.price_list_rate
+            price_list_rate = target_price_list_rate
             rate = raw_rate * conversion_factor if raw_rate else raw_rate
             discount_amount = raw_discount_amount * conversion_factor if raw_discount_amount else raw_discount_amount
+
+        if not should_scale and conversion_factor not in (0, 1) and raw_price_list_rate and not target_price_list_rate:
+            price_list_rate = raw_price_list_rate * conversion_factor
 
         if not rate:
             if discount_amount:
