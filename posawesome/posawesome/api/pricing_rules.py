@@ -351,8 +351,8 @@ def _build_pricing_args(
         item_code=line.item_code,
         qty=qty,
         stock_qty=effective_stock_qty,
-        price_list_rate=flt(line.base_price_list_rate or line.price_list_rate or 0),
-        rate=flt(line.base_rate or line.rate or 0),
+        price_list_rate=flt(line.price_list_rate or line.base_price_list_rate or 0),
+        rate=flt(line.rate or line.base_rate or 0),
         currency=ctx.get("currency"),
         price_list=ctx.get("price_list"),
         transaction_date=ctx.get("date") or nowdate(),
@@ -435,7 +435,7 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         discount_amount = raw_discount_amount
         rate = raw_rate
 
-        target_price_list_rate = flt(line.get("base_price_list_rate") or line.get("price_list_rate") or 0)
+        target_price_list_rate = flt(line.get("price_list_rate") or line.get("base_price_list_rate") or 0)
 
         should_scale = (
             conversion_factor not in (0, 1)
