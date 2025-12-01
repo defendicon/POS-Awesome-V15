@@ -409,7 +409,18 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         price_list_rate = flt(details.get("price_list_rate") or args.price_list_rate)
         discount_amount = flt(details.get("discount_amount") or 0)
         discount_percentage = flt(details.get("discount_percentage") or 0)
-        rate = flt(details.get("rate") or (price_list_rate - discount_amount))
+
+        rate = flt(details.get("rate") or 0)
+        if not rate:
+            if discount_amount:
+                rate = price_list_rate - discount_amount
+            elif discount_percentage:
+                rate = price_list_rate * (1 - (discount_percentage / 100))
+            else:
+                rate = price_list_rate
+
+        if not discount_amount and discount_percentage:
+            discount_amount = price_list_rate - rate
 
         updates.append(
             {
