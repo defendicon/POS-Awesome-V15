@@ -87,25 +87,27 @@
 
 			<!-- Desktop: Show all items normally -->
 			<template v-else>
-				<!-- Enhanced connectivity status indicator -->
-				<div class="gadget-wrapper status-gadget">
-					<slot name="status-indicator"></slot>
-				</div>
+				<NavbarInfoGadgets :class="['info-gadgets-wrapper', isRtl ? 'rtl-info-gadgets' : 'ltr-info-gadgets']">
+					<!-- Enhanced connectivity status indicator -->
+					<template #status-indicator>
+						<slot name="status-indicator"></slot>
+					</template>
 
-				<!-- Cache Usage Meter -->
-				<div class="gadget-wrapper cache-gadget">
-					<slot name="cache-usage-meter"></slot>
-				</div>
+					<!-- Cache Usage Meter -->
+					<template #cache-usage-meter>
+						<slot name="cache-usage-meter"></slot>
+					</template>
 
-				<!-- Database Usage Gadget -->
-				<div class="gadget-wrapper db-gadget">
-					<slot name="db-usage-gadget"></slot>
-				</div>
+					<!-- Database Usage Gadget -->
+					<template #db-usage-gadget>
+						<slot name="db-usage-gadget"></slot>
+					</template>
 
-				<!-- CPU Load Gadget -->
-				<div class="gadget-wrapper cpu-gadget">
-					<slot name="cpu-gadget"></slot>
-				</div>
+					<!-- CPU Load Gadget -->
+					<template #cpu-gadget>
+						<slot name="cpu-gadget"></slot>
+					</template>
+				</NavbarInfoGadgets>
 
 				<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
 					<v-chip
@@ -184,9 +186,13 @@
 <script>
 import { useRtl } from "../../composables/useRtl.js";
 import posLogo from "../pos/pos.png";
+import NavbarInfoGadgets from "./NavbarInfoGadgets.vue";
 
 export default {
 	name: "NavbarAppBar",
+	components: {
+		NavbarInfoGadgets,
+	},
 	setup() {
 		const { isRtl, rtlStyles, rtlClasses } = useRtl();
 		return {
@@ -383,32 +389,16 @@ export default {
 }
 
 /* LTR Actions ordering for proper sequence */
-.ltr-actions-section > :nth-child(1) {
-	/* status-indicator */
+.ltr-info-gadgets {
 	order: 1;
 }
 
-.ltr-actions-section > :nth-child(2) {
-	/* cache-usage-meter */
+.ltr-actions-section .profile-section {
 	order: 2;
 }
 
-.ltr-actions-section > :nth-child(3) {
-	/* db-usage-gadget */
-	order: 3;
-}
-
-.ltr-actions-section > :nth-child(4) {
-	/* cpu-gadget */
-	order: 4;
-}
-
-.ltr-actions-section .profile-section {
-	order: 5;
-}
-
 .ltr-actions-section .offline-invoices-btn {
-	order: 6;
+	order: 3;
 }
 
 /* Menu should be the last element */
@@ -416,24 +406,11 @@ export default {
 /* menu slot */
 .ltr-actions-section .v-menu,
 .ltr-actions-section [role="menu"] {
-	order: 7 !important;
+	order: 4 !important;
 }
 
 /* RTL adjustments for gadgets - reverse the order */
-.rtl-actions-section > :nth-child(1) {
-	order: 6;
-	/* Reverse order in RTL */
-}
-
-.rtl-actions-section > :nth-child(2) {
-	order: 5;
-}
-
-.rtl-actions-section > :nth-child(3) {
-	order: 4;
-}
-
-.rtl-actions-section > :nth-child(4) {
+.rtl-info-gadgets {
 	order: 3;
 }
 
@@ -609,24 +586,6 @@ export default {
 	display: none;
 }
 
-/* Individual gadget responsiveness */
-@media (max-width: 1200px) {
-	.db-gadget {
-		display: none;
-	}
-}
-
-@media (max-width: 1024px) {
-	.cpu-gadget {
-		display: none;
-	}
-}
-
-@media (max-width: 900px) {
-	.cache-gadget {
-		display: none;
-	}
-}
 
 /* Profile Section */
 .profile-section {
