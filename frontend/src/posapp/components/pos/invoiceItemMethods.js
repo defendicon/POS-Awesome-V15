@@ -224,7 +224,9 @@ export default {
 			return;
 		}
 
-		const allowRateUpdate = !item.locked_price && !item.posa_offer_applied && !item._manual_rate_set;
+                const manualFromUom = item._manual_rate_set_from_uom === true;
+                const manualOverride = item._manual_rate_set === true && !manualFromUom;
+                const allowRateUpdate = !item.locked_price && !item.posa_offer_applied && !manualOverride;
 		const rawDocQty = Number.parseFloat(item.qty || 0);
 		const signedDocQty = Number.isFinite(rawDocQty) ? rawDocQty : 0;
 		const docQty = Math.abs(signedDocQty);
@@ -1078,7 +1080,8 @@ export default {
 			const discountPercentage =
 				Number.parseFloat(update.discount_percentage ?? item.discount_percentage ?? 0) || 0;
 
-			const manualOverride = item._manual_rate_set === true;
+                        const manualFromUom = item._manual_rate_set_from_uom === true;
+                        const manualOverride = item._manual_rate_set === true && !manualFromUom;
 			const priceLocked = item.locked_price === true;
 			const offerApplied =
 				item.posa_offer_applied === true ||
@@ -2801,11 +2804,12 @@ export default {
 	},
 
 	_assignManualOverrideValues(item, values = {}) {
-		if (!item || !values) {
-			return;
-		}
+                if (!item || !values) {
+                        return;
+                }
 
-		item._manual_rate_set = true;
+                item._manual_rate_set = true;
+                item._manual_rate_set_from_uom = false;
 
 		if (values.uom) {
 			item.uom = values.uom;
@@ -3477,7 +3481,9 @@ export default {
 							updated_item.price_list_currency ||
 							item.price_list_currency ||
 							this.selected_currency;
-						const manualLocked = item._manual_rate_set === true;
+                                                const manualLocked =
+                                                        item._manual_rate_set === true &&
+                                                        item._manual_rate_set_from_uom !== true;
 						const shouldOverrideRate =
 							!item.locked_price && !item.posa_offer_applied && !manualLocked;
 
@@ -4083,7 +4089,7 @@ export default {
 
 		const rate = Number.isFinite(Number(newRate)) ? Number(newRate) : 0;
 		const resolvedCurrency = priceCurrency || this.selected_currency;
-		const manualOverride = item._manual_rate_set === true;
+                const manualOverride = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
 		const companyCurrency = this.pos_profile?.currency;
 
 		if (!item.original_currency) {

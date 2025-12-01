@@ -48,11 +48,12 @@ export function useDiscounts() {
 		const fieldId = $event.target.id;
 		let newValue = flt(value, context.currency_precision);
 
-		try {
-			// Flag to track manual rate changes
-			if (["rate", "discount_amount", "discount_percentage"].includes(fieldId)) {
-				item._manual_rate_set = true;
-			}
+                try {
+                        // Flag to track manual rate changes
+                        if (["rate", "discount_amount", "discount_percentage"].includes(fieldId)) {
+                                item._manual_rate_set = true;
+                                item._manual_rate_set_from_uom = false;
+                        }
 
 			// Handle negative values
 			if (newValue < 0) {
