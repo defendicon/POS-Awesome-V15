@@ -4272,10 +4272,16 @@ export default {
 
 		const blockSale =
 			this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty;
-		const allowNegativeStock =
+		const globalAllowNegative =
+			this.stock_settings?.allow_negative_stock === 1 ||
+			this.stock_settings?.allow_negative_stock === true ||
+			this.stock_settings?.allow_negative_stock === "1";
+		const itemAllowNegative =
 			item.allow_negative_stock === 1 ||
 			item.allow_negative_stock === true ||
 			item.allow_negative_stock === "1";
+		const allowNegativeStock = globalAllowNegative || itemAllowNegative;
+
 		let clamped = false;
 		if (
 			blockSale &&
@@ -4326,13 +4332,18 @@ export default {
 				item.allow_negative_stock === true ||
 				item.allow_negative_stock === "1";
 
-			if (allowNegativeStock) {
+			const globalAllowNegative =
+				this.stock_settings?.allow_negative_stock === 1 ||
+				this.stock_settings?.allow_negative_stock === true ||
+				this.stock_settings?.allow_negative_stock === "1";
+			const combinedAllowNegative = allowNegativeStock || globalAllowNegative;
+
+			if (combinedAllowNegative) {
 				item.disable_increment = false;
 			} else if (blockSale) {
 				item.disable_increment = item.qty >= item.max_qty;
 			} else {
-				item.disable_increment =
-					!this.stock_settings.allow_negative_stock && item.qty >= item.max_qty;
+				item.disable_increment = !combinedAllowNegative && item.qty >= item.max_qty;
 			}
 		}
 	},
