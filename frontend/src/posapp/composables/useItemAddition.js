@@ -123,10 +123,17 @@ export function useItemAddition() {
 	// Add item to invoice
 	const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
 		const blockSale = context.pos_profile?.posa_block_sale_beyond_available_qty;
-		const allowNegativeStock =
+		const globalAllowNegative =
+			context.stock_settings?.allow_negative_stock === 1 ||
+			context.stock_settings?.allow_negative_stock === true ||
+			context.stock_settings?.allow_negative_stock === "1";
+
+		const itemAllowNegative =
 			item.allow_negative_stock === 1 ||
 			item.allow_negative_stock === true ||
 			item.allow_negative_stock === "1";
+
+		const allowNegativeStock = globalAllowNegative || itemAllowNegative;
 
 		if (item.is_stock_item && item.actual_qty <= 0 && !allowNegativeStock) {
 			context.eventBus.emit("show_message", {

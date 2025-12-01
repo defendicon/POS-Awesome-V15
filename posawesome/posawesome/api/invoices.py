@@ -150,6 +150,10 @@ def _collect_stock_errors(items):
             continue
         if not _is_stock_item(d):
             continue
+
+        if cint(frappe.get_cached_value("Item", d.get("item_code"), "allow_negative_stock")):
+            continue
+
         available = _get_available_stock(d)
         requested = flt(d.get("stock_qty") or (flt(d.get("qty")) * flt(d.get("conversion_factor") or 1)))
         if requested > available:
@@ -285,13 +289,7 @@ def _should_block(pos_profile):
     if allow_negative:
         return False
 
-    block_sale = 1
-    if pos_profile:
-        block_sale = cint(
-            frappe.db.get_value("POS Profile", pos_profile, "posa_block_sale_beyond_available_qty") or 1
-        )
-
-    return bool(block_sale)
+    return True
 
 
 def _validate_stock_on_invoice(invoice_doc):
