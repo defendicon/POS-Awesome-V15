@@ -38,10 +38,11 @@
                                                         <template #activator="{ props }">
                                                                 <v-btn
                                                                         v-bind="props"
-                                                                        block
                                                                         color="primary"
                                                                         variant="tonal"
-                                                                        density="comfortable"
+                                                                        size="small"
+                                                                        rounded="circle"
+                                                                        class="previous-invoices-btn"
                                                                         icon="mdi-history"
                                                                         @click="openInvoiceHistory"
                                                                         :disabled="!customer"
@@ -2191,11 +2192,11 @@ export default {
 		}
 	},
 	// Register global keyboard shortcuts when component is created
-	created() {
-		this.invoiceStore.clear();
-		this.$watch(
-			() => this.selectedCustomer,
-			(newCustomer) => {
+                created() {
+                        this.invoiceStore.clear();
+                        this.$watch(
+                                () => this.selectedCustomer,
+                                (newCustomer) => {
 				if (newCustomer) {
 					if (this.customer !== newCustomer) {
 						this.customer = newCustomer;
@@ -2211,10 +2212,26 @@ export default {
 			() => {
 				if (this.customer) {
 					this.fetch_customer_details();
-				}
-			},
-		);
-		this._shortcutHandlers = this._shortcutHandlers || {};
+                                }
+                        },
+                );
+                this.$watch(
+                        () => this.customer,
+                        (newCustomer) => {
+                                if (!this.show_invoice_history) {
+                                        return;
+                                }
+
+                                this.resetInvoiceHistory();
+
+                                if (newCustomer) {
+                                        this.loadInvoiceHistory();
+                                } else {
+                                        this.invoice_history_error = __("Select a customer to view history.");
+                                }
+                        },
+                );
+                this._shortcutHandlers = this._shortcutHandlers || {};
 
 		this._shortcutHandlers.shortOpenPayment = this.shortOpenPayment.bind(this);
 		this._shortcutHandlers.shortDeleteFirstItem = this.shortDeleteFirstItem.bind(this);
@@ -2424,6 +2441,12 @@ export default {
 :deep(.column-switch .v-label) {
         opacity: 0.9;
         font-size: 0.95rem;
+}
+
+.previous-invoices-btn {
+        min-width: 40px;
+        height: 40px;
+        border-radius: 50%;
 }
 
 .history-list {
