@@ -28,27 +28,27 @@
 					{{ __("Invoices saved as POS Invoices") }}
 				</v-alert>
                                 <!-- Top Row: Customer Selection and Invoice Type -->
-                                <v-row align="center" class="items px-3 py-2">
-                                        <v-col :cols="pos_profile.posa_allow_sales_order ? 7 : 9" class="pb-0 pr-0">
-                                                <!-- Customer selection component -->
-                                                <Customer ref="customerComponent" />
-                                        </v-col>
-                                        <v-col :cols="pos_profile.posa_allow_sales_order ? 2 : 3" class="pb-0">
-                                                <v-tooltip :text="__('Check previous invoices')" location="top">
-                                                        <template #activator="{ props }">
-                                                                <v-btn
-                                                                        v-bind="props"
-                                                                        color="primary"
-                                                                        variant="tonal"
-                                                                        size="small"
-                                                                        rounded="circle"
-                                                                        class="previous-invoices-btn"
-                                                                        icon="mdi-history"
-                                                                        @click="openInvoiceHistory"
-                                                                        :disabled="!customer"
-                                                                ></v-btn>
-                                                        </template>
-                                                </v-tooltip>
+                                <v-row align="center" class="items px-3 py-2 history-header" no-gutters>
+                                        <v-col :cols="pos_profile.posa_allow_sales_order ? 9 : 12" class="pb-0 pr-0">
+                                                <div class="d-flex align-center ga-2 flex-nowrap">
+                                                        <!-- Customer selection component -->
+                                                        <Customer ref="customerComponent" class="flex-grow-1" />
+                                                        <v-tooltip :text="__('Check previous invoices')" location="top">
+                                                                <template #activator="{ props }">
+                                                                        <v-btn
+                                                                                v-bind="props"
+                                                                                color="primary"
+                                                                                variant="tonal"
+                                                                                size="small"
+                                                                                rounded="circle"
+                                                                                class="previous-invoices-btn"
+                                                                                icon="mdi-history"
+                                                                                @click="openInvoiceHistory"
+                                                                                :disabled="!getActiveCustomerId()"
+                                                                        ></v-btn>
+                                                                </template>
+                                                        </v-tooltip>
+                                                </div>
                                         </v-col>
                                         <!-- Invoice Type Selection (Only shown if sales orders are allowed) -->
                                         <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-4">
@@ -749,7 +749,19 @@ export default {
                         this.eventBus.emit("focus_item_search");
                 },
 
+                getActiveCustomerId() {
+                        const candidate = this.customer || this.selectedCustomer;
+                        if (candidate && typeof candidate === "object") {
+                                return candidate.name || candidate.customer || "";
+                        }
+                        return candidate || "";
+                },
+
                 openInvoiceHistory() {
+                        const activeCustomer = this.getActiveCustomerId();
+                        if (activeCustomer && !this.customer) {
+                                this.customer = activeCustomer;
+                        }
                         this.show_invoice_history = true;
                         this.resetInvoiceHistory();
                         this.loadInvoiceHistory();
@@ -851,7 +863,8 @@ export default {
                 },
 
                 async loadInvoiceHistory(loadMore = false) {
-                        if (!this.customer) {
+                        const customerId = this.getActiveCustomerId();
+                        if (!customerId) {
                                 this.invoice_history_error = __("Select a customer to view history.");
                                 return;
                         }
@@ -880,7 +893,7 @@ export default {
                                 const res = await frappe.call({
                                         method: "posawesome.posawesome.api.invoices.get_customer_invoice_history",
                                         args: {
-                                                customer: this.customer,
+                                                customer: customerId,
                                                 company: this.pos_profile?.company,
                                                 from_date: this.invoice_history_filters.from_date || undefined,
                                                 to_date: this.invoice_history_filters.to_date || undefined,
