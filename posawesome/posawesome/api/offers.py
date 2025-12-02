@@ -20,21 +20,38 @@ def get_pos_coupon(coupon, customer, company):
 
 
 @frappe.whitelist()
-def get_active_gift_coupons(customer, company):
+def get_active_gift_coupons(customer, company=None):
     coupons = []
     today = getdate(nowdate())
+
+    # Backward compatibility: earlier calls did not send the company argument.
+    # Fall back to the user's default company or the customer's default company
+    # so the API stays resilient instead of raising a missing-argument TypeError.
+    if not company:
+        company = (
+            frappe.defaults.get_user_default("company")
+            or frappe.db.get_value("Customer", customer, "default_company")
+            or frappe.defaults.get_defaults().get("company")
+        )
+
+    filters = {
+        "coupon_type": "Gift Card",
+        "customer": customer,
+        "used": 0,
+    }
+
+    if company:
+        filters["company"] = company
+
     coupons_data = frappe.get_all(
         "POS Coupon",
-        filters={
-            "company": company,
-            "coupon_type": "Gift Card",
-            "customer": customer,
-            "used": 0,
-        },
+        filters=filters,
         fields=["coupon_code", "valid_from", "valid_upto"],
     )
+
     if len(coupons_data):
         coupons = [i.coupon_code for i in coupons_data if _is_coupon_active(i, today)]
+
     return coupons
 
 
