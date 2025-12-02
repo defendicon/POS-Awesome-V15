@@ -297,30 +297,50 @@
 															}}
 														</span>
 													</div>
-													<div
-														v-if="
-															pos_profile.posa_allow_multi_currency &&
-															selected_currency !== pos_profile.currency
-														"
-														class="secondary-price"
-													>
-														<span class="currency-symbol">
-															{{ currencySymbol(selected_currency) }}
-														</span>
-														<span class="price-amount">
-															{{
-																format_currency(
-																	item.rate,
-																	selected_currency,
-																	ratePrecision(item.rate),
-																)
-															}}
-														</span>
-													</div>
-												</div>
-												<div class="card-item-stock">
-													<v-icon size="small" class="stock-icon">
-														mdi-package-variant
+                                                                                                        <div
+                                                                                                                v-if="
+                                                                                                                        pos_profile.posa_allow_multi_currency &&
+                                                                                                                        selected_currency !== pos_profile.currency
+                                                                                                                "
+                                                                                                                class="secondary-price"
+                                                                                                        >
+                                                                                                                <span class="currency-symbol">
+                                                                                                                        {{ currencySymbol(selected_currency) }}
+                                                                                                                </span>
+                                                                                                                <span class="price-amount">
+                                                                                                                        {{
+                                                                                                                               format_currency(
+                                                                                                                                       item.rate,
+                                                                                                                                       selected_currency,
+                                                                                                                                       ratePrecision(item.rate),
+                                                                                                                               )
+                                                                                                                        }}
+                                                                                                                </span>
+                                                                                                        </div>
+                                                                                                <div v-if="getLastInvoiceRate(item)" class="last-rate-chip">
+                                                                                                        <v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
+                                                                                                        <span class="last-rate-label">{{ __("Last") }}:</span>
+                                                                                                        <span class="last-rate-value">
+                                                                                                                {{
+                                                                                                                        currencySymbol(
+                                                                                                                                getLastInvoiceRate(item).currency ||
+                                                                                                                                        pos_profile.currency,
+                                                                                                                        )
+                                                                                                                }}
+                                                                                                                {{
+                                                                                                                        format_currency(
+                                                                                                                                getLastInvoiceRate(item).rate,
+                                                                                                                                getLastInvoiceRate(item).currency ||
+                                                                                                                                        pos_profile.currency,
+                                                                                                                                ratePrecision(getLastInvoiceRate(item).rate || 0),
+                                                                                                                        )
+                                                                                                                }}
+                                                                                                        </span>
+                                                                                                </div>
+                                                                                                </div>
+                                                                                                <div class="card-item-stock">
+                                                                                                        <v-icon size="small" class="stock-icon">
+                                                                                                                mdi-package-variant
 													</v-icon>
 													<span
 														class="stock-amount"
@@ -363,20 +383,43 @@
 											{{
 												currencySymbol(item.original_currency || pos_profile.currency)
 											}}
-											{{
-												format_currency(
-													item.base_price_list_rate ?? item.rate ?? 0,
-													item.original_currency || pos_profile.currency,
-													ratePrecision(
-														item.base_price_list_rate ?? item.rate ?? 0,
-													),
-												)
-											}}
-										</div>
-										<div
-											v-if="
-												pos_profile.posa_allow_multi_currency &&
-												selected_currency !== pos_profile.currency
+                                                                                        {{
+                                                                                                format_currency(
+                                                                                                        item.base_price_list_rate ?? item.rate ?? 0,
+                                                                                                        item.original_currency || pos_profile.currency,
+                                                                                                        ratePrecision(
+                                                                                                                item.base_price_list_rate ?? item.rate ?? 0,
+                                                                                                        ),
+                                                                                                )
+                                                                                        }}
+                                                                                </div>
+                                                                                <div
+                                                                                        v-if="getLastInvoiceRate(item)"
+                                                                                        class="text-caption d-flex align-center last-rate-inline"
+                                                                                >
+                                                                                        <v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
+                                                                                        <span class="mr-1">{{ __("Last") }}:</span>
+                                                                                        <span class="font-weight-medium">
+                                                                                                {{
+                                                                                                        currencySymbol(
+                                                                                                                getLastInvoiceRate(item).currency ||
+                                                                                                                        pos_profile.currency,
+                                                                                                        )
+                                                                                                }}
+                                                                                                {{
+                                                                                                        format_currency(
+                                                                                                                getLastInvoiceRate(item).rate,
+                                                                                                                getLastInvoiceRate(item).currency ||
+                                                                                                                        pos_profile.currency,
+                                                                                                                ratePrecision(getLastInvoiceRate(item).rate || 0),
+                                                                                                        )
+                                                                                                }}
+                                                                                        </span>
+                                                                                </div>
+                                                                                <div
+                                                                                        v-if="
+                                                                                                pos_profile.posa_allow_multi_currency &&
+                                                                                                selected_currency !== pos_profile.currency
 											"
 											class="text-success"
 										>
@@ -583,23 +626,27 @@ export default {
 		itemDetailsRetryTimeout: null,
 		selected_currency: "",
 		exchange_rate: 1,
-		prePopulateInProgress: false,
-		itemWorker: null,
-		flyConfig: { speed: 0.6, easing: "ease-in-out" },
+                prePopulateInProgress: false,
+                itemWorker: null,
+                flyConfig: { speed: 0.6, easing: "ease-in-out" },
 		storageAvailable: true,
 		localStorageAvailable: true,
 		stockUnsubscribe: null,
-		items_request_token: 0,
-		pendingGetItems: null,
-		lastGetItemsKey: "",
-		show_item_settings: false,
-		hide_qty_decimals: false,
-		temp_hide_qty_decimals: false,
-		hide_zero_rate_items: false,
-		temp_hide_zero_rate_items: false,
-		isDragging: false,
-		// Items per page configuration
-		enable_custom_items_per_page: false,
+                items_request_token: 0,
+                pendingGetItems: null,
+                lastGetItemsKey: "",
+                show_item_settings: false,
+                hide_qty_decimals: false,
+                temp_hide_qty_decimals: false,
+                hide_zero_rate_items: false,
+                temp_hide_zero_rate_items: false,
+                lastInvoiceRateCache: new Map(),
+                lastInvoiceRates: {},
+                lastInvoiceRateScheduler: null,
+                lastInvoiceRateLoading: false,
+                isDragging: false,
+                // Items per page configuration
+                enable_custom_items_per_page: false,
 		temp_enable_custom_items_per_page: false,
 		items_per_page: 50,
 		temp_items_per_page: 50,
@@ -666,10 +713,11 @@ export default {
 			this.search_onchange();
 		},
 		customer: _.debounce(function () {
-			if (this.pos_profile.posa_force_reload_items) {
-				if (this.pos_profile.posa_smart_reload_mode) {
-					// When limit search is enabled there may be no items yet.
-					// Fallback to full reload if nothing is loaded
+                        if (this.pos_profile.posa_force_reload_items) {
+                                this.scheduleLastInvoiceRateRefresh();
+                                if (this.pos_profile.posa_smart_reload_mode) {
+                                        // When limit search is enabled there may be no items yet.
+                                        // Fallback to full reload if nothing is loaded
 					if (!this.itemsLoaded || !this.displayedItems.length) {
 						if (!isOffline()) {
 							this.get_items(true);
@@ -703,21 +751,23 @@ export default {
 					}
 				}
 				return;
-			}
-			// When the customer changes, avoid reloading all items.
-			// Simply refresh prices for visible items only
-			if (this.itemsLoaded && this.displayedItems && this.displayedItems.length > 0) {
-				this.$nextTick(() => this.refreshPricesForVisibleItems());
-			} else {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					this.get_items(true);
-				} else {
-					this.get_items();
-				}
-			}
-		}, 300),
-		customer_price_list: _.debounce(async function () {
-			if (this.pos_profile.posa_force_reload_items) {
+                        }
+                        // When the customer changes, avoid reloading all items.
+                        // Simply refresh prices for visible items only
+                        if (this.itemsLoaded && this.displayedItems && this.displayedItems.length > 0) {
+                                this.$nextTick(() => this.refreshPricesForVisibleItems());
+                                this.scheduleLastInvoiceRateRefresh();
+                        } else {
+                                if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
+                                        this.get_items(true);
+                                } else {
+                                        this.get_items();
+                                }
+                                this.scheduleLastInvoiceRateRefresh();
+                        }
+                }, 300),
+                customer_price_list: _.debounce(async function () {
+                        if (this.pos_profile.posa_force_reload_items) {
 				if (this.pos_profile.posa_smart_reload_mode) {
 					// When limit search is enabled there may be no items yet.
 					// Fallback to full reload if nothing is loaded
@@ -796,15 +846,16 @@ export default {
 			}
 		},
 		displayedItems(new_value, old_value) {
-			// Update item details if items changed
-			if (!this.usesLimitSearch && new_value.length !== old_value.length) {
-				this.update_items_details(new_value);
-			}
-			this.$nextTick(() => {
-				this.checkItemContainerOverflow();
-				this.scheduleCardMetricsUpdate();
-			});
-		},
+                        // Update item details if items changed
+                        if (!this.usesLimitSearch && new_value.length !== old_value.length) {
+                                this.update_items_details(new_value);
+                        }
+                        this.$nextTick(() => {
+                                this.checkItemContainerOverflow();
+                                this.scheduleCardMetricsUpdate();
+                        });
+                        this.scheduleLastInvoiceRateRefresh();
+                },
 		// Automatically search when the query has at least 3 characters
 		first_search: _.debounce(function (val, oldVal) {
 			if (this.clearingSearch) {
@@ -1319,9 +1370,9 @@ export default {
 				this.itemDetailsRequestCache.result = null;
 			}
 		},
-		async refreshPricesForVisibleItems() {
-			const vm = this;
-			if (!vm.displayedItems || vm.displayedItems.length === 0) return;
+                async refreshPricesForVisibleItems() {
+                        const vm = this;
+                        if (!vm.displayedItems || vm.displayedItems.length === 0) return;
 
 			if (vm.refreshInFlight) {
 				return;
@@ -1438,13 +1489,98 @@ export default {
 					releaseLoading();
 				}
 			} finally {
-				vm.refreshInFlight = false;
-				releaseLoading();
-			}
-		},
+                                vm.refreshInFlight = false;
+                                releaseLoading();
+                        }
+                },
 
-		show_offers() {
-			this.eventBus.emit("show_offers", "true");
+                scheduleLastInvoiceRateRefresh() {
+                        if (!this.lastInvoiceRateScheduler) {
+                                this.lastInvoiceRateScheduler = _.debounce(() => {
+                                        this.refreshLastInvoiceRatesForVisibleItems();
+                                }, 200);
+                        }
+
+                        this.lastInvoiceRateScheduler();
+                },
+
+                async refreshLastInvoiceRatesForVisibleItems() {
+                        if (!this.displayedItems || !this.displayedItems.length) {
+                                this.lastInvoiceRates = {};
+                                return this.lastInvoiceRates;
+                        }
+
+                        const itemCodes = this.displayedItems.map((it) => it.item_code).filter(Boolean);
+                        return this.fetchLastInvoiceRates(itemCodes);
+                },
+
+                async fetchLastInvoiceRates(itemCodes = []) {
+                        const customer = this.customer || this.selectedCustomer;
+
+                        if (!customer) {
+                                this.lastInvoiceRates = {};
+                                return {};
+                        }
+
+                        const normalizedCodes = Array.from(new Set(itemCodes.filter(Boolean)));
+                        const cachedForCustomer = this.lastInvoiceRateCache.get(customer) || new Map();
+                        this.lastInvoiceRates = Object.fromEntries(cachedForCustomer);
+
+                        const missingCodes = normalizedCodes.filter((code) => !cachedForCustomer.has(code));
+                        if (!missingCodes.length) {
+                                return this.lastInvoiceRates;
+                        }
+
+                        if (isOffline()) {
+                                return this.lastInvoiceRates;
+                        }
+
+                        this.lastInvoiceRateLoading = true;
+                        try {
+                                const res = await frappe.call({
+                                        method: "posawesome.posawesome.api.invoices.get_last_invoice_rates",
+                                        args: {
+                                                customer,
+                                                item_codes: missingCodes,
+                                                company: this.pos_profile?.company,
+                                        },
+                                });
+
+                                const rows = (res && res.message) || [];
+                                const updatedCache = new Map(cachedForCustomer);
+                                rows.forEach((row) => {
+                                        if (row && row.item_code) {
+                                                updatedCache.set(row.item_code, {
+                                                        rate: row.rate,
+                                                        currency: row.currency,
+                                                        invoice: row.invoice,
+                                                        posting_date: row.posting_date,
+                                                });
+                                        }
+                                });
+
+                                this.lastInvoiceRateCache.set(customer, updatedCache);
+                                this.lastInvoiceRates = Object.fromEntries(updatedCache);
+                                return this.lastInvoiceRates;
+                        } catch (error) {
+                                console.error("Failed to fetch last invoice rates", error);
+                                this.lastInvoiceRates = Object.fromEntries(cachedForCustomer);
+                                return this.lastInvoiceRates;
+                        } finally {
+                                this.lastInvoiceRateLoading = false;
+                        }
+                },
+
+                getLastInvoiceRate(item) {
+                        if (!item || !item.item_code) {
+                                return null;
+                        }
+
+                        return this.lastInvoiceRates[item.item_code] || null;
+                },
+
+                show_offers() {
+                        this.eventBus.emit("show_offers", "true");
 		},
 		show_coupons() {
 			this.eventBus.emit("show_coupons", "true");
@@ -4748,19 +4884,46 @@ export default {
 }
 
 .secondary-price {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-	font-weight: 500;
-	color: #4caf50;
-	font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        font-weight: 500;
+        color: #4caf50;
+        font-size: 0.875rem;
+}
+
+.last-rate-chip {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.85rem;
+        color: rgba(0, 0, 0, 0.65);
+}
+
+.last-rate-label {
+        font-weight: 600;
+        opacity: 0.8;
+}
+
+.last-rate-value {
+        font-weight: 700;
+        color: var(--primary-color, #1976d2);
+}
+
+.last-rate-inline {
+        color: rgba(0, 0, 0, 0.6);
+}
+
+:deep(.v-theme--dark) .last-rate-chip,
+:deep(.v-theme--dark) .last-rate-inline {
+        color: rgba(255, 255, 255, 0.75);
 }
 
 .currency-symbol {
-	opacity: 0.8;
-	font-size: 0.85em;
-	font-family:
-		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+        opacity: 0.8;
+        font-size: 0.85em;
+        font-family:
+                "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
 }
 

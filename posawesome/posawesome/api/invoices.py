@@ -1034,6 +1034,93 @@ def delete_invoice(invoice):
 
 
 @frappe.whitelist()
+def get_customer_invoice_history(
+    customer,
+    company=None,
+    from_date=None,
+    to_date=None,
+    invoice_type=None,
+    limit=20,
+    offset=0,
+):
+    """Return a paginated list of invoices for a customer ordered by date."""
+
+    if not customer:
+        return {"invoices": [], "has_more": False}
+
+    limit_value = max(cint(limit or 20), 1)
+    offset_value = max(cint(offset or 0), 0)
+
+    params = {
+        "customer": customer,
+        "limit": limit_value + 1,
+        "offset": offset_value,
+    }
+
+    base_filters = ["docstatus = 1", "customer = %(customer)s"]
+    if company:
+        params["company"] = company
+        base_filters.append("company = %(company)s")
+    if from_date:
+        params["from_date"] = from_date
+        base_filters.append("posting_date >= %(from_date)s")
+    if to_date:
+        params["to_date"] = to_date
+        base_filters.append("posting_date <= %(to_date)s")
+
+    if invoice_type == "invoice":
+        base_filters.append("is_return = 0")
+    elif invoice_type == "return":
+        base_filters.append("is_return = 1")
+
+    filters = " and ".join(base_filters)
+
+    sales_invoice_query = f"""
+        select
+            'Sales Invoice' as doctype,
+            name as invoice,
+            posting_date,
+            grand_total,
+            currency,
+            customer,
+            is_return,
+            company,
+            outstanding_amount,
+            creation
+        from `tabSales Invoice`
+        where {filters}
+    """
+
+    pos_invoice_query = f"""
+        select
+            'POS Invoice' as doctype,
+            name as invoice,
+            posting_date,
+            grand_total,
+            currency,
+            customer,
+            is_return,
+            company,
+            outstanding_amount,
+            creation
+        from `tabPOS Invoice`
+        where {filters}
+    """
+
+    query = (
+        f"{sales_invoice_query}\nUNION ALL\n{pos_invoice_query}\n"
+        "order by posting_date desc, creation desc\n"
+        "limit %(limit)s offset %(offset)s"
+    )
+
+    rows = frappe.db.sql(query, params, as_dict=True)
+    has_more = len(rows) > limit_value
+    invoices = rows[:limit_value]
+
+    return {"invoices": invoices, "has_more": has_more}
+
+
+@frappe.whitelist()
 def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
     filters = {
         "posa_pos_opening_shift": pos_opening_shift,
@@ -1284,6 +1371,102 @@ def update_invoice_from_order(data):
     _deduplicate_free_items(invoice_doc)
     invoice_doc.save()
     return invoice_doc
+
+
+def _normalize_item_codes(item_codes):
+    """Return a de-duplicated list of item codes from various input formats."""
+
+    if not item_codes:
+        return []
+
+    parsed_codes = []
+
+    if isinstance(item_codes, str):
+        raw_value = item_codes.strip()
+        if not raw_value:
+            return []
+
+        try:
+            decoded = json.loads(raw_value)
+            if isinstance(decoded, (list, tuple, set)):
+                parsed_codes = list(decoded)
+            elif isinstance(decoded, str):
+                parsed_codes = [code.strip() for code in decoded.split(",") if code.strip()]
+        except Exception:
+            parsed_codes = [code.strip() for code in raw_value.split(",") if code.strip()]
+    elif isinstance(item_codes, (list, tuple, set)):
+        parsed_codes = list(item_codes)
+
+    return [c for c in parsed_codes if c]
+
+
+@frappe.whitelist()
+def get_last_invoice_rates(customer, item_codes=None, company=None, limit_per_item=1):
+    """Return the most recent invoice rate for each requested item for a customer."""
+
+    normalized_codes = _normalize_item_codes(item_codes)
+    if not customer or not normalized_codes:
+        return []
+
+    params = {
+        "customer": customer,
+        "item_codes": normalized_codes,
+        "limit": max(len(normalized_codes) * cint(limit_per_item or 1), 10),
+    }
+
+    filters = ["si.docstatus = 1", "sii.item_code in %(item_codes)s", "si.customer = %(customer)s"]
+    pos_filters = ["pi.docstatus = 1", "pii.item_code in %(item_codes)s", "pi.customer = %(customer)s"]
+
+    if company:
+        params["company"] = company
+        filters.append("si.company = %(company)s")
+        pos_filters.append("pi.company = %(company)s")
+
+    sales_invoice_query = f"""
+        select
+            'Sales Invoice' as doctype,
+            sii.item_code,
+            sii.rate,
+            si.currency,
+            si.name as invoice,
+            si.posting_date,
+            si.creation
+        from `tabSales Invoice Item` sii
+        inner join `tabSales Invoice` si on sii.parent = si.name
+        where {' and '.join(filters)}
+    """
+
+    pos_invoice_query = f"""
+        select
+            'POS Invoice' as doctype,
+            pii.item_code,
+            pii.rate,
+            pi.currency,
+            pi.name as invoice,
+            pi.posting_date,
+            pi.creation
+        from `tabPOS Invoice Item` pii
+        inner join `tabPOS Invoice` pi on pii.parent = pi.name
+        where {' and '.join(pos_filters)}
+    """
+
+    query = (
+        f"{sales_invoice_query}\nUNION ALL\n{pos_invoice_query}\n"
+        "order by posting_date desc, creation desc\n"
+        "limit %(limit)s"
+    )
+
+    rows = frappe.db.sql(query, params, as_dict=True)
+    results = {}
+    for row in rows:
+        code = row.get("item_code")
+        if code and code not in results:
+            results[code] = row
+
+        if len(results) == len(normalized_codes):
+            break
+
+    return list(results.values())
 
 
 @frappe.whitelist()

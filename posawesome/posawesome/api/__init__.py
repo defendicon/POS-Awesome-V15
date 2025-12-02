@@ -12,7 +12,9 @@ from .customers import (
     set_customer_info,
 )
 from .invoices import (
+    get_customer_invoice_history,
     delete_invoice,
+    get_last_invoice_rates,
     get_draft_invoices,
     search_invoices_for_return,
     submit_invoice,

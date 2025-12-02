@@ -27,32 +27,162 @@
 				>
 					{{ __("Invoices saved as POS Invoices") }}
 				</v-alert>
-				<!-- Top Row: Customer Selection and Invoice Type -->
-				<v-row align="center" class="items px-3 py-2">
-					<v-col :cols="pos_profile.posa_allow_sales_order ? 9 : 12" class="pb-0 pr-0">
-						<!-- Customer selection component -->
-						<Customer ref="customerComponent" />
-					</v-col>
-					<!-- Invoice Type Selection (Only shown if sales orders are allowed) -->
-					<v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-4">
-						<v-select
-							density="compact"
-							hide-details
-							variant="solo"
+                                <!-- Top Row: Customer Selection and Invoice Type -->
+                                <v-row align="center" class="items px-3 py-2">
+                                        <v-col :cols="pos_profile.posa_allow_sales_order ? 7 : 9" class="pb-0 pr-0">
+                                                <!-- Customer selection component -->
+                                                <Customer ref="customerComponent" />
+                                        </v-col>
+                                        <v-col :cols="pos_profile.posa_allow_sales_order ? 2 : 3" class="pb-0">
+                                                <v-btn
+                                                        block
+                                                        color="primary"
+                                                        variant="tonal"
+                                                        prepend-icon="mdi-history"
+                                                        @click="openInvoiceHistory"
+                                                        :disabled="!customer"
+                                                >
+                                                        {{ __("Previous Invoices") }}
+                                                </v-btn>
+                                        </v-col>
+                                        <!-- Invoice Type Selection (Only shown if sales orders are allowed) -->
+                                        <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-4">
+                                                <v-select
+                                                        density="compact"
+                                                        hide-details
+                                                        variant="solo"
 							color="primary"
 							class="sleek-field pos-themed-input"
 							:items="invoiceTypes"
 							:label="frappe._('Type')"
 							v-model="invoiceType"
-							:disabled="invoiceType == 'Return'"
-						></v-select>
-					</v-col>
-				</v-row>
+                                                        :disabled="invoiceType == 'Return'"
+                                                ></v-select>
+                                        </v-col>
+                                </v-row>
 
-				<!-- Delivery Charges Section (Only if enabled in POS profile) -->
-				<DeliveryCharges
-					:pos_profile="pos_profile"
-					:delivery_charges="delivery_charges"
+                                <v-dialog v-model="show_invoice_history" max-width="900px">
+                                        <v-card>
+                                                <v-card-title class="d-flex align-center">
+                                                        <span>{{ __("Previous Invoices") }}</span>
+                                                        <v-spacer></v-spacer>
+                                                        <v-btn
+                                                                icon="mdi-close"
+                                                                variant="text"
+                                                                density="compact"
+                                                                @click="show_invoice_history = false"
+                                                        ></v-btn>
+                                                </v-card-title>
+                                                <v-divider></v-divider>
+                                                <v-card-text>
+                                                        <v-row dense class="mb-2">
+                                                                <v-col cols="12" md="4">
+                                                                        <v-select
+                                                                                density="compact"
+                                                                                variant="outlined"
+                                                                                hide-details
+                                                                                :items="invoice_history_type_options"
+                                                                                item-title="title"
+                                                                                item-value="value"
+                                                                                v-model="invoice_history_filters.type"
+                                                                                :label="__('Type')"
+                                                                                @update:model-value="refreshInvoiceHistory"
+                                                                        ></v-select>
+                                                                </v-col>
+                                                                <v-col cols="12" md="4">
+                                                                        <v-text-field
+                                                                                type="date"
+                                                                                density="compact"
+                                                                                variant="outlined"
+                                                                                color="primary"
+                                                                                hide-details
+                                                                                :label="__('From Date')"
+                                                                                v-model="invoice_history_filters.from_date"
+                                                                                @change="refreshInvoiceHistory"
+                                                                        ></v-text-field>
+                                                                </v-col>
+                                                                <v-col cols="12" md="4">
+                                                                        <v-text-field
+                                                                                type="date"
+                                                                                density="compact"
+                                                                                variant="outlined"
+                                                                                color="primary"
+                                                                                hide-details
+                                                                                :label="__('To Date')"
+                                                                                v-model="invoice_history_filters.to_date"
+                                                                                @change="refreshInvoiceHistory"
+                                                                        ></v-text-field>
+                                                                </v-col>
+                                                        </v-row>
+                                                        <v-alert v-if="invoice_history_error" type="error" density="compact" class="mb-3">
+                                                                {{ invoice_history_error }}
+                                                        </v-alert>
+                                                        <v-progress-linear
+                                                                v-if="invoice_history_loading && !invoice_history.length"
+                                                                indeterminate
+                                                                color="primary"
+                                                                class="mb-3"
+                                                        ></v-progress-linear>
+                                                        <div
+                                                                v-if="!invoice_history_loading && !invoice_history.length && !invoice_history_error"
+                                                                class="text-body-2 text-medium-emphasis"
+                                                        >
+                                                                {{ __("No invoices found for this customer.") }}
+                                                        </div>
+                                                        <v-list v-if="invoice_history.length" density="compact" class="history-list">
+                                                                <v-list-item
+                                                                        v-for="invoice in invoice_history"
+                                                                        :key="invoice.invoice"
+                                                                        class="history-list-item"
+                                                                >
+                                                                        <v-list-item-title class="d-flex align-center justify-space-between">
+                                                                                <span class="font-weight-medium">{{ invoice.invoice }}</span>
+                                                                                <div class="d-flex align-center history-meta">
+                                                                                        <v-chip
+                                                                                                v-if="invoice.is_return"
+                                                                                                size="x-small"
+                                                                                                color="warning"
+                                                                                                variant="tonal"
+                                                                                        >
+                                                                                                {{ __("Return") }}
+                                                                                        </v-chip>
+                                                                                        <span class="text-caption">{{ formatHistoryDate(invoice.posting_date) }}</span>
+                                                                                </div>
+                                                                        </v-list-item-title>
+                                                                        <v-list-item-subtitle class="d-flex align-center justify-space-between flex-wrap">
+                                                                                <span>{{ formatHistoryAmount(invoice) }}</span>
+                                                                                <span class="text-caption">
+                                                                                        {{ __("Outstanding:") }}
+                                                                                        {{ formatHistoryAmount({
+                                                                                                ...invoice,
+                                                                                                grand_total: invoice.outstanding_amount,
+                                                                                        }) }}
+                                                                                </span>
+                                                                        </v-list-item-subtitle>
+                                                                </v-list-item>
+                                                        </v-list>
+                                                </v-card-text>
+                                                <v-card-actions class="justify-end">
+                                                        <v-btn variant="text" @click="show_invoice_history = false">
+                                                                {{ __("Close") }}
+                                                        </v-btn>
+                                                        <v-btn
+                                                                v-if="invoice_history_pagination.has_more"
+                                                                :loading="invoice_history_loading"
+                                                                color="primary"
+                                                                variant="tonal"
+                                                                @click="loadInvoiceHistory(true)"
+                                                        >
+                                                                {{ __("Load More") }}
+                                                        </v-btn>
+                                                </v-card-actions>
+                                        </v-card>
+                                </v-dialog>
+
+                                <!-- Delivery Charges Section (Only if enabled in POS profile) -->
+                                <DeliveryCharges
+                                        :pos_profile="pos_profile"
+                                        :delivery_charges="delivery_charges"
 					:selected_delivery_charge="selected_delivery_charge"
 					:delivery_charges_rate="delivery_charges_rate"
 					:deliveryChargesFilter="deliveryChargesFilter"
@@ -431,13 +561,24 @@ export default {
 			conversion_rate: 1, // Currency to company rate
 			exchange_rate_date: frappe.datetime.nowdate(), // Date of fetched exchange rate
 			company: null, // Company doc with default currency
-			available_currencies: [], // List of available currencies
-			price_lists: [], // Available selling price lists
-			selected_price_list: "", // Currently selected price list
-			price_list_currency: "", // Currency of the selected price list
-			_shortcutHandlers: {},
-			selected_columns: [], // Selected columns for items table
-			temp_selected_columns: [], // Temporary array for column selection
+                        available_currencies: [], // List of available currencies
+                        price_lists: [], // Available selling price lists
+                        selected_price_list: "", // Currently selected price list
+                        price_list_currency: "", // Currency of the selected price list
+                        show_invoice_history: false,
+                        invoice_history: [],
+                        invoice_history_loading: false,
+                        invoice_history_error: "",
+                        invoice_history_filters: { type: "all", from_date: "", to_date: "" },
+                        invoice_history_type_options: [
+                                { title: __("All Types"), value: "all" },
+                                { title: __("Invoices"), value: "invoice" },
+                                { title: __("Returns"), value: "return" },
+                        ],
+                        invoice_history_pagination: { start: 0, limit: 20, has_more: false },
+                        _shortcutHandlers: {},
+                        selected_columns: [], // Selected columns for items table
+                        temp_selected_columns: [], // Temporary array for column selection
 			available_columns: [], // All available columns
 			show_column_selector: false, // Column selector dialog visibility
 			invoiceHeight: null,
@@ -500,13 +641,119 @@ export default {
 			}
 		},
 
-		focusItemSearchField() {
-			this.eventBus.emit("focus_item_search");
-		},
+                focusItemSearchField() {
+                        this.eventBus.emit("focus_item_search");
+                },
 
-		initializeItemsHeaders() {
-			// Define all available columns
-			this.available_columns = [
+                openInvoiceHistory() {
+                        this.show_invoice_history = true;
+                        this.resetInvoiceHistory();
+                        this.loadInvoiceHistory();
+                },
+
+                resetInvoiceHistory() {
+                        this.invoice_history = [];
+                        this.invoice_history_error = "";
+                        this.invoice_history_pagination = {
+                                ...this.invoice_history_pagination,
+                                start: 0,
+                                has_more: false,
+                        };
+                },
+
+                refreshInvoiceHistory() {
+                        if (this.show_invoice_history) {
+                                this.resetInvoiceHistory();
+                                this.loadInvoiceHistory();
+                        }
+                },
+
+                formatHistoryAmount(invoice) {
+                        const currency = invoice?.currency || this.pos_profile?.currency;
+                        return `${this.currencySymbol(currency)} ${this.format_currency(
+                                invoice?.grand_total || 0,
+                                currency,
+                                this.currency_precision,
+                        )}`;
+                },
+
+                formatHistoryDate(date) {
+                        if (!date) {
+                                return "";
+                        }
+                        try {
+                                return frappe.datetime.str_to_user(date);
+                        } catch (error) {
+                                return date;
+                        }
+                },
+
+                async loadInvoiceHistory(loadMore = false) {
+                        if (!this.customer) {
+                                this.invoice_history_error = __("Select a customer to view history.");
+                                return;
+                        }
+
+                        if (isOffline()) {
+                                this.invoice_history_error = __("Invoice history is unavailable offline.");
+                                return;
+                        }
+
+                        if (this.invoice_history_loading) {
+                                return;
+                        }
+
+                        const start = loadMore
+                                ? this.invoice_history_pagination.start + this.invoice_history_pagination.limit
+                                : 0;
+
+                        this.invoice_history_loading = true;
+                        this.invoice_history_error = "";
+
+                        if (!loadMore) {
+                                this.invoice_history = [];
+                        }
+
+                        try {
+                                const res = await frappe.call({
+                                        method: "posawesome.posawesome.api.invoices.get_customer_invoice_history",
+                                        args: {
+                                                customer: this.customer,
+                                                company: this.pos_profile?.company,
+                                                from_date: this.invoice_history_filters.from_date || undefined,
+                                                to_date: this.invoice_history_filters.to_date || undefined,
+                                                invoice_type:
+                                                        this.invoice_history_filters.type === "all"
+                                                                ? undefined
+                                                                : this.invoice_history_filters.type,
+                                                limit: this.invoice_history_pagination.limit,
+                                                offset: start,
+                                        },
+                                });
+
+                                const message = (res && res.message) || {};
+                                const records = message.invoices || [];
+
+                                this.invoice_history = loadMore
+                                        ? [...this.invoice_history, ...records]
+                                        : records;
+
+                                this.invoice_history_pagination = {
+                                        ...this.invoice_history_pagination,
+                                        start,
+                                        has_more: Boolean(message.has_more),
+                                };
+                        } catch (error) {
+                                console.error("Failed to fetch invoice history", error);
+                                this.invoice_history_error = __("Unable to load invoice history.");
+                        } finally {
+                                this.invoice_history_loading = false;
+                        }
+                },
+
+                initializeItemsHeaders() {
+                        // Define all available columns
+                        this.available_columns = [
 				{ title: __("Name"), align: "start", sortable: true, key: "item_name", required: true },
 				{ title: __("QTY"), key: "qty", align: "center", required: true },
 				{ title: __("UOM"), key: "uom", align: "center", required: false },
@@ -2014,7 +2261,20 @@ export default {
 }
 
 :deep(.column-switch .v-label) {
-	opacity: 0.9;
-	font-size: 0.95rem;
+        opacity: 0.9;
+        font-size: 0.95rem;
+}
+
+.history-list {
+        max-height: 420px;
+        overflow-y: auto;
+}
+
+.history-list-item + .history-list-item {
+        border-top: 1px solid var(--field-border);
+}
+
+.history-meta {
+        gap: 8px;
 }
 </style>
