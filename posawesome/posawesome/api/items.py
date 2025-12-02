@@ -1256,3 +1256,42 @@ def get_item_brand(item_code):
     if not brand and data.get("variant_of"):
         brand = frappe.db.get_value("Item", data.get("variant_of"), "brand")
     return normalize_brand(brand) if brand else ""
+
+
+def _item_selector_settings_key(pos_profile: Optional[str] = None) -> str:
+    base_key = "posawesome_item_selector_settings"
+    return f"{base_key}::{pos_profile}" if pos_profile else base_key
+
+
+@frappe.whitelist()
+def get_item_selector_settings(pos_profile: Optional[str] = None):
+    """Return persisted item selector preferences for the given POS profile."""
+
+    key = _item_selector_settings_key(pos_profile)
+    raw = frappe.db.get_default(key)
+
+    if not raw:
+        return {}
+
+    try:
+        return json.loads(raw)
+    except Exception:
+        frappe.log_error(f"Failed to parse item selector settings for key {key}")
+        return {}
+
+
+@frappe.whitelist()
+def save_item_selector_settings(pos_profile: Optional[str] = None, settings: Optional[str] = None):
+    """Persist item selector preferences for the given POS profile."""
+
+    key = _item_selector_settings_key(pos_profile)
+    payload = {}
+
+    if settings:
+        try:
+            payload = json.loads(settings) if isinstance(settings, str) else settings
+        except Exception:
+            frappe.throw(_("Unable to save item selector settings"))
+
+    frappe.db.set_default(key, json.dumps(payload or {}))
+    return payload

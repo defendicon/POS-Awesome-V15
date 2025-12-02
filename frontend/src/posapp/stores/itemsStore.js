@@ -11,12 +11,14 @@ import {
 	saveItemDetailsCache,
 	isStockCacheReady,
 	getItemsLastSync,
-	getAllStoredItems,
-	getStoredItemsCount,
-	searchStoredItems,
-	saveItemsBulk,
-	clearStoredItems,
-	setItemsLastSync,
+        getAllStoredItems,
+        getStoredItemsCount,
+        searchStoredItems,
+        saveItemsBulk,
+        clearStoredItems,
+        setItemsLastSync,
+        updateLocalStockCache,
+        fetchItemStockQuantities,
 } from "../../offline/index.js";
 
 const DEFAULT_PAGE_SIZE = 200;
@@ -90,12 +92,17 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	// Cache management
-	const cacheHealth = ref({
-		items: "unknown",
-		priceList: "unknown",
-		stock: "unknown",
-		lastCheck: null,
-	});
+        const cacheHealth = ref({
+                items: "unknown",
+                priceList: "unknown",
+                stock: "unknown",
+                lastCheck: null,
+        });
+
+        // Stock sync state
+        const lastStockSyncTime = ref(null);
+        const lastStockSyncSize = ref(0);
+        const isStockSyncing = ref(false);
 
 	// Performance tracking
 	const performanceMetrics = ref({
@@ -611,8 +618,8 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const refreshModifiedItems = async () => {
-		if (!itemsLoaded.value) return { size: 0, count: 0 };
+        const refreshModifiedItems = async () => {
+                if (!itemsLoaded.value) return { size: 0, count: 0 };
 
 		const lastSync = getItemsLastSync();
 		if (!lastSync) return { size: 0, count: 0 };
@@ -628,7 +635,66 @@ export const useItemsStore = defineStore("items", () => {
 				item_groups: posProfile.value?.item_groups?.map((g) => g.item_group) || [],
 				modified_after: lastSync,
 				limit: 500,
-			};
+        };
+
+        const refreshStockQuantities = async (targets = null) => {
+                if (!itemsLoaded.value || !posProfile.value) {
+                        return { size: 0, count: 0 };
+                }
+
+                if (isStockSyncing.value) {
+                        return { size: 0, count: 0 };
+                }
+
+                const candidateItems = Array.isArray(targets)
+                        ? targets
+                        : filteredItems.value.length > 0
+                                ? filteredItems.value
+                                : items.value;
+
+                const payload = candidateItems
+                        .map((item) => ({ item_code: item?.item_code || item?.name || item?.code }))
+                        .filter((entry) => entry.item_code);
+
+                if (!payload.length) {
+                        return { size: 0, count: 0 };
+                }
+
+                isStockSyncing.value = true;
+                try {
+                        const refreshed = await fetchItemStockQuantities(payload, posProfile.value);
+                        const size = refreshed ? JSON.stringify(refreshed).length : 0;
+                        const count = Array.isArray(refreshed) ? refreshed.length : 0;
+
+                        if (Array.isArray(refreshed) && refreshed.length) {
+                                refreshed.forEach((entry) => {
+                                        const existing = itemsMap.value.get(entry.item_code);
+                                        if (existing) {
+                                                if (entry.actual_qty !== undefined) {
+                                                        existing.actual_qty = entry.actual_qty;
+                                                        existing._base_actual_qty = entry.actual_qty;
+                                                }
+
+                                                if (entry.available_qty !== undefined) {
+                                                        existing._base_available_qty = entry.available_qty;
+                                                }
+                                        }
+                                });
+
+                                updateLocalStockCache(refreshed);
+                        }
+
+                        lastStockSyncTime.value = new Date();
+                        lastStockSyncSize.value = size;
+
+                        return { size, count };
+                } catch (error) {
+                        console.error("Failed to refresh stock quantities:", error);
+                        return { size: 0, count: 0, error };
+                } finally {
+                        isStockSyncing.value = false;
+                }
+        };
 
 			const response = await frappe.call({
 				method: "posawesome.posawesome.api.items.get_items",
@@ -1463,11 +1529,16 @@ export const useItemsStore = defineStore("items", () => {
 		// Computed
 		activePriceList,
 		itemStats,
-		cacheStats,
+                cacheStats,
 
-		// Actions
-		initialize,
-		loadItems,
+                // Stock sync state
+                lastStockSyncTime,
+                lastStockSyncSize,
+                isStockSyncing,
+
+                // Actions
+                initialize,
+                loadItems,
 		loadItemGroups,
 		loadCachedItems,
 		searchItems,
@@ -1478,14 +1549,15 @@ export const useItemsStore = defineStore("items", () => {
 		resetCachedItemsForGroup,
 		backgroundSyncItems,
 		getItemByCode,
-		getItemByBarcode,
-		addScannedItem,
-		refreshModifiedItems,
-		clearLimitSearchResults,
-		clearAllCaches,
-		clearSearchCache,
-		assessCacheHealth,
-	};
+                getItemByBarcode,
+                addScannedItem,
+                refreshModifiedItems,
+                refreshStockQuantities,
+                clearLimitSearchResults,
+                clearAllCaches,
+                clearSearchCache,
+                assessCacheHealth,
+        };
 });
 
 export default useItemsStore;

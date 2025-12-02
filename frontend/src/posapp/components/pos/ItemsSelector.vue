@@ -46,11 +46,23 @@
 			></v-progress-linear>
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
-			<div class="dynamic-padding">
-				<div class="sticky-header">
-					<v-row class="items">
-						<v-col class="pb-0">
-							<v-text-field
+                        <div class="dynamic-padding">
+                                <div class="sticky-header">
+                                        <div class="stock-sync-status d-flex align-center mb-2">
+                                                <v-chip density="comfortable" variant="tonal" color="primary" class="mr-2">
+                                                        {{ __('Stock sync') }}: {{ formattedLastStockSyncTime }}
+                                                </v-chip>
+                                                <v-progress-circular
+                                                        v-if="isStockSyncing"
+                                                        indeterminate
+                                                        size="18"
+                                                        width="3"
+                                                        color="primary"
+                                                ></v-progress-circular>
+                                        </div>
+                                        <v-row class="items">
+                                                <v-col class="pb-0">
+                                                        <v-text-field
 								density="compact"
 								clearable
 								autofocus
@@ -3766,21 +3778,21 @@ export default {
 		cancelItemSettings() {
 			this.show_item_settings = false;
 		},
-		applyItemSettings() {
-			this.hide_qty_decimals = this.temp_hide_qty_decimals;
-			this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
-			this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
+                async applyItemSettings() {
+                        this.hide_qty_decimals = this.temp_hide_qty_decimals;
+                        this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
+                        this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
 			if (this.enable_custom_items_per_page) {
 				this.items_per_page = parseInt(this.temp_items_per_page) || 50;
 			} else {
 				this.items_per_page = 50;
 			}
-			this.itemsPerPage = this.items_per_page;
-			this.pos_profile.posa_force_server_items = this.temp_force_server_items ? 1 : 0;
-			this.savePosProfileSetting("posa_force_server_items", this.pos_profile.posa_force_server_items);
-			this.saveItemSettings();
-			this.show_item_settings = false;
-		},
+                        this.itemsPerPage = this.items_per_page;
+                        this.pos_profile.posa_force_server_items = this.temp_force_server_items ? 1 : 0;
+                        this.savePosProfileSetting("posa_force_server_items", this.pos_profile.posa_force_server_items);
+                        await this.saveItemSettings();
+                        this.show_item_settings = false;
+                },
 		onDragStart(event, item) {
 			this.isDragging = true;
 
@@ -3805,74 +3817,133 @@ export default {
 			// Emit event to hide drop feedback
 			this.eventBus.emit("item-drag-end");
 		},
-		saveItemSettings() {
-			if (!this.localStorageAvailable) return;
-			try {
-				const settings = {
-					hide_qty_decimals: this.hide_qty_decimals,
-					hide_zero_rate_items: this.hide_zero_rate_items,
-					enable_custom_items_per_page: this.enable_custom_items_per_page,
-					items_per_page: this.items_per_page,
-				};
-				localStorage.setItem("posawesome_item_selector_settings", JSON.stringify(settings));
-			} catch (e) {
-				console.error("Failed to save item selector settings:", e);
-			}
-		},
-		savePosProfileSetting(field, value) {
-			if (!this.pos_profile || !this.pos_profile.name) {
-				return;
-			}
-			frappe.db.set_value("POS Profile", this.pos_profile.name, field, value ? 1 : 0).catch((e) => {
-				console.error("Failed to save POS Profile setting", e);
-			});
-		},
-		loadItemSettings() {
-			if (!this.localStorageAvailable) return;
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					if (typeof opts.hide_qty_decimals === "boolean") {
-						this.hide_qty_decimals = opts.hide_qty_decimals;
-					}
-					if (typeof opts.hide_zero_rate_items === "boolean") {
-						this.hide_zero_rate_items = opts.hide_zero_rate_items;
-					}
-					if (typeof opts.enable_custom_items_per_page === "boolean") {
-						this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
-					}
-					if (typeof opts.items_per_page === "number") {
-						this.items_per_page = opts.items_per_page;
-						this.itemsPerPage = this.items_per_page;
-					}
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
-			}
-		},
+                async saveItemSettings() {
+                        const settings = {
+                                hide_qty_decimals: this.hide_qty_decimals,
+                                hide_zero_rate_items: this.hide_zero_rate_items,
+                                enable_custom_items_per_page: this.enable_custom_items_per_page,
+                                items_per_page: this.items_per_page,
+                        };
+
+                        if (this.localStorageAvailable) {
+                                try {
+                                        localStorage.setItem("posawesome_item_selector_settings", JSON.stringify(settings));
+                                } catch (e) {
+                                        console.error("Failed to save item selector settings:", e);
+                                }
+                        }
+
+                        await this.persistItemSelectorSettings(settings);
+                },
+                savePosProfileSetting(field, value) {
+                        if (!this.pos_profile || !this.pos_profile.name) {
+                                return;
+                        }
+                        frappe.db.set_value("POS Profile", this.pos_profile.name, field, value ? 1 : 0).catch((e) => {
+                                console.error("Failed to save POS Profile setting", e);
+                        });
+                },
+                async fetchServerItemSelectorSettings() {
+                        if (!this.pos_profile || !this.pos_profile.name) {
+                                return {};
+                        }
+
+                        try {
+                                const response = await frappe.call({
+                                        method: "posawesome.posawesome.api.items.get_item_selector_settings",
+                                        args: { pos_profile: this.pos_profile.name },
+                                });
+
+                                return response?.message || {};
+                        } catch (error) {
+                                console.error("Failed to fetch server item selector settings:", error);
+                                return {};
+                        }
+                },
+                async persistItemSelectorSettings(settings) {
+                        if (!this.pos_profile || !this.pos_profile.name) {
+                                return;
+                        }
+
+                        try {
+                                await frappe.call({
+                                        method: "posawesome.posawesome.api.items.save_item_selector_settings",
+                                        args: {
+                                                pos_profile: this.pos_profile.name,
+                                                settings: JSON.stringify(settings || {}),
+                                        },
+                                });
+                        } catch (error) {
+                                console.error("Failed to persist item selector settings:", error);
+                        }
+                },
+                async loadItemSettings() {
+                        let localSettings = {};
+                        if (this.localStorageAvailable) {
+                                try {
+                                        const saved = localStorage.getItem("posawesome_item_selector_settings");
+                                        if (saved) {
+                                                localSettings = JSON.parse(saved) || {};
+                                        }
+                                } catch (e) {
+                                        console.error("Failed to load item selector settings from local storage:", e);
+                                }
+                        }
+
+                        const serverSettings = await this.fetchServerItemSelectorSettings();
+                        const merged = { ...serverSettings, ...localSettings };
+
+                        if (typeof merged.hide_qty_decimals === "boolean") {
+                                this.hide_qty_decimals = merged.hide_qty_decimals;
+                        }
+                        if (typeof merged.hide_zero_rate_items === "boolean") {
+                                this.hide_zero_rate_items = merged.hide_zero_rate_items;
+                        }
+                        if (typeof merged.enable_custom_items_per_page === "boolean") {
+                                this.enable_custom_items_per_page = merged.enable_custom_items_per_page;
+                        }
+                        if (typeof merged.items_per_page === "number") {
+                                this.items_per_page = merged.items_per_page;
+                                this.itemsPerPage = this.items_per_page;
+                        }
+                },
 	},
 
 	computed: {
-		usesLimitSearch() {
-			const rawValue =
-				this.pos_profile?.pose_use_limit_search ?? this.pos_profile?.posa_use_limit_search;
+                usesLimitSearch() {
+                        const rawValue =
+                                this.pos_profile?.pose_use_limit_search ?? this.pos_profile?.posa_use_limit_search;
 
-			if (typeof rawValue === "string") {
-				const normalized = rawValue.trim().toLowerCase();
-				return normalized === "1" || normalized === "true" || normalized === "yes";
-			}
+                        if (typeof rawValue === "string") {
+                                const normalized = rawValue.trim().toLowerCase();
+                                return normalized === "1" || normalized === "true" || normalized === "yes";
+                        }
 
 			if (typeof rawValue === "number") {
 				return rawValue === 1;
 			}
 
-			return Boolean(rawValue);
-		},
-		limitSearchCap() {
-			if (!this.usesLimitSearch) {
-				return null;
-			}
+                        return Boolean(rawValue);
+                },
+                formattedLastStockSyncTime() {
+                        if (!this.lastStockSyncTime) {
+                                return __("Never");
+                        }
+
+                        const timestamp = this.lastStockSyncTime instanceof Date
+                                ? this.lastStockSyncTime
+                                : new Date(this.lastStockSyncTime);
+
+                        if (Number.isNaN(timestamp?.getTime?.())) {
+                                return __("Never");
+                        }
+
+                        return timestamp.toLocaleTimeString();
+                },
+                limitSearchCap() {
+                        if (!this.usesLimitSearch) {
+                                return null;
+                        }
 
 			const rawLimit = this.pos_profile?.posa_search_limit;
 			const parsed = parseInt(rawLimit, 10);
@@ -4075,8 +4146,8 @@ export default {
 			this.get_items();
 		}, 300);
 
-		// Load settings
-		this.loadItemSettings();
+                // Load settings
+                await this.loadItemSettings();
 		await this.ensureScaleBarcodeSettings();
 
 		// Initialize after memory is ready

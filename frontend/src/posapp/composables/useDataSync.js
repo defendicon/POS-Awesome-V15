@@ -1,11 +1,13 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import { storeToRefs } from "pinia";
 import { useItemsStore } from "../stores/itemsStore";
 
 export function useDataSync(intervalSeconds = 30) {
-	const itemsStore = useItemsStore();
-	const lastSyncTime = ref(null);
-	const lastSyncSize = ref(0);
-	const totalSyncSize = ref(0);
+        const itemsStore = useItemsStore();
+        const { lastStockSyncTime, lastStockSyncSize, isStockSyncing } = storeToRefs(itemsStore);
+        const lastSyncTime = ref(null);
+        const lastSyncSize = ref(0);
+        const totalSyncSize = ref(0);
 	const syncHistory = ref([]); // Store { time: timestamp, size: bytes }
 	const isSyncing = ref(false);
 	let timer = null;
@@ -19,7 +21,7 @@ export function useDataSync(intervalSeconds = 30) {
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 	};
 
-	const estimatedHourlyUsage = computed(() => {
+        const estimatedHourlyUsage = computed(() => {
 		// Calculate usage based on history in the last hour
 		const now = Date.now();
 		const oneHourAgo = now - 60 * 60 * 1000;
@@ -48,35 +50,56 @@ export function useDataSync(intervalSeconds = 30) {
 
 		const projected = (recentTotal / duration) * 3600 * 1000;
 		return formatBytes(projected);
-	});
+        });
 
-	const performSync = async () => {
-		if (isSyncing.value) return;
-		// Check if online
-		if (!navigator.onLine) return;
+        const formattedLastStockSyncTime = computed(() => {
+                if (!lastStockSyncTime.value) return "Never";
+                return new Date(lastStockSyncTime.value).toLocaleTimeString();
+        });
 
-		isSyncing.value = true;
-		try {
-			const { size, count } = await itemsStore.refreshModifiedItems();
+        const performStockSync = async () => {
+                if (isStockSyncing.value) return;
+                if (!navigator.onLine) return;
 
-			const now = Date.now();
-			lastSyncTime.value = new Date();
-			lastSyncSize.value = size;
-			totalSyncSize.value += size;
+                try {
+                        const { size } = await itemsStore.refreshStockQuantities();
+                        if (typeof size === "number") {
+                                lastStockSyncSize.value = size;
+                        }
+                } catch (error) {
+                        console.error("Stock sync failed:", error);
+                }
+        };
 
-			syncHistory.value.push({ time: now, size });
+        const performSync = async () => {
+                if (isSyncing.value) return;
+                // Check if online
+                if (!navigator.onLine) return;
 
-			// Cleanup old history (older than 1 hour)
-			const oneHourAgo = now - 60 * 60 * 1000;
-			if (syncHistory.value.length > 0 && syncHistory.value[0].time < oneHourAgo) {
-				syncHistory.value = syncHistory.value.filter((entry) => entry.time > oneHourAgo);
-			}
-		} catch (error) {
-			console.error("Data sync failed:", error);
-		} finally {
-			isSyncing.value = false;
-		}
-	};
+                isSyncing.value = true;
+                try {
+                        const { size, count } = await itemsStore.refreshModifiedItems();
+
+                        const now = Date.now();
+                        lastSyncTime.value = new Date();
+                        lastSyncSize.value = size;
+                        totalSyncSize.value += size;
+
+                        syncHistory.value.push({ time: now, size });
+
+                        // Cleanup old history (older than 1 hour)
+                        const oneHourAgo = now - 60 * 60 * 1000;
+                        if (syncHistory.value.length > 0 && syncHistory.value[0].time < oneHourAgo) {
+                                syncHistory.value = syncHistory.value.filter((entry) => entry.time > oneHourAgo);
+                        }
+
+                        await performStockSync();
+                } catch (error) {
+                        console.error("Data sync failed:", error);
+                } finally {
+                        isSyncing.value = false;
+                }
+        };
 
 	const startSync = () => {
 		if (timer) clearInterval(timer);
@@ -99,14 +122,19 @@ export function useDataSync(intervalSeconds = 30) {
 
 	return {
 		lastSyncTime,
-		formattedLastSyncTime: computed(() => {
-			if (!lastSyncTime.value) return "Never";
-			return lastSyncTime.value.toLocaleTimeString();
-		}),
-		lastSyncSize: computed(() => formatBytes(lastSyncSize.value)),
-		totalSyncSize: computed(() => formatBytes(totalSyncSize.value)),
-		estimatedHourlyUsage,
-		performSync,
-		isSyncing,
-	};
+                formattedLastSyncTime: computed(() => {
+                        if (!lastSyncTime.value) return "Never";
+                        return lastSyncTime.value.toLocaleTimeString();
+                }),
+                lastSyncSize: computed(() => formatBytes(lastSyncSize.value)),
+                lastStockSyncSize: computed(() => formatBytes(lastStockSyncSize.value)),
+                totalSyncSize: computed(() => formatBytes(totalSyncSize.value)),
+                estimatedHourlyUsage,
+                performSync,
+                performStockSync,
+                isSyncing,
+                isStockSyncing,
+                lastStockSyncTime,
+                formattedLastStockSyncTime,
+        };
 }
