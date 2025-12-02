@@ -1057,7 +1057,9 @@ def get_customer_invoice_history(
         "offset": offset_value,
     }
 
-    base_filters = ["docstatus = 1", "customer = %(customer)s"]
+    # Match either the customer DocType name or the stored display name so results
+    # still appear when the caller provides a customer display string.
+    base_filters = ["docstatus = 1", "(customer = %(customer)s or customer_name = %(customer)s)"]
     if company:
         params["company"] = company
         base_filters.append("company = %(company)s")

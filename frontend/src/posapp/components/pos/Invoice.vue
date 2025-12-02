@@ -750,11 +750,31 @@ export default {
                 },
 
                 getActiveCustomerId() {
-                        const candidate = this.customer || this.selectedCustomer;
-                        if (candidate && typeof candidate === "object") {
-                                return candidate.name || candidate.customer || "";
+                        const candidates = [
+                                this.customer,
+                                this.selectedCustomer,
+                                this.invoice_doc?.customer,
+                                this.invoiceStore?.invoiceDoc?.customer,
+                                this.customer_info?.customer,
+                        ];
+
+                        for (const candidate of candidates) {
+                                if (!candidate) continue;
+
+                                if (typeof candidate === "object") {
+                                        const id = candidate.name || candidate.customer;
+                                        if (id) {
+                                                return id;
+                                        }
+                                        continue;
+                                }
+
+                                if (typeof candidate === "string" && candidate.trim()) {
+                                        return candidate.trim();
+                                }
                         }
-                        return candidate || "";
+
+                        return "";
                 },
 
                 openInvoiceHistory() {
