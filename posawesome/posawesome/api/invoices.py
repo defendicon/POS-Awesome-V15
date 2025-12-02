@@ -1051,15 +1051,32 @@ def get_customer_invoice_history(
     limit_value = max(cint(limit or 20), 1)
     offset_value = max(cint(offset or 0), 0)
 
+    resolved_customer_id = _resolve_customer_identifier(customer)
+
+    # Build candidate identifiers to match both the resolved ID and any display labels
+    candidates = []
+    for value in {customer, resolved_customer_id}:
+        if not value:
+            continue
+        candidates.append(value)
+        candidates.append(cstr(value).strip())
+
     params = {
-        "customer": customer,
         "limit": limit_value + 1,
         "offset": offset_value,
     }
 
-    # Match either the customer DocType name or the stored display name so results
-    # still appear when the caller provides a customer display string.
-    base_filters = ["docstatus = 1", "(customer = %(customer)s or customer_name = %(customer)s)"]
+    candidate_params = []
+    for idx, candidate in enumerate(dict.fromkeys(candidates)):
+        key = f"customer_{idx}"
+        params[key] = candidate
+        candidate_params.append(f"customer = %({key})s or customer_name = %({key})s")
+
+    # When no candidate rows were added, fail fast with empty results
+    if not candidate_params:
+        return {"invoices": [], "has_more": False}
+
+    base_filters = ["docstatus = 1", f"({' or '.join(candidate_params)})"]
     if company:
         params["company"] = company
         base_filters.append("company = %(company)s")
@@ -1120,6 +1137,38 @@ def get_customer_invoice_history(
     invoices = rows[:limit_value]
 
     return {"invoices": invoices, "has_more": has_more}
+
+
+def _resolve_customer_identifier(customer: str | None):
+    """Return a best-effort customer ID from various display formats."""
+
+    if not customer:
+        return ""
+
+    # Direct name match
+    if frappe.db.exists("Customer", customer):
+        return customer
+
+    # Common display strings may embed a delimiter (e.g. "CUST-0001 - John Doe")
+    if " - " in customer:
+        code, _, suffix = customer.partition(" - ")
+        if frappe.db.exists("Customer", code.strip()):
+            return code.strip()
+        if frappe.db.exists("Customer", suffix.strip()):
+            return suffix.strip()
+
+    # Match by exact display name
+    exact_match = frappe.db.get_value(
+        "Customer", {"customer_name": customer}, "name", cache=True
+    )
+    if exact_match:
+        return exact_match
+
+    # Relaxed contains search as a final fallback
+    fuzzy_match = frappe.db.get_value(
+        "Customer", {"customer_name": ["like", f"%{customer}%"]}, "name", cache=True
+    )
+    return fuzzy_match or ""
 
 
 @frappe.whitelist()

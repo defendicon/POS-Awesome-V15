@@ -756,15 +756,20 @@ export default {
                                 this.invoice_doc?.customer,
                                 this.invoiceStore?.invoiceDoc?.customer,
                                 this.customer_info?.customer,
+                                this.customer_info?.customer_name,
                         ];
 
                         for (const candidate of candidates) {
                                 if (!candidate) continue;
 
                                 if (typeof candidate === "object") {
-                                        const id = candidate.name || candidate.customer;
+                                        const id =
+                                                candidate.name ||
+                                                candidate.customer ||
+                                                candidate.value ||
+                                                candidate.customer_name;
                                         if (id) {
-                                                return id;
+                                                return `${id}`.trim();
                                         }
                                         continue;
                                 }
