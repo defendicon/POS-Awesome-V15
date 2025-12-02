@@ -754,8 +754,10 @@ export default {
                                 this.customer,
                                 this.selectedCustomer,
                                 this.invoice_doc?.customer,
+                                this.invoice_doc?.customer_name,
                                 this.invoiceStore?.invoiceDoc?.customer,
                                 this.customer_info?.customer,
+                                this.customer_info?.name,
                                 this.customer_info?.customer_name,
                         ];
 

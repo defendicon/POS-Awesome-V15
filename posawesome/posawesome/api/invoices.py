@@ -1062,22 +1062,42 @@ def get_customer_invoice_history(
         candidates.append(cstr(value))
         candidates.append(cstr(value).strip())
 
+    # Attempt to fetch the canonical customer name for the provided identifier
+    # (this covers cases where the UI passes a display label that differs from the
+    # stored link field value)
+    if resolved_customer_id:
+        display_name = frappe.db.get_value(
+            "Customer", resolved_customer_id, "customer_name", cache=True
+        )
+        if display_name:
+            candidates.append(display_name)
+
     params = {
         "limit": limit_value + 1,
         "offset": offset_value,
+        "customer_like": f"%{raw_customer}%",
     }
 
     candidate_params = []
     for idx, candidate in enumerate(dict.fromkeys(candidates)):
         key = f"customer_{idx}"
         params[key] = candidate
-        candidate_params.append(f"customer = %({key})s or customer_name = %({key})s")
+        candidate_params.append(
+            f"customer = %({key})s or customer_name = %({key})s or customer like %({key})s or customer_name like %({key})s"
+        )
 
-    # When no candidate rows were added, fail fast with empty results
-    if not candidate_params:
-        return {"invoices": [], "has_more": False}
+    # When no candidate rows were added, use only the broad LIKE filter
+    if candidate_params:
+        base_filters = ["docstatus = 1", f"({' or '.join(candidate_params)})"]
+    else:
+        base_filters = [
+            "docstatus = 1",
+            "(customer like %(customer_like)s or customer_name like %(customer_like)s)",
+        ]
 
-    base_filters = ["docstatus = 1", f"({' or '.join(candidate_params)})"]
+    # Always keep a broad LIKE match in the filter to catch display-name-only values
+    base_filters.append("(customer like %(customer_like)s or customer_name like %(customer_like)s)")
+
     if company:
         params["company"] = company
         base_filters.append("company = %(company)s")
@@ -1093,7 +1113,7 @@ def get_customer_invoice_history(
     elif invoice_type == "return":
         base_filters.append("is_return = 1")
 
-    filters = " and ".join(base_filters)
+    filters = " and ".join(dict.fromkeys(base_filters))
 
     sales_invoice_query = f"""
         select
@@ -1135,63 +1155,6 @@ def get_customer_invoice_history(
 
     rows = frappe.db.sql(query, params, as_dict=True)
 
-    # Fallback: when direct matches fail, attempt a fuzzy match on the customer name
-    if not rows:
-        fuzzy_params = {
-            **params,
-            "customer_like": f"%{raw_customer}%",
-        }
-
-        fuzzy_filters = ["docstatus = 1", "(customer like %(customer_like)s or customer_name like %(customer_like)s)"]
-        if company:
-            fuzzy_filters.append("company = %(company)s")
-        if from_date:
-            fuzzy_filters.append("posting_date >= %(from_date)s")
-        if to_date:
-            fuzzy_filters.append("posting_date <= %(to_date)s")
-
-        if invoice_type == "invoice":
-            fuzzy_filters.append("is_return = 0")
-        elif invoice_type == "return":
-            fuzzy_filters.append("is_return = 1")
-
-        fallback_filters = " and ".join(fuzzy_filters)
-
-        fallback_query = (
-            f"""
-            select
-                'Sales Invoice' as doctype,
-                name as invoice,
-                posting_date,
-                grand_total,
-                currency,
-                customer,
-                is_return,
-                company,
-                outstanding_amount,
-                creation
-            from `tabSales Invoice`
-            where {fallback_filters}
-            union all
-            select
-                'POS Invoice' as doctype,
-                name as invoice,
-                posting_date,
-                grand_total,
-                currency,
-                customer,
-                is_return,
-                company,
-                outstanding_amount,
-                creation
-            from `tabPOS Invoice`
-            where {fallback_filters}
-            order by posting_date desc, creation desc
-            limit %(limit)s offset %(offset)s
-            """
-        )
-
-        rows = frappe.db.sql(fallback_query, fuzzy_params, as_dict=True)
     has_more = len(rows) > limit_value
     invoices = rows[:limit_value]
 
