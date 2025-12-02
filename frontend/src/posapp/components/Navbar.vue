@@ -203,6 +203,7 @@ export default {
 			{ text: "POS", icon: "mdi-network-pos" },
 			{ text: "Payments", icon: "mdi-credit-card" },
 			{ text: "Sales Return", icon: "mdi-keyboard-return" },
+			{ text: "Print", icon: "mdi-qrcode" },
 			{ text: "Stock Entry", icon: "mdi-package-variant" },
 			{ text: "Item", icon: "mdi-tag" },
 		],
