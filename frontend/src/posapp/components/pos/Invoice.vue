@@ -34,16 +34,20 @@
                                                 <Customer ref="customerComponent" />
                                         </v-col>
                                         <v-col :cols="pos_profile.posa_allow_sales_order ? 2 : 3" class="pb-0">
-                                                <v-btn
-                                                        block
-                                                        color="primary"
-                                                        variant="tonal"
-                                                        prepend-icon="mdi-history"
-                                                        @click="openInvoiceHistory"
-                                                        :disabled="!customer"
-                                                >
-                                                        {{ __("Previous Invoices") }}
-                                                </v-btn>
+                                                <v-tooltip :text="__('Check previous invoices')" location="top">
+                                                        <template #activator="{ props }">
+                                                                <v-btn
+                                                                        v-bind="props"
+                                                                        block
+                                                                        color="primary"
+                                                                        variant="tonal"
+                                                                        density="comfortable"
+                                                                        icon="mdi-history"
+                                                                        @click="openInvoiceHistory"
+                                                                        :disabled="!customer"
+                                                                ></v-btn>
+                                                        </template>
+                                                </v-tooltip>
                                         </v-col>
                                         <!-- Invoice Type Selection (Only shown if sales orders are allowed) -->
                                         <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-4">
@@ -135,30 +139,40 @@
                                                                         :key="invoice.invoice"
                                                                         class="history-list-item"
                                                                 >
-                                                                        <v-list-item-title class="d-flex align-center justify-space-between">
-                                                                                <span class="font-weight-medium">{{ invoice.invoice }}</span>
-                                                                                <div class="d-flex align-center history-meta">
-                                                                                        <v-chip
-                                                                                                v-if="invoice.is_return"
-                                                                                                size="x-small"
-                                                                                                color="warning"
-                                                                                                variant="tonal"
-                                                                                        >
-                                                                                                {{ __("Return") }}
-                                                                                        </v-chip>
-                                                                                        <span class="text-caption">{{ formatHistoryDate(invoice.posting_date) }}</span>
+                                                                        <div class="d-flex flex-column ga-1">
+                                                                                <div class="d-flex align-center justify-space-between">
+                                                                                        <div class="d-flex align-center ga-2">
+                                                                                                <span class="text-caption text-medium-emphasis">{{ formatHistoryDate(invoice.posting_date) }}</span>
+                                                                                                <v-chip
+                                                                                                        v-if="invoice.is_return"
+                                                                                                        size="x-small"
+                                                                                                        color="warning"
+                                                                                                        variant="tonal"
+                                                                                                >
+                                                                                                        {{ __("Return") }}
+                                                                                                </v-chip>
+                                                                                        </div>
+                                                                                        <span class="font-weight-medium">{{ formatHistoryAmount(invoice) }}</span>
                                                                                 </div>
-                                                                        </v-list-item-title>
-                                                                        <v-list-item-subtitle class="d-flex align-center justify-space-between flex-wrap">
-                                                                                <span>{{ formatHistoryAmount(invoice) }}</span>
-                                                                                <span class="text-caption">
-                                                                                        {{ __("Outstanding:") }}
-                                                                                        {{ formatHistoryAmount({
-                                                                                                ...invoice,
-                                                                                                grand_total: invoice.outstanding_amount,
-                                                                                        }) }}
-                                                                                </span>
-                                                                        </v-list-item-subtitle>
+                                                                                <div class="d-flex align-center justify-space-between flex-wrap">
+                                                                                        <v-btn
+                                                                                                variant="text"
+                                                                                                color="primary"
+                                                                                                density="compact"
+                                                                                                class="pa-0 text-body-2"
+                                                                                                @click="openInvoiceRecord(invoice)"
+                                                                                        >
+                                                                                                {{ invoice.invoice }}
+                                                                                        </v-btn>
+                                                                                        <span class="text-caption">
+                                                                                                {{ __("Outstanding:") }}
+                                                                                                {{ formatHistoryAmount({
+                                                                                                        ...invoice,
+                                                                                                        grand_total: invoice.outstanding_amount,
+                                                                                                }) }}
+                                                                                        </span>
+                                                                                </div>
+                                                                        </div>
                                                                 </v-list-item>
                                                         </v-list>
                                                 </v-card-text>
@@ -175,6 +189,90 @@
                                                         >
                                                                 {{ __("Load More") }}
                                                         </v-btn>
+                                                </v-card-actions>
+                                        </v-card>
+                                </v-dialog>
+
+                                <v-dialog v-model="show_invoice_record" max-width="960px">
+                                        <v-card>
+                                                <v-card-title class="d-flex align-center">
+                                                        <div class="d-flex flex-column">
+                                                                <span class="text-subtitle-1">{{ selected_invoice_record?.invoice }}</span>
+                                                                <span class="text-caption text-medium-emphasis">
+                                                                        {{ formatHistoryDate(selected_invoice_record?.posting_date) }}
+                                                                </span>
+                                                        </div>
+                                                        <v-spacer></v-spacer>
+                                                        <v-btn
+                                                                icon="mdi-printer"
+                                                                variant="text"
+                                                                color="primary"
+                                                                :disabled="!selected_invoice_record"
+                                                                @click="printInvoiceRecord"
+                                                        ></v-btn>
+                                                        <v-btn icon="mdi-close" variant="text" density="compact" @click="closeInvoiceRecord"></v-btn>
+                                                </v-card-title>
+                                                <v-divider></v-divider>
+                                                <v-card-text>
+                                                        <v-alert
+                                                                v-if="invoice_record_error"
+                                                                type="error"
+                                                                density="compact"
+                                                                class="mb-3"
+                                                        >
+                                                                {{ invoice_record_error }}
+                                                        </v-alert>
+                                                        <v-progress-linear
+                                                                v-if="invoice_record_loading"
+                                                                indeterminate
+                                                                color="primary"
+                                                                class="mb-3"
+                                                        ></v-progress-linear>
+
+                                                        <div v-if="invoice_record && !invoice_record_loading">
+                                                                <div class="d-flex flex-wrap ga-6 mb-4">
+                                                                        <div>
+                                                                                <div class="text-caption text-medium-emphasis">{{ __('Customer') }}</div>
+                                                                                <div class="text-body-2">{{ invoice_record.customer_name || invoice_record.customer }}</div>
+                                                                        </div>
+                                                                        <div>
+                                                                                <div class="text-caption text-medium-emphasis">{{ __('Invoice Total') }}</div>
+                                                                                <div class="text-body-2">{{ formatHistoryAmount({
+                                                                                        grand_total: invoice_record.grand_total,
+                                                                                        currency: invoice_record.currency,
+                                                                                }) }}</div>
+                                                                        </div>
+                                                                        <div>
+                                                                                <div class="text-caption text-medium-emphasis">{{ __('Outstanding') }}</div>
+                                                                                <div class="text-body-2">{{ formatHistoryAmount({
+                                                                                        grand_total: invoice_record.outstanding_amount,
+                                                                                        currency: invoice_record.currency,
+                                                                                }) }}</div>
+                                                                        </div>
+                                                                </div>
+
+                                                                <v-table density="compact" class="mb-4">
+                                                                        <thead>
+                                                                                <tr>
+                                                                                        <th class="text-left">{{ __('Item') }}</th>
+                                                                                        <th class="text-left">{{ __('Qty') }}</th>
+                                                                                        <th class="text-left">{{ __('Rate') }}</th>
+                                                                                        <th class="text-left">{{ __('Amount') }}</th>
+                                                                                </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                                <tr v-for="row in invoice_record.items || []" :key="row.name">
+                                                                                        <td>{{ row.item_name || row.item_code }}</td>
+                                                                                        <td>{{ formatFloat(row.qty) }}</td>
+                                                                                        <td>{{ formatHistoryAmount({ grand_total: row.rate, currency: invoice_record.currency }) }}</td>
+                                                                                        <td>{{ formatHistoryAmount({ grand_total: row.amount, currency: invoice_record.currency }) }}</td>
+                                                                                </tr>
+                                                                        </tbody>
+                                                                </v-table>
+                                                        </div>
+                                                </v-card-text>
+                                                <v-card-actions class="justify-end">
+                                                        <v-btn variant="text" @click="closeInvoiceRecord">{{ __('Close') }}</v-btn>
                                                 </v-card-actions>
                                         </v-card>
                                 </v-dialog>
@@ -576,6 +674,11 @@ export default {
                                 { title: __("Returns"), value: "return" },
                         ],
                         invoice_history_pagination: { start: 0, limit: 20, has_more: false },
+                        show_invoice_record: false,
+                        selected_invoice_record: null,
+                        invoice_record: null,
+                        invoice_record_loading: false,
+                        invoice_record_error: "",
                         _shortcutHandlers: {},
                         selected_columns: [], // Selected columns for items table
                         temp_selected_columns: [], // Temporary array for column selection
@@ -666,6 +769,64 @@ export default {
                                 this.resetInvoiceHistory();
                                 this.loadInvoiceHistory();
                         }
+                },
+
+                async openInvoiceRecord(invoice) {
+                        if (!invoice) {
+                                return;
+                        }
+
+                        this.selected_invoice_record = invoice;
+                        this.invoice_record = null;
+                        this.invoice_record_error = "";
+                        this.show_invoice_record = true;
+                        await this.fetchInvoiceRecord();
+                },
+
+                closeInvoiceRecord() {
+                        this.show_invoice_record = false;
+                        this.selected_invoice_record = null;
+                        this.invoice_record = null;
+                        this.invoice_record_error = "";
+                },
+
+                async fetchInvoiceRecord() {
+                        if (!this.selected_invoice_record) {
+                                return;
+                        }
+
+                        if (isOffline()) {
+                                this.invoice_record_error = __("Invoice details are unavailable offline.");
+                                return;
+                        }
+
+                        this.invoice_record_loading = true;
+                        this.invoice_record_error = "";
+
+                        try {
+                                const res = await frappe.call({
+                                        method: "frappe.client.get",
+                                        args: {
+                                                doctype: this.selected_invoice_record.doctype || "Sales Invoice",
+                                                name: this.selected_invoice_record.invoice,
+                                        },
+                                });
+
+                                this.invoice_record = res?.message || null;
+                        } catch (error) {
+                                console.error("Failed to fetch invoice record", error);
+                                this.invoice_record_error = __("Unable to load invoice details.");
+                        } finally {
+                                this.invoice_record_loading = false;
+                        }
+                },
+
+                printInvoiceRecord() {
+                        if (!this.selected_invoice_record) {
+                                return;
+                        }
+
+                        this.load_print_page(this.selected_invoice_record.invoice);
                 },
 
                 formatHistoryAmount(invoice) {
