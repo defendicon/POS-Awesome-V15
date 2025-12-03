@@ -1,4 +1,12 @@
 import { createVuetify } from "vuetify";
+import "vuetify/styles";
+import "@mdi/font/css/materialdesignicons.css";
+import "@fontsource/roboto/100.css";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import "@fontsource/roboto/900.css";
 import { createApp } from "vue";
 import Dexie from "dexie/dist/dexie.mjs";
 import VueDatePicker from "@vuepic/vue-datepicker";
