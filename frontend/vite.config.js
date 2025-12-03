@@ -92,6 +92,10 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "src"),
+			"@mdi/font/css/materialdesignicons.css": path.resolve(
+				__dirname,
+				"node_modules/@mdi/font/css/materialdesignicons.css",
+			),
 		},
 	},
 	define: {
