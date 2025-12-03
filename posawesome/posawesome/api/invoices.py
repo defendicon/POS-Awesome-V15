@@ -1286,6 +1286,91 @@ def update_invoice_from_order(data):
     return invoice_doc
 
 
+def _normalize_item_codes(item_codes):
+    """Normalize provided item codes into a clean list."""
+
+    if isinstance(item_codes, str):
+        try:
+            parsed_codes = json.loads(item_codes)
+        except Exception:
+            parsed_codes = [item_codes]
+    else:
+        parsed_codes = item_codes or []
+
+    return [c for c in parsed_codes if c]
+
+
+@frappe.whitelist()
+def get_last_invoice_rates(customer, item_codes=None, company=None, limit_per_item=1):
+    """Return the most recent invoice rate for each requested item for a customer."""
+
+    normalized_codes = _normalize_item_codes(item_codes)
+    if not customer or not normalized_codes:
+        return []
+
+    params = {
+        "customer": customer,
+        "item_codes": normalized_codes,
+        "limit": max(len(normalized_codes) * cint(limit_per_item or 1), 10),
+    }
+
+    filters = ["si.docstatus = 1", "sii.item_code in %(item_codes)s", "si.customer = %(customer)s"]
+    pos_filters = ["pi.docstatus = 1", "pii.item_code in %(item_codes)s", "pi.customer = %(customer)s"]
+
+    if company:
+        params["company"] = company
+        filters.append("si.company = %(company)s")
+        pos_filters.append("pi.company = %(company)s")
+
+    sales_invoice_query = f"""
+        select
+            'Sales Invoice' as doctype,
+            sii.item_code,
+            sii.rate,
+            sii.uom,
+            si.currency,
+            si.name as invoice,
+            si.posting_date,
+            si.creation
+        from `tabSales Invoice Item` sii
+        inner join `tabSales Invoice` si on sii.parent = si.name
+        where {' and '.join(filters)}
+    """
+
+    pos_invoice_query = f"""
+        select
+            'POS Invoice' as doctype,
+            pii.item_code,
+            pii.rate,
+            pii.uom,
+            pi.currency,
+            pi.name as invoice,
+            pi.posting_date,
+            pi.creation
+        from `tabPOS Invoice Item` pii
+        inner join `tabPOS Invoice` pi on pii.parent = pi.name
+        where {' and '.join(pos_filters)}
+    """
+
+    query = (
+        f"{sales_invoice_query}\nUNION ALL\n{pos_invoice_query}\n"
+        "order by posting_date desc, creation desc\n"
+        "limit %(limit)s"
+    )
+
+    rows = frappe.db.sql(query, params, as_dict=True)
+    results = {}
+    for row in rows:
+        code = row.get("item_code")
+        if code and code not in results:
+            results[code] = row
+
+        if len(results) == len(normalized_codes):
+            break
+
+    return list(results.values())
+
+
 @frappe.whitelist()
 def get_available_currencies():
     """Get list of available currencies from ERPNext"""

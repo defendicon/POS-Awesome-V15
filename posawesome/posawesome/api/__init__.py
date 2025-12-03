@@ -14,6 +14,7 @@ from .customers import (
 from .invoices import (
     delete_invoice,
     get_draft_invoices,
+    get_last_invoice_rates,
     search_invoices_for_return,
     submit_invoice,
     update_invoice,
