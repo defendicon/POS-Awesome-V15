@@ -1099,7 +1099,7 @@ export default {
 					this.flt(this.loyalty_amount) / this.customer_info.conversion_factor;
 			}
 		},
-		// Watch redeemed_customer_credit to validate
+		// Watch redeemed_customer_credit to validate and auto-adjust cash payment
 		redeemed_customer_credit(newVal) {
 			if (newVal > this.available_customer_credit) {
 				this.redeemed_customer_credit = this.available_customer_credit;
@@ -1108,6 +1108,26 @@ export default {
 					color: "error",
 				});
 			}
+			
+			// Auto-adjust cash payment field when customer credit is applied
+			// Core Logic: Cash Payment = Grand Total - Applied Credit
+			if (!this.invoice_doc || this.invoice_doc.is_return) {
+				return;
+			}
+			
+			const invoiceTotal = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+			const appliedCredit = this.flt(newVal, this.currency_precision);
+			const remainingBalance = this.flt(invoiceTotal - appliedCredit, this.currency_precision);
+			
+			// Update the cash payment field automatically
+			this.invoice_doc.payments.forEach((payment) => {
+				if (payment.mode_of_payment.toLowerCase().includes('cash')) {
+					payment.amount = remainingBalance > 0 ? remainingBalance : 0;
+					if (payment.base_amount !== undefined) {
+						payment.base_amount = remainingBalance > 0 ? remainingBalance : 0;
+					}
+				}
+			});
 		},
 		// Recalculate total redeemed credit whenever credit entries change
 		customer_credit_dict: {
@@ -1116,6 +1136,35 @@ export default {
 				this.redeemed_customer_credit = this.flt(total, this.currency_precision);
 			},
 			deep: true,
+		},
+		// Watch redeem_customer_credit checkbox to auto-adjust cash payment
+		redeem_customer_credit(isChecked) {
+			if (!this.invoice_doc || this.invoice_doc.is_return) {
+				return;
+			}
+			
+			const invoiceTotal = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+			
+			// Update the cash payment field based on checkbox state
+			this.invoice_doc.payments.forEach((payment) => {
+				if (payment.mode_of_payment.toLowerCase().includes('cash')) {
+					if (isChecked) {
+						// When checkbox is checked, calculate: Grand Total - Applied Credit
+						const appliedCredit = this.flt(this.redeemed_customer_credit, this.currency_precision);
+						const remainingBalance = this.flt(invoiceTotal - appliedCredit, this.currency_precision);
+						payment.amount = remainingBalance > 0 ? remainingBalance : 0;
+						if (payment.base_amount !== undefined) {
+							payment.base_amount = remainingBalance > 0 ? remainingBalance : 0;
+						}
+					} else {
+						// When checkbox is unchecked, reset to full invoice total
+						payment.amount = invoiceTotal;
+						if (payment.base_amount !== undefined) {
+							payment.base_amount = invoiceTotal;
+						}
+					}
+				}
+			});
 		},
 		// Watch sales_person to update sales_team
 		sales_person(newVal) {
