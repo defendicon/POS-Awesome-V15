@@ -196,16 +196,8 @@ export default {
 		},
 
 		generate_qr_print(item, copy_number, total_copies) {
-			const qr_data = {
-				item_code: item.item_code,
-				item_name: item.item_name,
-				rate: item.rate,
-				warehouse: item.warehouse,
-				date: new Date().toISOString().split("T")[0],
-				copy: copy_number + " of " + total_copies,
-			};
-
-			const qr_content = JSON.stringify(qr_data);
+			// QR code contains ONLY the item code
+			const qr_content = item.item_code;
 			const printWindow = window.open("", "", "width=800,height=600");
 
 			const htmlContent =
@@ -224,9 +216,6 @@ export default {
 				"#qrcode canvas { max-width: 250mm !important; max-height: 250mm !important; width: 250mm !important; height: 250mm !important; }" +
 				".item-info { text-align: center; margin-top: 20px; }" +
 				".item-code { font-size: 48px; font-weight: bold; margin: 10px 0; }" +
-				".item-name { font-size: 36px; margin: 10px 0; }" +
-				".item-details { font-size: 28px; margin: 5px 0; }" +
-				".copy-number { font-size: 24px; color: #666; margin-top: 10px; }" +
 				"@media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }" +
 				"</style></head><body>" +
 				'<div class="qr-container">' +
@@ -234,18 +223,6 @@ export default {
 				'<div class="item-info">' +
 				'<div class="item-code">' +
 				item.item_code +
-				"</div>" +
-				'<div class="item-name">' +
-				item.item_name +
-				"</div>" +
-				'<div class="item-details">Rate: ' +
-				this.format_currency(item.rate) +
-				"</div>" +
-				'<div class="item-details">Date: ' +
-				qr_data.date +
-				"</div>" +
-				'<div class="copy-number">Copy ' +
-				qr_data.copy +
 				"</div>" +
 				"</div></div>" +
 				"<script>" +
