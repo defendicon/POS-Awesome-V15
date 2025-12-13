@@ -2,7 +2,7 @@ import { setActivePinia } from "pinia";
 import { pinia, useUpdateStore } from "./posapp/stores/index.js";
 
 const VERSION_ENDPOINT = "/assets/posawesome/dist/js/version.json";
-const SERVICE_WORKER_SCOPE = "/assets/posawesome/dist/www/sw.js";
+const SERVICE_WORKER_SCOPE = "/sw.js";
 const VERSION_CACHE_TTL = 30 * 1000;
 
 let cachedVersionInfo = null;
