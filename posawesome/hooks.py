@@ -18,7 +18,7 @@ app_license = "GPLv3"
 _asset_version = get_build_version()
 
 app_include_js = [
-    f"/assets/posawesome/dist/js/posawesome.umd.js?v={_asset_version}",
+    f"/assets/posawesome/dist/js/loader.js?v={_asset_version}",
 ]
 
 app_include_css = [

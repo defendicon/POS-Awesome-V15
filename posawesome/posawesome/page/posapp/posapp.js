@@ -6,6 +6,23 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 		single_column: true,
 	});
 
+	const waitForPosApp = () => {
+		return new Promise((resolve) => {
+			if (frappe.PosApp && frappe.PosApp.posapp) {
+				resolve();
+			} else {
+				const interval = setInterval(() => {
+					if (frappe.PosApp && frappe.PosApp.posapp) {
+						clearInterval(interval);
+						resolve();
+					}
+				}, 100);
+			}
+		});
+	};
+
+	await waitForPosApp();
+
 	this.page.$PosApp = new frappe.PosApp.posapp(this.page);
 
 	$("div.navbar-fixed-top").find(".container").css("padding", "0");

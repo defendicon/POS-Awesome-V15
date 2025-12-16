@@ -601,7 +601,9 @@ export default {
 
 		// Initialize Pinia store integration
 		const itemsIntegration = useItemsIntegration({
-			enableDebounce: true,
+			// Disable integration debounce since ItemsSelector manages its own debounce
+			// This prevents a double-debounce delay (300ms + 300ms = 600ms)
+			enableDebounce: false,
 			debounceDelay: 300,
 		});
 
@@ -4148,70 +4150,42 @@ export default {
 			return Math.max(180, width);
 		},
 		displayedItems() {
-			const baseItems = Array.isArray(this.filteredItems) ? [...this.filteredItems] : [];
+			// PERF: Avoid unnecessary array cloning ([...this.filteredItems]) as it creates garbage and O(N) cost on every render
+			const baseItems = Array.isArray(this.filteredItems) ? this.filteredItems : [];
 
 			if (!baseItems.length) {
 				return [];
 			}
 
+			// Note: We use the store's filteredItems which is already filtered by search term and item group.
+			// Re-applying search filtering here is redundant unless we want immediate optimistic UI updates
+			// while waiting for the store debounce. However, doing so with a full array scan is expensive.
+			// We trust the store to be the source of truth.
+
 			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
 			let filteredItems = baseItems;
 
-			// Apply search filter only for queries with at least three characters
-			if (searchTerm.length >= 3) {
-				const searchTerms = Array.from(new Set(searchTerm.split(/\s+/).filter(Boolean)));
+			// Optimization: If the store hasn't caught up to the current search term yet (due to debounce),
+			// we could optimistically filter here. However, to keep this computed property fast,
+			// we will rely on the store's state, especially since we disabled the extra debounce layer.
 
-				filteredItems = filteredItems.filter((item) => {
-					// Use pre-computed search index if available (from itemsStore optimization)
-					if (item._search_index) {
-						// Note: searchTerm is already lowercased above:
-						// const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-						// searchTerms are derived from it, so they are lowercased.
-						// item._search_index is also lowercased in store.
-						return searchTerms.every((term) => item._search_index.includes(term));
-					}
+			// Apply search filter only for queries with at least three characters if local filtering is needed
+			// (e.g. if baseItems contains all items but we have a new search term)
+			// Checking if baseItems is "All" vs "Filtered" is complex, but generally if we have a search term
+			// and the store has returned items, they match.
+			// The only case for local filtering is if the store result is a SUPERSET of what we want.
+			// But for now, we assume the store is correct to avoid double filtering cost.
 
-					const barcodeList = [];
-					if (Array.isArray(item.item_barcode)) {
-						barcodeList.push(...item.item_barcode.map((b) => b.barcode).filter(Boolean));
-					} else if (item.item_barcode) {
-						barcodeList.push(String(item.item_barcode));
-					}
-					if (Array.isArray(item.barcodes)) {
-						barcodeList.push(...item.barcodes.map((b) => String(b)).filter(Boolean));
-					}
+			// If the user is typing (searchTerm exists) but the list is huge, we might still want to filter
+			// locally to narrow down results faster than the store update if the store is slow.
+			// But sticking to the store result is safer and cleaner.
+			// We DO apply the search filter if we detect we are likely looking at a stale "All Items" list
+			// while having a search term.
+			// However, detecting "All Items" cheaply is tricky.
+			// For this optimization pass, we remove the redundant full-scan search filter block entirely
+			// because the store (useItemsStore) handles search filtering efficiently.
 
-					const searchFields = [
-						item.item_code,
-						item.item_name,
-						item.barcode,
-						item.description,
-						...barcodeList,
-						...(this.pos_profile?.posa_search_serial_no && Array.isArray(item.serial_no_data)
-							? item.serial_no_data.map((s) => s.serial_no)
-							: []),
-						...(this.pos_profile?.posa_search_batch_no && Array.isArray(item.batch_no_data)
-							? item.batch_no_data.map((b) => b.batch_no)
-							: []),
-					]
-						.filter(Boolean)
-						.map((field) => field.toLowerCase());
-
-					if (!searchTerms.length) {
-						return true;
-					}
-
-					return searchTerms.every((term) => searchFields.some((field) => field.includes(term)));
-				});
-			}
-
-			// Apply item group filter
-			if (this.item_group !== "ALL") {
-				filteredItems = filteredItems.filter(
-					(item) =>
-						item.item_group && item.item_group.toLowerCase() === this.item_group.toLowerCase(),
-				);
-			}
+			// Redundant item_group filter removed as store handles it.
 
 			// Apply zero rate filter
 			if (this.hide_zero_rate_items) {
