@@ -1351,6 +1351,11 @@ export default {
 			this.itemDetailsRequestCache.key = key;
 
 			this.abortController = new AbortController();
+
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(() => reject(new Error("Request timed out")), 5000);
+			});
+
 			const requestPromise = frappe.call({
 				method: "posawesome.posawesome.api.items.get_items_details",
 				args: {
@@ -1362,17 +1367,22 @@ export default {
 				signal: this.abortController.signal,
 			});
 
-			this.itemDetailsRequestCache.promise = requestPromise;
+			this.itemDetailsRequestCache.promise = Promise.race([requestPromise, timeoutPromise]);
 
 			try {
-				const r = await requestPromise;
+				const r = await this.itemDetailsRequestCache.promise;
 				const msg = (r && r.message) || [];
 				if (this.itemDetailsRequestCache.key === key) {
 					this.itemDetailsRequestCache.result = msg;
 				}
 				return msg;
 			} catch (err) {
-				if (err.name !== "AbortError") {
+				if (err.message === "Request timed out") {
+					if (this.abortController) {
+						this.abortController.abort();
+					}
+					console.warn("Item details fetch timed out, proceeding with local data.");
+				} else if (err.name !== "AbortError") {
 					console.error("Error fetching item details:", err);
 				}
 				throw err;
@@ -2716,6 +2726,7 @@ export default {
 					}
 				}
 			} catch (err) {
+				const isTimeout = err.message === "Request timed out";
 				if (err.name !== "AbortError") {
 					console.error("Error fetching item details:", err);
 					items.forEach((item) => {
@@ -2733,7 +2744,7 @@ export default {
 						}
 					});
 
-					if (!isOffline()) {
+					if (!isOffline() && !isTimeout) {
 						vm.itemDetailsRetryCount += 1;
 						const delay = Math.min(32000, 1000 * Math.pow(2, vm.itemDetailsRetryCount - 1));
 						vm.itemDetailsRetryTimeout = setTimeout(() => {
