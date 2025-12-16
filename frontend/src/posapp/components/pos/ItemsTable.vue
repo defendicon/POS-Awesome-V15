@@ -94,14 +94,14 @@
 						v-if="editing_qty_row_id !== item.posa_row_id"
 						class="pos-table__qty-display amount-value number-field-rtl"
 						:class="{
-							'negative-number': isNegative(item.qty),
+							'negative-number': memoizedIsNegative(item.qty),
 							'large-number': memoizedQtyLength(item.qty) > 6,
 						}"
 						:data-length="memoizedQtyLength(item.qty)"
-						:title="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
+						:title="memoizedFormatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
 						@click.stop="openQtyEdit(item)"
 					>
-						{{ formatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
+						{{ memoizedFormatFloat(item.qty, hide_qty_decimals ? 0 : undefined) }}
 					</div>
 					<v-text-field
 						v-else
@@ -185,8 +185,8 @@
 						@click.stop="openRateEdit(item)"
 					>
 						<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
-						<span class="amount-value" :class="{ 'negative-number': isNegative(item.rate) }">
-							{{ formatCurrency(item.rate) }}
+						<span class="amount-value" :class="{ 'negative-number': memoizedIsNegative(item.rate) }">
+							{{ memoizedFormatCurrency(item.rate) }}
 						</span>
 					</div>
 					<v-text-field
@@ -217,8 +217,8 @@
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span
 						class="amount-value"
-						:class="{ 'negative-number': isNegative(item.qty * item.rate) }"
-						>{{ formatCurrency(item.qty * item.rate) }}</span
+						:class="{ 'negative-number': memoizedIsNegative(item.qty * item.rate) }"
+						>{{ memoizedFormatCurrency(item.qty * item.rate) }}</span
 					>
 				</div>
 			</template>
@@ -233,7 +233,7 @@
 					>
 						<span class="amount-value">
 							{{
-								formatFloat(
+								memoizedFormatFloat(
 									Math.abs(
 										item.discount_percentage ||
 											(item.price_list_rate
@@ -276,7 +276,7 @@
 					>
 						<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 						<span class="amount-value">{{
-							formatCurrency(Math.abs(item.discount_amount || 0))
+							memoizedFormatCurrency(Math.abs(item.discount_amount || 0))
 						}}</span>
 					</div>
 					<v-text-field
@@ -307,8 +307,8 @@
 					<span class="currency-symbol">{{ currencySymbol(displayCurrency) }}</span>
 					<span
 						class="amount-value"
-						:class="{ 'negative-number': isNegative(item.price_list_rate) }"
-						>{{ formatCurrency(item.price_list_rate) }}</span
+						:class="{ 'negative-number': memoizedIsNegative(item.price_list_rate) }"
+						>{{ memoizedFormatCurrency(item.price_list_rate) }}</span
 					>
 				</div>
 			</template>
@@ -378,7 +378,7 @@
 											class="pos-themed-input"
 											hide-details
 											:model-value="
-												formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
+												memoizedFormatFloat(item.qty, hide_qty_decimals ? 0 : undefined)
 											"
 											@change="handleQtyChange(item, $event)"
 											:rules="[isNumber]"
@@ -388,7 +388,7 @@
 										<div v-if="item.max_qty !== undefined" class="text-caption mt-1">
 											{{
 												__("In stock: {0}", [
-													formatFloat(
+													memoizedFormatFloat(
 														item._base_actual_qty,
 														hide_qty_decimals ? 0 : undefined,
 													),
@@ -434,7 +434,7 @@
 											:label="frappe._('Rate')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatCurrency(item.rate)"
+											:model-value="memoizedFormatCurrency(item.rate)"
 											@change="[
 												setFormatedCurrency(item, 'rate', null, false, $event),
 												calcPrices(item, $event.target.value, $event),
@@ -457,7 +457,7 @@
 											class="pos-themed-input"
 											hide-details
 											:model-value="
-												formatFloat(Math.abs(item.discount_percentage || 0))
+												memoizedFormatFloat(Math.abs(item.discount_percentage || 0))
 											"
 											@change="[
 												setFormatedCurrency(
@@ -486,7 +486,7 @@
 											:label="frappe._('Discount Amount')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
+											:model-value="memoizedFormatCurrency(Math.abs(item.discount_amount || 0))"
 											@change="[
 												setFormatedCurrency(
 													item,
@@ -515,7 +515,7 @@
 											:label="frappe._('Price List Rate')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatCurrency(item.price_list_rate ?? 0)"
+											:model-value="memoizedFormatCurrency(item.price_list_rate ?? 0)"
 											:disabled="!pos_profile.posa_allow_price_list_rate_change"
 											prepend-inner-icon="mdi-format-list-numbered"
 											:prefix="currencySymbol(pos_profile.currency)"
@@ -530,7 +530,7 @@
 											:label="frappe._('Total Amount')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatCurrency(item.qty * item.rate)"
+											:model-value="memoizedFormatCurrency(item.qty * item.rate)"
 											disabled
 											prepend-inner-icon="mdi-calculator"
 										></v-text-field>
@@ -568,7 +568,7 @@
 											:label="frappe._('Available QTY')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatFloat(item._base_actual_qty)"
+											:model-value="memoizedFormatFloat(item._base_actual_qty)"
 											disabled
 											prepend-inner-icon="mdi-package-variant"
 										></v-text-field>
@@ -581,7 +581,7 @@
 											:label="frappe._('Stock QTY')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatFloat(item.stock_qty)"
+											:model-value="memoizedFormatFloat(item.stock_qty)"
 											disabled
 											prepend-inner-icon="mdi-scale-balance"
 										></v-text-field>
@@ -701,7 +701,7 @@
 											:label="frappe._('Batch No. Available QTY')"
 											class="pos-themed-input"
 											hide-details
-											:model-value="formatFloat(item.actual_batch_qty)"
+											:model-value="memoizedFormatFloat(item.actual_batch_qty)"
 											disabled
 											prepend-inner-icon="mdi-package-variant"
 										></v-text-field>
@@ -826,7 +826,6 @@
 /* global process */
 import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
-import { parseBooleanSetting } from "../../utils/stock.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 export default {
 	name: "ItemsTable",
@@ -893,7 +892,50 @@ export default {
 			editing_discount_amount_value: null,
 		};
 	},
+	created() {
+		// Non-reactive cache for performance
+		this.formatCache = new Map();
+	},
+	watch: {
+		displayCurrency() {
+			if (this.formatCache) this.formatCache.clear();
+		},
+		pos_profile: {
+			handler() {
+				if (this.formatCache) this.formatCache.clear();
+			},
+			deep: true,
+		},
+	},
 	computed: {
+		memoizedFormatFloat() {
+			return (value, precision) => {
+				if (value === null || value === undefined) return "";
+				const key = `f_${value}_${precision ?? "def"}`;
+				if (this.formatCache.has(key)) return this.formatCache.get(key);
+				const result = this.formatFloat(value, precision);
+				this.formatCache.set(key, result);
+				if (this.formatCache.size > 5000) this.formatCache.clear();
+				return result;
+			};
+		},
+		memoizedFormatCurrency() {
+			return (value, precision) => {
+				if (value === null || value === undefined) return "";
+				const key = `c_${value}_${precision ?? "def"}`;
+				if (this.formatCache.has(key)) return this.formatCache.get(key);
+				const result = this.formatCurrency(value, precision);
+				this.formatCache.set(key, result);
+				if (this.formatCache.size > 5000) this.formatCache.clear();
+				return result;
+			};
+		},
+		memoizedIsNegative() {
+			return (value) => {
+				if (typeof value === "number") return value < 0;
+				return this.isNegative(value);
+			};
+		},
 		items() {
 			return this.invoiceStore.items;
 		},
@@ -1411,7 +1453,7 @@ export default {
 			this.editing_uom_row_id = item.posa_row_id;
 		},
 
-		closeUomEdit(item) {
+		closeUomEdit() {
 			this.editing_uom_row_id = null;
 		},
 
@@ -1587,6 +1629,9 @@ export default {
 		}
 		if (this.expandedCache) {
 			this.expandedCache.clear();
+		}
+		if (this.formatCache) {
+			this.formatCache.clear();
 		}
 	},
 };
