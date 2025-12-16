@@ -86,7 +86,7 @@
 						size="small"
 						variant="flat"
 						class="pos-table__qty-btn pos-table__qty-btn--minus minus-btn qty-control-btn"
-						@click.stop="handleMinusClick(item)"
+						@click.stop="handleMinusClick(item)" :aria-label="__('Decrease quantity')"
 					>
 						<v-icon size="small">mdi-minus</v-icon>
 					</v-btn>
@@ -131,7 +131,7 @@
 						size="small"
 						variant="flat"
 						class="pos-table__qty-btn pos-table__qty-btn--plus plus-btn qty-control-btn"
-						@click.stop="addOne(item)"
+						@click.stop="addOne(item)" :aria-label="__('Increase quantity')"
 					>
 						<v-icon size="small">mdi-plus</v-icon>
 					</v-btn>
@@ -144,7 +144,7 @@
 						size="x-small"
 						variant="flat"
 						class="pos-table__editor-btn uom-arrow"
-						@click.stop="changeUom(item, -1)"
+						@click.stop="changeUom(item, -1)" :aria-label="__('Previous unit of measure')"
 						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
 					>
 						<v-icon size="small">mdi-chevron-left</v-icon>
@@ -168,7 +168,7 @@
 						size="x-small"
 						variant="flat"
 						class="pos-table__editor-btn uom-arrow"
-						@click.stop="changeUom(item, 1)"
+						@click.stop="changeUom(item, 1)" :aria-label="__('Next unit of measure')"
 						:disabled="!item.item_uoms || item.item_uoms.length <= 1"
 					>
 						<v-icon size="small">mdi-chevron-right</v-icon>
@@ -333,7 +333,7 @@
 					size="small"
 					variant="flat"
 					class="pos-table__delete-btn delete-action-btn"
-					@click.stop="removeItem(item)"
+					@click.stop="removeItem(item)" :aria-label="__('Remove item')"
 				>
 					<v-icon size="small">mdi-delete-outline</v-icon>
 				</v-btn>
