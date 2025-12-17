@@ -955,6 +955,9 @@ def submit_invoice(invoice, data):
         invoice_doc.pos_profile,
         "posa_allow_submissions_in_background_job",
     ):
+        # Set lock to prevent immediate retry by subsequent calls
+        frappe.cache().set_value(f"posa_bg_sub_{invoice_doc.name}", 1, expires_in_sec=300)
+
         enqueue(
             method=submit_in_background_job,
             queue="short",
@@ -984,6 +987,13 @@ def submit_invoice(invoice, data):
         )
 
         for failed_invoice in failed_invoices:
+            # Check if job is already running or recently queued
+            retry_key = f"posa_bg_sub_{failed_invoice}"
+            if frappe.cache().get_value(retry_key):
+                continue
+
+            frappe.cache().set_value(retry_key, 1, expires_in_sec=300)
+
             failed_doc = frappe.get_doc(invoice_doc.doctype, failed_invoice)
             failed_payments = failed_doc.payments
             failed_is_payment_entry = 1 if failed_doc.get("advances") else 0
