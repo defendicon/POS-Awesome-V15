@@ -83,7 +83,8 @@ def _validate_return_window(invoice_doc, doctype, enabled):
 
     original_invoice = frappe.get_doc(doctype, invoice_doc.return_against)
     validity_date = original_invoice.get("posa_return_valid_upto")
-    if validity_date and getdate(nowdate()) > getdate(validity_date):
+    return_date = getdate(invoice_doc.get("posting_date") or nowdate())
+    if validity_date and return_date > getdate(validity_date):
         frappe.throw(
             _("Returns are only allowed until {0}").format(formatdate(validity_date))
         )
