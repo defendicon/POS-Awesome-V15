@@ -870,18 +870,6 @@ def submit_invoice(invoice, data):
     else:
         cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
 
-    # Update remarks with items details
-    items = []
-    for item in invoice_doc.items:
-        if item.item_name and item.rate and item.qty:
-            total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
-
-    # Add the grand total at the end of remarks
-    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
-    items.append(grand_total)
-
-    invoice_doc.remarks = "\n".join(items)
 
     # calculating cash
     total_cash = 0
@@ -970,6 +958,8 @@ def submit_invoice(invoice, data):
         _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
+    enqueue(update_remarks_in_background, doctype=invoice_doc.doctype, docname=invoice_doc.name)
+
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
 
@@ -984,18 +974,6 @@ def submit_in_background_job(kwargs):
 
     invoice_doc = frappe.get_doc(doctype, invoice)
 
-    # Update remarks with items details for background job
-    items = []
-    for item in invoice_doc.items:
-        if item.item_name and item.rate and item.qty:
-            total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
-
-    # Add the grand total at the end of remarks
-    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
-    items.append(grand_total)
-
-    invoice_doc.remarks = "\n".join(items)
 
     if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
         invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
@@ -1014,6 +992,24 @@ def submit_in_background_job(kwargs):
     invoice_doc.submit()
     _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
     redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+
+    enqueue(update_remarks_in_background, doctype=invoice_doc.doctype, docname=invoice_doc.name)
+
+
+def update_remarks_in_background(doctype, docname):
+    """Generate and update the remarks field in the background."""
+    invoice_doc = frappe.get_doc(doctype, docname)
+    items = []
+    for item in invoice_doc.items:
+        if item.item_name and item.rate and item.qty:
+            total = item.rate * item.qty
+            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+
+    # Add the grand total at the end of remarks
+    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
+    items.append(grand_total)
+
+    frappe.db.set_value(doctype, docname, "remarks", "\n".join(items))
 
 
 @frappe.whitelist()
