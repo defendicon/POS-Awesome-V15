@@ -98,6 +98,24 @@ def _sanitize_item_name(name: str) -> str:
     return cleaned.strip()[:140]
 
 
+def _build_invoice_remarks(invoice_doc):
+    """Generate the invoice remarks string with item totals and grand total."""
+
+    if not invoice_doc or not getattr(invoice_doc, "items", None):
+        return ""
+
+    lines = []
+    for item in invoice_doc.items:
+        if item.item_name and item.rate and item.qty:
+            total = item.rate * item.qty
+            lines.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+
+    if lines:
+        lines.append(f"\nGrand Total: {invoice_doc.grand_total}")
+
+    return "\n".join(lines)
+
+
 def _apply_item_name_overrides(invoice_doc, overrides=None):
     """Apply custom item names to invoice items."""
     overrides = overrides or {}
@@ -886,18 +904,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
     else:
         cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
 
-    # Update remarks with items details
-    items = []
-    for item in invoice_doc.items:
-        if item.item_name and item.rate and item.qty:
-            total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
-
-    # Add the grand total at the end of remarks
-    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
-    items.append(grand_total)
-
-    invoice_doc.remarks = "\n".join(items)
+    invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
     # calculating cash
     total_cash = 0
@@ -984,11 +991,11 @@ def submit_invoice(invoice, data, submit_in_background=False):
 def submit_in_background_job(kwargs):
     invoice = kwargs.get("invoice")
     doctype = kwargs.get("doctype") or "Sales Invoice"
-    data = kwargs.get("data")
+    data = kwargs.get("data") or {}
     is_payment_entry = kwargs.get("is_payment_entry")
     total_cash = kwargs.get("total_cash")
     cash_account = kwargs.get("cash_account")
-    payments = kwargs.get("payments")
+    payments = kwargs.get("payments") or []
 
     invoice_doc = frappe.get_doc(doctype, invoice)
 
@@ -998,18 +1005,12 @@ def submit_in_background_job(kwargs):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
 
-    # Update remarks with items details for background job
-    items = []
-    for item in invoice_doc.items:
-        if item.item_name and item.rate and item.qty:
-            total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+    # Re-run validations that may be impacted while queued (stock, credit limits)
+    _validate_stock_on_invoice(invoice_doc)
+    if hasattr(invoice_doc, "validate_credit_limit"):
+        invoice_doc.validate_credit_limit()
 
-    # Add the grand total at the end of remarks
-    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
-    items.append(grand_total)
-
-    invoice_doc.remarks = "\n".join(items)
+    invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
     if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
         invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
