@@ -19,8 +19,24 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Install Frontend dependencies
+        run: |
+          cd frontend
+          yarn install --frozen-lockfile
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - name: Build and Publish Electron App
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd frontend
+          # Ensure dependencies are installed (might be redundant but safe)
+          yarn install
+          # Build and publish to the release created by semantic-release
+          yarn electron:build --publish always
