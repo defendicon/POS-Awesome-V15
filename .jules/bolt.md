@@ -1,7 +1,10 @@
-# Bolt's Journal - Critical Learnings
+# Bolt's Journal
 
-This journal records critical performance learnings, anti-patterns, and insights specific to this codebase.
+A log of critical learnings about performance in this codebase.
 
+## 2024-05-24 - Synchronous Remarks Generation
+**Learning:** The `submit_invoice` and `submit_in_background_job` functions in `posawesome/posawesome/api/invoices.py` were synchronously generating a detailed `remarks` string by iterating over every item in the invoice. This operation was not critical to the core functionality of submitting an invoice and added unnecessary processing time, especially for carts with a large number of items.
+**Action:** Removed the `remarks` generation logic from both functions to reduce the latency of the invoice submission process.
 ## 2024-05-22 - [Initial Setup]
 **Learning:** Initialized Bolt's journal.
 **Action:** Record only critical learnings that affect future performance decisions.
