@@ -149,6 +149,87 @@ def get_stock_availability(item_code, warehouse):
 
 
 @frappe.whitelist()
+def get_bulk_stock_availability(items):
+    """
+    Fetch stock availability for multiple items in a single query.
+
+    Args:
+        items (list): List of dicts with keys: item_code, warehouse, batch_no (optional)
+
+    Returns:
+        dict: Keys are (item_code, warehouse, batch_no), Values are available qty
+    """
+    if isinstance(items, str):
+        items = json.loads(items)
+
+    results = {}
+
+    # Deduplicate requests
+    # Key: (item_code, warehouse, batch_no)
+    unique_requests = set()
+    for item in items:
+        item_code = item.get("item_code")
+        warehouse = item.get("warehouse")
+        if not item_code or not warehouse:
+            continue
+        batch_no = item.get("batch_no") or None
+        unique_requests.add((item_code, warehouse, batch_no))
+
+    batch_requests = [r for r in unique_requests if r[2]]
+    non_batch_requests = [r for r in unique_requests if not r[2]]
+
+    # 1. Handle non-batch items via bulk Bin query
+    if non_batch_requests:
+        warehouses = list(set(r[1] for r in non_batch_requests))
+        item_codes = list(set(r[0] for r in non_batch_requests))
+
+        # Check for group warehouses
+        group_warehouses = set(
+            frappe.get_all("Warehouse", filters={"name": ["in", warehouses], "is_group": 1}, pluck="name")
+        )
+
+        # Resolve all leaf warehouses we need to fetch
+        warehouse_to_leaves = {}
+        all_leaves = set()
+
+        for w in warehouses:
+            if w in group_warehouses:
+                leaves = frappe.db.get_descendants("Warehouse", w) or []
+                warehouse_to_leaves[w] = leaves
+                all_leaves.update(leaves)
+            else:
+                warehouse_to_leaves[w] = [w]
+                all_leaves.add(w)
+
+        # Fetch Bin data
+        stock_map = {}
+        if all_leaves and item_codes:
+            bin_data = frappe.get_all(
+                "Bin",
+                filters={"item_code": ["in", item_codes], "warehouse": ["in", list(all_leaves)]},
+                fields=["item_code", "warehouse", "actual_qty"],
+            )
+
+            for b in bin_data:
+                stock_map[(b.item_code, b.warehouse)] = flt(b.actual_qty)
+
+        # Aggregate for each request
+        for r in non_batch_requests:
+            ic, wh, _ = r
+            leaves = warehouse_to_leaves.get(wh, [])
+            total_qty = sum(stock_map.get((ic, leaf), 0.0) for leaf in leaves)
+            results[r] = total_qty
+
+    # 2. Handle batch items (fallback to loop)
+    for r in batch_requests:
+        ic, wh, bn = r
+        qty = get_batch_qty(bn, wh) or 0.0
+        results[r] = flt(qty)
+
+    return results
+
+
+@frappe.whitelist()
 def get_available_qty(items):
     """Return available stock quantity for given items.
 
@@ -164,6 +245,8 @@ def get_available_qty(items):
     if isinstance(items, str):
         items = json.loads(items)
 
+    stock_map = get_bulk_stock_availability(items)
+
     result = []
     for it in items or []:
         item_code = it.get("item_code")
@@ -173,10 +256,8 @@ def get_available_qty(items):
         if not item_code or not warehouse:
             continue
 
-        if batch_no:
-            available_qty = get_batch_qty(batch_no, warehouse) or 0
-        else:
-            available_qty = get_stock_availability(item_code, warehouse)
+        key = (item_code, warehouse, batch_no or None)
+        available_qty = stock_map.get(key, 0.0)
 
         result.append(
             {
