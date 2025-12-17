@@ -969,6 +969,35 @@ def submit_invoice(invoice, data):
                 "payments": payments,
             },
         )
+
+        # Retry mechanism for previously printed but unsubmitted invoices
+        failed_invoices = frappe.get_all(
+            invoice_doc.doctype,
+            filters={
+                "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
+                "docstatus": 0,
+                "posa_is_printed": 1,
+                "name": ["!=", invoice_doc.name],
+            },
+            pluck="name",
+        )
+
+        for failed_invoice in failed_invoices:
+            enqueue(
+                method=submit_in_background_job,
+                queue="short",
+                timeout=1000,
+                is_async=True,
+                kwargs={
+                    "invoice": failed_invoice,
+                    "doctype": invoice_doc.doctype,
+                    "data": {},
+                    "is_payment_entry": 0,
+                    "total_cash": 0,
+                    "cash_account": None,
+                    "payments": [],
+                },
+            )
     else:
         invoice_doc.submit()
         _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
