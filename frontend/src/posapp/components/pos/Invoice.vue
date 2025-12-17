@@ -1092,17 +1092,17 @@ export default {
 
 			const enforceStockLimits = this.shouldEnforceStockLimits(item);
 			// Enforce available stock limits
-                        const allowNegativeStock =
-                                (parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
-                                        parseBooleanSetting(item?.allow_negative_stock)) &&
-                                !this.blockSaleBeyondAvailableQty;
+			const allowNegativeStock =
+				(parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
+					parseBooleanSetting(item?.allow_negative_stock)) &&
+				!this.blockSaleBeyondAvailableQty;
 
-                        if (
-                                enforceStockLimits &&
-                                item.max_qty !== undefined &&
-                                this.flt(item[field_name]) > this.flt(item.max_qty)
-                        ) {
-                                const blockSale = this.blockSaleBeyondAvailableQty || !allowNegativeStock;
+			if (
+				enforceStockLimits &&
+				item.max_qty !== undefined &&
+				this.flt(item[field_name]) > this.flt(item.max_qty)
+			) {
+				const blockSale = this.blockSaleBeyondAvailableQty || !allowNegativeStock;
 				if (blockSale) {
 					item[field_name] = item.max_qty;
 					parsedValue = item.max_qty;
@@ -1522,22 +1522,21 @@ export default {
 		},
 
 		// Increase quantity of an item (handles return logic)
-                add_one(item) {
-                        const enforceStockLimits = this.shouldEnforceStockLimits(item);
-                        const allowNegativeStock =
-                                (parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
-                                        parseBooleanSetting(item?.allow_negative_stock)) &&
-                                !this.blockSaleBeyondAvailableQty;
-                        if (this.isReturnInvoice) {
-                                // For returns, make quantity more negative
-                                item.qty--;
-                        } else {
-                                const proposed = item.qty + 1;
-                                const blockSale =
-                                        enforceStockLimits &&
-                                        (this.blockSaleBeyondAvailableQty || !allowNegativeStock);
-                                const exceedsAvailable =
-                                        enforceStockLimits && item.max_qty !== undefined && proposed > item.max_qty;
+		add_one(item) {
+			const enforceStockLimits = this.shouldEnforceStockLimits(item);
+			const allowNegativeStock =
+				(parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
+					parseBooleanSetting(item?.allow_negative_stock)) &&
+				!this.blockSaleBeyondAvailableQty;
+			if (this.isReturnInvoice) {
+				// For returns, make quantity more negative
+				item.qty--;
+			} else {
+				const proposed = item.qty + 1;
+				const blockSale =
+					enforceStockLimits && (this.blockSaleBeyondAvailableQty || !allowNegativeStock);
+				const exceedsAvailable =
+					enforceStockLimits && item.max_qty !== undefined && proposed > item.max_qty;
 				if (blockSale && exceedsAvailable) {
 					item.qty = item.max_qty;
 					this.calc_stock_qty(item, item.qty);

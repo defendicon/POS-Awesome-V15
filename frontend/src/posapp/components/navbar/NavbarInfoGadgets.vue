@@ -1,12 +1,6 @@
 <template>
 	<div class="info-gadgets-container">
-		<v-menu
-			v-model="menu"
-			:close-on-content-click="false"
-			location="bottom end"
-			offset="10"
-			eager
-		>
+		<v-menu v-model="menu" :close-on-content-click="false" location="bottom end" offset="10" eager>
 			<template v-slot:activator="{ props }">
 				<v-btn
 					icon

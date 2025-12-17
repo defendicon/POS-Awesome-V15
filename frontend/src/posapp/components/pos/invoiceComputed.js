@@ -4,12 +4,12 @@ import { perfMarkStart, perfMarkEnd } from "../../utils/perf.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
 
 export default {
-        // Calculate total quantity of all items
-        total_qty() {
-                const mark = perfMarkStart("pos:totals-total_qty");
-                const store = this.invoiceStore;
-                const storeValue = store?.totalQty?.value ?? store?.totalQty;
-                let qty;
+	// Calculate total quantity of all items
+	total_qty() {
+		const mark = perfMarkStart("pos:totals-total_qty");
+		const store = this.invoiceStore;
+		const storeValue = store?.totalQty?.value ?? store?.totalQty;
+		let qty;
 
 		if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
 			qty = storeValue;
@@ -46,13 +46,13 @@ export default {
 		const result = this.flt(sum, this.currency_precision);
 		perfMarkEnd("pos:totals-gross", mark);
 		return result;
-        },
-        // Calculate subtotal after discounts and delivery charges
-        subtotal() {
-                const mark = perfMarkStart("pos:totals-subtotal");
-                const store = this.invoiceStore;
-                const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
-                let sum = typeof storeValue === "number" && !Number.isNaN(storeValue) ? storeValue : 0;
+	},
+	// Calculate subtotal after discounts and delivery charges
+	subtotal() {
+		const mark = perfMarkStart("pos:totals-subtotal");
+		const store = this.invoiceStore;
+		const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
+		let sum = typeof storeValue === "number" && !Number.isNaN(storeValue) ? storeValue : 0;
 
 		if (!(typeof storeValue === "number" && !Number.isNaN(storeValue))) {
 			this.items.forEach((item) => {
@@ -136,12 +136,12 @@ export default {
 	isReturnInvoice() {
 		return this.invoiceType === "Return" || (this.invoice_doc && this.invoice_doc.is_return);
 	},
-        blockSaleBeyondAvailableQty() {
-                if (["Order", "Quotation"].includes(this.invoiceType)) {
-                        return false;
-                }
-                return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
-        },
+	blockSaleBeyondAvailableQty() {
+		if (["Order", "Quotation"].includes(this.invoiceType)) {
+			return false;
+		}
+		return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
+	},
 	// Table headers for item table (for another table if needed)
 	itemTableHeaders() {
 		return [

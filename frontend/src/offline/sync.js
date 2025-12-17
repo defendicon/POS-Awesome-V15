@@ -7,50 +7,50 @@ import { updateLocalStock } from "./stock.js";
 let invoiceSyncInProgress = false;
 
 function getOfflineTimestamp(entry) {
-        const now = new Date();
-        const pad = (value) => String(value).padStart(2, "0");
-        const posting_date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-        const posting_time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+	const now = new Date();
+	const pad = (value) => String(value).padStart(2, "0");
+	const posting_date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+	const posting_time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-        return {
-                offline_created_at: entry?.offline_created_at || now.toISOString(),
-                posting_date: entry?.invoice?.posting_date || posting_date,
-                posting_time: entry?.invoice?.posting_time || posting_time,
-        };
+	return {
+		offline_created_at: entry?.offline_created_at || now.toISOString(),
+		posting_date: entry?.invoice?.posting_date || posting_date,
+		posting_time: entry?.invoice?.posting_time || posting_time,
+	};
 }
 
 export function saveOfflineInvoice(entry) {
-        // Validate that invoice has items before saving
-        if (!entry.invoice || !Array.isArray(entry.invoice.items) || !entry.invoice.items.length) {
-                throw new Error("Cart is empty. Add items before saving.");
-        }
+	// Validate that invoice has items before saving
+	if (!entry.invoice || !Array.isArray(entry.invoice.items) || !entry.invoice.items.length) {
+		throw new Error("Cart is empty. Add items before saving.");
+	}
 
-        const key = "offline_invoices";
-        const entries = memory.offline_invoices;
-        // Clone the entry before storing to strip Vue reactivity
-        // and other non-serializable properties. IndexedDB only
-        // supports structured cloneable data, so reactive proxies
-        // cause a DataCloneError without this step.
-        const { offline_created_at, posting_date, posting_time } = getOfflineTimestamp(entry);
+	const key = "offline_invoices";
+	const entries = memory.offline_invoices;
+	// Clone the entry before storing to strip Vue reactivity
+	// and other non-serializable properties. IndexedDB only
+	// supports structured cloneable data, so reactive proxies
+	// cause a DataCloneError without this step.
+	const { offline_created_at, posting_date, posting_time } = getOfflineTimestamp(entry);
 
-        let cleanEntry;
-        try {
-                cleanEntry = JSON.parse(
-                        JSON.stringify({
-                                ...entry,
-                                offline_created_at,
-                                invoice: {
-                                        ...entry.invoice,
-                                        posting_date,
-                                        posting_time,
-                                        set_posting_time: 1,
-                                },
-                        }),
-                );
-        } catch (e) {
-                console.error("Failed to serialize offline invoice", e);
-                throw e;
-        }
+	let cleanEntry;
+	try {
+		cleanEntry = JSON.parse(
+			JSON.stringify({
+				...entry,
+				offline_created_at,
+				invoice: {
+					...entry.invoice,
+					posting_date,
+					posting_time,
+					set_posting_time: 1,
+				},
+			}),
+		);
+	} catch (e) {
+		console.error("Failed to serialize offline invoice", e);
+		throw e;
+	}
 
 	entries.push(cleanEntry);
 	if (entries.length > MAX_QUEUE_ITEMS) {

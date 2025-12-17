@@ -16,12 +16,7 @@
 				<div class="db-tooltip-section-title mb-1">{{ __("Database Info") }}</div>
 				<div class="db-tooltip-sparkline mb-2">
 					<svg :width="120" :height="32" class="db-sparkline">
-						<polyline
-							:points="sparklinePoints"
-							fill="none"
-							stroke="#1976d2"
-							stroke-width="2"
-						/>
+						<polyline :points="sparklinePoints" fill="none" stroke="#1976d2" stroke-width="2" />
 					</svg>
 				</div>
 				<div class="db-tooltip-detail flex items-center mb-1">
@@ -35,8 +30,8 @@
 					<v-icon size="14" color="info" class="mr-1">mdi-database</v-icon>
 					{{ __("Size:") }} <b>{{ formattedDbSize }}</b>
 					<span class="ml-2 flex items-center"
-						><v-icon size="14" color="info" class="mr-1">mdi-table</v-icon
-						>{{ __("Tables:") }} <b>{{ dbStats.db_table_count }}</b></span
+						><v-icon size="14" color="info" class="mr-1">mdi-table</v-icon>{{ __("Tables:") }}
+						<b>{{ dbStats.db_table_count }}</b></span
 					>
 					<span class="ml-2 flex items-center"
 						><v-icon size="14" color="info" class="mr-1">mdi-format-list-numbered</v-icon
@@ -58,11 +53,7 @@
 						{{ __("Top Tables") }}
 					</div>
 					<ul class="db-top-tables ml-2">
-						<li
-							v-for="t in dbStats.db_top_tables"
-							:key="t.name"
-							class="flex items-center mb-1"
-						>
+						<li v-for="t in dbStats.db_top_tables" :key="t.name" class="flex items-center mb-1">
 							<v-icon size="12" color="info" class="mr-1">mdi-table</v-icon>
 							<b>{{ t.name }}</b
 							>: {{ formatBytes(t.size) }}

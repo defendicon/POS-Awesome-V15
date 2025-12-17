@@ -477,13 +477,13 @@ export function useItemAddition() {
 		if (!item.posa_is_offer) {
 			item.posa_is_offer = 0;
 		}
-                if (!item.posa_is_replace) {
-                        item.posa_is_replace = "";
-                }
+		if (!item.posa_is_replace) {
+			item.posa_is_replace = "";
+		}
 
-                // Initialize flag for tracking manual rate changes
-                new_item._manual_rate_set = false;
-                new_item._manual_rate_set_from_uom = false;
+		// Initialize flag for tracking manual rate changes
+		new_item._manual_rate_set = false;
+		new_item._manual_rate_set_from_uom = false;
 
 		// Set negative quantity for return invoices
 		if (context.isReturnInvoice && item.qty > 0) {

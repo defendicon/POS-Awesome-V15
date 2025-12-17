@@ -1074,10 +1074,16 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
     else:
         item_uom = None
 
-    if not item_code or not frappe.db.exists("Item", item_code):
+    if not item_code:
         return None
 
-    item_doc = frappe.get_cached_doc("Item", item_code)
+    try:
+        # OPTIMIZE: Remove redundant DB query from exists()
+        # frappe.get_cached_doc will raise DoesNotExistError if item is missing
+        # saving one DB round-trip per scan.
+        item_doc = frappe.get_cached_doc("Item", item_code)
+    except frappe.DoesNotExistError:
+        return None
 
     if not item_uom:
         item_uom = getattr(item_doc, "stock_uom", None)

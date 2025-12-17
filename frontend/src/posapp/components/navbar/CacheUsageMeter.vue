@@ -47,12 +47,12 @@
 					>{{ __("Total Size") }}: <b>{{ formatBytes(cacheUsageDetails.total) }}</b>
 				</div>
 				<div class="cache-tooltip-detail">
-					<v-icon size="14" color="info" class="mr-1">mdi-database</v-icon
-					>{{ __("IndexedDB") }}: <b>{{ formatBytes(cacheUsageDetails.indexedDB) }}</b>
+					<v-icon size="14" color="info" class="mr-1">mdi-database</v-icon>{{ __("IndexedDB") }}:
+					<b>{{ formatBytes(cacheUsageDetails.indexedDB) }}</b>
 				</div>
 				<div class="cache-tooltip-detail">
-					<v-icon size="14" color="info" class="mr-1">mdi-folder</v-icon
-					>{{ __("localStorage") }}: <b>{{ formatBytes(cacheUsageDetails.localStorage) }}</b>
+					<v-icon size="14" color="info" class="mr-1">mdi-folder</v-icon>{{ __("localStorage") }}:
+					<b>{{ formatBytes(cacheUsageDetails.localStorage) }}</b>
 				</div>
 			</div>
 			<div class="cache-tooltip-detail" v-else>

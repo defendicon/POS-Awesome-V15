@@ -92,7 +92,9 @@
 					<slot name="status-indicator"></slot>
 				</div>
 
-				<NavbarInfoGadgets :class="['info-gadgets-wrapper', isRtl ? 'rtl-info-gadgets' : 'ltr-info-gadgets']">
+				<NavbarInfoGadgets
+					:class="['info-gadgets-wrapper', isRtl ? 'rtl-info-gadgets' : 'ltr-info-gadgets']"
+				>
 					<!-- Cache Usage Meter -->
 					<template #cache-usage-meter>
 						<slot name="cache-usage-meter"></slot>
@@ -589,7 +591,6 @@ export default {
 .gadget-wrapper:empty {
 	display: none;
 }
-
 
 /* Profile Section */
 .profile-section {

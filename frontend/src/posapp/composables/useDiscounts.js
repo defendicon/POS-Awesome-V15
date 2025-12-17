@@ -48,12 +48,12 @@ export function useDiscounts() {
 		const fieldId = $event.target.id;
 		let newValue = flt(value, context.currency_precision);
 
-                try {
-                        // Flag to track manual rate changes
-                        if (["rate", "discount_amount", "discount_percentage"].includes(fieldId)) {
-                                item._manual_rate_set = true;
-                                item._manual_rate_set_from_uom = false;
-                        }
+		try {
+			// Flag to track manual rate changes
+			if (["rate", "discount_amount", "discount_percentage"].includes(fieldId)) {
+				item._manual_rate_set = true;
+				item._manual_rate_set_from_uom = false;
+			}
 
 			// Handle negative values
 			if (newValue < 0) {
@@ -74,46 +74,49 @@ export function useDiscounts() {
 			// Field-wise calculations
 			switch (fieldId) {
 				case "rate":
-				item.base_rate = context.flt(newValue / context.exchange_rate, context.currency_precision);
+					item.base_rate = context.flt(
+						newValue / context.exchange_rate,
+						context.currency_precision,
+					);
 					item.rate = newValue;
 
-				item.base_discount_amount = context.flt(
-					item.base_price_list_rate - item.base_rate,
+					item.base_discount_amount = context.flt(
+						item.base_price_list_rate - item.base_rate,
 						context.currency_precision,
 					);
-				item.discount_amount = context.flt(
-					item.base_discount_amount * context.exchange_rate,
+					item.discount_amount = context.flt(
+						item.base_discount_amount * context.exchange_rate,
 						context.currency_precision,
 					);
 
-				if (item.base_price_list_rate) {
+					if (item.base_price_list_rate) {
 						item.discount_percentage = context.flt(
-						(item.base_discount_amount / item.base_price_list_rate) * 100,
+							(item.base_discount_amount / item.base_price_list_rate) * 100,
 							context.float_precision,
 						);
 					}
 					break;
 
 				case "discount_amount":
-				newValue = Math.min(newValue, item.price_list_rate);
-				item.discount_amount = newValue;
+					newValue = Math.min(newValue, item.price_list_rate);
+					item.discount_amount = newValue;
 
 					item.base_discount_amount = context.flt(
-					item.discount_amount / context.exchange_rate,
+						item.discount_amount / context.exchange_rate,
 						context.currency_precision,
 					);
-				item.base_rate = context.flt(
-					item.base_price_list_rate - item.base_discount_amount,
+					item.base_rate = context.flt(
+						item.base_price_list_rate - item.base_discount_amount,
 						context.currency_precision,
 					);
-				item.rate = context.flt(
-					item.base_rate * context.exchange_rate,
+					item.rate = context.flt(
+						item.base_rate * context.exchange_rate,
 						context.currency_precision,
 					);
 
-				if (item.base_price_list_rate) {
+					if (item.base_price_list_rate) {
 						item.discount_percentage = context.flt(
-						(item.base_discount_amount / item.base_price_list_rate) * 100,
+							(item.base_discount_amount / item.base_price_list_rate) * 100,
 							context.float_precision,
 						);
 					} else {
@@ -125,20 +128,20 @@ export function useDiscounts() {
 					newValue = Math.min(newValue, 100);
 					item.discount_percentage = context.flt(newValue, context.float_precision);
 
-				item.base_discount_amount = context.flt(
-					(item.base_price_list_rate * item.discount_percentage) / 100,
-					context.currency_precision,
-				);
-					item.discount_amount = context.flt(
-					item.base_discount_amount * context.exchange_rate,
+					item.base_discount_amount = context.flt(
+						(item.base_price_list_rate * item.discount_percentage) / 100,
 						context.currency_precision,
 					);
-				item.base_rate = context.flt(
-					item.base_price_list_rate - item.base_discount_amount,
+					item.discount_amount = context.flt(
+						item.base_discount_amount * context.exchange_rate,
+						context.currency_precision,
+					);
+					item.base_rate = context.flt(
+						item.base_price_list_rate - item.base_discount_amount,
 						context.currency_precision,
 					);
 					item.rate = context.flt(
-					item.base_rate * context.exchange_rate,
+						item.base_rate * context.exchange_rate,
 						context.currency_precision,
 					);
 					break;

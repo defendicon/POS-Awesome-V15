@@ -216,16 +216,16 @@ export default {
 			snack: false,
 			snackText: "",
 			snackColor: "success",
-                        snackTimeout: DEFAULT_SNACK_TIMEOUT,
-                        notificationQueue: [],
-                        currentNotification: null,
-                        clearQueuedOnClose: false,
-                        lastNotificationShownAt: {},
-                        clearingCache: false,
-                        initialCacheRefreshRequested: false,
-                        notificationUpdateHandle: null,
-                        notificationUpdateUsesTimeout: false,
-                };
+			snackTimeout: DEFAULT_SNACK_TIMEOUT,
+			notificationQueue: [],
+			currentNotification: null,
+			clearQueuedOnClose: false,
+			lastNotificationShownAt: {},
+			clearingCache: false,
+			initialCacheRefreshRequested: false,
+			notificationUpdateHandle: null,
+			notificationUpdateUsesTimeout: false,
+		};
 	},
 	watch: {
 		cacheReady: {
@@ -432,22 +432,22 @@ export default {
 		updateAfterDelete() {
 			this.$emit("update-after-delete");
 		},
-                showMessage(data) {
-                        const notification = this.normalizeNotification(data);
+		showMessage(data) {
+			const notification = this.normalizeNotification(data);
 
-                        if (!notification.title) {
-                                return;
-                        }
+			if (!notification.title) {
+				return;
+			}
 
-                        if (this.shouldThrottleNotification(notification)) {
-                                return;
-                        }
+			if (this.shouldThrottleNotification(notification)) {
+				return;
+			}
 
-                        if (this.currentNotification && this.currentNotification.key === notification.key) {
-                                this.mergeNotifications(this.currentNotification, notification);
-                                this.updateActiveNotification();
-                                return;
-                        }
+			if (this.currentNotification && this.currentNotification.key === notification.key) {
+				this.mergeNotifications(this.currentNotification, notification);
+				this.updateActiveNotification();
+				return;
+			}
 
 			const existingQueued = this.notificationQueue.find((item) => item.key === notification.key);
 
@@ -461,81 +461,83 @@ export default {
 				this.processNextNotification();
 			}
 		},
-                normalizeNotification(data = {}) {
-                        const title = typeof data.title === "string" ? data.title.trim() : "";
-                        const color = data.color || "success";
-                        const timeout =
-                                typeof data.timeout === "number" && data.timeout >= 0 ? data.timeout : DEFAULT_SNACK_TIMEOUT;
-                        const summary = typeof data.summary === "string" ? data.summary.trim() : "";
-                        const detail = typeof data.detail === "string" ? data.detail.trim() : "";
-                        const count = Number.isFinite(data.count) && data.count > 0 ? Math.floor(data.count) : 1;
-                        const providedKey =
-                                (typeof data.groupId === "string" && data.groupId.trim()) ||
-                                (typeof data.groupKey === "string" && data.groupKey.trim()) ||
-                                "";
+		normalizeNotification(data = {}) {
+			const title = typeof data.title === "string" ? data.title.trim() : "";
+			const color = data.color || "success";
+			const timeout =
+				typeof data.timeout === "number" && data.timeout >= 0 ? data.timeout : DEFAULT_SNACK_TIMEOUT;
+			const summary = typeof data.summary === "string" ? data.summary.trim() : "";
+			const detail = typeof data.detail === "string" ? data.detail.trim() : "";
+			const count = Number.isFinite(data.count) && data.count > 0 ? Math.floor(data.count) : 1;
+			const providedKey =
+				(typeof data.groupId === "string" && data.groupId.trim()) ||
+				(typeof data.groupKey === "string" && data.groupKey.trim()) ||
+				"";
 
-                        const offlineWarning = this.isConnectionLossNotification(title, summary, detail);
-                        const cooldownMs =
-                                typeof data.cooldownMs === "number" && data.cooldownMs >= 0
-                                        ? data.cooldownMs
-                                        : offlineWarning
-                                                ? OFFLINE_WARNING_COOLDOWN_MS
-                                                : undefined;
+			const offlineWarning = this.isConnectionLossNotification(title, summary, detail);
+			const cooldownMs =
+				typeof data.cooldownMs === "number" && data.cooldownMs >= 0
+					? data.cooldownMs
+					: offlineWarning
+						? OFFLINE_WARNING_COOLDOWN_MS
+						: undefined;
 
-                        const baseKey = offlineWarning ? OFFLINE_NOTIFICATION_KEY : providedKey || `${color}::${summary || title}`;
+			const baseKey = offlineWarning
+				? OFFLINE_NOTIFICATION_KEY
+				: providedKey || `${color}::${summary || title}`;
 
-                        return {
-                                title,
-                                color,
-                                timeout,
-                                count,
-                                key: baseKey,
-                                summary,
-                                latestDetail: detail,
-                                cooldownMs,
-                                isOfflineWarning: offlineWarning,
-                        };
-                },
-                shouldThrottleNotification(notification) {
-                        const effectiveCooldown = this.getNotificationCooldown(notification);
-                        if (!effectiveCooldown) {
-                                return false;
-                        }
+			return {
+				title,
+				color,
+				timeout,
+				count,
+				key: baseKey,
+				summary,
+				latestDetail: detail,
+				cooldownMs,
+				isOfflineWarning: offlineWarning,
+			};
+		},
+		shouldThrottleNotification(notification) {
+			const effectiveCooldown = this.getNotificationCooldown(notification);
+			if (!effectiveCooldown) {
+				return false;
+			}
 
-                        const lastShown = this.lastNotificationShownAt[notification.key] || 0;
-                        const now = Date.now();
+			const lastShown = this.lastNotificationShownAt[notification.key] || 0;
+			const now = Date.now();
 
-                        if (now - lastShown < effectiveCooldown) {
-                                return true;
-                        }
+			if (now - lastShown < effectiveCooldown) {
+				return true;
+			}
 
-                        this.lastNotificationShownAt[notification.key] = now;
-                        return false;
-                },
-                getNotificationCooldown(notification) {
-                        if (typeof notification.cooldownMs === "number") {
-                                return notification.cooldownMs;
-                        }
+			this.lastNotificationShownAt[notification.key] = now;
+			return false;
+		},
+		getNotificationCooldown(notification) {
+			if (typeof notification.cooldownMs === "number") {
+				return notification.cooldownMs;
+			}
 
-                        if (notification.isOfflineWarning || notification.title === OFFLINE_WARNING_TITLE) {
-                                return OFFLINE_WARNING_COOLDOWN_MS;
-                        }
+			if (notification.isOfflineWarning || notification.title === OFFLINE_WARNING_TITLE) {
+				return OFFLINE_WARNING_COOLDOWN_MS;
+			}
 
-                        return 0;
-                },
-                isConnectionLossNotification(title = "", summary = "", detail = "") {
-                        const combined = `${title} ${summary} ${detail}`.toLowerCase();
-                        if (!combined) {
-                                return false;
-                        }
+			return 0;
+		},
+		isConnectionLossNotification(title = "", summary = "", detail = "") {
+			const combined = `${title} ${summary} ${detail}`.toLowerCase();
+			if (!combined) {
+				return false;
+			}
 
-                        return (
-                                combined.includes("connection lost") ||
-                                combined.includes("not connected to internet") ||
-                                (combined.includes("connection") && combined.includes("offline")) ||
-                                (combined.includes("internet") && combined.includes("retry"))
-                        );
-                },
+			return (
+				combined.includes("connection lost") ||
+				combined.includes("not connected to internet") ||
+				(combined.includes("connection") && combined.includes("offline")) ||
+				(combined.includes("internet") && combined.includes("retry"))
+			);
+		},
 		mergeNotifications(target, incoming) {
 			target.count += incoming.count;
 			target.timeout = Math.max(target.timeout, incoming.timeout);

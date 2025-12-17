@@ -22,12 +22,7 @@
 							<stop offset="100%" stop-color="#4caf50" stop-opacity="0" />
 						</linearGradient>
 					</defs>
-					<polyline
-						:points="sparklinePointsLarge"
-						fill="none"
-						stroke="#4caf50"
-						stroke-width="2"
-					/>
+					<polyline :points="sparklinePointsLarge" fill="none" stroke="#4caf50" stroke-width="2" />
 					<polygon :points="areaPointsLarge" fill="url(#cpuAreaGradient)" stroke="none" />
 				</svg>
 			</div>

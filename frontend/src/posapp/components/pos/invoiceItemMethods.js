@@ -20,7 +20,7 @@ import { parseBooleanSetting } from "../../utils/stock.js";
 import stockCoordinator from "../../utils/stockCoordinator.js";
 import { useItemsStore } from "../../stores/itemsStore.js";
 import { usePricingRulesStore } from "../../stores/pricingRulesStore.js";
-import { applyLocalPricingRules, computeFreeItems } from "../../../lib/pricingEngine.js";
+import { evaluatePricingRules } from "../../../lib/pricingEngine.js";
 
 const ITEM_DETAIL_CACHE_TTL = 5000;
 const STOCK_CACHE_TTL = 5000;
@@ -224,9 +224,9 @@ export default {
 			return;
 		}
 
-                const manualFromUom = item._manual_rate_set_from_uom === true;
-                const manualOverride = item._manual_rate_set === true && !manualFromUom;
-                const allowRateUpdate = !item.locked_price && !item.posa_offer_applied && !manualOverride;
+		const manualFromUom = item._manual_rate_set_from_uom === true;
+		const manualOverride = item._manual_rate_set === true && !manualFromUom;
+		const allowRateUpdate = !item.locked_price && !item.posa_offer_applied && !manualOverride;
 		const rawDocQty = Number.parseFloat(item.qty || 0);
 		const signedDocQty = Number.isFinite(rawDocQty) ? rawDocQty : 0;
 		const docQty = Math.abs(signedDocQty);
@@ -239,7 +239,14 @@ export default {
 		}
 
 		const baseRate = this._resolveBaseRate(item);
-		const pricing = applyLocalPricingRules({ item, qty, docQty, baseRate, ctx, indexes });
+		const { pricing, freebies } = evaluatePricingRules({
+			item,
+			qty,
+			docQty,
+			baseRate,
+			ctx,
+			indexes,
+		});
 
 		this._updatePricingBadge(item, pricing.applied);
 
@@ -290,7 +297,6 @@ export default {
 			item.base_amount = this.flt ? this.flt(baseAmount, this.currency_precision) : baseAmount;
 		}
 
-		const freebies = computeFreeItems({ item, qty, docQty, ctx, indexes });
 		if (Array.isArray(freebies)) {
 			freebies.forEach((entry) => {
 				const key = `${entry.rule}::${entry.item_code}::${item.posa_row_id}`;
@@ -880,44 +886,41 @@ export default {
 		const serverFree = Array.isArray(message.free_lines) ? message.free_lines : [];
 		const invoiceUpdates = message.invoice_updates || {};
 
-                const hasDiscountUpdate =
-                        invoiceUpdates &&
-                        (Object.prototype.hasOwnProperty.call(invoiceUpdates, "discount_amount") ||
-                                Object.prototype.hasOwnProperty.call(
-                                        invoiceUpdates,
-                                        "additional_discount_percentage",
-                                ));
+		const hasDiscountUpdate =
+			invoiceUpdates &&
+			(Object.prototype.hasOwnProperty.call(invoiceUpdates, "discount_amount") ||
+				Object.prototype.hasOwnProperty.call(invoiceUpdates, "additional_discount_percentage"));
 
-                const serverDiscountAmount = Number.parseFloat(invoiceUpdates.discount_amount || 0);
-                const serverDiscountPercentage = Number.parseFloat(
-                        invoiceUpdates.additional_discount_percentage || 0,
-                );
-                const serverRules = invoiceUpdates.pricing_rules;
+		const serverDiscountAmount = Number.parseFloat(invoiceUpdates.discount_amount || 0);
+		const serverDiscountPercentage = Number.parseFloat(
+			invoiceUpdates.additional_discount_percentage || 0,
+		);
+		const serverRules = invoiceUpdates.pricing_rules;
 
-                if (hasDiscountUpdate) {
-                        if (this.pos_profile?.posa_use_percentage_discount) {
-                                if (serverDiscountPercentage > 0) {
-                                        this.additional_discount_percentage = serverDiscountPercentage;
-                                } else if (serverDiscountAmount > 0 && this.Total > 0) {
-                                        this.additional_discount_percentage = (serverDiscountAmount / this.Total) * 100;
-                                } else {
-                                        this.additional_discount_percentage = 0;
-                                }
-                                this.update_discount_umount();
-                        } else {
-                                this.additional_discount = serverDiscountAmount;
-                                this.additional_discount_percentage = serverDiscountPercentage;
-                                this.discount_amount = this.additional_discount;
-                        }
-                }
+		if (hasDiscountUpdate) {
+			if (this.pos_profile?.posa_use_percentage_discount) {
+				if (serverDiscountPercentage > 0) {
+					this.additional_discount_percentage = serverDiscountPercentage;
+				} else if (serverDiscountAmount > 0 && this.Total > 0) {
+					this.additional_discount_percentage = (serverDiscountAmount / this.Total) * 100;
+				} else {
+					this.additional_discount_percentage = 0;
+				}
+				this.update_discount_umount();
+			} else {
+				this.additional_discount = serverDiscountAmount;
+				this.additional_discount_percentage = serverDiscountPercentage;
+				this.discount_amount = this.additional_discount;
+			}
+		}
 
-                if (serverRules !== undefined) {
-                        if (this.invoice_doc) {
-                                this.invoice_doc.pricing_rules = serverRules || null;
-                        } else {
-                                this.invoiceStore.mergeInvoiceDoc({ pricing_rules: serverRules || null });
-                        }
-                }
+		if (serverRules !== undefined) {
+			if (this.invoice_doc) {
+				this.invoice_doc.pricing_rules = serverRules || null;
+			} else {
+				this.invoiceStore.mergeInvoiceDoc({ pricing_rules: serverRules || null });
+			}
+		}
 
 		serverFree.forEach((entry) => {
 			if (!entry || !entry.item_code) {
@@ -1080,8 +1083,8 @@ export default {
 			const discountPercentage =
 				Number.parseFloat(update.discount_percentage ?? item.discount_percentage ?? 0) || 0;
 
-                        const manualFromUom = item._manual_rate_set_from_uom === true;
-                        const manualOverride = item._manual_rate_set === true && !manualFromUom;
+			const manualFromUom = item._manual_rate_set_from_uom === true;
+			const manualOverride = item._manual_rate_set === true && !manualFromUom;
 			const priceLocked = item.locked_price === true;
 			const offerApplied =
 				item.posa_offer_applied === true ||
@@ -2007,13 +2010,13 @@ export default {
 
 		// Add offer details
 		doc.posa_offers = this.posa_offers;
-                doc.posa_coupons = this.posa_coupons;
-                doc.posa_delivery_charges = this.selected_delivery_charge?.name || null;
-                doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
-                doc.posa_notes = sourceDoc.posa_notes ?? null;
-                doc.posa_authorization_code = sourceDoc.posa_authorization_code ?? null;
-                doc.posa_return_valid_upto = sourceDoc.posa_return_valid_upto ?? null;
-                doc.posting_date = this.formatDateForBackend(this.posting_date_display);
+		doc.posa_coupons = this.posa_coupons;
+		doc.posa_delivery_charges = this.selected_delivery_charge?.name || null;
+		doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
+		doc.posa_notes = sourceDoc.posa_notes ?? null;
+		doc.posa_authorization_code = sourceDoc.posa_authorization_code ?? null;
+		doc.posa_return_valid_upto = sourceDoc.posa_return_valid_upto ?? null;
+		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
 		// Add flags to ensure proper rate handling
 		doc.ignore_pricing_rule = 0;
@@ -2804,12 +2807,12 @@ export default {
 	},
 
 	_assignManualOverrideValues(item, values = {}) {
-                if (!item || !values) {
-                        return;
-                }
+		if (!item || !values) {
+			return;
+		}
 
-                item._manual_rate_set = true;
-                item._manual_rate_set_from_uom = false;
+		item._manual_rate_set = true;
+		item._manual_rate_set_from_uom = false;
 
 		if (values.uom) {
 			item.uom = values.uom;
@@ -3083,27 +3086,27 @@ export default {
 				}
 			}
 
-                        // Update invoice_doc with current currency info
-                        invoice_doc.currency = this.selected_currency || this.pos_profile.currency;
-                        invoice_doc.conversion_rate = this.conversion_rate || 1;
-                        invoice_doc.plc_conversion_rate = this.exchange_rate || 1;
+			// Update invoice_doc with current currency info
+			invoice_doc.currency = this.selected_currency || this.pos_profile.currency;
+			invoice_doc.conversion_rate = this.conversion_rate || 1;
+			invoice_doc.plc_conversion_rate = this.exchange_rate || 1;
 
-                        // Sync additional discount values back to the UI so totals remain accurate
-                        // in the summary panel even after the invoice is refreshed from the server.
-                        if (invoice_doc.discount_amount !== undefined && invoice_doc.discount_amount !== null) {
-                                this.discount_amount = this.flt(invoice_doc.discount_amount, this.currency_precision);
-                                this.additional_discount = this.discount_amount;
-                        }
+			// Sync additional discount values back to the UI so totals remain accurate
+			// in the summary panel even after the invoice is refreshed from the server.
+			if (invoice_doc.discount_amount !== undefined && invoice_doc.discount_amount !== null) {
+				this.discount_amount = this.flt(invoice_doc.discount_amount, this.currency_precision);
+				this.additional_discount = this.discount_amount;
+			}
 
-                        if (
-                                invoice_doc.additional_discount_percentage !== undefined &&
-                                invoice_doc.additional_discount_percentage !== null
-                        ) {
-                                this.additional_discount_percentage = this.flt(
-                                        invoice_doc.additional_discount_percentage,
-                                        this.float_precision,
-                                );
-                        }
+			if (
+				invoice_doc.additional_discount_percentage !== undefined &&
+				invoice_doc.additional_discount_percentage !== null
+			) {
+				this.additional_discount_percentage = this.flt(
+					invoice_doc.additional_discount_percentage,
+					this.float_precision,
+				);
+			}
 
 			// Preserve totals calculated on the server to ensure taxes are included
 			// The process_invoice method already updates the invoice with taxes and
@@ -3481,9 +3484,8 @@ export default {
 							updated_item.price_list_currency ||
 							item.price_list_currency ||
 							this.selected_currency;
-                                                const manualLocked =
-                                                        item._manual_rate_set === true &&
-                                                        item._manual_rate_set_from_uom !== true;
+						const manualLocked =
+							item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
 						const shouldOverrideRate =
 							!item.locked_price && !item.posa_offer_applied && !manualLocked;
 
@@ -4089,7 +4091,7 @@ export default {
 
 		const rate = Number.isFinite(Number(newRate)) ? Number(newRate) : 0;
 		const resolvedCurrency = priceCurrency || this.selected_currency;
-                const manualOverride = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
+		const manualOverride = item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
 		const companyCurrency = this.pos_profile?.currency;
 
 		if (!item.original_currency) {
@@ -4296,20 +4298,15 @@ export default {
 			this.update_qty_limits(item);
 		}
 
-                const blockSale = Boolean(
-                        this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty,
-                );
-                const allowNegativeStock =
-                        !blockSale &&
-                        (parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
-                                parseBooleanSetting(item?.allow_negative_stock));
+		const blockSale = Boolean(
+			this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty,
+		);
+		const allowNegativeStock =
+			!blockSale &&
+			(parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
+				parseBooleanSetting(item?.allow_negative_stock));
 		let clamped = false;
-		if (
-			blockSale &&
-			!allowNegativeStock &&
-			item.max_qty !== undefined &&
-			flt(item.qty) > item.max_qty
-		) {
+		if (blockSale && !allowNegativeStock && item.max_qty !== undefined && flt(item.qty) > item.max_qty) {
 			this.eventBus.emit("show_message", {
 				title: __("Quantity exceeds available stock"),
 				text: __("The quantity for {0} has been adjusted to the maximum available stock.", [
@@ -4346,25 +4343,25 @@ export default {
 			item.max_qty = flt(item._base_actual_qty / (item.conversion_factor || 1));
 
 			// Set increment disable flag based on stock limits
-                        const blockSale = Boolean(
-                                this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty,
-                        );
-                        const allowNegativeStock =
-                                !blockSale &&
-                                (parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
-                                        parseBooleanSetting(item?.allow_negative_stock));
+			const blockSale = Boolean(
+				this.pos_profile?.posa_block_sale_beyond_available_qty || this.blockSaleBeyondAvailableQty,
+			);
+			const allowNegativeStock =
+				!blockSale &&
+				(parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
+					parseBooleanSetting(item?.allow_negative_stock));
 
-                        if (allowNegativeStock) {
-                                item.disable_increment = false;
-                        } else if (blockSale) {
-                                item.disable_increment = item.qty >= item.max_qty;
-                        } else {
-                                item.disable_increment =
-                                        !parseBooleanSetting(this.stock_settings?.allow_negative_stock) &&
-                                        item.qty >= item.max_qty;
-                        }
-                }
-        },
+			if (allowNegativeStock) {
+				item.disable_increment = false;
+			} else if (blockSale) {
+				item.disable_increment = item.qty >= item.max_qty;
+			} else {
+				item.disable_increment =
+					!parseBooleanSetting(this.stock_settings?.allow_negative_stock) &&
+					item.qty >= item.max_qty;
+			}
+		}
+	},
 
 	// Fetch available stock for an item and cache it
 	async fetch_available_qty(item) {

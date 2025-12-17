@@ -70,10 +70,10 @@ export function useCartValidation() {
 				// Step 4: Client-side quantity validation (before server call)
 				// Allow negative stock items when Allow Negative Stock is enabled
 				// This overrides POS Profile's block setting when negative stock is explicitly allowed
-                                const allowNegativeStock =
-                                        !blockSaleBeyondAvailableQty &&
-                                        (parseBooleanSetting(stockSettings?.allow_negative_stock) ||
-                                                parseBooleanSetting(item?.allow_negative_stock));
+				const allowNegativeStock =
+					!blockSaleBeyondAvailableQty &&
+					(parseBooleanSetting(stockSettings?.allow_negative_stock) ||
+						parseBooleanSetting(item?.allow_negative_stock));
 				const exceedsAvailable =
 					typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
 				const blockSale = !allowNegativeStock && exceedsAvailable;
@@ -201,10 +201,10 @@ export function useCartValidation() {
 
 		if (isStockItem) {
 			// Allow negative stock items when Allow Negative Stock is enabled
-                        const allowNegativeStock =
-                                !blockSaleBeyondAvailableQty &&
-                                (parseBooleanSetting(stockSettings?.allow_negative_stock) ||
-                                        parseBooleanSetting(item?.allow_negative_stock));
+			const allowNegativeStock =
+				!blockSaleBeyondAvailableQty &&
+				(parseBooleanSetting(stockSettings?.allow_negative_stock) ||
+					parseBooleanSetting(item?.allow_negative_stock));
 
 			// Simple negative stock check - only block if negative stock is not allowed
 			if (item.actual_qty < 0 && !allowNegativeStock) {

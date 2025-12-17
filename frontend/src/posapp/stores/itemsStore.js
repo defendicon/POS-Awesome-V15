@@ -755,6 +755,9 @@ export const useItemsStore = defineStore("items", () => {
 			return;
 		}
 
+		const includeSerial = normalizeBooleanSetting(posProfile.value?.posa_search_serial_no);
+		const includeBatch = normalizeBooleanSetting(posProfile.value?.posa_search_batch_no);
+
 		itemList.forEach((item) => {
 			if (!item || !item.item_code) {
 				return;
@@ -772,6 +775,32 @@ export const useItemsStore = defineStore("items", () => {
 			if (item.barcode) {
 				barcodeIndex.value.set(String(item.barcode), item);
 			}
+
+			// Pre-compute search index for performance
+			const searchFields = [item.item_code, item.item_name, item.barcode, item.description];
+
+			if (Array.isArray(item.item_barcode)) {
+				item.item_barcode.forEach((b) => searchFields.push(b?.barcode));
+			} else if (item.item_barcode) {
+				searchFields.push(String(item.item_barcode));
+			}
+
+			if (Array.isArray(item.barcodes)) {
+				item.barcodes.forEach((b) => searchFields.push(b));
+			}
+
+			if (includeSerial && Array.isArray(item.serial_no_data)) {
+				item.serial_no_data.forEach((s) => searchFields.push(s?.serial_no));
+			}
+
+			if (includeBatch && Array.isArray(item.batch_no_data)) {
+				item.batch_no_data.forEach((b) => searchFields.push(b?.batch_no));
+			}
+
+			item._search_index = searchFields
+				.filter(Boolean)
+				.map((f) => String(f).toLowerCase())
+				.join(" ");
 		});
 	};
 
@@ -786,64 +815,34 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		const searchTerm = term.toLowerCase();
-		const includeSerial = normalizeBooleanSetting(posProfile.value?.posa_search_serial_no);
-		const includeBatch = normalizeBooleanSetting(posProfile.value?.posa_search_batch_no);
+		const searchTerms = searchTerm.split(/\s+/).filter(Boolean);
 
 		return itemList.filter((item) => {
 			if (!item) {
 				return false;
 			}
 
-			const fields = [];
+			// Use pre-computed search index if available
+			if (item._search_index) {
+				return searchTerms.every((t) => item._search_index.includes(t));
+			}
 
-			if (item.item_code) {
-				fields.push(item.item_code);
-			}
-			if (item.item_name) {
-				fields.push(item.item_name);
-			}
-			if (item.barcode) {
-				fields.push(item.barcode);
-			}
-			if (item.description) {
-				fields.push(item.description);
-			}
+			// Fallback for items without index
+			const fields = [item.item_code, item.item_name, item.barcode, item.description];
 
 			if (Array.isArray(item.item_barcode)) {
-				item.item_barcode.forEach((entry) => {
-					if (entry?.barcode) {
-						fields.push(entry.barcode);
-					}
-				});
+				item.item_barcode.forEach((entry) => fields.push(entry?.barcode));
 			} else if (item.item_barcode) {
 				fields.push(String(item.item_barcode));
 			}
 
 			if (Array.isArray(item.barcodes)) {
-				item.barcodes.forEach((code) => {
-					if (code) {
-						fields.push(String(code));
-					}
-				});
+				item.barcodes.forEach((code) => fields.push(code));
 			}
 
-			if (includeSerial && Array.isArray(item.serial_no_data)) {
-				item.serial_no_data.forEach((serial) => {
-					if (serial?.serial_no) {
-						fields.push(serial.serial_no);
-					}
-				});
-			}
-
-			if (includeBatch && Array.isArray(item.batch_no_data)) {
-				item.batch_no_data.forEach((batch) => {
-					if (batch?.batch_no) {
-						fields.push(batch.batch_no);
-					}
-				});
-			}
-
-			return fields.filter(Boolean).some((field) => field.toLowerCase().includes(searchTerm));
+			// Note: Dynamic checking of serial/batch here is slow, but this is a fallback
+			// ideally all items should have _search_index
+			return fields.filter(Boolean).some((field) => String(field).toLowerCase().includes(searchTerm));
 		});
 	};
 
