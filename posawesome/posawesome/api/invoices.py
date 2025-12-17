@@ -983,6 +983,37 @@ def submit_invoice(invoice, data):
         )
 
         for failed_invoice in failed_invoices:
+            failed_doc = frappe.get_doc(invoice_doc.doctype, failed_invoice)
+            failed_payments = failed_doc.payments
+            failed_is_payment_entry = 1 if failed_doc.get("advances") else 0
+            failed_total_cash = sum(flt(p.amount) for p in failed_payments)
+
+            failed_cash_account = None
+            # Prepare payments for logic that expects 'type' attribute (which DB docs don't have joined)
+            for p in failed_payments:
+                if not hasattr(p, "type"):
+                    p.type = frappe.get_cached_value("Mode of Payment", p.mode_of_payment, "type")
+
+            failed_mop_cash_list = [
+                i.mode_of_payment
+                for i in failed_payments
+                if "cash" in i.mode_of_payment.lower() and i.type == "Cash"
+            ]
+            if len(failed_mop_cash_list) > 0:
+                failed_cash_account = get_bank_cash_account(failed_mop_cash_list[0], failed_doc.company)
+            else:
+                failed_cash_account = {
+                    "account": frappe.get_value("Company", failed_doc.company, "default_cash_account")
+                }
+
+            # Reconstruct basic data payload for change handling
+            failed_data = {}
+            change_amount = flt(failed_doc.get("change_amount"))
+            if change_amount > 0:
+                # Default to paid change (cash return) as we lost original intent
+                failed_data["paid_change"] = change_amount
+                failed_data["credit_change"] = 0
+
             enqueue(
                 method=submit_in_background_job,
                 queue="short",
@@ -991,11 +1022,11 @@ def submit_invoice(invoice, data):
                 kwargs={
                     "invoice": failed_invoice,
                     "doctype": invoice_doc.doctype,
-                    "data": {},
-                    "is_payment_entry": 0,
-                    "total_cash": 0,
-                    "cash_account": None,
-                    "payments": [],
+                    "data": failed_data,
+                    "is_payment_entry": failed_is_payment_entry,
+                    "total_cash": failed_total_cash,
+                    "cash_account": failed_cash_account,
+                    "payments": failed_payments,
                 },
             )
     else:
