@@ -27,6 +27,7 @@ from frappe.utils import (
 from frappe.utils.background_jobs import enqueue
 
 from posawesome.posawesome.api.payments import (
+    get_available_credit,
     redeeming_customer_credit,
 )  # Updated import
 from posawesome.posawesome.api.utilities import (
@@ -1013,6 +1014,32 @@ def submit_invoice(invoice, data):
                 # Default to paid change (cash return) as we lost original intent
                 failed_data["paid_change"] = change_amount
                 failed_data["credit_change"] = 0
+
+            # Reconstruct customer credit redemption (Sales Return invoices) if amount is missing
+            # Only consider missing amounts larger than tolerance
+            failed_advances = sum(flt(d.allocated_amount) for d in failed_doc.get("advances") or [])
+            failed_paid = sum(flt(p.amount) for p in failed_payments)
+            missing_amount = flt(failed_doc.grand_total) - failed_paid - failed_advances
+
+            if missing_amount > 0.01:
+                available_credits = get_available_credit(failed_doc.customer, failed_doc.company)
+                customer_credit_dict = []
+                redeemed_credit = 0.0
+
+                for credit in available_credits:
+                    if credit.get("type") == "Invoice" and credit.get("total_credit") > 0:
+                        remaining_need = missing_amount - redeemed_credit
+                        if remaining_need <= 0:
+                            break
+
+                        take = min(credit["total_credit"], remaining_need)
+                        credit["credit_to_redeem"] = take
+                        customer_credit_dict.append(credit)
+                        redeemed_credit += take
+
+                if redeemed_credit > 0:
+                    failed_data["redeemed_customer_credit"] = redeemed_credit
+                    failed_data["customer_credit_dict"] = customer_credit_dict
 
             enqueue(
                 method=submit_in_background_job,
