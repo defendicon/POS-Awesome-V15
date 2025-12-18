@@ -58,7 +58,6 @@ export function useDiscounts() {
 		if (!$event?.target?.id || !item) return;
 
 		const fieldId = $event.target.id;
-		const maxDiscount = flt(context.pos_profile?.posa_max_discount_allowed);
 		let newValue = flt(value, context.currency_precision);
 
 		try {
@@ -137,18 +136,8 @@ export function useDiscounts() {
 					}
 					break;
 
-				case "discount_percentage": {
-					let allowed = 100;
-					if (maxDiscount > 0) allowed = maxDiscount;
-					if (newValue > allowed) {
-						newValue = allowed;
-						context.eventBus.emit("show_message", {
-							title: __("Discount limited by POS Profile"),
-							message: __("The maximum discount allowed is") + " " + maxDiscount + "%",
-							color: "warning",
-						});
-					}
-
+				case "discount_percentage":
+					newValue = Math.min(newValue, 100);
 					item.discount_percentage = context.flt(newValue, context.float_precision);
 
 					item.base_discount_amount = context.flt(
@@ -168,37 +157,6 @@ export function useDiscounts() {
 						context.currency_precision,
 					);
 					break;
-				}
-			}
-
-			// Check max discount for rate and amount changes
-			if (fieldId !== "discount_percentage" && maxDiscount > 0) {
-				if (item.discount_percentage > maxDiscount) {
-					item.discount_percentage = maxDiscount;
-					context.eventBus.emit("show_message", {
-						title: __("Discount limited by POS Profile"),
-						message: __("The maximum discount allowed is") + " " + maxDiscount + "%",
-						color: "warning",
-					});
-
-					// Recalculate amounts based on capped percentage
-					item.base_discount_amount = context.flt(
-						(item.base_price_list_rate * item.discount_percentage) / 100,
-						context.currency_precision,
-					);
-					item.discount_amount = context.flt(
-						item.base_discount_amount * context.exchange_rate,
-						context.currency_precision,
-					);
-					item.base_rate = context.flt(
-						item.base_price_list_rate - item.base_discount_amount,
-						context.currency_precision,
-					);
-					item.rate = context.flt(
-						item.base_rate * context.exchange_rate,
-						context.currency_precision,
-					);
-				}
 			}
 
 			// Ensure rate doesn't go below zero
