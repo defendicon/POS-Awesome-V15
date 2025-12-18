@@ -2,7 +2,7 @@ const path = require("path");
 const { app, BrowserWindow, ipcMain, net, shell } = require("electron");
 const Store = require("electron-store");
 
-const DEFAULT_PATH = "/app/posawesome";
+const DEFAULT_PATH = "/app/posapp";
 const store = new Store({
 	name: "posawesome-desktop",
 	defaults: {
