@@ -57,6 +57,20 @@ After switching branches or pulling latest changes:
 Go to developer tools in browser, then go to application tab, then go to storage and clear site data. 
 After clearing site data go to browser settings and delete cache and images data in history also. 
 
+### Electron Desktop App
+
+Use the bundled Electron shell when you need an offline-friendly desktop build that remembers the ERPNext server URL.
+
+1. **Install dependencies** (root): `yarn install`
+2. **Run the desktop shell**: `yarn electron:dev`
+3. **Build installers**: `yarn electron:build`
+
+Notes:
+
+- The app prompts for the server URL on first launch (the `/app/posawesome` path is added automatically) and saves it locally so you do not need to re-enter it.
+- If connectivity drops, an offline screen appears with options to retry or change the saved server.
+- Windows (`.exe`) builds require Wine/Mono when running `electron-builder` on Linux. By default, `yarn electron:build` targets the current platform and writes artifacts into `dist-electron/`.
+
 ### Main Features
 
 1. Supports Erpnext Version 15

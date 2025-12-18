@@ -1624,19 +1624,21 @@ export default {
 			}
 
 			try {
-				const r = await frappe.call({
-					method:
-						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-							? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-							: this.invoiceType === "Quotation"
-								? "posawesome.posawesome.api.quotations.submit_quotation"
-								: "posawesome.posawesome.api.invoices.submit_invoice",
-					args: {
-						data: data,
-						invoice: this.invoice_doc,
-						order: this.invoice_doc,
-					},
-				});
+                                const r = await frappe.call({
+                                        method:
+                                                this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+                                                        ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
+                                                        : this.invoiceType === "Quotation"
+                                                                ? "posawesome.posawesome.api.quotations.submit_quotation"
+                                                                : "posawesome.posawesome.api.invoices.submit_invoice",
+                                        args: {
+                                                data: data,
+                                                invoice: this.invoice_doc,
+                                                order: this.invoice_doc,
+                                                submit_in_background:
+                                                        this.pos_profile.posa_allow_submissions_in_background_job,
+                                        },
+                                });
 
 				if (!r.message) {
 					this.eventBus.emit("show_message", {

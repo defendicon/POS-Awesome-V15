@@ -9,6 +9,7 @@ from frappe.utils import cstr, add_to_date, get_datetime
 from typing import List, Dict
 import time
 import os
+import re
 
 try:
     import psutil
@@ -49,6 +50,10 @@ def get_app_branch(app):
 
 def get_root_of(doctype):
     """Get root element of a DocType with a tree structure"""
+    # Security: Validate doctype to prevent SQL injection since it's used in FROM clause
+    if not re.match(r"^[a-zA-Z0-9 _-]+$", doctype):
+        return None
+
     result = frappe.db.sql(
         """select t1.name from `tab{0}` t1 where
 		(select count(*) from `tab{1}` t2 where
@@ -74,8 +79,9 @@ def get_item_group_condition(pos_profile, item_groups=None):
     cond = " and 1=1"
     item_groups = item_groups or get_item_groups(pos_profile)
     if item_groups:
-        cond = " and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
-        return cond % tuple(item_groups)
+        # Security: Escape values to prevent SQL injection
+        escaped_groups = [frappe.db.escape(g) for g in item_groups]
+        cond = " and item_group in ({0})".format(", ".join(escaped_groups))
 
     return cond
 

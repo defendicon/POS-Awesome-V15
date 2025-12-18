@@ -83,7 +83,8 @@ def _validate_return_window(invoice_doc, doctype, enabled):
 
     original_invoice = frappe.get_doc(doctype, invoice_doc.return_against)
     validity_date = original_invoice.get("posa_return_valid_upto")
-    if validity_date and getdate(nowdate()) > getdate(validity_date):
+    return_date = getdate(invoice_doc.get("posting_date") or nowdate())
+    if validity_date and return_date > getdate(validity_date):
         frappe.throw(
             _("Returns are only allowed until {0}").format(formatdate(validity_date))
         )
@@ -95,6 +96,24 @@ def _sanitize_item_name(name: str) -> str:
         return ""
     cleaned = strip_html_tags(name)
     return cleaned.strip()[:140]
+
+
+def _build_invoice_remarks(invoice_doc):
+    """Generate the invoice remarks string with item totals and grand total."""
+
+    if not invoice_doc or not getattr(invoice_doc, "items", None):
+        return ""
+
+    lines = []
+    for item in invoice_doc.items:
+        if item.item_name and item.rate and item.qty:
+            total = item.rate * item.qty
+            lines.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+
+    if lines:
+        lines.append(f"\nGrand Total: {invoice_doc.grand_total}")
+
+    return "\n".join(lines)
 
 
 def _apply_item_name_overrides(invoice_doc, overrides=None):
@@ -383,8 +402,13 @@ def validate_cart_items(items, pos_profile=None):
     return errors
 
 
-def get_latest_rate(from_currency: str, to_currency: str):
+def get_latest_rate(from_currency: str, to_currency: str, cache=None):
     """Return the most recent Currency Exchange rate and its date."""
+    if cache is not None:
+        key = (from_currency, to_currency)
+        if key in cache:
+            return cache[key]
+
     rate_doc = frappe.get_all(
         "Currency Exchange",
         filters={"from_currency": from_currency, "to_currency": to_currency},
@@ -393,9 +417,15 @@ def get_latest_rate(from_currency: str, to_currency: str):
         limit=1,
     )
     if rate_doc:
-        return flt(rate_doc[0].exchange_rate), rate_doc[0].date
-    rate = get_exchange_rate(from_currency, to_currency, nowdate())
-    return flt(rate), nowdate()
+        result = flt(rate_doc[0].exchange_rate), rate_doc[0].date
+    else:
+        rate = get_exchange_rate(from_currency, to_currency, nowdate())
+        result = flt(rate), nowdate()
+
+    if cache is not None:
+        cache[key] = result
+
+    return result
 
 
 @frappe.whitelist()
@@ -441,6 +471,7 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
 
 @frappe.whitelist()
 def update_invoice(data):
+    currency_cache = {}
     data = json.loads(data)
     _strip_client_freebies_from_payload(data)
     # Determine doctype based on POS Profile setting
@@ -548,6 +579,7 @@ def update_invoice(data):
         conversion_rate, exchange_rate_date = get_latest_rate(
             invoice_doc.currency,
             company_currency,
+            cache=currency_cache,
         )
         if not conversion_rate:
             frappe.throw(
@@ -561,6 +593,7 @@ def update_invoice(data):
             plc_conversion_rate, _ignored = get_latest_rate(
                 price_list_currency,
                 invoice_doc.currency,
+                cache=currency_cache,
             )
             if not plc_conversion_rate:
                 frappe.throw(
@@ -820,9 +853,10 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
 
 
 @frappe.whitelist()
-def submit_invoice(invoice, data):
+def submit_invoice(invoice, data, submit_in_background=False):
     data = json.loads(data)
     invoice = json.loads(invoice)
+    submit_in_background = cint(submit_in_background)
     _strip_client_freebies_from_payload(invoice)
     pos_profile = invoice.get("pos_profile")
     doctype = "Sales Invoice"
@@ -870,18 +904,7 @@ def submit_invoice(invoice, data):
     else:
         cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
 
-    # Update remarks with items details
-    items = []
-    for item in invoice_doc.items:
-        if item.item_name and item.rate and item.qty:
-            total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
-
-    # Add the grand total at the end of remarks
-    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
-    items.append(grand_total)
-
-    invoice_doc.remarks = "\n".join(items)
+    invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
     # calculating cash
     total_cash = 0
@@ -935,36 +958,28 @@ def submit_invoice(invoice, data):
             update_modified=False,
         )
 
-    if frappe.get_value(
+    allow_background_submit = frappe.get_value(
         "POS Profile",
         invoice_doc.pos_profile,
         "posa_allow_submissions_in_background_job",
-    ):
-        invoices_list = frappe.get_all(
-            invoice_doc.doctype,
-            filters={
-                "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
-                "docstatus": 0,
-                "posa_is_printed": 1,
+    )
+
+    if submit_in_background and allow_background_submit:
+        enqueue(
+            method=submit_in_background_job,
+            queue="short",
+            timeout=1000,
+            is_async=True,
+            kwargs={
+                "invoice": invoice_doc.name,
+                "doctype": invoice_doc.doctype,
+                "data": data,
+                "is_payment_entry": is_payment_entry,
+                "total_cash": total_cash,
+                "cash_account": cash_account,
+                "payments": payments,
             },
         )
-        for invoice in invoices_list:
-            enqueue(
-                method=submit_in_background_job,
-                queue="short",
-                timeout=1000,
-                is_async=True,
-                kwargs={
-                    "invoice": invoice.name,
-                    "doctype": invoice_doc.doctype,
-                    "invoice_doc": invoice_doc,
-                    "data": data,
-                    "is_payment_entry": is_payment_entry,
-                    "total_cash": total_cash,
-                    "cash_account": cash_account,
-                    "payments": payments,
-                },
-            )
     else:
         invoice_doc.submit()
         _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
@@ -976,26 +991,26 @@ def submit_invoice(invoice, data):
 def submit_in_background_job(kwargs):
     invoice = kwargs.get("invoice")
     doctype = kwargs.get("doctype") or "Sales Invoice"
-    data = kwargs.get("data")
+    data = kwargs.get("data") or {}
     is_payment_entry = kwargs.get("is_payment_entry")
     total_cash = kwargs.get("total_cash")
     cash_account = kwargs.get("cash_account")
-    payments = kwargs.get("payments")
+    payments = kwargs.get("payments") or []
 
     invoice_doc = frappe.get_doc(doctype, invoice)
 
-    # Update remarks with items details for background job
-    items = []
-    for item in invoice_doc.items:
-        if item.item_name and item.rate and item.qty:
-            total = item.rate * item.qty
-            items.append(f"{item.item_name} - Rate: {item.rate}, Qty: {item.qty}, Amount: {total}")
+    if invoice_doc.docstatus == 1:
+        return
 
-    # Add the grand total at the end of remarks
-    grand_total = f"\nGrand Total: {invoice_doc.grand_total}"
-    items.append(grand_total)
+    invoice_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
 
-    invoice_doc.remarks = "\n".join(items)
+    # Re-run validations that may be impacted while queued (stock, credit limits)
+    _validate_stock_on_invoice(invoice_doc)
+    if hasattr(invoice_doc, "validate_credit_limit"):
+        invoice_doc.validate_credit_limit()
+
+    invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
     if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
         invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
