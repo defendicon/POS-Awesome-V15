@@ -87,6 +87,11 @@ module.exports = {
 					"Release: v${nextRelease.version} — ${new Date().toISOString().slice(0, 10)}\n\n${nextRelease.notes}\n",
 			},
 		],
-		"@semantic-release/github",
+		[
+			"@semantic-release/github",
+			{
+				assets: ["dist-electron/*.AppImage", "dist-electron/*.exe"],
+			},
+		],
 	],
 };
