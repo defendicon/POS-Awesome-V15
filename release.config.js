@@ -76,7 +76,7 @@ module.exports = {
 		[
 			"@semantic-release/exec",
 			{
-				prepareCmd: "python scripts/update_version.py ${nextRelease.version}",
+				prepareCmd: "python scripts/update_version.py ${nextRelease.version} && yarn build && yarn electron:build:win",
 			},
 		],
 		[

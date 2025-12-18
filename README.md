@@ -67,7 +67,7 @@ Use the bundled Electron shell when you need an offline-friendly desktop build t
 
 Notes:
 
-- The app prompts for the server URL on first launch (the `/app/posawesome` path is added automatically) and saves it locally so you do not need to re-enter it.
+- The app prompts for the server URL on first launch (the `/app/posapp` path is added automatically) and saves it locally so you do not need to re-enter it.
 - If connectivity drops, an offline screen appears with options to retry or change the saved server.
 - Windows (`.exe`) builds require Wine/Mono when running `electron-builder` on Linux. By default, `yarn electron:build` targets the current platform and writes artifacts into `dist-electron/`.
 

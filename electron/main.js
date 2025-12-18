@@ -60,8 +60,11 @@ function ensureUrl(rawUrl) {
 		return "";
 	}
 
-	if (!parsed.pathname || parsed.pathname === "/") {
+	const trimmedPath = parsed.pathname?.replace(/\/+$/, "") || "";
+	if (!trimmedPath || trimmedPath === "/") {
 		parsed.pathname = DEFAULT_PATH;
+	} else if (trimmedPath === "/app/posawesome" || trimmedPath.startsWith("/app/posawesome/")) {
+		parsed.pathname = trimmedPath.replace("/app/posawesome", DEFAULT_PATH);
 	}
 
 	return parsed.toString().replace(/\/$/, "");
