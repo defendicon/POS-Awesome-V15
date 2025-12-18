@@ -63,15 +63,6 @@ jobs:
       - name: Build frontend
         run: yarn build
 
-      - name: Build Electron app (Linux)
-        run: yarn electron:build:linux
-
-      - name: Upload Electron artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: electron-linux
-          path: dist-electron/**/*.AppImage
-
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
         with:

@@ -90,7 +90,7 @@ module.exports = {
 		[
 			"@semantic-release/github",
 			{
-				assets: ["dist-electron/*.AppImage", "dist-electron/*.exe"],
+				assets: ["dist-electron/*.exe"],
 			},
 		],
 	],
