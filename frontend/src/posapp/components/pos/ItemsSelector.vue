@@ -2194,12 +2194,6 @@ export default {
 			// Keep first_search in sync with the value we are about to search for
 			vm.first_search = trimmedQuery;
 
-			// If the input is a numeric string longer than 6 characters, treat it as a barcode
-			if (/^\d{7,}$/.test(trimmedQuery)) {
-				vm.onBarcodeScanned(trimmedQuery);
-				return;
-			}
-
 			// Require a minimum of three characters before running a search
 			if (!trimmedQuery || trimmedQuery.length < 3) {
 				vm.search_from_scanner = false;
@@ -2220,6 +2214,7 @@ export default {
 				const shouldForceServer =
 					!vm.pos_profile.posa_local_storage || !vm.storageAvailable || !isOffline();
 				await vm.get_items(shouldForceServer);
+				vm.enter_event();
 			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
 				if (vm.storageAvailable) {
 					await vm.loadVisibleItems(true);
