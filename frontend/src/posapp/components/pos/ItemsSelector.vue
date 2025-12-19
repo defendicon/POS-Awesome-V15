@@ -737,7 +737,7 @@ export default {
 		lastInvoiceRateLoading: false,
 		searchMetaCache: null,
 		searchTermCache: null,
-		searchCacheLimit: 50,
+		searchCacheLimit: 100,
 		searchTokenCacheLimit: 100,
 		lastSearchNormalization: { raw: null, normalized: "", tokens: [] },
 	}),
@@ -1146,7 +1146,7 @@ export default {
 			if (this.searchCache) {
 				this.searchCache.set(cacheKey, result);
 				// PERF: keep cache bounded to avoid unbounded memory growth on rapid searches
-				this.capCacheSize(this.searchCache, this.searchCacheLimit || 50);
+				this.capCacheSize(this.searchCache, this.searchCacheLimit || 100);
 			}
 
 			return result;
