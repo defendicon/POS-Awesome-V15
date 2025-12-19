@@ -130,6 +130,9 @@ export const useItemsStore = defineStore("items", () => {
 			prefix: "posa_items_",
 		},
 	});
+	// Throttle expensive cache cleanup to avoid iterating large Maps after every search write
+	const MEMORY_CLEANUP_INTERVAL = 1000; // 1s between cleanups is enough for freshness while saving CPU
+	let lastMemoryCleanup = 0;
 
 	// Computed properties
 	const activePriceList = computed(() => {
@@ -1377,6 +1380,14 @@ export const useItemsStore = defineStore("items", () => {
 	const cleanupMemoryCache = () => {
 		const now = Date.now();
 		const ttl = cache.value.memory.ttl;
+
+		// Skip cleanup when called too frequently and the cache is within size limits.
+		// This avoids repeated Map iterations and sorting on rapid search input while
+		// still running promptly when the cache grows beyond the configured max size.
+		if (now - lastMemoryCleanup < MEMORY_CLEANUP_INTERVAL && cache.value.memory.searchResults.size <= cache.value.memory.maxSize) {
+			return;
+		}
+		lastMemoryCleanup = now;
 
 		// Cleanup expired entries
 		for (const [key, value] of cache.value.memory.searchResults.entries()) {
