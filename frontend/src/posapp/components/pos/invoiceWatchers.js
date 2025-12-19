@@ -168,8 +168,13 @@ export default {
 				this.scheduleOfferRefresh(Array.from(changed));
 			}
 
-			if (typeof this.emitCartQuantities === "function") {
-				this.emitCartQuantities();
+			const triggerCartUpdate =
+				typeof this.scheduleCartQuantitiesUpdate === "function"
+					? this.scheduleCartQuantitiesUpdate
+					: this.emitCartQuantities;
+
+			if (typeof triggerCartUpdate === "function") {
+				triggerCartUpdate();
 			}
 		},
 	},
@@ -198,8 +203,13 @@ export default {
 				this.scheduleOfferRefresh(Array.from(changed));
 			}
 
-			if (typeof this.emitCartQuantities === "function") {
-				this.emitCartQuantities();
+			const triggerCartUpdate =
+				typeof this.scheduleCartQuantitiesUpdate === "function"
+					? this.scheduleCartQuantitiesUpdate
+					: this.emitCartQuantities;
+
+			if (typeof triggerCartUpdate === "function") {
+				triggerCartUpdate();
 			}
 		},
 	},

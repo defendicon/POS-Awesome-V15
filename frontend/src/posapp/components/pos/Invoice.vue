@@ -444,6 +444,9 @@ export default {
 			paymentVisible: false, // Track current payment view state
 			_busHandlers: {},
 			pricing_reconcile_in_progress: false,
+			cartQuantitiesScheduleHandle: null,
+			cartQuantitiesSchedulePending: false,
+			cartQuantitiesScheduleDirty: false,
 		};
 	},
 
@@ -543,6 +546,47 @@ export default {
 
 			// Generate headers based on selected columns
 			this.updateHeadersFromSelection();
+		},
+		scheduleCartQuantitiesUpdate() {
+			this.cartQuantitiesScheduleDirty = true;
+			if (this.cartQuantitiesSchedulePending) {
+				return;
+			}
+			this.cartQuantitiesSchedulePending = true;
+
+			const scheduler =
+				typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+					? window.requestAnimationFrame.bind(window)
+					: (cb) => setTimeout(cb, 16);
+
+			this.cartQuantitiesScheduleHandle = scheduler(() => {
+				this.cartQuantitiesScheduleHandle = null;
+				this.cartQuantitiesSchedulePending = false;
+
+				if (!this.cartQuantitiesScheduleDirty) {
+					return;
+				}
+
+				this.cartQuantitiesScheduleDirty = false;
+				this.emitCartQuantities();
+			});
+		},
+		cancelScheduledCartQuantitiesUpdate() {
+			if (!this.cartQuantitiesScheduleHandle) {
+				this.cartQuantitiesSchedulePending = false;
+				this.cartQuantitiesScheduleDirty = false;
+				return;
+			}
+
+			if (typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+				window.cancelAnimationFrame(this.cartQuantitiesScheduleHandle);
+			} else {
+				clearTimeout(this.cartQuantitiesScheduleHandle);
+			}
+
+			this.cartQuantitiesScheduleHandle = null;
+			this.cartQuantitiesSchedulePending = false;
+			this.cartQuantitiesScheduleDirty = false;
 		},
 		emitCartQuantities() {
 			const totals = {};
@@ -1776,6 +1820,7 @@ export default {
 		if (typeof this.cancelScheduledOfferRefresh === "function") {
 			this.cancelScheduledOfferRefresh();
 		}
+		this.cancelScheduledCartQuantitiesUpdate();
 		if (this._suppressClosePaymentsTimer) {
 			clearTimeout(this._suppressClosePaymentsTimer);
 			this._suppressClosePaymentsTimer = null;
