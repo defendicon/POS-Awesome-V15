@@ -21,7 +21,7 @@ import {
 
 const DEFAULT_PAGE_SIZE = 200;
 	const LARGE_CATALOG_THRESHOLD = 5000;
-	const LIMIT_SEARCH_FALLBACK = 500;
+const LIMIT_SEARCH_FALLBACK = 100;
 	const SEARCH_TOKEN_CACHE_LIMIT = 100;
 
 	export const useItemsStore = defineStore("items", () => {

@@ -4217,7 +4217,7 @@ export default {
 				return parsed;
 			}
 
-			return 500;
+			return 100;
 		},
 		blockSaleBeyondAvailableQty() {
 			return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
