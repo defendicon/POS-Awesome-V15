@@ -908,6 +908,8 @@ export default {
 		// Non-reactive cache for performance
 		this.formatCache = new Map();
 		this.qtyLengthCache = new Map();
+		// PERF: cache search normalization once per query to avoid repeating string ops for every row render
+		this._searchCache = { raw: null, normalized: "", terms: [] };
 	},
 	watch: {
 		displayCurrency() {
@@ -1146,12 +1148,27 @@ export default {
 				return true;
 			}
 
-			const normalized = String(search).toLowerCase().trim();
+			let normalized = "";
+			let terms = [];
+
+			if (this._searchCache?.raw === search) {
+				// PERF: reuse normalized tokens for identical search text to avoid per-row lowercasing/splitting
+				({ normalized, terms } = this._searchCache);
+			} else {
+				normalized = String(search).toLowerCase().trim();
+				terms = normalized ? normalized.split(/\s+/).filter(Boolean) : [];
+
+				if (this._searchCache) {
+					this._searchCache.raw = search;
+					this._searchCache.normalized = normalized;
+					this._searchCache.terms = terms;
+				}
+			}
+
 			if (!normalized) {
 				return true;
 			}
 
-			const terms = normalized.split(/\s+/).filter(Boolean);
 			if (!terms.length) {
 				return true;
 			}
