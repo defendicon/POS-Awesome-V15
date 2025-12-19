@@ -2587,6 +2587,33 @@ export default {
 				stockCoordinator.updateBaseQuantities(baseEntries, { source: "items-selector" });
 				baseRecords.clear();
 			};
+			const hasCachedDetails = (item) => {
+				const hasUoms = Array.isArray(item?.item_uoms) && item.item_uoms.length > 0;
+				const hasPrice = item?.price_list_rate !== undefined || item?.rate !== undefined;
+				const hasCurrency = Boolean(item?.currency || vm.pos_profile?.currency);
+				const hasQty = typeof item?.actual_qty === "number";
+				return hasUoms && hasPrice && hasCurrency && hasQty;
+			};
+
+			// Fast path: if all items already have the details we need, avoid redundant fetches
+			if (!forceRefresh && items.every((item) => hasCachedDetails(item))) {
+				items.forEach((item) => {
+					if (!item.original_rate) {
+						item.original_rate = item.price_list_rate ?? item.rate;
+					}
+					if (!item.original_currency) {
+						item.original_currency = item.currency || vm.pos_profile.currency;
+					}
+					vm.captureBaseAvailability(item, item.actual_qty);
+					baseRecords.set(item.item_code, item.actual_qty);
+					vm.indexItem(item);
+					vm.applyCurrencyConversionToItem(item);
+				});
+				vm.itemDetailsRetryCount = 0;
+				flushBaseRecords();
+				vm.recomputeAvailabilityForCodes(affectedCodes);
+				return;
+			}
 			const cacheResult = await getCachedItemDetails(
 				vm.pos_profile.name,
 				vm.active_price_list,
