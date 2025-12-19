@@ -1670,6 +1670,34 @@ export default {
 						submissionStatus = ensured.status;
 					}
 
+					const submittedItems = Array.isArray(this.invoice_doc.items)
+						? [...this.invoice_doc.items]
+						: [];
+
+					if (
+						this.invoiceType !== "Order" &&
+						this.invoiceType !== "Quotation" &&
+						this.pos_profile.posa_allow_submissions_in_background_job &&
+						submissionStatus !== 1
+					) {
+						// Queue submit and immediately return to a fresh invoice so the cashier can continue
+						this.eventBus.emit("show_message", {
+							title: __("Invoice queued for submission. Preparing a new cart..."),
+							color: "info",
+						});
+						this.resetToNewInvoiceUI();
+						this.finalizeSubmissionAsync(
+							submissionMethod,
+							submissionArgs,
+							submissionName,
+							submissionStatus,
+							print,
+							submittedItems,
+						);
+						return;
+					}
+
+					// Synchronous submission or background already completed
 					if (submissionStatus !== 1) {
 						this.eventBus.emit("show_message", {
 							title: __("Invoice submission failed or queued. Please try again."),
@@ -1678,44 +1706,7 @@ export default {
 						return;
 					}
 
-					if (print) {
-						this.load_print_page();
-					}
-					this.customer_credit_dict = [];
-					this.redeem_customer_credit = false;
-					this.is_cashback = true;
-					this.is_credit_return = false;
-					this.sales_person = "";
-					this.invoice_doc.name = submissionName;
-					this.eventBus.emit("set_last_invoice", this.invoice_doc.name);
-					this.eventBus.emit("show_message", {
-						title:
-							this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-								? __("Sales Order {0} is Submitted", [submissionName])
-								: this.invoiceType === "Quotation"
-									? __("Quotation {0} is Submitted", [submissionName])
-									: __("Invoice {0} is Submitted", [submissionName]),
-						color: "success",
-					});
-					frappe.utils.play_sound("submit");
-					const submittedItems = Array.isArray(this.invoice_doc.items) ? this.invoice_doc.items : [];
-					updateLocalStock(submittedItems);
-					stockCoordinator.applyInvoiceConsumption(submittedItems, {
-						source: "invoice",
-					});
-					const submittedCodes = submittedItems
-						.map((item) => (item ? item.item_code : null))
-						.filter((code) => code !== undefined && code !== null);
-					this.eventBus.emit("invoice_stock_adjusted", {
-						items: submittedItems,
-						item_codes: submittedCodes,
-						timestamp: Date.now(),
-					});
-					this.addresses = [];
-					this.eventBus.emit("clear_invoice");
-					this.eventBus.emit("focus_item_search");
-					this.eventBus.emit("reset_posting_date");
-					this.back_to_invoice();
+					this.runPostSubmitSuccess(submissionName, submittedItems, print);
 				} catch (exc) {
 					console.error("Error submitting invoice:", exc);
 					let errorMsg = exc.toString();
@@ -1744,10 +1735,10 @@ export default {
 					}
 				}
 			},
-			async ensureInvoiceSubmitted(name, doctype, method, args, initialStatus = 0) {
-				if (initialStatus === 1) {
-					return { name, status: 1 };
-				}
+				async ensureInvoiceSubmitted(name, doctype, method, args, initialStatus = 0) {
+					if (initialStatus === 1) {
+						return { name, status: 1 };
+					}
 
 				this.eventBus.emit("show_message", {
 					title: __("Invoice queued for submission..."),
@@ -1847,8 +1838,81 @@ export default {
 						payment.base_amount = isReturn ? -Math.abs(amount) : amount;
 					}
 				}
-			});
-		},
+					});
+				},
+				async finalizeSubmissionAsync(
+					method,
+					args,
+					submissionName,
+					initialStatus,
+					print,
+					submittedItems = [],
+				) {
+					const ensured = await this.ensureInvoiceSubmitted(
+						submissionName,
+						this.invoice_doc?.doctype || "Sales Invoice",
+						method,
+						args,
+						initialStatus,
+					);
+					if (ensured.status === 1) {
+						this.runPostSubmitSuccess(ensured.name, submittedItems, print, { skipClear: true });
+					} else {
+						this.eventBus.emit("show_message", {
+							title: __("Invoice could not be submitted. Please retry."),
+							color: "error",
+						});
+					}
+				},
+				runPostSubmitSuccess(submissionName, submittedItems, print, { skipClear = false } = {}) {
+					this.customer_credit_dict = [];
+					this.redeem_customer_credit = false;
+					this.is_cashback = true;
+					this.is_credit_return = false;
+					this.sales_person = "";
+					this.invoice_doc.name = submissionName;
+					this.eventBus.emit("set_last_invoice", submissionName);
+					this.eventBus.emit("show_message", {
+						title:
+							this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+								? __("Sales Order {0} is Submitted", [submissionName])
+								: this.invoiceType === "Quotation"
+									? __("Quotation {0} is Submitted", [submissionName])
+									: __("Invoice {0} is Submitted", [submissionName]),
+						color: "success",
+					});
+					frappe.utils.play_sound("submit");
+
+					if (submittedItems && submittedItems.length) {
+						updateLocalStock(submittedItems);
+						stockCoordinator.applyInvoiceConsumption(submittedItems, {
+							source: "invoice",
+						});
+						const submittedCodes = submittedItems
+							.map((item) => (item ? item.item_code : null))
+							.filter((code) => code !== undefined && code !== null);
+						this.eventBus.emit("invoice_stock_adjusted", {
+							items: submittedItems,
+							item_codes: submittedCodes,
+							timestamp: Date.now(),
+						});
+					}
+
+					if (!skipClear) {
+						this.resetToNewInvoiceUI();
+					}
+
+					if (print) {
+						this.load_print_page();
+					}
+				},
+				resetToNewInvoiceUI() {
+					this.addresses = [];
+					this.eventBus.emit("clear_invoice");
+					this.eventBus.emit("focus_item_search");
+					this.eventBus.emit("reset_posting_date");
+					this.back_to_invoice();
+				},
 		// Clear all payment amounts
 		clear_all_amounts() {
 			this.invoice_doc.payments.forEach((payment) => {
