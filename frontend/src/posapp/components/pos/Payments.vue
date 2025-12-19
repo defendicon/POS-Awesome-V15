@@ -1621,102 +1621,182 @@ export default {
 					});
 					return;
 				}
-			}
-
-			try {
-                                const r = await frappe.call({
-                                        method:
-                                                this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-                                                        ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-                                                        : this.invoiceType === "Quotation"
-                                                                ? "posawesome.posawesome.api.quotations.submit_quotation"
-                                                                : "posawesome.posawesome.api.invoices.submit_invoice",
-                                        args: {
-                                                data: data,
-                                                invoice: this.invoice_doc,
-                                                order: this.invoice_doc,
-                                                submit_in_background:
-                                                        this.pos_profile.posa_allow_submissions_in_background_job,
-                                        },
-                                });
-
-				if (!r.message) {
-					this.eventBus.emit("show_message", {
-						title: __("Error submitting invoice: No response from server"),
-						color: "error",
-					});
-					return;
 				}
 
-				if (print) {
-					this.load_print_page();
-				}
-				this.customer_credit_dict = [];
-				this.redeem_customer_credit = false;
-				this.is_cashback = true;
-				this.is_credit_return = false;
-				this.sales_person = "";
-				this.eventBus.emit("set_last_invoice", this.invoice_doc.name);
-				this.eventBus.emit("show_message", {
-					title:
+				try {
+					const submissionMethod =
 						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-							? __("Sales Order {0} is Submitted", [r.message.name])
+							? "posawesome.posawesome.api.sales_orders.submit_sales_order"
 							: this.invoiceType === "Quotation"
-								? __("Quotation {0} is Submitted", [r.message.name])
-								: __("Invoice {0} is Submitted", [r.message.name]),
-					color: "success",
-				});
-				frappe.utils.play_sound("submit");
-				const submittedItems = Array.isArray(this.invoice_doc.items) ? this.invoice_doc.items : [];
-				updateLocalStock(submittedItems);
-				stockCoordinator.applyInvoiceConsumption(submittedItems, {
-					source: "invoice",
-				});
-				const submittedCodes = submittedItems
-					.map((item) => (item ? item.item_code : null))
-					.filter((code) => code !== undefined && code !== null);
-				this.eventBus.emit("invoice_stock_adjusted", {
-					items: submittedItems,
-					item_codes: submittedCodes,
-					timestamp: Date.now(),
-				});
-				this.addresses = [];
-				this.eventBus.emit("clear_invoice");
-				this.eventBus.emit("focus_item_search");
-				this.eventBus.emit("reset_posting_date");
-				this.back_to_invoice();
-			} catch (exc) {
-				console.error("Error submitting invoice:", exc);
-				let errorMsg = exc.toString();
-				if (errorMsg.includes("Amount must be negative")) {
+								? "posawesome.posawesome.api.quotations.submit_quotation"
+								: "posawesome.posawesome.api.invoices.submit_invoice";
+
+					const submissionArgs = {
+						data: data,
+						invoice: this.invoice_doc,
+						order: this.invoice_doc,
+						submit_in_background: this.pos_profile.posa_allow_submissions_in_background_job,
+					};
+
+					const r = await frappe.call({
+						method: submissionMethod,
+						args: submissionArgs,
+					});
+
+					if (!r.message) {
+						this.eventBus.emit("show_message", {
+							title: __("Error submitting invoice: No response from server"),
+							color: "error",
+						});
+						return;
+					}
+
+					let submissionName = r.message.name || this.invoice_doc.name;
+					let submissionStatus = r.message.status;
+
+					if (
+						this.invoiceType !== "Order" &&
+						this.invoiceType !== "Quotation" &&
+						this.pos_profile.posa_allow_submissions_in_background_job
+					) {
+						const ensured = await this.ensureInvoiceSubmitted(
+							submissionName,
+							this.invoice_doc.doctype || "Sales Invoice",
+							submissionMethod,
+							submissionArgs,
+							submissionStatus,
+						);
+						submissionName = ensured.name;
+						submissionStatus = ensured.status;
+					}
+
+					if (submissionStatus !== 1) {
+						this.eventBus.emit("show_message", {
+							title: __("Invoice submission failed or queued. Please try again."),
+							color: "error",
+						});
+						return;
+					}
+
+					if (print) {
+						this.load_print_page();
+					}
+					this.customer_credit_dict = [];
+					this.redeem_customer_credit = false;
+					this.is_cashback = true;
+					this.is_credit_return = false;
+					this.sales_person = "";
+					this.invoice_doc.name = submissionName;
+					this.eventBus.emit("set_last_invoice", this.invoice_doc.name);
 					this.eventBus.emit("show_message", {
-						title: __("Fixing payment amounts for return invoice..."),
-						color: "warning",
+						title:
+							this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+								? __("Sales Order {0} is Submitted", [submissionName])
+								: this.invoiceType === "Quotation"
+									? __("Quotation {0} is Submitted", [submissionName])
+									: __("Invoice {0} is Submitted", [submissionName]),
+						color: "success",
 					});
-					this.invoice_doc.payments.forEach((payment) => {
-						if (payment.amount > 0) {
-							payment.amount = -Math.abs(payment.amount);
-						}
-						if (payment.base_amount > 0) {
-							payment.base_amount = -Math.abs(payment.base_amount);
-						}
+					frappe.utils.play_sound("submit");
+					const submittedItems = Array.isArray(this.invoice_doc.items) ? this.invoice_doc.items : [];
+					updateLocalStock(submittedItems);
+					stockCoordinator.applyInvoiceConsumption(submittedItems, {
+						source: "invoice",
 					});
-					console.log("Retrying submission with fixed payment amounts");
-					setTimeout(() => {
-						this.submit_invoice(print);
-					}, 500);
-				} else {
-					this.eventBus.emit("show_message", {
-						title: __("Error submitting invoice: ") + errorMsg,
-						color: "error",
+					const submittedCodes = submittedItems
+						.map((item) => (item ? item.item_code : null))
+						.filter((code) => code !== undefined && code !== null);
+					this.eventBus.emit("invoice_stock_adjusted", {
+						items: submittedItems,
+						item_codes: submittedCodes,
+						timestamp: Date.now(),
 					});
+					this.addresses = [];
+					this.eventBus.emit("clear_invoice");
+					this.eventBus.emit("focus_item_search");
+					this.eventBus.emit("reset_posting_date");
+					this.back_to_invoice();
+				} catch (exc) {
+					console.error("Error submitting invoice:", exc);
+					let errorMsg = exc.toString();
+					if (errorMsg.includes("Amount must be negative")) {
+						this.eventBus.emit("show_message", {
+							title: __("Fixing payment amounts for return invoice..."),
+							color: "warning",
+						});
+						this.invoice_doc.payments.forEach((payment) => {
+							if (payment.amount > 0) {
+								payment.amount = -Math.abs(payment.amount);
+							}
+							if (payment.base_amount > 0) {
+								payment.base_amount = -Math.abs(payment.base_amount);
+							}
+						});
+						console.log("Retrying submission with fixed payment amounts");
+						setTimeout(() => {
+							this.submit_invoice(print);
+						}, 500);
+					} else {
+						this.eventBus.emit("show_message", {
+							title: __("Error submitting invoice: ") + errorMsg,
+							color: "error",
+						});
+					}
 				}
-			}
-		},
-		// Set full amount for a payment method (or negative for returns)
-		set_full_amount(idx) {
-			const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
-			let totalAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+			},
+			async ensureInvoiceSubmitted(name, doctype, method, args, initialStatus = 0) {
+				if (initialStatus === 1) {
+					return { name, status: 1 };
+				}
+
+				this.eventBus.emit("show_message", {
+					title: __("Invoice queued for submission..."),
+					color: "info",
+				});
+
+				const resolvedDoctype = doctype || "Sales Invoice";
+				const submitted = await this.pollForSubmission(resolvedDoctype, name, 6, 1000);
+				if (submitted) {
+					return { name, status: 1 };
+				}
+
+				// Background worker might be unavailable; fall back to synchronous submit to avoid stuck drafts
+				try {
+					const fallback = await frappe.call({
+						method,
+						args: {
+							...args,
+							submit_in_background: 0,
+						},
+					});
+					return {
+						name: fallback?.message?.name || name,
+						status: fallback?.message?.status ?? initialStatus ?? 0,
+					};
+				} catch (fallbackError) {
+					console.error("Fallback submission failed", fallbackError);
+					return { name, status: initialStatus ?? 0 };
+				}
+			},
+			async pollForSubmission(doctype, name, attempts = 5, delayMs = 800) {
+				for (let attempt = 0; attempt < attempts; attempt += 1) {
+					const res = await frappe.db.get_value(doctype, name, "docstatus").catch(() => null);
+					const status =
+						res?.message?.docstatus !== undefined ? res.message.docstatus : res?.docstatus;
+					if (status === 1) {
+						return true;
+					}
+					await this.wait(delayMs);
+				}
+				return false;
+			},
+			async wait(ms) {
+				return new Promise((resolve) => setTimeout(resolve, ms));
+			},
+			// Set full amount for a payment method (or negative for returns)
+			set_full_amount(idx) {
+				const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
+				let totalAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
 
 			console.log("Setting full amount for payment method idx:", idx);
 			console.log("Current payments:", JSON.stringify(this.invoice_doc.payments));
