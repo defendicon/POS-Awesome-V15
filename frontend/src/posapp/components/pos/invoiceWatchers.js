@@ -34,6 +34,33 @@ const buildSnapshot = (items) => {
 	return snapshot;
 };
 
+const META_KEYS = [
+	"item_code",
+	"item_group",
+	"brand",
+	"uom",
+	"conversion_factor",
+	"price_list_rate",
+	"stock_qty",
+	"posa_is_offer",
+	"posa_is_replace",
+];
+
+// PERF: shallow-compare tracked fields instead of JSON stringifying whole meta blobs on every change.
+// This avoids repeated allocations during cart edits while still detecting meaningful differences.
+const metaChanged = (prevMeta, currMeta) => {
+	if (prevMeta === currMeta) return false;
+	if (!prevMeta || !currMeta) return true;
+
+	for (const key of META_KEYS) {
+		if (prevMeta[key] !== currMeta[key]) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
 const diffSnapshots = (previous, current) => {
 	const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
 	const changed = new Set();
@@ -72,9 +99,7 @@ const diffSnapshots = (previous, current) => {
 
 		const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
 		const currMeta = current.meta ? current.meta[rowId] : undefined;
-		if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
-			changed.add(rowId);
-		}
+		if (metaChanged(prevMeta, currMeta)) changed.add(rowId);
 	});
 
 	return { changed, removedInfo };
