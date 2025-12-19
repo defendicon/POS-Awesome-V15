@@ -231,6 +231,8 @@ export default {
 			printLoading: false,
 			applyOffersLoading: false,
 			paymentLoading: false,
+			hideQtyPreference: false,
+			itemSettingsListener: null,
 		};
 	},
 	emits: [
@@ -246,8 +248,27 @@ export default {
 		"apply-offers",
 		"show-payment",
 	],
+	created() {
+		this.hideQtyPreference = this.readHideQtyPreference();
+		this.itemSettingsListener = () => {
+			this.hideQtyPreference = this.readHideQtyPreference();
+		};
+		if (typeof window !== "undefined") {
+			window.addEventListener("posawesome:item-settings-updated", this.itemSettingsListener);
+			window.addEventListener("storage", this.itemSettingsListener);
+		}
+	},
 	computed: {
 		hide_qty_decimals() {
+			// PERF: reuse cached preference to avoid parsing localStorage each render
+			return !!this.hideQtyPreference;
+		},
+	},
+	methods: {
+		readHideQtyPreference() {
+			if (typeof localStorage === "undefined") {
+				return false;
+			}
 			try {
 				const saved = localStorage.getItem("posawesome_item_selector_settings");
 				if (saved) {
@@ -259,8 +280,6 @@ export default {
 			}
 			return false;
 		},
-	},
-	methods: {
 		// Debounced handlers for better performance
 		handleAdditionalDiscountUpdate(value) {
 			this.$emit("update:additional_discount", value);
@@ -341,6 +360,12 @@ export default {
 				this.paymentLoading = false;
 			}
 		},
+	},
+	beforeUnmount() {
+		if (typeof window !== "undefined" && this.itemSettingsListener) {
+			window.removeEventListener("posawesome:item-settings-updated", this.itemSettingsListener);
+			window.removeEventListener("storage", this.itemSettingsListener);
+		}
 	},
 };
 </script>

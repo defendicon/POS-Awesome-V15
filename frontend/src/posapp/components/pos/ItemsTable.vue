@@ -902,6 +902,8 @@ export default {
 			editing_discount_percent_value: null,
 			editing_discount_amount_row_id: null,
 			editing_discount_amount_value: null,
+			hideQtyPreference: false,
+			itemSettingsListener: null,
 		};
 	},
 	created() {
@@ -912,6 +914,17 @@ export default {
 		this._itemMergeCache = { map: new Map(), signature: -1, lastItems: null };
 		// PERF: cache search normalization once per query to avoid repeating string ops for every row render
 		this._searchCache = { raw: null, normalized: "", terms: [] };
+		this.hideQtyPreference = this.readHideQtyPreference();
+
+		// Listen for settings updates instead of re-reading localStorage on every render
+		this.itemSettingsListener = () => {
+			this.hideQtyPreference = this.readHideQtyPreference();
+			this.formatCache?.clear();
+		};
+		if (typeof window !== "undefined") {
+			window.addEventListener("posawesome:item-settings-updated", this.itemSettingsListener);
+			window.addEventListener("storage", this.itemSettingsListener);
+		}
 	},
 	watch: {
 		displayCurrency() {
@@ -1108,16 +1121,8 @@ export default {
 			};
 		},
 		hide_qty_decimals() {
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					return !!opts.hide_qty_decimals;
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
-			}
-			return false;
+			// PERF: use cached preference instead of parsing localStorage on every render
+			return !!this.hideQtyPreference;
 		},
 		isRTL() {
 			if (this._rtlComputed !== undefined) {
@@ -1140,6 +1145,21 @@ export default {
 	methods: {
 		buildMergeKey(entry) {
 			return `${entry?.item_code || ""}::${entry?.uom || ""}::${entry?.rate ?? ""}`;
+		},
+		readHideQtyPreference() {
+			if (typeof localStorage === "undefined") {
+				return false;
+			}
+			try {
+				const saved = localStorage.getItem("posawesome_item_selector_settings");
+				if (saved) {
+					const opts = JSON.parse(saved);
+					return !!opts.hide_qty_decimals;
+				}
+			} catch (e) {
+				console.error("Failed to load item selector settings:", e);
+			}
+			return false;
 		},
 		ensureMergeCache() {
 			if (!this._itemMergeCache) {
@@ -1717,6 +1737,10 @@ export default {
 		}
 		if (this._itemMergeCache?.map) {
 			this._itemMergeCache.map.clear();
+		}
+		if (typeof window !== "undefined" && this.itemSettingsListener) {
+			window.removeEventListener("posawesome:item-settings-updated", this.itemSettingsListener);
+			window.removeEventListener("storage", this.itemSettingsListener);
 		}
 	},
 };

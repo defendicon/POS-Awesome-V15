@@ -20,10 +20,11 @@ import {
 } from "../../offline/index.js";
 
 const DEFAULT_PAGE_SIZE = 200;
-const LARGE_CATALOG_THRESHOLD = 5000;
-const LIMIT_SEARCH_FALLBACK = 500;
+	const LARGE_CATALOG_THRESHOLD = 5000;
+	const LIMIT_SEARCH_FALLBACK = 500;
+	const SEARCH_TOKEN_CACHE_LIMIT = 100;
 
-export const useItemsStore = defineStore("items", () => {
+	export const useItemsStore = defineStore("items", () => {
 	// Core state
 	const items = ref([]);
 	const filteredItems = ref([]);
@@ -133,6 +134,7 @@ export const useItemsStore = defineStore("items", () => {
 	// Throttle expensive cache cleanup to avoid iterating large Maps after every search write
 	const MEMORY_CLEANUP_INTERVAL = 1000; // 1s between cleanups is enough for freshness while saving CPU
 	let lastMemoryCleanup = 0;
+	const searchTokenCache = new Map(); // PERF: cache tokenized search terms to skip repeated split/lowercase
 
 	// Computed properties
 	const activePriceList = computed(() => {
@@ -199,14 +201,36 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const itemStats = computed(() => {
-		return {
+		// PERF: derive all counts in a single pass to avoid multiple O(n) scans on large catalogs
+		const stats = {
 			total: items.value.length,
 			filtered: filteredItems.value.length,
-			groups: [...new Set(items.value.map((item) => item.item_group))].length,
-			withImages: items.value.filter((item) => item.image).length,
-			withStock: items.value.filter((item) => (item.actual_qty || 0) > 0).length,
-			lowStock: items.value.filter((item) => (item.actual_qty || 0) < 5).length,
+			groups: 0,
+			withImages: 0,
+			withStock: 0,
+			lowStock: 0,
 		};
+
+		const groups = new Set();
+		items.value.forEach((item) => {
+			if (!item) return;
+			if (item.item_group) {
+				groups.add(item.item_group);
+			}
+			if (item.image) {
+				stats.withImages += 1;
+			}
+			const qty = item.actual_qty || 0;
+			if (qty > 0) {
+				stats.withStock += 1;
+				if (qty < 5) {
+					stats.lowStock += 1;
+				}
+			}
+		});
+
+		stats.groups = groups.size;
+		return stats;
 	});
 
 	const cacheStats = computed(() => {
@@ -668,10 +692,15 @@ export const useItemsStore = defineStore("items", () => {
 	const updateItemsInPlace = (updates) => {
 		let needsReindex = false;
 		const additions = [];
+		const dirtySearchItems = [];
 
 		updates.forEach((update) => {
 			const existing = itemsMap.value.get(update.item_code);
 			if (existing) {
+				if (shouldRefreshSearchIndex(update)) {
+					dirtySearchItems.push(existing);
+					needsReindex = true;
+				}
 				Object.assign(existing, update);
 			} else {
 				additions.push(update);
@@ -682,6 +711,10 @@ export const useItemsStore = defineStore("items", () => {
 			items.value.push(...additions);
 			updateIndexes(additions);
 			needsReindex = true;
+		}
+
+		if (dirtySearchItems.length) {
+			updateIndexes(dirtySearchItems);
 		}
 
 		if (needsReindex && !searchTerm.value) {
@@ -800,10 +833,17 @@ export const useItemsStore = defineStore("items", () => {
 				item.batch_no_data.forEach((b) => searchFields.push(b?.batch_no));
 			}
 
-			item._search_index = searchFields
+			const normalizedFields = searchFields
 				.filter(Boolean)
-				.map((f) => String(f).toLowerCase())
-				.join(" ");
+				.map((f) => String(f).toLowerCase().trim())
+				.filter(Boolean);
+
+			item._search_index = normalizedFields.join(" ");
+			// PERF: Store token set + normalized fields to avoid rebuilding on every search filter
+			item._search_terms = new Set(normalizedFields.join(" ").split(/\s+/).filter(Boolean));
+			item._lc_item_code = (item.item_code || "").toLowerCase();
+			item._lc_item_name = (item.item_name || "").toLowerCase();
+			item._lc_barcodes = normalizedFields.filter((f) => f && f !== item._lc_item_code && f !== item._lc_item_name);
 		});
 	};
 
@@ -817,8 +857,9 @@ export const useItemsStore = defineStore("items", () => {
 			return filterItemsByGroup(itemList, itemGroup.value);
 		}
 
-		const searchTerm = term.toLowerCase();
-		const searchTerms = searchTerm.split(/\s+/).filter(Boolean);
+		const searchMeta = getNormalizedSearchTokens(term);
+		const searchTerm = searchMeta.normalized;
+		const searchTerms = searchMeta.tokens;
 
 		return itemList.filter((item) => {
 			if (!item) {
@@ -826,6 +867,10 @@ export const useItemsStore = defineStore("items", () => {
 			}
 
 			// Use pre-computed search index if available
+			if (item._search_terms && item._search_terms.size) {
+				return searchTerms.every((t) => item._search_terms.has(t));
+			}
+
 			if (item._search_index) {
 				return searchTerms.every((t) => item._search_index.includes(t));
 			}
@@ -849,6 +894,23 @@ export const useItemsStore = defineStore("items", () => {
 		});
 	};
 
+	function shouldRefreshSearchIndex(update) {
+		if (!update || typeof update !== "object") {
+			return false;
+		}
+		const keys = [
+			"item_code",
+			"item_name",
+			"barcode",
+			"item_barcode",
+			"barcodes",
+			"serial_no_data",
+			"batch_no_data",
+			"description",
+		];
+		return keys.some((key) => Object.prototype.hasOwnProperty.call(update, key));
+	}
+
 	const filterItemsByGroup = (itemList, group) => {
 		if (group === "ALL") {
 			return itemList;
@@ -858,6 +920,29 @@ export const useItemsStore = defineStore("items", () => {
 
 	const generateCacheKey = (search, group, priceList) => {
 		return `items_${search || "all"}_${group}_${priceList || "default"}`;
+	};
+
+	const getNormalizedSearchTokens = (term) => {
+		const normalized = (term || "").toString().trim().toLowerCase();
+		if (!normalized) {
+			return { normalized: "", tokens: [] };
+		}
+
+		if (searchTokenCache.has(normalized)) {
+			return searchTokenCache.get(normalized);
+		}
+
+		const tokens = normalized.split(/\s+/).filter(Boolean);
+		const payload = { normalized, tokens };
+		searchTokenCache.set(normalized, payload);
+
+		if (searchTokenCache.size > SEARCH_TOKEN_CACHE_LIMIT) {
+			// Drop oldest entry to keep memory bounded
+			const firstKey = searchTokenCache.keys().next().value;
+			searchTokenCache.delete(firstKey);
+		}
+
+		return payload;
 	};
 
 	// Cache management functions

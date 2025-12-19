@@ -735,6 +735,11 @@ export default {
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
 		lastInvoiceRateLoading: false,
+		searchMetaCache: null,
+		searchTermCache: null,
+		searchCacheLimit: 50,
+		searchTokenCacheLimit: 100,
+		lastSearchNormalization: { raw: null, normalized: "", tokens: [] },
 	}),
 
 	watch: {
@@ -1053,6 +1058,77 @@ export default {
 			}
 			return String(value || "").startsWith(prefix);
 		},
+		capCacheSize(map, limit = 50) {
+			if (!map || !limit) return;
+			while (map.size > limit) {
+				const firstKey = map.keys().next().value;
+				map.delete(firstKey);
+			}
+		},
+		getSearchTokensCached(searchTerm) {
+			const normalized = (searchTerm || "").toString().trim().toLowerCase();
+			if (this.lastSearchNormalization?.raw === normalized) {
+				return this.lastSearchNormalization;
+			}
+
+			if (this.searchTermCache && this.searchTermCache.has(normalized)) {
+				const cached = this.searchTermCache.get(normalized);
+				this.lastSearchNormalization = cached;
+				return cached;
+			}
+
+			const tokens = normalized ? normalized.split(/\s+/).filter(Boolean) : [];
+			const payload = { raw: normalized, normalized, tokens };
+			if (this.searchTermCache) {
+				this.searchTermCache.set(normalized, payload);
+				this.capCacheSize(this.searchTermCache, this.searchTokenCacheLimit || 100);
+			}
+			this.lastSearchNormalization = payload;
+			return payload;
+		},
+		getItemSearchMeta(item) {
+			if (!item || typeof item !== "object") {
+				return null;
+			}
+
+			const metaCache = this.searchMetaCache;
+			const signatureParts = [
+				item.item_code,
+				item.item_name,
+				item.barcode,
+				item._search_terms ? item._search_terms.size : "",
+				Array.isArray(item.barcodes) ? item.barcodes.length : "",
+				Array.isArray(item.item_barcode) ? item.item_barcode.length : "",
+			];
+			const signature = signatureParts.join("|");
+			const cached = metaCache?.get(item);
+			if (cached && cached.signature === signature) {
+				return cached;
+			}
+
+			const searchIndex = item._search_index || "";
+			const searchTerms =
+				item._search_terms instanceof Set
+					? item._search_terms
+					: new Set(searchIndex.split(/\s+/).filter(Boolean));
+			const code = item._lc_item_code || (item.item_code || "").toLowerCase();
+			const name = item._lc_item_name || (item.item_name || "").toLowerCase();
+			const barcodes = Array.isArray(item._lc_barcodes)
+				? item._lc_barcodes
+				: [
+						item.barcode,
+						...(Array.isArray(item.barcodes) ? item.barcodes : []),
+						...(Array.isArray(item.item_barcode)
+							? item.item_barcode.map((b) => b?.barcode)
+							: []),
+					]
+						.filter(Boolean)
+						.map((codeVal) => String(codeVal).toLowerCase());
+
+			const meta = { signature, searchIndex, searchTerms, code, name, barcodes };
+			metaCache?.set(item, meta);
+			return meta;
+		},
 		// Performance optimization: Memoized search function
 		memoizedSearch(searchTerm, itemGroup) {
 			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
@@ -1069,6 +1145,8 @@ export default {
 			// Cache the result
 			if (this.searchCache) {
 				this.searchCache.set(cacheKey, result);
+				// PERF: keep cache bounded to avoid unbounded memory growth on rapid searches
+				this.capCacheSize(this.searchCache, this.searchCacheLimit || 50);
 			}
 
 			return result;
@@ -1093,41 +1171,26 @@ export default {
 
 			// Filter by search term only if it exists and is long enough
 			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
-				const term = searchTerm.toLowerCase();
+				const { tokens: searchWords } = this.getSearchTokensCached(searchTerm);
 				filtered = filtered.filter((item) => {
 					if (!searchWords.length) {
 						return true;
 					}
 
-					const name = (item.item_name || "").toLowerCase();
-					const code = (item.item_code || "").toLowerCase();
-
-					const barcodeValues = [];
-					if (Array.isArray(item.item_barcode)) {
-						item.item_barcode.forEach((b) => {
-							if (b?.barcode) {
-								barcodeValues.push(String(b.barcode).toLowerCase());
-							}
-						});
-					}
-					if (Array.isArray(item.barcodes)) {
-						item.barcodes.forEach((bc) => {
-							if (bc) {
-								barcodeValues.push(String(bc).toLowerCase());
-							}
-						});
-					}
-					if (item.barcode) {
-						barcodeValues.push(String(item.barcode).toLowerCase());
+					const meta = this.getItemSearchMeta(item);
+					if (!meta) {
+						return false;
 					}
 
-					return searchWords.every((word) => {
-						return (
-							code.includes(word) ||
-							name.includes(word) ||
-							barcodeValues.some((barcode) => barcode.includes(word))
-						);
-					});
+					if (meta.searchTerms && meta.searchTerms.size) {
+						return searchWords.every((word) => meta.searchTerms.has(word));
+					}
+
+					if (meta.searchIndex) {
+						return searchWords.every((word) => meta.searchIndex.includes(word));
+					}
+
+					return false;
 				});
 			}
 
@@ -3573,20 +3636,29 @@ export default {
 			}
 		},
 		searchItemsByCode(code) {
+			const normalizedCode = String(code || "").trim();
+			if (!normalizedCode) {
+				return [];
+			}
+
+			// PERF: Attempt exact barcode lookup before scanning the full collection
+			const barcodeHit =
+				this.barcodeIndex?.get(normalizedCode) ||
+				this.barcodeIndex?.get(normalizedCode.toLowerCase());
+			if (barcodeHit) {
+				return [barcodeHit];
+			}
+
+			const lowered = normalizedCode.toLowerCase();
 			return this.items.filter((item) => {
-				const searchTerm = code.toLowerCase();
-				const barcodeMatch =
-					(item.barcode && item.barcode.toLowerCase().includes(searchTerm)) ||
-					(Array.isArray(item.barcodes) &&
-						item.barcodes.some((bc) => String(bc).toLowerCase().includes(searchTerm))) ||
-					(Array.isArray(item.item_barcode) &&
-						item.item_barcode.some(
-							(b) => b.barcode && b.barcode.toLowerCase().includes(searchTerm),
-						));
+				const meta = this.getItemSearchMeta(item);
+				if (!meta) {
+					return false;
+				}
 				return (
-					item.item_code.toLowerCase().includes(searchTerm) ||
-					item.item_name.toLowerCase().includes(searchTerm) ||
-					barcodeMatch
+					meta.code.includes(lowered) ||
+					meta.name.includes(lowered) ||
+					meta.barcodes.some((barcode) => barcode.includes(lowered))
 				);
 			});
 		},
@@ -4040,6 +4112,12 @@ export default {
 					items_per_page: this.items_per_page,
 				};
 				localStorage.setItem("posawesome_item_selector_settings", JSON.stringify(settings));
+				if (typeof window !== "undefined") {
+					// Notify other components in-process without forcing a re-read of localStorage on every render
+					window.dispatchEvent(
+						new CustomEvent("posawesome:item-settings-updated", { detail: settings }),
+					);
+				}
 			} catch (e) {
 				console.error("Failed to save item selector settings:", e);
 			}
@@ -4215,19 +4293,30 @@ export default {
 			// while waiting for the store debounce. However, doing so with a full array scan is expensive.
 			// We trust the store to be the source of truth.
 
-			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
+			const searchMeta = this.getSearchTokensCached(this.get_search(this.first_search));
 			const activeStoreSearch = (this.search || "").trim().toLowerCase();
 			let filteredItems = baseItems;
 
 			// Restore local filtering for immediate feedback (Auto Search)
 			// This provides instant results while the store debounces/fetches in the background.
 			// PERF: Skip local filtering if the store has already filtered by the same term
-			if (searchTerm && searchTerm.length >= 3 && searchTerm !== activeStoreSearch) {
-				const searchTerms = searchTerm.split(/\s+/).filter(Boolean);
+			if (
+				searchMeta.normalized &&
+				searchMeta.normalized.length >= 3 &&
+				searchMeta.normalized !== activeStoreSearch
+			) {
+				const searchTerms = searchMeta.tokens;
 				filteredItems = filteredItems.filter((item) => {
 					// Use optimized search index if available
+					if (item._search_terms instanceof Set) {
+						return searchTerms.every((term) => item._search_terms.has(term));
+					}
 					if (item._search_index) {
 						return searchTerms.every((term) => item._search_index.includes(term));
+					}
+					const meta = this.getItemSearchMeta(item);
+					if (meta?.searchIndex) {
+						return searchTerms.every((term) => meta.searchIndex.includes(term));
 					}
 					// Fallback for items without index
 					const rawIndex = (
@@ -4303,6 +4392,8 @@ export default {
 		this.itemCache = new Map();
 		this.lastInvoiceRateCache = new Map();
 		this.formatCache = new Map();
+		this.searchMetaCache = new WeakMap();
+		this.searchTermCache = new Map();
 
 		console.log("ItemsSelector created - starting initialization with Pinia store");
 
