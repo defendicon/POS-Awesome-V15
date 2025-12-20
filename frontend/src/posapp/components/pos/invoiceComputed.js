@@ -8,12 +8,12 @@ export default {
 	total_qty() {
 		const mark = perfMarkStart("pos:totals-total_qty");
 		const store = this.invoiceStore;
-		const storeValue = store?.totalQty?.value ?? store?.totalQty;
 		let qty;
 
-		if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-			qty = storeValue;
+		if (store && (typeof store.totalQty === "number" || store.totalQty?.value !== undefined)) {
+			qty = typeof store.totalQty === "number" ? store.totalQty : store.totalQty.value;
 		} else {
+			// Fallback if store is not available or totals not calculated
 			qty = 0;
 			this.items.forEach((item) => {
 				qty += flt(item.qty);
@@ -28,11 +28,11 @@ export default {
 	Total() {
 		const mark = perfMarkStart("pos:totals-gross");
 		const store = this.invoiceStore;
-		const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
 		let sum;
 
-		if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-			sum = this.isReturnInvoice ? Math.abs(storeValue) : storeValue;
+		if (store && (typeof store.grossTotal === "number" || store.grossTotal?.value !== undefined)) {
+			const rawSum = typeof store.grossTotal === "number" ? store.grossTotal : store.grossTotal.value;
+			sum = this.isReturnInvoice ? Math.abs(rawSum) : rawSum;
 		} else {
 			sum = 0;
 			this.items.forEach((item) => {
@@ -51,17 +51,22 @@ export default {
 	subtotal() {
 		const mark = perfMarkStart("pos:totals-subtotal");
 		const store = this.invoiceStore;
-		const storeValue = store?.grossTotal?.value ?? store?.grossTotal;
-		let sum = typeof storeValue === "number" && !Number.isNaN(storeValue) ? storeValue : 0;
+		let sum;
 
-		if (!(typeof storeValue === "number" && !Number.isNaN(storeValue))) {
+		if (store && (typeof store.grossTotal === "number" || store.grossTotal?.value !== undefined)) {
+			const rawSum = typeof store.grossTotal === "number" ? store.grossTotal : store.grossTotal.value;
+			sum = rawSum;
+		} else {
+			sum = 0;
 			this.items.forEach((item) => {
 				// For returns, use absolute value for correct calculation
 				const qty = this.isReturnInvoice ? Math.abs(flt(item.qty)) : flt(item.qty);
 				const rate = flt(item.rate);
 				sum += qty * rate;
 			});
-		} else if (this.isReturnInvoice) {
+		}
+
+		if (this.isReturnInvoice) {
 			sum = Math.abs(sum);
 		}
 
@@ -85,11 +90,10 @@ export default {
 	total_items_discount_amount() {
 		const mark = perfMarkStart("pos:totals-discount");
 		const store = this.invoiceStore;
-		const storeValue = store?.discountTotal?.value ?? store?.discountTotal;
 		let sum;
 
-		if (typeof storeValue === "number" && !Number.isNaN(storeValue)) {
-			sum = Math.abs(storeValue);
+		if (store && (typeof store.discountTotal === "number" || store.discountTotal?.value !== undefined)) {
+			sum = Math.abs(typeof store.discountTotal === "number" ? store.discountTotal : store.discountTotal.value);
 		} else {
 			sum = 0;
 			this.items.forEach((item) => {

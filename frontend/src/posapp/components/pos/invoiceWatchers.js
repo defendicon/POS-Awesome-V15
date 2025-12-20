@@ -142,67 +142,49 @@ export default {
 			value: this.discount_percentage_offer_name,
 		});
 	},
-	// Watch for items array changes (deep) and re-handle offers
-	items: {
-		deep: true,
-		handler(newItems) {
-			const snapshot = buildSnapshot(newItems);
-			this._offerSnapshots = this._offerSnapshots || {};
-			const previous = this._offerSnapshots.items;
-			this._offerSnapshots.items = snapshot;
 
-			const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+	// Optimized watcher using store metadata instead of deep watch
+	'invoiceStore.metadata.changeVersion': function() {
+		// Re-trigger stock and offer logic
+		// This replaces the deep watcher on 'items'
 
-			if (removedInfo && Object.keys(removedInfo).length) {
-				this._pendingRemovedRowInfo = {
-					...(this._pendingRemovedRowInfo || {}),
-					...removedInfo,
-				};
+		// Note: We lost the diffing capability of the deep watcher here.
+		// However, for most cases, we just need to know *something* changed.
+		// For offers, we might be inefficient if we recalc everything.
+		// Ideally, the store or batch process should emit specifically what changed.
+
+		// For now, we fall back to a quick snapshot diff to maintain logic without deep watch overhead.
+		// We diff only on version change (triggered by batch updates).
+
+		const newItems = this.items; // Projection from store
+
+		const snapshot = buildSnapshot(newItems);
+		this._offerSnapshots = this._offerSnapshots || {};
+		const previous = this._offerSnapshots.items;
+		this._offerSnapshots.items = snapshot;
+
+		const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+
+		if (removedInfo && Object.keys(removedInfo).length) {
+			this._pendingRemovedRowInfo = {
+				...(this._pendingRemovedRowInfo || {}),
+				...removedInfo,
+			};
+		}
+
+		if (!previous) {
+			if (snapshot.order.length) {
+				this.scheduleOfferRefresh([...new Set(snapshot.order)]);
 			}
+		} else if (changed.size) {
+			this.scheduleOfferRefresh(Array.from(changed));
+		}
 
-			if (!previous) {
-				if (snapshot.order.length) {
-					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-				}
-			} else if (changed.size) {
-				this.scheduleOfferRefresh(Array.from(changed));
-			}
-
-			if (typeof this.emitCartQuantities === "function") {
-				this.emitCartQuantities();
-			}
-		},
+		if (typeof this.emitCartQuantities === "function") {
+			this.emitCartQuantities();
+		}
 	},
-	packed_items: {
-		deep: true,
-		handler(newItems) {
-			const snapshot = buildSnapshot(newItems);
-			this._offerSnapshots = this._offerSnapshots || {};
-			const previous = this._offerSnapshots.packed;
-			this._offerSnapshots.packed = snapshot;
 
-			const { changed, removedInfo } = diffSnapshots(previous, snapshot);
-
-			if (removedInfo && Object.keys(removedInfo).length) {
-				this._pendingRemovedRowInfo = {
-					...(this._pendingRemovedRowInfo || {}),
-					...removedInfo,
-				};
-			}
-
-			if (!previous) {
-				if (snapshot.order.length) {
-					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-				}
-			} else if (changed.size) {
-				this.scheduleOfferRefresh(Array.from(changed));
-			}
-
-			if (typeof this.emitCartQuantities === "function") {
-				this.emitCartQuantities();
-			}
-		},
-	},
 	// Watch for invoice type change and emit
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);
