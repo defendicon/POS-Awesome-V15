@@ -131,10 +131,16 @@ export function useItemAddition() {
 
 	// Remove item from invoice
 	const removeItem = (item, context) => {
-		const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
-		if (index >= 0) {
-			context.items.splice(index, 1);
+		if (context.invoiceStore) {
+			context.invoiceStore.removeItemByRowId(item.posa_row_id);
+		} else {
+			// Fallback for non-store contexts (e.g. tests or legacy)
+			const index = context.items.findIndex((el) => el.posa_row_id == item.posa_row_id);
+			if (index >= 0) {
+				context.items.splice(index, 1);
+			}
 		}
+
 		if (item.is_bundle) {
 			context.packed_items = context.packed_items.filter((it) => it.bundle_id !== item.bundle_id);
 		}
@@ -159,8 +165,9 @@ export function useItemAddition() {
 		parent.warehouse = null;
 		parent.stock_qty = 0;
 		parent.bundle_id = context.makeid ? context.makeid(10) : Math.random().toString(36).substr(2, 10);
-		// Force reactivity so the bundle badge appears immediately
-		context.items = [...context.items];
+		// Force update logic is handled by store reactivity usually, but here we modify parent properties.
+		// Since 'parent' is reactive from store, changes reflect.
+
 		for (const comp of components) {
 			const isStockItem = comp.is_stock_item ?? 1;
 			const child = {
@@ -207,15 +214,26 @@ export function useItemAddition() {
 
 	const moveItemToTop = (context, target, currentIndex = null) => {
 		if (!target) return;
-		const resolvedIndex =
-			typeof currentIndex === "number" && currentIndex >= 0
-				? currentIndex
-				: context.items.findIndex((item) => item.posa_row_id === target.posa_row_id);
-		if (resolvedIndex > 0) {
-			const [existing] = context.items.splice(resolvedIndex, 1);
-			context.items.unshift(existing);
-			refreshMergeCacheEntry(context, existing, 0);
+		if (context.invoiceStore) {
+			// Using store actions
+			// Remove from current position and insert at 0
+			// Since target is the object, we need its ID.
+			// currentIndex might be passed, but we should verify.
+			const rowId = target.posa_row_id;
+			// Optimised store method would be better, but composing actions works:
+			context.invoiceStore.removeItemByRowId(rowId);
+			context.invoiceStore.addItem(target, 0); // Insert at 0
+		} else {
+			const resolvedIndex =
+				typeof currentIndex === "number" && currentIndex >= 0
+					? currentIndex
+					: context.items.findIndex((item) => item.posa_row_id === target.posa_row_id);
+			if (resolvedIndex > 0) {
+				const [existing] = context.items.splice(resolvedIndex, 1);
+				context.items.unshift(existing);
+			}
 		}
+		refreshMergeCacheEntry(context, target, 0);
 	};
 
 	// Add item to invoice
@@ -307,7 +325,13 @@ export function useItemAddition() {
 			}
 
 			if (index === -1 || context.new_line) {
-				context.items.unshift(new_item);
+				if (context.invoiceStore) {
+					// Use the reactive proxy returned by the store
+					new_item = context.invoiceStore.addItem(new_item, 0);
+				} else {
+					context.items.unshift(new_item);
+				}
+
 				refreshMergeCacheEntry(context, new_item, 0);
 				runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
 				// Skip recalculation to preserve the manually set rate
@@ -613,8 +637,14 @@ export function useItemAddition() {
 
 	// Reset all invoice fields to default/empty values
 	const clearInvoice = (context) => {
-		context.items = [];
-		context.packed_items = [];
+		if (context.invoiceStore) {
+			context.invoiceStore.clearItems();
+			context.invoiceStore.setPackedItems([]);
+		} else {
+			context.items = [];
+			context.packed_items = [];
+		}
+
 		context.posa_offers = [];
 		context.expanded = [];
 		context.eventBus.emit("set_pos_coupons", []);
@@ -659,7 +689,7 @@ export function useItemAddition() {
 	};
 
 	// Add this utility for grouping logic, matching ItemsTable.vue
-	function groupAndAddItem(items, newItem) {
+	function groupAndAddItem(items, newItem, context) {
 		// Find a matching item (by item_code, uom, and rate)
 		const match = items.find(
 			(item) =>
@@ -672,7 +702,11 @@ export function useItemAddition() {
 			match.qty += newItem.qty || 1;
 			match.amount = match.qty * match.rate;
 		} else {
-			items.push({ ...newItem });
+			if (context && context.invoiceStore) {
+				context.invoiceStore.addItem(newItem);
+			} else {
+				items.push({ ...newItem });
+			}
 		}
 	}
 
