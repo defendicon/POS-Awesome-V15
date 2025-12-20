@@ -1059,6 +1059,18 @@ def submit_in_background_job(kwargs):
             user=user,
         )
 
+    # Check if invoice is still in draft after processing
+    # This covers cases where no exception was raised but submission failed silently or rolled back
+    try:
+        if frappe.db.get_value(doctype, invoice, "docstatus") == 0:
+            frappe.publish_realtime(
+                "pos_invoice_submit_error",
+                {"invoice": invoice, "error": "Submission failed: Invoice remains in Draft state.", "user": user},
+                user=user,
+            )
+    except Exception:
+        pass
+
 
 @frappe.whitelist()
 def delete_invoice(invoice):
