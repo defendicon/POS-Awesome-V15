@@ -968,7 +968,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
         enqueue(
             method=submit_in_background_job,
             queue="default",
-            timeout=30,
+            timeout=15,
             is_async=True,
             kwargs={
                 "invoice": invoice_doc.name,
@@ -1042,12 +1042,12 @@ def submit_in_background_job(kwargs):
             f"POS Background Submission Failed for {invoice} (Attempt {retry_count + 1}): {error_msg}"
         )
 
-        if retry_count < 3:
+        if retry_count < 1:
             kwargs["retry_count"] = retry_count + 1
             enqueue(
                 method=submit_in_background_job,
                 queue="default",
-                timeout=30,
+                timeout=15,
                 is_async=True,
                 kwargs=kwargs,
             )
@@ -1055,7 +1055,7 @@ def submit_in_background_job(kwargs):
 
         frappe.publish_realtime(
             "pos_invoice_submit_error",
-            {"invoice": invoice, "error": error_msg},
+            {"invoice": invoice, "error": error_msg, "user": user},
             user=user,
         )
 
