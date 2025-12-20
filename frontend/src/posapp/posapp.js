@@ -112,6 +112,12 @@ frappe.PosApp.posapp = class {
 					color: "error",
 					timeout: 8000,
 				});
+
+				eventBus.emit("invoice_submission_failed", {
+					invoice: invoice,
+					error: message,
+					timestamp: new Date(),
+				});
 			}
 		});
 

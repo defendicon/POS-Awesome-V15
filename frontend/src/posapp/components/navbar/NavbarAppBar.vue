@@ -160,6 +160,69 @@
 					</v-tooltip>
 				</v-btn>
 
+				<!-- Bell Notification Icon -->
+				<v-btn
+					id="notification-btn"
+					icon
+					:class="[
+						'notification-btn pos-themed-button',
+						isRtl ? 'rtl-notification-btn' : 'ltr-notification-btn',
+						{ 'has-notifications': submissionNotifications.length > 0 },
+					]"
+					:aria-label="__('Notifications') + ` (${submissionNotifications.length})`"
+				>
+					<v-badge
+						v-if="submissionNotifications.length > 0"
+						:content="submissionNotifications.length"
+						color="error"
+						overlap
+					>
+						<v-icon class="pos-text-primary">mdi-bell</v-icon>
+					</v-badge>
+					<v-icon v-else class="pos-text-primary">mdi-bell-outline</v-icon>
+
+					<v-menu activator="parent" :close-on-content-click="false" max-width="400">
+						<v-list class="pos-themed-card">
+							<v-list-item v-if="submissionNotifications.length === 0">
+								<v-list-item-title class="text-caption">{{
+									__("No new notifications")
+								}}</v-list-item-title>
+							</v-list-item>
+
+							<template v-else>
+								<v-list-item>
+									<div class="d-flex justify-space-between align-center" style="width: 100%">
+										<span class="text-subtitle-2 font-weight-bold">{{
+											__("Failed Invoices")
+										}}</span>
+										<v-btn
+											size="x-small"
+											variant="text"
+											color="primary"
+											@click="$emit('clear-notifications')"
+										>
+											{{ __("Clear All") }}
+										</v-btn>
+									</div>
+								</v-list-item>
+								<v-divider></v-divider>
+								<v-list-item
+									v-for="(note, index) in submissionNotifications"
+									:key="index"
+									lines="two"
+								>
+									<v-list-item-title class="font-weight-medium text-body-2">
+										{{ note.invoice }}
+									</v-list-item-title>
+									<v-list-item-subtitle class="text-caption text-error">
+										{{ note.error }}
+									</v-list-item-subtitle>
+								</v-list-item>
+							</template>
+						</v-list>
+					</v-menu>
+				</v-btn>
+
 				<!-- Menu component slot -->
 				<slot name="menu"></slot>
 			</template>
@@ -246,6 +309,10 @@ export default {
 			type: String,
 			default: "Loading app data...",
 		},
+		submissionNotifications: {
+			type: Array,
+			default: () => [],
+		},
 	},
 	computed: {
 		appBarColor() {
@@ -316,7 +383,7 @@ export default {
 			}
 		},
 	},
-	emits: ["nav-click", "go-desk", "show-offline-invoices"],
+	emits: ["nav-click", "go-desk", "show-offline-invoices", "clear-notifications"],
 };
 </script>
 
@@ -407,12 +474,16 @@ export default {
 	order: 4;
 }
 
+.ltr-notification-btn {
+	order: 5;
+}
+
 /* Menu should be the last element */
 .ltr-actions-section> :last-child,
 /* menu slot */
 .ltr-actions-section .v-menu,
 .ltr-actions-section [role="menu"] {
-	order: 5 !important;
+	order: 6 !important;
 }
 
 /* RTL adjustments for gadgets - reverse the order */
@@ -426,6 +497,10 @@ export default {
 
 .rtl-actions-section .offline-invoices-btn {
 	order: 2;
+}
+
+.rtl-notification-btn {
+	order: 1;
 }
 
 /* RTL Menu should be first */

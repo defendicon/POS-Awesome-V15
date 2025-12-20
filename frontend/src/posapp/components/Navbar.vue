@@ -7,9 +7,11 @@
 			:loading-progress="loadingProgress"
 			:loading-active="loadingActive"
 			:loading-message="loadingMessage"
+			:submission-notifications="submissionNotifications"
 			@nav-click="handleNavClick"
 			@go-desk="goDesk"
 			@show-offline-invoices="showOfflineInvoices = true"
+			@clear-notifications="clearNotifications"
 		>
 			<!-- Slot for status indicator -->
 			<template #status-indicator>
@@ -225,6 +227,7 @@ export default {
 			initialCacheRefreshRequested: false,
 			notificationUpdateHandle: null,
 			notificationUpdateUsesTimeout: false,
+			submissionNotifications: [],
 		};
 	},
 	watch: {
@@ -351,7 +354,16 @@ export default {
 				this.eventBus.on("freeze", this.handleFreeze);
 				this.eventBus.on("unfreeze", this.handleUnfreeze);
 				this.eventBus.on("set_company", this.handleSetCompany);
+				this.eventBus.on("invoice_submission_failed", this.handleSubmissionFailed);
 			}
+		},
+		handleSubmissionFailed(data) {
+			if (!this.submissionNotifications.some((n) => n.invoice === data.invoice)) {
+				this.submissionNotifications.push(data);
+			}
+		},
+		clearNotifications() {
+			this.submissionNotifications = [];
 		},
 		handleNavClick() {
 			this.drawer = !this.drawer;

@@ -990,6 +990,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
 def submit_in_background_job(kwargs):
     invoice = kwargs.get("invoice")
+    retry_count = kwargs.get("retry_count", 0)
+
     try:
         doctype = kwargs.get("doctype") or "Sales Invoice"
         data = kwargs.get("data") or {}
@@ -1034,7 +1036,21 @@ def submit_in_background_job(kwargs):
     except Exception as e:
         frappe.db.rollback()
         error_msg = str(e)
-        frappe.log_error(f"POS Background Submission Failed for {invoice}: {error_msg}")
+        frappe.log_error(
+            f"POS Background Submission Failed for {invoice} (Attempt {retry_count + 1}): {error_msg}"
+        )
+
+        if retry_count < 3:
+            kwargs["retry_count"] = retry_count + 1
+            enqueue(
+                method=submit_in_background_job,
+                queue="default",
+                timeout=3000,
+                is_async=True,
+                kwargs=kwargs,
+            )
+            return
+
         frappe.publish_realtime(
             "pos_invoice_submit_error",
             {"invoice": invoice, "error": error_msg},
