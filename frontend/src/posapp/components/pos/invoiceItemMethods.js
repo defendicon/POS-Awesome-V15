@@ -4423,6 +4423,49 @@ export default {
 		this.applyPricingRulesForCart(force);
 	}, 150),
 
+	triggerBackgroundFlush: debounce(function () {
+		this.flushBackgroundUpdates();
+	}, 2000), // 2s debounce as requested
+
+	async flushBackgroundUpdates() {
+		if (isOffline()) return;
+
+		const itemsToUpdate = [];
+		const items = this.invoiceStore ? this.invoiceStore.items.value : this.items;
+
+		if (!Array.isArray(items)) return;
+
+		items.forEach(item => {
+			if (!item) return;
+			// Check if item is marked dirty or needs sync
+			// We can also check if essential fields are missing (like price_list_rate if 0?)
+			// But _needs_update flag set by useItemAddition is the primary signal.
+			if (item._needs_update || item._detailSynced === false) {
+				itemsToUpdate.push(item);
+			}
+		});
+
+		if (itemsToUpdate.length === 0) return;
+
+		console.log(`Background flushing ${itemsToUpdate.length} items`);
+
+		try {
+			// This calls the existing batch update method
+			await this.update_items_details(itemsToUpdate);
+
+			// Mark as synced
+			itemsToUpdate.forEach(item => {
+				item._needs_update = false;
+				item._detailSynced = true;
+			});
+
+			// Re-apply pricing rules if rates changed
+			this.schedulePricingRuleApplication();
+		} catch (e) {
+			console.error("Background flush failed", e);
+		}
+	},
+
 	change_price_list_rate(item) {
 		const vm = this;
 

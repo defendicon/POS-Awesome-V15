@@ -188,8 +188,12 @@ export function useItemAddition() {
 				posa_offers: JSON.stringify([]),
 				posa_offer_applied: 0,
 				posa_is_offer: 0,
+				_needs_update: true // Mark for background update
 			};
 			context.packed_items.push(child);
+
+			// OPTIMIZATION: Do not fetch immediately. Let background sync handle it.
+			/*
 			if (context.update_item_detail) {
 				scheduleItemTask(
 					context,
@@ -209,7 +213,12 @@ export function useItemAddition() {
 					"fetch_available_qty:bundle_child",
 				);
 			}
+			*/
+			// Schedule explicit calc_stock_qty if needed, or rely on update
+			context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
 		}
+		// Trigger background flush if available
+		if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 	};
 
 	const moveItemToTop = (context, target, currentIndex = null) => {
@@ -281,6 +290,9 @@ export function useItemAddition() {
 				refreshMergeCacheEntry(context, item, 0);
 				runAsyncTask(() => expandBundle(item, context), "expand_bundle");
 
+				// OPTIMIZATION: Removed immediate server calls.
+				// Rely on '_needs_update' flag (set in getNewItem/addItem) and background sync.
+				/*
 				if (context.update_item_detail) {
 					scheduleItemTask(
 						context,
@@ -300,6 +312,7 @@ export function useItemAddition() {
 						"fetch_available_qty:new",
 					);
 				}
+				*/
 
 				// Handle Batch/Serial/Return specific logic for new items
 				if (
@@ -362,6 +375,8 @@ export function useItemAddition() {
 				}
 			});
 		}
+		// Trigger background flush if any updates or additions happened
+		if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 	};
 
 	// Add item to invoice
@@ -414,6 +429,8 @@ export function useItemAddition() {
 		let new_item;
 		if (index === -1 || context.new_line) {
 			new_item = getNewItem(item, context);
+			new_item._needs_update = true; // Mark new item for background update
+
 			// Handle serial number logic
 			if (item.has_serial_no && item.to_set_serial_no) {
 				new_item.serial_no_selected = [];
@@ -497,7 +514,9 @@ export function useItemAddition() {
 					context.items.unshift(new_item);
 					refreshMergeCacheEntry(context, new_item, 0);
 					runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
-					// Skip recalculation to preserve the manually set rate
+
+					// OPTIMIZATION: Skipped immediate server calls here too
+					/*
 					if (context.update_item_detail) {
 						scheduleItemTask(
 							context,
@@ -517,6 +536,10 @@ export function useItemAddition() {
 							"fetch_available_qty:new",
 						);
 					}
+					*/
+
+					// Trigger background flush
+					if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 
 					if (
 						context.isReturnInvoice &&
@@ -585,19 +608,7 @@ export function useItemAddition() {
 							pendingUpdates.set(rowId, { qty: qtyDelta, resolvers: [resolve] });
 						}
 
-						// Merge serial numbers immediately (non-reactive for pending logic, or handle in flush?)
-						// For safety, let's assume serials are merged on the object directly if it's reactive?
-						// Actually, `cur_item` IS reactive. But we want to avoid triggering re-renders repeatedly.
-						// However, `pendingUpdates` logic above queues the QTY update.
-						// Serial numbers are array pushes, which MIGHT trigger reactivity if watched deep.
-						// But the big hitter is usually the list re-render or heavy computations on qty.
-
-						// For now, let's defer serial number merging to flush time too if possible?
-						// But pendingUpdates only tracks QTY.
-						// Let's do side-effects immediately for now, or assume 10 items/sec usually implies same SKU scanning which implies qty updates.
-
-						// If we want to be strict, we should buffer serials too.
-						// For simplicity, apply serials now but defer qty/heavy recalc.
+						// Merge serial numbers immediately
 						if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
 							new_item.serial_no_selected.forEach((sn) => {
 								if (!cur_item.serial_no_selected.includes(sn)) {
@@ -615,10 +626,12 @@ export function useItemAddition() {
 
 				const previousQty = cur_item.qty;
 				if (context.update_items_details) {
-					runAsyncTask(
-						() => context.update_items_details([cur_item]),
-						"update_items_details:merge_new",
-					);
+					// OPTIMIZATION: Deferred update
+					// runAsyncTask(
+					// 	() => context.update_items_details([cur_item]),
+					// 	"update_items_details:merge_new",
+					// );
+					cur_item._needs_update = true;
 				}
 				// Merge serial numbers if any
 				if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
@@ -652,6 +665,8 @@ export function useItemAddition() {
 					);
 				}
 
+				// OPTIMIZATION: Deferred stock check
+				/*
 				if (context.fetch_available_qty) {
 					scheduleItemTask(
 						context,
@@ -661,17 +676,22 @@ export function useItemAddition() {
 						"fetch_available_qty:merge_new",
 					);
 				}
+				*/
 				if (cur_item.qty > previousQty) {
 					moveItemToTop(context, cur_item, index);
 				} else {
 					refreshMergeCacheEntry(context, cur_item, index);
 				}
+				// Trigger background flush
+				if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 			}
 		} else {
 			const cur_item = context.items[index];
 			const previousQty = cur_item.qty;
 			if (context.update_items_details) {
-				runAsyncTask(() => context.update_items_details([cur_item]), "update_items_details:existing");
+				// OPTIMIZATION: Deferred update
+				// runAsyncTask(() => context.update_items_details([cur_item]), "update_items_details:existing");
+				cur_item._needs_update = true;
 			}
 			// Serial number logic for existing item
 			if (item.has_serial_no && item.to_set_serial_no) {
@@ -717,6 +737,8 @@ export function useItemAddition() {
 				);
 			}
 
+			// OPTIMIZATION: Deferred stock check
+			/*
 			if (context.fetch_available_qty) {
 				scheduleItemTask(
 					context,
@@ -726,11 +748,14 @@ export function useItemAddition() {
 					"fetch_available_qty:existing",
 				);
 			}
+			*/
 			if (cur_item.qty > previousQty) {
 				moveItemToTop(context, cur_item, index);
 			} else {
 				refreshMergeCacheEntry(context, cur_item, index);
 			}
+			// Trigger background flush
+			if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 		}
 		if (context.forceUpdate) {
 			runAsyncTask(() => context.forceUpdate(), "force_update");
@@ -753,6 +778,8 @@ export function useItemAddition() {
 		// Mark server detail state so invoice can avoid redundant refreshes
 		new_item._detailSynced = false;
 		new_item._detailInFlight = false;
+		new_item._needs_update = false; // Will be set to true if added fresh
+
 		if (!new_item.warehouse) {
 			new_item.warehouse = context.pos_profile.warehouse;
 		}
