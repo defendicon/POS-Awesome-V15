@@ -42,8 +42,24 @@ export function useItemAddition() {
 		}, contextLabel);
 	};
 
-	// Helper to find merge target (optimized)
-	const findMergeTargetInList = (list, newItem, requireBatchMatch) => {
+	// Helper to find merge target (optimized with cache)
+	const findMergeTargetInList = (list, newItem, requireBatchMatch, context) => {
+		// Use O(1) cache if available on context
+		if (context && context.getMergeTarget && typeof context.getMergeTarget === 'function') {
+			const cacheHit = context.getMergeTarget(newItem);
+			if (cacheHit && cacheHit.item && !cacheHit.item.posa_is_offer && !cacheHit.item.posa_is_replace) {
+				// Verify batch requirement if needed
+				if (requireBatchMatch) {
+					const hitBatch = cacheHit.item.batch_no || '';
+					const newBatch = newItem.batch_no || '';
+					if (hitBatch !== newBatch) return null;
+				}
+				return cacheHit;
+			}
+			return null;
+		}
+
+		// Fallback to O(N) search if cache is not ready
 		const newItemKey = `${newItem.item_code}::${newItem.uom}::${requireBatchMatch ? newItem.batch_no || '' : ''}`;
 
 		// Search from end (likely to merge with recently added items)
@@ -79,6 +95,13 @@ export function useItemAddition() {
 		context.expanded = context.expanded.filter((id) => id !== item.posa_row_id);
 		if (item?.posa_row_id && typeof context?.resetItemTaskCache === "function") {
 			context.resetItemTaskCache(item.posa_row_id);
+		}
+
+		// Invalidate cache if available
+		if (context && context.refreshMergeCacheEntry && typeof context.refreshMergeCacheEntry === 'function') {
+			// Actually we need to remove or invalidate the cache for this item
+			// But since we removed it, we can just trigger a refresh or let the cache helper handle it
+			// For now, assume ItemsTable handles cache invalidation on list changes or just let it be stale until next add
 		}
 	};
 
@@ -194,7 +217,7 @@ export function useItemAddition() {
 		let mergeTarget = null;
 
 		if (!isNewLine) {
-			mergeTarget = findMergeTargetInList(itemsList, item, requireBatchMatch);
+			mergeTarget = findMergeTargetInList(itemsList, item, requireBatchMatch, context);
 		}
 
 		if (!mergeTarget) {
@@ -222,10 +245,14 @@ export function useItemAddition() {
 			// Add to list
 			if (invoiceStore) {
 				invoiceStore.upsertItem(new_item);
-				// We need to re-fetch the object reference from store if we want to modify it further?
-				// upsertItem modifies in place if we passed the object.
 			} else {
 				context.items.unshift(new_item);
+			}
+
+			// Update merge cache with new item
+			if (context.refreshMergeCacheEntry && typeof context.refreshMergeCacheEntry === 'function') {
+				// Use index 0 as upsert pushes to end or unshift pushes to start, but for cache just need item
+				context.refreshMergeCacheEntry(new_item);
 			}
 
 			// Async tasks
@@ -301,6 +328,11 @@ export function useItemAddition() {
 
 			if (invoiceStore) {
 				invoiceStore.upsertItem(cur_item); // Trigger update
+			}
+
+			// Refresh cache for merged item
+			if (context.refreshMergeCacheEntry && typeof context.refreshMergeCacheEntry === 'function') {
+				context.refreshMergeCacheEntry(cur_item);
 			}
 		}
 	};

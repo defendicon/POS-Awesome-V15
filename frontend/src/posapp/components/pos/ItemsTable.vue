@@ -19,6 +19,7 @@
 			:class="tableClasses"
 			:items-per-page="virtualScrollConfig.itemsPerPage"
 			:item-height="virtualScrollConfig.itemHeight"
+			:height="containerHeight || 600"
 			:buffer-size="virtualScrollConfig.bufferSize"
 			expand-on-click
 			:density="tableDensity"
@@ -29,6 +30,7 @@
 			@update:expanded="handleExpandedUpdate"
 			:search="itemSearch"
 			:custom-filter="customItemFilter"
+			fixed-header
 		>
 			<!-- Optimized Row Component -->
 			<template v-slot:item="{ item }">
@@ -606,7 +608,7 @@ export default {
 			editedName: "",
 			// Container awareness properties
 			containerWidth: 0,
-			containerHeight: 0,
+			containerHeight: 600, // Default safe height
 			resizeObserver: null,
 			breakpoint: "xl",
 			columnVisibility: new Map(),
@@ -1335,7 +1337,7 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Reuse existing styles */
+<style>
+/* Removed scoped attribute to allow styling of CartItemRow children */
 @import "./items-table-styles.css";
 </style>
