@@ -11,16 +11,13 @@
 					'status-offline': statusColor === 'red',
 				}"
 			>
-				{{ statusText }}
+				{{ connectionStateLabel }}
 			</div>
-			<div class="status-detail-inline">{{ syncInfoText }}</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import { useDataSync } from "../../composables/useDataSync";
-
 // Avoid relying on `import.meta` so the file can be bundled with older
 // JavaScript targets without warnings from esbuild. Debug logging can be
 // toggled by changing this flag during development.
@@ -35,15 +32,6 @@ export default {
 		isIpHost: Boolean,
 		syncTotals: Object,
 		cacheReady: Boolean,
-	},
-	setup() {
-		const { lastSyncSize, estimatedHourlyUsage, isSyncing, formattedLastSyncTime } = useDataSync(30);
-		return {
-			lastSyncSize,
-			estimatedHourlyUsage,
-			isSyncing,
-			formattedLastSyncTime,
-		};
 	},
 	computed: {
 		/**
@@ -156,38 +144,20 @@ export default {
 
 			return this.__(`Server Offline (${hostname})`);
 		},
-		/**
-		 * Returns a short string summarizing the last offline invoice sync results.
-		 */
-		syncInfoText() {
-			const { pending, synced, drafted } = this.syncTotals;
-
-			if (!this.cacheReady) {
-				return this.__("Loading cache...");
+		connectionStateLabel() {
+			if (this.serverConnecting) {
+				return this.__("Connecting...");
 			}
 
-			// Ensure we have valid numbers
-			const pendingCount = pending || 0;
-			const syncedCount = synced || 0;
-			const draftedCount = drafted || 0;
-
-			let status = "";
 			if (!this.networkOnline) {
-				// In offline mode, show all available information
-				if (pendingCount > 0 || syncedCount > 0 || draftedCount > 0) {
-					status = `Pending: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
-				} else {
-					status = "Offline Mode";
-				}
-			} else {
-				// Online mode - show full status
-				status = `To Sync: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
+				return this.__("Offline");
 			}
 
-			if (this.networkOnline) {
-				status += ` | Usage: ${this.lastSyncSize} (Est: ${this.estimatedHourlyUsage}/hr) | Sync: ${this.formattedLastSyncTime}`;
+			if (!this.isIpHost && !this.serverOnline) {
+				return this.__("Server Offline");
 			}
-			return status;
+
+			return this.__("Online");
 		},
 	},
 };
@@ -220,8 +190,8 @@ export default {
 .status-info-always-visible {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
-	min-width: 120px;
+	align-items: center;
+	min-width: 96px;
 }
 
 .status-title-inline {
@@ -240,10 +210,7 @@ export default {
 }
 
 .status-detail-inline {
-	font-size: 11px;
-	color: #666;
-	line-height: 1.2;
-	margin-top: 2px;
+	display: none;
 }
 
 /* Responsive Design */

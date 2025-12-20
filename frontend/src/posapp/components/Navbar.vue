@@ -505,6 +505,16 @@ export default {
 				return;
 			}
 
+			const isOfflineSync = this.isOfflineSyncNotification(notification);
+			if (isOfflineSync) {
+				this.addBellNotification({
+					title: notification.summary || notification.title,
+					detail: notification.latestDetail || "",
+					color: notification.color,
+					timestamp: Date.now(),
+				});
+			}
+
 			if (this.shouldThrottleNotification(notification)) {
 				return;
 			}
@@ -558,6 +568,7 @@ export default {
 				timeout,
 				count,
 				key: baseKey,
+				groupId: providedKey || null,
 				summary,
 				latestDetail: detail,
 				cooldownMs,
@@ -579,6 +590,23 @@ export default {
 
 			this.lastNotificationShownAt[notification.key] = now;
 			return false;
+		},
+		isOfflineSyncNotification(notification) {
+			if (!notification) {
+				return false;
+			}
+
+			if (notification.groupId && notification.groupId.startsWith("offline-sync")) {
+				return true;
+			}
+
+			const title = `${notification.title} ${notification.summary || ""}`.toLowerCase();
+			return (
+				title.includes("offline invoice") ||
+				title.includes("pending for sync") ||
+				title.includes("synced") ||
+				title.includes("saved as draft")
+			);
 		},
 		getNotificationCooldown(notification) {
 			if (typeof notification.cooldownMs === "number") {

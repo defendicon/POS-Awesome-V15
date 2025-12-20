@@ -57,62 +57,102 @@
 		<div :class="['pos-navbar-actions-section', isRtl ? 'rtl-actions-section' : 'ltr-actions-section']">
 			<!-- Mobile: Show only essential items, others in menu -->
 			<template v-if="isMobile">
-				<!-- Always visible status indicator -->
-				<slot name="status-indicator"></slot>
+				<div class="mobile-center-cluster">
+					<!-- Always visible status indicator -->
+					<slot name="status-indicator"></slot>
 
-				<!-- Offline Invoices with higher priority on mobile -->
-				<v-btn
-					icon
-					size="small"
-					:class="[
-						'offline-invoices-btn mobile-btn pos-themed-button',
-						isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
-						{ 'has-pending': pendingInvoices > 0 },
-					]"
-					:aria-label="__('View offline invoices') + ` (${pendingInvoices})`"
-					@click="$emit('show-offline-invoices')"
-				>
-					<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
-						<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					</v-badge>
-					<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					<v-tooltip activator="parent" location="bottom">
-						{{ __("Offline Invoices") }} ({{ pendingInvoices }})
-					</v-tooltip>
-				</v-btn>
+					<!-- Offline Invoices with higher priority on mobile -->
+					<v-btn
+						icon
+						size="small"
+						:class="[
+							'offline-invoices-btn mobile-btn pos-themed-button',
+							isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
+							{ 'has-pending': pendingInvoices > 0 },
+						]"
+						:aria-label="__('View offline invoices') + ` (${pendingInvoices})`"
+						@click="$emit('show-offline-invoices')"
+					>
+						<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
+							<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
+						</v-badge>
+						<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
+						<v-tooltip activator="parent" location="bottom">
+							{{ __("Offline Invoices") }} ({{ pendingInvoices }})
+						</v-tooltip>
+					</v-btn>
 
-				<!-- Notification bell between offline invoices and menu -->
-				<slot name="notification-bell"></slot>
+					<!-- Notification bell between offline invoices and menu -->
+					<slot name="notification-bell"></slot>
 
-				<!-- Mobile Menu - contains all other items -->
-				<slot name="menu"></slot>
+					<!-- Mobile Menu - contains all other items -->
+					<slot name="menu"></slot>
+				</div>
 			</template>
 
 			<!-- Desktop: Show all items normally -->
 			<template v-else>
-				<!-- Enhanced connectivity status indicator (kept outside info menu) -->
-				<div class="gadget-wrapper status-gadget">
-					<slot name="status-indicator"></slot>
+				<div class="actions-left">
+					<!-- Enhanced connectivity status indicator (kept outside info menu) -->
+					<div class="gadget-wrapper status-gadget">
+						<slot name="status-indicator"></slot>
+					</div>
+
+					<NavbarInfoGadgets
+						:class="['info-gadgets-wrapper', isRtl ? 'rtl-info-gadgets' : 'ltr-info-gadgets']"
+					>
+						<!-- Cache Usage Meter -->
+						<template #cache-usage-meter>
+							<slot name="cache-usage-meter"></slot>
+						</template>
+
+						<!-- Database Usage Gadget -->
+						<template #db-usage-gadget>
+							<slot name="db-usage-gadget"></slot>
+						</template>
+
+						<!-- CPU Load Gadget -->
+						<template #cpu-gadget>
+							<slot name="cpu-gadget"></slot>
+						</template>
+					</NavbarInfoGadgets>
 				</div>
 
-				<NavbarInfoGadgets
-					:class="['info-gadgets-wrapper', isRtl ? 'rtl-info-gadgets' : 'ltr-info-gadgets']"
-				>
-					<!-- Cache Usage Meter -->
-					<template #cache-usage-meter>
-						<slot name="cache-usage-meter"></slot>
-					</template>
+				<div class="nav-center-cluster">
+					<v-btn
+						icon
+						:class="[
+							'offline-invoices-btn pos-themed-button',
+							isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
+							{ 'has-pending': pendingInvoices > 0 },
+						]"
+						:aria-label="__('View offline invoices') + ` (${pendingInvoices})`"
+						:aria-describedby="'offline-invoices-tooltip'"
+						@click="$emit('show-offline-invoices')"
+						@keydown.enter="$emit('show-offline-invoices')"
+						tabindex="0"
+					>
+						<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
+							<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
+						</v-badge>
+						<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
+						<v-tooltip
+							id="offline-invoices-tooltip"
+							activator="parent"
+							:location="isRtl ? 'bottom start' : 'bottom end'"
+							:open-delay="500"
+							:close-delay="200"
+						>
+							{{ __("Offline Invoices") }} ({{ pendingInvoices }})
+						</v-tooltip>
+					</v-btn>
 
-					<!-- Database Usage Gadget -->
-					<template #db-usage-gadget>
-						<slot name="db-usage-gadget"></slot>
-					</template>
+					<!-- Notification bell between offline invoices and menu -->
+					<slot name="notification-bell"></slot>
 
-					<!-- CPU Load Gadget -->
-					<template #cpu-gadget>
-						<slot name="cpu-gadget"></slot>
-					</template>
-				</NavbarInfoGadgets>
+					<!-- Menu component slot -->
+					<slot name="menu"></slot>
+				</div>
 
 				<div :class="['profile-section', isRtl ? 'rtl-profile-section' : 'ltr-profile-section']">
 					<v-chip
@@ -134,40 +174,6 @@
 						</span>
 					</v-chip>
 				</div>
-
-				<v-btn
-					icon
-					:class="[
-						'offline-invoices-btn pos-themed-button',
-						isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
-						{ 'has-pending': pendingInvoices > 0 },
-					]"
-					:aria-label="__('View offline invoices') + ` (${pendingInvoices})`"
-					:aria-describedby="'offline-invoices-tooltip'"
-					@click="$emit('show-offline-invoices')"
-					@keydown.enter="$emit('show-offline-invoices')"
-					tabindex="0"
-				>
-					<v-badge v-if="pendingInvoices > 0" :content="pendingInvoices" color="error" overlap>
-						<v-icon class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					</v-badge>
-					<v-icon v-else class="pos-text-primary">mdi-file-document-multiple-outline</v-icon>
-					<v-tooltip
-						id="offline-invoices-tooltip"
-						activator="parent"
-						:location="isRtl ? 'bottom start' : 'bottom end'"
-						:open-delay="500"
-						:close-delay="200"
-					>
-						{{ __("Offline Invoices") }} ({{ pendingInvoices }})
-					</v-tooltip>
-				</v-btn>
-
-				<!-- Notification bell between offline invoices and menu -->
-				<slot name="notification-bell"></slot>
-
-				<!-- Menu component slot -->
-				<slot name="menu"></slot>
 			</template>
 		</div>
 
@@ -385,6 +391,7 @@ export default {
 	gap: 8px;
 	flex-direction: row;
 	/* Default to normal row */
+	flex: 1;
 }
 
 .rtl-actions-section {
@@ -401,28 +408,11 @@ export default {
 	order: 1;
 }
 
-.ltr-info-gadgets {
-	order: 2;
-}
-
-.ltr-actions-section .profile-section {
-	order: 3;
-}
-
-.ltr-actions-section .offline-invoices-btn {
-	order: 4;
-}
-
-.ltr-actions-section .notification-bell-btn {
-	order: 5;
-}
-
-/* Menu should be the last element */
-.ltr-actions-section> :last-child,
-/* menu slot */
-.ltr-actions-section .v-menu,
-.ltr-actions-section [role="menu"] {
-	order: 6 !important;
+.actions-left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
 }
 
 /* RTL adjustments for gadgets - reverse the order */
@@ -442,12 +432,22 @@ export default {
 	order: 1;
 }
 
-/* RTL Menu should be first */
-.rtl-actions-section> :last-child,
-/* menu slot */
-.rtl-actions-section .v-menu,
-.rtl-actions-section [role="menu"] {
-	order: 0 !important;
+/* Center cluster for offline invoices, notification bell, and menu */
+.nav-center-cluster {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-inline: auto;
+	flex: 1;
+}
+
+.mobile-center-cluster {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	flex: 1;
 }
 
 .pos-navbar-enhanced:hover {

@@ -378,6 +378,8 @@ export default {
 				this.eventBus.emit("show_message", {
 					title: `${pending} invoice${pending > 1 ? "s" : ""} pending for sync`,
 					color: "warning",
+					groupId: "offline-sync-pending",
+					detail: this.__("Pending offline invoices waiting for connectivity"),
 				});
 			}
 			if (isOffline()) {
@@ -389,12 +391,16 @@ export default {
 					this.eventBus.emit("show_message", {
 						title: `${result.synced} offline invoice${result.synced > 1 ? "s" : ""} synced`,
 						color: "success",
+						groupId: "offline-sync-result",
+						detail: this.__("{0} invoice(s) synced successfully", [result.synced]),
 					});
 				}
 				if (result.drafted) {
 					this.eventBus.emit("show_message", {
 						title: `${result.drafted} offline invoice${result.drafted > 1 ? "s" : ""} saved as draft`,
 						color: "warning",
+						groupId: "offline-sync-result",
+						detail: this.__("{0} invoice(s) left as draft", [result.drafted]),
 					});
 				}
 			}
