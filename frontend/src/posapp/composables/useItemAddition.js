@@ -236,6 +236,134 @@ export function useItemAddition() {
 		refreshMergeCacheEntry(context, target, 0);
 	};
 
+	// Micro-batching state
+	let pendingItems = [];
+	let pendingResolvers = [];
+	let pendingUpdates = new Map(); // rowId -> { qty, resolvers[] }
+	let flushScheduled = false;
+
+	const flushPendingItems = async (context) => {
+		if (!pendingItems.length && !pendingUpdates.size) return;
+
+		const currentItems = [...pendingItems];
+		const currentResolvers = [...pendingResolvers];
+		const currentUpdates = new Map(pendingUpdates);
+
+		pendingItems = [];
+		pendingResolvers = [];
+		pendingUpdates.clear();
+		flushScheduled = false;
+
+		// 1. Process Updates
+		for (const [rowId, data] of currentUpdates) {
+			const item = context.invoiceStore.itemsData.get(rowId);
+			if (item) {
+				item.qty += data.qty;
+				if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+
+				// Handle other updates that happen on merge
+				if (item.has_batch_no && item.batch_no && context.setBatchQty) {
+					context.setBatchQty(item, item.batch_no, false);
+				}
+				if (context.setSerialNo) context.setSerialNo(item);
+
+				// Resolve all promises waiting for this update
+				data.resolvers.forEach(r => r(item));
+			}
+		}
+
+		// 2. Process Additions
+		if (currentItems.length) {
+			const addedItems = context.invoiceStore.addItems(currentItems, 0); // Prepend to top
+
+			addedItems.forEach((item, index) => {
+				const resolvers = currentResolvers[index]; // Array of resolvers
+				refreshMergeCacheEntry(context, item, 0);
+				runAsyncTask(() => expandBundle(item, context), "expand_bundle");
+
+				if (context.update_item_detail) {
+					scheduleItemTask(
+						context,
+						item,
+						"update_item_detail",
+						() => context.update_item_detail(item, false),
+						"update_item_detail:new",
+					);
+				}
+
+				if (context.fetch_available_qty) {
+					scheduleItemTask(
+						context,
+						item,
+						"fetch_available_qty",
+						() => context.fetch_available_qty(item),
+						"fetch_available_qty:new",
+					);
+				}
+
+				// Handle Batch/Serial/Return specific logic for new items
+				if (
+					context.isReturnInvoice &&
+					context.pos_profile.posa_allow_return_without_invoice &&
+					item.has_batch_no &&
+					!context.pos_profile.posa_auto_set_batch
+				) {
+					const opts =
+						Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0
+							? item.batch_no_data
+							: null;
+					if (opts) {
+						// ... existing dialog logic ...
+						const dialog = new frappe.ui.Dialog({
+							title: __("Select Batch"),
+							fields: [
+								{
+									fieldtype: "Select",
+									fieldname: "batch",
+									label: __("Batch"),
+									options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
+									reqd: !context.pos_profile.posa_allow_free_batch_return,
+								},
+							],
+							primary_action_label: __("Select"),
+							primary_action(values) {
+								const selected = values.batch ? values.batch.split("|")[0].trim() : null;
+								context.setBatchQty(item, selected, false);
+								dialog.hide();
+							},
+						});
+						dialog.onhide = () => {
+							if (!item.batch_no) {
+								context.setBatchQty(item, null, false);
+							}
+						};
+						dialog.show();
+					} else {
+						context.setBatchQty(item, null, false);
+					}
+				}
+
+				if (
+					(!context.pos_profile.posa_auto_set_batch && item.has_batch_no) ||
+					item.has_serial_no
+				) {
+					nextTick(() => {
+						context.expanded = [item.posa_row_id];
+					});
+				}
+
+				// Resolve all promises waiting for this new item
+				if (Array.isArray(resolvers)) {
+					resolvers.forEach(r => r(item));
+				} else {
+					// Fallback if structure mismatches (shouldn't happen with new logic)
+					if (typeof resolvers === 'function') resolvers(item);
+					else if (resolvers && resolvers.resolve) resolvers.resolve(item);
+				}
+			});
+		}
+	};
+
 	// Add item to invoice
 	const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
 		const blockSale = context.pos_profile?.posa_block_sale_beyond_available_qty;
@@ -326,86 +454,165 @@ export function useItemAddition() {
 
 			if (index === -1 || context.new_line) {
 				if (context.invoiceStore) {
-					// Use the reactive proxy returned by the store
-					new_item = context.invoiceStore.addItem(new_item, 0);
+					// Use batching
+					return new Promise((resolve) => {
+						// Check pending additions first
+						const pendingIndex = pendingItems.findIndex((pendingItem) => {
+							// Use same matching logic as findMergeTarget but for pending items
+							// Note: pendingItems contains item OBJECTS, not Vue proxies yet.
+							// Assuming we match by item_code and uom and rate
+							return (
+								pendingItem.item_code === new_item.item_code &&
+								pendingItem.uom === new_item.uom &&
+								pendingItem.rate === new_item.rate
+							);
+						});
+
+						if (pendingIndex !== -1 && !context.new_line) {
+							// Merge with pending item
+							const pendingItem = pendingItems[pendingIndex];
+							if (context.isReturnInvoice) {
+								pendingItem.qty -= Math.abs(new_item.qty || 1);
+							} else {
+								pendingItem.qty += new_item.qty || 1;
+							}
+
+							// Add this resolver to the existing item's resolver list
+							if (!Array.isArray(pendingResolvers[pendingIndex])) {
+								pendingResolvers[pendingIndex] = [pendingResolvers[pendingIndex]];
+							}
+							pendingResolvers[pendingIndex].push(resolve);
+						} else {
+							// Add as new pending item
+							pendingItems.push(new_item);
+							pendingResolvers.push([resolve]); // Array of resolvers for this item
+						}
+
+						if (!flushScheduled) {
+							flushScheduled = true;
+							queueMicrotask(() => flushPendingItems(context));
+						}
+					});
 				} else {
 					context.items.unshift(new_item);
-				}
+					refreshMergeCacheEntry(context, new_item, 0);
+					runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
+					// Skip recalculation to preserve the manually set rate
+					if (context.update_item_detail) {
+						scheduleItemTask(
+							context,
+							new_item,
+							"update_item_detail",
+							() => context.update_item_detail(new_item, false),
+							"update_item_detail:new",
+						);
+					}
 
-				refreshMergeCacheEntry(context, new_item, 0);
-				runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
-				// Skip recalculation to preserve the manually set rate
-				if (context.update_item_detail) {
-					scheduleItemTask(
-						context,
-						new_item,
-						"update_item_detail",
-						() => context.update_item_detail(new_item, false),
-						"update_item_detail:new",
-					);
-				}
+					if (context.fetch_available_qty) {
+						scheduleItemTask(
+							context,
+							new_item,
+							"fetch_available_qty",
+							() => context.fetch_available_qty(new_item),
+							"fetch_available_qty:new",
+						);
+					}
 
-				if (context.fetch_available_qty) {
-					scheduleItemTask(
-						context,
-						new_item,
-						"fetch_available_qty",
-						() => context.fetch_available_qty(new_item),
-						"fetch_available_qty:new",
-					);
-				}
-
-				if (
-					context.isReturnInvoice &&
-					context.pos_profile.posa_allow_return_without_invoice &&
-					new_item.has_batch_no &&
-					!context.pos_profile.posa_auto_set_batch
-				) {
-					const opts =
-						Array.isArray(new_item.batch_no_data) && new_item.batch_no_data.length > 0
-							? new_item.batch_no_data
-							: null;
-					if (opts) {
-						const dialog = new frappe.ui.Dialog({
-							title: __("Select Batch"),
-							fields: [
-								{
-									fieldtype: "Select",
-									fieldname: "batch",
-									label: __("Batch"),
-									options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
-									reqd: !context.pos_profile.posa_allow_free_batch_return,
+					if (
+						context.isReturnInvoice &&
+						context.pos_profile.posa_allow_return_without_invoice &&
+						new_item.has_batch_no &&
+						!context.pos_profile.posa_auto_set_batch
+					) {
+						const opts =
+							Array.isArray(new_item.batch_no_data) && new_item.batch_no_data.length > 0
+								? new_item.batch_no_data
+								: null;
+						if (opts) {
+							const dialog = new frappe.ui.Dialog({
+								title: __("Select Batch"),
+								fields: [
+									{
+										fieldtype: "Select",
+										fieldname: "batch",
+										label: __("Batch"),
+										options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
+										reqd: !context.pos_profile.posa_allow_free_batch_return,
+									},
+								],
+								primary_action_label: __("Select"),
+								primary_action(values) {
+									const selected = values.batch ? values.batch.split("|")[0].trim() : null;
+									context.setBatchQty(new_item, selected, false);
+									dialog.hide();
 								},
-							],
-							primary_action_label: __("Select"),
-							primary_action(values) {
-								const selected = values.batch ? values.batch.split("|")[0].trim() : null;
-								context.setBatchQty(new_item, selected, false);
-								dialog.hide();
-							},
+							});
+							dialog.onhide = () => {
+								if (!new_item.batch_no) {
+									context.setBatchQty(new_item, null, false);
+								}
+							};
+							dialog.show();
+						} else {
+							context.setBatchQty(new_item, null, false);
+						}
+					}
+
+					// Expand new item if it has batch or serial number
+					if (
+						(!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
+						new_item.has_serial_no
+					) {
+						nextTick(() => {
+							context.expanded = [new_item.posa_row_id];
 						});
-						dialog.onhide = () => {
-							if (!new_item.batch_no) {
-								context.setBatchQty(new_item, null, false);
-							}
-						};
-						dialog.show();
-					} else {
-						context.setBatchQty(new_item, null, false);
 					}
 				}
+			} else {
+				// Existing item update
+				const cur_item = context.items[index];
+				const qtyDelta = context.isReturnInvoice ? -Math.abs(new_item.qty || 1) : (new_item.qty || 1);
 
-				// Expand new item if it has batch or serial number
-				if (
-					(!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
-					new_item.has_serial_no
-				) {
-					nextTick(() => {
-						context.expanded = [new_item.posa_row_id];
+				if (context.invoiceStore) {
+					// Use batching for updates
+					return new Promise((resolve) => {
+						const rowId = cur_item.posa_row_id;
+						if (pendingUpdates.has(rowId)) {
+							const data = pendingUpdates.get(rowId);
+							data.qty += qtyDelta;
+							data.resolvers.push(resolve);
+						} else {
+							pendingUpdates.set(rowId, { qty: qtyDelta, resolvers: [resolve] });
+						}
+
+						// Merge serial numbers immediately (non-reactive for pending logic, or handle in flush?)
+						// For safety, let's assume serials are merged on the object directly if it's reactive?
+						// Actually, `cur_item` IS reactive. But we want to avoid triggering re-renders repeatedly.
+						// However, `pendingUpdates` logic above queues the QTY update.
+						// Serial numbers are array pushes, which MIGHT trigger reactivity if watched deep.
+						// But the big hitter is usually the list re-render or heavy computations on qty.
+
+						// For now, let's defer serial number merging to flush time too if possible?
+						// But pendingUpdates only tracks QTY.
+						// Let's do side-effects immediately for now, or assume 10 items/sec usually implies same SKU scanning which implies qty updates.
+
+						// If we want to be strict, we should buffer serials too.
+						// For simplicity, apply serials now but defer qty/heavy recalc.
+						if (new_item.serial_no_selected && new_item.serial_no_selected.length) {
+							new_item.serial_no_selected.forEach((sn) => {
+								if (!cur_item.serial_no_selected.includes(sn)) {
+									cur_item.serial_no_selected.push(sn);
+								}
+							});
+						}
+
+						if (!flushScheduled) {
+							flushScheduled = true;
+							queueMicrotask(() => flushPendingItems(context));
+						}
 					});
 				}
-			} else {
-				const cur_item = context.items[index];
+
 				const previousQty = cur_item.qty;
 				if (context.update_items_details) {
 					runAsyncTask(
@@ -421,11 +628,8 @@ export function useItemAddition() {
 						}
 					});
 				}
-				if (context.isReturnInvoice) {
-					cur_item.qty -= Math.abs(new_item.qty || 1);
-				} else {
-					cur_item.qty += new_item.qty || 1;
-				}
+				cur_item.qty += qtyDelta;
+
 				if (context.calc_stock_qty) context.calc_stock_qty(cur_item, cur_item.qty);
 
 				if (cur_item.has_batch_no && cur_item.batch_no && context.setBatchQty) {

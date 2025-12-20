@@ -108,6 +108,32 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		return itemsData.get(rowId);
 	};
 
+	const addItems = (items, index = -1) => {
+		if (!Array.isArray(items) || !items.length) return [];
+		const addedIds = [];
+
+		items.forEach((item) => {
+			if (!item) return;
+			const rowId = item.posa_row_id || Math.random().toString(36).substr(2, 20);
+			if (!item.posa_row_id) item.posa_row_id = rowId;
+			itemsData.set(rowId, cloneItem(item));
+			addedIds.push(rowId);
+		});
+
+		if (addedIds.length > 0) {
+			if (index >= 0 && index < itemOrder.value.length) {
+				itemOrder.value.splice(index, 0, ...addedIds);
+			} else if (index === 0) {
+				itemOrder.value.unshift(...addedIds);
+			} else {
+				itemOrder.value.push(...addedIds);
+			}
+			touch();
+		}
+
+		return addedIds.map(id => itemsData.get(id));
+	};
+
 	const replaceItemAt = (index, item) => {
 		if (index < 0 || index >= itemOrder.value.length) {
 			return;
@@ -253,6 +279,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		mergeInvoiceDoc,
 		setItems,
 		addItem,
+		addItems,
 		replaceItemAt,
 		upsertItem,
 		removeItemByRowId,
