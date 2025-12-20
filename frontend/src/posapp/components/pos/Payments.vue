@@ -1332,15 +1332,23 @@ export default {
 			this.is_credit_return = false;
 		},
 	},
-	methods: {
-		// Go back to invoice view and reset customer readonly
-		back_to_invoice() {
-			this.eventBus.emit("show_payment", "false");
-			this.eventBus.emit("set_customer_readonly", false);
-			this.$nextTick(() => {
-				this.eventBus.emit("focus_item_search");
-			});
-		},
+		methods: {
+			// Go back to invoice view and reset customer readonly
+			back_to_invoice() {
+				this.eventBus.emit("show_payment", "false");
+				this.eventBus.emit("set_customer_readonly", false);
+				this.$nextTick(() => {
+					this.eventBus.emit("focus_item_search");
+				});
+			},
+			finishSubmissionNavigation(clearInvoice = false) {
+				this.back_to_invoice();
+				if (clearInvoice) {
+					this.addresses = [];
+					this.eventBus.emit("clear_invoice");
+					this.eventBus.emit("reset_posting_date");
+				}
+			},
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
@@ -1703,6 +1711,7 @@ export default {
 							title: __("Invoice {0} stayed in draft", [responseInvoiceName || ""]),
 							color: "warning",
 						});
+						this.finishSubmissionNavigation(true);
 						return;
 					}
 
@@ -1738,11 +1747,7 @@ export default {
 						item_codes: submittedCodes,
 						timestamp: Date.now(),
 					});
-					this.addresses = [];
-					this.eventBus.emit("clear_invoice");
-					this.eventBus.emit("focus_item_search");
-					this.eventBus.emit("reset_posting_date");
-					this.back_to_invoice();
+					this.finishSubmissionNavigation(true);
 				} catch (exc) {
 					console.error("Error submitting invoice:", exc);
 					let errorMsg = this.extractSubmissionErrorMessage(exc);
@@ -1778,6 +1783,9 @@ export default {
 							title: __("Error submitting invoice: ") + errorMsg,
 							color: "error",
 						});
+						if (this.pos_profile?.posa_allow_submissions_in_background_job) {
+							this.finishSubmissionNavigation(true);
+						}
 					}
 				}
 			},
