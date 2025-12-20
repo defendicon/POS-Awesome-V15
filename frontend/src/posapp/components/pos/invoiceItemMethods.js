@@ -1348,7 +1348,7 @@ export default {
 	},
 
 	async add_item(item, options = {}) {
-		const res = await addItem(item, this);
+		const res = await addItem(item, this, options);
 		this.schedulePricingRuleApplication();
 
 		const shouldNotify =

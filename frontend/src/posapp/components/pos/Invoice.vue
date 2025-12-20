@@ -462,7 +462,10 @@ export default {
 				return this.invoiceStore.items;
 			},
 			set(value) {
-				this.invoiceStore.setItems(value);
+				this.invoiceStore.setItems(
+					value,
+					this.selected_price_list || this.price_list || this.pos_profile?.selling_price_list,
+				);
 			},
 		},
 		invoice_doc: {

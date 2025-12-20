@@ -2,10 +2,17 @@ import { nextTick } from "vue";
 import _ from "lodash";
 import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
+import { buildCartKey } from "../utils/cartKeys.js";
 
 /* global frappe, __ */
 
 export function useItemAddition() {
+	const getContextPriceList = (context) =>
+		context?.selected_price_list ||
+		context?.price_list ||
+		context?.pos_profile?.selling_price_list ||
+		"";
+
 	const runAsyncTask = (task, contextLabel) => {
 		Promise.resolve().then(() => {
 			try {
@@ -43,9 +50,12 @@ export function useItemAddition() {
 		!entry.posa_is_replace &&
 		Number.parseFloat(entry.qty) > 0;
 
-	const buildMergeKey = (entry, requireBatch) => {
-		const batchPart = requireBatch ? entry?.batch_no || "" : "";
-		return `${entry?.item_code || ""}::${entry?.uom || ""}::${batchPart}`;
+	const buildMergeKey = (entry, requireBatch, priceList = "") => {
+		const keyPayload = { ...(entry || {}) };
+		if (!requireBatch) {
+			keyPayload.batch_no = "";
+		}
+		return buildCartKey(keyPayload, priceList);
 	};
 
 	const ensureMergeCache = (context) => {
@@ -58,37 +68,40 @@ export function useItemAddition() {
 				strictBatch: new Map(),
 				signature: -1,
 				lastItems: null,
+				priceList: null,
 			};
 		}
 		const cache = context._mergeIndexCache;
 		const itemsRef = context.items || [];
 		const signature = itemsRef.length;
+		const priceList = getContextPriceList(context);
 		// PERF: micro-bench (500 merges) improved from ~6ms to ~1ms by reusing this lookup instead of Array.find
-		if (cache.signature !== signature || cache.lastItems !== itemsRef) {
+		if (cache.signature !== signature || cache.lastItems !== itemsRef || cache.priceList !== priceList) {
 			cache.flexBatch.clear();
 			cache.strictBatch.clear();
 			itemsRef.forEach((entry, index) => {
 				if (!shouldIndexItem(entry)) return;
 
-				const flexKey = buildMergeKey(entry, false);
+				const flexKey = buildMergeKey(entry, false, priceList);
 				if (!cache.flexBatch.has(flexKey)) {
 					cache.flexBatch.set(flexKey, { item: entry, index });
 				}
 
-				const strictKey = buildMergeKey(entry, true);
+				const strictKey = buildMergeKey(entry, true, priceList);
 				if (!cache.strictBatch.has(strictKey)) {
 					cache.strictBatch.set(strictKey, { item: entry, index });
 				}
 			});
 			cache.signature = signature;
 			cache.lastItems = itemsRef;
+			cache.priceList = priceList;
 		}
 		return cache;
 	};
 
 	const findMergeTarget = (context, item, requireBatchMatch) => {
 		const cache = ensureMergeCache(context);
-		const key = buildMergeKey(item, requireBatchMatch);
+		const key = buildMergeKey(item, requireBatchMatch, cache.priceList);
 		const bucket = requireBatchMatch ? cache.strictBatch : cache.flexBatch;
 		const hit = bucket.get(key);
 		if (hit && shouldIndexItem(hit.item)) {
@@ -100,6 +113,7 @@ export function useItemAddition() {
 	const refreshMergeCacheEntry = (context, entry, indexHint = null) => {
 		if (!context || !entry) return;
 		const cache = ensureMergeCache(context);
+		const priceList = cache.priceList;
 		const itemsRef = context.items || [];
 		const index =
 			typeof indexHint === "number" && indexHint >= 0 ? indexHint : itemsRef.indexOf(entry);
@@ -111,21 +125,23 @@ export function useItemAddition() {
 		}
 
 		if (shouldIndexItem(entry)) {
-			cache.flexBatch.set(buildMergeKey(entry, false), { item: entry, index });
-			cache.strictBatch.set(buildMergeKey(entry, true), { item: entry, index });
+			cache.flexBatch.set(buildMergeKey(entry, false, priceList), { item: entry, index });
+			cache.strictBatch.set(buildMergeKey(entry, true, priceList), { item: entry, index });
 		} else {
-			cache.flexBatch.delete(buildMergeKey(entry, false));
-			cache.strictBatch.delete(buildMergeKey(entry, true));
+			cache.flexBatch.delete(buildMergeKey(entry, false, priceList));
+			cache.strictBatch.delete(buildMergeKey(entry, true, priceList));
 		}
 
 		cache.signature = itemsRef.length;
 		cache.lastItems = itemsRef;
+		cache.priceList = priceList;
 	};
 
 	const invalidateMergeCache = (context) => {
 		if (context && context._mergeIndexCache) {
 			context._mergeIndexCache.signature = -1;
 			context._mergeIndexCache.lastItems = null;
+			context._mergeIndexCache.priceList = null;
 		}
 	};
 
@@ -149,6 +165,7 @@ export function useItemAddition() {
 	const { getBundleComponents } = useBundles();
 
 	const expandBundle = async (parent, context) => {
+		const priceList = getContextPriceList(context);
 		const components = await getBundleComponents(parent.item_code);
 		if (!components || !components.length) {
 			return;
@@ -177,7 +194,13 @@ export function useItemAddition() {
 				is_stock_item: isStockItem ? 1 : 0,
 				has_batch_no: comp.is_batch,
 				has_serial_no: comp.is_serial,
-				posa_row_id: context.makeid ? context.makeid(20) : Math.random().toString(36).substr(2, 20),
+				posa_row_key: buildCartKey(comp, priceList),
+				posa_row_id:
+					context.makeid && comp.item_code && comp.uom
+						? `${comp.item_code}::${comp.uom}::${context.makeid(8)}`
+						: context.makeid
+							? context.makeid(20)
+							: Math.random().toString(36).substr(2, 20),
 				posa_offers: JSON.stringify([]),
 				posa_offer_applied: 0,
 				posa_is_offer: 0,
@@ -218,8 +241,66 @@ export function useItemAddition() {
 		}
 	};
 
+	const pendingAdds = [];
+	let pendingFlush = null;
+
+	const flushPendingAdds = async () => {
+		const queued = pendingAdds.splice(0);
+		if (!queued.length) {
+			return;
+		}
+
+		const grouped = new Map();
+		queued.forEach((entry) => {
+			const priceList = getContextPriceList(entry.context);
+			const key = buildCartKey(entry.item, priceList);
+			if (!grouped.has(key)) {
+				grouped.set(key, {
+					item: { ...entry.item },
+					context: entry.context,
+					options: { ...(entry.options || {}) },
+					resolvers: [],
+				});
+			}
+			const bucket = grouped.get(key);
+			const currentQty = Number.parseFloat(bucket.item.qty || 0) || 0;
+			const incomingQty = Number.parseFloat(entry.item.qty || 0);
+			bucket.item.qty = currentQty + (Number.isFinite(incomingQty) ? incomingQty : 1);
+			bucket.resolvers.push(entry.resolve);
+		});
+
+		for (const payload of grouped.values()) {
+			// Prefer a single render cycle for a burst of scans
+			// eslint-disable-next-line no-await-in-loop
+			const result = await addItemImmediate(payload.item, payload.context, payload.options);
+			payload.resolvers.forEach((resolve) => resolve(result));
+		}
+	};
+
+	const queueAddItem = (item, context, options = {}) => {
+		const disableBatching =
+			options?.disableBatching || context?.pos_profile?.posa_disable_cart_batching === true;
+		if (disableBatching) {
+			return addItemImmediate(item, context, options);
+		}
+
+		return new Promise((resolve) => {
+			pendingAdds.push({ item, context, options, resolve });
+			if (!pendingFlush) {
+				pendingFlush = Promise.resolve().then(() => {
+					pendingFlush = null;
+					return flushPendingAdds();
+				});
+			}
+		});
+	};
+
 	// Add item to invoice
-	const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
+	const addItemImmediate = withPerf("pos:add-item", async function addItemMeasured(
+		item,
+		context,
+		options = {},
+	) {
 		const blockSale = context.pos_profile?.posa_block_sale_beyond_available_qty;
 		const allowNegativeStock =
 			item.allow_negative_stock === 1 ||
@@ -519,6 +600,7 @@ export function useItemAddition() {
 
 	// Create a new item object with default and calculated fields
 	const getNewItem = (item, context) => {
+		const priceList = getContextPriceList(context);
 		const new_item = { ...item };
 		new_item.original_item_name = new_item.item_name;
 		new_item.name_overridden = 0;
@@ -598,7 +680,14 @@ export function useItemAddition() {
 		new_item.bundle_id = null;
 		new_item.posa_notes = "";
 		new_item.posa_delivery_date = "";
-		new_item.posa_row_id = context.makeid ? context.makeid(20) : Math.random().toString(36).substr(2, 20);
+		new_item.posa_row_key = buildCartKey(new_item, priceList);
+		new_item.posa_row_id =
+			new_item.posa_row_id ||
+			(new_item.posa_row_key
+				? `${new_item.posa_row_key}::${context.makeid ? context.makeid(6) : Math.random().toString(36).substr(2, 6)}`
+				: context.makeid
+					? context.makeid(20)
+					: Math.random().toString(36).substr(2, 20));
 		if (new_item.has_serial_no && !new_item.serial_no_selected) {
 			new_item.serial_no_selected = [];
 			new_item.serial_no_selected_count = 0;
@@ -659,29 +748,29 @@ export function useItemAddition() {
 	};
 
 	// Add this utility for grouping logic, matching ItemsTable.vue
-	function groupAndAddItem(items, newItem) {
-		// Find a matching item (by item_code, uom, and rate)
-		const match = items.find(
-			(item) =>
-				item.item_code === newItem.item_code &&
-				item.uom === newItem.uom &&
-				item.rate === newItem.rate,
-		);
+	function groupAndAddItem(items, newItem, priceList = "") {
+		const targetKey = buildCartKey(newItem, priceList);
+		// Find a matching item (by normalized stable key)
+		const match = items.find((item) => item.posa_row_key === targetKey);
 		if (match) {
 			// If found, increment quantity
 			match.qty += newItem.qty || 1;
 			match.amount = match.qty * match.rate;
 		} else {
-			items.push({ ...newItem });
+			items.push({ ...newItem, posa_row_key: targetKey });
 		}
 	}
 
 	// Debounced version for rapid additions
-	const groupAndAddItemDebounced = _.debounce(groupAndAddItem, 50);
+	const groupAndAddItemDebounced = _.debounce(
+		(items, newItem, priceList = "") => groupAndAddItem(items, newItem, priceList),
+		50,
+	);
 
 	return {
 		removeItem,
-		addItem,
+		addItem: (item, context, options = {}) => queueAddItem(item, context, options),
+		addItemImmediate,
 		getNewItem,
 		clearInvoice,
 		groupAndAddItem,

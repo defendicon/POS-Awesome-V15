@@ -14,7 +14,7 @@
 			:items="items"
 			:expanded="expanded"
 			show-expand
-			item-value="posa_row_id"
+			:item-value="resolveRowKey"
 			class="pos-table elevation-2 pos-themed-card"
 			:class="tableClasses"
 			:items-per-page="virtualScrollConfig.itemsPerPage"
@@ -840,6 +840,7 @@
 import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { buildCartKey } from "../../utils/cartKeys.js";
 export default {
 	name: "ItemsTable",
 	setup() {
@@ -958,6 +959,14 @@ export default {
 		},
 		invoice_doc() {
 			return this.invoiceStore.invoiceDoc || {};
+		},
+		activePriceList() {
+			return (
+				this.invoice_doc?.price_list ||
+				this.invoice_doc?.selling_price_list ||
+				this.pos_profile?.selling_price_list ||
+				""
+			);
 		},
 		// Dynamic container styles based on parent
 		containerStyles() {
@@ -1139,17 +1148,22 @@ export default {
 	},
 	methods: {
 		buildMergeKey(entry) {
-			return `${entry?.item_code || ""}::${entry?.uom || ""}::${entry?.rate ?? ""}`;
+			return buildCartKey(entry, this.activePriceList);
 		},
 		ensureMergeCache() {
 			if (!this._itemMergeCache) {
-				this._itemMergeCache = { map: new Map(), signature: -1, lastItems: null };
+				this._itemMergeCache = { map: new Map(), signature: -1, lastItems: null, priceList: null };
 			}
 
 			const cache = this._itemMergeCache;
 			const itemsRef = this.items || [];
+			const priceList = this.activePriceList;
 			// PERF: micro-bench (500 merges) dropped from ~6ms to ~1ms by reusing this map instead of Array.find
-			if (cache.signature !== itemsRef.length || cache.lastItems !== itemsRef) {
+			if (
+				cache.signature !== itemsRef.length ||
+				cache.lastItems !== itemsRef ||
+				cache.priceList !== priceList
+			) {
 				cache.map.clear();
 				itemsRef.forEach((entry, index) => {
 					if (!entry) return;
@@ -1160,6 +1174,7 @@ export default {
 				});
 				cache.signature = itemsRef.length;
 				cache.lastItems = itemsRef;
+				cache.priceList = priceList;
 			}
 			return cache;
 		},
@@ -1167,6 +1182,10 @@ export default {
 			const cache = this.ensureMergeCache();
 			const hit = cache.map.get(this.buildMergeKey(newItem));
 			return hit && hit.item ? hit : null;
+		},
+		resolveRowKey(item) {
+			if (!item) return "";
+			return item.posa_row_id || item.posa_row_key;
 		},
 		refreshMergeCacheEntry(entry, indexHint = null) {
 			if (!entry) return;
@@ -1413,15 +1432,20 @@ export default {
 		},
 		addItem(newItem) {
 			// PERF: use cached merge lookup to avoid O(n) scans when many items are added rapidly
-			const cachedMatch = this.getMergeTarget(newItem);
+			const normalizedKey = this.buildMergeKey(newItem);
+			const normalizedItem = { ...newItem, posa_row_key: normalizedKey };
+			const cachedMatch = this.getMergeTarget(normalizedItem);
 			const match = cachedMatch?.item;
 			if (match) {
+				if (!match.posa_row_key) {
+					match.posa_row_key = normalizedKey;
+				}
 				match.qty += newItem.qty || 1;
 				match.amount = match.qty * match.rate;
 				this.refreshMergeCacheEntry(match, cachedMatch.index);
 				this.$forceUpdate();
 			} else {
-				this.items.push({ ...newItem });
+				this.items.push(normalizedItem);
 				const inserted = this.items[this.items.length - 1];
 				this.refreshMergeCacheEntry(inserted, this.items.length - 1);
 			}
