@@ -873,6 +873,28 @@ export default {
 			get() {
 				return this.invoiceStore.invoiceDoc;
 			},
+			extractSubmissionErrorMessage(exc) {
+				if (!exc) {
+					return __("Unknown error");
+				}
+				if (exc?._server_messages) {
+					try {
+						const parsed = JSON.parse(exc._server_messages);
+						if (Array.isArray(parsed) && parsed.length) {
+							const first = parsed[0];
+							if (typeof first === "string") {
+								return frappe.utils.strip_html(first);
+							}
+						}
+					} catch {
+						/* ignore parse issues */
+					}
+				}
+				if (exc?.message) {
+					return exc.message;
+				}
+				return exc.toString ? exc.toString() : __("Unknown error");
+			},
 			set(value) {
 				this.invoiceStore.setInvoiceDoc(value);
 			},
@@ -1640,99 +1662,125 @@ export default {
                                         },
                                 });
 
-				if (!r.message) {
-					if (
-						this.pos_profile?.posa_allow_submissions_in_background_job &&
-						this.eventBus &&
-						typeof this.eventBus.emit === "function"
-					) {
-						this.eventBus.emit("invoice_submission_failed", {
-							invoice: this.invoice_doc?.name,
-							reason: __("No response from server"),
+					if (!r.message) {
+						if (
+							this.pos_profile?.posa_allow_submissions_in_background_job &&
+							this.eventBus &&
+							typeof this.eventBus.emit === "function"
+						) {
+							this.eventBus.emit("invoice_submission_failed", {
+								invoice: this.invoice_doc?.name,
+								reason: __("No response from server"),
+							});
+						}
+						this.eventBus.emit("show_message", {
+							title: __("Error submitting invoice: No response from server"),
+							color: "error",
 						});
+						return;
 					}
-					this.eventBus.emit("show_message", {
-						title: __("Error submitting invoice: No response from server"),
-						color: "error",
-					});
-					return;
-				}
 
-				if (print) {
-					this.load_print_page();
-				}
-				this.customer_credit_dict = [];
-				this.redeem_customer_credit = false;
-				this.is_cashback = true;
-				this.is_credit_return = false;
-				this.sales_person = "";
-				this.eventBus.emit("set_last_invoice", this.invoice_doc.name);
-				this.eventBus.emit("show_message", {
-					title:
-						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-							? __("Sales Order {0} is Submitted", [r.message.name])
-							: this.invoiceType === "Quotation"
-								? __("Quotation {0} is Submitted", [r.message.name])
-								: __("Invoice {0} is Submitted", [r.message.name]),
-					color: "success",
-				});
-				frappe.utils.play_sound("submit");
-				const submittedItems = Array.isArray(this.invoice_doc.items) ? this.invoice_doc.items : [];
-				updateLocalStock(submittedItems);
-				stockCoordinator.applyInvoiceConsumption(submittedItems, {
-					source: "invoice",
-				});
-				const submittedCodes = submittedItems
-					.map((item) => (item ? item.item_code : null))
-					.filter((code) => code !== undefined && code !== null);
-				this.eventBus.emit("invoice_stock_adjusted", {
-					items: submittedItems,
-					item_codes: submittedCodes,
-					timestamp: Date.now(),
-				});
-				this.addresses = [];
-				this.eventBus.emit("clear_invoice");
-				this.eventBus.emit("focus_item_search");
-				this.eventBus.emit("reset_posting_date");
-				this.back_to_invoice();
-			} catch (exc) {
-				console.error("Error submitting invoice:", exc);
-				let errorMsg = exc.toString();
-				if (errorMsg.includes("Amount must be negative")) {
+					const wasSubmitted = r.message?.docstatus === 1 || r.message?.status === 1;
+					const responseInvoiceName = r.message?.name || this.invoice_doc?.name;
+
+					if (!wasSubmitted && this.pos_profile?.posa_allow_submissions_in_background_job) {
+						const backgroundReason =
+							r.message?.error ||
+							r.message?.exc ||
+							r.message?.exception ||
+							r.message?.message ||
+							__("Submission kept as draft while processing in background.");
+						if (this.eventBus && typeof this.eventBus.emit === "function") {
+							this.eventBus.emit("invoice_submission_failed", {
+								invoice: responseInvoiceName,
+								reason: backgroundReason,
+							});
+						}
+					}
+
+					if (!wasSubmitted) {
+						this.eventBus.emit("show_message", {
+							title: __("Invoice {0} stayed in draft", [responseInvoiceName || ""]),
+							color: "warning",
+						});
+						return;
+					}
+
+					if (print) {
+						this.load_print_page();
+					}
+					this.customer_credit_dict = [];
+					this.redeem_customer_credit = false;
+					this.is_cashback = true;
+					this.is_credit_return = false;
+					this.sales_person = "";
+					this.eventBus.emit("set_last_invoice", this.invoice_doc.name);
 					this.eventBus.emit("show_message", {
-						title: __("Fixing payment amounts for return invoice..."),
-						color: "warning",
+						title:
+							this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+								? __("Sales Order {0} is Submitted", [r.message.name])
+								: this.invoiceType === "Quotation"
+									? __("Quotation {0} is Submitted", [r.message.name])
+									: __("Invoice {0} is Submitted", [r.message.name]),
+						color: "success",
 					});
-					this.invoice_doc.payments.forEach((payment) => {
-						if (payment.amount > 0) {
-							payment.amount = -Math.abs(payment.amount);
-						}
-						if (payment.base_amount > 0) {
-							payment.base_amount = -Math.abs(payment.base_amount);
-						}
+					frappe.utils.play_sound("submit");
+					const submittedItems = Array.isArray(this.invoice_doc.items) ? this.invoice_doc.items : [];
+					updateLocalStock(submittedItems);
+					stockCoordinator.applyInvoiceConsumption(submittedItems, {
+						source: "invoice",
 					});
-					console.log("Retrying submission with fixed payment amounts");
-					setTimeout(() => {
-						this.submit_invoice(print);
-					}, 500);
-				} else {
-					if (
-						this.pos_profile?.posa_allow_submissions_in_background_job &&
-						this.eventBus &&
-						typeof this.eventBus.emit === "function"
-					) {
-						this.eventBus.emit("invoice_submission_failed", {
-							invoice: this.invoice_doc?.name,
-							reason: errorMsg,
+					const submittedCodes = submittedItems
+						.map((item) => (item ? item.item_code : null))
+						.filter((code) => code !== undefined && code !== null);
+					this.eventBus.emit("invoice_stock_adjusted", {
+						items: submittedItems,
+						item_codes: submittedCodes,
+						timestamp: Date.now(),
+					});
+					this.addresses = [];
+					this.eventBus.emit("clear_invoice");
+					this.eventBus.emit("focus_item_search");
+					this.eventBus.emit("reset_posting_date");
+					this.back_to_invoice();
+				} catch (exc) {
+					console.error("Error submitting invoice:", exc);
+					let errorMsg = this.extractSubmissionErrorMessage(exc);
+					if (errorMsg.includes("Amount must be negative")) {
+						this.eventBus.emit("show_message", {
+							title: __("Fixing payment amounts for return invoice..."),
+							color: "warning",
+						});
+						this.invoice_doc.payments.forEach((payment) => {
+							if (payment.amount > 0) {
+								payment.amount = -Math.abs(payment.amount);
+							}
+							if (payment.base_amount > 0) {
+								payment.base_amount = -Math.abs(payment.base_amount);
+							}
+						});
+						console.log("Retrying submission with fixed payment amounts");
+						setTimeout(() => {
+							this.submit_invoice(print);
+						}, 500);
+					} else {
+						if (
+							this.pos_profile?.posa_allow_submissions_in_background_job &&
+							this.eventBus &&
+							typeof this.eventBus.emit === "function"
+						) {
+							this.eventBus.emit("invoice_submission_failed", {
+								invoice: this.invoice_doc?.name,
+								reason: errorMsg,
+							});
+						}
+						this.eventBus.emit("show_message", {
+							title: __("Error submitting invoice: ") + errorMsg,
+							color: "error",
 						});
 					}
-					this.eventBus.emit("show_message", {
-						title: __("Error submitting invoice: ") + errorMsg,
-						color: "error",
-					});
 				}
-			}
-		},
+			},
 		// Set full amount for a payment method (or negative for returns)
 		set_full_amount(idx) {
 			const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
