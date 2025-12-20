@@ -968,7 +968,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
         enqueue(
             method=submit_in_background_job,
             queue="default",
-            timeout=3000,
+            timeout=30,
             is_async=True,
             kwargs={
                 "invoice": invoice_doc.name,
@@ -978,6 +978,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 "total_cash": total_cash,
                 "cash_account": cash_account,
                 "payments": payments,
+                "user": frappe.session.user,
             },
         )
     else:
@@ -991,6 +992,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 def submit_in_background_job(kwargs):
     invoice = kwargs.get("invoice")
     retry_count = kwargs.get("retry_count", 0)
+    user = kwargs.get("user")
 
     try:
         doctype = kwargs.get("doctype") or "Sales Invoice"
@@ -1045,7 +1047,7 @@ def submit_in_background_job(kwargs):
             enqueue(
                 method=submit_in_background_job,
                 queue="default",
-                timeout=3000,
+                timeout=30,
                 is_async=True,
                 kwargs=kwargs,
             )
@@ -1054,7 +1056,7 @@ def submit_in_background_job(kwargs):
         frappe.publish_realtime(
             "pos_invoice_submit_error",
             {"invoice": invoice, "error": error_msg},
-            user=frappe.session.user,
+            user=user,
         )
 
 
