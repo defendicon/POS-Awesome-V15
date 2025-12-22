@@ -7,7 +7,11 @@ import json
 import frappe
 from frappe.utils import nowdate, flt
 from frappe import _
-from erpnext.accounts.party import get_party_bank_account
+from erpnext.accounts.party import (
+    get_party_bank_account,
+    get_party_account,
+    get_outstanding_invoices,
+)
 from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
@@ -389,5 +393,25 @@ def get_available_credit(customer, company):
         }
 
         total_credit.append(row)
+
+    party_account = get_party_account("Customer", customer, company)
+    outstanding_items = get_outstanding_invoices(
+        "Customer", customer, party_account, company=company
+    )
+
+    for item in outstanding_items:
+        if (
+            item.get("voucher_type") == "Journal Entry"
+            and flt(item.get("outstanding_amount")) < 0
+        ):
+            total_credit.append(
+                {
+                    "type": "Journal Entry",
+                    "credit_origin": item.get("voucher_no"),
+                    "total_credit": abs(flt(item.get("outstanding_amount"))),
+                    "credit_to_redeem": 0,
+                    "source_type": "Journal Entry",
+                }
+            )
 
     return total_credit
