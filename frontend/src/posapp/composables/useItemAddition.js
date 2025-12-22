@@ -799,8 +799,8 @@ export function useItemAddition() {
 		}
 
 		// Initialize flag for tracking manual rate changes
-		new_item._manual_rate_set = false;
-		new_item._manual_rate_set_from_uom = false;
+		new_item._manual_rate_set = new_item._manual_rate_set || false;
+		new_item._manual_rate_set_from_uom = new_item._manual_rate_set_from_uom || false;
 
 		// Set negative quantity for return invoices
 		if (context.isReturnInvoice && item.qty > 0) {
