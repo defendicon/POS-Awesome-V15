@@ -191,6 +191,51 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
             order_by="posting_date desc",
         )
 
+        # Get all outstanding Journal Entries
+        je_filters = {
+            "company": company,
+            "docstatus": 1,
+            "party_type": "Customer",
+            "party": customer,
+        }
+
+        # Filter for outstanding amount > 0 (Debit entries, meaning customer owes us)
+        # In ERPNext, party_balance for Customer (Asset) is Debit - Credit.
+        # But Journal Entries structure is accounts child table.
+        # We can use the get_outstanding_invoices utility from ERPNext to help,
+        # or we can query the GL/Journal Entry Account.
+        # A simpler way often used is querying the GL Entry or using the `get_outstanding_invoices` utility.
+
+        # However, to match the direct query style above, we need to be careful.
+        # Let's use `get_outstanding_invoices` from `erpnext.accounts.utils` which handles this robustly
+        # but we need to re-map the fields to match our output format.
+
+        from erpnext.accounts.utils import get_outstanding_invoices as get_erpnext_outstanding_invoices
+
+        erpnext_outstanding = get_erpnext_outstanding_invoices(
+            party_type="Customer",
+            party=customer,
+            account=party_account,
+            company=company
+        )
+
+        for item in erpnext_outstanding:
+            if item.voucher_type == "Journal Entry":
+                outstanding_invoices.append(frappe._dict({
+                    "voucher_no": item.voucher_no,
+                    "outstanding_amount": flt(item.outstanding_amount),
+                    "invoice_amount": flt(item.invoice_amount),
+                    "due_date": item.due_date,
+                    "posting_date": item.posting_date,
+                    "currency": item.currency,
+                    "customer": customer,
+                    "customer_name": frappe.get_cached_value("Customer", customer, "customer_name"), # Fetch if needed
+                    # pos_profile might not be applicable for JE, can leave None or infer
+                }))
+
+        # Sort combined list by posting date desc
+        outstanding_invoices.sort(key=lambda x: x.posting_date or "", reverse=True)
+
         # Ensure all amounts are properly formatted
         for invoice in outstanding_invoices:
             invoice.outstanding_amount = flt(invoice.outstanding_amount)

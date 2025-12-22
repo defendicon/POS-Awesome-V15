@@ -934,28 +934,6 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 invoice_doc.is_pos = 0
                 is_payment_entry = 1
 
-            elif row["type"] == "Journal Entry" and row["credit_to_redeem"]:
-                je = frappe.get_doc("Journal Entry", row["credit_origin"])
-
-                advance_payment = {
-                    "reference_type": "Journal Entry",
-                    "reference_name": je.name,
-                    "remarks": je.user_remark,
-                    "advance_amount": row["total_credit"],
-                    "allocated_amount": row["credit_to_redeem"],
-                }
-
-                advance_row = invoice_doc.append("advances", {})
-                advance_row.update(advance_payment)
-                child_dt = (
-                    "POS Invoice Advance"
-                    if invoice_doc.doctype == "POS Invoice"
-                    else "Sales Invoice Advance"
-                )
-                ensure_child_doctype(invoice_doc, "advances", child_dt)
-                invoice_doc.is_pos = 0
-                is_payment_entry = 1
-
     payments = invoice_doc.payments
 
     _auto_set_return_batches(invoice_doc)
