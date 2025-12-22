@@ -10,8 +10,8 @@ from frappe import _
 from erpnext.accounts.party import (
     get_party_bank_account,
     get_party_account,
-    get_outstanding_invoices,
 )
+from erpnext.accounts.utils import get_outstanding_invoices
 from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
