@@ -1999,8 +1999,10 @@ export default {
 				return;
 			}
 
-			// Ensure details are initialized before validation
-			await this.update_items_details([item]);
+			// PERF: Skip blocking update_items_details call.
+			// The background sync mechanism (flushBackgroundUpdates) in invoiceItemMethods.js
+			// will handle fetching fresh details asynchronously after the item is added.
+			// await this.update_items_details([item]);
 
 			// Validate item before adding to cart
 			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
@@ -2012,6 +2014,7 @@ export default {
 				this.eventBus,
 				this.blockSaleBeyondAvailableQty,
 				!suppressNegativeWarning,
+				true, // Skip server-side validation for instant add
 			);
 
 			if (!isValid) {

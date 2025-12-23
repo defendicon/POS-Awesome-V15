@@ -18,8 +18,6 @@
 					:server-online="serverOnline"
 					:server-connecting="serverConnecting"
 					:is-ip-host="isIpHost"
-					:sync-totals="syncTotals"
-					:cache-ready="cacheReady"
 				/>
 			</template>
 
@@ -41,6 +39,15 @@
 			<!-- Slot for Database Usage Gadget -->
 			<template #db-usage-gadget>
 				<DatabaseUsageGadget />
+			</template>
+
+			<template #notification-bell>
+				<NotificationBell
+					:notifications="notificationCenter.items"
+					:unread-count="notificationCenter.unread"
+					@mark-read="markBellNotificationsRead"
+					@clear="clearBellNotifications"
+				/>
 			</template>
 
 			<!-- Slot for menu -->
@@ -114,6 +121,7 @@ import { defineAsyncComponent } from "vue";
 import NavbarAppBar from "./navbar/NavbarAppBar.vue";
 import NavbarDrawer from "./navbar/NavbarDrawer.vue";
 import NavbarMenu from "./navbar/NavbarMenu.vue";
+import NotificationBell from "./navbar/NotificationBell.vue";
 import StatusIndicator from "./navbar/StatusIndicator.vue";
 import CacheUsageMeter from "./navbar/CacheUsageMeter.vue";
 import AboutDialog from "./navbar/AboutDialog.vue";
@@ -145,6 +153,7 @@ export default {
 		NavbarAppBar,
 		NavbarDrawer,
 		NavbarMenu,
+		NotificationBell,
 		StatusIndicator,
 		CacheUsageMeter,
 		AboutDialog,
@@ -183,7 +192,6 @@ export default {
 			type: Object,
 			default: () => ({ total: 0, indexedDB: 0, localStorage: 0 }),
 		},
-		cacheReady: Boolean,
 		loadingProgress: {
 			type: Number,
 			default: 0,
@@ -222,25 +230,28 @@ export default {
 			clearQueuedOnClose: false,
 			lastNotificationShownAt: {},
 			clearingCache: false,
-			initialCacheRefreshRequested: false,
 			notificationUpdateHandle: null,
 			notificationUpdateUsesTimeout: false,
+			notificationCenter: {
+				items: [],
+				unread: 0,
+			},
+			lastSyncTotalsSnapshot: { pending: 0, synced: 0, drafted: 0 },
+			syncNotificationPrimed: false,
 		};
 	},
 	watch: {
-		cacheReady: {
-			handler(newVal) {
-				if (newVal && !this.initialCacheRefreshRequested) {
-					this.initialCacheRefreshRequested = true;
-					this.refreshCacheUsage();
-				}
-			},
-			immediate: true,
-		},
 		snack(newVal, oldVal) {
 			if (!newVal && oldVal) {
 				this.handleSnackbarClosed();
 			}
+		},
+		syncTotals: {
+			handler(newTotals, oldTotals) {
+				this.handleSyncTotalsNotification(newTotals, oldTotals);
+			},
+			deep: true,
+			immediate: true,
 		},
 	},
 	computed: {
@@ -271,6 +282,7 @@ export default {
 			this.eventBus.off("freeze", this.handleFreeze);
 			this.eventBus.off("unfreeze", this.handleUnfreeze);
 			this.eventBus.off("set_company", this.handleSetCompany);
+			this.eventBus.off("invoice_submission_failed", this.handleInvoiceSubmissionFailed);
 		}
 	},
 	methods: {
@@ -351,6 +363,7 @@ export default {
 				this.eventBus.on("freeze", this.handleFreeze);
 				this.eventBus.on("unfreeze", this.handleUnfreeze);
 				this.eventBus.on("set_company", this.handleSetCompany);
+				this.eventBus.on("invoice_submission_failed", this.handleInvoiceSubmissionFailed);
 			}
 		},
 		handleNavClick() {
@@ -431,6 +444,150 @@ export default {
 		},
 		updateAfterDelete() {
 			this.$emit("update-after-delete");
+		},
+		handleSyncTotalsNotification(newTotals = {}, oldTotals = {}) {
+			const normalized = this.normalizeSyncTotals(newTotals);
+			const previous = this.syncNotificationPrimed
+				? this.normalizeSyncTotals(this.lastSyncTotalsSnapshot)
+				: this.normalizeSyncTotals(oldTotals);
+
+			// Prime state without spamming when component mounts
+			if (!this.syncNotificationPrimed) {
+				this.syncNotificationPrimed = true;
+				this.lastSyncTotalsSnapshot = normalized;
+
+				if (this.hasOfflineSyncCounts(normalized)) {
+					this.addBellNotification({
+						title: this.__("Offline invoices status"),
+						detail: this.__("Pending: {0} | Synced: {1} | Draft: {2}", [
+							normalized.pending,
+							normalized.synced,
+							normalized.drafted,
+						]),
+						color: normalized.pending ? "warning" : "success",
+					});
+				}
+				return;
+			}
+
+			const diffSynced = Math.max(0, normalized.synced - previous.synced);
+			const diffDrafted = Math.max(0, normalized.drafted - previous.drafted);
+
+			if (normalized.pending !== previous.pending) {
+				const pendingTitle =
+					normalized.pending > 0
+						? this.__("{0} offline invoice{1} pending", [
+								normalized.pending,
+								normalized.pending > 1 ? "s" : "",
+							])
+						: this.__("No pending offline invoices");
+
+				this.addBellNotification({
+					title: pendingTitle,
+					detail: this.__("Pending count updated from {0} to {1}", [
+						previous.pending,
+						normalized.pending,
+					]),
+					color: normalized.pending ? "warning" : "success",
+				});
+			}
+
+			if (diffSynced > 0) {
+				this.addBellNotification({
+					title: this.__("{0} offline invoice{1} synced", [
+						diffSynced,
+						diffSynced > 1 ? "s" : "",
+					]),
+					detail: this.__("Pending: {0}", [normalized.pending]),
+					color: "success",
+				});
+			}
+
+			if (diffDrafted > 0) {
+				this.addBellNotification({
+					title: this.__("{0} offline invoice{1} saved as draft", [
+						diffDrafted,
+						diffDrafted > 1 ? "s" : "",
+					]),
+					detail: this.__("Pending: {0}", [normalized.pending]),
+					color: "warning",
+				});
+			}
+
+			if (normalized.pending === 0 && previous.pending > 0 && diffSynced === 0 && diffDrafted === 0) {
+				this.addBellNotification({
+					title: this.__("Offline invoices synced"),
+					detail: this.__("All pending invoices are up to date"),
+					color: "success",
+				});
+			}
+
+			this.lastSyncTotalsSnapshot = normalized;
+		},
+		normalizeSyncTotals(totals = {}) {
+			const toNumber = (value) => {
+				const parsed = Number(value);
+				return Number.isFinite(parsed) ? parsed : 0;
+			};
+
+			return {
+				pending: toNumber(totals.pending),
+				synced: toNumber(totals.synced),
+				drafted: toNumber(totals.drafted),
+			};
+		},
+		hasOfflineSyncCounts(totals = {}) {
+			const normalized = this.normalizeSyncTotals(totals);
+			return normalized.pending > 0 || normalized.synced > 0 || normalized.drafted > 0;
+		},
+		handleInvoiceSubmissionFailed(payload = {}) {
+			const invoiceNumber =
+				payload.invoice || payload.invoiceId || payload.invoice_name || payload.name || payload.reference;
+			const rawReason = (payload.reason || payload.error || payload.message || "").toString().trim();
+			const reasonText =
+				rawReason || this.__("The invoice stayed in draft. Please review and submit it manually.");
+			const title = invoiceNumber
+				? this.__("Invoice {0} submission failed", [invoiceNumber])
+				: this.__("Invoice submission failed");
+
+			this.addBellNotification({
+				title,
+				detail: this.__("Saved as draft because: {0}", [reasonText]),
+				color: "error",
+				timestamp: payload.timestamp || Date.now(),
+			});
+
+			this.showMessage({
+				title,
+				summary: title,
+				detail: reasonText,
+				color: "error",
+				groupId: "invoice-submission-failed",
+			});
+		},
+		addBellNotification(notification = {}) {
+			const title = notification.title || this.__("Notification");
+			const detail = notification.detail || "";
+			const color = notification.color || "info";
+			const timestamp = notification.timestamp || Date.now();
+
+			const entry = {
+				id: `${timestamp}-${Math.random().toString(36).slice(2, 8)}`,
+				title,
+				detail,
+				color,
+				timestamp,
+			};
+
+			this.notificationCenter.items = [entry, ...this.notificationCenter.items].slice(0, 20);
+			this.notificationCenter.unread += 1;
+		},
+		markBellNotificationsRead() {
+			this.notificationCenter.unread = 0;
+		},
+		clearBellNotifications() {
+			this.notificationCenter.items = [];
+			this.notificationCenter.unread = 0;
 		},
 		showMessage(data) {
 			const notification = this.normalizeNotification(data);

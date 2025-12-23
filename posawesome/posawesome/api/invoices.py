@@ -967,8 +967,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
     if submit_in_background and allow_background_submit:
         enqueue(
             method=submit_in_background_job,
-            queue="short",
-            timeout=1000,
+            queue="default",
+            timeout=3000,
             is_async=True,
             kwargs={
                 "invoice": invoice_doc.name,
@@ -990,45 +990,56 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
 def submit_in_background_job(kwargs):
     invoice = kwargs.get("invoice")
-    doctype = kwargs.get("doctype") or "Sales Invoice"
-    data = kwargs.get("data") or {}
-    is_payment_entry = kwargs.get("is_payment_entry")
-    total_cash = kwargs.get("total_cash")
-    cash_account = kwargs.get("cash_account")
-    payments = kwargs.get("payments") or []
+    try:
+        doctype = kwargs.get("doctype") or "Sales Invoice"
+        data = kwargs.get("data") or {}
+        is_payment_entry = kwargs.get("is_payment_entry")
+        total_cash = kwargs.get("total_cash")
+        cash_account = kwargs.get("cash_account")
+        payments = kwargs.get("payments") or []
 
-    invoice_doc = frappe.get_doc(doctype, invoice)
+        invoice_doc = frappe.get_doc(doctype, invoice)
 
-    if invoice_doc.docstatus == 1:
-        return
+        if invoice_doc.docstatus == 1:
+            return
 
-    invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
+        invoice_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
 
-    # Re-run validations that may be impacted while queued (stock, credit limits)
-    _validate_stock_on_invoice(invoice_doc)
-    if hasattr(invoice_doc, "validate_credit_limit"):
-        invoice_doc.validate_credit_limit()
+        # Re-run validations that may be impacted while queued (stock, credit limits)
+        _validate_stock_on_invoice(invoice_doc)
+        if hasattr(invoice_doc, "validate_credit_limit"):
+            invoice_doc.validate_credit_limit()
 
-    invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
+        invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
-    if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
-        invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
+        if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
+            invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
 
-    if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
-        if not invoice_doc.loyalty_redemption_account:
-            invoice_doc.loyalty_redemption_account = frappe.db.get_value(
-                "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
-            )
+        if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
+            if not invoice_doc.loyalty_redemption_account:
+                invoice_doc.loyalty_redemption_account = frappe.db.get_value(
+                    "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
+                )
 
-        if not invoice_doc.loyalty_redemption_cost_center:
-            invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
+            if not invoice_doc.loyalty_redemption_cost_center:
+                invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
 
-    invoice_doc.save()
+        invoice_doc.save()
 
-    invoice_doc.submit()
-    _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
-    redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+        invoice_doc.submit()
+        _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
+        redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+
+    except Exception as e:
+        frappe.db.rollback()
+        error_msg = str(e)
+        frappe.log_error(f"POS Background Submission Failed for {invoice}: {error_msg}")
+        frappe.publish_realtime(
+            "pos_invoice_submit_error",
+            {"invoice": invoice, "error": error_msg},
+            user=frappe.session.user,
+        )
 
 
 @frappe.whitelist()
