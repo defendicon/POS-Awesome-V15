@@ -201,12 +201,16 @@ export default {
 		return {
 			drawer: false,
 			mini: true,
-			item: 0,
-			items: [
-				{ text: "POS", icon: "mdi-network-pos" },
-				{ text: "Payments", icon: "mdi-credit-card" },
-			],
-			company: "POS Awesome",
+		item: 0,
+		items: [
+			{ text: "POS", icon: "mdi-network-pos" },
+			{ text: "Payments", icon: "mdi-credit-card" },
+			{ text: "Sales Return", icon: "mdi-keyboard-return" },
+			{ text: "Print", icon: "mdi-qrcode" },
+			{ text: "Stock Entry", icon: "mdi-package-variant" },
+			{ text: "Item", icon: "mdi-tag" },
+		],
+		company: "POS Awesome",
 			companyImg: posLogo,
 			showAboutDialog: false,
 			showOfflineInvoices: false,
@@ -245,7 +249,16 @@ export default {
 	},
 	computed: {
 		appBarColor() {
-			return this.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
+			const isDark = this.$theme?.isDark?.value ?? false;
+			const surfaceColor =
+				this.$theme?.themeColors?.value?.surface ??
+				this.$vuetify?.theme?.global?.current?.value?.colors?.surface;
+
+			if (isDark) {
+				return surfaceColor || "#1E1E1E";
+			}
+
+			return surfaceColor || "#ffffff";
 		},
 	},
 	mounted() {

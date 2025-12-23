@@ -23,7 +23,7 @@
 
 			<v-img
 				:src="posLogo"
-				alt="POS Awesome"
+				alt="IBS POS"
 				:max-width="isMobile ? 24 : 32"
 				:class="['pos-navbar-logo', isRtl ? 'rtl-logo' : 'ltr-logo']"
 				loading="lazy"
@@ -42,11 +42,10 @@
 				role="button"
 			>
 				<template v-if="isMobile">
-					<span class="pos-navbar-title-compact">{{ __("POS") }}</span>
+					<span class="pos-navbar-title-compact">{{ __("IBS POS") }}</span>
 				</template>
 				<template v-else>
-					<span class="font-weight-light pos-navbar-title-light">{{ __("POS") }}</span
-					><span class="pos-navbar-title-bold">{{ __("Awesome") }}</span>
+					<span class="pos-navbar-title-bold">{{ __("IBS POS") }}</span>
 				</template>
 			</v-toolbar-title>
 		</div>
@@ -249,7 +248,16 @@ export default {
 	},
 	computed: {
 		appBarColor() {
-			return this.$theme.isDark ? this.$vuetify.theme.themes.dark.colors.surface : "white";
+			const isDark = this.$theme?.isDark?.value ?? false;
+			const surfaceColor =
+				this.$theme?.themeColors?.value?.surface ??
+				this.$vuetify?.theme?.global?.current?.value?.colors?.surface;
+
+			if (isDark) {
+				return surfaceColor || "#1E1E1E";
+			}
+
+			return surfaceColor || "#ffffff";
 		},
 
 		displayName() {
