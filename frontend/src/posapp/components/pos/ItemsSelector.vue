@@ -2186,13 +2186,13 @@ export default {
 			if (this.search_onchange.cancel) {
 				this.search_onchange.cancel();
 			}
-			this._performSearch();
+			this._performSearch(true);
 		},
-		search_onchange: _.debounce(function () {
-			this._performSearch();
+		search_onchange: _.debounce(function (commitSelection = false) {
+			this._performSearch(commitSelection);
 		}, 300),
 
-		async _performSearch() {
+		async _performSearch(commitSelection = false) {
 			const vm = this;
 
 			vm.cancelItemDetailsRequest();
@@ -2224,6 +2224,7 @@ export default {
 			vm.search = trimmedQuery;
 
 			const fromScanner = vm.search_from_scanner;
+			const shouldCommitSelection = commitSelection || fromScanner;
 
 			if (vm.usesLimitSearch) {
 				const shouldForceServer =
@@ -2232,7 +2233,9 @@ export default {
 			} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
 				if (vm.storageAvailable) {
 					await vm.loadVisibleItems(true);
-					vm.enter_event();
+					if (shouldCommitSelection) {
+						vm.enter_event();
+					}
 				} else {
 					vm.get_items(true);
 				}
@@ -2241,7 +2244,9 @@ export default {
 				// from the server so searches aren't limited to the
 				// initially loaded set.
 				await vm.get_items(true);
-				vm.enter_event();
+				if (shouldCommitSelection) {
+					vm.enter_event();
+				}
 
 				if (vm.displayedItems && vm.displayedItems.length > 0) {
 					setTimeout(() => {
