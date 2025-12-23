@@ -2875,6 +2875,7 @@ export default {
 
 				onScan.attachTo(document, {
 					suffixKeyCodes: [],
+					minLength: 8,
 					keyCodeMapper: function (oEvent) {
 						oEvent.stopImmediatePropagation();
 						oEvent.preventDefault();
