@@ -111,6 +111,13 @@ Notes:
 33. Payments Reconciliation
 34. A lot more bug fixes from the version 14
 35. Offline invoices that fail to submit are saved as draft documents
+36. **Shift Management**: Full support for opening and closing POS shifts with cash reconciliation, detailed shift reports, and payment breakdown.
+37. **System Status Gadgets**: Real-time monitoring of Server, Database, Cache, and Network status directly from the POS navbar.
+38. **Quotations**: Create, update, and submit Quotations directly from the POS interface, useful for generating estimates before a sale.
+39. **Camera Scanner**: Integrated camera support for scanning barcodes on mobile or desktop devices, eliminating the need for a dedicated barcode scanner.
+40. **Background Sync**: Advanced background synchronization for offline transactions and master data updates (Items, Customers), ensuring data consistency.
+41. **Fly to Cart Animation**: Visual feedback when adding items to the cart.
+42. **Performance**: Optimized for large datasets using virtual scrolling and efficient state management.
 
 
 ### Shortcuts:
