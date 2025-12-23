@@ -31,7 +31,7 @@
 			:search="itemSearch"
 			:custom-filter="customItemFilter"
 		>
-			<template v-slot:item="{ item }">
+			<template v-slot:item="{ item, toggleExpand, internalItem }">
 				<CartItemRow
 					:item="item"
 					:posProfile="pos_profile"
@@ -61,7 +61,7 @@
 					@reset-item-name="resetItemName"
 					@toggle-offer="toggleOffer"
 					@remove-item="removeItem"
-					@click="handleRowClick($event, item)"
+					@click="handleRowClick($event, item, toggleExpand, internalItem)"
 				/>
 			</template>
 
@@ -1245,14 +1245,10 @@ export default {
 			this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
 		},
 
-		handleRowClick(event, item) {
-			// Only toggle expand if not clicking on interactive elements
-			// CartItemRow should handle click.stop on interactive elements
-			// But for the row itself, we might want to toggle expand
-			// Since v-data-table handles expand-on-click, we might not need explicit handling
-			// But since we override the item slot, we might need to handle it if we want expand behavior
-			// The prop `expand-on-click` on v-data-table-virtual usually handles this if `tr` is rendered
-			// Let's assume standard behavior for now, or emit event if needed.
+		handleRowClick(event, item, toggleExpand, internalItem) {
+			if (toggleExpand) {
+				toggleExpand(internalItem);
+			}
 		},
 	},
 

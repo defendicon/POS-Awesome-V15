@@ -619,7 +619,7 @@ export default {
 				price_list_rate: 0,
 				uom: resolvedUom || (catalogItem ? catalogItem.uom : undefined),
 			};
-			const freeLine = this.get_new_item(template);
+			let freeLine = this.get_new_item(template);
 			freeLine.qty = quantity;
 			if (resolvedUom) {
 				freeLine.uom = resolvedUom;
@@ -645,7 +645,10 @@ export default {
 			const insertAt = parentIndex >= 0 ? parentIndex + 1 : this.items.length;
 			if (this.invoiceStore) {
 				// Use the reactive proxy returned by the store
-				freeLine = this.invoiceStore.addItem(freeLine, insertAt);
+				const added = this.invoiceStore.addItem(freeLine, insertAt);
+				if (added) {
+					freeLine = added;
+				}
 			} else {
 				this.items.splice(insertAt, 0, freeLine);
 			}
