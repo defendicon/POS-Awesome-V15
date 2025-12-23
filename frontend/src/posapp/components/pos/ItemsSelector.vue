@@ -730,7 +730,9 @@ export default {
 		keyboardScanStartTime: 0,
 		keyboardScanPendingValue: "",
 		keyboardScanMinLength: 6,
-		keyboardScanMaxInterval: 65,
+		// Require scanner-like speed to avoid triggering on manual typing
+		keyboardScanMaxInterval: 45,
+		keyboardScanMaxDuration: 250,
 		keyboardScanProcessingDelay: 100,
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
@@ -3411,6 +3413,14 @@ export default {
 
 			if (!duration || duration <= 0) {
 				return true;
+			}
+
+			if (
+				this.keyboardScanMaxDuration &&
+				typeof this.keyboardScanMaxDuration === "number" &&
+				duration > this.keyboardScanMaxDuration
+			) {
+				return false;
 			}
 
 			const averageInterval = duration / code.length;
