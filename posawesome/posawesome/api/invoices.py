@@ -132,6 +132,35 @@ def _apply_item_name_overrides(invoice_doc, overrides=None):
             item.name_overridden = 0
 
 
+def _allow_credit_note_extra_items(invoice_doc):
+    """Normalize extra non-stock items on returns to avoid ERPNext return validation errors."""
+    if not invoice_doc or not invoice_doc.get("is_return") or not invoice_doc.get("return_against"):
+        return
+
+    pos_profile = invoice_doc.get("pos_profile")
+    if not pos_profile:
+        return
+
+    allow_extra = cint(
+        frappe.db.get_value("POS Profile", pos_profile, "posa_allow_credit_note_other_items") or 0
+    )
+    if not allow_extra:
+        return
+
+    original_invoice = frappe.get_doc(invoice_doc.doctype, invoice_doc.return_against)
+    original_items = {row.item_code for row in original_invoice.items if row.item_code}
+
+    for item in invoice_doc.items:
+        if not item.item_code or item.item_code in original_items:
+            continue
+        if cint(frappe.get_cached_value("Item", item.item_code, "is_stock_item") or 0):
+            continue
+        if flt(item.qty) < 0:
+            item.qty = abs(flt(item.qty))
+        if flt(item.rate) > 0:
+            item.rate = -abs(flt(item.rate))
+
+
 def _get_available_stock(item):
     """Return available stock qty for an item row."""
     warehouse = item.get("warehouse")
@@ -494,6 +523,7 @@ def update_invoice(data):
         invoice_doc = frappe.get_doc(data)
 
     # Set currency from data before set_missing_values
+    _allow_credit_note_extra_items(invoice_doc)
     # Validate return items if this is a return invoice
     if (data.get("is_return") or invoice_doc.is_return) and invoice_doc.get("return_against"):
         validation = validate_return_items(
@@ -875,6 +905,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
         invoice_doc.update(invoice)
 
     _deduplicate_free_items(invoice_doc)
+    _allow_credit_note_extra_items(invoice_doc)
 
     if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
         invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
