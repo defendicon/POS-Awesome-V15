@@ -13,6 +13,8 @@ from erpnext.stock.doctype.batch.batch import (
 )
 from erpnext.stock.get_item_details import get_item_details
 from frappe import _, as_json
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import redis_cache
@@ -139,10 +141,13 @@ def get_stock_availability(item_code, warehouse):
         # Include all child warehouses when a group warehouse is set
         warehouses = frappe.db.get_descendants("Warehouse", warehouse) or []
 
-    rows = frappe.get_all(
-        "Bin",
-        fields=["sum(actual_qty) as actual_qty"],
-        filters={"item_code": item_code, "warehouse": ["in", warehouses]},
+    bin_doctype = DocType("Bin")
+    rows = (
+        frappe.qb.from_(bin_doctype)
+        .select(Sum(bin_doctype.actual_qty).as_("actual_qty"))
+        .where(bin_doctype.item_code == item_code)
+        .where(bin_doctype.warehouse.isin(warehouses))
+        .run(as_dict=True)
     )
 
     return flt(rows[0].actual_qty) if rows else 0.0
