@@ -6,7 +6,7 @@
 					<span class="text-h6 font-weight-bold">Invoice Discounts</span>
 				</v-card-title>
 				<v-card-text class="pa-4 h-100 d-flex flex-column">
-					<div class="mb-4" style="max-width: 600px; margin: 0 auto">
+					<div class="mb-4 w-100">
 						<Customer :pos_profile="posProfile" />
 					</div>
 
@@ -60,6 +60,9 @@
 							class="elevation-1"
 							density="compact"
 							hover
+							show-select
+							item-value="name"
+							v-model="selectedInvoices"
 							:items-per-page="100"
 						>
 							<template v-slot:item.grand_total="{ item }">
@@ -116,6 +119,7 @@ export default {
 	data() {
 		return {
 			invoices: [],
+			selectedInvoices: [],
 			loading: false,
 			filters: {
 				from_date: "",
