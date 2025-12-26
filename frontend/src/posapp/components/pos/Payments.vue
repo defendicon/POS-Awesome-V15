@@ -866,12 +866,35 @@ export default {
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 			last_payment_change_was_cash: null, // Track last edited payment type
+			backgroundStatusCheck: null,
 		};
 	},
 	computed: {
 		invoice_doc: {
 			get() {
 				return this.invoiceStore.invoiceDoc;
+			},
+			extractSubmissionErrorMessage(exc) {
+				if (!exc) {
+					return __("Unknown error");
+				}
+				if (exc?._server_messages) {
+					try {
+						const parsed = JSON.parse(exc._server_messages);
+						if (Array.isArray(parsed) && parsed.length) {
+							const first = parsed[0];
+							if (typeof first === "string") {
+								return frappe.utils.strip_html(first);
+							}
+						}
+					} catch {
+						/* ignore parse issues */
+					}
+				}
+				if (exc?.message) {
+					return exc.message;
+				}
+				return exc.toString ? exc.toString() : __("Unknown error");
 			},
 			set(value) {
 				this.invoiceStore.setInvoiceDoc(value);
@@ -1319,6 +1342,14 @@ export default {
 				this.eventBus.emit("focus_item_search");
 			});
 		},
+		finishSubmissionNavigation(clearInvoice = false) {
+			this.back_to_invoice();
+			if (clearInvoice) {
+				this.addresses = [];
+				this.eventBus.emit("clear_invoice");
+				this.eventBus.emit("reset_posting_date");
+			}
+		},
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
@@ -1624,27 +1655,65 @@ export default {
 			}
 
 			try {
-                                const r = await frappe.call({
-                                        method:
-                                                this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-                                                        ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-                                                        : this.invoiceType === "Quotation"
-                                                                ? "posawesome.posawesome.api.quotations.submit_quotation"
-                                                                : "posawesome.posawesome.api.invoices.submit_invoice",
-                                        args: {
-                                                data: data,
-                                                invoice: this.invoice_doc,
-                                                order: this.invoice_doc,
-                                                submit_in_background:
-                                                        this.pos_profile.posa_allow_submissions_in_background_job,
-                                        },
-                                });
+				const r = await frappe.call({
+					method:
+						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+							? "posawesome.posawesome.api.sales_orders.submit_sales_order"
+							: this.invoiceType === "Quotation"
+								? "posawesome.posawesome.api.quotations.submit_quotation"
+								: "posawesome.posawesome.api.invoices.submit_invoice",
+					args: {
+						data: data,
+						invoice: this.invoice_doc,
+						order: this.invoice_doc,
+						submit_in_background: this.pos_profile.posa_allow_submissions_in_background_job,
+					},
+				});
 
 				if (!r.message) {
+					if (
+						this.pos_profile?.posa_allow_submissions_in_background_job &&
+						this.eventBus &&
+						typeof this.eventBus.emit === "function"
+					) {
+						this.eventBus.emit("invoice_submission_failed", {
+							invoice: this.invoice_doc?.name,
+							reason: __("No response from server"),
+						});
+					}
 					this.eventBus.emit("show_message", {
 						title: __("Error submitting invoice: No response from server"),
 						color: "error",
 					});
+					return;
+				}
+
+				const docstatus = r.message?.docstatus;
+				const status = r.message?.status;
+				const responseInvoiceName = r.message?.name || this.invoice_doc?.name;
+				const backgroundReason =
+					r.message?.error || r.message?.exc || r.message?.exception || r.message?.message;
+
+				const wasSubmitted =
+					docstatus === 1 || status === 1 || (docstatus === undefined && status === undefined);
+
+				if (!wasSubmitted && backgroundReason) {
+					if (this.pos_profile?.posa_allow_submissions_in_background_job) {
+						if (this.eventBus && typeof this.eventBus.emit === "function") {
+							this.eventBus.emit("invoice_submission_failed", {
+								invoice: responseInvoiceName,
+								reason: backgroundReason,
+							});
+						}
+					}
+
+					this.eventBus.emit("show_message", {
+						title: __("Error submitting invoice: {0}", [responseInvoiceName || ""]),
+						color: "error",
+						detail: backgroundReason,
+					});
+					this.finishSubmissionNavigation(true);
+					this.scheduleBackgroundStatusCheck(responseInvoiceName, r.message?.doctype);
 					return;
 				}
 
@@ -1680,14 +1749,11 @@ export default {
 					item_codes: submittedCodes,
 					timestamp: Date.now(),
 				});
-				this.addresses = [];
-				this.eventBus.emit("clear_invoice");
-				this.eventBus.emit("focus_item_search");
-				this.eventBus.emit("reset_posting_date");
-				this.back_to_invoice();
+				this.finishSubmissionNavigation(true);
+				this.scheduleBackgroundStatusCheck(responseInvoiceName, r.message?.doctype);
 			} catch (exc) {
 				console.error("Error submitting invoice:", exc);
-				let errorMsg = exc.toString();
+				let errorMsg = this.extractSubmissionErrorMessage(exc);
 				if (errorMsg.includes("Amount must be negative")) {
 					this.eventBus.emit("show_message", {
 						title: __("Fixing payment amounts for return invoice..."),
@@ -1706,11 +1772,72 @@ export default {
 						this.submit_invoice(print);
 					}, 500);
 				} else {
+					if (
+						this.pos_profile?.posa_allow_submissions_in_background_job &&
+						this.eventBus &&
+						typeof this.eventBus.emit === "function"
+					) {
+						this.eventBus.emit("invoice_submission_failed", {
+							invoice: this.invoice_doc?.name,
+							reason: errorMsg,
+						});
+					}
 					this.eventBus.emit("show_message", {
 						title: __("Error submitting invoice: ") + errorMsg,
 						color: "error",
 					});
+					if (this.pos_profile?.posa_allow_submissions_in_background_job) {
+						this.finishSubmissionNavigation(true);
+						this.scheduleBackgroundStatusCheck(this.invoice_doc?.name, this.invoice_doc?.doctype);
+					}
 				}
+			}
+		},
+		scheduleBackgroundStatusCheck(invoiceName, doctype) {
+			this.clearBackgroundStatusCheck();
+			if (!this.pos_profile?.posa_allow_submissions_in_background_job) {
+				return;
+			}
+			if (!invoiceName) {
+				return;
+			}
+			this.backgroundStatusCheck = setTimeout(async () => {
+				try {
+					const result = await frappe.call({
+						method: "frappe.client.get_value",
+						args: {
+							doctype: doctype || this.invoice_doc?.doctype || "Sales Invoice",
+							filters: { name: invoiceName },
+							fieldname: ["docstatus"],
+						},
+					});
+					const status = result?.message?.docstatus;
+					if (status === 1) {
+						return;
+					}
+					const reason = this.__("Invoice is still in draft after background submission.");
+					if (this.eventBus && typeof this.eventBus.emit === "function") {
+						this.eventBus.emit("invoice_submission_failed", {
+							invoice: invoiceName,
+							reason,
+						});
+					}
+					this.eventBus.emit("show_message", {
+						title: __("Error submitting invoice: {0}", [invoiceName]),
+						color: "error",
+						detail: reason,
+					});
+				} catch (err) {
+					console.error("Background status check failed", err);
+				} finally {
+					this.clearBackgroundStatusCheck();
+				}
+			}, 10000);
+		},
+		clearBackgroundStatusCheck() {
+			if (this.backgroundStatusCheck) {
+				clearTimeout(this.backgroundStatusCheck);
+				this.backgroundStatusCheck = null;
 			}
 		},
 		// Set full amount for a payment method (or negative for returns)
@@ -2605,6 +2732,7 @@ export default {
 		this.eventBus.off("network-online", this.syncPendingInvoices);
 		this.eventBus.off("server-online", this.syncPendingInvoices);
 		this.eventBus.off("show_payment", this.handleShowPayment);
+		this.clearBackgroundStatusCheck();
 	},
 	// Lifecycle hook: unmounted
 	unmounted() {

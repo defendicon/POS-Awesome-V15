@@ -729,8 +729,10 @@ export default {
 		keyboardScanLastTime: 0,
 		keyboardScanStartTime: 0,
 		keyboardScanPendingValue: "",
-		keyboardScanMinLength: 6,
-		keyboardScanMaxInterval: 65,
+		keyboardScanMinLength: 8,
+		// Require scanner-like speed to avoid triggering on manual typing
+		keyboardScanMaxInterval: 45,
+		keyboardScanMaxDuration: 250,
 		keyboardScanProcessingDelay: 100,
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
@@ -976,6 +978,29 @@ export default {
 			};
 			this.scaleBarcodeSettingsLoaded = true;
 			return this.scaleBarcodeSettings;
+		},
+		startItemWorker() {
+			// Avoid spawning duplicate workers which doubles script downloads and background threads
+			if (this.itemWorker || typeof Worker === "undefined") {
+				return;
+			}
+
+			try {
+				// Use the plain URL so the service worker can match the cached file
+				// even when offline. Using a query string causes cache lookups to fail
+				// which results in "Failed to fetch a worker script" errors.
+				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
+				this.itemWorker = new Worker(workerUrl, { type: "classic" });
+				this.itemWorker.onerror = function (event) {
+					console.error("Worker error:", event);
+					console.error("Message:", event.message);
+					console.error("Filename:", event.filename);
+					console.error("Line number:", event.lineno);
+				};
+			} catch (e) {
+				console.error("Failed to start item worker", e);
+				this.itemWorker = null;
+			}
 		},
 		async ensureScaleBarcodeSettings(force = false) {
 			if (!force && this.scaleBarcodeSettingsLoaded) {
@@ -1240,25 +1265,8 @@ export default {
 				} else {
 					this.localStorageAvailable = true;
 				}
-				if (
-					this.pos_profile &&
-					this.pos_profile.posa_local_storage &&
-					typeof Worker !== "undefined" &&
-					!this.itemWorker
-				) {
-					try {
-						const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-						this.itemWorker = new Worker(workerUrl, { type: "classic" });
-						this.itemWorker.onerror = function (event) {
-							console.error("Worker error:", event);
-							console.error("Message:", event.message);
-							console.error("Filename:", event.filename);
-							console.error("Line number:", event.lineno);
-						};
-					} catch (e) {
-						console.error("Failed to start item worker", e);
-						this.itemWorker = null;
-					}
+				if (this.pos_profile && this.pos_profile.posa_local_storage) {
+					this.startItemWorker();
 				}
 			} else {
 				this.markStorageUnavailable();
@@ -1993,8 +2001,10 @@ export default {
 				return;
 			}
 
-			// Ensure details are initialized before validation
-			await this.update_items_details([item]);
+			// PERF: Skip blocking update_items_details call.
+			// The background sync mechanism (flushBackgroundUpdates) in invoiceItemMethods.js
+			// will handle fetching fresh details asynchronously after the item is added.
+			// await this.update_items_details([item]);
 
 			// Validate item before adding to cart
 			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
@@ -2006,6 +2016,7 @@ export default {
 				this.eventBus,
 				this.blockSaleBeyondAvailableQty,
 				!suppressNegativeWarning,
+				true, // Skip server-side validation for instant add
 			);
 
 			if (!isValid) {
@@ -2194,8 +2205,8 @@ export default {
 			// Keep first_search in sync with the value we are about to search for
 			vm.first_search = trimmedQuery;
 
-			// If the input is a numeric string longer than 6 characters, treat it as a barcode
-			if (/^\d{7,}$/.test(trimmedQuery)) {
+			// If the input is a numeric string longer than 8 characters, treat it as a barcode
+			if (/^\d{8,}$/.test(trimmedQuery)) {
 				vm.onBarcodeScanned(trimmedQuery);
 				return;
 			}
@@ -3404,6 +3415,14 @@ export default {
 				return true;
 			}
 
+			if (
+				this.keyboardScanMaxDuration &&
+				typeof this.keyboardScanMaxDuration === "number" &&
+				duration > this.keyboardScanMaxDuration
+			) {
+				return false;
+			}
+
 			const averageInterval = duration / code.length;
 			return averageInterval <= this.keyboardScanMaxInterval;
 		},
@@ -4422,47 +4441,7 @@ export default {
 			}
 		});
 
-		if (typeof Worker !== "undefined") {
-			try {
-				// Use the plain URL so the service worker can match the cached file
-				// even when offline. Using a query string causes cache lookups to fail
-				// which results in "Failed to fetch a worker script" errors.
-				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-				this.itemWorker = new Worker(workerUrl, { type: "classic" });
-
-				this.itemWorker.onerror = function (event) {
-					console.error("Worker error:", event);
-					console.error("Message:", event.message);
-					console.error("Filename:", event.filename);
-					console.error("Line number:", event.lineno);
-				};
-				console.log("Created worker");
-			} catch (e) {
-				console.error("Failed to start item worker", e);
-				this.itemWorker = null;
-			}
-		}
-
-		if (typeof Worker !== "undefined") {
-			try {
-				// Use the plain URL so the service worker can match the cached file
-				// even when offline. Using a query string causes cache lookups to fail
-				// which results in "Failed to fetch a worker script" errors.
-				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-				this.itemWorker = new Worker(workerUrl, { type: "classic" });
-
-				this.itemWorker.onerror = function (event) {
-					console.error("Worker error:", event);
-					console.error("Message:", event.message);
-					console.error("Filename:", event.filename);
-					console.error("Line number:", event.lineno);
-				};
-				console.log("Created worker");
-			} catch (e) {
-				console.error("Failed to start item worker", e);
-				this.itemWorker = null;
-			}
-		}
+		this.startItemWorker();
 
 		// Setup auto-refresh for item quantities
 		// Trigger an immediate refresh once items are available

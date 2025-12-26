@@ -2,84 +2,6 @@ import { clearPriceListCache } from "../../../offline/index.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 /* global frappe */
 
-const buildSnapshot = (items) => {
-	const snapshot = {
-		order: [],
-		qty: {},
-		stockQty: {},
-		meta: {},
-	};
-
-	(Array.isArray(items) ? items : []).forEach((item) => {
-		if (!item || !item.posa_row_id) {
-			return;
-		}
-		const rowId = item.posa_row_id;
-		snapshot.order.push(rowId);
-		snapshot.qty[rowId] = item.qty;
-		snapshot.stockQty[rowId] = item.stock_qty;
-		snapshot.meta[rowId] = {
-			item_code: item.item_code,
-			item_group: item.item_group,
-			brand: item.brand,
-			uom: item.uom,
-			conversion_factor: item.conversion_factor,
-			price_list_rate: item.price_list_rate,
-			stock_qty: item.stock_qty,
-			posa_is_offer: item.posa_is_offer,
-			posa_is_replace: item.posa_is_replace,
-		};
-	});
-
-	return snapshot;
-};
-
-const diffSnapshots = (previous, current) => {
-	const prevSnapshot = previous || { order: [], qty: {}, stockQty: {}, meta: {} };
-	const changed = new Set();
-	const removedInfo = {};
-
-	const prevOrder = Array.isArray(prevSnapshot.order) ? prevSnapshot.order : [];
-	const currOrder = Array.isArray(current.order) ? current.order : [];
-	const prevSet = new Set(prevOrder);
-	const currSet = new Set(currOrder);
-
-	currOrder.forEach((rowId) => {
-		if (!prevSet.has(rowId)) {
-			changed.add(rowId);
-		}
-	});
-
-	prevOrder.forEach((rowId) => {
-		if (!currSet.has(rowId)) {
-			changed.add(rowId);
-			if (prevSnapshot.meta && prevSnapshot.meta[rowId]) {
-				removedInfo[rowId] = { ...prevSnapshot.meta[rowId] };
-			}
-		}
-	});
-
-	currOrder.forEach((rowId) => {
-		const previousQty = prevSnapshot.qty ? prevSnapshot.qty[rowId] : undefined;
-		if (previousQty !== current.qty[rowId]) {
-			changed.add(rowId);
-		}
-
-		const previousStockQty = prevSnapshot.stockQty ? prevSnapshot.stockQty[rowId] : undefined;
-		if (previousStockQty !== current.stockQty[rowId]) {
-			changed.add(rowId);
-		}
-
-		const prevMeta = prevSnapshot.meta ? prevSnapshot.meta[rowId] : undefined;
-		const currMeta = current.meta ? current.meta[rowId] : undefined;
-		if (JSON.stringify(prevMeta) !== JSON.stringify(currMeta)) {
-			changed.add(rowId);
-		}
-	});
-
-	return { changed, removedInfo };
-};
-
 export default {
 	// Watch for customer change and update related data
 	customer(newValue, oldValue) {
@@ -117,67 +39,27 @@ export default {
 			value: this.discount_percentage_offer_name,
 		});
 	},
-	// Watch for items array changes (deep) and re-handle offers
-	items: {
-		deep: true,
-		handler(newItems) {
-			const snapshot = buildSnapshot(newItems);
-			this._offerSnapshots = this._offerSnapshots || {};
-			const previous = this._offerSnapshots.items;
-			this._offerSnapshots.items = snapshot;
 
-			const { changed, removedInfo } = diffSnapshots(previous, snapshot);
-
-			if (removedInfo && Object.keys(removedInfo).length) {
-				this._pendingRemovedRowInfo = {
-					...(this._pendingRemovedRowInfo || {}),
-					...removedInfo,
-				};
-			}
-
-			if (!previous) {
-				if (snapshot.order.length) {
-					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-				}
-			} else if (changed.size) {
-				this.scheduleOfferRefresh(Array.from(changed));
-			}
-
+	// Optimized watcher: Track store version instead of deep watching items array
+	"invoiceStore.metadata.changeVersion": {
+		handler() {
+			// This covers both items and packed_items changes if they modify the store
 			if (typeof this.emitCartQuantities === "function") {
+				// emitCartQuantities is usually debounced internally or cheap enough
 				this.emitCartQuantities();
 			}
+
+			// Offer refresh is now handled explicitly by actions (addItem/updateItem)
+			// or via the background sync mechanism.
+			// If we need a catch-all, we could schedule it here, but avoiding it prevents double-work.
 		},
 	},
-	packed_items: {
-		deep: true,
-		handler(newItems) {
-			const snapshot = buildSnapshot(newItems);
-			this._offerSnapshots = this._offerSnapshots || {};
-			const previous = this._offerSnapshots.packed;
-			this._offerSnapshots.packed = snapshot;
 
-			const { changed, removedInfo } = diffSnapshots(previous, snapshot);
+	// Keep a shallow watcher on packed_items just in case (for non-store flows)
+	// But ideally we should rely on the store version.
+	// If legacy code mutates items directly without store, this won't catch it,
+	// but our new architecture pushes updates through store actions.
 
-			if (removedInfo && Object.keys(removedInfo).length) {
-				this._pendingRemovedRowInfo = {
-					...(this._pendingRemovedRowInfo || {}),
-					...removedInfo,
-				};
-			}
-
-			if (!previous) {
-				if (snapshot.order.length) {
-					this.scheduleOfferRefresh([...new Set(snapshot.order)]);
-				}
-			} else if (changed.size) {
-				this.scheduleOfferRefresh(Array.from(changed));
-			}
-
-			if (typeof this.emitCartQuantities === "function") {
-				this.emitCartQuantities();
-			}
-		},
-	},
 	// Watch for invoice type change and emit
 	invoiceType() {
 		this.eventBus.emit("update_invoice_type", this.invoiceType);

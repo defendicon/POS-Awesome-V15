@@ -16,7 +16,6 @@
 				:cache-usage="cacheUsage"
 				:cache-usage-loading="cacheUsageLoading"
 				:cache-usage-details="cacheUsageDetails"
-				:cache-ready="cacheReady"
 				:loading-progress="loadingProgress"
 				:loading-active="loadingActive"
 				:loading-message="loadingMessage"
@@ -57,7 +56,6 @@ import {
 	purgeOldQueueEntries,
 	initPromise,
 	memoryInitPromise,
-	isCacheReady,
 	toggleManualOffline,
 	isManualOffline,
 	syncOfflineInvoices,
@@ -112,7 +110,6 @@ export default {
 			cacheUsage: 0,
 			cacheUsageLoading: false,
 			cacheUsageDetails: { total: 0, indexedDB: 0, localStorage: 0 },
-			cacheReady: false,
 
 			// Loading progress handled via utility
 		};
@@ -155,8 +152,6 @@ export default {
 	},
 	mounted() {
 		this.remove_frappe_nav();
-		// Initialize cache ready state early from stored value
-		this.cacheReady = isCacheReady();
 		initLoadingSources(["init", "items", "customers"]);
 		this.initializeData();
 		this.setupNetworkListeners();
@@ -197,7 +192,6 @@ export default {
 		async initializeData() {
 			await initPromise;
 			await memoryInitPromise;
-			this.cacheReady = true;
 			checkDbHealth().catch(() => {});
 			// Load POS profile from cache or storage
 			const openingData = getOpeningStorage();

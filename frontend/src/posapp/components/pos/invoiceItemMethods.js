@@ -619,7 +619,7 @@ export default {
 				price_list_rate: 0,
 				uom: resolvedUom || (catalogItem ? catalogItem.uom : undefined),
 			};
-			const freeLine = this.get_new_item(template);
+			let freeLine = this.get_new_item(template);
 			freeLine.qty = quantity;
 			if (resolvedUom) {
 				freeLine.uom = resolvedUom;
@@ -643,7 +643,15 @@ export default {
 
 			const parentIndex = this.items.findIndex((line) => line.posa_row_id === data.parentRowId);
 			const insertAt = parentIndex >= 0 ? parentIndex + 1 : this.items.length;
-			this.items.splice(insertAt, 0, freeLine);
+			if (this.invoiceStore) {
+				// Use the reactive proxy returned by the store
+				const added = this.invoiceStore.addItem(freeLine, insertAt);
+				if (added) {
+					freeLine = added;
+				}
+			} else {
+				this.items.splice(insertAt, 0, freeLine);
+			}
 			if (this.calc_stock_qty) {
 				this.calc_stock_qty(freeLine, freeLine.qty);
 			}
@@ -652,15 +660,12 @@ export default {
 		const removable = [];
 		this.items.forEach((line, index) => {
 			if (line && line.auto_free_source && !expectedKeys.has(line.auto_free_source)) {
-				removable.push(index);
+				removable.push(line);
 			}
 		});
 
-		removable.reverse().forEach((idx) => {
-			const [line] = this.items.splice(idx, 1);
-			if (line && line.bundle_id) {
-				this.packed_items = this.packed_items.filter((packed) => packed.bundle_id !== line.bundle_id);
-			}
+		removable.forEach((line) => {
+			this.remove_item(line);
 		});
 	},
 	async applyPricingRulesForCart(force = false) {
@@ -4420,6 +4425,49 @@ export default {
 	schedulePricingRuleApplication: debounce(function (force = false) {
 		this.applyPricingRulesForCart(force);
 	}, 150),
+
+	triggerBackgroundFlush: debounce(function () {
+		this.flushBackgroundUpdates();
+	}, 2000), // 2s debounce as requested
+
+	async flushBackgroundUpdates() {
+		if (isOffline()) return;
+
+		const itemsToUpdate = [];
+		const items = this.invoiceStore ? this.invoiceStore.items.value : this.items;
+
+		if (!Array.isArray(items)) return;
+
+		items.forEach((item) => {
+			if (!item) return;
+			// Check if item is marked dirty or needs sync
+			// We can also check if essential fields are missing (like price_list_rate if 0?)
+			// But _needs_update flag set by useItemAddition is the primary signal.
+			if (item._needs_update || item._detailSynced === false) {
+				itemsToUpdate.push(item);
+			}
+		});
+
+		if (itemsToUpdate.length === 0) return;
+
+		console.log(`Background flushing ${itemsToUpdate.length} items`);
+
+		try {
+			// This calls the existing batch update method
+			await this.update_items_details(itemsToUpdate);
+
+			// Mark as synced
+			itemsToUpdate.forEach((item) => {
+				item._needs_update = false;
+				item._detailSynced = true;
+			});
+
+			// Re-apply pricing rules if rates changed
+			this.schedulePricingRuleApplication();
+		} catch (e) {
+			console.error("Background flush failed", e);
+		}
+	},
 
 	change_price_list_rate(item) {
 		const vm = this;

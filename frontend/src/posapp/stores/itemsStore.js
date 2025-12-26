@@ -130,6 +130,9 @@ export const useItemsStore = defineStore("items", () => {
 			prefix: "posa_items_",
 		},
 	});
+	// Throttle expensive cache cleanup to avoid iterating large Maps after every search write
+	const MEMORY_CLEANUP_INTERVAL = 1000; // 1s between cleanups is enough for freshness while saving CPU
+	let lastMemoryCleanup = 0;
 
 	// Computed properties
 	const activePriceList = computed(() => {
@@ -381,6 +384,18 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const searchItems = async (term) => {
+		// Optimization: Check if we can refine the previous search result
+		// This avoids scanning the full item list when the user is just typing more characters
+		const previousTerm = searchTerm.value || "";
+		const canRefineSearch =
+			!shouldUseIndexedSearch() &&
+			term &&
+			previousTerm.length > 0 && // Only refine an existing search
+			term.length > previousTerm.length &&
+			term.toLowerCase().startsWith(previousTerm.toLowerCase()) &&
+			filteredItems.value.length > 0 &&
+			filteredItems.value.length < items.value.length; // Only if we actually filtered something
+
 		searchTerm.value = term;
 		lastSearch.value = term;
 
@@ -451,7 +466,9 @@ export const useItemsStore = defineStore("items", () => {
 				cachedPagination.value.total = Math.max(cachedPagination.value.total, searchResults.length);
 			} else {
 				// Search in current items first
-				searchResults = performLocalSearch(term, items.value);
+				// Optimization: Refine from previous results if applicable to avoid O(N) scan
+				const sourceItems = canRefineSearch ? filteredItems.value : items.value;
+				searchResults = performLocalSearch(term, sourceItems);
 
 				// If no results and term is specific enough, search server
 				if (searchResults.length === 0 && term.length >= 3) {
@@ -1377,6 +1394,17 @@ export const useItemsStore = defineStore("items", () => {
 	const cleanupMemoryCache = () => {
 		const now = Date.now();
 		const ttl = cache.value.memory.ttl;
+
+		// Skip cleanup when called too frequently and the cache is within size limits.
+		// This avoids repeated Map iterations and sorting on rapid search input while
+		// still running promptly when the cache grows beyond the configured max size.
+		if (
+			now - lastMemoryCleanup < MEMORY_CLEANUP_INTERVAL &&
+			cache.value.memory.searchResults.size <= cache.value.memory.maxSize
+		) {
+			return;
+		}
+		lastMemoryCleanup = now;
 
 		// Cleanup expired entries
 		for (const [key, value] of cache.value.memory.searchResults.entries()) {
