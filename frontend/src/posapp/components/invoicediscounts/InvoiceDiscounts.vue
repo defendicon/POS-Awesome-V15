@@ -63,7 +63,7 @@
 							show-select
 							item-value="name"
 							v-model="selectedInvoices"
-							:items-per-page="100"
+							:items-per-page="25"
 						>
 							<template v-slot:item.grand_total="{ item }">
 								{{ formatCurrency(item.grand_total, item.currency) }}
@@ -77,6 +77,30 @@
 								</div>
 							</template>
 						</v-data-table>
+					</div>
+
+					<!-- Footer Actions -->
+					<div class="mt-4 pt-4 border-top" v-if="selectedCustomer">
+						<v-row align="center">
+							<v-col cols="12" sm="4">
+								<v-text-field
+									label="Discount Amount"
+									type="number"
+									density="compact"
+									variant="outlined"
+									hide-details
+									prefix="$"
+								></v-text-field>
+							</v-col>
+							<v-col cols="12" sm="8" class="d-flex justify-end gap-2">
+								<v-btn color="primary" variant="outlined" class="mr-2">
+									Submit
+								</v-btn>
+								<v-btn color="primary">
+									Submit and Print
+								</v-btn>
+							</v-col>
+						</v-row>
 					</div>
 
 					<div v-else class="d-flex justify-center align-center flex-grow-1 text-medium-emphasis">
