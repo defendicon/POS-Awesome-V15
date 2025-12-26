@@ -6,6 +6,7 @@ import json
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.accounts.party import get_party_account
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.batch.batch import (
@@ -1513,9 +1514,7 @@ def create_discount_credit_note(invoice_name, discount_amount, pos_profile=None)
         frappe.throw(_("Discount Amount must be greater than 0"))
 
     # Create Return Invoice
-    return_invoice = make_sales_invoice(invoice_name, ignore_permissions=True)
-    return_invoice.is_return = 1
-    return_invoice.return_against = invoice_name
+    return_invoice = make_return_doc("Sales Invoice", invoice_name)
     return_invoice.update_stock = 0 # No stock update for discount
 
     # Set POS Profile if provided or from original
