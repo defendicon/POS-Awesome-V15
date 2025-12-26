@@ -29,7 +29,7 @@
 				v-for="(item, index) in items"
 				:key="item.text"
 				:value="index"
-				@click="changePage(item.text)"
+				@click="changePage(item.value || item.text)"
 				class="drawer-item"
 			>
 				<template v-slot:prepend>

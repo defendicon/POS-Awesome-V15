@@ -211,8 +211,9 @@ export default {
 			mini: true,
 			item: 0,
 			items: [
-				{ text: "POS", icon: "mdi-network-pos" },
-				{ text: "Payments", icon: "mdi-credit-card" },
+				{ text: "POS", icon: "mdi-network-pos", value: "POS" },
+				{ text: "Payments", icon: "mdi-credit-card", value: "Payments" },
+				{ text: "Invoice Discounts", icon: "mdi-ticket-percent", value: "InvoiceDiscounts" },
 			],
 			company: "POS Awesome",
 			companyImg: posLogo,
