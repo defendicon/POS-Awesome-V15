@@ -6,7 +6,11 @@
 					<span class="text-h6 font-weight-bold">Invoice Discounts</span>
 				</v-card-title>
 				<v-card-text class="pa-4 h-100 overflow-y-auto">
-					<div class="d-flex justify-center align-center h-100 text-medium-emphasis">
+					<div class="mb-4" style="max-width: 600px; margin: 0 auto">
+						<Customer :pos_profile="posProfile" />
+					</div>
+
+					<div class="d-flex justify-center align-center text-medium-emphasis" style="height: 60%">
 						<div class="text-center">
 							<v-icon size="64" color="primary" class="mb-4">mdi-ticket-percent</v-icon>
 							<div class="text-h5">Coming Soon</div>
@@ -20,8 +24,19 @@
 </template>
 
 <script>
+import Customer from "../pos/Customer.vue";
+
 export default {
 	name: "InvoiceDiscounts",
+	components: {
+		Customer,
+	},
+	props: {
+		posProfile: {
+			type: Object,
+			default: () => ({}),
+		},
+	},
 };
 </script>
 
