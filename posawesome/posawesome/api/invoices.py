@@ -1429,3 +1429,72 @@ def get_price_list_currency(price_list: str) -> str:
     if not price_list:
         return None
     return frappe.db.get_value("Price List", price_list, "currency")
+
+@frappe.whitelist()
+def get_submitted_invoices(
+    customer,
+    company=None,
+    from_date=None,
+    to_date=None,
+    invoice_name=None,
+    min_amount=None,
+    max_amount=None,
+    limit=20,
+    page=1,
+    sort_by="posting_date",
+    sort_order="desc",
+    doctype="Sales Invoice",
+    **kwargs,
+):
+    if not customer:
+        return {"invoices": [], "total_count": 0}
+
+    filters = {
+        "customer": customer,
+        "docstatus": 1,
+    }
+
+    if company:
+        filters["company"] = company
+
+    if invoice_name:
+        filters["name"] = ["like", f"%{invoice_name}%"]
+
+    if from_date and to_date:
+        filters["posting_date"] = ["between", [from_date, to_date]]
+    elif from_date:
+        filters["posting_date"] = [">=", from_date]
+    elif to_date:
+        filters["posting_date"] = ["<=", to_date]
+
+    if min_amount:
+        filters["grand_total"] = [">=", flt(min_amount)]
+    if max_amount:
+        if "grand_total" in filters:
+            filters["grand_total"] = ["between", [flt(min_amount), flt(max_amount)]]
+        else:
+            filters["grand_total"] = ["<=", flt(max_amount)]
+
+    order_by = f"{sort_by} {sort_order}"
+
+    invoices = frappe.get_list(
+        doctype,
+        filters=filters,
+        fields=[
+            "name",
+            "posting_date",
+            "grand_total",
+            "currency",
+            "status",
+            "due_date",
+            "paid_amount",
+            "outstanding_amount",
+        ],
+        limit_start=(int(page) - 1) * int(limit),
+        limit_page_length=int(limit),
+        order_by=order_by,
+    )
+
+    total_count = frappe.db.count(doctype, filters=filters)
+
+    return {"invoices": invoices, "total_count": total_count}
