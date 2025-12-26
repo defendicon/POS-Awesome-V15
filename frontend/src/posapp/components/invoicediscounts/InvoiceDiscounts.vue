@@ -1,54 +1,56 @@
 <template>
-	<div class="invoice-discounts-page">
-		<v-container fluid class="pa-0 h-100">
-			<v-card class="h-100 pos-themed-card" flat>
-				<v-card-title class="d-flex align-center py-2 px-4 border-bottom">
+	<div class="invoice-discounts-page h-100">
+		<v-container fluid class="pa-4 h-100">
+			<v-card class="h-100 pos-themed-card d-flex flex-column" flat>
+				<v-card-title class="d-flex align-center py-2 px-4 border-bottom flex-shrink-0">
 					<span class="text-h6 font-weight-bold">Invoice Discounts</span>
 				</v-card-title>
-				<v-card-text class="pa-4 h-100 d-flex flex-column">
-					<div class="mb-4 w-100">
-						<Customer :pos_profile="posProfile" />
-					</div>
+				<v-card-text class="pa-4 flex-grow-1 d-flex flex-column overflow-hidden" style="min-height: 0;">
+					<div class="flex-shrink-0">
+						<div class="mb-4 w-100">
+							<Customer :pos_profile="posProfile" />
+						</div>
 
-					<!-- Filters -->
-					<div class="d-flex gap-4 mb-4" v-if="selectedCustomer">
-						<v-row dense>
-							<v-col cols="12" sm="4">
-								<v-text-field
-									v-model="filters.from_date"
-									label="From Date"
-									type="date"
-									density="compact"
-									variant="outlined"
-									hide-details
-									@change="fetchInvoices"
-								></v-text-field>
-							</v-col>
-							<v-col cols="12" sm="4">
-								<v-text-field
-									v-model="filters.to_date"
-									label="To Date"
-									type="date"
-									density="compact"
-									variant="outlined"
-									hide-details
-									@change="fetchInvoices"
-								></v-text-field>
-							</v-col>
-							<v-col cols="12" sm="4">
-								<v-select
-									v-model="filters.sort_order"
-									:items="sortOptions"
-									label="Sort Order"
-									density="compact"
-									variant="outlined"
-									hide-details
-									item-title="text"
-									item-value="value"
-									@update:modelValue="fetchInvoices"
-								></v-select>
-							</v-col>
-						</v-row>
+						<!-- Filters -->
+						<div class="d-flex gap-4 mb-4" v-if="selectedCustomer">
+							<v-row dense>
+								<v-col cols="12" sm="4">
+									<v-text-field
+										v-model="filters.from_date"
+										label="From Date"
+										type="date"
+										density="compact"
+										variant="outlined"
+										hide-details
+										@change="fetchInvoices"
+									></v-text-field>
+								</v-col>
+								<v-col cols="12" sm="4">
+									<v-text-field
+										v-model="filters.to_date"
+										label="To Date"
+										type="date"
+										density="compact"
+										variant="outlined"
+										hide-details
+										@change="fetchInvoices"
+									></v-text-field>
+								</v-col>
+								<v-col cols="12" sm="4">
+									<v-select
+										v-model="filters.sort_order"
+										:items="sortOptions"
+										label="Sort Order"
+										density="compact"
+										variant="outlined"
+										hide-details
+										item-title="text"
+										item-value="value"
+										@update:modelValue="fetchInvoices"
+									></v-select>
+								</v-col>
+							</v-row>
+						</div>
 					</div>
 
 					<!-- Invoices List -->
@@ -64,6 +66,7 @@
 							item-value="name"
 							v-model="selectedInvoices"
 							:items-per-page="25"
+							fixed-header
 						>
 							<template v-slot:item.grand_total="{ item }">
 								{{ formatCurrency(item.grand_total, item.currency) }}
@@ -79,8 +82,16 @@
 						</v-data-table>
 					</div>
 
+					<div v-else class="d-flex justify-center align-center flex-grow-1 text-medium-emphasis">
+						<div class="text-center">
+							<v-icon size="64" color="primary" class="mb-4">mdi-account-search</v-icon>
+							<div class="text-h5">Select a Customer</div>
+							<div class="text-body-1 mt-2">Search for a customer to view their submitted invoices.</div>
+						</div>
+					</div>
+
 					<!-- Footer Actions -->
-					<div class="mt-4 pt-4 border-top" v-if="selectedCustomer">
+					<div class="mt-4 pt-4 border-top flex-shrink-0" v-if="selectedCustomer">
 						<v-row align="center">
 							<v-col cols="12" sm="4">
 								<v-text-field
@@ -89,26 +100,19 @@
 									density="compact"
 									variant="outlined"
 									hide-details
+									v-model="discountAmount"
 									prefix="$"
 								></v-text-field>
 							</v-col>
 							<v-col cols="12" sm="8" class="d-flex justify-end gap-2">
-								<v-btn color="primary" variant="outlined" class="mr-2">
+								<v-btn color="primary" variant="outlined" class="mr-2" @click="submitDiscount(false)" :loading="submitting">
 									Submit
 								</v-btn>
-								<v-btn color="primary">
+								<v-btn color="primary" @click="submitDiscount(true)" :loading="submitting">
 									Submit and Print
 								</v-btn>
 							</v-col>
 						</v-row>
-					</div>
-
-					<div v-else class="d-flex justify-center align-center flex-grow-1 text-medium-emphasis">
-						<div class="text-center">
-							<v-icon size="64" color="primary" class="mb-4">mdi-account-search</v-icon>
-							<div class="text-h5">Select a Customer</div>
-							<div class="text-body-1 mt-2">Search for a customer to view their submitted invoices.</div>
-						</div>
 					</div>
 				</v-card-text>
 			</v-card>
@@ -117,7 +121,7 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, getCurrentInstance } from "vue";
 import { storeToRefs } from "pinia";
 import Customer from "../pos/Customer.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
@@ -136,14 +140,18 @@ export default {
 		},
 	},
 	setup() {
+		const { proxy } = getCurrentInstance();
+		const eventBus = proxy?.eventBus;
 		const customersStore = useCustomersStore();
 		const { selectedCustomer } = storeToRefs(customersStore);
-		return { selectedCustomer };
+		return { selectedCustomer, eventBus };
 	},
 	data() {
 		return {
 			invoices: [],
 			selectedInvoices: [],
+			discountAmount: "",
+			submitting: false,
 			loading: false,
 			filters: {
 				from_date: "",
@@ -202,6 +210,56 @@ export default {
 		formatDate(date) {
 			if (!date) return "";
 			return frappe.datetime.str_to_user(date);
+		},
+		async submitDiscount(print) {
+			if (this.selectedInvoices.length !== 1) {
+				this.eventBus?.emit("show_message", {
+					title: "Please select exactly one invoice",
+					color: "error",
+				});
+				return;
+			}
+
+			if (!this.discountAmount || parseFloat(this.discountAmount) <= 0) {
+				this.eventBus?.emit("show_message", {
+					title: "Please enter a valid discount amount",
+					color: "error",
+				});
+				return;
+			}
+
+			this.submitting = true;
+			try {
+				const res = await frappe.call({
+					method: "posawesome.posawesome.api.invoices.create_discount_credit_note",
+					args: {
+						invoice_name: this.selectedInvoices[0],
+						discount_amount: this.discountAmount,
+						pos_profile: this.posProfile.name,
+					},
+				});
+
+				if (res.message) {
+					this.eventBus?.emit("show_message", {
+						title: "Discount applied successfully",
+						color: "success",
+					});
+
+					this.selectedInvoices = [];
+					this.discountAmount = "";
+					this.fetchInvoices(); // Refresh list
+
+					if (print) {
+						// Trigger print for the new Credit Note
+						this.eventBus?.emit("print_invoice", res.message);
+					}
+				}
+			} catch (e) {
+				console.error("Failed to apply discount", e);
+				// Error message is usually handled by frappe.call globally or shows up in UI
+			} finally {
+				this.submitting = false;
+			}
 		},
 	},
 };

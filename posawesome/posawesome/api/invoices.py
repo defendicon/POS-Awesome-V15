@@ -1498,3 +1498,65 @@ def get_submitted_invoices(
     total_count = frappe.db.count(doctype, filters=filters)
 
     return {"invoices": invoices, "total_count": total_count}
+
+@frappe.whitelist()
+def create_discount_credit_note(invoice_name, discount_amount, pos_profile=None):
+    if not invoice_name or not discount_amount:
+        frappe.throw(_("Invoice Name and Discount Amount are required"))
+
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
+
+    if invoice_doc.docstatus != 1:
+        frappe.throw(_("Invoice must be submitted"))
+
+    if flt(discount_amount) <= 0:
+        frappe.throw(_("Discount Amount must be greater than 0"))
+
+    # Create Return Invoice
+    return_invoice = make_sales_invoice(invoice_name, ignore_permissions=True)
+    return_invoice.is_return = 1
+    return_invoice.return_against = invoice_name
+    return_invoice.update_stock = 0 # No stock update for discount
+
+    # Set POS Profile if provided or from original
+    if pos_profile:
+        return_invoice.pos_profile = pos_profile
+
+    # Clear existing items
+    return_invoice.items = []
+
+    # Get or create discount item
+    discount_item_code = frappe.db.get_value("Item", {"item_name": "Manual Discount"}, "name")
+
+    # Try to find a suitable non-stock item if specific name not found
+    if not discount_item_code:
+        # Check POS Profile for a configured service item (hypothetically, if the field existed)
+        # Fallback 1: Search for any non-stock item with 'Discount' in the name
+        discount_item_code = frappe.db.get_value("Item", {"item_name": ["like", "%Discount%"], "is_stock_item": 0}, "name")
+
+    if not discount_item_code:
+        # Fallback 2: Search for any non-stock item with 'Service' in the name
+        discount_item_code = frappe.db.get_value("Item", {"item_name": ["like", "%Service%"], "is_stock_item": 0}, "name")
+
+    if not discount_item_code:
+            # Final Fallback: Throw explicit error
+            frappe.throw(_("Unable to find a non-stock item for applying discount. Please create an Item named 'Manual Discount'."))
+
+    # Add discount item
+    return_invoice.append("items", {
+        "item_code": discount_item_code,
+        "qty": -1,
+        "rate": flt(discount_amount),
+        "description": "Manual Discount applied after invoice submission"
+    })
+
+    # Set amounts
+    return_invoice.set_missing_values()
+    return_invoice.calculate_taxes_and_totals()
+
+    # Submit
+    return_invoice.flags.ignore_permissions = True
+    return_invoice.save()
+    return_invoice.submit()
+
+    return return_invoice.name
