@@ -1189,16 +1189,31 @@ def search_invoices_for_return(
         - invoices: List of invoice documents
         - has_more: Boolean indicating if there are more invoices to load
     """
+    def _normalize_request_value(value):
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.lower() in {"", "undefined", "null"}:
+                return None
+            return normalized
+        return value
+
+    invoice_name = _normalize_request_value(invoice_name)
+    company = _normalize_request_value(company)
+    pos_profile = _normalize_request_value(pos_profile)
+    doctype = _normalize_request_value(doctype)
+
     if not company and pos_profile:
         company = frappe.get_cached_value("POS Profile", pos_profile, "company")
 
     if not company:
         frappe.throw(_("Company is required to search invoices."))
 
-    enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
-
     if doctype not in {"Sales Invoice", "POS Invoice"}:
         doctype = "Sales Invoice"
+
+    enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
     # Start with base filters
     filters = {
