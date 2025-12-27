@@ -729,7 +729,7 @@ export default {
 		keyboardScanLastTime: 0,
 		keyboardScanStartTime: 0,
 		keyboardScanPendingValue: "",
-		keyboardScanMinLength: 8,
+		keyboardScanMinLength: 12,
 		// Require scanner-like speed to avoid triggering on manual typing
 		keyboardScanMaxInterval: 45,
 		keyboardScanMaxDuration: 250,
@@ -2205,8 +2205,8 @@ export default {
 			// Keep first_search in sync with the value we are about to search for
 			vm.first_search = trimmedQuery;
 
-			// If the input is a numeric string longer than 8 characters, treat it as a barcode
-			if (/^\d{8,}$/.test(trimmedQuery)) {
+			// If the input is a numeric string 12 characters or longer, treat it as a barcode
+			if (/^\d{12,}$/.test(trimmedQuery)) {
 				vm.onBarcodeScanned(trimmedQuery);
 				return;
 			}
