@@ -4326,7 +4326,13 @@ export default {
 			await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
 			console.log("Pinia store initialized successfully");
 		} else {
-			console.warn("No POS Profile available for store initialization");
+			console.warn("No POS Profile available for store initialization", {
+				pos_profile_prop: this.pos_profile,
+				boot_pos_profile: frappe?.boot?.pos_profile,
+				route_context: frappe?.router?.current_route,
+				customer: this.customer,
+				customer_price_list: this.customer_price_list,
+			});
 		}
 
 		// Keep legacy initialization for backward compatibility
