@@ -677,7 +677,11 @@ def update_invoice(data):
             invoice_doc.return_against = None
             invoice_doc.save()
             frappe.db.set_value(
-                invoice_doc.doctype, invoice_doc.name, "return_against", original_return_against
+                invoice_doc.doctype,
+                invoice_doc.name,
+                "return_against",
+                original_return_against,
+                update_modified=False,
             )
             invoice_doc.return_against = original_return_against
         else:
@@ -1030,7 +1034,11 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 invoice_doc.return_against = None
                 invoice_doc.submit()
                 frappe.db.set_value(
-                    invoice_doc.doctype, invoice_doc.name, "return_against", original_return_against
+                    invoice_doc.doctype,
+                    invoice_doc.name,
+                    "return_against",
+                    original_return_against,
+                    update_modified=False,
                 )
                 invoice_doc.return_against = original_return_against
             else:
