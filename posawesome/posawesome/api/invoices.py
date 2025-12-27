@@ -1256,14 +1256,25 @@ def search_invoices_for_return(
         else:
             filters["grand_total"] = ["<=", float(max_amount)]
 
+    invoice_meta = frappe.get_meta(doctype)
+    customer_meta = frappe.get_meta("Customer")
+
     if customer_name:
-        filters["customer_name"] = ["like", f"%{customer_name}%"]
+        if invoice_meta.has_field("customer_name"):
+            filters["customer_name"] = ["like", f"%{customer_name}%"]
+        else:
+            filters["customer"] = ["like", f"%{customer_name}%"]
 
     if customer_id:
         filters["customer"] = ["like", f"%{customer_id}%"]
 
     customer_ids = None
     if mobile_no or tax_id:
+        if mobile_no and not customer_meta.has_field("mobile_no"):
+            return {"invoices": [], "has_more": False}
+        if tax_id and not customer_meta.has_field("tax_id"):
+            return {"invoices": [], "has_more": False}
+
         conditions = []
         params = {}
 
