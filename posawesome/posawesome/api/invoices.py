@@ -1189,6 +1189,12 @@ def search_invoices_for_return(
         - invoices: List of invoice documents
         - has_more: Boolean indicating if there are more invoices to load
     """
+    invoice_name = cstr(invoice_name).strip() or None
+    customer_name = cstr(customer_name).strip() or None
+    customer_id = cstr(customer_id).strip() or None
+    mobile_no = cstr(mobile_no).strip() or None
+    tax_id = cstr(tax_id).strip() or None
+
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
     profile = None
@@ -1287,9 +1293,14 @@ def search_invoices_for_return(
         # If we found matching customers, add them to the filter
         if customer_ids:
             filters["customer"] = ["in", customer_ids]
-        # If customer search criteria provided but no matches found, return empty
-        elif any([customer_name, customer_id, mobile_no, tax_id]):
-            return {"invoices": [], "has_more": False}
+        # If customer search criteria provided but no matches found, attempt direct invoice search
+        else:
+            if mobile_no or tax_id:
+                return {"invoices": [], "has_more": False}
+            if customer_name:
+                filters["customer_name"] = ["like", f"%{customer_name}%"]
+            if customer_id:
+                filters["customer"] = ["like", f"%{customer_id}%"]
 
     # Count total invoices matching the criteria (for has_more flag)
     total_count_query = frappe.get_list(
