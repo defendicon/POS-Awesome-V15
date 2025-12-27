@@ -543,9 +543,11 @@ export default {
 				page: vm.page,
 				pos_profile: vm.pos_profile?.name,
 				doctype:
-					vm.pos_profile && vm.pos_profile.create_pos_invoice_instead_of_sales_invoice
-						? "POS Invoice"
-						: "Sales Invoice",
+					vm.pos_profile
+						? vm.pos_profile.create_pos_invoice_instead_of_sales_invoice
+							? "POS Invoice"
+							: "Sales Invoice"
+						: null,
 			};
 
 			frappe.call({

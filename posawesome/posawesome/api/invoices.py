@@ -1166,7 +1166,7 @@ def search_invoices_for_return(
     max_amount=None,
     page=1,
     pos_profile=None,
-    doctype="Sales Invoice",
+    doctype=None,
 ):
     """
     Search for invoices that can be returned with separate customer search fields and pagination
@@ -1191,15 +1191,29 @@ def search_invoices_for_return(
     """
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
-    if not company and pos_profile:
-        company = frappe.get_cached_value("POS Profile", pos_profile, "company")
+    profile = None
+    if pos_profile:
+        profile = frappe.get_cached_doc("POS Profile", pos_profile)
+
+    if not company:
+        if profile:
+            company = profile.company
+        else:
+            company = frappe.defaults.get_user_default("company")
+
+    if not doctype:
+        if profile and getattr(profile, "create_pos_invoice_instead_of_sales_invoice", 0):
+            doctype = "POS Invoice"
+        else:
+            doctype = "Sales Invoice"
 
     # Start with base filters
     filters = {
-        "company": company,
         "docstatus": 1,
         "is_return": 0,
     }
+    if company:
+        filters["company"] = company
 
     # Convert page to integer if it's a string
     if page and isinstance(page, str):
