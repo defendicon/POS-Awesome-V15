@@ -979,11 +979,21 @@ def submit_invoice(invoice, data, submit_in_background=False):
             and "does not exist in Sales Invoice" in str(e)
         ):
             frappe.msgprint(str(e), title=_("Warning"), indicator="orange")
+            # Reload timestamp to prevent TimestampMismatchError on retry
+            latest_modified = frappe.db.get_value(
+                invoice_doc.doctype, invoice_doc.name, "modified"
+            )
+            if latest_modified:
+                invoice_doc.modified = latest_modified
             original_return_against = invoice_doc.return_against
             invoice_doc.return_against = None
             invoice_doc.save()
             frappe.db.set_value(
-                invoice_doc.doctype, invoice_doc.name, "return_against", original_return_against
+                invoice_doc.doctype,
+                invoice_doc.name,
+                "return_against",
+                original_return_against,
+                update_modified=False,
             )
             invoice_doc.return_against = original_return_against
         else:
@@ -1096,11 +1106,21 @@ def submit_in_background_job(kwargs):
                 and "Returned Item" in str(e)
                 and "does not exist in Sales Invoice" in str(e)
             ):
+                # Reload timestamp to prevent TimestampMismatchError on retry
+                latest_modified = frappe.db.get_value(
+                    invoice_doc.doctype, invoice_doc.name, "modified"
+                )
+                if latest_modified:
+                    invoice_doc.modified = latest_modified
                 original_return_against = invoice_doc.return_against
                 invoice_doc.return_against = None
                 invoice_doc.save()
                 frappe.db.set_value(
-                    invoice_doc.doctype, invoice_doc.name, "return_against", original_return_against
+                    invoice_doc.doctype,
+                    invoice_doc.name,
+                    "return_against",
+                    original_return_against,
+                    update_modified=False,
                 )
                 invoice_doc.return_against = original_return_against
             else:
@@ -1115,11 +1135,21 @@ def submit_in_background_job(kwargs):
                 and "Returned Item" in str(e)
                 and "does not exist in Sales Invoice" in str(e)
             ):
+                # Reload timestamp to prevent TimestampMismatchError on retry
+                latest_modified = frappe.db.get_value(
+                    invoice_doc.doctype, invoice_doc.name, "modified"
+                )
+                if latest_modified:
+                    invoice_doc.modified = latest_modified
                 original_return_against = invoice_doc.return_against
                 invoice_doc.return_against = None
                 invoice_doc.submit()
                 frappe.db.set_value(
-                    invoice_doc.doctype, invoice_doc.name, "return_against", original_return_against
+                    invoice_doc.doctype,
+                    invoice_doc.name,
+                    "return_against",
+                    original_return_against,
+                    update_modified=False,
                 )
                 invoice_doc.return_against = original_return_against
             else:
