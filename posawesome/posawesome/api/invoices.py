@@ -1186,7 +1186,7 @@ def search_invoices_for_return(
         if customer_filters:
             customers = frappe.get_list(
                 "Customer",
-                filters=None,
+                filters={},
                 or_filters=customer_filters,
                 fields=["name"],
                 limit_page_length=100,
@@ -1201,13 +1201,7 @@ def search_invoices_for_return(
             return {"invoices": [], "has_more": False}
 
     # Count total invoices matching the criteria (for has_more flag)
-    total_count_query = frappe.get_list(
-        doctype,
-        filters=filters,
-        fields=["count(name) as total_count"],
-        as_list=False,
-    )
-    total_count = total_count_query[0].total_count if total_count_query else 0
+    total_count = frappe.db.count(doctype, filters=filters)
 
     # Get invoices matching all criteria with pagination
     invoices_list = frappe.get_list(
