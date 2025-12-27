@@ -1256,55 +1256,36 @@ def search_invoices_for_return(
         else:
             filters["grand_total"] = ["<=", float(max_amount)]
 
-    invoice_meta = frappe.get_meta(doctype)
-    customer_meta = frappe.get_meta("Customer")
+    if customer_name or customer_id or mobile_no or tax_id:
+        customer_meta = frappe.get_meta("Customer")
+        customer_filters = []
 
-    if customer_name:
-        if invoice_meta.has_field("customer_name"):
-            filters["customer_name"] = ["like", f"%{customer_name}%"]
-        else:
-            filters["customer"] = ["like", f"%{customer_name}%"]
+        if customer_name:
+            customer_filters.append(["customer_name", "like", f"%{customer_name}%"])
 
-    if customer_id:
-        filters["customer"] = ["like", f"%{customer_id}%"]
-
-    customer_ids = None
-    if mobile_no or tax_id:
-        if mobile_no and not customer_meta.has_field("mobile_no"):
-            return {"invoices": [], "has_more": False}
-        if tax_id and not customer_meta.has_field("tax_id"):
-            return {"invoices": [], "has_more": False}
-
-        conditions = []
-        params = {}
+        if customer_id:
+            customer_filters.append(["name", "like", f"%{customer_id}%"])
 
         if mobile_no:
-            conditions.append("mobile_no LIKE %(mobile_no)s")
-            params["mobile_no"] = f"%{mobile_no}%"
+            if not customer_meta.has_field("mobile_no"):
+                return {"invoices": [], "has_more": False}
+            customer_filters.append(["mobile_no", "like", f"%{mobile_no}%"])
 
         if tax_id:
-            conditions.append("tax_id LIKE %(tax_id)s")
-            params["tax_id"] = f"%{tax_id}%"
+            if not customer_meta.has_field("tax_id"):
+                return {"invoices": [], "has_more": False}
+            customer_filters.append(["tax_id", "like", f"%{tax_id}%"])
 
-        where_clause = " OR ".join(conditions)
-        customer_query = f"""
-        SELECT name
-        FROM `tabCustomer`
-        WHERE {where_clause}
-        LIMIT 100
-    """
-
-        customers = frappe.db.sql(customer_query, params, as_dict=True)
+        customers = frappe.get_list(
+            "Customer",
+            or_filters=customer_filters,
+            fields=["name"],
+            limit_page_length=100,
+        )
         customer_ids = [c.name for c in customers]
 
         if not customer_ids:
             return {"invoices": [], "has_more": False}
-
-    if customer_ids is not None:
-        if customer_id:
-            customer_ids = [cid for cid in customer_ids if customer_id in cid]
-            if not customer_ids:
-                return {"invoices": [], "has_more": False}
 
         filters["customer"] = ["in", customer_ids]
 
