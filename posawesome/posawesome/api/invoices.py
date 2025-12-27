@@ -1197,6 +1197,9 @@ def search_invoices_for_return(
 
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
+    if doctype not in {"Sales Invoice", "POS Invoice"}:
+        doctype = "Sales Invoice"
+
     # Start with base filters
     filters = {
         "company": company,
@@ -1205,7 +1208,11 @@ def search_invoices_for_return(
     }
 
     # Normalize page input
+    if page in {"undefined", "null"}:
+        page = None
     page = cint(page) if page else 1
+    if page < 1:
+        page = 1
 
     # Items per page - can be adjusted based on performance requirements
     page_length = 100
