@@ -1133,10 +1133,9 @@ def search_invoices_for_return(
     }
 
     # Convert page to integer if it's a string
-    if page and isinstance(page, str):
-        page = int(page)
-    else:
-        page = 1  # Default to page 1
+    page = cint(page)
+    if page <= 0:
+        page = 1
 
     # Items per page - can be adjusted based on performance requirements
     page_length = 100
@@ -1170,36 +1169,29 @@ def search_invoices_for_return(
     # If any customer search criteria is provided, find matching customers
     customer_ids = []
     if customer_name or customer_id or mobile_no or tax_id:
-        conditions = []
-        params = {}
+        customer_filters = []
 
         if customer_name:
-            conditions.append("customer_name LIKE %(customer_name)s")
-            params["customer_name"] = f"%{customer_name}%"
+            customer_filters.append(["customer_name", "like", f"%{customer_name}%"])
 
         if customer_id:
-            conditions.append("name LIKE %(customer_id)s")
-            params["customer_id"] = f"%{customer_id}%"
+            customer_filters.append(["name", "like", f"%{customer_id}%"])
 
-        if mobile_no:
-            conditions.append("mobile_no LIKE %(mobile_no)s")
-            params["mobile_no"] = f"%{mobile_no}%"
+        if mobile_no and frappe.db.has_column("Customer", "mobile_no"):
+            customer_filters.append(["mobile_no", "like", f"%{mobile_no}%"])
 
-        if tax_id:
-            conditions.append("tax_id LIKE %(tax_id)s")
-            params["tax_id"] = f"%{tax_id}%"
+        if tax_id and frappe.db.has_column("Customer", "tax_id"):
+            customer_filters.append(["tax_id", "like", f"%{tax_id}%"])
 
-        # Build the WHERE clause for the query
-        where_clause = " OR ".join(conditions)
-        customer_query = f"""
-        SELECT name
-        FROM `tabCustomer`
-        WHERE {where_clause}
-        LIMIT 100
-    """
-
-        customers = frappe.db.sql(customer_query, params, as_dict=True)
-        customer_ids = [c.name for c in customers]
+        if customer_filters:
+            customers = frappe.get_list(
+                "Customer",
+                filters=None,
+                or_filters=customer_filters,
+                fields=["name"],
+                limit_page_length=100,
+            )
+            customer_ids = [c.name for c in customers]
 
         # If we found matching customers, add them to the filter
         if customer_ids:
