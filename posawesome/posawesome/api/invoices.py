@@ -1154,8 +1154,8 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
 @frappe.whitelist()
 def search_invoices_for_return(
-    invoice_name,
-    company,
+    invoice_name=None,
+    company=None,
     customer_name=None,
     customer_id=None,
     mobile_no=None,
@@ -1190,6 +1190,9 @@ def search_invoices_for_return(
         - has_more: Boolean indicating if there are more invoices to load
     """
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
+
+    if not company and pos_profile:
+        company = frappe.get_cached_value("POS Profile", pos_profile, "company")
 
     # Start with base filters
     filters = {

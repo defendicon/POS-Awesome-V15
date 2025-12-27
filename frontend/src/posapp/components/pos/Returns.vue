@@ -454,6 +454,7 @@ export default {
 		perform_search() {
 			const vm = this;
 			vm.loading_more = true;
+			const searchCompany = vm.company || vm.pos_profile?.company || "";
 
 			// Format dates for API call in YYYY-MM-DD format
 			let formattedFromDate = null;
@@ -538,7 +539,7 @@ export default {
 				to_date: formattedToDate,
 				min_amount: minAmount,
 				max_amount: maxAmount,
-				company: vm.company,
+				company: searchCompany,
 				page: vm.page,
 				pos_profile: vm.pos_profile?.name,
 				doctype:
