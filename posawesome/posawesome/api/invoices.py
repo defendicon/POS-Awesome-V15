@@ -1261,20 +1261,20 @@ def search_invoices_for_return(
         customer_filters = []
 
         if customer_name:
-            customer_filters.append(["customer_name", "like", f"%{customer_name}%"])
+            customer_filters.append({"customer_name": ["like", f"%{customer_name}%"]})
 
         if customer_id:
-            customer_filters.append(["name", "like", f"%{customer_id}%"])
+            customer_filters.append({"name": ["like", f"%{customer_id}%"]})
 
         if mobile_no:
             if not customer_meta.has_field("mobile_no"):
                 return {"invoices": [], "has_more": False}
-            customer_filters.append(["mobile_no", "like", f"%{mobile_no}%"])
+            customer_filters.append({"mobile_no": ["like", f"%{mobile_no}%"]})
 
         if tax_id:
             if not customer_meta.has_field("tax_id"):
                 return {"invoices": [], "has_more": False}
-            customer_filters.append(["tax_id", "like", f"%{tax_id}%"])
+            customer_filters.append({"tax_id": ["like", f"%{tax_id}%"]})
 
         customers = frappe.get_list(
             "Customer",
