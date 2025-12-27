@@ -1154,8 +1154,8 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
 @frappe.whitelist()
 def search_invoices_for_return(
-    invoice_name,
-    company,
+    invoice_name=None,
+    company=None,
     customer_name=None,
     customer_id=None,
     mobile_no=None,
@@ -1189,6 +1189,12 @@ def search_invoices_for_return(
         - invoices: List of invoice documents
         - has_more: Boolean indicating if there are more invoices to load
     """
+    if not company and pos_profile:
+        company = frappe.get_cached_value("POS Profile", pos_profile, "company")
+
+    if not company:
+        frappe.throw(_("Company is required to search invoices."))
+
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
     # Start with base filters
@@ -1198,11 +1204,8 @@ def search_invoices_for_return(
         "is_return": 0,
     }
 
-    # Convert page to integer if it's a string
-    if page and isinstance(page, str):
-        page = int(page)
-    else:
-        page = 1  # Default to page 1
+    # Normalize page input
+    page = cint(page) if page else 1
 
     # Items per page - can be adjusted based on performance requirements
     page_length = 100
