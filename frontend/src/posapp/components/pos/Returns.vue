@@ -454,6 +454,7 @@ export default {
 		perform_search() {
 			const vm = this;
 			vm.loading_more = true;
+			console.groupCollapsed("[Sales Return Search] Request");
 
 			// Format dates for API call in YYYY-MM-DD format
 			let formattedFromDate = null;
@@ -546,6 +547,23 @@ export default {
 						? "POS Invoice"
 						: "Sales Invoice",
 			};
+			console.debug("[Sales Return Search] Params", {
+				raw: {
+					invoice_name: vm.invoice_name,
+					customer_name: vm.customer_name,
+					customer_id: vm.customer_id,
+					mobile_no: vm.mobile_no,
+					tax_id: vm.tax_id,
+					from_date: vm.from_date,
+					to_date: vm.to_date,
+					min_amount: vm.min_amount,
+					max_amount: vm.max_amount,
+					page: vm.page,
+				},
+				formatted: this.current_search_params,
+				dates: { formattedFromDate, formattedToDate },
+			});
+			console.groupEnd();
 
 			frappe.call({
 				method: "posawesome.posawesome.api.invoices.search_invoices_for_return",
@@ -553,6 +571,7 @@ export default {
 				callback: function (r) {
 					vm.loading_more = false;
 					vm.searched_once = true;
+					console.debug("[Sales Return Search] Response", r);
 
 					if (r.message) {
 						// If this is page 1, replace data, otherwise append
@@ -575,7 +594,13 @@ export default {
 				},
 				error: function (err) {
 					vm.loading_more = false;
-					console.error("Error searching invoices:", err);
+					console.error("[Sales Return Search] Error", {
+						error: err,
+						responseText: err?.responseText,
+						status: err?.status,
+						statusText: err?.statusText,
+						requestParams: vm.current_search_params,
+					});
 					vm.eventBus.emit("show_message", {
 						title: __("Error searching invoices"),
 						color: "error",
