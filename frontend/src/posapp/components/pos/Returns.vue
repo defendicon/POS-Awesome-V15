@@ -254,32 +254,18 @@
 <script>
 /* global __, frappe */
 import format, { formatUtils } from "../../format";
+import { useReturnsStore } from "../../stores/returnsStore.js";
+import { storeToRefs } from "pinia";
 
 export default {
 	mixins: [format],
+	setup() {
+		const returnsStore = useReturnsStore();
+		const storeRefs = storeToRefs(returnsStore);
+		return { returnsStore, ...storeRefs };
+	},
 	data: () => ({
-		invoicesDialog: false,
 		singleSelect: true,
-		selected: [],
-		dialog_data: [],
-		company: "",
-		invoice_name: "",
-		customer_name: "",
-		customer_id: "",
-		mobile_no: "",
-		tax_id: "",
-		from_date: null,
-		to_date: null,
-		from_date_formatted: null,
-		to_date_formatted: null,
-		min_amount: "",
-		max_amount: "",
-		pos_profile: "",
-		page: 1,
-		has_more_invoices: false,
-		loading_more: false,
-		searched_once: false,
-		current_search_params: null,
 		headers: [
 			{
 				title: __("Customer"),
@@ -422,24 +408,10 @@ export default {
 			this.to_date_formatted = null;
 		},
 		close_dialog() {
-			this.invoicesDialog = false;
+			this.returnsStore.closeDialog();
 		},
 		clear_search() {
-			this.invoice_name = "";
-			this.customer_name = "";
-			this.customer_id = "";
-			this.mobile_no = "";
-			this.tax_id = "";
-			this.from_date = null;
-			this.to_date = null;
-			this.from_date_formatted = null;
-			this.to_date_formatted = null;
-			this.min_amount = "";
-			this.max_amount = "";
-			this.dialog_data = [];
-			this.page = 1;
-			this.has_more_invoices = false;
-			this.searched_once = false;
+			this.returnsStore.resetSearch();
 		},
 		search_invoices_by_enter(e) {
 			if (e.keyCode === 13) {
@@ -662,28 +634,11 @@ export default {
 	},
 	created: function () {
 		this.eventBus.on("open_returns", (data) => {
-			this.invoicesDialog = true;
-			this.company = data;
-			this.invoice_name = "";
-			this.customer_name = "";
-			this.customer_id = "";
-			this.mobile_no = "";
-			this.tax_id = "";
-			this.from_date = null;
-			this.to_date = null;
-			this.from_date_formatted = null;
-			this.to_date_formatted = null;
-			this.min_amount = "";
-			this.max_amount = "";
-			this.dialog_data = [];
-			this.selected = [];
-			this.page = 1;
-			this.has_more_invoices = false;
-			this.searched_once = false;
+			this.returnsStore.openDialog(data);
 		});
 
 		this.eventBus.on("register_pos_profile", (data) => {
-			this.pos_profile = data.pos_profile;
+			this.returnsStore.setPosProfile(data.pos_profile);
 		});
 	},
 	beforeUnmount() {

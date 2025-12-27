@@ -11,6 +11,7 @@ export const pinia = createPinia();
 export { useCustomersStore } from "./customersStore.js";
 export { useItemsStore } from "./itemsStore.js";
 export { useInvoiceStore } from "./invoiceStore.js";
+export { useReturnsStore } from "./returnsStore.js";
 export { useUpdateStore, formatBuildVersion } from "./updateStore.js";
 export { usePricingRulesStore } from "./pricingRulesStore.js";
 
