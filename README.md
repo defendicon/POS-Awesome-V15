@@ -127,7 +127,6 @@ Notes:
 - **Address Management**: Manage multiple shipping addresses for customers.
 - **ERPNext v15 Support**: Fully compatible with the latest ERPNext version.
 
-
 ### Shortcuts:
 
 - `CTRL or CMD + S` open payments
