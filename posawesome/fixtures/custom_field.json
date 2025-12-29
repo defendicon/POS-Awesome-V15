@@ -7512,5 +7512,14 @@
 		"translatable": 0,
 		"unique": 0,
 		"width": null
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_print_format_rules",
+		"fieldtype": "Table",
+		"label": "Print Format Rules",
+		"options": "POS Awesome Print Format Rule",
+		"insert_after": "posa_open_print_in_new_tab"
 	}
 ]

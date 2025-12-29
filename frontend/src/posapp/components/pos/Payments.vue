@@ -682,6 +682,23 @@
 						></v-select>
 					</v-col>
 				</v-row>
+				<!-- Print Format Selection -->
+				<v-row class="pb-0 mb-2" align="start">
+					<v-col cols="12">
+						<v-select
+							density="compact"
+							clearable
+							variant="solo"
+							color="primary"
+							:label="frappe._('Print Format')"
+							v-model="print_format"
+							:items="print_formats"
+							class="sleek-field pos-themed-input"
+							:no-data-text="__('No Print Formats Found')"
+							hide-details
+						></v-select>
+					</v-col>
+				</v-row>
 			</div>
 		</v-card>
 
@@ -862,6 +879,8 @@ export default {
 			mpesa_modes: [], // List of available M-Pesa modes
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
+			print_formats: [], // List of print formats
+			print_format: "", // Selected print format
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
@@ -1282,8 +1301,10 @@ export default {
 		"invoice_doc.customer"(customer, previous) {
 			if (customer && customer !== previous) {
 				this.get_addresses();
+				this.set_print_format();
 			} else if (!customer) {
 				this.addresses = [];
+				this.print_format = "";
 			}
 		},
 		"invoice_doc.posa_delivery_date"(date) {
@@ -1904,7 +1925,7 @@ export default {
 		},
 		// Open print page for invoice
 		load_print_page() {
-			const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
+			const print_format = this.print_format || this.pos_profile.print_format_for_online || this.pos_profile.print_format;
 			const letter_head = this.pos_profile.letter_head || 0;
 			let doctype;
 
@@ -2635,6 +2656,28 @@ export default {
 			this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
 		},
 	},
+		get_print_formats() {
+			frappe.call({
+				method: "posawesome.posawesome.api.print_formats.get_print_formats",
+				args: {
+					doctype: "Sales Invoice"
+				},
+				callback: (r) => {
+					this.print_formats = r.message;
+				}
+			});
+		},
+		set_print_format() {
+			this.print_format = "";
+			if (this.pos_profile.posa_print_format_rules && this.customer_info) {
+				const rule = this.pos_profile.posa_print_format_rules.find(
+					(r) => r.customer_group === this.customer_info.customer_group
+				);
+				if (rule) {
+					this.print_format = rule.print_format;
+				}
+			}
+		},
 	// Lifecycle hook: created
 	created() {
 		// Register keyboard shortcut for payment
@@ -2690,6 +2733,7 @@ export default {
 				this.pos_profile = data.pos_profile;
 				this.stock_settings = data.stock_settings || {};
 				this.get_mpesa_modes();
+				this.get_print_formats();
 			});
 			this.eventBus.on("add_the_new_address", (data) => {
 				const normalized = this.normalizeAddress(data);
