@@ -571,7 +571,7 @@ export async function clearAllCache() {
 
 	if (typeof localStorage !== "undefined") {
 		Object.keys(localStorage).forEach((key) => {
-			if (key.startsWith("posa_")) {
+			if (key.startsWith("posa_") && key !== "pos_settings") {
 				localStorage.removeItem(key);
 			}
 		});
@@ -619,7 +619,7 @@ export async function forceClearAllCache() {
 	terminatePersistWorker();
 	if (typeof localStorage !== "undefined") {
 		Object.keys(localStorage).forEach((key) => {
-			if (key.startsWith("posa_")) {
+			if (key.startsWith("posa_") && key !== "pos_settings") {
 				localStorage.removeItem(key);
 			}
 		});

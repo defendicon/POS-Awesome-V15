@@ -412,7 +412,10 @@ export default {
 					westernPref = localStorage.getItem("use_western_numerals");
 				}
 				await forceClearAllCache();
-				await clearAllCaches({ confirmBeforeClear: false }).catch(() => {});
+				await clearAllCaches({
+					confirmBeforeClear: false,
+					excludeKeys: ["pos_settings"],
+				}).catch(() => {});
 				if (westernPref !== null && typeof localStorage !== "undefined") {
 					localStorage.setItem("use_western_numerals", westernPref);
 				}

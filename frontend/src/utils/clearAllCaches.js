@@ -4,13 +4,17 @@ async function delay(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function clearLocalStorage(keys = []) {
+export async function clearLocalStorage(keys = [], excludeKeys = []) {
 	if (typeof localStorage === "undefined") return;
 	try {
 		if (keys.length) {
-			keys.forEach((k) => localStorage.removeItem(k));
+			keys.forEach((k) => {
+				if (!excludeKeys.includes(k)) localStorage.removeItem(k);
+			});
 		} else {
-			Object.keys(localStorage).forEach((key) => localStorage.removeItem(key));
+			Object.keys(localStorage).forEach((key) => {
+				if (!excludeKeys.includes(key)) localStorage.removeItem(key);
+			});
 		}
 		console.log("[ClearAllCaches] localStorage cleared", keys.length ? keys : "all");
 	} catch (e) {
@@ -191,6 +195,7 @@ export async function clearAllCaches(
 		onSuccess: () => {},
 		onError: () => {},
 		specificKeys: [],
+		excludeKeys: [],
 		specificDatabases: [],
 		specificCaches: [],
 		skipStorage: [],
@@ -204,6 +209,7 @@ export async function clearAllCaches(
 			onSuccess: () => {},
 			onError: () => {},
 			specificKeys: [],
+			excludeKeys: [],
 			specificDatabases: [],
 			specificCaches: [],
 			skipStorage: [],
@@ -227,7 +233,7 @@ export async function clearAllCaches(
 
 		const tasks = [];
 		if (!opts.skipStorage.includes("localStorage")) {
-			tasks.push(clearLocalStorage(opts.specificKeys));
+			tasks.push(clearLocalStorage(opts.specificKeys, opts.excludeKeys));
 		}
 		if (!opts.skipStorage.includes("sessionStorage")) {
 			tasks.push(clearSessionStorage(opts.specificKeys));
