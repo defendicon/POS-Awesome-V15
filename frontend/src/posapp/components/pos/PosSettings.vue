@@ -27,9 +27,21 @@
 					<h2 class="text-h5 mb-4 pos-text-primary">{{ selectedItem }}</h2>
 					<v-divider class="mb-4"></v-divider>
 
-					<!-- Placeholder for settings content -->
+					<!-- Settings Content -->
 					<div class="pos-text-secondary">
-						<p>Settings for {{ selectedItem }} will appear here.</p>
+						<template v-if="selectedItem === 'Invoice Settings'">
+							<v-switch
+								v-model="settings.allowUserToEditRate"
+								@update:modelValue="updateSetting('allowUserToEditRate', $event)"
+								label="Allow user to edit Rate"
+								color="primary"
+								inset
+								hide-details
+							></v-switch>
+						</template>
+						<template v-else>
+							<p>Settings for {{ selectedItem }} will appear here.</p>
+						</template>
 					</div>
 				</div>
 			</div>
