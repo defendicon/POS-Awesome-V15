@@ -2656,19 +2656,7 @@ export default {
 				if (invoice_doc.is_return) {
 					this.is_return = true;
 					this.is_credit_return = false;
-					// Reset all payment amounts to zero for returns
-					invoice_doc.payments.forEach((payment) => {
-						payment.amount = 0;
-						payment.base_amount = 0;
-					});
-					// Set default payment to negative amount for returns
-					if (default_payment) {
-						const amount = invoice_doc.rounded_total || invoice_doc.grand_total;
-						default_payment.amount = -Math.abs(amount);
-						if (default_payment.base_amount !== undefined) {
-							default_payment.base_amount = -Math.abs(amount);
-						}
-					}
+					// Proportional payments are already set, do not reset them here
 				} else if (default_payment) {
 					// For regular invoices, set positive amount
 					default_payment.amount = this.flt(

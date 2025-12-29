@@ -2274,61 +2274,96 @@ export default {
 	// Prepare payments array for invoice doc
 	get_payments() {
 		const payments = [];
-		// Use this.subtotal which is already in selected currency and includes all calculations
 		const total_amount = this.subtotal;
 		let remaining_amount = total_amount;
 
-		if (this.loyalty_amount) remaining_amount -= this.loyalty_amount;
-		if (this.redeemed_customer_credit) remaining_amount -= this.redeemed_customer_credit;
+		if (
+			this.isReturnInvoice &&
+			this.return_doc &&
+			this.return_doc.payments &&
+			this.return_doc.payments.length > 0
+		) {
+			const originalTotal = this.return_doc.grand_total;
+			const returnTotal = total_amount; // this is negative
 
-		// Find the index of the default payment method
-		const defaultPaymentIndex = this.pos_profile.payments.findIndex((payment) => payment.default === 1);
-		const targetIndex = defaultPaymentIndex >= 0 ? defaultPaymentIndex : 0;
+			if (originalTotal > 0) {
+				let totalRefunded = 0;
+				this.pos_profile.payments.forEach((profile_payment) => {
+					const original_payment = this.return_doc.payments.find(
+						(p) => p.mode_of_payment === profile_payment.mode_of_payment,
+					);
 
-		this.pos_profile.payments.forEach((payment, index) => {
-			// For the default payment method (or first if no default), assign the full remaining amount
-			const payment_amount = index === targetIndex ? remaining_amount : payment.amount || 0;
+					let payment_amount = 0;
+					if (original_payment) {
+						const proportion = original_payment.amount / originalTotal;
+						payment_amount = proportion * returnTotal;
+					}
 
-			// For return invoices, ensure payment amounts are negative
-			const adjusted_amount = this.isReturnInvoice ? -Math.abs(payment_amount) : payment_amount;
+					const adjusted_amount = this.flt(payment_amount, this.currency_precision);
+					totalRefunded += adjusted_amount;
 
-			// Handle currency conversion
-			// If selected_currency is USD and base is PKR:
-			// amount is in USD (e.g. 10 USD)
-			// base_amount should be in PKR (e.g. 3000 PKR)
-			// So multiply by exchange rate to get base_amount
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			const base_amount =
-				this.selected_currency !== baseCurrency
-					? this.flt(adjusted_amount / (this.exchange_rate || 1), this.currency_precision)
-					: adjusted_amount;
+					const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+					const base_amount =
+						this.selected_currency !== baseCurrency
+							? this.flt(adjusted_amount / (this.exchange_rate || 1), this.currency_precision)
+							: adjusted_amount;
 
-			payments.push({
-				amount: adjusted_amount, // Keep in selected currency (e.g. USD)
-				base_amount: base_amount, // Convert to base currency (e.g. PKR)
-				mode_of_payment: payment.mode_of_payment,
-				default: payment.default,
-				account: payment.account || "",
-				type: payment.type || "Cash",
-				currency: this.selected_currency || this.pos_profile.currency,
-				conversion_rate: this.conversion_rate || 1,
-			});
+					payments.push({
+						amount: adjusted_amount,
+						base_amount: base_amount,
+						mode_of_payment: profile_payment.mode_of_payment,
+						default: profile_payment.default,
+						account: profile_payment.account || "",
+						type: profile_payment.type || "Cash",
+						currency: this.selected_currency || this.pos_profile.currency,
+						conversion_rate: this.conversion_rate || 1,
+					});
+				});
 
-			// Only subtract if we actually used the remaining amount
-			if (index === targetIndex) {
-				remaining_amount -= payment_amount;
+				const difference = returnTotal - totalRefunded;
+				if (Math.abs(difference) > 0.001) {
+					const defaultPayment = payments.find((p) => p.default === 1) || payments[0];
+					if (defaultPayment) {
+						defaultPayment.amount += difference;
+						defaultPayment.base_amount += difference / (this.exchange_rate || 1);
+					}
+				}
 			}
-		});
+		} else {
+			if (this.loyalty_amount) remaining_amount -= this.loyalty_amount;
+			if (this.redeemed_customer_credit) remaining_amount -= this.redeemed_customer_credit;
 
-		console.log("Generated payments:", {
-			currency: this.selected_currency,
-			exchange_rate: this.exchange_rate,
-			payments: payments.map((p) => ({
-				mode: p.mode_of_payment,
-				amount: p.amount,
-				base_amount: p.base_amount,
-			})),
-		});
+			const defaultPaymentIndex = this.pos_profile.payments.findIndex(
+				(payment) => payment.default === 1,
+			);
+			const targetIndex = defaultPaymentIndex >= 0 ? defaultPaymentIndex : 0;
+
+			this.pos_profile.payments.forEach((payment, index) => {
+				const payment_amount = index === targetIndex ? remaining_amount : payment.amount || 0;
+				const adjusted_amount = this.isReturnInvoice ? -Math.abs(payment_amount) : payment_amount;
+
+				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+				const base_amount =
+					this.selected_currency !== baseCurrency
+						? this.flt(adjusted_amount / (this.exchange_rate || 1), this.currency_precision)
+						: adjusted_amount;
+
+				payments.push({
+					amount: adjusted_amount,
+					base_amount: base_amount,
+					mode_of_payment: payment.mode_of_payment,
+					default: payment.default,
+					account: payment.account || "",
+					type: payment.type || "Cash",
+					currency: this.selected_currency || this.pos_profile.currency,
+					conversion_rate: this.conversion_rate || 1,
+				});
+
+				if (index === targetIndex) {
+					remaining_amount -= payment_amount;
+				}
+			});
+		}
 
 		return payments;
 	},
