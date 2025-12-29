@@ -112,7 +112,6 @@ Notes:
 34. A lot more bug fixes from the version 14
 35. Offline invoices that fail to submit are saved as draft documents
 
-
 ### Shortcuts:
 
 - `CTRL or CMD + S` open payments
