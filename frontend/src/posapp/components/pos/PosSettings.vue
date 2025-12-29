@@ -30,14 +30,13 @@
 					<!-- Settings Content -->
 					<div class="pos-text-secondary">
 						<template v-if="selectedItem === 'Invoice Settings'">
-							<v-switch
+							<v-checkbox
 								v-model="settings.allowUserToEditRate"
 								@update:modelValue="updateSetting('allowUserToEditRate', $event)"
 								label="Allow user to edit Rate"
 								color="primary"
-								inset
 								hide-details
-							></v-switch>
+							></v-checkbox>
 						</template>
 						<template v-else>
 							<p>Settings for {{ selectedItem }} will appear here.</p>
