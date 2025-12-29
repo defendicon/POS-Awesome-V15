@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"cJigdSD9mh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"id\":\"4D2sc3CbN3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"id\":\"NEW_SHORTCUT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Settings\",\"col\":3}},{\"id\":\"nVBkn7nfDw\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-B_qEZqEA6\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"NEW_CARD\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"tsAHaUCd5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"2-3HMkGou3\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"GdPtnrazDS\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"cABO53xhGv\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
+ "content": "[{\"id\":\"cJigdSD9mh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"id\":\"4D2sc3CbN3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"id\":\"NEW_SHORTCUT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome Settings\",\"col\":3}},{\"id\":\"nVBkn7nfDw\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-B_qEZqEA6\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"NEW_CARD\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"tsAHaUCd5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"2-3HMkGou3\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"GdPtnrazDS\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"cABO53xhGv\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
  "creation": "2022-11-29 14:33:45.038200",
  "custom_blocks": [],
  "docstatus": 0,
@@ -33,9 +33,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS Settings",
+   "label": "POS Awesome Settings",
    "link_count": 0,
-   "link_to": "POS Settings",
+   "link_to": "POS Awesome Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -203,8 +203,8 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "POS Settings",
-   "link_to": "POS Settings",
+   "label": "POS Awesome Settings",
+   "link_to": "POS Awesome Settings",
    "type": "DocType"
   }
  ],

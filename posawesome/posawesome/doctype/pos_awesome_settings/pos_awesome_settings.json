@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:POS-SET-{MM}-{YY}-{####}",
+ "autoname": "format:POS-AWS-SET-{MM}-{YY}-{####}",
  "creation": "2024-05-22 10:00:00.000000",
  "default_view": "List",
  "doctype": "DocType",
@@ -22,7 +22,7 @@
  "modified": "2024-05-22 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "POSAwesome",
- "name": "POS Settings",
+ "name": "POS Awesome Settings",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
