@@ -818,6 +818,7 @@ import renderOfflineInvoiceHTML from "../../../offline_print_template";
 import { silentPrint, watchPrintWindow } from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
+import { useSettings } from "../../composables/useSettings.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator.js";
 
@@ -827,8 +828,9 @@ export default {
 	setup() {
 		const invoiceStore = useInvoiceStore();
 		const customersStore = useCustomersStore();
+		const { settings } = useSettings();
 		const { selectedCustomer, customerInfo } = storeToRefs(customersStore);
-		return { invoiceStore, selectedCustomer, customerInfoFromStore: customerInfo };
+		return { invoiceStore, selectedCustomer, customerInfoFromStore: customerInfo, settings };
 	},
 	data() {
 		return {
@@ -2563,7 +2565,7 @@ export default {
 				return false;
 			}
 
-			const configuredCashMOP = String(this.pos_profile?.posa_cash_mode_of_payment || "").toLowerCase();
+			const configuredCashMOP = String(this.settings.cashModeOfPayment || "").toLowerCase();
 
 			const type = String(payment.type || "").toLowerCase();
 			if (type === "cash") {

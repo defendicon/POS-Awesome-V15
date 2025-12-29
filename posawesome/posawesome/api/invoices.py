@@ -722,11 +722,7 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
             )
         )
 
-    configured_cash_mode_of_payment = None
-    if pos_profile:
-        configured_cash_mode_of_payment = frappe.db.get_value(
-            "POS Profile", pos_profile, "posa_cash_mode_of_payment"
-        )
+    configured_cash_mode_of_payment = "Cash"
 
     cash_mode_of_payment = configured_cash_mode_of_payment
     if not cash_mode_of_payment:

@@ -238,19 +238,7 @@ const get_value = async (doctype, name, field) => {
 	}
 };
 
-const get_cash_mode_of_payment = async (frm) => {
-	const profile = frm.doc.pos_profile;
-
-	if (!frm.__cashModeCache || frm.__cashModeCache.profile !== profile) {
-		const value = await get_value("POS Profile", profile, "posa_cash_mode_of_payment");
-		frm.__cashModeCache = {
-			profile,
-			value: value || "Cash",
-		};
-	}
-
-	return frm.__cashModeCache.value;
-};
+const get_cash_mode_of_payment = async () => "Cash";
 
 const get_conversion_rate = (doc) =>
 	doc.conversion_rate || doc.exchange_rate || doc.target_exchange_rate || doc.plc_conversion_rate || 1;

@@ -38,6 +38,16 @@
 								hide-details
 							></v-checkbox>
 						</template>
+						<template v-else-if="selectedItem === 'Payment Settings'">
+							<v-select
+								v-model="settings.cashModeOfPayment"
+								:items="modeOfPayments"
+								label="Cash Mode of Payment"
+								variant="outlined"
+								density="compact"
+								@update:modelValue="updateSetting('cashModeOfPayment', $event)"
+							></v-select>
+						</template>
 						<template v-else>
 							<p>Settings for {{ selectedItem }} will appear here.</p>
 						</template>
@@ -60,6 +70,7 @@ export default {
 	},
 	data() {
 		return {
+			modeOfPayments: [],
 			selectedItem: "Invoice Settings",
 			menuItems: [
 				"Invoice Settings",
@@ -74,6 +85,28 @@ export default {
 				"Advance Settings",
 			],
 		};
+	},
+	mounted() {
+		this.fetchModeOfPayments();
+	},
+	methods: {
+		async fetchModeOfPayments() {
+			try {
+				const r = await frappe.call({
+					method: "frappe.client.get_list",
+					args: {
+						doctype: "Mode of Payment",
+						fields: ["name"],
+						filters: { enabled: 1 },
+					},
+				});
+				if (r.message) {
+					this.modeOfPayments = r.message.map((m) => m.name);
+				}
+			} catch (e) {
+				console.error("Failed to fetch mode of payments", e);
+			}
+		},
 	},
 };
 </script>

@@ -240,9 +240,7 @@ class POSClosingShift(Document):
             if currency:
                 row["currencies"][currency] += flt(amount)
 
-        cash_mode_of_payment = (
-            frappe.db.get_value("POS Profile", self.pos_profile, "posa_cash_mode_of_payment") or "Cash"
-        )
+        cash_mode_of_payment = "Cash"
 
         for row in self.get("pos_transactions", []):
             invoice = row.get("sales_invoice") or row.get("pos_invoice")
@@ -1152,13 +1150,7 @@ def make_closing_shift_from_opening(opening_shift):
         for p in d.payments:
             existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
             if existing_pay:
-                cash_mode_of_payment = frappe.get_value(
-                    "POS Profile",
-                    opening_shift.get("pos_profile"),
-                    "posa_cash_mode_of_payment",
-                )
-                if not cash_mode_of_payment:
-                    cash_mode_of_payment = "Cash"
+                cash_mode_of_payment = "Cash"
                 conversion_rate = d.get("conversion_rate")
                 if existing_pay[0].mode_of_payment == cash_mode_of_payment:
                     amount = get_base_value(p, "amount", "base_amount", conversion_rate) - get_base_value(
