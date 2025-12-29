@@ -283,8 +283,14 @@
 
 <script>
 /* global __ */
+import { useSettings } from "../../composables/useSettings.js";
+
 export default {
 	name: "CartItemRow",
+	setup() {
+		const { settings } = useSettings();
+		return { settings };
+	},
 	props: {
 		item: {
 			type: Object,
@@ -375,7 +381,7 @@ export default {
 		},
 		disableRateEdit() {
 			return (
-				!this.posProfile.posa_allow_user_to_edit_rate ||
+				!this.settings.allowUserToEditRate ||
 				!!this.item.posa_is_replace ||
 				!!this.item.posa_offer_applied
 			);

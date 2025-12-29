@@ -38,8 +38,15 @@
 </template>
 
 <script>
+import { useSettings } from "../../composables/useSettings.js";
+
 export default {
 	name: "PosSettings",
+	setup() {
+		const { settings, updateSetting, loadSettings } = useSettings();
+		loadSettings();
+		return { settings, updateSetting };
+	},
 	data() {
 		return {
 			selectedItem: "Invoice Settings",

@@ -558,6 +558,7 @@
 import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useSettings } from "../../composables/useSettings.js";
 import CartItemRow from "./CartItemRow.vue";
 export default {
 	name: "ItemsTable",
@@ -566,7 +567,8 @@ export default {
 	},
 	setup() {
 		const invoiceStore = useInvoiceStore();
-		return { invoiceStore };
+		const { settings } = useSettings();
+		return { invoiceStore, settings };
 	},
 	props: {
 		headers: Array,
