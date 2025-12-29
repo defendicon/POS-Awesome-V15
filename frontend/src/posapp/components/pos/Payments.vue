@@ -1932,6 +1932,28 @@ export default {
 				invoiceDoc: this.invoice_doc,
 				allowOfflineFallback: isOffline(),
 			};
+
+			if (this.pos_profile.posa_open_print_in_new_tab) {
+				let newTabUrl =
+					frappe.urllib.get_base_url() +
+					"/printview?doctype=" +
+					encodeURIComponent(doctype) +
+					"&name=" +
+					this.invoice_doc.name +
+					"&format=" +
+					print_format;
+
+				if (this.pos_profile.letter_head) {
+					newTabUrl += "&letterhead=" + encodeURIComponent(this.pos_profile.letter_head);
+					newTabUrl += "&no_letterhead=0";
+				} else {
+					newTabUrl += "&no_letterhead=0";
+				}
+
+				window.open(newTabUrl, "_blank");
+				return;
+			}
+
 			if (this.pos_profile.posa_silent_print) {
 				silentPrint(url, printOptions);
 			} else {
