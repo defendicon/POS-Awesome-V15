@@ -1,12 +1,25 @@
 {
  "actions": [],
  "allow_rename": 0,
+ "autoname": "field:user",
  "creation": "2024-05-22 10:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": [],
- "fields": [],
- "issingle": 1,
+ "field_order": [
+  "user"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "issingle": 0,
  "module": "POSAwesome",
  "modified": "2024-05-22 10:00:00.000000",
  "modified_by": "Administrator",
