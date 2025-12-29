@@ -213,6 +213,7 @@ export default {
 			items: [
 				{ text: "POS", icon: "mdi-network-pos" },
 				{ text: "Payments", icon: "mdi-credit-card" },
+				{ text: "POS Settings", icon: "mdi-cog" },
 			],
 			company: "POS Awesome",
 			companyImg: posLogo,
