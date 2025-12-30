@@ -7520,6 +7520,7 @@
 		"fieldtype": "Table",
 		"label": "Print Format Rules",
 		"options": "POS Awesome Print Format Rule",
-		"insert_after": "posa_open_print_in_new_tab"
+		"insert_after": "posa_open_print_in_new_tab",
+		"name": "POS Profile-posa_print_format_rules"
 	}
 ]
