@@ -315,6 +315,7 @@
 
 <script>
 /* global __ */
+// CartItemRow component for displaying items in the POS cart
 export default {
 	name: "CartItemRow",
 	props: {
