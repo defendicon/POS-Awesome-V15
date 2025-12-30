@@ -27,20 +27,28 @@
 					</template>
 					<span>{{ item.pricing_rule_badge.tooltip }}</span>
 				</v-tooltip>
-				<v-icon
+				<v-btn
 					v-if="posProfile.posa_allow_line_item_name_override && !item.posa_is_replace"
+					icon
 					size="x-small"
+					variant="text"
 					class="ml-1"
 					@click.stop="$emit('open-name-dialog', item)"
-					>mdi-pencil</v-icon
+					:aria-label="__('Edit item name')"
 				>
-				<v-icon
+					<v-icon size="small">mdi-pencil</v-icon>
+				</v-btn>
+				<v-btn
 					v-if="item.name_overridden"
+					icon
 					size="x-small"
+					variant="text"
 					class="ml-1"
 					@click.stop="$emit('reset-item-name', item)"
-					>mdi-undo</v-icon
+					:aria-label="__('Reset item name')"
 				>
+					<v-icon size="small">mdi-undo</v-icon>
+				</v-btn>
 			</div>
 		</td>
 
