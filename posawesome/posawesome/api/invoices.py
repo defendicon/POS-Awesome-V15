@@ -677,19 +677,11 @@ def update_invoice(data):
             and "Returned Item" in str(e)
             and "does not exist in Sales Invoice" in str(e)
         ):
-            frappe.msgprint(
-                _("Warning: Return link removed to allow non-original items."),
-                title=_("Warning"),
-                indicator="orange",
-            )
-            # Reload timestamp to prevent TimestampMismatchError on retry
-            latest_modified = frappe.db.get_value(
-                invoice_doc.doctype, invoice_doc.name, "modified"
-            )
-            if latest_modified:
-                invoice_doc.modified = latest_modified
+            return_against = invoice_doc.return_against
             invoice_doc.return_against = None
             invoice_doc.save()
+            frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
+            invoice_doc.reload()
         else:
             raise
 
@@ -984,19 +976,11 @@ def submit_invoice(invoice, data, submit_in_background=False):
             and "Returned Item" in str(e)
             and "does not exist in Sales Invoice" in str(e)
         ):
-            frappe.msgprint(
-                _("Warning: Return link removed to allow non-original items."),
-                title=_("Warning"),
-                indicator="orange",
-            )
-            # Reload timestamp to prevent TimestampMismatchError on retry
-            latest_modified = frappe.db.get_value(
-                invoice_doc.doctype, invoice_doc.name, "modified"
-            )
-            if latest_modified:
-                invoice_doc.modified = latest_modified
+            return_against = invoice_doc.return_against
             invoice_doc.return_against = None
             invoice_doc.save()
+            frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
+            invoice_doc.reload()
         else:
             raise
 
@@ -1041,14 +1025,11 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 and "Returned Item" in str(e)
                 and "does not exist in Sales Invoice" in str(e)
             ):
-                # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(
-                    invoice_doc.doctype, invoice_doc.name, "modified"
-                )
-                if latest_modified:
-                    invoice_doc.modified = latest_modified
+                return_against = invoice_doc.return_against
                 invoice_doc.return_against = None
                 invoice_doc.submit()
+                frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
+                invoice_doc.reload()
             else:
                 raise
 
@@ -1104,14 +1085,11 @@ def submit_in_background_job(kwargs):
                 and "Returned Item" in str(e)
                 and "does not exist in Sales Invoice" in str(e)
             ):
-                # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(
-                    invoice_doc.doctype, invoice_doc.name, "modified"
-                )
-                if latest_modified:
-                    invoice_doc.modified = latest_modified
+                return_against = invoice_doc.return_against
                 invoice_doc.return_against = None
                 invoice_doc.save()
+                frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
+                invoice_doc.reload()
             else:
                 raise
 
@@ -1124,14 +1102,11 @@ def submit_in_background_job(kwargs):
                 and "Returned Item" in str(e)
                 and "does not exist in Sales Invoice" in str(e)
             ):
-                # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(
-                    invoice_doc.doctype, invoice_doc.name, "modified"
-                )
-                if latest_modified:
-                    invoice_doc.modified = latest_modified
+                return_against = invoice_doc.return_against
                 invoice_doc.return_against = None
                 invoice_doc.submit()
+                frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
+                invoice_doc.reload()
             else:
                 raise
 
@@ -1283,25 +1258,26 @@ def search_invoices_for_return(
             conditions.append("name LIKE %(customer_id)s")
             params["customer_id"] = f"%{customer_id}%"
 
-        if mobile_no:
+        if mobile_no and frappe.db.has_column("Customer", "mobile_no"):
             conditions.append("mobile_no LIKE %(mobile_no)s")
             params["mobile_no"] = f"%{mobile_no}%"
 
-        if tax_id:
+        if tax_id and frappe.db.has_column("Customer", "tax_id"):
             conditions.append("tax_id LIKE %(tax_id)s")
             params["tax_id"] = f"%{tax_id}%"
 
-        # Build the WHERE clause for the query
-        where_clause = " OR ".join(conditions)
-        customer_query = f"""
-        SELECT name
-        FROM `tabCustomer`
-        WHERE {where_clause}
-        LIMIT 100
-    """
+        if conditions:
+            # Build the WHERE clause for the query
+            where_clause = " OR ".join(conditions)
+            customer_query = f"""
+            SELECT name
+            FROM `tabCustomer`
+            WHERE {where_clause}
+            LIMIT 100
+        """
 
-        customers = frappe.db.sql(customer_query, params, as_dict=True)
-        customer_ids = [c.name for c in customers]
+            customers = frappe.db.sql(customer_query, params, as_dict=True)
+            customer_ids = [c.name for c in customers]
 
         # If we found matching customers, add them to the filter
         if customer_ids:
