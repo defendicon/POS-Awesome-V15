@@ -681,7 +681,10 @@ def update_invoice(data):
             invoice_doc.return_against = None
             invoice_doc.save()
             frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
-            invoice_doc.reload()
+            invoice_doc.return_against = return_against
+            invoice_doc.modified = frappe.db.get_value(
+                invoice_doc.doctype, invoice_doc.name, "modified"
+            )
         else:
             raise
 
@@ -980,7 +983,10 @@ def submit_invoice(invoice, data, submit_in_background=False):
             invoice_doc.return_against = None
             invoice_doc.save()
             frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
-            invoice_doc.reload()
+            invoice_doc.return_against = return_against
+            invoice_doc.modified = frappe.db.get_value(
+                invoice_doc.doctype, invoice_doc.name, "modified"
+            )
         else:
             raise
 
@@ -1029,7 +1035,10 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 invoice_doc.return_against = None
                 invoice_doc.submit()
                 frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
-                invoice_doc.reload()
+                invoice_doc.return_against = return_against
+                invoice_doc.modified = frappe.db.get_value(
+                    invoice_doc.doctype, invoice_doc.name, "modified"
+                )
             else:
                 raise
 
@@ -1089,7 +1098,10 @@ def submit_in_background_job(kwargs):
                 invoice_doc.return_against = None
                 invoice_doc.save()
                 frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
-                invoice_doc.reload()
+                invoice_doc.return_against = return_against
+                invoice_doc.modified = frappe.db.get_value(
+                    invoice_doc.doctype, invoice_doc.name, "modified"
+                )
             else:
                 raise
 
@@ -1106,7 +1118,10 @@ def submit_in_background_job(kwargs):
                 invoice_doc.return_against = None
                 invoice_doc.submit()
                 frappe.db.set_value(invoice_doc.doctype, invoice_doc.name, "return_against", return_against)
-                invoice_doc.reload()
+                invoice_doc.return_against = return_against
+                invoice_doc.modified = frappe.db.get_value(
+                    invoice_doc.doctype, invoice_doc.name, "modified"
+                )
             else:
                 raise
 
