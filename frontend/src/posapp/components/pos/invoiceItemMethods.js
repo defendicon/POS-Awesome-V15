@@ -2273,6 +2273,49 @@ export default {
 
 	// Prepare payments array for invoice doc
 	get_payments() {
+		if (this.isReturnInvoice && Array.isArray(this.invoice_doc?.payments) && this.invoice_doc.payments.length) {
+			const total_amount = Math.abs(this.subtotal);
+			const sourcePayments = this.invoice_doc.payments.filter((payment) => payment?.mode_of_payment);
+			const sourceTotal = sourcePayments.reduce(
+				(sum, payment) => sum + Math.abs(this.flt(payment.amount || 0, this.currency_precision)),
+				0,
+			);
+
+			if (sourcePayments.length && sourceTotal > 0 && total_amount > 0) {
+				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+				let remaining_amount = total_amount;
+
+				return sourcePayments.map((payment, index) => {
+					const share = Math.abs(this.flt(payment.amount || 0, this.currency_precision)) / sourceTotal;
+					let payment_amount =
+						index === sourcePayments.length - 1
+							? remaining_amount
+							: this.flt(total_amount * share, this.currency_precision);
+					payment_amount = -Math.abs(payment_amount);
+					remaining_amount = this.flt(
+						remaining_amount - Math.abs(payment_amount),
+						this.currency_precision,
+					);
+
+					const base_amount =
+						this.selected_currency !== baseCurrency
+							? this.flt(payment_amount / (this.exchange_rate || 1), this.currency_precision)
+							: payment_amount;
+
+					return {
+						amount: payment_amount,
+						base_amount: base_amount,
+						mode_of_payment: payment.mode_of_payment,
+						default: payment.default,
+						account: payment.account || "",
+						type: payment.type || "Cash",
+						currency: this.selected_currency || this.pos_profile.currency,
+						conversion_rate: this.conversion_rate || 1,
+					};
+				});
+			}
+		}
+
 		const payments = [];
 		// Use this.subtotal which is already in selected currency and includes all calculations
 		const total_amount = this.subtotal;

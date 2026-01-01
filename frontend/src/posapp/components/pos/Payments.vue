@@ -2697,23 +2697,30 @@ export default {
 			this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
 				this.invoice_doc = invoice_doc;
 				const default_payment = this.invoice_doc.payments.find((payment) => payment.default === 1);
+				const hasReturnPayments = this.invoice_doc.payments.some(
+					(payment) => Math.abs(this.flt(payment.amount || 0, this.currency_precision)) > 0,
+				);
 				this.is_credit_sale = false;
 				this.is_write_off_change = false;
 				if (invoice_doc.is_return) {
 					this.is_return = true;
 					this.is_credit_return = false;
-					// Reset all payment amounts to zero for returns
-					invoice_doc.payments.forEach((payment) => {
-						payment.amount = 0;
-						payment.base_amount = 0;
-					});
-					// Set default payment to negative amount for returns
-					if (default_payment) {
-						const amount = invoice_doc.rounded_total || invoice_doc.grand_total;
-						default_payment.amount = -Math.abs(amount);
-						if (default_payment.base_amount !== undefined) {
-							default_payment.base_amount = -Math.abs(amount);
+					if (!hasReturnPayments) {
+						// Reset all payment amounts to zero for returns
+						invoice_doc.payments.forEach((payment) => {
+							payment.amount = 0;
+							payment.base_amount = 0;
+						});
+						// Set default payment to negative amount for returns
+						if (default_payment) {
+							const amount = invoice_doc.rounded_total || invoice_doc.grand_total;
+							default_payment.amount = -Math.abs(amount);
+							if (default_payment.base_amount !== undefined) {
+								default_payment.base_amount = -Math.abs(amount);
+							}
 						}
+					} else {
+						this.ensureReturnPaymentsAreNegative();
 					}
 				} else if (default_payment) {
 					// For regular invoices, set positive amount
