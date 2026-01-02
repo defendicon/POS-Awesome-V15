@@ -3560,7 +3560,16 @@ export default {
 				}
 
 				const tableEl = tableRef?.$el || tableRef;
+				const wrapper = tableEl?.querySelector?.(".v-table__wrapper");
 				const rows = tableEl?.querySelectorAll?.("tbody tr");
+				if (wrapper && rows && rows.length > 0) {
+					const rowHeight = rows[0].getBoundingClientRect().height || 0;
+					if (rowHeight > 0) {
+						wrapper.scrollTop = rowHeight * index;
+						return;
+					}
+				}
+
 				if (rows && rows[index]) {
 					rows[index].scrollIntoView({ block: "nearest" });
 				}
