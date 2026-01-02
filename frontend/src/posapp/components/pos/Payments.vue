@@ -819,7 +819,6 @@
 /* global frappe, __, get_currency_symbol */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
-import { parseBooleanSetting } from "../../utils/stock.js";
 import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";
 import {
 	saveOfflineInvoice,
@@ -1373,6 +1372,13 @@ export default {
 				this.eventBus.emit("reset_posting_date");
 			}
 		},
+		resetPaymentState() {
+			this.customer_credit_dict = [];
+			this.redeem_customer_credit = false;
+			this.is_cashback = true;
+			this.is_credit_return = false;
+			this.sales_person = "";
+		},
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
@@ -1614,6 +1620,13 @@ export default {
 			if (this.invoice_doc.is_return) {
 				this.ensureReturnPaymentsAreNegative();
 			}
+			const invoiceSnapshot = this.invoice_doc;
+			const submittedItemsSnapshot = Array.isArray(invoiceSnapshot?.items) ? invoiceSnapshot.items : [];
+			const submittedCodesSnapshot = submittedItemsSnapshot
+				.map((item) => (item ? item.item_code : null))
+				.filter((code) => code !== undefined && code !== null);
+			const shouldNavigateEarly = Boolean(this.pos_profile?.posa_allow_submissions_in_background_job);
+			let navigatedEarly = false;
 			let totalPayedAmount = 0;
 			this.invoice_doc.payments.forEach((payment) => {
 				payment.amount = this.flt(payment.amount);
@@ -1680,6 +1693,15 @@ export default {
 			}
 
 			try {
+				if (shouldNavigateEarly) {
+					if (print) {
+						this.load_print_page();
+					}
+					this.resetPaymentState();
+					this.finishSubmissionNavigation(true);
+					navigatedEarly = true;
+				}
+
 				const r = await frappe.call({
 					method:
 						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
@@ -1742,15 +1764,11 @@ export default {
 					return;
 				}
 
-				if (print) {
+				if (print && !navigatedEarly) {
 					this.load_print_page();
 				}
-				this.customer_credit_dict = [];
-				this.redeem_customer_credit = false;
-				this.is_cashback = true;
-				this.is_credit_return = false;
-				this.sales_person = "";
-				this.eventBus.emit("set_last_invoice", this.invoice_doc.name);
+				this.resetPaymentState();
+				this.eventBus.emit("set_last_invoice", invoiceSnapshot?.name);
 				this.eventBus.emit("show_message", {
 					title:
 						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
@@ -1761,20 +1779,18 @@ export default {
 					color: "success",
 				});
 				frappe.utils.play_sound("submit");
-				const submittedItems = Array.isArray(this.invoice_doc.items) ? this.invoice_doc.items : [];
-				updateLocalStock(submittedItems);
-				stockCoordinator.applyInvoiceConsumption(submittedItems, {
+				updateLocalStock(submittedItemsSnapshot);
+				stockCoordinator.applyInvoiceConsumption(submittedItemsSnapshot, {
 					source: "invoice",
 				});
-				const submittedCodes = submittedItems
-					.map((item) => (item ? item.item_code : null))
-					.filter((code) => code !== undefined && code !== null);
 				this.eventBus.emit("invoice_stock_adjusted", {
-					items: submittedItems,
-					item_codes: submittedCodes,
+					items: submittedItemsSnapshot,
+					item_codes: submittedCodesSnapshot,
 					timestamp: Date.now(),
 				});
-				this.finishSubmissionNavigation(true);
+				if (!navigatedEarly) {
+					this.finishSubmissionNavigation(true);
+				}
 				this.scheduleBackgroundStatusCheck(responseInvoiceName, r.message?.doctype);
 			} catch (exc) {
 				console.error("Error submitting invoice:", exc);
