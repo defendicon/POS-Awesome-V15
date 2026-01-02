@@ -813,31 +813,6 @@
 			</v-card>
 		</v-dialog>
 
-		<!-- Submit Confirmation Dialog -->
-		<v-dialog v-model="confirm_submit_dialog" max-width="400px">
-			<v-card>
-				<v-card-title class="text-h6">
-					{{ __("Confirm Submit") }}
-				</v-card-title>
-				<v-card-text>
-					{{ __("Are you sure you want to submit?") }}
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="confirm_submit_dialog = false">
-						{{ __("Cancel") }}
-					</v-btn>
-					<v-btn
-						ref="confirmSubmitYesButton"
-						color="primary"
-						theme="dark"
-						@click="confirm_submit"
-					>
-						{{ __("Yes") }}
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
 	</div>
 </template>
 
@@ -910,8 +885,6 @@ export default {
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
-			confirm_submit_dialog: false,
-			confirm_submit_print: false,
 			last_payment_change_was_cash: null, // Track last edited payment type
 			backgroundStatusCheck: null,
 			paymentVisible: false,
@@ -2052,44 +2025,27 @@ export default {
 			if (isAltOnly && key === "p") {
 				event.preventDefault();
 				event.stopPropagation();
-				if (this.paymentVisible) {
-					this.submit(null, false, true);
-				} else {
-					this.open_submit_confirm(true);
-				}
+				this.submitOrShowPayments(true);
 				return;
 			}
 
 			if ((isAltOnly || event.ctrlKey || event.metaKey) && key === "x") {
 				event.preventDefault();
 				event.stopPropagation();
-				if (this.paymentVisible) {
-					this.submit(null, false, false);
-				} else {
-					this.open_submit_confirm(false);
-				}
+				this.submitOrShowPayments(false);
 			}
 		},
-		open_submit_confirm(print) {
-			if (!this.invoice_doc) {
-				this.eventBus.emit("show_message", {
-					title: __("Unable to submit: invoice is not ready yet."),
-					color: "error",
-				});
+		submitOrShowPayments(print) {
+			if (this.paymentVisible) {
+				this.submit(null, false, print);
 				return;
 			}
-			this.confirm_submit_print = print;
-			this.confirm_submit_dialog = true;
+			this.eventBus.emit("show_payment", "true");
 			this.$nextTick(() => {
-				const btn = this.$refs.confirmSubmitYesButton;
-				const el = btn && btn.$el ? btn.$el : btn;
-				el?.focus?.();
+				setTimeout(() => {
+					this.submit(null, false, print);
+				}, 150);
 			});
-		},
-		confirm_submit() {
-			const shouldPrint = this.confirm_submit_print;
-			this.confirm_submit_dialog = false;
-			this.submit(null, false, shouldPrint);
 		},
 		// Get available customer credit and auto-allocate
 		get_available_credit(use_credit) {
