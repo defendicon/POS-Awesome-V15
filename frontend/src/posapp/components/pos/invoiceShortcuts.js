@@ -182,6 +182,12 @@ export default {
 		if (keyLower === "d") {
 			consumeEvent(event);
 			this.show_payment?.();
+			return;
+		}
+
+		if (keyLower === "l") {
+			consumeEvent(event);
+			this.get_draft_invoices?.();
 		}
 	},
 
