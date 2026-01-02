@@ -153,30 +153,27 @@ Notes:
 - `Alt + 7` load draft orders.
 - `Alt + 8` open returns.
 - `Alt + 9` focus delivery charges.
-- `Alt + \`` focus posting date.
+- `Alt + `` focus posting date.
 
 #### Alt + Keys
 
 - `Alt + PageUp` open payments panel.
 - `Alt + Home` go to home and reload.
-- `Alt + Q` focus quantity field for the next item (cycles).
-- `Alt + U` focus UOM field for the next item (cycles).
-- `Alt + R` focus rate field for the next item (cycles).
+- `Alt + Q` focus quantity field for first item and then the next item (cycles).
+- `Alt + U` focus UOM field for first item and then the next item (cycles).
+- `Alt + R` focus rate field for first item and then the next item (cycles).
 - `Alt + E` remove the first item from the top.
-- `Alt + F` focus item search field.
+- `Alt + F` focus item table search field for added items searching.
 - `Alt + L` load draft invoices.
 - `Alt + M` toggle item selector settings.
 - `Alt + S` save and clear invoice.
 - `Alt + C` open cancel dialog.
-- `Alt + D` open payments panel.
-- `Alt + X` open payments, then submit (prompts if payments are closed).
-- `Alt + P` open payments, then submit & print (prompts if payments are closed).
 
 #### Payments Panel
 
-- `Alt + X` submit payment.
-- `Ctrl/Cmd + X` submit payment.
-- `Alt + P` submit payment and print.
+- `Alt + D` open payments panel.
+- `Alt + X` on invoice it open payments, then submit automatically (prompts if payments are closed). on payments it submit directly.
+- `Alt + P` on invoice it open payments, then submit & print automatically (prompts if payments are closed). on payments it submit directly.
 
 ---
 
