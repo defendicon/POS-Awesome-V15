@@ -2011,10 +2011,6 @@ export default {
 		},
 		// Keyboard shortcuts for payment submit (Alt+X) and submit+print (Alt+P)
 		handlePaymentShortcut(event) {
-			if (!this.paymentVisible) {
-				return;
-			}
-
 			const isAltOnly = event.altKey && !event.ctrlKey && !event.metaKey;
 			const key = event.key.toLowerCase();
 
