@@ -222,7 +222,8 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
                         je.posting_date AS posting_date,
                         jea.debit_in_account_currency AS debit_in_account_currency,
                         jea.credit_in_account_currency AS credit_in_account_currency,
-                        jea.account_currency AS currency
+                        jea.account_currency AS currency,
+                        jea.account AS account
                     FROM `tabJournal Entry Account` jea
                     INNER JOIN `tabJournal Entry` je ON je.name = jea.parent
                     WHERE je.docstatus = 1
@@ -259,34 +260,42 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
 
             journal_entry_names = [entry.get("voucher_no") for entry in journal_entries]
             allocated_map = {}
-            if party_account and journal_entry_names:
+            journal_entry_accounts = {
+                (entry.get("voucher_no"), entry.get("account")) for entry in journal_entries
+            }
+            accounts_list = [acc for _, acc in journal_entry_accounts if acc]
+            if journal_entry_names and accounts_list:
                 allocated_rows = frappe.db.sql(
                     """
                         SELECT
                             against_voucher AS voucher_no,
+                            account,
                             SUM(credit - debit) AS allocated_amount
                         FROM `tabGL Entry`
                         WHERE docstatus = 1
                             AND against_voucher IN %(voucher_nos)s
                             AND party_type = 'Customer'
                             AND party = %(customer)s
-                            AND account = %(party_account)s
-                        GROUP BY against_voucher
+                            AND account IN %(accounts)s
+                        GROUP BY against_voucher, account
                     """,
                     {
                         "voucher_nos": tuple(journal_entry_names),
                         "customer": customer,
-                        "party_account": party_account,
+                        "accounts": tuple(accounts_list),
                     },
                     as_dict=True,
                 )
                 allocated_map = {
-                    row.voucher_no: flt(row.allocated_amount) for row in allocated_rows or []
+                    (row.voucher_no, row.account): flt(row.allocated_amount)
+                    for row in allocated_rows or []
                 }
 
             updated_entries = []
             for entry in journal_entries:
-                allocated_amount = flt(allocated_map.get(entry.get("voucher_no")))
+                allocated_amount = flt(
+                    allocated_map.get((entry.get("voucher_no"), entry.get("account")))
+                )
                 if allocated_amount:
                     entry.outstanding_amount = max(
                         0, flt(entry.outstanding_amount) - max(0, allocated_amount)
