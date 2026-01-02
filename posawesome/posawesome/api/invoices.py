@@ -34,7 +34,7 @@ from posawesome.posawesome.api.utilities import (
     set_batch_nos_for_bundels,
 )  # Updated imports
 
-from .items import get_stock_availability
+from .items import get_bulk_stock_availability, get_stock_availability
 
 
 def _get_return_validity_settings(pos_profile: str | None = None):
@@ -183,6 +183,8 @@ def _allow_negative_stock(item):
 def _collect_stock_errors(items):
     """Return list of items exceeding available stock."""
     errors = []
+    items_to_check = []
+
     for d in items:
         if flt(d.get("qty")) < 0:
             continue
@@ -190,13 +192,25 @@ def _collect_stock_errors(items):
             continue
         if _allow_negative_stock(d):
             continue
-        available = _get_available_stock(d)
+        items_to_check.append(d)
+
+    if not items_to_check:
+        return []
+
+    stock_map = get_bulk_stock_availability(items_to_check)
+
+    for d in items_to_check:
+        item_code = d.get("item_code")
+        warehouse = d.get("warehouse")
+        batch_no = cstr(d.get("batch_no"))
+
+        available = stock_map.get((item_code, warehouse, batch_no), 0.0)
         requested = flt(d.get("stock_qty") or (flt(d.get("qty")) * flt(d.get("conversion_factor") or 1)))
         if requested > available:
             errors.append(
                 {
-                    "item_code": d.get("item_code"),
-                    "warehouse": d.get("warehouse"),
+                    "item_code": item_code,
+                    "warehouse": warehouse,
                     "requested_qty": requested,
                     "available_qty": available,
                 }
