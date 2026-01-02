@@ -1464,6 +1464,13 @@ export default {
 		},
 		// Submit payment after validation
 		async submit(event, payment_received = false, print = false) {
+			if (!this.invoice_doc) {
+				this.eventBus.emit("show_message", {
+					title: __("Unable to submit: invoice is not ready yet."),
+					color: "error",
+				});
+				return;
+			}
 			this.loading = true;
 			try {
 				// For return invoices, ensure payment amounts are negative
@@ -2064,6 +2071,13 @@ export default {
 			}
 		},
 		open_submit_confirm(print) {
+			if (!this.invoice_doc) {
+				this.eventBus.emit("show_message", {
+					title: __("Unable to submit: invoice is not ready yet."),
+					color: "error",
+				});
+				return;
+			}
 			this.confirm_submit_print = print;
 			this.confirm_submit_dialog = true;
 			this.$nextTick(() => {
