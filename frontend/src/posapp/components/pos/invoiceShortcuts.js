@@ -150,6 +150,15 @@ export default {
 			return;
 		}
 
+		if (keyLower === "e") {
+			consumeEvent(event);
+			const firstItem = this.items?.[0];
+			if (firstItem) {
+				this.remove_item?.(firstItem);
+			}
+			return;
+		}
+
 		if (keyLower === "f") {
 			consumeEvent(event);
 			const input = this.$refs.itemSearchField;
