@@ -428,6 +428,7 @@
 								:no-data-text="__('No items found')"
 								@click:row="click_item_row"
 								:item-class="getItemRowClass"
+								:row-props="getItemRowProps"
 								@scroll.passive="onListScroll"
 							>
 								<template v-slot:item.rate="{ item }">
@@ -3566,13 +3567,32 @@ export default {
 			});
 		},
 		isItemHighlighted(item) {
-			if (!item || !this.highlightedItemCode) {
+			const resolvedItem = this.resolveHighlightedItem(item);
+			if (!resolvedItem || !this.highlightedItemCode) {
 				return false;
 			}
-			return item.item_code === this.highlightedItemCode;
+			return resolvedItem.item_code === this.highlightedItemCode;
 		},
 		getItemRowClass(item) {
 			return this.isItemHighlighted(item) ? "item-row-highlighted" : "";
+		},
+		getItemRowProps(item) {
+			return this.isItemHighlighted(item) ? { class: "item-row-highlighted" } : {};
+		},
+		resolveHighlightedItem(item) {
+			if (!item || typeof item !== "object") {
+				return item;
+			}
+
+			if (item.raw) {
+				return item.raw;
+			}
+
+			if (item.item) {
+				return item.item.raw || item.item;
+			}
+
+			return item;
 		},
 		async selectHighlightedItem() {
 			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
