@@ -5065,12 +5065,14 @@ export default {
 
 .card-item-card.item-highlighted {
 	border-color: var(--primary-color, #1976d2);
-	box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-	transform: translate3d(0, -1px, 0);
+	box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.35), 0 8px 20px rgba(25, 118, 210, 0.2);
+	transform: translate3d(0, -2px, 0);
+	background: rgba(25, 118, 210, 0.08);
 }
 
 :deep(.item-row-highlighted) {
-	background-color: rgba(25, 118, 210, 0.12);
+	background-color: rgba(25, 118, 210, 0.18);
+	box-shadow: inset 0 0 0 2px rgba(25, 118, 210, 0.35);
 }
 
 .card-item-image-container {
