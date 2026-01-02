@@ -267,7 +267,6 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
                             SUM(credit - debit) AS allocated_amount
                         FROM `tabGL Entry`
                         WHERE docstatus = 1
-                            AND against_voucher_type = 'Journal Entry'
                             AND against_voucher IN %(voucher_nos)s
                             AND party_type = 'Customer'
                             AND party = %(customer)s
