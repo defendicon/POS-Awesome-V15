@@ -54,8 +54,8 @@ After switching branches or pulling latest changes:
 5. bench build --app posawesome
 6. bench --site your.site migrate
 
-Go to developer tools in browser, then go to application tab, then go to storage and clear site data. 
-After clearing site data go to browser settings and delete cache and images data in history also. 
+Go to developer tools in browser, then go to application tab, then go to storage and clear site data.
+After clearing site data go to browser settings and delete cache and images data in history also.
 
 ### Electron Desktop App
 
@@ -74,6 +74,7 @@ Notes:
 ### Main Features
 
 #### 🎨 UI/UX & Interface
+
 - **Modern Interface**: User-friendly design using Vue.js and Vuetify, optimized for speed and experience.
 - **View Modes**: Toggle between List View (efficient for data entry) and Card View (visual with item images).
 - **Dark Mode & Theming**: Built-in dark mode support with automatic or manual toggle, plus customizable theme options.
@@ -85,6 +86,7 @@ Notes:
 - **Multi-Language**: Supports English, Arabic, Portuguese, Spanish, and more.
 
 #### 💸 Transactions & Sales
+
 - **Multi-Currency**: Full support for invoicing in different currencies with automatic exchange rate fetching.
 - **Quotations**: Create, update, and submit Quotations directly from the POS interface.
 - **Sales Orders**: Create Sales Orders directly. Configurable "Sales Order Only" mode available.
@@ -95,6 +97,7 @@ Notes:
 - **Customer PO**: Capture Customer Purchase Order (PO) number and date.
 
 #### 📦 Inventory & Products
+
 - **Batch & Serial**: Comprehensive support for Batch and Serial number selection and search.
 - **Product Bundles**: Auto-apply batches for bundle items.
 - **Variants**: Support for template items with product variants.
@@ -103,6 +106,7 @@ Notes:
 - **Stock Validation**: Configurable stock validation (warn or block) including negative stock handling.
 
 #### 💳 Payments & Pricing
+
 - **Smart Tender**: "Quick Cash" suggestions based on currency denominations for faster checkout.
 - **Split Payments**: Accept multiple payment modes for a single transaction.
 - **M-Pesa**: Integrated M-Pesa mobile payment support.
@@ -115,6 +119,7 @@ Notes:
 - **Payment Reconciliation**: Reconcile payments against existing invoices.
 
 #### 🔄 Offline & Technical
+
 - **Robust Offline Mode**: Create invoices and customers offline. Data syncs automatically when reconnected.
 - **Background Sync**: Advanced background synchronization for offline transactions and master data updates.
 - **Local Storage**: Option to use browser Local Storage for caching to improve reliability.
@@ -122,6 +127,7 @@ Notes:
 - **Drafts**: Failed offline submissions are safely saved as Draft documents.
 
 #### ⚙️ Configuration & Shift Management
+
 - **Shift Management**: Opening and Closing shifts with cash reconciliation and detailed payment breakdown reports.
 - **Customer Balance**: Option to display current customer balance on the main screen.
 - **Address Management**: Manage multiple shipping addresses for customers.
@@ -129,13 +135,48 @@ Notes:
 
 ### Shortcuts:
 
-- `CTRL or CMD + S` open payments
-- `CTRL or CMD + X` submit payments
-- `CTRL or CMD + D` remove the first item from the top
-- `CTRL or CMD + A` expand the first item from the top
-- `CTRL or CMD + E` focus on discount field
-- `CTRL or CMD + B` focus on customer search
-- `CTRL or CMD + I` focus on item search field
+#### Global (Invoice Screen)
+
+- `F4` profile switch (currently shows “not available” message).
+- `F5` open new customer form.
+- `F11` open shift details.
+- `F12` POS lock (currently shows “not available” message).
+
+#### Alt + Number
+
+- `Alt + 1` close payments panel.
+- `Alt + 2` clear invoice, reset posting date, focus item search.
+- `Alt + 3` focus item search.
+- `Alt + 4` select top item.
+- `Alt + 5` focus customer search.
+- `Alt + 6` select first customer.
+- `Alt + 7` load draft orders.
+- `Alt + 8` open returns.
+- `Alt + 9` focus delivery charges.
+- `Alt + \`` focus posting date.
+
+#### Alt + Keys
+
+- `Alt + PageUp` open payments panel.
+- `Alt + Home` go to home and reload.
+- `Alt + Q` focus quantity field for the next item (cycles).
+- `Alt + U` focus UOM field for the next item (cycles).
+- `Alt + R` focus rate field for the next item (cycles).
+- `Alt + E` remove the first item from the top.
+- `Alt + F` focus item search field.
+- `Alt + L` load draft invoices.
+- `Alt + M` toggle item selector settings.
+- `Alt + S` save and clear invoice.
+- `Alt + C` open cancel dialog.
+- `Alt + D` open payments panel.
+- `Alt + X` open payments, then submit (prompts if payments are closed).
+- `Alt + P` open payments, then submit & print (prompts if payments are closed).
+
+#### Payments Panel
+
+- `Alt + X` submit payment.
+- `Ctrl/Cmd + X` submit payment.
+- `Alt + P` submit payment and print.
 
 ---
 
