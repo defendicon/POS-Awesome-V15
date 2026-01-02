@@ -24,6 +24,8 @@ import { evaluatePricingRules } from "../../../lib/pricingEngine.js";
 
 const ITEM_DETAIL_CACHE_TTL = 5000;
 const STOCK_CACHE_TTL = 5000;
+// Benchmark: skip redundant invoice reloads within this window unless server-side rules/taxes changed.
+const PAYMENT_INVOICE_REFRESH_TTL = 15000;
 
 const { setSerialNo, setBatchQty } = useBatchSerial();
 const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
@@ -890,6 +892,7 @@ export default {
 		const updates = Array.isArray(message.updates) ? message.updates : [];
 		const serverFree = Array.isArray(message.free_lines) ? message.free_lines : [];
 		const invoiceUpdates = message.invoice_updates || {};
+		this._pricingRulesAppliedAt = Date.now();
 
 		const hasDiscountUpdate =
 			invoiceUpdates &&
@@ -2273,7 +2276,11 @@ export default {
 
 	// Prepare payments array for invoice doc
 	get_payments() {
-		if (this.isReturnInvoice && Array.isArray(this.invoice_doc?.payments) && this.invoice_doc.payments.length) {
+		if (
+			this.isReturnInvoice &&
+			Array.isArray(this.invoice_doc?.payments) &&
+			this.invoice_doc.payments.length
+		) {
 			const total_amount = Math.abs(this.subtotal);
 			const sourcePayments = this.invoice_doc.payments.filter((payment) => payment?.mode_of_payment);
 			const sourceTotal = sourcePayments.reduce(
@@ -2286,7 +2293,8 @@ export default {
 				let remaining_amount = total_amount;
 
 				return sourcePayments.map((payment, index) => {
-					const share = Math.abs(this.flt(payment.amount || 0, this.currency_precision)) / sourceTotal;
+					const share =
+						Math.abs(this.flt(payment.amount || 0, this.currency_precision)) / sourceTotal;
 					let payment_amount =
 						index === sourcePayments.length - 1
 							? remaining_amount
@@ -2415,6 +2423,7 @@ export default {
 					this._normalizeReturnDocTotals(message);
 				}
 				this.invoice_doc = message;
+				this._markInvoiceSynced(message);
 				if (message.exchange_rate_date) {
 					this.exchange_rate_date = message.exchange_rate_date;
 					const posting_backend = this.formatDateForBackend(this.posting_date_display);
@@ -2461,6 +2470,7 @@ export default {
 					this._normalizeReturnDocTotals(message);
 				}
 				this.invoice_doc = message;
+				this._markInvoiceSynced(message);
 				if (message.exchange_rate_date) {
 					this.exchange_rate_date = message.exchange_rate_date;
 					const posting_backend = this.formatDateForBackend(this.posting_date_display);
@@ -2592,6 +2602,7 @@ export default {
 				await this.load_invoice(doc, {
 					preserveAdditionalDiscountPercentage: true,
 				});
+				this._markInvoiceSynced(doc);
 				return doc;
 			}
 			return null;
@@ -3051,6 +3062,44 @@ export default {
 			}
 		});
 	},
+	_buildInvoiceTaxSignature(doc) {
+		const taxes = doc?.taxes;
+		if (!Array.isArray(taxes) || !taxes.length) {
+			return "";
+		}
+		const normalized = taxes
+			.map((tax) => ({
+				account_head: tax.account_head || "",
+				rate: Number.parseFloat(tax.rate || 0) || 0,
+				tax_amount: Number.parseFloat(tax.tax_amount || 0) || 0,
+				charge_type: tax.charge_type || "",
+				included_in_print_rate: tax.included_in_print_rate || 0,
+			}))
+			.sort((a, b) => a.account_head.localeCompare(b.account_head));
+		return JSON.stringify(normalized);
+	},
+	_markInvoiceSynced(doc) {
+		this._lastInvoiceSyncAt = Date.now();
+		this._lastInvoiceSyncName = doc?.name || this._lastInvoiceSyncName || null;
+		this._lastInvoiceTaxSignature = this._buildInvoiceTaxSignature(doc);
+	},
+	_shouldReloadInvoiceForPayment(doc) {
+		if (!doc || isOffline()) {
+			return false;
+		}
+		const stale =
+			!this._lastInvoiceSyncAt || Date.now() - this._lastInvoiceSyncAt > PAYMENT_INVOICE_REFRESH_TTL;
+		const pricingRulesApplied =
+			!!this._pricingRulesAppliedAt &&
+			(!this._lastInvoiceSyncAt || this._pricingRulesAppliedAt > this._lastInvoiceSyncAt);
+		const taxSignature = this._buildInvoiceTaxSignature(doc);
+		const taxesChanged =
+			this._lastInvoiceTaxSignature !== undefined &&
+			this._lastInvoiceTaxSignature !== null &&
+			taxSignature !== this._lastInvoiceTaxSignature;
+		const docMismatch = this._lastInvoiceSyncName && doc.name && this._lastInvoiceSyncName !== doc.name;
+		return pricingRulesApplied || taxesChanged || stale || docMismatch;
+	},
 
 	// Show payment dialog after validation and processing
 	async show_payment() {
@@ -3123,7 +3172,7 @@ export default {
 			}
 
 			// Reload current invoice from backend (no selection dialog) to ensure items/totals are up-to-date
-			if (!isOffline() && invoice_doc.name) {
+			if (!isOffline() && invoice_doc.name && this._shouldReloadInvoiceForPayment(invoice_doc)) {
 				console.log("Reloading current invoice from backend");
 				const refreshed = await this.reload_current_invoice_from_backend();
 				if (refreshed) {

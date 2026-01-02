@@ -819,7 +819,6 @@
 /* global frappe, __, get_currency_symbol */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
-import { parseBooleanSetting } from "../../utils/stock.js";
 import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";
 import {
 	saveOfflineInvoice,
@@ -837,6 +836,9 @@ import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator.js";
+
+// Benchmark: avoid repeat stock validation for unchanged carts within the TTL.
+const CART_VALIDATION_TTL_MS = 15000;
 
 export default {
 	// Using format mixin for shared formatting methods
@@ -888,6 +890,11 @@ export default {
 			backgroundStatusCheck: null,
 			paymentVisible: false,
 			_shortcutHandlers: {},
+			cartFingerprint: "",
+			cartValidationCache: {
+				fingerprint: "",
+				timestamp: 0,
+			},
 		};
 	},
 	computed: {
@@ -1333,8 +1340,54 @@ export default {
 			this.is_cashback = true;
 			this.is_credit_return = false;
 		},
+		"invoice_doc.items": {
+			handler() {
+				this.updateCartFingerprint();
+			},
+			deep: true,
+		},
 	},
 	methods: {
+		buildCartFingerprint(items = []) {
+			if (!Array.isArray(items) || !items.length) {
+				return "";
+			}
+			const lines = items
+				.filter((item) => item && item.item_code)
+				.map((item) => {
+					const qty = this.flt(
+						formatUtils.fromArabicNumerals(String(item.qty ?? 0)),
+						this.currency_precision,
+					);
+					const warehouse = item.warehouse || "";
+					return `${item.item_code}::${qty}::${warehouse}`;
+				})
+				.sort();
+			return lines.join("|");
+		},
+		updateCartFingerprint() {
+			if (!this.invoice_doc || !Array.isArray(this.invoice_doc.items)) {
+				this.cartFingerprint = "";
+				return;
+			}
+			const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
+			this.cartFingerprint = this.buildCartFingerprint(itemsToCheck);
+		},
+		shouldValidateCartItems(fingerprint) {
+			if (!fingerprint) {
+				return true;
+			}
+			const cache = this.cartValidationCache || {};
+			const stale = !cache.timestamp || Date.now() - cache.timestamp > CART_VALIDATION_TTL_MS;
+			const changed = cache.fingerprint !== fingerprint;
+			return changed || stale;
+		},
+		markCartValidation(fingerprint) {
+			this.cartValidationCache = {
+				fingerprint,
+				timestamp: Date.now(),
+			};
+		},
 		extractSubmissionErrorMessage(exc) {
 			if (!exc) {
 				return __("Unknown error");
@@ -1563,31 +1616,37 @@ export default {
 				if (!isOffline()) {
 					try {
 						const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
-						const stockCheck = await frappe.call({
-							method: "posawesome.posawesome.api.invoices.validate_cart_items",
-							args: { items: JSON.stringify(itemsToCheck) },
-						});
-						if (stockCheck.message && stockCheck.message.length) {
-							const msg = stockCheck.message
-								.map(
-									(e) =>
-										`${e.item_code} (${e.warehouse}) - ${this.formatFloat(
-											e.available_qty,
-										)}`,
-								)
-								.join("\n");
-							const blocking =
-								!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-							this.eventBus.emit("show_message", {
-								title: blocking
-									? __("Insufficient stock:\n{0}", [msg])
-									: __("Stock is lower than requested:\n{0}", [msg]),
-								color: blocking ? "error" : "warning",
+						const fingerprint = this.buildCartFingerprint(itemsToCheck);
+						const shouldValidate = this.shouldValidateCartItems(fingerprint);
+						if (shouldValidate) {
+							const stockCheck = await frappe.call({
+								method: "posawesome.posawesome.api.invoices.validate_cart_items",
+								args: { items: JSON.stringify(itemsToCheck) },
 							});
-							if (blocking) {
-								frappe.utils.play_sound("error");
-								return;
+							if (stockCheck.message && stockCheck.message.length) {
+								const msg = stockCheck.message
+									.map(
+										(e) =>
+											`${e.item_code} (${e.warehouse}) - ${this.formatFloat(
+												e.available_qty,
+											)}`,
+									)
+									.join("\n");
+								const blocking =
+									!this.stock_settings.allow_negative_stock ||
+									this.blockSaleBeyondAvailableQty;
+								this.eventBus.emit("show_message", {
+									title: blocking
+										? __("Insufficient stock:\n{0}", [msg])
+										: __("Stock is lower than requested:\n{0}", [msg]),
+									color: blocking ? "error" : "warning",
+								});
+								if (blocking) {
+									frappe.utils.play_sound("error");
+									return;
+								}
 							}
+							this.markCartValidation(fingerprint);
 						}
 					} catch (e) {
 						console.error("Stock validation failed", e);
@@ -2723,6 +2782,7 @@ export default {
 			// Listen to various event bus events for POS actions
 			this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
 				this.invoice_doc = invoice_doc;
+				this.updateCartFingerprint();
 				const default_payment = this.invoice_doc.payments.find((payment) => payment.default === 1);
 				const hasReturnPayments = this.invoice_doc.payments.some(
 					(payment) => Math.abs(this.flt(payment.amount || 0, this.currency_precision)) > 0,
