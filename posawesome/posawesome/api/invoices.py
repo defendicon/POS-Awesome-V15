@@ -90,9 +90,7 @@ def _validate_return_window(invoice_doc, doctype, enabled):
     validity_date = original_invoice.get("posa_return_valid_upto")
     return_date = getdate(invoice_doc.get("posting_date") or nowdate())
     if validity_date and return_date > getdate(validity_date):
-        frappe.throw(
-            _("Returns are only allowed until {0}").format(formatdate(validity_date))
-        )
+        frappe.throw(_("Returns are only allowed until {0}").format(formatdate(validity_date)))
 
 
 def _sanitize_item_name(name: str) -> str:
@@ -697,9 +695,7 @@ def update_invoice(data):
                 indicator="orange",
             )
             # Reload timestamp to prevent TimestampMismatchError on retry
-            latest_modified = frappe.db.get_value(
-                invoice_doc.doctype, invoice_doc.name, "modified"
-            )
+            latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
             if latest_modified:
                 invoice_doc.modified = latest_modified
             invoice_doc.return_against = None
@@ -1004,9 +1000,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 indicator="orange",
             )
             # Reload timestamp to prevent TimestampMismatchError on retry
-            latest_modified = frappe.db.get_value(
-                invoice_doc.doctype, invoice_doc.name, "modified"
-            )
+            latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
             if latest_modified:
                 invoice_doc.modified = latest_modified
             invoice_doc.return_against = None
@@ -1056,9 +1050,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 and "does not exist in Sales Invoice" in str(e)
             ):
                 # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(
-                    invoice_doc.doctype, invoice_doc.name, "modified"
-                )
+                latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
                 if latest_modified:
                     invoice_doc.modified = latest_modified
                 invoice_doc.return_against = None
@@ -1066,8 +1058,29 @@ def submit_invoice(invoice, data, submit_in_background=False):
             else:
                 raise
 
-        _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
-        redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+        defer_post_submit_tasks = cint(
+            frappe.db.get_value("POS Profile", invoice_doc.pos_profile, "posa_defer_post_submit_tasks") or 0
+        )
+        if defer_post_submit_tasks:
+            # Benchmark: defer post-submit accounting work to keep checkout/print responsive.
+            enqueue(
+                method=post_submit_tasks_job,
+                queue="default",
+                timeout=3000,
+                is_async=True,
+                kwargs={
+                    "invoice": invoice_doc.name,
+                    "doctype": invoice_doc.doctype,
+                    "data": data,
+                    "pos_profile": pos_profile,
+                    "is_payment_entry": is_payment_entry,
+                    "total_cash": total_cash,
+                    "cash_account": cash_account,
+                },
+            )
+        else:
+            _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
+            redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
@@ -1098,7 +1111,9 @@ def submit_in_background_job(kwargs):
         invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
         if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
-            invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
+            invoice_doc.loyalty_program = frappe.db.get_value(
+                "Customer", invoice_doc.customer, "loyalty_program"
+            )
 
         if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
             if not invoice_doc.loyalty_redemption_account:
@@ -1119,9 +1134,7 @@ def submit_in_background_job(kwargs):
                 and "does not exist in Sales Invoice" in str(e)
             ):
                 # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(
-                    invoice_doc.doctype, invoice_doc.name, "modified"
-                )
+                latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
                 if latest_modified:
                     invoice_doc.modified = latest_modified
                 invoice_doc.return_against = None
@@ -1139,9 +1152,7 @@ def submit_in_background_job(kwargs):
                 and "does not exist in Sales Invoice" in str(e)
             ):
                 # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(
-                    invoice_doc.doctype, invoice_doc.name, "modified"
-                )
+                latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
                 if latest_modified:
                     invoice_doc.modified = latest_modified
                 invoice_doc.return_against = None
@@ -1161,6 +1172,38 @@ def submit_in_background_job(kwargs):
             {"invoice": invoice, "error": error_msg},
             user=frappe.session.user,
         )
+
+
+def post_submit_tasks_job(kwargs):
+    """Run post-submit accounting tasks in the background for faster checkout."""
+
+    invoice = kwargs.get("invoice")
+    if not invoice:
+        return
+
+    try:
+        doctype = kwargs.get("doctype") or "Sales Invoice"
+        data = kwargs.get("data") or {}
+        pos_profile = kwargs.get("pos_profile")
+        is_payment_entry = kwargs.get("is_payment_entry")
+        total_cash = kwargs.get("total_cash")
+        cash_account = kwargs.get("cash_account")
+
+        invoice_doc = frappe.get_doc(doctype, invoice)
+        if invoice_doc.docstatus != 1:
+            return
+
+        _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
+        redeeming_customer_credit(
+            invoice_doc,
+            data,
+            is_payment_entry,
+            total_cash,
+            cash_account,
+            invoice_doc.payments,
+        )
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "POSAwesome Post-Submit Tasks Error")
 
 
 @frappe.whitelist()
@@ -1481,7 +1524,7 @@ def get_last_invoice_rates(customer, item_codes=None, company=None, limit_per_it
             si.creation
         from `tabSales Invoice Item` sii
         inner join `tabSales Invoice` si on sii.parent = si.name
-        where {' and '.join(filters)}
+        where {" and ".join(filters)}
     """
 
     pos_invoice_query = f"""
@@ -1496,7 +1539,7 @@ def get_last_invoice_rates(customer, item_codes=None, company=None, limit_per_it
             pi.creation
         from `tabPOS Invoice Item` pii
         inner join `tabPOS Invoice` pi on pii.parent = pi.name
-        where {' and '.join(pos_filters)}
+        where {" and ".join(pos_filters)}
     """
 
     query = (
