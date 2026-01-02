@@ -485,6 +485,12 @@ export default {
 					key: "voucher_no",
 				},
 				{
+					title: __("Type"),
+					align: "start",
+					sortable: true,
+					key: "voucher_type",
+				},
+				{
 					title: __("Customer"),
 					align: "start",
 					sortable: true,
