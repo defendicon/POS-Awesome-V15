@@ -5071,15 +5071,13 @@ export default {
 }
 
 :deep(.item-row-highlighted) {
-	background-color: rgba(25, 118, 210, 0.28);
-	box-shadow:
-		inset 0 0 0 2px rgba(25, 118, 210, 0.6),
-		inset 0 0 0 6px rgba(25, 118, 210, 0.12);
+	background-color: rgba(25, 118, 210, 0.32);
 }
 
 :deep(.item-row-highlighted td) {
 	font-weight: 600;
 	color: var(--primary-color, #1976d2);
+	background-color: rgba(25, 118, 210, 0.32);
 }
 
 .card-item-image-container {
