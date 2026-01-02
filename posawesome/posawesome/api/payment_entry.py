@@ -611,16 +611,16 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
             if allocation <= 0:
                 continue
 
-			entry_list.append(
-				frappe._dict(
-					{
-						"voucher_type": "Payment Entry",
-						"voucher_no": payment_name,
-						"voucher_detail_no": None,
-						"against_voucher_type": invoice.get("voucher_type") or "Sales Invoice",
-						"against_voucher": invoice.get("voucher_no"),
-						"account": pe_doc.paid_from,
-						"party_type": "Customer",
+            entry_list.append(
+                frappe._dict(
+                    {
+                        "voucher_type": "Payment Entry",
+                        "voucher_no": payment_name,
+                        "voucher_detail_no": None,
+                        "against_voucher_type": invoice.get("voucher_type") or "Sales Invoice",
+                        "against_voucher": invoice.get("voucher_no"),
+                        "account": pe_doc.paid_from,
+                        "party_type": "Customer",
                         "party": customer,
                         "dr_or_cr": "credit_in_account_currency",
                         "unreconciled_amount": unallocated_before,
