@@ -1,7 +1,6 @@
 <template>
-	<v-row justify="center">
-		<v-dialog v-model="closingDialog" max-width="900px" persistent>
-			<v-card elevation="8" class="closing-dialog-card">
+	<v-dialog v-model="closingDialog" max-width="900px" persistent>
+		<v-card elevation="8" class="closing-dialog-card">
 				<!-- Enhanced White Header -->
 				<v-card-title class="closing-header pa-6 d-flex align-center">
 					<div class="header-content">
@@ -868,9 +867,8 @@
 						<span>{{ __("Submit") }}</span>
 					</v-btn>
 				</v-card-actions>
-			</v-card>
-		</v-dialog>
-	</v-row>
+		</v-card>
+	</v-dialog>
 </template>
 
 <script>
