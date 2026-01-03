@@ -957,13 +957,18 @@ def submit_invoice(invoice, data, submit_in_background=False):
     if data.get("redeemed_customer_credit"):
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Advance" and row["credit_to_redeem"]:
-                advance = frappe.get_doc("Payment Entry", row["credit_origin"])
+                advance = frappe.db.get_value(
+                    "Payment Entry",
+                    row["credit_origin"],
+                    ["name", "remarks", "unallocated_amount"],
+                    as_dict=True,
+                )
 
                 advance_payment = {
                     "reference_type": "Payment Entry",
-                    "reference_name": advance.name,
-                    "remarks": advance.remarks,
-                    "advance_amount": advance.unallocated_amount,
+                    "reference_name": advance.get("name"),
+                    "remarks": advance.get("remarks"),
+                    "advance_amount": advance.get("unallocated_amount"),
                     "allocated_amount": row["credit_to_redeem"],
                 }
 
@@ -1337,65 +1342,110 @@ def search_invoices_for_return(
     invoices_list = frappe.get_list(
         doctype,
         filters=filters,
-        fields=["name"],
+        fields=["*"],
         limit_start=start,
         limit_page_length=page_length,
         order_by="posting_date desc, name desc",
     )
 
-    # Process and return the results
-    data = []
+    if not invoices_list:
+        return {"invoices": [], "has_more": False}
 
-    # Process invoices and check for returns
-    for invoice in invoices_list:
-        invoice_doc = frappe.get_doc(doctype, invoice.name)
+    invoice_names = [d.name for d in invoices_list]
 
-        validity_date = invoice_doc.get("posa_return_valid_upto")
-        expired = False
+    # Pre-fetch child tables
+    meta = frappe.get_meta(doctype)
+    item_doctype = meta.get_field("items").options
+    payment_doctype = meta.get_field("payments").options
 
-        if enforce_return_validity and validity_date:
-            expired = getdate(nowdate()) > getdate(validity_date)
+    # Items
+    all_items = frappe.get_all(
+        item_doctype,
+        filters={"parent": ["in", invoice_names]},
+        fields=["*"],
+        order_by="idx",
+    )
+    items_map = {}
+    for item in all_items:
+        items_map.setdefault(item.parent, []).append(item)
 
-        invoice_doc.posa_return_expired = cint(expired)
+    # Payments
+    all_payments = frappe.get_all(
+        payment_doctype,
+        filters={"parent": ["in", invoice_names]},
+        fields=["*"],
+        order_by="idx",
+    )
+    payments_map = {}
+    for payment in all_payments:
+        payments_map.setdefault(payment.parent, []).append(payment)
 
-        # Check if any items have already been returned
-        has_returns = frappe.get_all(
-            doctype,
-            filters={"return_against": invoice.name, "docstatus": 1},
-            fields=["name"],
+    # Returns check
+    all_returns = frappe.get_all(
+        doctype,
+        filters={"return_against": ["in", invoice_names], "docstatus": 1, "is_return": 1},
+        fields=["name", "return_against"],
+    )
+
+    returned_qty_map = {}
+    if all_returns:
+        return_names = [r.name for r in all_returns]
+        return_items = frappe.get_all(
+            item_doctype,
+            filters={"parent": ["in", return_names]},
+            fields=["item_code", "qty", "parent"],
         )
 
-        if has_returns:
-            # Calculate returned quantity per item_code
-            returned_qty = {}
-            for ret_inv in has_returns:
-                ret_doc = frappe.get_doc(doctype, ret_inv.name)
-                for item in ret_doc.items:
-                    returned_qty[item.item_code] = returned_qty.get(item.item_code, 0) + abs(item.qty)
+        # Map return ID -> Original Invoice ID
+        return_to_orig = {r.name: r.return_against for r in all_returns}
 
-            # Filter items with remaining qty
-            filtered_items = []
-            for item in invoice_doc.items:
-                remaining_qty = item.qty - returned_qty.get(item.item_code, 0)
-                if remaining_qty > 0:
-                    new_item = item.as_dict().copy()
-                    new_item["qty"] = remaining_qty
-                    new_item["amount"] = remaining_qty * item.rate
-                    if item.get("stock_qty"):
-                        new_item["stock_qty"] = (
-                            item.stock_qty / item.qty * remaining_qty if item.qty else remaining_qty
-                        )
-                    filtered_items.append(frappe._dict(new_item))
+        for r_item in return_items:
+            orig_inv = return_to_orig.get(r_item.parent)
+            if orig_inv:
+                key = (orig_inv, r_item.item_code)
+                returned_qty_map[key] = returned_qty_map.get(key, 0) + abs(flt(r_item.qty))
 
+    data = []
+    for invoice in invoices_list:
+        # Attach children
+        invoice["items"] = items_map.get(invoice.name, [])
+        invoice["payments"] = payments_map.get(invoice.name, [])
+
+        # Validation checks logic
+        validity_date = invoice.get("posa_return_valid_upto")
+        expired = False
+        if enforce_return_validity and validity_date:
+            expired = getdate(nowdate()) > getdate(validity_date)
+        invoice["posa_return_expired"] = cint(expired)
+
+        filtered_items = []
+        has_any_return = False
+
+        for item in invoice["items"]:
+            # returned_qty_map key is (invoice.name, item.item_code)
+            ret_qty = returned_qty_map.get((invoice.name, item.item_code), 0)
+            if ret_qty > 0:
+                has_any_return = True
+
+            remaining_qty = item.qty - ret_qty
+            if remaining_qty > 0:
+                new_item = item.copy()
+                new_item["qty"] = remaining_qty
+                new_item["amount"] = remaining_qty * item.rate
+                if item.get("stock_qty"):
+                    new_item["stock_qty"] = (
+                        (item.stock_qty / item.qty * remaining_qty)
+                        if item.qty
+                        else remaining_qty
+                    )
+                filtered_items.append(new_item)
+
+        if has_any_return:
             if filtered_items:
-                # Create a copy of invoice with filtered items
-                filtered_invoice = frappe.get_doc(doctype, invoice.name)
-                filtered_invoice.items = filtered_items
-                filtered_invoice.posa_return_expired = cint(expired)
-                filtered_invoice.posa_return_valid_upto = validity_date
-                data.append(filtered_invoice)
+                invoice["items"] = filtered_items
+                data.append(invoice)
         else:
-            data.append(invoice_doc)
+            data.append(invoice)
 
     # Check if there are more results
     has_more = (start + page_length) < total_count

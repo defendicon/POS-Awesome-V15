@@ -1,7 +1,3 @@
-# Bolt's Journal - Critical Learnings
-
-This journal records critical performance learnings, anti-patterns, and insights specific to this codebase.
-
 ## 2024-05-22 - [Initial Setup]
 **Learning:** Initialized Bolt's journal.
 **Action:** Record only critical learnings that affect future performance decisions.
@@ -21,3 +17,7 @@ This journal records critical performance learnings, anti-patterns, and insights
 ## 2025-12-19 - [Refine local search results]
 **Learning:** Filtering the entire item catalog (potentially thousands of items) on every keystroke (O(N)) is wasteful when the user is simply appending characters to refine a search.
 **Action:** When a search term is an extension of the previous term (e.g., "app" -> "appl") and the result set was not empty, filter the *previous* result set instead of the full list. This reduces the search space from O(N) to O(K) where K << N.
+
+## 2025-05-23 - [N+1 in Search API]
+**Learning:** The `search_invoices_for_return` API was performing an O(N) `frappe.get_doc` for every invoice in the results page (100 items), plus nested O(M) `frappe.get_doc` for every return linked to those invoices. This made the Returns search extremely slow (seconds latency).
+**Action:** Replaced `frappe.get_doc` loops with bulk `frappe.get_all` queries and manual Python-side assembly (Eager Loading). This reduced DB queries from ~200+ per request to ~5 constant queries, regardless of page size.
