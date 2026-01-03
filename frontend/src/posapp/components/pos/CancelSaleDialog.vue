@@ -14,7 +14,9 @@
 			</v-card-text>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn color="error" autofocus @click="onConfirm">{{ __("Yes, Cancel sale") }}</v-btn>
+				<v-btn color="error" ref="confirmButton" @click="onConfirm">
+					{{ __("Yes, Cancel sale") }}
+				</v-btn>
 				<v-btn color="warning" @click="$emit('update:modelValue', false)">{{ __("Back") }}</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -27,7 +29,27 @@ export default {
 		modelValue: Boolean,
 	},
 	emits: ["update:modelValue", "confirm"],
+	watch: {
+		modelValue(isOpen) {
+			if (isOpen) {
+				this.$nextTick(() => {
+					this.focusConfirmButton();
+				});
+			}
+		},
+	},
 	methods: {
+		focusConfirmButton() {
+			const button = this.$refs.confirmButton;
+			if (button?.focus) {
+				button.focus();
+				return;
+			}
+			const target = button?.$el?.querySelector("button");
+			if (target) {
+				target.focus();
+			}
+		},
 		onConfirm() {
 			this.$emit("confirm");
 		},
