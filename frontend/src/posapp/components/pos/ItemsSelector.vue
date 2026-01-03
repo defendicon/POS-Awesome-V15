@@ -1,5 +1,9 @@
 <template>
-	<div ref="itemSelectorContainer" :style="containerStyles">
+	<div
+		ref="itemSelectorContainer"
+		:style="containerStyles"
+		style="height: 100%; display: flex; flex-direction: column"
+	>
 		<v-dialog v-model="scanErrorDialog" persistent max-width="420" content-class="scan-error-dialog">
 			<v-card>
 				<v-card-title class="d-flex align-center text-error text-h6">
@@ -29,7 +33,7 @@
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
 			]"
-			style="height: 100%; max-height: 100%; display: flex; flex-direction: column"
+			style="flex: 1; display: flex; flex-direction: column; overflow: hidden"
 		>
 			<v-progress-linear
 				:active="loading"
