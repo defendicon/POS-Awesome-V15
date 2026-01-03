@@ -24,6 +24,61 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
+		<v-dialog v-model="showHighlightedItemDialog" max-width="420">
+			<v-card>
+				<v-card-title class="text-h6 pa-4 d-flex align-center">
+					<span>{{ __("Add Item") }}</span>
+					<v-spacer></v-spacer>
+					<v-btn
+						icon="mdi-close"
+						variant="text"
+						density="compact"
+						@click="closeHighlightedItemDialog"
+						:aria-label="__('Close')"
+					>
+					</v-btn>
+				</v-card-title>
+				<v-divider></v-divider>
+				<v-card-text class="pa-4">
+					<div class="mb-3 text-subtitle-2">
+						{{ highlightedDialogItem?.item_name || highlightedDialogItem?.item_code }}
+					</div>
+					<v-text-field
+						ref="highlightedQtyInput"
+						v-model="highlightedDialogQty"
+						type="number"
+						density="compact"
+						variant="outlined"
+						color="primary"
+						hide-details
+						:label="__('QTY')"
+						class="mb-3 pos-themed-input"
+					></v-text-field>
+					<v-select
+						v-model="highlightedDialogUom"
+						:items="highlightedDialogUoms"
+						item-title="uom"
+						item-value="uom"
+						density="compact"
+						variant="outlined"
+						color="primary"
+						hide-details
+						:label="__('UOM')"
+						:disabled="highlightedDialogUoms.length <= 1"
+						class="pos-themed-input"
+					></v-select>
+				</v-card-text>
+				<v-card-actions class="pa-4 pt-0">
+					<v-btn color="error" variant="text" @click="closeHighlightedItemDialog">
+						{{ __("Cancel") }}
+					</v-btn>
+					<v-spacer></v-spacer>
+					<v-btn color="primary" variant="flat" @click="confirmHighlightedItemDialog">
+						{{ __("Add") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 		<v-card
 			:class="[
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
@@ -276,7 +331,10 @@
 									<div
 										v-if="item"
 										:key="item.item_code"
-										:class="['card-item-card', { 'item-highlighted': isItemHighlighted(item) }]"
+										:class="[
+											'card-item-card',
+											{ 'item-highlighted': isItemHighlighted(item) },
+										]"
 										:style="{
 											width: cardColumnWidth + 'px',
 											height: cardRowHeight + 'px',
@@ -769,6 +827,10 @@ export default {
 		keyboardScanProcessingDelay: 100,
 		highlightedIndex: -1,
 		highlightedItemCode: null,
+		showHighlightedItemDialog: false,
+		highlightedDialogItem: null,
+		highlightedDialogQty: 1,
+		highlightedDialogUom: "",
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
 		lastInvoiceRateLoading: false,
@@ -2036,7 +2098,7 @@ export default {
 			await this.add_item(item);
 		},
 		async add_item(item, options = {}) {
-			const { suppressNegativeWarning = false } = options;
+			const { suppressNegativeWarning = false, requestedQty, selectedUom } = options;
 			item = { ...item };
 
 			// Handle variant items
@@ -2051,10 +2113,12 @@ export default {
 			// await this.update_items_details([item]);
 
 			// Validate item before adding to cart
-			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
+			const baseQty =
+				requestedQty != null ? Math.abs(parseFloat(requestedQty)) : Math.abs(parseFloat(this.qty));
+			const resolvedQty = Number.isFinite(baseQty) && baseQty > 0 ? baseQty : 1;
 			const isValid = await this.cartValidation.validateCartItem(
 				item,
-				requestedQty,
+				resolvedQty,
 				this.pos_profile,
 				this.stock_settings,
 				this.eventBus,
@@ -2069,7 +2133,10 @@ export default {
 			}
 
 			// Prepare item for cart
-			await this.prepareItemForCart(item, requestedQty);
+			if (selectedUom) {
+				item.uom = selectedUom;
+			}
+			await this.prepareItemForCart(item, resolvedQty);
 
 			// Add item to cart
 			const payload = { ...item };
@@ -3554,8 +3621,7 @@ export default {
 				}
 
 				const tableRef = this.$refs.itemsTable;
-				const scrollToIndex =
-					tableRef?.scrollToIndex || tableRef?.$?.exposed?.scrollToIndex || null;
+				const scrollToIndex = tableRef?.scrollToIndex || tableRef?.$?.exposed?.scrollToIndex || null;
 				if (scrollToIndex) {
 					const scheduleScroll =
 						typeof requestAnimationFrame === "function"
@@ -3632,7 +3698,64 @@ export default {
 				return;
 			}
 
-			await this.add_item(item);
+			await this.openHighlightedItemDialog(item);
+		},
+		async openHighlightedItemDialog(item) {
+			const resolved = this.resolveHighlightedItem(item);
+			if (!resolved) {
+				return;
+			}
+
+			const dialogItem = { ...resolved };
+			await this.update_items_details([dialogItem]);
+			if (!dialogItem.item_uoms || dialogItem.item_uoms.length === 0) {
+				dialogItem.item_uoms = [
+					{
+						uom: dialogItem.stock_uom || dialogItem.uom,
+						conversion_factor: 1.0,
+					},
+				].filter((entry) => entry.uom);
+			}
+
+			const rawQty = this.qty != null ? Math.abs(parseFloat(this.qty)) : 1;
+			const qty = Number.isFinite(rawQty) && rawQty > 0 ? rawQty : 1;
+			const resolvedQty = this.hide_qty_decimals ? Math.trunc(qty) : qty;
+
+			this.highlightedDialogItem = dialogItem;
+			this.highlightedDialogQty = resolvedQty;
+			this.highlightedDialogUom =
+				dialogItem.uom || dialogItem.stock_uom || dialogItem.item_uoms?.[0]?.uom || "";
+			this.showHighlightedItemDialog = true;
+
+			this.$nextTick(() => {
+				this.$refs.highlightedQtyInput?.focus?.();
+			});
+		},
+		closeHighlightedItemDialog() {
+			this.showHighlightedItemDialog = false;
+			this.highlightedDialogItem = null;
+			this.highlightedDialogQty = 1;
+			this.highlightedDialogUom = "";
+		},
+		async confirmHighlightedItemDialog() {
+			if (!this.highlightedDialogItem) {
+				return;
+			}
+
+			let qty = Math.abs(parseFloat(this.highlightedDialogQty));
+			if (!Number.isFinite(qty) || qty <= 0) {
+				qty = 1;
+			}
+			if (this.hide_qty_decimals) {
+				qty = Math.trunc(qty);
+			}
+
+			const uom = this.highlightedDialogUom || this.highlightedDialogItem.uom;
+			await this.add_item(this.highlightedDialogItem, {
+				requestedQty: qty,
+				selectedUom: uom,
+			});
+			this.closeHighlightedItemDialog();
 			this.clearHighlightedItem();
 			this.clearSearch();
 			this.focusItemSearch();
@@ -4357,6 +4480,17 @@ export default {
 		},
 		blockSaleBeyondAvailableQty() {
 			return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
+		},
+		highlightedDialogUoms() {
+			const item = this.highlightedDialogItem;
+			if (!item) {
+				return [];
+			}
+			if (Array.isArray(item.item_uoms) && item.item_uoms.length > 0) {
+				return item.item_uoms;
+			}
+			const fallback = item.uom || item.stock_uom;
+			return fallback ? [{ uom: fallback, conversion_factor: 1.0 }] : [];
 		},
 		headers() {
 			return this.getItemsHeaders();
@@ -5108,7 +5242,9 @@ export default {
 
 .card-item-card.item-highlighted {
 	border-color: var(--primary-color, #1976d2);
-	box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.35), 0 8px 20px rgba(25, 118, 210, 0.2);
+	box-shadow:
+		0 0 0 3px rgba(25, 118, 210, 0.35),
+		0 8px 20px rgba(25, 118, 210, 0.2);
 	transform: translate3d(0, -2px, 0);
 	background: rgba(25, 118, 210, 0.08);
 }
