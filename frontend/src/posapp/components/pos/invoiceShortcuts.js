@@ -203,16 +203,7 @@ export default {
 			consumeEvent(event);
 
 			const shouldPrint = keyLower === "p";
-			const shouldSubmit = window.confirm(
-				__("Payments are not open. Do you want to open payments and submit?"),
-			);
-			if (!shouldSubmit) {
-				return;
-			}
-			await this.show_payment?.();
-			if (this.paymentVisible) {
-				this.eventBus.emit("submit_payment_shortcut", { print: shouldPrint });
-			}
+			this.openPaymentShortcutDialog?.({ print: shouldPrint });
 		}
 	},
 

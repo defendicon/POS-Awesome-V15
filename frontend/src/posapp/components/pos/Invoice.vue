@@ -3,6 +3,37 @@
 	<div class="pa-0">
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
+		<v-dialog v-model="paymentShortcutDialog" max-width="420px" @keydown.esc="closePaymentShortcutDialog">
+			<v-card>
+				<v-card-title class="text-h6 pa-4">
+					{{ __("Open payments and submit") }}
+				</v-card-title>
+				<v-card-text class="pa-4 pt-0">
+					<div class="text-body-2 mb-3">
+						{{ __("Payments are not open. Enter amount to submit or press Enter.") }}
+					</div>
+					<v-text-field
+						ref="paymentShortcutAmountField"
+						v-model="paymentShortcutAmount"
+						:label="paymentShortcutLabel"
+						variant="solo"
+						density="compact"
+						clearable
+						hide-details
+						@keydown.enter.prevent="confirmPaymentShortcut"
+					/>
+				</v-card-text>
+				<v-card-actions class="pa-4 pt-0">
+					<v-btn color="error" variant="text" @click="closePaymentShortcutDialog">
+						{{ __("Cancel") }}
+					</v-btn>
+					<v-spacer />
+					<v-btn color="primary" variant="tonal" @click="confirmPaymentShortcut">
+						{{ __("Submit") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 
 		<!-- Main Invoice Card (contains all invoice content) -->
 		<v-card
@@ -349,6 +380,7 @@ import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
+import { formatUtils } from "../../format";
 import { isOffline } from "../../../offline/index.js";
 
 export default {
@@ -437,6 +469,9 @@ export default {
 			show_column_selector: false, // Column selector dialog visibility
 			invoiceHeight: null,
 			paymentVisible: false, // Track current payment view state
+			paymentShortcutDialog: false,
+			paymentShortcutAmount: "",
+			paymentShortcutPrint: false,
 			_busHandlers: {},
 		};
 	},
@@ -476,6 +511,18 @@ export default {
 			},
 		},
 		...invoiceComputed,
+		paymentShortcutDefaultPayment() {
+			if (!this.invoice_doc || !Array.isArray(this.invoice_doc.payments)) {
+				return null;
+			}
+			return this.invoice_doc.payments.find((payment) => payment.default === 1) || null;
+		},
+		paymentShortcutLabel() {
+			if (!this.paymentShortcutDefaultPayment) {
+				return __("Default Payment");
+			}
+			return `${__("Default Payment")} (${this.paymentShortcutDefaultPayment.mode_of_payment})`;
+		},
 	},
 
 	methods: {
@@ -500,6 +547,54 @@ export default {
 
 		focusAdditionalDiscountField() {
 			this.$refs.invoiceSummary?.focusAdditionalDiscountField?.();
+		},
+		openPaymentShortcutDialog({ print = false } = {}) {
+			this.paymentShortcutPrint = print;
+			if (this.paymentShortcutDefaultPayment) {
+				this.paymentShortcutAmount = this.formatCurrency(
+					this.paymentShortcutDefaultPayment.amount,
+					this.currency_precision,
+				);
+			} else {
+				this.paymentShortcutAmount = "";
+			}
+			this.paymentShortcutDialog = true;
+			this.$nextTick(() => {
+				this.$refs.paymentShortcutAmountField?.focus?.();
+			});
+		},
+		closePaymentShortcutDialog() {
+			this.paymentShortcutDialog = false;
+			this.paymentShortcutAmount = "";
+			this.paymentShortcutPrint = false;
+		},
+		async confirmPaymentShortcut() {
+			const defaultPayment = this.paymentShortcutDefaultPayment;
+			const enteredAmount = String(this.paymentShortcutAmount || "").trim();
+			if (enteredAmount && defaultPayment) {
+				const normalized = formatUtils.fromArabicNumerals(enteredAmount).replace(/,/g, "");
+				const parsedAmount = parseFloat(normalized);
+				if (!Number.isNaN(parsedAmount)) {
+					defaultPayment.amount = this.flt(parsedAmount, this.currency_precision);
+					if (defaultPayment.base_amount !== undefined) {
+						const conversionRate = this.invoice_doc?.conversion_rate || 1;
+						defaultPayment.base_amount = this.flt(
+							parsedAmount * conversionRate,
+							this.currency_precision,
+						);
+					}
+				}
+			}
+
+			const shouldPrint = this.paymentShortcutPrint;
+			this.paymentShortcutDialog = false;
+			this.paymentShortcutAmount = "";
+			this.paymentShortcutPrint = false;
+
+			await this.show_payment?.();
+			if (this.paymentVisible) {
+				this.eventBus.emit("submit_payment_shortcut", { print: shouldPrint });
+			}
 		},
 
 		initializeItemsHeaders() {
