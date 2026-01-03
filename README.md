@@ -150,7 +150,7 @@ Notes:
 - `Alt + 4` select top item.
 - `Alt + 5` focus customer search.
 - `Alt + 6` select first customer.
-- `Alt + 7` load draft orders.
+- `Alt + 7` load sales orders.
 - `Alt + 8` open returns.
 - `Alt + 9` focus delivery charges.
 - `Alt + `` focus posting date.

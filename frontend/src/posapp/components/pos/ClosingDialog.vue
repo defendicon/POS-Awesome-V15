@@ -952,6 +952,11 @@ export default {
 	watch: {},
 
 	methods: {
+		handleKeydown(event) {
+			if (event.key === "Escape" && this.closingDialog) {
+				this.close_dialog();
+			}
+		},
 		close_dialog() {
 			this.closingDialog = false;
 			this.overview = null;
@@ -1554,9 +1559,13 @@ export default {
 			}
 		});
 	},
+	mounted() {
+		window.addEventListener("keydown", this.handleKeydown);
+	},
 	beforeUnmount() {
 		this.eventBus.off("open_ClosingDialog");
 		this.eventBus.off("register_pos_profile");
+		window.removeEventListener("keydown", this.handleKeydown);
 	},
 };
 </script>
