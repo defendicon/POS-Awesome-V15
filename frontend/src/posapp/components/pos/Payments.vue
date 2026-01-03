@@ -819,7 +819,6 @@
 /* global frappe, __, get_currency_symbol */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
-import { parseBooleanSetting } from "../../utils/stock.js";
 import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";
 import {
 	saveOfflineInvoice,
@@ -916,15 +915,28 @@ export default {
 			}
 			return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
+		// Performance: normalize payment amounts once per reactive update to avoid repeated parsing
+		// across totals, change calculations, and denomination rendering (cuts ~3 O(n) scans per render).
+		paymentAmountSummary() {
+			const payments = Array.isArray(this.invoice_doc?.payments) ? this.invoice_doc.payments : [];
+			let total = 0;
+			const amountByPayment = new Map();
+
+			payments.forEach((payment) => {
+				const amount = parseFloat(formatUtils.fromArabicNumerals(String(payment?.amount))) || 0;
+				amountByPayment.set(payment, amount);
+				total += amount;
+			});
+
+			return {
+				payments,
+				amountByPayment,
+				total: this.flt(total, this.currency_precision),
+			};
+		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {
-			let total = 0;
-			if (this.invoice_doc && this.invoice_doc.payments) {
-				this.invoice_doc.payments.forEach((payment) => {
-					// Payment amount is already in selected currency
-					total += parseFloat(formatUtils.fromArabicNumerals(String(payment.amount))) || 0;
-				});
-			}
+			let total = this.paymentAmountSummary.total;
 
 			// Add loyalty amount (convert if needed)
 			const doc = this.invoice_doc;
@@ -1026,15 +1038,14 @@ export default {
 				return false;
 			}
 
-			const payments = Array.isArray(this.invoice_doc.payments) ? this.invoice_doc.payments : [];
-
+			const { payments, amountByPayment } = this.paymentAmountSummary;
 			const totals = payments.reduce(
 				(accumulator, payment) => {
 					if (!payment) {
 						return accumulator;
 					}
 
-					const amount = this.flt(payment.amount || 0, this.currency_precision);
+					const amount = this.flt(amountByPayment.get(payment) || 0, this.currency_precision);
 
 					if (this.isCashLikePayment(payment)) {
 						accumulator.cash += amount;
@@ -2538,13 +2549,7 @@ export default {
 			const invoice_total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
 
 			// Calculate current total paid
-			let current_total_paid = 0;
-			if (this.invoice_doc && this.invoice_doc.payments) {
-				this.invoice_doc.payments.forEach((p) => {
-					current_total_paid += parseFloat(formatUtils.fromArabicNumerals(String(p.amount))) || 0;
-				});
-			}
-			current_total_paid = this.flt(current_total_paid, this.currency_precision);
+			const current_total_paid = this.paymentAmountSummary.total;
 
 			const excess = this.flt(current_total_paid - invoice_total, this.currency_precision);
 
@@ -2585,8 +2590,8 @@ export default {
 			const currency = this.invoice_doc.currency;
 
 			const current_total_paid = this.total_payments;
-			const current_payment_amount =
-				parseFloat(formatUtils.fromArabicNumerals(String(payment.amount))) || 0;
+			const { amountByPayment } = this.paymentAmountSummary;
+			const current_payment_amount = amountByPayment.get(payment) || 0;
 
 			const other_payments = current_total_paid - current_payment_amount;
 
