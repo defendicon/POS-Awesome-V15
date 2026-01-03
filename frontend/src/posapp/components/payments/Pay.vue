@@ -770,10 +770,8 @@ export default {
 		onInvoiceSelected(event) {
 			if (event && event.item && event.item.customer) {
 				useCustomersStore().setSelectedCustomer(event.item.customer);
-				// Force UI to update total calculations
-				this.$nextTick(() => {
-					this.$forceUpdate();
-				});
+				// Optimization: rely on Vue reactivity to update totals and selection UI.
+				// Avoiding $forceUpdate prevents full component re-renders on every row click.
 			}
 		},
 		get_outstanding_invoices() {
@@ -798,10 +796,7 @@ export default {
 					if (r.message) {
 						this.outstanding_invoices = r.message;
 						this.invoices_loading = false;
-						// Force refresh UI after data is loaded
-						this.$nextTick(() => {
-							this.$forceUpdate();
-						});
+						// Optimization: data table and totals reactively update without forcing a full re-render.
 					}
 				});
 		},
@@ -892,10 +887,7 @@ export default {
 
 				await this.get_outstanding_invoices();
 				await this.get_unallocated_payments();
-
-				this.$nextTick(() => {
-					this.$forceUpdate();
-				});
+				// Optimization: avoid $forceUpdate after data refresh to keep reconciliation fast on large lists.
 
 				if (this.auto_reconcile_summary) {
 					this.eventBus.emit("show_message", {
@@ -1159,7 +1151,6 @@ export default {
 			this.$nextTick(() => {
 				console.log("Selected invoices:", this.selected_invoices);
 				console.log("Total selected amount:", this.total_selected_invoices);
-				this.$forceUpdate();
 			});
 		},
 		isSelected(item) {
