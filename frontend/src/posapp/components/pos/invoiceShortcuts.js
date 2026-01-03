@@ -32,13 +32,13 @@ export default {
 			return;
 		}
 
-		if (key === "F11") {
+		if (key === "F7") {
 			consumeEvent(event);
 			this.eventBus.emit("open_shift_details");
 			return;
 		}
 
-		if (key === "F12") {
+		if (key === "F8") {
 			consumeEvent(event);
 			this.eventBus.emit("show_message", {
 				title: __("POS lock is not available yet"),

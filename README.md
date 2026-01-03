@@ -139,8 +139,8 @@ Notes:
 
 - `F4` profile switch (currently shows “not available” message).
 - `F5` open new customer form.
-- `F11` open shift details.
-- `F12` POS lock (currently shows “not available” message).
+- `F7` open shift details.
+- `F8` POS lock (currently shows “not available” message).
 
 #### Alt + Number
 
@@ -168,6 +168,9 @@ Notes:
 - `Alt + L` load draft invoices.
 - `Alt + M` toggle item selector settings.
 - `Alt + S` save and clear invoice.
+
+#### Payments Panel
+
 - `Alt + D` open payments panel.
 - `Alt + X` on invoice it open payments, then submit automatically (prompts if payments are closed). on payments it submit directly.
 - `Alt + P` on invoice it open payments, then submit & print automatically (prompts if payments are closed). on payments it submit directly.
