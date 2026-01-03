@@ -25,6 +25,7 @@
 									:label="frappe._('Customer Name') + ' *'"
 									hide-details
 									class="pos-themed-input"
+									ref="customerNameField"
 									v-model="customer_name"
 								></v-text-field>
 							</v-col>
@@ -279,6 +280,16 @@ export default {
 		],
 	}),
 	watch: {
+		customerDialog(val) {
+			if (val) {
+				this.$nextTick(() => {
+					this.focusCustomerName();
+				});
+				window.addEventListener("keydown", this.handleEscapeKey);
+			} else {
+				window.removeEventListener("keydown", this.handleEscapeKey);
+			}
+		},
 		hideNonEssential(val) {
 			if (typeof localStorage !== "undefined") {
 				localStorage.setItem("posawesome_hide_non_essential_fields", JSON.stringify(val));
@@ -338,6 +349,27 @@ export default {
 	},
 	computed: {},
 	methods: {
+		handleEscapeKey(event) {
+			if (event.key !== "Escape" || !this.customerDialog) {
+				return;
+			}
+			if (this.confirmDialog) {
+				this.confirmClose();
+				return;
+			}
+			this.confirm_close();
+		},
+		focusCustomerName() {
+			const field = this.$refs.customerNameField;
+			if (field?.focus) {
+				field.focus();
+				return;
+			}
+			const input = field?.$el?.querySelector("input");
+			if (input) {
+				input.focus();
+			}
+		},
 		// Add a new method to update calendar date
 		updateCalendarDate(day, month, year) {
 			// First close the date picker if it's open
@@ -691,6 +723,9 @@ export default {
 		// set default values for customer group and territory from user defaults
 		this.group = frappe.defaults.get_user_default("Customer Group");
 		this.territory = frappe.defaults.get_user_default("Territory");
+	},
+	beforeUnmount() {
+		window.removeEventListener("keydown", this.handleEscapeKey);
 	},
 };
 </script>
