@@ -1344,29 +1344,6 @@ export default {
 			});
 		},
 
-		checkItemContainerOverflow() {
-			const ref = this.$refs.itemsContainer;
-			const el = ref && ref.$el ? ref.$el : ref;
-			if (!el) {
-				this.isOverflowing = false;
-				return;
-			}
-
-			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
-			if (isNaN(containerHeight)) {
-				this.isOverflowing = false;
-				return;
-			}
-
-			const stickyHeader = el.closest(".dynamic-padding")?.querySelector(".sticky-header");
-			const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-			const availableHeight = containerHeight - headerHeight;
-
-			el.style.maxHeight = `${availableHeight}px`;
-			this.isOverflowing = el.scrollHeight > availableHeight;
-			this.scheduleCardMetricsUpdate();
-		},
-
 		async fetchItemDetails(items) {
 			if (!items || items.length === 0) {
 				return [];
@@ -4307,9 +4284,19 @@ export default {
 					for (let entry of entries) {
 						const { width, height } = entry.contentRect;
 						if (this.containerWidth !== width || this.containerHeight !== height) {
+							// Save current scroll position before resize
+							const scrollTop = this.$refs.itemsContainer?.$el?.scrollTop || 0;
+
 							this.containerWidth = width;
 							this.containerHeight = height;
 							this.updateBreakpoint();
+
+							// Restore scroll position after layout recalculation
+							this.$nextTick(() => {
+								if (this.$refs.itemsContainer?.$el) {
+									this.$refs.itemsContainer.$el.scrollTop = scrollTop;
+								}
+							});
 						}
 					}
 				}, 16);
@@ -4773,9 +4760,8 @@ export default {
 
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
-		window.addEventListener("resize", this.checkItemContainerOverflow);
+		this.setupResizeObserver();
 		this.$nextTick(() => {
-			this.checkItemContainerOverflow();
 			this.scheduleCardMetricsUpdate();
 		});
 	},
@@ -4846,7 +4832,7 @@ export default {
 		this.eventBus.off("focus_item_search");
 		this.eventBus.off("select_top_item");
 		this.eventBus.off("toggle_item_selector_settings");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
+		this.cleanupResizeObserver();
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
 			this.metricsRaf = null;
@@ -5710,5 +5696,24 @@ export default {
 		animation: none !important;
 		transform: none !important;
 	}
+}
+
+/* Ensure the container can actually scroll */
+.virtual-scroller,
+.items-card-grid,
+.items-table-container {
+	will-change: scroll-position;
+	scroll-behavior: smooth;
+}
+
+/* Prevent layout shifts during resize */
+.item-container {
+	overflow-anchor: auto; /* Enable scroll anchoring */
+}
+
+/* Keep scroll position stable */
+.dynamic-padding {
+	scroll-behavior: smooth;
+	contain: layout style;
 }
 </style>
