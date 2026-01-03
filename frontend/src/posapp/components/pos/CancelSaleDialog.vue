@@ -2,6 +2,7 @@
 	<v-dialog
 		:model-value="modelValue"
 		max-width="330"
+		@after-enter="focusConfirmButton"
 		@update:model-value="$emit('update:modelValue', $event)"
 	>
 		<v-card>
@@ -29,26 +30,19 @@ export default {
 		modelValue: Boolean,
 	},
 	emits: ["update:modelValue", "confirm"],
-	watch: {
-		modelValue(isOpen) {
-			if (isOpen) {
-				this.$nextTick(() => {
-					this.focusConfirmButton();
-				});
-			}
-		},
-	},
 	methods: {
 		focusConfirmButton() {
-			const button = this.$refs.confirmButton;
-			if (button?.focus) {
-				button.focus();
-				return;
-			}
-			const target = button?.$el?.querySelector("button");
-			if (target) {
-				target.focus();
-			}
+			this.$nextTick(() => {
+				const button = this.$refs.confirmButton;
+				if (button?.focus) {
+					button.focus();
+					return;
+				}
+				const target = button?.$el?.querySelector("button");
+				if (target?.focus) {
+					target.focus();
+				}
+			});
 		},
 		onConfirm() {
 			this.$emit("confirm");
