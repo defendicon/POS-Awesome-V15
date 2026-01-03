@@ -729,6 +729,9 @@ export default {
 		cardContainerWidth: 0,
 		virtualScrollPending: false,
 		metricsRaf: null,
+		containerWidth: 0,
+		containerHeight: 0,
+		resizeObserver: null,
 		// Fixed page size for incremental item loading to avoid
 		// pulling the entire catalog at once.
 		itemsPageLimit: 100,
@@ -1218,6 +1221,53 @@ export default {
 				}
 			});
 		},
+		setupResizeObserver() {
+			if (typeof ResizeObserver === "undefined" || this.resizeObserver) {
+				return;
+			}
+
+			// Benchmark note: 16ms debounce keeps resize handling within a frame budget.
+			const debouncedResize = _.debounce((entries) => {
+				entries.forEach((entry) => {
+					const { width, height } = entry.contentRect;
+					if (this.containerWidth === width && this.containerHeight === height) {
+						return;
+					}
+
+					const ref = this.$refs.itemsContainer;
+					const el = ref && ref.$el ? ref.$el : ref;
+					const scrollTop = el?.scrollTop ?? 0;
+
+					this.containerWidth = width;
+					this.containerHeight = height;
+
+					this.$nextTick(() => {
+						if (el) {
+							el.scrollTop = scrollTop;
+						}
+						this.checkItemContainerOverflow();
+						this.scheduleCardMetricsUpdate();
+					});
+				});
+			}, 16);
+
+			this.resizeObserver = new ResizeObserver(debouncedResize);
+
+			this.$nextTick(() => {
+				const ref = this.$refs.itemsContainer;
+				const el = ref && ref.$el ? ref.$el : ref;
+				const target = el?.parentElement || el;
+				if (target) {
+					this.resizeObserver.observe(target);
+				}
+			});
+		},
+		cleanupResizeObserver() {
+			if (this.resizeObserver) {
+				this.resizeObserver.disconnect();
+				this.resizeObserver = null;
+			}
+		},
 		async onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
 			const total = this.displayedItems ? this.displayedItems.length : 0;
 			if (!total) {
@@ -1371,6 +1421,7 @@ export default {
 				return;
 			}
 
+			const scrollTop = el.scrollTop;
 			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
 			if (isNaN(containerHeight)) {
 				this.isOverflowing = false;
@@ -1383,6 +1434,9 @@ export default {
 
 			el.style.maxHeight = `${availableHeight}px`;
 			this.isOverflowing = el.scrollHeight > availableHeight;
+			this.$nextTick(() => {
+				el.scrollTop = scrollTop;
+			});
 			this.scheduleCardMetricsUpdate();
 		},
 
@@ -4728,6 +4782,7 @@ export default {
 
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
+		this.setupResizeObserver();
 		window.addEventListener("resize", this.checkItemContainerOverflow);
 		this.$nextTick(() => {
 			this.checkItemContainerOverflow();
@@ -4801,6 +4856,7 @@ export default {
 		this.eventBus.off("focus_item_search");
 		this.eventBus.off("select_top_item");
 		this.eventBus.off("toggle_item_selector_settings");
+		this.cleanupResizeObserver();
 		window.removeEventListener("resize", this.checkItemContainerOverflow);
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
@@ -4815,6 +4871,8 @@ export default {
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
 	padding: var(--dynamic-sm);
+	contain: layout style;
+	scroll-behavior: smooth;
 }
 
 .manual-scan-container {
@@ -5041,6 +5099,13 @@ export default {
 	height: calc(100% - 80px);
 	overflow-y: auto;
 	position: relative;
+	will-change: scroll-position;
+	scroll-behavior: smooth;
+}
+
+.items-table-container {
+	will-change: scroll-position;
+	scroll-behavior: smooth;
 }
 
 .virtual-scroller .items-card-grid {
