@@ -34,14 +34,16 @@ export default {
 		focusConfirmButton() {
 			this.$nextTick(() => {
 				const button = this.$refs.confirmButton;
-				if (button?.focus) {
-					button.focus();
+				const target = button?.$el?.querySelector("button") || button;
+				if (!target?.focus) {
 					return;
 				}
-				const target = button?.$el?.querySelector("button");
-				if (target?.focus) {
-					target.focus();
-				}
+				requestAnimationFrame(() => {
+					target.focus({ preventScroll: true });
+					setTimeout(() => {
+						target.focus({ preventScroll: true });
+					}, 50);
+				});
 			});
 		},
 		onConfirm() {
