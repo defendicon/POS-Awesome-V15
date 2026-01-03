@@ -1,5 +1,5 @@
 <template>
-	<div :style="responsiveStyles">
+	<div ref="itemSelectorContainer" :style="containerStyles">
 		<v-dialog v-model="scanErrorDialog" persistent max-width="420" content-class="scan-error-dialog">
 			<v-card>
 				<v-card-title class="d-flex align-center text-error text-h6">
@@ -29,13 +29,7 @@
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
 			]"
-			:style="{
-				height: responsiveStyles['--container-height'],
-				maxHeight: responsiveStyles['--container-height'],
-				resize: 'vertical',
-				overflow: 'auto',
-				position: 'relative',
-			}"
+			style="height: 100%; max-height: 100%; display: flex; flex-direction: column"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -46,7 +40,7 @@
 			></v-progress-linear>
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
-			<div class="dynamic-padding">
+			<div class="dynamic-padding" style="flex: 1; display: flex; flex-direction: column">
 				<div class="sticky-header">
 					<v-row class="items">
 						<v-col class="pb-0">
@@ -228,9 +222,9 @@
 						</v-col>
 					</v-row>
 				</div>
-				<v-row class="items">
-					<v-col cols="12" class="pt-0 mt-0">
-						<div v-if="items_view == 'card'" class="items-card-container">
+				<v-row class="items" style="flex: 1; overflow: hidden">
+					<v-col cols="12" class="pt-0 mt-0" style="height: 100%">
+						<div v-if="items_view == 'card'" class="items-card-container" style="height: 100%">
 							<div v-if="loading" class="items-card-grid">
 								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
 							</div>
@@ -262,6 +256,7 @@
 								v-else
 								ref="itemsContainer"
 								class="virtual-scroller"
+								style="height: 100%"
 								:list-class="['items-virtual-list', { 'item-container': isOverflowing }]"
 								:items="displayedItems"
 								key-field="item_code"
@@ -414,13 +409,12 @@
 								</template>
 							</RecycleScroller>
 						</div>
-						<div v-else class="items-table-container">
+						<div v-else class="items-table-container" style="height: 100%">
 							<v-data-table-virtual
 								ref="itemsTable"
 								:headers="headers"
 								:items="displayedItems"
 								class="sleek-data-table overflow-y-auto"
-								:style="{ height: 'calc(100% - 80px)' }"
 								item-key="item_code"
 								fixed-header
 								height="100%"
@@ -623,7 +617,6 @@ import {
 	forceClearAllCache,
 } from "../../../offline/index.js";
 import stockCoordinator from "../../utils/stockCoordinator.js";
-import { useResponsive } from "../../composables/useResponsive.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
 import { withPerf, perfMarkStart, perfMarkEnd, scheduleFrame } from "../../utils/perf.js";
@@ -638,7 +631,6 @@ import { storeToRefs } from "pinia";
 export default {
 	mixins: [format],
 	setup() {
-		const responsive = useResponsive();
 		const rtl = useRtl();
 		const { fly } = useFlyAnimation();
 		const cartValidation = useCartValidation();
@@ -655,7 +647,6 @@ export default {
 		const { selectedCustomer } = storeToRefs(customersStore);
 
 		return {
-			...responsive,
 			...rtl,
 			fly,
 			cartValidation,
@@ -723,7 +714,6 @@ export default {
 		searchDebounce: null,
 		// Prevent repeated server fetches when local storage is empty
 		fallbackAttempted: false,
-		cardContainerWidth: 0,
 		virtualScrollPending: false,
 		metricsRaf: null,
 		// Fixed page size for incremental item loading to avoid
@@ -772,6 +762,10 @@ export default {
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
 		lastInvoiceRateLoading: false,
+		// Container awareness properties
+		containerWidth: 0,
+		containerHeight: 0,
+		resizeObserver: null,
 	}),
 
 	watch: {
@@ -962,16 +956,6 @@ export default {
 		// Also react when exchange rate is adjusted manually
 		exchange_rate() {
 			this.applyCurrencyConversionToItems();
-		},
-		windowWidth() {
-			// Keep the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-			this.scheduleCardMetricsUpdate();
-		},
-		windowHeight() {
-			// Maintain the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-			this.scheduleCardMetricsUpdate();
 		},
 		itemsLoaded(val) {
 			if (val) {
@@ -4293,6 +4277,63 @@ export default {
 				console.error("Failed to load item selector settings:", e);
 			}
 		},
+		// Container awareness methods
+		updateContainerDimensions() {
+			if (this.$refs.itemSelectorContainer) {
+				const rect = this.$refs.itemSelectorContainer.getBoundingClientRect();
+				this.containerWidth = rect.width;
+				this.containerHeight = rect.height;
+				this.updateBreakpoint();
+			}
+		},
+
+		updateBreakpoint() {
+			if (this.containerWidth < 500) {
+				this.breakpoint = "xs";
+			} else if (this.containerWidth < 700) {
+				this.breakpoint = "sm";
+			} else if (this.containerWidth < 900) {
+				this.breakpoint = "md";
+			} else if (this.containerWidth < 1200) {
+				this.breakpoint = "lg";
+			} else {
+				this.breakpoint = "xl";
+			}
+		},
+
+		setupResizeObserver() {
+			if (typeof ResizeObserver !== "undefined") {
+				const debouncedResizeHandler = _.debounce((entries) => {
+					for (let entry of entries) {
+						const { width, height } = entry.contentRect;
+						if (this.containerWidth !== width || this.containerHeight !== height) {
+							this.containerWidth = width;
+							this.containerHeight = height;
+							this.updateBreakpoint();
+						}
+					}
+				}, 16);
+
+				this.resizeObserver = new ResizeObserver(debouncedResizeHandler);
+				this.$nextTick(() => {
+					if (this.$refs.itemSelectorContainer) {
+						this.resizeObserver.observe(this.$refs.itemSelectorContainer);
+						this.updateContainerDimensions();
+					}
+				});
+			} else {
+				window.addEventListener("resize", this.updateContainerDimensions);
+			}
+		},
+
+		cleanupResizeObserver() {
+			if (this.resizeObserver) {
+				this.resizeObserver.disconnect();
+				this.resizeObserver = null;
+			} else {
+				window.removeEventListener("resize", this.updateContainerDimensions);
+			}
+		},
 	},
 
 	computed: {
@@ -4362,37 +4403,37 @@ export default {
 			return this.getItemsHeaders();
 		},
 		cardColumns() {
-			if (this.windowWidth <= 768) {
+			if (this.containerWidth <= 768) {
 				return 1;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.containerWidth <= 1200) {
 				return 2;
 			}
 			return 3;
 		},
 		cardGap() {
-			if (this.windowWidth <= 768) {
+			if (this.containerWidth <= 768) {
 				return 10;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.containerWidth <= 1200) {
 				return 12;
 			}
 			return 16;
 		},
 		cardPadding() {
-			if (this.windowWidth <= 768) {
+			if (this.containerWidth <= 768) {
 				return 10;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.containerWidth <= 1200) {
 				return 12;
 			}
 			return 16;
 		},
 		cardRowHeight() {
-			if (this.windowWidth <= 768) {
+			if (this.containerWidth <= 768) {
 				return 260;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.containerWidth <= 1200) {
 				return 280;
 			}
 			return 300;
@@ -4405,7 +4446,7 @@ export default {
 		},
 		cardColumnWidth() {
 			const columns = Math.max(1, this.cardColumns);
-			const containerWidth = this.cardContainerWidth || 0;
+			const containerWidth = this.containerWidth || 0;
 			if (!containerWidth) {
 				return 240;
 			}
@@ -4415,6 +4456,12 @@ export default {
 			const available = Math.max(0, containerWidth - gapTotal - paddingTotal);
 			const width = Math.floor(available / columns);
 			return Math.max(180, width);
+		},
+		containerStyles() {
+			return {
+				"--container-width": `${this.containerWidth}px`,
+				"--container-height": `${this.containerHeight}px`,
+			};
 		},
 		displayedItems() {
 			// PERF: Avoid unnecessary array cloning ([...this.filteredItems]) as it creates garbage and O(N) cost on every render
