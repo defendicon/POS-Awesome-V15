@@ -2273,7 +2273,11 @@ export default {
 
 	// Prepare payments array for invoice doc
 	get_payments() {
-		if (this.isReturnInvoice && Array.isArray(this.invoice_doc?.payments) && this.invoice_doc.payments.length) {
+		if (
+			this.isReturnInvoice &&
+			Array.isArray(this.invoice_doc?.payments) &&
+			this.invoice_doc.payments.length
+		) {
 			const total_amount = Math.abs(this.subtotal);
 			const sourcePayments = this.invoice_doc.payments.filter((payment) => payment?.mode_of_payment);
 			const sourceTotal = sourcePayments.reduce(
@@ -2286,7 +2290,8 @@ export default {
 				let remaining_amount = total_amount;
 
 				return sourcePayments.map((payment, index) => {
-					const share = Math.abs(this.flt(payment.amount || 0, this.currency_precision)) / sourceTotal;
+					const share =
+						Math.abs(this.flt(payment.amount || 0, this.currency_precision)) / sourceTotal;
 					let payment_amount =
 						index === sourcePayments.length - 1
 							? remaining_amount
@@ -2327,10 +2332,17 @@ export default {
 		// Find the index of the default payment method
 		const defaultPaymentIndex = this.pos_profile.payments.findIndex((payment) => payment.default === 1);
 		const targetIndex = defaultPaymentIndex >= 0 ? defaultPaymentIndex : 0;
+		const overrideAmount = this.paymentShortcutOverrideAmount;
+		const hasOverrideAmount = Number.isFinite(overrideAmount);
 
 		this.pos_profile.payments.forEach((payment, index) => {
 			// For the default payment method (or first if no default), assign the full remaining amount
-			const payment_amount = index === targetIndex ? remaining_amount : payment.amount || 0;
+			const payment_amount =
+				index === targetIndex
+					? hasOverrideAmount
+						? overrideAmount
+						: remaining_amount
+					: payment.amount || 0;
 
 			// For return invoices, ensure payment amounts are negative
 			const adjusted_amount = this.isReturnInvoice ? -Math.abs(payment_amount) : payment_amount;
