@@ -472,7 +472,6 @@ export default {
 			paymentShortcutDialog: false,
 			paymentShortcutAmount: "",
 			paymentShortcutPrint: false,
-			paymentShortcutOverrideAmount: null,
 			_busHandlers: {},
 		};
 	},
@@ -568,7 +567,9 @@ export default {
 			this.paymentShortcutDialog = false;
 			this.paymentShortcutAmount = "";
 			this.paymentShortcutPrint = false;
-			this.paymentShortcutOverrideAmount = null;
+			if (this.invoice_doc) {
+				this.invoice_doc.payment_shortcut_override_amount = null;
+			}
 		},
 		async confirmPaymentShortcut() {
 			const defaultPayment = this.paymentShortcutDefaultPayment;
@@ -585,10 +586,14 @@ export default {
 							this.currency_precision,
 						);
 					}
-					this.paymentShortcutOverrideAmount = parsedAmount;
+					if (this.invoice_doc) {
+						this.invoice_doc.payment_shortcut_override_amount = parsedAmount;
+					}
 				}
 			} else {
-				this.paymentShortcutOverrideAmount = null;
+				if (this.invoice_doc) {
+					this.invoice_doc.payment_shortcut_override_amount = null;
+				}
 			}
 
 			const shouldPrint = this.paymentShortcutPrint;
@@ -597,7 +602,6 @@ export default {
 			this.paymentShortcutPrint = false;
 
 			await this.show_payment?.();
-			this.paymentShortcutOverrideAmount = null;
 			if (this.paymentVisible) {
 				this.eventBus.emit("submit_payment_shortcut", { print: shouldPrint });
 			}

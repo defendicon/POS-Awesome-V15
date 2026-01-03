@@ -2332,7 +2332,7 @@ export default {
 		// Find the index of the default payment method
 		const defaultPaymentIndex = this.pos_profile.payments.findIndex((payment) => payment.default === 1);
 		const targetIndex = defaultPaymentIndex >= 0 ? defaultPaymentIndex : 0;
-		const overrideAmount = this.paymentShortcutOverrideAmount;
+		const overrideAmount = this.invoice_doc?.payment_shortcut_override_amount;
 		const hasOverrideAmount = Number.isFinite(overrideAmount);
 
 		this.pos_profile.payments.forEach((payment, index) => {

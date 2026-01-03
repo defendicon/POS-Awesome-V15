@@ -2724,6 +2724,9 @@ export default {
 			this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
 				this.invoice_doc = invoice_doc;
 				const default_payment = this.invoice_doc.payments.find((payment) => payment.default === 1);
+				const overrideAmount = Number.isFinite(this.invoice_doc.payment_shortcut_override_amount)
+					? this.invoice_doc.payment_shortcut_override_amount
+					: null;
 				const hasReturnPayments = this.invoice_doc.payments.some(
 					(payment) => Math.abs(this.flt(payment.amount || 0, this.currency_precision)) > 0,
 				);
@@ -2751,11 +2754,12 @@ export default {
 					}
 				} else if (default_payment) {
 					// For regular invoices, set positive amount
-					default_payment.amount = this.flt(
-						invoice_doc.rounded_total || invoice_doc.grand_total,
-						this.currency_precision,
-					);
+					const amount = overrideAmount ?? (invoice_doc.rounded_total || invoice_doc.grand_total);
+					default_payment.amount = this.flt(amount, this.currency_precision);
 					this.is_credit_return = false;
+				}
+				if (this.invoice_doc) {
+					this.invoice_doc.payment_shortcut_override_amount = null;
 				}
 				this.initializeReturnValidity(invoice_doc);
 				this.loyalty_amount = 0;
