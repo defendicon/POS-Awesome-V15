@@ -402,17 +402,6 @@ def _auto_set_return_batches(invoice_doc):
                 frappe.throw(_("No batches available in {0} for {1}.").format(d.warehouse, d.item_code))
 
 
-def _is_non_original_return_item_error(error) -> bool:
-    """Return True when the validation error matches non-original return item checks."""
-
-    message = cstr(error)
-    if "Returned Item" not in message:
-        return False
-    if "does not exist in" not in message:
-        return False
-    return True
-
-
 @frappe.whitelist()
 def validate_cart_items(items, pos_profile=None):
     """Validate cart items for available stock.
@@ -698,23 +687,7 @@ def update_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.docstatus = 0
-    try:
-        invoice_doc.save()
-    except frappe.ValidationError as e:
-        if invoice_doc.is_return and invoice_doc.return_against and _is_non_original_return_item_error(e):
-            frappe.msgprint(
-                _("Warning: Return link removed to allow non-original items."),
-                title=_("Warning"),
-                indicator="orange",
-            )
-            # Reload timestamp to prevent TimestampMismatchError on retry
-            latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
-            if latest_modified:
-                invoice_doc.modified = latest_modified
-            invoice_doc.return_against = None
-            invoice_doc.save()
-        else:
-            raise
+    invoice_doc.save()
 
     # Return both the invoice doc and the updated data
     response = invoice_doc.as_dict()
@@ -1003,23 +976,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
-    try:
-        invoice_doc.save()
-    except frappe.ValidationError as e:
-        if invoice_doc.is_return and invoice_doc.return_against and _is_non_original_return_item_error(e):
-            frappe.msgprint(
-                _("Warning: Return link removed to allow non-original items."),
-                title=_("Warning"),
-                indicator="orange",
-            )
-            # Reload timestamp to prevent TimestampMismatchError on retry
-            latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
-            if latest_modified:
-                invoice_doc.modified = latest_modified
-            invoice_doc.return_against = None
-            invoice_doc.save()
-        else:
-            raise
+    invoice_doc.save()
 
     if data.get("due_date"):
         frappe.db.set_value(
@@ -1053,18 +1010,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
             },
         )
     else:
-        try:
-            invoice_doc.submit()
-        except frappe.ValidationError as e:
-            if invoice_doc.is_return and invoice_doc.return_against and _is_non_original_return_item_error(e):
-                # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
-                if latest_modified:
-                    invoice_doc.modified = latest_modified
-                invoice_doc.return_against = None
-                invoice_doc.submit()
-            else:
-                raise
+        invoice_doc.submit()
 
         _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
@@ -1111,31 +1057,9 @@ def submit_in_background_job(kwargs):
             if not invoice_doc.loyalty_redemption_cost_center:
                 invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
 
-        try:
-            invoice_doc.save()
-        except frappe.ValidationError as e:
-            if invoice_doc.is_return and invoice_doc.return_against and _is_non_original_return_item_error(e):
-                # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
-                if latest_modified:
-                    invoice_doc.modified = latest_modified
-                invoice_doc.return_against = None
-                invoice_doc.save()
-            else:
-                raise
+        invoice_doc.save()
 
-        try:
-            invoice_doc.submit()
-        except frappe.ValidationError as e:
-            if invoice_doc.is_return and invoice_doc.return_against and _is_non_original_return_item_error(e):
-                # Reload timestamp to prevent TimestampMismatchError on retry
-                latest_modified = frappe.db.get_value(invoice_doc.doctype, invoice_doc.name, "modified")
-                if latest_modified:
-                    invoice_doc.modified = latest_modified
-                invoice_doc.return_against = None
-                invoice_doc.submit()
-            else:
-                raise
+        invoice_doc.submit()
 
         _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)

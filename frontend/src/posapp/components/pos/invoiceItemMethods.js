@@ -2182,12 +2182,6 @@ export default {
 				posa_notes: item.posa_notes,
 				posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
 			};
-			if (isReturn) {
-				const refField = usesPosInvoice ? "pos_invoice_item" : "sales_invoice_item";
-				if (!new_item[refField] && item.name) {
-					new_item[refField] = item.name;
-				}
-			}
 
 			// Handle currency conversion for rates and amounts
 			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
