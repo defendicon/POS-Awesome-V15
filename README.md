@@ -145,7 +145,7 @@ Notes:
 #### Alt + Number
 
 - `Alt + 1` close payments panel.
-- `Alt + 2` clear invoice, reset posting date, focus item search.
+- `Alt + 2` open cancel dialog.
 - `Alt + 3` focus item search.
 - `Alt + 4` select top item.
 - `Alt + 5` focus customer search.
@@ -168,10 +168,6 @@ Notes:
 - `Alt + L` load draft invoices.
 - `Alt + M` toggle item selector settings.
 - `Alt + S` save and clear invoice.
-- `Alt + C` open cancel dialog.
-
-#### Payments Panel
-
 - `Alt + D` open payments panel.
 - `Alt + X` on invoice it open payments, then submit automatically (prompts if payments are closed). on payments it submit directly.
 - `Alt + P` on invoice it open payments, then submit & print automatically (prompts if payments are closed). on payments it submit directly.
