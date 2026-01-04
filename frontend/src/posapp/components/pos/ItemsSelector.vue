@@ -1390,9 +1390,13 @@ export default {
 				return;
 			}
 
-			const stickyHeader = el.closest(".dynamic-padding")?.querySelector(".sticky-header");
+			const wrapper = el.closest(".dynamic-padding");
+			const stickyHeader = wrapper?.querySelector(".sticky-header");
 			const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-			const availableHeight = containerHeight - headerHeight;
+			const wrapperStyles = wrapper ? getComputedStyle(wrapper) : null;
+			const paddingTop = wrapperStyles ? parseFloat(wrapperStyles.paddingTop) || 0 : 0;
+			const paddingBottom = wrapperStyles ? parseFloat(wrapperStyles.paddingBottom) || 0 : 0;
+			const availableHeight = Math.max(0, containerHeight - headerHeight - paddingTop - paddingBottom);
 
 			el.style.maxHeight = `${availableHeight}px`;
 			this.isOverflowing = el.scrollHeight > availableHeight;
