@@ -25,6 +25,7 @@
 			</v-card>
 		</v-dialog>
 		<v-card
+			ref="itemSelectorCard"
 			:class="[
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
@@ -729,6 +730,7 @@ export default {
 		cardContainerWidth: 0,
 		virtualScrollPending: false,
 		metricsRaf: null,
+		itemSelectorResizeObserver: null,
 		// Fixed page size for incremental item loading to avoid
 		// pulling the entire catalog at once.
 		itemsPageLimit: 100,
@@ -1371,8 +1373,19 @@ export default {
 				return;
 			}
 
-			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
-			if (isNaN(containerHeight)) {
+			const cardRef = this.$refs.itemSelectorCard;
+			const cardEl = cardRef && cardRef.$el ? cardRef.$el : cardRef;
+			let containerHeight = 0;
+			if (cardEl) {
+				containerHeight = cardEl.getBoundingClientRect().height;
+			}
+
+			if (!containerHeight || Number.isNaN(containerHeight)) {
+				const cssHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
+				containerHeight = Number.isNaN(cssHeight) ? 0 : cssHeight;
+			}
+
+			if (!containerHeight) {
 				this.isOverflowing = false;
 				return;
 			}
@@ -1384,6 +1397,34 @@ export default {
 			el.style.maxHeight = `${availableHeight}px`;
 			this.isOverflowing = el.scrollHeight > availableHeight;
 			this.scheduleCardMetricsUpdate();
+		},
+		setupItemSelectorResizeObserver() {
+			if (typeof ResizeObserver !== "undefined") {
+				const debouncedResizeHandler = _.debounce(() => {
+					this.checkItemContainerOverflow();
+					this.scheduleCardMetricsUpdate();
+				}, 16);
+
+				this.itemSelectorResizeObserver = new ResizeObserver(debouncedResizeHandler);
+
+				this.$nextTick(() => {
+					const cardRef = this.$refs.itemSelectorCard;
+					const cardEl = cardRef && cardRef.$el ? cardRef.$el : cardRef;
+					if (cardEl) {
+						this.itemSelectorResizeObserver.observe(cardEl);
+					}
+				});
+			} else {
+				window.addEventListener("resize", this.checkItemContainerOverflow);
+			}
+		},
+		cleanupItemSelectorResizeObserver() {
+			if (this.itemSelectorResizeObserver) {
+				this.itemSelectorResizeObserver.disconnect();
+				this.itemSelectorResizeObserver = null;
+			} else {
+				window.removeEventListener("resize", this.checkItemContainerOverflow);
+			}
 		},
 
 		async fetchItemDetails(items) {
@@ -4728,7 +4769,7 @@ export default {
 
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
-		window.addEventListener("resize", this.checkItemContainerOverflow);
+		this.setupItemSelectorResizeObserver();
 		this.$nextTick(() => {
 			this.checkItemContainerOverflow();
 			this.scheduleCardMetricsUpdate();
@@ -4801,7 +4842,7 @@ export default {
 		this.eventBus.off("focus_item_search");
 		this.eventBus.off("select_top_item");
 		this.eventBus.off("toggle_item_selector_settings");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
+		this.cleanupItemSelectorResizeObserver();
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
 			this.metricsRaf = null;
