@@ -731,6 +731,7 @@ export default {
 		selectorContainerWidth: 0,
 		selectorContainerHeight: 0,
 		resizeObserver: null,
+		observedItemsContainer: null,
 		virtualScrollPending: false,
 		metricsRaf: null,
 		// Fixed page size for incremental item loading to avoid
@@ -988,6 +989,18 @@ export default {
 		},
 		items_view() {
 			this.$nextTick(() => {
+				if (this.resizeObserver) {
+					const itemsEl = this.getItemsContainerElement();
+					if (this.observedItemsContainer && this.observedItemsContainer !== itemsEl) {
+						this.resizeObserver.unobserve(this.observedItemsContainer);
+						this.observedItemsContainer = null;
+					}
+					if (itemsEl && this.observedItemsContainer !== itemsEl) {
+						this.resizeObserver.observe(itemsEl);
+						this.observedItemsContainer = itemsEl;
+						this.handleItemsContainerResize();
+					}
+				}
 				if (this.items_view === "card") {
 					this.checkItemContainerOverflow();
 					this.scheduleCardMetricsUpdate();
@@ -1226,6 +1239,28 @@ export default {
 			const ref = this.$refs.selectorContainer;
 			return ref && ref.$el ? ref.$el : ref;
 		},
+		getItemsContainerElement() {
+			const ref = this.$refs.itemsContainer;
+			return ref && ref.$el ? ref.$el : ref;
+		},
+		updateItemsContainerWidth(rect) {
+			let width = rect?.width;
+			if (!width) {
+				const el = this.getItemsContainerElement();
+				if (!el || typeof el.getBoundingClientRect !== "function") {
+					return false;
+				}
+				width = el.getBoundingClientRect().width;
+			}
+
+			const roundedWidth = Math.round(width);
+			if (roundedWidth !== Math.round(this.cardContainerWidth)) {
+				this.cardContainerWidth = width;
+				return true;
+			}
+
+			return false;
+		},
 		updateSelectorContainerDimensions(rect) {
 			let width = rect?.width;
 			let height = rect?.height;
@@ -1260,21 +1295,42 @@ export default {
 				this.scheduleCardMetricsUpdate();
 			}
 		},
+		handleItemsContainerResize(rect) {
+			const updated = this.updateItemsContainerWidth(rect);
+			if (updated) {
+				this.scheduleCardMetricsUpdate();
+			}
+		},
 		setupResizeObserver() {
 			if (typeof ResizeObserver !== "undefined") {
 				const debouncedResizeHandler = _.debounce((entries) => {
+					const selectorEl = this.getSelectorContainerElement();
+					const itemsEl = this.getItemsContainerElement();
 					for (const entry of entries) {
 						// Benchmark: ~60fps throttle to avoid resize/layout thrash.
-						this.handleContainerResize(entry.contentRect);
+						if (itemsEl && entry.target === itemsEl) {
+							this.handleItemsContainerResize(entry.contentRect);
+						} else if (selectorEl && entry.target === selectorEl) {
+							this.handleContainerResize(entry.contentRect);
+						} else {
+							this.handleContainerResize(entry.contentRect);
+							this.handleItemsContainerResize(entry.contentRect);
+						}
 					}
 				}, 16);
 
 				this.resizeObserver = new ResizeObserver(debouncedResizeHandler);
 				this.$nextTick(() => {
-					const el = this.getSelectorContainerElement();
-					if (el) {
-						this.resizeObserver.observe(el);
+					const selectorEl = this.getSelectorContainerElement();
+					if (selectorEl) {
+						this.resizeObserver.observe(selectorEl);
 						this.handleContainerResize();
+					}
+					const itemsEl = this.getItemsContainerElement();
+					if (itemsEl) {
+						this.resizeObserver.observe(itemsEl);
+						this.observedItemsContainer = itemsEl;
+						this.handleItemsContainerResize();
 					}
 				});
 			} else {
@@ -1283,6 +1339,10 @@ export default {
 		},
 		cleanupResizeObserver() {
 			if (this.resizeObserver) {
+				if (this.observedItemsContainer) {
+					this.resizeObserver.unobserve(this.observedItemsContainer);
+					this.observedItemsContainer = null;
+				}
 				this.resizeObserver.disconnect();
 				this.resizeObserver = null;
 			} else {
@@ -1442,7 +1502,9 @@ export default {
 				return;
 			}
 
-			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
+			const containerHeight =
+				this.selectorContainerHeight ||
+				parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
 			if (isNaN(containerHeight)) {
 				this.isOverflowing = false;
 				return;
