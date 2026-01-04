@@ -25,17 +25,20 @@
 			</v-card>
 		</v-dialog>
 		<v-card
+			ref="itemSelectorCard"
 			:class="[
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
 			]"
 			:style="{
-				height: responsiveStyles['--container-height'],
-				maxHeight: responsiveStyles['--container-height'],
+				height: itemSelectorHeight || responsiveStyles['--container-height'],
+				maxHeight: itemSelectorHeight || responsiveStyles['--container-height'],
 				resize: 'vertical',
 				overflow: 'auto',
 				position: 'relative',
 			}"
+			@mouseup="saveItemSelectorHeight"
+			@touchend="saveItemSelectorHeight"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -717,6 +720,7 @@ export default {
 		temp_enable_custom_items_per_page: false,
 		items_per_page: 50,
 		temp_items_per_page: 50,
+		itemSelectorHeight: null,
 		temp_force_server_items: false,
 		virtualScrollEnabled: true,
 		virtualScrollBuffer: 200,
@@ -995,6 +999,81 @@ export default {
 	},
 
 	methods: {
+		saveItemSelectorHeight() {
+			const ref = this.$refs.itemSelectorCard;
+			const el = ref && ref.$el ? ref.$el : ref;
+			if (!el) {
+				return;
+			}
+			const clampedHeight = this.clampItemSelectorHeight(el.clientHeight);
+			this.itemSelectorHeight = `${Math.round(clampedHeight)}px`;
+			try {
+				localStorage.setItem("posawesome_item_selector_height", this.itemSelectorHeight);
+			} catch (e) {
+				console.error("Failed to save item selector height:", e);
+			}
+		},
+		loadItemSelectorHeight() {
+			try {
+				const saved = localStorage.getItem("posawesome_item_selector_height");
+				if (saved) {
+					const parsed = parseFloat(saved);
+					if (Number.isFinite(parsed)) {
+						const clampedHeight = this.clampItemSelectorHeight(parsed);
+						this.itemSelectorHeight = `${Math.round(clampedHeight)}px`;
+					}
+				}
+			} catch (e) {
+				console.error("Failed to load item selector height:", e);
+			}
+		},
+		updateItemSelectorHeightForViewport() {
+			if (!this.itemSelectorHeight) {
+				return;
+			}
+			const parsed = parseFloat(this.itemSelectorHeight);
+			if (!Number.isFinite(parsed)) {
+				return;
+			}
+			const clampedHeight = this.clampItemSelectorHeight(parsed);
+			const nextHeight = `${Math.round(clampedHeight)}px`;
+			if (nextHeight !== this.itemSelectorHeight) {
+				this.itemSelectorHeight = nextHeight;
+				try {
+					localStorage.setItem("posawesome_item_selector_height", this.itemSelectorHeight);
+				} catch (e) {
+					console.error("Failed to update item selector height:", e);
+				}
+			}
+		},
+		getResponsiveContainerHeightPx() {
+			const baseEl = this.$el;
+			if (!baseEl) {
+				return window.innerHeight * 0.68;
+			}
+			const rawValue = getComputedStyle(baseEl).getPropertyValue("--container-height").trim();
+			if (!rawValue) {
+				return window.innerHeight * 0.68;
+			}
+			if (rawValue.endsWith("vh")) {
+				const parsed = parseFloat(rawValue);
+				return Number.isFinite(parsed)
+					? (parsed / 100) * window.innerHeight
+					: window.innerHeight * 0.68;
+			}
+			const parsed = parseFloat(rawValue);
+			return Number.isFinite(parsed) ? parsed : window.innerHeight * 0.68;
+		},
+		clampItemSelectorHeight(value) {
+			const maxHeight = this.getResponsiveContainerHeightPx();
+			const minHeight = Math.min(280, maxHeight);
+			return Math.max(minHeight, Math.min(value, maxHeight));
+		},
+		handleItemSelectorResize() {
+			this.updateItemSelectorHeightForViewport();
+			this.checkItemContainerOverflow();
+			this.scheduleCardMetricsUpdate();
+		},
 		normalizeScaleBarcodeSettings(rawSettings = {}) {
 			const settings = rawSettings && typeof rawSettings === "object" ? rawSettings : {};
 			const prefix = String(settings.prefix || "").trim();
@@ -1371,7 +1450,11 @@ export default {
 				return;
 			}
 
-			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
+			const cardRef = this.$refs.itemSelectorCard;
+			const cardEl = cardRef && cardRef.$el ? cardRef.$el : cardRef;
+			const containerHeight = cardEl
+				? cardEl.clientHeight
+				: parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
 			if (isNaN(containerHeight)) {
 				this.isOverflowing = false;
 				return;
@@ -4728,7 +4811,8 @@ export default {
 
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
-		window.addEventListener("resize", this.checkItemContainerOverflow);
+		this.loadItemSelectorHeight();
+		window.addEventListener("resize", this.handleItemSelectorResize);
 		this.$nextTick(() => {
 			this.checkItemContainerOverflow();
 			this.scheduleCardMetricsUpdate();
@@ -4801,7 +4885,7 @@ export default {
 		this.eventBus.off("focus_item_search");
 		this.eventBus.off("select_top_item");
 		this.eventBus.off("toggle_item_selector_settings");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
+		window.removeEventListener("resize", this.handleItemSelectorResize);
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
 			this.metricsRaf = null;
