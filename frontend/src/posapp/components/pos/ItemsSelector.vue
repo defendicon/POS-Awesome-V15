@@ -29,6 +29,7 @@
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
 			]"
+			ref="selectorContainer"
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
@@ -727,6 +728,9 @@ export default {
 		// Prevent repeated server fetches when local storage is empty
 		fallbackAttempted: false,
 		cardContainerWidth: 0,
+		selectorContainerWidth: 0,
+		selectorContainerHeight: 0,
+		resizeObserver: null,
 		virtualScrollPending: false,
 		metricsRaf: null,
 		// Fixed page size for incremental item loading to avoid
@@ -1217,6 +1221,73 @@ export default {
 					this.cardContainerWidth = width;
 				}
 			});
+		},
+		getSelectorContainerElement() {
+			const ref = this.$refs.selectorContainer;
+			return ref && ref.$el ? ref.$el : ref;
+		},
+		updateSelectorContainerDimensions(rect) {
+			let width = rect?.width;
+			let height = rect?.height;
+			if (!width || !height) {
+				const el = this.getSelectorContainerElement();
+				if (!el || typeof el.getBoundingClientRect !== "function") {
+					return false;
+				}
+				const bounds = el.getBoundingClientRect();
+				width = bounds.width;
+				height = bounds.height;
+			}
+
+			const roundedWidth = Math.round(width);
+			const roundedHeight = Math.round(height);
+			if (
+				roundedWidth !== Math.round(this.selectorContainerWidth) ||
+				roundedHeight !== Math.round(this.selectorContainerHeight)
+			) {
+				this.selectorContainerWidth = width;
+				this.selectorContainerHeight = height;
+				return true;
+			}
+
+			return false;
+		},
+		handleContainerResize(rect) {
+			const updated = this.updateSelectorContainerDimensions(rect);
+			if (updated) {
+				this.itemsPerPage = this.items_per_page;
+				this.checkItemContainerOverflow();
+				this.scheduleCardMetricsUpdate();
+			}
+		},
+		setupResizeObserver() {
+			if (typeof ResizeObserver !== "undefined") {
+				const debouncedResizeHandler = _.debounce((entries) => {
+					for (const entry of entries) {
+						// Benchmark: ~60fps throttle to avoid resize/layout thrash.
+						this.handleContainerResize(entry.contentRect);
+					}
+				}, 16);
+
+				this.resizeObserver = new ResizeObserver(debouncedResizeHandler);
+				this.$nextTick(() => {
+					const el = this.getSelectorContainerElement();
+					if (el) {
+						this.resizeObserver.observe(el);
+						this.handleContainerResize();
+					}
+				});
+			} else {
+				window.addEventListener("resize", this.handleContainerResize);
+			}
+		},
+		cleanupResizeObserver() {
+			if (this.resizeObserver) {
+				this.resizeObserver.disconnect();
+				this.resizeObserver = null;
+			} else {
+				window.removeEventListener("resize", this.handleContainerResize);
+			}
 		},
 		async onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
 			const total = this.displayedItems ? this.displayedItems.length : 0;
@@ -4363,38 +4434,41 @@ export default {
 		headers() {
 			return this.getItemsHeaders();
 		},
+		responsiveWidth() {
+			return this.selectorContainerWidth || this.cardContainerWidth || this.windowWidth;
+		},
 		cardColumns() {
-			if (this.windowWidth <= 768) {
+			if (this.responsiveWidth <= 768) {
 				return 1;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.responsiveWidth <= 1200) {
 				return 2;
 			}
 			return 3;
 		},
 		cardGap() {
-			if (this.windowWidth <= 768) {
+			if (this.responsiveWidth <= 768) {
 				return 10;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.responsiveWidth <= 1200) {
 				return 12;
 			}
 			return 16;
 		},
 		cardPadding() {
-			if (this.windowWidth <= 768) {
+			if (this.responsiveWidth <= 768) {
 				return 10;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.responsiveWidth <= 1200) {
 				return 12;
 			}
 			return 16;
 		},
 		cardRowHeight() {
-			if (this.windowWidth <= 768) {
+			if (this.responsiveWidth <= 768) {
 				return 260;
 			}
-			if (this.windowWidth <= 1200) {
+			if (this.responsiveWidth <= 1200) {
 				return 280;
 			}
 			return 300;
@@ -4728,7 +4802,7 @@ export default {
 
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
-		window.addEventListener("resize", this.checkItemContainerOverflow);
+		this.setupResizeObserver();
 		this.$nextTick(() => {
 			this.checkItemContainerOverflow();
 			this.scheduleCardMetricsUpdate();
@@ -4801,7 +4875,7 @@ export default {
 		this.eventBus.off("focus_item_search");
 		this.eventBus.off("select_top_item");
 		this.eventBus.off("toggle_item_selector_settings");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
+		this.cleanupResizeObserver();
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
 			this.metricsRaf = null;
