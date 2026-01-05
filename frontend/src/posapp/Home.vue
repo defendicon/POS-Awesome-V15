@@ -78,12 +78,17 @@ import {
 	checkWebSocketConnectivity,
 } from "./composables/useNetwork.js";
 import { useRtl } from "./composables/useRtl.js";
+import { useDataSync } from "./composables/useDataSync.js";
 
 export default {
 	setup() {
 		const { isRtl, rtlStyles, rtlClasses } = useRtl();
 		const { overlayVisible } = useLoading();
 		const { get_closing_data } = usePosShift();
+
+		// Initialize background data sync (every 30 seconds)
+		useDataSync(30);
+
 		return {
 			isRtl,
 			rtlStyles,

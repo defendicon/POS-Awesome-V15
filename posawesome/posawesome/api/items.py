@@ -420,13 +420,21 @@ def _get_updated_items_map(modified_after) -> Optional[Dict[str, Any]]:
     updated_map = {}
 
     # 1. Items
-    items = frappe.get_all("Item", filters={"modified": [">", parsed_date]}, fields=["name", "modified"])
+    items = frappe.get_all(
+        "Item",
+        filters={"modified": [">", parsed_date]},
+        fields=["name", "modified"],
+        limit_page_length=None,
+    )
     for i in items:
         updated_map[i.name] = i.modified
 
     # 2. Item Prices
     prices = frappe.get_all(
-        "Item Price", filters={"modified": [">", parsed_date]}, fields=["item_code", "modified"]
+        "Item Price",
+        filters={"modified": [">", parsed_date]},
+        fields=["item_code", "modified"],
+        limit_page_length=None,
     )
     for p in prices:
         current = updated_map.get(p.item_code)
@@ -434,7 +442,12 @@ def _get_updated_items_map(modified_after) -> Optional[Dict[str, Any]]:
             updated_map[p.item_code] = p.modified
 
     # 3. Bins
-    bins = frappe.get_all("Bin", filters={"modified": [">", parsed_date]}, fields=["item_code", "modified"])
+    bins = frappe.get_all(
+        "Bin",
+        filters={"modified": [">", parsed_date]},
+        fields=["item_code", "modified"],
+        limit_page_length=None,
+    )
     for b in bins:
         current = updated_map.get(b.item_code)
         if not current or b.modified > current:
