@@ -109,6 +109,7 @@ export {
 	getCachedPriceListItems,
 	clearPriceListCache,
 	saveItemDetailsCache,
+	clearItemDetailsCache,
 	getCachedItemDetails,
 	saveItemsBulk,
 	getAllStoredItems,

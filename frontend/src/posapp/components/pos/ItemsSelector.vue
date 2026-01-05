@@ -609,6 +609,7 @@ import {
 	clearStoredItems,
 	getLocalStockCache,
 	setLocalStockCache,
+	clearLocalStockCache,
 	initPromise,
 	memoryInitPromise,
 	checkDbHealth,
@@ -619,6 +620,7 @@ import {
 	isStockCacheReady,
 	getCachedItemDetails,
 	saveItemDetailsCache,
+	clearItemDetailsCache,
 	saveItemGroups,
 	getCachedItemGroups,
 	getItemsLastSync,
@@ -1741,13 +1743,25 @@ export default {
 			});
 		},
 		async forceReloadItems() {
+			if (isOffline()) {
+				frappe.msgprint(__("Cannot reload items while offline."));
+				return;
+			}
+
 			console.log("[ItemsSelector] forceReloadItems called");
-			// Clear cached price list items so the reload always
-			// fetches the latest data from the server
-			await clearPriceListCache();
-			console.log("[ItemsSelector] price list cache cleared");
 			await this.ensureStorageHealth();
 			console.log("[ItemsSelector] storage health ensured");
+
+			if (typeof this.clearAllCaches === "function") {
+				await this.clearAllCaches();
+			}
+
+			await clearStoredItems();
+			await clearPriceListCache();
+			clearLocalStockCache();
+			clearItemDetailsCache(this.pos_profile?.name, this.active_price_list);
+			setItemsLastSync(null);
+			console.log("[ItemsSelector] item caches cleared");
 
 			// When no search term is entered, reset the search so
 			// we fetch the entire item list from the server.
@@ -1759,6 +1773,11 @@ export default {
 
 			console.log("[ItemsSelector] loading items from server");
 			await this.get_items(true);
+
+			if (Array.isArray(this.displayedItems) && this.displayedItems.length) {
+				// Benchmark: refresh visible item details only to avoid large payloads on full reload.
+				await this.update_items_details(this.displayedItems, { forceRefresh: true });
+			}
 			console.log("[ItemsSelector] forceReloadItems finished");
 		},
 		async verifyServerItemCount() {

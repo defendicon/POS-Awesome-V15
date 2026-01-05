@@ -159,6 +159,36 @@ export function saveItemDetailsCache(profileName, priceList, items) {
 	}
 }
 
+export function clearItemDetailsCache(profileName = null, priceList = null) {
+	try {
+		const cache = memory.item_details_cache || {};
+
+		if (!profileName) {
+			memory.item_details_cache = {};
+			persist("item_details_cache", memory.item_details_cache);
+			return;
+		}
+
+		if (!cache[profileName]) {
+			return;
+		}
+
+		if (!priceList) {
+			delete cache[profileName];
+		} else if (cache[profileName][priceList]) {
+			delete cache[profileName][priceList];
+			if (Object.keys(cache[profileName]).length === 0) {
+				delete cache[profileName];
+			}
+		}
+
+		memory.item_details_cache = cache;
+		persist("item_details_cache", memory.item_details_cache);
+	} catch (e) {
+		console.error("Failed to clear item details cache", e);
+	}
+}
+
 export async function getCachedItemDetails(profileName, priceList, itemCodes, ttl = 15 * 60 * 1000) {
 	try {
 		const cache = memory.item_details_cache || {};
