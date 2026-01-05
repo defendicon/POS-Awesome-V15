@@ -68,6 +68,7 @@ class SearchPlan:
     include_image: bool
     posa_display_items_in_stock: bool
     posa_show_template_items: bool
+    updated_items_map: Optional[Dict[str, Any]] = None
 
 
 def normalize_brand(brand: str) -> str:
@@ -407,6 +408,41 @@ def _to_positive_int(value: Any) -> Optional[int]:
     return integer if integer >= 0 else None
 
 
+def _get_updated_items_map(modified_after) -> Optional[Dict[str, Any]]:
+    if not modified_after:
+        return None
+
+    try:
+        parsed_date = get_datetime(modified_after)
+    except Exception:
+        return None
+
+    updated_map = {}
+
+    # 1. Items
+    items = frappe.get_all("Item", filters={"modified": [">", parsed_date]}, fields=["name", "modified"])
+    for i in items:
+        updated_map[i.name] = i.modified
+
+    # 2. Item Prices
+    prices = frappe.get_all(
+        "Item Price", filters={"modified": [">", parsed_date]}, fields=["item_code", "modified"]
+    )
+    for p in prices:
+        current = updated_map.get(p.item_code)
+        if not current or p.modified > current:
+            updated_map[p.item_code] = p.modified
+
+    # 3. Bins
+    bins = frappe.get_all("Bin", filters={"modified": [">", parsed_date]}, fields=["item_code", "modified"])
+    for b in bins:
+        current = updated_map.get(b.item_code)
+        if not current or b.modified > current:
+            updated_map[b.item_code] = b.modified
+
+    return updated_map
+
+
 def _build_search_plan(
     pos_profile: Dict[str, Any],
     item_group: str,
@@ -433,12 +469,16 @@ def _build_search_plan(
     filters: Dict[str, Any] = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
     if start_after:
         filters["item_name"] = [">", start_after]
+
+    updated_items_map = None
     if modified_after:
-        try:
-            parsed_modified_after = get_datetime(modified_after)
-        except Exception:
-            frappe.throw(_("modified_after must be a valid ISO datetime"))
-        filters["modified"] = [">", parsed_modified_after.isoformat()]
+        updated_items_map = _get_updated_items_map(modified_after)
+        if updated_items_map:
+            filters["name"] = ["in", list(updated_items_map.keys())]
+        else:
+            # If modified_after is set but no items found, ensure query returns empty
+            # We can use a condition that is always false
+            filters["name"] = "No Item Found"
 
     if item_groups:
         filters["item_group"] = ["in", list(item_groups)]
@@ -557,6 +597,7 @@ def _build_search_plan(
         include_image=include_image,
         posa_display_items_in_stock=bool(posa_display_items_in_stock),
         posa_show_template_items=bool(posa_show_template_items),
+        updated_items_map=updated_items_map,
     )
 
 
@@ -661,6 +702,18 @@ def _shape_item_row(
     row.update(item)
     row.update(detail or {})
     row.update({"attributes": attributes or "", "item_attributes": item_attributes or ""})
+
+    if plan.updated_items_map:
+        latest_modified = plan.updated_items_map.get(item_code)
+        if latest_modified:
+            # Ensure we send the latest timestamp (e.g. from Bin or Item Price)
+            # so the frontend advances its sync cursor.
+            current_modified = row.get("modified")
+            if not current_modified or latest_modified > get_datetime(current_modified):
+                # Convert to string if it's a datetime object, as strict JSON
+                # serialization might be expected or consistent with standard API
+                row["modified"] = str(latest_modified)
+
     return row
 
 
