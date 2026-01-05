@@ -629,10 +629,10 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const refreshModifiedItems = async () => {
-		if (!itemsLoaded.value) return { size: 0, count: 0 };
+		if (!itemsLoaded.value) return { size: 0, count: 0, items: [] };
 
 		const lastSync = getItemsLastSync();
-		if (!lastSync) return { size: 0, count: 0 };
+		if (!lastSync) return { size: 0, count: 0, items: [] };
 
 		try {
 			const args = {
@@ -654,10 +654,14 @@ export const useItemsStore = defineStore("items", () => {
 
 			const size = JSON.stringify(response).length;
 			const fetchedItems = response.message || [];
+			let resolvedItems = [];
 
 			if (fetchedItems.length > 0) {
 				updateItemsInPlace(fetchedItems);
 				await saveItemsBulk(fetchedItems);
+				resolvedItems = fetchedItems
+					.map((item) => itemsMap.value.get(item.item_code))
+					.filter(Boolean);
 
 				// Find the latest modification timestamp from the fetched items
 				let maxModified = "";
@@ -672,10 +676,10 @@ export const useItemsStore = defineStore("items", () => {
 				}
 			}
 
-			return { size, count: fetchedItems.length };
+			return { size, count: fetchedItems.length, items: resolvedItems };
 		} catch (error) {
 			console.error("Failed to refresh modified items:", error);
-			return { size: 0, count: 0, error };
+			return { size: 0, count: 0, items: [], error };
 		}
 	};
 

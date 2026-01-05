@@ -182,6 +182,26 @@
 												class="mb-2"
 											></v-switch>
 											<v-switch
+												v-model="temp_enable_background_sync"
+												:label="__('Enable background sync')"
+												hide-details
+												density="compact"
+												color="primary"
+												class="mb-2"
+											></v-switch>
+											<v-text-field
+												v-model="temp_background_sync_interval"
+												:label="__('Background sync interval (seconds)')"
+												type="number"
+												density="compact"
+												variant="outlined"
+												color="primary"
+												hide-details
+												class="mb-2 pos-themed-input"
+												:min="10"
+												:disabled="!temp_enable_background_sync"
+											></v-text-field>
+											<v-switch
 												v-model="temp_enable_custom_items_per_page"
 												:label="__('Custom items per page')"
 												hide-details
@@ -688,7 +708,8 @@ export default {
 		appliedCouponsCount: 0,
 		new_line: false,
 		qty: 1,
-		refresh_interval: null,
+		background_sync_timer: null,
+		background_sync_in_flight: false,
 		abortController: null,
 		itemDetailsRequestCache: { key: null, promise: null, result: null },
 		itemDetailsRetryCount: 0,
@@ -711,6 +732,10 @@ export default {
 		temp_hide_zero_rate_items: false,
 		show_last_invoice_rate: true,
 		temp_show_last_invoice_rate: true,
+		enable_background_sync: true,
+		temp_enable_background_sync: true,
+		background_sync_interval: 30,
+		temp_background_sync_interval: 30,
 		isDragging: false,
 		// Items per page configuration
 		enable_custom_items_per_page: false,
@@ -4195,6 +4220,8 @@ export default {
 			this.temp_items_per_page = this.items_per_page;
 			this.temp_force_server_items = !!(this.pos_profile && this.pos_profile.posa_force_server_items);
 			this.temp_show_last_invoice_rate = this.show_last_invoice_rate;
+			this.temp_enable_background_sync = this.enable_background_sync;
+			this.temp_background_sync_interval = this.background_sync_interval;
 			this.show_item_settings = true;
 		},
 		cancelItemSettings() {
@@ -4204,6 +4231,11 @@ export default {
 			this.hide_qty_decimals = this.temp_hide_qty_decimals;
 			this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
 			this.show_last_invoice_rate = this.temp_show_last_invoice_rate;
+			this.enable_background_sync = this.temp_enable_background_sync;
+			this.background_sync_interval = this.normalizeBackgroundSyncInterval(
+				this.temp_background_sync_interval,
+			);
+			this.temp_background_sync_interval = this.background_sync_interval;
 			this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
 			if (this.enable_custom_items_per_page) {
 				this.items_per_page = parseInt(this.temp_items_per_page) || 50;
@@ -4219,6 +4251,7 @@ export default {
 				this.scheduleLastInvoiceRateRefresh();
 			}
 			this.saveItemSettings();
+			this.startBackgroundSyncScheduler();
 			this.show_item_settings = false;
 		},
 		onDragStart(event, item) {
@@ -4252,6 +4285,8 @@ export default {
 					hide_qty_decimals: this.hide_qty_decimals,
 					hide_zero_rate_items: this.hide_zero_rate_items,
 					show_last_invoice_rate: this.show_last_invoice_rate,
+					enable_background_sync: this.enable_background_sync,
+					background_sync_interval: this.background_sync_interval,
 					enable_custom_items_per_page: this.enable_custom_items_per_page,
 					items_per_page: this.items_per_page,
 				};
@@ -4283,6 +4318,14 @@ export default {
 					if (typeof opts.show_last_invoice_rate === "boolean") {
 						this.show_last_invoice_rate = opts.show_last_invoice_rate;
 					}
+					if (typeof opts.enable_background_sync === "boolean") {
+						this.enable_background_sync = opts.enable_background_sync;
+					}
+					if (typeof opts.background_sync_interval === "number") {
+						this.background_sync_interval = this.normalizeBackgroundSyncInterval(
+							opts.background_sync_interval,
+						);
+					}
 					if (typeof opts.enable_custom_items_per_page === "boolean") {
 						this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
 					}
@@ -4293,6 +4336,87 @@ export default {
 				}
 			} catch (e) {
 				console.error("Failed to load item selector settings:", e);
+			}
+		},
+		normalizeBackgroundSyncInterval(value) {
+			const parsed = parseInt(value, 10);
+			if (!Number.isFinite(parsed) || parsed <= 0) {
+				return 30;
+			}
+			return Math.max(10, parsed);
+		},
+		startBackgroundSyncScheduler() {
+			this.stopBackgroundSyncScheduler();
+			if (!this.enable_background_sync) {
+				return;
+			}
+
+			const intervalMs = this.normalizeBackgroundSyncInterval(this.background_sync_interval) * 1000;
+			this.background_sync_timer = setInterval(() => {
+				this.performBackgroundSync({ source: "interval" });
+			}, intervalMs);
+
+			this.performBackgroundSync({ source: "initial" });
+		},
+		stopBackgroundSyncScheduler() {
+			if (this.background_sync_timer) {
+				clearInterval(this.background_sync_timer);
+				this.background_sync_timer = null;
+			}
+		},
+		async ensureBackgroundSyncBaseline() {
+			const lastSync = getItemsLastSync();
+			if (lastSync) {
+				return lastSync;
+			}
+
+			const serverTimestamp = await this.fetchServerItemsTimestamp();
+			if (serverTimestamp) {
+				setItemsLastSync(serverTimestamp);
+				return serverTimestamp;
+			}
+
+			return null;
+		},
+		shouldRunBackgroundSync() {
+			if (!this.enable_background_sync) {
+				return false;
+			}
+			if (this.background_sync_in_flight) {
+				return false;
+			}
+			if (isOffline()) {
+				return false;
+			}
+			if (this.usesLimitSearch) {
+				return false;
+			}
+			return true;
+		},
+		async performBackgroundSync({ source = "manual" } = {}) {
+			if (!this.shouldRunBackgroundSync()) {
+				return;
+			}
+
+			this.background_sync_in_flight = true;
+			try {
+				// PERF: use modified_after sync to avoid full catalog reloads.
+				// Benchmark note: keeps background sync payloads small even for large catalogs.
+				await this.ensureBackgroundSyncBaseline();
+				const { items: updatedItems } = await this.refreshModifiedItems();
+
+				if (updatedItems && updatedItems.length) {
+					await this.update_items_details(updatedItems, { forceRefresh: true });
+					this.eventBus.emit("set_all_items", this.items);
+				}
+
+				if (this.displayedItems && this.displayedItems.length > 0) {
+					await this.update_items_details(this.displayedItems);
+				}
+			} catch (error) {
+				console.error(`Background sync failed (${source})`, error);
+			} finally {
+				this.background_sync_in_flight = false;
 			}
 		},
 	},
@@ -4666,6 +4790,7 @@ export default {
 			if (this.items && this.items.length > 0) {
 				await this.update_items_details(this.items);
 			}
+			await this.performBackgroundSync({ source: "server-online" });
 		});
 
 		this.startItemWorker();
@@ -4673,11 +4798,7 @@ export default {
 		// Setup auto-refresh for item quantities
 		// Trigger an immediate refresh once items are available
 		this.update_cur_items_details();
-		this.refresh_interval = setInterval(() => {
-			if (this.displayedItems && this.displayedItems.length > 0) {
-				this.update_cur_items_details();
-			}
-		}, 30000); // Refresh every 30 seconds after the initial fetch
+		this.startBackgroundSyncScheduler();
 
 		// Add new event listener for currency changes
 		this.eventBus.on("update_currency", (data) => {
@@ -4737,9 +4858,7 @@ export default {
 
 	beforeUnmount() {
 		// Clear interval when component is destroyed
-		if (this.refresh_interval) {
-			clearInterval(this.refresh_interval);
-		}
+		this.stopBackgroundSyncScheduler();
 
 		if (this.formatCache) {
 			this.formatCache.clear();
