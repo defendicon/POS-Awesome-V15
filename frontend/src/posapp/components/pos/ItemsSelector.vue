@@ -718,6 +718,7 @@ export default {
 		background_sync_timer: null,
 		background_sync_in_flight: false,
 		last_background_sync_time: null,
+		background_sync_details_in_flight: false,
 		abortController: null,
 		itemDetailsRequestCache: { key: null, promise: null, result: null },
 		itemDetailsRetryCount: 0,
@@ -4357,6 +4358,30 @@ export default {
 			}
 			return parsed.toLocaleTimeString();
 		},
+		async refreshAllItemDetailsInBatches(batchSize = 100) {
+			if (this.background_sync_details_in_flight) {
+				return;
+			}
+			if (!Array.isArray(this.items) || this.items.length === 0) {
+				return;
+			}
+
+			this.background_sync_details_in_flight = true;
+			try {
+				for (let start = 0; start < this.items.length; start += batchSize) {
+					const chunk = this.items.slice(start, start + batchSize);
+					if (chunk.length === 0) {
+						break;
+					}
+					await this.update_items_details(chunk, { forceRefresh: true });
+					await scheduleFrame();
+				}
+			} catch (error) {
+				console.error("Failed to refresh all item details in background", error);
+			} finally {
+				this.background_sync_details_in_flight = false;
+			}
+		},
 		normalizeBackgroundSyncInterval(value) {
 			const parsed = parseInt(value, 10);
 			if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -4425,16 +4450,20 @@ export default {
 				// Benchmark note: keeps background sync payloads small even for large catalogs.
 				await this.ensureBackgroundSyncBaseline();
 				const { items: updatedItems } = await this.refreshModifiedItems();
-				this.last_background_sync_time = getItemsLastSync() || new Date().toISOString();
 
 				if (updatedItems && updatedItems.length) {
 					await this.update_items_details(updatedItems, { forceRefresh: true });
 					this.eventBus.emit("set_all_items", this.items);
 				}
 
+				// Refresh cached quantities/prices for all items so non-visible items stay in sync.
+				await this.refreshAllItemDetailsInBatches(this.itemsPageLimit || 100);
+
 				if (this.displayedItems && this.displayedItems.length > 0) {
 					await this.update_items_details(this.displayedItems);
 				}
+
+				this.last_background_sync_time = new Date().toISOString();
 			} catch (error) {
 				console.error(`Background sync failed (${source})`, error);
 			} finally {
