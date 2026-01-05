@@ -1192,7 +1192,7 @@ export default {
 
 		new_item.posa_row_id = this.makeid(20);
 
-		if ((!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no) {
+		if (new_item.has_batch_no || new_item.has_serial_no) {
 			// Store only the item's row ID for the expanded state
 			this.expanded.push(new_item.posa_row_id);
 		}

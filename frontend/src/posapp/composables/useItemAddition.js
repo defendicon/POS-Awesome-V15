@@ -36,6 +36,8 @@ export function useItemAddition() {
 		}, contextLabel);
 	};
 
+	const shouldExpandItemRow = (item) => Boolean(item?.has_serial_no || item?.has_batch_no);
+
 	// PERF: maintain an O(1) lookup map for mergeable lines to avoid repeated O(n) scans when 100+ items are added
 	const shouldIndexItem = (entry) =>
 		entry && !entry.posa_is_offer && !entry.posa_is_replace && Number.parseFloat(entry.qty) > 0;
@@ -352,7 +354,7 @@ export function useItemAddition() {
 					}
 				}
 
-				if ((!context.pos_profile.posa_auto_set_batch && item.has_batch_no) || item.has_serial_no) {
+				if (shouldExpandItemRow(item)) {
 					nextTick(() => {
 						context.expanded = [item.posa_row_id];
 					});
@@ -755,10 +757,7 @@ export function useItemAddition() {
 		}
 
 		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
-			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
-		) {
+		if (new_item && shouldExpandItemRow(new_item)) {
 			context.expanded = [new_item.posa_row_id];
 		}
 	});
@@ -852,7 +851,7 @@ export function useItemAddition() {
 			new_item.serial_no_selected_count = 0;
 		}
 		// Expand row if batch/serial required
-		if ((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no) {
+		if (shouldExpandItemRow(new_item)) {
 			// Only store the row ID to keep expanded array consistent
 			context.expanded.push(new_item.posa_row_id);
 		}
