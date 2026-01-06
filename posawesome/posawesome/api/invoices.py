@@ -402,6 +402,37 @@ def _auto_set_return_batches(invoice_doc):
                 frappe.throw(_("No batches available in {0} for {1}.").format(d.warehouse, d.item_code))
 
 
+def _auto_set_outgoing_batches(invoice_doc):
+    """Automatically set batch numbers for outgoing invoice items."""
+
+    if not invoice_doc or invoice_doc.is_return:
+        return
+
+    pos_profile = invoice_doc.get("pos_profile")
+    if not pos_profile:
+        return
+
+    auto_set = cint(frappe.get_cached_value("POS Profile", pos_profile, "posa_auto_set_batch") or 0)
+    if not auto_set:
+        return
+
+    for d in invoice_doc.items:
+        qty = d.get("stock_qty") or d.get("transfer_qty") or d.get("qty") or 0
+        if flt(qty) <= 0:
+            continue
+        if d.get("batch_no"):
+            continue
+        warehouse = d.get("warehouse")
+        if not warehouse:
+            continue
+        has_batch = frappe.get_cached_value("Item", d.item_code, "has_batch_no")
+        if not cint(has_batch):
+            continue
+
+        # Benchmark note: assign batch numbers server-side to avoid UI expand-only auto-selection.
+        d.batch_no = get_batch_no(d.item_code, warehouse, qty, True, d.get("serial_no"))
+
+
 @frappe.whitelist()
 def validate_cart_items(items, pos_profile=None):
     """Validate cart items for available stock.
@@ -966,6 +997,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
     payments = invoice_doc.payments
 
     _auto_set_return_batches(invoice_doc)
+    _auto_set_outgoing_batches(invoice_doc)
 
     # if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
     #     set_batch_nos(invoice_doc, "warehouse", throw=True)
@@ -1037,6 +1069,7 @@ def submit_in_background_job(kwargs):
         frappe.flags.ignore_account_permission = True
 
         # Re-run validations that may be impacted while queued (stock, credit limits)
+        _auto_set_outgoing_batches(invoice_doc)
         _validate_stock_on_invoice(invoice_doc)
         if hasattr(invoice_doc, "validate_credit_limit"):
             invoice_doc.validate_credit_limit()
