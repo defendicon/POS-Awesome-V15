@@ -436,8 +436,6 @@ def _auto_set_outgoing_batches(invoice_doc):
 def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
     """Resolve batch number across ERPNext signature variants."""
     try:
-        return get_batch_no(item_code, warehouse, qty, True, serial_no)
-    except TypeError:
         return get_batch_no(
             {
                 "item_code": item_code,
@@ -447,6 +445,8 @@ def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
                 "serial_no": serial_no,
             }
         )
+    except TypeError:
+        return get_batch_no(item_code, warehouse, qty, True, serial_no)
 
 
 @frappe.whitelist()
