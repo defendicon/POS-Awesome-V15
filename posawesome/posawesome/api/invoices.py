@@ -1,6 +1,7 @@
 # Copyright (c) 2020, Youssef Restom and contributors
 # For license information, please see license.txt
 
+import inspect
 import json
 
 import frappe
@@ -430,13 +431,24 @@ def _auto_set_outgoing_batches(invoice_doc):
             continue
 
         # Benchmark note: assign batch numbers server-side to avoid UI expand-only auto-selection.
-        d.batch_no = get_batch_no(
-            item_code=d.item_code,
-            warehouse=warehouse,
-            qty=qty,
-            throw=True,
-            serial_no=d.get("serial_no"),
+        d.batch_no = _resolve_batch_no(d.item_code, warehouse, qty, d.get("serial_no"))
+
+
+def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
+    """Resolve batch number across ERPNext signature variants."""
+
+    params = list(inspect.signature(get_batch_no).parameters.values())
+    if len(params) == 1:
+        return get_batch_no(
+            {
+                "item_code": item_code,
+                "warehouse": warehouse,
+                "qty": qty,
+                "throw": True,
+                "serial_no": serial_no,
+            }
         )
+    return get_batch_no(item_code, warehouse, qty, True, serial_no)
 
 
 @frappe.whitelist()
