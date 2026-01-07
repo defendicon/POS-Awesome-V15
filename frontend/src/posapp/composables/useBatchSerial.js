@@ -62,7 +62,9 @@ export function useBatchSerial() {
 		const source_batches = Array.isArray(item.batch_no_data) ? item.batch_no_data : [];
 		const normalized_batch_data = source_batches
 			.map((batch, index) => {
-				const baseQty = Number(batch.original_batch_qty ?? batch.batch_qty) || 0;
+				// Benchmark note: fall back to available_qty when batch_qty is missing to skip empty batches.
+				const baseQty =
+					Number(batch.original_batch_qty ?? batch.batch_qty ?? batch.available_qty) || 0;
 				return {
 					...batch,
 					_original_index: index,
