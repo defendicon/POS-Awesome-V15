@@ -65,6 +65,29 @@
 								>
 							</v-col>
 						</v-row>
+						<!-- Currency Filter Row -->
+						<v-row class="mb-2">
+							<v-col md="4" cols="12">
+								<v-select
+									density="compact"
+									variant="outlined"
+									hide-details
+									clearable
+									v-model="currency_filter"
+									:items="['ALL', ...invoice_currencies]"
+									label="Filter by Currency"
+									class="pos-themed-input"
+								></v-select>
+							</v-col>
+							<v-col md="8" cols="12">
+								<div class="text-caption text-medium-emphasis mt-2">
+									<span v-for="(data, curr) in outstanding_by_currency" :key="curr" class="mr-4">
+										<strong>{{ data.symbol }} {{ formatCurrency(data.amount) }} {{ curr }}</strong>
+									</span>
+								</div>
+							</v-col>
+						</v-row>
+
 						<v-row
 							v-if="
 								pos_profile.posa_allow_reconcile_payments &&
@@ -93,7 +116,7 @@
 						</v-row>
 						<v-data-table
 							:headers="invoices_headers"
-							:items="outstanding_invoices"
+							:items="filtered_outstanding_invoices"
 							item-key="voucher_no"
 							class="elevation-1 mt-0"
 							:loading="invoices_loading"
@@ -470,6 +493,7 @@ export default {
 			payment_methods_list: [],
 			mpesa_search_name: "",
 			mpesa_search_mobile: "",
+			currency_filter: "ALL",
 			invoices_headers: [
 				{
 					title: "",
@@ -791,6 +815,7 @@ export default {
 					company: this.company,
 					currency: this.pos_profile.currency,
 					pos_profile: this.pos_profile_search || null,
+					include_all_currencies: true
 				})
 				.then((r) => {
 					if (r.message) {
@@ -1204,9 +1229,39 @@ export default {
 	},
 
 	computed: {
-		total_outstanding_amount() {
-			if (!this.outstanding_invoices || !this.outstanding_invoices.length) return 0;
-			return this.outstanding_invoices.reduce((acc, cur) => acc + flt(cur?.outstanding_amount || 0), 0);
+		// Get unique currencies from invoices
+		invoice_currencies() {
+			const currencies = new Set();
+			this.outstanding_invoices.forEach(inv => {
+				currencies.add(inv.currency || this.pos_profile.currency);
+			});
+			return Array.from(currencies).sort();
+		},
+		
+		// Summary of outstanding amounts by currency
+		outstanding_by_currency() {
+			const summary = {};
+			this.outstanding_invoices.forEach(inv => {
+				const curr = inv.currency || this.pos_profile.currency;
+				if (!summary[curr]) {
+					summary[curr] = {
+						amount: 0,
+						symbol: this.currencySymbol(curr)
+					};
+				}
+				summary[curr].amount += flt(inv.outstanding_amount || 0);
+			});
+			return summary;
+		},
+		
+		// Filtered invoices based on selected currency
+		filtered_outstanding_invoices() {
+			if (this.currency_filter === 'ALL' || !this.currency_filter) {
+				return this.outstanding_invoices;
+			}
+			return this.outstanding_invoices.filter(inv => 
+				(inv.currency || this.pos_profile.currency) === this.currency_filter
+			);
 		},
 		total_unallocated_amount() {
 			if (!this.unallocated_payments || !this.unallocated_payments.length) return 0;
@@ -1214,15 +1269,18 @@ export default {
 		},
 		total_selected_invoices() {
 			if (!this.selected_invoices || !this.selected_invoices.length) {
-				console.log("No selected invoices");
 				return 0;
 			}
-			const total = this.selected_invoices.reduce(
-				(acc, cur) => acc + flt(cur?.outstanding_amount || 0),
-				0,
-			);
-			console.log("Calculated total selected invoices:", total, "from", this.selected_invoices);
-			return total;
+			// Only sum invoices matching the current currency filter
+			return this.selected_invoices.reduce((acc, cur) => {
+				const invoice_currency = cur.currency || this.pos_profile.currency;
+				// Only include if it matches the filter or filter is ALL
+				if (this.currency_filter === 'ALL' || !this.currency_filter || 
+					invoice_currency === this.currency_filter) {
+					return acc + flt(cur?.outstanding_amount || 0);
+				}
+				return acc;
+			}, 0);
 		},
 		total_selected_payments() {
 			if (!this.selected_payments || !this.selected_payments.length) return 0;
