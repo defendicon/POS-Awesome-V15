@@ -430,7 +430,13 @@ def _auto_set_outgoing_batches(invoice_doc):
             continue
 
         # Benchmark note: assign batch numbers server-side to avoid UI expand-only auto-selection.
-        d.batch_no = get_batch_no(d.item_code, warehouse, qty, True, d.get("serial_no"))
+        d.batch_no = get_batch_no(
+            item_code=d.item_code,
+            warehouse=warehouse,
+            qty=qty,
+            throw=True,
+            serial_no=d.get("serial_no"),
+        )
 
 
 @frappe.whitelist()
