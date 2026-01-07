@@ -1,7 +1,6 @@
 # Copyright (c) 2020, Youssef Restom and contributors
 # For license information, please see license.txt
 
-import inspect
 import json
 
 import frappe
@@ -436,9 +435,9 @@ def _auto_set_outgoing_batches(invoice_doc):
 
 def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
     """Resolve batch number across ERPNext signature variants."""
-
-    params = list(inspect.signature(get_batch_no).parameters.values())
-    if len(params) == 1:
+    try:
+        return get_batch_no(item_code, warehouse, qty, True, serial_no)
+    except TypeError:
         return get_batch_no(
             {
                 "item_code": item_code,
@@ -448,7 +447,6 @@ def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
                 "serial_no": serial_no,
             }
         )
-    return get_batch_no(item_code, warehouse, qty, True, serial_no)
 
 
 @frappe.whitelist()
