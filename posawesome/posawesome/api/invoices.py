@@ -436,7 +436,7 @@ def _auto_set_outgoing_batches(invoice_doc):
 def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
     """Resolve batch number across ERPNext signature variants."""
     try:
-        return get_batch_no(
+        batch_no = get_batch_no(
             {
                 "item_code": item_code,
                 "warehouse": warehouse,
@@ -446,7 +446,20 @@ def _resolve_batch_no(item_code, warehouse, qty, serial_no=None):
             }
         )
     except TypeError:
-        return get_batch_no(item_code, warehouse, qty, True, serial_no)
+        batch_no = get_batch_no(item_code, warehouse, qty, True, serial_no)
+    return _normalize_batch_no(batch_no)
+
+
+def _normalize_batch_no(batch_no):
+    """Return a string batch number or None when the response is not usable."""
+
+    if isinstance(batch_no, dict):
+        batch_no = batch_no.get("batch_no")
+
+    if isinstance(batch_no, str):
+        return batch_no or None
+
+    return None
 
 
 @frappe.whitelist()
