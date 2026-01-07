@@ -3511,6 +3511,17 @@ export default {
 		if (pending.length > 0) {
 			await this.update_items_details(pending);
 		}
+
+		// Benchmark note: avoid extra loops by reusing the pending list after refresh.
+		const refreshTargets = pending.length > 0 ? pending : ready;
+		refreshTargets.forEach((item) => {
+			if (!item?.has_batch_no || item.batch_no) {
+				return;
+			}
+			if (Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0) {
+				this.set_batch_qty(item, null, false);
+			}
+		});
 	},
 
 	// Update details for all items (fetch from backend)
