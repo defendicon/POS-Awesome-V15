@@ -4374,6 +4374,7 @@ export default {
 						break;
 					}
 					await this.update_items_details(chunk, { forceRefresh: true });
+					// Benchmark note: yield to the next frame to avoid long tasks during large catalog refreshes.
 					await scheduleFrame();
 				}
 			} catch (error) {
