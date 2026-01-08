@@ -1,4 +1,9 @@
-import { silentPrint } from "../../plugins/print.js";
+import {
+	appendDebugPrintParam,
+	isDebugPrintEnabled,
+	silentPrint,
+	watchPrintWindow,
+} from "../../plugins/print.js";
 import { isOffline } from "../../../offline/index.js";
 import { formatUtils } from "../../format.js";
 /* global __, frappe, flt */
@@ -1549,7 +1554,8 @@ export default {
 		const doctype = this.pos_profile.create_pos_invoice_instead_of_sales_invoice
 			? "POS Invoice"
 			: "Sales Invoice";
-		const url =
+		const debugPrint = isDebugPrintEnabled();
+		let url =
 			frappe.urllib.get_base_url() +
 			"/printview?doctype=" +
 			encodeURIComponent(doctype) +
@@ -1560,18 +1566,29 @@ export default {
 			print_format +
 			"&no_letterhead=" +
 			letter_head;
+		url = appendDebugPrintParam(url, debugPrint);
 
 		if (this.pos_profile.posa_silent_print) {
-			silentPrint(url, { allowOfflineFallback: isOffline() });
+			silentPrint(url, {
+				allowOfflineFallback: isOffline(),
+				triggerPrint: "1",
+				debugPrint,
+				debugInfo: {
+					printFormat: print_format,
+					templatePath: "online-printview",
+				},
+			});
 		} else {
 			const printWindow = window.open(url, "Print");
-			printWindow.addEventListener(
-				"load",
-				function () {
-					printWindow.print();
+			watchPrintWindow(printWindow, {
+				allowOfflineFallback: isOffline(),
+				triggerPrint: "1",
+				debugPrint,
+				debugInfo: {
+					printFormat: print_format,
+					templatePath: "online-printview",
 				},
-				{ once: true },
-			);
+			});
 		}
 	},
 

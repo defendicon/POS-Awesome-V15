@@ -81,18 +81,22 @@
 							</v-col>
 							<v-col md="8" cols="12">
 								<div class="text-caption text-medium-emphasis mt-2">
-									<span v-for="(data, key) in outstanding_by_currency" :key="key" class="mr-4">
-									<strong>
-										{{ formatCurrency(data.amount) }} 
-										{{ data.symbol }} 
-										{{ data.party_currency }}
-										<span v-if="data.party_currency !== data.invoice_currency">
-										({{ data.invoice_currency }})
-										</span>
-									</strong>
+									<span
+										v-for="(data, key) in outstanding_by_currency"
+										:key="key"
+										class="mr-4"
+									>
+										<strong>
+											{{ formatCurrency(data.amount) }}
+											{{ data.symbol }}
+											{{ data.party_currency }}
+											<span v-if="data.party_currency !== data.invoice_currency">
+												({{ data.invoice_currency }})
+											</span>
+										</strong>
 									</span>
 								</div>
-								</v-col>
+							</v-col>
 						</v-row>
 
 						<v-row
@@ -144,7 +148,13 @@
 							</template>
 							<template v-slot:item.outstanding_amount="{ item }">
 								<span class="text-primary"
-									>{{ currencySymbol(item?.party_account_currency || item?.currency || pos_profile.currency) }}
+									>{{
+										currencySymbol(
+											item?.party_account_currency ||
+												item?.currency ||
+												pos_profile.currency,
+										)
+									}}
 									{{ formatCurrency(item?.outstanding_amount || 0) }}</span
 								>
 							</template>
@@ -455,7 +465,12 @@ import {
 	getCustomerStorage,
 	getOfflineCustomers,
 } from "../../../offline/index.js";
-import { silentPrint, watchPrintWindow } from "../../plugins/print.js";
+import {
+	appendDebugPrintParam,
+	isDebugPrintEnabled,
+	silentPrint,
+	watchPrintWindow,
+} from "../../plugins/print.js";
 import { useRtl } from "../../composables/useRtl.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
@@ -822,7 +837,7 @@ export default {
 					company: this.company,
 					currency: this.pos_profile.currency,
 					pos_profile: this.pos_profile_search || null,
-					include_all_currencies: true
+					include_all_currencies: true,
 				})
 				.then((r) => {
 					if (r.message) {
@@ -1196,16 +1211,26 @@ export default {
 			}
 
 			// Use simplest URL possible to avoid errors
-			const url =
+			const debugPrint = isDebugPrintEnabled();
+			let url =
 				frappe.urllib.get_base_url() +
 				"/printview?doctype=Payment%20Entry" +
 				"&name=" +
 				payment_name +
 				"&trigger_print=1";
 
+			url = appendDebugPrintParam(url, debugPrint);
 			console.log("Opening printing URL:", url);
 
-			const printOptions = { allowOfflineFallback: isOffline() };
+			const printOptions = {
+				allowOfflineFallback: isOffline(),
+				triggerPrint: "1",
+				debugPrint,
+				debugInfo: {
+					printFormat: null,
+					templatePath: "online-printview",
+				},
+			};
 			if (this.pos_profile?.posa_silent_print) {
 				silentPrint(url, printOptions);
 			} else {
@@ -1239,40 +1264,40 @@ export default {
 		// Get unique currencies from invoices
 		invoice_currencies() {
 			const currencies = new Set();
-			this.outstanding_invoices.forEach(inv => {
+			this.outstanding_invoices.forEach((inv) => {
 				currencies.add(inv.currency || this.pos_profile.currency);
 			});
 			return Array.from(currencies).sort();
 		},
-		
+
 		// Summary of outstanding amounts by currency
 		outstanding_by_currency() {
-		const summary = {};
-		this.outstanding_invoices.forEach(inv => {
-			const partyCurr = inv.party_account_currency || inv.currency || this.pos_profile.currency;
-			const invoiceCurr = inv.currency || this.pos_profile.currency;
-			const key = `${partyCurr}-${invoiceCurr}`;
-			
-			if (!summary[key]) {
-			summary[key] = {
-				amount: 0,
-				symbol: this.currencySymbol(partyCurr),
-				party_currency: partyCurr,
-				invoice_currency: invoiceCurr
-			};
-			}
-			summary[key].amount += flt(inv.outstanding_amount || 0);
-		});
-		return summary;
+			const summary = {};
+			this.outstanding_invoices.forEach((inv) => {
+				const partyCurr = inv.party_account_currency || inv.currency || this.pos_profile.currency;
+				const invoiceCurr = inv.currency || this.pos_profile.currency;
+				const key = `${partyCurr}-${invoiceCurr}`;
+
+				if (!summary[key]) {
+					summary[key] = {
+						amount: 0,
+						symbol: this.currencySymbol(partyCurr),
+						party_currency: partyCurr,
+						invoice_currency: invoiceCurr,
+					};
+				}
+				summary[key].amount += flt(inv.outstanding_amount || 0);
+			});
+			return summary;
 		},
-		
+
 		// Filtered invoices based on selected currency
 		filtered_outstanding_invoices() {
-			if (this.currency_filter === 'ALL' || !this.currency_filter) {
+			if (this.currency_filter === "ALL" || !this.currency_filter) {
 				return this.outstanding_invoices;
 			}
-			return this.outstanding_invoices.filter(inv => 
-				(inv.currency || this.pos_profile.currency) === this.currency_filter
+			return this.outstanding_invoices.filter(
+				(inv) => (inv.currency || this.pos_profile.currency) === this.currency_filter,
 			);
 		},
 		total_unallocated_amount() {
@@ -1287,8 +1312,11 @@ export default {
 			return this.selected_invoices.reduce((acc, cur) => {
 				const invoice_currency = cur.currency || this.pos_profile.currency;
 				// Only include if it matches the filter or filter is ALL
-				if (this.currency_filter === 'ALL' || !this.currency_filter || 
-					invoice_currency === this.currency_filter) {
+				if (
+					this.currency_filter === "ALL" ||
+					!this.currency_filter ||
+					invoice_currency === this.currency_filter
+				) {
 					return acc + flt(cur?.outstanding_amount || 0);
 				}
 				return acc;

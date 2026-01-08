@@ -831,7 +831,12 @@ import {
 } from "../../../offline/index.js";
 
 import renderOfflineInvoiceHTML from "../../../offline_print_template";
-import { silentPrint, watchPrintWindow } from "../../plugins/print.js";
+import {
+	appendDebugPrintParam,
+	isDebugPrintEnabled,
+	silentPrint,
+	watchPrintWindow,
+} from "../../plugins/print.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
@@ -1941,6 +1946,7 @@ export default {
 				this.pos_profile.print_format;
 			const letter_head = this.pos_profile.letter_head || 0;
 			let doctype;
+			const debugPrint = isDebugPrintEnabled();
 
 			if (this.invoiceType === "Quotation") {
 				doctype = "Quotation";
@@ -1951,7 +1957,7 @@ export default {
 			} else {
 				doctype = "Sales Invoice";
 			}
-			const url =
+			let url =
 				frappe.urllib.get_base_url() +
 				"/printview?doctype=" +
 				encodeURIComponent(doctype) +
@@ -1962,12 +1968,26 @@ export default {
 				print_format +
 				"&no_letterhead=" +
 				letter_head;
+			url = appendDebugPrintParam(url, debugPrint);
 			const printOptions = {
 				invoiceDoc: this.invoice_doc,
 				allowOfflineFallback: isOffline(),
+				triggerPrint: "1",
+				debugPrint,
+				debugInfo: {
+					printFormat: print_format,
+					templatePath: "online-printview",
+				},
 			};
 
 			if (this.pos_profile.posa_open_print_in_new_tab) {
+				if (isOffline()) {
+					this.open_offline_invoice_preview(this.invoice_doc, {
+						debugPrint,
+						printFormat: print_format,
+					});
+					return;
+				}
 				let newTabUrl =
 					frappe.urllib.get_base_url() +
 					"/printview?doctype=" +
@@ -1985,7 +2005,14 @@ export default {
 					newTabUrl += "&no_letterhead=0";
 				}
 
-				window.open(newTabUrl, "_blank");
+				newTabUrl = appendDebugPrintParam(newTabUrl, debugPrint);
+				// Android Share → Print is more reliable, so keep trigger_print=0 and skip auto-print.
+				const printWindow = window.open(newTabUrl, "_blank");
+				watchPrintWindow(printWindow, {
+					...printOptions,
+					triggerPrint: "0",
+					shouldPrint: false,
+				});
 				return;
 			}
 
@@ -2005,6 +2032,26 @@ export default {
 			win.document.close();
 			win.focus();
 			win.print();
+		},
+		// Open offline invoice preview without triggering auto-print (for new-tab mode)
+		async open_offline_invoice_preview(invoice, { debugPrint = false, printFormat = "" } = {}) {
+			if (!invoice) return;
+			const html = await renderOfflineInvoiceHTML(invoice);
+			const win = window.open("", "_blank");
+			if (!win) return;
+			win.document.write(html);
+			win.document.close();
+			win.focus();
+			if (debugPrint) {
+				console.log("[POSAwesome][Print Debug]", {
+					location: win.location?.href || null,
+					online: navigator.onLine,
+					trigger_print: "0",
+					print_format: printFormat || null,
+					template_path: "offline-fallback",
+					should_print: false,
+				});
+			}
 		},
 		// Validate due date (should not be in the past)
 		validate_due_date() {

@@ -2,6 +2,100 @@ import renderOfflineInvoiceHTML from "../../offline_print_template.js";
 
 const DEFAULT_READY_SELECTORS = ["#print-view", ".print-format"];
 const DEFAULT_TIMEOUT = 10000;
+const DEBUG_PRINT_PARAM = "debug_print";
+const TRIGGER_PRINT_PARAM = "trigger_print";
+
+function getWindowHref(targetWindow) {
+	try {
+		return targetWindow?.location?.href || "";
+	} catch (err) {
+		return "";
+	}
+}
+
+function getSearchParamFromHref(href, param) {
+	if (!href) return null;
+	try {
+		const resolved = new URL(href, window.location.origin);
+		return resolved.searchParams.get(param);
+	} catch (err) {
+		return null;
+	}
+}
+
+function resolveTriggerPrint(targetWindow, options = {}) {
+	if (options.triggerPrint !== undefined && options.triggerPrint !== null) {
+		return String(options.triggerPrint);
+	}
+	return getSearchParamFromHref(getWindowHref(targetWindow), TRIGGER_PRINT_PARAM);
+}
+
+function resolveDebugPrint(targetWindow, options = {}) {
+	if (typeof options.debugPrint === "boolean") {
+		return options.debugPrint;
+	}
+	const href = getWindowHref(targetWindow);
+	if (href) {
+		return getSearchParamFromHref(href, DEBUG_PRINT_PARAM) === "1";
+	}
+	return isDebugPrintEnabled();
+}
+
+function resolveOnlineStatus(targetWindow) {
+	try {
+		return Boolean(targetWindow?.navigator?.onLine);
+	} catch (err) {
+		return Boolean(navigator?.onLine);
+	}
+}
+
+function logPrintDebug(details) {
+	if (!details?.debugPrint) return;
+	const payload = {
+		location: details.location || null,
+		online: details.online,
+		trigger_print: details.triggerPrint,
+		print_format: details.printFormat || null,
+		template_path: details.templatePath || null,
+		should_print: details.shouldPrint,
+	};
+	if (details.note) {
+		payload.note = details.note;
+	}
+	console.log("[POSAwesome][Print Debug]", payload);
+}
+
+function isLoginRedirect(targetWindow) {
+	try {
+		const path = targetWindow?.location?.pathname || "";
+		if (path.includes("login")) return true;
+		const title = targetWindow?.document?.title || "";
+		if (/login|session/i.test(title)) return true;
+		const loginForm = targetWindow?.document?.querySelector("form[action*='login']");
+		return Boolean(loginForm);
+	} catch (err) {
+		return false;
+	}
+}
+
+function showSessionMessage(targetWindow) {
+	if (!targetWindow) return;
+	try {
+		const message =
+			"Unable to load the online print view. Your session may have expired. Please sign in again and re-open the print view.";
+		targetWindow.document.open();
+		targetWindow.document.write(
+			`<div style="font-family:sans-serif;padding:24px;line-height:1.5;">
+				<h2 style="margin:0 0 12px;">Print view unavailable</h2>
+				<p style="margin:0 0 12px;">${message}</p>
+				<p style="margin:0;">Once signed in, retry from POS Awesome.</p>
+			</div>`,
+		);
+		targetWindow.document.close();
+	} catch (err) {
+		console.warn("Unable to show session warning in print window", err);
+	}
+}
 
 function waitForDocumentSelectors(targetWindow, selectors, timeout) {
 	return new Promise((resolve, reject) => {
@@ -107,7 +201,7 @@ function waitForDocumentSelectors(targetWindow, selectors, timeout) {
 	});
 }
 
-async function fallbackToOfflinePrint(invoiceDoc, existingWindow) {
+async function fallbackToOfflinePrint(invoiceDoc, existingWindow, options = {}) {
 	if (!invoiceDoc) {
 		return false;
 	}
@@ -138,8 +232,20 @@ async function fallbackToOfflinePrint(invoiceDoc, existingWindow) {
 
 		target.document.write(html);
 		target.document.close();
-		target.focus();
-		target.print();
+		const shouldPrint = options.shouldPrint ?? true;
+		logPrintDebug({
+			debugPrint: resolveDebugPrint(target, options),
+			location: getWindowHref(target),
+			online: resolveOnlineStatus(target),
+			triggerPrint: resolveTriggerPrint(target, options),
+			printFormat: options?.debugInfo?.printFormat,
+			templatePath: "offline-fallback",
+			shouldPrint,
+		});
+		if (shouldPrint) {
+			target.focus();
+			target.print();
+		}
 		return true;
 	} catch (err) {
 		console.error("Offline print fallback failed", err);
@@ -157,9 +263,31 @@ async function ensureReadyAndPrint(targetWindow, options = {}) {
 		timeout = DEFAULT_TIMEOUT,
 		invoiceDoc = null,
 		allowOfflineFallback = true,
+		shouldPrint = true,
 	} = options;
 
 	const readySelectors = Array.isArray(selectors) ? selectors.filter(Boolean) : [selectors].filter(Boolean);
+	const resolvedDebugPrint = resolveDebugPrint(targetWindow, options);
+	const resolvedOnline = resolveOnlineStatus(targetWindow);
+	const resolvePrintState = () => {
+		const triggerPrintValue = resolveTriggerPrint(targetWindow, options);
+		return {
+			triggerPrintValue,
+			resolvedShouldPrint: shouldPrint && triggerPrintValue === "1",
+		};
+	};
+	const initialPrintState = resolvePrintState();
+
+	// Benchmark: avoid unnecessary print calls unless trigger_print is explicitly "1" for Android reliability.
+	logPrintDebug({
+		debugPrint: resolvedDebugPrint,
+		location: getWindowHref(targetWindow),
+		online: resolvedOnline,
+		triggerPrint: initialPrintState.triggerPrintValue,
+		printFormat: options?.debugInfo?.printFormat,
+		templatePath: "online-printview",
+		shouldPrint: initialPrintState.resolvedShouldPrint,
+	});
 
 	try {
 		await waitForDocumentSelectors(
@@ -167,15 +295,47 @@ async function ensureReadyAndPrint(targetWindow, options = {}) {
 			readySelectors.length ? readySelectors : DEFAULT_READY_SELECTORS,
 			timeout,
 		);
-		targetWindow.focus();
-		targetWindow.print();
+		const { triggerPrintValue, resolvedShouldPrint } = resolvePrintState();
+		logPrintDebug({
+			debugPrint: resolvedDebugPrint,
+			location: getWindowHref(targetWindow),
+			online: resolvedOnline,
+			triggerPrint: triggerPrintValue,
+			printFormat: options?.debugInfo?.printFormat,
+			templatePath: "online-printview",
+			shouldPrint: resolvedShouldPrint,
+			note: "Print target ready",
+		});
+		if (resolvedShouldPrint) {
+			targetWindow.focus();
+			targetWindow.print();
+		}
 	} catch (err) {
 		console.warn("Print readiness check failed", err);
+		const wantsSessionMessage = options.showSessionMessage !== false;
+		const { triggerPrintValue, resolvedShouldPrint } = resolvePrintState();
+		if (wantsSessionMessage && isLoginRedirect(targetWindow)) {
+			logPrintDebug({
+				debugPrint: resolvedDebugPrint,
+				location: getWindowHref(targetWindow),
+				online: resolvedOnline,
+				triggerPrint: triggerPrintValue,
+				printFormat: options?.debugInfo?.printFormat,
+				templatePath: "login-redirect",
+				shouldPrint: resolvedShouldPrint,
+				note: "Login redirect detected",
+			});
+			showSessionMessage(targetWindow);
+			return;
+		}
 		let usedFallback = false;
 		if (allowOfflineFallback && invoiceDoc) {
-			usedFallback = await fallbackToOfflinePrint(invoiceDoc, targetWindow);
+			usedFallback = await fallbackToOfflinePrint(invoiceDoc, targetWindow, {
+				...options,
+				shouldPrint: resolvedShouldPrint,
+			});
 		}
-		if (!usedFallback) {
+		if (!usedFallback && resolvedShouldPrint) {
 			try {
 				targetWindow.focus();
 				targetWindow.print();
@@ -231,5 +391,27 @@ export function silentPrint(url, options = {}) {
 		if (win) {
 			watchPrintWindow(win, options);
 		}
+	}
+}
+
+export function isDebugPrintEnabled(sourceWindow = window) {
+	try {
+		const href = sourceWindow?.location?.href || "";
+		return getSearchParamFromHref(href, DEBUG_PRINT_PARAM) === "1";
+	} catch (err) {
+		return false;
+	}
+}
+
+export function appendDebugPrintParam(url, debugEnabled = isDebugPrintEnabled()) {
+	if (!url || !debugEnabled) {
+		return url;
+	}
+	try {
+		const resolved = new URL(url, window.location.origin);
+		resolved.searchParams.set(DEBUG_PRINT_PARAM, "1");
+		return resolved.toString();
+	} catch (err) {
+		return url;
 	}
 }
