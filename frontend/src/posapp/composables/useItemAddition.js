@@ -2,6 +2,7 @@ import { nextTick } from "vue";
 import _ from "lodash";
 import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
+import { parseBooleanSetting } from "../utils/stock.js";
 
 /* global frappe, __ */
 
@@ -388,13 +389,19 @@ export function useItemAddition() {
 
 	// Add item to invoice
 	const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
-		const blockSale = context.pos_profile?.posa_block_sale_beyond_available_qty;
+		const blockSale = parseBooleanSetting(context.pos_profile?.posa_block_sale_beyond_available_qty);
 		const allowNegativeStock =
-			item.allow_negative_stock === 1 ||
-			item.allow_negative_stock === true ||
-			item.allow_negative_stock === "1";
+			parseBooleanSetting(context.stock_settings?.allow_negative_stock) ||
+			parseBooleanSetting(item.allow_negative_stock);
 
-		if (item.is_stock_item && item.actual_qty <= 0 && !allowNegativeStock) {
+		if (blockSale && item.is_stock_item && item.actual_qty <= 0 && !allowNegativeStock) {
+			console.debug("POS stock gate: item blocked", {
+				item_code: item.item_code,
+				actual_qty: item.actual_qty,
+				block_sale_beyond_available_qty: blockSale,
+				allow_negative_stock: allowNegativeStock,
+				item_allow_negative_stock: parseBooleanSetting(item.allow_negative_stock),
+			});
 			context.eventBus.emit("show_message", {
 				title: __("Item is out of stock"),
 				text: __("Cannot add an item with zero or negative quantity."),
