@@ -66,7 +66,12 @@ import {
 	isOffline,
 	getLastSyncTotals,
 } from "../offline/index.js";
-import { silentPrint, watchPrintWindow } from "./plugins/print.js";
+import {
+	appendDebugPrintParam,
+	isDebugPrintEnabled,
+	silentPrint,
+	watchPrintWindow,
+} from "./plugins/print.js";
 import {
 	setupNetworkListeners,
 	checkNetworkConnectivity,
@@ -352,7 +357,8 @@ export default {
 			const doctype = this.posProfile.create_pos_invoice_instead_of_sales_invoice
 				? "POS Invoice"
 				: "Sales Invoice";
-			const url =
+			const debugPrint = isDebugPrintEnabled();
+			let url =
 				frappe.urllib.get_base_url() +
 				"/printview?doctype=" +
 				encodeURIComponent(doctype) +
@@ -364,7 +370,15 @@ export default {
 				"&no_letterhead=" +
 				letter_head;
 
-			const printOptions = { allowOfflineFallback: isOffline() };
+			url = appendDebugPrintParam(url, debugPrint);
+			const printOptions = {
+				allowOfflineFallback: isOffline(),
+				debugPrint,
+				debugInfo: {
+					printFormat: print_format,
+					templatePath: "online-printview",
+				},
+			};
 			if (this.posProfile.posa_silent_print) {
 				silentPrint(url, printOptions);
 			} else {
