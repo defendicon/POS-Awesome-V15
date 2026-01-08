@@ -101,6 +101,34 @@ export default {
 			territory: doc.territory || customerInfo.territory || null,
 		};
 	},
+	_isPriceDebugEnabled() {
+		try {
+			if (typeof window === "undefined" || !window.location) {
+				return false;
+			}
+			const params = new URLSearchParams(window.location.search || "");
+			return params.get("debug_price") === "1";
+		} catch {
+			return false;
+		}
+	},
+	_buildPriceListSnapshot(items = []) {
+		// Benchmark note: keep debug snapshots lightweight to avoid expensive deep clones.
+		if (!Array.isArray(items)) {
+			return [];
+		}
+		return items.map((item) => ({
+			item_code: item.item_code,
+			price_list_rate: item.price_list_rate,
+			base_price_list_rate: item.base_price_list_rate,
+		}));
+	},
+	_logPriceListDebug(context, payload) {
+		if (!this._isPriceDebugEnabled()) {
+			return;
+		}
+		console.log("[POSA][PriceList]", context, payload);
+	},
 	async _ensurePricingRules(force = false) {
 		const store = this._getPricingRulesStore();
 		const ctx = this._getPricingContext();
@@ -1353,8 +1381,20 @@ export default {
 	},
 
 	async add_item(item, options = {}) {
+		const priceContext = {
+			customer: this.customer,
+			customer_price_list: this.customer_info?.customer_price_list || null,
+			pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+			effective_price_list: this.get_price_list(),
+			invoice_selling_price_list: this.invoice_doc?.selling_price_list || null,
+			item_before: this._buildPriceListSnapshot([item]),
+		};
 		const res = await addItem(item, this);
 		this.schedulePricingRuleApplication();
+		this._logPriceListDebug("add_item", {
+			...priceContext,
+			item_after: this._buildPriceListSnapshot([item]),
+		});
 
 		const shouldNotify =
 			options?.notifyOnSuccess === true && !options?.skipNotification && this.eventBus?.emit;
@@ -1842,7 +1882,7 @@ export default {
 
 		// Other fields
 		doc.campaign = doc.campaign || this.pos_profile.campaign;
-		doc.selling_price_list = this.pos_profile.selling_price_list;
+		doc.selling_price_list = this.get_price_list();
 		doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
 		const customerDetails =
 			this.customer_info && typeof this.customer_info === "object" ? this.customer_info : {};
@@ -2404,6 +2444,14 @@ export default {
 					: "posawesome.posawesome.api.invoices.update_invoice";
 
 		try {
+			this._logPriceListDebug("update_invoice_request", {
+				customer: this.customer,
+				customer_price_list: this.customer_info?.customer_price_list || null,
+				pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+				effective_price_list: this.get_price_list(),
+				invoice_selling_price_list: doc.selling_price_list,
+				items_before: this._buildPriceListSnapshot(doc.items),
+			});
 			const response = await frappe.call({
 				method,
 				args: {
@@ -2413,6 +2461,10 @@ export default {
 
 			const message = response?.message;
 			if (message) {
+				this._logPriceListDebug("update_invoice_response", {
+					invoice_selling_price_list: message.selling_price_list,
+					items_after: this._buildPriceListSnapshot(message.items),
+				});
 				if (message.is_return) {
 					this._normalizeReturnDocTotals(message);
 				}
@@ -2490,6 +2542,14 @@ export default {
 	// Process and save invoice (handles update or create)
 	async process_invoice() {
 		const doc = this.get_invoice_doc();
+		this._logPriceListDebug("pre-submit", {
+			customer: this.customer,
+			customer_price_list: this.customer_info?.customer_price_list || null,
+			pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+			effective_price_list: this.get_price_list(),
+			invoice_selling_price_list: doc.selling_price_list,
+			items_before: this._buildPriceListSnapshot(doc.items),
+		});
 		try {
 			const updated_doc = await this.update_invoice(doc);
 			if (updated_doc && updated_doc.posting_date) {
@@ -3070,6 +3130,14 @@ export default {
 				items_count: this.items.length,
 				customer: this.customer,
 			});
+			this._logPriceListDebug("show_payment", {
+				customer: this.customer,
+				customer_price_list: this.customer_info?.customer_price_list || null,
+				pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+				effective_price_list: this.get_price_list(),
+				invoice_selling_price_list: this.invoice_doc?.selling_price_list || null,
+				items_before: this._buildPriceListSnapshot(this.items),
+			});
 
 			if (!this.customer) {
 				console.log("Customer validation failed");
@@ -3535,7 +3603,7 @@ export default {
 				args: {
 					pos_profile: JSON.stringify(this.pos_profile),
 					items_data: JSON.stringify(items),
-					price_list: this.selected_price_list || this.pos_profile.selling_price_list,
+					price_list: this.get_price_list(),
 				},
 			});
 
@@ -3682,7 +3750,7 @@ export default {
 				args: {
 					warehouse: item.warehouse || this.pos_profile.warehouse,
 					doc: currentDoc,
-					price_list: this.selected_price_list || this.pos_profile.selling_price_list,
+					price_list: this.get_price_list(),
 					item: {
 						item_code: item.item_code,
 						customer: this.customer,
@@ -4063,9 +4131,9 @@ export default {
 
 	// Get price list for current customer
 	get_price_list() {
-		// Use the currently selected price list if available,
-		// otherwise fall back to the POS Profile selling price list
-		return this.selected_price_list || this.pos_profile.selling_price_list;
+		// Customer price list has highest priority, then manual selection, then POS Profile default.
+		const customerPriceList = this.customer_info?.customer_price_list || null;
+		return customerPriceList || this.selected_price_list || this.pos_profile.selling_price_list;
 	},
 
 	// Update price list for customer
