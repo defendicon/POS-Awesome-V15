@@ -81,11 +81,18 @@
 							</v-col>
 							<v-col md="8" cols="12">
 								<div class="text-caption text-medium-emphasis mt-2">
-									<span v-for="(data, curr) in outstanding_by_currency" :key="curr" class="mr-4">
-										<strong>{{ data.symbol }} {{ formatCurrency(data.amount) }} {{ curr }}</strong>
+									<span v-for="(data, key) in outstanding_by_currency" :key="key" class="mr-4">
+									<strong>
+										{{ formatCurrency(data.amount) }} 
+										{{ data.symbol }} 
+										{{ data.party_currency }}
+										<span v-if="data.party_currency !== data.invoice_currency">
+										({{ data.invoice_currency }})
+										</span>
+									</strong>
 									</span>
 								</div>
-							</v-col>
+								</v-col>
 						</v-row>
 
 						<v-row
@@ -1240,18 +1247,23 @@ export default {
 		
 		// Summary of outstanding amounts by currency
 		outstanding_by_currency() {
-			const summary = {};
-			this.outstanding_invoices.forEach(inv => {
-				const curr = inv.currency || this.pos_profile.currency;
-				if (!summary[curr]) {
-					summary[curr] = {
-						amount: 0,
-						symbol: this.currencySymbol(curr)
-					};
-				}
-				summary[curr].amount += flt(inv.outstanding_amount || 0);
-			});
-			return summary;
+		const summary = {};
+		this.outstanding_invoices.forEach(inv => {
+			const partyCurr = inv.party_account_currency || inv.currency || this.pos_profile.currency;
+			const invoiceCurr = inv.currency || this.pos_profile.currency;
+			const key = `${partyCurr}-${invoiceCurr}`;
+			
+			if (!summary[key]) {
+			summary[key] = {
+				amount: 0,
+				symbol: this.currencySymbol(partyCurr),
+				party_currency: partyCurr,
+				invoice_currency: invoiceCurr
+			};
+			}
+			summary[key].amount += flt(inv.outstanding_amount || 0);
+		});
+		return summary;
 		},
 		
 		// Filtered invoices based on selected currency
