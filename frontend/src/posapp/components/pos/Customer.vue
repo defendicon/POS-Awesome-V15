@@ -323,6 +323,27 @@ export default {
 			eventBus?.emit("open_update_customer", customerInfo.value || {});
 		};
 
+		const selectFirstCustomer = () => {
+			const list =
+				filteredCustomers.value && filteredCustomers.value.length
+					? filteredCustomers.value
+					: customers.value;
+
+			if (!list || !list.length) {
+				return;
+			}
+
+			const first = list[0];
+			tempSelectedCustomer.value = first.name;
+			internalCustomer.value = first.name;
+			customersStore.setSelectedCustomer(first.name);
+			closeCustomerMenu();
+		};
+
+		const openNewCustomer = () => {
+			new_customer();
+		};
+
 		const focusCustomerSearch = async () => {
 			const dropdown = customerDropdown.value;
 			if (!dropdown) {
@@ -350,7 +371,7 @@ export default {
 			}
 		};
 
-		expose({ focusCustomerSearch });
+		expose({ focusCustomerSearch, selectFirstCustomer, openNewCustomer });
 
 		const busHandlers = [];
 
@@ -414,6 +435,8 @@ export default {
 			handleEnter,
 			new_customer,
 			edit_customer,
+			selectFirstCustomer,
+			openNewCustomer,
 			focusCustomerSearch,
 		};
 	},

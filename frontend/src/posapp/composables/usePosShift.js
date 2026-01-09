@@ -91,6 +91,13 @@ export function usePosShift(openDialog) {
 	}
 
 	function get_closing_data() {
+		const cachedOpeningShift = getOpeningStorage()?.pos_opening_shift;
+		if (!pos_opening_shift.value && cachedOpeningShift) {
+			pos_opening_shift.value = cachedOpeningShift;
+		}
+		if (!pos_opening_shift.value) {
+			return Promise.resolve();
+		}
 		return frappe
 			.call(
 				"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.make_closing_shift_from_opening",

@@ -34,7 +34,7 @@ from posawesome.posawesome.api.utilities import (
     set_batch_nos_for_bundels,
 )  # Updated imports
 
-from .items import get_stock_availability
+from .items import get_bulk_stock_availability, get_stock_availability
 
 
 def _get_return_validity_settings(pos_profile: str | None = None):
@@ -49,10 +49,15 @@ def _get_return_validity_settings(pos_profile: str | None = None):
     default_days = 0
 
     if pos_profile:
-        profile = frappe.get_cached_doc("POS Profile", pos_profile)
-        enable_validity = cint(getattr(profile, "posa_enable_return_validity", 0))
-        if enable_validity:
-            default_days = cint(getattr(profile, "posa_return_validity_days", 0))
+        profile = None
+        try:
+            profile = frappe.get_cached_doc("POS Profile", pos_profile)
+        except frappe.DoesNotExistError:
+            profile = None
+        if profile:
+            enable_validity = cint(getattr(profile, "posa_enable_return_validity", 0))
+            if enable_validity:
+                default_days = cint(getattr(profile, "posa_return_validity_days", 0))
 
     if not enable_validity:
         settings = frappe.get_cached_doc("POS Settings")
@@ -85,9 +90,7 @@ def _validate_return_window(invoice_doc, doctype, enabled):
     validity_date = original_invoice.get("posa_return_valid_upto")
     return_date = getdate(invoice_doc.get("posting_date") or nowdate())
     if validity_date and return_date > getdate(validity_date):
-        frappe.throw(
-            _("Returns are only allowed until {0}").format(formatdate(validity_date))
-        )
+        frappe.throw(_("Returns are only allowed until {0}").format(formatdate(validity_date)))
 
 
 def _sanitize_item_name(name: str) -> str:
@@ -161,11 +164,16 @@ def _is_stock_item(item):
     return bool(cint(frappe.get_cached_value("Item", item_code, "is_stock_item") or 0))
 
 
-def _allow_negative_stock(item):
+def _allow_negative_stock(item, global_allow_negative=None):
     """Return True if negative stock is allowed globally or for the item."""
 
     # Global setting overrides everything
-    if cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0):
+    if global_allow_negative is None:
+        global_allow_negative = cint(
+            frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0
+        )
+
+    if global_allow_negative:
         return True
 
     flag = item.get("allow_negative_stock")
@@ -178,20 +186,36 @@ def _allow_negative_stock(item):
 def _collect_stock_errors(items):
     """Return list of items exceeding available stock."""
     errors = []
+    items_to_check = []
+
+    global_allow_negative = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)
+
     for d in items:
         if flt(d.get("qty")) < 0:
             continue
         if not _is_stock_item(d):
             continue
-        if _allow_negative_stock(d):
+        if _allow_negative_stock(d, global_allow_negative=global_allow_negative):
             continue
-        available = _get_available_stock(d)
+        items_to_check.append(d)
+
+    if not items_to_check:
+        return []
+
+    stock_map = get_bulk_stock_availability(items_to_check)
+
+    for d in items_to_check:
+        item_code = d.get("item_code")
+        warehouse = d.get("warehouse")
+        batch_no = cstr(d.get("batch_no"))
+
+        available = stock_map.get((item_code, warehouse, batch_no), 0.0)
         requested = flt(d.get("stock_qty") or (flt(d.get("qty")) * flt(d.get("conversion_factor") or 1)))
         if requested > available:
             errors.append(
                 {
-                    "item_code": d.get("item_code"),
-                    "warehouse": d.get("warehouse"),
+                    "item_code": item_code,
+                    "warehouse": warehouse,
                     "requested_qty": requested,
                     "available_qty": available,
                 }
@@ -915,13 +939,18 @@ def submit_invoice(invoice, data, submit_in_background=False):
     if data.get("redeemed_customer_credit"):
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Advance" and row["credit_to_redeem"]:
-                advance = frappe.get_doc("Payment Entry", row["credit_origin"])
+                advance = frappe.db.get_value(
+                    "Payment Entry",
+                    row["credit_origin"],
+                    ["name", "remarks", "unallocated_amount"],
+                    as_dict=True,
+                )
 
                 advance_payment = {
                     "reference_type": "Payment Entry",
-                    "reference_name": advance.name,
-                    "remarks": advance.remarks,
-                    "advance_amount": advance.unallocated_amount,
+                    "reference_name": advance.get("name"),
+                    "remarks": advance.get("remarks"),
+                    "advance_amount": advance.get("unallocated_amount"),
                     "allocated_amount": row["credit_to_redeem"],
                 }
 
@@ -967,8 +996,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
     if submit_in_background and allow_background_submit:
         enqueue(
             method=submit_in_background_job,
-            queue="short",
-            timeout=1000,
+            queue="default",
+            timeout=3000,
             is_async=True,
             kwargs={
                 "invoice": invoice_doc.name,
@@ -982,6 +1011,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
         )
     else:
         invoice_doc.submit()
+
         _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
 
@@ -990,45 +1020,59 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
 def submit_in_background_job(kwargs):
     invoice = kwargs.get("invoice")
-    doctype = kwargs.get("doctype") or "Sales Invoice"
-    data = kwargs.get("data") or {}
-    is_payment_entry = kwargs.get("is_payment_entry")
-    total_cash = kwargs.get("total_cash")
-    cash_account = kwargs.get("cash_account")
-    payments = kwargs.get("payments") or []
+    try:
+        doctype = kwargs.get("doctype") or "Sales Invoice"
+        data = kwargs.get("data") or {}
+        is_payment_entry = kwargs.get("is_payment_entry")
+        total_cash = kwargs.get("total_cash")
+        cash_account = kwargs.get("cash_account")
+        payments = kwargs.get("payments") or []
 
-    invoice_doc = frappe.get_doc(doctype, invoice)
+        invoice_doc = frappe.get_doc(doctype, invoice)
 
-    if invoice_doc.docstatus == 1:
-        return
+        if invoice_doc.docstatus == 1:
+            return
 
-    invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
+        invoice_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
 
-    # Re-run validations that may be impacted while queued (stock, credit limits)
-    _validate_stock_on_invoice(invoice_doc)
-    if hasattr(invoice_doc, "validate_credit_limit"):
-        invoice_doc.validate_credit_limit()
+        # Re-run validations that may be impacted while queued (stock, credit limits)
+        _validate_stock_on_invoice(invoice_doc)
+        if hasattr(invoice_doc, "validate_credit_limit"):
+            invoice_doc.validate_credit_limit()
 
-    invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
+        invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
-    if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
-        invoice_doc.loyalty_program = frappe.db.get_value("Customer", invoice_doc.customer, "loyalty_program")
-
-    if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
-        if not invoice_doc.loyalty_redemption_account:
-            invoice_doc.loyalty_redemption_account = frappe.db.get_value(
-                "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
+        if invoice_doc.redeem_loyalty_points and not invoice_doc.loyalty_program:
+            invoice_doc.loyalty_program = frappe.db.get_value(
+                "Customer", invoice_doc.customer, "loyalty_program"
             )
 
-        if not invoice_doc.loyalty_redemption_cost_center:
-            invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
+        if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_program:
+            if not invoice_doc.loyalty_redemption_account:
+                invoice_doc.loyalty_redemption_account = frappe.db.get_value(
+                    "Loyalty Program", invoice_doc.loyalty_program, "expense_account"
+                )
 
-    invoice_doc.save()
+            if not invoice_doc.loyalty_redemption_cost_center:
+                invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
 
-    invoice_doc.submit()
-    _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
-    redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+        invoice_doc.save()
+
+        invoice_doc.submit()
+
+        _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
+        redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
+
+    except Exception as e:
+        frappe.db.rollback()
+        error_msg = str(e)
+        frappe.log_error(f"POS Background Submission Failed for {invoice}: {error_msg}")
+        frappe.publish_realtime(
+            "pos_invoice_submit_error",
+            {"invoice": invoice, "error": error_msg},
+            user=frappe.session.user,
+        )
 
 
 @frappe.whitelist()
@@ -1205,65 +1249,108 @@ def search_invoices_for_return(
     invoices_list = frappe.get_list(
         doctype,
         filters=filters,
-        fields=["name"],
+        fields=["*"],
         limit_start=start,
         limit_page_length=page_length,
         order_by="posting_date desc, name desc",
     )
 
-    # Process and return the results
-    data = []
+    if not invoices_list:
+        return {"invoices": [], "has_more": False}
 
-    # Process invoices and check for returns
-    for invoice in invoices_list:
-        invoice_doc = frappe.get_doc(doctype, invoice.name)
+    invoice_names = [d.name for d in invoices_list]
 
-        validity_date = invoice_doc.get("posa_return_valid_upto")
-        expired = False
+    # Pre-fetch child tables
+    meta = frappe.get_meta(doctype)
+    item_doctype = meta.get_field("items").options
+    payment_doctype = meta.get_field("payments").options
 
-        if enforce_return_validity and validity_date:
-            expired = getdate(nowdate()) > getdate(validity_date)
+    # Items
+    all_items = frappe.get_all(
+        item_doctype,
+        filters={"parent": ["in", invoice_names]},
+        fields=["*"],
+        order_by="idx",
+    )
+    items_map = {}
+    for item in all_items:
+        items_map.setdefault(item.parent, []).append(item)
 
-        invoice_doc.posa_return_expired = cint(expired)
+    # Payments
+    all_payments = frappe.get_all(
+        payment_doctype,
+        filters={"parent": ["in", invoice_names]},
+        fields=["*"],
+        order_by="idx",
+    )
+    payments_map = {}
+    for payment in all_payments:
+        payments_map.setdefault(payment.parent, []).append(payment)
 
-        # Check if any items have already been returned
-        has_returns = frappe.get_all(
-            doctype,
-            filters={"return_against": invoice.name, "docstatus": 1},
-            fields=["name"],
+    # Returns check
+    all_returns = frappe.get_all(
+        doctype,
+        filters={"return_against": ["in", invoice_names], "docstatus": 1, "is_return": 1},
+        fields=["name", "return_against"],
+    )
+
+    returned_qty_map = {}
+    if all_returns:
+        return_names = [r.name for r in all_returns]
+        return_items = frappe.get_all(
+            item_doctype,
+            filters={"parent": ["in", return_names]},
+            fields=["item_code", "qty", "parent"],
         )
 
-        if has_returns:
-            # Calculate returned quantity per item_code
-            returned_qty = {}
-            for ret_inv in has_returns:
-                ret_doc = frappe.get_doc(doctype, ret_inv.name)
-                for item in ret_doc.items:
-                    returned_qty[item.item_code] = returned_qty.get(item.item_code, 0) + abs(item.qty)
+        # Map return ID -> Original Invoice ID
+        return_to_orig = {r.name: r.return_against for r in all_returns}
 
-            # Filter items with remaining qty
-            filtered_items = []
-            for item in invoice_doc.items:
-                remaining_qty = item.qty - returned_qty.get(item.item_code, 0)
-                if remaining_qty > 0:
-                    new_item = item.as_dict().copy()
-                    new_item["qty"] = remaining_qty
-                    new_item["amount"] = remaining_qty * item.rate
-                    if item.get("stock_qty"):
-                        new_item["stock_qty"] = (
-                            item.stock_qty / item.qty * remaining_qty if item.qty else remaining_qty
-                        )
-                    filtered_items.append(frappe._dict(new_item))
+        for r_item in return_items:
+            orig_inv = return_to_orig.get(r_item.parent)
+            if orig_inv:
+                key = (orig_inv, r_item.item_code)
+                returned_qty_map[key] = returned_qty_map.get(key, 0) + abs(flt(r_item.qty))
 
+    data = []
+    for invoice in invoices_list:
+        # Attach children
+        invoice["items"] = items_map.get(invoice.name, [])
+        invoice["payments"] = payments_map.get(invoice.name, [])
+
+        # Validation checks logic
+        validity_date = invoice.get("posa_return_valid_upto")
+        expired = False
+        if enforce_return_validity and validity_date:
+            expired = getdate(nowdate()) > getdate(validity_date)
+        invoice["posa_return_expired"] = cint(expired)
+
+        filtered_items = []
+        has_any_return = False
+
+        for item in invoice["items"]:
+            # returned_qty_map key is (invoice.name, item.item_code)
+            ret_qty = returned_qty_map.get((invoice.name, item.item_code), 0)
+            if ret_qty > 0:
+                has_any_return = True
+
+            remaining_qty = item.qty - ret_qty
+            if remaining_qty > 0:
+                new_item = item.copy()
+                new_item["qty"] = remaining_qty
+                new_item["amount"] = remaining_qty * item.rate
+                if item.get("stock_qty"):
+                    new_item["stock_qty"] = (
+                        (item.stock_qty / item.qty * remaining_qty) if item.qty else remaining_qty
+                    )
+                filtered_items.append(new_item)
+
+        if has_any_return:
             if filtered_items:
-                # Create a copy of invoice with filtered items
-                filtered_invoice = frappe.get_doc(doctype, invoice.name)
-                filtered_invoice.items = filtered_items
-                filtered_invoice.posa_return_expired = cint(expired)
-                filtered_invoice.posa_return_valid_upto = validity_date
-                data.append(filtered_invoice)
+                invoice["items"] = filtered_items
+                data.append(invoice)
         else:
-            data.append(invoice_doc)
+            data.append(invoice)
 
     # Check if there are more results
     has_more = (start + page_length) < total_count
@@ -1349,7 +1436,7 @@ def get_last_invoice_rates(customer, item_codes=None, company=None, limit_per_it
             si.creation
         from `tabSales Invoice Item` sii
         inner join `tabSales Invoice` si on sii.parent = si.name
-        where {' and '.join(filters)}
+        where {" and ".join(filters)}
     """
 
     pos_invoice_query = f"""
@@ -1364,7 +1451,7 @@ def get_last_invoice_rates(customer, item_codes=None, company=None, limit_per_it
             pi.creation
         from `tabPOS Invoice Item` pii
         inner join `tabPOS Invoice` pi on pii.parent = pi.name
-        where {' and '.join(pos_filters)}
+        where {" and ".join(pos_filters)}
     """
 
     query = (

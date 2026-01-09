@@ -2,6 +2,7 @@
 	<v-row align="center" class="items px-3 py-2 mt-0" v-if="pos_profile.posa_allow_change_posting_date">
 		<v-col cols="12" sm="4" class="pb-2">
 			<VueDatePicker
+				ref="postingDatePicker"
 				v-model="internal_posting_date_display"
 				model-type="format"
 				format="dd-MM-yyyy"
@@ -78,6 +79,13 @@ export default {
 		},
 		onPriceListUpdate(val) {
 			this.$emit("update:priceList", val);
+		},
+		focusPostingDate() {
+			const input = this.$refs.postingDatePicker?.$el?.querySelector("input");
+			if (input) {
+				input.focus();
+				input.select?.();
+			}
 		},
 	},
 };

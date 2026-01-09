@@ -84,6 +84,11 @@
 												? __('Acknowledge the error to resume scanning')
 												: __('Scan with Camera')
 										"
+										:aria-label="
+											scannerLocked
+												? __('Acknowledge the error to resume scanning')
+												: __('Scan with Camera')
+										"
 									>
 									</v-btn>
 								</template>
@@ -126,6 +131,13 @@
 									{{ __("Settings") }}
 								</v-btn>
 								<v-spacer></v-spacer>
+								<span
+									v-if="enable_background_sync"
+									class="text-caption text-medium-emphasis last-sync-label"
+								>
+									{{ __("Last sync:") }} {{ formatBackgroundSyncTime() }}
+								</span>
+								<v-spacer></v-spacer>
 								<v-btn
 									density="compact"
 									variant="text"
@@ -147,6 +159,7 @@
 												variant="text"
 												density="compact"
 												@click="show_item_settings = false"
+												:aria-label="__('Close Settings')"
 											>
 											</v-btn>
 										</v-card-title>
@@ -175,6 +188,26 @@
 												color="primary"
 												class="mb-2"
 											></v-switch>
+											<v-switch
+												v-model="temp_enable_background_sync"
+												:label="__('Enable background sync')"
+												hide-details
+												density="compact"
+												color="primary"
+												class="mb-2"
+											></v-switch>
+											<v-text-field
+												v-model="temp_background_sync_interval"
+												:label="__('Background sync interval (seconds)')"
+												type="number"
+												density="compact"
+												variant="outlined"
+												color="primary"
+												hide-details
+												class="mb-2 pos-themed-input"
+												:min="10"
+												:disabled="!temp_enable_background_sync"
+											></v-text-field>
 											<v-switch
 												v-model="temp_enable_custom_items_per_page"
 												:label="__('Custom items per page')"
@@ -228,6 +261,30 @@
 							<div v-if="loading" class="items-card-grid">
 								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
 							</div>
+							<div
+								v-else-if="displayedItems.length === 0"
+								class="d-flex flex-column align-center justify-center text-center fill-height pa-4"
+								style="height: 100%; min-height: 200px"
+							>
+								<v-icon size="64" color="grey-lighten-1" class="mb-4"
+									>mdi-package-variant-closed</v-icon
+								>
+								<div class="text-h6 text-medium-emphasis mb-1">
+									{{ __("No items found") }}
+								</div>
+								<div class="text-body-2 text-medium-emphasis">
+									{{ __("Try adjusting your search or filters") }}
+								</div>
+								<v-btn
+									v-if="search_input || (item_group && item_group !== 'ALL')"
+									variant="text"
+									color="primary"
+									class="mt-4"
+									@click="clearSearch"
+								>
+									{{ __("Clear Search") }}
+								</v-btn>
+							</div>
 							<RecycleScroller
 								v-else
 								ref="itemsContainer"
@@ -246,7 +303,10 @@
 									<div
 										v-if="item"
 										:key="item.item_code"
-										class="card-item-card"
+										:class="[
+											'card-item-card',
+											{ 'item-highlighted': isItemHighlighted(item) },
+										]"
 										:style="{
 											width: cardColumnWidth + 'px',
 											height: cardRowHeight + 'px',
@@ -386,6 +446,7 @@
 						</div>
 						<div v-else class="items-table-container">
 							<v-data-table-virtual
+								ref="itemsTable"
 								:headers="headers"
 								:items="displayedItems"
 								class="sleek-data-table overflow-y-auto"
@@ -396,6 +457,8 @@
 								:header-props="headerProps"
 								:no-data-text="__('No items found')"
 								@click:row="click_item_row"
+								:item-class="getItemRowClass"
+								:row-props="getItemRowProps"
 								@scroll.passive="onListScroll"
 							>
 								<template v-slot:item.rate="{ item }">
@@ -652,7 +715,10 @@ export default {
 		appliedCouponsCount: 0,
 		new_line: false,
 		qty: 1,
-		refresh_interval: null,
+		background_sync_timer: null,
+		background_sync_in_flight: false,
+		last_background_sync_time: null,
+		background_sync_details_in_flight: false,
 		abortController: null,
 		itemDetailsRequestCache: { key: null, promise: null, result: null },
 		itemDetailsRetryCount: 0,
@@ -675,6 +741,10 @@ export default {
 		temp_hide_zero_rate_items: false,
 		show_last_invoice_rate: true,
 		temp_show_last_invoice_rate: true,
+		enable_background_sync: true,
+		temp_enable_background_sync: true,
+		background_sync_interval: 30,
+		temp_background_sync_interval: 30,
 		isDragging: false,
 		// Items per page configuration
 		enable_custom_items_per_page: false,
@@ -729,9 +799,13 @@ export default {
 		keyboardScanLastTime: 0,
 		keyboardScanStartTime: 0,
 		keyboardScanPendingValue: "",
-		keyboardScanMinLength: 6,
-		keyboardScanMaxInterval: 65,
+		keyboardScanMinLength: 12,
+		// Require scanner-like speed to avoid triggering on manual typing
+		keyboardScanMaxInterval: 45,
+		keyboardScanMaxDuration: 250,
 		keyboardScanProcessingDelay: 100,
+		highlightedIndex: -1,
+		highlightedItemCode: null,
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
 		lastInvoiceRateLoading: false,
@@ -740,6 +814,7 @@ export default {
 	watch: {
 		search_input(newValue) {
 			this.first_search = newValue;
+			this.clearHighlightedItem();
 			this.search_onchange();
 		},
 		customer: _.debounce(function () {
@@ -887,6 +962,7 @@ export default {
 				this.scheduleCardMetricsUpdate();
 			});
 			this.scheduleLastInvoiceRateRefresh();
+			this.syncHighlightedItem();
 		},
 		// Automatically search when the query has at least 3 characters
 		first_search: _.debounce(function (val, oldVal) {
@@ -976,6 +1052,29 @@ export default {
 			};
 			this.scaleBarcodeSettingsLoaded = true;
 			return this.scaleBarcodeSettings;
+		},
+		startItemWorker() {
+			// Avoid spawning duplicate workers which doubles script downloads and background threads
+			if (this.itemWorker || typeof Worker === "undefined") {
+				return;
+			}
+
+			try {
+				// Use the plain URL so the service worker can match the cached file
+				// even when offline. Using a query string causes cache lookups to fail
+				// which results in "Failed to fetch a worker script" errors.
+				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
+				this.itemWorker = new Worker(workerUrl, { type: "classic" });
+				this.itemWorker.onerror = function (event) {
+					console.error("Worker error:", event);
+					console.error("Message:", event.message);
+					console.error("Filename:", event.filename);
+					console.error("Line number:", event.lineno);
+				};
+			} catch (e) {
+				console.error("Failed to start item worker", e);
+				this.itemWorker = null;
+			}
 		},
 		async ensureScaleBarcodeSettings(force = false) {
 			if (!force && this.scaleBarcodeSettingsLoaded) {
@@ -1071,6 +1170,7 @@ export default {
 			// Filter by search term only if it exists and is long enough
 			if (searchTerm && searchTerm.trim() && searchTerm.trim().length >= 3) {
 				const term = searchTerm.toLowerCase();
+				const searchWords = term.split(/\s+/).filter(Boolean);
 				filtered = filtered.filter((item) => {
 					if (!searchWords.length) {
 						return true;
@@ -1240,25 +1340,8 @@ export default {
 				} else {
 					this.localStorageAvailable = true;
 				}
-				if (
-					this.pos_profile &&
-					this.pos_profile.posa_local_storage &&
-					typeof Worker !== "undefined" &&
-					!this.itemWorker
-				) {
-					try {
-						const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-						this.itemWorker = new Worker(workerUrl, { type: "classic" });
-						this.itemWorker.onerror = function (event) {
-							console.error("Worker error:", event);
-							console.error("Message:", event.message);
-							console.error("Filename:", event.filename);
-							console.error("Line number:", event.lineno);
-						};
-					} catch (e) {
-						console.error("Failed to start item worker", e);
-						this.itemWorker = null;
-					}
+				if (this.pos_profile && this.pos_profile.posa_local_storage) {
+					this.startItemWorker();
 				}
 			} else {
 				this.markStorageUnavailable();
@@ -1965,6 +2048,12 @@ export default {
 			}
 			this.add_item(item);
 		},
+		selectTopItem() {
+			if (!this.displayedItems || !this.displayedItems.length) {
+				return;
+			}
+			this.add_item(this.displayedItems[0]);
+		},
 		async click_item_row(event, { item }) {
 			const targets = document.querySelectorAll(".items-table-container");
 			const target = targets[targets.length - 1];
@@ -1993,8 +2082,10 @@ export default {
 				return;
 			}
 
-			// Ensure details are initialized before validation
-			await this.update_items_details([item]);
+			// PERF: Skip blocking update_items_details call.
+			// The background sync mechanism (flushBackgroundUpdates) in invoiceItemMethods.js
+			// will handle fetching fresh details asynchronously after the item is added.
+			// await this.update_items_details([item]);
 
 			// Validate item before adding to cart
 			const requestedQty = this.qty != null ? Math.abs(this.qty) : 1;
@@ -2006,6 +2097,7 @@ export default {
 				this.eventBus,
 				this.blockSaleBeyondAvailableQty,
 				!suppressNegativeWarning,
+				true, // Skip server-side validation for instant add
 			);
 
 			if (!isValid) {
@@ -2173,7 +2265,14 @@ export default {
 				}
 			}
 		},
-		onEnter() {
+		onEnter(event) {
+			if (this.highlightedIndex >= 0) {
+				if (event && typeof event.preventDefault === "function") {
+					event.preventDefault();
+				}
+				this.selectHighlightedItem();
+				return;
+			}
 			if (this.search_onchange.cancel) {
 				this.search_onchange.cancel();
 			}
@@ -2194,8 +2293,8 @@ export default {
 			// Keep first_search in sync with the value we are about to search for
 			vm.first_search = trimmedQuery;
 
-			// If the input is a numeric string longer than 6 characters, treat it as a barcode
-			if (/^\d{7,}$/.test(trimmedQuery)) {
+			// If the input is a numeric string 12 characters or longer, treat it as a barcode
+			if (/^\d{12,}$/.test(trimmedQuery)) {
 				vm.onBarcodeScanned(trimmedQuery);
 				return;
 			}
@@ -3321,6 +3420,12 @@ export default {
 
 			const key = event.key || "";
 
+			if (key === "ArrowDown" || key === "ArrowUp") {
+				event.preventDefault();
+				this.navigateHighlightedItem(key === "ArrowDown" ? 1 : -1);
+				return;
+			}
+
 			if (key === "Enter" || key === "Escape") {
 				return;
 			}
@@ -3404,6 +3509,14 @@ export default {
 				return true;
 			}
 
+			if (
+				this.keyboardScanMaxDuration &&
+				typeof this.keyboardScanMaxDuration === "number" &&
+				duration > this.keyboardScanMaxDuration
+			) {
+				return false;
+			}
+
 			const averageInterval = duration / code.length;
 			return averageInterval <= this.keyboardScanMaxInterval;
 		},
@@ -3416,6 +3529,149 @@ export default {
 			this.keyboardScanLastTime = 0;
 			this.keyboardScanStartTime = 0;
 			this.keyboardScanPendingValue = "";
+		},
+		clearHighlightedItem() {
+			this.highlightedIndex = -1;
+			this.highlightedItemCode = null;
+		},
+		syncHighlightedItem() {
+			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
+				this.clearHighlightedItem();
+				return;
+			}
+
+			if (this.highlightedItemCode) {
+				const index = this.displayedItems.findIndex(
+					(item) => item && item.item_code === this.highlightedItemCode,
+				);
+				if (index >= 0) {
+					this.highlightedIndex = index;
+					return;
+				}
+			}
+
+			this.clearHighlightedItem();
+		},
+		navigateHighlightedItem(direction) {
+			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
+				this.clearHighlightedItem();
+				return;
+			}
+
+			let nextIndex = this.highlightedIndex;
+			if (nextIndex < 0) {
+				nextIndex = direction > 0 ? 0 : this.displayedItems.length - 1;
+			} else {
+				nextIndex += direction;
+			}
+
+			if (nextIndex < 0) {
+				nextIndex = 0;
+			}
+
+			if (nextIndex >= this.displayedItems.length) {
+				nextIndex = this.displayedItems.length - 1;
+			}
+
+			const nextItem = this.displayedItems[nextIndex];
+			if (!nextItem) {
+				this.clearHighlightedItem();
+				return;
+			}
+
+			this.highlightedIndex = nextIndex;
+			this.highlightedItemCode = nextItem.item_code || null;
+			this.scrollHighlightedItemIntoView(nextIndex);
+		},
+		scrollHighlightedItemIntoView(index) {
+			this.$nextTick(() => {
+				if (this.items_view === "card") {
+					this.$refs.itemsContainer?.scrollToItem?.(index);
+					return;
+				}
+
+				const tableRef = this.$refs.itemsTable;
+				const scrollToIndex = tableRef?.scrollToIndex || tableRef?.$?.exposed?.scrollToIndex || null;
+				if (scrollToIndex) {
+					const scheduleScroll =
+						typeof requestAnimationFrame === "function"
+							? requestAnimationFrame
+							: (callback) => setTimeout(callback, 0);
+					scheduleScroll(() => {
+						scrollToIndex(index);
+					});
+					return;
+				}
+
+				const tableEl = tableRef?.$el || tableRef;
+				const wrapper = tableEl?.querySelector?.(".v-table__wrapper");
+				const rows = tableEl?.querySelectorAll?.("tbody tr");
+				if (wrapper && rows && rows.length > 0) {
+					const targetRow = rows[index];
+					if (targetRow && typeof targetRow.offsetTop === "number") {
+						wrapper.scrollTop = Math.max(0, targetRow.offsetTop - wrapper.clientHeight / 2);
+						return;
+					}
+
+					const rowHeight = rows[0].getBoundingClientRect().height || 0;
+					if (rowHeight > 0) {
+						wrapper.scrollTop = rowHeight * index;
+						return;
+					}
+				}
+
+				if (rows && rows[index]) {
+					rows[index].scrollIntoView({ block: "nearest" });
+				}
+			});
+		},
+		isItemHighlighted(item) {
+			const resolvedItem = this.resolveHighlightedItem(item);
+			if (!resolvedItem || !this.highlightedItemCode) {
+				return false;
+			}
+			return resolvedItem.item_code === this.highlightedItemCode;
+		},
+		getItemRowClass(item) {
+			return this.isItemHighlighted(item) ? "item-row-highlighted" : "";
+		},
+		getItemRowProps(item) {
+			return this.isItemHighlighted(item) ? { class: "item-row-highlighted" } : {};
+		},
+		resolveHighlightedItem(item) {
+			if (!item || typeof item !== "object") {
+				return item;
+			}
+
+			if (item.raw) {
+				return item.raw;
+			}
+
+			if (item.item) {
+				return item.item.raw || item.item;
+			}
+
+			return item;
+		},
+		async selectHighlightedItem() {
+			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
+				return;
+			}
+
+			const index = this.highlightedIndex;
+			if (index < 0 || index >= this.displayedItems.length) {
+				return;
+			}
+
+			const item = this.displayedItems[index];
+			if (!item) {
+				return;
+			}
+
+			await this.add_item(item);
+			this.clearHighlightedItem();
+			this.clearSearch();
+			this.focusItemSearch();
 		},
 		async processScannedItem(scannedCode) {
 			const mark = perfMarkStart("pos:scan-process");
@@ -3973,6 +4229,8 @@ export default {
 			this.temp_items_per_page = this.items_per_page;
 			this.temp_force_server_items = !!(this.pos_profile && this.pos_profile.posa_force_server_items);
 			this.temp_show_last_invoice_rate = this.show_last_invoice_rate;
+			this.temp_enable_background_sync = this.enable_background_sync;
+			this.temp_background_sync_interval = this.background_sync_interval;
 			this.show_item_settings = true;
 		},
 		cancelItemSettings() {
@@ -3982,6 +4240,11 @@ export default {
 			this.hide_qty_decimals = this.temp_hide_qty_decimals;
 			this.hide_zero_rate_items = this.temp_hide_zero_rate_items;
 			this.show_last_invoice_rate = this.temp_show_last_invoice_rate;
+			this.enable_background_sync = this.temp_enable_background_sync;
+			this.background_sync_interval = this.normalizeBackgroundSyncInterval(
+				this.temp_background_sync_interval,
+			);
+			this.temp_background_sync_interval = this.background_sync_interval;
 			this.enable_custom_items_per_page = this.temp_enable_custom_items_per_page;
 			if (this.enable_custom_items_per_page) {
 				this.items_per_page = parseInt(this.temp_items_per_page) || 50;
@@ -3997,6 +4260,7 @@ export default {
 				this.scheduleLastInvoiceRateRefresh();
 			}
 			this.saveItemSettings();
+			this.startBackgroundSyncScheduler();
 			this.show_item_settings = false;
 		},
 		onDragStart(event, item) {
@@ -4030,6 +4294,8 @@ export default {
 					hide_qty_decimals: this.hide_qty_decimals,
 					hide_zero_rate_items: this.hide_zero_rate_items,
 					show_last_invoice_rate: this.show_last_invoice_rate,
+					enable_background_sync: this.enable_background_sync,
+					background_sync_interval: this.background_sync_interval,
 					enable_custom_items_per_page: this.enable_custom_items_per_page,
 					items_per_page: this.items_per_page,
 				};
@@ -4061,6 +4327,14 @@ export default {
 					if (typeof opts.show_last_invoice_rate === "boolean") {
 						this.show_last_invoice_rate = opts.show_last_invoice_rate;
 					}
+					if (typeof opts.enable_background_sync === "boolean") {
+						this.enable_background_sync = opts.enable_background_sync;
+					}
+					if (typeof opts.background_sync_interval === "number") {
+						this.background_sync_interval = this.normalizeBackgroundSyncInterval(
+							opts.background_sync_interval,
+						);
+					}
 					if (typeof opts.enable_custom_items_per_page === "boolean") {
 						this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
 					}
@@ -4071,6 +4345,129 @@ export default {
 				}
 			} catch (e) {
 				console.error("Failed to load item selector settings:", e);
+			}
+		},
+		formatBackgroundSyncTime() {
+			const lastSync = this.last_background_sync_time;
+			if (!lastSync) {
+				return __("Never");
+			}
+			const parsed = new Date(lastSync);
+			if (Number.isNaN(parsed.getTime())) {
+				return __("Never");
+			}
+			return parsed.toLocaleTimeString();
+		},
+		async refreshAllItemDetailsInBatches(batchSize = 100) {
+			if (this.background_sync_details_in_flight) {
+				return;
+			}
+			if (!Array.isArray(this.items) || this.items.length === 0) {
+				return;
+			}
+
+			this.background_sync_details_in_flight = true;
+			try {
+				for (let start = 0; start < this.items.length; start += batchSize) {
+					const chunk = this.items.slice(start, start + batchSize);
+					if (chunk.length === 0) {
+						break;
+					}
+					await this.update_items_details(chunk, { forceRefresh: true });
+					await scheduleFrame();
+				}
+			} catch (error) {
+				console.error("Failed to refresh all item details in background", error);
+			} finally {
+				this.background_sync_details_in_flight = false;
+			}
+		},
+		normalizeBackgroundSyncInterval(value) {
+			const parsed = parseInt(value, 10);
+			if (!Number.isFinite(parsed) || parsed <= 0) {
+				return 30;
+			}
+			return Math.max(10, parsed);
+		},
+		startBackgroundSyncScheduler() {
+			this.stopBackgroundSyncScheduler();
+			if (!this.enable_background_sync) {
+				return;
+			}
+
+			const intervalMs = this.normalizeBackgroundSyncInterval(this.background_sync_interval) * 1000;
+			this.background_sync_timer = setInterval(() => {
+				this.performBackgroundSync({ source: "interval" });
+			}, intervalMs);
+
+			this.performBackgroundSync({ source: "initial" });
+		},
+		stopBackgroundSyncScheduler() {
+			if (this.background_sync_timer) {
+				clearInterval(this.background_sync_timer);
+				this.background_sync_timer = null;
+			}
+		},
+		async ensureBackgroundSyncBaseline() {
+			const lastSync = getItemsLastSync();
+			if (lastSync) {
+				this.last_background_sync_time = lastSync;
+				return lastSync;
+			}
+
+			const serverTimestamp = await this.fetchServerItemsTimestamp();
+			if (serverTimestamp) {
+				setItemsLastSync(serverTimestamp);
+				this.last_background_sync_time = serverTimestamp;
+				return serverTimestamp;
+			}
+
+			return null;
+		},
+		shouldRunBackgroundSync() {
+			if (!this.enable_background_sync) {
+				return false;
+			}
+			if (this.background_sync_in_flight) {
+				return false;
+			}
+			if (isOffline()) {
+				return false;
+			}
+			if (this.usesLimitSearch) {
+				return false;
+			}
+			return true;
+		},
+		async performBackgroundSync({ source = "manual" } = {}) {
+			if (!this.shouldRunBackgroundSync()) {
+				return;
+			}
+
+			this.background_sync_in_flight = true;
+			try {
+				// PERF: use modified_after sync to avoid full catalog reloads.
+				// Benchmark note: keeps background sync payloads small even for large catalogs.
+				await this.ensureBackgroundSyncBaseline();
+				const { items: updatedItems } = await this.refreshModifiedItems();
+
+				if (updatedItems && updatedItems.length) {
+					await this.update_items_details(updatedItems, { forceRefresh: true });
+					this.eventBus.emit("set_all_items", this.items);
+				}
+
+				// Refresh cached quantities/prices for all items so non-visible items stay in sync.
+				await this.refreshAllItemDetailsInBatches(this.itemsPageLimit || 100);
+
+				if (this.displayedItems && this.displayedItems.length > 0) {
+					await this.update_items_details(this.displayedItems);
+				}
+
+				this.last_background_sync_time = new Date().toISOString();
+			} catch (error) {
+				console.error(`Background sync failed (${source})`, error);
+			} finally {
+				this.background_sync_in_flight = false;
 			}
 		},
 	},
@@ -4211,54 +4608,72 @@ export default {
 
 			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
 			const activeStoreSearch = (this.search || "").trim().toLowerCase();
-			let filteredItems = baseItems;
 
-			// Restore local filtering for immediate feedback (Auto Search)
-			// This provides instant results while the store debounces/fetches in the background.
-			// PERF: Skip local filtering if the store has already filtered by the same term
-			if (searchTerm && searchTerm.length >= 3 && searchTerm !== activeStoreSearch) {
-				const searchTerms = searchTerm.split(/\s+/).filter(Boolean);
-				filteredItems = filteredItems.filter((item) => {
+			// Check if we need to apply local search filtering
+			// This happens when the user types but the store hasn't updated yet (debounce)
+			const needsLocalSearch = searchTerm && searchTerm.length >= 3 && searchTerm !== activeStoreSearch;
+
+			// Check other filters
+			const hideZeroRate = this.hide_zero_rate_items;
+			const hideVariants = this.pos_profile?.posa_hide_variants_items;
+			const limit = this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage;
+
+			// PERF: If no filters needed, just slice and return to avoid O(N) filtering
+			if (!needsLocalSearch && !hideZeroRate && !hideVariants) {
+				return baseItems.slice(0, limit);
+			}
+
+			// Prepare search terms if needed
+			let searchTerms = null;
+			if (needsLocalSearch) {
+				searchTerms = searchTerm.split(/\s+/).filter(Boolean);
+			}
+
+			// PERF: Use a single loop to filter and paginate simultaneously.
+			// This avoids iterating the entire array when we only need the first 'limit' items.
+			const result = [];
+			for (let i = 0; i < baseItems.length; i++) {
+				const item = baseItems[i];
+
+				// 1. Search Filter
+				if (needsLocalSearch) {
+					let matches = false;
 					// Use optimized search index if available
 					if (item._search_index) {
-						return searchTerms.every((term) => item._search_index.includes(term));
+						matches = searchTerms.every((term) => item._search_index.includes(term));
+					} else {
+						// Fallback for items without index
+						const rawIndex = (
+							(item.item_code || "") +
+							" " +
+							(item.item_name || "") +
+							" " +
+							(item.barcode || "")
+						).toLowerCase();
+						matches = searchTerms.every((term) => rawIndex.includes(term));
 					}
-					// Fallback for items without index
-					const rawIndex = (
-						(item.item_code || "") +
-						" " +
-						(item.item_name || "") +
-						" " +
-						(item.barcode || "")
-					).toLowerCase();
-					return searchTerms.every((term) => rawIndex.includes(term));
-				});
-			}
-
-			// Redundant item_group filter removed as store handles it.
-
-			// Apply zero rate filter
-			if (this.hide_zero_rate_items) {
-				filteredItems = filteredItems.filter((item) => parseFloat(item.rate || 0) > 0);
-			}
-
-			// Apply template/variant filter
-			if (this.pos_profile?.posa_hide_variants_items) {
-				filteredItems = filteredItems.filter((item) => !item.variant_of);
-			}
-
-			// Apply pagination
-			const limit = this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage;
-			filteredItems = filteredItems.slice(0, limit);
-
-			// Ensure quantities are defined
-			filteredItems.forEach((item) => {
-				if (item.actual_qty === undefined || item.actual_qty === null) {
-					item.actual_qty = 0;
+					if (!matches) continue;
 				}
-			});
 
-			return filteredItems;
+				// 2. Zero Rate Filter
+				if (hideZeroRate) {
+					// Use loose inequality to catch '0', 0, 0.0 etc.
+					if (parseFloat(item.rate || 0) <= 0) continue;
+				}
+
+				// 3. Variant Filter
+				if (hideVariants) {
+					if (item.variant_of) continue;
+				}
+
+				result.push(item);
+
+				if (result.length >= limit) {
+					break;
+				}
+			}
+
+			return result;
 		},
 		debounce_search: {
 			get() {
@@ -4320,6 +4735,7 @@ export default {
 
 		// Load settings
 		this.loadItemSettings();
+		this.last_background_sync_time = getItemsLastSync();
 		await this.ensureScaleBarcodeSettings();
 
 		// Initialize after memory is ready
@@ -4396,6 +4812,12 @@ export default {
 		this.eventBus.on("focus_item_search", () => {
 			this.focusItemSearch();
 		});
+		this.eventBus.on("select_top_item", () => {
+			this.selectTopItem();
+		});
+		this.eventBus.on("toggle_item_selector_settings", () => {
+			this.toggleItemSettings();
+		});
 
 		// Manually trigger a full item reload when requested
 		this.eventBus.on("force_reload_items", async () => {
@@ -4420,58 +4842,15 @@ export default {
 			if (this.items && this.items.length > 0) {
 				await this.update_items_details(this.items);
 			}
+			await this.performBackgroundSync({ source: "server-online" });
 		});
 
-		if (typeof Worker !== "undefined") {
-			try {
-				// Use the plain URL so the service worker can match the cached file
-				// even when offline. Using a query string causes cache lookups to fail
-				// which results in "Failed to fetch a worker script" errors.
-				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-				this.itemWorker = new Worker(workerUrl, { type: "classic" });
-
-				this.itemWorker.onerror = function (event) {
-					console.error("Worker error:", event);
-					console.error("Message:", event.message);
-					console.error("Filename:", event.filename);
-					console.error("Line number:", event.lineno);
-				};
-				console.log("Created worker");
-			} catch (e) {
-				console.error("Failed to start item worker", e);
-				this.itemWorker = null;
-			}
-		}
-
-		if (typeof Worker !== "undefined") {
-			try {
-				// Use the plain URL so the service worker can match the cached file
-				// even when offline. Using a query string causes cache lookups to fail
-				// which results in "Failed to fetch a worker script" errors.
-				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-				this.itemWorker = new Worker(workerUrl, { type: "classic" });
-
-				this.itemWorker.onerror = function (event) {
-					console.error("Worker error:", event);
-					console.error("Message:", event.message);
-					console.error("Filename:", event.filename);
-					console.error("Line number:", event.lineno);
-				};
-				console.log("Created worker");
-			} catch (e) {
-				console.error("Failed to start item worker", e);
-				this.itemWorker = null;
-			}
-		}
+		this.startItemWorker();
 
 		// Setup auto-refresh for item quantities
 		// Trigger an immediate refresh once items are available
 		this.update_cur_items_details();
-		this.refresh_interval = setInterval(() => {
-			if (this.displayedItems && this.displayedItems.length > 0) {
-				this.update_cur_items_details();
-			}
-		}, 30000); // Refresh every 30 seconds after the initial fetch
+		this.startBackgroundSyncScheduler();
 
 		// Add new event listener for currency changes
 		this.eventBus.on("update_currency", (data) => {
@@ -4531,9 +4910,7 @@ export default {
 
 	beforeUnmount() {
 		// Clear interval when component is destroyed
-		if (this.refresh_interval) {
-			clearInterval(this.refresh_interval);
-		}
+		this.stopBackgroundSyncScheduler();
 
 		if (this.formatCache) {
 			this.formatCache.clear();
@@ -4593,6 +4970,8 @@ export default {
 		this.eventBus.off("update_customer_price_list");
 		this.eventBus.off("force_reload_items");
 		this.eventBus.off("focus_item_search");
+		this.eventBus.off("select_top_item");
+		this.eventBus.off("toggle_item_selector_settings");
 		window.removeEventListener("resize", this.checkItemContainerOverflow);
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
@@ -4740,6 +5119,10 @@ export default {
 
 .text-success {
 	color: #4caf50 !important;
+}
+
+.last-sync-label {
+	white-space: nowrap;
 }
 
 /* Enhanced Arabic number support for ItemsSelector */
@@ -4898,6 +5281,25 @@ export default {
 	transform: translate3d(0, -2px, 0);
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 	border-color: var(--primary-color, #1976d2);
+}
+
+.card-item-card.item-highlighted {
+	border-color: var(--primary-color, #1976d2);
+	box-shadow:
+		0 0 0 3px rgba(25, 118, 210, 0.35),
+		0 8px 20px rgba(25, 118, 210, 0.2);
+	transform: translate3d(0, -2px, 0);
+	background: rgba(25, 118, 210, 0.08);
+}
+
+:deep(.item-row-highlighted) {
+	background-color: rgba(25, 118, 210, 0.32);
+}
+
+:deep(.item-row-highlighted td) {
+	font-weight: 600;
+	color: var(--primary-color, #1976d2);
+	background-color: rgba(25, 118, 210, 0.32);
 }
 
 .card-item-image-container {

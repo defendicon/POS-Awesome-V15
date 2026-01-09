@@ -1,876 +1,857 @@
 <template>
-	<v-row justify="center">
-		<v-dialog v-model="closingDialog" max-width="900px" persistent>
-			<v-card elevation="8" class="closing-dialog-card">
-				<!-- Enhanced White Header -->
-				<v-card-title class="closing-header pa-6 d-flex align-center">
-					<div class="header-content">
-						<div class="header-icon-wrapper">
-							<v-icon class="header-icon" size="40">mdi-store-clock-outline</v-icon>
-						</div>
-						<div class="header-text">
-							<h3 class="header-title">{{ __("Closing POS Shift") }}</h3>
-							<p class="header-subtitle">
-								{{ __("Reconcile payment methods and close shift") }}
-							</p>
-						</div>
+	<v-dialog v-model="closingDialog" max-width="900px" persistent>
+		<v-card elevation="8" class="closing-dialog-card">
+			<!-- Enhanced White Header -->
+			<v-card-title class="closing-header pa-6 d-flex align-center">
+				<div class="header-content">
+					<div class="header-icon-wrapper">
+						<v-icon class="header-icon" size="40">mdi-store-clock-outline</v-icon>
 					</div>
-					<v-spacer></v-spacer>
-					<v-btn
-						icon="mdi-close"
-						variant="text"
-						density="comfortable"
-						class="header-close-btn"
-						:title="__('Close')"
-						@click="close_dialog"
-					></v-btn>
-				</v-card-title>
+					<div class="header-text">
+						<h3 class="header-title">{{ __("Closing POS Shift") }}</h3>
+						<p class="header-subtitle">
+							{{ __("Reconcile payment methods and close shift") }}
+						</p>
+					</div>
+				</div>
+				<v-spacer></v-spacer>
+				<v-btn
+					icon="mdi-close"
+					variant="text"
+					density="comfortable"
+					class="header-close-btn"
+					:title="__('Close')"
+					@click="close_dialog"
+				></v-btn>
+			</v-card-title>
 
-				<v-divider class="header-divider"></v-divider>
+			<v-divider class="header-divider"></v-divider>
 
-				<v-card-text class="pa-0 white-background">
-					<v-container class="pa-6">
-						<v-row class="mb-6">
-							<v-col cols="12" class="pa-1">
-								<div class="table-header mb-4">
-									<h4 class="text-h6 text-grey-darken-2 mb-1">
-										{{ __("Shift Overview") }}
-									</h4>
-									<p class="text-body-2 text-grey">
-										{{ __("Review shift totals before submitting the closing entry") }}
-									</p>
-								</div>
+			<v-card-text class="pa-0 white-background">
+				<v-container class="pa-6">
+					<v-row class="mb-6">
+						<v-col cols="12" class="pa-1">
+							<div class="table-header mb-4">
+								<h4 class="text-h6 text-grey-darken-2 mb-1">
+									{{ __("Shift Overview") }}
+								</h4>
+								<p class="text-body-2 text-grey">
+									{{ __("Review shift totals before submitting the closing entry") }}
+								</p>
+							</div>
 
-								<div class="overview-wrapper" v-if="overviewLoading">
-									<v-progress-circular
-										color="primary"
-										indeterminate
-										size="32"
-									></v-progress-circular>
-								</div>
+							<div class="overview-wrapper" v-if="overviewLoading">
+								<v-progress-circular
+									color="primary"
+									indeterminate
+									size="32"
+								></v-progress-circular>
+							</div>
 
-								<div v-else class="overview-wrapper">
-									<div class="insight-grid">
-										<v-row dense>
-											<v-col
-												v-for="card in primaryInsights"
-												:key="card.key"
-												cols="12"
-												sm="6"
-												md="3"
-												class="d-flex"
-											>
-												<div class="insight-card">
-													<div class="insight-icon" :class="card.color">
-														<v-icon size="22">{{ card.icon }}</v-icon>
-													</div>
-													<div class="insight-body">
-														<div class="insight-label">{{ card.label }}</div>
-														<div class="insight-value">{{ card.value }}</div>
-														<div class="insight-caption">{{ card.caption }}</div>
-													</div>
+							<div v-else class="overview-wrapper">
+								<div class="insight-grid">
+									<v-row dense>
+										<v-col
+											v-for="card in primaryInsights"
+											:key="card.key"
+											cols="12"
+											sm="6"
+											md="3"
+											class="d-flex"
+										>
+											<div class="insight-card">
+												<div class="insight-icon" :class="card.color">
+													<v-icon size="22">{{ card.icon }}</v-icon>
 												</div>
-											</v-col>
-										</v-row>
-										<v-row dense class="mt-2" v-if="secondaryInsights.length">
-											<v-col
-												v-for="card in secondaryInsights"
-												:key="card.key"
-												cols="12"
-												sm="6"
-												md="3"
-												class="d-flex"
-											>
-												<div class="insight-card compact">
-													<div class="insight-icon" :class="card.color">
-														<v-icon size="20">{{ card.icon }}</v-icon>
-													</div>
-													<div class="insight-body">
-														<div class="insight-label">{{ card.label }}</div>
-														<div class="insight-value">{{ card.value }}</div>
-														<div class="insight-caption">{{ card.caption }}</div>
-													</div>
-												</div>
-											</v-col>
-										</v-row>
-									</div>
-
-									<div class="table-section mt-6">
-										<div class="table-header mb-2">
-											<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
-												{{ __("Totals by Invoice Currency") }}
-											</h5>
-											<p class="text-body-2 text-grey">
-												{{ __("Shows the distribution of invoices per currency") }}
-											</p>
-										</div>
-
-										<div v-if="multiCurrencyTotals.length" class="overview-table-wrapper">
-											<table class="overview-table">
-												<thead>
-													<tr>
-														<th>{{ __("Currency") }}</th>
-														<th class="text-end">
-															{{ __("Total") }}
-														</th>
-														<th class="text-end">
-															{{ __("Invoices") }}
-														</th>
-													</tr>
-												</thead>
-												<tbody>
-													<tr
-														v-for="row in multiCurrencyTotals"
-														:key="row.currency"
-													>
-														<td>{{ row.currency }}</td>
-														<td class="text-end">
-															<div class="amount-with-base">
-																<div class="amount-primary">
-																	<span class="overview-amount">
-																		{{
-																			formatCurrencyWithSymbol(
-																				row.total || 0,
-																				row.currency ||
-																					overviewCompanyCurrency,
-																			)
-																		}}
-																	</span>
-																	<span
-																		v-if="
-																			shouldShowCompanyEquivalent(
-																				row,
-																				row.currency,
-																			)
-																		"
-																		class="company-equivalent"
-																	>
-																		({{
-																			formatCurrencyWithSymbol(
-																				row.company_currency_total ||
-																					0,
-																				overviewCompanyCurrency,
-																			)
-																		}})
-																	</span>
-																</div>
-																<div
-																	v-if="
-																		showExchangeRates(row, row.currency)
-																	"
-																	class="exchange-note"
-																>
-																	{{
-																		formatExchangeRates(
-																			row.exchange_rates,
-																			row.currency ||
-																				overviewCompanyCurrency,
-																			overviewCompanyCurrency,
-																		)
-																	}}
-																</div>
-															</div>
-														</td>
-														<td class="text-end">{{ row.invoice_count || 0 }}</td>
-													</tr>
-												</tbody>
-											</table>
-										</div>
-										<div v-else class="overview-empty text-body-2">
-											{{ __("No invoices recorded for this shift.") }}
-										</div>
-									</div>
-
-									<v-row dense class="mt-4">
-										<v-col cols="12" md="6">
-											<div class="table-section">
-												<div class="table-header mb-2">
-													<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
-														{{ __("Outstanding Credit by Currency") }}
-													</h5>
-													<p class="text-body-2 text-grey">
-														{{ __("Credit sales remaining to be collected") }}
-													</p>
-												</div>
-												<div
-													v-if="creditInvoicesByCurrency.length"
-													class="overview-table-wrapper"
-												>
-													<table class="overview-table">
-														<thead>
-															<tr>
-																<th>{{ __("Currency") }}</th>
-																<th class="text-end">
-																	{{ __("Outstanding") }}
-																</th>
-																<th class="text-end">
-																	{{ __("Invoices") }}
-																</th>
-															</tr>
-														</thead>
-														<tbody>
-															<tr
-																v-for="row in creditInvoicesByCurrency"
-																:key="`credit-${row.currency}`"
-															>
-																<td>{{ row.currency }}</td>
-																<td class="text-end">
-																	<div class="amount-with-base">
-																		<div class="amount-primary">
-																			<span class="overview-amount">
-																				{{
-																					formatCurrencyWithSymbol(
-																						row.total || 0,
-																						row.currency ||
-																							overviewCompanyCurrency,
-																					)
-																				}}
-																			</span>
-																			<span
-																				v-if="
-																					shouldShowCompanyEquivalent(
-																						row,
-																						row.currency,
-																					)
-																				"
-																				class="company-equivalent"
-																			>
-																				({{
-																					formatCurrencyWithSymbol(
-																						row.company_currency_total ||
-																							0,
-																						overviewCompanyCurrency,
-																					)
-																				}})
-																			</span>
-																		</div>
-																		<div
-																			v-if="
-																				showExchangeRates(
-																					row,
-																					row.currency,
-																				)
-																			"
-																			class="exchange-note"
-																		>
-																			{{
-																				formatExchangeRates(
-																					row.exchange_rates,
-																					row.currency ||
-																						overviewCompanyCurrency,
-																					overviewCompanyCurrency,
-																				)
-																			}}
-																		</div>
-																	</div>
-																</td>
-																<td class="text-end">
-																	{{ row.invoice_count || 0 }}
-																</td>
-															</tr>
-														</tbody>
-													</table>
-												</div>
-												<div v-else class="overview-empty text-body-2">
-													{{ __("No outstanding credit invoices for this shift.") }}
-												</div>
-											</div>
-										</v-col>
-										<v-col cols="12" md="6">
-											<div class="table-section">
-												<div class="table-header mb-2">
-													<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
-														{{ __("Returns by Currency") }}
-													</h5>
-													<p class="text-body-2 text-grey">
-														{{
-															__("Processed returns impacting the shift totals")
-														}}
-													</p>
-												</div>
-												<div
-													v-if="returnsByCurrency.length"
-													class="overview-table-wrapper"
-												>
-													<table class="overview-table">
-														<thead>
-															<tr>
-																<th>{{ __("Currency") }}</th>
-																<th class="text-end">
-																	{{ __("Returns") }}
-																</th>
-																<th class="text-end">
-																	{{ __("Count") }}
-																</th>
-															</tr>
-														</thead>
-														<tbody>
-															<tr
-																v-for="row in returnsByCurrency"
-																:key="`return-${row.currency}`"
-															>
-																<td>{{ row.currency }}</td>
-																<td class="text-end">
-																	<div class="amount-with-base">
-																		<div class="amount-primary">
-																			<span class="overview-amount">
-																				{{
-																					formatCurrencyWithSymbol(
-																						row.total || 0,
-																						row.currency ||
-																							overviewCompanyCurrency,
-																					)
-																				}}
-																			</span>
-																			<span
-																				v-if="
-																					shouldShowCompanyEquivalent(
-																						row,
-																						row.currency,
-																					)
-																				"
-																				class="company-equivalent"
-																			>
-																				({{
-																					formatCurrencyWithSymbol(
-																						row.company_currency_total ||
-																							0,
-																						overviewCompanyCurrency,
-																					)
-																				}})
-																			</span>
-																		</div>
-																		<div
-																			v-if="
-																				showExchangeRates(
-																					row,
-																					row.currency,
-																				)
-																			"
-																			class="exchange-note"
-																		>
-																			{{
-																				formatExchangeRates(
-																					row.exchange_rates,
-																					row.currency ||
-																						overviewCompanyCurrency,
-																					overviewCompanyCurrency,
-																				)
-																			}}
-																		</div>
-																	</div>
-																</td>
-																<td class="text-end">
-																	{{ row.invoice_count || 0 }}
-																</td>
-															</tr>
-														</tbody>
-													</table>
-												</div>
-												<div v-else class="overview-empty text-body-2">
-													{{ __("No returns were processed in this shift.") }}
+												<div class="insight-body">
+													<div class="insight-label">{{ card.label }}</div>
+													<div class="insight-value">{{ card.value }}</div>
+													<div class="insight-caption">{{ card.caption }}</div>
 												</div>
 											</div>
 										</v-col>
 									</v-row>
-
-									<v-row dense class="mt-4">
-										<v-col cols="12" md="6">
-											<div class="table-section">
-												<div class="table-header mb-2">
-													<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
-														{{ __("Change Returned") }}
-													</h5>
-													<p class="text-body-2 text-grey">
-														{{
-															__(
-																"Track how much cash was handed back to customers",
-															)
-														}}
-													</p>
+									<v-row dense class="mt-2" v-if="secondaryInsights.length">
+										<v-col
+											v-for="card in secondaryInsights"
+											:key="card.key"
+											cols="12"
+											sm="6"
+											md="3"
+											class="d-flex"
+										>
+											<div class="insight-card compact">
+												<div class="insight-icon" :class="card.color">
+													<v-icon size="20">{{ card.icon }}</v-icon>
 												</div>
-												<div
-													v-if="changeReturnedRows.length"
-													class="overview-table-wrapper"
-												>
-													<table class="overview-table">
-														<thead>
-															<tr>
-																<th>{{ __("Currency") }}</th>
-																<th class="text-end">
-																	{{ __("Invoice Change") }}
-																</th>
-																<th class="text-end">
-																	{{ __("Overpayment Change") }}
-																</th>
-																<th class="text-end">
-																	{{ __("Total Change") }}
-																</th>
-															</tr>
-														</thead>
-														<tbody>
-															<tr
-																v-for="row in changeReturnedRows"
-																:key="`change-returned-${row.currency}`"
-															>
-																<td>{{ row.currency }}</td>
-																<td class="text-end">
-																	<div class="amount-with-base">
-																		<div class="amount-primary">
-																			<span class="overview-amount">
-																				{{
-																					formatCurrencyWithSymbol(
-																						row.invoice_total,
-																						row.currency ||
-																							overviewCompanyCurrency,
-																					)
-																				}}
-																			</span>
-																			<span
-																				v-if="
-																					shouldShowCompanyEquivalent(
-																						{
-																							currency:
-																								row.currency,
-																							total: row.invoice_total,
-																							company_currency_total:
-																								row.invoice_company_currency_total,
-																						},
-																						row.currency,
-																					)
-																				"
-																				class="company-equivalent"
-																			>
-																				({{
-																					formatCurrencyWithSymbol(
-																						row.invoice_company_currency_total,
-																						overviewCompanyCurrency,
-																					)
-																				}})
-																			</span>
-																		</div>
-																		<div
-																			v-if="
-																				showExchangeRates(
-																					row,
-																					row.currency,
-																				)
-																			"
-																			class="exchange-note"
-																		>
-																			{{
-																				formatExchangeRates(
-																					row.exchange_rates,
-																					row.currency ||
-																						overviewCompanyCurrency,
-																					overviewCompanyCurrency,
-																				)
-																			}}
-																		</div>
-																	</div>
-																</td>
-																<td class="text-end">
-																	<div class="amount-with-base">
-																		<div class="amount-primary">
-																			<span class="overview-amount">
-																				{{
-																					formatCurrencyWithSymbol(
-																						row.overpayment_total,
-																						row.currency ||
-																							overviewCompanyCurrency,
-																					)
-																				}}
-																			</span>
-																			<span
-																				v-if="
-																					shouldShowCompanyEquivalent(
-																						{
-																							currency:
-																								row.currency,
-																							total: row.overpayment_total,
-																							company_currency_total:
-																								row.overpayment_company_currency_total,
-																						},
-																						row.currency,
-																					)
-																				"
-																				class="company-equivalent"
-																			>
-																				({{
-																					formatCurrencyWithSymbol(
-																						row.overpayment_company_currency_total,
-																						overviewCompanyCurrency,
-																					)
-																				}})
-																			</span>
-																		</div>
-																		<div
-																			v-if="
-																				showExchangeRates(
-																					row,
-																					row.currency,
-																				)
-																			"
-																			class="exchange-note"
-																		>
-																			{{
-																				formatExchangeRates(
-																					row.exchange_rates,
-																					row.currency ||
-																						overviewCompanyCurrency,
-																					overviewCompanyCurrency,
-																				)
-																			}}
-																		</div>
-																	</div>
-																</td>
-																<td class="text-end">
-																	<div class="amount-with-base">
-																		<div class="amount-primary">
-																			<span class="overview-amount">
-																				{{
-																					formatCurrencyWithSymbol(
-																						row.total,
-																						row.currency ||
-																							overviewCompanyCurrency,
-																					)
-																				}}
-																			</span>
-																			<span
-																				v-if="
-																					shouldShowCompanyEquivalent(
-																						row.company_currency_total,
-																						row.currency,
-																					)
-																				"
-																				class="company-equivalent"
-																			>
-																				({{
-																					formatCurrencyWithSymbol(
-																						row.company_currency_total,
-																						overviewCompanyCurrency,
-																					)
-																				}})
-																			</span>
-																		</div>
-																		<div
-																			v-if="
-																				showExchangeRates(
-																					row,
-																					row.currency,
-																				)
-																			"
-																			class="exchange-note"
-																		>
-																			{{
-																				formatExchangeRates(
-																					row.exchange_rates,
-																					row.currency ||
-																						overviewCompanyCurrency,
-																					overviewCompanyCurrency,
-																				)
-																			}}
-																		</div>
-																	</div>
-																</td>
-															</tr>
-														</tbody>
-													</table>
-												</div>
-												<div v-else class="overview-empty text-body-2">
-													{{ __("No change returned recorded for this shift.") }}
+												<div class="insight-body">
+													<div class="insight-label">{{ card.label }}</div>
+													<div class="insight-value">{{ card.value }}</div>
+													<div class="insight-caption">{{ card.caption }}</div>
 												</div>
 											</div>
-											<!-- End: Change Returned -->
-											<div class="table-section">
-												<div class="table-header mb-2">
-													<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
-														{{ __("Cash Drawer Snapshot") }}
-													</h5>
-													<p class="text-body-2 text-grey">
-														{{ __("Expected cash on hand grouped by currency") }}
-													</p>
-												</div>
-												<div
-													v-if="cashExpectedByCurrency.length"
-													class="overview-table-wrapper"
-												>
-													<table class="overview-table">
-														<thead>
-															<tr>
-																<th>{{ __("Currency") }}</th>
-																<th class="text-end">
-																	{{ __("Expected Cash") }}
-																</th>
-															</tr>
-														</thead>
-														<tbody>
-															<tr
-																v-for="row in cashExpectedByCurrency"
-																:key="`cash-${row.currency}`"
+										</v-col>
+									</v-row>
+								</div>
+
+								<div class="table-section mt-6">
+									<div class="table-header mb-2">
+										<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+											{{ __("Totals by Invoice Currency") }}
+										</h5>
+										<p class="text-body-2 text-grey">
+											{{ __("Shows the distribution of invoices per currency") }}
+										</p>
+									</div>
+
+									<div v-if="multiCurrencyTotals.length" class="overview-table-wrapper">
+										<table class="overview-table">
+											<thead>
+												<tr>
+													<th>{{ __("Currency") }}</th>
+													<th class="text-end">
+														{{ __("Total") }}
+													</th>
+													<th class="text-end">
+														{{ __("Invoices") }}
+													</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr v-for="row in multiCurrencyTotals" :key="row.currency">
+													<td>{{ row.currency }}</td>
+													<td class="text-end">
+														<div class="amount-with-base">
+															<div class="amount-primary">
+																<span class="overview-amount">
+																	{{
+																		formatCurrencyWithSymbol(
+																			row.total || 0,
+																			row.currency ||
+																				overviewCompanyCurrency,
+																		)
+																	}}
+																</span>
+																<span
+																	v-if="
+																		shouldShowCompanyEquivalent(
+																			row,
+																			row.currency,
+																		)
+																	"
+																	class="company-equivalent"
+																>
+																	({{
+																		formatCurrencyWithSymbol(
+																			row.company_currency_total || 0,
+																			overviewCompanyCurrency,
+																		)
+																	}})
+																</span>
+															</div>
+															<div
+																v-if="showExchangeRates(row, row.currency)"
+																class="exchange-note"
 															>
-																<td>{{ row.currency }}</td>
-																<td class="text-end">
-																	<div class="amount-with-base">
-																		<div class="amount-primary">
-																			<span class="overview-amount">
-																				{{
-																					formatCurrencyWithSymbol(
-																						row.total || 0,
-																						row.currency ||
-																							overviewCompanyCurrency,
-																					)
-																				}}
-																			</span>
-																			<span
-																				v-if="
-																					shouldShowCompanyEquivalent(
-																						row,
-																						row.currency,
-																					)
-																				"
-																				class="company-equivalent"
-																			>
-																				({{
-																					formatCurrencyWithSymbol(
-																						row.company_currency_total ||
-																							0,
+																{{
+																	formatExchangeRates(
+																		row.exchange_rates,
+																		row.currency ||
+																			overviewCompanyCurrency,
+																		overviewCompanyCurrency,
+																	)
+																}}
+															</div>
+														</div>
+													</td>
+													<td class="text-end">{{ row.invoice_count || 0 }}</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<div v-else class="overview-empty text-body-2">
+										{{ __("No invoices recorded for this shift.") }}
+									</div>
+								</div>
+
+								<v-row dense class="mt-4">
+									<v-col cols="12" md="6">
+										<div class="table-section">
+											<div class="table-header mb-2">
+												<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+													{{ __("Outstanding Credit by Currency") }}
+												</h5>
+												<p class="text-body-2 text-grey">
+													{{ __("Credit sales remaining to be collected") }}
+												</p>
+											</div>
+											<div
+												v-if="creditInvoicesByCurrency.length"
+												class="overview-table-wrapper"
+											>
+												<table class="overview-table">
+													<thead>
+														<tr>
+															<th>{{ __("Currency") }}</th>
+															<th class="text-end">
+																{{ __("Outstanding") }}
+															</th>
+															<th class="text-end">
+																{{ __("Invoices") }}
+															</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr
+															v-for="row in creditInvoicesByCurrency"
+															:key="`credit-${row.currency}`"
+														>
+															<td>{{ row.currency }}</td>
+															<td class="text-end">
+																<div class="amount-with-base">
+																	<div class="amount-primary">
+																		<span class="overview-amount">
+																			{{
+																				formatCurrencyWithSymbol(
+																					row.total || 0,
+																					row.currency ||
 																						overviewCompanyCurrency,
-																					)
-																				}})
-																			</span>
-																		</div>
-																		<div
+																				)
+																			}}
+																		</span>
+																		<span
 																			v-if="
-																				isCashMode(
-																					row.mode_of_payment,
-																				) &&
-																				overpaymentDeductionForCurrency(
+																				shouldShowCompanyEquivalent(
+																					row,
 																					row.currency,
 																				)
 																			"
-																			class="exchange-note"
+																			class="company-equivalent"
 																		>
+																			({{
+																				formatCurrencyWithSymbol(
+																					row.company_currency_total ||
+																						0,
+																					overviewCompanyCurrency,
+																				)
+																			}})
+																		</span>
+																	</div>
+																	<div
+																		v-if="
+																			showExchangeRates(
+																				row,
+																				row.currency,
+																			)
+																		"
+																		class="exchange-note"
+																	>
+																		{{
+																			formatExchangeRates(
+																				row.exchange_rates,
+																				row.currency ||
+																					overviewCompanyCurrency,
+																				overviewCompanyCurrency,
+																			)
+																		}}
+																	</div>
+																</div>
+															</td>
+															<td class="text-end">
+																{{ row.invoice_count || 0 }}
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+											<div v-else class="overview-empty text-body-2">
+												{{ __("No outstanding credit invoices for this shift.") }}
+											</div>
+										</div>
+									</v-col>
+									<v-col cols="12" md="6">
+										<div class="table-section">
+											<div class="table-header mb-2">
+												<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+													{{ __("Returns by Currency") }}
+												</h5>
+												<p class="text-body-2 text-grey">
+													{{ __("Processed returns impacting the shift totals") }}
+												</p>
+											</div>
+											<div
+												v-if="returnsByCurrency.length"
+												class="overview-table-wrapper"
+											>
+												<table class="overview-table">
+													<thead>
+														<tr>
+															<th>{{ __("Currency") }}</th>
+															<th class="text-end">
+																{{ __("Returns") }}
+															</th>
+															<th class="text-end">
+																{{ __("Count") }}
+															</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr
+															v-for="row in returnsByCurrency"
+															:key="`return-${row.currency}`"
+														>
+															<td>{{ row.currency }}</td>
+															<td class="text-end">
+																<div class="amount-with-base">
+																	<div class="amount-primary">
+																		<span class="overview-amount">
 																			{{
-																				__(
-																					"Overpayment change deducted: {0}",
-																					[
-																						formatCurrencyWithSymbol(
-																							overpaymentDeductionForCurrency(
-																								row.currency,
-																							),
-																							row.currency ||
-																								overviewCompanyCurrency,
+																				formatCurrencyWithSymbol(
+																					row.total || 0,
+																					row.currency ||
+																						overviewCompanyCurrency,
+																				)
+																			}}
+																		</span>
+																		<span
+																			v-if="
+																				shouldShowCompanyEquivalent(
+																					row,
+																					row.currency,
+																				)
+																			"
+																			class="company-equivalent"
+																		>
+																			({{
+																				formatCurrencyWithSymbol(
+																					row.company_currency_total ||
+																						0,
+																					overviewCompanyCurrency,
+																				)
+																			}})
+																		</span>
+																	</div>
+																	<div
+																		v-if="
+																			showExchangeRates(
+																				row,
+																				row.currency,
+																			)
+																		"
+																		class="exchange-note"
+																	>
+																		{{
+																			formatExchangeRates(
+																				row.exchange_rates,
+																				row.currency ||
+																					overviewCompanyCurrency,
+																				overviewCompanyCurrency,
+																			)
+																		}}
+																	</div>
+																</div>
+															</td>
+															<td class="text-end">
+																{{ row.invoice_count || 0 }}
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+											<div v-else class="overview-empty text-body-2">
+												{{ __("No returns were processed in this shift.") }}
+											</div>
+										</div>
+									</v-col>
+								</v-row>
+
+								<v-row dense class="mt-4">
+									<v-col cols="12" md="6">
+										<div class="table-section">
+											<div class="table-header mb-2">
+												<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+													{{ __("Change Returned") }}
+												</h5>
+												<p class="text-body-2 text-grey">
+													{{
+														__("Track how much cash was handed back to customers")
+													}}
+												</p>
+											</div>
+											<div
+												v-if="changeReturnedRows.length"
+												class="overview-table-wrapper"
+											>
+												<table class="overview-table">
+													<thead>
+														<tr>
+															<th>{{ __("Currency") }}</th>
+															<th class="text-end">
+																{{ __("Invoice Change") }}
+															</th>
+															<th class="text-end">
+																{{ __("Overpayment Change") }}
+															</th>
+															<th class="text-end">
+																{{ __("Total Change") }}
+															</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr
+															v-for="row in changeReturnedRows"
+															:key="`change-returned-${row.currency}`"
+														>
+															<td>{{ row.currency }}</td>
+															<td class="text-end">
+																<div class="amount-with-base">
+																	<div class="amount-primary">
+																		<span class="overview-amount">
+																			{{
+																				formatCurrencyWithSymbol(
+																					row.invoice_total,
+																					row.currency ||
+																						overviewCompanyCurrency,
+																				)
+																			}}
+																		</span>
+																		<span
+																			v-if="
+																				shouldShowCompanyEquivalent(
+																					{
+																						currency:
+																							row.currency,
+																						total: row.invoice_total,
+																						company_currency_total:
+																							row.invoice_company_currency_total,
+																					},
+																					row.currency,
+																				)
+																			"
+																			class="company-equivalent"
+																		>
+																			({{
+																				formatCurrencyWithSymbol(
+																					row.invoice_company_currency_total,
+																					overviewCompanyCurrency,
+																				)
+																			}})
+																		</span>
+																	</div>
+																	<div
+																		v-if="
+																			showExchangeRates(
+																				row,
+																				row.currency,
+																			)
+																		"
+																		class="exchange-note"
+																	>
+																		{{
+																			formatExchangeRates(
+																				row.exchange_rates,
+																				row.currency ||
+																					overviewCompanyCurrency,
+																				overviewCompanyCurrency,
+																			)
+																		}}
+																	</div>
+																</div>
+															</td>
+															<td class="text-end">
+																<div class="amount-with-base">
+																	<div class="amount-primary">
+																		<span class="overview-amount">
+																			{{
+																				formatCurrencyWithSymbol(
+																					row.overpayment_total,
+																					row.currency ||
+																						overviewCompanyCurrency,
+																				)
+																			}}
+																		</span>
+																		<span
+																			v-if="
+																				shouldShowCompanyEquivalent(
+																					{
+																						currency:
+																							row.currency,
+																						total: row.overpayment_total,
+																						company_currency_total:
+																							row.overpayment_company_currency_total,
+																					},
+																					row.currency,
+																				)
+																			"
+																			class="company-equivalent"
+																		>
+																			({{
+																				formatCurrencyWithSymbol(
+																					row.overpayment_company_currency_total,
+																					overviewCompanyCurrency,
+																				)
+																			}})
+																		</span>
+																	</div>
+																	<div
+																		v-if="
+																			showExchangeRates(
+																				row,
+																				row.currency,
+																			)
+																		"
+																		class="exchange-note"
+																	>
+																		{{
+																			formatExchangeRates(
+																				row.exchange_rates,
+																				row.currency ||
+																					overviewCompanyCurrency,
+																				overviewCompanyCurrency,
+																			)
+																		}}
+																	</div>
+																</div>
+															</td>
+															<td class="text-end">
+																<div class="amount-with-base">
+																	<div class="amount-primary">
+																		<span class="overview-amount">
+																			{{
+																				formatCurrencyWithSymbol(
+																					row.total,
+																					row.currency ||
+																						overviewCompanyCurrency,
+																				)
+																			}}
+																		</span>
+																		<span
+																			v-if="
+																				shouldShowCompanyEquivalent(
+																					row.company_currency_total,
+																					row.currency,
+																				)
+																			"
+																			class="company-equivalent"
+																		>
+																			({{
+																				formatCurrencyWithSymbol(
+																					row.company_currency_total,
+																					overviewCompanyCurrency,
+																				)
+																			}})
+																		</span>
+																	</div>
+																	<div
+																		v-if="
+																			showExchangeRates(
+																				row,
+																				row.currency,
+																			)
+																		"
+																		class="exchange-note"
+																	>
+																		{{
+																			formatExchangeRates(
+																				row.exchange_rates,
+																				row.currency ||
+																					overviewCompanyCurrency,
+																				overviewCompanyCurrency,
+																			)
+																		}}
+																	</div>
+																</div>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+											<div v-else class="overview-empty text-body-2">
+												{{ __("No change returned recorded for this shift.") }}
+											</div>
+										</div>
+										<!-- End: Change Returned -->
+										<div class="table-section">
+											<div class="table-header mb-2">
+												<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+													{{ __("Cash Drawer Snapshot") }}
+												</h5>
+												<p class="text-body-2 text-grey">
+													{{ __("Expected cash on hand grouped by currency") }}
+												</p>
+											</div>
+											<div
+												v-if="cashExpectedByCurrency.length"
+												class="overview-table-wrapper"
+											>
+												<table class="overview-table">
+													<thead>
+														<tr>
+															<th>{{ __("Currency") }}</th>
+															<th class="text-end">
+																{{ __("Expected Cash") }}
+															</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr
+															v-for="row in cashExpectedByCurrency"
+															:key="`cash-${row.currency}`"
+														>
+															<td>{{ row.currency }}</td>
+															<td class="text-end">
+																<div class="amount-with-base">
+																	<div class="amount-primary">
+																		<span class="overview-amount">
+																			{{
+																				formatCurrencyWithSymbol(
+																					row.total || 0,
+																					row.currency ||
+																						overviewCompanyCurrency,
+																				)
+																			}}
+																		</span>
+																		<span
+																			v-if="
+																				shouldShowCompanyEquivalent(
+																					row,
+																					row.currency,
+																				)
+																			"
+																			class="company-equivalent"
+																		>
+																			({{
+																				formatCurrencyWithSymbol(
+																					row.company_currency_total ||
+																						0,
+																					overviewCompanyCurrency,
+																				)
+																			}})
+																		</span>
+																	</div>
+																	<div
+																		v-if="
+																			isCashMode(row.mode_of_payment) &&
+																			overpaymentDeductionForCurrency(
+																				row.currency,
+																			)
+																		"
+																		class="exchange-note"
+																	>
+																		{{
+																			__(
+																				"Overpayment change deducted: {0}",
+																				[
+																					formatCurrencyWithSymbol(
+																						overpaymentDeductionForCurrency(
+																							row.currency,
 																						),
-																					],
-																				)
-																			}}
-																		</div>
-																		<div
-																			v-if="
-																				showExchangeRates(
-																					row,
-																					row.currency,
-																				)
-																			"
-																			class="exchange-note"
-																		>
-																			{{
-																				formatExchangeRates(
-																					row.exchange_rates,
-																					row.currency ||
-																						overviewCompanyCurrency,
-																					overviewCompanyCurrency,
-																				)
-																			}}
-																		</div>
-																	</div>
-																</td>
-															</tr>
-														</tbody>
-													</table>
-												</div>
-												<div v-else class="overview-empty text-body-2">
-													{{ __("No cash expected for this shift.") }}
-												</div>
-											</div>
-										</v-col>
-									</v-row>
-
-									<div class="table-section mt-4">
-										<div class="table-header mb-2">
-											<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
-												{{ __("Payments by Mode of Payment") }}
-											</h5>
-											<p class="text-body-2 text-grey">
-												{{
-													__("Grouped totals for each payment method and currency")
-												}}
-											</p>
-										</div>
-
-										<div v-if="paymentsByMode.length" class="overview-table-wrapper">
-											<table class="overview-table">
-												<thead>
-													<tr>
-														<th>{{ __("Mode of Payment") }}</th>
-														<th>{{ __("Currency") }}</th>
-														<th class="text-end">
-															{{ __("Amount") }}
-														</th>
-													</tr>
-												</thead>
-												<tbody>
-													<tr
-														v-for="row in paymentsByMode"
-														:key="`${row.mode_of_payment}-${row.currency}`"
-													>
-														<td>{{ row.mode_of_payment }}</td>
-														<td>{{ row.currency }}</td>
-														<td class="text-end">
-															<div class="amount-with-base">
-																<div class="amount-primary">
-																	<span class="overview-amount">
-																		{{
-																			formatCurrencyWithSymbol(
-																				row.total || 0,
-																				row.currency ||
-																					overviewCompanyCurrency,
+																						row.currency ||
+																							overviewCompanyCurrency,
+																					),
+																				],
 																			)
 																		}}
-																	</span>
-																	<span
+																	</div>
+																	<div
 																		v-if="
-																			shouldShowCompanyEquivalent(
+																			showExchangeRates(
 																				row,
 																				row.currency,
 																			)
 																		"
-																		class="company-equivalent"
+																		class="exchange-note"
 																	>
-																		({{
-																			formatCurrencyWithSymbol(
-																				row.company_currency_total ||
-																					0,
+																		{{
+																			formatExchangeRates(
+																				row.exchange_rates,
+																				row.currency ||
+																					overviewCompanyCurrency,
 																				overviewCompanyCurrency,
 																			)
-																		}})
-																	</span>
+																		}}
+																	</div>
 																</div>
-																<div
-																	v-if="
-																		showExchangeRates(row, row.currency)
-																	"
-																	class="exchange-note"
-																>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+											<div v-else class="overview-empty text-body-2">
+												{{ __("No cash expected for this shift.") }}
+											</div>
+										</div>
+									</v-col>
+								</v-row>
+
+								<div class="table-section mt-4">
+									<div class="table-header mb-2">
+										<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+											{{ __("Payments by Mode of Payment") }}
+										</h5>
+										<p class="text-body-2 text-grey">
+											{{ __("Grouped totals for each payment method and currency") }}
+										</p>
+									</div>
+
+									<div v-if="paymentsByMode.length" class="overview-table-wrapper">
+										<table class="overview-table">
+											<thead>
+												<tr>
+													<th>{{ __("Mode of Payment") }}</th>
+													<th>{{ __("Currency") }}</th>
+													<th class="text-end">
+														{{ __("Amount") }}
+													</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr
+													v-for="row in paymentsByMode"
+													:key="`${row.mode_of_payment}-${row.currency}`"
+												>
+													<td>{{ row.mode_of_payment }}</td>
+													<td>{{ row.currency }}</td>
+													<td class="text-end">
+														<div class="amount-with-base">
+															<div class="amount-primary">
+																<span class="overview-amount">
 																	{{
-																		formatExchangeRates(
-																			row.exchange_rates,
+																		formatCurrencyWithSymbol(
+																			row.total || 0,
 																			row.currency ||
 																				overviewCompanyCurrency,
-																			overviewCompanyCurrency,
 																		)
 																	}}
-																</div>
+																</span>
+																<span
+																	v-if="
+																		shouldShowCompanyEquivalent(
+																			row,
+																			row.currency,
+																		)
+																	"
+																	class="company-equivalent"
+																>
+																	({{
+																		formatCurrencyWithSymbol(
+																			row.company_currency_total || 0,
+																			overviewCompanyCurrency,
+																		)
+																	}})
+																</span>
 															</div>
-														</td>
-													</tr>
-												</tbody>
-											</table>
-										</div>
-										<div v-else class="overview-empty text-body-2">
-											{{ __("No payments registered for this shift.") }}
-										</div>
+															<div
+																v-if="showExchangeRates(row, row.currency)"
+																class="exchange-note"
+															>
+																{{
+																	formatExchangeRates(
+																		row.exchange_rates,
+																		row.currency ||
+																			overviewCompanyCurrency,
+																		overviewCompanyCurrency,
+																	)
+																}}
+															</div>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<div v-else class="overview-empty text-body-2">
+										{{ __("No payments registered for this shift.") }}
 									</div>
 								</div>
-							</v-col>
-						</v-row>
-						<v-row>
-							<v-col cols="12" class="pa-1">
-								<div class="table-header mb-4">
-									<h4 class="text-h6 text-grey-darken-2 mb-1">
-										{{ __("Payment Reconciliation") }}
-									</h4>
-									<p class="text-body-2 text-grey">
-										{{ __("Verify closing amounts for each payment method") }}
-									</p>
-								</div>
+							</div>
+						</v-col>
+					</v-row>
+					<v-row>
+						<v-col cols="12" class="pa-1">
+							<div class="table-header mb-4">
+								<h4 class="text-h6 text-grey-darken-2 mb-1">
+									{{ __("Payment Reconciliation") }}
+								</h4>
+								<p class="text-body-2 text-grey">
+									{{ __("Verify closing amounts for each payment method") }}
+								</p>
+							</div>
 
-								<v-data-table
-									:headers="headers"
-									:items="dialog_data.payment_reconciliation"
-									item-key="mode_of_payment"
-									class="elevation-0 rounded-lg white-table"
-									:items-per-page="itemsPerPage"
-									hide-default-footer
-									density="compact"
+							<v-data-table
+								:headers="headers"
+								:items="dialog_data.payment_reconciliation"
+								item-key="mode_of_payment"
+								class="elevation-0 rounded-lg white-table"
+								:items-per-page="itemsPerPage"
+								hide-default-footer
+								density="compact"
+							>
+								<template v-slot:item.closing_amount="props">
+									<v-text-field
+										v-model="props.item.closing_amount"
+										:rules="[closingAmountRule]"
+										:label="frappe._('Edit')"
+										single-line
+										counter
+										type="number"
+										density="compact"
+										variant="outlined"
+										color="primary"
+										class="pos-themed-input"
+										hide-details
+										:prefix="companyCurrencySymbol"
+									></v-text-field>
+								</template>
+								<template v-slot:item.difference="{ item }">
+									{{ companyCurrencySymbol }}
+									{{ formatCurrency(calculateDifference(item)) }}
+								</template>
+								<template v-slot:item.opening_amount="{ item }">
+									{{ companyCurrencySymbol }}
+									{{ formatCurrency(item.opening_amount) }}</template
 								>
-									<template v-slot:item.closing_amount="props">
-										<v-text-field
-											v-model="props.item.closing_amount"
-											:rules="[closingAmountRule]"
-											:label="frappe._('Edit')"
-											single-line
-											counter
-											type="number"
-											density="compact"
-											variant="outlined"
-											color="primary"
-											class="pos-themed-input"
-											hide-details
-											:prefix="companyCurrencySymbol"
-										></v-text-field>
-									</template>
-									<template v-slot:item.difference="{ item }">
-										{{ companyCurrencySymbol }}
-										{{ formatCurrency(calculateDifference(item)) }}
-									</template>
-									<template v-slot:item.opening_amount="{ item }">
-										{{ companyCurrencySymbol }}
-										{{ formatCurrency(item.opening_amount) }}</template
-									>
-									<template v-slot:item.expected_amount="{ item }">
-										{{ companyCurrencySymbol }}
-										{{ formatCurrency(item.expected_amount) }}</template
-									>
-									<template v-slot:item.variance_percent="{ item }">
-										<span :class="['variance-chip', varianceClass(item)]">
-											{{ formatVariancePercent(item) }}
-										</span>
-									</template>
-								</v-data-table>
-							</v-col>
-						</v-row>
-					</v-container>
-				</v-card-text>
+								<template v-slot:item.expected_amount="{ item }">
+									{{ companyCurrencySymbol }}
+									{{ formatCurrency(item.expected_amount) }}</template
+								>
+								<template v-slot:item.variance_percent="{ item }">
+									<span :class="['variance-chip', varianceClass(item)]">
+										{{ formatVariancePercent(item) }}
+									</span>
+								</template>
+							</v-data-table>
+						</v-col>
+					</v-row>
+				</v-container>
+			</v-card-text>
 
-				<v-divider></v-divider>
-				<v-card-actions class="dialog-actions-container">
-					<v-spacer></v-spacer>
-					<v-btn
-						theme="dark"
-						@click="close_dialog"
-						class="pos-action-btn cancel-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-close-circle-outline</v-icon>
-						<span>{{ __("Close") }}</span>
-					</v-btn>
-					<v-btn
-						theme="dark"
-						@click="submit_dialog"
-						class="pos-action-btn submit-action-btn"
-						size="large"
-						elevation="2"
-					>
-						<v-icon start>mdi-check-circle-outline</v-icon>
-						<span>{{ __("Submit") }}</span>
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
-	</v-row>
+			<v-divider></v-divider>
+			<v-card-actions class="dialog-actions-container">
+				<v-spacer></v-spacer>
+				<v-btn
+					theme="dark"
+					@click="close_dialog"
+					class="pos-action-btn cancel-action-btn"
+					size="large"
+					elevation="2"
+				>
+					<v-icon start>mdi-close-circle-outline</v-icon>
+					<span>{{ __("Close") }}</span>
+				</v-btn>
+				<v-btn
+					theme="dark"
+					@click="submit_dialog"
+					class="pos-action-btn submit-action-btn"
+					size="large"
+					elevation="2"
+				>
+					<v-icon start>mdi-check-circle-outline</v-icon>
+					<span>{{ __("Submit") }}</span>
+				</v-btn>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
 </template>
 
 <script>
@@ -954,6 +935,11 @@ export default {
 	watch: {},
 
 	methods: {
+		handleKeydown(event) {
+			if (event.key === "Escape" && this.closingDialog) {
+				this.close_dialog();
+			}
+		},
 		close_dialog() {
 			this.closingDialog = false;
 			this.overview = null;
@@ -1556,9 +1542,13 @@ export default {
 			}
 		});
 	},
+	mounted() {
+		window.addEventListener("keydown", this.handleKeydown);
+	},
 	beforeUnmount() {
 		this.eventBus.off("open_ClosingDialog");
 		this.eventBus.off("register_pos_profile");
+		window.removeEventListener("keydown", this.handleKeydown);
 	},
 };
 </script>

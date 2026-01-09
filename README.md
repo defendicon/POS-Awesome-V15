@@ -3,7 +3,7 @@
     <h2>POS AWESOME</h2>
 </div>
 
-#### An open-source Point of Sale for [Erpnext](https://github.com/frappe/erpnext) using [Vue.js](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify) (VERSION 15 Support)
+#### An open-source Point of Sale for [Erpnext](https://github.com/frappe/erpnext) using [Vue.js](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify) (VERSION 15 and 16 Support)
 
 ---
 
@@ -54,8 +54,8 @@ After switching branches or pulling latest changes:
 5. bench build --app posawesome
 6. bench --site your.site migrate
 
-Go to developer tools in browser, then go to application tab, then go to storage and clear site data. 
-After clearing site data go to browser settings and delete cache and images data in history also. 
+Go to developer tools in browser, then go to application tab, then go to storage and clear site data.
+After clearing site data go to browser settings and delete cache and images data in history also.
 
 ### Electron Desktop App
 
@@ -73,55 +73,107 @@ Notes:
 
 ### Main Features
 
-1. Supports Erpnext Version 15
-2. Supports Multi-Currency Transactions.
-   Customers can be invoiced in different currencies.
-   Exchange Rate is fetched automatically based on selected currency. When a price list has its own exchange rate set, POS Awesome uses that rate and falls back to the standard ERPNext rate otherwise.
-   Invoices made with posawesome display Grand Total in both base and selected currency in erpnext.
-3. Supports offline mode for creating invoices and customers, saves data locally with stock validation, and syncs automatically when reconnected. If **Allow Negative Stock** is enabled in Stock Settings, offline invoices can still be saved even when quantities are below zero. **Enable browser local storage from settings and also enable the server cache for offline mode.**
-4. User-friendly and provides a good user experience and speed of use
-5. The cashier can either use list view or card view during sales transactions. Card view shows the images of the items
-6. Supports enqueue invoice submission after printing the receipt for faster processing
-7. Supports batch & serial numbering
-8. Supports batch-based pricing
-9. Supports UOM-specific barcode and pricing
-10. Supports sales of scale (weighted) products
-11. Ability to make returns from POS
-12. Supports Making returns for either cash or customer credit
-13. Supports using customer credit notes for payment
-14. Supports credit sales
-15. Allows the user to choose a due date for credit sales
-16. Supports customer loyalty points
-17. Shortcut keys
-18. Supports Customer Discount
-19. Supports POS Offers
-20. Auto-apply batches for bundle items
-21. Search and add items by Serial Number
-22. Create Sales Orders from POS directly
-23. Supports template items with variants
-24. Supports multiple languages with language selection per POS Profile (English, Arabic, Portuguese and Spanish provided)
-25. Supports Mpesa mobile payment
-26. POS Coupons
-27. Supports Referral Code
-28. Supports Customer and Customer Group price list
-29. Supports Sales Person
-30. Supports Delivery Charges
-31. Search and add items by Batch Number
-32. Accept new payments from customers against existing invoices
-33. Payments Reconciliation
-34. A lot more bug fixes from the version 14
-35. Offline invoices that fail to submit are saved as draft documents
+#### 🎨 UI/UX & Interface
 
+- **Modern Interface**: User-friendly design using Vue.js and Vuetify, optimized for speed and experience.
+- **View Modes**: Toggle between List View (efficient for data entry) and Card View (visual with item images).
+- **Dark Mode & Theming**: Built-in dark mode support with automatic or manual toggle, plus customizable theme options.
+- **RTL Support**: Full support for Right-to-Left languages (Arabic, etc.).
+- **System Status Gadgets**: Real-time monitoring of Server, Database, Cache, and Network status directly from the POS navbar.
+- **Fly to Cart Animation**: Visual feedback when adding items to the cart.
+- **Performance**: Optimized for large datasets using virtual scrolling and efficient state management.
+- **Shortcuts**: Extensive keyboard shortcuts for rapid operation.
+- **Multi-Language**: Supports English, Arabic, Portuguese, Spanish, and more.
+
+#### 💸 Transactions & Sales
+
+- **Multi-Currency**: Full support for invoicing in different currencies with automatic exchange rate fetching.
+- **Quotations**: Create, update, and submit Quotations directly from the POS interface.
+- **Sales Orders**: Create Sales Orders directly. Configurable "Sales Order Only" mode available.
+- **Returns**: Process returns for Cash or Customer Credit (Credit Note).
+- **Credit Sales**: Support for credit sales with configurable due dates.
+- **Change Posting Date**: Ability to change the transaction posting date (backdating) if allowed by profile.
+- **Additional Notes**: Fields for internal notes and authorization codes.
+- **Customer PO**: Capture Customer Purchase Order (PO) number and date.
+
+#### 📦 Inventory & Products
+
+- **Batch & Serial**: Comprehensive support for Batch and Serial number selection and search.
+- **Product Bundles**: Auto-apply batches for bundle items.
+- **Variants**: Support for template items with product variants.
+- **UOM Support**: Barcode and pricing support specific to Units of Measure.
+- **Weighted Products**: Support for scale/weighted product barcodes.
+- **Stock Validation**: Configurable stock validation (warn or block) including negative stock handling.
+
+#### 💳 Payments & Pricing
+
+- **Smart Tender**: "Quick Cash" suggestions based on currency denominations for faster checkout.
+- **Split Payments**: Accept multiple payment modes for a single transaction.
+- **M-Pesa**: Integrated M-Pesa mobile payment support.
+- **Loyalty Points**: Earn and redeem Customer Loyalty Points.
+- **Coupons & Offers**: Support for POS Coupons, Promotional Offers, and Referral Codes.
+- **Price Lists**: Support for Customer/Group price lists, with option to manually select Price List per transaction.
+- **Discounts**: Customer-level and Transaction-level discount support.
+- **Delivery Charges**: Add shipping/delivery charges to the invoice.
+- **Write Off**: Option to write off small difference amounts in change.
+- **Payment Reconciliation**: Reconcile payments against existing invoices.
+
+#### 🔄 Offline & Technical
+
+- **Robust Offline Mode**: Create invoices and customers offline. Data syncs automatically when reconnected.
+- **Background Sync**: Advanced background synchronization for offline transactions and master data updates.
+- **Local Storage**: Option to use browser Local Storage for caching to improve reliability.
+- **Background Submission**: Enqueue invoice submission to background jobs for faster UI response.
+- **Drafts**: Failed offline submissions are safely saved as Draft documents.
+
+#### ⚙️ Configuration & Shift Management
+
+- **Shift Management**: Opening and Closing shifts with cash reconciliation and detailed payment breakdown reports.
+- **Customer Balance**: Option to display current customer balance on the main screen.
+- **Address Management**: Manage multiple shipping addresses for customers.
+- **ERPNext v15 Support**: Fully compatible with the latest ERPNext version.
 
 ### Shortcuts:
 
-- `CTRL or CMD + S` open payments
-- `CTRL or CMD + X` submit payments
-- `CTRL or CMD + D` remove the first item from the top
-- `CTRL or CMD + A` expand the first item from the top
-- `CTRL or CMD + E` focus on discount field
-- `CTRL or CMD + B` focus on customer search
-- `CTRL or CMD + I` focus on item search field
+#### Global (Invoice Screen)
+
+- `F4` profile switch (currently shows “not available” message).
+- `F5` open new customer form.
+- `F7` open shift details.
+- `F8` POS lock (currently shows “not available” message).
+
+#### Alt + Number
+
+- `Alt + 1` close payments panel.
+- `Alt + 2` open cancel dialog.
+- `Alt + 3` focus item search.
+- `Alt + 4` select top item.
+- `Alt + 5` focus customer search.
+- `Alt + 6` select first customer.
+- `Alt + 7` load sales orders.
+- `Alt + 8` open returns.
+- `Alt + 9` focus delivery charges.
+- `Alt + `` focus posting date.
+
+#### Alt + Keys
+
+- `Alt + PageUp` open payments panel.
+- `Alt + Home` go to home and reload.
+- `Alt + A` focus additional discount field.
+- `Alt + Q` focus quantity field for first item and then the next item (cycles).
+- `Alt + U` focus UOM field for first item and then the next item (cycles).
+- `Alt + R` focus rate field for first item and then the next item (cycles).
+- `Alt + E` remove the first item from the top.
+- `Alt + F` focus item table search field for added items searching.
+- `Alt + L` load draft invoices.
+- `Alt + M` toggle item selector settings.
+- `Alt + S` save and clear invoice.
+
+#### Payments Panel
+
+- `Alt + D` open payments panel.
+- `Alt + X` on invoice it open payments, then submit automatically (prompts if payments are closed). on payments it submit directly.
+- `Alt + P` on invoice it open payments, then submit & print automatically (prompts if payments are closed). on payments it submit directly.
 
 ---
 

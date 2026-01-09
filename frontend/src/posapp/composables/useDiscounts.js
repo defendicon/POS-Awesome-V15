@@ -5,11 +5,23 @@ export function useDiscounts() {
 	const updateDiscountAmount = (context) => {
 		let value = flt(context.additional_discount_percentage);
 		const usePercentage = Boolean(context.pos_profile?.posa_use_percentage_discount);
+		const maxDiscount = flt(context.pos_profile?.posa_max_discount_allowed);
+
 		// If value is too large, reset to 0
 		if (value < -100 || value > 100) {
 			context.additional_discount_percentage = 0;
 			context.additional_discount = 0;
 			return;
+		}
+
+		if (maxDiscount > 0 && Math.abs(value) > maxDiscount) {
+			value = value < 0 ? -maxDiscount : maxDiscount;
+			context.additional_discount_percentage = value;
+			context.eventBus.emit("show_message", {
+				title: __("Discount limited by POS Profile"),
+				message: __("The maximum discount allowed is") + " " + maxDiscount + "%",
+				color: "warning",
+			});
 		}
 
 		// Calculate discount amount based on percentage

@@ -95,6 +95,26 @@ frappe.PosApp.posapp = class {
 		app.use(themePlugin, { vuetify });
 		app.mount(this.$el[0]);
 
+		// Global listener for background submission errors
+		frappe.realtime.on("pos_invoice_submit_error", (data) => {
+			if (data.user === frappe.session.user) {
+				const message = data.error || __("Unknown error during background submission");
+				const invoice = data.invoice || "";
+				frappe.msgprint({
+					title: __("Invoice Submission Failed"),
+					message: __("Background processing failed for Invoice {0}: {1}", [invoice, message]),
+					indicator: "red",
+				});
+				// Also emit to local event bus if needed for UI updates
+				eventBus.emit("show_message", {
+					title: __("Background Submission Failed"),
+					text: message,
+					color: "error",
+					timeout: 8000,
+				});
+			}
+		});
+
 		if (isPerfEnabled()) {
 			initLongTaskObserver("posapp");
 		}

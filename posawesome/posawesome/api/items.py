@@ -13,6 +13,8 @@ from erpnext.stock.doctype.batch.batch import (
 )
 from erpnext.stock.get_item_details import get_item_details
 from frappe import _, as_json
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import redis_cache
@@ -139,13 +141,94 @@ def get_stock_availability(item_code, warehouse):
         # Include all child warehouses when a group warehouse is set
         warehouses = frappe.db.get_descendants("Warehouse", warehouse) or []
 
-    rows = frappe.get_all(
-        "Bin",
-        fields=["sum(actual_qty) as actual_qty"],
-        filters={"item_code": item_code, "warehouse": ["in", warehouses]},
+    bin_doctype = DocType("Bin")
+    rows = (
+        frappe.qb.from_(bin_doctype)
+        .select(Sum(bin_doctype.actual_qty).as_("actual_qty"))
+        .where(bin_doctype.item_code == item_code)
+        .where(bin_doctype.warehouse.isin(warehouses))
+        .run(as_dict=True)
     )
 
     return flt(rows[0].actual_qty) if rows else 0.0
+
+
+@frappe.whitelist()
+def get_bulk_stock_availability(items):
+    """
+    Fetch available stock for a list of items.
+
+    Args:
+        items: List of dicts/objects with 'item_code', 'warehouse', and optional 'batch_no'.
+
+    Returns:
+        dict: key=(item_code, warehouse, batch_no), value=qty
+    """
+    if not items:
+        return {}
+
+    # Separate items
+    regular_items_map = {}  # (warehouse) -> set(item_code)
+    results = {}
+
+    for d in items:
+        item_code = d.get("item_code")
+        warehouse = d.get("warehouse")
+        batch_no = cstr(d.get("batch_no"))  # Normalize to empty string
+
+        if not item_code or not warehouse:
+            continue
+
+        if batch_no:
+            # Fallback to existing single fetch for batches for now
+            results[(item_code, warehouse, batch_no)] = flt(get_batch_qty(batch_no, warehouse))
+        else:
+            if warehouse not in regular_items_map:
+                regular_items_map[warehouse] = set()
+            regular_items_map[warehouse].add(item_code)
+
+    if not regular_items_map:
+        return results
+
+    # Identify warehouse groups
+    all_warehouses = list(regular_items_map.keys())
+    group_warehouses = set(
+        frappe.get_all("Warehouse", filters={"name": ["in", all_warehouses], "is_group": 1}, pluck="name")
+    )
+
+    bin_doctype = DocType("Bin")
+
+    for warehouse, item_codes in regular_items_map.items():
+        if not item_codes:
+            continue
+
+        target_warehouses = [warehouse]
+        if warehouse in group_warehouses:
+            target_warehouses = frappe.db.get_descendants("Warehouse", warehouse) or []
+
+        if not target_warehouses:
+            for code in item_codes:
+                results[(code, warehouse, "")] = 0.0
+            continue
+
+        # Chunking item_codes if too many (SQL IN limit usually 1000s, invoices are smaller)
+        item_code_list = list(item_codes)
+
+        query = (
+            frappe.qb.from_(bin_doctype)
+            .select(bin_doctype.item_code, Sum(bin_doctype.actual_qty).as_("actual_qty"))
+            .where(bin_doctype.item_code.isin(item_code_list))
+            .where(bin_doctype.warehouse.isin(target_warehouses))
+            .groupby(bin_doctype.item_code)
+        )
+
+        rows = query.run(as_dict=True)
+        qty_map = {r.item_code: flt(r.actual_qty) for r in rows}
+
+        for code in item_codes:
+            results[(code, warehouse, "")] = qty_map.get(code, 0.0)
+
+    return results
 
 
 @frappe.whitelist()

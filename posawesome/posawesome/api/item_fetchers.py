@@ -7,6 +7,8 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tupl
 
 import frappe
 from erpnext.setup.utils import get_exchange_rate
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, nowdate
 from frappe.utils.caching import redis_cache
 
@@ -118,14 +120,14 @@ def _fetch_bin_qty(warehouse: str, item_codes: Tuple[str, ...]):
         warehouses = frappe.db.get_descendants("Warehouse", warehouse) or []
         if not warehouses:
             return []
-        return frappe.get_all(
-            "Bin",
-            fields=["item_code", "sum(actual_qty) as actual_qty"],
-            filters={
-                "warehouse": ["in", warehouses],
-                "item_code": ["in", item_codes],
-            },
-            group_by="item_code",
+        bin_doctype = DocType("Bin")
+        return (
+            frappe.qb.from_(bin_doctype)
+            .select(bin_doctype.item_code, Sum(bin_doctype.actual_qty).as_("actual_qty"))
+            .where(bin_doctype.warehouse.isin(warehouses))
+            .where(bin_doctype.item_code.isin(item_codes))
+            .groupby(bin_doctype.item_code)
+            .run(as_dict=True)
         )
 
     return frappe.get_all(

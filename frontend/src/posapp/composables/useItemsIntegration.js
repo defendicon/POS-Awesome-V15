@@ -264,6 +264,7 @@ export function useItemsIntegration(options = {}) {
 		appendCachedItemsPage: itemsStore.appendCachedItemsPage,
 		resetCachedItemsForGroup: itemsStore.resetCachedItemsForGroup,
 		backgroundSyncItems: itemsStore.backgroundSyncItems,
+		refreshModifiedItems: itemsStore.refreshModifiedItems,
 		getItemByCode: itemsStore.getItemByCode,
 		getItemByBarcode: itemsStore.getItemByBarcode,
 		addScannedItem: itemsStore.addScannedItem,

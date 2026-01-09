@@ -619,7 +619,7 @@ export default {
 				price_list_rate: 0,
 				uom: resolvedUom || (catalogItem ? catalogItem.uom : undefined),
 			};
-			const freeLine = this.get_new_item(template);
+			let freeLine = this.get_new_item(template);
 			freeLine.qty = quantity;
 			if (resolvedUom) {
 				freeLine.uom = resolvedUom;
@@ -643,7 +643,15 @@ export default {
 
 			const parentIndex = this.items.findIndex((line) => line.posa_row_id === data.parentRowId);
 			const insertAt = parentIndex >= 0 ? parentIndex + 1 : this.items.length;
-			this.items.splice(insertAt, 0, freeLine);
+			if (this.invoiceStore) {
+				// Use the reactive proxy returned by the store
+				const added = this.invoiceStore.addItem(freeLine, insertAt);
+				if (added) {
+					freeLine = added;
+				}
+			} else {
+				this.items.splice(insertAt, 0, freeLine);
+			}
 			if (this.calc_stock_qty) {
 				this.calc_stock_qty(freeLine, freeLine.qty);
 			}
@@ -652,15 +660,12 @@ export default {
 		const removable = [];
 		this.items.forEach((line, index) => {
 			if (line && line.auto_free_source && !expectedKeys.has(line.auto_free_source)) {
-				removable.push(index);
+				removable.push(line);
 			}
 		});
 
-		removable.reverse().forEach((idx) => {
-			const [line] = this.items.splice(idx, 1);
-			if (line && line.bundle_id) {
-				this.packed_items = this.packed_items.filter((packed) => packed.bundle_id !== line.bundle_id);
-			}
+		removable.forEach((line) => {
+			this.remove_item(line);
 		});
 	},
 	async applyPricingRulesForCart(force = false) {
@@ -2169,17 +2174,14 @@ export default {
 				// the referenced Sales or POS Invoice
 				...(item.sales_invoice_item && { sales_invoice_item: item.sales_invoice_item }),
 				...(item.pos_invoice_item && { pos_invoice_item: item.pos_invoice_item }),
+				// Explicitly include stock status to optimize backend validation loops
+				// where O(N) cache lookups occur if this flag is missing.
+				is_stock_item: item.is_stock_item,
 				discount_percentage: flt(item.discount_percentage),
 				batch_no: item.batch_no,
 				posa_notes: item.posa_notes,
 				posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
 			};
-			if (isReturn) {
-				const refField = usesPosInvoice ? "pos_invoice_item" : "sales_invoice_item";
-				if (!new_item[refField] && item.name) {
-					new_item[refField] = item.name;
-				}
-			}
 
 			// Handle currency conversion for rates and amounts
 			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
@@ -2268,6 +2270,54 @@ export default {
 
 	// Prepare payments array for invoice doc
 	get_payments() {
+		if (
+			this.isReturnInvoice &&
+			Array.isArray(this.invoice_doc?.payments) &&
+			this.invoice_doc.payments.length
+		) {
+			const total_amount = Math.abs(this.subtotal);
+			const sourcePayments = this.invoice_doc.payments.filter((payment) => payment?.mode_of_payment);
+			const sourceTotal = sourcePayments.reduce(
+				(sum, payment) => sum + Math.abs(this.flt(payment.amount || 0, this.currency_precision)),
+				0,
+			);
+
+			if (sourcePayments.length && sourceTotal > 0 && total_amount > 0) {
+				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+				let remaining_amount = total_amount;
+
+				return sourcePayments.map((payment, index) => {
+					const share =
+						Math.abs(this.flt(payment.amount || 0, this.currency_precision)) / sourceTotal;
+					let payment_amount =
+						index === sourcePayments.length - 1
+							? remaining_amount
+							: this.flt(total_amount * share, this.currency_precision);
+					payment_amount = -Math.abs(payment_amount);
+					remaining_amount = this.flt(
+						remaining_amount - Math.abs(payment_amount),
+						this.currency_precision,
+					);
+
+					const base_amount =
+						this.selected_currency !== baseCurrency
+							? this.flt(payment_amount / (this.exchange_rate || 1), this.currency_precision)
+							: payment_amount;
+
+					return {
+						amount: payment_amount,
+						base_amount: base_amount,
+						mode_of_payment: payment.mode_of_payment,
+						default: payment.default,
+						account: payment.account || "",
+						type: payment.type || "Cash",
+						currency: this.selected_currency || this.pos_profile.currency,
+						conversion_rate: this.conversion_rate || 1,
+					};
+				});
+			}
+		}
+
 		const payments = [];
 		// Use this.subtotal which is already in selected currency and includes all calculations
 		const total_amount = this.subtotal;
@@ -4420,6 +4470,49 @@ export default {
 	schedulePricingRuleApplication: debounce(function (force = false) {
 		this.applyPricingRulesForCart(force);
 	}, 150),
+
+	triggerBackgroundFlush: debounce(function () {
+		this.flushBackgroundUpdates();
+	}, 2000), // 2s debounce as requested
+
+	async flushBackgroundUpdates() {
+		if (isOffline()) return;
+
+		const itemsToUpdate = [];
+		const items = this.invoiceStore ? this.invoiceStore.items.value : this.items;
+
+		if (!Array.isArray(items)) return;
+
+		items.forEach((item) => {
+			if (!item) return;
+			// Check if item is marked dirty or needs sync
+			// We can also check if essential fields are missing (like price_list_rate if 0?)
+			// But _needs_update flag set by useItemAddition is the primary signal.
+			if (item._needs_update || item._detailSynced === false) {
+				itemsToUpdate.push(item);
+			}
+		});
+
+		if (itemsToUpdate.length === 0) return;
+
+		console.log(`Background flushing ${itemsToUpdate.length} items`);
+
+		try {
+			// This calls the existing batch update method
+			await this.update_items_details(itemsToUpdate);
+
+			// Mark as synced
+			itemsToUpdate.forEach((item) => {
+				item._needs_update = false;
+				item._detailSynced = true;
+			});
+
+			// Re-apply pricing rules if rates changed
+			this.schedulePricingRuleApplication();
+		} catch (e) {
+			console.error("Background flush failed", e);
+		}
+	},
 
 	change_price_list_rate(item) {
 		const vm = this;

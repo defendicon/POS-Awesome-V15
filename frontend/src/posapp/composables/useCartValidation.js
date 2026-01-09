@@ -32,6 +32,7 @@ export function useCartValidation() {
 		eventBus,
 		blockSaleBeyondAvailableQty = false,
 		showNegativeStockWarning = true,
+		skipServerValidation = false,
 	) {
 		isValidating.value = true;
 		validationError.value = null;
@@ -93,20 +94,23 @@ export function useCartValidation() {
 				}
 
 				// Step 5: Server-side stock validation
-				const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
+				// Skipped for instant-add flows; relied on background sync or checkout validation
+				if (!skipServerValidation) {
+					const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
 
-				if (!stockValidationResult.isValid) {
-					if (eventBus) {
-						eventBus.emit("show_message", {
-							title: formatStockShortageError(
-								stockValidationResult.data?.item_name || item.item_name || item.item_code,
-								stockValidationResult.data?.available_qty ?? item.actual_qty,
-								stockValidationResult.data?.requested_qty ?? requestedQty,
-							),
-							color: "error",
-						});
+					if (!stockValidationResult.isValid) {
+						if (eventBus) {
+							eventBus.emit("show_message", {
+								title: formatStockShortageError(
+									stockValidationResult.data?.item_name || item.item_name || item.item_code,
+									stockValidationResult.data?.available_qty ?? item.actual_qty,
+									stockValidationResult.data?.requested_qty ?? requestedQty,
+								),
+								color: "error",
+							});
+						}
+						return false;
 					}
-					return false;
 				}
 			}
 			return true;

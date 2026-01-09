@@ -153,6 +153,7 @@ def set_paid_amount_and_received_amount(
 def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None):
     try:
         party_account = get_party_account("Customer", customer, company)
+        customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
 
         frappe.logger().debug(
             f"Fetching outstanding invoices for customer: {customer}, party_account: {party_account}"
@@ -195,6 +196,117 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         for invoice in outstanding_invoices:
             invoice.outstanding_amount = flt(invoice.outstanding_amount)
             invoice.invoice_amount = flt(invoice.invoice_amount)
+            invoice.voucher_type = "Sales Invoice"
+
+        journal_entries = []
+        if customer and company:
+            conditions = []
+            params = {"company": company, "customer": customer}
+
+            if party_account:
+                conditions.append("jea.account = %(party_account)s")
+                params["party_account"] = party_account
+
+            if currency:
+                conditions.append("jea.account_currency = %(currency)s")
+                params["currency"] = currency
+
+            condition_sql = ""
+            if conditions:
+                condition_sql = " AND " + " AND ".join(conditions)
+
+            journal_entries = frappe.db.sql(
+                f"""
+                    SELECT
+                        je.name AS voucher_no,
+                        je.posting_date AS posting_date,
+                        jea.debit_in_account_currency AS debit_in_account_currency,
+                        jea.credit_in_account_currency AS credit_in_account_currency,
+                        jea.account_currency AS currency,
+                        jea.account AS account
+                    FROM `tabJournal Entry Account` jea
+                    INNER JOIN `tabJournal Entry` je ON je.name = jea.parent
+                    WHERE je.docstatus = 1
+                        AND je.company = %(company)s
+                        AND jea.party_type = 'Customer'
+                        AND jea.party = %(customer)s
+                        AND (jea.reference_type IS NULL OR jea.reference_type = '')
+                        AND (jea.reference_name IS NULL OR jea.reference_name = '')
+                        {condition_sql}
+                """,
+                params,
+                as_dict=True,
+            )
+
+            journal_entries = [
+                frappe._dict(
+                    {
+                        "voucher_no": entry.voucher_no,
+                        "outstanding_amount": flt(entry.debit_in_account_currency)
+                        - flt(entry.credit_in_account_currency),
+                        "invoice_amount": flt(entry.debit_in_account_currency)
+                        - flt(entry.credit_in_account_currency),
+                        "due_date": entry.posting_date,
+                        "posting_date": entry.posting_date,
+                        "currency": entry.currency or currency,
+                        "pos_profile": None,
+                        "customer": customer,
+                        "customer_name": customer_name,
+                        "voucher_type": "Journal Entry",
+                    }
+                )
+                for entry in journal_entries
+            ]
+
+            journal_entry_names = [entry.get("voucher_no") for entry in journal_entries]
+            allocated_map = {}
+            if journal_entry_names:
+                allocated_rows = frappe.db.sql(
+                    """
+                        SELECT
+                            per.reference_name AS voucher_no,
+                            SUM(per.allocated_amount) AS allocated_amount
+                        FROM `tabPayment Entry Reference` per
+                        INNER JOIN `tabPayment Entry` pe ON pe.name = per.parent
+                        WHERE pe.docstatus = 1
+                            AND pe.party_type = 'Customer'
+                            AND pe.party = %(customer)s
+                            AND pe.company = %(company)s
+                            AND per.reference_doctype = 'Journal Entry'
+                            AND per.reference_name IN %(voucher_nos)s
+                        GROUP BY per.reference_name
+                    """,
+                    {
+                        "voucher_nos": tuple(journal_entry_names),
+                        "customer": customer,
+                        "company": company,
+                    },
+                    as_dict=True,
+                )
+                allocated_map = {
+                    row.voucher_no: flt(row.allocated_amount) for row in allocated_rows or []
+                }
+
+            updated_entries = []
+            for entry in journal_entries:
+                allocated_amount = flt(allocated_map.get(entry.get("voucher_no")))
+                if allocated_amount:
+                    entry.outstanding_amount = max(
+                        0, flt(entry.outstanding_amount) - max(0, allocated_amount)
+                    )
+                if flt(entry.outstanding_amount) > 0:
+                    updated_entries.append(entry)
+
+            journal_entries = updated_entries
+
+        outstanding_invoices = outstanding_invoices + journal_entries
+        outstanding_invoices = sorted(
+            outstanding_invoices,
+            key=lambda inv: (
+                getdate(inv.get("posting_date")) if inv.get("posting_date") else getdate(nowdate())
+            ),
+            reverse=True,
+        )
 
         frappe.logger().debug(f"Found {len(outstanding_invoices)} outstanding invoices")
         frappe.logger().debug(
@@ -436,7 +548,7 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
                             "voucher_type": "Sales Invoice",
                             "voucher_no": payment_name,
                             "voucher_detail_no": None,
-                            "against_voucher_type": "Sales Invoice",
+                            "against_voucher_type": invoice.get("voucher_type") or "Sales Invoice",
                             "against_voucher": invoice.get("voucher_no"),
                             "account": receivable_account,
                             "party_type": "Customer",
@@ -543,7 +655,7 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
                         "voucher_type": "Payment Entry",
                         "voucher_no": payment_name,
                         "voucher_detail_no": None,
-                        "against_voucher_type": "Sales Invoice",
+                        "against_voucher_type": invoice.get("voucher_type") or "Sales Invoice",
                         "against_voucher": invoice.get("voucher_no"),
                         "account": pe_doc.paid_from,
                         "party_type": "Customer",
@@ -692,16 +804,25 @@ def process_pos_payment(payload):
     remaining_invoices = []
     for invoice in data.selected_invoices:
         invoice_name = invoice.get("voucher_no") or invoice.get("name")
+        voucher_type = invoice.get("voucher_type") or "Sales Invoice"
         if not invoice_name:
             continue
         outstanding = flt(invoice.get("outstanding_amount"))
-        if outstanding <= 0:
+        if outstanding <= 0 and voucher_type == "Sales Invoice":
             try:
                 si = frappe.get_doc("Sales Invoice", invoice_name)
                 outstanding = flt(si.outstanding_amount)
             except Exception:
                 outstanding = 0
-        remaining_invoices.append({"name": invoice_name, "outstanding_amount": outstanding})
+        if outstanding <= 0:
+            continue
+        remaining_invoices.append(
+            {
+                "name": invoice_name,
+                "outstanding_amount": outstanding,
+                "voucher_type": voucher_type,
+            }
+        )
 
     new_payments_entry = []
     all_payments_entry = []
@@ -776,7 +897,7 @@ def process_pos_payment(payload):
                                     "voucher_type": "Sales Invoice",
                                     "voucher_no": payment_name,
                                     "voucher_detail_no": None,
-                                    "against_voucher_type": "Sales Invoice",
+                                    "against_voucher_type": inv.get("voucher_type") or "Sales Invoice",
                                     "against_voucher": inv["name"],
                                     "account": receivable_account,
                                     "party_type": "Customer",
@@ -871,7 +992,7 @@ def process_pos_payment(payload):
                                 "voucher_type": "Payment Entry",
                                 "voucher_no": payment_name,
                                 "voucher_detail_no": None,
-                                "against_voucher_type": "Sales Invoice",
+                                "against_voucher_type": inv.get("voucher_type") or "Sales Invoice",
                                 "against_voucher": inv["name"],
                                 "account": pe_doc.paid_from,
                                 "party_type": "Customer",
@@ -950,7 +1071,7 @@ def process_pos_payment(payload):
                     payment_entry.append(
                         "references",
                         {
-                            "reference_doctype": "Sales Invoice",
+                            "reference_doctype": inv.get("voucher_type") or "Sales Invoice",
                             "reference_name": inv["name"],
                             "total_amount": inv["outstanding_amount"],
                             "outstanding_amount": inv["outstanding_amount"],

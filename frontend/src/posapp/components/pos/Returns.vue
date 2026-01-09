@@ -639,6 +639,18 @@ export default {
 				invoice_doc.customer = return_doc.customer;
 				invoice_doc.discount_amount = return_doc.discount_amount;
 				invoice_doc.additional_discount_percentage = return_doc.additional_discount_percentage;
+				invoice_doc.payments = Array.isArray(return_doc.payments)
+					? return_doc.payments.map((payment) => ({
+							mode_of_payment: payment.mode_of_payment,
+							amount: payment.amount,
+							base_amount: payment.base_amount,
+							default: payment.default,
+							account: payment.account,
+							type: payment.type,
+							currency: payment.currency,
+							conversion_rate: payment.conversion_rate,
+						}))
+					: [];
 
 				// Make sure grand_total is negative for returns
 				if (return_doc.grand_total > 0) {

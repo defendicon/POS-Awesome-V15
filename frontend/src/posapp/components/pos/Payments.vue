@@ -682,6 +682,23 @@
 						></v-select>
 					</v-col>
 				</v-row>
+				<!-- Print Format Selection -->
+				<v-row class="pb-0 mb-2" align="start">
+					<v-col cols="12">
+						<v-select
+							density="compact"
+							clearable
+							variant="solo"
+							color="primary"
+							:label="frappe._('Print Format')"
+							v-model="print_format"
+							:items="print_formats"
+							class="sleek-field pos-themed-input"
+							:no-data-text="__('No Print Formats Found')"
+							hide-details
+						></v-select>
+					</v-col>
+				</v-row>
 			</div>
 		</v-card>
 
@@ -802,7 +819,6 @@
 /* global frappe, __, get_currency_symbol */
 // Importing format mixin for currency and utility functions
 import format, { formatUtils } from "../../format";
-import { parseBooleanSetting } from "../../utils/stock.js";
 import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";
 import {
 	saveOfflineInvoice,
@@ -862,10 +878,15 @@ export default {
 			mpesa_modes: [], // List of available M-Pesa modes
 			sales_persons: [], // List of sales persons
 			sales_person: "", // Selected sales person
+			print_formats: [], // List of print formats
+			print_format: "", // Selected print format
 			addresses: [], // List of customer addresses
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 			last_payment_change_was_cash: null, // Track last edited payment type
+			backgroundStatusCheck: null,
+			paymentVisible: false,
+			_shortcutHandlers: {},
 		};
 	},
 	computed: {
@@ -894,15 +915,28 @@ export default {
 			}
 			return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
+		// Performance: normalize payment amounts once per reactive update to avoid repeated parsing
+		// across totals, change calculations, and denomination rendering (cuts ~3 O(n) scans per render).
+		paymentAmountSummary() {
+			const payments = Array.isArray(this.invoice_doc?.payments) ? this.invoice_doc.payments : [];
+			let total = 0;
+			const amountByPayment = new Map();
+
+			payments.forEach((payment) => {
+				const amount = parseFloat(formatUtils.fromArabicNumerals(String(payment?.amount))) || 0;
+				amountByPayment.set(payment, amount);
+				total += amount;
+			});
+
+			return {
+				payments,
+				amountByPayment,
+				total: this.flt(total, this.currency_precision),
+			};
+		},
 		// Calculate total payments (all methods, loyalty, credit)
 		total_payments() {
-			let total = 0;
-			if (this.invoice_doc && this.invoice_doc.payments) {
-				this.invoice_doc.payments.forEach((payment) => {
-					// Payment amount is already in selected currency
-					total += parseFloat(formatUtils.fromArabicNumerals(String(payment.amount))) || 0;
-				});
-			}
+			let total = this.paymentAmountSummary.total;
 
 			// Add loyalty amount (convert if needed)
 			const doc = this.invoice_doc;
@@ -1004,15 +1038,14 @@ export default {
 				return false;
 			}
 
-			const payments = Array.isArray(this.invoice_doc.payments) ? this.invoice_doc.payments : [];
-
+			const { payments, amountByPayment } = this.paymentAmountSummary;
 			const totals = payments.reduce(
 				(accumulator, payment) => {
 					if (!payment) {
 						return accumulator;
 					}
 
-					const amount = this.flt(payment.amount || 0, this.currency_precision);
+					const amount = this.flt(amountByPayment.get(payment) || 0, this.currency_precision);
 
 					if (this.isCashLikePayment(payment)) {
 						accumulator.cash += amount;
@@ -1281,8 +1314,10 @@ export default {
 		"invoice_doc.customer"(customer, previous) {
 			if (customer && customer !== previous) {
 				this.get_addresses();
+				this.set_print_format();
 			} else if (!customer) {
 				this.addresses = [];
+				this.print_format = "";
 			}
 		},
 		"invoice_doc.posa_delivery_date"(date) {
@@ -1311,6 +1346,56 @@ export default {
 		},
 	},
 	methods: {
+		extractSubmissionErrorMessage(exc) {
+			if (!exc) {
+				return __("Unknown error");
+			}
+			if (exc?._server_messages) {
+				try {
+					const parsed = JSON.parse(exc._server_messages);
+					if (Array.isArray(parsed) && parsed.length) {
+						const first = parsed[0];
+						// Check if message is a JSON string containing errors (stock validation)
+						try {
+							const msgObj = JSON.parse(first);
+							if (msgObj.errors && Array.isArray(msgObj.errors)) {
+								return this.formatStockErrors(msgObj.errors);
+							}
+						} catch {
+							/* Not a JSON string */
+						}
+
+						if (typeof first === "string") {
+							return frappe.utils.strip_html(first);
+						}
+					}
+				} catch {
+					/* ignore parse issues */
+				}
+			}
+			if (exc?.message) {
+				try {
+					const parsed = JSON.parse(exc.message);
+					if (parsed.errors && Array.isArray(parsed.errors)) {
+						return this.formatStockErrors(parsed.errors);
+					}
+				} catch {
+					/* Not a JSON string */
+				}
+				return exc.message;
+			}
+			return exc.toString ? exc.toString() : __("Unknown error");
+		},
+		formatStockErrors(errors) {
+			const msg = errors
+				.map((e) => `${e.item_code} (${e.warehouse}) - ${this.formatFloat(e.available_qty)}`)
+				.join("\n");
+			const blocking = !this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
+
+			return blocking
+				? __("Insufficient stock:\n{0}", [msg])
+				: __("Stock is lower than requested:\n{0}", [msg]);
+		},
 		// Go back to invoice view and reset customer readonly
 		back_to_invoice() {
 			this.eventBus.emit("show_payment", "false");
@@ -1319,9 +1404,18 @@ export default {
 				this.eventBus.emit("focus_item_search");
 			});
 		},
+		finishSubmissionNavigation(clearInvoice = false) {
+			this.back_to_invoice();
+			if (clearInvoice) {
+				this.addresses = [];
+				this.eventBus.emit("clear_invoice");
+				this.eventBus.emit("reset_posting_date");
+			}
+		},
 		// Highlight and focus the submit button when payment screen opens
 		handleShowPayment(data) {
 			if (data === "true") {
+				this.paymentVisible = true;
 				this.$nextTick(() => {
 					setTimeout(() => {
 						const btn = this.$refs.submitButton;
@@ -1334,6 +1428,7 @@ export default {
 					}, 100);
 				});
 			} else {
+				this.paymentVisible = false;
 				this.highlightSubmit = false;
 			}
 		},
@@ -1503,42 +1598,8 @@ export default {
 					frappe.utils.play_sound("error");
 					return;
 				}
-				// Validate stock availability before submitting
-				if (!isOffline()) {
-					try {
-						const itemsToCheck = this.invoice_doc.items.filter((it) => !it.is_bundle);
-						const stockCheck = await frappe.call({
-							method: "posawesome.posawesome.api.invoices.validate_cart_items",
-							args: { items: JSON.stringify(itemsToCheck) },
-						});
-						if (stockCheck.message && stockCheck.message.length) {
-							const msg = stockCheck.message
-								.map(
-									(e) =>
-										`${e.item_code} (${e.warehouse}) - ${this.formatFloat(
-											e.available_qty,
-										)}`,
-								)
-								.join("\n");
-							const blocking =
-								!this.stock_settings.allow_negative_stock || this.blockSaleBeyondAvailableQty;
-							this.eventBus.emit("show_message", {
-								title: blocking
-									? __("Insufficient stock:\n{0}", [msg])
-									: __("Stock is lower than requested:\n{0}", [msg]),
-								color: blocking ? "error" : "warning",
-							});
-							if (blocking) {
-								frappe.utils.play_sound("error");
-								return;
-							}
-						}
-					} catch (e) {
-						console.error("Stock validation failed", e);
-					}
-				}
-
 				// Proceed to submit the invoice
+				// We rely on backend validation in submit_invoice to catch stock issues
 				await this.submit_invoice(print);
 			} catch (error) {
 				console.error("An error occurred during submission:", error);
@@ -1624,27 +1685,65 @@ export default {
 			}
 
 			try {
-                                const r = await frappe.call({
-                                        method:
-                                                this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-                                                        ? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-                                                        : this.invoiceType === "Quotation"
-                                                                ? "posawesome.posawesome.api.quotations.submit_quotation"
-                                                                : "posawesome.posawesome.api.invoices.submit_invoice",
-                                        args: {
-                                                data: data,
-                                                invoice: this.invoice_doc,
-                                                order: this.invoice_doc,
-                                                submit_in_background:
-                                                        this.pos_profile.posa_allow_submissions_in_background_job,
-                                        },
-                                });
+				const r = await frappe.call({
+					method:
+						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
+							? "posawesome.posawesome.api.sales_orders.submit_sales_order"
+							: this.invoiceType === "Quotation"
+								? "posawesome.posawesome.api.quotations.submit_quotation"
+								: "posawesome.posawesome.api.invoices.submit_invoice",
+					args: {
+						data: data,
+						invoice: this.invoice_doc,
+						order: this.invoice_doc,
+						submit_in_background: this.pos_profile.posa_allow_submissions_in_background_job,
+					},
+				});
 
 				if (!r.message) {
+					if (
+						this.pos_profile?.posa_allow_submissions_in_background_job &&
+						this.eventBus &&
+						typeof this.eventBus.emit === "function"
+					) {
+						this.eventBus.emit("invoice_submission_failed", {
+							invoice: this.invoice_doc?.name,
+							reason: __("No response from server"),
+						});
+					}
 					this.eventBus.emit("show_message", {
 						title: __("Error submitting invoice: No response from server"),
 						color: "error",
 					});
+					return;
+				}
+
+				const docstatus = r.message?.docstatus;
+				const status = r.message?.status;
+				const responseInvoiceName = r.message?.name || this.invoice_doc?.name;
+				const backgroundReason =
+					r.message?.error || r.message?.exc || r.message?.exception || r.message?.message;
+
+				const wasSubmitted =
+					docstatus === 1 || status === 1 || (docstatus === undefined && status === undefined);
+
+				if (!wasSubmitted && backgroundReason) {
+					if (this.pos_profile?.posa_allow_submissions_in_background_job) {
+						if (this.eventBus && typeof this.eventBus.emit === "function") {
+							this.eventBus.emit("invoice_submission_failed", {
+								invoice: responseInvoiceName,
+								reason: backgroundReason,
+							});
+						}
+					}
+
+					this.eventBus.emit("show_message", {
+						title: __("Error submitting invoice: {0}", [responseInvoiceName || ""]),
+						color: "error",
+						detail: backgroundReason,
+					});
+					this.finishSubmissionNavigation(true);
+					this.scheduleBackgroundStatusCheck(responseInvoiceName, r.message?.doctype);
 					return;
 				}
 
@@ -1680,14 +1779,11 @@ export default {
 					item_codes: submittedCodes,
 					timestamp: Date.now(),
 				});
-				this.addresses = [];
-				this.eventBus.emit("clear_invoice");
-				this.eventBus.emit("focus_item_search");
-				this.eventBus.emit("reset_posting_date");
-				this.back_to_invoice();
+				this.finishSubmissionNavigation(true);
+				this.scheduleBackgroundStatusCheck(responseInvoiceName, r.message?.doctype);
 			} catch (exc) {
 				console.error("Error submitting invoice:", exc);
-				let errorMsg = exc.toString();
+				let errorMsg = this.extractSubmissionErrorMessage(exc);
 				if (errorMsg.includes("Amount must be negative")) {
 					this.eventBus.emit("show_message", {
 						title: __("Fixing payment amounts for return invoice..."),
@@ -1706,11 +1802,72 @@ export default {
 						this.submit_invoice(print);
 					}, 500);
 				} else {
+					if (
+						this.pos_profile?.posa_allow_submissions_in_background_job &&
+						this.eventBus &&
+						typeof this.eventBus.emit === "function"
+					) {
+						this.eventBus.emit("invoice_submission_failed", {
+							invoice: this.invoice_doc?.name,
+							reason: errorMsg,
+						});
+					}
 					this.eventBus.emit("show_message", {
 						title: __("Error submitting invoice: ") + errorMsg,
 						color: "error",
 					});
+					if (this.pos_profile?.posa_allow_submissions_in_background_job) {
+						this.finishSubmissionNavigation(true);
+						this.scheduleBackgroundStatusCheck(this.invoice_doc?.name, this.invoice_doc?.doctype);
+					}
 				}
+			}
+		},
+		scheduleBackgroundStatusCheck(invoiceName, doctype) {
+			this.clearBackgroundStatusCheck();
+			if (!this.pos_profile?.posa_allow_submissions_in_background_job) {
+				return;
+			}
+			if (!invoiceName) {
+				return;
+			}
+			this.backgroundStatusCheck = setTimeout(async () => {
+				try {
+					const result = await frappe.call({
+						method: "frappe.client.get_value",
+						args: {
+							doctype: doctype || this.invoice_doc?.doctype || "Sales Invoice",
+							filters: { name: invoiceName },
+							fieldname: ["docstatus"],
+						},
+					});
+					const status = result?.message?.docstatus;
+					if (status === 1) {
+						return;
+					}
+					const reason = this.__("Invoice is still in draft after background submission.");
+					if (this.eventBus && typeof this.eventBus.emit === "function") {
+						this.eventBus.emit("invoice_submission_failed", {
+							invoice: invoiceName,
+							reason,
+						});
+					}
+					this.eventBus.emit("show_message", {
+						title: __("Error submitting invoice: {0}", [invoiceName]),
+						color: "error",
+						detail: reason,
+					});
+				} catch (err) {
+					console.error("Background status check failed", err);
+				} finally {
+					this.clearBackgroundStatusCheck();
+				}
+			}, 10000);
+		},
+		clearBackgroundStatusCheck() {
+			if (this.backgroundStatusCheck) {
+				clearTimeout(this.backgroundStatusCheck);
+				this.backgroundStatusCheck = null;
 			}
 		},
 		// Set full amount for a payment method (or negative for returns)
@@ -1777,7 +1934,10 @@ export default {
 		},
 		// Open print page for invoice
 		load_print_page() {
-			const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format;
+			const print_format =
+				this.print_format ||
+				this.pos_profile.print_format_for_online ||
+				this.pos_profile.print_format;
 			const letter_head = this.pos_profile.letter_head || 0;
 			let doctype;
 
@@ -1805,6 +1965,29 @@ export default {
 				invoiceDoc: this.invoice_doc,
 				allowOfflineFallback: isOffline(),
 			};
+
+			if (this.pos_profile.posa_open_print_in_new_tab) {
+				let newTabUrl =
+					frappe.urllib.get_base_url() +
+					"/printview?doctype=" +
+					encodeURIComponent(doctype) +
+					"&name=" +
+					this.invoice_doc.name +
+					"&trigger_print=0" +
+					"&format=" +
+					print_format;
+
+				if (this.pos_profile.letter_head) {
+					newTabUrl += "&letterhead=" + encodeURIComponent(this.pos_profile.letter_head);
+					newTabUrl += "&no_letterhead=0";
+				} else {
+					newTabUrl += "&no_letterhead=0";
+				}
+
+				window.open(newTabUrl, "_blank");
+				return;
+			}
+
 			if (this.pos_profile.posa_silent_print) {
 				silentPrint(url, printOptions);
 			} else {
@@ -1831,15 +2014,36 @@ export default {
 				this.invoice_doc.due_date = today;
 			}
 		},
-		// Keyboard shortcut for payment submit (Ctrl+X)
-		shortPay(e) {
-			if (e.key.toLowerCase() === "x" && (e.ctrlKey || e.metaKey)) {
-				e.preventDefault();
-				e.stopPropagation();
-				if (this.invoice_doc && this.invoice_doc.payments) {
-					this.submit_invoice();
-				}
+		// Keyboard shortcuts for payment submit (Alt+X) and submit+print (Alt+P)
+		handlePaymentShortcut(event) {
+			if (!this.paymentVisible) {
+				return;
 			}
+
+			const isAltOnly = event.altKey && !event.ctrlKey && !event.metaKey;
+			const key = event.key.toLowerCase();
+
+			if (isAltOnly && key === "p") {
+				event.preventDefault();
+				event.stopPropagation();
+				this.submit(null, false, true);
+				return;
+			}
+
+			if ((isAltOnly || event.ctrlKey || event.metaKey) && key === "x") {
+				event.preventDefault();
+				event.stopPropagation();
+				this.submit(null, false, false);
+			}
+		},
+		handleSubmitPaymentShortcut({ print = false } = {}) {
+			if (!this.paymentVisible) {
+				return;
+			}
+
+			this.$nextTick(() => {
+				this.submit(null, false, print);
+			});
 		},
 		// Get available customer credit and auto-allocate
 		get_available_credit(use_credit) {
@@ -2345,13 +2549,7 @@ export default {
 			const invoice_total = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
 
 			// Calculate current total paid
-			let current_total_paid = 0;
-			if (this.invoice_doc && this.invoice_doc.payments) {
-				this.invoice_doc.payments.forEach((p) => {
-					current_total_paid += parseFloat(formatUtils.fromArabicNumerals(String(p.amount))) || 0;
-				});
-			}
-			current_total_paid = this.flt(current_total_paid, this.currency_precision);
+			const current_total_paid = this.paymentAmountSummary.total;
 
 			const excess = this.flt(current_total_paid - invoice_total, this.currency_precision);
 
@@ -2392,8 +2590,8 @@ export default {
 			const currency = this.invoice_doc.currency;
 
 			const current_total_paid = this.total_payments;
-			const current_payment_amount =
-				parseFloat(formatUtils.fromArabicNumerals(String(payment.amount))) || 0;
+			const { amountByPayment } = this.paymentAmountSummary;
+			const current_payment_amount = amountByPayment.get(payment) || 0;
 
 			const other_payments = current_total_paid - current_payment_amount;
 
@@ -2484,11 +2682,35 @@ export default {
 			}
 			this.eventBus.emit("pending_invoices_changed", getPendingOfflineInvoiceCount());
 		},
+		get_print_formats() {
+			frappe.call({
+				method: "posawesome.posawesome.api.print_formats.get_print_formats",
+				args: {
+					doctype: "Sales Invoice",
+				},
+				callback: (r) => {
+					this.print_formats = r.message;
+				},
+			});
+		},
+		set_print_format() {
+			this.print_format = "";
+			if (this.pos_profile.posa_print_format_rules && this.customer_info) {
+				const rule = this.pos_profile.posa_print_format_rules.find(
+					(r) => r.customer_group === this.customer_info.customer_group,
+				);
+				if (rule) {
+					this.print_format = rule.print_format;
+				}
+			}
+		},
 	},
 	// Lifecycle hook: created
 	created() {
 		// Register keyboard shortcut for payment
-		document.addEventListener("keydown", this.shortPay.bind(this));
+		this._shortcutHandlers = this._shortcutHandlers || {};
+		this._shortcutHandlers.handlePaymentShortcut = this.handlePaymentShortcut.bind(this);
+		document.addEventListener("keydown", this._shortcutHandlers.handlePaymentShortcut);
 		this.syncPendingInvoices();
 		this.eventBus.on("network-online", this.syncPendingInvoices);
 		// Also sync when the server connection is re-established
@@ -2501,23 +2723,30 @@ export default {
 			this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
 				this.invoice_doc = invoice_doc;
 				const default_payment = this.invoice_doc.payments.find((payment) => payment.default === 1);
+				const hasReturnPayments = this.invoice_doc.payments.some(
+					(payment) => Math.abs(this.flt(payment.amount || 0, this.currency_precision)) > 0,
+				);
 				this.is_credit_sale = false;
 				this.is_write_off_change = false;
 				if (invoice_doc.is_return) {
 					this.is_return = true;
 					this.is_credit_return = false;
-					// Reset all payment amounts to zero for returns
-					invoice_doc.payments.forEach((payment) => {
-						payment.amount = 0;
-						payment.base_amount = 0;
-					});
-					// Set default payment to negative amount for returns
-					if (default_payment) {
-						const amount = invoice_doc.rounded_total || invoice_doc.grand_total;
-						default_payment.amount = -Math.abs(amount);
-						if (default_payment.base_amount !== undefined) {
-							default_payment.base_amount = -Math.abs(amount);
+					if (!hasReturnPayments) {
+						// Reset all payment amounts to zero for returns
+						invoice_doc.payments.forEach((payment) => {
+							payment.amount = 0;
+							payment.base_amount = 0;
+						});
+						// Set default payment to negative amount for returns
+						if (default_payment) {
+							const amount = invoice_doc.rounded_total || invoice_doc.grand_total;
+							default_payment.amount = -Math.abs(amount);
+							if (default_payment.base_amount !== undefined) {
+								default_payment.base_amount = -Math.abs(amount);
+							}
 						}
+					} else {
+						this.ensureReturnPaymentsAreNegative();
 					}
 				} else if (default_payment) {
 					// For regular invoices, set positive amount
@@ -2540,6 +2769,7 @@ export default {
 				this.pos_profile = data.pos_profile;
 				this.stock_settings = data.stock_settings || {};
 				this.get_mpesa_modes();
+				this.get_print_formats();
 			});
 			this.eventBus.on("add_the_new_address", (data) => {
 				const normalized = this.normalizeAddress(data);
@@ -2581,6 +2811,7 @@ export default {
 			this.eventBus.on("set_mpesa_payment", (data) => {
 				this.set_mpesa_payment(data);
 			});
+			this.eventBus.on("submit_payment_shortcut", this.handleSubmitPaymentShortcut);
 			// Clear any stored invoice when parent emits clear_invoice
 			this.eventBus.on("clear_invoice", () => {
 				this.invoice_doc = "";
@@ -2601,15 +2832,21 @@ export default {
 		this.eventBus.off("update_invoice_type");
 		this.eventBus.off("set_pos_settings");
 		this.eventBus.off("set_mpesa_payment");
+		this.eventBus.off("submit_payment_shortcut", this.handleSubmitPaymentShortcut);
 		this.eventBus.off("clear_invoice");
 		this.eventBus.off("network-online", this.syncPendingInvoices);
 		this.eventBus.off("server-online", this.syncPendingInvoices);
 		this.eventBus.off("show_payment", this.handleShowPayment);
+		this.clearBackgroundStatusCheck();
 	},
 	// Lifecycle hook: unmounted
 	unmounted() {
 		// Remove keyboard shortcut listener
-		document.removeEventListener("keydown", this.shortPay);
+		if (!this._shortcutHandlers) {
+			return;
+		}
+		document.removeEventListener("keydown", this._shortcutHandlers.handlePaymentShortcut);
+		this._shortcutHandlers = {};
 	},
 };
 </script>
