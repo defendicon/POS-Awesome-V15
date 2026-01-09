@@ -29,6 +29,7 @@
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
 				rtlClasses,
 			]"
+			ref="itemsSelectorCard"
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
@@ -758,6 +759,10 @@ export default {
 		lastScrollTop: 0,
 		scrollThrottle: null,
 		searchDebounce: null,
+		scrollRestoreToken: 0,
+		resizeObserver: null,
+		resizeObserverRaf: null,
+		lastKnownMaxHeight: null,
 		// Prevent repeated server fetches when local storage is empty
 		fallbackAttempted: false,
 		cardContainerWidth: 0,
@@ -1283,7 +1288,7 @@ export default {
 
 			this.scrollThrottle = requestAnimationFrame(() => {
 				try {
-					const el = this.$refs.itemsContainer;
+					const el = this.getItemsScrollElement();
 					if (!el) return;
 
 					const scrollTop = el.scrollTop;
@@ -1303,6 +1308,118 @@ export default {
 					this.scrollThrottle = null;
 				}
 			});
+		},
+		resolveElement(ref) {
+			const el = ref?.$el || ref?.$?.el || ref;
+			return el && el instanceof HTMLElement ? el : null;
+		},
+		getCardScrollElement() {
+			const ref = this.$refs.itemsContainer;
+			return this.resolveElement(ref);
+		},
+		getListScrollElement() {
+			const ref = this.$refs.itemsTable;
+			const baseEl = this.resolveElement(ref);
+			if (!baseEl) {
+				return null;
+			}
+			return (
+				baseEl.querySelector(".v-table__wrapper") ||
+				baseEl.querySelector(".v-data-table-virtual__wrapper") ||
+				baseEl
+			);
+		},
+		getItemsScrollElement() {
+			// Use the real scroll container so we don't restore on a non-scrollable wrapper.
+			return this.items_view === "card" ? this.getCardScrollElement() : this.getListScrollElement();
+		},
+		captureScrollPosition() {
+			const el = this.getItemsScrollElement();
+			if (!el) {
+				return null;
+			}
+			const top = el.scrollTop || 0;
+			this.lastScrollTop = top;
+			return {
+				top,
+				view: this.items_view,
+			};
+		},
+		applyScrollPosition(snapshot) {
+			if (!snapshot) {
+				return;
+			}
+			const { top, view } = snapshot;
+			if (view && view !== this.items_view) {
+				return;
+			}
+			if (view === "card") {
+				const scroller = this.$refs.itemsContainer;
+				if (scroller?.scrollToPosition) {
+					scroller.scrollToPosition(top);
+					return;
+				}
+			}
+			const el = this.getItemsScrollElement();
+			if (el) {
+				el.scrollTop = top;
+			}
+		},
+		waitForFrame() {
+			return new Promise((resolve) => {
+				requestAnimationFrame(() => resolve());
+			});
+		},
+		scheduleScrollRestore(snapshot) {
+			if (!snapshot) {
+				return;
+			}
+			const token = ++this.scrollRestoreToken;
+			this.$nextTick(() => {
+				// Wait for DOM + virtual scroller recalculation to settle before restoring.
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						if (token !== this.scrollRestoreToken) {
+							return;
+						}
+						this.applyScrollPosition(snapshot);
+					});
+				});
+			});
+		},
+		async restoreScrollPosition(snapshot) {
+			if (!snapshot) {
+				return;
+			}
+			const token = ++this.scrollRestoreToken;
+			await this.$nextTick();
+			await this.waitForFrame();
+			await this.waitForFrame();
+			if (token !== this.scrollRestoreToken) {
+				return;
+			}
+			this.applyScrollPosition(snapshot);
+		},
+		setupItemsResizeObserver() {
+			if (typeof ResizeObserver === "undefined") {
+				return;
+			}
+			const target = this.resolveElement(this.$refs.itemsSelectorCard);
+			if (!target) {
+				return;
+			}
+			const scheduleResize = () => {
+				if (this.resizeObserverRaf) {
+					cancelAnimationFrame(this.resizeObserverRaf);
+				}
+				this.resizeObserverRaf = requestAnimationFrame(() => {
+					this.resizeObserverRaf = null;
+					const scrollSnapshot = this.captureScrollPosition();
+					this.checkItemContainerOverflow(scrollSnapshot);
+				});
+			};
+			this.resizeObserver = new ResizeObserver(scheduleResize);
+			this.resizeObserver.observe(target);
 		},
 		markStorageUnavailable(localOnly = false) {
 			if (localOnly) {
@@ -1397,7 +1514,8 @@ export default {
 			});
 		},
 
-		checkItemContainerOverflow() {
+		checkItemContainerOverflow(scrollSnapshot = null) {
+			const snapshot = scrollSnapshot || this.captureScrollPosition();
 			const ref = this.$refs.itemsContainer;
 			const el = ref && ref.$el ? ref.$el : ref;
 			if (!el) {
@@ -1415,9 +1533,14 @@ export default {
 			const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
 			const availableHeight = containerHeight - headerHeight;
 
-			el.style.maxHeight = `${availableHeight}px`;
+			const nextMaxHeight = `${availableHeight}px`;
+			if (this.lastKnownMaxHeight !== nextMaxHeight) {
+				el.style.maxHeight = nextMaxHeight;
+				this.lastKnownMaxHeight = nextMaxHeight;
+			}
 			this.isOverflowing = el.scrollHeight > availableHeight;
 			this.scheduleCardMetricsUpdate();
+			this.scheduleScrollRestore(snapshot);
 		},
 
 		async fetchItemDetails(items) {
@@ -2111,8 +2234,10 @@ export default {
 			// Add item to cart
 			const payload = { ...item };
 			delete payload._barcode_qty;
+			const scrollSnapshot = this.captureScrollPosition();
 			this.eventBus.emit("add_item", payload);
 			this.qty = 1;
+			await this.restoreScrollPosition(scrollSnapshot);
 		},
 
 		/**
@@ -4902,6 +5027,7 @@ export default {
 		// Apply the configured items per page on mount
 		this.itemsPerPage = this.items_per_page;
 		window.addEventListener("resize", this.checkItemContainerOverflow);
+		this.setupItemsResizeObserver();
 		this.$nextTick(() => {
 			this.checkItemContainerOverflow();
 			this.scheduleCardMetricsUpdate();
@@ -4973,6 +5099,14 @@ export default {
 		this.eventBus.off("select_top_item");
 		this.eventBus.off("toggle_item_selector_settings");
 		window.removeEventListener("resize", this.checkItemContainerOverflow);
+		if (this.resizeObserver) {
+			this.resizeObserver.disconnect();
+			this.resizeObserver = null;
+		}
+		if (this.resizeObserverRaf) {
+			cancelAnimationFrame(this.resizeObserverRaf);
+			this.resizeObserverRaf = null;
+		}
 		if (this.metricsRaf) {
 			cancelAnimationFrame(this.metricsRaf);
 			this.metricsRaf = null;
