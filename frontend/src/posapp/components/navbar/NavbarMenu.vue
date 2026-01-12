@@ -614,12 +614,12 @@ export default {
 /* Mobile Menu Button Styles */
 .mobile-menu-btn {
 	margin: 0 !important;
-	padding: 6px !important;
-	border-radius: 12px !important;
-	min-width: 36px !important;
-	max-width: 36px !important;
-	width: 36px !important;
-	height: 36px !important;
+	padding: 8px !important;
+	border-radius: 14px !important;
+	min-width: 44px !important;
+	max-width: 44px !important;
+	width: 44px !important;
+	height: 44px !important;
 	background: rgba(25, 118, 210, 0.08) !important;
 	border: 1px solid rgba(25, 118, 210, 0.12) !important;
 }
