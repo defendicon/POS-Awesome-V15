@@ -82,8 +82,12 @@ export function useStockUtils() {
 
 			if (baseCurrency && companyCurrency && baseCurrency !== companyCurrency) {
 				// uomRate is in Price List Currency. We need it in Company Currency for base_ fields.
-				// plc_conversion_rate is Price List -> Company
-				conversionFactor = context.plc_conversion_rate || 1;
+				// exchange_rate is Price List -> Selected
+				// conversion_rate is Selected -> Company
+				// Price List -> Company = (Price List -> Selected) * (Selected -> Company)
+				const exchangeRate = context.exchange_rate || 1;
+				const conversionRate = context.conversion_rate || 1;
+				conversionFactor = exchangeRate * conversionRate;
 			}
 
 			// default rates based on fetched UOM price (converted to Company Currency)
