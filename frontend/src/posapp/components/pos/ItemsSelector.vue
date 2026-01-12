@@ -2938,18 +2938,18 @@ export default {
 			// original_rate is in price list currency
 			const price_list_rate = item.original_rate;
 
-			// Determine base rate using available conversion info
+			// Determine base rate using available conversion info (Price List -> Company)
 			const base_rate = price_list_rate * (item.plc_conversion_rate || 1);
 
 			item.base_rate = base_rate;
 			item.base_price_list_rate = base_rate;
 
-			let converted_rate;
-			if (this.selected_currency === this.pos_profile.currency) {
-				converted_rate = base_rate;
-			} else {
-				converted_rate = base_rate / (this.exchange_rate || 1);
-			}
+			// Determine selected rate using exchange rate (Price List -> Selected)
+			// item.original_currency is the Price List Currency
+			const converted_rate =
+				item.original_currency === this.selected_currency
+					? price_list_rate
+					: price_list_rate * (this.exchange_rate || 1);
 
 			item.rate = this.flt(converted_rate, this.currency_precision);
 			item.currency = this.selected_currency;
