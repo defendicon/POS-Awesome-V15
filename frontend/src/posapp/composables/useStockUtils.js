@@ -75,9 +75,20 @@ export function useStockUtils() {
 			item._manual_rate_set = true;
 			item._manual_rate_set_from_uom = true;
 
-			// default rates based on fetched UOM price
-			let base_price = uomRate;
-			let base_rate = uomRate;
+			// Determine if we need to convert from Price List Currency to Company Currency
+			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+			const companyCurrency = context.pos_profile.currency;
+			let conversionFactor = 1;
+
+			if (baseCurrency && companyCurrency && baseCurrency !== companyCurrency) {
+				// uomRate is in Price List Currency. We need it in Company Currency for base_ fields.
+				// plc_conversion_rate is Price List -> Company
+				conversionFactor = context.plc_conversion_rate || 1;
+			}
+
+			// default rates based on fetched UOM price (converted to Company Currency)
+			let base_price = uomRate * conversionFactor;
+			let base_rate = uomRate * conversionFactor;
 			let base_discount = 0;
 
 			// Reapply offer if present
@@ -121,15 +132,23 @@ export function useStockUtils() {
 			item.base_rate = base_rate;
 			item.base_discount_amount = base_discount;
 
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
+			// Convert to selected currency for display
+			// If selected currency != company currency, we need to convert base values (Company Currency) to Selected Currency.
+			// exchange_rate is Price List -> Selected.
+			// But we are converting from Company -> Selected.
+			// conversion_rate is Selected -> Company. So we divide by conversion_rate.
+
+			const selectedCurrency = context.selected_currency;
+			const conversion_rate = context.conversion_rate || 1;
+
+			if (selectedCurrency !== companyCurrency) {
 				item.price_list_rate = context.flt(
-					base_price * context.exchange_rate,
+					base_price / conversion_rate,
 					context.currency_precision,
 				);
-				item.rate = context.flt(base_rate * context.exchange_rate, context.currency_precision);
+				item.rate = context.flt(base_rate / conversion_rate, context.currency_precision);
 				item.discount_amount = context.flt(
-					base_discount * context.exchange_rate,
+					base_discount / conversion_rate,
 					context.currency_precision,
 				);
 			} else {
