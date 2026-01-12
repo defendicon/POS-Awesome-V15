@@ -664,6 +664,8 @@ export default {
 .menu-card-compact {
 	border-radius: 20px;
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 	background: rgba(255, 255, 255, 0.9);
 	border: 1px solid rgba(255, 255, 255, 0.2);
 	box-shadow:
@@ -699,6 +701,8 @@ export default {
 .menu-list-compact {
 	padding: 8px 6px 12px;
 	background: #ffffff;
+	flex: 1 1 auto;
+	overflow-y: auto;
 }
 
 /* Compact Menu Items */
@@ -861,6 +865,7 @@ export default {
 		min-width: 240px;
 		max-width: 260px;
 		border-radius: 14px;
+		max-height: 80vh;
 	}
 
 	.menu-item-compact {
@@ -891,6 +896,7 @@ export default {
 	.menu-card-compact {
 		min-width: 220px;
 		max-width: 240px;
+		max-height: 80vh;
 	}
 
 	.menu-item-compact {
