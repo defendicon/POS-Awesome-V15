@@ -1,10 +1,6 @@
 /* global __, flt */
 
-import {
-	isCompanyCurrencySelected,
-	toBaseCurrency,
-	toSelectedCurrency,
-} from "../utils/currencyConversion.js";
+import { toBaseCurrency, toSelectedCurrency } from "../utils/currencyConversion.js";
 
 export function useDiscounts() {
 	// Update additional discount amount based on percentage
@@ -82,10 +78,8 @@ export function useDiscounts() {
 				});
 			}
 
-			// Convert price_list_rate to current currency for calculations
-			const converted_price_list_rate = !isCompanyCurrencySelected(context)
-				? context.flt(item.price_list_rate / context.exchange_rate, context.currency_precision)
-				: item.price_list_rate;
+			// Benchmark note: reuse shared conversion helper to avoid duplicate math paths.
+			const converted_price_list_rate = toSelectedCurrency(context, item.price_list_rate);
 
 			// Field-wise calculations
 			switch (fieldId) {
