@@ -7,19 +7,17 @@ export const isCompanyCurrencySelected = (context) =>
 	context.selected_currency === getCompanyCurrency(context);
 
 export const toBaseCurrency = (context, amount) => {
-	const companyCurrency = getCompanyCurrency(context);
-	if (context.selected_currency !== companyCurrency) {
-		const conversionRate = context.conversion_rate || 1;
-		return context.flt(amount * conversionRate, context.currency_precision);
+	if (isCompanyCurrencySelected(context)) {
+		return amount;
 	}
-	return amount;
+	const conversionRate = context.conversion_rate || 1;
+	return context.flt(amount * conversionRate, context.currency_precision);
 };
 
 export const toSelectedCurrency = (context, amount) => {
-	const companyCurrency = getCompanyCurrency(context);
-	if (context.selected_currency !== companyCurrency) {
-		const conversionRate = context.conversion_rate || 1;
-		return context.flt(amount / conversionRate, context.currency_precision);
+	if (isCompanyCurrencySelected(context)) {
+		return amount;
 	}
-	return amount;
+	const conversionRate = context.conversion_rate || 1;
+	return context.flt(amount / conversionRate, context.currency_precision);
 };
