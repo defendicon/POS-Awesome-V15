@@ -2706,6 +2706,9 @@ export default {
 					if (det.currency) {
 						item.currency = det.currency;
 					}
+					if (det.price_list_currency) {
+						item.price_list_currency = det.price_list_currency;
+					}
 
 					vm.captureBaseAvailability(item, det.actual_qty);
 					if (det.actual_qty !== undefined && det.actual_qty !== null) {
@@ -2799,6 +2802,8 @@ export default {
 											? updated_item.price_list_rate
 											: item.price_list_rate,
 									currency: updated_item.currency || item.currency,
+									price_list_currency:
+										updated_item.price_list_currency || item.price_list_currency,
 								},
 							});
 
@@ -2923,9 +2928,19 @@ export default {
 			this.items.forEach((it) => this.applyCurrencyConversionToItem(it));
 		},
 
+		_resolvePriceListCurrency(item, fallbackCurrency) {
+			// Benchmark note: resolve PLC once per item to avoid repeated lookups.
+			const resolved =
+				item?.price_list_currency ||
+				item?.original_currency ||
+				this.price_list_currency ||
+				fallbackCurrency;
+			return resolved || fallbackCurrency;
+		},
+
 		_getPlcToCompanyRate(item) {
 			const companyCurrency = this.pos_profile.currency;
-			const priceListCurrency = this.price_list_currency || companyCurrency;
+			const priceListCurrency = this._resolvePriceListCurrency(item, companyCurrency);
 			// Benchmark note: favor item-level plc_conversion_rate to avoid recomputing PLC->CC.
 			return (
 				item.plc_conversion_rate ??
@@ -2956,8 +2971,8 @@ export default {
 
 			// Determine selected rate using exchange rate (Price List -> Selected)
 			// item.original_currency is the Price List Currency
-			const priceListCurrency = this.price_list_currency || base;
-			const selectedCurrency = this.selected_currency;
+			const priceListCurrency = this._resolvePriceListCurrency(item, base);
+			const selectedCurrency = this.selected_currency || base;
 			// Benchmark note: when PLC === SC, keep the displayed rate in PLC to avoid CC bleed-through.
 			const converted_rate =
 				selectedCurrency === priceListCurrency
@@ -2969,6 +2984,9 @@ export default {
 			item.rate = this.flt(converted_rate, this.currency_precision);
 			item.currency = selectedCurrency;
 			item.price_list_rate = item.rate;
+			if (!item.price_list_currency) {
+				item.price_list_currency = priceListCurrency;
+			}
 		},
 		scan_barcoud() {
 			const vm = this;
