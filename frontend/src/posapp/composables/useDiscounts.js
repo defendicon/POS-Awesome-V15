@@ -79,7 +79,10 @@ export function useDiscounts() {
 			}
 
 			// Benchmark note: reuse shared conversion helper to avoid duplicate math paths.
-			const converted_price_list_rate = toSelectedCurrency(context, item.price_list_rate);
+			const converted_price_list_rate = toSelectedCurrency(
+				context,
+				item.base_price_list_rate ?? toBaseCurrency(context, item.price_list_rate),
+			);
 
 			// Field-wise calculations
 			switch (fieldId) {
