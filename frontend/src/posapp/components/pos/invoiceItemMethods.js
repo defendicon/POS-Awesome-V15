@@ -2268,6 +2268,7 @@ export default {
 				batch_no: item.batch_no,
 				posa_notes: item.posa_notes,
 				posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
+				ignore_pricing_rule: item.ignore_pricing_rule ? 1 : 0,
 			};
 
 			// Handle currency conversion for rates and amounts
@@ -2346,6 +2347,7 @@ export default {
 				posa_notes: item.posa_notes,
 				posa_delivery_date: item.posa_delivery_date,
 				price_list_rate: item.price_list_rate,
+				ignore_pricing_rule: item.ignore_pricing_rule ? 1 : 0,
 			};
 			items_list.push(new_item);
 		});

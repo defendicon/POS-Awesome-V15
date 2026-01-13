@@ -764,3 +764,42 @@ describe("invoiceItemMethods._applyManualRateOverridesToDoc", () => {
 		expect(freeLine.discount_amount).toBe(0);
 	});
 });
+
+describe("invoiceItemMethods.get_invoice_items", () => {
+	it("includes ignore_pricing_rule for items with manual overrides", () => {
+		const context = {
+			...createContext(),
+			pos_profile: {
+				...createContext().pos_profile,
+				currency: "USD",
+				create_pos_invoice_instead_of_sales_invoice: false,
+			},
+			selected_currency: "USD",
+			conversion_rate: 1,
+			isReturnInvoice: false,
+			formatDateForBackend: vi.fn(() => "2024-01-01"),
+			items: [
+				{
+					item_code: "ITEM-IGNORE",
+					item_name: "Item Ignore",
+					qty: 1,
+					rate: 50,
+					price_list_rate: 50,
+					base_rate: 50,
+					base_price_list_rate: 50,
+					discount_amount: 0,
+					base_discount_amount: 0,
+					discount_percentage: 0,
+					uom: "Nos",
+					conversion_factor: 1,
+					ignore_pricing_rule: 1,
+				},
+			],
+		};
+
+		const items = invoiceItemMethods.get_invoice_items.call(context);
+
+		expect(items).toHaveLength(1);
+		expect(items[0].ignore_pricing_rule).toBe(1);
+	});
+});
