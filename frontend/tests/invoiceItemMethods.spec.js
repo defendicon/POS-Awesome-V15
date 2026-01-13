@@ -35,7 +35,7 @@ const createContext = () => ({
 	set_batch_qty: vi.fn(),
 	calc_stock_qty: vi.fn(),
 	eventBus: { emit: vi.fn() },
-	_shouldIgnorePricingRuleForLine: invoiceItemMethods._shouldIgnorePricingRuleForLine,
+	_shouldIgnorePricingRulesForInvoice: invoiceItemMethods._shouldIgnorePricingRulesForInvoice,
 	flt(value, precision = null) {
 		const prec = precision !== null ? precision : this.float_precision;
 		const num = Number(value);
@@ -424,57 +424,6 @@ describe("invoiceItemMethods._applyServerPricingRules", () => {
 		delete global.frappe;
 	});
 
-	it("marks ignored pricing rule lines in the server payload", async () => {
-		const paidItem = {
-			posa_row_id: "ROW-IGNORE",
-			item_code: "ITEM-IGNORE",
-			qty: 1,
-			rate: 75,
-			base_rate: 75,
-			price_list_rate: 75,
-			base_price_list_rate: 75,
-			discount_amount: 0,
-			base_discount_amount: 0,
-			discount_percentage: 0,
-			ignore_pricing_rule: 1,
-		};
-
-		const context = {
-			...createContext(),
-			pos_profile: {
-				...createContext().pos_profile,
-				posa_ignore_pricing_rule_on_manual_rate: true,
-			},
-			items: [paidItem],
-			_syncAutoFreeLines: vi.fn(),
-			_updatePricingBadge: vi.fn(),
-			$forceUpdate: vi.fn(),
-		};
-		context._fromBaseCurrency = invoiceItemMethods._fromBaseCurrency;
-		context._toBaseCurrency = invoiceItemMethods._toBaseCurrency;
-		context._resolvePricingQty = invoiceItemMethods._resolvePricingQty;
-
-		let payloadLines = [];
-		global.frappe = {
-			call: vi.fn(async ({ args }) => {
-				const payload = JSON.parse(args.cart_payload);
-				payloadLines = payload.lines || [];
-				return { message: { updates: [], free_lines: [] } };
-			}),
-		};
-
-		await invoiceItemMethods._applyServerPricingRules.call(context, {
-			company: "Test Co",
-			price_list: "Standard",
-			currency: "USD",
-		});
-
-		expect(payloadLines).toHaveLength(1);
-		expect(payloadLines[0].ignore_pricing_rule).toBe(1);
-
-		delete global.frappe;
-	});
-
 	it("preserves offer-adjusted item rates when reconciling with server", async () => {
 		const offeredItem = {
 			posa_row_id: "ROW-2",
@@ -765,41 +714,34 @@ describe("invoiceItemMethods._applyManualRateOverridesToDoc", () => {
 	});
 });
 
-describe("invoiceItemMethods.get_invoice_items", () => {
-	it("includes ignore_pricing_rule for items with manual overrides", () => {
+describe("invoiceItemMethods._shouldIgnorePricingRulesForInvoice", () => {
+	it("returns true when manual rate items exist and the toggle is enabled", () => {
 		const context = {
 			...createContext(),
 			pos_profile: {
 				...createContext().pos_profile,
-				currency: "USD",
-				create_pos_invoice_instead_of_sales_invoice: false,
+				posa_ignore_pricing_rule_on_manual_rate: true,
 			},
-			selected_currency: "USD",
-			conversion_rate: 1,
-			isReturnInvoice: false,
-			formatDateForBackend: vi.fn(() => "2024-01-01"),
-			items: [
-				{
-					item_code: "ITEM-IGNORE",
-					item_name: "Item Ignore",
-					qty: 1,
-					rate: 50,
-					price_list_rate: 50,
-					base_rate: 50,
-					base_price_list_rate: 50,
-					discount_amount: 0,
-					base_discount_amount: 0,
-					discount_percentage: 0,
-					uom: "Nos",
-					conversion_factor: 1,
-					ignore_pricing_rule: 1,
-				},
-			],
+			items: [{ _manual_rate_set: true }],
 		};
 
-		const items = invoiceItemMethods.get_invoice_items.call(context);
+		const result = invoiceItemMethods._shouldIgnorePricingRulesForInvoice.call(context);
 
-		expect(items).toHaveLength(1);
-		expect(items[0].ignore_pricing_rule).toBe(1);
+		expect(result).toBe(true);
+	});
+
+	it("returns false when there are no manual rate overrides", () => {
+		const context = {
+			...createContext(),
+			pos_profile: {
+				...createContext().pos_profile,
+				posa_ignore_pricing_rule_on_manual_rate: true,
+			},
+			items: [{ _manual_rate_set: false }],
+		};
+
+		const result = invoiceItemMethods._shouldIgnorePricingRulesForInvoice.call(context);
+
+		expect(result).toBe(false);
 	});
 });

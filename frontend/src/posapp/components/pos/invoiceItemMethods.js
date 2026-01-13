@@ -271,23 +271,19 @@ export default {
 		item.pricing_rule_details = applied;
 		item.pricing_rules = JSON.stringify(names);
 	},
-	_shouldIgnorePricingRuleForLine(item) {
-		if (!item || !this.pos_profile?.posa_ignore_pricing_rule_on_manual_rate) {
+	_shouldIgnorePricingRulesForInvoice() {
+		if (!this.pos_profile?.posa_ignore_pricing_rule_on_manual_rate) {
 			return false;
 		}
 
-		return (
-			item.ignore_pricing_rule === true ||
-			item.ignore_pricing_rule === 1 ||
-			item.ignore_pricing_rule === "1"
-		);
+		return Array.isArray(this.items) && this.items.some((item) => item?._manual_rate_set === true);
 	},
 	_applyPricingToLine(item, ctx, indexes, freebiesMap) {
 		if (!item) {
 			return;
 		}
 
-		if (this._shouldIgnorePricingRuleForLine(item)) {
+		if (this._shouldIgnorePricingRulesForInvoice()) {
 			this._updatePricingBadge(item, []);
 			return;
 		}
@@ -740,6 +736,9 @@ export default {
 		if (this.isReturnInvoice) {
 			return;
 		}
+		if (this._shouldIgnorePricingRulesForInvoice()) {
+			return;
+		}
 		if (this._applyingPricingRules) {
 			this._pendingPricingRules = true;
 			return;
@@ -916,7 +915,6 @@ export default {
 					item_group: item.item_group,
 					brand: item.brand,
 					pricing_rules: item.pricing_rules || null,
-					ignore_pricing_rule: this._shouldIgnorePricingRuleForLine(item) ? 1 : 0,
 				};
 			});
 
@@ -1149,7 +1147,7 @@ export default {
 				return;
 			}
 
-			if (this._shouldIgnorePricingRuleForLine(item)) {
+			if (this._shouldIgnorePricingRulesForInvoice()) {
 				this._updatePricingBadge(item, []);
 				return;
 			}
@@ -1911,7 +1909,8 @@ export default {
 			doc.doctype = "Sales Invoice";
 		}
 		doc.is_pos = 1;
-		doc.ignore_pricing_rule = 0;
+		const shouldIgnorePricingRules = this._shouldIgnorePricingRulesForInvoice();
+		doc.ignore_pricing_rule = shouldIgnorePricingRules ? 1 : 0;
 		doc.company = doc.company || this.pos_profile.company;
 		doc.pos_profile = doc.pos_profile || this.pos_profile.name;
 		doc.posa_show_custom_name_marker_on_print = this.pos_profile.posa_show_custom_name_marker_on_print;
@@ -2112,7 +2111,7 @@ export default {
 		doc.posting_date = this.formatDateForBackend(this.posting_date_display);
 
 		// Add flags to ensure proper rate handling
-		doc.ignore_pricing_rule = 0;
+		doc.ignore_pricing_rule = shouldIgnorePricingRules ? 1 : 0;
 
 		// Preserve the real price list currency
 		doc.price_list_currency = priceListCurrency;
@@ -2268,7 +2267,6 @@ export default {
 				batch_no: item.batch_no,
 				posa_notes: item.posa_notes,
 				posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
-				ignore_pricing_rule: item.ignore_pricing_rule ? 1 : 0,
 			};
 
 			// Handle currency conversion for rates and amounts
@@ -2347,7 +2345,6 @@ export default {
 				posa_notes: item.posa_notes,
 				posa_delivery_date: item.posa_delivery_date,
 				price_list_rate: item.price_list_rate,
-				ignore_pricing_rule: item.ignore_pricing_rule ? 1 : 0,
 			};
 			items_list.push(new_item);
 		});
@@ -2882,7 +2879,6 @@ export default {
 						base_amount: item.base_amount,
 						conversion_factor: item.conversion_factor,
 						uom: item.uom,
-						ignore_pricing_rule: item.ignore_pricing_rule,
 					},
 				};
 			});
@@ -3016,10 +3012,6 @@ export default {
 		if (values.discount_percentage !== undefined) {
 			item.discount_percentage = values.discount_percentage;
 		}
-		if (values.ignore_pricing_rule !== undefined) {
-			item.ignore_pricing_rule = values.ignore_pricing_rule;
-		}
-
 		if (values.amount !== undefined) {
 			item.amount = values.amount;
 		} else if (typeof item.qty === "number" && typeof item.rate === "number") {
@@ -3127,7 +3119,6 @@ export default {
 						base_amount: item.base_amount,
 						conversion_factor: item.conversion_factor,
 						uom: item.uom,
-						ignore_pricing_rule: item.ignore_pricing_rule,
 					},
 				};
 			})

@@ -3922,15 +3922,9 @@ export default {
 
 			// Clone the item to avoid mutating list data
 			const newItem = { ...item };
-			const ignorePricingRuleOnManualRate = Boolean(
-				this.pos_profile?.posa_ignore_pricing_rule_on_manual_rate,
-			);
 			const markManualRateOverride = () => {
 				newItem._manual_rate_set = true;
 				newItem.skip_force_update = true;
-				if (ignorePricingRuleOnManualRate) {
-					newItem.ignore_pricing_rule = 1;
-				}
 			};
 
 			// If the scanned barcode has a specific UOM, apply it
