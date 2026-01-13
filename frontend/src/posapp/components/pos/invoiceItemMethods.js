@@ -271,8 +271,24 @@ export default {
 		item.pricing_rule_details = applied;
 		item.pricing_rules = JSON.stringify(names);
 	},
+	_shouldIgnorePricingRuleForLine(item) {
+		if (!item || !this.pos_profile?.posa_ignore_pricing_rule_on_manual_rate) {
+			return false;
+		}
+
+		return (
+			item.ignore_pricing_rule === true ||
+			item.ignore_pricing_rule === 1 ||
+			item.ignore_pricing_rule === "1"
+		);
+	},
 	_applyPricingToLine(item, ctx, indexes, freebiesMap) {
 		if (!item) {
+			return;
+		}
+
+		if (this._shouldIgnorePricingRuleForLine(item)) {
+			this._updatePricingBadge(item, []);
 			return;
 		}
 
@@ -900,6 +916,7 @@ export default {
 					item_group: item.item_group,
 					brand: item.brand,
 					pricing_rules: item.pricing_rules || null,
+					ignore_pricing_rule: this._shouldIgnorePricingRuleForLine(item) ? 1 : 0,
 				};
 			});
 
@@ -1129,6 +1146,11 @@ export default {
 						(line.item_code === targetId && !line.auto_free_source)),
 			);
 			if (!item) {
+				return;
+			}
+
+			if (this._shouldIgnorePricingRuleForLine(item)) {
+				this._updatePricingBadge(item, []);
 				return;
 			}
 
@@ -2858,6 +2880,7 @@ export default {
 						base_amount: item.base_amount,
 						conversion_factor: item.conversion_factor,
 						uom: item.uom,
+						ignore_pricing_rule: item.ignore_pricing_rule,
 					},
 				};
 			});
@@ -2991,6 +3014,9 @@ export default {
 		if (values.discount_percentage !== undefined) {
 			item.discount_percentage = values.discount_percentage;
 		}
+		if (values.ignore_pricing_rule !== undefined) {
+			item.ignore_pricing_rule = values.ignore_pricing_rule;
+		}
 
 		if (values.amount !== undefined) {
 			item.amount = values.amount;
@@ -3099,6 +3125,7 @@ export default {
 						base_amount: item.base_amount,
 						conversion_factor: item.conversion_factor,
 						uom: item.uom,
+						ignore_pricing_rule: item.ignore_pricing_rule,
 					},
 				};
 			})

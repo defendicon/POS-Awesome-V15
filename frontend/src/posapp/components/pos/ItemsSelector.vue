@@ -3922,6 +3922,16 @@ export default {
 
 			// Clone the item to avoid mutating list data
 			const newItem = { ...item };
+			const ignorePricingRuleOnManualRate = Boolean(
+				this.pos_profile?.posa_ignore_pricing_rule_on_manual_rate,
+			);
+			const markManualRateOverride = () => {
+				newItem._manual_rate_set = true;
+				newItem.skip_force_update = true;
+				if (ignorePricingRuleOnManualRate) {
+					newItem.ignore_pricing_rule = 1;
+				}
+			};
 
 			// If the scanned barcode has a specific UOM, apply it
 			if (Array.isArray(newItem.item_barcode)) {
@@ -3967,8 +3977,7 @@ export default {
 							if (conversionFactor) {
 								newItem.conversion_factor = conversionFactor;
 							}
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
+							markManualRateOverride();
 						} else if (conversionFactor) {
 							const newPrice = baseUnitRate * conversionFactor;
 
@@ -3977,8 +3986,7 @@ export default {
 							newItem.base_rate = baseUnitRate;
 							newItem.base_price_list_rate = baseUnitRate;
 							newItem.conversion_factor = conversionFactor;
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
+							markManualRateOverride();
 						}
 					} catch (e) {
 						console.error("Failed to fetch UOM price", e);
@@ -4023,8 +4031,7 @@ export default {
 					newItem.price_list_rate = parsedPrice;
 					newItem.base_rate = parsedPrice;
 					newItem.base_price_list_rate = parsedPrice;
-					newItem._manual_rate_set = true;
-					newItem.skip_force_update = true;
+					markManualRateOverride();
 				}
 			}
 

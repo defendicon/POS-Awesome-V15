@@ -35,6 +35,7 @@ const createContext = () => ({
 	set_batch_qty: vi.fn(),
 	calc_stock_qty: vi.fn(),
 	eventBus: { emit: vi.fn() },
+	_shouldIgnorePricingRuleForLine: invoiceItemMethods._shouldIgnorePricingRuleForLine,
 	flt(value, precision = null) {
 		const prec = precision !== null ? precision : this.float_precision;
 		const num = Number(value);
@@ -419,6 +420,57 @@ describe("invoiceItemMethods._applyServerPricingRules", () => {
 		expect(manualItem.discount_amount).toBeCloseTo(60);
 		expect(manualItem.base_discount_amount).toBeCloseTo(60);
 		expect(manualItem.discount_percentage).toBeCloseTo(40);
+
+		delete global.frappe;
+	});
+
+	it("marks ignored pricing rule lines in the server payload", async () => {
+		const paidItem = {
+			posa_row_id: "ROW-IGNORE",
+			item_code: "ITEM-IGNORE",
+			qty: 1,
+			rate: 75,
+			base_rate: 75,
+			price_list_rate: 75,
+			base_price_list_rate: 75,
+			discount_amount: 0,
+			base_discount_amount: 0,
+			discount_percentage: 0,
+			ignore_pricing_rule: 1,
+		};
+
+		const context = {
+			...createContext(),
+			pos_profile: {
+				...createContext().pos_profile,
+				posa_ignore_pricing_rule_on_manual_rate: true,
+			},
+			items: [paidItem],
+			_syncAutoFreeLines: vi.fn(),
+			_updatePricingBadge: vi.fn(),
+			$forceUpdate: vi.fn(),
+		};
+		context._fromBaseCurrency = invoiceItemMethods._fromBaseCurrency;
+		context._toBaseCurrency = invoiceItemMethods._toBaseCurrency;
+		context._resolvePricingQty = invoiceItemMethods._resolvePricingQty;
+
+		let payloadLines = [];
+		global.frappe = {
+			call: vi.fn(async ({ args }) => {
+				const payload = JSON.parse(args.cart_payload);
+				payloadLines = payload.lines || [];
+				return { message: { updates: [], free_lines: [] } };
+			}),
+		};
+
+		await invoiceItemMethods._applyServerPricingRules.call(context, {
+			company: "Test Co",
+			price_list: "Standard",
+			currency: "USD",
+		});
+
+		expect(payloadLines).toHaveLength(1);
+		expect(payloadLines[0].ignore_pricing_rule).toBe(1);
 
 		delete global.frappe;
 	});

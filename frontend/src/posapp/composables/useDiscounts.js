@@ -69,6 +69,10 @@ export function useDiscounts() {
 				item._manual_rate_set_from_uom = false;
 			}
 
+			if (fieldId === "rate" && context.pos_profile?.posa_ignore_pricing_rule_on_manual_rate) {
+				item.ignore_pricing_rule = 1;
+			}
+
 			// Handle negative values
 			if (newValue < 0) {
 				newValue = 0;

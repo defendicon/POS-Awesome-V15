@@ -356,7 +356,7 @@ def _build_pricing_args(line: frappe._dict, ctx: frappe._dict) -> frappe._dict:
         uom=line.get("uom"),
         item_group=line.get("item_group"),
         brand=line.get("brand"),
-        ignore_pricing_rule=0,
+        ignore_pricing_rule=cint(line.get("ignore_pricing_rule") or 0),
         child_docname=line.get("posa_row_id") or line.get("name") or line.item_code,
         transaction_type="selling",
     )
