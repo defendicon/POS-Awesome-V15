@@ -88,27 +88,19 @@ export function useDiscounts() {
 			switch (fieldId) {
 				case "rate":
 					item.rate = newValue;
-					if (context.selected_currency !== companyCurrency) {
-						item.base_rate = context.flt(
-							newValue * conversion_rate,
-							context.currency_precision,
-						);
-					} else {
-						item.base_rate = newValue;
-					}
+					item.base_rate =
+						context.selected_currency !== companyCurrency
+							? context.flt(newValue * conversion_rate, context.currency_precision)
+							: newValue;
 
 					item.base_discount_amount = context.flt(
 						item.base_price_list_rate - item.base_rate,
 						context.currency_precision,
 					);
-					if (context.selected_currency !== companyCurrency) {
-						item.discount_amount = context.flt(
-							item.base_discount_amount / conversion_rate,
-							context.currency_precision,
-						);
-					} else {
-						item.discount_amount = item.base_discount_amount;
-					}
+					item.discount_amount =
+						context.selected_currency !== companyCurrency
+							? context.flt(item.base_discount_amount / conversion_rate, context.currency_precision)
+							: item.base_discount_amount;
 
 					if (item.base_price_list_rate) {
 						item.discount_percentage = context.flt(
@@ -122,14 +114,10 @@ export function useDiscounts() {
 					newValue = Math.min(newValue, item.price_list_rate);
 					item.discount_amount = newValue;
 
-					if (context.selected_currency !== companyCurrency) {
-						item.base_discount_amount = context.flt(
-							item.discount_amount * conversion_rate,
-							context.currency_precision,
-						);
-					} else {
-						item.base_discount_amount = item.discount_amount;
-					}
+					item.base_discount_amount =
+						context.selected_currency !== companyCurrency
+							? context.flt(item.discount_amount * conversion_rate, context.currency_precision)
+							: item.discount_amount;
 
 					item.base_rate = context.flt(
 						item.base_price_list_rate - item.base_discount_amount,
