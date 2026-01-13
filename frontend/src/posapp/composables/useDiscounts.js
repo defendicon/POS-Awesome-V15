@@ -80,9 +80,10 @@ export function useDiscounts() {
 
 			// Benchmark note: reuse shared conversion helper while avoiding redundant round-trips.
 			const basePriceListRate = item.base_price_list_rate;
-			const converted_price_list_rate = basePriceListRate
-				? toSelectedCurrency(context, basePriceListRate)
-				: item.price_list_rate;
+			const converted_price_list_rate =
+				basePriceListRate != null
+					? toSelectedCurrency(context, basePriceListRate)
+					: item.price_list_rate;
 
 			// Field-wise calculations
 			switch (fieldId) {
