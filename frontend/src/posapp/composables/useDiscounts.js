@@ -78,10 +78,11 @@ export function useDiscounts() {
 				});
 			}
 
-			// Benchmark note: reuse shared conversion helper to avoid duplicate math paths.
-			const basePriceListRate =
-				item.base_price_list_rate ?? toBaseCurrency(context, item.price_list_rate);
-			const converted_price_list_rate = toSelectedCurrency(context, basePriceListRate);
+			// Benchmark note: reuse shared conversion helper while avoiding redundant round-trips.
+			const basePriceListRate = item.base_price_list_rate;
+			const converted_price_list_rate = basePriceListRate
+				? toSelectedCurrency(context, basePriceListRate)
+				: item.price_list_rate;
 
 			// Field-wise calculations
 			switch (fieldId) {
