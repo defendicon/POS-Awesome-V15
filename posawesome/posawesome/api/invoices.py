@@ -202,6 +202,17 @@ def _allow_negative_stock(item, global_allow_negative=None):
     return bool(cint(flag or 0))
 
 
+def _should_ignore_pricing_rule_for_invoice(pos_profile: str | None, items: list | None) -> bool:
+    if not pos_profile or not items:
+        return False
+    if not cint(frappe.db.get_value("POS Profile", pos_profile, "posa_ignore_pricing_rule_on_manual_rate")):
+        return False
+    for item in items:
+        if isinstance(item, dict) and cint(item.get("manual_rate") or 0):
+            return True
+    return False
+
+
 def _collect_stock_errors(items):
     """Return list of items exceeding available stock."""
     errors = []
@@ -596,8 +607,11 @@ def update_invoice(data):
                     "is_free_item": d.get("is_free_item"),
                 }
 
-    invoice_doc.ignore_pricing_rule = 1
-    invoice_doc.flags.ignore_pricing_rule = True
+    should_ignore_pricing_rule = _should_ignore_pricing_rule_for_invoice(
+        pos_profile, data.get("items") if isinstance(data, dict) else None
+    )
+    invoice_doc.ignore_pricing_rule = 1 if should_ignore_pricing_rule else 0
+    invoice_doc.flags.ignore_pricing_rule = bool(should_ignore_pricing_rule)
 
     _deduplicate_free_items(invoice_doc)
 

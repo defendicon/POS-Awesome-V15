@@ -2267,6 +2267,7 @@ export default {
 				batch_no: item.batch_no,
 				posa_notes: item.posa_notes,
 				posa_delivery_date: this.formatDateForBackend(item.posa_delivery_date),
+				manual_rate: item._manual_rate_set ? 1 : 0,
 			};
 
 			// Handle currency conversion for rates and amounts
