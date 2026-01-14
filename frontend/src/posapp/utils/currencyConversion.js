@@ -15,7 +15,7 @@ export const toBaseCurrency = (context, amount) => {
 };
 
 export const toSelectedCurrency = (context, amount) => {
-	if (isCompanyCurrencySelected(context)) {
+	if (amount == null || isCompanyCurrencySelected(context)) {
 		return amount;
 	}
 	const conversionRate = context.conversion_rate || 1;
