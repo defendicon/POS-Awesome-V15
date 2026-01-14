@@ -124,7 +124,6 @@ def _validate_stock_on_invoice(invoice_doc):
 
 def _auto_set_return_batches(invoice_doc):
         """Assign batch numbers for return invoices without a source invoice.
-
         When the POS Profile allows returns without an original invoice and an
         item requires a batch number, this function allocates the first
         available batch in FIFO order. If no batches exist in the selected
@@ -152,7 +151,9 @@ def _auto_set_return_batches(invoice_doc):
                         continue
 
                 has_batch = frappe.db.get_value("Item", d.item_code, "has_batch_no")
-                if has_batch and not d.get("batch_no"):
+                #if has_batch and not d.get("batch_no"):
+                if has_batch and d.get("batch_no"):
+                        d.use_serial_batch_fields = 1
                         batch_list = get_batch_qty(
                                 item_code=d.item_code, warehouse=d.warehouse
                         ) or []
