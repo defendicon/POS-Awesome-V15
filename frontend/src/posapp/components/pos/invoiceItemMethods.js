@@ -22,6 +22,20 @@ import { useItemsStore } from "../../stores/itemsStore.js";
 import { usePricingRulesStore } from "../../stores/pricingRulesStore.js";
 import { evaluatePricingRules } from "../../../lib/pricingEngine.js";
 
+/**
+ * Currency Contract
+ * - CC (Company Currency): this.pos_profile.currency (base currency for base_* fields)
+ * - PLC (Price List Currency): this.price_list_currency
+ * - SC (Selected/Customer Currency): this.selected_currency (transaction/display currency)
+ * - exchange_rate: PLC -> SC (fetch_exchange_rate_pair(from=PLC, to=SC))
+ * - conversion_rate: SC -> CC (fetch_exchange_rate_pair(from=SC, to=CC))
+ * - plc_conversion_rate: PLC -> CC (exchange_rate * conversion_rate when PLC != CC)
+ * Field invariants:
+ * - base_* fields (base_rate, base_amount, base_discount_amount, base_* totals) are in CC.
+ * - rate/amount/discount_amount/displayed totals are in SC.
+ * - price_list_rate is treated as SC, base_price_list_rate is treated as CC.
+ */
+
 const ITEM_DETAIL_CACHE_TTL = 5000;
 const STOCK_CACHE_TTL = 5000;
 
@@ -101,6 +115,34 @@ export default {
 			territory: doc.territory || customerInfo.territory || null,
 		};
 	},
+	_isPriceDebugEnabled() {
+		try {
+			if (typeof window === "undefined" || !window.location) {
+				return false;
+			}
+			const params = new URLSearchParams(window.location.search || "");
+			return params.get("debug_price") === "1";
+		} catch {
+			return false;
+		}
+	},
+	_buildPriceListSnapshot(items = []) {
+		// Benchmark note: keep debug snapshots lightweight to avoid expensive deep clones.
+		if (!Array.isArray(items)) {
+			return [];
+		}
+		return items.map((item) => ({
+			item_code: item.item_code,
+			price_list_rate: item.price_list_rate,
+			base_price_list_rate: item.base_price_list_rate,
+		}));
+	},
+	_logPriceListDebug(context, payload) {
+		if (!this._isPriceDebugEnabled()) {
+			return;
+		}
+		console.log("[POSA][PriceList]", context, payload);
+	},
 	async _ensurePricingRules(force = false) {
 		const store = this._getPricingRulesStore();
 		const ctx = this._getPricingContext();
@@ -111,16 +153,26 @@ export default {
 		return { store, ctx };
 	},
 	_toBaseCurrency(value) {
-		const rate = Number.parseFloat(this.exchange_rate || 1) || 1;
+		const rate = Number.parseFloat(this.conversion_rate || 1) || 1;
 		if (!rate || rate === 0) {
 			return Number.parseFloat(value || 0) || 0;
 		}
-		return Number.parseFloat(value || 0) / rate;
+		return Number.parseFloat(value || 0) * rate;
 	},
 	_fromBaseCurrency(value) {
-		const rate = Number.parseFloat(this.exchange_rate || 1) || 1;
+		const rate = Number.parseFloat(this.conversion_rate || 1) || 1;
 		const numeric = Number.parseFloat(value || 0) || 0;
-		return rate ? numeric * rate : numeric;
+		return rate ? numeric / rate : numeric;
+	},
+	_getPlcConversionRate() {
+		const companyCurrency = (this.company && this.company.default_currency) || this.pos_profile.currency;
+		const priceListCurrency = this.price_list_currency || companyCurrency;
+		if (priceListCurrency === companyCurrency) {
+			return 1;
+		}
+		const exchangeRate = Number.parseFloat(this.exchange_rate || 1) || 1;
+		const conversionRate = Number.parseFloat(this.conversion_rate || 1) || 1;
+		return exchangeRate * conversionRate;
 	},
 	_isFreeLine(item) {
 		if (!item) {
@@ -1353,8 +1405,21 @@ export default {
 	},
 
 	async add_item(item, options = {}) {
+		const priceContext = {
+			customer: this.customer,
+			customer_price_list: this.customer_info?.customer_price_list || null,
+			pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+			effective_price_list: this.get_price_list(),
+			selected_price_list: this.selected_price_list || null,
+			invoice_selling_price_list: this.invoice_doc?.selling_price_list || null,
+			item_before: this._buildPriceListSnapshot([item]),
+		};
 		const res = await addItem(item, this);
 		this.schedulePricingRuleApplication();
+		this._logPriceListDebug("add_item", {
+			...priceContext,
+			item_after: this._buildPriceListSnapshot([item]),
+		});
 
 		const shouldNotify =
 			options?.notifyOnSuccess === true && !options?.skipNotification && this.eventBus?.emit;
@@ -1833,16 +1898,17 @@ export default {
 		doc.currency = this.selected_currency || this.pos_profile.currency;
 		doc.conversion_rate = (sourceDoc && sourceDoc.conversion_rate) || this.conversion_rate || 1;
 
-		// Use actual price list currency if available
-		doc.price_list_currency = this.price_list_currency || doc.currency;
+		const companyCurrency = (this.company && this.company.default_currency) || this.pos_profile.currency;
+		const priceListCurrency = this.price_list_currency || companyCurrency;
+		const plcConversionRate = this._getPlcConversionRate();
 
-		doc.plc_conversion_rate =
-			(sourceDoc && sourceDoc.plc_conversion_rate) ||
-			(doc.price_list_currency === doc.currency ? 1 : this.exchange_rate);
+		// Use actual price list currency if available
+		doc.price_list_currency = priceListCurrency;
+		doc.plc_conversion_rate = plcConversionRate;
 
 		// Other fields
 		doc.campaign = doc.campaign || this.pos_profile.campaign;
-		doc.selling_price_list = this.pos_profile.selling_price_list;
+		doc.selling_price_list = this.get_price_list();
 		doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
 		const customerDetails =
 			this.customer_info && typeof this.customer_info === "object" ? this.customer_info : {};
@@ -1883,15 +1949,15 @@ export default {
 
 		doc.total = total;
 		doc.net_total = total; // Will adjust later if taxes are inclusive
-		doc.base_total = total * (this.exchange_rate || 1);
-		doc.base_net_total = total * (this.exchange_rate || 1);
+		doc.base_total = total * (this.conversion_rate || 1);
+		doc.base_net_total = total * (this.conversion_rate || 1);
 
 		// Apply discounts with correct sign for returns
 		let discountAmount = flt(this.additional_discount);
 		if (isReturn && discountAmount > 0) discountAmount = -Math.abs(discountAmount);
 
 		doc.discount_amount = discountAmount;
-		doc.base_discount_amount = discountAmount * (this.exchange_rate || 1);
+		doc.base_discount_amount = discountAmount * (this.conversion_rate || 1);
 
 		let discountPercentage = flt(this.additional_discount_percentage);
 		if (this.pos_profile?.posa_use_percentage_discount) {
@@ -1922,8 +1988,8 @@ export default {
 					included_in_print_rate: tax.included_in_print_rate || 0,
 					tax_amount: tax.tax_amount,
 					total: tax.total,
-					base_tax_amount: tax.tax_amount * (this.exchange_rate || 1),
-					base_total: tax.total * (this.exchange_rate || 1),
+					base_tax_amount: tax.tax_amount * (this.conversion_rate || 1),
+					base_total: tax.total * (this.conversion_rate || 1),
 				});
 			});
 			doc.total_taxes_and_charges = totalTax;
@@ -1954,13 +2020,13 @@ export default {
 						included_in_print_rate: row.charge_type === "Actual" ? 0 : inclusive ? 1 : 0,
 						tax_amount: tax_amount,
 						total: runningTotal,
-						base_tax_amount: tax_amount * (this.exchange_rate || 1),
-						base_total: runningTotal * (this.exchange_rate || 1),
+						base_tax_amount: tax_amount * (this.conversion_rate || 1),
+						base_total: runningTotal * (this.conversion_rate || 1),
 					});
 				});
 				if (inclusive) {
 					doc.net_total = doc.total - totalTax;
-					doc.base_net_total = doc.net_total * (this.exchange_rate || 1);
+					doc.base_net_total = doc.net_total * (this.conversion_rate || 1);
 					grandTotal = doc.total;
 				} else {
 					grandTotal = runningTotal;
@@ -1972,7 +2038,7 @@ export default {
 		if (isReturn && grandTotal > 0) grandTotal = -Math.abs(grandTotal);
 
 		doc.grand_total = grandTotal;
-		doc.base_grand_total = grandTotal * (this.exchange_rate || 1);
+		doc.base_grand_total = grandTotal * (this.conversion_rate || 1);
 
 		// Apply rounding to get rounded total unless disabled in POS Profile
 		if (this.pos_profile.disable_rounded_total) {
@@ -2027,25 +2093,24 @@ export default {
 		doc.ignore_pricing_rule = 0;
 
 		// Preserve the real price list currency
-		doc.price_list_currency = this.price_list_currency || doc.currency;
-		doc.plc_conversion_rate = this.exchange_rate || doc.conversion_rate;
+		doc.price_list_currency = priceListCurrency;
+		doc.plc_conversion_rate = plcConversionRate;
 		doc.ignore_default_fields = 1; // Add this to prevent default field updates
 
 		// Add custom fields to track offer rates
 		doc.posa_is_offer_applied = this.posa_offers.length > 0 ? 1 : 0;
 
 		// Calculate base amounts using the exchange rate
-		const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-		if (this.selected_currency !== baseCurrency) {
+		if (this.selected_currency !== companyCurrency) {
 			// For returns, we need to ensure negative values
 			const multiplier = isReturn ? -1 : 1;
 
 			// Convert amounts back to the base currency
-			doc.base_total = (total / this.exchange_rate) * multiplier;
-			doc.base_net_total = (total / this.exchange_rate) * multiplier;
-			doc.base_discount_amount = (discountAmount / this.exchange_rate) * multiplier;
-			doc.base_grand_total = (grandTotal / this.exchange_rate) * multiplier;
-			doc.base_rounded_total = (grandTotal / this.exchange_rate) * multiplier;
+			doc.base_total = total * (this.conversion_rate || 1) * multiplier;
+			doc.base_net_total = total * (this.conversion_rate || 1) * multiplier;
+			doc.base_discount_amount = discountAmount * (this.conversion_rate || 1) * multiplier;
+			doc.base_grand_total = grandTotal * (this.conversion_rate || 1) * multiplier;
+			doc.base_rounded_total = grandTotal * (this.conversion_rate || 1) * multiplier;
 		} else {
 			// Same currency, just ensure negative values for returns
 			const multiplier = isReturn ? -1 : 1;
@@ -2060,9 +2125,9 @@ export default {
 		// Ensure payments have correct base amounts
 		if (doc.payments && doc.payments.length) {
 			doc.payments.forEach((payment) => {
-				if (this.selected_currency !== baseCurrency) {
+				if (this.selected_currency !== companyCurrency) {
 					// Convert payment amount to base currency
-					payment.base_amount = payment.amount / this.exchange_rate;
+					payment.base_amount = payment.amount * (this.conversion_rate || 1);
 				} else {
 					payment.base_amount = payment.amount;
 				}
@@ -2184,28 +2249,26 @@ export default {
 			};
 
 			// Handle currency conversion for rates and amounts
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-			if (this.selected_currency !== baseCurrency) {
-				// If exchange rate is 300 PKR = 1 USD
-				// item.rate is in USD (e.g. 10 USD)
-				// base_rate should be in PKR (e.g. 3000 PKR)
+			const companyCurrency = this.pos_profile.currency;
+			if (this.selected_currency !== companyCurrency) {
+				// item.rate is in SC and base_rate should be in CC.
 				new_item.rate = flt(item.rate); // Keep rate in USD
 
 				// Use pre-stored base_rate if available, otherwise calculate
-				new_item.base_rate = item.base_rate || flt(item.rate / this.exchange_rate);
+				new_item.base_rate = item.base_rate || flt(item.rate * (this.conversion_rate || 1));
 
 				new_item.price_list_rate = flt(item.price_list_rate); // Keep price list rate in USD
 				new_item.base_price_list_rate =
-					item.base_price_list_rate ?? flt(item.price_list_rate / this.exchange_rate);
+					item.base_price_list_rate ?? flt(item.price_list_rate * (this.conversion_rate || 1));
 
 				// Calculate amounts
 				new_item.amount = flt(item.qty) * new_item.rate; // Amount in USD
-				new_item.base_amount = new_item.amount / this.exchange_rate; // Convert to base currency
+				new_item.base_amount = new_item.amount * (this.conversion_rate || 1); // Convert to base currency
 
 				// Handle discount amount
 				new_item.discount_amount = flt(item.discount_amount); // Keep discount in USD
 				new_item.base_discount_amount =
-					item.base_discount_amount || flt(item.discount_amount / this.exchange_rate);
+					item.base_discount_amount || flt(item.discount_amount * (this.conversion_rate || 1));
 			} else {
 				// Same currency (base currency), make sure we use base rates if available
 				new_item.rate = flt(item.rate);
@@ -2283,7 +2346,7 @@ export default {
 			);
 
 			if (sourcePayments.length && sourceTotal > 0 && total_amount > 0) {
-				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+				const baseCurrency = this.pos_profile.currency;
 				let remaining_amount = total_amount;
 
 				return sourcePayments.map((payment, index) => {
@@ -2301,7 +2364,7 @@ export default {
 
 					const base_amount =
 						this.selected_currency !== baseCurrency
-							? this.flt(payment_amount / (this.exchange_rate || 1), this.currency_precision)
+							? this.flt(payment_amount * (this.conversion_rate || 1), this.currency_precision)
 							: payment_amount;
 
 					return {
@@ -2342,10 +2405,10 @@ export default {
 			// amount is in USD (e.g. 10 USD)
 			// base_amount should be in PKR (e.g. 3000 PKR)
 			// So multiply by exchange rate to get base_amount
-			const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+			const baseCurrency = this.pos_profile.currency;
 			const base_amount =
 				this.selected_currency !== baseCurrency
-					? this.flt(adjusted_amount / (this.exchange_rate || 1), this.currency_precision)
+					? this.flt(adjusted_amount * (this.conversion_rate || 1), this.currency_precision)
 					: adjusted_amount;
 
 			payments.push({
@@ -2380,11 +2443,11 @@ export default {
 
 	// Convert amount to selected currency
 	convert_amount(amount) {
-		const baseCurrency = this.price_list_currency || this.pos_profile.currency;
+		const baseCurrency = this.pos_profile.currency;
 		if (this.selected_currency === baseCurrency) {
 			return amount;
 		}
-		return this.flt(amount * this.exchange_rate, this.currency_precision);
+		return this.flt(amount / (this.conversion_rate || 1), this.currency_precision);
 	},
 
 	// Update invoice in backend
@@ -2404,6 +2467,15 @@ export default {
 					: "posawesome.posawesome.api.invoices.update_invoice";
 
 		try {
+			this._logPriceListDebug("update_invoice_request", {
+				customer: this.customer,
+				customer_price_list: this.customer_info?.customer_price_list || null,
+				pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+				effective_price_list: this.get_price_list(),
+				selected_price_list: this.selected_price_list || null,
+				invoice_selling_price_list: doc.selling_price_list,
+				items_before: this._buildPriceListSnapshot(doc.items),
+			});
 			const response = await frappe.call({
 				method,
 				args: {
@@ -2413,6 +2485,11 @@ export default {
 
 			const message = response?.message;
 			if (message) {
+				this._logPriceListDebug("update_invoice_response", {
+					effective_price_list: this.get_price_list(),
+					invoice_selling_price_list: message.selling_price_list,
+					items_after: this._buildPriceListSnapshot(message.items),
+				});
 				if (message.is_return) {
 					this._normalizeReturnDocTotals(message);
 				}
@@ -2490,6 +2567,15 @@ export default {
 	// Process and save invoice (handles update or create)
 	async process_invoice() {
 		const doc = this.get_invoice_doc();
+		this._logPriceListDebug("pre-submit", {
+			customer: this.customer,
+			customer_price_list: this.customer_info?.customer_price_list || null,
+			pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+			effective_price_list: this.get_price_list(),
+			selected_price_list: this.selected_price_list || null,
+			invoice_selling_price_list: doc.selling_price_list,
+			items_before: this._buildPriceListSnapshot(doc.items),
+		});
 		try {
 			const updated_doc = await this.update_invoice(doc);
 			if (updated_doc && updated_doc.posting_date) {
@@ -2562,6 +2648,14 @@ export default {
 			const current = this.invoice_doc || {};
 			const name = current.name;
 			let doctype = current.doctype;
+			const effectivePriceList = this.get_price_list();
+			this._logPriceListDebug("reload_invoice_request", {
+				customer: this.customer,
+				customer_price_list: this.customer_info?.customer_price_list || null,
+				pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+				effective_price_list: effectivePriceList,
+				invoice_selling_price_list: current.selling_price_list || null,
+			});
 
 			if (!doctype) {
 				if (this.invoiceType === "Quotation") {
@@ -2588,6 +2682,11 @@ export default {
 
 			const doc = r?.message;
 			if (doc) {
+				this._logPriceListDebug("reload_invoice_response", {
+					effective_price_list: effectivePriceList,
+					invoice_selling_price_list: doc.selling_price_list,
+					items_after: this._buildPriceListSnapshot(doc.items),
+				});
 				if (manualOverrides.length) {
 					this._applyManualRateOverridesToDoc(doc, manualOverrides);
 				}
@@ -3070,6 +3169,15 @@ export default {
 				items_count: this.items.length,
 				customer: this.customer,
 			});
+			this._logPriceListDebug("show_payment", {
+				customer: this.customer,
+				customer_price_list: this.customer_info?.customer_price_list || null,
+				pos_profile_price_list: this.pos_profile?.selling_price_list || null,
+				effective_price_list: this.get_price_list(),
+				selected_price_list: this.selected_price_list || null,
+				invoice_selling_price_list: this.invoice_doc?.selling_price_list || null,
+				items_before: this._buildPriceListSnapshot(this.items),
+			});
 
 			if (!this.customer) {
 				console.log("Customer validation failed");
@@ -3097,6 +3205,8 @@ export default {
 				console.log("Main validation failed");
 				return;
 			}
+
+			await this.ensure_auto_batch_selection();
 
 			let invoice_doc;
 			if (
@@ -3139,7 +3249,7 @@ export default {
 			// Update invoice_doc with current currency info
 			invoice_doc.currency = this.selected_currency || this.pos_profile.currency;
 			invoice_doc.conversion_rate = this.conversion_rate || 1;
-			invoice_doc.plc_conversion_rate = this.exchange_rate || 1;
+			invoice_doc.plc_conversion_rate = this._getPlcConversionRate();
 
 			// Sync additional discount values back to the UI so totals remain accurate
 			// in the summary panel even after the invoice is refreshed from the server.
@@ -3476,6 +3586,52 @@ export default {
 		this.eventBus.emit("show_payment", "false");
 	},
 
+	// Ensure auto-batch items have batch numbers before payment/submit
+	async ensure_auto_batch_selection() {
+		if (!this.pos_profile?.posa_auto_set_batch) {
+			return;
+		}
+
+		if (!Array.isArray(this.items) || this.items.length === 0) {
+			return;
+		}
+
+		const pending = [];
+		const ready = [];
+
+		this.items.forEach((item) => {
+			if (!item?.has_batch_no || item.batch_no) {
+				return;
+			}
+
+			if (Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0) {
+				ready.push(item);
+			} else {
+				pending.push(item);
+			}
+		});
+
+		// Benchmark note: assign batch numbers before payment to avoid backend validation errors.
+		ready.forEach((item) => {
+			this.set_batch_qty(item, null, false);
+		});
+
+		if (pending.length > 0) {
+			await this.update_items_details(pending);
+		}
+
+		// Benchmark note: avoid extra loops by reusing the pending list after refresh.
+		const refreshTargets = pending.length > 0 ? pending : ready;
+		refreshTargets.forEach((item) => {
+			if (!item?.has_batch_no || item.batch_no) {
+				return;
+			}
+			if (Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0) {
+				this.set_batch_qty(item, null, false);
+			}
+		});
+	},
+
 	// Update details for all items (fetch from backend)
 	async update_items_details(items) {
 		if (!items?.length) return;
@@ -3487,7 +3643,7 @@ export default {
 				args: {
 					pos_profile: JSON.stringify(this.pos_profile),
 					items_data: JSON.stringify(items),
-					price_list: this.selected_price_list || this.pos_profile.selling_price_list,
+					price_list: this.get_price_list(),
 				},
 			});
 
@@ -3521,6 +3677,16 @@ export default {
 					item.allow_negative_stock = updated_item.allow_negative_stock;
 					item.batch_no_data = updated_item.batch_no_data;
 					item.serial_no_data = updated_item.serial_no_data;
+					// Benchmark note: Apply auto-batch assignment during bulk updates to avoid extra UI expand cycles.
+					if (
+						item.has_batch_no &&
+						this.pos_profile?.posa_auto_set_batch &&
+						!item.batch_no &&
+						Array.isArray(item.batch_no_data) &&
+						item.batch_no_data.length > 0
+					) {
+						this.set_batch_qty(item, null, false);
+					}
 
 					if (updated_item.price_list_currency) {
 						item.price_list_currency = updated_item.price_list_currency;
@@ -3624,7 +3790,7 @@ export default {
 				args: {
 					warehouse: item.warehouse || this.pos_profile.warehouse,
 					doc: currentDoc,
-					price_list: this.selected_price_list || this.pos_profile.selling_price_list,
+					price_list: this.get_price_list(),
 					item: {
 						item_code: item.item_code,
 						customer: this.customer,
@@ -3780,10 +3946,12 @@ export default {
 
 		if (!item.locked_price) {
 			if (forceUpdate || !item.base_rate) {
+				// Benchmark note: normalize incoming price_list_rate (PLC) into base CC once.
+				const plcConversionRate = this._getPlcConversionRate();
 				if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
-					item.base_price_list_rate = data.price_list_rate;
+					item.base_price_list_rate = data.price_list_rate * plcConversionRate;
 					if (!item.posa_offer_applied) {
-						item.base_rate = data.price_list_rate;
+						item.base_rate = data.price_list_rate * plcConversionRate;
 					}
 				}
 			}
@@ -3806,13 +3974,13 @@ export default {
 						item.rate = this.flt(item.base_rate / conv, this.currency_precision);
 					}
 				} else if (this.selected_currency !== baseCurrency) {
-					const exchange_rate = this.exchange_rate || 1;
+					const conversionRate = this.conversion_rate || 1;
 					item.price_list_rate = this.flt(
-						item.base_price_list_rate * exchange_rate,
+						item.base_price_list_rate / conversionRate,
 						this.currency_precision,
 					);
 
-					item.rate = this.flt(item.base_rate * exchange_rate, this.currency_precision);
+					item.rate = this.flt(item.base_rate / conversionRate, this.currency_precision);
 				} else {
 					item.price_list_rate = item.base_price_list_rate;
 
@@ -3821,10 +3989,10 @@ export default {
 					}
 				}
 			} else {
-				const baseCurrency = this.price_list_currency || this.pos_profile.currency;
-				if (this.selected_currency !== baseCurrency) {
+				const companyCurrency = this.pos_profile.currency;
+				if (this.selected_currency !== companyCurrency) {
 					item.price_list_rate = this.flt(
-						item.base_rate * this.exchange_rate,
+						item.base_rate / (this.conversion_rate || 1),
 						this.currency_precision,
 					);
 				} else {
@@ -4004,15 +4172,21 @@ export default {
 	},
 
 	// Get price list for current customer
+	get_effective_price_list() {
+		// Benchmark note: keep this resolver O(1) to avoid extra lookups in pricing loops.
+		const customerPriceList = this.customer_info?.customer_price_list || null;
+		const profilePriceList = this.pos_profile?.selling_price_list || null;
+		return customerPriceList || profilePriceList;
+	},
+
 	get_price_list() {
-		// Use the currently selected price list if available,
-		// otherwise fall back to the POS Profile selling price list
-		return this.selected_price_list || this.pos_profile.selling_price_list;
+		// Customer price list has highest priority, then POS Profile default.
+		return this.get_effective_price_list();
 	},
 
 	// Update price list for customer
 	update_price_list() {
-		const price_list = this.pos_profile?.selling_price_list || null;
+		const price_list = this.get_effective_price_list();
 		const hasChanged = this.selected_price_list !== price_list;
 		if (hasChanged) {
 			this.selected_price_list = price_list;
@@ -4169,16 +4343,17 @@ export default {
 				item.rate = rate;
 			}
 		} else {
+			const plcConversionRate = resolvedCurrency === companyCurrency ? 1 : this._getPlcConversionRate();
 			if (rate !== 0 || !item.base_price_list_rate) {
-				item.base_price_list_rate = rate;
+				item.base_price_list_rate = rate * plcConversionRate;
 				if (!manualOverride) {
-					item.base_rate = rate;
+					item.base_rate = rate * plcConversionRate;
 				}
 			}
 
 			if (this.selected_currency !== companyCurrency) {
-				const conv = this.exchange_rate || 1;
-				const converted = this.flt(rate * conv, this.currency_precision);
+				const exchangeRate = this.exchange_rate || 1;
+				const converted = this.flt(rate * exchangeRate, this.currency_precision);
 				if (rate !== 0 || !item.price_list_rate) {
 					item.price_list_rate = converted;
 				}
@@ -4222,11 +4397,12 @@ export default {
 			return result;
 		}
 
-		result.base_price_list_rate = this.flt(numericRate, this.currency_precision);
+		const plcConversionRate = resolvedCurrency === companyCurrency ? 1 : this._getPlcConversionRate();
+		result.base_price_list_rate = this.flt(numericRate * plcConversionRate, this.currency_precision);
 
 		if (selectedCurrency && companyCurrency && selectedCurrency !== companyCurrency) {
-			const exchange = this.exchange_rate || 1;
-			result.price_list_rate = this.flt(numericRate * exchange, this.currency_precision);
+			const exchangeRate = this.exchange_rate || 1;
+			result.price_list_rate = this.flt(numericRate * exchangeRate, this.currency_precision);
 		}
 
 		return result;

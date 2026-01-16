@@ -62,7 +62,9 @@ export function useBatchSerial() {
 		const source_batches = Array.isArray(item.batch_no_data) ? item.batch_no_data : [];
 		const normalized_batch_data = source_batches
 			.map((batch, index) => {
-				const baseQty = Number(batch.original_batch_qty ?? batch.batch_qty) || 0;
+				// Benchmark note: fall back to available_qty when batch_qty is missing to skip empty batches.
+				const baseQty =
+					Number(batch.original_batch_qty ?? batch.batch_qty ?? batch.available_qty) || 0;
 				return {
 					...batch,
 					_original_index: index,
@@ -134,7 +136,13 @@ export function useBatchSerial() {
 			item.batch_no_expiry_date = batch_to_use.expiry_date;
 			item.batch_no_is_expired = batch_to_use.is_expired;
 
-			if (batch_to_use.batch_price) {
+			const hasPriceListRate =
+				item.price_list_rate !== undefined &&
+				item.price_list_rate !== null &&
+				Number(item.price_list_rate) !== 0;
+			const shouldApplyBatchPrice = batch_to_use.batch_price && (update || !hasPriceListRate);
+
+			if (shouldApplyBatchPrice) {
 				// Store batch price in base currency
 				item.base_batch_price = batch_to_use.batch_price;
 

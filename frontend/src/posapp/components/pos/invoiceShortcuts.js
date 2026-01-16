@@ -7,6 +7,11 @@ const consumeEvent = (event) => {
 const isDigit = (event, digit) =>
 	event.key === String(digit) || event.code === `Digit${digit}` || event.code === `Numpad${digit}`;
 const isBackquote = (event) => event.key === "`" || event.code === "Backquote";
+const isLetter = (event, letter) => {
+	const normalized = letter.toLowerCase();
+	const keyValue = event.key?.toLowerCase?.();
+	return keyValue === normalized || event.code === `Key${letter.toUpperCase()}`;
+};
 
 export default {
 	async handleInvoiceShortcut(event) {
@@ -15,7 +20,6 @@ export default {
 		}
 
 		const key = event.key;
-		const keyLower = key.toLowerCase();
 
 		if (key === "F4") {
 			consumeEvent(event);
@@ -26,7 +30,7 @@ export default {
 			return;
 		}
 
-		if (key === "F5") {
+		if (key === "F6") {
 			consumeEvent(event);
 			this.$refs.customerComponent?.openNewCustomer?.();
 			return;
@@ -128,31 +132,31 @@ export default {
 			return;
 		}
 
-		if (keyLower === "q") {
+		if (isLetter(event, "q")) {
 			consumeEvent(event);
 			this.focusItemTableField("qty");
 			return;
 		}
 
-		if (keyLower === "a") {
+		if (isLetter(event, "a")) {
 			consumeEvent(event);
 			this.focusAdditionalDiscountField?.();
 			return;
 		}
 
-		if (keyLower === "u") {
+		if (isLetter(event, "u")) {
 			consumeEvent(event);
 			this.focusItemTableField("uom");
 			return;
 		}
 
-		if (keyLower === "r") {
+		if (isLetter(event, "r")) {
 			consumeEvent(event);
 			this.focusItemTableField("rate");
 			return;
 		}
 
-		if (keyLower === "e") {
+		if (isLetter(event, "e")) {
 			consumeEvent(event);
 			const firstItem = this.items?.[0];
 			if (firstItem) {
@@ -161,7 +165,7 @@ export default {
 			return;
 		}
 
-		if (keyLower === "f") {
+		if (isLetter(event, "f")) {
 			consumeEvent(event);
 			const input = this.$refs.itemSearchField;
 			if (input?.focus) {
@@ -172,37 +176,39 @@ export default {
 			return;
 		}
 
-		if (keyLower === "l") {
+		if (isLetter(event, "l")) {
 			consumeEvent(event);
 			this.get_draft_invoices?.();
 			return;
 		}
 
-		if (keyLower === "m") {
+		if (isLetter(event, "m")) {
 			consumeEvent(event);
 			this.eventBus.emit("toggle_item_selector_settings");
 			return;
 		}
 
-		if (keyLower === "s") {
+		if (isLetter(event, "s")) {
 			consumeEvent(event);
 			this.save_and_clear_invoice?.();
 			return;
 		}
 
-		if (keyLower === "d") {
+		if (isLetter(event, "d")) {
 			consumeEvent(event);
 			this.show_payment?.();
 			return;
 		}
 
-		if (keyLower === "x" || keyLower === "p") {
+		const isPaymentShortcut = isLetter(event, "x");
+		const isPrintShortcut = isLetter(event, "p");
+		if (isPaymentShortcut || isPrintShortcut) {
 			if (this.paymentVisible) {
 				return;
 			}
 			consumeEvent(event);
 
-			const shouldPrint = keyLower === "p";
+			const shouldPrint = isPrintShortcut;
 			const shouldSubmit = window.confirm(
 				__("Payments are not open. Do you want to open payments and submit?"),
 			);

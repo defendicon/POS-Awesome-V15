@@ -2,6 +2,7 @@ import { nextTick } from "vue";
 import _ from "lodash";
 import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
+import { parseBooleanSetting } from "../utils/stock.js";
 
 /* global frappe, __ */
 
@@ -116,6 +117,16 @@ export function useItemAddition() {
 
 		cache.signature = itemsRef.length;
 		cache.lastItems = itemsRef;
+	};
+
+	const shouldAutoSetBatch = (context, item) => {
+		if (!context?.setBatchQty || !context?.pos_profile?.posa_auto_set_batch) {
+			return false;
+		}
+		if (!item?.has_batch_no || item.batch_no) {
+			return false;
+		}
+		return Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0;
 	};
 
 	const invalidateMergeCache = (context) => {
@@ -284,6 +295,10 @@ export function useItemAddition() {
 			addedItems.forEach((item, index) => {
 				const resolvers = currentResolvers[index]; // Array of resolvers
 				refreshMergeCacheEntry(context, item, 0);
+				// Benchmark note: Use preloaded batch data to avoid extra fetches on auto-assign.
+				if (shouldAutoSetBatch(context, item)) {
+					context.setBatchQty(item, null, false);
+				}
 				runAsyncTask(() => expandBundle(item, context), "expand_bundle");
 
 				// OPTIMIZATION: Removed immediate server calls.
@@ -374,13 +389,19 @@ export function useItemAddition() {
 
 	// Add item to invoice
 	const addItem = withPerf("pos:add-item", async function addItemMeasured(item, context) {
-		const blockSale = context.pos_profile?.posa_block_sale_beyond_available_qty;
+		const blockSale = parseBooleanSetting(context.pos_profile?.posa_block_sale_beyond_available_qty);
 		const allowNegativeStock =
-			item.allow_negative_stock === 1 ||
-			item.allow_negative_stock === true ||
-			item.allow_negative_stock === "1";
+			parseBooleanSetting(context.stock_settings?.allow_negative_stock) ||
+			parseBooleanSetting(item.allow_negative_stock);
 
-		if (item.is_stock_item && item.actual_qty <= 0 && !allowNegativeStock) {
+		if (blockSale && item.is_stock_item && item.actual_qty <= 0 && !allowNegativeStock) {
+			console.debug("POS stock gate: item blocked", {
+				item_code: item.item_code,
+				actual_qty: item.actual_qty,
+				block_sale_beyond_available_qty: blockSale,
+				allow_negative_stock: allowNegativeStock,
+				item_allow_negative_stock: parseBooleanSetting(item.allow_negative_stock),
+			});
 			context.eventBus.emit("show_message", {
 				title: __("Item is out of stock"),
 				text: __("Cannot add an item with zero or negative quantity."),
@@ -436,6 +457,9 @@ export function useItemAddition() {
 				item.to_set_batch_no = null;
 				item.batch_no = null;
 				if (context.setBatchQty) context.setBatchQty(new_item, new_item.batch_no, false);
+			}
+			if (shouldAutoSetBatch(context, new_item)) {
+				context.setBatchQty(new_item, null, false);
 			}
 			// Make quantity negative for returns
 			if (context.isReturnInvoice) {
@@ -807,15 +831,16 @@ export function useItemAddition() {
 		new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;
 
 		// Setup base rates properly for multi-currency
-		const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-		if (context.selected_currency !== baseCurrency) {
-			// Store original base currency values
+		const companyCurrency = context.pos_profile.currency;
+		if (context.selected_currency !== companyCurrency) {
+			// Store original base currency values (Selected -> Company)
+			const conversionRate = context.conversion_rate || 1;
 			new_item.base_price_list_rate =
 				item.base_price_list_rate !== undefined
 					? item.base_price_list_rate
-					: item.rate / context.exchange_rate;
+					: item.rate * conversionRate;
 			new_item.base_rate =
-				item.base_rate !== undefined ? item.base_rate : item.rate / context.exchange_rate;
+				item.base_rate !== undefined ? item.base_rate : item.rate * conversionRate;
 			new_item.base_discount_amount = 0;
 		} else {
 			// In base currency, base rates = displayed rates

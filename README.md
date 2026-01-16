@@ -138,7 +138,7 @@ Notes:
 #### Global (Invoice Screen)
 
 - `F4` profile switch (currently shows “not available” message).
-- `F5` open new customer form.
+- `F6` open new customer form.
 - `F7` open shift details.
 - `F8` POS lock (currently shows “not available” message).
 

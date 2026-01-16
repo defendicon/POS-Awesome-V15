@@ -558,6 +558,7 @@
 import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { parseBooleanSetting } from "../../utils/stock.js";
 import CartItemRow from "./CartItemRow.vue";
 export default {
 	name: "ItemsTable",
@@ -708,7 +709,7 @@ export default {
 
 		blockSaleBeyondAvailableQty() {
 			if (["Order", "Quotation"].includes(this.invoiceType)) return false;
-			return !!this.pos_profile?.posa_block_sale_beyond_available_qty;
+			return parseBooleanSetting(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
 
 		// Responsive headers based on container size

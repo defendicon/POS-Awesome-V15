@@ -101,6 +101,25 @@ def _sanitize_item_name(name: str) -> str:
     return cleaned.strip()[:140]
 
 
+def _resolve_effective_price_list(
+    customer_name: str | None,
+    pos_profile: str | None,
+    fallback_price_list: str | None = None,
+) -> str | None:
+    customer_price_list = None
+    if customer_name:
+        customer_price_list = frappe.db.get_value("Customer", customer_name, "default_price_list")
+    if customer_price_list:
+        return customer_price_list
+
+    if pos_profile:
+        profile_price_list = frappe.db.get_value("POS Profile", pos_profile, "selling_price_list")
+        if profile_price_list:
+            return profile_price_list
+
+    return fallback_price_list
+
+
 def _build_invoice_remarks(invoice_doc):
     """Generate the invoice remarks string with item totals and grand total."""
 
@@ -529,10 +548,6 @@ def update_invoice(data):
             frappe.throw(validation.get("message"))
 
     _validate_return_window(invoice_doc, doctype, return_validity_enabled)
-    selected_currency = data.get("currency")
-    price_list_currency = data.get("price_list_currency")
-    if not price_list_currency and invoice_doc.get("selling_price_list"):
-        price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
 
     # Ensure customer exists before setting missing values
     customer_name = invoice_doc.get("customer")
@@ -553,6 +568,19 @@ def update_invoice(data):
             invoice_doc.customer_name = cust.customer_name
         except Exception as e:
             frappe.log_error(f"Failed to create customer {customer_name}: {e}")
+
+    effective_price_list = _resolve_effective_price_list(
+        invoice_doc.get("customer"),
+        invoice_doc.get("pos_profile") or pos_profile,
+        invoice_doc.get("selling_price_list") or data.get("selling_price_list"),
+    )
+    if effective_price_list:
+        invoice_doc.selling_price_list = effective_price_list
+
+    selected_currency = data.get("currency")
+    price_list_currency = data.get("price_list_currency")
+    if not price_list_currency and invoice_doc.get("selling_price_list"):
+        price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
 
     # Preserve provided item names for manual overrides
     overrides = {d.idx: {"item_name": d.item_name} for d in invoice_doc.items}
@@ -575,6 +603,8 @@ def update_invoice(data):
 
     # Set missing values first
     invoice_doc.set_missing_values()
+    if effective_price_list:
+        invoice_doc.selling_price_list = effective_price_list
 
     _set_return_valid_upto(invoice_doc, return_validity_enabled, default_validity_days)
 

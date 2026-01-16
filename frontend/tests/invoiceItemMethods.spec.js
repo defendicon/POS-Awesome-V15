@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../src/posapp/utils/stockCoordinator.js", () => ({
 	default: {
@@ -9,6 +9,10 @@ vi.mock("../src/posapp/utils/stockCoordinator.js", () => ({
 vi.mock("../src/lib/pricingEngine.js", () => ({
 	applyLocalPricingRules: vi.fn(() => ({ rate: 0, discountPerUnit: 0, applied: [] })),
 	computeFreeItems: vi.fn(() => []),
+	evaluatePricingRules: vi.fn(() => ({
+		pricing: { rate: 110, discountPerUnit: -10, applied: [] },
+		freebies: [],
+	})),
 }));
 
 import invoiceItemMethods from "../src/posapp/components/pos/invoiceItemMethods.js";
@@ -39,6 +43,69 @@ const createContext = () => ({
 		}
 		return Number(num.toFixed(prec));
 	},
+});
+
+const createInvoiceContext = (overrides = {}) => ({
+	...createContext(),
+	pos_profile: {
+		currency: "EUR",
+		warehouse: "Main",
+		posa_apply_customer_discount: false,
+		posa_auto_set_batch: false,
+		posa_use_percentage_discount: false,
+		create_pos_invoice_instead_of_sales_invoice: false,
+		naming_series: "ACC-SINV-.YYYY.-",
+	},
+	company: { default_currency: "EUR" },
+	price_list_currency: "USD",
+	selected_currency: "USD",
+	exchange_rate: 1,
+	conversion_rate: 1.5,
+	currency_precision: 2,
+	float_precision: 2,
+	items: [],
+	packed_items: [],
+	posa_offers: [],
+	posa_coupons: [],
+	selected_delivery_charge: null,
+	delivery_charges_rate: 0,
+	posa_notes: null,
+	posa_authorization_code: null,
+	posa_return_valid_upto: null,
+	posting_date_display: "2024-01-01",
+	formatDateForBackend: vi.fn(() => "2024-01-01"),
+	get_invoice_items: vi.fn(() => []),
+	get_payments: vi.fn(() => []),
+	get_price_list: vi.fn(() => "Standard Selling"),
+	roundAmount: (value) => Number(value.toFixed(2)),
+	pos_opening_shift: { name: "SHIFT-1" },
+	Total: 100,
+	subtotal: 100,
+	additional_discount: 0,
+	additional_discount_percentage: 0,
+	invoice_doc: {},
+	invoiceType: "Invoice",
+	customer_info: {},
+	customer: null,
+	isReturnInvoice: false,
+	_getPlcConversionRate: invoiceItemMethods._getPlcConversionRate,
+	...overrides,
+});
+
+beforeEach(() => {
+	globalThis.__ = (value) => value;
+	globalThis.flt = (value, precision = 2) => {
+		const numeric = Number(value);
+		if (!Number.isFinite(numeric)) {
+			return 0;
+		}
+		return Number(numeric.toFixed(precision));
+	};
+});
+
+afterEach(() => {
+	delete globalThis.__;
+	delete globalThis.flt;
 });
 
 describe("invoiceItemMethods._applyItemDetailPayload", () => {
@@ -150,6 +217,43 @@ describe("invoiceItemMethods._applyItemDetailPayload", () => {
 		expect(item.base_discount_amount).toBeCloseTo(5);
 		expect(item.rate).toBeCloseTo(95);
 		expect(item.base_rate).toBeCloseTo(95);
+	});
+});
+
+describe("invoiceItemMethods.get_invoice_doc currency conversions", () => {
+	it("uses conversion_rate for base totals when PLC=SC != CC", () => {
+		const context = createInvoiceContext({
+			price_list_currency: "USD",
+			selected_currency: "USD",
+			exchange_rate: 1,
+			conversion_rate: 1.5,
+			Total: 100,
+			subtotal: 100,
+		});
+
+		const doc = invoiceItemMethods.get_invoice_doc.call(context);
+
+		expect(doc.plc_conversion_rate).toBeCloseTo(1.5);
+		expect(doc.base_total).toBeCloseTo(150);
+		expect(doc.base_grand_total).toBeCloseTo(150);
+	});
+
+	it("keeps plc_conversion_rate aligned to PLC->CC when all currencies differ", () => {
+		// Benchmark scenario: PLC USD -> SC GBP (0.8), SC GBP -> CC EUR (1.1)
+		const context = createInvoiceContext({
+			price_list_currency: "USD",
+			selected_currency: "GBP",
+			exchange_rate: 0.8,
+			conversion_rate: 1.1,
+			Total: 200,
+			subtotal: 200,
+		});
+
+		const doc = invoiceItemMethods.get_invoice_doc.call(context);
+
+		expect(doc.plc_conversion_rate).toBeCloseTo(0.88);
+		expect(doc.base_total).toBeCloseTo(220);
+		expect(doc.base_grand_total).toBeCloseTo(220);
 	});
 });
 

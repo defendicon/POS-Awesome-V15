@@ -351,15 +351,11 @@
 														<span class="price-amount">
 															{{
 																memoizedFormatCurrency(
-																	item.base_price_list_rate ??
-																		item.rate ??
-																		0,
+																	item.original_rate ?? item.rate ?? 0,
 																	item.original_currency ||
 																		pos_profile.currency,
 																	ratePrecision(
-																		item.base_price_list_rate ??
-																			item.rate ??
-																			0,
+																		item.original_rate ?? item.rate ?? 0,
 																	),
 																)
 															}}
@@ -469,11 +465,9 @@
 											}}
 											{{
 												memoizedFormatCurrency(
-													item.base_price_list_rate ?? item.rate ?? 0,
+													item.original_rate ?? item.rate ?? 0,
 													item.original_currency || pos_profile.currency,
-													ratePrecision(
-														item.base_price_list_rate ?? item.rate ?? 0,
-													),
+													ratePrecision(item.original_rate ?? item.rate ?? 0),
 												)
 											}}
 										</div>
@@ -725,6 +719,7 @@ export default {
 		itemDetailsRetryTimeout: null,
 		selected_currency: "",
 		exchange_rate: 1,
+		conversion_rate: 1,
 		prePopulateInProgress: false,
 		itemWorker: null,
 		flyConfig: { speed: 0.6, easing: "ease-in-out" },
@@ -2170,10 +2165,12 @@ export default {
 			if (this.pos_profile.posa_allow_multi_currency) {
 				this.applyCurrencyConversionToItem(item);
 
+				const companyCurrency = this.pos_profile.currency;
+				const plcToCompanyRate = this._getPlcToCompanyRate(item);
 				const base_rate =
-					item.original_currency === this.pos_profile.currency
+					item.original_currency === companyCurrency
 						? item.original_rate
-						: item.original_rate * (item.plc_conversion_rate || this.exchange_rate);
+						: item.original_rate * plcToCompanyRate;
 
 				item.base_rate = base_rate;
 				item.base_price_list_rate = base_rate;
@@ -2926,6 +2923,18 @@ export default {
 			this.items.forEach((it) => this.applyCurrencyConversionToItem(it));
 		},
 
+		_getPlcToCompanyRate(item) {
+			const companyCurrency = this.pos_profile.currency;
+			const priceListCurrency = this.price_list_currency || companyCurrency;
+			// Benchmark note: favor item-level plc_conversion_rate to avoid recomputing PLC->CC.
+			return (
+				item.plc_conversion_rate ??
+				(priceListCurrency === companyCurrency
+					? 1
+					: (this.exchange_rate || 1) * (this.conversion_rate || 1))
+			);
+		},
+
 		applyCurrencyConversionToItem(item) {
 			if (!item) return;
 			const base = this.pos_profile.currency;
@@ -2938,21 +2947,27 @@ export default {
 			// original_rate is in price list currency
 			const price_list_rate = item.original_rate;
 
-			// Determine base rate using available conversion info
-			const base_rate = price_list_rate * (item.plc_conversion_rate || 1);
+			// Determine base rate using available conversion info (Price List -> Company)
+			const plc_to_cc_rate = this._getPlcToCompanyRate(item);
+			const base_rate = price_list_rate * plc_to_cc_rate;
 
 			item.base_rate = base_rate;
-			item.base_price_list_rate = price_list_rate;
+			item.base_price_list_rate = base_rate;
 
-			// If the price list currency matches the selected currency,
-			// don't apply any conversion
+			// Determine selected rate using exchange rate (Price List -> Selected)
+			// item.original_currency is the Price List Currency
+			const priceListCurrency = this.price_list_currency || base;
+			const selectedCurrency = this.selected_currency;
+			// Benchmark note: when PLC === SC, keep the displayed rate in PLC to avoid CC bleed-through.
 			const converted_rate =
-				item.original_currency === this.selected_currency
+				selectedCurrency === priceListCurrency
 					? price_list_rate
-					: price_list_rate * (this.exchange_rate || 1);
+					: item.original_currency === selectedCurrency
+						? price_list_rate
+						: price_list_rate * (this.exchange_rate || 1);
 
 			item.rate = this.flt(converted_rate, this.currency_precision);
-			item.currency = this.selected_currency;
+			item.currency = selectedCurrency;
 			item.price_list_rate = item.rate;
 		},
 		scan_barcoud() {
@@ -4533,7 +4548,7 @@ export default {
 			return 500;
 		},
 		blockSaleBeyondAvailableQty() {
-			return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
+			return parseBooleanSetting(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
 		headers() {
 			return this.getItemsHeaders();
@@ -4856,6 +4871,7 @@ export default {
 		this.eventBus.on("update_currency", (data) => {
 			this.selected_currency = data.currency;
 			this.exchange_rate = data.exchange_rate;
+			this.conversion_rate = data.conversion_rate ?? this.conversion_rate ?? 1;
 
 			// Refresh visible item prices when currency changes
 			this.applyCurrencyConversionToItems();

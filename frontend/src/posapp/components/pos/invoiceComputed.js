@@ -140,7 +140,7 @@ export default {
 		if (["Order", "Quotation"].includes(this.invoiceType)) {
 			return false;
 		}
-		return Boolean(this.pos_profile?.posa_block_sale_beyond_available_qty);
+		return parseBooleanSetting(this.pos_profile?.posa_block_sale_beyond_available_qty);
 	},
 	// Table headers for item table (for another table if needed)
 	itemTableHeaders() {
