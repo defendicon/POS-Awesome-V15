@@ -4389,7 +4389,8 @@ export default {
 						break;
 					}
 					await this.update_items_details(chunk, { forceRefresh: true });
-					await scheduleFrame();
+					// Yield to main thread to keep UI responsive
+					await new Promise((resolve) => requestAnimationFrame(resolve));
 				}
 			} catch (error) {
 				console.error("Failed to refresh all item details in background", error);

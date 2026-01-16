@@ -1347,15 +1347,56 @@ def get_item_brand(item_code):
     return normalize_brand(brand) if brand else ""
 
 
+    brand = data.get("brand")
+    if not brand and data.get("variant_of"):
+        brand = frappe.db.get_value("Item", data.get("variant_of"), "brand")
+    return normalize_brand(brand) if brand else ""
+
+
 def on_item_price_change(doc, method):
     """
     Invalidate the POS profile cache and update the item timestamp
-    to trigger the background sync on POS Awesome
+    to trigger the background sync on POS Awesome.
+    Uses SCAN for safe cache clearing.
     """
     from frappe.utils import now
 
-    # Clear cache
-    frappe.cache().delete_keys("posa_items_")
+    # Clear cache safely using SCAN
+    clear_pos_cache("posa_items_")
 
     # Update item timestamp
     frappe.db.set_value("Item", doc.item_code, "modified", now())
+
+
+def clear_pos_cache(pattern):
+    try:
+        cache = frappe.cache()
+        # Handle different Frappe versions/Redis clients
+        redis_client = getattr(cache, "redis_client", getattr(cache, "redis_server", None))
+        
+        if redis_client:
+            # Append wildcard to pattern if not present
+            if not pattern.endswith("*"):
+                pattern += "*"
+            if not pattern.startswith("*"):
+                pattern = "*" + pattern
+                
+            # Perform non-blocking SCAN
+            # scan_iter yields keys matching the pattern
+            # We collect them in chunks to delete
+            keys_to_delete = []
+            for key in redis_client.scan_iter(match=pattern, count=1000):
+                keys_to_delete.append(key)
+                if len(keys_to_delete) >= 1000:
+                    redis_client.delete(*keys_to_delete)
+                    keys_to_delete = []
+            
+            if keys_to_delete:
+                redis_client.delete(*keys_to_delete)
+        else:
+            # Fallback if we can't access redis client directly
+            frappe.cache().delete_keys(pattern)
+            
+    except Exception:
+        # If anything fails, log it but don't crash
+        frappe.log_error("Failed to clear POS cache safely")
