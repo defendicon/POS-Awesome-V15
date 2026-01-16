@@ -415,6 +415,20 @@ def _auto_set_return_batches(invoice_doc):
             d.use_serial_batch_fields = 1
             batch_list = get_batch_qty(item_code=d.item_code, warehouse=d.warehouse) or []
 
+            # Filter out expired batches
+            if batch_list:
+                batch_details = frappe.get_all(
+                    "Batch",
+                    filters={"name": ["in", [b.get("batch_no") for b in batch_list]]},
+                    fields=["name", "expiry_date"],
+                )
+                valid_batches = {
+                    b.name
+                    for b in batch_details
+                    if not b.expiry_date or getdate(b.expiry_date) >= getdate(nowdate())
+                }
+                batch_list = [b for b in batch_list if b.get("batch_no") in valid_batches]
+
             if batch_list:
                 # FIFO: batches are already sorted by posting/expiry in ERPNext
                 d.batch_no = batch_list[0].get("batch_no")
