@@ -414,7 +414,7 @@ def _auto_set_return_batches(invoice_doc):
         if has_batch and not d.get("batch_no"):
             d.use_serial_batch_fields = 1
             batch_list = get_batch_qty(item_code=d.item_code, warehouse=d.warehouse) or []
-            batch_list = [b for b in batch_list if flt(b.get("qty")) > 0]
+
             if batch_list:
                 # FIFO: batches are already sorted by posting/expiry in ERPNext
                 d.batch_no = batch_list[0].get("batch_no")
