@@ -290,7 +290,6 @@ def get_items(
     profile_ctx = _normalize_profile_context(pos_profile)
     groups_ctx = _prepare_item_groups(profile_ctx.profile_name, item_groups)
 
-    @redis_cache(ttl=profile_ctx.cache_ttl or 300)
     def __get_items(
         _pos_profile_name,
         _warehouse,
@@ -322,7 +321,41 @@ def get_items(
         )
 
     if profile_ctx.use_price_list_cache:
-        return __get_items(
+        import hashlib
+        
+        # Prepare arguments for hash generation to create a unique cache key
+        # We include all arguments that affect the output
+        cache_args = [
+            profile_ctx.profile_name,
+            profile_ctx.warehouse,
+            price_list,
+            customer,
+            search_value,
+            limit,
+            offset,
+            start_after,
+            modified_after,
+            item_group,
+            include_description,
+            include_image,
+            groups_ctx.groups_tuple,
+        ]
+        
+        try:
+            # Generate a consistent hash
+            key_str = json.dumps(cache_args, default=str, sort_keys=True)
+            key_hash = hashlib.sha256(key_str.encode('utf-8')).hexdigest()
+            cache_key = f"posa_items_{key_hash}"
+            
+            cached_result = frappe.cache().get_value(cache_key)
+            if cached_result is not None:
+                return cached_result
+        except Exception:
+            # Fallback if hashing fails for some reason
+            cache_key = None
+            frappe.log_error("Failed to generate cache key for get_items")
+
+        result = __get_items(
             profile_ctx.profile_name,
             profile_ctx.warehouse,
             price_list,
@@ -337,6 +370,11 @@ def get_items(
             include_image,
             groups_ctx.groups_tuple,
         )
+        
+        if cache_key:
+            frappe.cache().set_value(cache_key, result, expires_in_sec=profile_ctx.cache_ttl or 300)
+            
+        return result
 
     return _execute_item_search(
         profile_ctx.pos_profile_json,
