@@ -2336,7 +2336,65 @@ export default {
 					}, 300);
 				}
 			}
+		},
 
+		async update_items_details(itemsToUpdate, options = {}) {
+			if (!itemsToUpdate || !itemsToUpdate.length) return;
+			const { forceRefresh = false } = options; 
+
+			// Use the store/mixin provided fetcher if available, or call API directly
+			try {
+				const codes = itemsToUpdate.map((i) => i.item_code);
+				const details = await getCachedItemDetails(
+					this.pos_profile.name,
+					this.active_price_list,
+					codes
+				);
+				
+				// Apply updates
+				const cached = details.cached || [];
+				const missing = details.missing || [];
+				
+				const processUpdate = (det) => {
+					const item = itemsToUpdate.find(i => i.item_code === det.item_code);
+					if (item) {
+						if (det.rate !== undefined) {
+							const price = det.price_list_rate ?? det.rate ?? 0;
+							// Only overwrite if forceRefresh or value changed
+							item.rate = price;
+							item.price_list_rate = price;
+						}
+						// Update other fields as needed
+						if (det.actual_qty !== undefined) item.actual_qty = det.actual_qty;
+						if (det.item_uoms) item.item_uoms = det.item_uoms;
+					}
+				};
+
+				cached.forEach(processUpdate);
+				
+				if (missing.length) {
+					// We could fetch missing from server
+					// But for now, let's assume getCachedItemDetails handles some fetching or returns missing
+				    // If we have missing items and forceRefresh is true, we should fetch them
+					if (forceRefresh) {
+						 const res = await frappe.call({
+							method: "posawesome.posawesome.api.items.get_items_details",
+							args: {
+								pos_profile: this.pos_profile.name,
+								items_data: JSON.stringify(missing.map(code => ({ item_code: code }))),
+								price_list: this.active_price_list,
+								customer: this.customer
+							}
+						});
+						const freshDetails = res.message || [];
+						freshDetails.forEach(processUpdate);
+						// Cache them? saveItemDetailsCache...
+					}
+				}
+			} catch (e) {
+				console.error("Failed to update item details", e);
+			}
+		},
 			// Clear the input only when triggered via scanner
 			if (fromScanner) {
 				vm.clearSearch();

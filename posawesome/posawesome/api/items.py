@@ -1375,17 +1375,28 @@ def clear_pos_cache(pattern):
         redis_client = getattr(cache, "redis_client", getattr(cache, "redis_server", None))
         
         if redis_client:
+            # Determine the key prefix used by this site
+            # make_key usually returns "site_name|key" or similar
+            try:
+                # pass a dummy key to see the prefix structure
+                test_key = cache.make_key("test_prefix_marker")
+                prefix = test_key.replace("test_prefix_marker", "")
+            except Exception:
+                # Fallback: assume standard site prefix if make_key fails
+                prefix = frappe.local.site + "|"
+
             # Append wildcard to pattern if not present
             if not pattern.endswith("*"):
                 pattern += "*"
             if not pattern.startswith("*"):
                 pattern = "*" + pattern
+            
+            # Prepend site prefix to the pattern
+            full_pattern = prefix + pattern
                 
             # Perform non-blocking SCAN
-            # scan_iter yields keys matching the pattern
-            # We collect them in chunks to delete
             keys_to_delete = []
-            for key in redis_client.scan_iter(match=pattern, count=1000):
+            for key in redis_client.scan_iter(match=full_pattern, count=1000):
                 keys_to_delete.append(key)
                 if len(keys_to_delete) >= 1000:
                     redis_client.delete(*keys_to_delete)
