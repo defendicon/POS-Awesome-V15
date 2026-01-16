@@ -323,9 +323,16 @@ def get_items(
     if profile_ctx.use_price_list_cache:
         import hashlib
         
+        # Get current cache version, default to 0
+        try:
+            cache_version = frappe.cache().get_value("posa_cache_version") or 0
+        except Exception:
+            cache_version = 0
+
         # Prepare arguments for hash generation to create a unique cache key
         # We include all arguments that affect the output
         cache_args = [
+            str(cache_version), # Include version in hash
             profile_ctx.profile_name,
             profile_ctx.warehouse,
             price_list,
@@ -1385,60 +1392,24 @@ def get_item_brand(item_code):
     return normalize_brand(brand) if brand else ""
 
 
+    brand = data.get("brand")
+    if not brand and data.get("variant_of"):
+        brand = frappe.db.get_value("Item", data.get("variant_of"), "brand")
+    return normalize_brand(brand) if brand else ""
+
+
 def on_item_price_change(doc, method):
     """
-    Invalidate the POS profile cache and update the item timestamp
-    to trigger the background sync on POS Awesome.
-    Uses SCAN for safe cache clearing.
+    Invalidate the POS profile cache by incrementing version
+    and update the item timestamp to trigger the background sync on POS Awesome.
     """
     from frappe.utils import now
 
-    # Clear cache safely using SCAN
-    clear_pos_cache("posa_items_")
+    # Increment cache version to invalidate all current item keys
+    try:
+        frappe.cache().incr("posa_cache_version")
+    except Exception:
+        frappe.cache().set_value("posa_cache_version", 1)
 
     # Update item timestamp
     frappe.db.set_value("Item", doc.item_code, "modified", now())
-
-
-def clear_pos_cache(pattern):
-    try:
-        cache = frappe.cache()
-        # Handle different Frappe versions/Redis clients
-        redis_client = getattr(cache, "redis_client", getattr(cache, "redis_server", None))
-        
-        if redis_client:
-            # Determine the key prefix used by this site
-            # make_key usually returns "site_name|key" or similar
-            try:
-                # pass a dummy key to see the prefix structure
-                test_key = cache.make_key("test_prefix_marker")
-                prefix = test_key.replace("test_prefix_marker", "")
-            except Exception:
-                # Fallback: assume standard site prefix if make_key fails
-                prefix = frappe.local.site + "|"
-
-            # Append wildcard to pattern if not present
-            if not pattern.endswith("*"):
-                pattern += "*"
-            
-            # Prepend site prefix to the pattern
-            # Do NOT prepend wildcard to the start as site prefix is always at start
-            full_pattern = prefix + pattern
-                
-            # Perform non-blocking SCAN
-            keys_to_delete = []
-            for key in redis_client.scan_iter(match=full_pattern, count=1000):
-                keys_to_delete.append(key)
-                if len(keys_to_delete) >= 1000:
-                    redis_client.delete(*keys_to_delete)
-                    keys_to_delete = []
-            
-            if keys_to_delete:
-                redis_client.delete(*keys_to_delete)
-        else:
-            # Fallback if we can't access redis client directly
-            frappe.cache().delete_keys(pattern)
-            
-    except Exception:
-        # If anything fails, log it but don't crash
-        frappe.log_error("Failed to clear POS cache safely")
