@@ -2336,6 +2336,13 @@ export default {
 					}, 300);
 				}
 			}
+
+			// Clear the input only when triggered via scanner
+			if (fromScanner) {
+				vm.clearSearch();
+				vm.focusItemSearch();
+				vm.search_from_scanner = false;
+			}
 		},
 
 		async update_items_details(itemsToUpdate, options = {}) {
@@ -2393,13 +2400,6 @@ export default {
 				}
 			} catch (e) {
 				console.error("Failed to update item details", e);
-			}
-		},
-			// Clear the input only when triggered via scanner
-			if (fromScanner) {
-				vm.clearSearch();
-				vm.focusItemSearch();
-				vm.search_from_scanner = false;
 			}
 		},
 		get_item_qty(first_search) {
