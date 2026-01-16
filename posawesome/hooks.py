@@ -111,6 +111,9 @@ doc_events = {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
     },
+    "Item Price": {
+        "on_change": "posawesome.posawesome.api.items.on_item_price_change",
+    },
 }
 
 # Scheduled Tasks

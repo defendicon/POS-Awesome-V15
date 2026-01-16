@@ -1345,3 +1345,17 @@ def get_item_brand(item_code):
     if not brand and data.get("variant_of"):
         brand = frappe.db.get_value("Item", data.get("variant_of"), "brand")
     return normalize_brand(brand) if brand else ""
+
+
+def on_item_price_change(doc, method):
+    """
+    Invalidate the POS profile cache and update the item timestamp
+    to trigger the background sync on POS Awesome
+    """
+    from frappe.utils import now
+
+    # Clear cache
+    frappe.cache().delete_keys("posa_items_")
+
+    # Update item timestamp
+    frappe.db.set_value("Item", doc.item_code, "modified", now())
