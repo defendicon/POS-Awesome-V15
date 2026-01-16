@@ -2395,7 +2395,10 @@ export default {
 						});
 						const freshDetails = res.message || [];
 						freshDetails.forEach(processUpdate);
-						// Cache them? saveItemDetailsCache...
+						// Cache the fresh details to avoid repeated fetches
+						if (freshDetails.length > 0) {
+							saveItemDetailsCache(this.pos_profile.name, this.active_price_list, freshDetails);
+						}
 					}
 				}
 			} catch (e) {

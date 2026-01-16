@@ -1347,12 +1347,6 @@ def get_item_brand(item_code):
     return normalize_brand(brand) if brand else ""
 
 
-    brand = data.get("brand")
-    if not brand and data.get("variant_of"):
-        brand = frappe.db.get_value("Item", data.get("variant_of"), "brand")
-    return normalize_brand(brand) if brand else ""
-
-
 def on_item_price_change(doc, method):
     """
     Invalidate the POS profile cache and update the item timestamp
@@ -1388,10 +1382,9 @@ def clear_pos_cache(pattern):
             # Append wildcard to pattern if not present
             if not pattern.endswith("*"):
                 pattern += "*"
-            if not pattern.startswith("*"):
-                pattern = "*" + pattern
             
             # Prepend site prefix to the pattern
+            # Do NOT prepend wildcard to the start as site prefix is always at start
             full_pattern = prefix + pattern
                 
             # Perform non-blocking SCAN
