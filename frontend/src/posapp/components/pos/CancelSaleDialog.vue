@@ -14,7 +14,14 @@
 			</v-card-text>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn color="error" autofocus @click="onConfirm">{{ __("Yes, Cancel sale") }}</v-btn>
+				<v-btn
+					ref="confirmBtn"
+					color="error"
+					autofocus
+					@click="onConfirm"
+				>
+					{{ __("Yes, Cancel sale") }}
+				</v-btn>
 				<v-btn color="warning" @click="$emit('update:modelValue', false)">{{ __("Back") }}</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -30,6 +37,17 @@ export default {
 	methods: {
 		onConfirm() {
 			this.$emit("confirm");
+		},
+	},
+	watch: {
+		modelValue(val) {
+			if (val) {
+				this.$nextTick(() => {
+					setTimeout(() => {
+						this.$refs.confirmBtn?.$el?.focus();
+					}, 100);
+				});
+			}
 		},
 	},
 };
