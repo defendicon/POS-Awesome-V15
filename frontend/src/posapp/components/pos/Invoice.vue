@@ -298,7 +298,35 @@
 					</v-dialog>
 				</div>
 			</div>
+
 		</v-card>
+
+		<!-- Payment Confirmation Dialog -->
+		<v-dialog v-model="confirm_payment_dialog" max-width="400">
+			<v-card>
+				<v-card-title class="text-h6">
+					{{ __("Open Payments?") }}
+				</v-card-title>
+				<v-card-text>
+					{{ __("Payments are not open. Do you want to open payments and submit?") }}
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn color="error" variant="text" @click="resolvePaymentConfirmation(false)">
+						{{ __("Cancel") }}
+					</v-btn>
+					<v-btn
+						ref="confirmPaymentBtn"
+						color="primary"
+						variant="text"
+						@click="resolvePaymentConfirmation(true)"
+					>
+						{{ __("Yes") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
 		<!-- Payment Section -->
 		<InvoiceSummary
 			ref="invoiceSummary"
@@ -437,6 +465,8 @@ export default {
 			show_column_selector: false, // Column selector dialog visibility
 			invoiceHeight: null,
 			paymentVisible: false, // Track current payment view state
+			confirm_payment_dialog: false,
+			payment_confirmation_resolver: null,
 			_busHandlers: {},
 		};
 	},
@@ -479,6 +509,20 @@ export default {
 	},
 
 	methods: {
+		confirmPaymentSubmission() {
+			this.confirm_payment_dialog = true;
+			return new Promise((resolve) => {
+				this.payment_confirmation_resolver = resolve;
+			});
+		},
+
+		resolvePaymentConfirmation(result) {
+			this.confirm_payment_dialog = false;
+			if (this.payment_confirmation_resolver) {
+				this.payment_confirmation_resolver(result);
+				this.payment_confirmation_resolver = null;
+			}
+		},
 		...shortcutMethods,
 		...offerMethods,
 		...invoiceItemMethods,
@@ -1626,7 +1670,19 @@ export default {
 
 		this._shortcutHandlers = {};
 	},
-	watch: invoiceWatchers,
+	watch: {
+		...invoiceWatchers,
+		confirm_payment_dialog(val) {
+			if (val) {
+				this.$nextTick(() => {
+					// Add a small delay for the dialog animation
+					setTimeout(() => {
+						this.$refs.confirmPaymentBtn?.$el?.focus();
+					}, 100);
+				});
+			}
+		},
+	},
 };
 </script>
 
