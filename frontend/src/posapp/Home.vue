@@ -244,14 +244,7 @@ export default {
 
 			markSourceLoaded("init");
 
-			// Fallback: if items/customers don't load within 10 seconds, mark them as loaded
-			setTimeout(() => {
-				if (loadingState.active) {
-					console.warn("Forcing items/customers to complete due to delay");
-					markSourceLoaded("items");
-					markSourceLoaded("customers");
-				}
-			}, 10000);
+
 		},
 
 		setupEventListeners() {
