@@ -156,7 +156,7 @@ export default {
 		UpdateCustomer,
 		Skeleton,
 	},
-	setup(props) {
+	setup(props, { expose }) {
 		const { proxy } = getCurrentInstance();
 		const eventBus = proxy?.eventBus;
 		const customersStore = useCustomersStore();
@@ -323,6 +323,56 @@ export default {
 			eventBus?.emit("open_update_customer", customerInfo.value || {});
 		};
 
+		const selectFirstCustomer = () => {
+			const list =
+				filteredCustomers.value && filteredCustomers.value.length
+					? filteredCustomers.value
+					: customers.value;
+
+			if (!list || !list.length) {
+				return;
+			}
+
+			const first = list[0];
+			tempSelectedCustomer.value = first.name;
+			internalCustomer.value = first.name;
+			customersStore.setSelectedCustomer(first.name);
+			closeCustomerMenu();
+		};
+
+		const openNewCustomer = () => {
+			new_customer();
+		};
+
+		const focusCustomerSearch = async () => {
+			const dropdown = customerDropdown.value;
+			if (!dropdown) {
+				return;
+			}
+
+			try {
+				dropdown.menu = true;
+			} catch (err) {
+				dropdown.$emit?.("update:menu", true);
+			}
+
+			isMenuOpen.value = true;
+
+			if (typeof dropdown.focus === "function") {
+				dropdown.focus();
+			}
+
+			await nextTick();
+
+			const inputEl = dropdown.$el?.querySelector("input");
+			if (inputEl) {
+				inputEl.focus();
+				inputEl.select?.();
+			}
+		};
+
+		expose({ focusCustomerSearch, selectFirstCustomer, openNewCustomer });
+
 		const busHandlers = [];
 
 		const registerBus = (event, handler) => {
@@ -385,6 +435,9 @@ export default {
 			handleEnter,
 			new_customer,
 			edit_customer,
+			selectFirstCustomer,
+			openNewCustomer,
+			focusCustomerSearch,
 		};
 	},
 };

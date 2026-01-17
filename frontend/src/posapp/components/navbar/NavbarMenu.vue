@@ -4,7 +4,7 @@
 		:close-on-content-click="true"
 		:location="isMobile ? 'bottom end' : 'bottom end'"
 		:offset="[0, 4]"
-		:max-height="isMobile ? '80vh' : 'auto'"
+		:max-height="isMobile ? '90vh' : undefined"
 	>
 		<template #activator="{ props }">
 			<v-btn
@@ -31,56 +31,57 @@
 				<span class="menu-header-text-compact pos-text-primary">{{ __("Actions") }}</span>
 			</div>
 
-			<!-- Mobile-only: Show hidden items first -->
-			<template v-if="isMobile">
-				<v-list density="compact" class="menu-list-compact mobile-only-section">
-					<!-- Profile Information on mobile -->
-					<v-list-item class="menu-item-compact profile-info-mobile">
-						<template v-slot:prepend>
-							<div class="menu-icon-wrapper-compact info-icon">
-								<v-icon color="white" size="16">mdi-account-circle</v-icon>
+			<div class="menu-content-scrollable">
+				<!-- Mobile-only: Show hidden items first -->
+				<template v-if="isMobile">
+					<v-list density="compact" class="menu-list-compact mobile-only-section">
+						<!-- Profile Information on mobile -->
+						<v-list-item class="menu-item-compact profile-info-mobile">
+							<template v-slot:prepend>
+								<div class="menu-icon-wrapper-compact info-icon">
+									<v-icon color="white" size="16">mdi-account-circle</v-icon>
+								</div>
+							</template>
+							<div class="menu-content-compact">
+								<v-list-item-title class="menu-item-title-compact">{{
+									displayUserName
+								}}</v-list-item-title>
+								<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+									__("Current User")
+								}}</v-list-item-subtitle>
 							</div>
-						</template>
-						<div class="menu-content-compact">
-							<v-list-item-title class="menu-item-title-compact">{{
-								displayUserName
-							}}</v-list-item-title>
-							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-								__("Current User")
-							}}</v-list-item-subtitle>
-						</div>
-					</v-list-item>
+						</v-list-item>
 
-					<!-- Cache and System Status on mobile -->
+						<!-- Cache and System Status on mobile -->
+						<v-list-item
+							class="menu-item-compact system-info-mobile"
+							@click="$emit('refresh-cache-usage')"
+						>
+							<template v-slot:prepend>
+								<div class="menu-icon-wrapper-compact neutral-icon">
+									<v-icon color="white" size="16">mdi-database-clock</v-icon>
+								</div>
+							</template>
+							<div class="menu-content-compact">
+								<v-list-item-title class="menu-item-title-compact">{{
+									__("System Status")
+								}}</v-list-item-title>
+								<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+									__("Check cache and performance")
+								}}</v-list-item-subtitle>
+							</div>
+						</v-list-item>
+
+						<v-divider class="menu-section-divider-compact"></v-divider>
+					</v-list>
+				</template>
+
+				<v-list density="compact" class="menu-list-compact">
 					<v-list-item
-						class="menu-item-compact system-info-mobile"
-						@click="$emit('refresh-cache-usage')"
+						v-if="!posProfile.posa_hide_closing_shift"
+						@click="$emit('close-shift')"
+						class="menu-item-compact primary-action"
 					>
-						<template v-slot:prepend>
-							<div class="menu-icon-wrapper-compact neutral-icon">
-								<v-icon color="white" size="16">mdi-database-clock</v-icon>
-							</div>
-						</template>
-						<div class="menu-content-compact">
-							<v-list-item-title class="menu-item-title-compact">{{
-								__("System Status")
-							}}</v-list-item-title>
-							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-								__("Check cache and performance")
-							}}</v-list-item-subtitle>
-						</div>
-					</v-list-item>
-
-					<v-divider class="menu-section-divider-compact"></v-divider>
-				</v-list>
-			</template>
-
-			<v-list density="compact" class="menu-list-compact">
-				<v-list-item
-					v-if="!posProfile.posa_hide_closing_shift"
-					@click="$emit('close-shift')"
-					class="menu-item-compact primary-action"
-				>
 					<template v-slot:prepend>
 						<div class="menu-icon-wrapper-compact primary-icon">
 							<v-icon color="white" size="16">mdi-content-save-move-outline</v-icon>
@@ -213,13 +214,13 @@
 					<template v-slot:prepend>
 						<div class="menu-icon-wrapper-compact info-icon">
 							<v-icon color="white" size="16">{{
-								$theme.isDark ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
+								$theme.isDark.value ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
 							}}</v-icon>
 						</div>
 					</template>
 					<div class="menu-content-compact">
 						<v-list-item-title class="menu-item-title-compact">{{
-							$theme.isDark ? __("Light Mode") : __("Dark Mode")
+							$theme.isDark.value ? __("Light Mode") : __("Dark Mode")
 						}}</v-list-item-title>
 						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
 							__("Switch theme appearance")
@@ -243,6 +244,7 @@
 					</div>
 				</v-list-item>
 			</v-list>
+			</div>
 		</v-card>
 	</v-menu>
 
@@ -674,6 +676,16 @@ export default {
 	min-width: 260px;
 	max-width: 280px;
 	margin-top: 2px;
+	display: flex;
+	flex-direction: column;
+	max-height: 85vh;
+}
+
+.menu-content-scrollable {
+	overflow-y: auto;
+	flex: 1;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
 }
 
 /* Elite Menu Header */
@@ -685,6 +697,7 @@ export default {
 	align-items: center;
 	gap: 10px;
 	border-bottom: 1px solid rgba(25, 118, 210, 0.08);
+	flex-shrink: 0;
 }
 
 .menu-header-text-compact {
@@ -858,9 +871,10 @@ export default {
 /* Compact Responsive Design */
 @media (max-width: 768px) {
 	.menu-card-compact {
-		min-width: 240px;
-		max-width: 260px;
+		min-width: 280px;
+		max-width: 320px;
 		border-radius: 14px;
+		min-height: 300px;
 	}
 
 	.menu-item-compact {
@@ -889,8 +903,8 @@ export default {
 
 @media (max-width: 480px) {
 	.menu-card-compact {
-		min-width: 220px;
-		max-width: 240px;
+		min-width: 260px;
+		max-width: 300px;
 	}
 
 	.menu-item-compact {

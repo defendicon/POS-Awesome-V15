@@ -1,0 +1,148 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-11 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "barcode_settings_section",
+  "prefix_included_or_not",
+  "no_of_prefix_characters",
+  "prefix",
+  "column_break_prefix",
+  "item_code_starting_digit",
+  "item_code_total_digits",
+  "section_break_weight",
+  "weight_starting_digit",
+  "weight_total_digits",
+  "weight_decimals",
+  "column_break_weight",
+  "section_break_price",
+  "price_included_in_barcode_or_not",
+  "price_starting_digit",
+  "price_total_digit",
+  "price_decimals"
+ ],
+ "fields": [
+  {
+   "fieldname": "barcode_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Barcode Structure"
+  },
+  {
+   "default": "0",
+   "fieldname": "prefix_included_or_not",
+   "fieldtype": "Check",
+   "label": "Prefix included in barcode"
+  },
+  {
+   "description": "Number of characters to skip when a prefix is present.",
+   "fieldname": "no_of_prefix_characters",
+   "fieldtype": "Int",
+   "label": "Prefix length"
+  },
+  {
+   "description": "Optional prefix value that all scale barcodes start with.",
+   "fieldname": "prefix",
+   "fieldtype": "Data",
+   "label": "Prefix"
+  },
+  {
+   "fieldname": "column_break_prefix",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Starting position (1-indexed) of the item code within the barcode.",
+   "fieldname": "item_code_starting_digit",
+   "fieldtype": "Int",
+   "label": "Item code starting position"
+  },
+  {
+   "description": "Total number of digits used for the item code in the barcode.",
+   "fieldname": "item_code_total_digits",
+   "fieldtype": "Int",
+   "label": "Item code digits"
+  },
+  {
+   "fieldname": "section_break_weight",
+   "fieldtype": "Section Break",
+   "label": "Weight"
+  },
+  {
+   "description": "Starting position (1-indexed) of the weight segment.",
+   "fieldname": "weight_starting_digit",
+   "fieldtype": "Int",
+   "label": "Weight starting position"
+  },
+  {
+   "description": "Number of digits representing the weight before decimal places.",
+   "fieldname": "weight_total_digits",
+   "fieldtype": "Int",
+   "label": "Weight digits"
+  },
+  {
+   "description": "Number of decimal places encoded for the weight.",
+   "fieldname": "weight_decimals",
+   "fieldtype": "Int",
+   "label": "Weight decimals"
+  },
+  {
+   "fieldname": "column_break_weight",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_price",
+   "fieldtype": "Section Break",
+   "label": "Price"
+  },
+  {
+   "default": "0",
+   "fieldname": "price_included_in_barcode_or_not",
+   "fieldtype": "Check",
+   "label": "Price included in barcode"
+  },
+  {
+   "depends_on": "eval:doc.price_included_in_barcode_or_not",
+   "description": "Starting position (1-indexed) of the price segment.",
+   "fieldname": "price_starting_digit",
+   "fieldtype": "Int",
+   "label": "Price starting position"
+  },
+  {
+   "depends_on": "eval:doc.price_included_in_barcode_or_not",
+   "description": "Number of digits representing the price before decimal places.",
+   "fieldname": "price_total_digit",
+   "fieldtype": "Int",
+   "label": "Price digits"
+  },
+  {
+   "depends_on": "eval:doc.price_included_in_barcode_or_not",
+   "description": "Number of decimal places encoded for the price.",
+   "fieldname": "price_decimals",
+   "fieldtype": "Int",
+   "label": "Price decimals"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-01-11 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Scale Barcode Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

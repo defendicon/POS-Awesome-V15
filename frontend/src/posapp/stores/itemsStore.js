@@ -130,6 +130,9 @@ export const useItemsStore = defineStore("items", () => {
 			prefix: "posa_items_",
 		},
 	});
+	// Throttle expensive cache cleanup to avoid iterating large Maps after every search write
+	const MEMORY_CLEANUP_INTERVAL = 1000; // 1s between cleanups is enough for freshness while saving CPU
+	let lastMemoryCleanup = 0;
 
 	// Computed properties
 	const activePriceList = computed(() => {
@@ -381,6 +384,18 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	const searchItems = async (term) => {
+		// Optimization: Check if we can refine the previous search result
+		// This avoids scanning the full item list when the user is just typing more characters
+		const previousTerm = searchTerm.value || "";
+		const canRefineSearch =
+			!shouldUseIndexedSearch() &&
+			term &&
+			previousTerm.length > 0 && // Only refine an existing search
+			term.length > previousTerm.length &&
+			term.toLowerCase().startsWith(previousTerm.toLowerCase()) &&
+			filteredItems.value.length > 0 &&
+			filteredItems.value.length < items.value.length; // Only if we actually filtered something
+
 		searchTerm.value = term;
 		lastSearch.value = term;
 
@@ -451,7 +466,9 @@ export const useItemsStore = defineStore("items", () => {
 				cachedPagination.value.total = Math.max(cachedPagination.value.total, searchResults.length);
 			} else {
 				// Search in current items first
-				searchResults = performLocalSearch(term, items.value);
+				// Optimization: Refine from previous results if applicable to avoid O(N) scan
+				const sourceItems = canRefineSearch ? filteredItems.value : items.value;
+				searchResults = performLocalSearch(term, sourceItems);
 
 				// If no results and term is specific enough, search server
 				if (searchResults.length === 0 && term.length >= 3) {
@@ -573,6 +590,20 @@ export const useItemsStore = defineStore("items", () => {
 			if (response && response.message) {
 				const newItem = response.message;
 
+				if (newItem.scale_qty !== undefined && newItem.scale_qty !== null) {
+					const parsedQty = parseFloat(newItem.scale_qty);
+					if (!Number.isNaN(parsedQty)) {
+						newItem._scale_qty = parsedQty;
+					}
+				}
+
+				if (newItem.scale_price !== undefined && newItem.scale_price !== null) {
+					const parsedPrice = parseFloat(newItem.scale_price);
+					if (!Number.isNaN(parsedPrice)) {
+						newItem._scale_price = parsedPrice;
+					}
+				}
+
 				// Add to current items
 				items.value.push(newItem);
 				updateIndexes([newItem]);
@@ -594,6 +625,85 @@ export const useItemsStore = defineStore("items", () => {
 		} catch (error) {
 			console.error("Failed to fetch item by barcode:", error);
 			return null;
+		}
+	};
+
+	const refreshModifiedItems = async () => {
+		if (!itemsLoaded.value) return { size: 0, count: 0, items: [] };
+
+		const lastSync = getItemsLastSync();
+		if (!lastSync) return { size: 0, count: 0, items: [] };
+
+		try {
+			const args = {
+				pos_profile: JSON.stringify(posProfile.value),
+				price_list: activePriceList.value,
+				item_group: "",
+				search_value: "",
+				customer: customer.value,
+				include_image: 0,
+				item_groups: posProfile.value?.item_groups?.map((g) => g.item_group) || [],
+				modified_after: lastSync,
+				limit: 500,
+			};
+
+			const response = await frappe.call({
+				method: "posawesome.posawesome.api.items.get_items",
+				args,
+			});
+
+			const size = JSON.stringify(response).length;
+			const fetchedItems = response.message || [];
+			let resolvedItems = [];
+
+			if (fetchedItems.length > 0) {
+				updateItemsInPlace(fetchedItems);
+				await saveItemsBulk(fetchedItems);
+				resolvedItems = fetchedItems
+					.map((item) => itemsMap.value.get(item.item_code))
+					.filter(Boolean);
+
+				// Find the latest modification timestamp from the fetched items
+				let maxModified = "";
+				for (const item of fetchedItems) {
+					if (item.modified && item.modified > maxModified) {
+						maxModified = item.modified;
+					}
+				}
+
+				if (maxModified) {
+					setItemsLastSync(maxModified);
+				}
+			}
+
+			return { size, count: fetchedItems.length, items: resolvedItems };
+		} catch (error) {
+			console.error("Failed to refresh modified items:", error);
+			return { size: 0, count: 0, items: [], error };
+		}
+	};
+
+	const updateItemsInPlace = (updates) => {
+		let needsReindex = false;
+		const additions = [];
+
+		updates.forEach((update) => {
+			const existing = itemsMap.value.get(update.item_code);
+			if (existing) {
+				Object.assign(existing, update);
+			} else {
+				additions.push(update);
+			}
+		});
+
+		if (additions.length > 0) {
+			items.value.push(...additions);
+			updateIndexes(additions);
+			needsReindex = true;
+		}
+
+		if (needsReindex && !searchTerm.value) {
+			filteredItems.value = filterItemsByGroup(items.value, itemGroup.value);
 		}
 	};
 
@@ -666,6 +776,9 @@ export const useItemsStore = defineStore("items", () => {
 			return;
 		}
 
+		const includeSerial = normalizeBooleanSetting(posProfile.value?.posa_search_serial_no);
+		const includeBatch = normalizeBooleanSetting(posProfile.value?.posa_search_batch_no);
+
 		itemList.forEach((item) => {
 			if (!item || !item.item_code) {
 				return;
@@ -683,6 +796,32 @@ export const useItemsStore = defineStore("items", () => {
 			if (item.barcode) {
 				barcodeIndex.value.set(String(item.barcode), item);
 			}
+
+			// Pre-compute search index for performance
+			const searchFields = [item.item_code, item.item_name, item.barcode, item.description];
+
+			if (Array.isArray(item.item_barcode)) {
+				item.item_barcode.forEach((b) => searchFields.push(b?.barcode));
+			} else if (item.item_barcode) {
+				searchFields.push(String(item.item_barcode));
+			}
+
+			if (Array.isArray(item.barcodes)) {
+				item.barcodes.forEach((b) => searchFields.push(b));
+			}
+
+			if (includeSerial && Array.isArray(item.serial_no_data)) {
+				item.serial_no_data.forEach((s) => searchFields.push(s?.serial_no));
+			}
+
+			if (includeBatch && Array.isArray(item.batch_no_data)) {
+				item.batch_no_data.forEach((b) => searchFields.push(b?.batch_no));
+			}
+
+			item._search_index = searchFields
+				.filter(Boolean)
+				.map((f) => String(f).toLowerCase())
+				.join(" ");
 		});
 	};
 
@@ -697,64 +836,34 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		const searchTerm = term.toLowerCase();
-		const includeSerial = normalizeBooleanSetting(posProfile.value?.posa_search_serial_no);
-		const includeBatch = normalizeBooleanSetting(posProfile.value?.posa_search_batch_no);
+		const searchTerms = searchTerm.split(/\s+/).filter(Boolean);
 
 		return itemList.filter((item) => {
 			if (!item) {
 				return false;
 			}
 
-			const fields = [];
+			// Use pre-computed search index if available
+			if (item._search_index) {
+				return searchTerms.every((t) => item._search_index.includes(t));
+			}
 
-			if (item.item_code) {
-				fields.push(item.item_code);
-			}
-			if (item.item_name) {
-				fields.push(item.item_name);
-			}
-			if (item.barcode) {
-				fields.push(item.barcode);
-			}
-			if (item.description) {
-				fields.push(item.description);
-			}
+			// Fallback for items without index
+			const fields = [item.item_code, item.item_name, item.barcode, item.description];
 
 			if (Array.isArray(item.item_barcode)) {
-				item.item_barcode.forEach((entry) => {
-					if (entry?.barcode) {
-						fields.push(entry.barcode);
-					}
-				});
+				item.item_barcode.forEach((entry) => fields.push(entry?.barcode));
 			} else if (item.item_barcode) {
 				fields.push(String(item.item_barcode));
 			}
 
 			if (Array.isArray(item.barcodes)) {
-				item.barcodes.forEach((code) => {
-					if (code) {
-						fields.push(String(code));
-					}
-				});
+				item.barcodes.forEach((code) => fields.push(code));
 			}
 
-			if (includeSerial && Array.isArray(item.serial_no_data)) {
-				item.serial_no_data.forEach((serial) => {
-					if (serial?.serial_no) {
-						fields.push(serial.serial_no);
-					}
-				});
-			}
-
-			if (includeBatch && Array.isArray(item.batch_no_data)) {
-				item.batch_no_data.forEach((batch) => {
-					if (batch?.batch_no) {
-						fields.push(batch.batch_no);
-					}
-				});
-			}
-
-			return fields.filter(Boolean).some((field) => field.toLowerCase().includes(searchTerm));
+			// Note: Dynamic checking of serial/batch here is slow, but this is a fallback
+			// ideally all items should have _search_index
+			return fields.filter(Boolean).some((field) => String(field).toLowerCase().includes(searchTerm));
 		});
 	};
 
@@ -1290,6 +1399,17 @@ export const useItemsStore = defineStore("items", () => {
 		const now = Date.now();
 		const ttl = cache.value.memory.ttl;
 
+		// Skip cleanup when called too frequently and the cache is within size limits.
+		// This avoids repeated Map iterations and sorting on rapid search input while
+		// still running promptly when the cache grows beyond the configured max size.
+		if (
+			now - lastMemoryCleanup < MEMORY_CLEANUP_INTERVAL &&
+			cache.value.memory.searchResults.size <= cache.value.memory.maxSize
+		) {
+			return;
+		}
+		lastMemoryCleanup = now;
+
 		// Cleanup expired entries
 		for (const [key, value] of cache.value.memory.searchResults.entries()) {
 			if (now - value.timestamp > ttl) {
@@ -1391,6 +1511,7 @@ export const useItemsStore = defineStore("items", () => {
 		getItemByCode,
 		getItemByBarcode,
 		addScannedItem,
+		refreshModifiedItems,
 		clearLimitSearchResults,
 		clearAllCaches,
 		clearSearchCache,

@@ -1,3 +1,9 @@
+const DEFAULT_INDEXED_DB_NAMES = ["posawesome_offline"];
+
+async function delay(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function clearLocalStorage(keys = []) {
 	if (typeof localStorage === "undefined") return;
 	try {
@@ -31,12 +37,24 @@ export async function clearSessionStorage(keys = []) {
 export async function clearIndexedDB(databases = []) {
 	if (typeof indexedDB === "undefined") return;
 	try {
-		if (!databases.length && indexedDB.databases) {
-			const infos = await indexedDB.databases();
-			databases = infos.map((d) => d.name).filter(Boolean);
+		let targets = Array.isArray(databases) ? [...databases] : [];
+
+		if (!targets.length && indexedDB.databases) {
+			try {
+				const infos = await indexedDB.databases();
+				targets = infos.map((d) => d && d.name).filter(Boolean);
+			} catch (enumerationError) {
+				console.warn("[ClearAllCaches] Failed to enumerate IndexedDB databases", enumerationError);
+			}
 		}
+		if (!targets.length) {
+			targets = [...DEFAULT_INDEXED_DB_NAMES];
+		}
+
+		targets = Array.from(new Set(targets.filter(Boolean)));
+
 		await Promise.all(
-			databases.map(
+			targets.map(
 				(dbName) =>
 					new Promise((resolve, reject) => {
 						const req = indexedDB.deleteDatabase(dbName);
@@ -46,7 +64,9 @@ export async function clearIndexedDB(databases = []) {
 					}),
 			),
 		);
-		console.log("[ClearAllCaches] IndexedDB cleared", databases.length ? databases : "all");
+		if (targets.length) {
+			console.log("[ClearAllCaches] IndexedDB cleared", targets);
+		}
 	} catch (e) {
 		console.error("[ClearAllCaches] Failed to clear IndexedDB", e);
 		throw e;
@@ -67,6 +87,104 @@ export async function clearCacheAPI(cacheNames = []) {
 	}
 }
 
+export async function unregisterServiceWorkers(scopes = []) {
+	if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+		return;
+	}
+
+	const requestedScopes = Array.isArray(scopes) ? scopes.filter(Boolean) : [];
+
+	const unregister = async (registration) => {
+		if (!registration) return;
+		try {
+			const scope = registration.scope;
+			await registration.unregister();
+			if (registration.active) {
+				try {
+					registration.active.postMessage({ type: "CLIENT_FORCE_UNREGISTER" });
+				} catch (postMessageError) {
+					console.warn(
+						`[ClearAllCaches] Failed to notify active service worker for scope ${scope}`,
+						postMessageError,
+					);
+				}
+			}
+			if (registration.waiting) {
+				try {
+					registration.waiting.postMessage({ type: "CLIENT_FORCE_UNREGISTER" });
+				} catch (postMessageError) {
+					console.warn(
+						`[ClearAllCaches] Failed to notify waiting service worker for scope ${scope}`,
+						postMessageError,
+					);
+				}
+			}
+			if (registration.installing) {
+				try {
+					registration.installing.postMessage({ type: "CLIENT_FORCE_UNREGISTER" });
+				} catch (postMessageError) {
+					console.warn(
+						`[ClearAllCaches] Failed to notify installing service worker for scope ${scope}`,
+						postMessageError,
+					);
+				}
+			}
+			return scope;
+		} catch (error) {
+			console.error("[ClearAllCaches] Failed to unregister service worker", error);
+			throw error;
+		}
+	};
+
+	try {
+		let registrations = [];
+		if (navigator.serviceWorker.getRegistrations) {
+			registrations = await navigator.serviceWorker.getRegistrations();
+		} else if (navigator.serviceWorker.getRegistration) {
+			const single = await navigator.serviceWorker.getRegistration();
+			if (single) {
+				registrations = [single];
+			}
+		}
+
+		if (requestedScopes.length) {
+			registrations = registrations.filter((registration) =>
+				requestedScopes.some((scope) => registration.scope.includes(scope)),
+			);
+			// For scopes that did not have an eager registration fetch, try fetching directly
+			const missingScopes = requestedScopes.filter(
+				(scope) => !registrations.some((registration) => registration.scope.includes(scope)),
+			);
+			if (missingScopes.length && navigator.serviceWorker.getRegistration) {
+				const fetched = await Promise.all(
+					missingScopes.map((scope) =>
+						navigator.serviceWorker.getRegistration(scope).catch(() => null),
+					),
+				);
+				registrations.push(...fetched.filter(Boolean));
+			}
+		}
+
+		if (!registrations.length) {
+			return;
+		}
+
+		const scopesCleared = (
+			await Promise.all(registrations.map((registration) => unregister(registration)))
+		).filter(Boolean);
+
+		if (scopesCleared.length) {
+			console.log("[ClearAllCaches] Service workers unregistered", scopesCleared);
+		}
+
+		// Allow the browser a brief moment to detach controllers before subsequent cache removal
+		await delay(100);
+	} catch (error) {
+		console.error("[ClearAllCaches] Failed during service worker cleanup", error);
+		throw error;
+	}
+}
+
 export async function clearAllCaches(
 	options = {
 		confirmBeforeClear: true,
@@ -76,6 +194,8 @@ export async function clearAllCaches(
 		specificDatabases: [],
 		specificCaches: [],
 		skipStorage: [],
+		skipServiceWorkers: false,
+		serviceWorkerScopes: [],
 	},
 ) {
 	const opts = Object.assign(
@@ -87,6 +207,8 @@ export async function clearAllCaches(
 			specificDatabases: [],
 			specificCaches: [],
 			skipStorage: [],
+			skipServiceWorkers: false,
+			serviceWorkerScopes: [],
 		},
 		options || {},
 	);
@@ -97,6 +219,10 @@ export async function clearAllCaches(
 			if (!window.confirm(confirmMsg)) {
 				return;
 			}
+		}
+
+		if (!opts.skipServiceWorkers) {
+			await unregisterServiceWorkers(opts.serviceWorkerScopes);
 		}
 
 		const tasks = [];

@@ -1,0 +1,36 @@
+{
+    "doctype": "DocType",
+    "name": "POS Awesome Print Format Rule",
+    "module": "Posawesome",
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "customer_group",
+            "fieldtype": "Link",
+            "label": "Customer Group",
+            "options": "Customer Group",
+            "in_list_view": 1,
+            "reqd": 1
+        },
+        {
+            "fieldname": "print_format",
+            "fieldtype": "Link",
+            "label": "Print Format",
+            "options": "Print Format",
+            "in_list_view": 1,
+            "reqd": 1
+        }
+    ],
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1,
+            "submit": 1,
+            "cancel": 1,
+            "amend": 1
+        }
+    ]
+}

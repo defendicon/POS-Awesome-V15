@@ -56,6 +56,9 @@ export {
 	forceClearAllCache,
 	getCacheUsageEstimate,
 	isCacheReady,
+	savePricingRulesSnapshot,
+	getCachedPricingRulesSnapshot,
+	clearPricingRulesSnapshot,
 } from "./cache.js";
 
 // Stock exports

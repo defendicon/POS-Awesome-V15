@@ -12,5 +12,6 @@ export { useCustomersStore } from "./customersStore.js";
 export { useItemsStore } from "./itemsStore.js";
 export { useInvoiceStore } from "./invoiceStore.js";
 export { useUpdateStore, formatBuildVersion } from "./updateStore.js";
+export { usePricingRulesStore } from "./pricingRulesStore.js";
 
 export default pinia;

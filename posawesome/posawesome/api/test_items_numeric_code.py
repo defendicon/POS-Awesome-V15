@@ -43,3 +43,29 @@ class TestNumericItemCodes(FrappeTestCase):
             second_page = get_items(pos_profile, limit=2, start_after=last_name)
         codes = [i["item_code"] for i in second_page]
         self.assertIn("002", codes)
+
+    def test_item_search_with_whitespace(self):
+        # Create an item with a barcode
+        item_code = "TEST-ITEM-123"
+        barcode = "123456789"
+
+        if not frappe.db.exists("Item", item_code):
+            frappe.get_doc(
+                {
+                    "doctype": "Item",
+                    "item_code": item_code,
+                    "item_name": "Test Item Whitespace",
+                    "stock_uom": "Nos",
+                    "item_group": "All Item Groups",
+                    "is_sales_item": 1,
+                    "barcodes": [{"barcode": barcode}],
+                }
+            ).insert(ignore_permissions=True)
+
+        pos_profile = json.dumps({"name": "TestProfile"})
+
+        # Search with leading/trailing whitespace
+        items = get_items(pos_profile, search_value=f"  {barcode}  ")
+
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["item_code"], item_code)

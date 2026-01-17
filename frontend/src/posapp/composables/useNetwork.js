@@ -55,11 +55,16 @@ function scheduleNextCheck(vm) {
 			scheduleNextCheck(vm);
 			return;
 		}
-		vm.serverConnecting = true;
-		vm.$forceUpdate();
+		const shouldShowConnecting = !vm.serverOnline || !vm.networkOnline;
+		if (shouldShowConnecting) {
+			vm.serverConnecting = true;
+			vm.$forceUpdate();
+		}
 		await vm.checkNetworkConnectivity();
-		vm.serverConnecting = false;
-		vm.$forceUpdate();
+		if (shouldShowConnecting) {
+			vm.serverConnecting = false;
+			vm.$forceUpdate();
+		}
 		// If failed, increase interval (up to max)
 		if (!vm.serverOnline) {
 			checkInterval = Math.min(checkInterval * 2, MAX_INTERVAL);

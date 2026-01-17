@@ -89,9 +89,7 @@ def fetch_sales_person_names():
         allowed = []
         if profile:
             allowed = [
-                d.get("sales_person")
-                for d in profile.get("posa_sales_persons", [])
-                if d.get("sales_person")
+                d.get("sales_person") for d in profile.get("posa_sales_persons", []) if d.get("sales_person")
             ]
 
         filters = {"enabled": 1}

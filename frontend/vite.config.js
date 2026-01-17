@@ -26,6 +26,7 @@ function posawesomeBuildVersionPlugin(version) {
 }
 
 export default defineConfig({
+	base: "/assets/posawesome/dist/js/",
 	plugins: [
 		posawesomeBuildVersionPlugin(buildVersion),
 		frappeVueStyle(),
@@ -51,6 +52,13 @@ export default defineConfig({
 						return contents.replace(/__BUILD_VERSION__/g, buildVersion);
 					},
 				},
+				{
+					src: "src/loader.js",
+					dest: ".",
+					transform(contents) {
+						return contents.replace(/__BUILD_VERSION__/g, buildVersion);
+					},
+				},
 			],
 		}),
 	],
@@ -61,29 +69,31 @@ export default defineConfig({
 	},
 	build: {
 		target: "esnext",
-		lib: {
-			entry: path.resolve(__dirname, "src/posawesome.bundle.js"),
-			name: "PosAwesome",
-			fileName: "posawesome",
-		},
 		outDir: "../posawesome/public/dist/js",
 		emptyOutDir: true,
+		cssCodeSplit: false,
 		rollupOptions: {
+			input: {
+				posawesome: path.resolve(__dirname, "src/posawesome.bundle.js"),
+			},
 			external: ["socket.io-client"],
-			output: [
-				{
-					format: "es",
-					entryFileNames: "posawesome.js",
+			output: {
+				format: "es",
+				entryFileNames: "[name].js",
+				chunkFileNames: "[name]-[hash].js",
+				assetFileNames: "posawesome.[ext]",
+				manualChunks: (id) => {
+					if (id.includes("node_modules")) {
+						if (id.includes("vuetify")) {
+							return "vuetify";
+						}
+						if (id.includes("vue")) {
+							return "vue";
+						}
+						return "vendor";
+					}
 				},
-				{
-					format: "umd",
-					name: "PosAwesome",
-					entryFileNames: "posawesome.umd.js",
-					globals: {
-						"socket.io-client": "io",
-					},
-				},
-			],
+			},
 		},
 	},
 	worker: {

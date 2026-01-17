@@ -2,6 +2,24 @@
 /* global importScripts, Dexie */
 
 let db;
+const BASE_SCHEMA = {
+	keyval: "&key",
+	queue: "&key",
+	cache: "&key",
+	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+	item_prices: "&[price_list+item_code],price_list,item_code",
+	customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	local_stock: "&key",
+	coupons: "&key",
+	item_groups: "&key",
+	translations: "&key",
+	pricing_rules: "&key",
+	settings: "&key",
+	sync_state: "&key",
+};
+
+const SCHEMA_SIGNATURE = JSON.stringify(BASE_SCHEMA);
+
 (async () => {
 	let DexieLib;
 	try {
@@ -42,6 +60,91 @@ let db;
 						: [];
 				}),
 		);
+	db.version(8)
+		.stores({
+			keyval: "&key",
+			queue: "&key",
+			cache: "&key",
+			items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+			item_prices: "&[price_list+item_code],price_list,item_code",
+			customers: "&name,customer_name,mobile_no,email_id,tax_id",
+			local_stock: "&key",
+			coupons: "&key",
+			item_groups: "&key",
+			translations: "&key",
+			pricing_rules: "&key",
+		})
+		.upgrade(async (tx) => {
+			const migrateKey = async (key, targetTable) => {
+				try {
+					const entry = await tx.table("keyval").get(key);
+					if (entry) {
+						await tx.table(targetTable).put(entry);
+					}
+				} catch (err) {
+					console.warn(`Worker migration failed for ${key} -> ${targetTable}`, err);
+				}
+			};
+
+			await Promise.all([
+				migrateKey("local_stock_cache", "local_stock"),
+				migrateKey("coupons_cache", "coupons"),
+				migrateKey("item_groups_cache", "item_groups"),
+				migrateKey("translation_cache", "translations"),
+				migrateKey("pricing_rules_snapshot", "pricing_rules"),
+				migrateKey("pricing_rules_context", "pricing_rules"),
+				migrateKey("pricing_rules_last_sync", "pricing_rules"),
+				migrateKey("pricing_rules_stale_at", "pricing_rules"),
+			]);
+		});
+	db.version(9)
+		.stores(BASE_SCHEMA)
+		.upgrade(async (tx) => {
+			const migrateKey = async (key, targetTable) => {
+				try {
+					const entry = await tx.table("keyval").get(key);
+					if (entry) {
+						await tx.table(targetTable).put(entry);
+					}
+				} catch (err) {
+					console.warn(`Worker migration failed for ${key} -> ${targetTable}`, err);
+				}
+			};
+
+			const settingsKeys = [
+				"cache_version",
+				"cache_ready",
+				"stock_cache_ready",
+				"manual_offline",
+				"schema_signature",
+			];
+
+			const syncStateKeys = [
+				"items_last_sync",
+				"customers_last_sync",
+				"payment_methods_last_sync",
+				"pos_last_sync_totals",
+			];
+
+			await Promise.all([
+				migrateKey("local_stock_cache", "local_stock"),
+				migrateKey("coupons_cache", "coupons"),
+				migrateKey("item_groups_cache", "item_groups"),
+				migrateKey("translation_cache", "translations"),
+				migrateKey("pricing_rules_snapshot", "pricing_rules"),
+				migrateKey("pricing_rules_context", "pricing_rules"),
+				migrateKey("pricing_rules_last_sync", "pricing_rules"),
+				migrateKey("pricing_rules_stale_at", "pricing_rules"),
+				...settingsKeys.map((key) => migrateKey(key, "settings")),
+				...syncStateKeys.map((key) => migrateKey(key, "sync_state")),
+			]);
+
+			try {
+				await tx.table("settings").put({ key: "schema_signature", value: SCHEMA_SIGNATURE });
+			} catch (err) {
+				console.warn("Worker failed to persist schema signature", err);
+			}
+		});
 	try {
 		await db.open();
 	} catch (err) {
@@ -55,6 +158,23 @@ const KEY_TABLE_MAP = {
 	offline_payments: "queue",
 	item_details_cache: "cache",
 	customer_storage: "cache",
+	local_stock_cache: "local_stock",
+	coupons_cache: "coupons",
+	item_groups_cache: "item_groups",
+	translation_cache: "translations",
+	pricing_rules_snapshot: "pricing_rules",
+	pricing_rules_context: "pricing_rules",
+	pricing_rules_last_sync: "pricing_rules",
+	pricing_rules_stale_at: "pricing_rules",
+	cache_version: "settings",
+	cache_ready: "settings",
+	stock_cache_ready: "settings",
+	manual_offline: "settings",
+	schema_signature: "settings",
+	items_last_sync: "sync_state",
+	customers_last_sync: "sync_state",
+	payment_methods_last_sync: "sync_state",
+	pos_last_sync_totals: "sync_state",
 };
 
 const LARGE_KEYS = new Set(["items", "item_details_cache", "local_stock_cache"]);
@@ -83,7 +203,7 @@ async function persist(key, value) {
 	}
 }
 
-async function bulkPutItems(items) {
+async function bulkPutItems(items, syncedAt = Date.now()) {
 	try {
 		if (!db.isOpen()) {
 			await db.open();
@@ -91,7 +211,10 @@ async function bulkPutItems(items) {
 		const CHUNK_SIZE = 1000;
 		await db.transaction("rw", db.table("items"), async () => {
 			for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-				const chunk = items.slice(i, i + CHUNK_SIZE);
+				const chunk = items.slice(i, i + CHUNK_SIZE).map((item) => ({
+					...item,
+					synced_at: syncedAt,
+				}));
 				await db.table("items").bulkPut(chunk);
 			}
 		});
@@ -100,7 +223,7 @@ async function bulkPutItems(items) {
 	}
 }
 
-async function bulkPutPrices(priceList, items) {
+async function bulkPutPrices(priceList, items, syncedAt = Date.now()) {
 	try {
 		if (!priceList) {
 			return;
@@ -115,7 +238,7 @@ async function bulkPutPrices(priceList, items) {
 				item_code: it.item_code,
 				rate: price,
 				price_list_rate: price,
-				timestamp: Date.now(),
+				timestamp: syncedAt,
 			};
 		});
 		await db.table("item_prices").bulkPut(records);
@@ -134,6 +257,7 @@ self.onmessage = async (event) => {
 			let parsed = JSON.parse(data.json);
 			let itemsRaw = parsed.message || parsed;
 			let items;
+			const syncTimestamp = data.syncedAt || Date.now();
 			try {
 				if (typeof structuredClone === "function") {
 					items = structuredClone(itemsRaw);
@@ -175,8 +299,8 @@ self.onmessage = async (event) => {
 					? it.batch_no_data.map((b) => b.batch_no).filter(Boolean)
 					: [],
 			}));
-			await bulkPutItems(trimmed);
-			await bulkPutPrices(data.priceList, trimmed);
+			await bulkPutItems(trimmed, syncTimestamp);
+			await bulkPutPrices(data.priceList, trimmed, syncTimestamp);
 			// Clear references to release memory before posting back
 			items = null;
 			itemsRaw = null;
@@ -194,7 +318,7 @@ self.onmessage = async (event) => {
 		await persist(data.key, data.value);
 		self.postMessage({ type: "persisted", key: data.key });
 	} else if (data.type === "bulk_put_items") {
-		await bulkPutItems(data.items || []);
+		await bulkPutItems(data.items || [], data.syncedAt || Date.now());
 		self.postMessage({ type: "items_saved" });
 	}
 };

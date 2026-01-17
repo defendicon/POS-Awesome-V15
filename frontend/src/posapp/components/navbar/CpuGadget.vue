@@ -1,104 +1,97 @@
 <template>
 	<div class="cpu-gadget-section mx-1">
-		<v-tooltip location="bottom">
-			<template #activator="{ props }">
-				<div v-bind="props" class="cpu-meter-container">
-					<v-icon size="22" color="success">mdi-chip</v-icon>
-					<span class="cpu-current-lag">{{ cpuLag.toFixed(1) }} ms</span>
-				</div>
-			</template>
-			<div class="cpu-tooltip-content">
-				<div class="cpu-tooltip-title">{{ __("CPU Load") }}</div>
-				<div class="cpu-tooltip-peak mb-1">
-					<v-icon size="14" color="success" class="mr-1">mdi-arrow-up-bold</v-icon>
-					{{ __("Peak:") }}
-					<b>{{ peakLag.toFixed(1) }} ms</b>
-					({{ peakPercent }}%)
-				</div>
-				<div class="cpu-tooltip-sparkline mb-2">
-					<svg :width="180" :height="40" class="cpu-sparkline-large">
-						<defs>
-							<linearGradient id="cpuAreaGradient" x1="0" y1="0" x2="0" y2="1">
-								<stop offset="0%" stop-color="#4caf50" stop-opacity="0.35" />
-								<stop offset="100%" stop-color="#4caf50" stop-opacity="0" />
-							</linearGradient>
-						</defs>
-						<polyline
-							:points="sparklinePointsLarge"
-							fill="none"
-							stroke="#4caf50"
-							stroke-width="2"
-						/>
-						<polygon :points="areaPointsLarge" fill="url(#cpuAreaGradient)" stroke="none" />
-					</svg>
+		<div class="d-flex align-center mb-2">
+			<div class="cpu-meter-container mr-3">
+				<v-icon size="22" color="success">mdi-chip</v-icon>
+				<span class="cpu-current-lag">{{ cpuLag.toFixed(1) }} ms</span>
+			</div>
+			<div class="cpu-tooltip-title mb-0">{{ __("CPU Load") }}</div>
+		</div>
+		<div class="cpu-tooltip-content">
+			<div class="cpu-tooltip-peak mb-1">
+				<v-icon size="14" color="success" class="mr-1">mdi-arrow-up-bold</v-icon>
+				{{ __("Peak:") }}
+				<b>{{ peakLag.toFixed(1) }} ms</b>
+				({{ peakPercent }}%)
+			</div>
+			<div class="cpu-tooltip-sparkline mb-2">
+				<svg :width="180" :height="40" class="cpu-sparkline-large">
+					<defs>
+						<linearGradient id="cpuAreaGradient" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0%" stop-color="#4caf50" stop-opacity="0.35" />
+							<stop offset="100%" stop-color="#4caf50" stop-opacity="0" />
+						</linearGradient>
+					</defs>
+					<polyline :points="sparklinePointsLarge" fill="none" stroke="#4caf50" stroke-width="2" />
+					<polygon :points="areaPointsLarge" fill="url(#cpuAreaGradient)" stroke="none" />
+				</svg>
+			</div>
+			<div class="cpu-tooltip-detail">
+				{{ __("Current Event Loop Lag:") }} <b>{{ cpuLag.toFixed(1) }}</b> ms
+			</div>
+			<div v-if="cpuLag >= 80" class="cpu-tooltip-warning">
+				<v-icon size="14" color="error" class="mr-1">mdi-alert</v-icon>
+				{{ __("Warning: High lag may indicate heavy processing or browser slowness.") }}
+			</div>
+			<div v-if="serverLoading" class="cpu-tooltip-detail">
+				{{ __("Loading server CPU/memory usage...") }}
+			</div>
+			<div v-else-if="serverError" class="cpu-tooltip-warning">{{ serverError }}</div>
+			<div v-else>
+				<div class="cpu-tooltip-detail">
+					{{ __("Server CPU Usage:") }}
+					<b>{{ serverCpu !== null ? serverCpu.toFixed(1) + "%" : "N/A" }}</b>
+					<span class="ml-2"
+						>{{ __("Peak Server:") }} <b>{{ serverPeak.toFixed(1) }}%</b></span
+					>
 				</div>
 				<div class="cpu-tooltip-detail">
-					{{ __("Current Event Loop Lag:") }} <b>{{ cpuLag.toFixed(1) }}</b> ms
+					{{ __("Server Memory Usage:") }}
+					<b>{{ serverMemory !== null ? serverMemory.toFixed(1) + "%" : "N/A" }}</b>
+					<span class="ml-2"
+						>{{ __("Peak Memory:") }} <b>{{ serverMemoryPeak.toFixed(1) }}%</b></span
+					>
 				</div>
-				<div v-if="cpuLag >= 80" class="cpu-tooltip-warning">
-					<v-icon size="14" color="error" class="mr-1">mdi-alert</v-icon>
-					{{ __("Warning: High lag may indicate heavy processing or browser slowness.") }}
-				</div>
-				<div v-if="serverLoading" class="cpu-tooltip-detail">
-					{{ __("Loading server CPU/memory usage...") }}
-				</div>
-				<div v-else-if="serverError" class="cpu-tooltip-warning">{{ serverError }}</div>
-				<div v-else>
-					<div class="cpu-tooltip-detail">
-						{{ __("Server CPU Usage:") }}
-						<b>{{ serverCpu !== null ? serverCpu.toFixed(1) + "%" : "N/A" }}</b>
-						<span class="ml-2"
-							>{{ __("Peak Server:") }} <b>{{ serverPeak.toFixed(1) }}%</b></span
-						>
+				<div class="cpu-tooltip-bar">
+					<div class="cpu-bar-bg">
+						<div
+							class="cpu-bar-fill"
+							:style="{
+								width: (serverMemory || 0) + '%',
+								background: 'linear-gradient(90deg,#1976d2 0%,#42a5f5 100%)',
+							}"
+						></div>
 					</div>
-					<div class="cpu-tooltip-detail">
-						{{ __("Server Memory Usage:") }}
-						<b>{{ serverMemory !== null ? serverMemory.toFixed(1) + "%" : "N/A" }}</b>
-						<span class="ml-2"
-							>{{ __("Peak Memory:") }} <b>{{ serverMemoryPeak.toFixed(1) }}%</b></span
-						>
-					</div>
-					<div class="cpu-tooltip-bar">
-						<div class="cpu-bar-bg">
-							<div
-								class="cpu-bar-fill"
-								:style="{
-									width: (serverMemory || 0) + '%',
-									background: 'linear-gradient(90deg,#1976d2 0%,#42a5f5 100%)',
-								}"
-							></div>
-						</div>
-						<span class="cpu-bar-label">{{
-							serverMemory !== null ? serverMemory.toFixed(1) + "%" : "N/A"
-						}}</span>
-					</div>
-					<div class="cpu-tooltip-detail">
-						{{ __("Total:") }} <b>{{ formatBytes(memoryTotal) }}</b>
-						<span class="ml-2"
-							>{{ __("Used:") }} <b>{{ formatBytes(memoryUsed) }}</b></span
-						>
-						<span class="ml-2"
-							>{{ __("Available:") }} <b>{{ formatBytes(memoryAvailable) }}</b></span
-						>
-					</div>
-					<div class="cpu-tooltip-detail">
-						{{ __("Server Uptime:") }} <b>{{ formatUptime(serverUptime) }}</b>
-					</div>
+					<span class="cpu-bar-label">{{
+						serverMemory !== null ? serverMemory.toFixed(1) + "%" : "N/A"
+					}}</span>
 				</div>
-				<div class="cpu-tooltip-tip mt-2">
-					<v-icon size="14" color="primary" class="mr-1">mdi-lightbulb-on-outline</v-icon>
-					{{ __("Tip: Close unused tabs or apps to reduce lag.") }}
+				<div class="cpu-tooltip-detail">
+					{{ __("Total:") }} <b>{{ formatBytes(memoryTotal) }}</b>
+					<span class="ml-2"
+						>{{ __("Used:") }} <b>{{ formatBytes(memoryUsed) }}</b></span
+					>
+					<span class="ml-2"
+						>{{ __("Available:") }} <b>{{ formatBytes(memoryAvailable) }}</b></span
+					>
 				</div>
-				<div class="cpu-tooltip-explanation mt-2">
-					<v-icon size="14" color="info" class="mr-1">mdi-chip</v-icon>
-					{{ __("Event-loop lag measures how busy your browser is. Lower is better.") }}
-				</div>
-				<div class="cpu-tooltip-action mt-2">
-					<v-icon size="14" class="mr-1">mdi-refresh</v-icon>
-					{{ __("Updates automatically") }}
+				<div class="cpu-tooltip-detail">
+					{{ __("Server Uptime:") }} <b>{{ formatUptime(serverUptime) }}</b>
 				</div>
 			</div>
-		</v-tooltip>
+			<div class="cpu-tooltip-tip mt-2">
+				<v-icon size="14" color="primary" class="mr-1">mdi-lightbulb-on-outline</v-icon>
+				{{ __("Tip: Close unused tabs or apps to reduce lag.") }}
+			</div>
+			<div class="cpu-tooltip-explanation mt-2">
+				<v-icon size="14" color="info" class="mr-1">mdi-chip</v-icon>
+				{{ __("Event-loop lag measures how busy your browser is. Lower is better.") }}
+			</div>
+			<div class="cpu-tooltip-action mt-2">
+				<v-icon size="14" class="mr-1">mdi-refresh</v-icon>
+				{{ __("Updates automatically") }}
+			</div>
+		</div>
 	</div>
 </template>
 

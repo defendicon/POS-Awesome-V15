@@ -6,6 +6,19 @@ import { updateLocalStock } from "./stock.js";
 // Flag to avoid concurrent invoice syncs which can cause duplicate submissions
 let invoiceSyncInProgress = false;
 
+function getOfflineTimestamp(entry) {
+	const now = new Date();
+	const pad = (value) => String(value).padStart(2, "0");
+	const posting_date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+	const posting_time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+	return {
+		offline_created_at: entry?.offline_created_at || now.toISOString(),
+		posting_date: entry?.invoice?.posting_date || posting_date,
+		posting_time: entry?.invoice?.posting_time || posting_time,
+	};
+}
+
 export function saveOfflineInvoice(entry) {
 	// Validate that invoice has items before saving
 	if (!entry.invoice || !Array.isArray(entry.invoice.items) || !entry.invoice.items.length) {
@@ -18,9 +31,22 @@ export function saveOfflineInvoice(entry) {
 	// and other non-serializable properties. IndexedDB only
 	// supports structured cloneable data, so reactive proxies
 	// cause a DataCloneError without this step.
+	const { offline_created_at, posting_date, posting_time } = getOfflineTimestamp(entry);
+
 	let cleanEntry;
 	try {
-		cleanEntry = JSON.parse(JSON.stringify(entry));
+		cleanEntry = JSON.parse(
+			JSON.stringify({
+				...entry,
+				offline_created_at,
+				invoice: {
+					...entry.invoice,
+					posting_date,
+					posting_time,
+					set_posting_time: 1,
+				},
+			}),
+		);
 	} catch (e) {
 		console.error("Failed to serialize offline invoice", e);
 		throw e;
@@ -216,10 +242,17 @@ export async function syncOfflineInvoices() {
 
 		for (const inv of invoices) {
 			try {
+				const invoicePayload = {
+					...inv.invoice,
+					posting_date: inv.invoice?.posting_date || inv.offline_created_at,
+					posting_time: inv.invoice?.posting_time,
+					set_posting_time: 1,
+				};
+
 				await frappe.call({
 					method: "posawesome.posawesome.api.invoices.submit_invoice",
 					args: {
-						invoice: inv.invoice,
+						invoice: invoicePayload,
 						data: inv.data,
 					},
 				});

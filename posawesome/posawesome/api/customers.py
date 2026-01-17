@@ -19,15 +19,23 @@ def get_customer_groups(pos_profile):
     if pos_profile.get("customer_groups"):
         # Get items based on the item groups defined in the POS profile
         for data in pos_profile.get("customer_groups"):
+            group_name = data.get("customer_group") if data else None
+            if not group_name:
+                continue
             customer_groups.extend(
-                [d.get("name") for d in get_child_nodes("Customer Group", data.get("customer_group"))]
+                [d.get("name") for d in get_child_nodes("Customer Group", group_name)]
             )
 
     return list(set(customer_groups))
 
 
 def get_child_nodes(group_type, root):
-    lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+    if not root:
+        return []
+    result = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+    if not result:
+        return []
+    lft, rgt = result
     return frappe.get_all(
         group_type,
         filters={"lft": [">=", lft], "rgt": ["<=", rgt]},

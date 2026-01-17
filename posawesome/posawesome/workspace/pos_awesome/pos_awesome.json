@@ -26,7 +26,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Profile",
-   "link_count": 1,
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -36,6 +36,16 @@
    "label": "POS Profile",
    "link_count": 0,
    "link_to": "POS Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scale Barcode Settings",
+   "link_count": 0,
+   "link_to": "Scale Barcode Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

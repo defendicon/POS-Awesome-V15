@@ -11,17 +11,13 @@
 					'status-offline': statusColor === 'red',
 				}"
 			>
-				{{ statusText }}
+				{{ connectivityLabel }}
 			</div>
-			<div class="status-detail-inline">{{ syncInfoText }}</div>
 		</div>
 	</div>
 </template>
 
 <script>
-// Avoid relying on `import.meta` so the file can be bundled with older
-// JavaScript targets without warnings from esbuild. Debug logging can be
-// toggled by changing this flag during development.
 const DEBUG = false;
 
 export default {
@@ -31,8 +27,6 @@ export default {
 		serverOnline: Boolean,
 		serverConnecting: Boolean,
 		isIpHost: Boolean,
-		syncTotals: Object,
-		cacheReady: Boolean,
 	},
 	computed: {
 		/**
@@ -146,31 +140,24 @@ export default {
 			return this.__(`Server Offline (${hostname})`);
 		},
 		/**
-		 * Returns a short string summarizing the last offline invoice sync results.
+		 * Short, user-friendly connectivity label for the navbar.
+		 * @returns {string}
 		 */
-		syncInfoText() {
-			const { pending, synced, drafted } = this.syncTotals;
-
-			if (!this.cacheReady) {
-				return this.__("Loading cache...");
+		connectivityLabel() {
+			if (this.serverConnecting) {
+				return this.__("Connecting");
 			}
-
-			// Ensure we have valid numbers
-			const pendingCount = pending || 0;
-			const syncedCount = synced || 0;
-			const draftedCount = drafted || 0;
 
 			if (!this.networkOnline) {
-				// In offline mode, show all available information
-				if (pendingCount > 0 || syncedCount > 0 || draftedCount > 0) {
-					return `Pending: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
-				} else {
-					return "Offline Mode";
-				}
+				return this.__("Offline");
 			}
 
-			// Online mode - show full status
-			return `To Sync: ${pendingCount} | Synced: ${syncedCount} | Draft: ${draftedCount}`;
+			if (this.networkOnline && this.serverOnline) {
+				return this.__("Online");
+			}
+
+			// Network is available but server is not responding
+			return this.__("Limited");
 		},
 	},
 };
@@ -222,22 +209,7 @@ export default {
 	color: #f44336;
 }
 
-.status-detail-inline {
-	font-size: 11px;
-	color: #666;
-	line-height: 1.2;
-	margin-top: 2px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-	.status-info-always-visible {
-		display: none;
-	}
-
-	.status-section-enhanced {
-		margin-right: 4px;
-		/* Further reduced for mobile */
-	}
+.status-section-enhanced .status-info-always-visible {
+	min-width: unset;
 }
 </style>

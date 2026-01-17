@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>POS Awesome Desktop</title>
+		<style>
+			:root {
+				color-scheme: light dark;
+				--bg: #0f172a;
+				--panel: #111827;
+				--text: #e5e7eb;
+				--muted: #94a3b8;
+				--primary: #06b6d4;
+				--primary-strong: #0891b2;
+				--danger: #ef4444;
+				--shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+			}
+
+			* {
+				box-sizing: border-box;
+				font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: grid;
+				place-items: center;
+				background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.08), transparent 35%),
+					radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.08), transparent 30%),
+					var(--bg);
+				color: var(--text);
+				padding: 24px;
+			}
+
+			.card {
+				width: min(680px, 100%);
+				background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+				border: 1px solid rgba(255, 255, 255, 0.08);
+				border-radius: 16px;
+				padding: 32px;
+				box-shadow: var(--shadow);
+				backdrop-filter: blur(8px);
+			}
+
+			h1 {
+				margin: 0 0 12px;
+				font-size: 28px;
+			}
+
+			p.description {
+				margin: 0 0 20px;
+				color: var(--muted);
+				line-height: 1.5;
+			}
+
+			label {
+				display: block;
+				font-weight: 600;
+				margin-bottom: 8px;
+			}
+
+			input[type="text"] {
+				width: 100%;
+				padding: 14px 16px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.12);
+				background: rgba(255, 255, 255, 0.04);
+				color: var(--text);
+				font-size: 16px;
+			}
+
+			input[type="text"]:focus {
+				outline: 2px solid var(--primary);
+				border-color: var(--primary);
+				box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.25);
+			}
+
+			.actions {
+				display: flex;
+				gap: 12px;
+				margin-top: 18px;
+				flex-wrap: wrap;
+			}
+
+			button {
+				appearance: none;
+				border: none;
+				padding: 12px 16px;
+				border-radius: 12px;
+				font-weight: 700;
+				cursor: pointer;
+				transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+				color: #0b172a;
+			}
+
+			button.primary {
+				background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+				box-shadow: 0 10px 30px rgba(6, 182, 212, 0.35);
+				color: #032026;
+			}
+
+			button.secondary {
+				background: rgba(255, 255, 255, 0.08);
+				color: var(--text);
+				border: 1px solid rgba(255, 255, 255, 0.08);
+			}
+
+			button.danger {
+				background: linear-gradient(135deg, var(--danger), #b91c1c);
+				color: #fffaf7;
+			}
+
+			button:hover {
+				transform: translateY(-1px);
+				box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+			}
+
+			.status {
+				margin-top: 16px;
+				color: var(--muted);
+				min-height: 24px;
+			}
+
+			.badge {
+				display: inline-block;
+				padding: 6px 10px;
+				border-radius: 999px;
+				background: rgba(6, 182, 212, 0.12);
+				color: var(--text);
+				font-size: 13px;
+				margin-left: 8px;
+				border: 1px solid rgba(6, 182, 212, 0.25);
+			}
+
+			.hint {
+				margin-top: 18px;
+				color: var(--muted);
+				line-height: 1.4;
+			}
+
+			ul {
+				padding-left: 18px;
+				color: var(--muted);
+			}
+
+			@media (max-width: 640px) {
+				.card {
+					padding: 20px;
+				}
+				h1 {
+					font-size: 22px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<h1>POS Awesome Desktop</h1>
+			<p class="description">
+				POS Awesome Desktop needs your server URL to launch. Enter your ERPNext / POS Awesome server URL below;
+				we will automatically add the <code>/app/posapp</code> path and save the URL locally for the next
+				startup.
+			</p>
+
+			<form id="server-form">
+				<label for="server-url">Server URL</label>
+				<input id="server-url" type="text" name="server-url" placeholder="https://pos.example.com" autocomplete="off" required />
+				<div class="actions">
+					<button class="primary" type="submit">Save &amp; Launch</button>
+					<button class="secondary" type="button" id="open-saved">Open saved server</button>
+					<button class="danger" type="button" id="reset-server">Clear saved URL</button>
+				</div>
+			</form>
+
+			<div class="status" id="status">Checking saved server&hellip;</div>
+
+			<div class="hint">
+				<ul>
+					<li>Example: <strong>https://yourdomain.com</strong> (we will append <code>/app/posapp</code>).</li>
+					<li>The saved URL is stored in IndexedDB plus disk for offline caching.</li>
+					<li>Open settings again using the <em>Change server</em> option in the app menu.</li>
+				</ul>
+			</div>
+		</div>
+		<script>
+			const statusEl = document.getElementById("status");
+			const input = document.getElementById("server-url");
+			const openSaved = document.getElementById("open-saved");
+			const resetButton = document.getElementById("reset-server");
+
+			function setStatus(text, tone = "muted") {
+				statusEl.textContent = text;
+				statusEl.style.color = tone === "error" ? "var(--danger)" : "var(--muted)";
+			}
+
+			async function hydrate() {
+				const saved = await window.electronAPI.getServerUrl();
+				if (saved) {
+					input.value = saved;
+					setStatus(`Saved server: ${saved}`);
+				} else {
+					setStatus("No server saved yet.");
+				}
+			}
+
+			document.getElementById("server-form").addEventListener("submit", async (event) => {
+				event.preventDefault();
+				const raw = input.value.trim();
+				setStatus("Validating URL...");
+				try {
+					const normalized = await window.electronAPI.setServerUrl(raw);
+					setStatus(`Launching ${normalized}`);
+				} catch (error) {
+					setStatus(error?.message || "Invalid URL", "error");
+				}
+			});
+
+			openSaved.addEventListener("click", async () => {
+				const result = await window.electronAPI.retryLoad();
+				if (!result?.launched) {
+					setStatus("No saved server found.", "error");
+				}
+			});
+
+			resetButton.addEventListener("click", async () => {
+				await window.electronAPI.resetServer();
+				input.value = "";
+				setStatus("Saved server cleared.");
+			});
+
+			hydrate();
+		</script>
+	</body>
+</html>

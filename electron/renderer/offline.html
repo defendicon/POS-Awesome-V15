@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>POS Awesome Offline</title>
+		<style>
+			:root {
+				color-scheme: light dark;
+				--bg: #0b1221;
+				--panel: #0f172a;
+				--text: #e2e8f0;
+				--muted: #94a3b8;
+				--primary: #22d3ee;
+				--danger: #f97316;
+			}
+
+			* {
+				box-sizing: border-box;
+				font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: grid;
+				place-items: center;
+				padding: 24px;
+				background: radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.08), transparent 32%),
+					radial-gradient(circle at 90% 20%, rgba(248, 113, 113, 0.08), transparent 30%),
+					var(--bg);
+				color: var(--text);
+			}
+
+			.card {
+				width: min(640px, 100%);
+				background: rgba(255, 255, 255, 0.02);
+				border-radius: 16px;
+				padding: 28px;
+				border: 1px solid rgba(255, 255, 255, 0.08);
+				box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+				text-align: center;
+			}
+
+			.icon {
+				font-size: 54px;
+				margin-bottom: 8px;
+			}
+
+			h1 {
+				margin: 8px 0 12px;
+			}
+
+			p {
+				color: var(--muted);
+				margin: 0 0 12px;
+			}
+
+			.actions {
+				display: flex;
+				justify-content: center;
+				gap: 12px;
+				flex-wrap: wrap;
+				margin-top: 12px;
+			}
+
+			button {
+				appearance: none;
+				border: none;
+				padding: 11px 16px;
+				border-radius: 12px;
+				font-weight: 700;
+				cursor: pointer;
+				transition: transform 0.12s ease, box-shadow 0.12s ease;
+				color: #0b172a;
+			}
+
+			button.primary {
+				background: linear-gradient(135deg, var(--primary), #0ea5e9);
+				box-shadow: 0 10px 30px rgba(14, 165, 233, 0.35);
+			}
+
+			button.secondary {
+				background: rgba(255, 255, 255, 0.08);
+				color: var(--text);
+				border: 1px solid rgba(255, 255, 255, 0.12);
+			}
+
+			button:hover {
+				transform: translateY(-1px);
+				box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+			}
+
+			.small {
+				font-size: 13px;
+				margin-top: 6px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<div class="icon">📡</div>
+			<h1>Offline Mode</h1>
+			<p>We can't reach the network or your server right now. Your local cache is available, but syncing requires the server.</p>
+			<p id="server-label" class="small"></p>
+			<div class="actions">
+				<button id="retry" class="primary" type="button">Retry connection</button>
+				<button id="settings" class="secondary" type="button">Change server</button>
+			</div>
+		</div>
+		<script>
+			const serverLabel = document.getElementById("server-label");
+			window.electronAPI.getServerUrl().then((saved) => {
+				serverLabel.textContent = saved ? `Last saved server: ${saved}` : "No server URL is set.";
+			});
+
+			document.getElementById("retry").addEventListener("click", async () => {
+				const result = await window.electronAPI.retryLoad();
+				if (!result?.launched) {
+					serverLabel.textContent = "No server URL is set.";
+				}
+			});
+
+			document.getElementById("settings").addEventListener("click", () => {
+				window.electronAPI.openSettings();
+			});
+		</script>
+	</body>
+</html>

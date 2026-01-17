@@ -1,5 +1,10 @@
 /* global frappe */
-import { getOpeningStorage, setPrintTemplate, setTermsAndConditions } from "../offline/index.js";
+import {
+	getOpeningStorage,
+	setOpeningStorage,
+	setPrintTemplate,
+	setTermsAndConditions,
+} from "../offline/index.js";
 
 async function cachePrintTemplateAndTerms(profile) {
 	if (!profile || typeof frappe === "undefined" || !navigator.onLine) return;
@@ -31,10 +36,43 @@ async function cachePrintTemplateAndTerms(profile) {
 	}
 }
 
+function hasProfileChanged(currentProfile, nextProfile) {
+	if (!nextProfile) return false;
+	if (!currentProfile) return true;
+	if (currentProfile.name !== nextProfile.name) return true;
+	if (currentProfile.modified && nextProfile.modified) {
+		return currentProfile.modified !== nextProfile.modified;
+	}
+	return false;
+}
+
+function updateOpeningStorageProfile(profile) {
+	const cached = getOpeningStorage();
+	if (cached?.pos_profile) {
+		setOpeningStorage({ ...cached, pos_profile: profile });
+	}
+}
+
 export async function ensurePosProfile() {
 	const bootProfile = frappe?.boot?.pos_profile;
 	if (bootProfile && bootProfile.warehouse && bootProfile.selling_price_list) {
 		await cachePrintTemplateAndTerms(bootProfile);
+		if (navigator.onLine) {
+			try {
+				const res = await frappe.call({
+					method: "posawesome.posawesome.api.utils.get_active_pos_profile",
+					args: { user: frappe.session.user },
+				});
+				if (res.message && hasProfileChanged(bootProfile, res.message)) {
+					frappe.boot.pos_profile = res.message;
+					updateOpeningStorageProfile(res.message);
+					await cachePrintTemplateAndTerms(res.message);
+					return res.message;
+				}
+			} catch (e) {
+				console.error("Failed to refresh active POS profile", e);
+			}
+		}
 		return bootProfile;
 	}
 	try {
@@ -44,6 +82,7 @@ export async function ensurePosProfile() {
 		});
 		if (res.message) {
 			frappe.boot.pos_profile = res.message;
+			updateOpeningStorageProfile(res.message);
 			await cachePrintTemplateAndTerms(res.message);
 			return res.message;
 		}

@@ -379,3 +379,75 @@
 		color 0.01s linear,
 		border-color 0.01s linear !important;
 }
+/* Fix for view toggle buttons text color in dark mode */
+[data-theme="dark"] .view-toggle-btn .v-btn--selected .v-btn__content {
+	color: #ffffff !important;
+}
+
+[data-theme="dark"] .view-toggle-btn .v-btn--selected {
+	background-color: var(--pos-primary) !important;
+}
+
+/* Fix for VueDatePicker inside pos-themed-input in Dark Mode */
+[data-theme="dark"] .pos-themed-input .dp__input {
+	background-color: var(--pos-input-bg) !important;
+	color: var(--pos-text-primary) !important;
+	border-color: var(--pos-border) !important;
+}
+
+[data-theme="dark"] .pos-themed-input .dp__icon {
+	color: var(--pos-text-secondary) !important;
+}
+
+/* Ensure placeholder text is visible */
+[data-theme="dark"] .pos-themed-input .dp__input::placeholder {
+	color: var(--pos-text-hint) !important;
+	opacity: 1;
+}
+
+/* Fix popup menu background in dark mode */
+[data-theme="dark"] .dp__menu {
+	background-color: var(--pos-card-bg) !important;
+	border-color: var(--pos-border) !important;
+}
+
+[data-theme="dark"] .dp__calendar_header_item {
+	color: var(--pos-text-secondary) !important;
+}
+
+[data-theme="dark"] .dp__cell_inner {
+	color: var(--pos-text-primary) !important;
+}
+
+[data-theme="dark"] .dp__month_year_select {
+	color: var(--pos-text-primary) !important;
+}
+
+[data-theme="dark"] .dp__arrow_top,
+[data-theme="dark"] .dp__arrow_bottom {
+	background-color: var(--pos-card-bg) !important;
+	border-color: var(--pos-border) !important;
+}
+
+/* Active/Selected dates */
+[data-theme="dark"] .dp__active_date,
+[data-theme="dark"] .dp__range_start,
+[data-theme="dark"] .dp__range_end {
+	background-color: var(--pos-primary) !important;
+	color: var(--pos-on-primary) !important;
+}
+
+/* Today's date */
+[data-theme="dark"] .dp__today {
+	border-color: var(--pos-primary) !important;
+}
+
+/* Action buttons */
+[data-theme="dark"] .dp__action_select {
+	background-color: var(--pos-primary) !important;
+	color: var(--pos-on-primary) !important;
+}
+
+[data-theme="dark"] .dp__action_cancel {
+	color: var(--pos-text-secondary) !important;
+}

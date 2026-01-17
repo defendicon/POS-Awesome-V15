@@ -1,9 +1,14 @@
 /* global __, flt */
 
+import { toBaseCurrency, toSelectedCurrency } from "../utils/currencyConversion.js";
+
 export function useDiscounts() {
 	// Update additional discount amount based on percentage
 	const updateDiscountAmount = (context) => {
-		const value = flt(context.additional_discount_percentage);
+		let value = flt(context.additional_discount_percentage);
+		const usePercentage = Boolean(context.pos_profile?.posa_use_percentage_discount);
+		const maxDiscount = flt(context.pos_profile?.posa_max_discount_allowed);
+
 		// If value is too large, reset to 0
 		if (value < -100 || value > 100) {
 			context.additional_discount_percentage = 0;
@@ -11,9 +16,40 @@ export function useDiscounts() {
 			return;
 		}
 
+		if (maxDiscount > 0 && Math.abs(value) > maxDiscount) {
+			value = value < 0 ? -maxDiscount : maxDiscount;
+			context.additional_discount_percentage = value;
+			context.eventBus.emit("show_message", {
+				title: __("Discount limited by POS Profile"),
+				message: __("The maximum discount allowed is") + " " + maxDiscount + "%",
+				color: "warning",
+			});
+		}
+
 		// Calculate discount amount based on percentage
 		if (context.Total && context.Total !== 0) {
-			context.additional_discount = (context.Total * value) / 100;
+			if (usePercentage && context.isReturnInvoice && value > 0) {
+				value = -Math.abs(value);
+				context.additional_discount_percentage = value;
+			}
+
+			if (usePercentage) {
+				const baseTotal = context.isReturnInvoice ? Math.abs(context.Total) : context.Total;
+
+				const percentMagnitude = Math.abs(value);
+				let discountAmount = (baseTotal * percentMagnitude) / 100;
+
+				if (value < 0 || context.isReturnInvoice) {
+					discountAmount = -Math.abs(discountAmount);
+				} else {
+					discountAmount = Math.abs(discountAmount);
+				}
+
+				context.additional_discount = discountAmount;
+			} else {
+				const signedTotal = context.isReturnInvoice ? -Math.abs(context.Total) : context.Total;
+				context.additional_discount = (signedTotal * value) / 100;
+			}
 		} else {
 			context.additional_discount = 0;
 		}
@@ -28,8 +64,9 @@ export function useDiscounts() {
 
 		try {
 			// Flag to track manual rate changes
-			if (fieldId === "rate") {
+			if (["rate", "discount_amount", "discount_percentage"].includes(fieldId)) {
 				item._manual_rate_set = true;
+				item._manual_rate_set_from_uom = false;
 			}
 
 			// Handle negative values
@@ -41,67 +78,48 @@ export function useDiscounts() {
 				});
 			}
 
-			// Convert price_list_rate to current currency for calculations
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
+			// Benchmark note: reuse shared conversion helper while avoiding redundant round-trips.
+			const basePriceListRate = item.base_price_list_rate;
 			const converted_price_list_rate =
-				context.selected_currency !== baseCurrency
-					? context.flt(item.price_list_rate / context.exchange_rate, context.currency_precision)
+				basePriceListRate != null
+					? toSelectedCurrency(context, basePriceListRate)
 					: item.price_list_rate;
 
 			// Field-wise calculations
 			switch (fieldId) {
 				case "rate":
-					// Store base rate and convert to selected currency
-					item.base_rate = context.flt(
-						newValue / context.exchange_rate,
-						context.currency_precision,
-					);
 					item.rate = newValue;
+					item.base_rate = toBaseCurrency(context, newValue);
 
-					// Calculate discount amount in selected currency
-					item.discount_amount = context.flt(
-						converted_price_list_rate - item.rate,
-						context.currency_precision,
-					);
 					item.base_discount_amount = context.flt(
-						item.price_list_rate - item.base_rate,
+						item.base_price_list_rate - item.base_rate,
 						context.currency_precision,
 					);
+					item.discount_amount = toSelectedCurrency(context, item.base_discount_amount);
 
-					// Calculate percentage based on converted values
-					if (converted_price_list_rate) {
+					if (item.base_price_list_rate) {
 						item.discount_percentage = context.flt(
-							(item.discount_amount / converted_price_list_rate) * 100,
+							(item.base_discount_amount / item.base_price_list_rate) * 100,
 							context.float_precision,
 						);
 					}
 					break;
 
 				case "discount_amount":
-					// Ensure discount amount doesn't exceed price list rate
-					newValue = Math.min(newValue, converted_price_list_rate);
-
-					// Store base discount and convert to selected currency
-					item.base_discount_amount = context.flt(
-						newValue / context.exchange_rate,
-						context.currency_precision,
-					);
+					newValue = Math.min(newValue, item.price_list_rate);
 					item.discount_amount = newValue;
 
-					// Update rate based on discount
-					item.rate = context.flt(
-						converted_price_list_rate - item.discount_amount,
-						context.currency_precision,
-					);
-					item.base_rate = context.flt(
-						item.price_list_rate - item.base_discount_amount,
-						context.currency_precision,
-					);
+					item.base_discount_amount = toBaseCurrency(context, item.discount_amount);
 
-					// Calculate percentage
-					if (converted_price_list_rate) {
+					item.base_rate = context.flt(
+						item.base_price_list_rate - item.base_discount_amount,
+						context.currency_precision,
+					);
+					item.rate = toSelectedCurrency(context, item.base_rate);
+
+					if (item.base_price_list_rate) {
 						item.discount_percentage = context.flt(
-							(item.discount_amount / converted_price_list_rate) * 100,
+							(item.base_discount_amount / item.base_price_list_rate) * 100,
 							context.float_precision,
 						);
 					} else {
@@ -110,29 +128,20 @@ export function useDiscounts() {
 					break;
 
 				case "discount_percentage":
-					// Ensure percentage doesn't exceed 100%
 					newValue = Math.min(newValue, 100);
 					item.discount_percentage = context.flt(newValue, context.float_precision);
 
-					// Calculate discount amount in selected currency
-					item.discount_amount = context.flt(
-						(converted_price_list_rate * item.discount_percentage) / 100,
-						context.currency_precision,
-					);
 					item.base_discount_amount = context.flt(
-						(item.price_list_rate * item.discount_percentage) / 100,
+						(item.base_price_list_rate * item.discount_percentage) / 100,
 						context.currency_precision,
 					);
+					item.discount_amount = toSelectedCurrency(context, item.base_discount_amount);
 
-					// Update rates
-					item.rate = context.flt(
-						converted_price_list_rate - item.discount_amount,
-						context.currency_precision,
-					);
 					item.base_rate = context.flt(
-						item.price_list_rate - item.base_discount_amount,
+						item.base_price_list_rate - item.base_discount_amount,
 						context.currency_precision,
 					);
+					item.rate = toSelectedCurrency(context, item.base_rate);
 					break;
 			}
 
@@ -167,30 +176,14 @@ export function useDiscounts() {
 
 		if (item.locked_price) {
 			item.amount = context.flt(item.qty * item.rate, context.currency_precision);
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
-				item.base_amount = context.flt(
-					item.amount / context.exchange_rate,
-					context.currency_precision,
-				);
-			} else {
-				item.base_amount = item.amount;
-			}
+			item.base_amount = toBaseCurrency(context, item.amount);
 			if (context.forceUpdate) context.forceUpdate();
 			return;
 		}
 
 		if (item.posa_offer_applied) {
 			item.amount = context.flt(item.qty * item.rate, context.currency_precision);
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
-				item.base_amount = context.flt(
-					item.amount / context.exchange_rate,
-					context.currency_precision,
-				);
-			} else {
-				item.base_amount = item.amount;
-			}
+			item.base_amount = toBaseCurrency(context, item.amount);
 			if (context.forceUpdate) context.forceUpdate();
 			return;
 		}
@@ -198,22 +191,13 @@ export function useDiscounts() {
 		if (item.price_list_rate) {
 			// Always work with base rates first
 			if (!item.base_price_list_rate) {
-				item.base_price_list_rate = item.price_list_rate;
-				item.base_rate = item.rate;
+				item.base_price_list_rate = toBaseCurrency(context, item.price_list_rate);
+				item.base_rate = toBaseCurrency(context, item.rate);
 			}
 
 			// Convert to selected currency
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
-				item.price_list_rate = context.flt(
-					item.base_price_list_rate / context.exchange_rate,
-					context.currency_precision,
-				);
-				item.rate = context.flt(item.base_rate / context.exchange_rate, context.currency_precision);
-			} else {
-				item.price_list_rate = item.base_price_list_rate;
-				item.rate = item.base_rate;
-			}
+			item.price_list_rate = toSelectedCurrency(context, item.base_price_list_rate);
+			item.rate = toSelectedCurrency(context, item.base_rate);
 		}
 
 		// Handle discounts
@@ -229,25 +213,12 @@ export function useDiscounts() {
 			item.rate = context.flt(price_list_rate - discount_amount, context.currency_precision);
 
 			// Store base discount amount
-			const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-			if (context.selected_currency !== baseCurrency) {
-				item.base_discount_amount = context.flt(
-					discount_amount / context.exchange_rate,
-					context.currency_precision,
-				);
-			} else {
-				item.base_discount_amount = item.discount_amount;
-			}
+			item.base_discount_amount = toBaseCurrency(context, item.discount_amount);
 		}
 
 		// Calculate amounts
 		item.amount = context.flt(item.qty * item.rate, context.currency_precision);
-		const baseCurrency = context.price_list_currency || context.pos_profile.currency;
-		if (context.selected_currency !== baseCurrency) {
-			item.base_amount = context.flt(item.amount / context.exchange_rate, context.currency_precision);
-		} else {
-			item.base_amount = item.amount;
-		}
+		item.base_amount = toBaseCurrency(context, item.amount);
 
 		if (context.forceUpdate) context.forceUpdate();
 	};

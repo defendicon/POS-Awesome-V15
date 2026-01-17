@@ -59,7 +59,6 @@ Custom Field - label: POS Profile-posa_hide_variants_items,Hide Variants Items,E
 apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Invalid Period,Periodo Invalido
 Custom Field - label: Sales Invoice Item-posa_is_offer,Is Offer,É uma Oferta
 Custom Field - label: Sales Invoice Item-posa_is_replace,Is Offer Replace For item Row ID,É uma Substituição de Oferta para o Linha do ID do Item
-Custom Field - description: POS Profile-posa_scale_barcode_start,It is best not to use more than four numbers,É aconselhavel não usar mais que quatro numeros
 DocType: POS Offer,Item Code,Codigo do Item
 DocType: POS Offer,Item Group,Grupo do Item
 DocType: POS Offer,Item Price,Preço do Item
@@ -125,7 +124,6 @@ DocType: POS Closing Shift,Sales Manager,Gestor de Vendas
 DocType: POS Offer,Sales Master Manager,Gerente Mestre de Vendas
 apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Sales Summary,Resumo de Vendas
 DocType: POS Offer,Sales User,Usuário de Vendas
-Custom Field - label: POS Profile-posa_scale_barcode_start,Scale Barcode Start With,Codigo de Barras de Peso começa com 
 Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number,Procurar por Numero de Serie
 apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Selected POS Opening Shift should be open.,Abertura de Turno do POS selecionado deve estar aberto.
 Custom Field - description: POS Profile-posa_allow_submissions_in_background_job,Send invoice to submit after printing,Enviar Factura para Submeter depois de Imprimir

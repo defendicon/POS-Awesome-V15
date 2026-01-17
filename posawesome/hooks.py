@@ -18,7 +18,7 @@ app_license = "GPLv3"
 _asset_version = get_build_version()
 
 app_include_js = [
-    f"/assets/posawesome/dist/js/posawesome.umd.js?v={_asset_version}",
+    f"/assets/posawesome/dist/js/loader.js?v={_asset_version}",
 ]
 
 app_include_css = [
@@ -190,7 +190,6 @@ fixtures = [
                     "POS Profile-posa_allow_return_without_invoice",
                     "POS Profile-posa_allow_free_batch_return",
                     "POS Profile-posa_col_1",
-                    "POS Profile-posa_scale_barcode_start",
                     "POS Profile-create_pos_invoice_instead_of_sales_invoice",
                     "POS Invoice-posa_is_printed",
                     "Sales Invoice-posa_is_printed",
@@ -222,7 +221,9 @@ fixtures = [
                     "Sales Invoice-posa_additional_notes_section",
                     "POS Invoice-posa_additional_notes_section",
                     "Sales Invoice-posa_notes",
+                    "Sales Invoice-posa_authorization_code",
                     "POS Invoice-posa_notes",
+                    "POS Invoice-posa_authorization_code",
                     "Sales Invoice-posa_column_break_111",
                     "POS Invoice-posa_column_break_111",
                     "Sales Invoice-posa_delivery_date",
@@ -259,6 +260,7 @@ fixtures = [
                     "POS Profile-posa_allow_customer_purchase_order",
                     "POS Profile-posa_allow_print_last_invoice",
                     "POS Profile-posa_display_additional_notes",
+                    "POS Profile-posa_display_authorization_code",
                     "POS Profile-posa_allow_write_off_change",
                     "POS Profile-posa_new_line",
                     "POS Profile-posa_input_qty",
@@ -294,6 +296,12 @@ fixtures = [
                     "POS Profile-posa_enable_camera_scanning",
                     "POS Profile-posa_camera_scan_type",
                     "POS Profile-posa_language",
+                    "POS Profile-posa_enable_return_validity",
+                    "POS Profile-posa_return_validity_days",
+                    "POS Settings-posa_enable_return_validity",
+                    "POS Settings-posa_return_validity_days",
+                    "POS Invoice-posa_return_valid_upto",
+                    "Sales Invoice-posa_return_valid_upto",
                 ),
             ]
         ],

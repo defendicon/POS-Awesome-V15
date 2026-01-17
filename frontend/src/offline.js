@@ -1205,6 +1205,14 @@ export async function forceClearAllCache() {
 	memory.tax_template_cache = {};
 	memory.tax_inclusive = false;
 	memory.manual_offline = false;
+	memory.translation_cache = {};
+	memory.pricing_rules_snapshot = [];
+	memory.pricing_rules_context = null;
+	memory.pricing_rules_last_sync = null;
+	memory.pricing_rules_stale_at = null;
+	memory.print_template = "";
+	memory.terms_and_conditions = "";
+	memory.cache_ready = false;
 
 	try {
 		await Dexie.delete("posawesome_offline");

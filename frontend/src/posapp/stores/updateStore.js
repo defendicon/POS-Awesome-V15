@@ -72,6 +72,16 @@ function parseTimestamp(version) {
 	return Number.isNaN(candidate) ? null : candidate;
 }
 
+// Benchmark: centralize version normalization to avoid repeating parseTimestamp/String work.
+function normalizeVersionInput(version, explicitTimestamp) {
+	if (!version) {
+		return { normalized: null, timestamp: null };
+	}
+	const normalized = String(version);
+	const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+	return { normalized, timestamp };
+}
+
 function formatTimestamp(timestamp) {
 	if (!timestamp) return null;
 	const date = new Date(timestamp);
@@ -133,9 +143,8 @@ export const useUpdateStore = defineStore("update", {
 			}
 		},
 		setCurrentVersion(version, explicitTimestamp) {
-			if (!version) return;
-			const normalized = String(version);
-			const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+			const { normalized, timestamp } = normalizeVersionInput(version, explicitTimestamp);
+			if (!normalized) return;
 			const { currentVersion, availableVersion, availableTimestamp } = this;
 			const updates = {};
 			const versionChanged = currentVersion !== normalized;
@@ -148,7 +157,7 @@ export const useUpdateStore = defineStore("update", {
 					updates.availableVersion = normalized;
 				}
 				if ((timestamp ?? null) !== (availableTimestamp ?? null)) {
-					updates.availableTimestamp = timestamp ?? null;
+					updates.availableTimestamp = timestamp;
 				}
 			}
 			if (Object.keys(updates).length) {
@@ -159,16 +168,15 @@ export const useUpdateStore = defineStore("update", {
 			}
 		},
 		setAvailableVersion(version, explicitTimestamp) {
-			if (!version) return;
-			const normalized = String(version);
-			const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+			const { normalized, timestamp } = normalizeVersionInput(version, explicitTimestamp);
+			if (!normalized) return;
 			const { availableVersion, availableTimestamp, currentVersion } = this;
 			const updates = {};
 			const versionChanged = availableVersion !== normalized;
 			const timestampChanged = (timestamp ?? null) !== (availableTimestamp ?? null);
 			if (!versionChanged && !timestampChanged) {
 				if (!currentVersion) {
-					this.setCurrentVersion(normalized, timestamp ?? null);
+					this.setCurrentVersion(normalized, timestamp);
 				}
 				return;
 			}
@@ -176,7 +184,7 @@ export const useUpdateStore = defineStore("update", {
 				updates.availableVersion = normalized;
 			}
 			if (timestampChanged) {
-				updates.availableTimestamp = timestamp ?? null;
+				updates.availableTimestamp = timestamp;
 			}
 			if (!currentVersion) {
 				updates.currentVersion = normalized;
@@ -194,11 +202,10 @@ export const useUpdateStore = defineStore("update", {
 				dismissedUntil: null,
 			};
 			if (version) {
-				const normalized = String(version);
-				const timestamp = explicitTimestamp ?? parseTimestamp(normalized);
+				const { normalized, timestamp } = normalizeVersionInput(version, explicitTimestamp);
 				updates.currentVersion = normalized;
 				updates.availableVersion = normalized;
-				updates.availableTimestamp = timestamp ?? null;
+				updates.availableTimestamp = timestamp;
 				if (hasBrowserContext) {
 					safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
 				}

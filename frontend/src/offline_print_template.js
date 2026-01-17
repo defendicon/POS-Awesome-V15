@@ -126,6 +126,7 @@ function defaultOfflineHTML(invoice, terms = "") {
         <div><strong>Customer:</strong> ${invoice.customer_name || invoice.customer || ""}</div>
         <div><strong>Mobile:</strong> ${invoice.contact_mobile || ""}</div>
         <div><strong>Additional Note:</strong> ${invoice.posa_notes || ""}</div>
+        ${invoice.posa_authorization_code ? `<div><strong>Authorization Code:</strong> ${invoice.posa_authorization_code}</div>` : ""}
     </div>
     <table class="items">
         <thead>

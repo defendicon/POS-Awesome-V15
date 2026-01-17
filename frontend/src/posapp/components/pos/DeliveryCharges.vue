@@ -2,6 +2,7 @@
 	<v-row align="center" class="items px-3 py-2 mt-0" v-if="pos_profile.posa_use_delivery_charges">
 		<v-col cols="12" sm="8" class="pb-0 mb-0 pr-0 pt-0">
 			<v-autocomplete
+				ref="deliveryChargesInput"
 				density="compact"
 				clearable
 				auto-select-first
@@ -73,6 +74,13 @@ export default {
 	methods: {
 		onUpdate(val) {
 			this.$emit("update:selected_delivery_charge", val);
+		},
+		focusDeliveryCharges() {
+			const input = this.$refs.deliveryChargesInput?.$el?.querySelector("input");
+			if (input) {
+				input.focus();
+				input.select?.();
+			}
 		},
 	},
 };

@@ -1,6 +1,11 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="customerDialog" max-width="600px" persistent>
+		<v-dialog
+			v-model="customerDialog"
+			max-width="600px"
+			persistent
+			@keydown.esc.capture.stop.prevent="handleDialogEscape"
+		>
 			<v-card>
 				<v-card-title class="d-flex align-center">
 					<span v-if="customer_id" class="text-h5 text-primary">{{ __("Update Customer") }}</span>
@@ -20,6 +25,7 @@
 						<v-row>
 							<v-col cols="12">
 								<v-text-field
+									ref="customerNameField"
 									density="compact"
 									color="primary"
 									:label="frappe._('Customer Name') + ' *'"
@@ -186,7 +192,11 @@
 		</v-dialog>
 
 		<!-- Confirmation Dialog -->
-		<v-dialog v-model="confirmDialog" max-width="400px">
+		<v-dialog
+			v-model="confirmDialog"
+			max-width="400px"
+			@keydown.esc.capture.stop.prevent="handleConfirmEscape"
+		>
 			<v-card>
 				<v-card-title class="text-h5 text-primary">
 					{{ __("Confirm Close") }}
@@ -338,6 +348,24 @@ export default {
 	},
 	computed: {},
 	methods: {
+		focusCustomerNameField() {
+			this.$nextTick(() => {
+				const field = this.$refs.customerNameField;
+				if (field && typeof field.focus === "function") {
+					field.focus();
+				}
+			});
+		},
+		handleDialogEscape() {
+			if (this.confirmDialog) {
+				this.confirmClose();
+				return;
+			}
+			this.confirm_close();
+		},
+		handleConfirmEscape() {
+			this.confirmClose();
+		},
 		// Add a new method to update calendar date
 		updateCalendarDate(day, month, year) {
 			// First close the date picker if it's open
@@ -655,6 +683,7 @@ export default {
 		}
 		this.eventBus.on("open_update_customer", (data) => {
 			this.customerDialog = true;
+			this.focusCustomerNameField();
 
 			if (data) {
 				this.customer_name = data.customer_name;

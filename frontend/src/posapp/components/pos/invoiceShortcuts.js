@@ -1,87 +1,242 @@
+/* global frappe, __ */
+const isAltOnly = (event) => event.altKey && !event.ctrlKey && !event.metaKey;
+const consumeEvent = (event) => {
+	event.preventDefault();
+	event.stopPropagation();
+};
+const isDigit = (event, digit) =>
+	event.key === String(digit) || event.code === `Digit${digit}` || event.code === `Numpad${digit}`;
+const isBackquote = (event) => event.key === "`" || event.code === "Backquote";
+const isLetter = (event, letter) => {
+	const normalized = letter.toLowerCase();
+	const keyValue = event.key?.toLowerCase?.();
+	return keyValue === normalized || event.code === `Key${letter.toUpperCase()}`;
+};
+
 export default {
-	shortOpenFirstItem(e) {
-		if (e.key.toLowerCase() === "a" && (e.ctrlKey || e.metaKey)) {
-			try {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (!this.items || this.items.length === 0) {
-					console.log("No items to expand/collapse");
-					return;
-				}
-
-				const firstItem = this.items[0];
-				console.log("Processing first item:", firstItem.item_code);
-
-				// Check if first item is currently expanded using its ID
-				const isExpanded = this.expanded.includes(firstItem.posa_row_id);
-
-				// Toggle expanded state using item ID
-				if (isExpanded) {
-					console.log("Collapsing item:", firstItem.item_code);
-					this.expanded = [];
-				} else {
-					console.log("Expanding item:", firstItem.item_code);
-					this.expanded = [firstItem.posa_row_id];
-					// Update item details when expanding
-					this.$nextTick(() => {
-						this.update_item_detail(firstItem);
-					});
-				}
-			} catch (error) {
-				console.error("Error in shortOpenFirstItem:", error);
-				this.eventBus.emit("show_message", {
-					title: __("Error toggling item details"),
-					color: "error",
-				});
-			}
+	async handleInvoiceShortcut(event) {
+		if (event.defaultPrevented) {
+			return;
 		}
-	},
 
-	handleExpandedUpdate(newExpanded) {
-		console.log("Expanded state updated:", newExpanded);
-		this.expanded = newExpanded;
+		const key = event.key;
 
-		// Update item details for newly expanded items
-		if (newExpanded && newExpanded.length > 0) {
-			const expandedItemId = newExpanded[0];
-			const expandedItem = this.items.find((item) => item.posa_row_id === expandedItemId);
-			if (expandedItem) {
-				this.$nextTick(() => {
-					this.update_item_detail(expandedItem);
-				});
-			}
+		if (key === "F4") {
+			consumeEvent(event);
+			this.eventBus.emit("show_message", {
+				title: __("Profile switching is not available yet"),
+				color: "warning",
+			});
+			return;
 		}
-	},
 
-	// Keyboard shortcut: open payment dialog
-	shortOpenPayment(e) {
-		if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-			e.preventDefault();
-			this.show_payment();
+		if (key === "F6") {
+			consumeEvent(event);
+			this.$refs.customerComponent?.openNewCustomer?.();
+			return;
 		}
-	},
 
-	// Keyboard shortcut: delete first item from the invoice
-	shortDeleteFirstItem(e) {
-		if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
-			e.preventDefault();
-			this.remove_item(this.items[0]);
+		if (key === "F7") {
+			consumeEvent(event);
+			this.eventBus.emit("open_shift_details");
+			return;
 		}
-	},
 
-	shortSelectDiscount(e) {
-		console.log("Shortcut pressed:", e.key, e.ctrlKey);
-		if (e.key.toLowerCase() === "e" && (e.ctrlKey || e.metaKey)) {
-			console.log("Focusing discount field");
-			e.preventDefault();
-			e.stopPropagation();
-			if (this.$refs.discount) {
-				this.$refs.discount.focus();
-				console.log("Discount field focused");
+		if (key === "F8") {
+			consumeEvent(event);
+			this.eventBus.emit("show_message", {
+				title: __("POS lock is not available yet"),
+				color: "warning",
+			});
+			return;
+		}
+
+		if (!isAltOnly(event)) {
+			return;
+		}
+
+		if (isDigit(event, 1)) {
+			consumeEvent(event);
+			if (typeof this.close_payments === "function") {
+				this.close_payments();
 			} else {
-				console.log("Discount field ref not found");
+				this.eventBus.emit("show_payment", "false");
+			}
+			return;
+		}
+
+		if (isDigit(event, 2)) {
+			consumeEvent(event);
+			this.cancel_dialog = true;
+			return;
+		}
+
+		if (isDigit(event, 3)) {
+			consumeEvent(event);
+			this.eventBus.emit("focus_item_search");
+			return;
+		}
+
+		if (isDigit(event, 4)) {
+			consumeEvent(event);
+			this.eventBus.emit("select_top_item");
+			return;
+		}
+
+		if (isDigit(event, 5)) {
+			consumeEvent(event);
+			this.focusCustomerSearchField?.();
+			return;
+		}
+
+		if (isDigit(event, 6)) {
+			consumeEvent(event);
+			this.$refs.customerComponent?.selectFirstCustomer?.();
+			return;
+		}
+
+		if (isDigit(event, 7)) {
+			consumeEvent(event);
+			this.get_draft_orders?.();
+			return;
+		}
+
+		if (isDigit(event, 8)) {
+			consumeEvent(event);
+			this.open_returns?.();
+			return;
+		}
+
+		if (isDigit(event, 9)) {
+			consumeEvent(event);
+			this.$refs.deliveryChargesComponent?.focusDeliveryCharges?.();
+			return;
+		}
+
+		if (isBackquote(event)) {
+			consumeEvent(event);
+			this.$refs.postingDateComponent?.focusPostingDate?.();
+			return;
+		}
+
+		if (key === "PageUp") {
+			consumeEvent(event);
+			this.show_payment?.();
+			return;
+		}
+
+		if (key === "Home") {
+			consumeEvent(event);
+			frappe.set_route("/");
+			location.reload();
+			return;
+		}
+
+		if (isLetter(event, "q")) {
+			consumeEvent(event);
+			this.focusItemTableField("qty");
+			return;
+		}
+
+		if (isLetter(event, "a")) {
+			consumeEvent(event);
+			this.focusAdditionalDiscountField?.();
+			return;
+		}
+
+		if (isLetter(event, "u")) {
+			consumeEvent(event);
+			this.focusItemTableField("uom");
+			return;
+		}
+
+		if (isLetter(event, "r")) {
+			consumeEvent(event);
+			this.focusItemTableField("rate");
+			return;
+		}
+
+		if (isLetter(event, "e")) {
+			consumeEvent(event);
+			const firstItem = this.items?.[0];
+			if (firstItem) {
+				this.remove_item?.(firstItem);
+			}
+			return;
+		}
+
+		if (isLetter(event, "f")) {
+			consumeEvent(event);
+			const input = this.$refs.itemSearchField;
+			if (input?.focus) {
+				input.focus();
+			} else {
+				input?.$el?.querySelector?.("input")?.focus?.();
+			}
+			return;
+		}
+
+		if (isLetter(event, "l")) {
+			consumeEvent(event);
+			this.get_draft_invoices?.();
+			return;
+		}
+
+		if (isLetter(event, "m")) {
+			consumeEvent(event);
+			this.eventBus.emit("toggle_item_selector_settings");
+			return;
+		}
+
+		if (isLetter(event, "s")) {
+			consumeEvent(event);
+			this.save_and_clear_invoice?.();
+			return;
+		}
+
+		if (isLetter(event, "d")) {
+			consumeEvent(event);
+			this.show_payment?.();
+			return;
+		}
+
+		const isPaymentShortcut = isLetter(event, "x");
+		const isPrintShortcut = isLetter(event, "p");
+		if (isPaymentShortcut || isPrintShortcut) {
+			if (this.paymentVisible) {
+				return;
+			}
+			consumeEvent(event);
+
+			const shouldPrint = isPrintShortcut;
+			const shouldSubmit = window.confirm(
+				__("Payments are not open. Do you want to open payments and submit?"),
+			);
+			if (!shouldSubmit) {
+				return;
+			}
+			await this.show_payment?.();
+			if (this.paymentVisible) {
+				this.eventBus.emit("submit_payment_shortcut", { print: shouldPrint });
 			}
 		}
+	},
+
+	focusItemTableField(field) {
+		const count = this.items?.length || 0;
+		if (!count) {
+			return;
+		}
+
+		if (!this.shortcutCycle) {
+			this.shortcutCycle = { qty: 0, uom: 0, rate: 0 };
+		}
+
+		let index = Number.isInteger(this.shortcutCycle[field]) ? this.shortcutCycle[field] : 0;
+		if (index >= count) {
+			index = 0;
+		}
+		this.shortcutCycle[field] = (index + 1) % count;
+		this.$refs.itemsTable?.focusItemField?.(index, field);
 	},
 };

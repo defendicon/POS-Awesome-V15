@@ -1,89 +1,76 @@
 <template>
 	<div class="db-gadget-section mx-1">
-		<v-tooltip location="bottom">
-			<template #activator="{ props }">
-				<div v-bind="props" class="db-meter-container">
-					<v-icon size="22" color="info">mdi-database</v-icon>
-					<span class="db-current-size">{{ formattedDbSize }}</span>
+		<div class="d-flex align-center mb-2">
+			<div class="db-meter-container mr-3">
+				<v-icon size="22" color="info">mdi-database</v-icon>
+				<span class="db-current-size">{{ formattedDbSize }}</span>
+			</div>
+			<div class="db-tooltip-title flex items-center font-semibold text-[14px] mb-0">
+				{{ __("Database Health") }}
+			</div>
+		</div>
+		<div class="db-tooltip-content p-3 min-w-[220px]">
+			<div v-if="loading" class="db-tooltip-detail">{{ __("Loading database stats...") }}</div>
+			<div v-else-if="error" class="db-tooltip-warning">{{ error }}</div>
+			<div v-else>
+				<div class="db-tooltip-section-title mb-1">{{ __("Database Info") }}</div>
+				<div class="db-tooltip-sparkline mb-2">
+					<svg :width="120" :height="32" class="db-sparkline">
+						<polyline :points="sparklinePoints" fill="none" stroke="#1976d2" stroke-width="2" />
+					</svg>
 				</div>
-			</template>
-			<div class="db-tooltip-content p-3 min-w-[220px]">
-				<div class="db-tooltip-title flex items-center font-semibold text-[14px] mb-2">
-					<v-icon size="16" color="info" class="mr-1">mdi-database-settings</v-icon>
-					{{ __("Database Health") }}
-				</div>
-				<v-divider class="my-2" />
-				<div v-if="loading" class="db-tooltip-detail">{{ __("Loading database stats...") }}</div>
-				<div v-else-if="error" class="db-tooltip-warning">{{ error }}</div>
-				<div v-else>
-					<div class="db-tooltip-section-title mb-1">{{ __("Database Info") }}</div>
-					<div class="db-tooltip-sparkline mb-2">
-						<svg :width="120" :height="32" class="db-sparkline">
-							<polyline
-								:points="sparklinePoints"
-								fill="none"
-								stroke="#1976d2"
-								stroke-width="2"
-							/>
-						</svg>
-					</div>
-					<div class="db-tooltip-detail flex items-center mb-1">
-						<v-icon size="14" color="info" class="mr-1">mdi-database-settings</v-icon>
-						<b>{{ dbStats.db_engine }}</b>
-						<span class="ml-2">{{ dbStats.db_version }}</span>
-					</div>
-					<v-divider class="my-2" />
-					<div class="db-tooltip-section-title mb-1">{{ __("Usage Stats") }}</div>
-					<div class="db-tooltip-detail flex items-center mb-1">
-						<v-icon size="14" color="info" class="mr-1">mdi-database</v-icon>
-						{{ __("Size:") }} <b>{{ formattedDbSize }}</b>
-						<span class="ml-2 flex items-center"
-							><v-icon size="14" color="info" class="mr-1">mdi-table</v-icon
-							>{{ __("Tables:") }} <b>{{ dbStats.db_table_count }}</b></span
-						>
-						<span class="ml-2 flex items-center"
-							><v-icon size="14" color="info" class="mr-1">mdi-format-list-numbered</v-icon
-							>{{ __("Rows:") }} <b>{{ dbStats.db_total_rows }}</b></span
-						>
-					</div>
-					<div class="db-tooltip-detail flex items-center mb-1">
-						<v-icon size="14" color="info" class="mr-1">mdi-connection</v-icon>
-						{{ __("Connections:") }} <b>{{ dbStats.db_connections }}</b>
-						<span class="ml-2 flex items-center"
-							><v-icon size="14" color="warning" class="mr-1">mdi-timer-sand</v-icon
-							>{{ __("Slow Queries:") }} <b>{{ dbStats.db_slow_queries }}</b></span
-						>
-					</div>
-					<v-divider class="my-2" />
-					<div v-if="dbStats.db_top_tables && dbStats.db_top_tables.length">
-						<div class="db-tooltip-section-title mb-1 flex items-center">
-							<v-icon size="14" color="info" class="mr-1">mdi-database-outline</v-icon>
-							{{ __("Top Tables") }}
-						</div>
-						<ul class="db-top-tables ml-2">
-							<li
-								v-for="t in dbStats.db_top_tables"
-								:key="t.name"
-								class="flex items-center mb-1"
-							>
-								<v-icon size="12" color="info" class="mr-1">mdi-table</v-icon>
-								<b>{{ t.name }}</b
-								>: {{ formatBytes(t.size) }}
-							</li>
-						</ul>
-					</div>
+				<div class="db-tooltip-detail flex items-center mb-1">
+					<v-icon size="14" color="info" class="mr-1">mdi-database-settings</v-icon>
+					<b>{{ dbStats.db_engine }}</b>
+					<span class="ml-2">{{ dbStats.db_version }}</span>
 				</div>
 				<v-divider class="my-2" />
-				<div class="db-tooltip-tip mt-2 flex items-center">
-					<v-icon size="14" color="primary" class="mr-1">mdi-lightbulb-on-outline</v-icon>
-					{{ __("Tip: Monitor slow queries and table size for optimal performance.") }}
-				</div>
-				<div class="db-tooltip-explanation mt-2 flex items-center">
+				<div class="db-tooltip-section-title mb-1">{{ __("Usage Stats") }}</div>
+				<div class="db-tooltip-detail flex items-center mb-1">
 					<v-icon size="14" color="info" class="mr-1">mdi-database</v-icon>
-					{{ __("Database health affects overall system speed and reliability.") }}
+					{{ __("Size:") }} <b>{{ formattedDbSize }}</b>
+					<span class="ml-2 flex items-center"
+						><v-icon size="14" color="info" class="mr-1">mdi-table</v-icon>{{ __("Tables:") }}
+						<b>{{ dbStats.db_table_count }}</b></span
+					>
+					<span class="ml-2 flex items-center"
+						><v-icon size="14" color="info" class="mr-1">mdi-format-list-numbered</v-icon
+						>{{ __("Rows:") }} <b>{{ dbStats.db_total_rows }}</b></span
+					>
+				</div>
+				<div class="db-tooltip-detail flex items-center mb-1">
+					<v-icon size="14" color="info" class="mr-1">mdi-connection</v-icon>
+					{{ __("Connections:") }} <b>{{ dbStats.db_connections }}</b>
+					<span class="ml-2 flex items-center"
+						><v-icon size="14" color="warning" class="mr-1">mdi-timer-sand</v-icon
+						>{{ __("Slow Queries:") }} <b>{{ dbStats.db_slow_queries }}</b></span
+					>
+				</div>
+				<v-divider class="my-2" />
+				<div v-if="dbStats.db_top_tables && dbStats.db_top_tables.length">
+					<div class="db-tooltip-section-title mb-1 flex items-center">
+						<v-icon size="14" color="info" class="mr-1">mdi-database-outline</v-icon>
+						{{ __("Top Tables") }}
+					</div>
+					<ul class="db-top-tables ml-2">
+						<li v-for="t in dbStats.db_top_tables" :key="t.name" class="flex items-center mb-1">
+							<v-icon size="12" color="info" class="mr-1">mdi-table</v-icon>
+							<b>{{ t.name }}</b
+							>: {{ formatBytes(t.size) }}
+						</li>
+					</ul>
 				</div>
 			</div>
-		</v-tooltip>
+			<v-divider class="my-2" />
+			<div class="db-tooltip-tip mt-2 flex items-center">
+				<v-icon size="14" color="primary" class="mr-1">mdi-lightbulb-on-outline</v-icon>
+				{{ __("Tip: Monitor slow queries and table size for optimal performance.") }}
+			</div>
+			<div class="db-tooltip-explanation mt-2 flex items-center">
+				<v-icon size="14" color="info" class="mr-1">mdi-database</v-icon>
+				{{ __("Database health affects overall system speed and reliability.") }}
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -160,7 +147,7 @@ const sparklinePoints = computed(() => {
 	font-weight: 600;
 	font-size: 14px;
 	margin-bottom: 8px;
-	color: var(--primary);
+	/* Removed hardcoded color */
 }
 .db-tooltip-detail {
 	font-size: 12px;
@@ -173,7 +160,7 @@ const sparklinePoints = computed(() => {
 	font-weight: 600;
 	font-size: 13px;
 	margin-bottom: 4px;
-	color: var(--primary);
+	/* Removed hardcoded color */
 	opacity: 0.85;
 	direction: ltr;
 	text-align: left;
@@ -206,7 +193,7 @@ const sparklinePoints = computed(() => {
 	text-align: left;
 }
 .db-tooltip-tip {
-	color: #1976d2;
+	/* Removed hardcoded color */
 	font-size: 12px;
 	display: flex;
 	align-items: center;
@@ -214,47 +201,11 @@ const sparklinePoints = computed(() => {
 	text-align: left;
 }
 .db-tooltip-explanation {
-	color: #0288d1;
+	/* Removed hardcoded color */
 	font-size: 12px;
 	display: flex;
 	align-items: center;
 	direction: ltr;
 	text-align: left;
-}
-/* Match ServerUsageGadget tooltip background and text color */
-:deep(.v-tooltip .v-overlay__content),
-:deep(.v-overlay__content) {
-	background: #e3f2fd !important;
-	color: #1a237e !important;
-	box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1) !important;
-	border: 1px solid #90caf9 !important;
-	direction: ltr !important;
-	text-align: left !important;
-}
-
-.db-tooltip-title,
-.db-tooltip-tip,
-.db-tooltip-explanation {
-	color: #1a237e !important;
-}
-
-:deep([data-theme="dark"]) .v-tooltip .v-overlay__content,
-:deep(.v-theme--dark) .v-tooltip .v-overlay__content,
-:deep([data-theme="dark"]) .v-overlay__content,
-:deep(.v-theme--dark) .v-overlay__content {
-	background: #26344d !important;
-	color: #fff !important;
-	border: 1px solid #1976d2 !important;
-	direction: ltr !important;
-	text-align: left !important;
-}
-
-:deep([data-theme="dark"]) .db-tooltip-title,
-:deep(.v-theme--dark) .db-tooltip-title,
-:deep([data-theme="dark"]) .db-tooltip-tip,
-:deep(.v-theme--dark) .db-tooltip-tip,
-:deep([data-theme="dark"]) .db-tooltip-explanation,
-:deep(.v-theme--dark) .db-tooltip-explanation {
-	color: #fff !important;
 }
 </style>
