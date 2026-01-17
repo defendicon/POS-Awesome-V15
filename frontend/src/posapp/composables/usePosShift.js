@@ -3,10 +3,10 @@ import {
 	initPromise,
 	checkDbHealth,
 	getOpeningStorage,
-	setOpeningStorage,
 	clearOpeningStorage,
 	setTaxTemplate,
 } from "../../offline/index.js";
+import { cacheOpeningStorageWithUser, isOpeningStorageValidForUser } from "../../utils/opening_storage.js";
 
 export function usePosShift(openDialog) {
 	const { proxy } = getCurrentInstance();
@@ -15,21 +15,23 @@ export function usePosShift(openDialog) {
 	const pos_profile = ref(null);
 	const pos_opening_shift = ref(null);
 
-	function isOpeningStorageValidForUser(data) {
-		if (!data?.pos_profile) return false;
-		const sessionUser = frappe?.session?.user;
-		if (!sessionUser) return true;
-		const cachedUser = data.cached_user || data.pos_opening_shift?.user;
-		if (!cachedUser) return true;
-		return cachedUser === sessionUser;
-	}
-
-	function cacheOpeningStorage(data) {
-		try {
-			setOpeningStorage({ ...data, cached_user: frappe?.session?.user || null });
-		} catch (e) {
-			console.error("Failed to cache opening data", e);
+	function applyCachedOpeningData(data) {
+		if (!data) return false;
+		if (!isOpeningStorageValidForUser(data)) {
+			clearOpeningStorage();
+			return false;
 		}
+		pos_profile.value = data.pos_profile;
+		pos_opening_shift.value = data.pos_opening_shift;
+		eventBus?.emit("register_pos_profile", data);
+		eventBus?.emit("set_company", data.company);
+		try {
+			frappe.realtime.emit("pos_profile_registered");
+		} catch (e) {
+			console.warn("Realtime emit failed", e);
+		}
+		console.info("LoadPosProfile (cached)");
+		return true;
 	}
 
 	async function check_opening_entry() {
@@ -65,49 +67,19 @@ export function usePosShift(openDialog) {
 						console.warn("Realtime emit failed", e);
 					}
 					console.info("LoadPosProfile");
-					try {
-						cacheOpeningStorage(r.message);
-					} catch (e) {
-						console.error("Failed to cache opening data", e);
-					}
+					cacheOpeningStorageWithUser(r.message);
 				} else {
 					const data = getOpeningStorage();
-					if (data && isOpeningStorageValidForUser(data)) {
-						pos_profile.value = data.pos_profile;
-						pos_opening_shift.value = data.pos_opening_shift;
-						eventBus?.emit("register_pos_profile", data);
-						eventBus?.emit("set_company", data.company);
-						try {
-							frappe.realtime.emit("pos_profile_registered");
-						} catch (e) {
-							console.warn("Realtime emit failed", e);
-						}
-						console.info("LoadPosProfile (cached)");
+					if (applyCachedOpeningData(data)) {
 						return;
-					}
-					if (data && !isOpeningStorageValidForUser(data)) {
-						clearOpeningStorage();
 					}
 					openDialog && openDialog();
 				}
 			})
 			.catch(() => {
 				const data = getOpeningStorage();
-				if (data && isOpeningStorageValidForUser(data)) {
-					pos_profile.value = data.pos_profile;
-					pos_opening_shift.value = data.pos_opening_shift;
-					eventBus?.emit("register_pos_profile", data);
-					eventBus?.emit("set_company", data.company);
-					try {
-						frappe.realtime.emit("pos_profile_registered");
-					} catch (e) {
-						console.warn("Realtime emit failed", e);
-					}
-					console.info("LoadPosProfile (cached)");
+				if (applyCachedOpeningData(data)) {
 					return;
-				}
-				if (data && !isOpeningStorageValidForUser(data)) {
-					clearOpeningStorage();
 				}
 				openDialog && openDialog();
 			});

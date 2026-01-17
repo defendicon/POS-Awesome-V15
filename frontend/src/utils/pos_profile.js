@@ -6,6 +6,7 @@ import {
 	setPrintTemplate,
 	setTermsAndConditions,
 } from "../offline/index.js";
+import { isOpeningStorageValidForUser } from "./opening_storage.js";
 
 async function cachePrintTemplateAndTerms(profile) {
 	if (!profile || typeof frappe === "undefined" || !navigator.onLine) return;
@@ -52,15 +53,6 @@ function updateOpeningStorageProfile(profile) {
 	if (cached?.pos_profile) {
 		setOpeningStorage({ ...cached, pos_profile: profile });
 	}
-}
-
-function isOpeningStorageValidForUser(data) {
-	if (!data?.pos_profile) return false;
-	const sessionUser = frappe?.session?.user;
-	if (!sessionUser) return true;
-	const cachedUser = data.cached_user || data.pos_opening_shift?.user;
-	if (!cachedUser) return true;
-	return cachedUser === sessionUser;
 }
 
 export async function ensurePosProfile() {
