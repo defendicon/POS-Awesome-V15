@@ -466,7 +466,6 @@ export default {
 			edit_customer,
 			selectFirstCustomer,
 			openNewCustomer,
-			openNewCustomer,
 			focusCustomerSearch,
 			reload_customers,
 			networkOnline
