@@ -23,6 +23,8 @@ export function useOnlineStatus() {
                 window.removeEventListener("offline", updateOnlineStatus);
             }
         });
+    } else {
+        warn("useOnlineStatus must be called inside a component's setup function.");
     }
 
     return {
