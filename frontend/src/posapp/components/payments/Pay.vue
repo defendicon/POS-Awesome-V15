@@ -1429,7 +1429,6 @@ export default {
 				valid: this.exchangeRate > 0
 			});
 			
-			this.$forceUpdate();
 		},
 		
 		async fetchCompanyCurrency() {
