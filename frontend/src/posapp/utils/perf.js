@@ -57,16 +57,29 @@ export function withPerf(label, fn) {
 }
 
 export function scheduleFrame(callback) {
-	const scheduler =
-		typeof requestAnimationFrame === "function" ? requestAnimationFrame : (cb) => setTimeout(cb, 16);
-	return scheduler(callback);
+	return new Promise((resolve) => {
+		const scheduler =
+			typeof requestAnimationFrame === "function"
+				? requestAnimationFrame
+				: (cb) => setTimeout(cb, 16);
+		scheduler(() => {
+			if (callback) {
+				try {
+					callback();
+				} catch (e) {
+					console.error(e);
+				}
+			}
+			resolve();
+		});
+	});
 }
 
 let longTaskCleanup = null;
 
 export function initLongTaskObserver(label = "pos-long-task") {
 	if (!isPerfEnabled() || typeof PerformanceObserver === "undefined") {
-		return () => {};
+		return () => { };
 	}
 	if (longTaskCleanup) {
 		return longTaskCleanup;
@@ -85,7 +98,7 @@ export function initLongTaskObserver(label = "pos-long-task") {
 		longTaskCleanup = () => observer.disconnect();
 	} catch (err) {
 		console.warn("PERF long task observer failed", err);
-		longTaskCleanup = () => {};
+		longTaskCleanup = () => { };
 	}
 	return longTaskCleanup;
 }
