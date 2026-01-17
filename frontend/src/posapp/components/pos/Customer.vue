@@ -166,6 +166,7 @@ import _ from "lodash";
 import UpdateCustomer from "./UpdateCustomer.vue";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
+import { useOnlineStatus } from "../../composables/useOnlineStatus.js";
 
 export default {
 	props: {
@@ -197,13 +198,10 @@ export default {
 		let scrollContainer = null;
 
 
-		
-		const networkOnline = ref(navigator.onLine);
-		
-		window.addEventListener('online', () => { networkOnline.value = true; });
-		window.addEventListener('offline', () => { networkOnline.value = false; });
 
-		const effectiveReadonly = computed(() => readonlyState.value && navigator.onLine);
+		const { isOnline: networkOnline } = useOnlineStatus();
+
+		const effectiveReadonly = computed(() => readonlyState.value && networkOnline.value);
 
 		const searchDebounce = _.debounce((term) => {
 			customersStore.queueSearch(term || "");
