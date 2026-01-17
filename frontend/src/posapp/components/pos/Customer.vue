@@ -196,7 +196,7 @@ export default {
 
 		let scrollContainer = null;
 
-		let scrollContainer = null;
+
 		
 		const networkOnline = ref(navigator.onLine);
 		
