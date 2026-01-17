@@ -209,9 +209,7 @@ export default {
 			consumeEvent(event);
 
 			const shouldPrint = isPrintShortcut;
-			const shouldSubmit = window.confirm(
-				__("Payments are not open. Do you want to open payments and submit?"),
-			);
+			const shouldSubmit = await this.confirmPaymentSubmission();
 			if (!shouldSubmit) {
 				return;
 			}
