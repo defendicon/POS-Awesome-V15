@@ -416,7 +416,22 @@
 										step="0.01"
 										flat
 										@input="validateExchangeRate"
+										:loading="exchangeRateLoading"
+										:error="!!exchangeRateError"
+										:hint="exchangeRateError"
+										persistent-hint
 									></v-text-field>
+									<v-btn
+										icon
+										size="small"
+										variant="text"
+										color="primary"
+										@click="fetchExchangeRate"
+										:loading="exchangeRateLoading"
+										:title="__('Refresh Exchange Rate')"
+									>
+										<v-icon>mdi-refresh</v-icon>
+									</v-btn>
 								</div>
 								<small class="text-caption text-medium-emphasis">
 									1 {{ invoiceTotalCurrency }} = {{ formatCurrency(exchangeRate || 0) }} {{ companyCurrency }}
@@ -549,6 +564,8 @@ export default {
 			currency_filter: "ALL",
 			exchangeRate: null,
 			companyCurrency: null,
+			exchangeRateLoading: false,
+			exchangeRateError: null,
 			invoices_headers: [
 				{
 					title: "",
@@ -1349,12 +1366,15 @@ export default {
 			}
 		},
 
-		async fetchExchangeRate() {
-			if (!this.requiresExchangeRate) {
+		fetchExchangeRate: async function() {
+			if (!this.requiresExchangeRate || !this.invoiceTotalCurrency || !this.companyCurrency) {
 				this.exchangeRate = 1;
 				return;
 			}
-			
+
+			this.exchangeRateLoading = true;
+			this.exchangeRateError = null;
+
 			try {
 				const response = await frappe.call({
 					method: "erpnext.setup.utils.get_exchange_rate",
@@ -1365,11 +1385,36 @@ export default {
 						args: "for_selling"
 					}
 				});
+
+				const rate = flt(response.message || 1);
 				
-				this.exchangeRate = flt(response.message || 1);
+				// Validate the rate
+				if (rate <= 0 || isNaN(rate)) {
+					throw new Error(__("Invalid exchange rate received"));
+				}
+
+				this.exchangeRate = rate;
+				
+				// Emit event to notify parent components (like MultiCurrencyRow.vue does)
+				this.$emit("exchange-rate-update", {
+					from_currency: this.invoiceTotalCurrency,
+					to_currency: this.companyCurrency,
+					exchange_rate: rate
+				});
+				
 			} catch (error) {
 				console.error("Failed to fetch exchange rate:", error);
+				this.exchangeRateError = error.message;
 				this.exchangeRate = 1;
+				
+				frappe.msgprint({
+					title: __("Exchange Rate Error"),
+					message: __("Could not fetch exchange rate: {0}", [error.message]),
+					indicator: "red"
+				});
+				
+			} finally {
+				this.exchangeRateLoading = false;
 			}
 		},
 		
@@ -1377,6 +1422,13 @@ export default {
 			if (!this.exchangeRate || this.exchangeRate <= 0) {
 				this.exchangeRate = 1;
 			}
+			
+			// Emit change event like MultiCurrencyRow.vue
+			this.$emit("exchange-rate-change", {
+				value: this.exchangeRate,
+				valid: this.exchangeRate > 0
+			});
+			
 			this.$forceUpdate();
 		},
 		
@@ -1583,6 +1635,17 @@ export default {
 		},
 		requiresExchangeRate() {
 			return this.invoiceTotalCurrency !== this.companyCurrency;
+		},
+	},
+
+	watch: {
+		invoiceTotalCurrency: {
+			handler: 'fetchExchangeRate',
+			immediate: true
+		},
+		companyCurrency: {
+			handler: 'fetchExchangeRate',
+			immediate: true
 		},
 	},
 
