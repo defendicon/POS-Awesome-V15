@@ -4737,7 +4737,19 @@ export default {
 			await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
 			console.log("Pinia store initialized successfully");
 		} else {
-			console.warn("No POS Profile available for store initialization");
+			// Try to find POS profile from global state if missing in local data
+			if (frappe.boot && frappe.boot.pos_profile) {
+				this.pos_profile = frappe.boot.pos_profile;
+			} else if (window.cur_pos && window.cur_pos.pos_profile) {
+				this.pos_profile = window.cur_pos.pos_profile;
+			}
+
+			if (this.pos_profile && this.pos_profile.name) {
+				await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
+				console.log("Pinia store initialized successfully (from global state)");
+			} else {
+				console.warn("No POS Profile available for store initialization");
+			}
 		}
 
 		// Keep legacy initialization for backward compatibility
