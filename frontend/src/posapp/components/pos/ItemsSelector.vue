@@ -1721,6 +1721,9 @@ export default {
 			this.eventBus.emit("show_coupons", "true");
 		},
 		async initializeItems() {
+			if (!this.pos_profile || !this.pos_profile.name) {
+				return;
+			}
 			await this.ensureStorageHealth();
 			if (
 				this.pos_profile &&

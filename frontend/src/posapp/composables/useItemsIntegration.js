@@ -75,6 +75,7 @@ export function useItemsIntegration(options = {}) {
 
 	// Legacy method adapters
 	const get_items = async (forceServer = false) => {
+		if (!posProfile.value || !posProfile.value.name) return [];
 		return await itemsStore.loadItems({
 			forceServer,
 			searchValue: searchTerm.value,
