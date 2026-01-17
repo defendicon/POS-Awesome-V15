@@ -88,10 +88,10 @@ export async function getCachedPriceListItems(priceList, ttl = 24 * 60 * 60 * 10
 				const price = p.price_list_rate ?? p.rate ?? 0;
 				return it
 					? {
-							...it,
-							rate: price,
-							price_list_rate: price,
-						}
+						...it,
+						rate: price,
+						price_list_rate: price,
+					}
 					: null;
 			})
 			.filter(Boolean);
@@ -194,6 +194,15 @@ export async function getCachedItemDetails(profileName, priceList, itemCodes, tt
 	} catch (e) {
 		console.error("Failed to get cached item details", e);
 		return { cached: [], missing: itemCodes };
+	}
+}
+
+export function clearItemDetailsCache() {
+	try {
+		memory.item_details_cache = {};
+		persist("item_details_cache", memory.item_details_cache);
+	} catch (e) {
+		console.error("Failed to clear item details cache", e);
 	}
 }
 

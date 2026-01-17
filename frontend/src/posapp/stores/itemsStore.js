@@ -17,6 +17,7 @@ import {
 	saveItemsBulk,
 	clearStoredItems,
 	setItemsLastSync,
+	clearItemDetailsCache,
 } from "../../offline/index.js";
 
 const DEFAULT_PAGE_SIZE = 200;
@@ -1389,6 +1390,7 @@ export const useItemsStore = defineStore("items", () => {
 
 		// Clear persistent cache
 		await clearPriceListCache();
+		clearItemDetailsCache();
 	};
 
 	const clearSearchCache = () => {
