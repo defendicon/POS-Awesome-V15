@@ -15,6 +15,23 @@ export function usePosShift(openDialog) {
 	const pos_profile = ref(null);
 	const pos_opening_shift = ref(null);
 
+	function isOpeningStorageValidForUser(data) {
+		if (!data?.pos_profile) return false;
+		const sessionUser = frappe?.session?.user;
+		if (!sessionUser) return true;
+		const cachedUser = data.cached_user || data.pos_opening_shift?.user;
+		if (!cachedUser) return true;
+		return cachedUser === sessionUser;
+	}
+
+	function cacheOpeningStorage(data) {
+		try {
+			setOpeningStorage({ ...data, cached_user: frappe?.session?.user || null });
+		} catch (e) {
+			console.error("Failed to cache opening data", e);
+		}
+	}
+
 	async function check_opening_entry() {
 		await initPromise;
 		await checkDbHealth();
@@ -49,13 +66,13 @@ export function usePosShift(openDialog) {
 					}
 					console.info("LoadPosProfile");
 					try {
-						setOpeningStorage(r.message);
+						cacheOpeningStorage(r.message);
 					} catch (e) {
 						console.error("Failed to cache opening data", e);
 					}
 				} else {
 					const data = getOpeningStorage();
-					if (data) {
+					if (data && isOpeningStorageValidForUser(data)) {
 						pos_profile.value = data.pos_profile;
 						pos_opening_shift.value = data.pos_opening_shift;
 						eventBus?.emit("register_pos_profile", data);
@@ -68,12 +85,15 @@ export function usePosShift(openDialog) {
 						console.info("LoadPosProfile (cached)");
 						return;
 					}
+					if (data && !isOpeningStorageValidForUser(data)) {
+						clearOpeningStorage();
+					}
 					openDialog && openDialog();
 				}
 			})
 			.catch(() => {
 				const data = getOpeningStorage();
-				if (data) {
+				if (data && isOpeningStorageValidForUser(data)) {
 					pos_profile.value = data.pos_profile;
 					pos_opening_shift.value = data.pos_opening_shift;
 					eventBus?.emit("register_pos_profile", data);
@@ -85,6 +105,9 @@ export function usePosShift(openDialog) {
 					}
 					console.info("LoadPosProfile (cached)");
 					return;
+				}
+				if (data && !isOpeningStorageValidForUser(data)) {
+					clearOpeningStorage();
 				}
 				openDialog && openDialog();
 			});

@@ -2,6 +2,7 @@
 import {
 	getOpeningStorage,
 	setOpeningStorage,
+	clearOpeningStorage,
 	setPrintTemplate,
 	setTermsAndConditions,
 } from "../offline/index.js";
@@ -53,6 +54,15 @@ function updateOpeningStorageProfile(profile) {
 	}
 }
 
+function isOpeningStorageValidForUser(data) {
+	if (!data?.pos_profile) return false;
+	const sessionUser = frappe?.session?.user;
+	if (!sessionUser) return true;
+	const cachedUser = data.cached_user || data.pos_opening_shift?.user;
+	if (!cachedUser) return true;
+	return cachedUser === sessionUser;
+}
+
 export async function ensurePosProfile() {
 	const bootProfile = frappe?.boot?.pos_profile;
 	if (bootProfile && bootProfile.warehouse && bootProfile.selling_price_list) {
@@ -91,6 +101,12 @@ export async function ensurePosProfile() {
 	}
 	const cached = getOpeningStorage();
 	if (cached && cached.pos_profile) {
+		if (!isOpeningStorageValidForUser(cached)) {
+			clearOpeningStorage();
+			console.warn("Cleared cached POS opening data for mismatched user");
+			await cachePrintTemplateAndTerms(bootProfile);
+			return bootProfile || null;
+		}
 		await cachePrintTemplateAndTerms(cached.pos_profile);
 		return cached.pos_profile;
 	}
