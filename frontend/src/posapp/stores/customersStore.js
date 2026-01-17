@@ -433,6 +433,10 @@ export const useCustomersStore = defineStore("customers", () => {
 		setCustomersLastSync(null);
 
 		await get_customer_names();
+
+		if (posProfile.value && posProfile.value.customer) {
+			setSelectedCustomer(posProfile.value.customer);
+		}
 	}
 
 	function clearLocalState() {
