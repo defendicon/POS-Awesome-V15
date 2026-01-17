@@ -4749,9 +4749,13 @@ export default {
 
 			if (this.pos_profile && this.pos_profile.name) {
 				await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
+				
+				// Start workers now that we have profile
+				this.startItemWorker();
+				this.update_cur_items_details();
+				this.startBackgroundSyncScheduler();
+				
 				console.log("Pinia store initialized successfully (from global state)");
-			} else {
-				console.warn("No POS Profile available for store initialization");
 			}
 		}
 
