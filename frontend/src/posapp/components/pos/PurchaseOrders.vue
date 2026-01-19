@@ -58,7 +58,7 @@
 									</template>
 								</v-autocomplete>
 							</v-col>
-							<v-col cols="12" md="4" class="d-flex align-center">
+							<v-col cols="12" md="4" class="d-flex flex-column">
 								<v-switch
 									v-if="pos_profile.posa_allow_purchase_receipt"
 									v-model="receiveNow"
@@ -67,20 +67,17 @@
 									color="success"
 									:label="__('Receive now')"
 								></v-switch>
+								<v-switch
+									v-model="createInvoice"
+									density="compact"
+									inset
+									color="primary"
+									:label="__('Create Purchase Invoice')"
+								></v-switch>
 							</v-col>
 						</v-row>
 
 						<v-row class="mb-2">
-							<v-col cols="12" sm="4">
-								<VueDatePicker
-									v-model="transactionDate"
-									model-type="format"
-									format="dd-MM-yyyy"
-									:enable-time-picker="false"
-									auto-apply
-									class="pos-themed-input"
-								/>
-							</v-col>
 							<v-col cols="12" sm="4">
 								<VueDatePicker
 									v-model="scheduleDate"
@@ -88,6 +85,18 @@
 									format="dd-MM-yyyy"
 									:enable-time-picker="false"
 									auto-apply
+									:placeholder="frappe._('Required By')"
+									class="pos-themed-input"
+								/>
+							</v-col>
+							<v-col cols="12" sm="4">
+								<VueDatePicker
+									v-model="transactionDate"
+									model-type="format"
+									format="dd-MM-yyyy"
+									:enable-time-picker="false"
+									auto-apply
+									:placeholder="frappe._('Posting Date')"
 									class="pos-themed-input"
 								/>
 							</v-col>
@@ -130,6 +139,7 @@
 										itemLoading ? __('Loading items...') : __('Items not found')
 									"
 									@update:search="handleItemSearch"
+									@focus="searchItems('')"
 									clearable
 								>
 									<template #append-inner>
@@ -415,6 +425,7 @@ export default {
 		dialog: false,
 		pos_profile: {},
 		supplier: null,
+		createInvoice: false,
 		supplierOptions: [],
 		supplierLoading: false,
 		supplierDialog: false,
@@ -486,11 +497,12 @@ export default {
 			if (!value) {
 				this.purchaseItems.forEach((item) => {
 					item.received_qty = 0;
+					item.receivedQtyManual = false;
 				});
 				return;
 			}
 			this.purchaseItems.forEach((item) => {
-				if (!item.received_qty || item.received_qty > item.qty) {
+				if (!item.receivedQtyManual) {
 					item.received_qty = item.qty;
 				}
 			});
@@ -530,6 +542,7 @@ export default {
 			this.transactionDate = this.getTodayDisplay();
 			this.scheduleDate = this.getTodayDisplay();
 			this.receiveNow = false;
+			this.createInvoice = false;
 			this.itemResults = [];
 			this.selectedItemCode = null;
 			this.purchaseItems = [];
@@ -574,36 +587,21 @@ export default {
 			}, 300);
 		},
 		async searchItems(searchText = "") {
-			if (!searchText) {
-				this.itemResults = [];
-				return;
-			}
 			this.itemLoading = true;
 			try {
 				const { message } = await frappe.call({
-					method: "frappe.client.get_list",
+					method: "posawesome.posawesome.api.purchase_orders.search_items",
 					args: {
-						doctype: "Item",
-						fields: ["name", "item_code", "item_name", "stock_uom", "item_group"],
-						filters: {
-							disabled: 0,
-							is_stock_item: 1,
-						},
-						or_filters: {
-							name: ["like", `%${searchText}%`],
-							item_code: ["like", `%${searchText}%`],
-							item_name: ["like", `%${searchText}%`],
-						},
-						limit_page_length: 20,
-						order_by: "item_name asc",
+						search_text: searchText,
+						limit: 20,
 					},
 				});
-				this.itemResults = (message || []).map((row) => ({
-					item_code: row.item_code || row.name,
-					item_name: row.item_name || row.item_code || row.name,
-					stock_uom: row.stock_uom,
-					item_group: row.item_group,
-				}));
+				const searchValue = formatUtils.fromArabicNumerals(String(searchText || "")).trim();
+				const shouldShowAll = !searchValue;
+				const results = Array.isArray(message) ? message : [];
+				this.itemResults = shouldShowAll
+					? results
+					: results.filter((row) => row.item_name || row.item_code);
 			} catch (error) {
 				console.error("Failed to fetch items:", error);
 				this.itemResults = [];
@@ -619,7 +617,7 @@ export default {
 			const existing = this.purchaseItems.find((item) => item.item_code === selected.item_code);
 			if (existing) {
 				existing.qty += 1;
-				if (this.receiveNow) {
+				if (this.receiveNow && !existing.receivedQtyManual) {
 					existing.received_qty = existing.qty;
 				}
 				this.selectedItemCode = null;
@@ -634,6 +632,7 @@ export default {
 				qty: 1,
 				rate: 0,
 				received_qty: this.receiveNow ? 1 : 0,
+				receivedQtyManual: false,
 			});
 			this.selectedItemCode = null;
 		},
@@ -642,7 +641,7 @@ export default {
 		},
 		updateItemQty(item, event) {
 			this.setFormatedFloat(item, "qty", null, true, event);
-			if (this.receiveNow && (!item.received_qty || item.received_qty > item.qty)) {
+			if (this.receiveNow && !item.receivedQtyManual) {
 				item.received_qty = item.qty;
 			}
 		},
@@ -651,6 +650,7 @@ export default {
 		},
 		updateItemReceivedQty(item, event) {
 			this.setFormatedFloat(item, "received_qty", null, true, event);
+			item.receivedQtyManual = true;
 		},
 		generateLineId() {
 			return `po_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
@@ -782,6 +782,14 @@ export default {
 				this.errorMessage = __("Supplier is required.");
 				return;
 			}
+			if (!this.transactionDate) {
+				this.errorMessage = __("Posting date is required.");
+				return;
+			}
+			if (!this.scheduleDate) {
+				this.errorMessage = __("Required by date is required.");
+				return;
+			}
 			const items = this.purchaseItems.filter((item) => item.qty > 0);
 			if (!items.length) {
 				this.errorMessage = __("Please add at least one item.");
@@ -797,6 +805,7 @@ export default {
 					transaction_date: this.formatDateForBackend(this.transactionDate),
 					schedule_date: this.formatDateForBackend(this.scheduleDate),
 					receive: this.receiveNow ? 1 : 0,
+					create_invoice: this.createInvoice ? 1 : 0,
 					pos_profile: this.pos_profile,
 					items: items.map((item) => ({
 						item_code: item.item_code,
@@ -814,9 +823,14 @@ export default {
 					args: { data: payload },
 				});
 				if (message?.purchase_order) {
-					const title = message.purchase_receipt
-						? __("Purchase order and receipt created")
-						: __("Purchase order created");
+					let title = __("Purchase order created");
+					if (message.purchase_receipt && message.purchase_invoice) {
+						title = __("Purchase order, receipt, and invoice created");
+					} else if (message.purchase_receipt) {
+						title = __("Purchase order and receipt created");
+					} else if (message.purchase_invoice) {
+						title = __("Purchase order and invoice created");
+					}
 					this.eventBus.emit("show_message", {
 						title,
 						color: "success",

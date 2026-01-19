@@ -246,6 +246,7 @@ def create_purchase_item(data):
             "is_stock_item": 1,
             "disabled": 0,
             "default_warehouse": profile.get("warehouse"),
+            "standard_rate": flt(payload.get("buying_price") or 0),
         }
     )
 
@@ -253,6 +254,7 @@ def create_purchase_item(data):
         item_doc.append("barcodes", {"barcode": barcode})
 
     item_doc.flags.ignore_permissions = True
+    item_doc.flags.ignore_mandatory = True
     item_doc.insert()
 
     selling_price_list = payload.get("selling_price_list") or profile.get("selling_price_list")
@@ -275,6 +277,9 @@ def create_purchase_item(data):
         uom=stock_uom,
         buying=True,
     )
+
+    if buying_price is not None:
+        item_doc.db_set("standard_rate", flt(buying_price), update_modified=False)
 
     return {
         "item": item_doc.as_dict(),
