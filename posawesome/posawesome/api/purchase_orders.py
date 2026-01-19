@@ -112,6 +112,9 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
 
     for po_item in po_doc.items:
         payload_row = _resolve_input_row(items_by_code, po_item.item_code)
+        if payload.get("receive") and not payload_row.get("received_qty") and not payload_row.get("receive_qty"):
+            payload_row["receive_qty"] = po_item.qty
+            payload_row["received_qty"] = po_item.qty
         received_qty = flt(
             payload_row.get("received_qty")
             or payload_row.get("receive_qty")
@@ -374,8 +377,84 @@ def create_purchase_order(data):
     receipt_name = None
     if receive_now:
         receipt_name = _create_purchase_receipt(po_doc, payload, warehouse, transaction_date)
+    invoice_name = None
+    if cint(payload.get("create_invoice", 0)):
+        invoice_name = _create_purchase_invoice(po_doc, payload, warehouse, transaction_date)
+
 
     return {
         "purchase_order": po_doc.name,
         "purchase_receipt": receipt_name,
+        "purchase_invoice": invoice_name,
     }
+
+
+@frappe.whitelist()
+def search_items(search_text=None, limit=20):
+    filters = {"disabled": 0}
+    or_filters = None
+    if search_text:
+        like_value = f"%{search_text}%"
+        or_filters = {
+            "name": ["like", like_value],
+            "item_name": ["like", like_value],
+        }
+
+    items = frappe.get_all(
+        "Item",
+        filters=filters,
+        or_filters=or_filters,
+        fields=["name", "item_name", "stock_uom"],
+        limit_page_length=limit,
+        order_by="name asc",
+    )
+    return [
+        {"item_code": it.get("name"), "item_name": it.get("item_name"), "stock_uom": it.get("stock_uom")} for it in items
+    ]
+
+
+def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date):
+    invoice_date = payload.get("invoice_date") or payload.get("invoice_posting_date") or transaction_date
+    invoice = frappe.get_doc(
+        {
+            "doctype": "Purchase Invoice",
+            "supplier": po_doc.supplier,
+            "company": po_doc.company,
+            "posting_date": invoice_date,
+            "purchase_order": po_doc.name,
+        }
+    )
+    if default_warehouse:
+        invoice.set_warehouse = default_warehouse
+
+    items_by_code = _build_items_map(payload.get("items"))
+    for po_item in po_doc.items:
+        payload_row = _resolve_input_row(items_by_code, po_item.item_code)
+        qty = flt(payload_row.get("qty") or po_item.qty)
+        if qty <= 0:
+            continue
+        invoice.append(
+            "items",
+            {
+                "item_code": po_item.item_code,
+                "item_name": po_item.item_name,
+                "qty": qty,
+                "uom": po_item.uom,
+                "stock_uom": po_item.stock_uom,
+                "conversion_factor": po_item.conversion_factor or 1,
+                "rate": po_item.rate,
+                "warehouse": po_item.warehouse or default_warehouse,
+                "purchase_order": po_doc.name,
+                "purchase_order_item": po_item.name,
+                "schedule_date": po_item.schedule_date,
+            },
+        )
+
+    if not invoice.items:
+        frappe.throw(_("No items to invoice. Please ensure there are items on the Purchase Order."))
+
+    invoice.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    invoice.insert()
+    invoice.submit()
+    return invoice.name
