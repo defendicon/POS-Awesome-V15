@@ -139,8 +139,8 @@ doc_events = {
 
 # before_tests = "posawesome.install.before_tests"
 
-# Reapply custom field fixtures on every migrate to keep older branch definitions.
-after_migrate = "posawesome.maintenance.custom_fields.reset_custom_field_fixtures"
+# Reinstall POS Awesome custom fields on every migrate.
+after_migrate = "posawesome.migrate.reset_custom_fields_on_migrate"
 
 # Overriding Methods
 # ------------------------------
