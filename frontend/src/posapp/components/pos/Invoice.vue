@@ -348,6 +348,7 @@
 			@save-and-clear="save_and_clear_invoice"
 			@load-drafts="get_draft_invoices"
 			@select-order="get_draft_orders"
+			@select-purchase-order="open_purchase_orders"
 			@cancel-sale="cancel_dialog = true"
 			@open-returns="open_returns"
 			@print-draft="print_draft_invoice"

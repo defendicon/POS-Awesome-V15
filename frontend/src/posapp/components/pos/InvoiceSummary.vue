@@ -138,6 +138,20 @@
 							{{ __("Select S.O") }}
 						</v-btn>
 					</v-col>
+					<v-col cols="6" v-if="pos_profile.posa_allow_purchase_order == 1">
+						<v-btn
+							block
+							color="secondary"
+							theme="dark"
+							prepend-icon="mdi-cart-plus"
+							@click="handleSelectPurchaseOrder"
+							class="summary-btn"
+							:loading="selectPurchaseOrderLoading"
+						>
+							{{ __("Purchase Order") }}
+						</v-btn>
+					</v-col>
+
 					<v-col cols="6">
 						<v-btn
 							block
@@ -232,6 +246,7 @@ export default {
 			saveLoading: false,
 			loadDraftsLoading: false,
 			selectOrderLoading: false,
+			selectPurchaseOrderLoading: false,
 			cancelLoading: false,
 			returnsLoading: false,
 			printLoading: false,
@@ -250,6 +265,7 @@ export default {
 		"save-and-clear",
 		"load-drafts",
 		"select-order",
+		"select-purchase-order",
 		"cancel-sale",
 		"open-returns",
 		"print-draft",
@@ -353,6 +369,15 @@ export default {
 				await this.$emit("select-order");
 			} finally {
 				this.selectOrderLoading = false;
+			}
+		},
+
+		async handleSelectPurchaseOrder() {
+			this.selectPurchaseOrderLoading = true;
+			try {
+				await this.$emit("select-purchase-order");
+			} finally {
+				this.selectPurchaseOrderLoading = false;
 			}
 		},
 

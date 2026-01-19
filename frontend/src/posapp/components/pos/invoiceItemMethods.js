@@ -2899,7 +2899,7 @@ export default {
 				coerce(item.same_item) ||
 				Boolean(
 					(typeof item.auto_free_source === "string" && item.auto_free_source) ||
-						(typeof item.free_item_source === "string" && item.free_item_source),
+					(typeof item.free_item_source === "string" && item.free_item_source),
 				);
 
 			if (expectsFree !== itemIsFree) {
@@ -3562,6 +3562,11 @@ export default {
 				color: "error",
 			});
 		}
+	},
+
+	// Open purchase order dialog
+	open_purchase_orders() {
+		this.eventBus.emit("open_purchase_orders");
 	},
 
 	// Open returns dialog

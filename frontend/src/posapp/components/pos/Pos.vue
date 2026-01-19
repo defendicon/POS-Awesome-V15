@@ -6,6 +6,7 @@
 	>
 		<Drafts></Drafts>
 		<SalesOrders></SalesOrders>
+		<PurchaseOrders></PurchaseOrders>
 		<Returns></Returns>
 		<NewAddress></NewAddress>
 		<MpesaPayments></MpesaPayments>
@@ -49,6 +50,7 @@ import PosOffers from "./PosOffers.vue";
 import PosCoupons from "./PosCoupons.vue";
 import Drafts from "./Drafts.vue";
 import SalesOrders from "./SalesOrders.vue";
+import PurchaseOrders from "./PurchaseOrders.vue";
 import NewAddress from "./NewAddress.vue";
 import Variants from "./Variants.vue";
 import Returns from "./Returns.vue";
@@ -110,6 +112,7 @@ export default {
 		Variants,
 		MpesaPayments,
 		SalesOrders,
+		PurchaseOrders,
 	},
 
 	methods: {
