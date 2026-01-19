@@ -13,3 +13,4 @@ package-lock.json
 frappe-bench/
 vite.log
 dist-electron/
+nul
