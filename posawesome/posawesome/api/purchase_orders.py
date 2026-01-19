@@ -136,11 +136,11 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
                 "rate": po_item.rate,
                 "warehouse": po_item.warehouse or default_warehouse,
                 "purchase_order": po_doc.name,
-                "purchase_order_item": po_item.name,
+                "po_detail": po_item.name,
                 "schedule_date": po_item.schedule_date,
             },
         )
-
+ 
     if not receipt.items:
         frappe.throw(_("No items to receive. Please enter received quantities."))
 
@@ -450,7 +450,7 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
                 "rate": po_item.rate,
                 "warehouse": po_item.warehouse or default_warehouse,
                 "purchase_order": po_doc.name,
-                "purchase_order_item": po_item.name,
+                "po_detail": po_item.name,
                 "schedule_date": po_item.schedule_date,
             },
         )
