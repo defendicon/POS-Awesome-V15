@@ -353,6 +353,9 @@ def create_purchase_order(data):
         item_name = row.get("item_name") or (meta.item_name if meta else item_code)
         uom = row.get("uom") or stock_uom
         conversion_factor = flt(row.get("conversion_factor") or 1)
+        if not conversion_factor:
+            conversion_factor = 1
+
 
         po_doc.append(
             "items",
@@ -417,9 +420,36 @@ def search_items(search_text=None, limit=20):
         limit_page_length=limit,
         order_by="name asc",
     )
-    return [
-        {"item_code": it.get("name"), "item_name": it.get("item_name"), "stock_uom": it.get("stock_uom")} for it in items
-    ]
+    item_codes = [it.get("name") for it in items if it.get("name")]
+    uom_rows = []
+    if item_codes:
+        uom_rows = frappe.get_all(
+            "UOM Conversion Detail",
+            filters={"parent": ["in", item_codes]},
+            fields=["parent", "uom", "conversion_factor"],
+        )
+    uom_map = {}
+    for row in uom_rows:
+        uom_map.setdefault(row.parent, []).append(
+            {"uom": row.uom, "conversion_factor": row.conversion_factor}
+        )
+
+    results = []
+    for it in items:
+        item_code = it.get("name")
+        stock_uom = it.get("stock_uom")
+        uoms = uom_map.get(item_code, [])
+        if stock_uom and not any(u.get("uom") == stock_uom for u in uoms):
+            uoms.append({"uom": stock_uom, "conversion_factor": 1})
+        results.append(
+            {
+                "item_code": item_code,
+                "item_name": it.get("item_name"),
+                "stock_uom": stock_uom,
+                "item_uoms": uoms,
+            }
+        )
+    return results
 
 
 def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date, receipt_doc=None):

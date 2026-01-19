@@ -189,6 +189,23 @@
 									class="elevation-1"
 									hide-default-footer
 								>
+									<template v-slot:item.uom="{ item }">
+										<v-select
+											density="compact"
+											variant="outlined"
+											class="pos-themed-input"
+											:model-value="item.uom"
+											:items="
+												item.item_uoms || [
+													{ uom: item.stock_uom, conversion_factor: 1 },
+												]
+											"
+											item-title="uom"
+											item-value="uom"
+											:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+											@update:model-value="updateItemUom(item, $event)"
+										></v-select>
+									</template>
 									<template v-slot:item.qty="{ item }">
 										<v-text-field
 											density="compact"
@@ -416,11 +433,13 @@
 <script>
 /* global __, frappe */
 import format, { formatUtils } from "../../format";
+import { useStockUtils } from "../../composables/useStockUtils";
 
 export default {
 	mixins: [format],
 	data: () => ({
 		dialog: false,
+		stockUtils: useStockUtils(),
 		pos_profile: {},
 		supplier: null,
 		createInvoice: false,
@@ -476,7 +495,7 @@ export default {
 		itemHeaders() {
 			const headers = [
 				{ title: __("Item"), key: "item_name", align: "start" },
-				{ title: __("UOM"), key: "stock_uom", align: "start" },
+				{ title: __("UOM"), key: "uom", align: "start" },
 				{ title: __("Qty"), key: "qty", align: "end" },
 				{ title: __("Rate"), key: "rate", align: "end" },
 			];
@@ -595,7 +614,11 @@ export default {
 						limit: 20,
 					},
 				});
-				this.itemResults = Array.isArray(message) ? message : [];
+				const results = Array.isArray(message) ? message : [];
+				this.itemResults = results.map((row) => ({
+					...row,
+					item_uoms: row.item_uoms || [{ uom: row.stock_uom, conversion_factor: 1 }],
+				}));
 			} catch (error) {
 				console.error("Failed to fetch items:", error);
 				this.itemResults = [];
@@ -623,6 +646,9 @@ export default {
 				item_name: selected.item_name,
 				stock_uom: selected.stock_uom,
 				item_group: selected.item_group,
+				item_uoms: selected.item_uoms || [{ uom: selected.stock_uom, conversion_factor: 1 }],
+				uom: selected.stock_uom,
+				conversion_factor: 1,
 				qty: 1,
 				rate: 0,
 				received_qty: this.receiveNow ? 1 : 0,
@@ -641,6 +667,17 @@ export default {
 		},
 		updateItemRate(item, event) {
 			this.setFormatedCurrency(item, "rate", null, true, event);
+		},
+		updateItemUom(item, value) {
+			if (!item || !value) {
+				return;
+			}
+			item.uom = value;
+			const matched = (item.item_uoms || []).find((uom) => uom.uom === value);
+			item.conversion_factor = matched ? matched.conversion_factor : 1;
+			if (this.stockUtils?.calcStockQty) {
+				this.stockUtils.calcStockQty(item, item.qty);
+			}
 		},
 		updateItemReceivedQty(item, event) {
 			this.setFormatedFloat(item, "received_qty", null, true, event);
@@ -805,7 +842,8 @@ export default {
 						item_code: item.item_code,
 						item_name: item.item_name,
 						stock_uom: item.stock_uom,
-						uom: item.stock_uom,
+						uom: item.uom || item.stock_uom,
+						conversion_factor: item.conversion_factor || 1,
 						qty: item.qty,
 						rate: item.rate,
 						received_qty: this.receiveNow ? item.received_qty || item.qty : undefined,
