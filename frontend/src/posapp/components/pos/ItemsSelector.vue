@@ -64,7 +64,7 @@
 								@keydown.enter="onEnter"
 								@keydown="handleSearchKeydown"
 								@click:clear="clearSearch"
-								@input="handleSearchInput"
+							@update:modelValue="handleSearchInput"
 								@paste="handleSearchPaste"
 								prepend-inner-icon="mdi-magnify"
 								@focus="handleItemSearchFocus"
@@ -1598,7 +1598,6 @@ export default {
 							vm.markStorageUnavailable && vm.markStorageUnavailable();
 						}
 					}
-					releaseLoading();
 				});
 			} catch (err) {
 				if (err.name !== "AbortError") {

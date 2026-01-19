@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="pos-main-container dynamic-container"
+		class="pos-main-container dynamic-container pos-main-bg"
 		:class="rtlClasses"
 		:style="[responsiveStyles, rtlStyles]"
 	>
@@ -22,26 +22,38 @@
 				cols="12"
 				class="pos dynamic-col"
 			>
-				<ItemsSelector></ItemsSelector>
+				<div class="pos-panel-wrapper">
+					<ItemsSelector></ItemsSelector>
+				</div>
 			</v-col>
 			<v-col v-show="showOffers" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
-				<PosOffers></PosOffers>
+				<div class="pos-panel-wrapper">
+					<PosOffers></PosOffers>
+				</div>
 			</v-col>
 			<v-col v-show="coupons" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
-				<PosCoupons></PosCoupons>
+				<div class="pos-panel-wrapper">
+					<PosCoupons></PosCoupons>
+				</div>
 			</v-col>
 			<v-col v-show="payment" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
-				<Payments></Payments>
+				<div class="pos-panel-wrapper">
+					<Payments></Payments>
+				</div>
 			</v-col>
 
 			<v-col xl="7" lg="7" md="7" sm="7" cols="12" class="pos dynamic-col">
-				<Invoice></Invoice>
+				<div class="pos-panel-wrapper">
+					<Invoice></Invoice>
+				</div>
 			</v-col>
 		</v-row>
 	</div>
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
+/* global frappe */
 import ItemsSelector from "./ItemsSelector.vue";
 import Invoice from "./Invoice.vue";
 import OpeningDialog from "./OpeningDialog.vue";
@@ -213,10 +225,9 @@ export default {
 
 <style scoped>
 .dynamic-container {
-	/* add space for the navbar with better spacing */
 	/*padding-top: calc(25px + var(--dynamic-lg));*/
-	/* Navbar height (25px) + larger spacing */
 	transition: all 0.3s ease;
+	min-height: 100vh;
 }
 
 .dynamic-main-row {
@@ -227,19 +238,31 @@ export default {
 .dynamic-col {
 	padding: var(--dynamic-sm);
 	transition: padding 0.3s ease;
-	margin-top: var(--dynamic-sm);
-	/* Add top margin for better separation */
+	/* Removed top margin to allow grid gap to handle spacing or full height columns */
+	margin-top: 0;
+	height: calc(100vh - 64px); /* Adjust based on navbar */
+}
+
+/* Wrapper to enforce height inside columns */
+.pos-panel-wrapper {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 @media (max-width: 768px) {
 	.dynamic-container {
 		padding-top: calc(56px + var(--dynamic-md));
-		/* Consistent navbar height + medium spacing */
 	}
 
 	.dynamic-col {
 		padding: var(--dynamic-xs);
 		margin-top: var(--dynamic-xs);
+		height: auto; /* Allow auto height on mobile */
+	}
+
+	.pos-panel-wrapper {
+		height: auto;
 	}
 }
 </style>
