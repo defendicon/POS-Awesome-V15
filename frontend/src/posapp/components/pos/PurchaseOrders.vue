@@ -458,7 +458,8 @@ export default {
 					conversion_factor: 1,
 					qty: 1,
 					rate: rate,
-					standard_rate: item.standard_rate || 0, // Preserve standard_rate for fallback calculations
+					stock_uom_rate: rate, // Store the base rate for Stock UOM for conversions
+					standard_rate: item.standard_rate || 0,
 					received_qty: this.receiveNow ? 1 : 0,
 					receivedQtyManual: false,
 				});
@@ -543,6 +544,7 @@ export default {
 			}
 
 			// Fetch new rate for UOM from Buying Price List
+			let priceFound = false;
 			try {
 				const priceList = this.itemsStore.activePriceList;
 				if (priceList) {
@@ -555,14 +557,20 @@ export default {
 						},
 					});
 
-					if (message !== undefined && message !== null) {
+					if (message !== undefined && message !== null && message > 0) {
 						foundItem.rate = message;
-					} else if (foundItem.standard_rate) {
-						foundItem.rate = foundItem.standard_rate * foundItem.conversion_factor;
+						priceFound = true;
 					}
 				}
 			} catch (e) {
 				console.error("Failed to update rate for UOM", e);
+			}
+
+			if (!priceFound) {
+				// Fallback: scale stock_uom_rate by conversion factor
+				// Use stock_uom_rate if available, fallback to standard_rate
+				const baseRate = foundItem.stock_uom_rate || foundItem.standard_rate || 0;
+				foundItem.rate = baseRate * foundItem.conversion_factor;
 			}
 		},
 		removeItem(item) {
