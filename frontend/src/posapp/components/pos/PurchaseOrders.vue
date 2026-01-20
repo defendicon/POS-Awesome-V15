@@ -241,7 +241,7 @@
 									</template>
 									<template v-slot:item.amount="{ item }">
 										<div class="text-right">
-											{{ currencySymbol(pos_profile.currency) }}
+											{{ currencySymbol(supplierCurrency || pos_profile.currency) }}
 											{{ formatCurrency(item.qty * item.rate) }}
 										</div>
 									</template>
@@ -457,6 +457,7 @@ export default {
 		},
 		supplierGroups: [],
 		supplierTypes: ["Company", "Individual"],
+		supplierCurrency: null,
 		warehouse: null,
 		warehouseOptions: [],
 		warehouseLoading: false,
@@ -524,6 +525,15 @@ export default {
 				}
 			});
 		},
+
+		supplier(value) {
+			if (value) {
+				const selectedSupplier = this.supplierOptions.find(s => s.name === value);
+				this.supplierCurrency = selectedSupplier?.default_currency || this.pos_profile.currency;
+			} else {
+				this.supplierCurrency = this.pos_profile.currency;
+			}
+		},
 	},
 	methods: {
 		formatDateForBackend(date) {
@@ -588,6 +598,12 @@ export default {
 					},
 				});
 				this.supplierOptions = Array.isArray(message) ? message : [];
+				
+				// ✅ Update currency when supplier is already selected
+				if (this.supplier) {
+					const selectedSupplier = this.supplierOptions.find(s => s.name === this.supplier);
+					this.supplierCurrency = selectedSupplier?.default_currency || this.pos_profile.currency;
+				}
 			} catch (error) {
 				console.error("Failed to fetch suppliers:", error);
 				this.supplierOptions = [];

@@ -201,7 +201,7 @@ def search_suppliers(search_text=None, limit=20):
         "Supplier",
         filters=filters,
         or_filters=or_filters,
-        fields=["name", "supplier_name", "supplier_group", "supplier_type"],
+        fields=["name", "supplier_name", "supplier_group", "supplier_type", "default_currency"],
         order_by="supplier_name asc",
         limit_page_length=limit,
     )
@@ -316,15 +316,37 @@ def create_purchase_order(data):
     if not items:
         frappe.throw(_("Purchase order requires at least one item."))
 
-    po_doc = frappe.get_doc(
-        {
-            "doctype": "Purchase Order",
-            "supplier": supplier,
-            "company": company,
-            "transaction_date": transaction_date,
-            "schedule_date": schedule_date,
-        }
-    )
+    # Get supplier currency (NEW CODE)
+    supplier_doc = frappe.get_doc("Supplier", supplier)
+    supplier_currency = supplier_doc.default_currency
+    if not supplier_currency:
+        # Fallback to company currency if supplier has no default
+        supplier_currency = frappe.get_value("Company", company, "default_currency")
+
+    # Validate price list currency matches (RECOMMENDED)
+    buying_price_list = _resolve_buying_price_list()
+    price_list_currency = frappe.get_value("Price List", buying_price_list, "currency")
+
+    # If currencies don't match, try to find a matching one
+    if price_list_currency and price_list_currency != supplier_currency:
+        alternative_price_list = frappe.db.get_value(
+            "Price List",
+            {"currency": supplier_currency, "buying": 1, "enabled": 1},
+            "name"
+        )
+        if alternative_price_list:
+            buying_price_list = alternative_price_list
+
+    po_doc = frappe.get_doc({
+        "doctype": "Purchase Order",
+        "supplier": supplier,
+        "company": company,
+        "transaction_date": transaction_date,
+        "schedule_date": schedule_date,
+        "currency": supplier_currency,
+        "buying_price_list": buying_price_list,
+    })
+    
     if warehouse:
         po_doc.set_warehouse = warehouse
 
@@ -355,7 +377,6 @@ def create_purchase_order(data):
         conversion_factor = flt(row.get("conversion_factor") or 1)
         if not conversion_factor:
             conversion_factor = 1
-
 
         po_doc.append(
             "items",
