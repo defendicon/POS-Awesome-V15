@@ -42,6 +42,12 @@ def _resolve_buying_price_list():
     buying_price_list = frappe.db.get_single_value("Buying Settings", "buying_price_list")
     if not buying_price_list:
         buying_price_list = frappe.db.get_value("Price List", {"buying": 1}, "name")
+    
+    if not buying_price_list:
+        # Fallback to standard default if exists
+        if frappe.db.exists("Price List", "Standard Buying"):
+            buying_price_list = "Standard Buying"
+            
     return buying_price_list
 
 
@@ -206,6 +212,11 @@ def search_suppliers(search_text=None, limit=20):
         limit_page_length=limit,
     )
     return suppliers
+
+
+@frappe.whitelist()
+def get_buying_price_list():
+    return _resolve_buying_price_list()
 
 
 @frappe.whitelist()
@@ -437,7 +448,7 @@ def search_items(search_text=None, limit=20):
         "Item",
         filters=filters,
         or_filters=or_filters,
-        fields=["name", "item_name", "stock_uom"],
+        fields=["name", "item_name", "stock_uom", "standard_rate"],
         limit_page_length=limit,
         order_by="name asc",
     )
@@ -468,6 +479,7 @@ def search_items(search_text=None, limit=20):
                 "item_name": it.get("item_name"),
                 "stock_uom": stock_uom,
                 "item_uoms": uoms,
+                "standard_rate": it.get("standard_rate"),
             }
         )
     return results

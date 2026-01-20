@@ -85,7 +85,6 @@ def _fetch_item_prices(
                 price_list = %(price_list)s
                 AND item_code IN %(item_codes)s
                 AND currency = %(currency)s
-                AND selling = 1
                 AND (valid_from IS NULL OR valid_from <= %(today)s)
                 AND IFNULL(customer, '') IN ('', %(customer)s)
                 AND (valid_upto IS NULL OR valid_upto = '' OR valid_upto >= %(today)s)
@@ -151,7 +150,7 @@ def _fetch_item_meta(item_codes: Tuple[str, ...]):
         return []
     return frappe.get_all(
         "Item",
-        fields=["name", "item_name", "has_batch_no", "has_serial_no", "stock_uom", "allow_negative_stock"],
+        fields=["name", "item_name", "has_batch_no", "has_serial_no", "stock_uom", "allow_negative_stock", "purchase_uom"],
         filters={"name": ["in", item_codes]},
     )
 
@@ -418,6 +417,7 @@ def merge_item_row(
             "has_batch_no": meta.get("has_batch_no"),
             "has_serial_no": meta.get("has_serial_no"),
             "allow_negative_stock": meta.get("allow_negative_stock"),
+            "purchase_uom": meta.get("purchase_uom"),
             "batch_no_data": lookup_data.batch_map.get(item_code, []),
             "serial_no_data": lookup_data.serial_map.get(item_code, []),
             "rate": price_row.get("price_list_rate") if price_row else 0,

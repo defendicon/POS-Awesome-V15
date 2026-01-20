@@ -1326,7 +1326,6 @@ def get_price_for_uom(item_code, price_list, uom):
             "item_code": item_code,
             "price_list": price_list,
             "uom": uom,
-            "selling": 1,
         },
         "price_list_rate",
     )

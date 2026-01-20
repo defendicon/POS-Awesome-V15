@@ -1,444 +1,351 @@
 <template>
-	<v-row justify="center">
-		<v-dialog v-model="dialog" max-width="1100px">
-			<v-card>
-				<v-card-title>
-					<span class="text-h5 text-primary">{{ __("Create Purchase Order") }}</span>
-				</v-card-title>
-				<v-card-text class="pa-0">
-					<v-container>
-						<v-row class="mb-2">
-							<v-col cols="12" md="8">
-								<v-autocomplete
-									v-model="supplier"
-									:items="supplierOptions"
-									item-title="supplier_name"
-									item-value="name"
-									:label="frappe._('Supplier')"
-									density="compact"
-									variant="solo"
-									color="primary"
-									class="pos-themed-input"
-									:loading="supplierLoading"
-									:disabled="supplierLoading"
-									:custom-filter="() => true"
-									:no-data-text="
-										supplierLoading
-											? __('Loading suppliers...')
-											: __('Suppliers not found')
-									"
-									@update:search="handleSupplierSearch"
-									clearable
-								>
-									<template #append-inner>
-										<v-tooltip v-if="allowCreateSupplier" text="Add new supplier">
-											<template #activator="{ props }">
-												<v-icon
-													v-bind="props"
-													class="icon-button"
-													@mousedown.prevent.stop
-													@click.stop="openCreateSupplierDialog"
-												>
-													mdi-plus
-												</v-icon>
-											</template>
-										</v-tooltip>
-									</template>
-									<template #item="{ props, item }">
-										<v-list-item v-bind="props">
-											<v-list-item-title>{{
-												item.raw.supplier_name
-											}}</v-list-item-title>
-											<v-list-item-subtitle
-												v-if="item.raw.name !== item.raw.supplier_name"
-											>
-												{{ item.raw.name }}
-											</v-list-item-subtitle>
-										</v-list-item>
-									</template>
-								</v-autocomplete>
-							</v-col>
-							<v-col cols="12" md="4" class="d-flex flex-column">
+	<div class="pa-0 h-100">
+		<v-row class="h-100 ma-0">
+			<!-- Left Column: Item Selector -->
+			<v-col cols="12" md="5" class="h-100 pa-0 border-e">
+				<ItemsSelector context="purchase" />
+			</v-col>
+
+			<!-- Right Column: Purchase Order Form (Cart) -->
+			<v-col cols="12" md="7" class="h-100 pa-0">
+				<v-card class="h-100 d-flex flex-column pos-themed-card" flat>
+					<v-card-title class="py-2 px-4 bg-primary text-white d-flex align-center">
+						<span class="text-h6">{{ __("Create Purchase Order") }}</span>
+						<v-spacer></v-spacer>
+						<v-btn
+							icon="mdi-delete"
+							variant="text"
+							color="white"
+							@click="resetForm"
+							:title="__('Clear All')"
+						></v-btn>
+					</v-card-title>
+
+					<v-card-text class="flex-grow-1 overflow-y-auto pa-4">
+						<v-container class="pa-0">
+							<!-- Header Fields -->
+							<v-row dense class="mb-2">
+								<v-col cols="12" md="6">
+									<v-autocomplete
+										v-model="supplier"
+										:items="supplierOptions"
+										item-title="supplier_name"
+										item-value="name"
+										:label="frappe._('Supplier')"
+										density="compact"
+										variant="outlined"
+										color="primary"
+										hide-details="auto"
+										:loading="supplierLoading"
+										@update:search="handleSupplierSearch"
+										:custom-filter="() => true"
+										:no-data-text="
+											supplierLoading
+												? __('Loading suppliers...')
+												: __('Suppliers not found')
+										"
+										class="pos-themed-input"
+										clearable
+									>
+										<template #append-inner>
+											<v-tooltip v-if="allowCreateSupplier" text="Add new supplier">
+												<template #activator="{ props }">
+													<v-icon
+														v-bind="props"
+														class="cursor-pointer"
+														@mousedown.prevent.stop
+														@click.stop="openCreateSupplierDialog"
+													>
+														mdi-plus
+													</v-icon>
+												</template>
+											</v-tooltip>
+										</template>
+									</v-autocomplete>
+								</v-col>
+								<v-col cols="12" md="6">
+									<v-autocomplete
+										v-model="warehouse"
+										:items="warehouseOptions"
+										item-title="warehouse_name"
+										item-value="name"
+										:label="frappe._('Warehouse')"
+										density="compact"
+										variant="outlined"
+										color="primary"
+										hide-details="auto"
+										clearable
+										:loading="warehouseLoading"
+										class="pos-themed-input"
+									/>
+								</v-col>
+							</v-row>
+
+							<v-row dense class="mb-4">
+								<v-col cols="6">
+									<VueDatePicker
+										v-model="transactionDate"
+										model-type="format"
+										format="dd-MM-yyyy"
+										:enable-time-picker="false"
+										auto-apply
+										:placeholder="frappe._('Posting Date')"
+										class="pos-themed-input"
+									/>
+								</v-col>
+								<v-col cols="6">
+									<VueDatePicker
+										v-model="scheduleDate"
+										model-type="format"
+										format="dd-MM-yyyy"
+										:enable-time-picker="false"
+										auto-apply
+										:placeholder="frappe._('Required By')"
+										class="pos-themed-input"
+									/>
+								</v-col>
+							</v-row>
+
+							<!-- Options Toggles -->
+							<div class="d-flex gap-4 mb-4">
 								<v-switch
 									v-if="pos_profile.posa_allow_purchase_receipt"
 									v-model="receiveNow"
 									density="compact"
-									inset
+									hide-details
 									color="success"
 									:label="__('Receive now')"
+									class="ma-0"
 								></v-switch>
 								<v-switch
 									v-model="createInvoice"
 									density="compact"
-									inset
+									hide-details
 									color="primary"
-									:label="__('Create Purchase Invoice')"
+									:label="__('Create Bill')"
+									class="ma-0 ml-4"
 								></v-switch>
-							</v-col>
-						</v-row>
+							</div>
 
-						<v-row class="mb-2">
-							<v-col cols="12" sm="4">
-								<VueDatePicker
-									v-model="scheduleDate"
-									model-type="format"
-									format="dd-MM-yyyy"
-									:enable-time-picker="false"
-									auto-apply
-									:placeholder="frappe._('Required By')"
-									class="pos-themed-input"
-								/>
-							</v-col>
-							<v-col cols="12" sm="4">
-								<VueDatePicker
-									v-model="transactionDate"
-									model-type="format"
-									format="dd-MM-yyyy"
-									:enable-time-picker="false"
-									auto-apply
-									:placeholder="frappe._('Posting Date')"
-									class="pos-themed-input"
-								/>
-							</v-col>
-							<v-col cols="12" sm="4">
-								<v-autocomplete
-									v-model="warehouse"
-									:items="warehouseOptions"
-									item-title="warehouse_name"
-									item-value="name"
-									:label="frappe._('Warehouse')"
-									density="compact"
-									variant="solo"
-									color="primary"
-									class="pos-themed-input"
-									clearable
-									:loading="warehouseLoading"
-									:disabled="warehouseLoading"
-								/>
-							</v-col>
-						</v-row>
+							<v-divider class="mb-4"></v-divider>
 
-						<v-divider class="my-2"></v-divider>
-
-						<v-row class="mb-2">
-							<v-col cols="12" md="8">
-								<v-autocomplete
-									v-model="selectedItemCode"
-									:items="itemResults"
-									item-title="item_name"
-									item-value="item_code"
-									:label="frappe._('Item')"
-									density="compact"
-									variant="solo"
-									color="primary"
-									class="pos-themed-input"
-									:loading="itemLoading"
-									:custom-filter="() => true"
-									:no-data-text="
-										itemLoading ? __('Loading items...') : __('Items not found')
-									"
-									@update:search="handleItemSearch"
-									clearable
-								>
-									<template #append-inner>
-										<v-tooltip v-if="allowCreateItem" text="Add new item">
-											<template #activator="{ props }">
-												<v-icon
-													v-bind="props"
-													class="icon-button"
-													@mousedown.prevent.stop
-													@click.stop="openCreateItemDialog"
-												>
-													mdi-plus
-												</v-icon>
-											</template>
-										</v-tooltip>
-									</template>
-									<template #item="{ props, item }">
-										<v-list-item v-bind="props">
-											<v-list-item-title>{{ item.raw.item_name }}</v-list-item-title>
-											<v-list-item-subtitle>
-												{{ item.raw.item_code }}
-												<span v-if="item.raw.stock_uom"
-													>- {{ item.raw.stock_uom }}</span
-												>
-											</v-list-item-subtitle>
-										</v-list-item>
-									</template>
-								</v-autocomplete>
-							</v-col>
-							<v-col cols="12" md="4" class="d-flex align-center">
-								<v-btn
-									block
-									color="primary"
-									theme="dark"
-									:disabled="!selectedItemCode"
-									@click="addSelectedItem"
-								>
-									{{ __("Add Item") }}
-								</v-btn>
-							</v-col>
-						</v-row>
-
-						<v-row>
-							<v-col cols="12" class="pa-1">
-								<v-data-table
-									:headers="itemHeaders"
-									:items="purchaseItems"
-									item-key="line_id"
-									class="elevation-1"
-									hide-default-footer
-								>
-									<template v-slot:item.uom="{ item }">
-										<v-select
-											density="compact"
-											variant="outlined"
-											class="pos-themed-input"
-											:model-value="item.uom"
-											:items="
-												item.item_uoms || [
-													{ uom: item.stock_uom, conversion_factor: 1 },
-												]
-											"
-											item-title="uom"
-											item-value="uom"
-											:disabled="!item.item_uoms || item.item_uoms.length <= 1"
-											@update:model-value="updateItemUom(item, $event)"
-										></v-select>
-									</template>
-									<template v-slot:item.qty="{ item }">
-										<v-text-field
-											density="compact"
-											variant="outlined"
-											class="pos-themed-input"
-											:rules="[isNumber]"
-											:label="frappe._('Qty')"
-											:model-value="formatFloat(item.qty)"
-											@change="updateItemQty(item, $event)"
-										></v-text-field>
-									</template>
-									<template v-slot:item.rate="{ item }">
-										<v-text-field
-											density="compact"
-											variant="outlined"
-											class="pos-themed-input"
-											:label="frappe._('Rate')"
-											:model-value="formatCurrency(item.rate)"
-											@change="updateItemRate(item, $event)"
-										></v-text-field>
-									</template>
-									<template v-slot:item.received_qty="{ item }">
-										<div v-if="receiveNow">
-											<v-text-field
-												density="compact"
-												variant="outlined"
-												class="pos-themed-input"
-												:label="frappe._('Received')"
-												:model-value="formatFloat(item.received_qty)"
-												@change="updateItemReceivedQty(item, $event)"
-											></v-text-field>
+							<!-- Items Table -->
+							<v-data-table
+								:headers="itemHeaders"
+								:items="purchaseItems"
+								item-key="line_id"
+								class="elevation-1 border rounded"
+								density="compact"
+								hide-default-footer
+								:items-per-page="-1"
+							>
+								<template v-slot:item.item_name="{ item }">
+									<div class="py-1">
+										<div class="font-weight-bold">{{ item.item_name }}</div>
+										<div class="text-caption text-medium-emphasis">
+											{{ item.item_code }}
 										</div>
-									</template>
-									<template v-slot:item.amount="{ item }">
-										<div class="text-right">
-											{{ currencySymbol(supplierCurrency || pos_profile.currency) }}
-											{{ formatCurrency(item.qty * item.rate) }}
-										</div>
-									</template>
-									<template v-slot:item.actions="{ item }">
-										<v-btn
-											icon="mdi-delete"
-											variant="text"
-											color="error"
-											@click="removeItem(item)"
-										></v-btn>
-									</template>
-								</v-data-table>
-							</v-col>
-						</v-row>
+									</div>
+								</template>
 
-						<v-row v-if="errorMessage">
-							<v-col cols="12" class="pt-0">
-								<v-alert type="error" dense border="start" class="mx-2">
-									{{ errorMessage }}
-								</v-alert>
-							</v-col>
-						</v-row>
-					</v-container>
+								<template v-slot:item.uom="{ item }">
+									<v-select
+										density="compact"
+										variant="outlined"
+										hide-details
+										:items="
+											item.item_uoms || [{ uom: item.stock_uom, conversion_factor: 1 }]
+										"
+										item-title="uom"
+										item-value="uom"
+										:model-value="item.uom"
+										@update:model-value="(val) => updateItemUom(item, val)"
+										class="pos-themed-input"
+										style="width: 100px"
+									></v-select>
+								</template>
+
+								<template v-slot:item.qty="{ item }">
+									<v-text-field
+										density="compact"
+										variant="outlined"
+										hide-details
+										type="number"
+										min="0"
+										:model-value="item.qty"
+										@update:model-value="(val) => updateItemQty(item, val)"
+										class="pos-themed-input"
+										style="width: 80px"
+									></v-text-field>
+								</template>
+
+								<template v-slot:item.rate="{ item }">
+									<v-text-field
+										density="compact"
+										variant="outlined"
+										hide-details
+										type="number"
+										min="0"
+										:model-value="item.rate"
+										@update:model-value="(val) => updateItemRate(item, val)"
+										class="pos-themed-input"
+										style="width: 100px"
+									></v-text-field>
+								</template>
+
+								<template v-slot:item.received_qty="{ item }">
+									<v-text-field
+										v-if="receiveNow"
+										density="compact"
+										variant="outlined"
+										hide-details
+										type="number"
+										min="0"
+										:model-value="item.received_qty"
+										@update:model-value="(val) => updateItemReceivedQty(item, val)"
+										class="pos-themed-input"
+										style="width: 80px"
+									></v-text-field>
+								</template>
+
+								<template v-slot:item.amount="{ item }">
+									<div class="text-right font-weight-bold">
+										{{ formatCurrency(item.qty * item.rate) }}
+									</div>
+								</template>
+
+								<template v-slot:item.actions="{ item }">
+									<v-btn
+										icon="mdi-delete"
+										variant="text"
+										color="error"
+										size="small"
+										@click="removeItem(item)"
+									></v-btn>
+								</template>
+
+								<template v-slot:bottom>
+									<div
+										class="d-flex justify-end pa-4 font-weight-bold text-subtitle-1 border-t"
+									>
+										<span class="mr-4">{{ __("Total:") }}</span>
+										<span>{{ formatCurrency(totalAmount) }}</span>
+									</div>
+								</template>
+							</v-data-table>
+
+							<v-alert v-if="errorMessage" type="error" density="compact" class="mt-4">
+								{{ errorMessage }}
+							</v-alert>
+						</v-container>
+					</v-card-text>
+
+					<v-card-actions class="pa-4 border-t">
+						<v-spacer></v-spacer>
+						<v-btn
+							color="success"
+							size="large"
+							variant="flat"
+							:loading="submitLoading"
+							:disabled="submitLoading || !purchaseItems.length"
+							@click="submitPurchaseOrder"
+							block
+						>
+							{{ __("Submit Purchase Order") }}
+						</v-btn>
+					</v-card-actions>
+				</v-card>
+			</v-col>
+		</v-row>
+
+		<!-- Supplier Dialog -->
+		<v-dialog v-model="supplierDialog" max-width="520px">
+			<v-card>
+				<v-card-title>
+					<span class="text-h6 text-primary">{{ __("Create Supplier") }}</span>
+				</v-card-title>
+				<v-card-text>
+					<v-text-field
+						v-model="supplierForm.supplier_name"
+						:label="frappe._('Supplier Name')"
+						density="compact"
+						variant="outlined"
+						class="pos-themed-input"
+					/>
+					<v-select
+						v-model="supplierForm.supplier_group"
+						:items="supplierGroups"
+						:label="frappe._('Supplier Group')"
+						density="compact"
+						variant="outlined"
+						class="pos-themed-input"
+						clearable
+					/>
+					<v-select
+						v-model="supplierForm.supplier_type"
+						:items="supplierTypes"
+						:label="frappe._('Supplier Type')"
+						density="compact"
+						variant="outlined"
+						class="pos-themed-input"
+					/>
+					<v-text-field
+						v-model="supplierForm.tax_id"
+						:label="frappe._('Tax ID')"
+						density="compact"
+						variant="outlined"
+						class="pos-themed-input"
+					/>
+					<v-text-field
+						v-model="supplierForm.mobile_no"
+						:label="frappe._('Mobile Number')"
+						density="compact"
+						variant="outlined"
+						class="pos-themed-input"
+					/>
+					<v-text-field
+						v-model="supplierForm.email_id"
+						:label="frappe._('Email')"
+						density="compact"
+						variant="outlined"
+						class="pos-themed-input"
+					/>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="closeDialog">{{ __("Close") }}</v-btn>
+					<v-btn color="error" variant="text" @click="closeSupplierDialog">{{
+						__("Cancel")
+					}}</v-btn>
 					<v-btn
-						color="success"
-						theme="dark"
-						:loading="submitLoading"
-						:disabled="submitLoading"
-						@click="submitPurchaseOrder"
+						color="primary"
+						variant="tonal"
+						:loading="supplierSubmitLoading"
+						:disabled="supplierSubmitLoading"
+						@click="submitSupplier"
 					>
-						{{ __("Submit") }}
+						{{ __("Create") }}
 					</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
-	</v-row>
-
-	<v-dialog v-model="supplierDialog" max-width="520px">
-		<v-card>
-			<v-card-title>
-				<span class="text-h6 text-primary">{{ __("Create Supplier") }}</span>
-			</v-card-title>
-			<v-card-text>
-				<v-text-field
-					v-model="supplierForm.supplier_name"
-					:label="frappe._('Supplier Name')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-select
-					v-model="supplierForm.supplier_group"
-					:items="supplierGroups"
-					:label="frappe._('Supplier Group')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-					clearable
-				/>
-				<v-select
-					v-model="supplierForm.supplier_type"
-					:items="supplierTypes"
-					:label="frappe._('Supplier Type')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-text-field
-					v-model="supplierForm.tax_id"
-					:label="frappe._('Tax ID')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-text-field
-					v-model="supplierForm.mobile_no"
-					:label="frappe._('Mobile Number')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-text-field
-					v-model="supplierForm.email_id"
-					:label="frappe._('Email')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-			</v-card-text>
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn color="error" variant="text" @click="closeSupplierDialog">{{ __("Cancel") }}</v-btn>
-				<v-btn
-					color="primary"
-					variant="tonal"
-					:loading="supplierSubmitLoading"
-					:disabled="supplierSubmitLoading"
-					@click="submitSupplier"
-				>
-					{{ __("Create") }}
-				</v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
-
-	<v-dialog v-model="itemDialog" max-width="620px">
-		<v-card>
-			<v-card-title>
-				<span class="text-h6 text-primary">{{ __("Create Item") }}</span>
-			</v-card-title>
-			<v-card-text>
-				<v-text-field
-					v-model="itemForm.item_code"
-					:label="frappe._('Item Code')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-text-field
-					v-model="itemForm.item_name"
-					:label="frappe._('Item Name')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-autocomplete
-					v-model="itemForm.stock_uom"
-					:items="uomOptions"
-					:label="frappe._('Stock UOM')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-					clearable
-				/>
-				<v-select
-					v-model="itemForm.item_group"
-					:items="itemGroups"
-					:label="frappe._('Item Group')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-					clearable
-				/>
-				<v-text-field
-					v-model="itemForm.barcode"
-					:label="frappe._('Barcode')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-				/>
-				<v-text-field
-					v-model="itemForm.buying_price"
-					:label="frappe._('Buying Price')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-					@change="setFormatedCurrency(itemForm, 'buying_price', null, true, $event)"
-				/>
-				<v-text-field
-					v-model="itemForm.selling_price"
-					:label="frappe._('Selling Price')"
-					density="compact"
-					variant="outlined"
-					class="pos-themed-input"
-					@change="setFormatedCurrency(itemForm, 'selling_price', null, true, $event)"
-				/>
-			</v-card-text>
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn color="error" variant="text" @click="closeItemDialog">{{ __("Cancel") }}</v-btn>
-				<v-btn
-					color="primary"
-					variant="tonal"
-					:loading="itemSubmitLoading"
-					:disabled="itemSubmitLoading"
-					@click="submitItem"
-				>
-					{{ __("Create") }}
-				</v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+	</div>
 </template>
 
 <script>
 /* global __, frappe */
 import format, { formatUtils } from "../../format";
 import { useStockUtils } from "../../composables/useStockUtils";
+import { getOpeningStorage } from "../../../offline/index.js";
+import { useItemsStore } from "../../stores/itemsStore";
+import { mapStores } from "pinia";
+import ItemsSelector from "./ItemsSelector.vue";
 
 export default {
 	mixins: [format],
+	components: {
+		ItemsSelector,
+	},
 	data: () => ({
-		dialog: false,
 		stockUtils: useStockUtils(),
 		pos_profile: {},
 		supplier: null,
@@ -464,21 +371,7 @@ export default {
 		receiveNow: false,
 		transactionDate: null,
 		scheduleDate: null,
-		itemResults: [],
-		selectedItemCode: null,
-		itemLoading: false,
 		purchaseItems: [],
-		itemDialog: false,
-		itemSubmitLoading: false,
-		itemForm: {
-			item_code: "",
-			item_name: "",
-			stock_uom: "",
-			item_group: "",
-			barcode: "",
-			buying_price: "",
-			selling_price: "",
-		},
 		itemGroups: [],
 		uomOptions: [],
 		itemSearchTimeout: null,
@@ -487,25 +380,26 @@ export default {
 		submitLoading: false,
 	}),
 	computed: {
+		...mapStores(useItemsStore),
 		allowCreateSupplier() {
 			return !!this.pos_profile?.posa_allow_create_purchase_suppliers;
 		},
-		allowCreateItem() {
-			return !!this.pos_profile?.posa_allow_create_purchase_items;
+		totalAmount() {
+			return this.purchaseItems.reduce((sum, item) => sum + item.qty * item.rate, 0);
 		},
 		itemHeaders() {
 			const headers = [
-				{ title: __("Item"), key: "item_name", align: "start" },
-				{ title: __("UOM"), key: "uom", align: "start" },
-				{ title: __("Qty"), key: "qty", align: "end" },
-				{ title: __("Rate"), key: "rate", align: "end" },
+				{ title: __("Item"), key: "item_name", align: "start", width: "35%" },
+				{ title: __("UOM"), key: "uom", align: "center", width: "15%" },
+				{ title: __("Qty"), key: "qty", align: "center", width: "15%" },
+				{ title: __("Rate"), key: "rate", align: "center", width: "15%" },
 			];
 			if (this.receiveNow) {
-				headers.push({ title: __("Received"), key: "received_qty", align: "end" });
+				headers.push({ title: __("Received"), key: "received_qty", align: "center", width: "10%" });
 			}
 			headers.push(
-				{ title: __("Amount"), key: "amount", align: "end" },
-				{ title: __("Actions"), key: "actions", align: "center", sortable: false },
+				{ title: __("Amount"), key: "amount", align: "end", width: "10%" },
+				{ title: "", key: "actions", align: "center", sortable: false, width: "50px" },
 			);
 			return headers;
 		},
@@ -536,6 +430,68 @@ export default {
 		},
 	},
 	methods: {
+		async onAddItem(item) {
+			if (!item) return;
+
+			// Fetch item details to get item_uoms if missing
+			if (!item.item_uoms || !item.item_uoms.length) {
+				try {
+					const details = await this.itemsStore.getItemByCode(item.item_code);
+					if (details) {
+						if (details.item_uoms) item.item_uoms = details.item_uoms;
+						if (details.purchase_uom) item.purchase_uom = details.purchase_uom;
+					}
+				} catch (e) {
+					console.warn("Failed to fetch item details for UOMs", e);
+				}
+			}
+
+			const existingItem = this.purchaseItems.find((p) => p.item_code === item.item_code);
+
+			if (existingItem) {
+				existingItem.qty += 1;
+				if (this.receiveNow && !existingItem.receivedQtyManual) {
+					existingItem.received_qty = existingItem.qty;
+				}
+			} else {
+				// Use the rate from the store (which should be the buying price list rate)
+				// If not available, fallback to standard_rate
+				let rate = item.rate || item.standard_rate || 0;
+				let uom = item.purchase_uom || item.stock_uom; // Default to purchase UOM if set
+				let conversion_factor = 1;
+
+				if (uom !== item.stock_uom && item.item_uoms) {
+					const uomData = item.item_uoms.find((u) => u.uom === uom);
+					if (uomData) {
+						conversion_factor = uomData.conversion_factor;
+					}
+				}
+
+				const newItem = {
+					line_id: this.generateLineId(),
+					item_code: item.item_code,
+					item_name: item.item_name,
+					stock_uom: item.stock_uom,
+					item_group: item.item_group,
+					item_uoms: item.item_uoms || [{ uom: item.stock_uom, conversion_factor: 1 }],
+					uom: uom,
+					conversion_factor: conversion_factor,
+					qty: 1,
+					rate: rate,
+					stock_uom_rate: rate, // Store the base rate for Stock UOM for conversions
+					standard_rate: item.standard_rate || 0,
+					received_qty: this.receiveNow ? 1 : 0,
+					receivedQtyManual: false,
+				};
+
+				this.purchaseItems.unshift(newItem); // Add to top of list
+
+				// Recalculate rate if UOM is different from stock UOM
+				if (newItem.uom !== newItem.stock_uom) {
+					this.updateItemUom(newItem, newItem.uom);
+				}
+			}
+		},
 		formatDateForBackend(date) {
 			if (!date) return null;
 			if (typeof date === "string") {
@@ -561,7 +517,7 @@ export default {
 		getTodayDisplay() {
 			return formatUtils.toArabicNumerals(frappe.datetime.nowdate());
 		},
-		resetDialog() {
+		resetForm() {
 			this.supplier = null;
 			this.supplierOptions = [];
 			this.supplierLoading = false;
@@ -570,14 +526,9 @@ export default {
 			this.scheduleDate = this.getTodayDisplay();
 			this.receiveNow = false;
 			this.createInvoice = false;
-			this.itemResults = [];
-			this.selectedItemCode = null;
 			this.purchaseItems = [];
 			this.errorMessage = "";
 			this.submitLoading = false;
-		},
-		closeDialog() {
-			this.dialog = false;
 		},
 		async handleSupplierSearch(term) {
 			if (this.supplierSearchTimeout) {
@@ -611,92 +562,67 @@ export default {
 				this.supplierLoading = false;
 			}
 		},
-		async handleItemSearch(term) {
-			if (this.itemSearchTimeout) {
-				clearTimeout(this.itemSearchTimeout);
+		async updateItemUom(item, value) {
+			const foundItem = this.purchaseItems.find((i) => i.line_id === item.line_id);
+			if (!foundItem || !value) {
+				return;
 			}
-			this.itemSearchTimeout = setTimeout(async () => {
-				await this.searchItems(term);
-			}, 300);
-		},
-		async searchItems(searchText = "") {
-			const searchValue = formatUtils.fromArabicNumerals(String(searchText || "")).trim();
-			this.itemLoading = true;
+
+			foundItem.uom = value;
+			const matched = (foundItem.item_uoms || []).find((uom) => uom.uom === value);
+			foundItem.conversion_factor = matched ? matched.conversion_factor : 1;
+
+			if (this.stockUtils?.calcStockQty) {
+				this.stockUtils.calcStockQty(foundItem, foundItem.qty);
+			}
+
+			// Fetch new rate for UOM from Buying Price List
+			let priceFound = false;
 			try {
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.purchase_orders.search_items",
-					args: {
-						search_text: searchValue || null,
-						limit: 20,
-					},
-				});
-				const results = Array.isArray(message) ? message : [];
-				this.itemResults = results.map((row) => ({
-					...row,
-					item_uoms: row.item_uoms || [{ uom: row.stock_uom, conversion_factor: 1 }],
-				}));
-			} catch (error) {
-				console.error("Failed to fetch items:", error);
-				this.itemResults = [];
-			} finally {
-				this.itemLoading = false;
-			}
-		},
-		addSelectedItem() {
-			const selected = this.itemResults.find((item) => item.item_code === this.selectedItemCode);
-			if (!selected) {
-				return;
-			}
-			const existing = this.purchaseItems.find((item) => item.item_code === selected.item_code);
-			if (existing) {
-				existing.qty += 1;
-				if (this.receiveNow && !existing.receivedQtyManual) {
-					existing.received_qty = existing.qty;
+				const priceList = this.itemsStore.activePriceList;
+				if (priceList) {
+					const { message } = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_price_for_uom",
+						args: {
+							item_code: foundItem.item_code,
+							price_list: priceList,
+							uom: value,
+						},
+					});
+
+					if (message !== undefined && message !== null && message > 0) {
+						foundItem.rate = message;
+						priceFound = true;
+					}
 				}
-				this.selectedItemCode = null;
-				return;
+			} catch (e) {
+				console.error("Failed to update rate for UOM", e);
 			}
-			this.purchaseItems.push({
-				line_id: this.generateLineId(),
-				item_code: selected.item_code,
-				item_name: selected.item_name,
-				stock_uom: selected.stock_uom,
-				item_group: selected.item_group,
-				item_uoms: selected.item_uoms || [{ uom: selected.stock_uom, conversion_factor: 1 }],
-				uom: selected.stock_uom,
-				conversion_factor: 1,
-				qty: 1,
-				rate: 0,
-				received_qty: this.receiveNow ? 1 : 0,
-				receivedQtyManual: false,
-			});
-			this.selectedItemCode = null;
+
+			if (!priceFound) {
+				// Fallback: scale stock_uom_rate by conversion factor
+				// Use stock_uom_rate if available, fallback to standard_rate
+				const baseRate = foundItem.stock_uom_rate || foundItem.standard_rate || 0;
+				foundItem.rate = baseRate * foundItem.conversion_factor;
+			}
 		},
 		removeItem(item) {
 			this.purchaseItems = this.purchaseItems.filter((row) => row.line_id !== item.line_id);
 		},
-		updateItemQty(item, event) {
-			this.setFormatedFloat(item, "qty", null, true, event);
+		updateItemQty(item, value) {
+			const val = parseFloat(value);
+			item.qty = isNaN(val) ? 0 : val;
 			if (this.receiveNow && !item.receivedQtyManual) {
 				item.received_qty = item.qty;
 			}
 		},
-		updateItemRate(item, event) {
-			this.setFormatedCurrency(item, "rate", null, true, event);
+		updateItemRate(item, value) {
+			const val = parseFloat(value);
+			item.rate = isNaN(val) ? 0 : val;
 		},
-		updateItemUom(item, value) {
-			if (!item || !value) {
-				return;
-			}
-			item.uom = value;
-			const matched = (item.item_uoms || []).find((uom) => uom.uom === value);
-			item.conversion_factor = matched ? matched.conversion_factor : 1;
-			if (this.stockUtils?.calcStockQty) {
-				this.stockUtils.calcStockQty(item, item.qty);
-			}
-		},
-		updateItemReceivedQty(item, event) {
-			this.setFormatedFloat(item, "received_qty", null, true, event);
+		updateItemReceivedQty(item, value) {
+			const val = parseFloat(value);
+			item.received_qty = isNaN(val) ? 0 : val;
 			item.receivedQtyManual = true;
 		},
 		generateLineId() {
@@ -756,72 +682,6 @@ export default {
 				});
 			} finally {
 				this.supplierSubmitLoading = false;
-			}
-		},
-		openCreateItemDialog() {
-			this.resetItemForm();
-			this.itemDialog = true;
-		},
-		closeItemDialog() {
-			this.itemDialog = false;
-		},
-		resetItemForm() {
-			this.itemForm = {
-				item_code: "",
-				item_name: "",
-				stock_uom: "",
-				item_group: this.itemGroups[0] || "",
-				barcode: "",
-				buying_price: "",
-				selling_price: "",
-			};
-			this.itemSubmitLoading = false;
-		},
-		async submitItem() {
-			if (!this.itemForm.item_code || !this.itemForm.stock_uom) {
-				this.eventBus.emit("show_message", {
-					title: __("Item code and stock UOM are required"),
-					color: "error",
-				});
-				return;
-			}
-			this.itemSubmitLoading = true;
-			try {
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.purchase_orders.create_purchase_item",
-					args: {
-						data: {
-							...this.itemForm,
-							pos_profile: this.pos_profile,
-						},
-					},
-				});
-				const itemDoc = message?.item || message;
-				if (itemDoc && itemDoc.item_code) {
-					this.eventBus.emit("show_message", {
-						title: __("Item created successfully"),
-						color: "success",
-					});
-					const newItem = {
-						item_code: itemDoc.item_code,
-						item_name: itemDoc.item_name || itemDoc.item_code,
-						stock_uom: itemDoc.stock_uom,
-						item_group: itemDoc.item_group,
-					};
-					this.itemResults.unshift(newItem);
-					this.selectedItemCode = newItem.item_code;
-					this.addSelectedItem();
-					this.itemDialog = false;
-					this.eventBus.emit("force_reload_items");
-				}
-			} catch (error) {
-				console.error("Failed to create item:", error);
-				this.eventBus.emit("show_message", {
-					title: __("Item creation failed"),
-					color: "error",
-				});
-			} finally {
-				this.itemSubmitLoading = false;
 			}
 		},
 		async submitPurchaseOrder() {
@@ -887,7 +747,7 @@ export default {
 						const itemCodes = items.map((item) => item.item_code);
 						this.eventBus.emit("invoice_stock_adjusted", { item_codes: itemCodes });
 					}
-					this.dialog = false;
+					this.resetForm();
 				}
 			} catch (error) {
 				console.error("Failed to submit purchase order:", error);
@@ -912,41 +772,6 @@ export default {
 				this.supplierGroups = (message || []).map((row) => row.name);
 			} catch (error) {
 				console.error("Failed to load supplier groups:", error);
-			}
-		},
-		async loadItemGroups() {
-			if (this.itemGroups.length) return;
-			try {
-				const { message } = await frappe.call({
-					method: "frappe.client.get_list",
-					args: {
-						doctype: "Item Group",
-						fields: ["name"],
-						filters: { is_group: 0 },
-						limit_page_length: 500,
-						order_by: "name",
-					},
-				});
-				this.itemGroups = (message || []).map((row) => row.name);
-			} catch (error) {
-				console.error("Failed to load item groups:", error);
-			}
-		},
-		async loadUoms() {
-			if (this.uomOptions.length) return;
-			try {
-				const { message } = await frappe.call({
-					method: "frappe.client.get_list",
-					args: {
-						doctype: "UOM",
-						fields: ["name"],
-						limit_page_length: 500,
-						order_by: "name",
-					},
-				});
-				this.uomOptions = (message || []).map((row) => row.name);
-			} catch (error) {
-				console.error("Failed to load UOMs:", error);
 			}
 		},
 		async loadWarehouses() {
@@ -974,20 +799,50 @@ export default {
 				this.warehouseLoading = false;
 			}
 		},
+		async initialize() {
+			if (!this.pos_profile || !this.pos_profile.name) {
+				const cachedData = getOpeningStorage();
+				if (cachedData && cachedData.pos_profile) {
+					this.pos_profile = cachedData.pos_profile;
+				}
+			}
+
+			// Load buying price list and update store
+			try {
+				const { message } = await frappe.call({
+					method: "posawesome.posawesome.api.purchase_orders.get_buying_price_list",
+				});
+				if (message) {
+					// Update store to use buying price list
+					// This will trigger a price refresh in the items store
+					if (this.itemsStore) {
+						// Force update even if it seems same, to ensure items are reloaded with correct price list
+						await this.itemsStore.updatePriceList(message);
+
+						// If store items are already loaded but price list update didn't trigger reload (e.g. same name),
+						// force a reload to ensure we get buying prices (since we cleared selling=1 filter)
+						if (this.itemsStore.activePriceList === message && this.itemsStore.items.length > 0) {
+							// Check if items seem to have selling prices (high rates) vs buying (low/standard)
+							// This is heuristic, but reloading is safer
+							await this.itemsStore.loadItems({
+								forceServer: true,
+								priceList: message,
+							});
+						}
+					}
+				}
+			} catch (e) {
+				console.error("Failed to load buying price list", e);
+			}
+
+			this.resetForm();
+			await Promise.all([this.searchSuppliers(""), this.loadSupplierGroups(), this.loadWarehouses()]);
+		},
 	},
 	created() {
-		this.eventBus.on("open_purchase_orders", async () => {
-			this.resetDialog();
-			await Promise.all([
-				this.searchSuppliers(""),
-				this.searchItems(""),
-				this.loadSupplierGroups(),
-				this.loadItemGroups(),
-				this.loadUoms(),
-				this.loadWarehouses(),
-			]);
-			this.dialog = true;
-		});
+		this.initialize();
+		// Listen for item addition from ItemsSelector
+		this.eventBus.on("add_item", this.onAddItem);
 	},
 	mounted() {
 		this.eventBus.on("register_pos_profile", (data) => {
@@ -995,22 +850,14 @@ export default {
 		});
 	},
 	beforeUnmount() {
-		this.eventBus.off("open_purchase_orders");
 		this.eventBus.off("register_pos_profile");
+		this.eventBus.off("add_item", this.onAddItem);
 	},
 };
 </script>
 
 <style scoped>
-.icon-button {
+.cursor-pointer {
 	cursor: pointer;
-	font-size: 20px;
-	opacity: 0.7;
-	transition: all 0.2s ease;
-}
-
-.icon-button:hover {
-	opacity: 1;
-	color: var(--v-theme-primary);
 }
 </style>

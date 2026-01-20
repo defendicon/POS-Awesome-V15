@@ -43,6 +43,7 @@
 import Navbar from "./components/Navbar.vue";
 import POS from "./components/pos/Pos.vue";
 import Payments from "./components/payments/Pay.vue";
+import PurchaseOrders from "./components/pos/PurchaseOrders.vue";
 import ClosingDialog from "./components/pos/ClosingDialog.vue";
 import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "./components/ui/UpdatePrompt.vue";
@@ -157,6 +158,7 @@ export default {
 		Navbar,
 		POS,
 		Payments,
+		"Purchase Order": PurchaseOrders,
 		ClosingDialog,
 		AppLoadingOverlay,
 		UpdatePrompt,
@@ -243,8 +245,6 @@ export default {
 			}
 
 			markSourceLoaded("init");
-
-
 		},
 
 		setupEventListeners() {
@@ -282,6 +282,10 @@ export default {
 				// Update pending invoice count when other modules emit the change
 				this.eventBus.on("pending_invoices_changed", (count) => {
 					this.pendingInvoices = count;
+				});
+
+				this.eventBus.on("open_purchase_orders", () => {
+					this.setPage("Purchase Order");
 				});
 			}
 

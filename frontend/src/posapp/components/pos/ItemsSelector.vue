@@ -348,7 +348,21 @@
 																)
 															}}
 														</span>
-														<span class="price-amount">
+														<span
+															v-if="context === 'purchase'"
+															class="price-amount"
+														>
+															{{
+																memoizedFormatCurrency(
+																	item.rate || item.standard_rate || 0,
+																	pos_profile.currency,
+																	ratePrecision(
+																		item.rate || item.standard_rate || 0,
+																	),
+																)
+															}}
+														</span>
+														<span v-else class="price-amount">
 															{{
 																memoizedFormatCurrency(
 																	item.original_rate ?? item.rate ?? 0,
@@ -363,6 +377,7 @@
 													</div>
 													<div
 														v-if="
+															context !== 'purchase' &&
 															pos_profile.posa_allow_multi_currency &&
 															selected_currency !== pos_profile.currency
 														"
@@ -458,7 +473,7 @@
 								@scroll.passive="onListScroll"
 							>
 								<template v-slot:item.rate="{ item }">
-									<div>
+									<div v-if="context !== 'purchase'">
 										<div class="text-primary">
 											{{
 												currencySymbol(item.original_currency || pos_profile.currency)
@@ -518,6 +533,16 @@
 												)
 											}}
 										</div>
+									</div>
+									<div v-else class="text-primary">
+										{{ currencySymbol(pos_profile.currency) }}
+										{{
+											memoizedFormatCurrency(
+												item.rate || item.standard_rate || 0,
+												pos_profile.currency,
+												ratePrecision(item.rate || item.standard_rate || 0),
+											)
+										}}
 									</div>
 								</template>
 								<template v-slot:item.actual_qty="{ item }">
@@ -691,6 +716,12 @@ export default {
 		CameraScanner,
 		Skeleton,
 		RecycleScroller,
+	},
+	props: {
+		context: {
+			type: String,
+			default: "pos", // 'pos', 'purchase'
+		},
 	},
 	data: () => ({
 		pos_profile: {},
@@ -1159,14 +1190,14 @@ export default {
 			if (rawSearch && rawSearch.length >= 3) {
 				const term = rawSearch.toLowerCase();
 				const searchWords = term.split(/\s+/).filter(Boolean);
-				
+
 				filtered = filtered.filter((item) => {
 					if (!searchWords.length) return true;
 
 					// Collect all searchable values into a single string or array for checking
 					const searchable = [];
-					const pushValue = (v) => { 
-						if (v) searchable.push(String(v).toLowerCase()); 
+					const pushValue = (v) => {
+						if (v) searchable.push(String(v).toLowerCase());
 					};
 
 					pushValue(item.item_code);
@@ -1174,24 +1205,24 @@ export default {
 					pushValue(item.barcode);
 					pushValue(item.description);
 					pushValue(item.brand);
-					
+
 					// Handle arrays (barcodes, serials, batches)
 					if (Array.isArray(item.item_barcode)) {
-						item.item_barcode.forEach(b => pushValue(b?.barcode));
+						item.item_barcode.forEach((b) => pushValue(b?.barcode));
 					}
 					if (Array.isArray(item.barcodes)) {
-						item.barcodes.forEach(b => pushValue(b));
+						item.barcodes.forEach((b) => pushValue(b));
 					}
 					if (Array.isArray(item.serial_no_data)) {
-						item.serial_no_data.forEach(s => pushValue(s?.serial_no));
+						item.serial_no_data.forEach((s) => pushValue(s?.serial_no));
 					}
 					if (Array.isArray(item.batch_no_data)) {
-						item.batch_no_data.forEach(b => pushValue(b?.batch_no));
+						item.batch_no_data.forEach((b) => pushValue(b?.batch_no));
 					}
 
 					// Verify EVERY search word is present in AT LEAST ONE of the fields
-					return searchWords.every(word => {
-						return searchable.some(field => field.includes(word));
+					return searchWords.every((word) => {
+						return searchable.some((field) => field.includes(word));
 					});
 				});
 			}
@@ -2011,6 +2042,31 @@ export default {
 			}
 		},
 		getItemsHeaders() {
+			if (this.context === "purchase") {
+				return [
+					{
+						title: __("Item"),
+						key: "item_name",
+						align: "start",
+						sortable: true,
+						width: "40%",
+					},
+					{
+						title: __("Buying Price"),
+						key: "rate",
+						align: "end",
+						sortable: true,
+						width: "25%",
+					},
+					{
+						title: __("Stock"),
+						key: "actual_qty",
+						align: "end",
+						sortable: true,
+						width: "20%",
+					},
+				];
+			}
 			const items_headers = [
 				{
 					title: __("Name"),
@@ -4752,12 +4808,12 @@ export default {
 
 			if (this.pos_profile && this.pos_profile.name) {
 				await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
-				
+
 				// Start workers now that we have profile
 				this.startItemWorker();
 				this.update_cur_items_details();
 				this.startBackgroundSyncScheduler();
-				
+
 				console.log("Pinia store initialized successfully (from global state)");
 			}
 		}
@@ -4830,7 +4886,7 @@ export default {
 			// Initialize Store with the new profile
 			if (this.pos_profile && this.pos_profile.name) {
 				await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
-				
+
 				// Start workers now that we have profile
 				this.startItemWorker();
 				this.update_cur_items_details();
@@ -4899,7 +4955,7 @@ export default {
 		});
 
 		// Workers are now started in memoryInitPromise.then or register_pos_profile
-		
+
 		// Add new event listener for currency changes
 		this.eventBus.on("update_currency", (data) => {
 			this.selected_currency = data.currency;
