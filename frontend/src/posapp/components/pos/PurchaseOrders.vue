@@ -522,6 +522,43 @@ export default {
 				this.supplierLoading = false;
 			}
 		},
+		async updateItemUom(item, value) {
+			const foundItem = this.purchaseItems.find((i) => i.line_id === item.line_id);
+			if (!foundItem || !value) {
+				return;
+			}
+
+			foundItem.uom = value;
+			const matched = (foundItem.item_uoms || []).find((uom) => uom.uom === value);
+			foundItem.conversion_factor = matched ? matched.conversion_factor : 1;
+
+			if (this.stockUtils?.calcStockQty) {
+				this.stockUtils.calcStockQty(foundItem, foundItem.qty);
+			}
+
+			// Fetch new rate for UOM from Buying Price List
+			try {
+				const priceList = this.itemsStore.activePriceList;
+				if (priceList) {
+					const { message } = await frappe.call({
+						method: "posawesome.posawesome.api.items.get_price_for_uom",
+						args: {
+							item_code: foundItem.item_code,
+							price_list: priceList,
+							uom: value,
+						},
+					});
+
+					if (message !== undefined && message !== null) {
+						foundItem.rate = message;
+					} else if (foundItem.standard_rate) {
+						foundItem.rate = foundItem.standard_rate * foundItem.conversion_factor;
+					}
+				}
+			} catch (e) {
+				console.error("Failed to update rate for UOM", e);
+			}
+		},
 		removeItem(item) {
 			this.purchaseItems = this.purchaseItems.filter((row) => row.line_id !== item.line_id);
 		},
