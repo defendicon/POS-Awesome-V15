@@ -209,6 +209,11 @@ def search_suppliers(search_text=None, limit=20):
 
 
 @frappe.whitelist()
+def get_buying_price_list():
+    return _resolve_buying_price_list()
+
+
+@frappe.whitelist()
 def create_purchase_item(data):
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))

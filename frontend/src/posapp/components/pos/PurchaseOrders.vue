@@ -438,15 +438,9 @@ export default {
 					existingItem.received_qty = existingItem.qty;
 				}
 			} else {
-				// Use Buying Price List rate if available, otherwise standard_rate, then 0
-				// The item object from store usually has 'rate' as selling rate.
-				// We need buying rate. Ideally it should be standard_rate (valuation rate) or from a buying price list.
-				// Since we don't have buying price list integration in itemsStore easily available,
-				// we fall back to standard_rate which is typically the valuation/buying rate in Frappe items.
-				let rate = item.standard_rate || 0;
-
-				// If we have a buying price list active in the backend configuration, we might want to fetch that.
-				// But for now, standard_rate is the best approximation available in the item object.
+				// Use the rate from the store (which should be the buying price list rate)
+				// If not available, fallback to standard_rate
+				let rate = item.rate || item.standard_rate || 0;
 
 				this.purchaseItems.push({
 					line_id: this.generateLineId(),
@@ -727,6 +721,22 @@ export default {
 				if (cachedData && cachedData.pos_profile) {
 					this.pos_profile = cachedData.pos_profile;
 				}
+			}
+
+			// Load buying price list and update store
+			try {
+				const { message } = await frappe.call({
+					method: "posawesome.posawesome.api.purchase_orders.get_buying_price_list",
+				});
+				if (message) {
+					// Update store to use buying price list
+					// This will trigger a price refresh in the items store
+					if (this.itemsStore) {
+						await this.itemsStore.updatePriceList(message);
+					}
+				}
+			} catch (e) {
+				console.error("Failed to load buying price list", e);
 			}
 
 			// Ensure items store is initialized to support ItemsSelector

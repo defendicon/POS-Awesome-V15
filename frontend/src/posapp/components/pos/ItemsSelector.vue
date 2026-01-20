@@ -354,9 +354,11 @@
 														>
 															{{
 																memoizedFormatCurrency(
-																	item.standard_rate || 0,
+																	item.rate || item.standard_rate || 0,
 																	pos_profile.currency,
-																	ratePrecision(item.standard_rate || 0),
+																	ratePrecision(
+																		item.rate || item.standard_rate || 0,
+																	),
 																)
 															}}
 														</span>
@@ -471,7 +473,7 @@
 								@scroll.passive="onListScroll"
 							>
 								<template v-slot:item.rate="{ item }">
-									<div>
+									<div v-if="context !== 'purchase'">
 										<div class="text-primary">
 											{{
 												currencySymbol(item.original_currency || pos_profile.currency)
@@ -532,15 +534,13 @@
 											}}
 										</div>
 									</div>
-								</template>
-								<template v-slot:item.standard_rate="{ item }">
-									<div class="text-primary">
+									<div v-else class="text-primary">
 										{{ currencySymbol(pos_profile.currency) }}
 										{{
 											memoizedFormatCurrency(
-												item.standard_rate || 0,
+												item.rate || item.standard_rate || 0,
 												pos_profile.currency,
-												ratePrecision(item.standard_rate || 0),
+												ratePrecision(item.rate || item.standard_rate || 0),
 											)
 										}}
 									</div>
