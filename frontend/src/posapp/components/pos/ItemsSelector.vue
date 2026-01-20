@@ -2042,6 +2042,31 @@ export default {
 			}
 		},
 		getItemsHeaders() {
+			if (this.context === "purchase") {
+				return [
+					{
+						title: __("Item"),
+						key: "item_name",
+						align: "start",
+						sortable: true,
+						width: "40%",
+					},
+					{
+						title: __("Buying Price"),
+						key: "rate",
+						align: "end",
+						sortable: true,
+						width: "25%",
+					},
+					{
+						title: __("Stock"),
+						key: "actual_qty",
+						align: "end",
+						sortable: true,
+						width: "20%",
+					},
+				];
+			}
 			const items_headers = [
 				{
 					title: __("Name"),
