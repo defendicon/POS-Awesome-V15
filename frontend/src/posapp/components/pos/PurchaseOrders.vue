@@ -39,6 +39,12 @@
 										:loading="supplierLoading"
 										:disabled="supplierLoading"
 										@update:search="handleSupplierSearch"
+										:custom-filter="() => true"
+										:no-data-text="
+											supplierLoading
+												? __('Loading suppliers...')
+												: __('Suppliers not found')
+										"
 										class="pos-themed-input"
 										clearable
 									>
