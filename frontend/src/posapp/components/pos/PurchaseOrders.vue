@@ -3,7 +3,7 @@
 		<v-row class="h-100 ma-0">
 			<!-- Left Column: Item Selector -->
 			<v-col cols="12" md="5" class="h-100 pa-0 border-e">
-				<ItemsSelector />
+				<ItemsSelector context="purchase" />
 			</v-col>
 
 			<!-- Right Column: Purchase Order Form (Cart) -->
