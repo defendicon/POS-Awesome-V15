@@ -67,12 +67,22 @@
 				</v-row>
 
 				<!-- Print Format Selection -->
-				<v-row dense class="mt-4">
+				<v-row dense class="mt-4 align-center">
+					<v-col cols="12" v-if="createInvoice">
+						<v-switch
+							v-model="printInvoice"
+							density="compact"
+							color="primary"
+							hide-details
+							:label="__('Print Purchase Invoice instead of PO')"
+							class="ma-0 mb-2"
+						></v-switch>
+					</v-col>
 					<v-col cols="12">
 						<v-select
 							v-model="selectedPrintFormat"
 							:items="printFormats"
-							:label="createInvoice ? __('Print Format (Invoice)') : __('Print Format (Order)')"
+							:label="printInvoice ? __('Print Format (Invoice)') : __('Print Format (Order)')"
 							density="compact"
 							variant="outlined"
 							hide-details
@@ -131,6 +141,7 @@ export default {
 			paymentLines: [],
 			printFormats: [],
 			selectedPrintFormat: null,
+			printInvoice: this.createInvoice,
 		};
 	},
 	computed: {
@@ -155,9 +166,13 @@ export default {
 	watch: {
 		dialog(val) {
 			if (val) {
+				this.printInvoice = this.createInvoice;
 				this.initializePayments();
 				this.fetchPrintFormats();
 			}
+		},
+		printInvoice() {
+			this.fetchPrintFormats();
 		},
 	},
 	methods: {
@@ -203,12 +218,13 @@ export default {
 				payments,
 				print: doPrint,
 				print_format: this.selectedPrintFormat,
+				print_invoice: this.printInvoice, // Pass this flag
 			});
 			this.dialog = false;
 		},
 		async fetchPrintFormats() {
 			try {
-				const doctype = this.createInvoice ? "Purchase Invoice" : "Purchase Order";
+				const doctype = this.printInvoice ? "Purchase Invoice" : "Purchase Order";
 				const { message } = await frappe.call({
 					method: "posawesome.posawesome.api.print_formats.get_print_formats",
 					args: {
@@ -216,10 +232,14 @@ export default {
 					},
 				});
 				this.printFormats = message || [];
-				if (this.printFormats.length && !this.selectedPrintFormat) {
-					// Set default if available or just first one?
-					// Usually we might want to check pos profile default print format
-					if (this.posProfile.print_format) {
+				this.selectedPrintFormat = null; // Reset selection when type changes
+
+				if (this.printFormats.length) {
+					// Try to find default
+					if (
+						this.posProfile.print_format &&
+						this.printFormats.includes(this.posProfile.print_format)
+					) {
 						this.selectedPrintFormat = this.posProfile.print_format;
 					} else {
 						this.selectedPrintFormat = this.printFormats[0];

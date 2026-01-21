@@ -816,7 +816,7 @@ export default {
 				this.supplierSubmitLoading = false;
 			}
 		},
-		async submitPurchaseOrder(print = false, printFormat = null) {
+		async submitPurchaseOrder(print = false, printFormat = null, printInvoice = false) {
 			if (!this.supplier) {
 				this.errorMessage = __("Supplier is required.");
 				return;
@@ -883,9 +883,15 @@ export default {
 
 					if (print) {
 						// Print either invoice or order
-						// Prioritize Invoice if created
-						const doctype = message.purchase_invoice ? "Purchase Invoice" : "Purchase Order";
-						const docname = message.purchase_invoice || message.purchase_order;
+						// Prioritize Invoice if requested and available
+						let doctype = "Purchase Order";
+						let docname = message.purchase_order;
+
+						if (printInvoice && message.purchase_invoice) {
+							doctype = "Purchase Invoice";
+							docname = message.purchase_invoice;
+						}
+
 						const format =
 							printFormat ||
 							this.pos_profile.print_format_for_purchase ||
@@ -924,9 +930,9 @@ export default {
 			this.errorMessage = "";
 			this.paymentDialog = true;
 		},
-		handlePaymentSubmit({ payments, print, print_format }) {
+		handlePaymentSubmit({ payments, print, print_format, print_invoice }) {
 			this.payments = payments;
-			this.submitPurchaseOrder(print, print_format);
+			this.submitPurchaseOrder(print, print_format, print_invoice);
 		},
 		async loadSupplierGroups() {
 			if (this.supplierGroups.length) return;
