@@ -807,6 +807,10 @@ export default {
 			type: String,
 			default: "pos", // 'pos', 'purchase'
 		},
+		showOnlyBarcodeItems: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	data: () => ({
 		newItemDialog: false,
@@ -1139,6 +1143,10 @@ export default {
 				}
 			});
 		},
+		showOnlyBarcodeItems() {
+			if (this.searchCache) this.searchCache.clear();
+			this.search_onchange();
+		},
 	},
 
 	methods: {
@@ -1333,7 +1341,7 @@ export default {
 		},
 		// Performance optimization: Memoized search function
 		memoizedSearch(searchTerm, itemGroup) {
-			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}`;
+			const cacheKey = `${searchTerm || ""}_${itemGroup || "ALL"}_${this.showOnlyBarcodeItems}`;
 
 			// Check if we have a cached result
 			if (this.searchCache && this.searchCache.has(cacheKey)) {
@@ -1360,6 +1368,17 @@ export default {
 			}
 
 			let filtered = this.items;
+
+			// Filter only barcode items if enabled
+			if (this.showOnlyBarcodeItems) {
+				filtered = filtered.filter((item) => {
+					return (
+						item.barcode ||
+						(Array.isArray(item.barcodes) && item.barcodes.length > 0) ||
+						(Array.isArray(item.item_barcode) && item.item_barcode.length > 0)
+					);
+				});
+			}
 
 			// Filter by item group
 			if (itemGroup !== "ALL") {

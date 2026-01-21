@@ -2,8 +2,22 @@
 	<div class="pa-0 h-100">
 		<v-row class="h-100 ma-0">
 			<!-- Left Column: Item Selector -->
-			<v-col cols="12" md="5" class="h-100 pa-0 border-e">
-				<ItemsSelector context="barcode" />
+			<v-col cols="12" md="5" class="h-100 pa-0 border-e d-flex flex-column">
+				<div class="px-2 pt-2">
+					<v-switch
+						v-model="showOnlyBarcodeItems"
+						:label="__('Show only items with barcode')"
+						density="compact"
+						color="primary"
+						hide-details
+						class="mb-2"
+					></v-switch>
+				</div>
+				<ItemsSelector
+					context="barcode"
+					:showOnlyBarcodeItems="showOnlyBarcodeItems"
+					class="flex-grow-1"
+				/>
 			</v-col>
 
 			<!-- Right Column: Barcode Printing -->
@@ -56,6 +70,51 @@
 								</v-btn>
 							</v-col>
 						</v-row>
+
+						<!-- Custom Label Settings -->
+						<v-expand-transition>
+							<div
+								v-if="labelSize === 'Custom'"
+								class="mb-3 pa-3 border rounded bg-grey-lighten-4"
+							>
+								<div class="text-subtitle-2 mb-2">{{ __("Custom Label Settings") }}</div>
+								<v-row dense>
+									<v-col cols="6" md="4">
+										<v-text-field
+											v-model.number="customLabel.width"
+											:label="__('Width (mm)')"
+											type="number"
+											density="compact"
+											variant="outlined"
+											hide-details
+											class="pos-themed-input bg-white"
+										></v-text-field>
+									</v-col>
+									<v-col cols="6" md="4">
+										<v-text-field
+											v-model.number="customLabel.height"
+											:label="__('Height (mm)')"
+											type="number"
+											density="compact"
+											variant="outlined"
+											hide-details
+											class="pos-themed-input bg-white"
+										></v-text-field>
+									</v-col>
+									<v-col cols="12" md="4">
+										<v-select
+											v-model="customLabel.paperType"
+											:items="['Gap/Die-cut', 'Continuous', 'Black Mark']"
+											:label="__('Paper Type')"
+											density="compact"
+											variant="outlined"
+											hide-details
+											class="pos-themed-input bg-white"
+										></v-select>
+									</v-col>
+								</v-row>
+							</div>
+						</v-expand-transition>
 
 						<v-divider class="my-3"></v-divider>
 
@@ -130,7 +189,13 @@ export default {
 		return {
 			items: [],
 			labelSize: "38x25mm",
-			labelSizeOptions: ["38x25mm", "50x30mm", "75x50mm", "A4 (3x7 labels)"],
+			labelSizeOptions: ["38x25mm", "50x30mm", "75x50mm", "A4 (3x7 labels)", "Custom"],
+			showOnlyBarcodeItems: false,
+			customLabel: {
+				width: 40,
+				height: 30,
+				paperType: "Gap/Die-cut",
+			},
 		};
 	},
 	computed: {
@@ -147,6 +212,13 @@ export default {
 	},
 	methods: {
 		parseLabelSize() {
+			if (this.labelSize === "Custom") {
+				return {
+					type: "Thermal",
+					width: this.customLabel.width || 40,
+					height: this.customLabel.height || 30,
+				};
+			}
 			if (this.labelSize.startsWith("A4")) return { type: "A4" };
 			const [width, height] = this.labelSize
 				.replace("mm", "")
