@@ -2612,6 +2612,8 @@ export default {
 			// Recompute and apply offers for current items
 			if (typeof this.handelOffers === "function") {
 				await this.handelOffers();
+				// Wait for event loop to process PosOffers.vue response
+				await new Promise((resolve) => setTimeout(resolve, 300));
 			}
 
 			// Persist invoice (server calculates totals/taxes)
