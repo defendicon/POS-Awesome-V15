@@ -37,19 +37,43 @@
 
 					<v-card-text class="flex-grow-1 overflow-y-auto pa-4">
 						<!-- Configuration -->
-						<v-row dense class="mb-2">
-							<v-col cols="12" md="6">
+						<v-row dense class="mb-2 align-center">
+							<v-col cols="12" md="3">
 								<v-select
-									v-model="labelSize"
-									:items="labelSizeOptions"
-									:label="__('Label Size')"
+									v-model="pageFormat"
+									:items="pageFormatOptions"
+									:label="__('Page Format')"
 									density="compact"
 									variant="outlined"
 									hide-details
 									class="pos-themed-input"
 								></v-select>
 							</v-col>
-							<v-col cols="12" md="6" class="d-flex gap-2">
+							<v-col cols="6" md="2">
+								<v-text-field
+									v-model.number="gridCols"
+									:label="__('Cols')"
+									type="number"
+									density="compact"
+									variant="outlined"
+									hide-details
+									class="pos-themed-input"
+									min="1"
+								></v-text-field>
+							</v-col>
+							<v-col cols="6" md="2">
+								<v-text-field
+									v-model.number="gridRows"
+									:label="__('Rows')"
+									type="number"
+									density="compact"
+									variant="outlined"
+									hide-details
+									class="pos-themed-input"
+									min="1"
+								></v-text-field>
+							</v-col>
+							<v-col cols="12" md="5" class="d-flex gap-2">
 								<v-btn
 									color="secondary"
 									class="flex-grow-1 mr-1 h-100"
@@ -68,6 +92,27 @@
 									<v-icon left class="mr-2">mdi-printer</v-icon>
 									{{ __("Print") }}
 								</v-btn>
+							</v-col>
+						</v-row>
+
+						<v-row dense class="mb-2">
+							<v-col cols="12" md="6">
+								<v-checkbox
+									v-model="includePrice"
+									:label="__('Include Price')"
+									density="compact"
+									hide-details
+									color="primary"
+								></v-checkbox>
+							</v-col>
+							<v-col cols="12" md="6">
+								<v-checkbox
+									v-model="includeBatchSerial"
+									:label="__('Include Batch / Serial')"
+									density="compact"
+									hide-details
+									color="primary"
+								></v-checkbox>
 							</v-col>
 						</v-row>
 
@@ -143,19 +188,13 @@ export default {
 	data() {
 		return {
 			items: [],
-			labelSize: "38x25mm",
-			labelSizeOptions: [
-				"38x25mm",
-				"50x30mm",
-				"50x25mm",
-				"40x30mm",
-				"40x20mm",
-				"58x40mm",
-				"58x60mm",
-				"75x50mm",
-				"A4 (3x7 labels)",
-			],
+			pageFormat: "A4",
+			pageFormatOptions: ["A4"],
+			gridCols: 3,
+			gridRows: 7,
 			showOnlyBarcodeItems: false,
+			includePrice: true,
+			includeBatchSerial: false,
 		};
 	},
 	computed: {
@@ -172,12 +211,15 @@ export default {
 	},
 	methods: {
 		parseLabelSize() {
-			if (this.labelSize.startsWith("A4")) return { type: "A4" };
-			const [width, height] = this.labelSize
-				.replace("mm", "")
-				.split("x")
-				.map((d) => parseInt(d));
-			return { type: "Thermal", width, height };
+			if (this.pageFormat === "A4") {
+				return {
+					type: "A4",
+					cols: parseInt(this.gridCols) || 3,
+					rows: parseInt(this.gridRows) || 7,
+				};
+			}
+			// Fallback
+			return { type: "A4", cols: 3, rows: 7 };
 		},
 		async onAddItem(item) {
 			if (!item) return;
@@ -398,32 +440,49 @@ export default {
 		getPrintStyles() {
 			const size = this.parseLabelSize();
 			if (size.type === "A4") {
+				const { cols, rows } = size;
+				// Calculate approximate height based on A4 height (297mm) and margins
+				// A4 = 210mm x 297mm
+				// Default margins 10mm top/bottom
+				const availableHeight = 277; // 297 - 20
+				const rowHeight = Math.floor(availableHeight / rows);
+
 				return `
           @page { size: A4; margin: 10mm; }
           body { font-family: sans-serif; margin: 0; padding: 0; }
           .label-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(${cols}, 1fr);
+            gap: 10px; /* Reduced gap slightly */
             page-break-after: always;
           }
           .label {
             border: 1px dashed #ccc;
             padding: 5px;
             text-align: center;
-            height: 36mm; /* Approx height for 3x7 grid on A4 */
+            height: ${rowHeight}mm;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             page-break-inside: avoid;
             box-sizing: border-box;
+            overflow: hidden;
           }
-          .item-name { font-size: 12px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 100%; }
-          .barcode-container { margin: 5px 0; width: 100%; display: flex; justify-content: center; }
+          .item-name { 
+              font-size: 11px; 
+              font-weight: bold; 
+              overflow: hidden; 
+              white-space: nowrap; 
+              text-overflow: ellipsis; 
+              max-width: 95%;
+              margin-bottom: 2px;
+          }
+          .barcode-container { margin: 2px 0; width: 100%; display: flex; justify-content: center; flex-grow: 1; align-items: center; overflow: hidden; }
           .barcode-text { font-size: 10px; }
-          .price { font-size: 12px; font-weight: bold; }
-          img.barcode { max-width: 100%; height: auto; max-height: 20mm; }
+          .price { font-size: 11px; font-weight: bold; margin-top: 2px; }
+          .batch-serial { font-size: 9px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95%; }
+          img.barcode { max-width: 95%; height: auto; max-height: 100%; object-fit: contain; }
         `;
 			} else {
 				// Thermal printer styles
@@ -468,6 +527,7 @@ export default {
               line-height: 1.2; 
               margin-top: 2px;
           }
+          .batch-serial { font-size: 9px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95%; }
           img.barcode { 
               max-width: 95%; 
               height: auto; 
@@ -486,6 +546,28 @@ export default {
 
 			items.forEach((item) => {
 				for (let i = 0; i < item.qty; i++) {
+					let batchSerialHtml = "";
+					if (this.includeBatchSerial) {
+						let text = "";
+						if (item.batch_no) text += `Batch: ${item.batch_no} `;
+						if (item.serial_no) text += `Serial: ${item.serial_no}`;
+						// Check array data if flat fields are empty
+						if (!text) {
+							if (item.batch_no_data && item.batch_no_data.length)
+								text += `Batch: ${item.batch_no_data[0].batch_no} `;
+							if (item.serial_no_data && item.serial_no_data.length)
+								text += `Serial: ${item.serial_no_data[0].serial_no}`;
+						}
+						if (text.trim()) {
+							batchSerialHtml = `<div class="batch-serial">${text.trim()}</div>`;
+						}
+					}
+
+					let priceHtml = "";
+					if (this.includePrice) {
+						priceHtml = `<div class="price">Price: ${this.formatCurrency(item.price)}</div>`;
+					}
+
 					html += `
             <div class="label">
               <div class="item-name">${item.item_name}</div>
@@ -500,7 +582,8 @@ export default {
                       jsbarcode-displayValue="true"
                       jsbarcode-fontSize="12">
               </div>
-              <div class="price">${this.formatCurrency(item.price)}</div>
+              ${batchSerialHtml}
+              ${priceHtml}
             </div>
           `;
 				}
