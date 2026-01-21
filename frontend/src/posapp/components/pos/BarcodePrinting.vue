@@ -76,7 +76,8 @@
 							<v-col cols="12" md="5" class="d-flex gap-2">
 								<v-btn
 									color="secondary"
-									class="flex-grow-1 mr-1 h-100"
+									class="flex-grow-1 mr-1"
+									height="40"
 									@click="downloadPdf"
 									:disabled="!items.length"
 								>
@@ -85,7 +86,8 @@
 								</v-btn>
 								<v-btn
 									color="primary"
-									class="flex-grow-1 ml-1 h-100"
+									class="flex-grow-1 ml-1"
+									height="40"
 									@click="printLabels"
 									:disabled="!items.length"
 								>
@@ -128,31 +130,46 @@
 							hide-default-footer
 						>
 							<template v-slot:item.qty="{ item }">
-								<div class="d-flex align-center justify-center">
+								<div class="pos-table__qty-counter">
 									<v-btn
-										size="x-small"
+										size="small"
 										variant="flat"
-										icon="mdi-minus"
-										class="mr-1"
+										class="pos-table__qty-btn pos-table__qty-btn--minus minus-btn qty-control-btn"
 										@click="decrementQty(item)"
-									></v-btn>
+									>
+										<v-icon size="small">mdi-minus</v-icon>
+									</v-btn>
+									<div
+										v-if="!item._editingQty"
+										class="pos-table__qty-display amount-value"
+										@click="openQtyEdit(item)"
+										tabindex="0"
+										role="button"
+									>
+										{{ item.qty }}
+									</div>
 									<v-text-field
-										v-model.number="item.qty"
-										type="number"
-										min="1"
+										v-else
+										v-model="editingQtyValue"
 										density="compact"
 										variant="outlined"
+										class="pos-table__qty-input"
+										@blur="closeQtyEdit(item)"
+										@keydown.enter.prevent="closeQtyEdit(item)"
+										@click.stop
+										:id="'qty-input-' + item.item_code"
+										:autofocus="true"
+										type="number"
 										hide-details
-										class="qty-input centered-input"
-										style="max-width: 60px"
 									></v-text-field>
 									<v-btn
-										size="x-small"
+										size="small"
 										variant="flat"
-										icon="mdi-plus"
-										class="ml-1"
+										class="pos-table__qty-btn pos-table__qty-btn--plus plus-btn qty-control-btn"
 										@click="incrementQty(item)"
-									></v-btn>
+									>
+										<v-icon size="small">mdi-plus</v-icon>
+									</v-btn>
 								</div>
 							</template>
 							<template v-slot:item.barcode="{ item }">
@@ -195,6 +212,7 @@ export default {
 			showOnlyBarcodeItems: false,
 			includePrice: true,
 			includeBatchSerial: false,
+			editingQtyValue: "",
 		};
 	},
 	computed: {
@@ -602,6 +620,29 @@ export default {
 			}
 			return value;
 		},
+		openQtyEdit(item) {
+			// Reset other items editing state if any
+			this.items.forEach((i) => (i._editingQty = false));
+
+			item._editingQty = true;
+			this.editingQtyValue = ""; // Clear value on open
+			this.$nextTick(() => {
+				const input = document.getElementById("qty-input-" + item.item_code);
+				if (input) input.focus();
+			});
+		},
+		closeQtyEdit(item) {
+			if (item._editingQty) {
+				if (this.editingQtyValue !== "" && this.editingQtyValue != null) {
+					const newQty = parseFloat(this.editingQtyValue);
+					if (newQty && newQty > 0) {
+						item.qty = newQty;
+					}
+				}
+				item._editingQty = false;
+				this.editingQtyValue = "";
+			}
+		},
 	},
 	created() {
 		this.eventBus.on("add_item", this.onAddItem);
@@ -617,7 +658,170 @@ export default {
 </script>
 
 <style scoped>
-.qty-input :deep(input) {
+.qty-control-btn {
+	width: 24px !important;
+	height: 24px !important;
+	min-width: 24px !important;
+	border-radius: 6px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow:
+		0 2px 8px var(--pos-shadow-light),
+		0 1px 3px var(--pos-shadow-light) !important;
+	font-weight: 600 !important;
+	backdrop-filter: blur(10px) !important;
+	position: relative !important;
+	overflow: hidden !important;
+	flex-shrink: 0;
+}
+
+.qty-control-btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--pos-hover-bg);
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.qty-control-btn:hover::before {
+	transform: translateX(0);
+}
+
+.qty-control-btn .v-icon {
+	position: relative;
+	z-index: 1;
+}
+
+.pos-table__qty-counter {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	padding: 2px;
+	min-width: 60px;
+	max-width: 100px;
+	width: auto;
+	height: auto;
+	background: var(--pos-surface-variant);
+	border-radius: 8px;
+	backdrop-filter: blur(10px);
+	border: 1px solid var(--pos-border-light);
+	transition: all 0.3s ease;
+	margin: 0 auto;
+	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+.pos-table__qty-counter:hover {
+	background: var(--pos-hover-bg);
+	box-shadow: 0 4px 16px var(--pos-shadow);
+	transform: translateY(-1px);
+}
+
+.pos-table__qty-display {
+	min-width: 15px;
+	max-width: 40px;
+	width: auto;
+	flex: 1 1 auto;
 	text-align: center;
+	font-weight: 600;
+	padding: 0 2px;
+	border-radius: 4px;
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-primary-variant);
+	font-family:
+		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+		sans-serif;
+	font-variant-numeric: lining-nums tabular-nums;
+	font-feature-settings:
+		"tnum" 1,
+		"lnum" 1,
+		"kern" 1;
+	color: var(--pos-primary);
+	font-size: 0.75rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 24px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	letter-spacing: -0.02em;
+	word-spacing: -0.1em;
+	cursor: pointer;
+}
+
+.pos-table__qty-display:focus-visible {
+	outline: 2px solid var(--pos-primary);
+	outline-offset: 2px;
+	z-index: 10;
+}
+
+.qty-control-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 6px var(--pos-shadow) !important;
+}
+
+.qty-control-btn.minus-btn {
+	background: var(--pos-button-warning-bg) !important;
+	color: var(--pos-button-warning-text) !important;
+	border: 2px solid var(--pos-button-warning-border) !important;
+}
+
+.qty-control-btn.minus-btn:hover {
+	background: var(--pos-button-warning-hover-bg) !important;
+	color: var(--pos-button-warning-hover-text) !important;
+	box-shadow:
+		0 6px 20px var(--pos-shadow),
+		0 4px 8px var(--pos-shadow-light) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.qty-control-btn.plus-btn {
+	background: var(--pos-button-success-bg) !important;
+	color: var(--pos-button-success-text) !important;
+	border: 2px solid var(--pos-button-success-border) !important;
+}
+
+.qty-control-btn.plus-btn:hover {
+	background: var(--pos-button-success-hover-bg) !important;
+	color: var(--pos-button-success-hover-text) !important;
+	box-shadow:
+		0 6px 20px var(--pos-shadow),
+		0 4px 8px var(--pos-shadow-light) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.pos-table__qty-input {
+	max-width: 80px;
+	margin: 0 auto;
+}
+.pos-table__qty-input :deep(input) {
+	text-align: center;
+	font-weight: 600;
+	-moz-appearance: textfield;
+}
+.pos-table__qty-input :deep(input::-webkit-outer-spin-button),
+.pos-table__qty-input :deep(input::-webkit-inner-spin-button) {
+	-webkit-appearance: none;
+	margin: 0;
+}
+.pos-table__qty-input :deep(.v-input__control) {
+	height: 24px;
+}
+.pos-table__qty-input :deep(.v-field__field) {
+	height: 24px;
+	padding: 0 4px;
+}
+.pos-table__qty-input :deep(.v-field__input) {
+	padding: 0;
+	min-height: 24px;
+	font-size: 0.75rem;
 }
 </style>
