@@ -71,51 +71,6 @@
 							</v-col>
 						</v-row>
 
-						<!-- Custom Label Settings -->
-						<v-expand-transition>
-							<div
-								v-if="labelSize === 'Custom'"
-								class="mb-3 pa-3 border rounded bg-grey-lighten-4"
-							>
-								<div class="text-subtitle-2 mb-2">{{ __("Custom Label Settings") }}</div>
-								<v-row dense>
-									<v-col cols="6" md="4">
-										<v-text-field
-											v-model.number="customLabel.width"
-											:label="__('Width (mm)')"
-											type="number"
-											density="compact"
-											variant="outlined"
-											hide-details
-											class="pos-themed-input bg-white"
-										></v-text-field>
-									</v-col>
-									<v-col cols="6" md="4">
-										<v-text-field
-											v-model.number="customLabel.height"
-											:label="__('Height (mm)')"
-											type="number"
-											density="compact"
-											variant="outlined"
-											hide-details
-											class="pos-themed-input bg-white"
-										></v-text-field>
-									</v-col>
-									<v-col cols="12" md="4">
-										<v-select
-											v-model="customLabel.paperType"
-											:items="['Gap/Die-cut', 'Continuous', 'Black Mark']"
-											:label="__('Paper Type')"
-											density="compact"
-											variant="outlined"
-											hide-details
-											class="pos-themed-input bg-white"
-										></v-select>
-									</v-col>
-								</v-row>
-							</div>
-						</v-expand-transition>
-
 						<v-divider class="my-3"></v-divider>
 
 						<!-- Items List -->
@@ -189,13 +144,8 @@ export default {
 		return {
 			items: [],
 			labelSize: "38x25mm",
-			labelSizeOptions: ["38x25mm", "50x30mm", "75x50mm", "A4 (3x7 labels)", "Custom"],
+			labelSizeOptions: ["38x25mm", "50x30mm", "75x50mm", "A4 (3x7 labels)"],
 			showOnlyBarcodeItems: false,
-			customLabel: {
-				width: 40,
-				height: 30,
-				paperType: "Gap/Die-cut",
-			},
 		};
 	},
 	computed: {
@@ -212,13 +162,6 @@ export default {
 	},
 	methods: {
 		parseLabelSize() {
-			if (this.labelSize === "Custom") {
-				return {
-					type: "Thermal",
-					width: this.customLabel.width || 40,
-					height: this.customLabel.height || 30,
-				};
-			}
 			if (this.labelSize.startsWith("A4")) return { type: "A4" };
 			const [width, height] = this.labelSize
 				.replace("mm", "")
@@ -490,10 +433,37 @@ export default {
             box-sizing: border-box;
             padding: 1mm;
           }
-          .item-name { font-size: 11px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.2; }
-          .barcode-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; }
-          .price { font-size: 11px; font-weight: bold; line-height: 1.2; }
-          img.barcode { max-width: 100%; height: auto; object-fit: contain; }
+          .item-name { 
+              font-size: 11px; 
+              font-weight: bold; 
+              white-space: nowrap; 
+              overflow: hidden; 
+              text-overflow: ellipsis; 
+              max-width: 95%; 
+              line-height: 1.2; 
+              margin-bottom: 2px;
+          }
+          .barcode-container { 
+              flex-grow: 1; 
+              display: flex; 
+              align-items: center; 
+              justify-content: center; 
+              width: 100%; 
+              overflow: hidden; 
+              padding: 2px 0;
+          }
+          .price { 
+              font-size: 11px; 
+              font-weight: bold; 
+              line-height: 1.2; 
+              margin-top: 2px;
+          }
+          img.barcode { 
+              max-width: 95%; 
+              height: auto; 
+              max-height: 100%;
+              object-fit: contain; 
+          }
         `;
 			}
 		},
