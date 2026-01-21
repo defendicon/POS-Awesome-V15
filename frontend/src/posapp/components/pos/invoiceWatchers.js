@@ -52,6 +52,9 @@ export default {
 			// Offer refresh is now handled explicitly by actions (addItem/updateItem)
 			// or via the background sync mechanism.
 			// If we need a catch-all, we could schedule it here, but avoiding it prevents double-work.
+			if (typeof this.scheduleOfferRefresh === "function") {
+				this.scheduleOfferRefresh();
+			}
 		},
 	},
 
