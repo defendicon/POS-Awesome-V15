@@ -347,13 +347,14 @@ export default {
 				qty: 1,
 				price: item.rate || item.standard_rate || 0,
 			};
-			this.addItemQty = 1;
+			this.addItemQty = ""; // Start empty
 			this.addItemDialog = true;
 		},
 		confirmAddItem() {
 			if (!this.pendingAddItem) return;
 
 			const item = this.pendingAddItem;
+			// If empty or invalid, default to 1
 			const qty = parseInt(this.addItemQty) || 1;
 
 			// Check if item already exists
