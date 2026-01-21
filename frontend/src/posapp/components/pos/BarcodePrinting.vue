@@ -35,16 +35,24 @@
 									class="pos-themed-input"
 								></v-select>
 							</v-col>
-							<v-col cols="12" md="6">
+							<v-col cols="12" md="6" class="d-flex gap-2">
+								<v-btn
+									color="secondary"
+									class="flex-grow-1 mr-1 h-100"
+									@click="downloadPdf"
+									:disabled="!items.length"
+								>
+									<v-icon left class="mr-2">mdi-file-pdf-box</v-icon>
+									{{ __("PDF") }}
+								</v-btn>
 								<v-btn
 									color="primary"
-									block
+									class="flex-grow-1 ml-1 h-100"
 									@click="printLabels"
 									:disabled="!items.length"
-									class="h-100"
 								>
 									<v-icon left class="mr-2">mdi-printer</v-icon>
-									{{ __("Print Labels") }}
+									{{ __("Print") }}
 								</v-btn>
 							</v-col>
 						</v-row>
@@ -138,6 +146,14 @@ export default {
 		},
 	},
 	methods: {
+		parseLabelSize() {
+			if (this.labelSize.startsWith("A4")) return { type: "A4" };
+			const [width, height] = this.labelSize
+				.replace("mm", "")
+				.split("x")
+				.map((d) => parseInt(d));
+			return { type: "Thermal", width, height };
+		},
 		async onAddItem(item) {
 			if (!item) return;
 
@@ -210,6 +226,11 @@ export default {
 				item.qty--;
 			}
 		},
+		getPrintWindowContent() {
+			const style = this.getPrintStyles();
+			const content = this.generatePrintContent(this.items.filter((item) => item.barcode));
+			return { style, content };
+		},
 		printLabels() {
 			if (!this.items.length) return;
 
@@ -267,8 +288,91 @@ export default {
       `);
 			printWindow.document.close();
 		},
+		downloadPdf() {
+			if (!this.items.length) return;
+
+			const itemsToPrint = this.items.filter((item) => item.barcode);
+			if (itemsToPrint.length === 0) {
+				this.eventBus.emit("show_message", {
+					title: __("No items with barcodes to print"),
+					color: "error",
+				});
+				return;
+			}
+
+			const printWindow = window.open("", "_blank");
+			if (!printWindow) {
+				this.eventBus.emit("show_message", {
+					title: __("Popup blocked. Please allow popups."),
+					color: "error",
+				});
+				return;
+			}
+
+			const style = this.getPrintStyles();
+			const content = this.generatePrintContent(itemsToPrint);
+			const size = this.parseLabelSize();
+			const isA4 = size.type === "A4";
+
+			// Determine PDF format settings
+			let pdfFormat = "a4";
+			let pdfUnit = "mm";
+			let orientation = "portrait";
+
+			if (!isA4) {
+				pdfFormat = [size.width, size.height];
+			}
+
+			const jsPdfOptions = {
+				unit: pdfUnit,
+				format: pdfFormat,
+				orientation: orientation,
+			};
+
+			printWindow.document.write(`
+        <html>
+          <head>
+            <title>Download PDF</title>
+            <style>
+              ${style}
+              /* Adjustments for PDF generation if needed */
+            </style>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"><\/script>
+          </head>
+          <body>
+            <div id="print-content">
+                ${content}
+            </div>
+            <script>
+              window.onload = function() {
+                JsBarcode(".barcode").init();
+                
+                setTimeout(() => {
+                    const element = document.getElementById('print-content');
+                    const opt = {
+                      margin:       0,
+                      filename:     'barcodes.pdf',
+                      image:        { type: 'jpeg', quality: 0.98 },
+                      html2canvas:  { scale: 2, useCORS: true },
+                      jsPDF:        ${JSON.stringify(jsPdfOptions)}
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        // Optional: close window after download
+                        // window.close();
+                    });
+                }, 800);
+              }
+            <\/script>
+          </body>
+        </html>
+      `);
+			printWindow.document.close();
+		},
 		getPrintStyles() {
-			if (this.labelSize.startsWith("A4")) {
+			const size = this.parseLabelSize();
+			if (size.type === "A4") {
 				return `
           @page { size: A4; margin: 10mm; }
           body { font-family: sans-serif; margin: 0; padding: 0; }
@@ -280,7 +384,7 @@ export default {
           }
           .label {
             border: 1px dashed #ccc;
-            padding: 10px;
+            padding: 5px;
             text-align: center;
             height: 36mm; /* Approx height for 3x7 grid on A4 */
             display: flex;
@@ -288,25 +392,22 @@ export default {
             justify-content: center;
             align-items: center;
             page-break-inside: avoid;
+            box-sizing: border-box;
           }
           .item-name { font-size: 12px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 100%; }
-          .barcode-container { margin: 5px 0; }
+          .barcode-container { margin: 5px 0; width: 100%; display: flex; justify-content: center; }
           .barcode-text { font-size: 10px; }
           .price { font-size: 12px; font-weight: bold; }
           img.barcode { max-width: 100%; height: auto; max-height: 20mm; }
         `;
 			} else {
-				// Thermal printer styles (approximate based on dimensions)
-				const [width, height] = this.labelSize
-					.replace("mm", "")
-					.split("x")
-					.map((d) => parseInt(d));
+				// Thermal printer styles
 				return `
-          @page { size: ${width}mm ${height}mm; margin: 0; }
-          body { font-family: sans-serif; margin: 0; padding: 0; width: ${width}mm; height: ${height}mm; }
+          @page { size: ${size.width}mm ${size.height}mm; margin: 0; }
+          body { font-family: sans-serif; margin: 0; padding: 0; width: ${size.width}mm; height: ${size.height}mm; overflow: hidden; }
           .label {
-            width: ${width}mm;
-            height: ${height}mm;
+            width: ${size.width}mm;
+            height: ${size.height}mm;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -315,18 +416,19 @@ export default {
             page-break-after: always;
             overflow: hidden;
             box-sizing: border-box;
-            padding: 2mm;
+            padding: 1mm;
           }
-          .item-name { font-size: 10px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-          .barcode-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
-          .price { font-size: 10px; font-weight: bold; }
-          img.barcode { max-width: 100%; max-height: 100%; }
+          .item-name { font-size: 11px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.2; }
+          .barcode-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; }
+          .price { font-size: 11px; font-weight: bold; line-height: 1.2; }
+          img.barcode { max-width: 100%; height: auto; object-fit: contain; }
         `;
 			}
 		},
 		generatePrintContent(items) {
 			let html = "";
-			if (this.labelSize.startsWith("A4")) {
+			const size = this.parseLabelSize();
+			if (size.type === "A4") {
 				html += '<div class="label-container">';
 			}
 
@@ -352,7 +454,7 @@ export default {
 				}
 			});
 
-			if (this.labelSize.startsWith("A4")) {
+			if (size.type === "A4") {
 				html += "</div>";
 			}
 			return html;
