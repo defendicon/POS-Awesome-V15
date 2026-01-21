@@ -308,25 +308,16 @@
 					<v-card-actions class="pa-4 border-t">
 						<v-spacer></v-spacer>
 						<v-btn
-							color="info"
+							color="success"
 							size="large"
 							variant="flat"
 							class="mr-2"
 							:loading="submitLoading"
 							:disabled="submitLoading || !purchaseItems.length"
 							@click="openPaymentDialog"
+							block
 						>
-							{{ __("Pay & Submit") }}
-						</v-btn>
-						<v-btn
-							color="success"
-							size="large"
-							variant="flat"
-							:loading="submitLoading"
-							:disabled="submitLoading || !purchaseItems.length"
-							@click="submitPurchaseOrder"
-						>
-							{{ __("Submit Purchase Order") }}
+							{{ __("Pay") }}
 						</v-btn>
 					</v-card-actions>
 				</v-card>

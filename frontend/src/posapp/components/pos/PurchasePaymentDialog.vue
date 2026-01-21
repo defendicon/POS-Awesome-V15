@@ -88,21 +88,10 @@
 					{{ __("Cancel") }}
 				</v-btn>
 				<v-spacer></v-spacer>
-				<v-btn
-					color="info"
-					variant="text"
-					@click="submit(true)"
-					:disabled="remainingAmount > 0.01"
-					class="mr-2"
-				>
+				<v-btn color="info" variant="text" @click="submit(true)" class="mr-2">
 					{{ __("Submit & Print") }}
 				</v-btn>
-				<v-btn
-					color="success"
-					variant="elevated"
-					@click="submit(false)"
-					:disabled="remainingAmount > 0.01"
-				>
+				<v-btn color="success" variant="elevated" @click="submit(false)">
 					{{ __("Submit") }}
 				</v-btn>
 			</v-card-actions>

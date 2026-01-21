@@ -325,6 +325,15 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
     ref_doctype = reference_doc.doctype
     ref_name = reference_doc.name
 
+    # Determine outstanding amount
+    outstanding_amount = 0
+    if ref_doctype == "Purchase Invoice":
+        outstanding_amount = reference_doc.outstanding_amount
+    else:
+        # For Purchase Order, use grand_total (assuming advance payment for new PO)
+        # Or calculate if some advance was already made, but here it's new.
+        outstanding_amount = reference_doc.grand_total
+
     for pay in payments:
         amount = flt(pay.get("amount"))
         mode = pay.get("mode_of_payment")
@@ -355,18 +364,18 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
         # Assuming base currency for simplified POS flow or that user enters converted amount.
         
         # References
-        # We need to handle references carefully. 
-        # If it's PI, standard payment. If PO, it's Advance.
-        # Payment Entry 'references' table requires total/outstanding.
+        # Allocate only up to outstanding amount
+        allocated_amount = 0
+        if outstanding_amount > 0:
+            allocated_amount = min(amount, outstanding_amount)
+            outstanding_amount -= allocated_amount
         
-        # For simplicity in this context, we'll try to let PE handle default allocation if we just set the party.
-        # But explicitly setting reference is better for linking.
-        
-        pe.append("references", {
-            "reference_doctype": ref_doctype,
-            "reference_name": ref_name,
-            "allocated_amount": amount
-        })
+        if allocated_amount > 0:
+            pe.append("references", {
+                "reference_doctype": ref_doctype,
+                "reference_name": ref_name,
+                "allocated_amount": allocated_amount
+            })
 
         pe.flags.ignore_permissions = True
         pe.insert()
