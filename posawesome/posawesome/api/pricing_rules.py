@@ -390,6 +390,28 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
     lines = cart.get("lines") or []
     free_lines = cart.get("free_lines") or []
 
+    # Bulk fetch item details (item_group, brand) to ensure pricing rules work correctly
+    # even if the frontend payload is incomplete.
+    item_codes = [line.get("item_code") for line in lines if line.get("item_code")]
+    item_details = {}
+    if item_codes:
+        items = frappe.get_all(
+            "Item",
+            filters={"item_code": ["in", item_codes]},
+            fields=["item_code", "item_group", "brand"]
+        )
+        for item in items:
+            item_details[item.item_code] = item
+
+    # Enrich lines with fetched details
+    for line in lines:
+        if line.get("item_code") and line.get("item_code") in item_details:
+            details = item_details[line.get("item_code")]
+            if not line.get("item_group"):
+                line["item_group"] = details.item_group
+            if not line.get("brand"):
+                line["brand"] = details.brand
+
     doc = _build_doc_context(ctx)
 
     # Pre-populate items to provide context for cross-item pricing rules
