@@ -394,13 +394,13 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
 
     # Pre-populate items to provide context for cross-item pricing rules
     # (e.g. buy item X, get discount on item Y)
-    doc.items = []
+    doc["items"] = []
     for raw_line in lines:
         line = frappe._dict(raw_line)
         args = _build_pricing_args(line, ctx)
         # Ensure we have a document-like object
         args.doctype = "Sales Invoice Item"
-        doc.items.append(args)
+        doc["items"].append(args)
 
     updates: List[dict] = []
     freebies: Dict[Tuple[str, str], frappe._dict] = {}
@@ -439,8 +439,8 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
 
         # Update the item in the doc context with the calculated values
         # This ensures that subsequent rules (and transaction level rules) see the correct state
-        if i < len(doc.items):
-            doc_item = doc.items[i]
+        if i < len(doc["items"]):
+            doc_item = doc["items"][i]
             doc_item.update({
                 "pricing_rules": ",".join(applied_rules),
                 "rate": rate,
