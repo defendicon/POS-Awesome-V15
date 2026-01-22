@@ -388,6 +388,11 @@ export const evaluatePricingRules = ({ item, qty, docQty, baseRate, ctx, indexes
 			// dictates that `same_item=0` means "Trigger is X, Target is Y".
 			// So, for the current item (which is X, the trigger), we skip this rule.
 			if (!rule.same_item) {
+				// Special Case: If "Discount on Other Item" fields are blank (apply_rule_on_other is not set),
+				// ERPNext treats this as "Apply on Self" (effectively same_item=1).
+				if (!rule.apply_rule_on_other) {
+					return true;
+				}
 				return false;
 			}
 			return true;

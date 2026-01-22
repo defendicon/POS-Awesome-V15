@@ -162,6 +162,7 @@ def _normalise_rule(doc: frappe._dict) -> frappe._dict:
         apply_recursion_over=flt(doc.get("apply_recursion_over") or 0),
         round_free_qty=cint(doc.get("round_free_qty") or 0),
         dont_enforce_free_item_qty=cint(doc.get("dont_enforce_free_item_qty") or 0),
+        apply_rule_on_other=doc.get("apply_rule_on_other"),
     )
 
     return output
@@ -232,8 +233,15 @@ def get_active_pricing_rules(params: dict | None = None, **kwargs):
         if meta.has_field(fieldname):
             select_columns.append(getattr(PricingRule, fieldname))
 
+    # Add fields for 'Apply On Other' logic
+    extra_fields = ["apply_rule_on_other", "other_item_code", "other_item_group", "other_brand"]
+    for fieldname in extra_fields:
+        if meta.has_field(fieldname):
+            select_columns.append(getattr(PricingRule, fieldname))
+
     query = (
         frappe.qb.from_(PricingRule)
+
         .select(*select_columns)
         .where(PricingRule.selling == 1)
         .where(Coalesce(PricingRule.disable, 0) == 0)
@@ -476,10 +484,14 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
             
             # If same_item is false (0), it is a "Discount on Other Item" rule.
             # It should ONLY apply if THIS item matches the "Other" criteria.
+            # If "Apply Rule On Other" is NOT set (None/Empty), then it behaves as same_item=1 (Apply on Self)
             is_target = False
             apply_on_other = rule_def.apply_rule_on_other
-            
-            if apply_on_other == "Item Code" and rule_def.other_item_code == args.item_code:
+
+            if not apply_on_other:
+                # Fallback: If no 'Other' criteria is defined, treat as Apply on Self
+                is_target = True
+            elif apply_on_other == "Item Code" and rule_def.other_item_code == args.item_code:
                 is_target = True
             elif apply_on_other == "Item Group":
                  # Check if item's group matches or is child of other_item_group
