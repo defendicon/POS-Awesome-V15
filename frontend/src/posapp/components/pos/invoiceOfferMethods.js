@@ -765,13 +765,16 @@ export default {
 						}
 						offer.items = updated_item_offers;
 
-						const collection = this.items.includes(item_to_remove)
-							? this.items
-							: this.packed_items;
-						const idx = collection.findIndex(
-							(el) => el.posa_row_id == item_to_remove.posa_row_id,
-						);
-						if (idx > -1) collection.splice(idx, 1);
+						const isItem = this.invoiceStore.itemsData.has(item_to_remove.posa_row_id);
+
+						if (isItem) {
+							this.invoiceStore.removeItemByRowId(item_to_remove.posa_row_id);
+						} else {
+							const idx = this.packed_items.findIndex(
+								(el) => el.posa_row_id == item_to_remove.posa_row_id,
+							);
+							if (idx > -1) this.packed_items.splice(idx, 1);
+						}
 
 						existOffer.give_item_row_id = null;
 						existOffer.give_item = null;
@@ -800,7 +803,7 @@ export default {
 									);
 									if (restoredItem) {
 										restoredItem.posa_is_offer = 0;
-										this.items.unshift(restoredItem);
+										this.invoiceStore.addItem(restoredItem, 0);
 									}
 								});
 							}
@@ -809,13 +812,17 @@ export default {
 							const diffQty = cheapestItem.qty - newItemOffer.qty;
 							if (diffQty <= 0) {
 								newItemOffer.qty += diffQty;
-								const baseCollection = this.items.includes(cheapestItem)
-									? this.items
-									: this.packed_items;
-								const baseIndex = baseCollection.findIndex(
-									(el) => el.posa_row_id == cheapestItem.posa_row_id,
+								const isCheapestItem = this.invoiceStore.itemsData.has(
+									cheapestItem.posa_row_id,
 								);
-								if (baseIndex > -1) baseCollection.splice(baseIndex, 1);
+								if (isCheapestItem) {
+									this.invoiceStore.removeItemByRowId(cheapestItem.posa_row_id);
+								} else {
+									const baseIndex = this.packed_items.findIndex(
+										(el) => el.posa_row_id == cheapestItem.posa_row_id,
+									);
+									if (baseIndex > -1) this.packed_items.splice(baseIndex, 1);
+								}
 								newItemOffer.posa_row_id = cheapestItem.posa_row_id;
 								newItemOffer.posa_is_replace = newItemOffer.posa_row_id;
 							} else {
@@ -823,7 +830,7 @@ export default {
 							}
 						}
 
-						this.items.unshift(newItemOffer);
+						this.invoiceStore.addItem(newItemOffer, 0);
 						existOffer.give_item_row_id = newItemOffer.posa_row_id;
 						existOffer.give_item = newItemOffer.item_code;
 					} else if (
@@ -882,9 +889,15 @@ export default {
 								existItem.qty -= diff;
 							} else {
 								offerItem.qty += existItem.qty;
-								const col = this.items.includes(existItem) ? this.items : this.packed_items;
-								const idx2 = col.findIndex((el) => el.posa_row_id == existItem.posa_row_id);
-								if (idx2 > -1) col.splice(idx2, 1);
+								const isExistItem = this.invoiceStore.itemsData.has(existItem.posa_row_id);
+								if (isExistItem) {
+									this.invoiceStore.removeItemByRowId(existItem.posa_row_id);
+								} else {
+									const idx2 = this.packed_items.findIndex(
+										(el) => el.posa_row_id == existItem.posa_row_id,
+									);
+									if (idx2 > -1) this.packed_items.splice(idx2, 1);
+								}
 							}
 						});
 					} else if (existOffer.offer === "Item Price") {
@@ -913,10 +926,12 @@ export default {
 			const item_to_remove = combined.find((item) => item.posa_row_id == invoiceOffer.give_item_row_id);
 			const index = this.posa_offers.findIndex((el) => el.row_id === invoiceOffer.row_id);
 			this.posa_offers.splice(index, 1);
-			if (item_to_remove) {
-				const collection = this.items.includes(item_to_remove) ? this.items : this.packed_items;
-				const idx = collection.findIndex((el) => el.posa_row_id == item_to_remove.posa_row_id);
-				if (idx > -1) collection.splice(idx, 1);
+			const isItemToRemove = this.invoiceStore.itemsData.has(item_to_remove.posa_row_id);
+			if (isItemToRemove) {
+				this.invoiceStore.removeItemByRowId(item_to_remove.posa_row_id);
+			} else {
+				const idx = this.packed_items.findIndex((el) => el.posa_row_id == item_to_remove.posa_row_id);
+				if (idx > -1) this.packed_items.splice(idx, 1);
 			}
 		}
 		if (invoiceOffer.offer === "Grand Total") {
@@ -968,14 +983,20 @@ export default {
 				item.posa_is_offer = 0;
 				if (diffQty <= 0) {
 					item.qty = baseItem.qty;
-					const collection = this.items.includes(baseItem) ? this.items : this.packed_items;
-					const idx = collection.findIndex((el) => el.posa_row_id == baseItem.posa_row_id);
-					if (idx > -1) collection.splice(idx, 1);
+					const isBaseItem = this.invoiceStore.itemsData.has(baseItem.posa_row_id);
+					if (isBaseItem) {
+						this.invoiceStore.removeItemByRowId(baseItem.posa_row_id);
+					} else {
+						const idx = this.packed_items.findIndex(
+							(el) => el.posa_row_id == baseItem.posa_row_id,
+						);
+						if (idx > -1) this.packed_items.splice(idx, 1);
+					}
 					item.posa_row_id = item.posa_is_replace;
 				} else {
 					baseItem.qty = diffQty;
 				}
-				this.items.unshift(item);
+				this.invoiceStore.addItem(item, 0);
 				offer.give_item_row_id = item.posa_row_id;
 			} else if (
 				offer.apply_on == "Item Group" &&
@@ -999,19 +1020,25 @@ export default {
 				const diffQty = baseItem.qty - offer.given_qty;
 				if (diffQty <= 0) {
 					item.qty = baseItem.qty;
-					const collection = this.items.includes(baseItem) ? this.items : this.packed_items;
-					const idx = collection.findIndex((el) => el.posa_row_id == baseItem.posa_row_id);
-					if (idx > -1) collection.splice(idx, 1);
+					const isBaseItem = this.invoiceStore.itemsData.has(baseItem.posa_row_id);
+					if (isBaseItem) {
+						this.invoiceStore.removeItemByRowId(baseItem.posa_row_id);
+					} else {
+						const idx = this.packed_items.findIndex(
+							(el) => el.posa_row_id == baseItem.posa_row_id,
+						);
+						if (idx > -1) this.packed_items.splice(idx, 1);
+					}
 					item.posa_row_id = item.posa_is_replace;
 				} else {
 					baseItem.qty = diffQty;
 				}
-				this.items.unshift(item);
+				this.invoiceStore.addItem(item, 0);
 				offer.give_item_row_id = item.posa_row_id;
 			} else {
 				const item = await this.ApplyOnGiveProduct(offer);
 				if (item) {
-					this.items.unshift(item);
+					this.invoiceStore.addItem(item, 0);
 					offer.give_item_row_id = item.posa_row_id;
 				} else {
 					return;
