@@ -48,10 +48,11 @@
 								<v-text-field
 									density="compact"
 									color="primary"
-									:label="frappe._('Mobile No')"
+									:label="frappe._('Mobile No') + ' *'"
 									class="pos-themed-input"
 									hide-details
 									v-model="mobile_no"
+									:error-messages="mobileError"
 								></v-text-field>
 							</v-col>
 							<v-col cols="12" v-if="!hideNonEssential">
@@ -128,7 +129,8 @@
 									class="pos-themed-input"
 								></v-text-field>
 							</v-col>
-							<v-col cols="6" v-if="!hideNonEssential">
+							<!-- Customer Group - ALWAYS VISIBLE -->
+							<v-col cols="6">
 								<v-autocomplete
 									clearable
 									density="compact"
@@ -144,7 +146,8 @@
 								>
 								</v-autocomplete>
 							</v-col>
-							<v-col cols="6" v-if="!hideNonEssential">
+							<!-- Territory - ALWAYS VISIBLE -->
+							<v-col cols="6">
 								<v-autocomplete
 									clearable
 									density="compact"
@@ -231,9 +234,10 @@ export default {
 		customer_name: "",
 		tax_id: "",
 		mobile_no: "",
+		mobileError: "",
 		address_line1: "",
 		city: "",
-		country: "Pakistan",
+		country: "Nigeria",
 		email_id: "",
 		referral_code: "",
 		birthday: "",
@@ -258,15 +262,18 @@ export default {
 			"Denmark",
 			"France",
 			"Germany",
+			"Ghana",
 			"India",
 			"Indonesia",
 			"Italy",
 			"Japan",
+			"Kenya",
 			"Kuwait",
 			"Malaysia",
 			"Nepal",
 			"Netherlands",
 			"New Zealand",
+			"Nigeria",
 			"Norway",
 			"Oman",
 			"Pakistan",
@@ -274,6 +281,7 @@ export default {
 			"Qatar",
 			"Saudi Arabia",
 			"Singapore",
+			"South Africa",
 			"South Korea",
 			"Spain",
 			"Sri Lanka",
@@ -294,40 +302,33 @@ export default {
 				localStorage.setItem("posawesome_hide_non_essential_fields", JSON.stringify(val));
 			}
 		},
+		mobile_no(newVal) {
+			// Clear error when user types
+			this.mobileError = "";
+		},
 		birthday(newVal) {
-			// Check if the user has entered 8 digits without separators (e.g., 04111994)
 			if (newVal && /^\d{8}$/.test(newVal)) {
 				try {
 					const day = newVal.substring(0, 2);
 					const month = newVal.substring(2, 4);
 					const year = newVal.substring(4);
-
-					// Format it as a hyphenated date for display
 					this.birthday = `${day}-${month}-${year}`;
-
-					// Update calendar (implemented below)
 					this.updateCalendarDate(day, month, year);
 				} catch (error) {
 					console.error("Error processing 8-digit date:", error);
 				}
-			}
-			// Check if the date is already in DD-MM-YYYY format
-			else if (newVal && /^\d{2}-\d{2}-\d{4}$/.test(newVal)) {
+			} else if (newVal && /^\d{2}-\d{2}-\d{4}$/.test(newVal)) {
 				try {
 					const parts = newVal.split("-");
 					const day = parts[0];
 					const month = parts[1];
 					const year = parts[2];
-
-					// Update calendar to show the correct month
 					this.updateCalendarDate(day, month, year);
 				} catch (error) {
 					console.error("Error processing formatted date:", error);
 				}
 			}
 		},
-
-		// Add a watcher for the calendar menu to ensure it shows the right date when opened
 		birthday_menu(isOpen) {
 			if (isOpen && this.birthday && /^\d{2}-\d{2}-\d{4}$/.test(this.birthday)) {
 				try {
@@ -335,8 +336,6 @@ export default {
 					const day = parts[0];
 					const month = parts[1];
 					const year = parts[2];
-
-					// Update calendar date when menu opens
 					this.$nextTick(() => {
 						this.updateCalendarDate(day, month, year);
 					});
@@ -348,6 +347,34 @@ export default {
 	},
 	computed: {},
 	methods: {
+		// Nigerian mobile number validation
+		validateNigerianMobile(mobile) {
+			if (!mobile) return { valid: false, message: __("Mobile number is required") };
+			
+			// Remove spaces, dashes, and plus sign for validation
+			const cleaned = mobile.replace(/[\s\-\+]/g, "");
+			
+			// Nigerian mobile formats:
+			// 0XXXXXXXXXX (11 digits starting with 0)
+			// 234XXXXXXXXXX (13 digits starting with 234)
+			// Valid prefixes after 0 or 234: 70, 80, 81, 90, 91, 70, 71, etc.
+			
+			const nigerianPatterns = [
+				/^0[789][01]\d{8}$/,  // 11 digits: 0 + 70/80/81/90/91 + 8 digits
+				/^234[789][01]\d{8}$/ // 13 digits: 234 + 70/80/81/90/91 + 8 digits
+			];
+			
+			const isValid = nigerianPatterns.some(pattern => pattern.test(cleaned));
+			
+			if (!isValid) {
+				return { 
+					valid: false, 
+					message: __("Invalid Nigerian mobile number. Use format: 08012345678 or 2348012345678") 
+				};
+			}
+			
+			return { valid: true, message: "" };
+		},
 		focusCustomerNameField() {
 			this.$nextTick(() => {
 				const field = this.$refs.customerNameField;
@@ -366,22 +393,14 @@ export default {
 		handleConfirmEscape() {
 			this.confirmClose();
 		},
-		// Add a new method to update calendar date
 		updateCalendarDate(day, month, year) {
-			// First close the date picker if it's open
 			const wasOpen = this.birthday_menu;
 			this.birthday_menu = false;
-
-			// Use nextTick to ensure DOM updates
 			this.$nextTick(() => {
-				// Format date in YYYY-MM-DD format for Vuetify
 				const tempDate = `${year}-${month}-${day}`;
-
-				// Try to directly set the calendar's date
 				setTimeout(() => {
 					if (this.$refs.birthday_menu) {
 						this.$refs.birthday_menu.date = tempDate;
-						// Optionally reopen menu if it was open
 						if (wasOpen) {
 							this.birthday_menu = true;
 						}
@@ -390,7 +409,6 @@ export default {
 			});
 		},
 		confirm_close() {
-			// Check if any data has been entered
 			if (
 				this.customer_name ||
 				this.tax_id ||
@@ -402,7 +420,6 @@ export default {
 			) {
 				this.confirmDialog = true;
 			} else {
-				// If no data entered, just close
 				this.close_dialog();
 			}
 		},
@@ -418,9 +435,10 @@ export default {
 			this.customer_name = "";
 			this.tax_id = "";
 			this.mobile_no = "";
+			this.mobileError = "";
 			this.address_line1 = "";
 			this.city = "";
-			this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Pakistan";
+			this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Nigeria";
 			this.email_id = "";
 			this.referral_code = "";
 			this.birthday = "";
@@ -484,7 +502,6 @@ export default {
 				});
 		},
 		formatBirthdayOnInput() {
-			// Handle 8-digit format (DDMMYYYY)
 			if (this.birthday && /^\d{8}$/.test(this.birthday)) {
 				try {
 					const day = this.birthday.substring(0, 2);
@@ -503,6 +520,14 @@ export default {
 				return;
 			}
 
+			// Validate Nigerian mobile number
+			const mobileValidation = this.validateNigerianMobile(this.mobile_no);
+			if (!mobileValidation.valid) {
+				this.mobileError = mobileValidation.message;
+				frappe.throw(mobileValidation.message);
+				return;
+			}
+
 			if (!this.group) {
 				frappe.throw(__("Customer group is required"));
 				return;
@@ -513,19 +538,15 @@ export default {
 				return;
 			}
 
-			// Format birthday to YYYY-MM-DD if it exists and is in another format
 			let formatted_birthday = null;
 			if (this.birthday) {
 				try {
-					// First check if it's a date without separators (e.g., 04111994 for 04-11-1994)
 					if (/^\d{8}$/.test(this.birthday)) {
 						const day = this.birthday.substring(0, 2);
 						const month = this.birthday.substring(2, 4);
 						const year = this.birthday.substring(4);
 						formatted_birthday = `${year}-${month}-${day}`;
-					}
-					// Check if it's in DD-MM-YYYY format
-					else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(this.birthday)) {
+					} else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(this.birthday)) {
 						const parts = this.birthday.split("-");
 						if (parts.length === 3) {
 							const day = parts[0].padStart(2, "0");
@@ -533,9 +554,7 @@ export default {
 							const year = parts[2];
 							formatted_birthday = `${year}-${month}-${day}`;
 						}
-					}
-					// Handle DD/MM/YYYY format
-					else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(this.birthday)) {
+					} else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(this.birthday)) {
 						const parts = this.birthday.split("/");
 						if (parts.length === 3) {
 							const day = parts[0].padStart(2, "0");
@@ -543,12 +562,9 @@ export default {
 							const year = parts[2];
 							formatted_birthday = `${year}-${month}-${day}`;
 						}
-					}
-					// For any other format, try to use the browser's date parsing
-					else if (this.birthday) {
+					} else if (this.birthday) {
 						try {
 							const date = new Date(this.birthday);
-							// Check if the date is valid
 							if (!isNaN(date.getTime())) {
 								const year = date.getFullYear();
 								const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -565,7 +581,6 @@ export default {
 				}
 			}
 
-			// Create args object to use in callback
 			const args = {
 				customer_id: this.customer_id,
 				customer_name: this.customer_name,
@@ -642,13 +657,9 @@ export default {
 			});
 		},
 		onDateSelect() {
-			// Close the menu
 			this.birthday_menu = false;
-
-			// Format date if it's a JavaScript Date object or full date string (from date picker)
 			if (this.birthday) {
 				try {
-					// Handle both JavaScript Date objects and strings with GMT
 					let dateObj;
 					if (typeof this.birthday === "object") {
 						dateObj = this.birthday;
@@ -658,15 +669,11 @@ export default {
 					) {
 						dateObj = new Date(this.birthday);
 					} else {
-						// Already formatted or something else, leave it
 						return;
 					}
-
 					const year = dateObj.getFullYear();
 					const month = String(dateObj.getMonth() + 1).padStart(2, "0");
 					const day = String(dateObj.getDate()).padStart(2, "0");
-
-					// Format as DD-MM-YYYY
 					this.birthday = `${day}-${month}-${year}`;
 				} catch (error) {
 					console.error("Error formatting date from picker:", error);
@@ -685,13 +692,13 @@ export default {
 			this.customerDialog = true;
 			this.focusCustomerNameField();
 
-			if (data) {
+			if (data && data.name) {
+				// Editing existing customer
 				this.customer_name = data.customer_name;
 				this.customer_id = data.name;
 				this.address_line1 = data.address_line1 || "";
 				this.city = data.city || "";
-				this.country =
-					data.country || (this.pos_profile && this.pos_profile.posa_default_country) || "Pakistan";
+				this.country = data.country || (this.pos_profile && this.pos_profile.posa_default_country) || "Nigeria";
 				this.tax_id = data.tax_id;
 				this.mobile_no = data.mobile_no;
 				this.email_id = data.email_id;
@@ -702,22 +709,31 @@ export default {
 				this.loyalty_points = data.loyalty_points;
 				this.loyalty_program = data.loyalty_program;
 				this.gender = data.gender;
+			} else if (data && data.prefill_mobile) {
+				// New customer with pre-filled mobile from search
+				const searchValue = data.prefill_mobile.trim();
+				// Check if the search value looks like a phone number (digits only or starts with +)
+				const cleaned = searchValue.replace(/[\s\-\+]/g, "");
+				if (/^\d+$/.test(cleaned) && cleaned.length >= 10) {
+					this.mobile_no = searchValue;
+				}
+				this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Nigeria";
 			} else {
-				this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Pakistan";
+				// New customer without pre-fill
+				this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Nigeria";
 			}
 		});
 		this.eventBus.on("register_pos_profile", (data) => {
 			this.pos_profile = data.pos_profile;
-			this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Pakistan";
+			this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Nigeria";
 		});
 		this.eventBus.on("payments_register_pos_profile", (data) => {
 			this.pos_profile = data.pos_profile;
-			this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Pakistan";
+			this.country = (this.pos_profile && this.pos_profile.posa_default_country) || "Nigeria";
 		});
 		this.getCustomerGroups();
 		this.getCustomerTerritorys();
 		this.getGenders();
-		// set default values for customer group and territory from user defaults
 		this.group = frappe.defaults.get_user_default("Customer Group");
 		this.territory = frappe.defaults.get_user_default("Territory");
 	},
