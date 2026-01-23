@@ -523,9 +523,12 @@ export default {
 			// Validate Nigerian mobile number
 			const mobileValidation = this.validateNigerianMobile(this.mobile_no);
 			if (!mobileValidation.valid) {
-				this.mobileError = mobileValidation.message;
-				frappe.throw(mobileValidation.message);
-				return;
+    			this.mobileError = mobileValidation.message;
+    			this.eventBus.emit("show_message", {
+        			title: mobileValidation.message,
+        			color: "error",
+    			});
+    			return;
 			}
 
 			if (!this.group) {
