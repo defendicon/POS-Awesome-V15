@@ -112,6 +112,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
             "supplier": po_doc.supplier,
             "company": po_doc.company,
             "posting_date": receipt_date,
+			"currency": po_doc.currency,
         }
     )
     if default_warehouse:
