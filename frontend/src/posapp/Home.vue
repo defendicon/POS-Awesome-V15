@@ -165,11 +165,8 @@ export default {
 		UpdatePrompt,
 	},
 	mounted() {
-		// Wait for Frappe to fully render then remove sidebar
-		setTimeout(() => {
-			this.remove_frappe_nav();
-			this.setup_sidebar_observer();
-		}, 800);
+		// Poll for Frappe sidebar instead of fixed timeout
+		this.pollForFrappeNav();
 
 		// Rest of your initialization code...
 		window.addEventListener("resize", this.adjust_frappe_sidebar_offset);
@@ -221,6 +218,29 @@ export default {
 		}
 	},
 	methods: {
+		pollForFrappeNav(maxAttempts = 50, interval = 100) {
+			let attempts = 0;
+			const checkAndRemove = () => {
+				attempts++;
+				// Check if any sidebar elements exist
+				const selectors = [
+					".body-sidebar-container", 
+					".body-sidebar", 
+					".desk-sidebar", 
+					".app-sidebar", 
+					".layout-side-section"
+				];
+				const hasSidebar = selectors.some(sel => document.querySelector(sel));
+				
+				if (hasSidebar || attempts >= maxAttempts) {
+					this.remove_frappe_nav();
+					this.setup_sidebar_observer();
+				} else {
+					setTimeout(checkAndRemove, interval);
+				}
+			};
+			checkAndRemove();
+		},
 		setupNetworkListeners,
 		checkNetworkConnectivity,
 		detectHostType,
@@ -545,15 +565,16 @@ export default {
 		},
 
 		setup_sidebar_observer() {
-			// PERFORMANCE FIX: Check added nodes directly instead of re-querying entire document
+			const SIDEBAR_SELECTORS = '.body-sidebar-container, .body-sidebar, .desk-sidebar, .app-sidebar, .layout-side-section';
+			
 			const observer = new MutationObserver((mutations) => {
 				for (const mutation of mutations) {
 					for (const node of mutation.addedNodes) {
 						if (node.nodeType === Node.ELEMENT_NODE) {
 							// Check if the added node itself is a sidebar element or contains one
 							if (
-								node.matches('.body-sidebar-container, .body-sidebar, .desk-sidebar, .app-sidebar, .layout-side-section') ||
-								node.querySelector('.body-sidebar-container, .body-sidebar, .desk-sidebar, .app-sidebar, .layout-side-section')
+								node.matches(SIDEBAR_SELECTORS) ||
+								node.querySelector(SIDEBAR_SELECTORS)
 							) {
 								this.remove_frappe_nav();
 								return; // Exit after handling
