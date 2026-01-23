@@ -316,7 +316,9 @@ export default {
 		};
 
 		const new_customer = () => {
-			eventBus?.emit("open_update_customer", null);
+    		// Get the current search query to pre-fill mobile number
+    		const searchValue = customerDropdown.value?.$el?.querySelector("input")?.value || "";
+    		eventBus?.emit("open_update_customer", { prefill_mobile: searchValue });
 		};
 
 		const edit_customer = () => {
