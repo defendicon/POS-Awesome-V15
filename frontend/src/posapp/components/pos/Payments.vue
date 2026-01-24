@@ -1877,29 +1877,50 @@ export default {
 			}
 		},
 		// Set full amount for a payment method (or negative for returns)
-		set_full_amount(idx) {
-			const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
-			let totalAmount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+	set_full_amount(idx) {
+    	const isReturn = this.invoice_doc.is_return || this.invoiceType === "Return";
+    
+   		// Get the clicked payment method's name from the button text
+    	const clickedButton = event?.target?.textContent?.trim();
+    	console.log("Clicked button text:", clickedButton);
+    
+    	// Determine total amount based on payment type
+    	// Only round UP to nearest 50 for Cash payments
+    	let totalAmount;
+    	const isCashPayment = clickedButton && clickedButton.toLowerCase().includes('cash');
+    	
+    	if (isCashPayment) {
+        	// Round UP to nearest 50 for Cash
+        	const grandTotal = this.invoice_doc.grand_total || 0;
+        	const remainder = grandTotal % 50;
+        	totalAmount = remainder === 0 ? grandTotal : grandTotal + (50 - remainder);
+       		 // Update rounded_total for display
+        	this.invoice_doc.rounded_total = totalAmount;
+        	this.invoice_doc.rounding_adjustment = totalAmount - grandTotal;
+    	} else {
+        	// Use exact grand_total for non-cash payments
+        	totalAmount = this.invoice_doc.grand_total;
+        	// Reset rounding for non-cash
+        	this.invoice_doc.rounded_total = this.invoice_doc.grand_total;
+        	this.invoice_doc.rounding_adjustment = 0;
+    	}
+		
+    	console.log("Setting full amount for payment method idx:", idx);
+    	console.log("Is Cash payment:", isCashPayment, "Total Amount:", totalAmount);
+    	console.log("Current payments:", JSON.stringify(this.invoice_doc.payments));
 
-			console.log("Setting full amount for payment method idx:", idx);
-			console.log("Current payments:", JSON.stringify(this.invoice_doc.payments));
+   		// Reset all payment amounts first
+    	this.invoice_doc.payments.forEach((payment) => {
+        	payment.amount = 0;
+        	if (payment.base_amount !== undefined) {
+            	payment.base_amount = 0;
+        	}
+    	});
 
-			// Reset all payment amounts first
-			this.invoice_doc.payments.forEach((payment) => {
-				payment.amount = 0;
-				if (payment.base_amount !== undefined) {
-					payment.base_amount = 0;
-				}
-			});
-
-			// Get the clicked payment method's name from the button text
-			const clickedButton = event?.target?.textContent?.trim();
-			console.log("Clicked button text:", clickedButton);
-
-			// Set amount only for clicked payment method
-			const clickedPayment = this.invoice_doc.payments.find(
-				(payment) => payment.mode_of_payment === clickedButton,
-			);
+    	// Set amount only for clicked payment method
+    	const clickedPayment = this.invoice_doc.payments.find(
+        	(payment) => payment.mode_of_payment === clickedButton,
+    	);
 
 			if (clickedPayment) {
 				console.log("Found clicked payment:", clickedPayment.mode_of_payment);
