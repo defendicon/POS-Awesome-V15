@@ -47,7 +47,7 @@
 				<div class="pa-3">
 					<v-row 
 						v-for="(payment, index) in paymentLines" 
-						:key="index" 
+						:key="payment.mode_of_payment" 
 						class="payments pa-1 ma-0 align-center" 
 						dense
 					>
@@ -63,7 +63,7 @@
 								@change="handlePaymentAmountChange(payment, $event)"
 								:prefix="currencySymbol(currency)"
 								@focus="set_rest_amount(payment)"
-								type="number"
+								inputmode="decimal"
 							></v-text-field>
 						</v-col>
 						<v-col cols="6">
@@ -288,7 +288,7 @@ export default {
 				mode_of_payment: m.mode_of_payment,
 				amount: 0,
 				default: m.default,
-				type: m.type || 'Cash', // Assuming type exists, default to Cash
+				type: m.type,
 			}));
 
 			// Identify cash payment method
