@@ -213,6 +213,54 @@ _Stability and Confidence._
 
 ---
 
+# Phase 6: TypeScript Migration
+
+_The ultimate reliability upgrade._
+
+## 📐 6.1 Setup & Configuration
+
+- [ ] **Infrastructure Setup**
+    - **Goal:** Enable TypeScript in the build pipeline without breaking existing JS.
+    - **Action Plan:**
+        1.  **Install Dependencies:** `vue-tsc`, `typescript`, `@types/node`, `@vitejs/plugin-vue`.
+        2.  **Config:** Create `tsconfig.json` with `allowJs: true` to support incremental migration.
+        3.  **Linting:** Update ESLint config to parse TypeScript.
+
+## 🧱 6.2 Data Layer (The Foundation)
+
+- [ ] **Type Definitions**
+    - **Goal:** Define the "shape" of our data once and use it everywhere.
+    - **Files:** Create `frontend/src/posapp/types/`
+        - `index.ts` (Shared types)
+        - `models.ts` (Frappe DocTypes: `POSProfile`, `Item`, `Customer`, `Invoice`)
+- [ ] **API Migration**
+    - **Goal:** Ensure `api.call` returns typed promises.
+    - **Files:** `api.js` -> `api.ts`.
+    - **Services:** `itemService.js` -> `itemService.ts`, `authService.js` -> `authService.ts`.
+
+## 💾 6.3 State Management (Stores)
+
+- [ ] **Pinia Migration**
+    - **Goal:** Autocomplete for store state and actions.
+    - **Files:**
+        - `syncStore.js` -> `syncStore.ts`
+        - `toastStore.js` -> `toastStore.ts`
+        - `uiStore.js` -> `uiStore.ts`
+        - `itemsStore.js` -> `itemsStore.ts` (Major)
+        - `invoiceStore.js` -> `invoiceStore.ts` (Major)
+
+## 🧩 6.4 Component Migration Strategy
+
+- [ ] **Critical Components First**
+    - **Strategy:** Convert components with complex logic first to catch bugs.
+    - **Files:**
+        - `Home.vue` (Layout & Routing)
+        - `Pos.vue` (Main Logic Hub)
+        - `Invoice.vue` (Complex Form Logic)
+        - `ItemsTable.vue` (Props & Events)
+
+---
+
 ## 📝 Change Log / Progress
 
 | Date       | Item                                | Status    | Notes                                                                                                                                |
