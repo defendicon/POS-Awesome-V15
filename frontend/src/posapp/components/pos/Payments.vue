@@ -842,6 +842,9 @@ import { useCustomersStore } from "../../stores/customersStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
+import { useUIStore } from "../../stores/uiStore.js";
+import { useToastStore } from "../../stores/toastStore.js";
+import invoiceService from "../../services/invoiceService.js";
 
 export default {
 	// Using format mixin for shared formatting methods
@@ -849,8 +852,21 @@ export default {
 	setup() {
 		const invoiceStore = useInvoiceStore();
 		const customersStore = useCustomersStore();
+		const uiStore = useUIStore();
+		const toastStore = useToastStore();
 		const { selectedCustomer, customerInfo } = storeToRefs(customersStore);
-		return { invoiceStore, selectedCustomer, customerInfoFromStore: customerInfo };
+		const { isFrozen, freezeTitle, freezeMessage } = storeToRefs(uiStore);
+
+		return {
+			invoiceStore,
+			selectedCustomer,
+			customerInfoFromStore: customerInfo,
+			uiStore,
+			toastStore,
+			isFrozen,
+			freezeTitle,
+			freezeMessage
+		};
 	},
 	data() {
 		return {
@@ -1691,20 +1707,15 @@ export default {
 			}
 
 			try {
-				const r = await frappe.call({
-					method:
-						this.invoiceType === "Order" && this.pos_profile.posa_create_only_sales_order
-							? "posawesome.posawesome.api.sales_orders.submit_sales_order"
-							: this.invoiceType === "Quotation"
-								? "posawesome.posawesome.api.quotations.submit_quotation"
-								: "posawesome.posawesome.api.invoices.submit_invoice",
-					args: {
-						data: data,
-						invoice: this.invoice_doc,
-						order: this.invoice_doc,
-						submit_in_background: this.pos_profile.posa_allow_submissions_in_background_job,
-					},
-				});
+				const message = await invoiceService.submitInvoice(
+					data,
+					this.invoice_doc,
+					this.invoiceType,
+					this.pos_profile
+				);
+				
+				// Wrap result to match existing structure
+				const r = { message };
 
 				if (!r.message) {
 					if (
@@ -2235,7 +2246,7 @@ export default {
 				return;
 			}
 
-			this.eventBus.emit("freeze", { title: __("Waiting for payment...") });
+			this.uiStore.freeze(__("Waiting for payment..."));
 
 			try {
 				this.invoice_doc.payments.forEach((payment) => {
@@ -2328,7 +2339,7 @@ export default {
 					color: "error",
 				});
 			} finally {
-				this.eventBus.emit("unfreeze");
+				this.uiStore.unfreeze();
 			}
 		},
 		// Get M-Pesa payment modes from backend

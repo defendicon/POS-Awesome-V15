@@ -86,6 +86,7 @@ import {
 	checkWebSocketConnectivity,
 } from "./composables/useNetwork.js";
 import { useRtl } from "./composables/useRtl.js";
+import authService from "./services/authService.js";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -490,7 +491,7 @@ export default {
 		},
 
 		handleLogout() {
-			frappe.call("logout").finally(() => {
+			authService.logout().finally(() => {
 				window.location.href = "/app";
 			});
 		},

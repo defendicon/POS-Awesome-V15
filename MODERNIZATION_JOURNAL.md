@@ -82,7 +82,7 @@ _Building the backbone for a scalable Single Page Application (SPA)._
 
 _Removing "Event Soup" and centralizing business logic._
 
-- [ ] **2.1 Remove Event Bus (`mitt`)**
+- [x] **2.1 Remove Event Bus (`mitt`)**
     - **Current Status:** `mitt` is used globally. Key events identified: `show_message`, `freeze/unfreeze`, `add_item`, `pending_invoices_changed`.
     - **Action Plan:**
         1.  **Create `useToastStore` (Pinia)**:
@@ -95,16 +95,16 @@ _Removing "Event Soup" and centralizing business logic._
         4.  **Refactor `pending_invoices_changed`**:
             - Make `pendingInvoices` a reactive getter in `useInvoiceStore`. Components should watch this store state.
 
-- [ ] **2.2 Centralize API Services**
+- [x] **2.2 Centralize API Services**
     - **Current Status:** `frappe.call` is scattered. `Invoice.vue` & `invoiceItemMethods.js` contain ~20 raw calls. `customersStore.js` contains mixed API/Store logic.
     - **Action Plan:**
-        1.  **Create `frontend/src/posapp/services/base.ts`**:
+        1.  **Create `frontend/src/posapp/services/api.js`**:
             - Wrapper around `frappe.call` for better typing and error handling.
-        2.  **Create `frontend/src/posapp/services/invoiceService.ts`**:
+        2.  **Create `frontend/src/posapp/services/invoiceService.js`**:
             - Move calls from `Invoice.vue`: `submit_invoice`, `validate_items`, `get_invoice_details`.
-        3.  **Create `frontend/src/posapp/services/customerService.ts`**:
+        3.  **Create `frontend/src/posapp/services/authService.js`**:
             - Extract calls from `customersStore.js`: `get_customer_names`, `get_customers_count`.
-        4.  **Create `frontend/src/posapp/services/itemService.ts`**:
+        4.  **Create `frontend/src/posapp/services/itemService.js`**:
             - Extract calls from `itemsStore.js`.
 
 - [ ] **2.3 Documentation Update**
@@ -203,7 +203,7 @@ _Stability and Confidence._
         1.  **Update CI:** Modify `.github/workflows/ci.yml`:
             ```yaml
             - name: Run Frontend Tests
-              run: |
+            - run: |
                   cd frontend
                   yarn install
                   yarn test
@@ -217,6 +217,8 @@ _Stability and Confidence._
 
 ## 📝 Change Log / Progress
 
-| Date       | Item             | Status    | Notes                |
-| ---------- | ---------------- | --------- | -------------------- |
-| 2026-01-25 | Journal Creation | Completed | Roadmap established. |
+| Date       | Item               | Status    | Notes                                                                            |
+| ---------- | ------------------ | --------- | -------------------------------------------------------------------------------- |
+| 2026-01-25 | Journal Creation   | Completed | Roadmap established.                                                             |
+| 2026-01-25 | Phase 2.1 Refactor | Completed | Created `toastStore`, `uiStore`, `socketStore` to replace Event Bus.             |
+| 2026-01-25 | Phase 2.2 Refactor | Completed | Created `api.js`, `authService.js`, `invoiceService.js` to centralize API calls. |
