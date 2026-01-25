@@ -17,8 +17,11 @@ import {
 	saveItemsBulk,
 	clearStoredItems,
 	setItemsLastSync,
+	clearStoredItems,
+	setItemsLastSync,
 	clearItemDetailsCache,
 } from "../../offline/index.js";
+import itemService from "../services/itemService.js";
 
 const DEFAULT_PAGE_SIZE = 200;
 const LARGE_CATALOG_THRESHOLD = 5000;
@@ -248,14 +251,11 @@ export const useItemsStore = defineStore("items", () => {
 				itemGroups.value = groups;
 			} else {
 				// Fallback to API
-				const response = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_items_groups",
-					args: {},
-				});
+				const response = await itemService.getItemGroups();
 
-				if (response.message) {
+				if (response) {
 					const groups = ["ALL"];
-					response.message.forEach((element) => {
+					response.forEach((element) => {
 						groups.push(element.name);
 					});
 					itemGroups.value = groups;
@@ -338,18 +338,12 @@ export const useItemsStore = defineStore("items", () => {
 				args.limit = resolvedLimit;
 			}
 
-			const response = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_items",
-				args,
-				signal: abortController.signal,
-			});
+			const fetchedItems = await itemService.getItems(args, abortController.signal);
 
 			// Check if request is still valid
 			if (requestToken.value !== currentRequestToken) {
 				return;
 			}
-
-			const fetchedItems = response.message || [];
 
 			// Update state
 			cachedPagination.value.enabled = false;
@@ -589,17 +583,13 @@ export const useItemsStore = defineStore("items", () => {
 
 		try {
 			// Search for item by barcode on server
-			const response = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_items_from_barcode",
-				args: {
-					selling_price_list: activePriceList.value,
-					currency: posProfile.value.currency,
-					barcode: barcode,
-				},
+			const newItem = await itemService.getItemsFromBarcode({
+				selling_price_list: activePriceList.value,
+				currency: posProfile.value.currency,
+				barcode: barcode,
 			});
 
-			if (response && response.message) {
-				const newItem = response.message;
+			if (newItem) {
 
 				if (newItem.scale_qty !== undefined && newItem.scale_qty !== null) {
 					const parsedQty = parseFloat(newItem.scale_qty);
@@ -658,13 +648,9 @@ export const useItemsStore = defineStore("items", () => {
 				limit: 500,
 			};
 
-			const response = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_items",
-				args,
-			});
+			const fetchedItems = (await itemService.getItems(args)) || [];
 
-			const size = JSON.stringify(response).length;
-			const fetchedItems = response.message || [];
+			const size = JSON.stringify(fetchedItems).length;
 			let resolvedItems = [];
 
 			if (fetchedItems.length > 0) {

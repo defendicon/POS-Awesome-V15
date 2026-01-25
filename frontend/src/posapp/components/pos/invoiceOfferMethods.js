@@ -6,6 +6,7 @@ import {
 } from "../../plugins/print.js";
 import { isOffline } from "../../../offline/index.js";
 import { formatUtils } from "../../format.js";
+import itemService from "../../services/itemService.js";
 /* global __, frappe, flt */
 
 export default {
@@ -118,10 +119,7 @@ export default {
 			brand = this.brand_cache[item.item_code];
 		} else {
 			try {
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.items.get_item_brand",
-					args: { item_code: item.item_code },
-				});
+				const message = await itemService.getItemBrand(item.item_code);
 				brand = this.normalizeBrand(message);
 			} catch (error) {
 				console.error("Failed to fetch item brand:", error);
