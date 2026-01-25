@@ -120,19 +120,13 @@ _Removing "Event Soup" and centralizing business logic._
 
 _Making it look and feel premium._
 
-- [ ] **3.1 Global Design System (Vuetify Customization)**
+- [x] **3.1 Global Design System (Vuetify Customization)**
     - **Current Status:** heavy reliance on `theme.css` with CSS variables.
     - **Action Plan:**
         1.  **Migrate CSS to JS:** Move `theme.css` variables into `frontend/src/posapp/plugins/vuetify.ts` theme definition.
             ```javascript
-            const posTheme = {
-            	dark: false,
-            	colors: {
-            		primary: "#0097a7",
-            		background: "#ffffff",
-            		surface: "#f8f9fa",
-            	},
-            };
+            import { createVuetify } from "vuetify";
+            // ... full theme definition with pos colors
             ```
         2.  **Typography:** Define global font defaults in Vuetify config to remove `@fontsource` manual imports if possible, or standardize them.
 

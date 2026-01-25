@@ -1,5 +1,5 @@
-import { createVuetify } from "vuetify";
 import { createApp } from "vue";
+import vuetify from "./plugins/vuetify";
 import "@mdi/font/css/materialdesignicons.css";
 import "@fontsource/roboto/100.css";
 import "@fontsource/roboto/300.css";
@@ -20,8 +20,6 @@ import { useToastStore } from "./stores/toastStore.js";
 import { useSocketStore } from "./stores/socketStore.js";
 import router from "./router/index.js";
 import "../sw-updater.js"; // Initialize service worker auto-updater
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
 import Home from "./Home.vue";
 import { attachProfilerHelpers, initLongTaskObserver, isPerfEnabled } from "./utils/perf.js";
 
@@ -47,56 +45,7 @@ frappe.PosApp.posapp = class {
 	}
 	make_body() {
 		this.$el = this.$parent.find(".main-section");
-		const vuetify = createVuetify({
-			components,
-			directives,
-			locale: {
-				rtl: frappe.utils.is_rtl(),
-			},
-			theme: {
-				defaultTheme: "light",
-				themes: {
-					light: {
-						colors: {
-							background: "#FFFFFF",
-							primary: "#0097A7",
-							secondary: "#00BCD4",
-							accent: "#FF6B35",
-							success: "#66BB6A",
-							info: "#2196F3",
-							warning: "#FF9800",
-							error: "#E86674",
-							orange: "#E65100",
-							golden: "#A68C59",
-							badge: "#F5528C",
-							customPrimary: "#085294",
-						},
-					},
-					dark: {
-						dark: true,
-						colors: {
-							background: "#121212",
-							surface: "#1E1E1E",
-							primary: "#00D4FF",
-							primaryVariant: "#00A0CC",
-							secondary: "#03DAC6",
-							accent: "#FF6B35",
-							success: "#66BB6A",
-							info: "#2196F3",
-							warning: "#FF9800",
-							error: "#CF6679",
-							orange: "#FF6F00",
-							golden: "#A68C59",
-							badge: "#F5528C",
-							customPrimary: "#4FC3F7",
-							onBackground: "#FFFFFF",
-							onSurface: "#FFFFFF",
-							divider: "#373737",
-						},
-					},
-				},
-			},
-		});
+		// Vuetify instance is now imported from plugins/vuetify.ts
 		const app = createApp(Home);
 		app.component("VueDatePicker", VueDatePicker);
 		app.use(pinia);
