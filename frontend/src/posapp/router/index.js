@@ -20,7 +20,7 @@ const routes = [
 	},
 	{
 		path: "/reports",
-		component: () => import("../components/reports/Reports.vue"),
+		component: () => import("@/posapp/components/reports/Reports.vue"),
 		meta: { title: "Reports" }
 	},
 	{
