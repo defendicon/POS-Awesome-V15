@@ -3,7 +3,7 @@
 		<v-row class="h-100 ma-0">
 			<!-- Left Column: Item Selector -->
 			<v-col cols="12" md="5" class="h-100 pa-0 border-e">
-				<ItemsSelector context="purchase" />
+				<ItemsSelector context="purchase" @add-item="onAddItem" />
 			</v-col>
 
 			<!-- Right Column: Purchase Order Form (Cart) -->
@@ -307,11 +307,13 @@
 
 					<v-card-actions class="pa-4 border-t">
 						<v-spacer></v-spacer>
+						<ItemsSelector
+							context="purchase"
+							:showOnlyBarcodeItems="false"
+							class="flex-grow-1"
+							@add-item="onAddItem"
+						/>
 						<v-btn
-							color="success"
-							size="large"
-							variant="flat"
-							class="mr-2"
 							:loading="submitLoading"
 							:disabled="submitLoading || !purchaseItems.length"
 							@click="openPaymentDialog"
@@ -1020,8 +1022,6 @@ export default {
 	},
 	created() {
 		this.initialize();
-		// Listen for item addition from ItemsSelector
-		this.eventBus.on("add_item", this.onAddItem);
 	},
 	mounted() {
 		this.eventBus.on("register_pos_profile", (data) => {
@@ -1033,7 +1033,6 @@ export default {
 			this.itemsStore.updatePriceList(this.pos_profile.selling_price_list);
 		}
 		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("add_item", this.onAddItem);
 	},
 };
 </script>

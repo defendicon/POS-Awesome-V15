@@ -91,7 +91,9 @@ _Removing "Event Soup" and centralizing business logic._
         2.  **Create `useUIStore` (Pinia)**:
             - Move `freeze`/`unfreeze` logic here. `uiStore.setLoading(true/false)`.
         3.  **Refactor `BarcodePrinting.vue`**:
-            - Instead of `eventBus.emit('add_item', ...)`, call `cartStore.addItem(...)` directly.
+            - [x] Refactored `ItemsSelector` to emit `@add-item` event.
+            - [x] Updated `BarcodePrinting.vue`, `Pos.vue`, and `PurchaseOrders.vue` to listen to the event.
+            - Decoupled `add_item` global event from `ItemsSelector`.
         4.  **Refactor `pending_invoices_changed`**:
             - Make `pendingInvoices` a reactive getter in `useInvoiceStore`. Components should watch this store state.
 

@@ -2368,7 +2368,7 @@ export default {
 			// Add item to cart
 			const payload = { ...item };
 			delete payload._barcode_qty;
-			this.eventBus.emit("add_item", payload);
+			this.$emit("add-item", payload);
 			this.qty = 1;
 		},
 

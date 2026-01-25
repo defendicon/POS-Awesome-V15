@@ -17,6 +17,7 @@
 					context="barcode"
 					:showOnlyBarcodeItems="showOnlyBarcodeItems"
 					class="flex-grow-1"
+					@add-item="onAddItem"
 				/>
 			</v-col>
 
@@ -720,13 +721,11 @@ export default {
 		},
 	},
 	created() {
-		this.eventBus.on("add_item", this.onAddItem);
 		this.eventBus.on("register_pos_profile", (data) => {
 			this.pos_profile = data.pos_profile || {};
 		});
 	},
 	beforeUnmount() {
-		this.eventBus.off("add_item", this.onAddItem);
 		this.eventBus.off("register_pos_profile");
 	},
 };

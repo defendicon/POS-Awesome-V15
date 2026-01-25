@@ -21,7 +21,7 @@
 				cols="12"
 				class="pos dynamic-col"
 			>
-				<ItemsSelector></ItemsSelector>
+				<ItemsSelector @add-item="handleAddItem"></ItemsSelector>
 			</v-col>
 			<v-col v-show="showOffers" xl="5" lg="5" md="5" sm="5" cols="12" class="pos dynamic-col">
 				<PosOffers></PosOffers>
@@ -125,6 +125,10 @@ export default {
 			if (this.itemsLoaded && this.customersLoaded) {
 				console.info("Loading completed");
 			}
+		},
+		handleAddItem(item) {
+			// Temporary compatibility: re-emit global event until Invoice is refactored
+			this.eventBus.emit("add_item", item);
 		},
 	},
 
