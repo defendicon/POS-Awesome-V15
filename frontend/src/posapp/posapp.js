@@ -20,7 +20,7 @@ import { useToastStore } from "./stores/toastStore.js";
 import { useSocketStore } from "./stores/socketStore.js";
 import router from "./router/index.js";
 import "../sw-updater.js"; // Initialize service worker auto-updater
-import Home from "./Home.vue";
+import App from "./App.vue";
 import { attachProfilerHelpers, initLongTaskObserver, isPerfEnabled } from "./utils/perf.js";
 
 attachProfilerHelpers();
@@ -46,14 +46,14 @@ frappe.PosApp.posapp = class {
 	make_body() {
 		this.$el = this.$parent.find(".main-section");
 		// Vuetify instance is now imported from plugins/vuetify.ts
-		const app = createApp(Home);
+		const app = createApp(App);
 		app.component("VueDatePicker", VueDatePicker);
 		app.use(pinia);
 		app.use(router);
 		app.use(eventBus);
 		app.use(vuetify);
 		app.use(themePlugin, { vuetify });
-		
+
 		// Global Error Handler
 		app.config.errorHandler = (err, instance, info) => {
 			console.error("Global Error:", err, info);
@@ -95,5 +95,5 @@ frappe.PosApp.posapp = class {
 				.catch((err) => console.error("SW registration failed", err));
 		}
 	}
-	setup_header() {}
+	setup_header() { }
 };

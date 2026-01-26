@@ -31,11 +31,8 @@
 				@update-after-delete="handleUpdateAfterDelete"
 			/>
 			<div class="page-content">
-				<router-view v-slot="{ Component }">
-					<transition name="fade-page" mode="out-in">
-						<component :is="Component" class="mx-4 md-4" />
-					</transition>
-				</router-view>
+				<!-- Replaced router-view with slot for layout usage -->
+				<slot />
 			</div>
 		</v-main>
 	</v-app>
@@ -43,15 +40,16 @@
 
 <script>
 /* global frappe, $ */
-import Navbar from "./components/Navbar.vue";
-import ClosingDialog from "./components/pos/ClosingDialog.vue";
-import AppLoadingOverlay from "./components/ui/LoadingOverlay.vue";
-import UpdatePrompt from "./components/ui/UpdatePrompt.vue";
-import { useLoading } from "./composables/useLoading.js";
-import { usePosShift } from "./composables/usePosShift.js";
-import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "./utils/loading.js";
-import { useCustomersStore } from "./stores/customersStore.js";
-import { useSyncStore } from "./stores/syncStore.js";
+// Note paths updated to be relative to layouts/ directory
+import Navbar from "../components/Navbar.vue";
+import ClosingDialog from "../components/pos/ClosingDialog.vue";
+import AppLoadingOverlay from "../components/ui/LoadingOverlay.vue";
+import UpdatePrompt from "../components/ui/UpdatePrompt.vue";
+import { useLoading } from "../composables/useLoading.js";
+import { usePosShift } from "../composables/usePosShift.js";
+import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "../utils/loading.js";
+import { useCustomersStore } from "../stores/customersStore.js";
+import { useSyncStore } from "../stores/syncStore.js";
 import { storeToRefs } from "pinia";
 import {
 	getOpeningStorage,
@@ -67,13 +65,13 @@ import {
 	getPendingOfflineInvoiceCount,
 	isOffline,
 	getLastSyncTotals,
-} from "../offline/index.js";
+} from "../../offline/index.js";
 import {
 	appendDebugPrintParam,
 	isDebugPrintEnabled,
 	silentPrint,
 	watchPrintWindow,
-} from "./plugins/print.js";
+} from "../plugins/print.js";
 import {
 	setupNetworkListeners,
 	checkNetworkConnectivity,
@@ -83,9 +81,9 @@ import {
 	checkCurrentOrigin,
 	checkExternalConnectivity,
 	checkWebSocketConnectivity,
-} from "./composables/useNetwork.js";
-import { useRtl } from "./composables/useRtl.js";
-import authService from "./services/authService.js";
+} from "../composables/useNetwork.js";
+import { useRtl } from "../composables/useRtl.js";
+import authService from "../services/authService.js";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -105,6 +103,7 @@ const FRAPPE_NAV_SELECTORS = [
 const FRAPPE_NAV_SELECTOR_STRING = FRAPPE_NAV_SELECTORS.join(", ");
 
 export default {
+    name: "DefaultLayout",
 	setup() {
 		const { isRtl, rtlStyles, rtlClasses } = useRtl();
 		const { overlayVisible } = useLoading();
@@ -525,7 +524,7 @@ export default {
 					} catch (err) {
 						console.warn("Failed to cache tax inclusive setting", err);
 					}
-					import("../offline/index.js")
+					import("../../offline/index.js")
 						.then((m) => {
 							if (m && m.setTaxInclusiveSetting) {
 								m.setTaxInclusiveSetting(val);
@@ -616,19 +615,5 @@ export default {
 	flex-direction: column;
 	min-height: 100%;
 	height: 100%;
-}
-
-/* Page Transition Styles */
-.fade-page-enter-active,
-.fade-page-leave-active {
-	transition:
-		opacity 0.2s ease,
-		transform 0.2s ease;
-}
-
-.fade-page-enter-from,
-.fade-page-leave-to {
-	opacity: 0;
-	transform: translateY(5px);
 }
 </style>
