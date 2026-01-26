@@ -104,7 +104,7 @@ def _resolve_input_row(items_by_code, item_code):
     return rows.pop(0)
 
 
-def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_date):
+def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_date, exchange_rate=1.0):
     receipt_date = payload.get("receipt_date") or payload.get("posting_date") or transaction_date
     receipt = frappe.get_doc(
         {
@@ -113,6 +113,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
             "company": po_doc.company,
             "posting_date": receipt_date,
 			"currency": po_doc.currency,
+            "conversion_rate": exchange_rate,
         }
     )
     if default_warehouse:
@@ -316,23 +317,29 @@ def _get_mode_of_payment_account(mode, company):
     return account
 
 
-def _create_payment_entry(reference_doc, payments, company, transaction_date):
+def _create_payment_entry(reference_doc, payments, company, transaction_date, exchange_rate=1.0, 
+                         supplier_currency=None, company_currency=None):
     if not payments:
         return []
 
     created_payments = []
 
-    # Check if reference is PO or PI
     ref_doctype = reference_doc.doctype
     ref_name = reference_doc.name
+    
+    if not supplier_currency:
+        supplier_currency = reference_doc.currency
+    if not company_currency:
+        company_currency = frappe.get_value("Company", company, "default_currency")
+    
+    is_multicurrency = supplier_currency != company_currency
+    if is_multicurrency and not exchange_rate:
+        exchange_rate = 1.0
 
-    # Determine outstanding amount
     outstanding_amount = 0
     if ref_doctype == "Purchase Invoice":
         outstanding_amount = reference_doc.outstanding_amount
     else:
-        # For Purchase Order, use grand_total (assuming advance payment for new PO)
-        # Or calculate if some advance was already made, but here it's new.
         outstanding_amount = reference_doc.grand_total
 
     for pay in payments:
@@ -343,6 +350,15 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
             continue
 
         paid_from_account = _get_mode_of_payment_account(mode, company)
+        paid_to_account = get_party_account("Supplier", reference_doc.supplier, company)
+        
+        if not paid_to_account:
+            frappe.throw(_("Please set Default Payable Account in Company {0}").format(company))
+
+        # Get the ACTUAL currency of the cash/bank account
+        paid_from_account_currency = frappe.db.get_value(
+            "Account", paid_from_account, "account_currency"
+        ) or company_currency
 
         pe = frappe.new_doc("Payment Entry")
         pe.payment_type = "Pay"
@@ -351,32 +367,55 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
         pe.mode_of_payment = mode
         pe.party_type = "Supplier"
         pe.party = reference_doc.supplier
-
         pe.paid_from = paid_from_account
-
-        # Fetch party account
-        pe.paid_to = get_party_account("Supplier", reference_doc.supplier, company)
-        if not pe.paid_to:
-             frappe.throw(_("Please set Default Payable Account in Company {0}").format(company))
-
-        pe.paid_amount = amount
-        pe.received_amount = amount 
-        # Note: If currencies differ, conversion handling is needed. 
-        # Assuming base currency for simplified POS flow or that user enters converted amount.
+        pe.paid_to = paid_to_account
         
-        # References
-        # Allocate only up to outstanding amount
+        if is_multicurrency:
+            # ALWAYS use the exchange rate to convert to company currency 
+            # regardless of whether cash account
+            
+            if paid_from_account_currency == supplier_currency:
+                # Case 1: Cash account is in Supplier Currency
+                # Both paid_from and paid_to 
+                pe.paid_from_account_currency = supplier_currency
+                pe.paid_to_account_currency = supplier_currency
+                # CRITICAL: Use actual exchange rate, not 1.0
+                pe.source_exchange_rate = exchange_rate
+                pe.target_exchange_rate = exchange_rate
+                pe.paid_amount = amount
+                pe.received_amount = amount
+                
+                
+            else:
+                # Case 2: Cash account is in Company Currency (YER)
+                pe.paid_from_account_currency = company_currency
+                pe.paid_to_account_currency = supplier_currency
+                pe.source_exchange_rate = exchange_rate
+                pe.target_exchange_rate = exchange_rate
+                pe.paid_amount = amount * exchange_rate
+                pe.received_amount = amount
+        else:
+            # Same currency - no conversion
+            pe.paid_amount = amount
+            pe.received_amount = amount
+
+        # Allocate to reference
         allocated_amount = 0
         if outstanding_amount > 0:
             allocated_amount = min(amount, outstanding_amount)
             outstanding_amount -= allocated_amount
         
         if allocated_amount > 0:
-            pe.append("references", {
+            ref_details = {
                 "reference_doctype": ref_doctype,
                 "reference_name": ref_name,
                 "allocated_amount": allocated_amount
-            })
+            }
+            if is_multicurrency:
+                ref_details["exchange_rate"] = exchange_rate
+                ref_details["exchange_gain_loss"] = 0
+            
+            pe.append("references", ref_details)
 
         pe.flags.ignore_permissions = True
         pe.insert()
@@ -443,6 +482,7 @@ def create_purchase_order(data):
         "transaction_date": transaction_date,
         "schedule_date": schedule_date,
         "currency": supplier_currency,
+        "conversion_rate": flt(payload.get("exchange_rate", 1)),
         "buying_price_list": buying_price_list,
     })
     
@@ -505,23 +545,42 @@ def create_purchase_order(data):
     receipt_name = None
     receipt_doc = None
     if receive_now:
-        receipt_name = _create_purchase_receipt(po_doc, payload, warehouse, transaction_date)
+        receipt_name = _create_purchase_receipt(
+        po_doc, payload, warehouse, transaction_date, 
+        exchange_rate=flt(payload.get("exchange_rate", 1))
+        )
         if receipt_name:
             receipt_doc = frappe.get_doc("Purchase Receipt", receipt_name)
     invoice_name = None
     if cint(payload.get("create_invoice", 0)):
         invoice_name = _create_purchase_invoice(
-            po_doc, payload, warehouse, transaction_date, receipt_doc=receipt_doc
+        po_doc, payload, warehouse, transaction_date, 
+        receipt_doc=receipt_doc,
+        exchange_rate=flt(payload.get("exchange_rate", 1))
         )
 
+    # Handle payments with exchange rate support
     payments = payload.get("payments")
+    exchange_rate = flt(payload.get("exchange_rate", 1))
+    # Use payload currency if provided (from frontend), otherwise use the supplier_currency already fetched earlier
+    supplier_currency = payload.get("currency") or supplier_currency
+    company_currency = payload.get("company_currency") or frappe.get_value("Company", company, "default_currency")
+    
     if payments:
         # Use PI if created, otherwise PO
         ref_doc = frappe.get_doc("Purchase Invoice", invoice_name) if invoice_name else po_doc
-        _create_payment_entry(ref_doc, payments, company, transaction_date)
+        _create_payment_entry(
+            ref_doc, 
+            payments, 
+            company, 
+            transaction_date,
+            exchange_rate=exchange_rate,
+            supplier_currency=supplier_currency,
+            company_currency=company_currency
+        )
 
     return {
-
+        
         "purchase_order": po_doc.name,
         "purchase_receipt": receipt_name,
         "purchase_invoice": invoice_name,
@@ -580,7 +639,7 @@ def search_items(search_text=None, limit=20):
     return results
 
 
-def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date, receipt_doc=None):
+def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date, receipt_doc=None, exchange_rate=1.0):
     invoice_date = payload.get("invoice_date") or payload.get("invoice_posting_date") or transaction_date
     invoice = frappe.get_doc(
         {
@@ -590,6 +649,7 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
             "posting_date": invoice_date,
             "purchase_order": po_doc.name,
             "currency": payload.get("currency") or po_doc.currency,
+            "conversion_rate": exchange_rate,
         }
     )
     if default_warehouse:

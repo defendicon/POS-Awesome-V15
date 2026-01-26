@@ -10,6 +10,21 @@
 			</v-card-title>
 
 			<v-card-text class="pa-0 overflow-y-auto" style="max-height: 60vh;">
+				<!-- Exchange Rate Info -->
+				<v-row v-if="requiresExchangeRate" class="mb-0 align-center bg-primary-lighten-5 pa-3 border-b">
+					<v-col cols="12" class="d-flex align-center justify-space-between">
+						<div class="d-flex align-center">
+							<v-icon color="primary" class="mr-2">mdi-currency-exchange</v-icon>
+							<span class="text-body-2">
+								{{ __("Exchange Rate") }}: 1 {{ supplierCurrency }} = {{ exchangeRate }} {{ companyCurrency }}
+							</span>
+						</div>
+						<v-chip color="info" size="small" variant="outlined">
+							{{ __("Multi-Currency") }}
+						</v-chip>
+					</v-col>
+				</v-row>
+
 				<!-- Payment Summary -->
 				<v-row v-if="totalAmount > 0" class="pa-3 ma-0" dense>
 					<v-col cols="6">
@@ -235,6 +250,16 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		exchangeRate: {
+            type: Number,
+            default: 1
+        },
+        requiresExchangeRate: {
+            type: Boolean,
+            default: false
+        },
+        supplierCurrency: String,
+        companyCurrency: String
 	},
 	emits: ["update:modelValue", "submit"],
 	data() {

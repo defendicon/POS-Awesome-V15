@@ -125,7 +125,57 @@
 									:label="__('Create Bill')"
 									class="ma-0 ml-4"
 								></v-switch>
+								<!-- NEW: Advance Payment Toggle -->
+								<v-switch
+									v-model="makeAdvancePayment"
+									density="compact"
+									hide-details
+									color="warning"
+									:label="__('Make Advance Payment')"
+									class="ma-0 ml-4"
+								></v-switch>
 							</div>
+
+							<!-- Exchange Rate Section - Shows immediately when supplier currency differs from company currency -->
+							<v-row v-if="requiresExchangeRate" dense class="mb-4 align-center">
+								<v-col cols="12" md="6" class="d-flex align-center">
+									<span class="text-body-2 mr-2">
+										{{ __("Exchange Rate") }}: 1 {{ supplierCurrency }} =
+									</span>
+									<v-text-field
+										v-model="exchangeRate"
+										density="compact"
+										variant="outlined"
+										color="primary"
+										hide-details
+										type="number"
+										step="0.0001"
+										style="width: 100px"
+										class="pos-themed-input mx-2"
+										:loading="exchangeRateLoading"
+										@blur="validateExchangeRate"
+									></v-text-field>
+									<span class="text-body-2">{{ companyCurrency }}</span>
+									<v-btn
+										icon="mdi-refresh"
+										size="x-small"
+										variant="text"
+										color="primary"
+										class="ml-2"
+										@click="fetchExchangeRate"
+										:loading="exchangeRateLoading"
+										:title="__('Refresh Rate')"
+									></v-btn>
+								</v-col>
+								<v-col cols="12" md="6" class="text-md-right">
+									<span class="text-caption text-medium-emphasis">
+										{{ __("Total") }} ({{ companyCurrency }}):
+									</span>
+									<span class="text-h6 text-primary font-weight-bold ml-2">
+										{{ currencySymbol(companyCurrency) }} {{ formatCurrency(totalAmountCompanyCurrency) }}
+									</span>
+								</v-col>
+							</v-row>
 
 							<v-divider class="mb-4"></v-divider>
 
@@ -274,8 +324,13 @@
 								</template>
 
 								<template v-slot:item.amount="{ item }">
-									<div class="text-right font-weight-bold">
-										{{ formatCurrency(item.qty * item.rate) }}
+									<div class="text-right">
+										<div class="font-weight-bold">
+											{{ currencySymbol(supplierCurrency) }} {{ formatCurrency(item.qty * item.rate) }}
+										</div>
+										<div v-if="requiresExchangeRate && exchangeRate" class="text-caption text-medium-emphasis">
+											≈ {{ currencySymbol(companyCurrency) }} {{ formatCurrency(item.qty * item.rate * exchangeRate) }}
+										</div>
 									</div>
 								</template>
 
@@ -290,11 +345,15 @@
 								</template>
 
 								<template v-slot:bottom>
-									<div
-										class="d-flex justify-end pa-4 font-weight-bold text-subtitle-1 border-t"
-									>
-										<span class="mr-4">{{ __("Total:") }}</span>
-										<span>{{ formatCurrency(totalAmount) }}</span>
+									<div class="d-flex flex-column align-end pa-4 border-t">
+										<div class="d-flex justify-end font-weight-bold text-subtitle-1">
+											<span class="mr-4">{{ __("Total") }} ({{ supplierCurrency }}):</span>
+											<span>{{ formatCurrency(totalAmount) }}</span>
+										</div>
+										<div v-if="requiresExchangeRate" class="d-flex justify-end text-caption text-medium-emphasis mt-1">
+											<span class="mr-4">{{ __("Equivalent") }} ({{ companyCurrency }}):</span>
+											<span>{{ formatCurrency(totalAmountCompanyCurrency) }}</span>
+										</div>
 									</div>
 								</template>
 							</v-data-table>
@@ -317,7 +376,7 @@
 							@click="openPaymentDialog"
 							block
 						>
-							{{ __("Pay") }}
+							{{ makeAdvancePayment ? __("Pay") : __("Submit Order") }}
 						</v-btn>
 					</v-card-actions>
 				</v-card>
@@ -331,6 +390,10 @@
 			:currency="supplierCurrency"
 			:pos-profile="pos_profile"
 			:create-invoice="createInvoice"
+			:exchange-rate="exchangeRate"
+			:requires-exchange-rate="requiresExchangeRate"
+			:supplier-currency="supplierCurrency"
+			:company-currency="companyCurrency"
 			@submit="handlePaymentSubmit"
 		/>
 
@@ -433,6 +496,7 @@ export default {
 		supplierDialog: false,
 		paymentDialog: false,
 		payments: [],
+		makeAdvancePayment: false,
 
 		supplierSubmitLoading: false,
 		supplierForm: {
@@ -446,6 +510,10 @@ export default {
 		supplierGroups: [],
 		supplierTypes: ["Company", "Individual"],
 		supplierCurrency: null,
+		exchangeRate: null,
+		companyCurrency: null,
+		exchangeRateLoading: false,
+		exchangeRateError: null,
 		warehouse: null,
 		warehouseOptions: [],
 		warehouseLoading: false,
@@ -473,7 +541,14 @@ export default {
 				{ title: __("Item"), key: "item_name", align: "start", width: "35%" },
 				{ title: __("UOM"), key: "uom", align: "center", width: "15%" },
 				{ title: __("Qty"), key: "qty", align: "center", width: "15%" },
-				{ title: __("Rate"), key: "rate", align: "center", width: "15%" },
+				{ 
+					title: this.requiresExchangeRate ? 
+						`${__("Rate")} (${this.supplierCurrency})` : 
+						__("Rate"), 
+					key: "rate", 
+					align: "center", 
+					width: "15%" 
+				},
 			];
 			if (this.receiveNow) {
 				headers.push({ title: __("Received"), key: "received_qty", align: "center", width: "10%" });
@@ -483,6 +558,17 @@ export default {
 				{ title: "", key: "actions", align: "center", sortable: false, width: "50px" },
 			);
 			return headers;
+		},
+		requiresExchangeRate() {
+			return this.supplierCurrency && 
+				this.companyCurrency && 
+				this.supplierCurrency !== this.companyCurrency;
+		},
+		totalAmountCompanyCurrency() {
+			if (!this.requiresExchangeRate || !this.exchangeRate) {
+				return this.totalAmount;
+			}
+			return this.totalAmount * this.exchangeRate;
 		},
 	},
 	watch: {
@@ -501,12 +587,19 @@ export default {
 			});
 		},
 
-		supplier(value) {
+		async supplier(value) {
 			if (value) {
 				const selectedSupplier = this.supplierOptions.find((s) => s.name === value);
 				this.supplierCurrency = selectedSupplier?.default_currency || this.pos_profile.currency;
+				// Fetch company currency immediately to show exchange rate if needed
+				await this.fetchCompanyCurrency();
+				if (this.requiresExchangeRate) {
+					await this.fetchExchangeRate();
+				}
 			} else {
 				this.supplierCurrency = this.pos_profile.currency;
+				this.companyCurrency = null;
+				this.exchangeRate = null;
 			}
 		},
 	},
@@ -816,7 +909,7 @@ export default {
 				this.supplierSubmitLoading = false;
 			}
 		},
-		async submitPurchaseOrder(print = false, printFormat = null, printInvoice = false) {
+		async submitPurchaseOrder(print = false, printFormat = null, printInvoice = false, paymentData = null) {
 			if (!this.supplier) {
 				this.errorMessage = __("Supplier is required.");
 				return;
@@ -842,6 +935,8 @@ export default {
 					company: this.pos_profile.company,
 					warehouse: this.warehouse,
 					currency: this.supplierCurrency,
+					company_currency: paymentData?.company_currency || this.companyCurrency || this.pos_profile.currency,
+					exchange_rate: paymentData?.exchange_rate || (this.requiresExchangeRate ? this.exchangeRate : 1),
 					transaction_date: this.formatDateForBackend(this.transactionDate),
 					schedule_date: this.formatDateForBackend(this.scheduleDate),
 					receive: this.receiveNow ? 1 : 0,
@@ -883,8 +978,6 @@ export default {
 					}
 
 					if (print) {
-						// Print either invoice or order
-						// Prioritize Invoice if requested and available
 						let doctype = "Purchase Order";
 						let docname = message.purchase_order;
 
@@ -917,23 +1010,6 @@ export default {
 			} finally {
 				this.submitLoading = false;
 			}
-		},
-		openPaymentDialog() {
-			if (!this.supplier) {
-				this.errorMessage = __("Supplier is required.");
-				return;
-			}
-			const items = this.purchaseItems.filter((item) => item.qty > 0);
-			if (!items.length) {
-				this.errorMessage = __("Please add at least one item.");
-				return;
-			}
-			this.errorMessage = "";
-			this.paymentDialog = true;
-		},
-		handlePaymentSubmit({ payments, print, print_format, print_invoice }) {
-			this.payments = payments;
-			this.submitPurchaseOrder(print, print_format, print_invoice);
 		},
 		async loadSupplierGroups() {
 			if (this.supplierGroups.length) return;
@@ -1016,6 +1092,109 @@ export default {
 
 			this.resetForm();
 			await Promise.all([this.searchSuppliers(""), this.loadSupplierGroups(), this.loadWarehouses()]);
+		},
+		async fetchCompanyCurrency() {
+			if (!this.pos_profile?.company) return;
+			
+			try {
+				const response = await frappe.call({
+					method: "frappe.client.get_value",
+					args: {
+						doctype: "Company",
+						filters: { name: this.pos_profile.company },
+						fieldname: "default_currency"
+					}
+				});
+				this.companyCurrency = response.message?.default_currency || this.pos_profile.currency;
+			} catch (error) {
+				console.error("Failed to fetch company currency:", error);
+				this.companyCurrency = this.pos_profile.currency;
+			}
+		},
+		
+		async fetchExchangeRate() {
+			if (!this.requiresExchangeRate) {
+				this.exchangeRate = 1;
+				return;
+			}
+			
+			this.exchangeRateLoading = true;
+			this.exchangeRateError = null;
+			
+			try {
+				const response = await frappe.call({
+					method: "erpnext.setup.utils.get_exchange_rate",
+					args: {
+						from_currency: this.supplierCurrency,
+						to_currency: this.companyCurrency,
+						transaction_date: frappe.datetime.nowdate(),
+						args: "for_buying"
+					}
+				});
+				
+				const rate = flt(response.message || 1);
+				if (rate <= 0 || isNaN(rate)) {
+					throw new Error(__("Invalid exchange rate received"));
+				}
+				this.exchangeRate = rate;
+			} catch (error) {
+				console.error("Failed to fetch exchange rate:", error);
+				this.exchangeRateError = error.message;
+				this.exchangeRate = 1;
+			} finally {
+				this.exchangeRateLoading = false;
+			}
+		},
+		
+		validateExchangeRate() {
+			if (!this.exchangeRate || this.exchangeRate <= 0) {
+				this.exchangeRate = 1;
+			}
+		},
+		
+		// Update openPaymentDialog to fetch currencies
+		async openPaymentDialog() {
+			if (!this.supplier) {
+				this.errorMessage = __("Supplier is required.");
+				return;
+			}
+			const items = this.purchaseItems.filter((item) => item.qty > 0);
+			if (!items.length) {
+				this.errorMessage = __("Please add at least one item.");
+				return;
+			}
+			this.errorMessage = "";
+			
+			// Fetch company currency and exchange rate if needed
+			if (this.requiresExchangeRate && !this.exchangeRate) {
+				await this.fetchExchangeRate();
+			}
+			
+			if (!this.makeAdvancePayment) {
+				this.submitPurchaseOrder(false, null, false, {
+					exchange_rate: this.requiresExchangeRate ? this.exchangeRate : 1,
+					supplier_currency: this.supplierCurrency,
+					company_currency: this.companyCurrency
+				});
+			} else {
+				this.paymentDialog = true;
+			}
+		},
+		
+		// Update handlePaymentSubmit to include exchange rate
+		handlePaymentSubmit({ payments, print, print_format, print_invoice }) {
+			this.payments = payments;
+			// Include exchange rate in submission if currencies differ
+			const submissionData = {
+				payments,
+				print,
+				print_format,
+				print_invoice,
+				exchange_rate: this.requiresExchangeRate ? this.exchangeRate : 1,
+				supplier_currency: this.supplierCurrency,
+				company_currency: this.companyCurrency
+			};
+			this.submitPurchaseOrder(print, print_format, print_invoice, submissionData);
 		},
 	},
 	created() {
