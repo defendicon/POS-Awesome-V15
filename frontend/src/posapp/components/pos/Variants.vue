@@ -1,3 +1,4 @@
+<template>
 	<v-row justify="center">
 		<v-dialog v-model="dialogVisible" max-width="600px">
 			<v-card min-height="500px">
