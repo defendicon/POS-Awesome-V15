@@ -92,6 +92,11 @@ export const useUIStore = defineStore("ui", () => {
 		lastInvoiceId.value = id;
 	}
 
+	const lastStockAdjustment = ref(null);
+	function setLastStockAdjustment(doc) {
+		lastStockAdjustment.value = doc;
+	}
+
 	const offers = ref([]);
 	function setOffers(data) {
 		offers.value = data || [];
@@ -147,6 +152,38 @@ export const useUIStore = defineStore("ui", () => {
 		draggedItem.value = item;
 	}
 
+	const offersCount = ref(0);
+	const appliedOffersCount = ref(0);
+	function setOfferCounts(total, applied) {
+		offersCount.value = total;
+		appliedOffersCount.value = applied;
+	}
+
+	const couponsCount = ref(0);
+	const appliedCouponsCount = ref(0);
+	function setCouponCounts(total, applied) {
+		couponsCount.value = total;
+		appliedCouponsCount.value = applied;
+	}
+
+	const showItemSettings = ref(false);
+	function toggleItemSettings() {
+		showItemSettings.value = !showItemSettings.value;
+	}
+	function setItemSettings(value) {
+		showItemSettings.value = value;
+	}
+
+	const triggerTopItemSelection = ref(0);
+	function selectTopItem() {
+		triggerTopItemSelection.value++;
+	}
+
+	const forceReloadTrigger = ref(0);
+	function triggerForceReloadItems() {
+		forceReloadTrigger.value++;
+	}
+
 	return {
 		isLoading,
 		loadingText,
@@ -197,5 +234,20 @@ export const useUIStore = defineStore("ui", () => {
 		closeVariants,
 		draggedItem,
 		setDraggedItem,
+		offersCount,
+		appliedOffersCount,
+		setOfferCounts,
+		couponsCount,
+		appliedCouponsCount,
+		setCouponCounts,
+		showItemSettings,
+		toggleItemSettings,
+		setItemSettings,
+		triggerTopItemSelection,
+		selectTopItem,
+		forceReloadTrigger,
+		triggerForceReloadItems,
+		lastStockAdjustment,
+		setLastStockAdjustment,
 	};
 });

@@ -300,10 +300,8 @@ export default {
 			return [];
 		},
 		updateCounters() {
-			this.eventBus.emit("update_offers_counters", {
-				offersCount: this.offersCount,
-				appliedOffersCount: this.appliedOffersCount,
-			});
+			// update store
+			this.uiStore.setOfferCounts(this.offersCount, this.appliedOffersCount);
 		},
 		updatePosCoupuns() {
 			const applyedOffers = this.pos_offers.filter(

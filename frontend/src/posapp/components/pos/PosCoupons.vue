@@ -203,10 +203,8 @@ export default {
 			this.eventBus.emit("update_invoice_coupons", this.posa_coupons);
 		},
 		updateCounters() {
-			this.eventBus.emit("update_coupons_counters", {
-				couponsCount: this.couponsCount,
-				appliedCouponsCount: this.appliedCouponsCount,
-			});
+			// update store
+			this.uiStore.setCouponCounts(this.couponsCount, this.appliedCouponsCount);
 		},
 	},
 

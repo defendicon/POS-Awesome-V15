@@ -1804,7 +1804,7 @@ export default {
 				const submittedCodes = submittedItems
 					.map((item) => (item ? item.item_code : null))
 					.filter((code) => code !== undefined && code !== null);
-				this.eventBus.emit("invoice_stock_adjusted", {
+				this.uiStore.setLastStockAdjustment({
 					items: submittedItems,
 					item_codes: submittedCodes,
 					timestamp: Date.now(),

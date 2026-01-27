@@ -5106,21 +5106,14 @@ export default {
 			}
 		});
 
-		// Event listeners
-		// Event listeners
+		// Event listeners - consolidated with store watchers
 		
-		// Watch Store
+		// Watch Store for Profile
 		this.$watch(
 			() => this.uiStore.posProfile,
 			async (newProfile) => {
 				if (newProfile && newProfile.name) {
 					this.pos_profile = newProfile;
-					// We might need stock settings from somewhere else if not in profile?
-					// Usually stock settings come with profile or separate call. 
-					// For now assuming profile has what we need or we fetch it.
-					// Actually the event passed `data` which had `pos_profile` AND `stock_settings`.
-					// We need to ensure we have stock settings.
-					
 					await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
 					this.startItemWorker();
 					this.update_cur_items_details();
@@ -5134,27 +5127,79 @@ export default {
 			},
 			{ deep: true, immediate: true }
 		);
-		this.eventBus.on("update_cur_items_details", () => {
-			this.update_cur_items_details();
-		});
-		this.eventBus.on("update_offers_counters", (data) => {
-			this.offersCount = data.offersCount;
-			this.appliedOffersCount = data.appliedOffersCount;
-		});
-		this.eventBus.on("update_coupons_counters", (data) => {
-			this.couponsCount = data.couponsCount;
-			this.appliedCouponsCount = data.appliedCouponsCount;
-		});
-		this.eventBus.on("cart_quantities_updated", this.handleCartQuantitiesUpdated);
-		this.eventBus.on("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);
-		this.eventBus.on("update_customer_price_list", (data) => {
-			const fallback = this.pos_profile?.selling_price_list || null;
-			if (data === null || data === undefined) {
-				this.customer_price_list = fallback;
-				return;
+
+		// Store Watchers for UI Updates
+		this.$watch(() => this.uiStore.offersCount, (val) => { this.offersCount = val; });
+		this.$watch(() => this.uiStore.appliedOffersCount, (val) => { this.appliedOffersCount = val; });
+		this.$watch(() => this.uiStore.couponsCount, (val) => { this.couponsCount = val; });
+		this.$watch(() => this.uiStore.appliedCouponsCount, (val) => { this.appliedCouponsCount = val; });
+
+		// Watch Invoice for Quantities
+		this.$watch(
+			() => this.invoiceStore.items,
+			() => {
+				this.handleCartQuantitiesUpdated();
+			},
+			{ deep: true }
+		);
+
+		// Watch for Settings Toggle
+		this.$watch(
+			() => this.uiStore.showItemSettings,
+			(val) => {
+				this.show_item_settings = val;
 			}
-			this.customer_price_list = data;
-		});
+		);
+		this.$watch(
+			() => this.show_item_settings,
+			(val) => {
+				if (val !== this.uiStore.showItemSettings) {
+					this.uiStore.setItemSettings(val);
+				}
+			}
+		);
+
+		// Watch for Top Item Selection
+		this.$watch(
+			() => this.uiStore.triggerTopItemSelection,
+			() => {
+				this.selectTopItem();
+			}
+		);
+
+		// Watch for Force Reload
+		this.$watch(
+			() => this.uiStore.forceReloadTrigger,
+			async () => {
+				await this.ensureStorageHealth();
+				if (!isOffline()) {
+					if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
+						await forceClearAllCache();
+					}
+					await this.get_items(true);
+				} else {
+					if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
+						await forceClearAllCache();
+						await this.get_items(true);
+					} else {
+						await this.get_items();
+					}
+				}
+			}
+		);
+
+		// Watch for Stock Adjustments (replacing invoice_stock_adjusted event)
+		this.$watch(
+			() => this.uiStore.lastStockAdjustment,
+			(val) => {
+				if (val) {
+					this.handleInvoiceStockAdjusted(val);
+				}
+			}
+		);
+
+		// Legacy support: update_cur_items_details is handled internally or via invoice updates
+		// update_customer_price_list is handled by useItemsIntegration via itemsStore watcher
 
 		// Trigger focus on item search
 		this.$watch(
@@ -5163,31 +5208,6 @@ export default {
 				this.focusItemSearch();
 			}
 		);
-
-		this.eventBus.on("select_top_item", () => {
-			this.selectTopItem();
-		});
-		this.eventBus.on("toggle_item_selector_settings", () => {
-			this.toggleItemSettings();
-		});
-
-		// Manually trigger a full item reload when requested
-		this.eventBus.on("force_reload_items", async () => {
-			await this.ensureStorageHealth();
-			if (!isOffline()) {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					await forceClearAllCache();
-				}
-				await this.get_items(true);
-			} else {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					await forceClearAllCache();
-					await this.get_items(true);
-				} else {
-					await this.get_items();
-				}
-			}
-		});
 
 		this.eventBus.on("server-online", async () => {
 			if (this.items && this.items.length > 0) {

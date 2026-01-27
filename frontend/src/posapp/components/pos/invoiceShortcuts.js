@@ -73,13 +73,13 @@ export default {
 
 		if (isDigit(event, 3)) {
 			consumeEvent(event);
-			this.eventBus.emit("focus_item_search");
+			this.uiStore.triggerItemSearchFocus();
 			return;
 		}
 
 		if (isDigit(event, 4)) {
 			consumeEvent(event);
-			this.eventBus.emit("select_top_item");
+			this.uiStore.selectTopItem();
 			return;
 		}
 
@@ -184,7 +184,7 @@ export default {
 
 		if (isLetter(event, "m")) {
 			consumeEvent(event);
-			this.eventBus.emit("toggle_item_selector_settings");
+			this.uiStore.toggleItemSettings();
 			return;
 		}
 
