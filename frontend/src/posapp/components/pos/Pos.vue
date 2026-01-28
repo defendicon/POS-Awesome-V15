@@ -178,7 +178,11 @@ export default {
 			}
 		},
 		handleAddItem(item) {
-			this.invoiceStore.addItem(item);
+			if (this.eventBus?.emit) {
+				this.eventBus.emit("add_item", item);
+			} else {
+				this.invoiceStore.addItem(item);
+			}
 		},
 		handleRegisterPosData(data) {
 			this.pos_profile = data.pos_profile;
@@ -191,7 +195,7 @@ export default {
 		},
 		closeOpeningDialog() {
 			this.dialog = false;
-		}
+		},
 	},
 
 	mounted: function () {
@@ -221,7 +225,7 @@ export default {
 						this.checkLoadingComplete();
 					}
 				},
-				{ immediate: true }
+				{ immediate: true },
 			);
 		});
 	},
