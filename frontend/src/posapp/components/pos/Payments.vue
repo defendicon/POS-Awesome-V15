@@ -1461,8 +1461,7 @@ export default {
 				this.invoiceStore.resetPostingDate();
 			}
 		},
-		// Highlight and focus the submit button when payment screen opens
-		// Logic moved to watcher on activeView
+		// handleShowPayment removed - state managed by uiStore/computed
 		// Reset all cash payments to zero
 		reset_cash_payments() {
 			this.invoice_doc.payments.forEach((payment) => {

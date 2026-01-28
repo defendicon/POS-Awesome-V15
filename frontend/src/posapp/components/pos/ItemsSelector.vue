@@ -791,6 +791,7 @@ export default {
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
 		const { selectedCustomer } = storeToRefs(customersStore);
+		const { invoiceStore } = itemsIntegration; // Ensure invoiceStore is available if destructured or accessed
 
 		return {
 			...responsive,
@@ -801,6 +802,7 @@ export default {
 			selectedCustomer,
 			toastStore,
 			uiStore,
+			invoiceStore, // Expose invoiceStore to template
 		};
 	},
 	components: {
