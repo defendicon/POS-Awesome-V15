@@ -307,12 +307,6 @@
 
 					<v-card-actions class="pa-4 border-t">
 						<v-spacer></v-spacer>
-						<ItemsSelector
-							context="purchase"
-							:showOnlyBarcodeItems="false"
-							class="flex-grow-1"
-							@add-item="onAddItem"
-						/>
 						<v-btn
 							:loading="submitLoading"
 							:disabled="submitLoading || !purchaseItems.length"
@@ -470,7 +464,7 @@ export default {
 		submitLoading: false,
 	}),
 	computed: {
-		...mapStores(useItemsStore),
+		...mapStores(useItemsStore, useUIStore),
 		allowCreateSupplier() {
 			return !!this.pos_profile?.posa_allow_create_purchase_suppliers;
 		},
@@ -789,7 +783,7 @@ export default {
 		},
 		async submitSupplier() {
 			if (!this.supplierForm.supplier_name) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("Supplier name is required"),
 					color: "error",
 				});
@@ -807,7 +801,7 @@ export default {
 					},
 				});
 				if (message && message.name) {
-					this.toastStore.show( {
+					this.toastStore.show({
 						title: __("Supplier created successfully"),
 						color: "success",
 					});
@@ -817,7 +811,7 @@ export default {
 				}
 			} catch (error) {
 				console.error("Failed to create supplier:", error);
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("Supplier creation failed"),
 					color: "error",
 				});
@@ -882,7 +876,7 @@ export default {
 					} else if (message.purchase_invoice) {
 						title = __("Purchase order and invoice created");
 					}
-					this.toastStore.show( {
+					this.toastStore.show({
 						title,
 						color: "success",
 					});
@@ -1036,7 +1030,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile || {};
 			},
-			{ deep: true, immediate: true }
+			{ deep: true, immediate: true },
 		);
 	},
 	beforeUnmount() {
@@ -1295,4 +1289,3 @@ export default {
 	font-size: 0.85em;
 }
 </style>
-
