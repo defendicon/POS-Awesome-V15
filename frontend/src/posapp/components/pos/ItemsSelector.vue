@@ -769,6 +769,7 @@ import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
+import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { storeToRefs } from "pinia";
 
 export default {
@@ -790,8 +791,8 @@ export default {
 		const customersStore = useCustomersStore();
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
+		const invoiceStore = useInvoiceStore();
 		const { selectedCustomer } = storeToRefs(customersStore);
-		const { invoiceStore } = itemsIntegration; // Ensure invoiceStore is available if destructured or accessed
 
 		return {
 			...responsive,

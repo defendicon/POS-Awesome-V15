@@ -1352,18 +1352,7 @@ export default {
 		},
 		activeView(newVal) {
 			if (newVal === "payment") {
-				this.paymentVisible = true;
-				this.$nextTick(() => {
-					setTimeout(() => {
-						const btn = this.$refs.submitButton;
-						const el = btn && btn.$el ? btn.$el : btn;
-						if (el) {
-							el.scrollIntoView({ behavior: "smooth", block: "center" });
-							el.focus();
-							this.highlightSubmit = true;
-						}
-					}, 100);
-				});
+				this.handleShowPayment();
 			} else {
 				this.paymentVisible = false;
 				this.highlightSubmit = false;
@@ -1461,7 +1450,20 @@ export default {
 				this.invoiceStore.resetPostingDate();
 			}
 		},
-		// handleShowPayment removed - state managed by uiStore/computed
+		handleShowPayment() {
+			this.paymentVisible = true;
+			this.$nextTick(() => {
+				setTimeout(() => {
+					const btn = this.$refs.submitButton;
+					const el = btn && btn.$el ? btn.$el : btn;
+					if (el) {
+						el.scrollIntoView({ behavior: "smooth", block: "center" });
+						el.focus();
+						this.highlightSubmit = true;
+					}
+				}, 100);
+			});
+		},
 		// Reset all cash payments to zero
 		reset_cash_payments() {
 			this.invoice_doc.payments.forEach((payment) => {
