@@ -861,6 +861,7 @@ export default {
 		const { isFrozen, freezeTitle, freezeMessage, activeView } = storeToRefs(uiStore);
 		return {
 			invoiceStore,
+			customersStore,
 			selectedCustomer,
 			customerInfoFromStore: customerInfo,
 			customerRefreshToken: refreshToken,
@@ -1151,7 +1152,7 @@ export default {
 		returnValidityEnabled() {
 			return Boolean(
 				this.pos_profile?.posa_enable_return_validity ||
-				this.pos_settings?.posa_enable_return_validity,
+					this.pos_settings?.posa_enable_return_validity,
 			);
 		},
 		returnValidityMinDate() {
@@ -1702,6 +1703,9 @@ export default {
 					if (print) {
 						this.print_offline_invoice(this.invoice_doc);
 					}
+					if (this.customersStore?.setSelectedCustomer) {
+						this.customersStore.setSelectedCustomer(this.pos_profile?.customer || null);
+					}
 					this.eventBus.emit("clear_invoice");
 					this.eventBus.emit("focus_item_search");
 					this.eventBus.emit("reset_posting_date");
@@ -1812,6 +1816,9 @@ export default {
 					timestamp: Date.now(),
 				});
 				this.finishSubmissionNavigation(true);
+				if (this.customersStore?.setSelectedCustomer) {
+					this.customersStore.setSelectedCustomer(this.pos_profile?.customer || null);
+				}
 				this.scheduleBackgroundStatusCheck(responseInvoiceName, r.message?.doctype);
 			} catch (exc) {
 				console.error("Error submitting invoice:", exc);

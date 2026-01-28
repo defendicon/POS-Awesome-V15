@@ -914,9 +914,6 @@ export function useItemAddition() {
 
 		// Always reset to default customer after invoice
 		context.customer = context.pos_profile.customer;
-		if (context.customersStore?.setSelectedCustomer) {
-			context.customersStore.setSelectedCustomer(context.pos_profile.customer || null);
-		}
 
 		context.eventBus.emit("set_customer_readonly", false);
 		context.invoiceType = context.pos_profile.posa_default_sales_order ? "Order" : "Invoice";

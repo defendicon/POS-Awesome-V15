@@ -1543,6 +1543,10 @@ export default {
 			});
 		}
 		this.clear_invoice();
+		this.customer = this.pos_profile?.customer || "";
+		if (this.customersStore?.setSelectedCustomer) {
+			this.customersStore.setSelectedCustomer(this.customer || null);
+		}
 		this.eventBus.emit("focus_item_search");
 		this.cancel_dialog = false;
 	},
