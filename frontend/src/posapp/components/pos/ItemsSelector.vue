@@ -214,6 +214,7 @@ import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
 import { extractItemCodeFromSearch } from "../../utils/searchUtils.js";
 import { openItemSelectionDialog } from "../../utils/itemSelectionDialog.js";
+import { loadItemSelectorSettings, saveItemSelectorSettings } from "../../utils/itemSelectorSettings.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -1525,55 +1526,6 @@ export default {
 					},
 				});
 			}
-		},
-		getItemsHeaders() {
-			if (this.context === "purchase") {
-				return [
-					{
-						title: __("Item"),
-						key: "item_name",
-						align: "start",
-						sortable: true,
-						width: "40%",
-					},
-					{
-						title: __("Buying Price"),
-						key: "rate",
-						align: "end",
-						sortable: true,
-						width: "25%",
-					},
-					{
-						title: __("Stock"),
-						key: "actual_qty",
-						align: "end",
-						sortable: true,
-						width: "20%",
-					},
-				];
-			}
-			const items_headers = [
-				{
-					title: __("Name"),
-					align: "start",
-					sortable: true,
-					key: "item_name",
-				},
-				{
-					title: __("Code"),
-					align: "start",
-					sortable: true,
-					key: "item_code",
-				},
-				{ title: __("Rate"), key: "rate", align: "start" },
-				{ title: __("Available QTY"), key: "actual_qty", align: "start" },
-				{ title: __("UOM"), key: "stock_uom", align: "start" },
-			];
-			if (!this.pos_profile.posa_display_item_code) {
-				items_headers.splice(1, 1);
-			}
-
-			return items_headers;
 		},
 		select_item(event, item) {
 			const targets = document.querySelectorAll(".items-table-container");
@@ -3830,20 +3782,16 @@ export default {
 		},
 		saveItemSettings() {
 			if (!this.localStorageAvailable) return;
-			try {
-				const settings = {
-					hide_qty_decimals: this.hide_qty_decimals,
-					hide_zero_rate_items: this.hide_zero_rate_items,
-					show_last_invoice_rate: this.show_last_invoice_rate,
-					enable_background_sync: this.enable_background_sync,
-					background_sync_interval: this.background_sync_interval,
-					enable_custom_items_per_page: this.enable_custom_items_per_page,
-					items_per_page: this.items_per_page,
-				};
-				localStorage.setItem("posawesome_item_selector_settings", JSON.stringify(settings));
-			} catch (e) {
-				console.error("Failed to save item selector settings:", e);
-			}
+			const settings = {
+				hide_qty_decimals: this.hide_qty_decimals,
+				hide_zero_rate_items: this.hide_zero_rate_items,
+				show_last_invoice_rate: this.show_last_invoice_rate,
+				enable_background_sync: this.enable_background_sync,
+				background_sync_interval: this.background_sync_interval,
+				enable_custom_items_per_page: this.enable_custom_items_per_page,
+				items_per_page: this.items_per_page,
+			};
+			saveItemSelectorSettings(settings);
 		},
 		savePosProfileSetting(field, value) {
 			if (!this.pos_profile || !this.pos_profile.name) {
@@ -3855,37 +3803,33 @@ export default {
 		},
 		loadItemSettings() {
 			if (!this.localStorageAvailable) return;
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					if (typeof opts.hide_qty_decimals === "boolean") {
-						this.hide_qty_decimals = opts.hide_qty_decimals;
-					}
-					if (typeof opts.hide_zero_rate_items === "boolean") {
-						this.hide_zero_rate_items = opts.hide_zero_rate_items;
-					}
-					if (typeof opts.show_last_invoice_rate === "boolean") {
-						this.show_last_invoice_rate = opts.show_last_invoice_rate;
-					}
-					if (typeof opts.enable_background_sync === "boolean") {
-						this.enable_background_sync = opts.enable_background_sync;
-					}
-					if (typeof opts.background_sync_interval === "number") {
-						this.background_sync_interval = this.normalizeBackgroundSyncInterval(
-							opts.background_sync_interval,
-						);
-					}
-					if (typeof opts.enable_custom_items_per_page === "boolean") {
-						this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
-					}
-					if (typeof opts.items_per_page === "number") {
-						this.items_per_page = opts.items_per_page;
-						this.itemsPerPage = this.items_per_page;
-					}
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
+			const opts = loadItemSelectorSettings();
+			if (!opts) {
+				return;
+			}
+			if (typeof opts.hide_qty_decimals === "boolean") {
+				this.hide_qty_decimals = opts.hide_qty_decimals;
+			}
+			if (typeof opts.hide_zero_rate_items === "boolean") {
+				this.hide_zero_rate_items = opts.hide_zero_rate_items;
+			}
+			if (typeof opts.show_last_invoice_rate === "boolean") {
+				this.show_last_invoice_rate = opts.show_last_invoice_rate;
+			}
+			if (typeof opts.enable_background_sync === "boolean") {
+				this.enable_background_sync = opts.enable_background_sync;
+			}
+			if (typeof opts.background_sync_interval === "number") {
+				this.background_sync_interval = this.normalizeBackgroundSyncInterval(
+					opts.background_sync_interval,
+				);
+			}
+			if (typeof opts.enable_custom_items_per_page === "boolean") {
+				this.enable_custom_items_per_page = opts.enable_custom_items_per_page;
+			}
+			if (typeof opts.items_per_page === "number") {
+				this.items_per_page = opts.items_per_page;
+				this.itemsPerPage = this.items_per_page;
 			}
 		},
 		formatBackgroundSyncTime() {
@@ -4080,7 +4024,7 @@ export default {
 			return parseBooleanSetting(this.pos_profile?.posa_block_sale_beyond_available_qty);
 		},
 		headers() {
-			return this.getItemsHeaders();
+			return getItemsTableHeaders(this.context, this.pos_profile || {});
 		},
 		cardColumns() {
 			if (this.windowWidth <= 768) {

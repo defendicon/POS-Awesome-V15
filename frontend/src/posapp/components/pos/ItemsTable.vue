@@ -559,6 +559,7 @@ import _ from "lodash";
 import { logComponentRender } from "../../utils/perf.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
+import { loadItemSelectorSettings } from "../../utils/itemSelectorSettings.js";
 import CartItemRow from "./CartItemRow.vue";
 export default {
 	name: "ItemsTable",
@@ -822,16 +823,8 @@ export default {
 			};
 		},
 		hide_qty_decimals() {
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					return !!opts.hide_qty_decimals;
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
-			}
-			return false;
+			const opts = loadItemSelectorSettings();
+			return !!opts?.hide_qty_decimals;
 		},
 		isRTL() {
 			if (this._rtlComputed !== undefined) {

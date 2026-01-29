@@ -225,6 +225,7 @@
 </template>
 
 <script>
+import { loadItemSelectorSettings } from "../../utils/itemSelectorSettings.js";
 export default {
 	props: {
 		pos_profile: Object,
@@ -274,16 +275,8 @@ export default {
 	],
 	computed: {
 		hide_qty_decimals() {
-			try {
-				const saved = localStorage.getItem("posawesome_item_selector_settings");
-				if (saved) {
-					const opts = JSON.parse(saved);
-					return !!opts.hide_qty_decimals;
-				}
-			} catch (e) {
-				console.error("Failed to load item selector settings:", e);
-			}
-			return false;
+			const opts = loadItemSelectorSettings();
+			return !!opts?.hide_qty_decimals;
 		},
 	},
 	watch: {
