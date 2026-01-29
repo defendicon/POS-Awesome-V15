@@ -91,13 +91,13 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 }
 
 .action-btn-consistent:hover {
-	background-color: rgba(25, 118, 210, 0.1) !important;
+	background-color: rgba(var(--v-theme-primary), 0.1) !important;
 	transform: translateY(-1px) !important;
 }
 
 .view-toggle-btn {
 	height: 32px;
-	border: 1px solid rgba(0, 0, 0, 0.12);
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
 }
 
 .dynamic-padding {

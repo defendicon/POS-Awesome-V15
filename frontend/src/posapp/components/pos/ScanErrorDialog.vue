@@ -80,7 +80,7 @@ export default {
 }
 
 .scan-error-details {
-	color: rgba(0, 0, 0, 0.72);
+	color: rgba(var(--v-theme-on-surface), 0.72);
 	font-size: 0.9rem;
 	line-height: 1.4;
 	margin-top: 12px;
@@ -91,11 +91,11 @@ export default {
 }
 
 :deep(.v-theme--dark) .scan-error-dialog .scan-error-code {
-	background-color: rgba(244, 67, 54, 0.25);
-	color: #ffebee;
+	background-color: rgba(var(--v-theme-error), 0.25);
+	color: rgb(var(--v-theme-on-error));
 }
 
 :deep(.v-theme--dark) .scan-error-dialog .scan-error-details {
-	color: rgba(255, 255, 255, 0.7);
+	color: rgba(var(--v-theme-on-surface), 0.7);
 }
 </style>

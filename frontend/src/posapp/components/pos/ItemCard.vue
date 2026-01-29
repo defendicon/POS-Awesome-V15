@@ -153,7 +153,7 @@ const onDragEnd = (event) => {
 	flex-direction: column;
 	height: 100%;
 	width: 100%;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	box-shadow: 0 2px 8px rgba(var(--v-theme-on-surface), 0.06);
 	will-change: transform;
 	backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
@@ -162,17 +162,17 @@ const onDragEnd = (event) => {
 
 .card-item-card:hover {
 	transform: translate3d(0, -2px, 0);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-	border-color: var(--primary-color, #1976d2);
+	box-shadow: 0 8px 24px rgba(var(--v-theme-on-surface), 0.12);
+	border-color: rgb(var(--v-theme-primary));
 }
 
 .card-item-card.item-highlighted {
-	border-color: var(--primary-color, #1976d2);
+	border-color: rgb(var(--v-theme-primary));
 	box-shadow:
-		0 0 0 3px rgba(25, 118, 210, 0.35),
-		0 8px 20px rgba(25, 118, 210, 0.2);
+		0 0 0 3px rgba(var(--v-theme-primary), 0.35),
+		0 8px 20px rgba(var(--v-theme-primary), 0.2);
 	transform: translate3d(0, -2px, 0);
-	background: rgba(25, 118, 210, 0.08);
+	background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .card-item-image-container {
@@ -248,7 +248,7 @@ const onDragEnd = (event) => {
 
 .primary-price {
 	font-weight: 700;
-	color: var(--primary-color, #1976d2);
+	color: rgb(var(--v-theme-primary));
 	font-size: 1rem;
 }
 
@@ -260,7 +260,7 @@ const onDragEnd = (event) => {
 .last-rate-chip {
 	margin-top: 4px;
 	font-size: 0.75rem;
-	color: var(--secondary-color, #757575);
+	color: rgb(var(--v-theme-secondary));
 	background: rgba(var(--v-theme-on-surface), 0.08);
 	padding: 2px 6px;
 	border-radius: 4px;
@@ -288,7 +288,7 @@ const onDragEnd = (event) => {
 }
 
 .stock-amount.negative-number {
-	color: var(--error-color, #d32f2f);
+	color: rgb(var(--v-theme-error));
 }
 
 .stock-uom {

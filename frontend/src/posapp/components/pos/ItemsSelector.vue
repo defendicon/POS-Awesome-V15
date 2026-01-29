@@ -1704,9 +1704,9 @@ export default {
 			const target = targets[targets.length - 1];
 			if (target && this.fly) {
 				const placeholder = document.createElement("div");
+				placeholder.className = "item-fly-placeholder";
 				placeholder.style.width = "40px";
 				placeholder.style.height = "40px";
-				placeholder.style.background = "#ccc";
 				placeholder.style.borderRadius = "50%";
 				placeholder.style.position = "fixed";
 				placeholder.style.top = `${event.clientY - 20}px`;
@@ -3826,23 +3826,34 @@ export default {
 			html += '<div class="item-selection-list">';
 
 			items.forEach((item, index) => {
-				html += `
-		<div class="item-option p-3 mb-2 border rounded cursor-pointer" data-item-index="${index}" style="border: 1px solid #ddd; cursor: pointer;">
-			<div class="d-flex align-items-center">
-			<img src="${item.image || placeholderImage}"
-				style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;" />
-			<div>
-				<div class="font-weight-bold">${item.item_name}</div>
-				<div class="text-muted small">${item.item_code}</div>
-				<div class="text-primary">${this.format_currency(item.rate, this.pos_profile.currency, this.ratePrecision(item.rate))}</div>
-			</div>
-			</div>
-		</div>
-		`;
+				html += this.buildItemSelectionOption(item, index);
 			});
 
 			html += "</div>";
 			return html;
+		},
+		buildItemSelectionOption(item, index) {
+			const price = this.format_currency(
+				item.rate,
+				this.pos_profile.currency,
+				this.ratePrecision(item.rate),
+			);
+			return `
+		<div class="item-option item-selection-option p-3 mb-2 rounded cursor-pointer" data-item-index="${index}">
+			<div class="d-flex align-items-center">
+				<img
+					class="item-selection-image"
+					src="${item.image || placeholderImage}"
+					alt="${item.item_name}"
+				/>
+				<div>
+					<div class="font-weight-bold">${item.item_name}</div>
+					<div class="text-muted small">${item.item_code}</div>
+					<div class="text-primary">${price}</div>
+				</div>
+			</div>
+		</div>
+		`;
 		},
 		handleItemNotFound(scannedCode) {
 			console.warn("Item not found for scanned code:", scannedCode);
@@ -4698,13 +4709,17 @@ export default {
 	contain: layout style;
 }
 
+.item-fly-placeholder {
+	background-color: rgba(var(--v-theme-on-surface), 0.2);
+}
+
 .item-container {
 	overflow-y: auto;
 	scrollbar-gutter: stable;
 }
 
 .text-success {
-	color: #4caf50 !important;
+	color: rgb(var(--v-theme-success)) !important;
 }
 
 /* Enhanced Arabic number support for ItemsSelector */
@@ -4731,7 +4746,7 @@ export default {
 
 /* Enhanced negative number styling for Arabic context */
 .negative-number {
-	color: #d32f2f !important;
+	color: rgb(var(--v-theme-error)) !important;
 	font-weight: 600;
 	/* Same enhanced font stack for negative numbers */
 	font-family:
@@ -4773,7 +4788,7 @@ export default {
 	height: calc(100% - 80px);
 	overflow-y: auto;
 	scrollbar-width: thin;
-	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+	scrollbar-color: rgba(var(--v-theme-on-surface), 0.2) transparent;
 	/* Performance optimizations */
 	contain: layout style;
 	will-change: scroll-position;
@@ -4804,7 +4819,7 @@ export default {
 }
 
 .items-card-grid::-webkit-scrollbar-thumb {
-	background-color: rgba(0, 0, 0, 0.2);
+	background-color: rgba(var(--v-theme-on-surface), 0.2);
 	border-radius: 4px;
 }
 
@@ -4827,23 +4842,23 @@ export default {
 }
 
 :deep(.item-row-highlighted) {
-	background-color: rgba(25, 118, 210, 0.32);
+	background-color: rgba(var(--v-theme-primary), 0.32);
 }
 
 :deep(.item-row-highlighted td) {
 	font-weight: 600;
-	color: var(--primary-color, #1976d2);
-	background-color: rgba(25, 118, 210, 0.32);
+	color: rgb(var(--v-theme-primary));
+	background-color: rgba(var(--v-theme-primary), 0.32);
 }
 
 .last-rate-inline {
-	color: rgba(0, 0, 0, 0.6);
+	color: rgba(var(--v-theme-on-surface), 0.6);
 	white-space: nowrap;
 }
 
 :deep(.v-theme--dark) .last-rate-chip,
 :deep(.v-theme--dark) .last-rate-inline {
-	color: rgba(255, 255, 255, 0.75);
+	color: rgba(var(--v-theme-on-surface), 0.75);
 }
 
 .sleek-data-table {
@@ -4860,7 +4875,7 @@ export default {
 }
 
 .sleek-data-table:hover {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+	box-shadow: 0 4px 12px rgba(var(--v-theme-on-surface), 0.15) !important;
 }
 
 /* Enhanced table header styling with modern gradients and Arabic support */
@@ -4871,16 +4886,21 @@ export default {
 	letter-spacing: 1px;
 	padding: 16px 20px;
 	transition: all 0.3s ease;
-	border-bottom: 3px solid #1976d2;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
-	color: #2c3e50;
+	border-bottom: 3px solid rgb(var(--v-theme-primary));
+	background: linear-gradient(
+		135deg,
+		rgb(var(--v-theme-surface)) 0%,
+		rgb(var(--v-theme-surface-variant)) 50%,
+		rgb(var(--v-theme-surface)) 100%
+	);
+	color: rgb(var(--v-theme-on-surface));
 	position: sticky !important;
 	top: 0 !important;
 	z-index: 10 !important;
 	backdrop-filter: blur(10px);
 	-webkit-backdrop-filter: blur(10px);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+	box-shadow: 0 2px 8px rgba(var(--v-theme-on-surface), 0.1);
+	text-shadow: 0 1px 2px rgba(var(--v-theme-on-surface), 0.2);
 	/* Enhanced Arabic number font stack */
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
@@ -4897,11 +4917,16 @@ export default {
 /* Enhanced dark theme header styling */
 :deep([data-theme="dark"]) .sleek-data-table th,
 :deep(.v-theme--dark) .sleek-data-table th {
-	background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%) !important;
-	border-bottom: 3px solid #3498db;
-	color: #ecf0f1;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	background: linear-gradient(
+		135deg,
+		rgb(var(--v-theme-surface)) 0%,
+		rgb(var(--v-theme-surface-variant)) 50%,
+		rgb(var(--v-theme-surface)) 100%
+	) !important;
+	border-bottom: 3px solid rgb(var(--v-theme-primary));
+	color: rgb(var(--v-theme-on-surface));
+	text-shadow: 0 1px 2px rgba(var(--v-theme-on-surface), 0.35);
+	box-shadow: 0 2px 8px rgba(var(--v-theme-on-surface), 0.3);
 }
 
 /* Table wrapper styling */
@@ -4931,21 +4956,21 @@ export default {
 /* Table row styling with gray theme */
 .sleek-data-table :deep(tr) {
 	transition: all 0.2s ease;
-	border-bottom: 1px solid #e0e0e0;
-	background-color: #fafafa;
+	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+	background-color: rgb(var(--v-theme-surface));
 }
 
 .sleek-data-table :deep(tr:hover) {
-	background-color: #f0f0f0;
+	background-color: rgba(var(--v-theme-on-surface), 0.06);
 	transform: translateY(-1px);
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 5px rgba(var(--v-theme-on-surface), 0.1);
 }
 
 /* Table cell styling with Arabic number support */
 .sleek-data-table :deep(td) {
 	padding: 12px 16px;
 	vertical-align: middle;
-	color: #424242;
+	color: rgb(var(--v-theme-on-surface));
 	/* Enhanced Arabic number font stack */
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
@@ -4961,22 +4986,6 @@ export default {
 }
 
 /* Dark theme row styling */
-:deep([data-theme="dark"]) .sleek-data-table tr,
-:deep(.v-theme--dark) .sleek-data-table tr {
-	background-color: #2d2d2d;
-	border-bottom: 1px solid #424242;
-}
-
-:deep([data-theme="dark"]) .sleek-data-table tr:hover,
-:deep(.v-theme--dark) .sleek-data-table tr:hover {
-	background-color: #3d3d3d;
-}
-
-:deep([data-theme="dark"]) .sleek-data-table td,
-:deep(.v-theme--dark) .sleek-data-table td {
-	color: #ffffff;
-}
-
 .truncate {
 	white-space: nowrap;
 	overflow: hidden;
@@ -4985,6 +4994,26 @@ export default {
 
 .selection {
 	background-color: var(--surface-secondary) !important;
+}
+
+.item-selection-option {
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+	transition:
+		border-color 0.2s ease,
+		background-color 0.2s ease;
+}
+
+.item-selection-option:hover {
+	background-color: rgba(var(--v-theme-primary), 0.06);
+	border-color: rgba(var(--v-theme-primary), 0.4);
+}
+
+.item-selection-image {
+	width: 50px;
+	height: 50px;
+	object-fit: cover;
+	margin-right: 15px;
+	background-color: rgb(var(--v-theme-surface-variant));
 }
 
 /* Responsive breakpoints */
