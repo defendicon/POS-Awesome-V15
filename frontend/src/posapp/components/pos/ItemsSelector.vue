@@ -1,29 +1,12 @@
 <template>
 	<div :style="responsiveStyles">
-		<v-dialog v-model="scanErrorDialog" persistent max-width="420" content-class="scan-error-dialog">
-			<v-card>
-				<v-card-title class="d-flex align-center text-error text-h6">
-					<v-icon color="error" class="mr-2">mdi-alert-octagon</v-icon>
-					{{ __("Scan Error") }}
-				</v-card-title>
-				<v-divider></v-divider>
-				<v-card-text>
-					<p class="scan-error-message">{{ scanErrorMessage }}</p>
-					<p v-if="scanErrorCode" class="scan-error-code mt-2 mb-0">
-						<strong>{{ __("Scanned Code:") }}</strong>
-						<span>{{ scanErrorCode }}</span>
-					</p>
-					<p v-if="scanErrorDetails" class="scan-error-details mt-4 mb-0">
-						{{ scanErrorDetails }}
-					</p>
-				</v-card-text>
-				<v-card-actions class="justify-end">
-					<v-btn color="primary" variant="tonal" autofocus @click="acknowledgeScanError">
-						{{ __("OK") }}
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
+		<ScanErrorDialog
+			v-model="scanErrorDialog"
+			:message="scanErrorMessage"
+			:code="scanErrorCode"
+			:details="scanErrorDetails"
+			@acknowledge="acknowledgeScanError"
+		/>
 		<v-card
 			:class="[
 				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
@@ -309,6 +292,7 @@ import ItemSettingsDialog from "./ItemSettingsDialog.vue";
 
 import ItemHeader from "./ItemHeader.vue";
 import NewItemDialog from "./NewItemDialog.vue";
+import ScanErrorDialog from "./ScanErrorDialog.vue";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import { RecycleScroller } from "vue-virtual-scroller";
 import {
@@ -412,6 +396,7 @@ export default {
 		ItemSettingsDialog,
 		ItemHeader,
 		NewItemDialog,
+		ScanErrorDialog,
 	},
 	props: {
 		context: {
