@@ -214,19 +214,57 @@ _Stability and Confidence._
 
 ---
 
-# Phase 6: TypeScript Migration
+# Phase 6: Component Decomposition & Refactoring
+
+_Taming the monoliths. Breaking down massive components for readability and maintainability._
+
+> **Why this first?** `ItemsSelector.vue` (5700+ lines) and `Invoice.vue` (1900+ lines) are too complex to migrate to TypeScript safely in their current state. We must simplify first.
+
+## ✂️ 6.1 `ItemsSelector.vue` (5716 lines)
+
+- [ ] **6.1.1 Extract Composables (Logic)**
+    - `useItemSearch.js`: Search filters, fuzzy search logic.
+    - `useItemSync.js`: Syncing logic, IndexedDB interactions.
+    - `useKeyboardShortcuts.js`: Key binding logic.
+
+- [ ] **6.1.2 Extract Sub-Components (UI)**
+    - `ItemCard.vue`: The grid view display of a single item.
+    - `ItemSearchFilters.vue`: The top bar with category/group/brand filters.
+    - `EditItemDialog.vue`: Isolate the "Edit Rate/Qty" dialog logic if embedded.
+    - `ItemImage.vue`: Handling fallback images and loading states.
+
+## ✂️ 6.2 `Invoice.vue` (1964 lines)
+
+- [ ] **6.2.1 Extract Composables**
+    - `useInvoiceCalculations.js`: Move complex tax/discount/total logic (already partially in `invoiceStore` but UI specific logic remains).
+    - `useInvoiceShortcuts.js`: Keyboard shortcuts.
+
+- [ ] **6.2.2 Decompose Sections**
+    - `InvoiceHeader.vue`: Customer selection, mode toggles.
+    - `InvoiceTotals.vue`: The summary section (Subtotal, Tax, Final Amount).
+    - `ActiveOffers.vue`: The chip list or display of applied offers.
+
+## ✂️ 6.3 `PurchaseOrders.vue` (1230 lines)
+
+- [ ] **6.3.1 Standardization**
+    - Apply same patterns as `Invoice.vue` after refactoring.
+    - Reuse `ItemSearchFilters.vue` if possible.
+
+---
+
+# Phase 7: TypeScript Migration
 
 _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
-## 📐 6.1 Setup & Infrastructure
+## 📐 7.1 Setup & Infrastructure
 
 > **Goal:** Enable TypeScript in the build pipeline without breaking existing JS files.
 
-- [ ] **6.1.1 Install Dependencies**
+- [ ] **7.1.1 Install Dependencies**
     - Run: `yarn add -D typescript vue-tsc @types/node @vue/tsconfig @types/lodash`
     - Verify `vite-plugin-checker` is installed (optional but recommended for dev feedback).
 
-- [ ] **6.1.2 Configure TypeScript**
+- [ ] **7.1.2 Configure TypeScript**
     - Create `frontend/tsconfig.json`:
       ```json
       {
@@ -256,7 +294,7 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
       declare const __: (str: string) => string;
       ```
 
-- [ ] **6.1.3 Update Build Scripts**
+- [ ] **7.1.3 Update Build Scripts**
     - Update `package.json` scripts:
       ```json
       "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
@@ -265,15 +303,15 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 ---
 
-## 🧱 6.2 Data Layer & Type Definitions
+## 🧱 7.2 Data Layer & Type Definitions
 
 > **Goal:** Define the "Truth" of our data structures.
 
-- [ ] **6.2.1 Create Type Directory**
+- [ ] **7.2.1 Create Type Directory**
     - Create `frontend/src/posapp/types/`
     - Create `frontend/src/posapp/types/frappe.d.ts` (Global Frappe types)
 
-- [ ] **6.2.2 Define Core Operations Models (`models.ts`)**
+- [ ] **7.2.2 Define Core Operations Models (`models.ts`)**
     - **Inventory Item**:
       ```ts
       export interface Item {
@@ -288,54 +326,54 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
     - **Cart Item (POS Item)**: Extension of Item with `qty`, `amount`, `posa_row_id`.
     - **Invoice**: `InvoiceDoc` interface (matching `invoiceStore.invoiceDoc`).
 
-- [ ] **6.2.3 Define API Responses**
+- [ ] **7.2.3 Define API Responses**
     - Create `frontend/src/posapp/types/api.ts` for standardized API return types.
 
 ---
 
-## 💾 6.3 State Management & Logic (Pinia First)
+## 💾 7.3 State Management & Logic (Pinia First)
 
 > **Goal:** Type the brain of the application. Stores are the highest value targets.
 
-- [ ] **6.3.1 Migrate `toastStore` & `uiStore`** (Low hanging fruit)
+- [ ] **7.3.1 Migrate `toastStore` & `uiStore`** (Low hanging fruit)
     - Rename `.js` to `.ts`.
     - Add return types to actions/getters.
 
-- [ ] **6.3.2 Migrate `invoiceStore`** (Critical)
+- [ ] **7.3.2 Migrate `invoiceStore`** (Critical)
     - Rename `invoiceStore.js` to `invoiceStore.ts`.
     - Define `InvoiceState` interface.
     - Explicitly type `invoiceDoc` ref: `ref<InvoiceDoc | null>(null)`.
     - Type `itemsData`: `reactive(new Map<string, CartItem>())`.
     - Fix `toNumber` utils validation with types.
 
-- [ ] **6.3.3 Migrate `customersStore`**
+- [ ] **7.3.3 Migrate `customersStore`**
     - Define `Customer` interface.
     - Type the `focusCustomerSearch` actions.
 
 ---
 
-## 🛠️ 6.4 Services & Utils
+## 🛠️ 7.4 Services & Utils
 
-- [ ] **6.4.1 Migrate `api.js`**
+- [ ] **7.4.1 Migrate `api.js`**
     - Convert to `api.ts`.
     - Generic wrapper: `call<T>(method: string, args?: any): Promise<T>`.
 
-- [ ] **6.4.2 Migrate `format.js`**
+- [ ] **7.4.2 Migrate `format.js`**
     - Ensure currency formatters accept `number` and return `string`.
 
 ---
 
-## 🧩 6.5 Component Migration Strategy
+## 🧩 7.5 Component Migration Strategy
 
 > **Strategy:** Migrate "Leaf" components first (small, no dependencies), then move up to "Container" components.
 
-- [ ] **6.5.1 Primitive UI Components**
+- [ ] **7.5.1 Primitive UI Components**
     - `PostingDateRow.vue`
     - `DeliveryCharges.vue`
     - `MultiCurrencyRow.vue`
     - **Action:** Add `<script setup lang="ts">`, define `Props` interface using `defineProps<Props>()`.
 
-- [ ] **6.5.2 Complex Components (The Big Ones)**
+- [ ] **7.5.2 Complex Components (The Big Ones)**
     - `ItemsTable.vue`:
         - Define `ItemsTableProps`.
         - Type events: `defineEmits<{ (e: 'update:expanded', val: any[]): void }>()`.
@@ -346,13 +384,13 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 ---
 
-## ✅ 6.6 Verification & Strictness (Final Polish)
+## ✅ 7.6 Verification & Strictness (Final Polish)
 
-- [ ] **6.6.1 Enable Strict Mode**
+- [ ] **7.6.1 Enable Strict Mode**
     - Change `noImplicitAny: true` in `tsconfig.json`.
     - Resolve all red squiggles.
 
-- [ ] **6.6.2 CI/CD Integration**
+- [ ] **7.6.2 CI/CD Integration**
     - Ensure `yarn type-check` passes in GitHub Actions.
 
 
