@@ -1,30 +1,11 @@
 <template>
 	<div class="items-card-container">
-		<div v-if="isLoadingOrSyncing" class="items-card-grid">
-			<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
-		</div>
-		<div
+		<ItemSelectorCardLoadingGrid v-if="isLoadingOrSyncing" />
+		<ItemSelectorCardEmptyState
 			v-else-if="displayedItems.length === 0"
-			class="d-flex flex-column align-center justify-center text-center fill-height pa-4"
-			style="height: 100%; min-height: 200px"
-		>
-			<v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-package-variant-closed</v-icon>
-			<div class="text-h6 text-medium-emphasis mb-1">
-				{{ __("No items found") }}
-			</div>
-			<div class="text-body-2 text-medium-emphasis">
-				{{ __("Try adjusting your search or filters") }}
-			</div>
-			<v-btn
-				v-if="showClearSearch"
-				variant="text"
-				color="primary"
-				class="mt-4"
-				@click="emit('clear-search')"
-			>
-				{{ __("Clear Search") }}
-			</v-btn>
-		</div>
+			:show-clear-search="showClearSearch"
+			@clear="emit('clear-search')"
+		/>
 		<RecycleScroller
 			v-else
 			ref="itemsContainer"
@@ -72,7 +53,8 @@
 <script setup>
 import { ref } from "vue";
 import ItemCard from "./ItemCard.vue";
-import Skeleton from "../ui/Skeleton.vue";
+import ItemSelectorCardEmptyState from "./ItemSelectorCardEmptyState.vue";
+import ItemSelectorCardLoadingGrid from "./ItemSelectorCardLoadingGrid.vue";
 import { RecycleScroller } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
