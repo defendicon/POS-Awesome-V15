@@ -11,19 +11,19 @@
  * @returns {string} Extracted item code or original string
  */
 export function extractItemCodeFromSearch(searchString, scalePrefix, scaleBarcodeMatches) {
-    if (!searchString) return "";
+	if (!searchString) return "";
 
-    const prefix = scalePrefix || "";
-    const prefix_len = prefix.length;
+	const prefix = scalePrefix || "";
+	const prefix_len = prefix.length;
 
-    if (!scaleBarcodeMatches || !scaleBarcodeMatches(searchString)) {
-        return searchString;
-    }
+	if (!scaleBarcodeMatches || !scaleBarcodeMatches(searchString)) {
+		return searchString;
+	}
 
-    // Calculate item code length from total barcode length
-    // Scale barcodes typically have: prefix + item_code + 6 digits for qty/price
-    const item_code_len = searchString.length - prefix_len - 6;
-    return searchString.substr(0, prefix_len + item_code_len);
+	// Calculate item code length from total barcode length
+	// Scale barcodes typically have: prefix + item_code + 6 digits for qty/price
+	const item_code_len = searchString.length - prefix_len - 6;
+	return searchString.substr(0, prefix_len + item_code_len);
 }
 
 /**
@@ -32,8 +32,8 @@ export function extractItemCodeFromSearch(searchString, scalePrefix, scaleBarcod
  * @returns {string} Normalized query
  */
 export function normalizeSearchQuery(query) {
-    if (!query) return "";
-    return String(query).trim().toLowerCase();
+	if (!query) return "";
+	return String(query).trim().toLowerCase();
 }
 
 /**
@@ -42,7 +42,7 @@ export function normalizeSearchQuery(query) {
  * @returns {boolean} True if query is valid
  */
 export function isValidSearchQuery(query) {
-    return Boolean(query && query.trim());
+	return Boolean(query && query.trim());
 }
 
 /**
@@ -55,12 +55,23 @@ export function isValidSearchQuery(query) {
  * @returns {boolean} True if reload is needed
  */
 export function shouldReloadOnSearchClear(params) {
-    const { currentSearch, previousSearch, itemsLoaded, itemsCount } = params;
+	const { currentSearch, previousSearch, itemsLoaded, itemsCount } = params;
 
-    const hadQuery = Boolean(
-        (currentSearch && currentSearch.trim()) ||
-        (previousSearch && previousSearch.trim())
-    );
+	const hadQuery = Boolean(
+		(currentSearch && currentSearch.trim()) || (previousSearch && previousSearch.trim()),
+	);
 
-    return hadQuery || !itemsLoaded || !itemsCount;
+	return hadQuery || !itemsLoaded || !itemsCount;
+}
+
+/**
+ * Normalize input event value to a string
+ * @param {Event|string} event
+ * @returns {string}
+ */
+export function normalizeSearchInputValue(event) {
+	if (event && event.target && typeof event.target.value === "string") {
+		return event.target.value;
+	}
+	return typeof event === "string" ? event : "";
 }

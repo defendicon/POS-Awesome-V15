@@ -44,3 +44,10 @@ export const isLikelyKeyboardScan = ({ code, duration, minLength, maxDuration, m
 	const averageInterval = duration / code.length;
 	return averageInterval <= maxInterval;
 };
+
+export const isSearchFieldPrimedForScan = (value) => {
+	if (!value) {
+		return true;
+	}
+	return /^\d*$/.test(value);
+};

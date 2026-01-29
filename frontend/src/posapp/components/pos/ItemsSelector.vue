@@ -212,7 +212,11 @@ import { useItemSearch } from "../../composables/useItemSearch.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
 import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
-import { extractItemCodeFromSearch } from "../../utils/searchUtils.js";
+import {
+	extractItemCodeFromSearch,
+	normalizeSearchInputValue,
+	shouldReloadOnSearchClear,
+} from "../../utils/searchUtils.js";
 import { openItemSelectionDialog } from "../../utils/itemSelectionDialog.js";
 import { loadItemSelectorSettings, saveItemSelectorSettings } from "../../utils/itemSelectorSettings.js";
 import {
@@ -228,6 +232,7 @@ import {
 	isScanCandidate,
 	shouldResetScanOnInput,
 	isLikelyKeyboardScan,
+	isSearchFieldPrimedForScan,
 } from "../../utils/keyboardScan.js";
 import { normalizeBackgroundSyncInterval, shouldRunBackgroundSync } from "../../utils/backgroundSync.js";
 import { findItemIndexByCode, getNextHighlightedIndex } from "../../utils/itemHighlight.js";
@@ -2527,38 +2532,18 @@ export default {
 				}
 			});
 		},
-		generateWordCombinations(inputString) {
-			const words = inputString.split(" ");
-			const wordCount = words.length;
-			const combinations = [];
-
-			// Helper function to generate all permutations
-			function permute(arr, m = []) {
-				if (arr.length === 0) {
-					combinations.push(m.join(" "));
-				} else {
-					for (let i = 0; i < arr.length; i++) {
-						const current = arr.slice();
-						const next = current.splice(i, 1);
-						permute(current.slice(), m.concat(next));
-					}
-				}
-			}
-
-			permute(words);
-
-			return combinations;
-		},
 		clearSearch() {
 			this.resetKeyboardScanDetection();
 			if (this.clearingSearch) {
 				return;
 			}
 
-			const hadQuery = Boolean(
-				(this.first_search && this.first_search.trim()) || (this.search && this.search.trim()),
-			);
-			const shouldReload = hadQuery || !this.itemsLoaded || !this.items.length;
+			const shouldReload = shouldReloadOnSearchClear({
+				currentSearch: this.first_search,
+				previousSearch: this.search,
+				itemsLoaded: this.itemsLoaded,
+				itemsCount: this.items.length,
+			});
 
 			this.search_backup = this.first_search;
 			this.clearingSearch = true;
@@ -2904,12 +2889,7 @@ export default {
 			});
 		},
 		handleSearchInput(event) {
-			const value =
-				event && event.target && typeof event.target.value === "string"
-					? event.target.value
-					: typeof event === "string"
-						? event
-						: "";
+			const value = normalizeSearchInputValue(event);
 
 			this.keyboardScanPendingValue = value;
 
@@ -2944,7 +2924,7 @@ export default {
 				return;
 			}
 
-			if (!this.isSearchFieldPrimedForScan()) {
+			if (!isSearchFieldPrimedForScan(this.search_input)) {
 				this.resetKeyboardScanDetection();
 				return;
 			}
@@ -2970,12 +2950,6 @@ export default {
 			this.keyboardScanTimer = setTimeout(() => {
 				this.evaluateKeyboardScan();
 			}, this.keyboardScanProcessingDelay);
-		},
-		isSearchFieldPrimedForScan() {
-			if (!this.search_input) {
-				return true;
-			}
-			return /^\d*$/.test(this.search_input);
 		},
 		evaluateKeyboardScan() {
 			if (this.keyboardScanTimer) {
