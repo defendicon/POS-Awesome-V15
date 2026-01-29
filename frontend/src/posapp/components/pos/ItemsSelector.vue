@@ -332,6 +332,7 @@ import { useCartValidation } from "../../composables/useCartValidation.js";
 import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
 import { useItemSearch } from "../../composables/useItemSearch.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
+import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
