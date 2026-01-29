@@ -143,9 +143,9 @@ const onDragEnd = (event) => {
 
 <style scoped>
 .card-item-card {
-	background-color: var(--surface-secondary, #ffffff);
+	background-color: rgb(var(--v-theme-surface));
 	border-radius: 12px;
-	border: 1px solid rgba(0, 0, 0, 0.08);
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	overflow: hidden;
 	transition:
 		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -183,14 +183,14 @@ const onDragEnd = (event) => {
 	height: 120px;
 	flex-shrink: 0;
 	overflow: hidden;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	background: rgb(var(--v-theme-surface-variant));
 }
 
 .card-item-image {
 	width: 100%;
 	height: 100%;
 	object-fit: contain; /* Changed to contain to ensure full image visibility */
-    background-color: #fff; /* White background for transparent images */
+	background-color: rgb(var(--v-theme-surface-bright));
 }
 
 /* Image Placeholder Style */
@@ -200,7 +200,7 @@ const onDragEnd = (event) => {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	background-color: #f5f5f5;
+	background-color: rgb(var(--v-theme-surface-variant));
 }
 
 .card-item-content {
@@ -264,7 +264,7 @@ const onDragEnd = (event) => {
 	margin-top: 4px;
 	font-size: 0.75rem;
 	color: var(--secondary-color, #757575);
-	background: rgba(0, 0, 0, 0.05);
+	background: rgba(var(--v-theme-on-surface), 0.08);
 	padding: 2px 6px;
 	border-radius: 4px;
 	display: inline-flex;
