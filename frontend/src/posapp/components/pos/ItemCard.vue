@@ -35,10 +35,7 @@
 							{{ formatCurrency(primaryRate, primaryCurrency, primaryPrecision) }}
 						</span>
 					</div>
-					<div
-						v-if="showSecondaryPrice"
-						class="secondary-price"
-					>
+					<div v-if="showSecondaryPrice" class="secondary-price">
 						<span class="currency-symbol">
 							{{ currencySymbol(secondaryCurrency) }}
 						</span>
@@ -55,7 +52,7 @@
 								formatCurrency(
 									lastInvoiceRate.rate,
 									lastInvoiceRate.currency || posProfile.currency,
-									primaryPrecision
+									primaryPrecision,
 								)
 							}}
 							<span v-if="lastInvoiceRate.uom" class="last-rate-uom">
@@ -160,7 +157,7 @@ const onDragEnd = (event) => {
 	will-change: transform;
 	backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
-    position: relative;
+	position: relative;
 }
 
 .card-item-card:hover {
@@ -299,4 +296,21 @@ const onDragEnd = (event) => {
 	text-transform: uppercase;
 }
 
+@media (max-width: 768px) {
+	.card-item-image-container {
+		height: 100px;
+	}
+
+	.card-item-content {
+		padding: 10px 12px 12px;
+	}
+
+	.card-item-name {
+		font-size: 0.85rem;
+	}
+
+	.card-item-code {
+		font-size: 0.7rem;
+	}
+}
 </style>

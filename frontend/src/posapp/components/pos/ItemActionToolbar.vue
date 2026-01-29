@@ -66,8 +66,10 @@
 </template>
 
 <script setup>
-/* global frappe, __ */
-const props = defineProps({
+const __ = window.__;
+const frappe = window.frappe;
+
+defineProps({
 	modelValue: { type: String, default: "ALL" }, // item_group
 	itemsGroup: { type: Array, default: () => [] },
 	itemsView: { type: String, default: "card" },
@@ -77,21 +79,59 @@ const props = defineProps({
 	couponsCount: { type: Number, default: 0 },
 });
 
-const emit = defineEmits([
-	"update:modelValue",
-	"update:itemsView",
-	"open-offers",
-	"open-coupons",
-]);
+defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupons"]);
 </script>
 
 <style scoped>
 .action-btn-consistent {
 	height: 32px !important;
+	margin-top: var(--dynamic-xs) !important;
+	padding: var(--dynamic-xs) var(--dynamic-sm) !important;
+	transition: var(--transition-normal) !important;
+}
+
+.action-btn-consistent:hover {
+	background-color: rgba(25, 118, 210, 0.1) !important;
+	transform: translateY(-1px) !important;
 }
 
 .view-toggle-btn {
 	height: 32px;
 	border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.dynamic-padding {
+	padding: var(--dynamic-sm);
+}
+
+.dynamic-spacing-sm {
+	padding: var(--dynamic-sm) !important;
+}
+
+.cards {
+	background-color: var(--surface-secondary) !important;
+	margin-top: var(--dynamic-sm) !important;
+	padding: var(--dynamic-sm) !important;
+}
+
+@media (max-width: 768px) {
+	.dynamic-padding {
+		padding: var(--dynamic-xs);
+	}
+
+	.dynamic-spacing-sm {
+		padding: var(--dynamic-xs) !important;
+	}
+
+	.action-btn-consistent {
+		padding: var(--dynamic-xs) !important;
+		font-size: 0.875rem !important;
+	}
+}
+
+@media (max-width: 480px) {
+	.cards {
+		padding: var(--dynamic-xs) !important;
+	}
 }
 </style>
