@@ -71,176 +71,57 @@
 
 				<v-row class="items">
 					<v-col cols="12" class="pt-0 mt-0">
-						<div v-if="items_view == 'card'" class="items-card-container">
-							<div v-if="isLoadingOrSyncing" class="items-card-grid">
-								<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
-							</div>
-							<div
-								v-else-if="displayedItems.length === 0"
-								class="d-flex flex-column align-center justify-center text-center fill-height pa-4"
-								style="height: 100%; min-height: 200px"
-							>
-								<v-icon size="64" color="grey-lighten-1" class="mb-4"
-									>mdi-package-variant-closed</v-icon
-								>
-								<div class="text-h6 text-medium-emphasis mb-1">
-									{{ __("No items found") }}
-								</div>
-								<div class="text-body-2 text-medium-emphasis">
-									{{ __("Try adjusting your search or filters") }}
-								</div>
-								<v-btn
-									v-if="search_input || (item_group && item_group !== 'ALL')"
-									variant="text"
-									color="primary"
-									class="mt-4"
-									@click="clearSearch"
-								>
-									{{ __("Clear Search") }}
-								</v-btn>
-							</div>
-							<RecycleScroller
-								v-else
-								ref="itemsContainer"
-								class="virtual-scroller"
-								:list-class="['items-virtual-list', { 'item-container': isOverflowing }]"
-								:items="displayedItems"
-								key-field="item_code"
-								:item-size="cardSlotHeight"
-								:grid-items="cardColumns"
-								:item-secondary-size="cardSlotWidth"
-								:buffer="virtualScrollBuffer"
-								:emit-update="true"
-								@update="onVirtualRangeUpdate"
-							>
-								<template #default="{ item }">
-									<ItemCard
-										v-if="item"
-										:key="item.item_code"
-										:item="item"
-										:pos-profile="pos_profile"
-										:context="context"
-										:selected-currency="selected_currency"
-										:hide-qty-decimals="hide_qty_decimals"
-										:last-invoice-rate="getLastInvoiceRate(item)"
-										:is-item-highlighted="isItemHighlighted(item)"
-										:currency-symbol="currencySymbol"
-										:format-currency="memoizedFormatCurrency"
-										:format-number="memoizedFormatNumber"
-										:rate-precision="ratePrecision"
-										:is-negative="isNegative"
-										:style="{
-											width: cardColumnWidth + 'px',
-											height: cardRowHeight + 'px',
-										}"
-										@click="select_item"
-										@dragstart="onDragStart"
-										@dragend="onDragEnd"
-									/>
-								</template>
-							</RecycleScroller>
-						</div>
-						<div v-else class="items-table-container">
-							<v-data-table-virtual
-								ref="itemsTable"
-								:headers="headers"
-								:items="displayedItems"
-								class="sleek-data-table overflow-y-auto"
-								:style="{ height: 'calc(100% - 80px)' }"
-								item-key="item_code"
-								fixed-header
-								height="100%"
-								:header-props="headerProps"
-								:no-data-text="__('No items found')"
-								@click:row="click_item_row"
-								:item-class="getItemRowClass"
-								:row-props="getItemRowProps"
-								@scroll.passive="onListScroll"
-							>
-								<template v-slot:item.rate="{ item }">
-									<div v-if="context !== 'purchase'">
-										<div class="text-primary">
-											{{
-												currencySymbol(item.original_currency || pos_profile.currency)
-											}}
-											{{
-												memoizedFormatCurrency(
-													item.original_rate ?? item.rate ?? 0,
-													item.original_currency || pos_profile.currency,
-													ratePrecision(item.original_rate ?? item.rate ?? 0),
-												)
-											}}
-										</div>
-										<div
-											v-if="getLastInvoiceRate(item)"
-											class="text-caption d-flex align-center last-rate-inline"
-										>
-											<v-icon size="14" class="mr-1" color="secondary"
-												>mdi-history</v-icon
-											>
-											<span class="mr-1">{{ __("Last") }}:</span>
-											<span class="font-weight-medium">
-												{{
-													currencySymbol(
-														getLastInvoiceRate(item).currency ||
-															pos_profile.currency,
-													)
-												}}
-												{{
-													memoizedFormatCurrency(
-														getLastInvoiceRate(item).rate,
-														getLastInvoiceRate(item).currency ||
-															pos_profile.currency,
-														ratePrecision(getLastInvoiceRate(item).rate || 0),
-													)
-												}}
-												<span
-													v-if="getLastInvoiceRate(item).uom"
-													class="last-rate-uom"
-												>
-													/{{ getLastInvoiceRate(item).uom }}
-												</span>
-											</span>
-										</div>
-										<div
-											v-if="
-												pos_profile.posa_allow_multi_currency &&
-												selected_currency !== pos_profile.currency
-											"
-											class="text-success"
-										>
-											{{ currencySymbol(selected_currency) }}
-											{{
-												memoizedFormatCurrency(
-													item.rate,
-													selected_currency,
-													ratePrecision(item.rate),
-												)
-											}}
-										</div>
-									</div>
-									<div v-else class="text-primary">
-										{{ currencySymbol(pos_profile.currency) }}
-										{{
-											memoizedFormatCurrency(
-												item.rate || item.standard_rate || 0,
-												pos_profile.currency,
-												ratePrecision(item.rate || item.standard_rate || 0),
-											)
-										}}
-									</div>
-								</template>
-								<template v-slot:item.actual_qty="{ item }">
-									<span
-										class="golden--text"
-										:class="{ 'negative-number': isNegative(item.actual_qty) }"
-										>{{
-											memoizedFormatNumber(item.actual_qty, hide_qty_decimals ? 0 : 4)
-										}}</span
-									>
-								</template>
-							</v-data-table-virtual>
-						</div>
+						<ItemSelectorCardView
+							v-if="items_view == 'card'"
+							ref="itemsCardView"
+							:displayed-items="displayedItems"
+							:is-loading-or-syncing="isLoadingOrSyncing"
+							:is-overflowing="isOverflowing"
+							:card-slot-height="cardSlotHeight"
+							:card-columns="cardColumns"
+							:card-slot-width="cardSlotWidth"
+							:card-column-width="cardColumnWidth"
+							:card-row-height="cardRowHeight"
+							:virtual-scroll-buffer="virtualScrollBuffer"
+							:pos-profile="pos_profile"
+							:context="context"
+							:selected-currency="selected_currency"
+							:hide-qty-decimals="hide_qty_decimals"
+							:get-last-invoice-rate="getLastInvoiceRate"
+							:is-item-highlighted="isItemHighlighted"
+							:currency-symbol="currencySymbol"
+							:format-currency="memoizedFormatCurrency"
+							:format-number="memoizedFormatNumber"
+							:rate-precision="ratePrecision"
+							:is-negative="isNegative"
+							:show-clear-search="search_input || (item_group && item_group !== 'ALL')"
+							@virtual-range-update="onVirtualRangeUpdate"
+							@clear-search="clearSearch"
+							@select-item="select_item"
+							@dragstart="onDragStart"
+							@dragend="onDragEnd"
+						/>
+						<ItemSelectorTableView
+							v-else
+							ref="itemsTableView"
+							:headers="headers"
+							:displayed-items="displayedItems"
+							:header-props="headerProps"
+							:context="context"
+							:pos-profile="pos_profile"
+							:selected-currency="selected_currency"
+							:currency-symbol="currencySymbol"
+							:format-currency="memoizedFormatCurrency"
+							:format-number="memoizedFormatNumber"
+							:rate-precision="ratePrecision"
+							:get-last-invoice-rate="getLastInvoiceRate"
+							:hide-qty-decimals="hide_qty_decimals"
+							:is-negative="isNegative"
+							:get-item-row-class="getItemRowClass"
+							:get-item-row-props="getItemRowProps"
+							@click-row="click_item_row"
+							@list-scroll="onListScroll"
+						/>
 					</v-col>
 				</v-row>
 			</div>
@@ -279,16 +160,15 @@ import format from "../../format";
 import _ from "lodash";
 import CameraScanner from "./CameraScanner.vue";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
-import ItemCard from "./ItemCard.vue";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
 import ItemSettingsDialog from "./ItemSettingsDialog.vue";
+import ItemSelectorCardView from "./ItemSelectorCardView.vue";
+import ItemSelectorTableView from "./ItemSelectorTableView.vue";
 
 import ItemHeader from "./ItemHeader.vue";
 import NewItemDialog from "./NewItemDialog.vue";
 import ScanErrorDialog from "./ScanErrorDialog.vue";
 import placeholderImage from "./placeholder-image.png";
-import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
-import { RecycleScroller } from "vue-virtual-scroller";
 import {
 	saveItemUOMs,
 	getItemUOMs,
@@ -329,7 +209,6 @@ import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock
 import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
 import { extractItemCodeFromSearch } from "../../utils/searchUtils.js";
-import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -386,11 +265,10 @@ export default {
 	},
 	components: {
 		CameraScanner,
-		RecycleScroller,
-		Skeleton,
-		ItemCard,
 		ItemActionToolbar,
 		ItemSettingsDialog,
+		ItemSelectorCardView,
+		ItemSelectorTableView,
 		ItemHeader,
 		NewItemDialog,
 		ScanErrorDialog,
@@ -842,6 +720,18 @@ export default {
 			}
 			return String(value || "").startsWith(prefix);
 		},
+		getItemsContainerRef() {
+			const viewRef = this.$refs.itemsCardView;
+			return viewRef?.itemsContainer || viewRef?.$?.exposed?.itemsContainer || null;
+		},
+		getItemsContainerElement() {
+			const ref = this.getItemsContainerRef();
+			return ref?.$el || ref || null;
+		},
+		getItemsTableRef() {
+			const viewRef = this.$refs.itemsTableView;
+			return viewRef?.itemsTable || viewRef?.$?.exposed?.itemsTable || null;
+		},
 
 		scheduleCardMetricsUpdate() {
 			if (this.metricsRaf) {
@@ -854,8 +744,7 @@ export default {
 		},
 		updateCardContainerMetrics() {
 			this.$nextTick(() => {
-				const ref = this.$refs.itemsContainer;
-				const el = ref && ref.$el ? ref.$el : ref;
+				const el = this.getItemsContainerElement();
 				if (!el || typeof el.getBoundingClientRect !== "function") {
 					return;
 				}
@@ -896,7 +785,7 @@ export default {
 
 			this.scrollThrottle = requestAnimationFrame(() => {
 				try {
-					const el = this.$refs.itemsContainer;
+					const el = this.getItemsContainerElement();
 					if (!el) return;
 
 					const scrollTop = el.scrollTop;
@@ -1011,8 +900,7 @@ export default {
 		},
 
 		checkItemContainerOverflow() {
-			const ref = this.$refs.itemsContainer;
-			const el = ref && ref.$el ? ref.$el : ref;
+			const el = this.getItemsContainerElement();
 			if (!el) {
 				this.isOverflowing = false;
 				return;
@@ -3276,11 +3164,11 @@ export default {
 		scrollHighlightedItemIntoView(index) {
 			this.$nextTick(() => {
 				if (this.items_view === "card") {
-					this.$refs.itemsContainer?.scrollToItem?.(index);
+					this.getItemsContainerRef()?.scrollToItem?.(index);
 					return;
 				}
 
-				const tableRef = this.$refs.itemsTable;
+				const tableRef = this.getItemsTableRef();
 				const scrollToIndex = tableRef?.scrollToIndex || tableRef?.$?.exposed?.scrollToIndex || null;
 				if (scrollToIndex) {
 					const scheduleScroll =
