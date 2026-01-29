@@ -213,6 +213,7 @@ import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock
 import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
 import { extractItemCodeFromSearch } from "../../utils/searchUtils.js";
+import { openItemSelectionDialog } from "../../utils/itemSelectionDialog.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -3684,66 +3685,16 @@ export default {
 			return allowNegativeSetting || allowNegativeItem;
 		},
 		showMultipleItemsDialog(items, scannedCode) {
-			// Create a dialog to let user choose from multiple matches
-			const dialog = new frappe.ui.Dialog({
-				title: __("Multiple Items Found"),
-				fields: [
-					{
-						fieldtype: "HTML",
-						fieldname: "items_html",
-						options: this.generateItemSelectionHTML(items, scannedCode),
-					},
-				],
-				primary_action_label: __("Cancel"),
-				primary_action: () => dialog.hide(),
+			openItemSelectionDialog({
+				items,
+				scannedCode,
+				currency: this.pos_profile.currency,
+				formatCurrency: this.format_currency,
+				ratePrecision: this.ratePrecision,
+				placeholderImage,
+				translate: this.__,
+				onSelect: (item) => this.addScannedItemToInvoice(item, scannedCode, null, null),
 			});
-
-			dialog.show();
-
-			// Add click handlers for item selection
-			setTimeout(() => {
-				items.forEach((item, index) => {
-					const button = dialog.$wrapper.find(`[data-item-index="${index}"]`);
-					button.on("click", () => {
-						this.addScannedItemToInvoice(item, scannedCode, null, null);
-						dialog.hide();
-					});
-				});
-			}, 100);
-		},
-		generateItemSelectionHTML(items, scannedCode) {
-			let html = `<div class="mb-3"><strong>Scanned Code:</strong> ${scannedCode}</div>`;
-			html += '<div class="item-selection-list">';
-
-			items.forEach((item, index) => {
-				html += this.buildItemSelectionOption(item, index);
-			});
-
-			html += "</div>";
-			return html;
-		},
-		buildItemSelectionOption(item, index) {
-			const price = this.format_currency(
-				item.rate,
-				this.pos_profile.currency,
-				this.ratePrecision(item.rate),
-			);
-			return `
-		<div class="item-option item-selection-option p-3 mb-2 rounded cursor-pointer" data-item-index="${index}">
-			<div class="d-flex align-items-center">
-				<img
-					class="item-selection-image"
-					src="${item.image || placeholderImage}"
-					alt="${item.item_name}"
-				/>
-				<div>
-					<div class="font-weight-bold">${item.item_name}</div>
-					<div class="text-muted small">${item.item_code}</div>
-					<div class="text-primary">${price}</div>
-				</div>
-			</div>
-		</div>
-		`;
 		},
 		handleItemNotFound(scannedCode) {
 			console.warn("Item not found for scanned code:", scannedCode);
