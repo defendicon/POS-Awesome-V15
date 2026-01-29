@@ -236,6 +236,13 @@ import {
 } from "../../utils/keyboardScan.js";
 import { normalizeBackgroundSyncInterval, shouldRunBackgroundSync } from "../../utils/backgroundSync.js";
 import { findItemIndexByCode, getNextHighlightedIndex } from "../../utils/itemHighlight.js";
+import {
+	ensureBarcodeIndex,
+	resetBarcodeIndex,
+	indexItemInBarcodeIndex,
+	replaceBarcodeIndex,
+	lookupItemInBarcodeIndex,
+} from "../../utils/barcodeIndex.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -3295,65 +3302,20 @@ export default {
 		},
 		// PERF: maintain a barcode index so unfound scans do not walk the full list
 		ensureBarcodeIndex() {
-			if (!this.barcodeIndex || typeof this.barcodeIndex.set !== "function") {
-				this.barcodeIndex = new Map();
-			}
+			this.barcodeIndex = ensureBarcodeIndex(this.barcodeIndex);
 			return this.barcodeIndex;
 		},
 		resetBarcodeIndex() {
-			const index = this.ensureBarcodeIndex();
-			index.clear();
+			this.barcodeIndex = resetBarcodeIndex(this.barcodeIndex);
 		},
 		indexItem(item) {
-			if (!item) {
-				return;
-			}
-			const index = this.ensureBarcodeIndex();
-			const register = (code) => {
-				if (code === undefined || code === null) {
-					return;
-				}
-				const normalized = String(code).trim();
-				if (!normalized) {
-					return;
-				}
-				if (!index.has(normalized)) {
-					index.set(normalized, item);
-				}
-				const lower = normalized.toLowerCase();
-				if (!index.has(lower)) {
-					index.set(lower, item);
-				}
-			};
-			register(item.item_code);
-			register(item.barcode);
-			if (Array.isArray(item.item_barcode)) {
-				item.item_barcode.forEach((barcode) => register(barcode?.barcode));
-			}
-			if (Array.isArray(item.barcodes)) {
-				item.barcodes.forEach((barcode) => register(barcode));
-			}
-			if (Array.isArray(item.serial_no_data)) {
-				item.serial_no_data.forEach((serial) => register(serial?.serial_no));
-			}
-			if (Array.isArray(item.batch_no_data)) {
-				item.batch_no_data.forEach((batch) => register(batch?.batch_no));
-			}
+			this.barcodeIndex = indexItemInBarcodeIndex(this.ensureBarcodeIndex(), item);
 		},
 		replaceBarcodeIndex(items = this.items) {
-			this.resetBarcodeIndex();
-			items.forEach((item) => this.indexItem(item));
+			this.barcodeIndex = replaceBarcodeIndex(this.ensureBarcodeIndex(), items);
 		},
 		lookupItemByBarcode(code) {
-			if (code === undefined || code === null) {
-				return null;
-			}
-			const index = this.ensureBarcodeIndex();
-			const normalized = String(code).trim();
-			if (!normalized) {
-				return null;
-			}
-			return index.get(normalized) || index.get(normalized.toLowerCase()) || null;
+			return lookupItemInBarcodeIndex(this.ensureBarcodeIndex(), code);
 		},
 		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null, priceFromBarcode = null) {
 			console.log("Adding scanned item to invoice:", item, scannedCode);
