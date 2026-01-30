@@ -567,6 +567,11 @@ export function useItemDetailFetcher() {
         }
     }
 
+    const clearCache = () => {
+        itemDetailsCache.clear();
+        itemDetailsRequestCache.clear();
+    };
+
     return {
         itemDetailsRetryCount,
         refreshInFlight,
@@ -578,5 +583,6 @@ export function useItemDetailFetcher() {
         prePopulateStockCache,
         refreshAllItemDetailsInBatches,
         cancelItemDetailsRequest,
+        clearCache,
     };
 }

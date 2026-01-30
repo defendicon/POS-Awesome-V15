@@ -73,7 +73,7 @@
 					<v-col cols="12" class="pt-0 mt-0">
 						<ItemsSelectorCards
 							v-if="items_view === 'card'"
-							ref="itemsContainer"
+							ref="cardsContainer"
 							:displayed-items="displayedItems"
 							:is-loading="isLoadingOrSyncing"
 							:search-input="search_input"
@@ -89,7 +89,7 @@
 							:context="context"
 							:selected-currency="selected_currency"
 							:hide-qty-decimals="hide_qty_decimals"
-							:get-last-invoice-rate="getLastInvoiceRate"
+							:get-last-invoice-rate="lastInvoiceRate.getLastInvoiceRate"
 							:is-item-highlighted="isItemHighlighted"
 							:currency-symbol="currencySymbol"
 							:format-currency="memoizedFormatCurrency"
@@ -104,6 +104,7 @@
 							@dragend="onDragEnd"
 							@virtual-range-update="onVirtualRangeUpdate"
 							@clear-search="clearSearch"
+							@scroll="itemLayout.onCardScroll"
 						/>
 						<ItemsSelectorTable
 							v-else
@@ -119,13 +120,13 @@
 							:format-currency="memoizedFormatCurrency"
 							:format-number="memoizedFormatNumber"
 							:rate-precision="ratePrecision"
-							:get-last-invoice-rate="getLastInvoiceRate"
+							:get-last-invoice-rate="lastInvoiceRate.getLastInvoiceRate"
 							:is-negative="isNegative"
 							:item-class="getItemRowClass"
 							:row-props="getItemRowProps"
 							:no-data-text="__('No items found')"
 							@row-click="click_item_row"
-							@list-scroll="onListScroll"
+							@list-scroll="itemLayout.onListScroll"
 						/>
 					</v-col>
 				</v-row>
@@ -214,6 +215,11 @@ import { useItemAvailability } from "../../composables/useItemAvailability.js";
 import { useItemDetailFetcher } from "../../composables/useItemDetailFetcher.js";
 import { useItemSelection } from "../../composables/useItemSelection.js";
 import { useItemSync } from "../../composables/useItemSync.js";
+import { useBarcodeIndexing } from "../../composables/useBarcodeIndexing.js";
+import { useLastInvoiceRate } from "../../composables/useLastInvoiceRate.js";
+import { useItemSelectorLayout } from "../../composables/useItemSelectorLayout.js";
+import { useItemStorageSafety } from "../../composables/useItemStorageSafety.js";
+import { useItemSearchTriggers } from "../../composables/useItemSearchTriggers.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
 import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
@@ -290,6 +296,29 @@ export default {
 		const itemDetailFetcher = useItemDetailFetcher();
 		const itemSelection = useItemSelection();
 		const itemSync = useItemSync();
+		const barcodeIndexing = useBarcodeIndexing({
+			itemSelection,
+			toastStore,
+			// eventBus will be injected in created() or passed here
+		});
+		const lastInvoiceRate = useLastInvoiceRate({
+			selectedCustomer,
+			posProfile: uiStore.posProfile,
+			toastStore,
+		});
+		const itemLayout = useItemSelectorLayout({
+			windowWidth: responsive.windowWidth,
+		});
+		const storageSafety = useItemStorageSafety({
+			posProfile: uiStore.posProfile,
+		});
+		const searchTriggers = useItemSearchTriggers({
+			searchTerm: itemsIntegration.searchTerm,
+			itemGroup: itemsIntegration.itemGroup,
+			itemsStore: itemsIntegration, // itemsIntegration returns the store-like interface
+		});
+
+		const flyConfig = { speed: 0.6, easing: "ease-in-out" };
 
 		return {
 			...responsive,
@@ -325,6 +354,13 @@ export default {
 			itemDetailFetcher,
 			itemSelection,
 			itemSync,
+			barcodeIndexing,
+			...itemLayout,
+			lastInvoiceRate,
+			itemLayout,
+			storageSafety,
+			searchTriggers,
+			flyConfig,
 		};
 	},
 	components: {
@@ -358,31 +394,17 @@ export default {
 		first_search: "",
 		search_input: "",
 		search_backup: "",
-		// Limit the displayed items to avoid overly large lists
-		itemsPerPage: 50,
 		offersCount: 0,
 		appliedOffersCount: 0,
 		couponsCount: 0,
 		appliedCouponsCount: 0,
 		new_line: false,
 		qty: 1,
-		background_sync_timer: null,
-		background_sync_in_flight: false,
-		last_background_sync_time: null,
-		background_sync_details_in_flight: false,
 		abortController: null,
-		itemDetailsRequestCache: { key: null, promise: null, result: null },
-		itemDetailsRetryCount: 0,
-		itemDetailsRetryTimeout: null,
 		selected_currency: "",
 		exchange_rate: 1,
 		conversion_rate: 1,
 		prePopulateInProgress: false,
-		itemWorker: null,
-		flyConfig: { speed: 0.6, easing: "ease-in-out" },
-		storageAvailable: true,
-		localStorageAvailable: true,
-		stockUnsubscribe: null,
 		items_request_token: 0,
 		pendingGetItems: null,
 		lastGetItemsKey: "",
@@ -412,23 +434,14 @@ export default {
 		searchDebounce: null,
 		// Prevent repeated server fetches when local storage is empty
 		fallbackAttempted: false,
-		cardContainerWidth: 0,
 		virtualScrollPending: false,
-		metricsRaf: null,
 		// Fixed page size for incremental item loading to avoid
 		// pulling the entire catalog at once.
 		itemsPageLimit: 100,
-		// Track if the current search was triggered by a scanner
-		pendingItemSearch: null,
+		// Scanner state managed by useScannerInput
 		loadProgress: 0,
 		totalItemCount: 0,
-		// Scanner state managed by useScannerInput
 		refreshInFlight: false,
-		clearingSearch: false,
-
-		lastInvoiceRates: {},
-		lastInvoiceRateScheduler: null,
-		lastInvoiceRateLoading: false,
 	}),
 
 	watch: {
@@ -438,9 +451,6 @@ export default {
 			this.search_onchange();
 		},
 		customer: _.debounce(function () {
-			if (!this.customer) {
-				this.lastInvoiceRates = {};
-			}
 			this.scheduleLastInvoiceRateRefresh();
 
 			if (this.pos_profile.posa_force_reload_items) {
@@ -612,16 +622,6 @@ export default {
 		exchange_rate() {
 			this.applyCurrencyConversionToItems();
 		},
-		windowWidth() {
-			// Keep the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-			this.scheduleCardMetricsUpdate();
-		},
-		windowHeight() {
-			// Maintain the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-			this.scheduleCardMetricsUpdate();
-		},
 		itemsLoaded(val) {
 			if (val) {
 				this.eventBus.emit("itemsLoaded");
@@ -655,35 +655,13 @@ export default {
 
 
 		scheduleCardMetricsUpdate() {
-			if (this.metricsRaf) {
-				cancelAnimationFrame(this.metricsRaf);
-			}
-			this.metricsRaf = requestAnimationFrame(() => {
-				this.metricsRaf = null;
-				this.updateCardContainerMetrics();
-			});
+			this.itemLayout.scheduleCardMetricsUpdate();
 		},
 		getItemsContainerElement() {
-			const ref = this.$refs.itemsContainer;
-			if (!ref) {
-				return null;
-			}
-			if (typeof ref.getScrollerElement === "function") {
-				return ref.getScrollerElement();
-			}
-			return ref.$el || ref;
+			return this.itemLayout.getItemsContainerElement();
 		},
 		updateCardContainerMetrics() {
-			this.$nextTick(() => {
-				const el = this.getItemsContainerElement();
-				if (!el || typeof el.getBoundingClientRect !== "function") {
-					return;
-				}
-				const { width } = el.getBoundingClientRect();
-				if (width && Math.round(width) !== Math.round(this.cardContainerWidth)) {
-					this.cardContainerWidth = width;
-				}
-			});
+			this.itemLayout.updateCardContainerMetrics();
 		},
 		async onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
 			const total = this.displayedItems ? this.displayedItems.length : 0;
@@ -711,98 +689,20 @@ export default {
 		},
 
 		// Optimized scroll handler with throttling
-		onCardScroll() {
-			if (this.scrollThrottle) return;
-
-			this.scrollThrottle = requestAnimationFrame(() => {
-				try {
-					const el = this.getItemsContainerElement();
-					if (!el) return;
-
-					const scrollTop = el.scrollTop;
-					const clientHeight = el.clientHeight;
-					const scrollHeight = el.scrollHeight;
-
-					// Only trigger load more if we're near the bottom
-					if (scrollTop + clientHeight >= scrollHeight - 50) {
-						this.currentPage += 1;
-						this.loadVisibleItems();
-					}
-
-					this.lastScrollTop = scrollTop;
-				} catch (error) {
-					console.error("Error in card scroll handler:", error);
-				} finally {
-					this.scrollThrottle = null;
-				}
-			});
+		onCardScroll(e) {
+			this.itemLayout.onCardScroll(e);
+		},
+		onListScroll(e) {
+			this.itemLayout.onListScroll(e);
 		},
 		startItemWorker() {
-			// Avoid spawning duplicate workers which doubles script downloads and background threads
-			if (this.itemWorker || typeof Worker === "undefined") {
-				return;
-			}
-
-			try {
-				// Use the plain URL so the service worker can match the cached file
-				// even when offline. Using a query string causes cache lookups to fail
-				// which results in "Failed to fetch a worker script" errors.
-				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-				this.itemWorker = new Worker(workerUrl, { type: "classic" });
-				this.itemWorker.onerror = function (event) {
-					console.error("Worker error:", event);
-					console.error("Message:", event.message);
-					console.error("Filename:", event.filename);
-					console.error("Line number:", event.lineno);
-				};
-			} catch (e) {
-				console.error("Failed to start item worker", e);
-				this.itemWorker = null;
-			}
+			this.storageSafety.initializeWorker("/assets/posawesome/dist/js/posapp/workers/itemWorker.js");
 		},
-		markStorageUnavailable(localOnly = false) {
-			if (localOnly) {
-				this.localStorageAvailable = false;
-				return;
-			}
-			this.storageAvailable = false;
-			this.localStorageAvailable = false;
-			this.itemsPageLimit = null;
-			if (this.itemWorker) {
-				this.itemWorker.terminate();
-				this.itemWorker = null;
-			}
-			if (this.pos_profile) {
-				this.pos_profile.posa_local_storage = false;
-			}
+		markStorageUnavailable(args) {
+			this.storageSafety.markStorageUnavailable(args);
 		},
-		async ensureStorageHealth() {
-			let localHealthy = true;
-			try {
-				if (typeof localStorage !== "undefined") {
-					const t = "posa_test";
-					localStorage.setItem(t, "1");
-					localStorage.removeItem(t);
-				}
-			} catch (e) {
-				console.warn("localStorage unavailable", e);
-				localHealthy = false;
-			}
-			const dbHealthy = await checkDbHealth().catch(() => false);
-			if (dbHealthy) {
-				this.storageAvailable = true;
-				if (!localHealthy) {
-					this.markStorageUnavailable(true);
-				} else {
-					this.localStorageAvailable = true;
-				}
-				if (this.pos_profile && this.pos_profile.posa_local_storage) {
-					this.startItemWorker();
-				}
-			} else {
-				this.markStorageUnavailable();
-			}
-			return dbHealthy;
+		ensureStorageHealth() {
+			return this.storageSafety.checkStorageHealth();
 		},
 		async loadVisibleItems(reset = false) {
 			this.loadProgress = 0;
@@ -835,152 +735,24 @@ export default {
 				});
 			}
 		},
-		onListScroll(event) {
-			if (this.scrollThrottle) return;
-
-			this.scrollThrottle = requestAnimationFrame(() => {
-				try {
-					const el = event.target;
-					if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
-						this.currentPage += 1;
-						this.loadVisibleItems();
-					}
-				} catch (error) {
-					console.error("Error in list scroll handler:", error);
-				} finally {
-					this.scrollThrottle = null;
-				}
-			});
-		},
-
 		checkItemContainerOverflow() {
-			const el = this.getItemsContainerElement();
-			if (!el) {
-				this.isOverflowing = false;
-				return;
-			}
-
-			const containerHeight = parseFloat(getComputedStyle(el).getPropertyValue("--container-height"));
-			if (isNaN(containerHeight)) {
-				this.isOverflowing = false;
-				return;
-			}
-
-			const stickyHeader = el.closest(".dynamic-padding")?.querySelector(".sticky-header");
-			const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-			const availableHeight = containerHeight - headerHeight;
-
-			el.style.maxHeight = `${availableHeight}px`;
-			this.isOverflowing = el.scrollHeight > availableHeight;
-			this.scheduleCardMetricsUpdate();
+			this.itemLayout.checkItemContainerOverflow();
 		},
 
 
 
 
 		scheduleLastInvoiceRateRefresh() {
-			if (!this.show_last_invoice_rate) {
-				this.lastInvoiceRates = {};
-				return;
-			}
-
-			if (!this.lastInvoiceRateScheduler) {
-				this.lastInvoiceRateScheduler = _.debounce(() => {
-					this.refreshLastInvoiceRatesForVisibleItems();
-				}, 200);
-			}
-
-			this.lastInvoiceRateScheduler();
+			this.lastInvoiceRate.scheduleLastInvoiceRateRefresh(this.displayedItems);
 		},
-
-		async refreshLastInvoiceRatesForVisibleItems() {
-			if (!this.show_last_invoice_rate) {
-				this.lastInvoiceRates = {};
-				return this.lastInvoiceRates;
-			}
-
-			if (!this.displayedItems || !this.displayedItems.length) {
-				this.lastInvoiceRates = {};
-				return this.lastInvoiceRates;
-			}
-
-			const itemCodes = this.displayedItems.map((it) => it.item_code).filter(Boolean);
-			return this.fetchLastInvoiceRates(itemCodes);
+		refreshLastInvoiceRatesForVisibleItems() {
+			this.lastInvoiceRate.scheduleLastInvoiceRateRefresh(this.displayedItems);
 		},
-
-		async fetchLastInvoiceRates(itemCodes = []) {
-			if (!this.show_last_invoice_rate) {
-				this.lastInvoiceRates = {};
-				return this.lastInvoiceRates;
-			}
-
-			const customer = this.customer || this.selectedCustomer;
-
-			if (!customer) {
-				this.lastInvoiceRates = {};
-				return {};
-			}
-
-			const normalizedCodes = Array.from(new Set(itemCodes.filter(Boolean)));
-			const cachedForCustomer = this.lastInvoiceRateCache.get(customer) || new Map();
-			this.lastInvoiceRates = Object.fromEntries(cachedForCustomer);
-
-			const missingCodes = normalizedCodes.filter((code) => !cachedForCustomer.has(code));
-			if (!missingCodes.length) {
-				return this.lastInvoiceRates;
-			}
-
-			if (isOffline()) {
-				return this.lastInvoiceRates;
-			}
-
-			this.lastInvoiceRateLoading = true;
-			try {
-				const res = await frappe.call({
-					method: "posawesome.posawesome.api.invoices.get_last_invoice_rates",
-					args: {
-						customer,
-						item_codes: missingCodes,
-						company: this.pos_profile?.company,
-					},
-				});
-
-				const rows = (res && res.message) || [];
-				const updatedCache = new Map(cachedForCustomer);
-				rows.forEach((row) => {
-					if (row && row.item_code) {
-						updatedCache.set(row.item_code, {
-							rate: row.rate,
-							currency: row.currency,
-							invoice: row.invoice,
-							uom: row.uom,
-							posting_date: row.posting_date,
-						});
-					}
-				});
-
-				this.lastInvoiceRateCache.set(customer, updatedCache);
-				this.lastInvoiceRates = Object.fromEntries(updatedCache);
-				return this.lastInvoiceRates;
-			} catch (error) {
-				console.error("Failed to fetch last invoice rates", error);
-				this.lastInvoiceRates = Object.fromEntries(cachedForCustomer);
-				return this.lastInvoiceRates;
-			} finally {
-				this.lastInvoiceRateLoading = false;
-			}
+		fetchLastInvoiceRates(items) {
+			this.lastInvoiceRate.fetchLastInvoiceRates(items);
 		},
-
 		getLastInvoiceRate(item) {
-			if (!this.show_last_invoice_rate) {
-				return null;
-			}
-
-			if (!item || !item.item_code) {
-				return null;
-			}
-
-			return this.lastInvoiceRates[item.item_code] || null;
+			return this.lastInvoiceRate.getLastInvoiceRate(item.item_code);
 		},
 
 		show_offers() {
@@ -1028,27 +800,17 @@ export default {
 				return;
 			}
 
-			console.log("[ItemsSelector] forceReloadItems called - Full Refresh");
+			// 1. Clear caches via composables
+			this.lastInvoiceRate.clearRates();
+			this.itemDetailFetcher.clearCache?.();
 
-			// 1. Clear local component caches
-			this.itemDetailsRequestCache = { key: null, promise: null, result: null };
-			if (this.lastInvoiceRateCache) {
-				this.lastInvoiceRateCache.clear();
-			}
-			this.lastInvoiceRates = {};
-
-			// 2. Reset search if empty to ensure full load
+			// 2. Reset search if empty
 			if (!this.first_search || !this.first_search.trim()) {
 				this.first_search = "";
 				this.search = "";
 			}
 
 			// 3. Delegate to Store for full cache wipe and reload
-			// This calls itemsStore.refreshItems() which:
-			// - Clears memory/session/IDB caches
-			// - Resets pagination
-			// - Forces server fetch
-			// - Triggers background details sync
 			try {
 				await this.refreshItems();
 				frappe.show_alert({ message: __("Items reloaded from server"), indicator: "green" });
@@ -1056,8 +818,6 @@ export default {
 				console.error("Failed to reload items:", error);
 				frappe.msgprint(__("Failed to reload items"));
 			}
-
-			console.log("[ItemsSelector] forceReloadItems finished");
 		},
 		async verifyServerItemCount() {
 			if (this.usesLimitSearch) {
@@ -2700,6 +2460,25 @@ export default {
 					this.get_items(!!forceServer);
 				}
 			},
+		});
+
+		// Configure Last Invoice Rate with component context
+		this.lastInvoiceRate.registerContext({
+			get customer() {
+				return vm.customer || vm.selectedCustomer;
+			},
+			get pos_profile() {
+				return vm.pos_profile;
+			},
+		});
+
+		// Configure Storage Safety with component context
+		this.storageSafety.registerContext({
+			get pos_profile() {
+				return vm.pos_profile;
+			},
+			startItemWorker: () => vm.startItemWorker(),
+			markStorageUnavailable: (args) => vm.markStorageUnavailable(args),
 		});
 
 		// Watch for highlighted index changes (triggered by keyboard nav in composable)
