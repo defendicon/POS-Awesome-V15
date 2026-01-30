@@ -1,6 +1,6 @@
 import { ref, nextTick } from "vue";
-import _ from "lodash";
-import { shouldReloadOnSearchClear } from "../../utils/searchUtils.js";
+import { shouldReloadOnSearchClear } from "../utils/searchUtils.js";
+import { isOffline } from "../../offline/index.js";
 
 /**
  * useItemSearchTriggers
@@ -98,6 +98,11 @@ export function useItemSearchTriggers({
 
         if (isBackgroundLoading.value) {
             // Defer reload
+            release();
+            return;
+        }
+
+        if (typeof isOffline === "function" && isOffline()) {
             release();
             return;
         }
