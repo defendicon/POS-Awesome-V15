@@ -886,7 +886,9 @@ export function useItemAddition() {
 	};
 
 	// Reset all invoice fields to default/empty values
-	const clearInvoice = (context) => {
+	const clearInvoice = (context, options = {}) => {
+		const { preserveStickies = false } = options;
+
 		if (context.invoiceStore) {
 			context.invoiceStore.clearItems();
 			context.invoiceStore.setPackedItems([]);
@@ -901,11 +903,15 @@ export function useItemAddition() {
 		context.posa_coupons = [];
 		context.invoice_doc = "";
 		context.return_doc = "";
-		context.discount_amount = 0;
-		context.additional_discount = 0;
-		context.additional_discount_percentage = 0;
-		context.delivery_charges_rate = 0;
-		context.selected_delivery_charge = "";
+
+		if (!preserveStickies) {
+			context.discount_amount = 0;
+			context.additional_discount = 0;
+			context.additional_discount_percentage = 0;
+			context.delivery_charges_rate = 0;
+			context.selected_delivery_charge = "";
+		}
+
 		// Reset posting date to today
 		context.posting_date = frappe.datetime.nowdate();
 

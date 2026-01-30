@@ -1457,8 +1457,8 @@ export default {
 	},
 
 	// Reset all invoice fields to default/empty values
-	clear_invoice() {
-		return clearInvoice(this);
+	clear_invoice(options = {}) {
+		return clearInvoice(this, options);
 	},
 
 	// Fetch customer balance from backend or cache
@@ -1553,7 +1553,8 @@ export default {
 
 	// Load an invoice (or return invoice) from data, set all fields accordingly
 	async load_invoice(data = {}, options = {}) {
-		const { preserveAdditionalDiscountPercentage = false } = options || {};
+		const { preserveAdditionalDiscountPercentage = false, preserveStickies = false } =
+			options || {};
 		const usePercentageDiscount = Boolean(this.pos_profile?.posa_use_percentage_discount);
 		const previousDiscountPercentage = usePercentageDiscount
 			? flt(this.additional_discount_percentage)
@@ -1563,6 +1564,17 @@ export default {
 			preserveAdditionalDiscountPercentage &&
 			Number.isFinite(previousDiscountPercentage);
 
+		// Capture current stickies if requested or if we are loading a draft (which usually implies we want to keep some context)
+		// Actually, let's stick to the options passed.
+		const stickyData = preserveStickies
+			? {
+				delivery_charge: this.selected_delivery_charge,
+				delivery_rate: this.delivery_charges_rate,
+				additional_discount: this.additional_discount,
+				additional_discount_percentage: this.additional_discount_percentage,
+			}
+			: null;
+
 		console.log("load_invoice called with data:", {
 			is_return: data.is_return,
 			return_against: data.return_against,
@@ -1570,7 +1582,24 @@ export default {
 			items_count: data.items ? data.items.length : 0,
 		});
 
-		this.clear_invoice();
+		this.clear_invoice({ preserveStickies });
+
+		// Restore stickies if they aren't provided in the data
+		if (preserveStickies && stickyData) {
+			if (!data.posa_delivery_charges && stickyData.delivery_charge) {
+				this.selected_delivery_charge = stickyData.delivery_charge;
+				this.delivery_charges_rate = stickyData.delivery_rate;
+			}
+			if (
+				data.additional_discount === undefined &&
+				data.additional_discount_percentage === undefined
+			) {
+				this.additional_discount = stickyData.additional_discount;
+				this.additional_discount_percentage = stickyData.additional_discount_percentage;
+				this.discount_amount = this.additional_discount;
+			}
+		}
+
 		if (data?.is_return) {
 			this._normalizeReturnDocTotals(data);
 		}

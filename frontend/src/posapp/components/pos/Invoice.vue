@@ -883,7 +883,8 @@ export default {
 				});
 			}
 		},
-		async set_delivery_charges() {
+		async set_delivery_charges(options = {}) {
+			const { forceReset = false } = options;
 			var vm = this;
 			if (!this.pos_profile || !this.customer || !this.pos_profile.posa_use_delivery_charges) {
 				this.delivery_charges = [];
@@ -892,9 +893,12 @@ export default {
 				this.selected_delivery_charge = "";
 				return;
 			}
-			this.base_delivery_charges_rate = 0;
-			this.delivery_charges_rate = 0;
-			this.selected_delivery_charge = "";
+
+			if (forceReset) {
+				this.base_delivery_charges_rate = 0;
+				this.delivery_charges_rate = 0;
+				this.selected_delivery_charge = "";
+			}
 			try {
 				const r = await frappe.call({
 					method: "posawesome.posawesome.api.offers.get_applicable_delivery_charges",
@@ -1531,7 +1535,7 @@ export default {
 			this.uiStore.triggerItemSearchFocus();
 		},
 		handleLoadInvoice(data) {
-			this.load_invoice(data);
+			this.load_invoice(data, { preserveStickies: true });
 		},
 		handleLoadOrder(data) {
 			this.new_order(data);
@@ -1681,7 +1685,7 @@ export default {
 			// "item-drag-end": this.handleItemDragEnd, // Handled by watcher
 			// register_pos_profile: this.handleRegisterPosProfile, // Handled by store watcher
 			add_item: this.add_item,
-			// clear_invoice: this.handleClearInvoice, // Handled by invoiceStore.clear()
+			clear_invoice: this.handleClearInvoice,
 			// load_invoice: this.handleLoadInvoice, // Handled by store watcher
 			// load_order: this.handleLoadOrder, // Handled by store watcher
 			// set_offers: this.handleSetOffers, // Handled by store watcher
