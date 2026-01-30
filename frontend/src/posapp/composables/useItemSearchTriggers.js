@@ -1,6 +1,5 @@
 import { ref, nextTick } from "vue";
 import _ from "lodash";
-import { isOffline } from "../../utils/frappe.js";
 import { shouldReloadOnSearchClear } from "../../utils/searchUtils.js";
 
 /**
