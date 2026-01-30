@@ -239,6 +239,13 @@ import {
 	isSearchFieldPrimedForScan,
 } from "../../utils/keyboardScan.js";
 import { normalizeBackgroundSyncInterval, shouldRunBackgroundSync } from "../../utils/backgroundSync.js";
+import {
+	ensureBarcodeIndex,
+	resetBarcodeIndex,
+	indexItemInBarcodeIndex,
+	replaceBarcodeIndex,
+	lookupItemInBarcodeIndex,
+} from "../../utils/barcodeIndex.js";
 
 import { useCustomersStore } from "../../stores/customersStore.js";
 
