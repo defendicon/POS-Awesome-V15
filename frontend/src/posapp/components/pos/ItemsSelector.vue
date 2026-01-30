@@ -212,6 +212,7 @@ import { useItemCurrency } from "../../composables/useItemCurrency.js";
 import { useScannerInput } from "../../composables/useScannerInput.js";
 import { useItemAvailability } from "../../composables/useItemAvailability.js";
 import { useItemDetailFetcher } from "../../composables/useItemDetailFetcher.js";
+import { useItemSelection } from "../../composables/useItemSelection.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
 import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
@@ -238,7 +239,7 @@ import {
 	isSearchFieldPrimedForScan,
 } from "../../utils/keyboardScan.js";
 import { normalizeBackgroundSyncInterval, shouldRunBackgroundSync } from "../../utils/backgroundSync.js";
-import { findItemIndexByCode, getNextHighlightedIndex } from "../../utils/itemHighlight.js";
+
 import { useCustomersStore } from "../../stores/customersStore.js";
 
 import { useToastStore } from "../../stores/toastStore.js";
@@ -279,6 +280,7 @@ export default {
 		const scannerInput = useScannerInput();
 		const itemAvailability = useItemAvailability();
 		const itemDetailFetcher = useItemDetailFetcher();
+		const itemSelection = useItemSelection();
 
 		return {
 			...responsive,
@@ -312,6 +314,7 @@ export default {
 			// Expose item availability
 			itemAvailability,
 			itemDetailFetcher,
+			itemSelection,
 		};
 	},
 	components: {
@@ -412,8 +415,7 @@ export default {
 		// Scanner state managed by useScannerInput
 		refreshInFlight: false,
 		clearingSearch: false,
-		highlightedIndex: -1,
-		highlightedItemCode: null,
+
 		lastInvoiceRates: {},
 		lastInvoiceRateScheduler: null,
 		lastInvoiceRateLoading: false,
@@ -570,7 +572,7 @@ export default {
 				this.scheduleCardMetricsUpdate();
 			});
 			this.scheduleLastInvoiceRateRefresh();
-			this.syncHighlightedItem();
+			this.itemSelection.syncHighlightedItem();
 		},
 		// Automatically search when the query has at least 3 characters
 		first_search: _.debounce(function (val, oldVal) {
@@ -1268,37 +1270,13 @@ export default {
 			}
 		},
 		select_item(event, item) {
-			const targets = document.querySelectorAll(".items-table-container");
-			const target = targets[targets.length - 1];
-			const source = event.currentTarget?.querySelector?.(".card-item-image") || event.currentTarget;
-			if (target && source && this.fly) {
-				this.fly(source, target, this.flyConfig);
-			}
-			this.add_item(item);
+			this.itemSelection.handleItemSelection(event, item);
 		},
 		selectTopItem() {
-			if (!this.displayedItems || !this.displayedItems.length) {
-				return;
-			}
-			this.add_item(this.displayedItems[0]);
+			this.itemSelection.selectTopItem();
 		},
 		async click_item_row(event, { item }) {
-			const targets = document.querySelectorAll(".items-table-container");
-			const target = targets[targets.length - 1];
-			if (target && this.fly) {
-				const placeholder = document.createElement("div");
-				placeholder.className = "item-fly-placeholder";
-				placeholder.style.width = "40px";
-				placeholder.style.height = "40px";
-				placeholder.style.borderRadius = "50%";
-				placeholder.style.position = "fixed";
-				placeholder.style.top = `${event.clientY - 20}px`;
-				placeholder.style.left = `${event.clientX - 20}px`;
-				document.body.appendChild(placeholder);
-				this.fly(placeholder, target, this.flyConfig);
-				placeholder.remove();
-			}
-			await this.add_item(item);
+			await this.itemSelection.handleRowClick(event, { item });
 		},
 		async add_item(item, options = {}) {
 			const { suppressNegativeWarning = false } = options;
@@ -1515,11 +1493,11 @@ export default {
 			}
 		},
 		onEnter(event) {
-			if (this.highlightedIndex >= 0) {
+			if (this.itemSelection.highlightedIndex >= 0) {
 				if (event && typeof event.preventDefault === "function") {
 					event.preventDefault();
 				}
-				this.selectHighlightedItem();
+				this.itemSelection.selectHighlightedItem();
 				return;
 			}
 			if (this.search_onchange.cancel) {
@@ -1822,9 +1800,7 @@ export default {
 			if (!event) return;
 			const key = event.key || "";
 
-			if (key === "ArrowDown" || key === "ArrowUp") {
-				event.preventDefault();
-				this.navigateHighlightedItem(key === "ArrowDown" ? 1 : -1);
+			if (this.itemSelection.handleSearchKeydown(event)) {
 				return;
 			}
 
@@ -1839,50 +1815,13 @@ export default {
 			// Deprecated: Handled by useScannerInput
 		},
 		clearHighlightedItem() {
-			this.highlightedIndex = -1;
-			this.highlightedItemCode = null;
+			this.itemSelection.clearHighlightedItem();
 		},
 		syncHighlightedItem() {
-			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
-				this.clearHighlightedItem();
-				return;
-			}
-
-			if (this.highlightedItemCode) {
-				const index = findItemIndexByCode(this.displayedItems, this.highlightedItemCode);
-				if (index >= 0) {
-					this.highlightedIndex = index;
-					return;
-				}
-			}
-
-			this.clearHighlightedItem();
+			this.itemSelection.syncHighlightedItem();
 		},
 		navigateHighlightedItem(direction) {
-			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
-				this.clearHighlightedItem();
-				return;
-			}
-
-			const nextIndex = getNextHighlightedIndex({
-				currentIndex: this.highlightedIndex,
-				itemsLength: this.displayedItems.length,
-				direction,
-			});
-			if (nextIndex < 0) {
-				this.clearHighlightedItem();
-				return;
-			}
-
-			const nextItem = this.displayedItems[nextIndex];
-			if (!nextItem) {
-				this.clearHighlightedItem();
-				return;
-			}
-
-			this.highlightedIndex = nextIndex;
-			this.highlightedItemCode = nextItem.item_code || null;
-			this.scrollHighlightedItemIntoView(nextIndex);
+			this.itemSelection.navigateHighlightedItem(direction);
 		},
 		scrollHighlightedItemIntoView(index) {
 			this.$nextTick(() => {
@@ -1927,52 +1866,20 @@ export default {
 			});
 		},
 		isItemHighlighted(item) {
-			const resolvedItem = this.resolveHighlightedItem(item);
-			if (!resolvedItem || !this.highlightedItemCode) {
-				return false;
-			}
-			return resolvedItem.item_code === this.highlightedItemCode;
+			return this.itemSelection.isItemHighlighted(item);
 		},
 		getItemRowClass(item) {
-			return this.isItemHighlighted(item) ? "item-row-highlighted" : "";
+			return this.itemSelection.getItemRowClass(item);
 		},
 		getItemRowProps(item) {
-			return this.isItemHighlighted(item) ? { class: "item-row-highlighted" } : {};
+			return this.itemSelection.getItemRowProps(item);
 		},
 		resolveHighlightedItem(item) {
-			if (!item || typeof item !== "object") {
-				return item;
-			}
-
-			if (item.raw) {
-				return item.raw;
-			}
-
-			if (item.item) {
-				return item.item.raw || item.item;
-			}
-
+			// Used internally by isItemHighlighted
 			return item;
 		},
 		async selectHighlightedItem() {
-			if (!Array.isArray(this.displayedItems) || this.displayedItems.length === 0) {
-				return;
-			}
-
-			const index = this.highlightedIndex;
-			if (index < 0 || index >= this.displayedItems.length) {
-				return;
-			}
-
-			const item = this.displayedItems[index];
-			if (!item) {
-				return;
-			}
-
-			await this.add_item(item);
-			this.clearHighlightedItem();
-			this.clearSearch();
-			this.focusItemSearch();
+			await this.itemSelection.selectHighlightedItem();
 		},
 		async processScannedItem(scannedCode) {
 			const mark = perfMarkStart("pos:scan-process");
@@ -2803,7 +2710,7 @@ export default {
 		this.itemAvailability.initAvailability();
 
 
-		// Configure Item Detail Fetcher with component context (Late Binding)
+	// Configure Item Detail Fetcher with component context (Late Binding)
 		this.itemDetailFetcher.registerContext({
 			get pos_profile() {
 				return vm.pos_profile;
@@ -2829,6 +2736,34 @@ export default {
 			applyCurrencyConversionToItem: (item) => vm.applyCurrencyConversionToItem(item),
 			forceUpdate: () => vm.$forceUpdate(),
 		});
+
+		// Configure Item Selection with component context
+		this.itemSelection.registerContext({
+			get items() {
+				return vm.items;
+			},
+			get displayedItems() {
+				return vm.displayedItems;
+			},
+			addItem: (item) => vm.add_item(item),
+			clearSearch: () => vm.clearSearch(),
+			focusItemSearch: () => vm.focusItemSearch(),
+			fly: this.fly,
+			get flyConfig() {
+				return vm.flyConfig;
+			},
+			get items_view() {
+				return vm.items_view;
+			},
+		});
+
+		// Watch for highlighted index changes (triggered by keyboard nav in composable)
+		this.$watch(
+			() => this.itemSelection.highlightedIndex,
+			(newIndex) => {
+				this.scrollHighlightedItemIntoView(newIndex);
+			},
+		);
 
 		// Initialize the Pinia store with existing POS profile data
 		if (this.pos_profile && this.pos_profile.name) {
