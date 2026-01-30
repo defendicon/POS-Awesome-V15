@@ -289,6 +289,7 @@ export default {
 		const itemAvailability = useItemAvailability();
 		const itemDetailFetcher = useItemDetailFetcher();
 		const itemSelection = useItemSelection();
+		const itemSync = useItemSync();
 
 		return {
 			...responsive,
