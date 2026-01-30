@@ -426,9 +426,6 @@ export default {
 			customer: "",
 			customer_info: "",
 			customer_balance: 0,
-			discount_amount: 0,
-			additional_discount: 0,
-			additional_discount_percentage: 0,
 			total_tax: 0,
 			packed_dialog_items: [], // Packed items displayed in dialog
 			show_packed_dialog: false, // Packing list dialog visibility
@@ -453,12 +450,7 @@ export default {
 			item_stock_cache: {},
 			brand_cache: {},
 			stockUnsubscribe: null,
-			delivery_charges: [], // List of delivery charges
-			base_delivery_charges_rate: 0, // Delivery charge in company currency
-			delivery_charges_rate: 0, // Selected delivery charge rate
-			selected_delivery_charge: "", // Selected delivery charge object
 			invoice_posting_date: false, // Posting date dialog
-			posting_date: frappe.datetime.nowdate(), // Invoice posting date
 			posting_date_display: "", // Display value for date picker
 			items_headers: [],
 			packedItemsHeaders: [
@@ -535,6 +527,62 @@ export default {
 		},
 		paymentVisible() {
 			return this.activeView === "payment";
+		},
+		discount_amount: {
+			get() {
+				return this.invoiceStore.discountAmount;
+			},
+			set(val) {
+				this.invoiceStore.setDiscountAmount(val);
+			},
+		},
+		additional_discount: {
+			get() {
+				return this.invoiceStore.additionalDiscount;
+			},
+			set(val) {
+				this.invoiceStore.setAdditionalDiscount(val);
+			},
+		},
+		additional_discount_percentage: {
+			get() {
+				return this.invoiceStore.additionalDiscountPercentage;
+			},
+			set(val) {
+				this.invoiceStore.setAdditionalDiscountPercentage(val);
+			},
+		},
+		delivery_charges: {
+			get() {
+				return this.invoiceStore.deliveryCharges;
+			},
+			set(val) {
+				this.invoiceStore.setDeliveryCharges(val);
+			},
+		},
+		delivery_charges_rate: {
+			get() {
+				return this.invoiceStore.deliveryChargesRate;
+			},
+			set(val) {
+				this.invoiceStore.setDeliveryChargesRate(val);
+			},
+		},
+		selected_delivery_charge: {
+			get() {
+				return this.invoiceStore.selectedDeliveryCharge;
+			},
+			set(val) {
+				this.invoiceStore.setSelectedDeliveryCharge(val);
+			},
+		},
+		posting_date: {
+			get() {
+				return this.invoiceStore.postingDate;
+			},
+			set(val) {
+				this.invoiceStore.setPostingDate(val);
+			},
 		},
 		...invoiceComputed,
 	},
@@ -1685,7 +1733,7 @@ export default {
 			// "item-drag-end": this.handleItemDragEnd, // Handled by watcher
 			// register_pos_profile: this.handleRegisterPosProfile, // Handled by store watcher
 			add_item: this.add_item,
-			clear_invoice: this.handleClearInvoice,
+			// clear_invoice: this.handleClearInvoice, // Handled by invoiceStore.clear()
 			// load_invoice: this.handleLoadInvoice, // Handled by store watcher
 			// load_order: this.handleLoadOrder, // Handled by store watcher
 			// set_offers: this.handleSetOffers, // Handled by store watcher

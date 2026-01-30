@@ -112,12 +112,44 @@ export const useInvoiceStore = defineStore("invoice", () => {
 	const orderToLoad = ref(null);
 	const postingDate = ref(frappe.datetime.nowdate());
 
+	// Sticky fields moved from local component state
+	const discountAmount = ref(0);
+	const additionalDiscount = ref(0);
+	const additionalDiscountPercentage = ref(0);
+	const deliveryCharges = ref([]);
+	const deliveryChargesRate = ref(0);
+	const selectedDeliveryCharge = ref("");
+
 	const setPostingDate = (date) => {
 		postingDate.value = date;
 	};
 
 	const resetPostingDate = () => {
 		postingDate.value = frappe.datetime.nowdate();
+	};
+
+	const setDiscountAmount = (val) => {
+		discountAmount.value = toNumber(val);
+	};
+
+	const setAdditionalDiscount = (val) => {
+		additionalDiscount.value = toNumber(val);
+	};
+
+	const setAdditionalDiscountPercentage = (val) => {
+		additionalDiscountPercentage.value = toNumber(val);
+	};
+
+	const setDeliveryCharges = (val) => {
+		deliveryCharges.value = Array.isArray(val) ? val : [];
+	};
+
+	const setDeliveryChargesRate = (val) => {
+		deliveryChargesRate.value = toNumber(val);
+	};
+
+	const setSelectedDeliveryCharge = (val) => {
+		selectedDeliveryCharge.value = val;
 	};
 
 	const setItems = (list) => {
@@ -256,10 +288,20 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		touch();
 	};
 
-	const clear = () => {
+	const clear = (options = {}) => {
+		const { preserveStickies = false } = options;
 		invoiceDoc.value = null;
 		clearItems();
 		packedItems.value = [];
+
+		if (!preserveStickies) {
+			discountAmount.value = 0;
+			additionalDiscount.value = 0;
+			additionalDiscountPercentage.value = 0;
+			deliveryChargesRate.value = 0;
+			selectedDeliveryCharge.value = "";
+		}
+
 		touch();
 	};
 
@@ -328,6 +370,20 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		triggerLoadOrder: (doc) => {
 			orderToLoad.value = doc;
 		},
+		// Exposed sticky fields
+		discountAmount,
+		additionalDiscount,
+		additionalDiscountPercentage,
+		deliveryCharges,
+		deliveryChargesRate,
+		selectedDeliveryCharge,
+		// Setters
+		setDiscountAmount,
+		setAdditionalDiscount,
+		setAdditionalDiscountPercentage,
+		setDeliveryCharges,
+		setDeliveryChargesRate,
+		setSelectedDeliveryCharge,
 	};
 });
 

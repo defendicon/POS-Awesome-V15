@@ -1449,8 +1449,6 @@ export default {
 				this.addresses = [];
 				this.invoiceStore.clear();
 				this.invoiceStore.resetPostingDate();
-				this.eventBus.emit("clear_invoice");
-				this.eventBus.emit("reset_posting_date");
 			}
 		},
 		handleShowPayment() {

@@ -890,11 +890,18 @@ export function useItemAddition() {
 		const { preserveStickies = false } = options;
 
 		if (context.invoiceStore) {
-			context.invoiceStore.clearItems();
-			context.invoiceStore.setPackedItems([]);
+			context.invoiceStore.clear({ preserveStickies });
 		} else {
 			context.items = [];
 			context.packed_items = [];
+
+			if (!preserveStickies) {
+				context.discount_amount = 0;
+				context.additional_discount = 0;
+				context.additional_discount_percentage = 0;
+				context.delivery_charges_rate = 0;
+				context.selected_delivery_charge = "";
+			}
 		}
 
 		context.posa_offers = [];
@@ -903,14 +910,6 @@ export function useItemAddition() {
 		context.posa_coupons = [];
 		context.invoice_doc = "";
 		context.return_doc = "";
-
-		if (!preserveStickies) {
-			context.discount_amount = 0;
-			context.additional_discount = 0;
-			context.additional_discount_percentage = 0;
-			context.delivery_charges_rate = 0;
-			context.selected_delivery_charge = "";
-		}
 
 		// Reset posting date to today
 		context.posting_date = frappe.datetime.nowdate();
