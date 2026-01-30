@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { checkDbHealth } from "../../../offline/index.js";
+import { checkDbHealth } from "../../offline/index.js";
 
 /**
  * useItemStorageSafety
