@@ -360,10 +360,33 @@ export default {
 		const add_item = (item, options) => {
 			const vm = getValidVM();
 			if (!vm) return;
-			// Create a context object that inherits from the component instance
-			// and mixes in specific options for this operation
-			const context = Object.create(vm);
-			Object.assign(context, options || {});
+			// Use a Proxy to create a robust context that delegates to the component instance
+			// but allows local overrides and method binding
+			const context = new Proxy(vm, {
+				get(target, prop, receiver) {
+					// 1. Check options override
+					if (options && options[prop] !== undefined) {
+						return options[prop];
+					}
+					// 2. Map specific missing methods if needed
+					if (prop === "update_items_details") {
+						return vm.itemDetailFetcher?.update_items_details;
+					}
+					// 3. Delegate to component instance
+					const value = Reflect.get(target, prop, receiver);
+					// Bind functions to the original VM to ensure 'this' context is correct
+					if (typeof value === "function") {
+						return value.bind(target);
+					}
+					return value;
+				},
+				// Allow writing specific properties back to the VM (e.g. cache)
+				set(target, prop, value, receiver) {
+					// We can allow all writes to flow through to the VM, or restrict them.
+					// useItemAddition writes to _mergeIndexCache, items (via push/splice), etc.
+					return Reflect.set(target, prop, value, receiver);
+				},
+			});
 			return itemAddition.addItem(item, context);
 		};
 
