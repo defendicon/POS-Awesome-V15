@@ -163,7 +163,7 @@
 /* global frappe, __, setLocalStockCache, flt, onScan, get_currency_symbol, current_items, wordCount */
 import format from "../../format";
 import _ from "lodash";
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance, onMounted } from "vue";
 import CameraScanner from "./CameraScanner.vue";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
@@ -246,6 +246,7 @@ import {
 } from "../../utils/keyboardScan.js";
 import { normalizeBackgroundSyncInterval, shouldRunBackgroundSync } from "../../utils/backgroundSync.js";
 import { useBarcodeIndexing } from "../../composables/useBarcodeIndexing.js";
+import { useScanProcessor } from "../../composables/useScanProcessor.js";
 
 import { useCustomersStore } from "../../stores/customersStore.js";
 
@@ -394,6 +395,54 @@ export default {
 			return itemAddition.addItem(item, context);
 		};
 
+
+		// Initialize useScanProcessor with context
+		const scanProcessor = useScanProcessor({
+			items: itemsIntegration.items,
+			pos_profile: itemsIntegration.pos_profile,
+			active_price_list: itemsIntegration.active_price_list,
+			customer_price_list: itemsIntegration.customer_price_list,
+			itemDetailFetcher,
+			itemAddition: { addItem: add_item }, // Pass wrapper for correct context
+			barcodeIndex: { lookupItemByBarcode, searchItemsByCode: searchItemsByCodeFn },
+			scannerInput,
+			searchCache: itemsIntegration.searchCache,
+			eventBus: itemsIntegration.eventBus,
+			format_number: getValidVM()?.format_number || ((v) => v),
+			float_precision: itemsIntegration.float_precision,
+			hide_qty_decimals: itemsIntegration.hide_qty_decimals,
+			blockSaleBeyondAvailableQty: itemsIntegration.blockSaleBeyondAvailableQty,
+			currency_precision: itemsIntegration.currency_precision,
+			exchange_rate: itemsIntegration.exchange_rate,
+			format_currency: getValidVM()?.format_currency || ((v) => v),
+			ratePrecision: getValidVM()?.ratePrecision || (() => 2),
+			customer: itemsIntegration.customer,
+			// Callbacks or methods expected by processor
+			add_item_wrapper: add_item,
+			search_from_scanner_ref: itemsIntegration.search_from_scanner,
+			get_search: (code) => getValidVM()?.get_search ? getValidVM().get_search(code) : code,
+			get_item_qty: (code) => getValidVM()?.get_item_qty ? getValidVM().get_item_qty(code) : 1,
+			onItemAdded: () => {
+				const vm = getValidVM();
+				if (vm) {
+					vm.clearSearch();
+					vm.focusItemSearch();
+				}
+			},
+			onItemNotFound: (code) => {
+				itemsIntegration.first_search.value = code;
+				itemsIntegration.search.value = code;
+			},
+			stock_settings: getValidVM()?.stock_settings, // might be undefined in setup, check lifecycle
+		});
+
+		// Register scan handler
+		onMounted(() => {
+			if (scannerInput && scannerInput.setScanHandler) {
+				scannerInput.setScanHandler(scanProcessor.processScannedItem);
+			}
+		});
+
 		return {
 			add_item,
 			...responsive,
@@ -430,8 +479,6 @@ export default {
 			itemCurrencyUtils: useItemCurrency(),
 			// Expose scanner input
 			scannerInput,
-			// Expose scanner input
-			scannerInput,
 			// Expose scanner state and methods for Template/Options API
 			scannerLocked: scannerInput.scannerLocked,
 			last_background_sync_time,
@@ -446,7 +493,6 @@ export default {
 			ensureScaleBarcodeSettings: scannerInput.ensureScaleBarcodeSettings,
 			updateScaleBarcodeSettings: scannerInput.updateScaleBarcodeSettings,
 			getScaleBarcodePrefix: scannerInput.getScaleBarcodePrefix,
-			getScaleBarcodePrefix: scannerInput.getScaleBarcodePrefix,
 			scaleBarcodeMatches: scannerInput.scaleBarcodeMatches,
 			playScanTone: scannerInput.playScanTone,
 			// Expose item availability
@@ -454,7 +500,11 @@ export default {
 			itemDetailFetcher,
 			itemSelection,
 			itemSync,
-			itemAddition,
+			// Expose Scan Processor (replaces processScannedItem)
+			scanProcessor,
+			processScannedItem: scanProcessor.processScannedItem,
+			addScannedItemToInvoice: scanProcessor.addScannedItemToInvoice,
+			showMultipleItemsDialog: scanProcessor.showMultipleItemsDialog,
 			// Last Invoice Rate
 			lastInvoiceRates,
 			lastInvoiceRateLoading,
@@ -1787,381 +1837,28 @@ export default {
 		async selectHighlightedItem() {
 			await this.itemSelection.selectHighlightedItem();
 		},
-		async processScannedItem(scannedCode) {
-			const mark = perfMarkStart("pos:scan-process");
-			this.pendingScanCode = scannedCode;
-			await this.ensureScaleBarcodeSettings();
-			// Handle scale barcodes by extracting the item code and quantity
-			let searchCode = scannedCode;
-			let qtyFromBarcode = null;
-			let priceFromBarcode = null;
-			let scaleResponse = null;
-
-			try {
-				const res = await frappe.call({
-					method: "posawesome.posawesome.api.items.parse_scale_barcode",
-					args: { barcode: scannedCode },
-				});
-				if (res && res.message) {
-					scaleResponse = res.message;
-				}
-			} catch (error) {
-				console.error("Failed to parse scale barcode via API:", error);
-			}
-
-			if (scaleResponse && scaleResponse.settings) {
-				this.updateScaleBarcodeSettings(scaleResponse.settings);
-			}
-
-			const configuredPrefix = this.getScaleBarcodePrefix();
-
-			if (
-				scaleResponse &&
-				configuredPrefix &&
-				!String(scannedCode || "").startsWith(configuredPrefix)
-			) {
-				scaleResponse = null;
-				searchCode = scannedCode;
-				qtyFromBarcode = null;
-				priceFromBarcode = null;
-			}
-
-			if (scaleResponse && scaleResponse.item_code) {
-				searchCode = scaleResponse.item_code;
-				const parsedQty = parseFloat(scaleResponse.qty);
-				if (!Number.isNaN(parsedQty)) {
-					qtyFromBarcode = parsedQty;
-				}
-				const parsedPrice = parseFloat(scaleResponse.price);
-				if (!Number.isNaN(parsedPrice)) {
-					priceFromBarcode = parsedPrice;
-				}
-			} else if (this.scaleBarcodeMatches(scannedCode)) {
-				searchCode = this.get_search(scannedCode);
-				qtyFromBarcode = parseFloat(this.get_item_qty(scannedCode));
-			}
-
-			// First try to find exact match by processed code using the pre-built index
-			const barcodeIndex = this.ensureBarcodeIndex();
-			let foundItem = this.lookupItemByBarcode(searchCode);
-
-			if (!foundItem && barcodeIndex.size === 0) {
-				// Index not populated yet, build it and fall back to a direct scan once
-				this.replaceBarcodeIndex(this.items);
-				foundItem = this.items.find((item) => {
-					const barcodeMatch =
-						item.barcode === searchCode ||
-						(Array.isArray(item.item_barcode) &&
-							item.item_barcode.some((b) => b.barcode === searchCode)) ||
-						(Array.isArray(item.barcodes) &&
-							item.barcodes.some((bc) => String(bc) === searchCode));
-					return barcodeMatch || item.item_code === searchCode;
-				});
-			}
-
-			if (foundItem) {
-				console.log("Found item by processed code:", foundItem);
-				await this.addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode, priceFromBarcode);
-				return;
-			}
-
-			// If not found locally, attempt to fetch from server using processed code
-			try {
-				let newItem = null;
-				if (qtyFromBarcode !== null) {
-					// Scale barcodes use a direct, faster lookup
-					const res = await frappe.call({
-						method: "posawesome.posawesome.api.items.get_item_detail",
-						args: {
-							item: JSON.stringify({ item_code: searchCode }),
-							warehouse: this.pos_profile.warehouse,
-							price_list: this.active_price_list,
-							company: this.pos_profile.company,
-						},
-					});
-					if (res && res.message) {
-						newItem = res.message;
-					}
-				} else {
-					// Regular barcodes and searches use the generic search
-					const res = await frappe.call({
-						method: "posawesome.posawesome.api.items.get_items",
-						args: {
-							pos_profile: this.pos_profile,
-							price_list: this.active_price_list,
-							search_value: searchCode,
-						},
-					});
-
-					if (res && res.message && res.message.length > 0) {
-						newItem = res.message[0];
-					}
-				}
-
-				if (newItem) {
-					this.items.push(newItem);
-					this.indexItem(newItem);
-
-					if (this.searchCache) {
-						this.searchCache.clear();
-					}
-
-					await saveItems(this.items);
-					await savePriceListItems(this.customer_price_list, this.items);
-					this.eventBus.emit("set_all_items", this.items);
-					await this.itemDetailFetcher.update_items_details([newItem]);
-					await this.addScannedItemToInvoice(newItem, searchCode, qtyFromBarcode, priceFromBarcode);
-					return;
-				}
-
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("Please verify the barcode or check the item's availability."),
-				});
-				return;
-			} catch (e) {
-				console.error("Error fetching item from barcode:", e);
-				this.first_search = scannedCode;
-				this.search = scannedCode;
-				this.showScanError({
-					message: `${this.__("Item not found")}: ${scannedCode}`,
-					code: scannedCode,
-					details: this.__("The system could not retrieve the item details. Please try again."),
-				});
-				return;
-			} finally {
-				perfMarkEnd("pos:scan-process", mark);
-			}
+		// Scan methods moved to useScanProcessor
+		processScannedItem(scannedCode) {
+			return this.scanProcessor.processScannedItem(scannedCode);
 		},
-		searchItemsByCode(code) {
-			return this.searchItemsByCodeFn(this.items, code);
-		},
-		async addScannedItemToInvoice(item, scannedCode, qtyFromBarcode = null, priceFromBarcode = null) {
-			console.log("Adding scanned item to invoice:", item, scannedCode);
-
-			// Clone the item to avoid mutating list data
-			const newItem = { ...item };
-
-			// If the scanned barcode has a specific UOM, apply it
-			if (Array.isArray(newItem.item_barcode)) {
-				const barcodeMatch = newItem.item_barcode.find((b) => b.barcode === scannedCode);
-				if (barcodeMatch && barcodeMatch.posa_uom) {
-					newItem.uom = barcodeMatch.posa_uom;
-
-					// Try fetching the rate for this UOM from the active price list
-					try {
-						const res = await frappe.call({
-							method: "posawesome.posawesome.api.items.get_price_for_uom",
-							args: {
-								item_code: newItem.item_code,
-								price_list: this.active_price_list,
-								uom: barcodeMatch.posa_uom,
-							},
-						});
-
-						const uomInfo =
-							newItem.item_uoms &&
-							newItem.item_uoms.find((u) => u.uom === barcodeMatch.posa_uom);
-						const conversionFactor =
-							uomInfo && uomInfo.conversion_factor
-								? parseFloat(uomInfo.conversion_factor)
-								: null;
-						const currentConversion = newItem.conversion_factor || 1;
-						const baseUnitRate =
-							parseFloat(
-								(newItem.base_price_list_rate ||
-									newItem.base_rate ||
-									newItem.price_list_rate ||
-									newItem.rate ||
-									0) / (currentConversion || 1),
-							) || 0;
-
-						if (res.message) {
-							const price = parseFloat(res.message);
-							newItem.rate = price;
-							newItem.price_list_rate = price;
-							const basePrice = conversionFactor ? price / conversionFactor : price;
-							newItem.base_rate = basePrice;
-							newItem.base_price_list_rate = basePrice;
-							if (conversionFactor) {
-								newItem.conversion_factor = conversionFactor;
-							}
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
-						} else if (conversionFactor) {
-							const newPrice = baseUnitRate * conversionFactor;
-
-							newItem.rate = newPrice;
-							newItem.price_list_rate = newPrice;
-							newItem.base_rate = baseUnitRate;
-							newItem.base_price_list_rate = baseUnitRate;
-							newItem.conversion_factor = conversionFactor;
-							newItem._manual_rate_set = true;
-							newItem.skip_force_update = true;
-						}
-					} catch (e) {
-						console.error("Failed to fetch UOM price", e);
-					}
-				}
-			}
-
-			let effectiveQty = qtyFromBarcode;
-			if (
-				(effectiveQty === null || Number.isNaN(effectiveQty)) &&
-				newItem._scale_qty !== undefined &&
-				newItem._scale_qty !== null
-			) {
-				const parsedScaleQty = parseFloat(newItem._scale_qty);
-				if (!Number.isNaN(parsedScaleQty)) {
-					effectiveQty = parsedScaleQty;
-				}
-			}
-
-			// Apply quantity from scale barcode if available
-			if (effectiveQty !== null && !Number.isNaN(effectiveQty)) {
-				newItem.qty = effectiveQty;
-				newItem._barcode_qty = true;
-			}
-
-			let effectivePrice = priceFromBarcode;
-			if (
-				(effectivePrice === null || Number.isNaN(effectivePrice)) &&
-				newItem._scale_price !== undefined &&
-				newItem._scale_price !== null
-			) {
-				const parsedScalePrice = parseFloat(newItem._scale_price);
-				if (!Number.isNaN(parsedScalePrice)) {
-					effectivePrice = parsedScalePrice;
-				}
-			}
-
-			if (effectivePrice !== null && !Number.isNaN(effectivePrice)) {
-				const parsedPrice = parseFloat(effectivePrice);
-				if (!Number.isNaN(parsedPrice)) {
-					newItem.rate = parsedPrice;
-					newItem.price_list_rate = parsedPrice;
-					newItem.base_rate = parsedPrice;
-					newItem.base_price_list_rate = parsedPrice;
-					newItem._manual_rate_set = true;
-					newItem.skip_force_update = true;
-				}
-			}
-
-			const requestedQtyRaw =
-				qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
-			const requestedQty = Math.abs(requestedQtyRaw || 1);
-			const availableQty =
-				typeof newItem.available_qty === "number"
-					? newItem.available_qty
-					: typeof newItem.actual_qty === "number"
-						? newItem.actual_qty
-						: null;
-
-			if (availableQty !== null && availableQty < requestedQty) {
-				const formattedAvailable = this.format_number
-					? this.format_number(availableQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: availableQty;
-				const formattedRequested = this.format_number
-					? this.format_number(requestedQty, this.hide_qty_decimals ? 0 : this.float_precision)
-					: requestedQty;
-				const negativeStockEnabled = this.isNegativeStockEnabled(newItem);
-				const exceedsAvailable = availableQty < requestedQty;
-				const shouldBlock =
-					(this.blockSaleBeyondAvailableQty && exceedsAvailable) ||
-					(!negativeStockEnabled && exceedsAvailable);
-
-				if (shouldBlock) {
-					this.showScanError({
-						message: formatStockShortageError(
-							newItem.item_name || newItem.item_code || scannedCode,
-							availableQty,
-							requestedQty,
-						),
-						code: scannedCode,
-						details: this.__("Adjust the quantity or enable negative stock to continue."),
-					});
-					return;
-				}
-
-				// Suppress low stock notifications when negative stock is allowed
-			}
-
-			this.awaitingScanResult = true;
-
-			try {
-				// Use existing add_item method with enhanced feedback
-				await this.add_item(newItem, {
-					suppressNegativeWarning: true,
-					skipNotification: true,
-				});
-				this.playScanTone("success");
-				this.scannerLocked = false;
-				this.search_from_scanner = false;
-				this.pendingScanCode = "";
-
-				// Show success message
-				const itemName = newItem.item_name || newItem.item_code || scannedCode || this.__("Item");
-				const rawPrecision = Number(this.float_precision);
-				const precision = Number.isInteger(rawPrecision) ? Math.min(Math.max(rawPrecision, 0), 6) : 2;
-				const displayQty = Number.isInteger(requestedQty)
-					? requestedQty
-					: Number(requestedQty.toFixed(precision));
-
-				if (this.eventBus?.emit) {
-					this.toastStore.show({
-						title: this.__("Item {0} added to invoice", [itemName]),
-						summary: this.__("Items added to invoice"),
-						detail: this.__("{0} (Qty: {1})", [itemName, displayQty]),
-						color: "success",
-						groupId: "invoice-item-added",
-					});
-				} else if (frappe?.show_alert) {
-					frappe.show_alert(
-						{
-							message: `Added: ${itemName}`,
-							indicator: "green",
-						},
-						3,
-					);
-				}
-
-				// Clear search after successful addition and refocus input
-				this.clearSearch();
-				this.focusItemSearch();
-			} finally {
-				this.awaitingScanResult = false;
-			}
-		},
-		isNegativeStockEnabled(item = null) {
-			const allowNegativeSetting = parseBooleanSetting(this.stock_settings?.allow_negative_stock);
-			const allowNegativeItem = item ? parseBooleanSetting(item.allow_negative_stock) : false;
-			return allowNegativeSetting || allowNegativeItem;
-		},
-		showMultipleItemsDialog(items, scannedCode) {
-			openItemSelectionDialog({
-				items,
-				scannedCode,
-				currency: this.pos_profile.currency,
-				formatCurrency: this.format_currency,
-				ratePrecision: this.ratePrecision,
-				placeholderImage,
-				translate: this.__,
-				onSelect: (item) => this.addScannedItemToInvoice(item, scannedCode, null, null),
-			});
+		addScannedItemToInvoice(item, scannedCode, qty, price) {
+			return this.scanProcessor.addScannedItemToInvoice(item, scannedCode, qty, price);
 		},
 		handleItemNotFound(scannedCode) {
 			console.warn("Item not found for scanned code:", scannedCode);
-
+			
 			this.first_search = scannedCode;
 			this.search = scannedCode;
-			this.showScanError({
-				message: `${this.__("Item not found")}: ${scannedCode}`,
-				code: scannedCode,
-				details: this.__("This barcode could not be matched to any item."),
-			});
+			
+			// Show error dialog directly
+			this.scanErrorDialog = true;
+			this.scanErrorMessage = `${this.__("Item not found")}: ${scannedCode}`;
+			this.scanErrorCode = scannedCode;
+			this.scanErrorDetails = this.__("This barcode could not be matched to any item.");
+			this.playScanTone("error");
+		},
+		showMultipleItemsDialog(items, scannedCode) {
+			this.scanProcessor.showMultipleItemsDialog(items, scannedCode);
 		},
 
 		currencySymbol(currency) {
