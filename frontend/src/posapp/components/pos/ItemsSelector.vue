@@ -2513,6 +2513,9 @@ export default {
 			},
 		});
 
+		// Configure Scanner Input with component handler
+		this.scannerInput.setScanHandler((code) => this.processScannedItem(code));
+
 		// Configure Item Sync with component context
 		this.itemSync.registerContext({
 			get pos_profile() {
