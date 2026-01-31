@@ -238,8 +238,8 @@ _Taming the monoliths. Breaking down massive components for readability and main
     - [x] `useItemSelection.js`: `select_item`, `click_item_row`, `highlightedIndex` navigation, `fly` animation logic.
     - [x] `useItemSync.js`: `forceReloadItems`, `verifyServerItemCount`, `kickoffBackgroundSync`, `backgroundLoadItems`.
     - [x] `useItemAddition.js` (or `useItemActionHandlers.js`): Consolidate `add_item`, `addScannedItemToInvoice`, `handleVariantItem`, `prepareItemForCart`.
-    - [ ] `useLastInvoiceRate.js`: Fetching and caching historical rates per customer.
-    - [x] `useItemSelectorLayout.js`: Grid metrics, overflow checking, virtual scroll synchronization, and container resizing.
+    - [x] `useLastInvoiceRate.js`: Fetching and caching historical rates per customer.
+    - [ ] `useItemSelectorLayout.js`: Grid metrics, overflow checking, virtual scroll synchronization, and container resizing.
     - [ ] `useItemStorageSafety.js`: IndexedDB/LocalStorage health checks and `itemWorker` management.
     - [ ] `useBarcodeIndexing.js`: High-performance barcode-to-item lookup index management.
     - [ ] `useItemSearchTriggers.js`: Consolidate Search Keydown, Focus, Blur, and Clear logic (UI bridge).

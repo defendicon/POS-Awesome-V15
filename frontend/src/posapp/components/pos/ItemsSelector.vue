@@ -218,6 +218,7 @@ import { useItemSelection } from "../../composables/useItemSelection.js";
 import { useItemSelectorLayout } from "../../composables/useItemSelectorLayout.js";
 import { useLastInvoiceRate } from "../../composables/useLastInvoiceRate.js";
 import { useItemSync } from "../../composables/useItemSync.js";
+import { useItemStorageSafety } from "../../composables/useItemStorageSafety.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
 import { playScanTone, closeScanAudioContext } from "../../utils/scannerAudio.js";
 import { getItemsTableHeaders } from "../../utils/itemsTableHeaders.js";
@@ -345,6 +346,14 @@ export default {
 			last_background_sync_time
 		} = itemSync;
 
+		const {
+			storageAvailable,
+			itemWorker,
+			ensureStorageHealth,
+			markStorageUnavailable,
+			startItemWorker
+		} = useItemStorageSafety();
+
 		return {
 			...responsive,
 			...rtl,
@@ -405,6 +414,13 @@ export default {
 			scheduleLastInvoiceRateRefresh,
 			fetchLastInvoiceRates,
 			clearLastInvoiceRateCache,
+			clearLastInvoiceRateCache,
+			// Storage Safety
+			storageAvailable,
+			itemWorker,
+			ensureStorageHealth,
+			markStorageUnavailable,
+			startItemWorker,
 		};
 	},
 	components: {
@@ -458,9 +474,9 @@ export default {
 		exchange_rate: 1,
 		conversion_rate: 1,
 		prePopulateInProgress: false,
-		itemWorker: null,
+		// itemWorker: null, // Managed by composable
 		flyConfig: { speed: 0.6, easing: "ease-in-out" },
-		storageAvailable: true,
+		// storageAvailable: true, // Managed by composable
 		localStorageAvailable: true,
 		stockUnsubscribe: null,
 		items_request_token: 0,
@@ -2308,6 +2324,7 @@ export default {
 			}
 			return parsed.toLocaleTimeString();
 		},
+		// ensureStorageHealth, markStorageUnavailable, startItemWorker moved to useItemStorageSafety.js
 
 
 
