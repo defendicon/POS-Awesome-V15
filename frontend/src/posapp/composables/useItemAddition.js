@@ -975,5 +975,139 @@ export function useItemAddition() {
 		clearInvoice,
 		groupAndAddItem,
 		groupAndAddItemDebounced,
+		// New exports
+		handleVariantItem,
+		prepareItemForCart,
 	};
 }
+
+// =====================================================================================
+// Shared Logic extracted from ItemsSelector.vue
+// =====================================================================================
+
+/**
+ * Handle variant item selection
+ */
+async function handleVariantItem(item, context) {
+	if (!context) return;
+	const { items, pos_profile, active_price_list, customer, toastStore, uiStore } = context;
+
+	let variants = items.filter((it) => it.variant_of == item.item_code);
+	let attrsMeta = {};
+
+	// Fetch variants if not already loaded
+	if (!variants.length) {
+		try {
+			const res = await frappe.call({
+				method: "posawesome.posawesome.api.items.get_item_variants",
+				args: {
+					pos_profile: JSON.stringify(pos_profile),
+					parent_item_code: item.item_code,
+					price_list: active_price_list,
+					customer: customer,
+				},
+			});
+			if (res.message) {
+				variants = res.message.variants || res.message;
+				attrsMeta = res.message.attributes_meta || {};
+				// Add variants to the main items list so they are cached
+				// context.items should be the reactive array
+				if (Array.isArray(items)) {
+					items.push(...variants);
+				} else if (context.itemsStore) {
+					// If context provided store, maybe add them?
+					// But usually ItemsSelector manages the list.
+					// We'll leave it to the caller to manage hydration if items is not array
+				}
+			}
+		} catch (e) {
+			console.error("Failed to fetch variants", e);
+		}
+	}
+
+	// Show variant selection dialog
+	if (toastStore) {
+		toastStore.show({
+			title: __("This is an item template. Please choose a variant."),
+			color: "warning",
+		});
+	}
+
+	attrsMeta = attrsMeta || {};
+	if (uiStore) {
+		uiStore.openVariants({
+			item,
+			items: variants,
+			profile: pos_profile,
+			attrsMeta,
+		});
+	}
+}
+
+/**
+ * Prepare item for adding to cart (UOMs, currency conversion, etc.)
+ * Returns the prepared item (modified in place mostly, but best to return it)
+ */
+async function prepareItemForCart(item, requestedQty, context) {
+	const { pos_profile, itemCurrencyUtils, itemDetailFetcher, hide_qty_decimals } = context;
+
+	// Ensure UOMs are initialized
+	if (!item.uom) {
+		item.uom = item.stock_uom;
+	}
+	if (!item.item_uoms || item.item_uoms.length === 0) {
+		// We need getItemUOMs here. It's likely a global utility or import.
+		// Assuming it needs to be imported or available on window/context?
+		// In ItemsSelector it was: const cachedUoms = getItemUOMs(item.item_code);
+		// We'll assume getItemUOMs is globally available or we need to import it.
+		// Let's use window.getItemUOMs if available or context helper.
+		// NOTE: getItemUOMs is likely imported in ItemsSelector.
+		// We will use existing logic if item.item_uoms is empty.
+		if (typeof window.getItemUOMs === "function") {
+			const cachedUoms = window.getItemUOMs(item.item_code);
+			if (cachedUoms.length > 0) {
+				item.item_uoms = cachedUoms;
+			} else {
+				item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
+			}
+		} else {
+			// Fallback
+			item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
+		}
+
+		// Benchmark: avoid awaiting item detail fetch to keep click-to-add responsive.
+		if (pos_profile?.name && itemDetailFetcher) {
+			itemDetailFetcher.update_items_details([item]).catch((error) => {
+				console.error("Failed to refresh item details for cart", error);
+			});
+		}
+	}
+
+	// Handle multi-currency conversion
+	if (pos_profile?.posa_allow_multi_currency && itemCurrencyUtils) {
+		// applyCurrencyConversionToItem logic
+		itemCurrencyUtils.applyCurrencyConversionToItem(item, context);
+
+		const companyCurrency = pos_profile.currency;
+		// _getPlcToCompanyRate logic
+		const plcToCompanyRate = itemCurrencyUtils.getPlcToCompanyRate(item, context);
+		const base_rate =
+			item.original_currency === companyCurrency
+				? item.original_rate
+				: item.original_rate * plcToCompanyRate;
+
+		item.base_rate = base_rate;
+		item.base_price_list_rate = base_rate;
+	}
+
+	// Set final quantity
+	const hasBarcodeQty = item._barcode_qty;
+	if (!item.qty || (item.qty === 1 && !hasBarcodeQty)) {
+		let qtyVal = requestedQty;
+		if (hide_qty_decimals) {
+			qtyVal = Math.trunc(qtyVal);
+		}
+		item.qty = qtyVal;
+	}
+
+	return item;

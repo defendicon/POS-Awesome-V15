@@ -212,6 +212,7 @@ import { useItemCurrency } from "../../composables/useItemCurrency.js";
 import { useScannerInput } from "../../composables/useScannerInput.js";
 import { useItemAvailability } from "../../composables/useItemAvailability.js";
 import { useItemDetailFetcher } from "../../composables/useItemDetailFetcher.js";
+import { useItemAddition } from "../../composables/useItemAddition.js";
 import { useItemSelection } from "../../composables/useItemSelection.js";
 import { useItemSync } from "../../composables/useItemSync.js";
 import { parseBooleanSetting, formatStockShortageError } from "../../utils/stock.js";
@@ -275,6 +276,7 @@ export default {
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
+		const itemAddition = useItemAddition(); // Initialize composable
 		const { selectedCustomer } = storeToRefs(customersStore);
 
 		const {
@@ -325,6 +327,7 @@ export default {
 			itemDetailFetcher,
 			itemSelection,
 			itemSync,
+			itemAddition,
 		};
 	},
 	components: {
@@ -1290,98 +1293,21 @@ export default {
 			this.qty = 1;
 		},
 
+
 		/**
 		 * Handle variant item selection
 		 */
 		async handleVariantItem(item) {
-			let variants = this.items.filter((it) => it.variant_of == item.item_code);
-			let attrsMeta = {};
-
-			// Fetch variants if not already loaded
-			if (!variants.length) {
-				try {
-					const res = await frappe.call({
-						method: "posawesome.posawesome.api.items.get_item_variants",
-						args: {
-							pos_profile: JSON.stringify(this.pos_profile),
-							parent_item_code: item.item_code,
-							price_list: this.active_price_list,
-							customer: this.customer,
-						},
-					});
-					if (res.message) {
-						variants = res.message.variants || res.message;
-						attrsMeta = res.message.attributes_meta || {};
-						this.items.push(...variants);
-					}
-				} catch (e) {
-					console.error("Failed to fetch variants", e);
-				}
-			}
-
-			// Show variant selection dialog
-			this.toastStore.show({
-				title: __("This is an item template. Please choose a variant."),
-				color: "warning",
-			});
-
-			attrsMeta = attrsMeta || {};
-			this.uiStore.openVariants({
-				item,
-				items: variants,
-				profile: this.pos_profile,
-				attrsMeta,
-			});
+			await this.itemAddition.handleVariantItem(item, this);
 		},
 
 		/**
 		 * Prepare item for adding to cart (UOMs, currency conversion, etc.)
 		 */
 		async prepareItemForCart(item, requestedQty) {
-			// Ensure UOMs are initialized
-			if (!item.uom) {
-				item.uom = item.stock_uom;
-			}
-			if (!item.item_uoms || item.item_uoms.length === 0) {
-				const cachedUoms = getItemUOMs(item.item_code);
-				if (cachedUoms.length > 0) {
-					item.item_uoms = cachedUoms;
-				} else {
-					item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-				}
-				// Benchmark: avoid awaiting item detail fetch to keep click-to-add responsive.
-				if (this.pos_profile?.name) {
-					this.itemDetailFetcher.update_items_details([item]).catch((error) => {
-						console.error("Failed to refresh item details for cart", error);
-					});
-				}
-			}
-
-			// Handle multi-currency conversion
-			if (this.pos_profile?.posa_allow_multi_currency) {
-				this.applyCurrencyConversionToItem(item);
-
-				const companyCurrency = this.pos_profile.currency;
-				const plcToCompanyRate = this._getPlcToCompanyRate(item);
-				const base_rate =
-					item.original_currency === companyCurrency
-						? item.original_rate
-						: item.original_rate * plcToCompanyRate;
-
-				item.base_rate = base_rate;
-				item.base_price_list_rate = base_rate;
-			}
-
-			// Set final quantity
-			const hasBarcodeQty = item._barcode_qty;
-			if (!item.qty || (item.qty === 1 && !hasBarcodeQty)) {
-				let qtyVal = requestedQty;
-				if (this.hide_qty_decimals) {
-					qtyVal = Math.trunc(qtyVal);
-				}
-				item.qty = qtyVal;
-			}
+			return await this.itemAddition.prepareItemForCart(item, requestedQty, this);
 		},
+
 		async enter_event(scannedCode) {
 			const searchTerm = scannedCode || this.first_search;
 			await this.scannerInput.ensureScaleBarcodeSettings();
