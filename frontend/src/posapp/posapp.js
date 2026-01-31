@@ -46,6 +46,10 @@ frappe.PosApp.posapp = class {
 	}
 	make_body() {
 		this.$el = this.$parent.find(".main-section");
+		if (!this.$el.length) {
+			this.$el = $('<div class="main-section" />');
+			this.$parent.append(this.$el);
+		}
 		// Vuetify instance is now imported from plugins/vuetify.ts
 		this.app = createApp(App);
 		const { router, history } = createPosAppRouter();
