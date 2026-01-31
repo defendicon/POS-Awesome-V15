@@ -131,9 +131,6 @@ def get_stock_availability(item_code, warehouse):
     ``warehouse`` can be either a single warehouse or a warehouse group.
     In case of a group, quantities from all child warehouses are summed up
     to provide an accurate availability figure.
-
-    This function also accounts for submitted-but-unconsolidated POS Invoices
-    to prevent overselling when stock updates happen only on shift close.
     """
 
     if not warehouse:
@@ -153,28 +150,7 @@ def get_stock_availability(item_code, warehouse):
         .run(as_dict=True)
     )
 
-    actual_qty = flt(rows[0].actual_qty) if rows else 0.0
-
-    # Subtract quantities from submitted but unconsolidated POS Invoices
-    # These invoices have claimed stock but haven't updated the Bin yet
-    committed_qty = get_committed_qty_from_pos_invoices(item_code, warehouses)
-
-    return flt(actual_qty - committed_qty)
-
-
-def get_committed_qty_from_pos_invoices(item_code, warehouses):
-    """Return total quantity committed in submitted but unconsolidated POS Invoices.
-
-    When POS Invoices are submitted, they don't immediately update stock.
-    Stock is only updated during POS Closing Shift consolidation.
-    This function calculates the quantity already committed to prevent overselling.
-    """
-
-    if not warehouses:
-        return 0.0
-
-    committed_map = get_bulk_committed_qty_from_pos_invoices([item_code], warehouses)
-    return committed_map.get(item_code, 0.0)
+    return flt(rows[0].actual_qty) if rows else 0.0
 
 
 @frappe.whitelist()
@@ -249,54 +225,10 @@ def get_bulk_stock_availability(items):
         rows = query.run(as_dict=True)
         qty_map = {r.item_code: flt(r.actual_qty) for r in rows}
 
-        # Get committed quantities from submitted but unconsolidated POS Invoices
-        committed_map = get_bulk_committed_qty_from_pos_invoices(item_code_list, target_warehouses)
-
         for code in item_codes:
-            actual = qty_map.get(code, 0.0)
-            committed = committed_map.get(code, 0.0)
-            results[(code, warehouse, "")] = flt(actual - committed)
+            results[(code, warehouse, "")] = qty_map.get(code, 0.0)
 
     return results
-
-
-def get_bulk_committed_qty_from_pos_invoices(item_codes, warehouses):
-    """Return committed quantities for multiple items from submitted but unconsolidated POS Invoices.
-
-    Args:
-        item_codes: List of item codes to check
-        warehouses: List of warehouses to check
-
-    Returns:
-        dict: {item_code: committed_qty}
-    """
-
-    if not item_codes or not warehouses:
-        return {}
-
-    pos_invoice = DocType("POS Invoice")
-    pos_invoice_item = DocType("POS Invoice Item")
-
-    query = (
-        frappe.qb.from_(pos_invoice)
-        .join(pos_invoice_item)
-        .on(pos_invoice_item.parent == pos_invoice.name)
-        .select(
-            pos_invoice_item.item_code,
-            Sum(pos_invoice_item.stock_qty).as_("committed_qty")
-        )
-        .where(pos_invoice.docstatus == 1)
-        .where(
-            (pos_invoice.consolidated_invoice.isnull())
-            | (pos_invoice.consolidated_invoice == "")
-        )
-        .where(pos_invoice_item.item_code.isin(item_codes))
-        .where(pos_invoice_item.warehouse.isin(warehouses))
-        .groupby(pos_invoice_item.item_code)
-    )
-
-    rows = query.run(as_dict=True)
-    return {r.item_code: flt(r.committed_qty) for r in rows}
 
 
 @frappe.whitelist()
