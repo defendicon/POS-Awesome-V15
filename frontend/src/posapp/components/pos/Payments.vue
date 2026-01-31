@@ -69,7 +69,7 @@
 							hide-details
 							:model-value="formatCurrency(loyalty_amount)"
 							type="text"
-							@change="setFormatedCurrency(this, 'loyalty_amount', null, false, $event)"
+							@change="setFormatedCurrency(null, 'loyalty_amount', null, false, $event)"
 							:prefix="currencySymbol(invoice_doc.currency)"
 						></v-text-field>
 					</v-col>
@@ -112,7 +112,7 @@
 							:model-value="formatCurrency(redeemed_customer_credit)"
 							type="text"
 							@change="
-								setFormatedCurrency(this, 'redeemed_customer_credit', null, false, $event)
+								setFormatedCurrency(null, 'redeemed_customer_credit', null, false, $event)
 							"
 							:prefix="currencySymbol(invoice_doc.currency)"
 							readonly

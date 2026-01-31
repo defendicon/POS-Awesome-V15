@@ -475,3 +475,4 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 | 2026-01-30 | Bug Fixes                           | Completed   | Resolved multiple runtime errors including `vm is not defined` and `playScanTone`.                                                                  |
 | 2026-01-31 | Phase 6.1 Logic Consolidation       | Completed   | Extracted `useBarcodeIndexing`, `useItemStorageSafety`, `useItemSelectorLayout`. Consolidated `useItemAddition`.                                    |
 | 2026-01-31 | Scan & Addition Debugging           | Completed   | Fixed item merge issues, scan handler registration, and adding items via Proxy wrapper.                                                             |
+| 2026-02-01 | Phase 6.2 Payments Refactoring      | Completed   | Decomposed `Payments.vue` into `PaymentMethods`, `PaymentSummary`, `InvoiceTotals`. Migrated logic to `usePayments.js` & `<script setup>`.          |
