@@ -106,7 +106,7 @@ def create_sales_order(doc):
         and not doc.update_stock
         and frappe.get_value("POS Profile", doc.pos_profile, "posa_allow_sales_order")
     ):
-        sales_order_doc = make_sales_order(doc.name)
+        sales_order_doc = make_sales_order(doc.name, doc.doctype)
         if sales_order_doc:
             sales_order_doc.posa_notes = getattr(doc, "posa_notes", None)
             sales_order_doc.flags.ignore_permissions = True
@@ -123,7 +123,7 @@ def create_sales_order(doc):
                 i += 1
 
 
-def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
+def make_sales_order(source_name, source_doctype="Sales Invoice", target_doc=None, ignore_permissions=True):
     def set_missing_values(source, target):
         target.ignore_pricing_rule = 1
         target.flags.ignore_permissions = ignore_permissions
@@ -136,14 +136,17 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
             source_parent, "posa_delivery_date", None
         )
 
+    # Determine the item child table doctype based on source doctype
+    item_doctype = f"{source_doctype} Item"
+
     doclist = get_mapped_doc(
-        "Sales Invoice",
+        source_doctype,
         source_name,
         {
-            "Sales Invoice": {
+            source_doctype: {
                 "doctype": "Sales Order",
             },
-            "Sales Invoice Item": {
+            item_doctype: {
                 "doctype": "Sales Order Item",
                 "field_map": {
                     "cost_center": "cost_center",
