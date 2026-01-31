@@ -228,7 +228,7 @@ export default {
 			const normalized = newCustomer || "";
 			if (this.customer !== normalized) {
 				const to_remove = [];
-				this.posa_coupons.forEach((el) => {
+				(this.posa_coupons || []).forEach((el) => {
 					if (el.type == "Promotional") {
 						el.customer = normalized;
 					} else {
