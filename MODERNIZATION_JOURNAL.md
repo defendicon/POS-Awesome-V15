@@ -214,7 +214,7 @@ _Stability and Confidence._
     - **Current Status:** Playwright config and a skipped smoke test are in place; test still needs a stable ERPNext/POS backend to run.
     - **Action Plan:**
         1.  [x] **Install Playwright:** Add `@playwright/test` and `playwright.config.js` in `frontend/`.
-        2.  [x] **Create Smoke Test:** `frontend/e2e/checkout.spec.ts` scaffolded and marked `test.skip` until backend fixtures are available.
+        2.  [x] **Create Smoke Test:** `frontend/e2e/checkout.spec.ts` scaffolded and wrapped in `test.describe.skip` until backend fixtures are available.
         3.  [ ] **Enable Test:** Wire a stable ERPNext site or mock layer so the checkout test can run end-to-end.
         4.  [ ] **CI Integration:** Update `.github/workflows/ci.yml` to run Playwright tests when the backend is available.
         5.  [ ] **Stable Fixtures:** Add deterministic test data and stubbed API responses to avoid flakiness.
