@@ -1829,7 +1829,11 @@ export default {
 				}
 			}
 		},
-		scheduleBackgroundStatusCheck(invoiceName, doctype) {
+		scheduleBackgroundStatusCheck(invoiceName, doctype, retryCount = 0) {
+			const INITIAL_WAIT_MS = 10000;
+			const RETRY_WAIT_MS = 5000;
+			const MAX_RETRIES = 3;
+
 			this.clearBackgroundStatusCheck();
 			if (!this.pos_profile?.posa_allow_submissions_in_background_job) {
 				return;
@@ -1837,6 +1841,9 @@ export default {
 			if (!invoiceName) {
 				return;
 			}
+
+			const waitTime = retryCount === 0 ? INITIAL_WAIT_MS : RETRY_WAIT_MS;
+
 			this.backgroundStatusCheck = setTimeout(async () => {
 				try {
 					const result = await frappe.call({
@@ -1846,11 +1853,19 @@ export default {
 							filters: { name: invoiceName },
 							fieldname: ["docstatus"],
 						},
+						freeze: false,
 					});
 					const status = result?.message?.docstatus;
 					if (status === 1) {
+						this.clearBackgroundStatusCheck();
 						return;
 					}
+
+					if (retryCount < MAX_RETRIES) {
+						this.scheduleBackgroundStatusCheck(invoiceName, doctype, retryCount + 1);
+						return;
+					}
+
 					const reason = this.__("Invoice is still in draft after background submission.");
 					if (this.eventBus && typeof this.eventBus.emit === "function") {
 						this.eventBus.emit("invoice_submission_failed", {
@@ -1864,11 +1879,28 @@ export default {
 						detail: reason,
 					});
 				} catch (err) {
-					console.error("Background status check failed", err);
+					if (retryCount < MAX_RETRIES) {
+						this.scheduleBackgroundStatusCheck(invoiceName, doctype, retryCount + 1);
+					} else {
+						const reason = this.__("Failed to check invoice status after multiple attempts.");
+						if (this.eventBus && typeof this.eventBus.emit === "function") {
+							this.eventBus.emit("invoice_submission_failed", {
+								invoice: invoiceName,
+								reason,
+							});
+						}
+						this.eventBus.emit("show_message", {
+							title: __("Error checking invoice status for {0}", [invoiceName]),
+							color: "error",
+							detail: reason,
+						});
+					}
 				} finally {
-					this.clearBackgroundStatusCheck();
+					if (retryCount >= MAX_RETRIES) {
+						this.clearBackgroundStatusCheck();
+					}
 				}
-			}, 10000);
+			}, waitTime);
 		},
 		clearBackgroundStatusCheck() {
 			if (this.backgroundStatusCheck) {
