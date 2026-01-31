@@ -237,443 +237,444 @@
 }
 </style>
 
-<script>
+<script setup>
 /* global frappe */
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { QrcodeStream } from "vue-qrcode-reader";
 import opencvProcessor from "../../utils/opencvProcessor.js";
 
-export default {
-	name: "CameraScanner",
-	components: { QrcodeStream },
-
-	props: {
-		scanType: {
-			type: String,
-			default: "Both", // 'QR Code', 'Barcode', 'Both'
-		},
-		// optional: auto close dialog after a successful scan
-		autoCloseOnScan: {
-			type: Boolean,
-			default: false,
-		},
+const props = defineProps({
+	scanType: {
+		type: String,
+		default: "Both", // 'QR Code', 'Barcode', 'Both'
 	},
+	// optional: auto close dialog after a successful scan
+	autoCloseOnScan: {
+		type: Boolean,
+		default: false,
+	},
+});
 
-	data() {
+const emit = defineEmits(["barcode-scanned", "scanner-opened", "scanner-closed"]);
+
+// State
+const scannerDialog = ref(false);
+const scanResult = ref("");
+const scanFormat = ref("");
+const errorMessage = ref("");
+const cameraPermissionDenied = ref(false);
+const isScanning = ref(false);
+const torchActive = ref(false);
+const selectedDeviceId = ref(null);
+const cameras = ref([]);
+
+// OpenCV controls
+const openCVEnabled = ref(true);
+const openCVLoading = ref(false);
+const isProcessing = ref(false);
+const frameSkipCounter = ref(0);
+
+// Timers
+let scanResetTimeoutId = null;
+let dialogCloseTimeoutId = null;
+const scannerLockedExternally = ref(false);
+
+// Computed
+const cameraConfig = computed(() => {
+	const baseConstraints = {
+		audio: false,
+		video: {
+			width: { ideal: 1920, min: 1280 },
+			height: { ideal: 1080, min: 720 },
+			aspectRatio: { ideal: 16 / 9 },
+			facingMode: "environment",
+			focusMode: "continuous",
+			advanced: [
+				{ focusMode: "continuous" },
+				{ exposureMode: "continuous" },
+				{ whiteBalanceMode: "continuous" },
+				{ brightness: { ideal: 0.6 } },
+				{ contrast: { ideal: 1.4 } },
+				{ saturation: { ideal: 0.9 } },
+				{ sharpness: { ideal: 1.3 } },
+			],
+		},
+	};
+	if (selectedDeviceId.value) {
 		return {
-			scannerDialog: false,
-			scanResult: "",
-			scanFormat: "",
-			errorMessage: "",
-			cameraPermissionDenied: false,
-			isScanning: false,
-			torchActive: false,
-			selectedDeviceId: null,
-			cameras: [],
-			// OpenCV controls
-			openCVEnabled: true,
-			openCVLoading: false,
-			isProcessing: false,
-			frameSkipCounter: 0,
-			// timers + external lock
-			scanResetTimeoutId: null,
-			dialogCloseTimeoutId: null,
-			scannerLockedExternally: false,
+			...baseConstraints,
+			video: { ...baseConstraints.video, deviceId: { exact: selectedDeviceId.value } },
 		};
-	},
+	}
+	return baseConstraints;
+});
 
-	computed: {
-		cameraConfig() {
-			const baseConstraints = {
-				audio: false,
-				video: {
-					width: { ideal: 1920, min: 1280 },
-					height: { ideal: 1080, min: 720 },
-					aspectRatio: { ideal: 16 / 9 },
-					facingMode: "environment",
-					focusMode: "continuous",
-					advanced: [
-						{ focusMode: "continuous" },
-						{ exposureMode: "continuous" },
-						{ whiteBalanceMode: "continuous" },
-						{ brightness: { ideal: 0.6 } },
-						{ contrast: { ideal: 1.4 } },
-						{ saturation: { ideal: 0.9 } },
-						{ sharpness: { ideal: 1.3 } },
-					],
-				},
-			};
-			if (this.selectedDeviceId) {
-				return {
-					...baseConstraints,
-					video: { ...baseConstraints.video, deviceId: { exact: this.selectedDeviceId } },
-				};
-			}
-			return baseConstraints;
-		},
+const readerFormats = computed(() => {
+	const availableFormats = [
+		"qr_code",
+		"ean_13",
+		"ean_8",
+		"code_128",
+		"code_39",
+		"code_93",
+		"codabar",
+		"upc_a",
+		"upc_e",
+		"itf",
+	];
+	if (props.scanType === "QR Code") return ["qr_code"];
+	if (props.scanType === "Barcode") return availableFormats.filter((f) => f !== "qr_code");
+	return availableFormats;
+});
 
-		trackFunctionOptions() {
-			return this.openCVEnabled ? this.opencvTrackFunction : null;
-		},
+// Implementation of opencvTrackFunction before it's used in computed
+const opencvTrackFunction = (detectedCodes, ctx) => {
+	if (isProcessing.value) return Promise.resolve(detectedCodes);
+	isProcessing.value = true;
 
-		readerFormats() {
-			const availableFormats = [
-				"qr_code",
-				"ean_13",
-				"ean_8",
-				"code_128",
-				"code_39",
-				"code_93",
-				"codabar",
-				"upc_a",
-				"upc_e",
-				"itf",
-			];
-			if (this.scanType === "QR Code") return ["qr_code"];
-			if (this.scanType === "Barcode") return availableFormats.filter((f) => f !== "qr_code");
-			return availableFormats;
-		},
-	},
+	return new Promise(async (resolve) => {
+		try {
+			const canvas = ctx.canvas;
 
-	methods: {
-		async startScanning() {
-			this.scannerLockedExternally = false;
-			this.scannerDialog = true;
-			this.errorMessage = "";
-			this.scanResult = "";
-			this.scanFormat = "";
-			this.cameraPermissionDenied = false;
-			this.isScanning = true;
-			await this.$nextTick();
-			await this.listCameras();
-		},
-
-		async listCameras() {
-			try {
-				if (!navigator.mediaDevices?.enumerateDevices) {
-					console.warn("MediaDevices API not supported.");
-					this.cameras = [];
-					return;
-				}
-				const devices = await navigator.mediaDevices.enumerateDevices();
-				this.cameras = devices.filter((d) => d.kind === "videoinput");
-				if (this.cameras.length > 0 && !this.selectedDeviceId) {
-					const rear = this.cameras.find((c) => /back|rear|environment/i.test(c.label));
-					this.selectedDeviceId = rear ? rear.deviceId : this.cameras[0].deviceId;
-				}
-			} catch (e) {
-				console.error("Error listing cameras:", e);
-				this.cameras = [];
-			}
-		},
-
-		async onCameraReady() {
-			this.isScanning = true;
-			try {
-				console.log("Camera ready with enhanced settings for barcode scanning");
-			} catch (e) {
-				console.warn("Could not apply enhanced camera settings:", e);
-			}
-		},
-
-		// unified detect handler (auto-close + timers)
-		onDetect(detectedCodes) {
-			if (detectedCodes && detectedCodes.length > 0) {
-				const first = detectedCodes[0];
-				this.handleScannedCode(first.rawValue, first.format);
-			}
-		},
-
-		handleScannedCode(rawValue, formatLabel = "", options = {}) {
-			const {
-				pauseCamera = true,
-				resetDelay = 1000,
-				closeDialog = this.autoCloseOnScan,
-				closeDelay,
-			} = options;
-
-			const code = (rawValue ?? "").toString().trim();
-			if (!code) return;
-
-			this.scanResult = code;
-			this.scanFormat = formatLabel || "";
-			this.errorMessage = "";
-
-			this.$emit("barcode-scanned", code);
-
-			if (typeof frappe !== "undefined" && frappe.show_alert) {
-				const formatSuffix = this.scanFormat ? ` (${this.scanFormat})` : "";
-				frappe.show_alert(
-					{ message: this.__("Code scanned successfully") + formatSuffix, indicator: "green" },
-					3,
-				);
-			}
-
-			const shouldPause = pauseCamera && this.isScanning;
-			if (shouldPause) this.isScanning = false;
-
-			// clear timers
-			if (this.scanResetTimeoutId) clearTimeout(this.scanResetTimeoutId);
-			if (this.dialogCloseTimeoutId) clearTimeout(this.dialogCloseTimeoutId);
-			this.scanResetTimeoutId = null;
-			this.dialogCloseTimeoutId = null;
-
-			if (closeDialog) {
-				const effectiveDelay = Math.max(
-					0,
-					typeof closeDelay === "number" ? closeDelay : Math.min(resetDelay, 250),
-				);
-				this.dialogCloseTimeoutId = setTimeout(() => {
-					this.dialogCloseTimeoutId = null;
-					this.stopScanning();
-				}, effectiveDelay);
+			if (frameSkipCounter.value > 0) {
+				frameSkipCounter.value--;
+				isProcessing.value = false;
+				resolve(detectedCodes);
 				return;
 			}
+			frameSkipCounter.value = 2; // process every 3rd frame
 
-			this.scanResetTimeoutId = setTimeout(
-				() => {
-					this.scanResult = "";
-					this.scanFormat = "";
-					if (shouldPause && this.scannerDialog && !this.scannerLockedExternally) {
-						this.isScanning = true;
-					}
-					this.scanResetTimeoutId = null;
-				},
-				Math.max(0, resetDelay),
-			);
-		},
+			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			const processedImageData = await opencvProcessor.quickProcess(imageData);
+			ctx.putImageData(processedImageData, 0, 0);
 
-		onError(error) {
-			this.errorMessage = error.name || "Unknown error";
-			console.error("Camera error:", error);
-
-			if (error.name === "NotAllowedError") {
-				this.cameraPermissionDenied = true;
-				this.errorMessage = this.__(
-					"Camera permission denied. Please allow camera access in your browser settings and refresh the page.",
-				);
-			} else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
-				this.errorMessage = this.__(
-					"No camera found on this device. Please ensure your device has a working camera.",
-				);
-			} else if (error.name === "NotSupportedError") {
-				this.errorMessage = this.__(
-					"Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.",
-				);
-			} else if (error.name === "AbortError") {
-				this.errorMessage = this.__("Camera access was aborted. Please try again.");
-			} else if (
-				error.name === "OverconstrainedError" ||
-				error.name === "ConstraintNotSatisfiedError"
-			) {
-				this.errorMessage = this.__(
-					"Camera constraints not supported by your device. Trying fallback settings...",
-				);
-				this.tryFallbackCamera();
-				return;
-			} else {
-				this.errorMessage =
-					this.__("Error accessing camera:") + ` ${error.message}. Please try refreshing the page.`;
-			}
-			this.isScanning = false;
-		},
-
-		async tryFallbackCamera() {
-			console.log("Trying fallback camera settings...");
-			try {
-				this.openCVEnabled = false; // reduce processing for weak devices
-				await this.$nextTick();
-				this.isScanning = true;
-				if (typeof frappe !== "undefined" && frappe.show_alert) {
-					frappe.show_alert(
-						{
-							message: this.__("Using basic camera settings due to device limitations"),
-							indicator: "orange",
-						},
-						3,
-					);
-				}
-			} catch (fallbackError) {
-				console.error("Fallback camera also failed:", fallbackError);
-				this.errorMessage = this.__(
-					"Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.",
-				);
-			}
-		},
-
-		stopScanning() {
-			this.scannerLockedExternally = false;
-			if (this.scanResetTimeoutId) clearTimeout(this.scanResetTimeoutId);
-			if (this.dialogCloseTimeoutId) clearTimeout(this.dialogCloseTimeoutId);
-			this.scanResetTimeoutId = null;
-			this.dialogCloseTimeoutId = null;
-
-			this.isScanning = false;
-			this.scannerDialog = false;
-			this.scanResult = "";
-			this.scanFormat = "";
-			this.errorMessage = "";
-			this.torchActive = false;
-			this.$emit("scanner-closed");
-		},
-
-		async toggleTorch() {
-			this.torchActive = !this.torchActive;
-		},
-
-		async switchCamera() {
-			if (this.cameras.length > 1) {
-				const currentIndex = this.cameras.findIndex((cam) => cam.deviceId === this.selectedDeviceId);
-				const nextIndex = (currentIndex + 1) % this.cameras.length;
-				this.selectedDeviceId = this.cameras[nextIndex].deviceId;
-
-				this.isScanning = false;
-				await this.$nextTick();
-				this.isScanning = true;
-
-				if (typeof frappe !== "undefined" && frappe.show_alert) {
-					frappe.show_alert(
-						{
-							message:
-								this.__("Switched to: ") +
-								(this.cameras[nextIndex].label || `Camera ${nextIndex + 1}`),
-							indicator: "blue",
-						},
-						2,
-					);
-				}
-			}
-		},
-
-		async toggleOpenCVProcessing() {
-			this.openCVLoading = true;
-			this.openCVEnabled = !this.openCVEnabled;
-
-			if (this.openCVEnabled) {
-				try {
-					await opencvProcessor.ensureInitialized();
-					console.log("OpenCV processing enabled");
-				} catch (error) {
-					console.error("Failed to initialize OpenCV:", error);
-					this.openCVEnabled = false;
-				}
-			}
-
-			this.isScanning = false;
-			await this.$nextTick();
-			this.isScanning = true;
-			this.openCVLoading = false;
-
-			if (typeof frappe !== "undefined" && frappe.show_alert) {
-				frappe.show_alert(
-					{
-						message: this.openCVEnabled
-							? this.__("OpenCV image processing enabled - Enhanced barcode detection")
-							: this.__("OpenCV processing disabled"),
-						indicator: this.openCVEnabled ? "green" : "blue",
-					},
-					3,
-				);
-			}
-		},
-
-		// OpenCV track function (lightweight; frame skipping)
-		opencvTrackFunction(detectedCodes, ctx) {
-			if (this.isProcessing) return Promise.resolve(detectedCodes);
-			this.isProcessing = true;
-
-			return new Promise(async (resolve) => {
-				try {
-					const canvas = ctx.canvas;
-
-					if (this.frameSkipCounter > 0) {
-						this.frameSkipCounter--;
-						this.isProcessing = false;
-						resolve(detectedCodes);
-						return;
-					}
-					this.frameSkipCounter = 2; // process every 3rd frame
-
-					const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-					const processedImageData = await opencvProcessor.quickProcess(imageData);
-					ctx.putImageData(processedImageData, 0, 0);
-
-					this.isProcessing = false;
-					resolve(detectedCodes);
-				} catch (error) {
-					console.warn("OpenCV processing failed:", error);
-					this.isProcessing = false;
-					resolve(detectedCodes);
-				}
-			});
-		},
-
-		handleEscKey(event) {
-			if (event.key === "Escape" && this.scannerDialog) {
-				event.preventDefault();
-				this.stopScanning();
-			}
-		},
-
-		// external lock helpers
-		pauseForExternalLock() {
-			this.scannerLockedExternally = true;
-			if (this.scanResetTimeoutId) clearTimeout(this.scanResetTimeoutId);
-			if (this.dialogCloseTimeoutId) clearTimeout(this.dialogCloseTimeoutId);
-			if (this.isScanning) this.isScanning = false;
-		},
-
-		resumeFromExternalLock() {
-			if (!this.scannerDialog) {
-				this.scannerLockedExternally = false;
-				return;
-			}
-			this.scannerLockedExternally = false;
-			if (!this.isScanning) {
-				this.$nextTick(() => {
-					if (this.scannerDialog && !this.isScanning) this.isScanning = true;
-				});
-			}
-		},
-	},
-
-	watch: {
-		scannerDialog(newVal) {
-			if (newVal) {
-				if (!this.selectedDeviceId && this.cameras.length === 0) this.listCameras();
-				this.$emit("scanner-opened");
-			} else {
-				this.isScanning = false;
-				this.torchActive = false;
-				this.$emit("scanner-closed");
-			}
-		},
-	},
-
-	async mounted() {
-		if (typeof document !== "undefined") {
-			document.addEventListener("keydown", this.handleEscKey);
+			isProcessing.value = false;
+			resolve(detectedCodes);
+		} catch (error) {
+			console.warn("OpenCV processing failed:", error);
+			isProcessing.value = false;
+			resolve(detectedCodes);
 		}
-		// Initialize OpenCV
+	});
+};
+
+const trackFunctionOptions = computed(() => {
+	return openCVEnabled.value ? opencvTrackFunction : null;
+});
+
+// Methods
+const listCameras = async () => {
+	try {
+		if (!navigator.mediaDevices?.enumerateDevices) {
+			console.warn("MediaDevices API not supported.");
+			cameras.value = [];
+			return;
+		}
+		const devices = await navigator.mediaDevices.enumerateDevices();
+		cameras.value = devices.filter((d) => d.kind === "videoinput");
+		if (cameras.value.length > 0 && !selectedDeviceId.value) {
+			const rear = cameras.value.find((c) => /back|rear|environment/i.test(c.label));
+			selectedDeviceId.value = rear ? rear.deviceId : cameras.value[0].deviceId;
+		}
+	} catch (e) {
+		console.error("Error listing cameras:", e);
+		cameras.value = [];
+	}
+};
+
+const startScanning = async () => {
+	scannerLockedExternally.value = false;
+	scannerDialog.value = true;
+	errorMessage.value = "";
+	scanResult.value = "";
+	scanFormat.value = "";
+	cameraPermissionDenied.value = false;
+	isScanning.value = true;
+	await nextTick();
+	await listCameras();
+};
+
+const onCameraReady = () => {
+	isScanning.value = true;
+	try {
+		console.log("Camera ready with enhanced settings for barcode scanning");
+	} catch (e) {
+		console.warn("Could not apply enhanced camera settings:", e);
+	}
+};
+
+const stopScanning = () => {
+	scannerLockedExternally.value = false;
+	if (scanResetTimeoutId) clearTimeout(scanResetTimeoutId);
+	if (dialogCloseTimeoutId) clearTimeout(dialogCloseTimeoutId);
+	scanResetTimeoutId = null;
+	dialogCloseTimeoutId = null;
+
+	isScanning.value = false;
+	scannerDialog.value = false;
+	scanResult.value = "";
+	scanFormat.value = "";
+	errorMessage.value = "";
+	torchActive.value = false;
+	emit("scanner-closed");
+};
+
+const handleScannedCode = (rawValue, formatLabel = "", options = {}) => {
+	const {
+		pauseCamera = true,
+		resetDelay = 1000,
+		closeDialog = props.autoCloseOnScan,
+		closeDelay,
+	} = options;
+
+	const code = (rawValue ?? "").toString().trim();
+	if (!code) return;
+
+	scanResult.value = code;
+	scanFormat.value = formatLabel || "";
+	errorMessage.value = "";
+
+	emit("barcode-scanned", code);
+
+	if (typeof frappe !== "undefined" && frappe.show_alert) {
+		const formatSuffix = scanFormat.value ? ` (${scanFormat.value})` : "";
+		frappe.show_alert(
+			{ message: __("Code scanned successfully") + formatSuffix, indicator: "green" },
+			3,
+		);
+	}
+
+	const shouldPause = pauseCamera && isScanning.value;
+	if (shouldPause) isScanning.value = false;
+
+	// clear timers
+	if (scanResetTimeoutId) clearTimeout(scanResetTimeoutId);
+	if (dialogCloseTimeoutId) clearTimeout(dialogCloseTimeoutId);
+	scanResetTimeoutId = null;
+	dialogCloseTimeoutId = null;
+
+	if (closeDialog) {
+		const effectiveDelay = Math.max(
+			0,
+			typeof closeDelay === "number" ? closeDelay : Math.min(resetDelay, 250),
+		);
+		dialogCloseTimeoutId = setTimeout(() => {
+			dialogCloseTimeoutId = null;
+			stopScanning();
+		}, effectiveDelay);
+		return;
+	}
+
+	scanResetTimeoutId = setTimeout(
+		() => {
+			scanResult.value = "";
+			scanFormat.value = "";
+			if (shouldPause && scannerDialog.value && !scannerLockedExternally.value) {
+				isScanning.value = true;
+			}
+			scanResetTimeoutId = null;
+		},
+		Math.max(0, resetDelay),
+	);
+};
+
+const onDetect = (detectedCodes) => {
+	if (detectedCodes && detectedCodes.length > 0) {
+		const first = detectedCodes[0];
+		handleScannedCode(first.rawValue, first.format);
+	}
+};
+
+const onError = (error) => {
+	errorMessage.value = error.name || "Unknown error";
+	console.error("Camera error:", error);
+
+	if (error.name === "NotAllowedError") {
+		cameraPermissionDenied.value = true;
+		errorMessage.value = __(
+			"Camera permission denied. Please allow camera access in your browser settings and refresh the page.",
+		);
+	} else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
+		errorMessage.value = __(
+			"No camera found on this device. Please ensure your device has a working camera.",
+		);
+	} else if (error.name === "NotSupportedError") {
+		errorMessage.value = __(
+			"Secure context (HTTPS) required for camera access. Please use HTTPS to access the camera.",
+		);
+	} else if (error.name === "AbortError") {
+		errorMessage.value = __("Camera access was aborted. Please try again.");
+	} else if (
+		error.name === "OverconstrainedError" ||
+		error.name === "ConstraintNotSatisfiedError"
+	) {
+		errorMessage.value = __(
+			"Camera constraints not supported by your device. Trying fallback settings...",
+		);
+		tryFallbackCamera();
+		return;
+	} else {
+		errorMessage.value =
+			__("Error accessing camera:") + ` ${error.message}. Please try refreshing the page.`;
+	}
+	isScanning.value = false;
+};
+
+const tryFallbackCamera = async () => {
+	console.log("Trying fallback camera settings...");
+	try {
+		openCVEnabled.value = false; // reduce processing for weak devices
+		await nextTick();
+		isScanning.value = true;
+		if (typeof frappe !== "undefined" && frappe.show_alert) {
+			frappe.show_alert(
+				{
+					message: __("Using basic camera settings due to device limitations"),
+					indicator: "orange",
+				},
+				3,
+			);
+		}
+	} catch (fallbackError) {
+		console.error("Fallback camera also failed:", fallbackError);
+		errorMessage.value = __(
+			"Unable to access camera even with basic settings. Please check your camera permissions and device compatibility.",
+		);
+	}
+};
+
+const toggleTorch = () => {
+	torchActive.value = !torchActive.value;
+};
+
+const switchCamera = async () => {
+	if (cameras.value.length > 1) {
+		const currentIndex = cameras.value.findIndex((cam) => cam.deviceId === selectedDeviceId.value);
+		const nextIndex = (currentIndex + 1) % cameras.value.length;
+		selectedDeviceId.value = cameras.value[nextIndex].deviceId;
+
+		isScanning.value = false;
+		await nextTick();
+		isScanning.value = true;
+
+		if (typeof frappe !== "undefined" && frappe.show_alert) {
+			frappe.show_alert(
+				{
+					message:
+						__("Switched to: ") +
+						(cameras.value[nextIndex].label || `Camera ${nextIndex + 1}`),
+					indicator: "blue",
+				},
+				2,
+			);
+		}
+	}
+};
+
+const toggleOpenCVProcessing = async () => {
+	openCVLoading.value = true;
+	openCVEnabled.value = !openCVEnabled.value;
+
+	if (openCVEnabled.value) {
 		try {
 			await opencvProcessor.ensureInitialized();
-			console.log("OpenCV initialized in CameraScanner component");
+			console.log("OpenCV processing enabled");
 		} catch (error) {
-			console.warn("OpenCV initialization failed:", error);
-			this.openCVEnabled = false;
+			console.error("Failed to initialize OpenCV:", error);
+			openCVEnabled.value = false;
 		}
-	},
+	}
 
-	async beforeUnmount() {
-		if (typeof document !== "undefined") {
-			document.removeEventListener("keydown", this.handleEscKey);
-		}
-		this.stopScanning();
-		try {
-			await opencvProcessor.destroy();
-			console.log("OpenCV Web Worker cleaned up successfully");
-		} catch (error) {
-			console.warn("Error cleaning up OpenCV Web Worker:", error);
-		}
-	},
+	isScanning.value = false;
+	await nextTick();
+	isScanning.value = true;
+	openCVLoading.value = false;
+
+	if (typeof frappe !== "undefined" && frappe.show_alert) {
+		frappe.show_alert(
+			{
+				message: openCVEnabled.value
+					? __("OpenCV image processing enabled - Enhanced barcode detection")
+					: __("OpenCV processing disabled"),
+				indicator: openCVEnabled.value ? "green" : "blue",
+			},
+			3,
+		);
+	}
 };
+
+const pauseForExternalLock = () => {
+	scannerLockedExternally.value = true;
+	if (scanResetTimeoutId) clearTimeout(scanResetTimeoutId);
+	if (dialogCloseTimeoutId) clearTimeout(dialogCloseTimeoutId);
+	if (isScanning.value) isScanning.value = false;
+};
+
+const resumeFromExternalLock = () => {
+	if (!scannerDialog.value) {
+		scannerLockedExternally.value = false;
+		return;
+	}
+	scannerLockedExternally.value = false;
+	if (!isScanning.value) {
+		nextTick(() => {
+			if (scannerDialog.value && !isScanning.value) isScanning.value = true;
+		});
+	}
+};
+
+const handleEscKey = (event) => {
+	if (event.key === "Escape" && scannerDialog.value) {
+		event.preventDefault();
+		stopScanning();
+	}
+};
+
+// Watchers
+watch(scannerDialog, (newVal) => {
+	if (newVal) {
+		if (!selectedDeviceId.value && cameras.value.length === 0) listCameras();
+		emit("scanner-opened");
+	} else {
+		isScanning.value = false;
+		torchActive.value = false;
+		emit("scanner-closed");
+	}
+});
+
+// Lifecycle
+onMounted(async () => {
+	if (typeof document !== "undefined") {
+		document.addEventListener("keydown", handleEscKey);
+	}
+	// Initialize OpenCV
+	try {
+		await opencvProcessor.ensureInitialized();
+		console.log("OpenCV initialized in CameraScanner component");
+	} catch (error) {
+		console.warn("OpenCV initialization failed:", error);
+		openCVEnabled.value = false;
+	}
+});
+
+onBeforeUnmount(async () => {
+	if (typeof document !== "undefined") {
+		document.removeEventListener("keydown", handleEscKey);
+	}
+	stopScanning();
+	try {
+		await opencvProcessor.destroy();
+		console.log("OpenCV Web Worker cleaned up successfully");
+	} catch (error) {
+		console.warn("Error cleaning up OpenCV Web Worker:", error);
+	}
+});
+
+// Expose public methods for parent components
+defineExpose({
+	startScanning,
+	stopScanning,
+	pauseForExternalLock,
+	resumeFromExternalLock,
+});
 </script>

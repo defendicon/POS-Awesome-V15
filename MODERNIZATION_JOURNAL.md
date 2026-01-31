@@ -255,7 +255,7 @@ _Taming the monoliths. Breaking down massive components for readability and main
     - [x] `ItemImage.vue`: Integrated into `ItemCard.vue`.
 
 - [ ] **6.1.4 Legacy Component Migration (Options API to Script Setup)**
-    - [ ] `CameraScanner.vue` (680 lines): Heavy component using Options API. Needs migration to `<script setup>`.
+    - [x] `CameraScanner.vue` (680 lines): Refactored to `<script setup>`. Logic preserved.
     - [x] `NewItemDialog.vue` (200 lines): Refactored to `<script setup>`. API calls moved to `itemService.js`.
 
 ## ✂️ 6.2 `Invoice.vue` (1964 lines)
