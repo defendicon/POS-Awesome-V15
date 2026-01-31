@@ -73,9 +73,16 @@ export function useItemStorageSafety() {
         }
 
         try {
-            // We assume the worker file is at the root or correctly served
-            const workerUrl = "/assets/posawesome/js/posapp/item_worker.js";
-            itemWorker.value = new Worker(workerUrl);
+            // Correct path to the worker file
+            const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
+
+            try {
+                // Try initializing with classic type first (better compatibility)
+                itemWorker.value = new Worker(workerUrl, { type: "classic" });
+            } catch (e) {
+                // Fallback to module type
+                itemWorker.value = new Worker(workerUrl, { type: "module" });
+            }
 
             itemWorker.value.onmessage = (e) => {
                 // Handle generic worker messages if needed
