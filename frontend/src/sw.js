@@ -66,11 +66,21 @@ workbox.routing.registerRoute(
 	new workbox.strategies.NetworkFirst({ cacheName: "api-cache", networkTimeoutSeconds: 3 }),
 );
 
+const apiQueue = new workbox.backgroundSync.Queue("api-sync-queue", {
+	maxRetentionTime: 24 * 60,
+});
+
+workbox.routing.registerRoute(
+	({ url, request }) => url.pathname.startsWith("/api/") && request.method !== "GET",
+	new workbox.strategies.NetworkOnly({
+		plugins: [apiQueue],
+	}),
+);
+
 workbox.routing.registerRoute(
 	({ request }) => ["script", "style"].includes(request.destination),
-	new workbox.strategies.NetworkFirst({
+	new workbox.strategies.CacheFirst({
 		cacheName: "assets-cache",
-		networkTimeoutSeconds: 3,
 		cacheKeyWillBeUsed: async ({ request }) => {
 			// Include version parameter in cache key for proper invalidation
 			return request.url;

@@ -30,6 +30,29 @@
 				@refresh-cache-usage="handleRefreshCacheUsage"
 				@update-after-delete="handleUpdateAfterDelete"
 			/>
+			<v-alert
+				v-if="showOfflineBanner"
+				class="offline-banner"
+				color="warning"
+				variant="tonal"
+				border="start"
+				density="compact"
+				closable
+			>
+				<div class="d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between">
+					<div class="mb-2 mb-sm-0">
+						<strong>Offline mode:</strong>
+						<span v-if="manualOffline">manual offline is enabled.</span>
+						<span v-else>network connection is unavailable.</span>
+					</div>
+					<div class="d-flex align-center ga-2">
+						<v-btn size="small" variant="text" @click="handleSyncInvoices">Retry sync</v-btn>
+						<v-btn size="small" variant="text" @click="handleToggleOffline">
+							{{ manualOffline ? "Go online" : "Work offline" }}
+						</v-btn>
+					</div>
+				</div>
+			</v-alert>
 			<div class="page-content">
 				<!-- Replaced router-view with slot for layout usage -->
 				<slot />
@@ -154,6 +177,7 @@ const isDark = computed(() => $theme?.isDark || false);
 const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
 const loadingMessage = computed(() => loadingState.message);
+const showOfflineBanner = computed(() => manualOffline.value || !networkOnline.value);
 
 // Watchers
 watch(networkOnline, (newVal, oldVal) => {
@@ -590,6 +614,10 @@ const adjust_frappe_sidebar_offset = () => {
 	flex: 1;
 	overflow-y: auto;
 	padding-top: 8px;
+}
+
+.offline-banner {
+	margin: 0 16px 12px;
 }
 
 /* Ensure proper spacing and prevent layout shifts */

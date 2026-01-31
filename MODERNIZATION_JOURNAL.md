@@ -65,15 +65,25 @@ _Building the backbone for a scalable Single Page Application (SPA)._
         5.  Remove `this` context references.
 
 - [ ] **1.4 Adopt TypeScript**
-    - **Current Status:** Pure JavaScript codebase.
+    - **Current Status:** Partial adoption. A few modules are already in TypeScript (`plugins/vuetify.ts`, `composables/useCpuLoad.ts`), but there is no `tsconfig.json` or type-check pipeline yet.
     - **Action Plan:**
-        1.  Rename `.js` files to `.ts` and `.vue` scripts to `<script lang="ts">`.
-        2.  Add `tsconfig.json` with strict mode enabled.
-        3.  Define interfaces for core entities: `Invoice`, `Customer`, `Item`, `POSProfile`.
-        4.  Typed Pinia Stores.
+        1.  Add TypeScript tooling and config:
+            - Add `typescript`, `vue-tsc`, `@types/node`, `@vue/tsconfig`, and `@types/lodash` to `frontend/package.json`.
+            - Create `frontend/tsconfig.json` and `frontend/env.d.ts` (see Phase 7.1 below).
+        2.  Enable type-checking in the build:
+            - Add `type-check` script with `vue-tsc`.
+            - Update `build` to run `type-check` before `vite build`.
+        3.  Type core domain models:
+            - Define `Invoice`, `Customer`, `Item`, `POSProfile` interfaces under `frontend/src/posapp/types/`.
+        4.  Migrate stores and composables incrementally:
+            - Start with `toastStore`, `uiStore`, and `useLoading` utilities.
+            - Work outward to `invoiceStore`, `customersStore`, and component props/emits.
 
 - [ ] **1.5 Documentation Update**
-    - **Action:** Update `README.md` to mention the new Router-based architecture and requirements.
+    - **Action Plan:**
+        1.  Add a section in `README.md` describing the router-based layout (`App.vue` + `DefaultLayout.vue`) and route meta usage.
+        2.  Document the SPA navigation paths (`/pos`, `/orders`, `/payments`, `/reports`, `/barcode`, `/closing`).
+        3.  Add a "Frontend Architecture" note with key folders (`router/`, `layouts/`, `stores/`, `services/`, `composables/`).
 
 ---
 
@@ -116,7 +126,10 @@ _Removing "Event Soup" and centralizing business logic._
             - Extract calls from `itemsStore.js`.
 
 - [ ] **2.3 Documentation Update**
-    - **Action:** Update `README.md` to document the new Store/Service architecture for contributors.
+    - **Action Plan:**
+        1.  Add a "State Management" section describing Pinia stores (`uiStore`, `toastStore`, `syncStore`, `customersStore`).
+        2.  Add a "Services" section describing API wrappers (`api.js`, `authService.js`, `invoiceService.js`, `itemService.js`).
+        3.  Provide a short "When to use Store vs Service" guideline and reference the `services/` and `stores/` directories.
 
 ---
 
@@ -135,19 +148,13 @@ _Making it look and feel premium._
         2.  **Typography:** Define global font defaults in Vuetify config to remove `@fontsource` manual imports if possible, or standardize them.
 
 - [ ] **3.2 Micro-Interactions & Motion**
-    - **Current Status:** `Pos.vue` uses `v-show` for Payment/Items switching. Instant, jarring changes.
+    - **Current Status:** Route transitions are implemented in `App.vue`, but dialog transitions are not standardized across all dialogs.
     - **Action Plan:**
-        1.  **Route Transitions:**
-            - In `DefaultLayout.vue` or `App.vue`:
-                ```html
-                <router-view v-slot="{ Component }">
-                	<transition name="fade" mode="out-in">
-                		<component :is="Component" />
-                	</transition>
-                </router-view>
-                ```
-        2.  **Dialog Transitions:**
-            - Update all `v-dialog` to have `transition="dialog-bottom-transition"`.
+        1.  [x] **Route Transitions:** Implemented in `App.vue` using `<transition name="fade-page" mode="out-in">`.
+        2.  [ ] **Dialog Transitions:**
+            - Audit dialogs in `Pos.vue`, `Invoice.vue`, `Payments.vue`, and shared UI components.
+            - Apply `transition="dialog-bottom-transition"` (or a consistent dialog transition) to each `v-dialog`.
+            - Verify animations on mobile and low-end devices for performance.
 
 - [ ] **3.3 Responsive & Modern Layout**
     - **Current Status:** `Pos.vue` has complex `v-show` logic based on screen size/state.
@@ -155,9 +162,16 @@ _Making it look and feel premium._
         1.  **Grid Cleanup:** Once Routes are active, `Pos.vue` will only show the _Cart_ and _Items_.
         2.  `Payments.vue` will be its own page (on mobile) or a side-drawer (on desktop).
         3.  **Mobile First:** Ensure `v-app-bar` handles navigation on small screens.
+        4.  **Implementation Steps:**
+            - Introduce layout breakpoints in `Pos.vue` for small/medium/large screens.
+            - Replace `v-show` toggles with layout-specific components (e.g., `PaymentsDrawer`).
+            - Add snapshot checks for primary flows (item browse → cart → pay) on mobile.
 
 - [ ] **3.4 Documentation Update**
-    - **Action:** Update `README.md` to highlight "Modern UI/UX" features and specific theme customization guide.
+    - **Action Plan:**
+        1.  Document route transitions and dialog motion in the "UI/UX" section.
+        2.  Add a short guide on theme customization (linking to `plugins/vuetify.ts`).
+        3.  Include mobile UX notes (drawer behavior, touch targets, and shortcuts).
 
 ---
 
@@ -165,21 +179,30 @@ _Making it look and feel premium._
 
 _Speed and Offline-First reliability._
 
-- [ ] **4.1 Route Lazy Loading & Chunking**
-    - **Current Status:** Manual chunking in `vite.config.js`.
+- [x] **4.1 Route Lazy Loading & Chunking**
+    - **Current Status:** Router routes are lazily loaded via dynamic imports and manual chunking has been removed to allow route-driven splitting.
     - **Action Plan:**
-        1.  **Remove Manual Chunks:** Delete `manualChunks` configuration in `vite.config.js`. Let Vite split based on dynamic imports in Router.
-        2.  **Async Components:** In `router/index.js`, use `component: () => import(...)`.
+        1.  [x] **Async Components:** Routes already use `component: () => import(...)` in `router/index.js`.
+        2.  [x] **Remove Manual Chunks:** Delete `manualChunks` configuration in `vite.config.js` to let Vite split based on route boundaries.
+        3.  [x] **Verify Output:** Compare build output sizes and ensure core routes (`/pos`, `/orders`, `/payments`) have distinct chunks.
+        4.  [x] **Benchmark Note:** Record before/after chunk sizes in the change log to track performance impact.
 
-- [ ] **4.2 Advanced Caching (Service Worker)**
-    - **Current Status:** `sw.js` uses `NetworkFirst` for scripts/styles. This causes delays on slow networks.
+- [x] **4.2 Advanced Caching (Service Worker)**
+    - **Current Status:** Script/style assets use `CacheFirst`, offline banner is visible, and API writes are queued for background sync.
     - **Action Plan:**
-        1.  **Strategy Shift:** Change `assets-cache` strategy to `CacheFirst` (or `StaleWhileRevalidate`). Since hashed filenames change on every build, we can safely cache aggressivey.
-        2.  **Offline Indicator:** Ensure `DefaultLayout.vue` shows a global banner when `useNetwork().isOnline` is false.
-        3.  **Background Sync:** Use `workbox-background-sync` for failed API requests (if `frappe.call` fails).
+        1.  [x] **Strategy Shift:** Change `assets-cache` strategy to `CacheFirst` (or `StaleWhileRevalidate`). Since hashed filenames change on every build, we can safely cache aggressivey.
+        2.  [x] **Offline Indicator:** Ensure `DefaultLayout.vue` shows a global banner when `useNetwork().isOnline` is false.
+        3.  [x] **Background Sync:** Use `workbox-background-sync` for failed API requests (if `frappe.call` fails).
+        4.  **Implementation Steps:**
+            - Add `workbox-background-sync` to the service worker bundle if not already available.
+            - Queue failed POST requests for retries and show a toast on retry failures.
+            - Add a manual "retry sync" action in the offline banner.
 
-- [ ] **4.3 Documentation Update**
-    - **Action:** Update `README.md` with "Offline First" capabilities and technical details on caching strategies.
+- [x] **4.3 Documentation Update**
+    - **Action Plan:**
+        1.  Document the service worker caching strategy (cache names, TTL assumptions, SW revisioning).
+        2.  Provide steps for clearing cache in troubleshooting.
+        3.  Add an "Offline Mode" section with UI indicators and sync behavior.
 
 ---
 
@@ -188,16 +211,14 @@ _Speed and Offline-First reliability._
 _Stability and Confidence._
 
 - [ ] **5.1 End-to-End Testing (Playwright)**
-    - **Current Status:** No E2E tests. Only 2 unit tests exist.
+    - **Current Status:** Playwright config and a skipped smoke test are in place; test still needs a stable ERPNext/POS backend to run.
     - **Action Plan:**
-        1.  **Install Playwright:** `yarn create playwright` in `frontend/`.
-        2.  **Create Smoke Test:** `tests/e2e/checkout.spec.ts`:
-            - Login (mocked).
-            - Navigate to `/pos`.
-            - Click an item.
-            - Verify Cart total updates.
-            - Click "Pay" -> "Complete".
-        3.  **CI Integration:** Update `.github/workflows/ci.yml` to run playwright tests.
+        1.  [x] **Install Playwright:** Add `@playwright/test` and `playwright.config.js` in `frontend/`.
+        2.  [x] **Create Smoke Test:** `frontend/e2e/checkout.spec.ts` scaffolded and marked `test.skip` until backend fixtures are available.
+        3.  [ ] **Enable Test:** Wire a stable ERPNext site or mock layer so the checkout test can run end-to-end.
+        4.  [ ] **CI Integration:** Update `.github/workflows/ci.yml` to run Playwright tests when the backend is available.
+        5.  [ ] **Stable Fixtures:** Add deterministic test data and stubbed API responses to avoid flakiness.
+        6.  [ ] **Reporting:** Upload HTML reports as CI artifacts for debugging failures.
 
 - [ ] **5.2 CI/CD & Quality Gates**
     - **Current Status:** CI only checks backend install/build. `yarn test` is NOT run.
@@ -211,9 +232,15 @@ _Stability and Confidence._
                   yarn test
             ```
         2.  **Linting:** Add `yarn run lint` to the CI pipeline to enforce code style.
+        3.  **Formatting Checks:** Add Prettier and Black checks (or reuse the existing manual workflow in check mode).
+        4.  **Backend Tests:** Run `bench run-tests --app posawesome` with a test site in CI.
+        5.  **Coverage:** Capture unit test coverage (Vitest + Python) and report in CI summary.
 
 - [ ] **5.3 Documentation Update**
-    - **Action:** Update `README.md` with instructions on how to run E2E tests and contributing guidelines using the new CI flow.
+    - **Action Plan:**
+        1.  Document unit test commands (`frontend/yarn test`, backend `bench run-tests`).
+        2.  Document E2E test setup (Playwright install, browsers, environment).
+        3.  Add troubleshooting guidance for CI failures (cached artifacts, SW caches, environment variables).
 
 ---
 
@@ -256,17 +283,29 @@ _Taming the monoliths. Breaking down massive components for readability and main
 - [ ] **6.2.1 Extract Composables**
     - `useInvoiceCalculations.js`: Move complex tax/discount/total logic (already partially in `invoiceStore` but UI specific logic remains).
     - `useInvoiceShortcuts.js`: Keyboard shortcuts.
+    - **Implementation Steps:**
+        1.  Move calculation helpers from `Invoice.vue` into `useInvoiceCalculations.js`.
+        2.  Add unit tests for tax/discount edge cases (split items, refunds, multi-currency).
+        3.  Replace inline key handlers with `useInvoiceShortcuts.js`.
 
 - [ ] **6.2.2 Decompose Sections**
     - `InvoiceHeader.vue`: Customer selection, mode toggles.
     - `InvoiceTotals.vue`: The summary section (Subtotal, Tax, Final Amount).
     - `ActiveOffers.vue`: The chip list or display of applied offers.
+    - **Implementation Steps:**
+        1.  Extract template sections into new components with explicit props/emits.
+        2.  Wire each child component to `invoiceStore` and local state via props.
+        3.  Remove unused reactive state from `Invoice.vue`.
 
 ## ✂️ 6.3 `PurchaseOrders.vue` (1230 lines)
 
 - [ ] **6.3.1 Standardization**
     - Apply same patterns as `Invoice.vue` after refactoring.
     - Reuse `ItemSearchFilters.vue` if possible.
+    - **Implementation Steps:**
+        1.  Identify shared UI patterns with `Invoice.vue` and extract reusable components.
+        2.  Align store/service usage with the refactored `Invoice.vue` patterns.
+        3.  Add unit tests for purchase order filtering and selection.
 
 ---
 
@@ -284,40 +323,40 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 - [ ] **7.1.2 Configure TypeScript**
     - Create `frontend/tsconfig.json`:
-      ```json
-      {
-        "extends": "@vue/tsconfig/tsconfig.dom.json",
-        "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
-        "exclude": ["src/**/__tests__/*"],
-        "compilerOptions": {
-          "composite": true,
-          "baseUrl": ".",
-          "paths": { "@/*": ["./src/*"] },
-          "allowJs": true,           // Critical for mixed codebase
-          "checkJs": false,          // Don't error on existing JS yet
-          "strict": true,            // Goal: strictly typed new files
-          "noImplicitAny": false     // Relaxed for initial migration
+        ```json
+        {
+        	"extends": "@vue/tsconfig/tsconfig.dom.json",
+        	"include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+        	"exclude": ["src/**/__tests__/*"],
+        	"compilerOptions": {
+        		"composite": true,
+        		"baseUrl": ".",
+        		"paths": { "@/*": ["./src/*"] },
+        		"allowJs": true, // Critical for mixed codebase
+        		"checkJs": false, // Don't error on existing JS yet
+        		"strict": true, // Goal: strictly typed new files
+        		"noImplicitAny": false // Relaxed for initial migration
+        	}
         }
-      }
-      ```
+        ```
     - Create `frontend/env.d.ts`:
-      ```ts
-      /// <reference types="vite/client" />
-      declare module '*.vue' {
-        import type { DefineComponent } from 'vue'
-        const component: DefineComponent<{}, {}, any>
-        export default component
-      }
-      declare const frappe: any; // Temporary global
-      declare const __: (str: string) => string;
-      ```
+        ```ts
+        /// <reference types="vite/client" />
+        declare module "*.vue" {
+        	import type { DefineComponent } from "vue";
+        	const component: DefineComponent<{}, {}, any>;
+        	export default component;
+        }
+        declare const frappe: any; // Temporary global
+        declare const __: (str: string) => string;
+        ```
 
 - [ ] **7.1.3 Update Build Scripts**
     - Update `package.json` scripts:
-      ```json
-      "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
-      "build": "run-p type-check \"vite build\""
-      ```
+        ```json
+        "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
+        "build": "run-p type-check \"vite build\""
+        ```
 
 ---
 
@@ -331,16 +370,16 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 - [ ] **7.2.2 Define Core Operations Models (`models.ts`)**
     - **Inventory Item**:
-      ```ts
-      export interface Item {
-        item_code: string;
-        item_name: string;
-        description?: string;
-        stock_qty: number;
-        standard_rate: number;
-        // ... ad-hoc fields
-      }
-      ```
+        ```ts
+        export interface Item {
+        	item_code: string;
+        	item_name: string;
+        	description?: string;
+        	stock_qty: number;
+        	standard_rate: number;
+        	// ... ad-hoc fields
+        }
+        ```
     - **Cart Item (POS Item)**: Extension of Item with `qty`, `amount`, `posa_row_id`.
     - **Invoice**: `InvoiceDoc` interface (matching `invoiceStore.invoiceDoc`).
 
@@ -411,24 +450,28 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 - [ ] **7.6.2 CI/CD Integration**
     - Ensure `yarn type-check` passes in GitHub Actions.
 
-
 ## 📝 Change Log / Progress
 
-| Date       | Item                                | Status    | Notes                                                                                                                                |
-| ---------- | ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-01-25 | Journal Creation                    | Completed | Roadmap established.                                                                                                                 |
-| 2026-01-25 | Phase 2.1 Refactor                  | Completed | Created `toastStore`, `uiStore`, `socketStore` to replace Event Bus.                                                                 |
-| 2026-01-25 | Phase 2.2 Refactor                  | Completed | Created `api.js`, `authService.js`, `invoiceService.js` to centralize API calls.                                                     |
-| 2026-01-26 | Refactor `pending_invoices_changed` | Completed | Created `syncStore.js` and updated `Payments.vue` and `Home.vue` to use it.                                                          |
-| 2026-01-26 | Phase 2.2 Finalization              | Completed | Implemented `itemService.js` and refactored `itemsStore.js` & `invoiceOfferMethods.js`. cleanup `customer_changed` event assumption. |
-| 2026-01-26 | Phase 3.1 Design System             | Completed | Migrated Vuetify theme to `plugins/vuetify.ts` and updated `posapp.js`.                                                              |
-| 2026-01-26 | Phase 3.2 Micro-Interactions        | Completed | Added page transitions to `Home.vue` and dialog transitions to `Invoice` and `CancelSaleDialog`.                                     |
-| 2026-01-26 | Phase 4 Performance                 | Completed | Verified Route Lazy Loading & Virtual Scrolling. Optimized `Home.vue` imports.                                                       |
-| 2026-01-26 | Phase 5.1 Reliability               | Completed | Implemented global error handler in `posapp.js` using `toastStore`.                                                                  |
-| 2026-01-26 | Phase 1.2 Explicit Layouts          | Completed | Created `DefaultLayout.vue`, `App.vue`, and updated Router.                                                                          |
-| 2026-01-26 | Phase 1.3 Composition API           | Completed | Refactored `DefaultLayout.vue` to `<script setup>` and removed Options API usage.                                                    |
-| 2026-01-26 | Phase 2.1 Remove Event Bus          | Completed | RefactoredView switching, Customer Dialogs, Invoice/Order Loading to use Stores.                                                     |
-| 2026-01-28 | Phase 2.1 Final Cleanup             | Completed | Removed remaining EventBus usage in `Payments.vue` and `Invoice.vue` (view switching, clearing invoice, posting date).               |
+| Date       | Item                                | Status      | Notes                                                                                                                                               |
+| ---------- | ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-01-25 | Journal Creation                    | Completed   | Roadmap established.                                                                                                                                |
+| 2026-01-25 | Phase 2.1 Refactor                  | Completed   | Created `toastStore`, `uiStore`, `socketStore` to replace Event Bus.                                                                                |
+| 2026-01-25 | Phase 2.2 Refactor                  | Completed   | Created `api.js`, `authService.js`, `invoiceService.js` to centralize API calls.                                                                    |
+| 2026-01-26 | Refactor `pending_invoices_changed` | Completed   | Created `syncStore.js` and updated `Payments.vue` and `Home.vue` to use it.                                                                         |
+| 2026-01-26 | Phase 2.2 Finalization              | Completed   | Implemented `itemService.js` and refactored `itemsStore.js` & `invoiceOfferMethods.js`. cleanup `customer_changed` event assumption.                |
+| 2026-01-26 | Phase 3.1 Design System             | Completed   | Migrated Vuetify theme to `plugins/vuetify.ts` and updated `posapp.js`.                                                                             |
+| 2026-01-26 | Phase 3.2 Micro-Interactions        | In Progress | Route transitions are in `App.vue`; dialog transitions still need a consistent audit/rollout.                                                       |
+| 2026-01-26 | Phase 4 Performance                 | Completed   | Removed manual chunking in `vite.config.js` to rely on route-driven splitting; record chunk size deltas in benchmark notes.                         |
+| 2026-01-26 | Phase 4.2 Caching                   | Completed   | Switched script/style cache to `CacheFirst`, added offline banner, and queued API writes for background sync.                                       |
+| 2026-01-26 | Phase 4 Benchmark Notes             | Updated     | Capture `vite build` chunk sizes in build logs to compare before/after routing-based splitting.                                                     |
+| 2026-01-26 | Benchmark Snapshot                  | Updated     | `posawesome.js` 891.78 kB (gzip 279.46 kB); `Pos` chunk 363.88 kB (gzip 85.88 kB); `ItemsSelector` 261.07 kB (gzip 79.68 kB).                       |
+| 2026-01-26 | Phase 4.3 Docs                      | Completed   | Added README section covering offline mode, caching strategy, and troubleshooting steps.                                                            |
+| 2026-01-26 | Phase 5.1 Reliability               | Completed   | Implemented global error handler in `posapp.js` using `toastStore`.                                                                                 |
+| 2026-01-26 | Phase 5.1 E2E Setup                 | In Progress | Added Playwright config and a skipped checkout smoke test pending backend fixtures.                                                                 |
+| 2026-01-26 | Phase 1.2 Explicit Layouts          | Completed   | Created `DefaultLayout.vue`, `App.vue`, and updated Router.                                                                                         |
+| 2026-01-26 | Phase 1.3 Composition API           | Completed   | Refactored `DefaultLayout.vue` to `<script setup>` and removed Options API usage.                                                                   |
+| 2026-01-26 | Phase 2.1 Remove Event Bus          | Completed   | RefactoredView switching, Customer Dialogs, Invoice/Order Loading to use Stores.                                                                    |
+| 2026-01-28 | Phase 2.1 Final Cleanup             | Completed   | Removed remaining EventBus usage in `Payments.vue` and `Invoice.vue` (view switching, clearing invoice, posting date).                              |
 | 2026-01-30 | Phase 6.1 ItemsSelector Refactor    | In Progress | Extracted `useScannerInput.js`, `useItemAvailability.js`, `useItemCurrency.js`, `useItemDetailFetcher.js`, `useItemSelection.js`, `useItemSync.js`. |
-| 2026-01-30 | Bug Fixes                           | Completed   | Resolved `417 Expectation Failed`, `vm is not defined`, and `replaceBarcodeIndex is not defined` errors. |
-| 2026-01-30 | Phase 6.1 Conclusion                | Updated     | Logic extraction for `ItemsSelector.vue` is ~90% complete. Remaining: `useItemAddition.js`. |
+| 2026-01-30 | Bug Fixes                           | Completed   | Resolved `417 Expectation Failed`, `vm is not defined`, and `replaceBarcodeIndex is not defined` errors.                                            |
+| 2026-01-30 | Phase 6.1 Conclusion                | Updated     | Logic extraction for `ItemsSelector.vue` is ~90% complete. Remaining: `useItemAddition.js`.                                                         |

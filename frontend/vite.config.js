@@ -90,17 +90,6 @@ export default defineConfig({
 				entryFileNames: "[name].js",
 				chunkFileNames: "[name]-[hash].js",
 				assetFileNames: "posawesome.[ext]",
-				manualChunks: (id) => {
-					if (id.includes("node_modules")) {
-						if (id.includes("vuetify")) {
-							return "vuetify";
-						}
-						if (id.includes("vue")) {
-							return "vue";
-						}
-						return "vendor";
-					}
-				},
 			},
 		},
 	},

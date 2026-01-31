@@ -194,6 +194,22 @@ Notes:
 
 ---
 
+### Offline Mode & Caching
+
+POS Awesome uses a service worker to provide offline-first reliability and faster reloads:
+
+- **Assets Cache**: Scripts/styles are cached using a Cache-First strategy so the UI loads quickly even on flaky networks.
+- **API Retry Queue**: Non-GET `/api/` requests are queued for background sync when the device reconnects.
+- **Offline Indicator**: A global banner appears when the app detects offline mode (manual or network loss) and provides quick sync/retry actions.
+
+**Troubleshooting cache issues**
+
+1. Open browser DevTools → Application → Storage.
+2. Clear Site Data and refresh the POS page.
+3. If the issue persists, delete cached images/assets from browser history.
+
+---
+
 ### Code Formatting
 
 This project uses Prettier and Black for consistent formatting. To format locally before
