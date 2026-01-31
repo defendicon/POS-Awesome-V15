@@ -415,6 +415,11 @@ export default {
 			cameraScannerActive: scannerInput.cameraScannerActive,
 			acknowledgeScanError: scannerInput.acknowledgeScanError,
 			onBarcodeScanned: scannerInput.onBarcodeScanned,
+			// Expose scale barcode methods
+			ensureScaleBarcodeSettings: scannerInput.ensureScaleBarcodeSettings,
+			updateScaleBarcodeSettings: scannerInput.updateScaleBarcodeSettings,
+			getScaleBarcodePrefix: scannerInput.getScaleBarcodePrefix,
+			scaleBarcodeMatches: scannerInput.scaleBarcodeMatches,
 			// Expose item availability
 			itemAvailability,
 			itemDetailFetcher,
