@@ -404,7 +404,14 @@ export default {
 			customer_price_list: itemsIntegration.customer_price_list,
 			itemDetailFetcher,
 			itemAddition: { addItem: add_item }, // Pass wrapper for correct context
-			barcodeIndex: { lookupItemByBarcode, searchItemsByCode: searchItemsByCodeFn },
+			barcodeIndex: { 
+				lookupItemByBarcode, 
+				searchItemsByCode: searchItemsByCodeFn,
+				ensureBarcodeIndex,
+				replaceBarcodeIndex,
+				indexItem,
+				resetBarcodeIndex
+			},
 			scannerInput,
 			searchCache: itemsIntegration.searchCache,
 			eventBus: itemsIntegration.eventBus,
