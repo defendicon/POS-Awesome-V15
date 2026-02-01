@@ -74,7 +74,7 @@
 /* global __ */
 import format from "../../format";
 import { useUIStore } from "../../stores/uiStore.js";
-import { ref, inject, onMounted, onBeforeUnmount, watch, unref } from "vue";
+import { ref, inject, onMounted, onBeforeUnmount, watch } from "vue";
 import { useClosingShift } from "../../composables/useClosingShift.js";
 import { useClosingSummary } from "../../composables/useClosingSummary.js";
 
@@ -89,7 +89,6 @@ export default {
 		ShiftOverview,
 		PaymentReconciliation,
 	},
-	mixins: [format],
 	setup() {
 		const uiStore = useUIStore();
 		const eventBus = inject("eventBus");
@@ -185,7 +184,7 @@ export default {
 				eventBus.on("open_ClosingDialog", (data) => {
 					closingDialog.value = true;
 					dialog_data.value = data;
-					fetchOverview(data.pos_opening_shift, unref(pos_profile)?.currency);
+					fetchOverview(data.pos_opening_shift, pos_profile.value?.currency);
 				});
 			} else {
 				console.error("ClosingDialog: eventBus not provided");
