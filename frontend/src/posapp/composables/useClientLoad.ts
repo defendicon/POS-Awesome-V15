@@ -3,23 +3,23 @@ import { ref, reactive, onUnmounted } from "vue";
 export function useClientLoad(interval = 1_000, windowSize = 60) {
 	// Basic lag
 	const cpuLag = ref(0);
-	const history = ref([]);
+	const history = ref<number[]>([]);
 
 	// Long‑tasks
-	const longTasks = ref([]);
+	const longTasks = ref<any[]>([]);
 
 	// Memory (Chrome-only)
 	const memoryUsage = ref(0);
 
 	// Device info
 	const device = reactive({
-		cores: navigator.hardwareConcurrency || 1,
-		gbMemory: navigator.deviceMemory || undefined,
+		cores: (navigator as any).hardwareConcurrency || 1,
+		gbMemory: (navigator as any).deviceMemory || undefined,
 	});
 
-	let timerId = null;
+	let timerId: number | null = null;
 	let last = performance.now();
-	let perfObserver = null;
+	let perfObserver: PerformanceObserver | null = null;
 
 	function measureLag() {
 		const now = performance.now();
@@ -36,6 +36,7 @@ export function useClientLoad(interval = 1_000, windowSize = 60) {
 	function sampleMemory() {
 		// @ts-ignore: not standard, but supported in Chrome
 		if (performance.memory) {
+			// @ts-ignore
 			memoryUsage.value = performance.memory.usedJSHeapSize;
 		}
 	}
@@ -48,7 +49,7 @@ export function useClientLoad(interval = 1_000, windowSize = 60) {
 		}, interval);
 
 		// Long‑task observer
-		if (window.PerformanceObserver && PerformanceObserver.supportedEntryTypes.includes("longtask")) {
+		if (window.PerformanceObserver && (PerformanceObserver as any).supportedEntryTypes?.includes("longtask")) {
 			perfObserver = new PerformanceObserver((list) => {
 				longTasks.value.push(...list.getEntries());
 				// keep history trim if desired

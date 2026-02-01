@@ -1,10 +1,11 @@
 import { ref, computed } from "vue";
+// @ts-ignore
 import config from "../config/loading.js";
 
-const loaders = ref(new Map());
+const loaders = ref(new Map<string, number>());
 const overlayVisible = ref(false);
-let delayTimer = null;
-let hideTimer = null;
+let delayTimer: ReturnType<typeof setTimeout> | null = null;
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
 let startTime = 0;
 
 function manageOverlay() {
@@ -12,14 +13,14 @@ function manageOverlay() {
 	const { delay, minVisible } = config.overlay;
 	if (any) {
 		if (!overlayVisible.value) {
-			clearTimeout(hideTimer);
+			if (hideTimer) clearTimeout(hideTimer);
 			delayTimer = setTimeout(() => {
 				overlayVisible.value = true;
 				startTime = Date.now();
 			}, delay);
 		}
 	} else {
-		clearTimeout(delayTimer);
+		if (delayTimer) clearTimeout(delayTimer);
 		if (overlayVisible.value) {
 			const elapsed = Date.now() - startTime;
 			const remaining = Math.max(minVisible - elapsed, 0);
@@ -43,7 +44,7 @@ export function stop(id = "global") {
 	if (id === "global") manageOverlay();
 }
 
-export function withLoading(fn, id = "global") {
+export function withLoading<T>(fn: () => T | Promise<T>, id = "global"): Promise<T> {
 	start(id);
 	return Promise.resolve()
 		.then(fn)

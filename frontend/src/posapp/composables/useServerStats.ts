@@ -1,21 +1,30 @@
 import { ref, onUnmounted } from "vue";
 
+export interface ServerStats {
+  cpu: number | null;
+  memory: number | null;
+  memoryTotal: number | null;
+  memoryUsed: number | null;
+  memoryAvailable: number | null;
+  uptime: number | null;
+}
+
 export function useServerStats(pollInterval = 10000, windowSize = 60) {
-	const cpu = ref(null);
-	const memory = ref(null);
-	const memoryTotal = ref(null);
-	const memoryUsed = ref(null);
-	const memoryAvailable = ref(null);
-	const history = ref([]);
+	const cpu = ref<number | null>(null);
+	const memory = ref<number | null>(null);
+	const memoryTotal = ref<number | null>(null);
+	const memoryUsed = ref<number | null>(null);
+	const memoryAvailable = ref<number | null>(null);
+	const history = ref<ServerStats[]>([]);
 	const loading = ref(true);
-	const error = ref(null);
-	let timer = null;
+	const error = ref<string | null>(null);
+	let timer: number | null = null;
 
 	async function fetchServerStats() {
 		loading.value = true;
 		error.value = null;
 		try {
-			const res = await frappe.call({
+			const res = await (window as any).frappe.call({
 				method: "posawesome.posawesome.api.utilities.get_server_usage",
 			});
 			if (res && res.message) {
@@ -37,8 +46,8 @@ export function useServerStats(pollInterval = 10000, windowSize = 60) {
 			} else {
 				error.value = "No data from server";
 			}
-		} catch (e) {
-			error.value = e.message || e;
+		} catch (e: any) {
+			error.value = e.message || String(e);
 		} finally {
 			loading.value = false;
 		}

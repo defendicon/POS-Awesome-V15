@@ -1,14 +1,16 @@
 import api from "./api";
 
-export default {
-	logout() {
+const authService = {
+	logout(): Promise<any> {
 		return api.call("logout");
 	},
 
-	getUser() {
+	getUser(): string | null {
 		if (typeof frappe !== "undefined" && frappe.session) {
 			return frappe.session.user;
 		}
 		return null;
 	}
 };
+
+export default authService;

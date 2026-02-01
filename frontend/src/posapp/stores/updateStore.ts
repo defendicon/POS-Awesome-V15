@@ -5,9 +5,9 @@ const SNOOZE_STORAGE_KEY = "posawesome_update_snooze_until";
 const DEFAULT_SNOOZE_MINUTES = 10;
 const hasBrowserContext = typeof window !== "undefined";
 
-let cachedDateFormatter = null;
+let cachedDateFormatter: Intl.DateTimeFormat | null | undefined = null;
 
-function getDateFormatter() {
+function getDateFormatter(): Intl.DateTimeFormat | null | undefined {
 	if (cachedDateFormatter !== null) {
 		return cachedDateFormatter;
 	}
@@ -26,12 +26,13 @@ function getDateFormatter() {
 	return cachedDateFormatter;
 }
 
-function safeNumber(value) {
+function safeNumber(value: string | null): number | null {
+	if (value === null) return null;
 	const numeric = Number(value);
 	return Number.isFinite(numeric) ? numeric : null;
 }
 
-function safeStorageGet(storage, key) {
+function safeStorageGet(storage: Storage | undefined, key: string): string | null {
 	if (!hasBrowserContext || !storage) return null;
 	try {
 		return storage.getItem(key);
@@ -41,7 +42,7 @@ function safeStorageGet(storage, key) {
 	}
 }
 
-function safeStorageSet(storage, key, value) {
+function safeStorageSet(storage: Storage | undefined, key: string, value: string): boolean {
 	if (!hasBrowserContext || !storage) return false;
 	try {
 		storage.setItem(key, value);
@@ -52,7 +53,7 @@ function safeStorageSet(storage, key, value) {
 	}
 }
 
-function safeStorageRemove(storage, key) {
+function safeStorageRemove(storage: Storage | undefined, key: string): void {
 	if (!hasBrowserContext || !storage) return;
 	try {
 		storage.removeItem(key);
@@ -61,8 +62,8 @@ function safeStorageRemove(storage, key) {
 	}
 }
 
-function parseTimestamp(version) {
-	if (!version) return null;
+function parseTimestamp(version: string | null | number): number | null {
+	if (version === null || version === undefined) return null;
 	const numeric = Number(version);
 	if (!Number.isNaN(numeric) && numeric > 1000) {
 		return numeric;
@@ -72,8 +73,7 @@ function parseTimestamp(version) {
 	return Number.isNaN(candidate) ? null : candidate;
 }
 
-// Benchmark: centralize version normalization to avoid repeating parseTimestamp/String work.
-function normalizeVersionInput(version, explicitTimestamp) {
+function normalizeVersionInput(version: string | null | number, explicitTimestamp?: number | null) {
 	if (!version) {
 		return { normalized: null, timestamp: null };
 	}
@@ -82,7 +82,7 @@ function normalizeVersionInput(version, explicitTimestamp) {
 	return { normalized, timestamp };
 }
 
-function formatTimestamp(timestamp) {
+function formatTimestamp(timestamp: number | null): string | null {
 	if (!timestamp) return null;
 	const date = new Date(timestamp);
 	if (Number.isNaN(date.getTime())) {
@@ -99,8 +99,17 @@ function formatTimestamp(timestamp) {
 	return date.toISOString();
 }
 
+export interface UpdateState {
+  currentVersion: string | null;
+  availableVersion: string | null;
+  availableTimestamp: number | null;
+  dismissedUntil: number | null;
+  reloadAction: (() => void) | null;
+  reloading: boolean;
+}
+
 export const useUpdateStore = defineStore("update", {
-	state: () => ({
+	state: (): UpdateState => ({
 		currentVersion: null,
 		availableVersion: null,
 		availableTimestamp: null,
@@ -109,20 +118,20 @@ export const useUpdateStore = defineStore("update", {
 		reloading: false,
 	}),
 	getters: {
-		isUpdateReady(state) {
+		isUpdateReady(state: UpdateState): boolean {
 			return Boolean(
 				state.availableVersion &&
 					state.currentVersion &&
 					state.availableVersion !== state.currentVersion,
 			);
 		},
-		shouldPrompt(state) {
+		shouldPrompt(state: UpdateState): boolean {
 			if (!this.isUpdateReady || state.reloading) {
 				return false;
 			}
 			return !state.dismissedUntil || state.dismissedUntil <= Date.now();
 		},
-		formattedAvailableVersion(state) {
+		formattedAvailableVersion(state: UpdateState): string | null {
 			return formatTimestamp(state.availableTimestamp) || state.availableVersion;
 		},
 	},
@@ -142,11 +151,11 @@ export const useUpdateStore = defineStore("update", {
 				this.dismissedUntil = snoozeUntil;
 			}
 		},
-		setCurrentVersion(version, explicitTimestamp) {
+		setCurrentVersion(version: string | number | null, explicitTimestamp?: number | null) {
 			const { normalized, timestamp } = normalizeVersionInput(version, explicitTimestamp);
 			if (!normalized) return;
 			const { currentVersion, availableVersion, availableTimestamp } = this;
-			const updates = {};
+			const updates: Partial<UpdateState> = {};
 			const versionChanged = currentVersion !== normalized;
 			if (versionChanged) {
 				updates.currentVersion = normalized;
@@ -167,11 +176,11 @@ export const useUpdateStore = defineStore("update", {
 				safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
 			}
 		},
-		setAvailableVersion(version, explicitTimestamp) {
+		setAvailableVersion(version: string | number | null, explicitTimestamp?: number | null) {
 			const { normalized, timestamp } = normalizeVersionInput(version, explicitTimestamp);
 			if (!normalized) return;
 			const { availableVersion, availableTimestamp, currentVersion } = this;
-			const updates = {};
+			const updates: Partial<UpdateState> = {};
 			const versionChanged = availableVersion !== normalized;
 			const timestampChanged = (timestamp ?? null) !== (availableTimestamp ?? null);
 			if (!versionChanged && !timestampChanged) {
@@ -196,8 +205,8 @@ export const useUpdateStore = defineStore("update", {
 				safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
 			}
 		},
-		markUpdateApplied(version, explicitTimestamp) {
-			const updates = {
+		markUpdateApplied(version?: string | number | null, explicitTimestamp?: number | null) {
+			const updates: Partial<UpdateState> = {
 				reloading: false,
 				dismissedUntil: null,
 			};
@@ -207,7 +216,7 @@ export const useUpdateStore = defineStore("update", {
 				updates.availableVersion = normalized;
 				updates.availableTimestamp = timestamp;
 				if (hasBrowserContext) {
-					safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized);
+					safeStorageSet(window.localStorage, VERSION_STORAGE_KEY, normalized || "");
 				}
 			} else if (this.currentVersion) {
 				const normalized = this.currentVersion;
@@ -220,7 +229,7 @@ export const useUpdateStore = defineStore("update", {
 				safeStorageRemove(window.sessionStorage, SNOOZE_STORAGE_KEY);
 			}
 		},
-		setReloadAction(action) {
+		setReloadAction(action: () => void) {
 			if (this.reloadAction === action) return;
 			this.reloadAction = action;
 		},
@@ -253,6 +262,6 @@ export const useUpdateStore = defineStore("update", {
 	},
 });
 
-export function formatBuildVersion(version) {
-	return formatTimestamp(parseTimestamp(version)) || version;
+export function formatBuildVersion(version: string | number | null) {
+	return formatTimestamp(parseTimestamp(version)) || String(version || "");
 }

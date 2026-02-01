@@ -4,8 +4,9 @@ import { ref, onUnmounted } from "vue";
  * Measures event-loop lag as a proxy for CPU load.
  * Returns a reactive ref (ms) and a stop function.
  */
-export function useCpuLoad(interval = 1000) {
+export function useCpuLoad(interval = 1000, windowSize = 60) {
     const cpuLag = ref(0);
+    const history = ref<number[]>([]);
     let timer: number | null = null;
     let last = performance.now();
 
@@ -14,6 +15,11 @@ export function useCpuLoad(interval = 1000) {
         const lag = now - last - interval;
         cpuLag.value = Math.max(0, lag);
         last = now;
+
+        history.value.push(cpuLag.value);
+        if (history.value.length > windowSize) {
+            history.value.shift();
+        }
     }
 
     timer = window.setInterval(measure, interval);
@@ -23,5 +29,5 @@ export function useCpuLoad(interval = 1000) {
         if (timer) clearInterval(timer);
     });
 
-    return { cpuLag };
-} 
+    return { cpuLag, history };
+}

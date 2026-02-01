@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, reactive, ref } from "vue";
+// @ts-ignore
 import {
 	isOffline,
 	savePricingRulesSnapshot,
@@ -9,14 +10,38 @@ import {
 
 const HOURS_STALE = 24;
 
-const benefitScore = (rule) => {
+export interface PricingRule {
+  name?: string;
+  item_code?: string;
+  item_group?: string;
+  brand?: string;
+  rate_or_discount?: number;
+  margin_rate_or_amount?: number;
+  free_qty?: number;
+  free_qty_per_unit?: number;
+  specificity?: number;
+  priority?: number;
+  [key: string]: any;
+}
+
+export interface RuleContext {
+  company?: string;
+  price_list?: string;
+  currency?: string;
+  customer?: string;
+  customer_group?: string;
+  territory?: string;
+  date?: string | Date;
+}
+
+const benefitScore = (rule: PricingRule) => {
 	const discount = Math.abs(rule.rate_or_discount || 0);
 	const margin = Math.abs(rule.margin_rate_or_amount || 0);
 	const freebies = Math.abs(rule.free_qty || 0) + Math.abs(rule.free_qty_per_unit || 0);
 	return Math.max(discount, margin, freebies);
 };
 
-const compareRules = (a, b) => {
+const compareRules = (a: PricingRule, b: PricingRule) => {
 	if ((b.specificity || 0) !== (a.specificity || 0)) {
 		return (b.specificity || 0) - (a.specificity || 0);
 	}
@@ -30,7 +55,7 @@ const compareRules = (a, b) => {
 	return String(a.name || "").localeCompare(String(b.name || ""));
 };
 
-const buildContextKey = (ctx = {}) => {
+const buildContextKey = (ctx: RuleContext = {}) => {
 	const payload = {
 		company: ctx.company || "",
 		price_list: ctx.price_list || "",
@@ -43,7 +68,7 @@ const buildContextKey = (ctx = {}) => {
 	return JSON.stringify(payload);
 };
 
-const computeStaleTimestamp = (fromIso) => {
+const computeStaleTimestamp = (fromIso: string | null) => {
 	try {
 		const base = fromIso ? new Date(fromIso) : new Date();
 		if (Number.isNaN(base.getTime())) {
@@ -57,7 +82,7 @@ const computeStaleTimestamp = (fromIso) => {
 	}
 };
 
-const normaliseRule = (rule = {}) => {
+const normaliseRule = (rule: any = {}): PricingRule => {
 	const copy = { ...rule };
 	if (copy.item_code) {
 		copy.specificity = 3;
@@ -75,16 +100,16 @@ const normaliseRule = (rule = {}) => {
 export const usePricingRulesStore = defineStore("pricing-rules", () => {
 	const ready = ref(false);
 	const loading = ref(false);
-	const rules = ref([]);
+	const rules = ref<PricingRule[]>([]);
 	const indexes = reactive({
-		byItem: new Map(),
-		byGroup: new Map(),
-		byBrand: new Map(),
-		general: [],
+		byItem: new Map<string, PricingRule[]>(),
+		byGroup: new Map<string, PricingRule[]>(),
+		byBrand: new Map<string, PricingRule[]>(),
+		general: [] as PricingRule[],
 	});
-	const contextKey = ref(null);
-	const lastSyncedAt = ref(null);
-	const staleAt = ref(null);
+	const contextKey = ref<string | null>(null);
+	const lastSyncedAt = ref<string | null>(null);
+	const staleAt = ref<string | null>(null);
 
 	const hasSnapshot = computed(() => rules.value.length > 0);
 	const isStale = computed(() => {
@@ -93,31 +118,11 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		return Number.isFinite(ts) ? Date.now() > ts : false;
 	});
 
-	const hydrateFromCache = () => {
-		if (ready.value) {
-			return;
-		}
-		try {
-			const cached = getCachedPricingRulesSnapshot();
-			if (cached) {
-				rules.value = Array.isArray(cached.snapshot) ? cached.snapshot.map(normaliseRule) : [];
-				contextKey.value = cached.context || null;
-				lastSyncedAt.value = cached.lastSync || null;
-				staleAt.value = cached.staleAt || null;
-				indexRules();
-			}
-		} catch (error) {
-			console.error("Failed to hydrate pricing rules cache", error);
-		} finally {
-			ready.value = true;
-		}
-	};
-
 	const indexRules = () => {
-		const itemMap = new Map();
-		const groupMap = new Map();
-		const brandMap = new Map();
-		const general = [];
+		const itemMap = new Map<string, PricingRule[]>();
+		const groupMap = new Map<string, PricingRule[]>();
+		const brandMap = new Map<string, PricingRule[]>();
+		const general: PricingRule[] = [];
 
 		for (const entry of rules.value) {
 			const rule = normaliseRule(entry);
@@ -156,15 +161,37 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		indexes.general = general;
 	};
 
+	const hydrateFromCache = () => {
+		if (ready.value) {
+			return;
+		}
+		try {
+			const cached = getCachedPricingRulesSnapshot();
+			if (cached) {
+				rules.value = Array.isArray(cached.snapshot) ? cached.snapshot.map(normaliseRule) : [];
+				contextKey.value = cached.context || null;
+				lastSyncedAt.value = cached.lastSync || null;
+				staleAt.value = cached.staleAt || null;
+				indexRules();
+			}
+		} catch (error) {
+			console.error("Failed to hydrate pricing rules cache", error);
+		} finally {
+			ready.value = true;
+		}
+	};
+
 	hydrateFromCache();
 
-	const setSnapshot = (snapshot, ctxKey) => {
+	const setSnapshot = (snapshot: any[], ctxKey: string) => {
 		rules.value = Array.isArray(snapshot) ? snapshot.map(normaliseRule) : [];
 		contextKey.value = ctxKey;
 		lastSyncedAt.value = new Date().toISOString();
 		staleAt.value = computeStaleTimestamp(lastSyncedAt.value);
 		indexRules();
-		savePricingRulesSnapshot(rules.value, contextKey.value, staleAt.value);
+		if (contextKey.value && staleAt.value) {
+			(savePricingRulesSnapshot as any)(rules.value, contextKey.value, staleAt.value);
+		}
 	};
 
 	const clearSnapshot = () => {
@@ -179,7 +206,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		clearPricingRulesSnapshot();
 	};
 
-	const ensureActiveRules = async (ctx = {}, options = {}) => {
+	const ensureActiveRules = async (ctx: RuleContext = {}, options: { force?: boolean } = {}) => {
 		hydrateFromCache();
 		const desiredKey = buildContextKey(ctx);
 		const force = options.force === true;
@@ -199,7 +226,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 
 		loading.value = true;
 		try {
-			const response = await frappe.call({
+			const response = await (frappe.call as any)({
 				method: "posawesome.posawesome.api.pricing_rules.get_active_pricing_rules",
 				args: {
 					company: ctx.company,
@@ -223,7 +250,7 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		}
 	};
 
-	const invalidateIfContextChanges = async (ctx = {}) => {
+	const invalidateIfContextChanges = async (ctx: RuleContext = {}) => {
 		hydrateFromCache();
 		const targetKey = buildContextKey(ctx);
 		if (contextKey.value !== targetKey) {
@@ -253,3 +280,5 @@ export const usePricingRulesStore = defineStore("pricing-rules", () => {
 		getIndexes,
 	};
 });
+
+export default usePricingRulesStore;

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "serve": "vite preview",
-    "build": "vite build",
+    "build": "vue-tsc --noEmit && vite build",
+    "type-check": "vue-tsc --noEmit",
     "format": "prettier --write \"**/*.{js,vue,css,scss,html}\"",
     "test": "vitest"
   },

@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+// @ts-ignore
 import vuetify from "./plugins/vuetify";
 import "@mdi/font/css/materialdesignicons.css";
 import "@fontsource/roboto/100.css";
@@ -7,6 +8,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/900.css";
+// @ts-ignore
 import Dexie from "dexie/dist/dexie.mjs";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
@@ -15,15 +17,23 @@ import "../style.css";
 import "./styles/theme.css";
 import eventBus from "./bus";
 import themePlugin from "./plugins/theme.js";
-import { pinia } from "./stores/index.js";
-import { useToastStore } from "./stores/toastStore.js";
-import { useSocketStore } from "./stores/socketStore.js";
-import { createPosAppRouter } from "./router/index.js";
+import { pinia } from "./stores";
+import { useToastStore } from "./stores/toastStore";
+import { useSocketStore } from "./stores/socketStore";
+import { createPosAppRouter } from "./router";
 import "../sw-updater.js"; // Initialize service worker auto-updater
 import App from "./App.vue";
+// @ts-ignore
 import { attachProfilerHelpers, initLongTaskObserver, isPerfEnabled } from "./utils/perf.js";
 
 attachProfilerHelpers();
+
+declare global {
+  interface Window {
+    Dexie: any;
+    frappe: any;
+  }
+}
 
 // Suppress known benign error from Frappe's shortcut.js (vendor)
 // This error occurs because POS view might not have the expected breadcrumb structure
@@ -54,12 +64,20 @@ if (typeof frappe === "undefined") {
 }
 
 frappe.PosApp.posapp = class {
-	constructor({ parent }) {
+    $parent: any;
+    page: any;
+    app: any;
+    router: any;
+    routerHistory: any;
+    $el: any;
+
+	constructor({ parent }: { parent: any }) {
 		this.$parent = $(document);
 		this.page = parent?.page || parent;
 		this.app = null;
 		this.make_body();
 	}
+
 	make_body() {
 		this.$el = this.$parent.find(".main-section");
 		// Vuetify instance is now imported from plugins/vuetify.ts
@@ -75,7 +93,7 @@ frappe.PosApp.posapp = class {
 		this.app.use(themePlugin, { vuetify });
 
 		// Global Error Handler
-		this.app.config.errorHandler = (err, instance, info) => {
+		this.app.config.errorHandler = (err: any, instance: any, info: string) => {
 			console.error("Global Error:", err, info);
 			const toastStore = useToastStore();
 			toastStore.show({
@@ -115,6 +133,7 @@ frappe.PosApp.posapp = class {
 				.catch((err) => console.error("SW registration failed", err));
 		}
 	}
+
 	unmount() {
 		if (this.app) {
 			// Clean up router to prevent global navigation interference
@@ -142,5 +161,6 @@ frappe.PosApp.posapp = class {
 			console.info("POS App unmounted");
 		}
 	}
+
 	setup_header() { }
 };

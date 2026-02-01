@@ -5,6 +5,7 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
+// @ts-ignore
 import {
 	getCachedPriceListItems,
 	clearPriceListCache,
@@ -19,19 +20,66 @@ import {
 	setItemsLastSync,
 	clearItemDetailsCache,
 } from "../../offline/index.js";
-import itemService from "../services/itemService.js";
+import itemService from "../services/itemService";
+import type { Item, POSProfile } from "../types/models";
 
 const DEFAULT_PAGE_SIZE = 200;
 const LARGE_CATALOG_THRESHOLD = 5000;
 const LIMIT_SEARCH_FALLBACK = 500;
 
+export interface CacheHealth {
+  items: string;
+  priceList: string;
+  stock: string;
+  lastCheck: number | null;
+}
+
+export interface PerformanceMetrics {
+  lastLoadTime: number;
+  averageLoadTime: number;
+  cacheHitRate: number;
+  totalRequests: number;
+  cachedRequests: number;
+  searchHits: number;
+  searchMisses: number;
+}
+
+export interface BackgroundSyncState {
+  running: boolean;
+  token: number;
+}
+
+export interface CachedPagination {
+  enabled: boolean;
+  pageSize: number;
+  offset: number;
+  total: number;
+  loading: boolean;
+  search: string;
+  group: string;
+}
+
+export interface ItemStoreCache {
+  memory: {
+    searchResults: Map<string, { data: Item[]; timestamp: number }>;
+    priceListData: Map<string, { data: any[]; timestamp: number }>;
+    itemDetails: Map<string, { data: any; timestamp: number }>;
+    maxSize: number;
+    ttl: number;
+  };
+  session: {
+    enabled: boolean;
+    prefix: string;
+  };
+}
+
 export const useItemsStore = defineStore("items", () => {
 	// Core state
-	const items = ref([]);
-	const filteredItems = ref([]);
-	const itemsMap = ref(new Map()); // O(1) lookup by item_code
-	const barcodeIndex = ref(new Map()); // O(1) barcode lookup
-	const itemGroups = ref(["ALL"]);
+	const items = ref<Item[]>([]);
+	const filteredItems = ref<Item[]>([]);
+	const itemsMap = ref(new Map<string, Item>()); // O(1) lookup by item_code
+	const barcodeIndex = ref(new Map<string, Item>()); // O(1) barcode lookup
+	const itemGroups = ref<string[]>(["ALL"]);
 
 	// Loading states
 	const isLoading = ref(false);
@@ -46,11 +94,11 @@ export const useItemsStore = defineStore("items", () => {
 	const lastSearch = ref("");
 
 	// Configuration
-	const posProfile = ref(null);
-	const customer = ref(null);
-	const customerPriceList = ref(null);
+	const posProfile = ref<POSProfile | null>(null);
+	const customer = ref<string | null>(null);
+	const customerPriceList = ref<string | null>(null);
 
-	const normalizeBooleanSetting = (value) => {
+	const normalizeBooleanSetting = (value: any): boolean => {
 		if (typeof value === "string") {
 			const normalized = value.trim().toLowerCase();
 			return normalized === "1" || normalized === "true" || normalized === "yes";
@@ -68,7 +116,7 @@ export const useItemsStore = defineStore("items", () => {
 		return normalizeBooleanSetting(rawValue);
 	});
 
-	const resolveLimitSearchSize = () => {
+	const resolveLimitSearchSize = (): number => {
 		if (!limitSearchEnabled.value) {
 			return DEFAULT_PAGE_SIZE;
 		}
@@ -83,7 +131,7 @@ export const useItemsStore = defineStore("items", () => {
 		return LIMIT_SEARCH_FALLBACK;
 	};
 
-	const resolvePageSize = (pageSize = DEFAULT_PAGE_SIZE) => {
+	const resolvePageSize = (pageSize = DEFAULT_PAGE_SIZE): number => {
 		if (limitSearchEnabled.value) {
 			return resolveLimitSearchSize();
 		}
@@ -92,7 +140,7 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	// Cache management
-	const cacheHealth = ref({
+	const cacheHealth = ref<CacheHealth>({
 		items: "unknown",
 		priceList: "unknown",
 		stock: "unknown",
@@ -100,7 +148,7 @@ export const useItemsStore = defineStore("items", () => {
 	});
 
 	// Performance tracking
-	const performanceMetrics = ref({
+	const performanceMetrics = ref<PerformanceMetrics>({
 		lastLoadTime: 0,
 		averageLoadTime: 0,
 		cacheHitRate: 0,
@@ -112,14 +160,14 @@ export const useItemsStore = defineStore("items", () => {
 
 	// Request management
 	const requestToken = ref(0);
-	const abortControllers = ref(new Map());
-	const backgroundSyncState = ref({
+	const abortControllers = ref(new Map<string, AbortController>());
+	const backgroundSyncState = ref<BackgroundSyncState>({
 		running: false,
 		token: 0,
 	});
 
 	// Multi-layer cache system
-	const cache = ref({
+	const cache = ref<ItemStoreCache>({
 		memory: {
 			searchResults: new Map(),
 			priceListData: new Map(),
@@ -138,10 +186,10 @@ export const useItemsStore = defineStore("items", () => {
 
 	// Computed properties
 	const activePriceList = computed(() => {
-		return customerPriceList.value || posProfile.value?.selling_price_list;
+		return customerPriceList.value || posProfile.value?.selling_price_list || "";
 	});
 
-	const cachedPagination = ref({
+	const cachedPagination = ref<CachedPagination>({
 		enabled: false,
 		pageSize: resolvePageSize(DEFAULT_PAGE_SIZE),
 		offset: 0,
@@ -158,12 +206,6 @@ export const useItemsStore = defineStore("items", () => {
 
 		if (cachedPagination.value.loading) {
 			return true;
-		}
-
-		if (searchTerm.value) {
-			// When searching we always fetch on demand based on term, so pagination
-			// availability is governed by the most recent fetch size
-			return cachedPagination.value.offset < cachedPagination.value.total;
 		}
 
 		return cachedPagination.value.offset < cachedPagination.value.total;
@@ -185,7 +227,7 @@ export const useItemsStore = defineStore("items", () => {
 		return Boolean(posProfile.value?.posa_local_storage);
 	};
 
-	const resetCachedPagination = (options = {}) => {
+	const resetCachedPagination = (options: { enabled?: boolean; total?: number; pageSize?: number } = {}) => {
 		const { enabled = false, total = 0, pageSize = DEFAULT_PAGE_SIZE } = options;
 
 		const resolvedPageSize = resolvePageSize(pageSize);
@@ -222,7 +264,7 @@ export const useItemsStore = defineStore("items", () => {
 	});
 
 	// Actions
-	const initialize = async (profile, cust = null, priceList = null) => {
+	const initialize = async (profile: POSProfile, cust: string | null = null, priceList: string | null = null) => {
 		posProfile.value = profile;
 		customer.value = cust;
 		customerPriceList.value = priceList;
@@ -239,9 +281,9 @@ export const useItemsStore = defineStore("items", () => {
 
 	const loadItemGroups = async () => {
 		try {
-			if (posProfile.value?.item_groups?.length > 0) {
+			if (posProfile.value?.item_groups?.length && posProfile.value.item_groups.length > 0) {
 				const groups = ["ALL"];
-				posProfile.value.item_groups.forEach((element) => {
+				posProfile.value.item_groups.forEach((element: any) => {
 					if (element.item_group !== "All Item Groups") {
 						groups.push(element.item_group);
 					}
@@ -264,7 +306,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const loadItems = async (options = {}) => {
+	const loadItems = async (options: { forceServer?: boolean; searchValue?: string; groupFilter?: string; priceList?: string | null; limit?: number | null } = {}) => {
 		const {
 			forceServer = false,
 			searchValue = "",
@@ -275,7 +317,7 @@ export const useItemsStore = defineStore("items", () => {
 
 		const startTime = performance.now();
 		const currentRequestToken = ++requestToken.value;
-		let cacheKey;
+		let cacheKey: string | null = null;
 
 		try {
 			isLoading.value = true;
@@ -288,8 +330,8 @@ export const useItemsStore = defineStore("items", () => {
 			cacheKey = generateCacheKey(searchValue, normalizedGroup, priceList);
 
 			const resolvedLimit =
-				Number.isFinite(limit) && limit > 0
-					? limit
+				Number.isFinite(limit) && limit! > 0
+					? limit!
 					: limitSearchEnabled.value
 						? resolveLimitSearchSize()
 						: null;
@@ -322,17 +364,17 @@ export const useItemsStore = defineStore("items", () => {
 				requestProfile.posa_force_reload_items = 1;
 			}
 
-			const args = {
+			const args: any = {
 				pos_profile: JSON.stringify(requestProfile),
 				price_list: priceList || activePriceList.value,
 				item_group: normalizedGroup !== "ALL" ? normalizedGroup.toLowerCase() : "",
 				search_value: searchValue || "",
 				customer: customer.value,
 				include_image: 1,
-				item_groups: posProfile.value?.item_groups?.map((g) => g.item_group) || [],
+				item_groups: posProfile.value?.item_groups?.map((g: any) => g.item_group) || [],
 			};
 
-			if (Number.isFinite(resolvedLimit) && resolvedLimit > 0) {
+			if (Number.isFinite(resolvedLimit) && resolvedLimit! > 0) {
 				args.limit = resolvedLimit;
 			}
 
@@ -348,7 +390,7 @@ export const useItemsStore = defineStore("items", () => {
 			cachedPagination.value.offset = fetchedItems.length;
 			cachedPagination.value.total = fetchedItems.length;
 			cachedPagination.value.loading = false;
-			setItems(fetchedItems, { replace: true });
+			setItems(fetchedItems);
 			itemsLoaded.value = true;
 
 			// Cache the results unless limit search requires fresh server lookups
@@ -373,7 +415,7 @@ export const useItemsStore = defineStore("items", () => {
 
 			updatePerformanceMetrics(startTime);
 			return fetchedItems;
-		} catch (error) {
+		} catch (error: any) {
 			if (error.name !== "AbortError") {
 				console.error("Failed to load items:", error);
 				throw error;
@@ -386,18 +428,17 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const searchItems = async (term) => {
+	const searchItems = async (term: string) => {
 		// Optimization: Check if we can refine the previous search result
-		// This avoids scanning the full item list when the user is just typing more characters
 		const previousTerm = searchTerm.value || "";
 		const canRefineSearch =
 			!shouldUseIndexedSearch() &&
 			term &&
-			previousTerm.length > 0 && // Only refine an existing search
+			previousTerm.length > 0 &&
 			term.length > previousTerm.length &&
 			term.toLowerCase().startsWith(previousTerm.toLowerCase()) &&
 			filteredItems.value.length > 0 &&
-			filteredItems.value.length < items.value.length; // Only if we actually filtered something
+			filteredItems.value.length < items.value.length;
 
 		searchTerm.value = term;
 		lastSearch.value = term;
@@ -449,7 +490,7 @@ export const useItemsStore = defineStore("items", () => {
 
 		try {
 			const shouldUseIndexed = shouldUseIndexedSearch();
-			let searchResults = [];
+			let searchResults: Item[] = [];
 
 			if (shouldUseIndexed) {
 				const normalizedGroup =
@@ -469,7 +510,6 @@ export const useItemsStore = defineStore("items", () => {
 				cachedPagination.value.total = Math.max(cachedPagination.value.total, searchResults.length);
 			} else {
 				// Search in current items first
-				// Optimization: Refine from previous results if applicable to avoid O(N) scan
 				const sourceItems = canRefineSearch ? filteredItems.value : items.value;
 				searchResults = performLocalSearch(term, sourceItems);
 
@@ -505,7 +545,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const filterByGroup = async (group) => {
+	const filterByGroup = async (group: string) => {
 		itemGroup.value = group;
 
 		if (searchTerm.value) {
@@ -521,7 +561,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const updatePriceList = async (newPriceList) => {
+	const updatePriceList = async (newPriceList: string) => {
 		if (!newPriceList || newPriceList === customerPriceList.value) {
 			return;
 		}
@@ -564,15 +604,15 @@ export const useItemsStore = defineStore("items", () => {
 		await loadItems({ forceServer: true });
 	};
 
-	const getItemByCode = (itemCode) => {
+	const getItemByCode = (itemCode: string) => {
 		return itemsMap.value.get(itemCode);
 	};
 
-	const getItemByBarcode = (barcode) => {
+	const getItemByBarcode = (barcode: string) => {
 		return barcodeIndex.value.get(barcode);
 	};
 
-	const addScannedItem = async (barcode) => {
+	const addScannedItem = async (barcode: string) => {
 		// First check existing items
 		let item = getItemByBarcode(barcode);
 		if (item) {
@@ -581,9 +621,9 @@ export const useItemsStore = defineStore("items", () => {
 
 		try {
 			// Search for item by barcode on server
-			const newItem = await itemService.getItemsFromBarcode({
+			const newItem: any = await itemService.getItemsFromBarcode({
 				selling_price_list: activePriceList.value,
-				currency: posProfile.value.currency,
+				currency: posProfile.value?.currency || "",
 				barcode: barcode,
 			});
 
@@ -617,7 +657,7 @@ export const useItemsStore = defineStore("items", () => {
 				// Clear search cache to force refresh
 				clearSearchCache();
 
-				return newItem;
+				return newItem as Item;
 			}
 
 			return null;
@@ -634,14 +674,14 @@ export const useItemsStore = defineStore("items", () => {
 		if (!lastSync) return { size: 0, count: 0, items: [] };
 
 		try {
-			const args = {
+			const args: any = {
 				pos_profile: JSON.stringify(posProfile.value),
 				price_list: activePriceList.value,
 				item_group: "",
 				search_value: "",
 				customer: customer.value,
 				include_image: 0,
-				item_groups: posProfile.value?.item_groups?.map((g) => g.item_group) || [],
+				item_groups: posProfile.value?.item_groups?.map((g: any) => g.item_group) || [],
 				modified_after: lastSync,
 				limit: 500,
 			};
@@ -649,16 +689,16 @@ export const useItemsStore = defineStore("items", () => {
 			const fetchedItems = (await itemService.getItems(args)) || [];
 
 			const size = JSON.stringify(fetchedItems).length;
-			let resolvedItems = [];
+			let resolvedItems: Item[] = [];
 
 			if (fetchedItems.length > 0) {
 				updateItemsInPlace(fetchedItems);
 				await saveItemsBulk(fetchedItems);
 				resolvedItems = fetchedItems
 					.map((item) => itemsMap.value.get(item.item_code))
-					.filter(Boolean);
+					.filter((item): item is Item => !!item);
 
-				// Find the latest modification timestamp from the fetched items
+				// Find the latest modification timestamp
 				let maxModified = "";
 				for (const item of fetchedItems) {
 					if (item.modified && item.modified > maxModified) {
@@ -678,9 +718,9 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const updateItemsInPlace = (updates) => {
+	const updateItemsInPlace = (updates: Item[]) => {
 		let needsReindex = false;
-		const additions = [];
+		const additions: Item[] = [];
 
 		updates.forEach((update) => {
 			const existing = itemsMap.value.get(update.item_code);
@@ -703,7 +743,8 @@ export const useItemsStore = defineStore("items", () => {
 	};
 
 	// Helper functions
-	const setItems = (newItems, { append = false, totalCount: totalOverride } = {}) => {
+	const setItems = (newItems: Item[], options: { append?: boolean; totalCount?: number } = {}) => {
+		const { append = false, totalCount: totalOverride } = options;
 		const normalizedGroup =
 			typeof itemGroup.value === "string" && itemGroup.value.length > 0 ? itemGroup.value : "ALL";
 
@@ -712,7 +753,7 @@ export const useItemsStore = defineStore("items", () => {
 			resetIndexes();
 			updateIndexes(items.value);
 		} else if (Array.isArray(newItems) && newItems.length) {
-			const additions = [];
+			const additions: Item[] = [];
 			newItems.forEach((item) => {
 				if (!item || !item.item_code || itemsMap.value.has(item.item_code)) {
 					return;
@@ -727,7 +768,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		if (Number.isFinite(totalOverride)) {
-			totalItemCount.value = totalOverride;
+			totalItemCount.value = totalOverride!;
 		} else if (!append) {
 			totalItemCount.value = items.value.length;
 		}
@@ -760,13 +801,13 @@ export const useItemsStore = defineStore("items", () => {
 			return filteredItems.value;
 		}
 
-		setItems([], { replace: true, totalCount: 0 });
+		setItems([], { totalCount: 0 });
 		itemsLoaded.value = false;
 		loadProgress.value = 0;
 		return filteredItems.value;
 	};
 
-	const updateIndexes = (itemList) => {
+	const updateIndexes = (itemList: Item[]) => {
 		if (!Array.isArray(itemList)) {
 			return;
 		}
@@ -781,7 +822,7 @@ export const useItemsStore = defineStore("items", () => {
 			itemsMap.value.set(item.item_code, item);
 
 			if (Array.isArray(item.item_barcode)) {
-				item.item_barcode.forEach((entry) => {
+				item.item_barcode.forEach((entry: any) => {
 					if (entry?.barcode) {
 						barcodeIndex.value.set(String(entry.barcode), item);
 					}
@@ -796,21 +837,21 @@ export const useItemsStore = defineStore("items", () => {
 			const searchFields = [item.item_code, item.item_name, item.barcode, item.description];
 
 			if (Array.isArray(item.item_barcode)) {
-				item.item_barcode.forEach((b) => searchFields.push(b?.barcode));
+				item.item_barcode.forEach((b: any) => searchFields.push(b?.barcode));
 			} else if (item.item_barcode) {
 				searchFields.push(String(item.item_barcode));
 			}
 
 			if (Array.isArray(item.barcodes)) {
-				item.barcodes.forEach((b) => searchFields.push(b));
+				item.barcodes.forEach((b: string) => searchFields.push(b));
 			}
 
 			if (includeSerial && Array.isArray(item.serial_no_data)) {
-				item.serial_no_data.forEach((s) => searchFields.push(s?.serial_no));
+				item.serial_no_data.forEach((s: any) => searchFields.push(s?.serial_no));
 			}
 
 			if (includeBatch && Array.isArray(item.batch_no_data)) {
-				item.batch_no_data.forEach((b) => searchFields.push(b?.batch_no));
+				item.batch_no_data.forEach((b: any) => searchFields.push(b?.batch_no));
 			}
 
 			item._search_index = searchFields
@@ -825,7 +866,7 @@ export const useItemsStore = defineStore("items", () => {
 		barcodeIndex.value.clear();
 	};
 
-	const performLocalSearch = (term, itemList) => {
+	const performLocalSearch = (term: string, itemList: Item[]) => {
 		if (!term) {
 			return filterItemsByGroup(itemList, itemGroup.value);
 		}
@@ -840,41 +881,39 @@ export const useItemsStore = defineStore("items", () => {
 
 			// Use pre-computed search index if available
 			if (item._search_index) {
-				return searchTerms.every((t) => item._search_index.includes(t));
+				return searchTerms.every((t) => item._search_index!.includes(t));
 			}
 
 			// Fallback for items without index
 			const fields = [item.item_code, item.item_name, item.barcode, item.description];
 
 			if (Array.isArray(item.item_barcode)) {
-				item.item_barcode.forEach((entry) => fields.push(entry?.barcode));
+				item.item_barcode.forEach((entry: any) => fields.push(entry?.barcode));
 			} else if (item.item_barcode) {
 				fields.push(String(item.item_barcode));
 			}
 
 			if (Array.isArray(item.barcodes)) {
-				item.barcodes.forEach((code) => fields.push(code));
+				item.barcodes.forEach((code: string) => fields.push(code));
 			}
 
-			// Note: Dynamic checking of serial/batch here is slow, but this is a fallback
-			// ideally all items should have _search_index
 			return fields.filter(Boolean).some((field) => String(field).toLowerCase().includes(searchTerm));
 		});
 	};
 
-	const filterItemsByGroup = (itemList, group) => {
+	const filterItemsByGroup = (itemList: Item[], group: string) => {
 		if (group === "ALL") {
 			return itemList;
 		}
 		return itemList.filter((item) => item.item_group === group);
 	};
 
-	const generateCacheKey = (search, group, priceList) => {
+	const generateCacheKey = (search: string, group: string, priceList: string | null) => {
 		return `items_${search || "all"}_${group}_${priceList || "default"}`;
 	};
 
 	// Cache management functions
-	const getCachedItems = async (cacheKey) => {
+	const getCachedItems = async (cacheKey: string) => {
 		// Check memory cache first
 		const memCache = cache.value.memory.searchResults.get(cacheKey);
 		if (memCache && Date.now() - memCache.timestamp < cache.value.memory.ttl) {
@@ -901,7 +940,7 @@ export const useItemsStore = defineStore("items", () => {
 		return null;
 	};
 
-	const cacheItems = async (cacheKey, items) => {
+	const cacheItems = async (cacheKey: string, items: Item[]) => {
 		const cacheData = {
 			data: items,
 			timestamp: Date.now(),
@@ -923,7 +962,7 @@ export const useItemsStore = defineStore("items", () => {
 		cleanupMemoryCache();
 	};
 
-	const persistItemsToStorage = async (itemsBatch, { replaceExisting = false } = {}) => {
+	const persistItemsToStorage = async (itemsBatch: Item[], { replaceExisting = false } = {}) => {
 		if (!shouldPersistItems()) {
 			return;
 		}
@@ -973,7 +1012,7 @@ export const useItemsStore = defineStore("items", () => {
 		isBackgroundLoading.value = false;
 	};
 
-	const backgroundSyncItems = async (options = {}) => {
+	const backgroundSyncItems = async (options: { reset?: boolean; groupFilter?: string; searchValue?: string; initialBatch?: Item[] } = {}) => {
 		const {
 			reset = false,
 			groupFilter = itemGroup.value,
@@ -996,7 +1035,7 @@ export const useItemsStore = defineStore("items", () => {
 		backgroundSyncState.value.running = true;
 		isBackgroundLoading.value = true;
 
-		const appended = [];
+		const appended: Item[] = [];
 
 		try {
 			if (reset) {
@@ -1013,7 +1052,6 @@ export const useItemsStore = defineStore("items", () => {
 				: null;
 
 			const limit = resolvePageSize(DEFAULT_PAGE_SIZE);
-			const profileGroups = posProfile.value?.item_groups?.map((g) => g.item_group) || [];
 
 			while (backgroundSyncState.value.token === token && shouldPersistItems()) {
 				// Clone posProfile and disable caching for this specific request
@@ -1023,7 +1061,7 @@ export const useItemsStore = defineStore("items", () => {
 					requestProfile.posa_force_reload_items = 1;
 				}
 
-				const response = await frappe.call({
+				const response = await (frappe.call as any)({
 					method: "posawesome.posawesome.api.items.get_items",
 					args: {
 						pos_profile: JSON.stringify(requestProfile),
@@ -1081,7 +1119,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const triggerBackgroundSync = (options = {}) => {
+	const triggerBackgroundSync = (options: any = {}) => {
 		if (!shouldPersistItems()) {
 			return;
 		}
@@ -1095,7 +1133,7 @@ export const useItemsStore = defineStore("items", () => {
 		});
 	};
 
-	const getCachedSearchResult = (cacheKey) => {
+	const getCachedSearchResult = (cacheKey: string) => {
 		const cached = cache.value.memory.searchResults.get(cacheKey);
 		if (cached && Date.now() - cached.timestamp < cache.value.memory.ttl) {
 			return cached.data;
@@ -1103,7 +1141,7 @@ export const useItemsStore = defineStore("items", () => {
 		return null;
 	};
 
-	const setCachedSearchResult = (cacheKey, data) => {
+	const setCachedSearchResult = (cacheKey: string, data: Item[]) => {
 		cache.value.memory.searchResults.set(cacheKey, {
 			data,
 			timestamp: Date.now(),
@@ -1111,7 +1149,7 @@ export const useItemsStore = defineStore("items", () => {
 		cleanupMemoryCache();
 	};
 
-	const getCachedPriceList = (cacheKey) => {
+	const getCachedPriceList = (cacheKey: string) => {
 		const cached = cache.value.memory.priceListData.get(cacheKey);
 		if (cached && Date.now() - cached.timestamp < cache.value.memory.ttl) {
 			return cached.data;
@@ -1119,14 +1157,14 @@ export const useItemsStore = defineStore("items", () => {
 		return null;
 	};
 
-	const setCachedPriceList = (cacheKey, data) => {
+	const setCachedPriceList = (cacheKey: string, data: any[]) => {
 		cache.value.memory.priceListData.set(cacheKey, {
 			data,
 			timestamp: Date.now(),
 		});
 	};
 
-	const applyPriceListToItems = (priceListItems) => {
+	const applyPriceListToItems = (priceListItems: any[]) => {
 		const priceMap = new Map();
 		priceListItems.forEach((item) => {
 			priceMap.set(item.item_code, item);
@@ -1148,7 +1186,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const backgroundLoadItemDetails = async (itemList) => {
+	const backgroundLoadItemDetails = async (itemList: Item[]) => {
 		if (!itemList || itemList.length === 0) return;
 
 		try {
@@ -1169,9 +1207,10 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const loadItemDetailsBatch = async (itemBatch) => {
+	const loadItemDetailsBatch = async (itemBatch: Item[]) => {
 		try {
-			const response = await frappe.call({
+			if (!posProfile.value) return;
+			const response = await (frappe.call as any)({
 				method: "posawesome.posawesome.api.items.get_items_details",
 				args: {
 					pos_profile: JSON.stringify(posProfile.value),
@@ -1183,7 +1222,7 @@ export const useItemsStore = defineStore("items", () => {
 			const details = response.message || [];
 
 			// Update items with details
-			details.forEach((detail) => {
+			details.forEach((detail: any) => {
 				const item = getItemByCode(detail.item_code);
 				if (item) {
 					Object.assign(item, detail);
@@ -1199,7 +1238,7 @@ export const useItemsStore = defineStore("items", () => {
 
 	const assessCacheHealth = async () => {
 		try {
-			const health = {
+			const health: CacheHealth = {
 				items: "healthy",
 				priceList: "healthy",
 				stock: "healthy",
@@ -1216,7 +1255,6 @@ export const useItemsStore = defineStore("items", () => {
 			if (lastSync) {
 				const age = Date.now() - new Date(lastSync).getTime();
 				if (age > 24 * 60 * 60 * 1000) {
-					// 24 hours
 					health.items = "stale";
 				}
 			} else {
@@ -1239,7 +1277,7 @@ export const useItemsStore = defineStore("items", () => {
 		try {
 			if (limitSearchEnabled.value) {
 				resetCachedPagination({ enabled: false, total: 0 });
-				setItems([], { replace: true, totalCount: 0 });
+				setItems([], { totalCount: 0 });
 				itemsLoaded.value = false;
 				return;
 			}
@@ -1264,7 +1302,7 @@ export const useItemsStore = defineStore("items", () => {
 			if (!shouldPaginate) {
 				const cachedItems = await getAllStoredItems().catch(() => []);
 				if (Array.isArray(cachedItems) && cachedItems.length) {
-					setItems(cachedItems, { replace: true, totalCount: resolvedCount });
+					setItems(cachedItems, { totalCount: resolvedCount });
 					cachedPagination.value.offset = cachedItems.length;
 					itemsLoaded.value = true;
 				}
@@ -1279,7 +1317,7 @@ export const useItemsStore = defineStore("items", () => {
 			});
 
 			const safeInitial = Array.isArray(initialItems) ? initialItems : [];
-			setItems(safeInitial, { replace: true, totalCount: resolvedCount });
+			setItems(safeInitial, { totalCount: resolvedCount });
 			cachedPagination.value.offset = safeInitial.length;
 			cachedPagination.value.search = "";
 			cachedPagination.value.group =
@@ -1300,7 +1338,6 @@ export const useItemsStore = defineStore("items", () => {
 		}
 
 		if (searchTerm.value && searchTerm.value.length >= 2) {
-			// Searches fetch a fresh page via searchItems, no incremental append required
 			return [];
 		}
 
@@ -1346,7 +1383,7 @@ export const useItemsStore = defineStore("items", () => {
 		}
 	};
 
-	const resetCachedItemsForGroup = async (group) => {
+	const resetCachedItemsForGroup = async (group: string) => {
 		if (limitSearchEnabled.value || !cachedPagination.value.enabled || !shouldUseIndexedSearch()) {
 			filteredItems.value = filterItemsByGroup(items.value, group);
 			return;
@@ -1365,7 +1402,7 @@ export const useItemsStore = defineStore("items", () => {
 		});
 
 		const safePage = Array.isArray(firstPage) ? firstPage : [];
-		setItems(safePage, { replace: true, totalCount: cachedPagination.value.total });
+		setItems(safePage, { totalCount: cachedPagination.value.total });
 		cachedPagination.value.offset = safePage.length;
 	};
 
@@ -1398,9 +1435,6 @@ export const useItemsStore = defineStore("items", () => {
 		const now = Date.now();
 		const ttl = cache.value.memory.ttl;
 
-		// Skip cleanup when called too frequently and the cache is within size limits.
-		// This avoids repeated Map iterations and sorting on rapid search input while
-		// still running promptly when the cache grows beyond the configured max size.
 		if (
 			now - lastMemoryCleanup < MEMORY_CLEANUP_INTERVAL &&
 			cache.value.memory.searchResults.size <= cache.value.memory.maxSize
@@ -1423,21 +1457,22 @@ export const useItemsStore = defineStore("items", () => {
 
 			const toRemove = Math.floor(entries.length * 0.2);
 			for (let i = 0; i < toRemove; i++) {
-				cache.value.memory.searchResults.delete(entries[i][0]);
+				const entry = entries[i];
+				if (entry) {
+					cache.value.memory.searchResults.delete(entry[0]);
+				}
 			}
 		}
 	};
 
-	const updatePerformanceMetrics = (startTime) => {
+	const updatePerformanceMetrics = (startTime: number) => {
 		const loadTime = performance.now() - startTime;
 		performanceMetrics.value.lastLoadTime = loadTime;
 
-		// Calculate running average
 		const { averageLoadTime, totalRequests } = performanceMetrics.value;
 		performanceMetrics.value.averageLoadTime =
-			(averageLoadTime * (totalRequests - 1) + loadTime) / totalRequests;
+			totalRequests > 1 ? (averageLoadTime * (totalRequests - 1) + loadTime) / totalRequests : loadTime;
 
-		// Update cache hit rate
 		const { cachedRequests, totalRequests: total } = performanceMetrics.value;
 		performanceMetrics.value.cacheHitRate = total > 0 ? (cachedRequests / total) * 100 : 0;
 	};
@@ -1445,15 +1480,10 @@ export const useItemsStore = defineStore("items", () => {
 	const getEstimatedMemoryUsage = () => {
 		try {
 			let usage = 0;
-
-			// Estimate items memory usage
-			usage += items.value.length * 2; // ~2KB per item estimate
-
-			// Estimate cache memory usage
-			usage += cache.value.memory.searchResults.size * 1; // ~1KB per cache entry
-			usage += cache.value.memory.priceListData.size * 0.5; // ~0.5KB per price entry
-
-			return Math.round(usage * 100) / 100; // MB
+			usage += items.value.length * 2 / 1024; // ~2KB per item estimate
+			usage += cache.value.memory.searchResults.size * 1 / 1024; // ~1KB per cache entry
+			usage += cache.value.memory.priceListData.size * 0.5 / 1024; // ~0.5KB per price entry
+			return Math.round(usage * 100) / 100; // MB estimate
 		} catch (e) {
 			return 0;
 		}

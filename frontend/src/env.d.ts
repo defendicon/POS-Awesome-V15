@@ -16,3 +16,4 @@ interface Window {
 
 declare const frappe: any;
 declare const __: (key: string, ...args: any[]) => string;
+declare const $: any;

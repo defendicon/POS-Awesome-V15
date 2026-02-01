@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import type { Customer, POSProfile } from "../types/models";
+// @ts-ignore
 import {
 	db,
 	checkDbHealth,
@@ -14,14 +16,14 @@ import {
 
 const PAGE_SIZE = 1000;
 
-function normalizeSearchTerm(term) {
+function normalizeSearchTerm(term: string | null | undefined): string {
 	if (typeof term !== "string") {
 		return "";
 	}
 	return term.trim();
 }
 
-function normalizeProfile(profile) {
+function normalizeProfile(profile: any): POSProfile | null {
 	if (!profile) {
 		return null;
 	}
@@ -47,13 +49,13 @@ function normalizeProfile(profile) {
 			}
 		}
 
-		return { name: trimmed };
+		return { name: trimmed } as POSProfile;
 	}
 
-	return resolved;
+	return resolved as POSProfile;
 }
 
-function getSerializedProfile(profile) {
+function getSerializedProfile(profile: any): string | null {
 	if (!profile) {
 		return null;
 	}
@@ -92,24 +94,24 @@ function getSerializedProfile(profile) {
 }
 
 export const useCustomersStore = defineStore("customers", () => {
-	const customers = ref([]);
-	const selectedCustomer = ref(null);
-	const customerInfo = ref({});
+	const customers = ref<Customer[]>([]);
+	const selectedCustomer = ref<string | null>(null);
+	const customerInfo = ref<Record<string, any>>({});
 	const searchTerm = ref("");
 	const page = ref(0);
 	const hasMore = ref(true);
-	const nextCustomerStart = ref(null);
+	const nextCustomerStart = ref<string | null>(null);
 	const loadingCustomers = ref(false);
 	const customersLoaded = ref(false);
 	const isCustomerBackgroundLoading = ref(false);
-	const pendingCustomerSearch = ref(null);
+	const pendingCustomerSearch = ref<string | null>(null);
 	const loadProgress = ref(0);
 	const totalCustomerCount = ref(0);
 	const loadedCustomerCount = ref(0);
-	const posProfile = ref(null);
+	const posProfile = ref<POSProfile | null>(null);
 	const refreshToken = ref(0);
 	const isUpdateCustomerDialogOpen = ref(false);
-	const customerToUpdate = ref(null);
+	const customerToUpdate = ref<Customer | null>(null);
 
 	const filteredCustomers = computed(() => (isCustomerBackgroundLoading.value ? [] : customers.value));
 
@@ -129,15 +131,15 @@ export const useCustomersStore = defineStore("customers", () => {
 		customers.value = [];
 	}
 
-	function setPosProfile(profile) {
+	function setPosProfile(profile: any) {
 		posProfile.value = normalizeProfile(profile);
 	}
 
-	function setSelectedCustomer(name) {
+	function setSelectedCustomer(name: string | null) {
 		selectedCustomer.value = name || null;
 	}
 
-	function setCustomerInfo(info) {
+	function setCustomerInfo(info: Record<string, any>) {
 		customerInfo.value = info || {};
 	}
 
@@ -152,7 +154,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		const normalizedTerm = normalizeSearchTerm(searchTerm.value);
 		if (normalizedTerm) {
 			const searchParts = normalizedTerm.toLowerCase().split(/\s+/).filter(Boolean);
-			collection = collection.filter((customer) => {
+			collection = collection.filter((customer: Customer) => {
 				if (!customer) {
 					return false;
 				}
@@ -200,7 +202,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		return performSearch({ append });
 	}
 
-	async function queueSearch(term) {
+	async function queueSearch(term: string) {
 		const normalized = normalizeSearchTerm(term);
 		if (isCustomerBackgroundLoading.value) {
 			pendingCustomerSearch.value = normalized;
@@ -224,7 +226,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		return count;
 	}
 
-	function fetchCustomerPage(startAfter, modifiedAfter, limit) {
+	function fetchCustomerPage(startAfter: string | null, modifiedAfter: string | null, limit: number): Promise<Customer[]> {
 		const serializedProfile = getSerializedProfile(posProfile.value);
 		return new Promise((resolve, reject) => {
 			if (!serializedProfile) {
@@ -239,8 +241,8 @@ export const useCustomersStore = defineStore("customers", () => {
 					limit,
 					start_after: startAfter,
 				},
-				callback: (r) => resolve(r.message || []),
-				error: (err) => {
+				callback: (r: any) => resolve(r.message || []),
+				error: (err: any) => {
 					console.error("Failed to fetch customers", err);
 					reject(err);
 				},
@@ -248,7 +250,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		});
 	}
 
-	async function backgroundLoadCustomers(startAfter, syncSince) {
+	async function backgroundLoadCustomers(startAfter: string | null, syncSince: string | null) {
 		if (!posProfile.value || isOffline()) {
 			return;
 		}
@@ -259,9 +261,9 @@ export const useCustomersStore = defineStore("customers", () => {
 		const limit = PAGE_SIZE;
 		isCustomerBackgroundLoading.value = true;
 		try {
-			let cursor = startAfter;
+			let cursor: string | null = startAfter;
 			while (cursor) {
-				const rows = await fetchCustomerPage(cursor, syncSince, limit);
+				const rows: Customer[] = await fetchCustomerPage(cursor, syncSince, limit);
 				if (rows.length) {
 					await setCustomerStorage(rows);
 					loadedCustomerCount.value += rows.length;
@@ -306,7 +308,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			if (!serializedProfile) {
 				return;
 			}
-			const response = await frappe.call({
+			const response = await (frappe.call as any)({
 				method: "posawesome.posawesome.api.customers.get_customers_count",
 				args: { pos_profile: serializedProfile },
 			});
@@ -317,7 +319,7 @@ export const useCustomersStore = defineStore("customers", () => {
 
 			if (serverCount > localCount) {
 				const syncSince = getCustomersLastSync();
-				const rows = await fetchCustomerPage(null, syncSince, PAGE_SIZE);
+				const rows: Customer[] = await fetchCustomerPage(null, syncSince, PAGE_SIZE);
 				if (rows.length) {
 					await setCustomerStorage(rows);
 					loadedCustomerCount.value += rows.length;
@@ -369,7 +371,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		loadingCustomers.value = true;
 		try {
 			try {
-				const countResponse = await frappe.call({
+				const countResponse = await (frappe.call as any)({
 					method: "posawesome.posawesome.api.customers.get_customers_count",
 					args: { pos_profile: serializedProfile },
 				});
@@ -379,7 +381,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				totalCustomerCount.value = 0;
 			}
 
-			const rows = await fetchCustomerPage(null, syncSince, PAGE_SIZE);
+			const rows: Customer[] = await fetchCustomerPage(null, syncSince, PAGE_SIZE);
 			if (rows.length) {
 				await setCustomerStorage(rows);
 			}
@@ -407,7 +409,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 	}
 
-	async function addOrUpdateCustomer(customer) {
+	async function addOrUpdateCustomer(customer: Customer) {
 		if (!customer || !customer.name) {
 			return;
 		}
@@ -441,7 +443,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		}
 	}
 
-	function openUpdateCustomerDialog(customer = null) {
+	function openUpdateCustomerDialog(customer: Customer | null = null) {
 		customerToUpdate.value = customer;
 		isUpdateCustomerDialogOpen.value = true;
 	}

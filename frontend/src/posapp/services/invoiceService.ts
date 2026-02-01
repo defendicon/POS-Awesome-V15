@@ -1,7 +1,8 @@
 import api from "./api";
+import type { InvoiceDoc, POSProfile } from "../types/models";
 
-export default {
-	submitInvoice(data, invoiceDoc, invoiceType, posProfile) {
+const invoiceService = {
+	submitInvoice(data: any, invoiceDoc: InvoiceDoc | string, invoiceType: string, posProfile: POSProfile) {
 		const method =
 			invoiceType === "Order" && posProfile.posa_create_only_sales_order
 				? "posawesome.posawesome.api.sales_orders.submit_sales_order"
@@ -19,3 +20,5 @@ export default {
 		return api.call(method, args);
 	},
 };
+
+export default invoiceService;

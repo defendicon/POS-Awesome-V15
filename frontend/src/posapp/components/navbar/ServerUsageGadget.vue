@@ -152,8 +152,9 @@ const serverUptime = ref<number | null>(null);
 watch(
 	serverHistory,
 	(hist) => {
-		if (hist.length && hist[hist.length - 1].uptime != null) {
-			serverUptime.value = hist[hist.length - 1].uptime;
+		const lastEntry = hist[hist.length - 1];
+		if (lastEntry && lastEntry.uptime != null) {
+			serverUptime.value = lastEntry.uptime;
 		}
 	},
 	{ immediate: true, deep: true },
