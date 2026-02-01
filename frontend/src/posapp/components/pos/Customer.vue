@@ -178,9 +178,9 @@ export default {
 		UpdateCustomer,
 		Skeleton,
 	},
-	setup(props, { expose }) {
+	setup(props, { emit, expose }) {
 		const { proxy } = getCurrentInstance();
-		// const eventBus = proxy?.eventBus; // Removed
+		const eventBus = proxy?.eventBus;
 		const customersStore = useCustomersStore();
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();

@@ -257,7 +257,7 @@ import { storeToRefs } from "pinia";
 
 export default {
 	mixins: [format],
-	setup() {
+	setup(props, { emit }) {
 		const responsive = useResponsive();
 		const rtl = useRtl();
 		const { fly } = useFlyAnimation();
