@@ -90,7 +90,7 @@ import {
 	checkDbHealth,
 	setTaxTemplate,
 } from "../../../offline/index.js";
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance, inject } from "vue";
 import { usePosShift } from "../../composables/usePosShift.js";
 import { useOffers } from "../../composables/useOffers.js";
 // Import the cache cleanup function
@@ -221,6 +221,14 @@ export default {
 				},
 				{ immediate: true },
 			);
+
+			// Listen for shift submission
+			const eventBus = inject("eventBus");
+			if (eventBus) {
+				eventBus.on("submit_closing_pos", (data) => {
+					this.submit_closing_pos(data);
+				});
+			}
 		});
 	},
 	// In the created() or mounted() lifecycle hook
