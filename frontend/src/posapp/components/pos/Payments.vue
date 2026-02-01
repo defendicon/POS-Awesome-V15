@@ -228,6 +228,7 @@ import { usePaymentSubmission } from "../../composables/usePaymentSubmission.js"
 import { useRedemptionLogic } from "../../composables/useRedemptionLogic.js";
 import { usePaymentPrinting } from "../../composables/usePaymentPrinting.js";
 import { usePaymentMethods } from "../../composables/usePaymentMethods.js";
+import { useInvoiceDetails } from "../../composables/useInvoiceDetails.js";
 import { ref, computed, getCurrentInstance } from "vue";
 
 export default {
@@ -260,6 +261,7 @@ export default {
 		// Component State migrated from data() for usePaymentCalculations & usePaymentSubmission
 		const pos_profile = ref("");
 		const stock_settings = ref("");
+		const pos_settings = ref({}); // Migrated from data
 		const invoiceType = ref("Invoice");
 		const is_cashback = ref(true);
 		const paid_change = ref(0);
@@ -356,6 +358,41 @@ export default {
 			onBackToInvoice: () => eventBus.emit("change_active_view", "Invoice"),
 		});
 
+		// Initialize Invoice Details
+		const {
+			addresses,
+			sales_persons,
+			new_delivery_date,
+			new_po_date,
+			new_credit_due_date,
+			credit_due_days,
+			credit_due_presets,
+			custom_days_dialog,
+			custom_days_value,
+			return_valid_upto_date,
+			get_addresses,
+			new_address,
+			addressFilter,
+			normalizeAddress,
+			get_sales_person_names,
+			update_delivery_date,
+			update_po_date,
+			update_credit_due_date,
+			applyDuePreset,
+			applyCustomDays,
+			initializeReturnValidity,
+		} = useInvoiceDetails({
+			invoiceDoc: computed(() => invoiceStore.invoiceDoc),
+			posProfile: pos_profile,
+			invoiceType: invoiceType,
+			posSettings: pos_settings,
+			stores: {
+				toastStore,
+				invoiceStore,
+			},
+			eventBus: proxy.eventBus,
+		});
+
 		// Initialize calculations composable
 		const paymentCalculations = usePaymentCalculations({
 			invoiceDoc: computed(() => invoiceStore.invoiceDoc),
@@ -448,6 +485,29 @@ export default {
 			set_rest_amount,
 			clear_all_amounts,
 			request_payment,
+			// Invoice Details & Dates
+			pos_settings,
+			addresses,
+			sales_persons,
+			new_delivery_date,
+			new_po_date,
+			new_credit_due_date,
+			credit_due_days,
+			credit_due_presets,
+			custom_days_dialog,
+			custom_days_value,
+			return_valid_upto_date,
+			get_addresses,
+			new_address,
+			addressFilter, // used in template? usually v-autocomplete needs it exposed
+			normalizeAddress, // used in template? maybe
+			get_sales_person_names,
+			update_delivery_date,
+			update_po_date,
+			update_credit_due_date,
+			applyDuePreset,
+			applyCustomDays,
+			initializeReturnValidity,
 			// Expose calculated properties from composable
 			...paymentCalculations,
 			// Expose submission logic
@@ -461,27 +521,27 @@ export default {
 	data() {
 		return {
 			syncStore: useSyncStore(),
-			pos_settings: {}, // POS settings
+			// pos_settings moved to setup
 			is_return: false, // Is this a return invoice?
 			is_credit_sale: false, // Is this a credit sale?
 			is_write_off_change: false, // Write-off for change enabled
 			redeem_customer_credit: false, // Redeem customer credit?
 			paid_change_rules: [], // Validation rules for paid change
-			phone_dialog: false, // Show phone payment dialog
-			custom_days_dialog: false, // Show custom days dialog
-			custom_days_value: null, // Custom days entry
-			new_delivery_date: null, // New delivery date value
-			new_po_date: null, // New PO date value
-			new_credit_due_date: null, // New credit due date value
-			credit_due_days: null, // Number of days until due
-			credit_due_presets: [7, 14, 30], // Preset options for due days
-			return_valid_upto_date: null, // Return valid until display date
-			mpesa_modes: [], // List of available M-Pesa modes
-			sales_persons: [], // List of sales persons
-			sales_person: "", // Selected sales person
+			// phone_dialog moved to usePaymentMethods
+			// custom_days_dialog moved to useInvoiceDetails
+			// custom_days_value moved to useInvoiceDetails
+			// new_delivery_date moved to useInvoiceDetails
+			// new_po_date moved to useInvoiceDetails
+			// new_credit_due_date moved to useInvoiceDetails
+			// credit_due_days moved to useInvoiceDetails
+			// credit_due_presets moved to useInvoiceDetails
+			// return_valid_upto_date moved to useInvoiceDetails
+			// mpesa_modes moved to usePaymentMethods
+			// sales_persons moved to useInvoiceDetails
+			// sales_person moved to setup
 			print_formats: [], // List of print formats
 			print_format: "", // Selected print format
-			addresses: [], // List of customer addresses
+			// addresses moved to useInvoiceDetails
 			is_user_editing_paid_change: false, // User interaction flag
 			highlightSubmit: false, // Highlight state for submit button
 			last_payment_change_was_cash: null, // Track last edited payment type
@@ -1083,165 +1143,6 @@ export default {
 					}
 				},
 			});
-		},
-		// Filter addresses for autocomplete
-		addressFilter(item, queryText) {
-			const record = (item && item.raw) || item || {};
-			const searchText = (queryText || "").toLowerCase();
-			if (!searchText) {
-				return true;
-			}
-			const fields = [
-				"address_title",
-				"address_line1",
-				"address_line2",
-				"city",
-				"state",
-				"country",
-				"name",
-			];
-			return fields.some((field) => {
-				const value = record[field];
-				if (!value) {
-					return false;
-				}
-				return String(value).toLowerCase().includes(searchText);
-			});
-		},
-		// Open dialog to add new address
-		new_address() {
-			if (!this.invoice_doc || !this.invoice_doc.customer) {
-				this.toastStore.show({
-					title: __("Please select a customer first"),
-					color: "error",
-				});
-				return;
-			}
-			this.eventBus.emit("open_new_address", this.invoice_doc.customer);
-		},
-		// Get sales person names from API/localStorage
-		get_sales_person_names() {
-			const vm = this;
-			if (vm.pos_profile.posa_local_storage && getSalesPersonsStorage().length) {
-				try {
-					vm.sales_persons = getSalesPersonsStorage();
-				} catch (e) {
-					console.error(e);
-				}
-			}
-			frappe.call({
-				method: "posawesome.posawesome.api.utilities.get_sales_person_names",
-				callback: function (r) {
-					if (r.message && r.message.length > 0) {
-						vm.sales_persons = r.message.map((sp) => ({
-							value: sp.name,
-							title: sp.sales_person_name,
-							sales_person_name: sp.sales_person_name,
-							name: sp.name,
-						}));
-						if (vm.pos_profile.posa_local_storage) {
-							setSalesPersonsStorage(vm.sales_persons);
-						}
-					} else {
-						vm.sales_persons = [];
-					}
-				},
-			});
-		},
-		// Normalize address records returned from the server
-		normalizeAddress(address) {
-			if (!address) {
-				return null;
-			}
-			const normalized = { ...address };
-			const fallback = normalized.address_title || normalized.address_line1 || normalized.name || "";
-			normalized.address_title = normalized.address_title || fallback;
-			normalized.display_title = fallback;
-			return normalized;
-		},
-		// Update delivery date after selection
-		update_delivery_date() {
-			const formatted = this.formatDate(this.new_delivery_date);
-			if (this.invoice_doc) {
-				this.invoice_doc.posa_delivery_date = formatted;
-				if (!formatted) {
-					this.invoice_doc.shipping_address_name = null;
-				}
-			} else {
-				this.invoiceStore.mergeInvoiceDoc({ posa_delivery_date: formatted });
-			}
-			if (!formatted) {
-				this.addresses = [];
-			}
-		},
-		// Update purchase order date after selection
-		update_po_date() {
-			this.invoice_doc.po_date = this.formatDate(this.new_po_date);
-		},
-		// Update credit due date after selection
-		update_credit_due_date() {
-			this.invoice_doc.due_date = this.formatDate(this.new_credit_due_date);
-		},
-		// Apply preset or typed number of days to set due date
-		applyDuePreset(days) {
-			if (days === null || days === "") {
-				return;
-			}
-			const westernDays = formatUtils.fromArabicNumerals(String(days));
-			if (isNaN(westernDays)) {
-				return;
-			}
-			const parsed = parseInt(westernDays, 10);
-			const d = new Date();
-			d.setDate(d.getDate() + parsed);
-			this.new_credit_due_date = this.formatDateDisplay(d);
-			this.credit_due_days = parsed;
-			this.update_credit_due_date();
-		},
-		// Apply days entered in dialog
-		applyCustomDays() {
-			this.applyDuePreset(this.custom_days_value);
-			this.custom_days_dialog = false;
-		},
-		calculateReturnValidUntil(baseDate) {
-			const formattedBase = this.formatDate(baseDate);
-			if (!formattedBase) {
-				return null;
-			}
-			const parsed = new Date(formattedBase);
-			if (Number.isNaN(parsed.getTime())) {
-				return null;
-			}
-			const profileDays = parseInt(this.pos_profile?.posa_return_validity_days ?? 0, 10);
-			const settingsDays = parseInt(this.pos_settings?.posa_return_validity_days ?? 0, 10);
-			const daysSetting = Number.isFinite(profileDays) && profileDays > 0 ? profileDays : settingsDays;
-			if (Number.isFinite(daysSetting) && daysSetting > 0) {
-				parsed.setDate(parsed.getDate() + daysSetting);
-			}
-			const year = parsed.getFullYear();
-			const month = `0${parsed.getMonth() + 1}`.slice(-2);
-			const day = `0${parsed.getDate()}`.slice(-2);
-			return `${year}-${month}-${day}`;
-		},
-		initializeReturnValidity(invoice_doc) {
-			if (!this.returnValidityEnabled || !invoice_doc || invoice_doc.is_return) {
-				this.return_valid_upto_date = null;
-				if (invoice_doc) {
-					invoice_doc.posa_return_valid_upto = null;
-				}
-				return;
-			}
-
-			const existing = invoice_doc.posa_return_valid_upto;
-			const proposedDate =
-				existing ||
-				this.calculateReturnValidUntil(invoice_doc.posting_date || frappe.datetime.nowdate());
-
-			if (proposedDate) {
-				const backendDate = this.formatDate(proposedDate);
-				invoice_doc.posa_return_valid_upto = backendDate;
-				this.return_valid_upto_date = this.formatDateDisplay(backendDate);
-			}
 		},
 		updateReturnValidUpto(value) {
 			if (!this.returnValidityEnabled) {
