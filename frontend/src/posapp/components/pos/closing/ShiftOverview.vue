@@ -720,13 +720,13 @@ const __ = window.__ || ((t) => t);
 }
 
 .insight-card {
-	background: #ffffff;
+	background: rgb(var(--v-theme-surface));
 	border-radius: 12px;
 	padding: 16px;
 	display: flex;
 	align-items: flex-start;
 	gap: 16px;
-	border: 1px solid #eeeeee;
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	width: 100%;
 	transition: all 0.2s ease;
@@ -735,7 +735,7 @@ const __ = window.__ || ((t) => t);
 .insight-card:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	border-color: #e0e0e0;
+	border-color: rgba(var(--v-border-color), 0.5);
 }
 
 .insight-card.compact {
@@ -756,26 +756,26 @@ const __ = window.__ || ((t) => t);
 	height: 40px;
 }
 
-/* Accent Colors for Icons */
+/* Accent Colors for Icons - Theme Aware */
 .accent-primary {
-	background-color: #e3f2fd;
-	color: #1976d2;
+	background-color: rgba(var(--v-theme-primary), 0.1);
+	color: rgb(var(--v-theme-primary));
 }
 .accent-success {
-	background-color: #e8f5e9;
-	color: #388e3c;
+	background-color: rgba(var(--v-theme-success), 0.1);
+	color: rgb(var(--v-theme-success));
 }
 .accent-secondary {
-	background-color: #f3e5f5;
-	color: #7b1fa2;
+	background-color: rgba(var(--v-theme-secondary), 0.1);
+	color: rgb(var(--v-theme-secondary));
 }
 .accent-info {
-	background-color: #e0f7fa;
-	color: #0097a7;
+	background-color: rgba(var(--v-theme-info), 0.1);
+	color: rgb(var(--v-theme-info));
 }
 .accent-warning {
-	background-color: #fff3e0;
-	color: #f57c00;
+	background-color: rgba(var(--v-theme-warning), 0.1);
+	color: rgb(var(--v-theme-warning));
 }
 
 .insight-body {
@@ -787,7 +787,7 @@ const __ = window.__ || ((t) => t);
 	font-size: 0.75rem;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
-	color: #757575;
+	opacity: 0.7;
 	font-weight: 600;
 	margin-bottom: 4px;
 }
@@ -795,16 +795,16 @@ const __ = window.__ || ((t) => t);
 .insight-value {
 	font-size: 1.25rem;
 	font-weight: 700;
-	color: #212121;
 	line-height: 1.2;
 }
+
 .insight-card.compact .insight-value {
 	font-size: 1.1rem;
 }
 
 .insight-caption {
 	font-size: 0.75rem;
-	color: #9e9e9e;
+	opacity: 0.6;
 	margin-top: 4px;
 	white-space: nowrap;
 	overflow: hidden;
@@ -812,8 +812,8 @@ const __ = window.__ || ((t) => t);
 }
 
 .table-section {
-	background: #ffffff;
-	border: 1px solid #eeeeee;
+	background: rgb(var(--v-theme-surface));
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	border-radius: 12px;
 	padding: 24px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
@@ -832,25 +832,25 @@ const __ = window.__ || ((t) => t);
 
 .overview-table th {
 	text-align: left;
-	color: #616161;
+	opacity: 0.7;
 	font-weight: 600;
 	padding: 12px 16px;
-	border-bottom: 2px solid #f5f5f5;
+	border-bottom: 2px solid rgba(var(--v-border-color), 0.1);
 	white-space: nowrap;
 }
 
 .overview-table td {
 	padding: 14px 16px;
-	border-bottom: 1px solid #f9f9f9;
-	color: #424242;
+	border-bottom: 1px solid rgba(var(--v-border-color), 0.05);
 	vertical-align: top;
 }
 
 .overview-table tbody tr:last-child td {
 	border-bottom: none;
 }
+
 .overview-table tbody tr:hover {
-	background-color: #fafafa;
+	background-color: rgba(var(--v-theme-on-surface), 0.02);
 }
 
 .text-end {
@@ -871,19 +871,18 @@ const __ = window.__ || ((t) => t);
 
 .overview-amount {
 	font-weight: 600;
-	color: #212121;
 }
 
 .company-equivalent {
 	font-size: 0.75rem;
-	color: #9e9e9e;
+	opacity: 0.6;
 	margin-top: 2px;
 }
 
 .exchange-note {
 	font-size: 0.7rem;
-	color: #1976d2;
-	background-color: #e3f2fd;
+	color: rgb(var(--v-theme-primary));
+	background-color: rgba(var(--v-theme-primary), 0.1);
 	padding: 2px 6px;
 	border-radius: 4px;
 	margin-top: 4px;
@@ -893,9 +892,9 @@ const __ = window.__ || ((t) => t);
 .overview-empty {
 	padding: 24px;
 	text-align: center;
-	background-color: #f9fafb;
+	background-color: rgba(var(--v-theme-on-surface), 0.03);
 	border-radius: 8px;
-	color: #757575;
+	opacity: 0.6;
 	font-style: italic;
 }
 </style>
