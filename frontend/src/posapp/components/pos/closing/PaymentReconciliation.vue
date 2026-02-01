@@ -131,13 +131,13 @@ const varianceClass = (item) => {
 
 <style scoped>
 .white-table {
-	background: #ffffff !important;
-	border: 1px solid #eeeeee;
+	background: rgb(var(--v-theme-surface)) !important;
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .pos-themed-input :deep(.v-field__outline__start),
 .pos-themed-input :deep(.v-field__outline__end) {
-	border-color: #e0e0e0 !important;
+	border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
 }
 
 .variance-chip {
@@ -150,17 +150,17 @@ const varianceClass = (item) => {
 }
 
 .variance-positive {
-	background-color: #e8f5e9;
-	color: #2e7d32;
+	background-color: rgba(var(--v-theme-success), 0.1);
+	color: rgb(var(--v-theme-success));
 }
 
 .variance-negative {
-	background-color: #ffebee;
-	color: #c62828;
+	background-color: rgba(var(--v-theme-error), 0.1);
+	color: rgb(var(--v-theme-error));
 }
 
 .variance-neutral {
-	background-color: #f5f5f5;
-	color: #757575;
+	background-color: rgba(var(--v-theme-on-surface), 0.05);
+	opacity: 0.7;
 }
 </style>

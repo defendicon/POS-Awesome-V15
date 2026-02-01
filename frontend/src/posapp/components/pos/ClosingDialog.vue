@@ -241,6 +241,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .closing-dialog-card {
 	border-radius: 16px;
@@ -248,13 +249,12 @@ export default {
 }
 
 .white-background {
-	background-color: #ffffff;
+	background-color: rgb(var(--v-theme-surface));
 }
 
 .dialog-actions-container {
 	padding: 16px 24px;
-	background-color: #f5f5f5;
-	border-top: 1px solid #e0e0e0;
+	border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .pos-action-btn {
@@ -266,14 +266,10 @@ export default {
 }
 
 .cancel-action-btn {
-	background-color: #ffffff !important;
-	color: #757575 !important;
-	border: 1px solid #e0e0e0;
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .submit-action-btn {
-	background-color: #4caf50 !important;
-	color: #ffffff !important;
 	margin-left: 16px;
 }
 </style>

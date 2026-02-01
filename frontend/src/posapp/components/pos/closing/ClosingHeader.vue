@@ -32,8 +32,7 @@ defineEmits(["close"]);
 
 <style scoped>
 .closing-header {
-	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-	border-bottom: 1px solid #e0e0e0;
+	border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 	padding: 24px !important;
 }
 
@@ -45,15 +44,13 @@ defineEmits(["close"]);
 }
 
 .header-icon-wrapper {
-	background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+	background: rgba(var(--v-theme-primary), 0.1);
 	padding: 16px;
 	border-radius: 16px;
-	box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
-	border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .header-icon {
-	color: #1976d2;
+	color: rgb(var(--v-theme-primary));
 }
 
 .header-text {
@@ -65,7 +62,6 @@ defineEmits(["close"]);
 .header-title {
 	font-size: 1.5rem;
 	font-weight: 700;
-	color: #1a237e;
 	letter-spacing: -0.5px;
 	margin: 0;
 	line-height: 1.2;
@@ -74,22 +70,22 @@ defineEmits(["close"]);
 .header-subtitle {
 	font-size: 0.875rem;
 	font-weight: 500;
-	color: #5f6368;
 	margin: 0;
 	line-height: 1.4;
+	opacity: 0.7;
 }
 
 .header-close-btn {
-	color: #5f6368 !important;
+	opacity: 0.7;
 	margin-left: 12px;
 }
 
 .header-close-btn:hover {
-	background-color: rgba(0, 0, 0, 0.04);
-	color: #202124 !important;
+	background-color: rgba(var(--v-theme-on-surface), 0.04);
+	opacity: 1;
 }
 
 .header-divider {
-	border-color: rgba(0, 0, 0, 0.06);
+	border-color: rgba(var(--v-border-color), var(--v-border-opacity));
 }
 </style>
