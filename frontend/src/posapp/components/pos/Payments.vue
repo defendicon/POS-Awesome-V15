@@ -521,10 +521,10 @@ export default {
 			// Expose submission logic
 			validate_due_date: validateDueDate,
 			extractSubmissionErrorMessage,
-			formatStockErrors,
 			ensureReturnPaymentsAreNegative,
 			submitInvoice,
 			print_formats,
+			print_format,
 			syncStore,
 		};
 	},
