@@ -2194,7 +2194,7 @@ export default {
 				if (this.qty === null || this.qty === "") return "";
 				return this.hide_qty_decimals ? Math.trunc(this.qty) : this.qty;
 			},
-			set: _.debounce(function (value) {
+			set(value) {
 				let parsed = parseFloat(String(value).replace(/,/g, ""));
 				if (isNaN(parsed)) {
 					parsed = null;
@@ -2203,7 +2203,7 @@ export default {
 					parsed = Math.trunc(parsed);
 				}
 				this.qty = parsed;
-			}, 200),
+			},
 		},
 		active_price_list() {
 			return this.customer_price_list || (this.pos_profile && this.pos_profile.selling_price_list);
