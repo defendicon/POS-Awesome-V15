@@ -428,7 +428,7 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 - [ ] **7.3.3- **Phase 2: Logic Extraction (In Progress)\*\*:
     - [x] `usePaymentCalculations.js`: Extracted totals, differences, change due, and auto-apply credit logic.
-    - [ ] `usePaymentSubmission.js`: Pending extraction of `submit`, `submit_invoice`, and validations.
+    - [x] `usePaymentSubmission.js`: Extracted `submit`, `submitInvoice`, and validation logic.
     - [ ] `useRedemptionLogic.js`: Pending extraction of fetching/validating points and credit.
 
 - [ ] **7.3.3 Migrate `customersStore`**

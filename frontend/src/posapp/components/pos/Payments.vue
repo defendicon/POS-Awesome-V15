@@ -229,6 +229,7 @@ import PaymentSelectionFields from "./PaymentSelectionFields.vue";
 import PaymentDialogs from "./PaymentDialogs.vue";
 import { usePaymentCalculations } from "../../composables/usePaymentCalculations.js";
 import { usePaymentSubmission } from "../../composables/usePaymentSubmission.js";
+import { useRedemptionLogic } from "../../composables/useRedemptionLogic.js";
 import { ref, computed, getCurrentInstance } from "vue";
 
 export default {
@@ -262,7 +263,6 @@ export default {
 		const pos_profile = ref("");
 		const stock_settings = ref("");
 		const invoiceType = ref("Invoice");
-		const loyalty_amount = ref(0);
 		const is_cashback = ref(true);
 		const paid_change = ref(0);
 		const credit_change = ref(0);
@@ -270,10 +270,30 @@ export default {
 		const show_change_dialog = ref(false);
 		const sales_person = ref("");
 		const is_credit_return = ref(false);
-		const redeemed_customer_credit = ref(0);
-		const customer_credit_dict = ref([]);
 		const customer_info = ref("");
 		const currency_precision = ref(2);
+
+		// Initialize redemption logic
+		const {
+			loyalty_amount,
+			redeemed_customer_credit,
+			customer_credit_dict,
+			available_customer_credit,
+			available_points_amount,
+			get_available_credit,
+		} = useRedemptionLogic({
+			invoiceDoc: computed(() => invoiceStore.invoiceDoc),
+			posProfile: pos_profile,
+			currencyPrecision: currency_precision,
+			formatFloat: (val, prec) => proxy.formatFloat(val, prec),
+			stores: {
+				toastStore,
+			},
+			onClearAmounts: () => {
+				// We can expose a clear function or logic here if needed, 
+				// but for now let's just use the composable's logic
+			}
+		});
 
 		// Initialize calculations composable
 		const paymentCalculations = usePaymentCalculations({
@@ -344,8 +364,12 @@ export default {
 			sales_person,
 			is_credit_return,
 			loyalty_amount,
+			// Redemption
 			redeemed_customer_credit,
 			customer_credit_dict,
+			available_customer_credit,
+			available_points_amount,
+			get_available_credit,
 			customer_info,
 			currency_precision,
 			// Expose calculated properties from composable
@@ -552,24 +576,6 @@ export default {
 					}
 				}
 			}
-		},
-		// Watch redeemed_customer_credit to validate
-		redeemed_customer_credit(newVal) {
-			if (newVal > this.available_customer_credit) {
-				this.redeemed_customer_credit = this.available_customer_credit;
-				this.toastStore.show({
-					title: `You can redeem customer credit up to ${this.available_customer_credit}`,
-					color: "error",
-				});
-			}
-		},
-		// Recalculate total redeemed credit whenever credit entries change
-		customer_credit_dict: {
-			handler(newVal) {
-				const total = newVal.reduce((sum, row) => sum + this.flt(row.credit_to_redeem || 0), 0);
-				this.redeemed_customer_credit = this.flt(total, this.currency_precision);
-			},
-			deep: true,
 		},
 		// Watch sales_person to update sales_team
 		sales_person(newVal) {
@@ -1149,42 +1155,6 @@ export default {
 			this.$nextTick(() => {
 				this.submit(null, false, print);
 			});
-		},
-		// Get available customer credit and auto-allocate
-		get_available_credit(use_credit) {
-			this.clear_all_amounts();
-			if (use_credit) {
-				frappe
-					.call("posawesome.posawesome.api.payments.get_available_credit", {
-						customer: this.invoice_doc.customer,
-						company: this.pos_profile.company,
-					})
-					.then((r) => {
-						const data = r.message;
-						if (data.length) {
-							const amount = this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
-							let remainAmount = amount;
-							data.forEach((row) => {
-								if (remainAmount > 0) {
-									if (remainAmount >= row.total_credit) {
-										row.credit_to_redeem = row.total_credit;
-										remainAmount -= row.total_credit;
-									} else {
-										row.credit_to_redeem = remainAmount;
-										remainAmount = 0;
-									}
-								} else {
-									row.credit_to_redeem = 0;
-								}
-							});
-							this.customer_credit_dict = data;
-						} else {
-							this.customer_credit_dict = [];
-						}
-					});
-			} else {
-				this.customer_credit_dict = [];
-			}
 		},
 		// Get customer addresses for shipping
 		get_addresses() {
