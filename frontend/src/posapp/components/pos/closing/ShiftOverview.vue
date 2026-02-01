@@ -700,7 +700,7 @@ const props = defineProps({
 	overpaymentDeductionForCurrency: Function,
 });
 
-const __ = inject("__");
+const __ = window.__ || ((t) => t);
 </script>
 
 <style scoped>

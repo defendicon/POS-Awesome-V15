@@ -72,7 +72,7 @@ const props = defineProps({
 });
 
 const $frappe = inject("frappe", window.frappe);
-const __ = inject("__");
+const __ = window.__ || ((t) => t);
 
 const closingAmountRule = (v) => {
 	if (v === "" || v === null || v === undefined) {

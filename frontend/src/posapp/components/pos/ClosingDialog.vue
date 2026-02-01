@@ -92,7 +92,7 @@ export default {
 	setup() {
 		const uiStore = useUIStore();
 		const eventBus = inject("eventBus");
-		const __ = inject("__");
+		const __ = window.__ || ((t) => t);
 
 		// Initialize composables
 		const {

@@ -26,7 +26,7 @@
 
 <script setup>
 import { inject } from "vue";
-const __ = inject("__");
+const __ = window.__ || ((t) => t);
 defineEmits(["close"]);
 </script>
 
