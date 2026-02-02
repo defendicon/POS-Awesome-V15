@@ -4,11 +4,13 @@ import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
 import { parseBooleanSetting } from "../utils/stock.js";
 import { useToastStore } from "../stores/toastStore.js";
+import { useStockUtils } from "./useStockUtils.js";
 
 /* global frappe, __ */
 
 export function useItemAddition() {
 	const toastStore = useToastStore();
+	const { calcStockQty } = useStockUtils();
 	const runAsyncTask = (task, contextLabel) => {
 		Promise.resolve().then(() => {
 			try {
@@ -211,7 +213,7 @@ export function useItemAddition() {
 					() => context.update_item_detail(child, false),
 					"update_item_detail:bundle_child",
 				);
-				context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
+				calcStockQty(child, child.qty);
 			}
 			if (context.fetch_available_qty && isStockItem) {
 				scheduleItemTask(
@@ -224,7 +226,7 @@ export function useItemAddition() {
 			}
 			*/
 			// Schedule explicit calc_stock_qty if needed, or rely on update
-			context.calc_stock_qty && context.calc_stock_qty(child, child.qty);
+			calcStockQty(child, child.qty);
 		}
 		// Trigger background flush if available
 		if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
@@ -278,7 +280,7 @@ export function useItemAddition() {
 			if (item) {
 				console.log("[useItemAddition] Merging item qty", { item_code: item.item_code, old_qty: item.qty, added: data.qty });
 				item.qty += data.qty;
-				if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+				calcStockQty(item, item.qty);
 
 				// Handle other updates that happen on merge
 				if (item.has_batch_no && item.batch_no && context.setBatchQty) {
@@ -670,7 +672,7 @@ export function useItemAddition() {
 				}
 				cur_item.qty += qtyDelta;
 
-				if (context.calc_stock_qty) context.calc_stock_qty(cur_item, cur_item.qty);
+				calcStockQty(cur_item, cur_item.qty);
 
 				if (cur_item.has_batch_no && cur_item.batch_no && context.setBatchQty) {
 					context.setBatchQty(cur_item, cur_item.batch_no, false);
@@ -740,7 +742,7 @@ export function useItemAddition() {
 			} else {
 				cur_item.qty += item.qty || 1;
 			}
-			if (context.calc_stock_qty) context.calc_stock_qty(cur_item, cur_item.qty);
+			calcStockQty(cur_item, cur_item.qty);
 
 			// Update batch quantity if needed
 			if (cur_item.has_batch_no && cur_item.batch_no && context.setBatchQty) {

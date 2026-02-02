@@ -272,20 +272,26 @@ export function useInvoiceOffers() {
 
             const offers = sourceOffers.map((offer: any) => cache.get(offer.name)).filter((entry: any) => !!entry);
 
+            console.log("[useInvoiceOffers] Evaluation complete. Derived offers:", offers.length);
+
             // BREAK INFINITE LOOP: Compare current offers with previous ones
-            // We use a more granular digest that includes affected item quantities/rates
+            // We use a more granular digest that includes affected item quantities/rates AND the resulting benefits
             // This ensures we react to qty changes (e.g. from item selector) but break on identical results.
             const currentOffersDigest = JSON.stringify(offers.map(o => {
-                const ids = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items) : []);
+                const ids = Array.isArray(o.items) ? o.items : (typeof o.items === "string" ? JSON.parse(o.items) : []);
                 const itemState = ids.map((id: string) => {
                     const it = itemMap.get(id);
                     // Include qty and rate to detect changes that affect benefit calculations
-                    return it ? `${id}:${it.qty}:${it.rate}` : id;
+                    return it ? `${id}:${it.qty}:${it.base_qty}:${it.stock_qty}:${it.rate}` : id;
                 });
                 return {
                     n: o.name,
                     ids: itemState,
-                    g: o.give_item_row_id
+                    g: o.give_item_row_id,
+                    g_qty: o.given_qty,
+                    r: o.rate,
+                    dp: o.discount_percentage,
+                    da: o.discount_amount
                 };
             }));
 
@@ -293,6 +299,13 @@ export function useInvoiceOffers() {
                 console.log("[useInvoiceOffers] handelOffers: No change in offers state, skipping update.");
                 return;
             }
+
+            console.log("[useInvoiceOffers] Digest changed. Applying updates...", {
+                prev: _lastAppliedOffersDigest.value?.length,
+                curr: currentOffersDigest.length,
+                diff: currentOffersDigest !== _lastAppliedOffersDigest.value
+            });
+
             _lastAppliedOffersDigest.value = currentOffersDigest;
 
             setItemGiveOffer(offers);
