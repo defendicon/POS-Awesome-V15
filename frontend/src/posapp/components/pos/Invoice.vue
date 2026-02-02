@@ -1096,67 +1096,6 @@ export default {
 			return Math.round(amount);
 		},
 
-		// Increase quantity of an item (handles return logic)
-		add_one(item) {
-			const enforceStockLimits = this.shouldEnforceStockLimits(item);
-			const allowNegativeStock =
-				(parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
-					parseBooleanSetting(item?.allow_negative_stock)) &&
-				!this.blockSaleBeyondAvailableQty;
-			if (this.isReturnInvoice) {
-				// For returns, make quantity more negative
-				item.qty--;
-			} else {
-				const proposed = item.qty + 1;
-				const blockSale =
-					enforceStockLimits && (this.blockSaleBeyondAvailableQty || !allowNegativeStock);
-				const exceedsAvailable =
-					enforceStockLimits && item.max_qty !== undefined && proposed > item.max_qty;
-				if (blockSale && exceedsAvailable) {
-					item.qty = item.max_qty;
-					this.calc_stock_qty(item, item.qty);
-					this.toastStore.show({
-						title: __("Maximum available quantity is {0}. Quantity adjusted to match stock.", [
-							this.formatFloat(item.max_qty),
-						]),
-						color: "error",
-					});
-					return;
-				}
-				if (!blockSale && exceedsAvailable) {
-					this.toastStore.show({
-						title: __(
-							`{0}: requested quantity exceeds available stock. Negative stock is allowed—proceed carefully.`,
-							[item.item_name || item.item_code],
-						),
-						color: "warning",
-					});
-				}
-				item.qty = proposed;
-			}
-			if (item.qty == 0) {
-				this.remove_item(item);
-			}
-			this.calc_stock_qty(item, item.qty);
-			this.updateBundleChildrenQty(item);
-			this.$forceUpdate();
-		},
-
-		// Decrease quantity of an item (handles return logic)
-		subtract_one(item) {
-			if (this.isReturnInvoice) {
-				// For returns, move quantity toward zero
-				item.qty++;
-			} else {
-				item.qty--;
-			}
-			if (item.qty == 0) {
-				this.remove_item(item);
-			}
-			this.calc_stock_qty(item, item.qty);
-			this.updateBundleChildrenQty(item);
-			this.$forceUpdate();
-		},
 
 		// Handle item reordering from drag and drop
 		handleItemReorder(reorderData) {

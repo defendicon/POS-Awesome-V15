@@ -1,4 +1,4 @@
-import { ref, computed, unref } from "vue";
+import { computed } from "vue";
 import type { Ref } from "vue";
 import { useInvoiceStore } from "../stores/invoiceStore";
 import { useToastStore } from "../stores/toastStore";
@@ -86,12 +86,6 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
             (parseBooleanSetting(stock_settings.value?.allow_negative_stock) ||
                 parseBooleanSetting(item?.allow_negative_stock)) &&
             !blockSaleBeyondAvailableQty.value;
-        // Note: blockSaleBeyondAvailableQty is likely a computed prop in Invoice.vue
-        // We might need it passed in props or calculate it here.
-        // For now assuming it is passed in props or we need to replicate logic.
-
-        // Replicating blockSaleBeyondAvailableQty logic if not passed:
-        // It's usually: !allowNegativeStock
 
         if (isReturnInvoice.value) {
             // For returns, make quantity more negative
@@ -127,7 +121,7 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
         }
 
         if (item.qty == 0) {
-            removeItem(item);
+            removeItem(item, { invoiceStore, items: invoiceStore.items, expanded: [], pos_profile: pos_profile.value });
         }
 
         calc_stock_qty(item, item.qty);
@@ -143,7 +137,7 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
         }
 
         if (item.qty == 0) {
-            removeItem(item);
+            removeItem(item, { invoiceStore, items: invoiceStore.items, expanded: [], pos_profile: pos_profile.value });
         }
 
         calc_stock_qty(item, item.qty);
