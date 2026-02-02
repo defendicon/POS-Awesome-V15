@@ -1,7 +1,8 @@
 import { ref, onUnmounted, getCurrentInstance, warn } from "vue";
+import type { Ref } from "vue";
 
 // Singleton state
-const isOnline = ref(navigator.onLine);
+const isOnline: Ref<boolean> = ref(navigator.onLine);
 let listenersCount = 0;
 
 const updateOnlineStatus = () => {

@@ -166,7 +166,7 @@ import _ from "lodash";
 import UpdateCustomer from "./UpdateCustomer.vue";
 import Skeleton from "../ui/Skeleton.vue";
 import { useCustomersStore } from "../../stores/customersStore.js";
-import { useOnlineStatus } from "../../composables/useOnlineStatus.js";
+import { useOnlineStatus } from "../../composables/useOnlineStatus";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
 

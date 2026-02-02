@@ -340,11 +340,11 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 > **Goal:** Enable TypeScript in the build pipeline without breaking existing JS files.
 
-- [ ] **7.1.1 Install Dependencies**
+- [x] **7.1.1 Install Dependencies**
     - Run: `yarn add -D typescript vue-tsc @types/node @vue/tsconfig @types/lodash`
     - Verify `vite-plugin-checker` is installed (optional but recommended for dev feedback).
 
-- [ ] **7.1.2 Configure TypeScript**
+- [x] **7.1.2 Configure TypeScript**
     - Create `frontend/tsconfig.json`:
         ```json
         {
@@ -374,7 +374,7 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
         declare const __: (str: string) => string;
         ```
 
-- [ ] **7.1.3 Update Build Scripts**
+- [x] **7.1.3 Update Build Scripts**
     - Update `package.json` scripts:
         ```json
         "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
@@ -502,4 +502,5 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 | 2026-02-01 | Phase 6.2 Payments Refactoring      | Completed   | Decomposed `Payments.vue` into `PaymentMethods`, `PaymentSummary`, `InvoiceTotals`. Migrated logic to `usePayments.js` & `<script setup>`.          |
 | 2026-02-01 | Phase 6.5 ClosingDialog Refactor    | Completed   | Decomposed into `ShiftOverview`, `PaymentReconciliation`, `ClosingHeader`. Stable and theme-aware.                                                  |
 | 2026-02-01 | Stabilization & Fixes               | Completed   | Fixed ClosingDialog Dark Mode, Shifts Submission Event flow, and Items Table toggle visibility.                                                     |
-| 2026-02-01 | Phase 7 initialization              | In Progress | Setting up TypeScript config and dependencies.                                                                                                      |
+| 2026-02-01 | Phase 7 initialization              | In Progress | Verified `tsconfig.json` and dependencies.                                                                                                          |
+| 2026-02-02 | Micro-Impl: useOnlineStatus         | Completed   | Migrated `useOnlineStatus.js` to TypeScript.                                                                                                        |

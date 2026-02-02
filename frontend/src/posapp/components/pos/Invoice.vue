@@ -252,7 +252,7 @@ import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator.js";
 import { parseBooleanSetting } from "../../utils/stock.js";
 import { isOffline } from "../../../offline/index.js";
-import { useOnlineStatus } from "../../composables/useOnlineStatus.js";
+import { useOnlineStatus } from "../../composables/useOnlineStatus";
 
 export default {
 	name: "POSInvoice",
