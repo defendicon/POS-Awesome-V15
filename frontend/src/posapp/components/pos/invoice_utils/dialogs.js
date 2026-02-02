@@ -207,3 +207,7 @@ export function close_payments(context) {
 
     context.eventBus.emit("show_payment", "false");
 }
+
+export function change_price_list_rate(context, item) {
+    context.eventBus.emit("change_price_list_rate", item);
+}

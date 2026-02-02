@@ -113,6 +113,7 @@ export default {
 	_buildManualOverrideKeyFromItem(item) { return ItemUpdates._buildManualOverrideKeyFromItem(this, item); },
 	_snapshotManualValuesFromDocItems(items) { return ItemUpdates._snapshotManualValuesFromDocItems(this, items); },
 	_restoreManualSnapshots(items, snapshots) { return ItemUpdates._restoreManualSnapshots(this, items, snapshots); },
+	_normalizeReturnDocTotals(doc) { return ItemUpdates._normalizeReturnDocTotals(this, doc); },
 	flushBackgroundUpdates() { return ItemUpdates.flushBackgroundUpdates(this); }, // Needs to be debounced below? No, implementation
 
 	// Customer

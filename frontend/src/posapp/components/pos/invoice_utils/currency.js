@@ -25,6 +25,10 @@ export function _fromBaseCurrency(context, value) {
     return rate ? numeric / rate : numeric;
 }
 
+export function convert_amount(context, value) {
+    return _toBaseCurrency(context, value);
+}
+
 export function _getPlcConversionRate(context) {
     const companyCurrency = (context.company && context.company.default_currency) || context.pos_profile.currency;
     const priceListCurrency = context.price_list_currency || companyCurrency;

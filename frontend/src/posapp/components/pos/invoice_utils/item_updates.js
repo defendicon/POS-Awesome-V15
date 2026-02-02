@@ -622,3 +622,34 @@ export async function flushBackgroundUpdates(context) {
         console.error("Background flush failed", e);
     }
 }
+
+export function _normalizeReturnDocTotals(context, doc) {
+    if (!doc || !doc.is_return) return doc;
+
+    const negate = (val) => (val > 0 ? -Math.abs(val) : val);
+
+    if (doc.grand_total > 0) doc.grand_total = negate(doc.grand_total);
+    if (doc.rounded_total > 0) doc.rounded_total = negate(doc.rounded_total);
+    if (doc.total > 0) doc.total = negate(doc.total);
+    if (doc.base_grand_total > 0) doc.base_grand_total = negate(doc.base_grand_total);
+    if (doc.base_rounded_total > 0) doc.base_rounded_total = negate(doc.base_rounded_total);
+    if (doc.base_total > 0) doc.base_total = negate(doc.base_total);
+
+    if (Array.isArray(doc.items)) {
+        doc.items.forEach((item) => {
+            if (item.qty > 0) item.qty = negate(item.qty);
+            if (item.stock_qty > 0) item.stock_qty = negate(item.stock_qty);
+            if (item.amount > 0) item.amount = negate(item.amount);
+            if (item.base_amount > 0) item.base_amount = negate(item.base_amount);
+        });
+    }
+
+    if (Array.isArray(doc.payments)) {
+        doc.payments.forEach((payment) => {
+            if (payment.amount > 0) payment.amount = negate(payment.amount);
+            if (payment.base_amount > 0) payment.base_amount = negate(payment.base_amount);
+        });
+    }
+
+    return doc;
+}
