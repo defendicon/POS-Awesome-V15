@@ -251,7 +251,8 @@ export default {
 		// But usually better to return the store or use storeToRefs
 		const { isOnline } = useOnlineStatus();
 
-
+		const { activeView } = storeToRefs(uiStore);
+		const { selectedCustomer, refreshToken: customerRefreshToken } = storeToRefs(customersStore);
 
 		const invoiceType = ref("Invoice");
 		const currencyState = useInvoiceCurrency({}, {});
