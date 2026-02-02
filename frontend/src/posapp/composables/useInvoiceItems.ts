@@ -81,67 +81,86 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
     };
 
     const add_one = (item: any) => {
-        const enforceStockLimits = shouldEnforceStockLimits(item);
-        const allowNegativeStock =
-            (parseBooleanSetting(stock_settings.value?.allow_negative_stock) ||
-                parseBooleanSetting(item?.allow_negative_stock)) &&
-            !blockSaleBeyondAvailableQty.value;
+        console.log("[useInvoiceItems] add_one called", { item_code: item?.item_code, qty: item?.qty });
+        try {
+            const enforceStockLimits = shouldEnforceStockLimits(item);
+            const allowNegativeStock =
+                (parseBooleanSetting(stock_settings.value?.allow_negative_stock) ||
+                    parseBooleanSetting(item?.allow_negative_stock)) &&
+                !blockSaleBeyondAvailableQty.value;
 
-        if (isReturnInvoice.value) {
-            // For returns, make quantity more negative
-            item.qty--;
-        } else {
-            const proposed = item.qty + 1;
-            const blockSale =
-                enforceStockLimits && (blockSaleBeyondAvailableQty.value || !allowNegativeStock);
-            const exceedsAvailable =
-                enforceStockLimits && item.max_qty !== undefined && proposed > item.max_qty;
+            if (isReturnInvoice.value) {
+                // For returns, make quantity more negative
+                item.qty--;
+            } else {
+                const proposed = (item.qty || 0) + 1;
+                const blockSale =
+                    enforceStockLimits && (blockSaleBeyondAvailableQty.value || !allowNegativeStock);
+                const exceedsAvailable =
+                    enforceStockLimits && item.max_qty !== undefined && proposed > item.max_qty;
 
-            if (blockSale && exceedsAvailable) {
-                item.qty = item.max_qty;
-                calc_stock_qty(item, item.qty);
-                toastStore.show({
-                    title: __("Maximum available quantity is {0}. Quantity adjusted to match stock.", [
-                        formatFloat(item.max_qty),
-                    ]),
-                    color: "error",
-                });
-                return;
+                if (blockSale && exceedsAvailable) {
+                    item.qty = item.max_qty;
+                    if (typeof calc_stock_qty === 'function') calc_stock_qty(item, item.qty);
+
+                    const displayMaxQty = typeof formatFloat === 'function' ? formatFloat(item.max_qty) : String(item.max_qty);
+
+                    toastStore.show({
+                        title: __("Maximum available quantity is {0}. Quantity adjusted to match stock.", [
+                            displayMaxQty,
+                        ]),
+                        color: "error",
+                    });
+                    return;
+                }
+                if (!blockSale && exceedsAvailable) {
+                    toastStore.show({
+                        title: __(
+                            `{0}: requested quantity exceeds available stock. Negative stock is allowed—proceed carefully.`,
+                            [item.item_name || item.item_code],
+                        ),
+                        color: "warning",
+                    });
+                }
+                item.qty = proposed;
             }
-            if (!blockSale && exceedsAvailable) {
-                toastStore.show({
-                    title: __(
-                        `{0}: requested quantity exceeds available stock. Negative stock is allowed—proceed carefully.`,
-                        [item.item_name || item.item_code],
-                    ),
-                    color: "warning",
-                });
+
+            if (item.qty == 0) {
+                if (typeof removeItem === 'function') {
+                    removeItem(item, { invoiceStore, items: invoiceStore.items, expanded: [], pos_profile: pos_profile.value });
+                }
             }
-            item.qty = proposed;
-        }
 
-        if (item.qty == 0) {
-            removeItem(item, { invoiceStore, items: invoiceStore.items, expanded: [], pos_profile: pos_profile.value });
+            if (typeof calc_stock_qty === 'function') calc_stock_qty(item, item.qty);
+            updateBundleChildrenQty(item);
+        } catch (error) {
+            console.error("[useInvoiceItems] Error in add_one:", error);
+            throw error;
         }
-
-        calc_stock_qty(item, item.qty);
-        updateBundleChildrenQty(item);
     };
 
     const subtract_one = (item: any) => {
-        if (isReturnInvoice.value) {
-            // For returns, move quantity toward zero
-            item.qty++;
-        } else {
-            item.qty--;
-        }
+        console.log("[useInvoiceItems] subtract_one called", { item_code: item?.item_code, qty: item?.qty });
+        try {
+            if (isReturnInvoice.value) {
+                // For returns, move quantity toward zero
+                item.qty++;
+            } else {
+                item.qty--;
+            }
 
-        if (item.qty == 0) {
-            removeItem(item, { invoiceStore, items: invoiceStore.items, expanded: [], pos_profile: pos_profile.value });
-        }
+            if (item.qty == 0) {
+                if (typeof removeItem === "function") {
+                    removeItem(item, { invoiceStore, items: invoiceStore.items, expanded: [], pos_profile: pos_profile.value });
+                }
+            }
 
-        calc_stock_qty(item, item.qty);
-        updateBundleChildrenQty(item);
+            if (typeof calc_stock_qty === "function") calc_stock_qty(item, item.qty);
+            updateBundleChildrenQty(item);
+        } catch (error) {
+            console.error("[useInvoiceItems] Error in subtract_one:", error);
+            throw error;
+        }
     };
 
     return {

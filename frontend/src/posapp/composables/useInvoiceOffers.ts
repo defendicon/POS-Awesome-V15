@@ -43,10 +43,15 @@ export function useInvoiceOffers() {
     const discount_percentage_offer_name = ref<string | null>(null);
     const brand_cache = ref<Record<string, string>>({});
 
-    // Watch items to trigger offer refresh automatically
+    // Watch items and offers to trigger refresh automatically
     watch(
-        items,
+        [items, posOffers, posa_coupons],
         () => {
+            console.log("[useInvoiceOffers] watch triggered", {
+                hasItems: items.value?.length > 0,
+                hasOffers: posOffers.value?.length > 0,
+                couponsCount: posa_coupons.value?.length
+            });
             scheduleOfferRefresh();
         },
         { deep: true }
@@ -102,7 +107,10 @@ export function useInvoiceOffers() {
     // Methods converted from invoiceOfferMethods.js
 
     const scheduleOfferRefresh = (changedRowIds: string[] = []) => {
-        if (isApplyingOffer.value) return;
+        if (isApplyingOffer.value) {
+            console.log("[useInvoiceOffers] scheduleOfferRefresh skipped: isApplyingOffer=true");
+            return;
+        }
 
         if (Array.isArray(changedRowIds)) {
             changedRowIds.forEach((rowId) => {
@@ -113,6 +121,7 @@ export function useInvoiceOffers() {
         if (_offerRefreshPending.value) return;
 
         _offerRefreshPending.value = true;
+        console.log("[useInvoiceOffers] scheduleOfferRefresh: refresh scheduled");
 
         const schedule = typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
             ? window.requestAnimationFrame.bind(window)
@@ -129,6 +138,7 @@ export function useInvoiceOffers() {
             const removedRows = _pendingRemovedRowInfo.value;
             _pendingRemovedRowInfo.value = {};
 
+            console.log("[useInvoiceOffers] Refreshing offers now", { pendingRows });
             handelOffers(pendingRows, removedRows);
         });
     };
@@ -215,9 +225,15 @@ export function useInvoiceOffers() {
     };
 
     const handelOffers = async (changedRowIds: string[] = [], removedRows: any = {}) => {
+        if (isApplyingOffer.value) {
+            console.log("[useInvoiceOffers] handelOffers skipped: isApplyingOffer=true");
+            return;
+        }
+        console.log("[useInvoiceOffers] handelOffers starting...", { changedRowIds });
         try {
             const sourceOffers = Array.isArray(posOffers.value) ? posOffers.value : [];
             if (!sourceOffers.length) {
+                console.log("[useInvoiceOffers] No source offers available");
                 updatePosOffers([]);
                 _cachedOfferResults.value.clear();
                 return;
