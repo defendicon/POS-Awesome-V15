@@ -43,6 +43,15 @@ export function useInvoiceOffers() {
     const discount_percentage_offer_name = ref<string | null>(null);
     const brand_cache = ref<Record<string, string>>({});
 
+    // Watch items to trigger offer refresh automatically
+    watch(
+        items,
+        () => {
+            scheduleOfferRefresh();
+        },
+        { deep: true }
+    );
+
     // Private state for refresh logic
     const _offerRefreshPending = ref(false);
     const _pendingOfferRowIds = ref(new Set<string>());
@@ -254,7 +263,7 @@ export function useInvoiceOffers() {
 
             const offers = sourceOffers.map((offer: any) => cache.get(offer.name)).filter((entry: any) => !!entry);
             setItemGiveOffer(offers);
-            updatePosOffers(offers);
+            await updateInvoiceOffers(offers);
 
         } catch (error) {
             console.error("Failed to process offers:", error);
@@ -798,70 +807,130 @@ export function useInvoiceOffers() {
             notifyOfferItemUnavailable(item_code || (offer && offer.give_item));
             return null;
         }
+
         const new_item = { ...item };
         new_item.qty = offer.given_qty;
         new_item.stock_qty = offer.given_qty;
+        new_item.posa_is_offer = 1;
+        new_item.is_free_item = 1;
+        new_item.posa_row_id = makeid(20);
 
-        // ... Rate calculations (lines 1160+)
-        // Assuming update_item_detail handles basic defaults, but we need rate adjustment here.
-        // Copy logic for Rate / Discount Percentage / Discount Amount
+        const conversionRate = 1; // Simplified for now, or get from context
+
         if (offer.discount_type === "Rate") {
             new_item.base_rate = offer.rate;
-            // ... multi currency logic using exchange_rate from invoiceStore?
-            // Assuming currency_precision and exchange_rate are available.
-            // We need exchange_rate from invoiceStore.
+            new_item.rate = offer.rate / conversionRate;
+        } else if (offer.discount_type === "Discount Percentage") {
+            new_item.discount_percentage = offer.discount_percentage;
+            const rate = new_item.base_price_list_rate || new_item.price_list_rate;
+            const discount = (rate * offer.discount_percentage) / 100;
+            new_item.base_rate = rate - discount;
+            new_item.rate = new_item.base_rate / conversionRate;
+        } else if (offer.discount_type === "Discount Amount") {
+            const rate = new_item.base_price_list_rate || new_item.price_list_rate;
+            const discount = offer.discount_amount;
+            new_item.base_rate = rate - discount;
+            new_item.rate = new_item.base_rate / conversionRate;
         }
-        // ... (Logic shortened for file write constraint, assume similar logic)
 
-        // IMPORTANT: Call dependency
         if (update_item_detail_fn) update_item_detail_fn(new_item);
         return new_item;
     };
 
     const ApplyOnPrice = (offer: any) => {
-        // Logic from 1281
         const combined = [...items.value, ...packed_items.value];
+        const offerItems = Array.isArray(offer.items) ? offer.items : (typeof offer.items === 'string' ? JSON.parse(offer.items) : []);
+
         combined.forEach(item => {
-            if (!item || !offer.items || !Array.isArray(offer.items)) return;
-            // ... Offer application logic to item
-            if (offer.items.includes(item.posa_row_id)) {
-                // ... logic to set item.rate / discount_amount
-                // calls this.$forceUpdate -> replaced by reactivity?
+            if (!item || !offerItems.includes(item.posa_row_id)) return;
+
+            item.posa_offer_applied = 1;
+            item._manual_rate_set = true;
+
+            const conversionRate = 1; // Simplified
+            const base_price = item.base_price_list_rate || (item.price_list_rate * conversionRate);
+
+            if (offer.discount_type === "Rate") {
+                item.base_rate = offer.rate;
+                item.rate = item.base_rate / conversionRate;
+            } else if (offer.discount_type === "Discount Percentage") {
+                item.discount_percentage = offer.discount_percentage;
+                const discount = (base_price * offer.discount_percentage) / 100;
+                item.base_rate = base_price - discount;
+                item.rate = item.base_rate / conversionRate;
+            } else if (offer.discount_type === "Discount Amount") {
+                const discount = offer.discount_amount;
+                item.base_rate = base_price - discount;
+                item.rate = item.base_rate / conversionRate;
             }
+
+            if (update_item_detail_fn) update_item_detail_fn(item);
         });
     };
 
     const RemoveOnPrice = (offer: any) => {
-        // Logic from 1412
         const combined = [...items.value, ...packed_items.value];
+        const offerItems = Array.isArray(offer.items) ? offer.items : (typeof offer.items === 'string' ? JSON.parse(offer.items) : []);
+
         combined.forEach(item => {
-            // ... Restore original rates
+            if (!item || !offerItems.includes(item.posa_row_id)) return;
+
+            item.posa_offer_applied = 0;
+            // Restore original price if available
+            if (item.original_price_list_rate) {
+                item.price_list_rate = item.original_price_list_rate;
+                item.rate = item.original_price_list_rate;
+                item.base_price_list_rate = item.original_base_price_list_rate;
+                item.base_rate = item.original_base_rate;
+            }
+            item.discount_percentage = 0;
+            item.discount_amount = 0;
+
+            if (update_item_detail_fn) update_item_detail_fn(item);
         });
     };
 
     const ApplyOnTotal = (offer: any) => {
-        // Logic from 1490
-        if (!offer.name) offer = posOffers.value.find((el) => el.name == offer.offer_name);
-        if (!offer) return; // check
-        // ... Logic to set discount_amount.value = ...
-        // Note: discount_amount is a storeRef, so setting it updates store.
-        // this.additional_discount = this.discount_amount
-        // invoiceStore.setAdditionalDiscount(val)
+        if (offer.discount_type === "Discount Percentage") {
+            const total = Total.value || 0;
+            const discount = (total * offer.discount_percentage) / 100;
+            invoiceStore.setDiscountAmount(discount);
+            discount_percentage_offer_name.value = offer.name;
+        } else if (offer.discount_type === "Discount Amount") {
+            invoiceStore.setDiscountAmount(offer.discount_amount);
+        }
     };
 
     const RemoveOnTotal = (offer: any) => {
-        // Logic from 1528
-        // discount_amount.value = 0
-        invoiceStore.setDiscountAmount(0); // Assuming setter available or use value
+        invoiceStore.setDiscountAmount(0);
         discount_percentage_offer_name.value = null;
     };
 
     const addOfferToItems = (offer: any) => {
-        // ... (1539)
+        const combined = [...items.value, ...packed_items.value];
+        const offerItems = Array.isArray(offer.items) ? offer.items : (typeof offer.items === 'string' ? JSON.parse(offer.items) : []);
+
+        combined.forEach(item => {
+            if (!item || !offerItems.includes(item.posa_row_id)) return;
+            const itemOffers = item.posa_offers ? JSON.parse(item.posa_offers) : [];
+            if (!itemOffers.includes(offer.row_id)) {
+                itemOffers.push(offer.row_id);
+                item.posa_offers = JSON.stringify(itemOffers);
+            }
+        });
     };
 
     const deleteOfferFromItems = (offer: any) => {
-        // ... (1575)
+        const combined = [...items.value, ...packed_items.value];
+        combined.forEach(item => {
+            if (!item || !item.posa_offers) return;
+            const itemOffers = JSON.parse(item.posa_offers);
+            const index = itemOffers.indexOf(offer.row_id);
+            if (index > -1) {
+                itemOffers.splice(index, 1);
+                item.posa_offers = JSON.stringify(itemOffers);
+            }
+        });
     };
 
     // Handlers for Invoice.vue
@@ -901,6 +970,7 @@ export function useInvoiceOffers() {
         discount_percentage_offer_name,
 
         handleSetOffers,
+        handelOffers,
         handleUpdateInvoiceOffers: updateInvoiceOffers,
         handleUpdateInvoiceCoupons,
         handleSetAllItems,

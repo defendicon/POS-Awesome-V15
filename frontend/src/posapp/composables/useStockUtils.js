@@ -321,5 +321,6 @@ export function useStockUtils() {
 	return {
 		calcUom,
 		calcStockQty,
+		calc_stock_qty: calcStockQty,
 	};
 }
