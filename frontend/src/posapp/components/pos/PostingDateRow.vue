@@ -7,7 +7,7 @@
 				model-type="format"
 				format="dd-MM-yyyy"
 				auto-apply
-				:placeholder="frappe._('Posting Date')"
+				:placeholder="placeholderText"
 				class="sleek-field posting-date-input pos-themed-input"
 				@update:model-value="onUpdate"
 			/>
@@ -23,7 +23,7 @@
 				variant="solo"
 				color="primary"
 				:items="priceLists"
-				:label="frappe._('Price List')"
+				:label="priceListLabel"
 				v-model="internal_price_list"
 				hide-details
 				class="flex-grow-1 sleek-field"
@@ -48,47 +48,72 @@
 	</v-row>
 </template>
 
-<script>
-export default {
-	props: {
-		pos_profile: Object,
-		posting_date_display: String,
-		customer_balance: Number,
-		formatCurrency: Function,
-		priceList: String,
-		priceLists: Array,
-	},
-	data() {
-		return {
-			internal_posting_date_display: this.posting_date_display,
-			internal_price_list: this.priceList,
-		};
-	},
-	computed: {},
-	watch: {
-		posting_date_display(val) {
-			this.internal_posting_date_display = val;
-		},
-		priceList(val) {
-			this.internal_price_list = val;
-		},
-	},
-	methods: {
-		onUpdate(val) {
-			this.$emit("update:posting_date_display", val);
-		},
-		onPriceListUpdate(val) {
-			this.$emit("update:priceList", val);
-		},
-		focusPostingDate() {
-			const input = this.$refs.postingDatePicker?.$el?.querySelector("input");
-			if (input) {
-				input.focus();
-				input.select?.();
-			}
-		},
-	},
+<script setup lang="ts">
+/* global frappe, __ */
+import { ref, watch, computed } from 'vue';
+import type { POSProfile } from '../../types/models';
+
+interface Props {
+	pos_profile: POSProfile | any; // Loose typing for now to avoid breaking changes
+	posting_date_display?: string;
+	customer_balance?: number;
+	formatCurrency: (val: number | undefined) => string;
+	priceList?: string;
+	priceLists?: string[];
+}
+
+const props = defineProps<Props>();
+
+const __ = (str: string) => window.__ ? window.__(str) : str;
+
+const emit = defineEmits<{
+	(e: 'update:posting_date_display', val: string): void;
+	(e: 'update:priceList', val: string): void;
+}>();
+
+const internal_posting_date_display = ref(props.posting_date_display);
+const internal_price_list = ref(props.priceList);
+const postingDatePicker = ref<any>(null);
+
+const placeholderText = computed(() => frappe._('Posting Date'));
+const priceListLabel = computed(() => frappe._('Price List'));
+
+watch(
+	() => props.posting_date_display,
+	(val) => {
+		internal_posting_date_display.value = val;
+	}
+);
+
+watch(
+	() => props.priceList,
+	(val) => {
+		internal_price_list.value = val;
+	}
+);
+
+const onUpdate = (val: any) => {
+	emit("update:posting_date_display", val);
 };
+
+const onPriceListUpdate = (val: any) => {
+	emit("update:priceList", val);
+};
+
+const focusPostingDate = () => {
+	// Use optional chaining carefully with the ref
+	const el = postingDatePicker.value?.$el || postingDatePicker.value;
+	const input = el?.querySelector("input");
+	if (input) {
+		input.focus();
+		input.select?.();
+	}
+};
+
+// Expose methods for template refs
+defineExpose({
+	focusPostingDate,
+});
 </script>
 
 <style scoped>

@@ -387,11 +387,11 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 > **Goal:** Define the "Truth" of our data structures.
 
-- [ ] **7.2.1 Create Type Directory**
+- [x] **7.2.1 Create Type Directory**
     - Create `frontend/src/posapp/types/`
     - Create `frontend/src/posapp/types/frappe.d.ts` (Global Frappe types)
 
-- [ ] **7.2.2 Define Core Operations Models (`models.ts`)**
+- [x] **7.2.2 Define Core Operations Models (`models.ts`)**
     - **Inventory Item**:
         ```ts
         export interface Item {
@@ -406,7 +406,7 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
     - **Cart Item (POS Item)**: Extension of Item with `qty`, `amount`, `posa_row_id`.
     - **Invoice**: `InvoiceDoc` interface (matching `invoiceStore.invoiceDoc`).
 
-- [ ] **7.2.3 Define API Responses**
+- [x] **7.2.3 Define API Responses**
     - Create `frontend/src/posapp/types/api.ts` for standardized API return types.
 
 ---
@@ -415,23 +415,23 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 > **Goal:** Type the brain of the application. Stores are the highest value targets.
 
-- [ ] **7.3.1 Migrate `toastStore` & `uiStore`** (Low hanging fruit)
+- [x] **7.3.1 Migrate `toastStore` & `uiStore`** (Low hanging fruit)
     - Rename `.js` to `.ts`.
     - Add return types to actions/getters.
 
-- [ ] **7.3.2 Migrate `invoiceStore`** (Critical)
+- [x] **7.3.2 Migrate `invoiceStore`** (Critical)
     - Rename `invoiceStore.js` to `invoiceStore.ts`.
     - Define `InvoiceState` interface.
     - Explicitly type `invoiceDoc` ref: `ref<InvoiceDoc | null>(null)`.
     - Type `itemsData`: `reactive(new Map<string, CartItem>())`.
     - Fix `toNumber` utils validation with types.
 
-- [ ] **7.3.3- **Phase 2: Logic Extraction (In Progress)\*\*:
+- [x] **7.3.3- **Phase 2: Logic Extraction (In Progress)\*\*:
     - [x] `usePaymentCalculations.js`: Extracted totals, differences, change due, and auto-apply credit logic.
     - [x] `usePaymentSubmission.js`: Extracted `submit`, `submitInvoice`, and validation logic.
     - [ ] `useRedemptionLogic.js`: Pending extraction of fetching/validating points and credit.
 
-- [ ] **7.3.3 Migrate `customersStore`**
+- [x] **7.3.3 Migrate `customersStore`**
     - Define `Customer` interface.
     - Type the `focusCustomerSearch` actions.
 
@@ -439,7 +439,7 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 ## 🛠️ 7.4 Services & Utils
 
-- [ ] **7.4.1 Migrate `api.js`**
+- [x] **7.4.1 Migrate `api.js`**
     - Convert to `api.ts`.
     - Generic wrapper: `call<T>(method: string, args?: any): Promise<T>`.
 
@@ -452,7 +452,7 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 > **Strategy:** Migrate "Leaf" components first (small, no dependencies), then move up to "Container" components.
 
-- [ ] **7.5.1 Primitive UI Components**
+- [x] **7.5.1 Primitive UI Components**
     - `PostingDateRow.vue`
     - `DeliveryCharges.vue`
     - `MultiCurrencyRow.vue`

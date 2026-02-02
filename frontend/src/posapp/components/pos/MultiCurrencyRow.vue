@@ -5,7 +5,7 @@
 				density="compact"
 				variant="solo"
 				color="primary"
-				:label="frappe._('Currency')"
+				:label="currencyLabel"
 				class="pos-themed-input sleek-field"
 				hide-details
 				v-model="internal_selected_currency"
@@ -18,7 +18,7 @@
 				density="compact"
 				variant="solo"
 				color="primary"
-				:label="'Price List ' + price_list_currency + ' to ' + internal_selected_currency"
+				:label="priceListLabel"
 				class="pos-themed-input sleek-field"
 				hide-details
 				v-model="internal_plc_rate"
@@ -31,7 +31,7 @@
 				density="compact"
 				variant="solo"
 				color="primary"
-				:label="frappe._('Conversion Rate')"
+				:label="conversionRateLabel"
 				class="pos-themed-input sleek-field"
 				hide-details
 				v-model="internal_conversion_rate"
@@ -42,47 +42,70 @@
 	</v-row>
 </template>
 
-<script>
-export default {
-	props: {
-		pos_profile: Object,
-		selected_currency: String,
-		plc_conversion_rate: Number,
-		conversion_rate: Number,
-		available_currencies: Array,
-		isNumber: Function,
-		price_list_currency: String,
-	},
-	data() {
-		return {
-			internal_selected_currency: this.selected_currency,
-			internal_plc_rate: this.plc_conversion_rate,
-			internal_conversion_rate: this.conversion_rate,
-		};
-	},
-	computed: {},
-	watch: {
-		selected_currency(val) {
-			this.internal_selected_currency = val;
-		},
-		plc_conversion_rate(val) {
-			this.internal_plc_rate = val;
-		},
-		conversion_rate(val) {
-			this.internal_conversion_rate = val;
-		},
-	},
-	methods: {
-		onCurrencyUpdate(val) {
-			this.$emit("update:selected_currency", val);
-		},
-		onPlcRateChange() {
-			this.$emit("update:plc_conversion_rate", this.internal_plc_rate);
-		},
-		onConversionChange() {
-			this.$emit("update:conversion_rate", this.internal_conversion_rate);
-		},
-	},
+<script setup lang="ts">
+/* global frappe */
+import { ref, watch, computed } from 'vue';
+import type { POSProfile } from '../../types/models';
+
+interface Props {
+	pos_profile: POSProfile | any;
+	selected_currency?: string;
+	plc_conversion_rate?: number;
+	conversion_rate?: number;
+	available_currencies?: string[];
+	isNumber: (val: any) => boolean | string;
+	price_list_currency?: string;
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+	(e: 'update:selected_currency', val: string): void;
+	(e: 'update:plc_conversion_rate', val: number | undefined): void;
+	(e: 'update:conversion_rate', val: number | undefined): void;
+}>();
+
+const internal_selected_currency = ref(props.selected_currency);
+const internal_plc_rate = ref(props.plc_conversion_rate);
+const internal_conversion_rate = ref(props.conversion_rate);
+
+const currencyLabel = computed(() => frappe._('Currency'));
+const conversionRateLabel = computed(() => frappe._('Conversion Rate'));
+const priceListLabel = computed(() => 
+	'Price List ' + props.price_list_currency + ' to ' + internal_selected_currency.value
+);
+
+watch(
+	() => props.selected_currency,
+	(val) => {
+		internal_selected_currency.value = val;
+	}
+);
+
+watch(
+	() => props.plc_conversion_rate,
+	(val) => {
+		internal_plc_rate.value = val;
+	}
+);
+
+watch(
+	() => props.conversion_rate,
+	(val) => {
+		internal_conversion_rate.value = val;
+	}
+);
+
+const onCurrencyUpdate = (val: any) => {
+	emit("update:selected_currency", val);
+};
+
+const onPlcRateChange = () => {
+	emit("update:plc_conversion_rate", internal_plc_rate.value);
+};
+
+const onConversionChange = () => {
+	emit("update:conversion_rate", internal_conversion_rate.value);
 };
 </script>
 

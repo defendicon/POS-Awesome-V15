@@ -8,7 +8,7 @@
 				auto-select-first
 				variant="solo"
 				color="primary"
-				:label="frappe._('Delivery Charges')"
+				:label="deliveryChargesLabel"
 				v-model="internal_selected_delivery_charge"
 				:items="delivery_charges"
 				item-title="name"
@@ -37,7 +37,7 @@
 				density="compact"
 				variant="solo"
 				color="primary"
-				:label="frappe._('Delivery Charges Rate')"
+				:label="rateLabel"
 				class="pos-themed-input sleek-field"
 				hide-details
 				:model-value="formatCurrency(delivery_charges_rate)"
@@ -48,42 +48,59 @@
 	</v-row>
 </template>
 
-<script>
-export default {
-	props: {
-		pos_profile: Object,
-		delivery_charges: Array,
-		selected_delivery_charge: [Object, String],
-		delivery_charges_rate: Number,
-		deliveryChargesFilter: Function,
-		formatCurrency: Function,
-		currencySymbol: Function,
-		readonly: Boolean,
-	},
-	data() {
-		return {
-			internal_selected_delivery_charge: this.selected_delivery_charge,
-		};
-	},
-	computed: {},
-	watch: {
-		selected_delivery_charge(val) {
-			this.internal_selected_delivery_charge = val;
-		},
-	},
-	methods: {
-		onUpdate(val) {
-			this.$emit("update:selected_delivery_charge", val);
-		},
-		focusDeliveryCharges() {
-			const input = this.$refs.deliveryChargesInput?.$el?.querySelector("input");
-			if (input) {
-				input.focus();
-				input.select?.();
-			}
-		},
-	},
+<script setup lang="ts">
+/* global frappe, __ */
+import { ref, watch, computed } from 'vue';
+import type { POSProfile, DeliveryCharge } from '../../types/models';
+
+interface Props {
+	pos_profile: POSProfile | any;
+	delivery_charges?: DeliveryCharge[] | any[];
+	selected_delivery_charge?: DeliveryCharge | string | null;
+	delivery_charges_rate?: number;
+	deliveryChargesFilter?: (val: any, query: string, item: any) => boolean;
+	formatCurrency: (val: number | undefined) => string;
+	currencySymbol: () => string;
+	readonly?: boolean;
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+	(e: 'update:selected_delivery_charge', val: any): void;
+}>();
+
+const __ = (str: string) => window.__ ? window.__(str) : str;
+
+const internal_selected_delivery_charge = ref(props.selected_delivery_charge);
+const deliveryChargesInput = ref<any>(null);
+
+const deliveryChargesLabel = computed(() => frappe._('Delivery Charges'));
+const rateLabel = computed(() => frappe._('Delivery Charges Rate'));
+
+watch(
+	() => props.selected_delivery_charge,
+	(val) => {
+		internal_selected_delivery_charge.value = val;
+	}
+);
+
+const onUpdate = (val: any) => {
+	emit("update:selected_delivery_charge", val);
 };
+
+const focusDeliveryCharges = () => {
+	const el = deliveryChargesInput.value?.$el || deliveryChargesInput.value;
+	const input = el?.querySelector("input");
+	if (input) {
+		input.focus();
+		input.select?.();
+	}
+};
+
+defineExpose({
+	focusDeliveryCharges,
+});
 </script>
 
 <style scoped></style>
