@@ -2718,7 +2718,7 @@ export default {
 		},
 		// Get change amount for display
 		get_change_amount() {
-			return Math.max(0, this.total_payments - this.invoice_doc.grand_total);
+    		return Math.max(0, this.total_payments - (this.invoice_doc.rounded_total || this.invoice_doc.grand_total));
 		},
 		// Sync any invoices stored offline and show pending/synced counts
 		async syncPendingInvoices() {
