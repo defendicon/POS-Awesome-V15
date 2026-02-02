@@ -513,3 +513,16 @@ export default {
 	},
 };
 </script>
+
+<style>
+/* Global styles for ItemsTable and its children */
+@import "./items-table-styles.css";
+</style>
+
+<style scoped>
+/* Scoped styles for ItemsTable component specific logic */
+.items-table-container {
+	position: relative;
+	transition: all 0.3s ease;
+}
+</style>

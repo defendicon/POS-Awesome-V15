@@ -510,4 +510,4 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 | 2026-02-02 | Bug Fixes: Payment & Offers       | Completed   | Fixed `mode_of_payment` TypeError and Item Selector Offer reactivity via synchronous stock updates. |
 | 2026-02-02 | ItemsTable.vue Decomposition        | In Progress | Extracted Search, DragDrop, and ExpandedRow. Planning extraction of Responsive and Merge logic.      |
 | 2026-02-02 | Phase 7: TypeScript Migration      | In Progress | Migrated `useOnlineStatus.ts`, `api.ts`, `invoiceStore.ts`, and `customersStore.ts`.                 |
-| 2026-02-02 | Style Fixes: ItemsTable & Expanded | Completed   | Restored missing `items-table-styles.css` import and fixed invalid `:deep()` selectors.              |
+| 2026-02-02 | Style Fixes: ItemsTable & Expanded | Completed   | Restored missing `items-table-styles.css` import, matched original responsive dimensions, and fixed `:deep()` selectors by using global CSS targeting. Cleaned up redundant child styles. |

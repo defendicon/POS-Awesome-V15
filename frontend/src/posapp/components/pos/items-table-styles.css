@@ -101,12 +101,11 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 150px;
-	min-width: 80px;
+	width: auto;
 	text-align: center;
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
-	height: 40px;
+	height: 48px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background-clip: padding-box;
 	border-radius: 0;
@@ -120,7 +119,7 @@
 	contain: layout style;
 }
 
-.pos-table :deep(th:last-child) {
+.pos-table th:last-child {
 	border-right: none;
 }
 
@@ -202,14 +201,14 @@
 	justify-content: center;
 	gap: 6px;
 	padding: 4px;
-	min-width: 130px;
-	max-width: 180px;
+	min-width: 140px;
+	max-width: 160px;
 	width: auto;
 	height: auto;
-	background: var(--pos-input-bg);
-	border-radius: 12px;
+	background: var(--pos-surface-variant);
+	border-radius: 8px;
 	backdrop-filter: blur(10px);
-	border: 1px solid var(--pos-border);
+	border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
 	margin: 0 auto;
 	flex-shrink: 0;
@@ -222,14 +221,15 @@
 	transform: translateY(-1px);
 }
 
+.qty-control-btn,
 .pos-table__qty-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
-	border-radius: 8px !important;
+	width: 24px !important;
+	height: 24px !important;
+	min-width: 24px !important;
+	border-radius: 6px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
-		0 2px 8px var(--pos-shadow),
+		0 2px 8px var(--pos-shadow-light),
 		0 1px 3px var(--pos-shadow-light) !important;
 	font-weight: 600 !important;
 	backdrop-filter: blur(10px) !important;
@@ -238,6 +238,7 @@
 	flex-shrink: 0;
 }
 
+.qty-control-btn::before,
 .pos-table__qty-btn::before {
 	content: "";
 	position: absolute;
@@ -245,139 +246,68 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: var(--pos-pressed-bg);
+	background: var(--pos-hover-bg);
 	transition: transform 0.3s ease;
 	transform: translateX(-100%);
 	z-index: 0;
 }
 
+.qty-control-btn:hover::before,
 .pos-table__qty-btn:hover::before {
 	transform: translateX(0);
 }
 
+.qty-control-btn .v-icon,
 .pos-table__qty-btn .v-icon {
 	position: relative;
 	z-index: 1;
 }
 
+.qty-control-btn.minus-btn,
 .pos-table__qty-btn--minus {
-	background: var(--pos-warning-container) !important;
-	color: var(--pos-warning) !important;
-	border: 2px solid var(--pos-warning) !important;
+	background: var(--pos-button-warning-bg) !important;
+	color: var(--pos-button-warning-text) !important;
+	border: 2px solid var(--pos-button-warning-border) !important;
 }
 
-.pos-table__qty-btn--minus .v-icon {
-	color: var(--pos-warning) !important;
-	position: relative;
-	z-index: 2;
-	transition: color 0.3s ease;
-}
-
+.qty-control-btn.minus-btn:hover,
 .pos-table__qty-btn--minus:hover {
-	background: var(--pos-warning) !important;
-	color: white !important;
+	background: var(--pos-button-warning-hover-bg) !important;
+	color: var(--pos-button-warning-hover-text) !important;
 	box-shadow:
 		0 6px 20px var(--pos-shadow),
 		0 4px 8px var(--pos-shadow-light) !important;
 	transform: translateY(-2px) scale(1.05) !important;
 }
 
-.pos-table__qty-btn--minus:hover .v-icon {
-	color: white !important;
-}
-
+.qty-control-btn.plus-btn,
 .pos-table__qty-btn--plus {
-	background: linear-gradient(145deg, #d1fae5, #34d399) !important;
-	color: #065f46 !important;
-	border: 2px solid rgba(52, 211, 153, 0.3) !important;
+	background: var(--pos-button-success-bg) !important;
+	color: var(--pos-button-success-text) !important;
+	border: 2px solid var(--pos-button-success-border) !important;
 }
 
-.pos-table__qty-btn--plus .v-icon {
-	color: #065f46 !important;
-	position: relative;
-	z-index: 2;
-	transition: color 0.3s ease;
-}
-
+.qty-control-btn.plus-btn:hover,
 .pos-table__qty-btn--plus:hover {
-	background: linear-gradient(145deg, #34d399, #10b981) !important;
-	color: white !important;
+	background: var(--pos-button-success-hover-bg) !important;
+	color: var(--pos-button-success-hover-text) !important;
 	box-shadow:
-		0 6px 20px rgba(52, 211, 153, 0.25),
-		0 4px 8px rgba(0, 0, 0, 0.08) !important;
+		0 6px 20px var(--pos-shadow),
+		0 4px 8px var(--pos-shadow-light) !important;
 	transform: translateY(-2px) scale(1.05) !important;
-}
-
-.pos-table__qty-btn--plus:hover .v-icon {
-	color: white !important;
-}
-
-/* Delete button styling */
-.pos-table__delete-btn {
-	width: 32px !important;
-	height: 32px !important;
-	min-width: 32px !important;
-	border-radius: 8px !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	box-shadow:
-		0 2px 8px var(--pos-shadow),
-		0 1px 3px var(--pos-shadow-light) !important;
-	font-weight: 600 !important;
-	backdrop-filter: blur(10px) !important;
-	position: relative !important;
-	overflow: hidden !important;
-	flex-shrink: 0;
-	background: linear-gradient(145deg, #fecaca, #f87171) !important;
-	color: #7f1d1d !important;
-	border: 2px solid rgba(248, 113, 113, 0.3) !important;
-}
-
-.pos-table__delete-btn::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: var(--pos-pressed-bg);
-	transition: transform 0.3s ease;
-	transform: translateX(-100%);
-	z-index: 0;
-}
-
-.pos-table__delete-btn:hover::before {
-	transform: translateX(0);
-}
-
-.pos-table__delete-btn .v-icon {
-	position: relative;
-	z-index: 1;
-	color: #7f1d1d !important;
-}
-
-.pos-table__delete-btn:hover {
-	background: linear-gradient(145deg, #f87171, #ef4444) !important;
-	box-shadow:
-		0 6px 20px rgba(248, 113, 113, 0.25),
-		0 4px 8px rgba(0, 0, 0, 0.08) !important;
-	transform: translateY(-2px) scale(1.05) !important;
-}
-
-.pos-table__delete-btn:hover .v-icon {
-	color: white !important;
 }
 
 .pos-table__qty-display {
-	min-width: 50px;
-	max-width: 100px;
+	min-width: 40px;
+	max-width: 80px;
 	width: auto;
 	flex: 1 1 auto;
 	text-align: center;
 	font-weight: 600;
-	padding: 6px 4px;
-	border-radius: 6px;
+	padding: 0 2px;
+	border-radius: 4px;
 	background: var(--pos-primary-container);
-	border: 1px solid var(--pos-border);
+	border: 1px solid var(--pos-primary-variant);
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -387,13 +317,13 @@
 		"lnum" 1,
 		"kern" 1;
 	color: var(--pos-primary);
-	font-size: 0.8rem;
+	font-size: 0.75rem;
 	transition: all 0.2s ease;
 	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 32px;
+	height: 24px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -402,18 +332,137 @@
 	direction: ltr;
 }
 
+.pos-table__qty-display.negative-number,
 .pos-table__qty-display--negative {
 	color: var(--pos-error);
 	background: var(--pos-error-container);
 	border-color: var(--pos-error);
 }
 
+.pos-table__qty-display.large-number,
 .pos-table__qty-display--large {
 	min-width: 70px;
 	max-width: 120px;
 	font-size: 0.75rem;
 	padding: 6px 3px;
 	letter-spacing: -0.04em;
+}
+
+/* =================================================================
+   ELIMINATE UNWANTED VUETIFY TABLE SPACERS AND EMPTY ROWS
+   ================================================================= */
+
+/* Hide empty placeholder/spacer rows generated by Vuetify */
+.pos-table tr[style*="height: 0px"],
+.pos-table tr[style*="height:0px"] {
+	display: none !important;
+	height: 0 !important;
+	line-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+}
+
+/* Hide empty cells within spacer rows */
+.pos-table tr[style*="height: 0px"] td,
+.pos-table tr[style*="height:0px"] td,
+.pos-table td[style*="height: 0px"],
+.pos-table td[style*="height:0px"] {
+	display: none !important;
+	height: 0 !important;
+	line-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+}
+
+/* Additional targeting for Vuetify virtual table placeholders */
+.pos-table .v-data-table__tr--placeholder,
+.pos-table .v-table__tr--placeholder {
+	display: none !important;
+}
+
+/* Ensure table rows have consistent spacing */
+.pos-table tbody tr:not([style*="height: 0"]) {
+	height: var(--cell-height, 60px);
+	min-height: var(--cell-height, 60px);
+}
+
+/* Clean up any unwanted spacing from virtual scrolling */
+.pos-table .v-virtual-scroll__item[style*="height: 0"],
+.pos-table .v-virtual-scroll__spacer[style*="height: 0"] {
+	display: none !important;
+}
+
+/* Force table to have clean spacing */
+.pos-table table {
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+
+/* Ensure tbody has no unwanted spacing */
+.pos-table tbody {
+	border-spacing: 0;
+	vertical-align: top;
+	border-top: none;
+	border-bottom: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Hide any Vuetify generated dividers or spacers */
+.pos-table .v-divider,
+.pos-table .v-spacer {
+	display: none !important;
+}
+
+/* Additional cleanup for v-data-table-virtual specific elements */
+.pos-table .v-data-table-virtual__spacer {
+	display: none !important;
+	height: 0 !important;
+}
+
+/* Hide empty measurement/calculation rows */
+.pos-table tr[data-test-id],
+.pos-table tr[data-testid],
+.pos-table tr[class*="measurement"],
+.pos-table tr[class*="placeholder"] {
+	display: none !important;
+}
+
+/* Clean up any row group spacing */
+.pos-table tbody tr {
+	vertical-align: middle;
+}
+
+/* Remove any default table spacing that might create gaps */
+.pos-table table,
+.pos-table tbody,
+.pos-table thead {
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* Ensure expanded rows don't create unwanted spacing */
+.pos-table tr.v-data-table__expanded {
+	border: none;
+}
+
+/* Clean slate for table structure */
+.pos-table * {
+	box-sizing: border-box;
+}
+
+/* Force removal of any invisible/zero-height elements that might cause spacing */
+.pos-table [style*="display: none"],
+.pos-table [style*="visibility: hidden"],
+.pos-table [style*="opacity: 0"] {
+	display: none !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 /* =================================================================
@@ -424,7 +473,7 @@
 	padding: 0 !important;
 	width: 100% !important;
 	max-width: 100% !important;
-	overflow: hidden;
+	overflow: visible;
 	box-sizing: border-box;
 	position: relative;
 }
@@ -434,9 +483,9 @@
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box;
-	background: #f8f9fa;
+	background: var(--pos-card-bg);
 	border-radius: 0 0 8px 8px;
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--pos-border);
 	border-top: none;
 	animation: expandIn 0.3s ease forwards;
 	container-type: inline-size;
@@ -450,14 +499,79 @@
 	from {
 		opacity: 0;
 		transform: translateY(-20px) scale(0.95);
-		max-height: 0;
 	}
 
 	to {
 		opacity: 1;
 		transform: translateY(0) scale(1);
-		max-height: 1000px;
 	}
+}
+
+.form-section {
+	width: 100%;
+	padding: 24px;
+	box-sizing: border-box;
+	background: var(--pos-card-bg);
+	border-radius: 12px;
+	border: 1px solid var(--pos-border);
+	box-shadow: 0 2px 8px var(--pos-shadow);
+	transition: all 0.3s ease;
+}
+
+.form-section:hover {
+	box-shadow: 0 4px 16px var(--pos-shadow-dark);
+	transform: translateY(-2px);
+}
+
+.item-details-form {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.section-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid var(--pos-primary);
+	position: relative;
+}
+
+.section-header::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 60px;
+	height: 2px;
+	background: linear-gradient(90deg, var(--pos-primary), var(--pos-primary-container));
+	border-radius: 1px;
+}
+
+.section-title {
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--pos-text-primary);
+}
+
+.form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	width: 100%;
+}
+
+.form-field {
+	flex: 1;
+	min-width: 250px;
+	max-width: 100%;
+	box-sizing: border-box;
 }
 
 /* =================================================================
@@ -509,190 +623,42 @@
 .responsive-table-container.compact-view .pos-table__qty-display {
 	min-width: 35px;
 	max-width: 65px;
-	height: 28px;
+	height: 24px;
 	font-size: 0.7rem;
-	padding: 4px 3px;
-	letter-spacing: -0.03em;
+	padding: 2px;
 }
 
-.responsive-table-container.compact-view .pos-table__qty-btn {
-	width: 28px !important;
-	height: 28px !important;
-	min-width: 28px !important;
+.responsive-table-container.compact-view .qty-control-btn {
+	width: 20px !important;
+	height: 20px !important;
+	min-width: 20px !important;
 }
 
 /* =================================================================
    RTL SUPPORT
    ================================================================= */
 
-[dir="rtl"] .pos-table__qty-counter--rtl,
-[lang^="ar"] .pos-table__qty-counter,
-[lang^="he"] .pos-table__qty-counter,
-[lang^="fa"] .pos-table__qty-counter {
+[dir="rtl"] .pos-table__qty-counter {
 	flex-direction: row !important;
 }
 
-[dir="rtl"] .pos-table__qty-counter--rtl .pos-table__qty-btn--plus,
-[lang^="ar"] .pos-table__qty-counter .pos-table__qty-btn--plus,
-[lang^="he"] .pos-table__qty-counter .pos-table__qty-btn--plus,
-[lang^="fa"] .pos-table__qty-counter .pos-table__qty-btn--plus {
+[dir="rtl"] .pos-table__qty-counter .plus-btn {
 	order: 3 !important;
 }
 
-[dir="rtl"] .pos-table__qty-counter--rtl .pos-table__qty-display,
-[lang^="ar"] .pos-table__qty-counter .pos-table__qty-display,
-[lang^="he"] .pos-table__qty-counter .pos-table__qty-display,
-[lang^="fa"] .pos-table__qty-counter .pos-table__qty-display {
+[dir="rtl"] .pos-table__qty-counter .pos-table__qty-display {
 	order: 2 !important;
+	direction: ltr !important;
 }
 
-[dir="rtl"] .pos-table__qty-counter--rtl .pos-table__qty-btn--minus,
-[lang^="ar"] .pos-table__qty-counter .pos-table__qty-btn--minus,
-[lang^="he"] .pos-table__qty-counter .pos-table__qty-btn--minus,
-[lang^="fa"] .pos-table__qty-counter .pos-table__qty-btn--minus {
+[dir="rtl"] .pos-table__qty-counter .minus-btn {
 	order: 1 !important;
 }
 
 /* =================================================================
-   DYNAMIC THEME SUPPORT - All styling via CSS custom properties
-   ================================================================= */
-/* All theme styles are automatically applied via CSS custom properties
-   defined in /src/posapp/styles/theme.css - no hardcoded dark mode overrides needed */
-
-/* =================================================================
-   IMPROVED BUTTON TEXT VISIBILITY FOR DARK/LIGHT THEMES
+   UTILITY & PERFORMANCE
    ================================================================= */
 
-/* Enhanced text visibility for minus button */
-[data-theme="dark"] .pos-table__qty-btn--minus,
-.v-theme--dark .pos-table__qty-btn--minus {
-	background: rgba(251, 191, 36, 0.2) !important;
-	color: #fbbf24 !important;
-	border: 2px solid #fbbf24 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--minus .v-icon,
-.v-theme--dark .pos-table__qty-btn--minus .v-icon {
-	color: #fbbf24 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--minus:hover,
-.v-theme--dark .pos-table__qty-btn--minus:hover {
-	background: #fbbf24 !important;
-	color: #1f2937 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--minus:hover .v-icon,
-.v-theme--dark .pos-table__qty-btn--minus:hover .v-icon {
-	color: #1f2937 !important;
-}
-
-/* Enhanced text visibility for plus button in dark mode */
-[data-theme="dark"] .pos-table__qty-btn--plus,
-.v-theme--dark .pos-table__qty-btn--plus {
-	background: rgba(34, 197, 94, 0.2) !important;
-	color: #22c55e !important;
-	border: 2px solid #22c55e !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--plus .v-icon,
-.v-theme--dark .pos-table__qty-btn--plus .v-icon {
-	color: #22c55e !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--plus:hover,
-.v-theme--dark .pos-table__qty-btn--plus:hover {
-	background: #22c55e !important;
-	color: #1f2937 !important;
-}
-
-[data-theme="dark"] .pos-table__qty-btn--plus:hover .v-icon,
-.v-theme--dark .pos-table__qty-btn--plus:hover .v-icon {
-	color: #1f2937 !important;
-}
-
-/* Ensure disabled buttons maintain proper contrast */
-.pos-table__qty-btn:disabled {
-	opacity: 0.5 !important;
-	cursor: not-allowed !important;
-}
-
-.pos-table__qty-btn:disabled .v-icon {
-	color: var(--pos-text-disabled) !important;
-}
-
-/* Vuetify table wrapper elements - using CSS custom properties */
-.v-table__wrapper {
-	background: var(--pos-card-bg) !important;
-	color: var(--pos-text-primary) !important;
-}
-
-.v-data-table__wrapper {
-	background: var(--pos-card-bg) !important;
-	color: var(--pos-text-primary) !important;
-}
-
-.v-data-table,
-.v-data-table-virtual {
-	background: var(--pos-card-bg) !important;
-	color: var(--pos-text-primary) !important;
-}
-
-/* Vuetify table body cells - dynamic theming */
-.v-data-table tbody td {
-	background: transparent !important;
-	color: var(--pos-text-primary) !important;
-	border-bottom-color: var(--pos-border) !important;
-}
-
-/* Vuetify table rows - dynamic theming */
-.v-data-table tbody tr {
-	background: transparent !important;
-}
-
-.v-data-table tbody tr:hover {
-	background: var(--pos-table-row-hover) !important;
-}
-
-/* Expanded rows - dynamic theming */
-.v-data-table__expanded-row {
-	background: var(--pos-surface-variant) !important;
-}
-
-.v-data-table__expanded-row td {
-	background: var(--pos-surface-variant) !important;
-	color: var(--pos-text-primary) !important;
-	border-color: var(--pos-border) !important;
-}
-
-/* Table footer/pagination - dynamic theming */
-.v-data-table-footer {
-	background: var(--pos-card-bg) !important;
-	color: var(--pos-text-primary) !important;
-	border-color: var(--pos-border) !important;
-}
-
-/* No data text - dynamic theming */
-.v-data-table__empty-wrapper {
-	color: var(--pos-text-secondary) !important;
-}
-
-/* =================================================================
-   UTILITY CLASSES
-   ================================================================= */
-
-/* Clean up empty/hidden elements */
-.pos-table tr[style*="height: 0px"],
-.pos-table tr[style*="height:0px"] {
-	display: none !important;
-}
-
-.pos-table .v-data-table__tr--placeholder,
-.pos-table .v-table__tr--placeholder {
-	display: none !important;
-}
-
-/* Ensure smooth transitions */
 .pos-table th,
 .pos-table td {
 	transition:
@@ -709,4 +675,11 @@
 	-webkit-backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
 	-webkit-transform: translate3d(0, 0, 0);
+}
+
+.pos-table .v-data-table__expanded__content,
+.pos-table tr.v-data-table__expanded__content {
+	width: 100% !important;
+	border: none !important;
+	background: transparent !important;
 }
