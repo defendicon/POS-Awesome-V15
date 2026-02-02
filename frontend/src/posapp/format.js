@@ -273,6 +273,29 @@ export default {
 
 			return formatted;
 		},
+
+		formatDateForBackend(date) {
+			if (!date) return null;
+			if (typeof date === "string") {
+				const western = formatUtils.fromArabicNumerals(date);
+				if (/^\d{4}-\d{2}-\d{2}$/.test(western)) {
+					return western;
+				}
+				if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(western)) {
+					const [d, m, y] = western.split("-");
+					return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+				}
+				date = western;
+			}
+			const parsed = new Date(formatUtils.fromArabicNumerals(String(date)));
+			if (!isNaN(parsed.getTime())) {
+				const year = parsed.getFullYear();
+				const month = `0${parsed.getMonth() + 1}`.slice(-2);
+				const day = `0${parsed.getDate()}`.slice(-2);
+				return `${year}-${month}-${day}`;
+			}
+			return formatUtils.fromArabicNumerals(String(date));
+		},
 	},
 	mounted() {
 		this.float_precision = frappe.defaults.get_default("float_precision") || 2;

@@ -387,6 +387,12 @@ export function useItemAddition() {
 				}
 			});
 		}
+
+		// Update store metadata to trigger reactivity
+		if (context.invoiceStore?.touch) {
+			context.invoiceStore.touch();
+		}
+
 		// Trigger background flush if any updates or additions happened
 		if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 	};
@@ -547,7 +553,7 @@ export function useItemAddition() {
 							"update_item_detail:new",
 						);
 					}
-
+	
 					if (context.fetch_available_qty) {
 						scheduleItemTask(
 							context,

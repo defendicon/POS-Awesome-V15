@@ -43,15 +43,12 @@ export function useInvoiceOffers() {
     const discount_percentage_offer_name = ref<string | null>(null);
     const brand_cache = ref<Record<string, string>>({});
 
-    // Watch items and offers to trigger refresh automatically
+    // Watch for changes that should trigger offer evaluation
+    // We watch metadata specifically because it is "touched" whenever items are modified in the store
     watch(
-        [items, posOffers, posa_coupons],
+        [items, posOffers, posa_coupons, () => invoiceStore.metadata],
         () => {
-            console.log("[useInvoiceOffers] watch triggered", {
-                hasItems: items.value?.length > 0,
-                hasOffers: posOffers.value?.length > 0,
-                couponsCount: posa_coupons.value?.length
-            });
+            console.log("[useInvoiceOffers] watch triggered for items/offers/coupons/metadata");
             scheduleOfferRefresh();
         },
         { deep: true }
