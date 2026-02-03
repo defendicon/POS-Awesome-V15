@@ -691,54 +691,6 @@ export default {
 			this.invoiceStore.setPostingDate(date);
 			this.$forceUpdate();
 		},
-		// Override setFormatedFloat for qty field to handle stock limits and return mode
-		setFormatedQty(item, field_name, precision, no_negative, value) {
-			// Parse and set the value using the mixin's formatter
-			let parsedValue = this.setFormatedFloat(item, field_name, precision, no_negative, value);
-
-			const enforceStockLimits = this.shouldEnforceStockLimits(item);
-			// Enforce available stock limits
-			const allowNegativeStock =
-				(parseBooleanSetting(this.stock_settings?.allow_negative_stock) ||
-					parseBooleanSetting(item?.allow_negative_stock)) &&
-				!this.blockSaleBeyondAvailableQty;
-
-			if (
-				enforceStockLimits &&
-				item.max_qty !== undefined &&
-				this.flt(item[field_name]) > this.flt(item.max_qty)
-			) {
-				const blockSale = this.blockSaleBeyondAvailableQty || !allowNegativeStock;
-				if (blockSale) {
-					item[field_name] = item.max_qty;
-					parsedValue = item.max_qty;
-					this.toastStore.show({
-						title: __(`Maximum available quantity is {0}. Quantity adjusted to match stock.`, [
-							this.formatFloat(item.max_qty),
-						]),
-						color: "error",
-					});
-				} else {
-					this.toastStore.show({
-						title: __("Stock is lower than requested. Proceeding may create negative stock."),
-						color: "warning",
-					});
-				}
-			}
-
-			// Ensure negative value for return invoices
-			if (this.isReturnInvoice && parsedValue > 0) {
-				parsedValue = -Math.abs(parsedValue);
-				item[field_name] = parsedValue;
-			}
-
-			// Recalculate stock quantity with the adjusted value
-			this.calc_stock_qty(item, item[field_name]);
-			if (field_name === "qty") {
-				this.updateBundleChildrenQty(item);
-			}
-			return parsedValue;
-		},
 
 
 

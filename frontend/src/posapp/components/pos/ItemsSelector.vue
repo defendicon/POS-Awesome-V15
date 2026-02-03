@@ -594,7 +594,6 @@ export default {
 			cardSlotWidth,
 			cardColumnWidth,
 			checkItemContainerOverflow,
-			scheduleCardMetricsUpdate,
 			handleListScroll,
 			...itemsIntegration,
 			selectedCustomer,
@@ -1723,27 +1722,6 @@ export default {
 		},
 		headers() {
 			return getItemsTableHeaders(this.context, this.pos_profile || {});
-		},
-		cardColumns() {
-			return this.cardColumns; // Mapped to composable ref
-		},
-		cardGap() {
-			return this.cardGap; // Mapped to composable ref
-		},
-		cardPadding() {
-			return this.cardPadding; // Mapped to composable ref
-		},
-		cardRowHeight() {
-			return this.cardRowHeight; // Mapped to composable ref
-		},
-		cardSlotHeight() {
-			return this.cardSlotHeight; // Mapped to composable ref
-		},
-		cardSlotWidth() {
-			return this.cardSlotWidth; // Mapped to composable ref
-		},
-		cardColumnWidth() {
-			return this.cardColumnWidth; // Mapped to composable ref
 		},
 		displayedItems() {
 			// PERF: Avoid unnecessary array cloning ([...this.filteredItems]) as it creates garbage and O(N) cost on every render

@@ -252,6 +252,8 @@ export function useInvoiceItems(invoiceType: Ref<string>) {
         fetch_delivery_charges,
         update_delivery_charges,
         isReturnInvoice,
-        blockSaleBeyondAvailableQty
+        blockSaleBeyondAvailableQty,
+        shouldEnforceStockLimits,
+        updateBundleChildrenQty
     };
 }
