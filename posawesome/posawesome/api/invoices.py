@@ -1068,6 +1068,18 @@ def submit_invoice(invoice, data, submit_in_background=False):
         "posa_allow_submissions_in_background_job",
     )
 
+	# Fix change_amount to use rounded_total instead of grand_total
+    # This prevents rounding adjustments from being treated as change to customer
+    if invoice_doc.is_pos and not invoice_doc.is_return:
+        total_paid = sum([flt(p.amount) for p in invoice_doc.payments if flt(p.amount) > 0])
+        total_to_pay = flt(invoice_doc.rounded_total or invoice_doc.grand_total)
+        correct_change = flt(total_paid - total_to_pay)
+        if correct_change < 0:
+            correct_change = 0
+        invoice_doc.change_amount = correct_change
+        invoice_doc.base_change_amount = flt(correct_change * (invoice_doc.conversion_rate or 1))
+        invoice_doc.save()
+		
     if submit_in_background and allow_background_submit:
         enqueue(
             method=submit_in_background_job,
@@ -1134,7 +1146,17 @@ def submit_in_background_job(kwargs):
 
         invoice_doc.save()
 
-        invoice_doc.submit()
+        # Fix change_amount to use rounded_total instead of grand_total
+        if invoice_doc.is_pos and not invoice_doc.is_return:
+            total_paid = sum([flt(p.amount) for p in invoice_doc.payments if flt(p.amount) > 0])
+            total_to_pay = flt(invoice_doc.rounded_total or invoice_doc.grand_total)
+            correct_change = flt(total_paid - total_to_pay)
+            if correct_change < 0:
+                correct_change = 0
+            invoice_doc.change_amount = correct_change
+            invoice_doc.base_change_amount = flt(correct_change * (invoice_doc.conversion_rate or 1))
+        
+		invoice_doc.submit()
 
         _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
