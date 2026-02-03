@@ -1156,7 +1156,7 @@ def submit_in_background_job(kwargs):
             invoice_doc.change_amount = correct_change
             invoice_doc.base_change_amount = flt(correct_change * (invoice_doc.conversion_rate or 1))
         
-		invoice_doc.submit()
+        invoice_doc.submit()
 
         _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
