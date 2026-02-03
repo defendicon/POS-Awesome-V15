@@ -747,8 +747,19 @@ def update_invoice(data):
 
         invoice_doc.paid_amount = flt(sum(p.amount for p in invoice_doc.payments))
         invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments))
-
-    invoice_doc.flags.ignore_permissions = True
+    
+	# Fix change_amount to use rounded_total instead of grand_total
+    # This prevents rounding adjustments from being treated as change to customer
+    if invoice_doc.is_pos and not invoice_doc.is_return:
+        total_paid = sum([flt(p.amount) for p in invoice_doc.payments if flt(p.amount) > 0])
+        total_to_pay = flt(invoice_doc.rounded_total or invoice_doc.grand_total)
+        correct_change = flt(total_paid - total_to_pay)
+        if correct_change < 0:
+            correct_change = 0
+        invoice_doc.change_amount = correct_change
+        invoice_doc.base_change_amount = flt(correct_change * (invoice_doc.conversion_rate or 1))
+    
+	invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.docstatus = 0
     invoice_doc.save()
