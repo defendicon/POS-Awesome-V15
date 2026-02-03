@@ -1488,6 +1488,21 @@ export default {
 			return this.formatFloatPlain(value, prec);
 		},
 
+		currencySymbol(currency) {
+			return get_currency_symbol(currency);
+		},
+		format_currency(value, currency, precision) {
+			const prec = typeof precision === "number" ? precision : this.currency_precision;
+			return this.formatCurrencyPlain(value, prec);
+		},
+		ratePrecision(value) {
+			const numericValue = typeof value === "string" ? parseFloat(value) : value;
+			return Number.isInteger(numericValue) ? 0 : this.currency_precision;
+		},
+		format_number(value, precision) {
+			const prec = typeof precision === "number" ? precision : this.float_precision;
+			return this.formatFloatPlain(value, prec);
+		},
 		hasDecimalPrecision(value) {
 			// Check if the value has any decimal precision when converted by exchange rate
 			if (this.exchange_rate && this.exchange_rate !== 1) {
