@@ -165,6 +165,7 @@ import { getCurrentInstance, onMounted, onBeforeUnmount, ref, computed, watch, n
 import { storeToRefs } from "pinia";
 import format from "../../format";
 import _ from "lodash";
+import { memoryInitPromise, forceClearAllCache } from "../../../offline/index.js";
 
 import CameraScanner from "./CameraScanner.vue";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
@@ -300,7 +301,8 @@ const headerProps = reactive({
 
 // 3. Computed Properties
 const pos_profile = computed(() => itemsIntegration.posProfile.value || {});
-const stock_settings = computed(() => itemsIntegration.stock_settings.value || {});
+const { stockSettings: stock_settings_ref } = storeToRefs(uiStore);
+const stock_settings = computed(() => stock_settings_ref.value || {});
 const items_group = computed(() => itemsIntegration.items_group.value || []);
 const offersCount = computed(() => invoiceStore.offersCount || 0);
 const couponsCount = computed(() => invoiceStore.couponsCount || 0);
@@ -338,7 +340,7 @@ const debounce_qty = computed({
 	},
 });
 
-const isLoadingOrSyncing = computed(() => loading.value || isBackgroundLoading.value || itemsIntegration.refreshInFlight?.value);
+const isLoadingOrSyncing = computed(() => loading.value || isBackgroundLoading.value);
 
 // 4. Initialization logic for Composables needing Context
 const instance = getCurrentInstance();
