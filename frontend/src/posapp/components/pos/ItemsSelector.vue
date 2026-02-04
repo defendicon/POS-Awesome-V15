@@ -1452,7 +1452,7 @@ export default {
 
 		// Setup search debounce (now handled by store, but keeping for compatibility)
 		this.searchDebounce = _.debounce(() => {
-			this.get_items();
+			// Removed get_items() - handled by store
 		}, 300);
 
 		// Load settings
@@ -1490,9 +1490,8 @@ export default {
 				// Load initial items if we have a profile (now handled by store)
 				if (this.pos_profile && this.pos_profile.name) {
 					console.log("Loading items with POS Profile:", this.pos_profile.name);
-					this.get_items_groups();
-					// Store handles item loading automatically, but keep legacy method for compatibility
-					await this.initializeItems();
+					// Removed get_items_groups() - handled by store
+					// Removed initializeItems() - handled by store initialization
 				} else {
 					console.warn("No POS Profile available during initialization");
 				}
@@ -1596,16 +1595,17 @@ export default {
 					) {
 						await forceClearAllCache();
 					}
-					await this.get_items(true);
+					await this.refreshItems(); // Use Store refreshItems
 				} else {
 					if (
 						this.pos_profile &&
 						(!this.pos_profile.posa_local_storage || !this.storageAvailable)
 					) {
 						await forceClearAllCache();
-						await this.get_items(true);
+						await this.refreshItems(); // Use Store refreshItems
 					} else {
-						await this.get_items();
+						// Store handles offline load automatically or via cached items
+						// No need to call legacy get_items
 					}
 				}
 			},
