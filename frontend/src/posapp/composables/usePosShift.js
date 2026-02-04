@@ -124,7 +124,11 @@ export function usePosShift(openDialog) {
 						title: `POS Shift Closed`,
 						color: "success",
 					});
-					check_opening_entry();
+					// Disabled auto-open: Cashier must manually open new shift
+					// check_opening_entry();
+					setTimeout(() => {
+						window.location.href = '/app';
+					}, 1500);
 				}
 			});
 	}
