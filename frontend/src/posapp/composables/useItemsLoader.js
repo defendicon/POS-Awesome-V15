@@ -1,6 +1,6 @@
 /* global frappe */
 import { ref } from "vue";
-import { initPromise } from "../../../offline/index.js";
+import { initPromise } from "../../offline/index.js";
 
 /**
  * useItemsLoader
