@@ -96,7 +96,13 @@
 					</v-btn>
 					<v-spacer></v-spacer>
 					<span
-						v-if="enableBackgroundSync"
+						v-if="syncStatus"
+						class="text-caption text-info font-weight-bold sync-status-label mx-2"
+					>
+						{{ syncStatus }}
+					</span>
+					<span
+						v-if="enableBackgroundSync && !syncStatus"
 						class="text-caption text-medium-emphasis last-sync-label"
 					>
 						{{ __("Last sync:") }} {{ lastSyncTime }}
@@ -130,6 +136,7 @@ const props = defineProps({
 	scannerLocked: { type: Boolean, default: false },
 	enableBackgroundSync: { type: Boolean, default: false },
 	lastSyncTime: { type: String, default: "" },
+	syncStatus: { type: String, default: "" },
 	context: { type: String, default: "pos" },
 });
 

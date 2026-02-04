@@ -38,6 +38,7 @@
 					:scanner-locked="scannerLocked"
 					:enable-background-sync="enable_background_sync"
 					:last-sync-time="formatBackgroundSyncTime()"
+					:sync-status="syncStatus"
 					:context="context"
 					@esc="esc_event"
 					@enter="onEnter"
@@ -221,14 +222,19 @@ const props = defineProps({
 const emit = defineEmits(["add-item"]);
 
 // 1. Initialize Stores and Core Composables
+const instance = getCurrentInstance();
 const customersStore = useCustomersStore();
 const toastStore = useToastStore();
 const uiStore = useUIStore();
 const invoiceStore = useInvoiceStore();
 const { selectedCustomer } = storeToRefs(customersStore);
+const { posProfile: uiPosProfile } = storeToRefs(uiStore);
 
 const eventBus = inject("eventBus");
 const selected_currency = ref("");
+const isInitialized = ref(false);
+const initTimeout = ref(null);
+const initError = ref(null);
 
 const responsive = useResponsive();
 const rtl = useRtl();
@@ -343,7 +349,17 @@ const debounce_qty = computed({
 	},
 });
 
-const isLoadingOrSyncing = computed(() => loading.value || isBackgroundLoading.value);
+const isLoadingOrSyncing = computed(() => {
+	if (loading.value) return true;
+	if (isBackgroundLoading.value && items.value.length === 0) return true;
+	return false;
+});
+
+const syncStatus = computed(() => {
+	if (loading.value) return __("Loading items...");
+	if (isBackgroundLoading.value) return __("Syncing offline catalog...");
+	return "";
+});
 
 // 4. Initialization logic for Composables needing Context
 const instance = getCurrentInstance();
@@ -558,19 +574,6 @@ onMounted(() => {
 		scannerInput.setScanHandler(scanProcessor.processScannedItem);
 	}
 
-	memoryInitPromise.then(async () => {
-		if (pos_profile.value?.name) {
-			// Initialize local currency ref
-			selected_currency.value = pos_profile.value.currency || "";
-
-			await itemsIntegration.initializeStore(pos_profile.value, selectedCustomer.value, customer_price_list.value);
-			startItemWorker();
-			itemDetailFetcher.update_cur_items_details();
-			itemSync.startBackgroundSyncScheduler();
-			itemsSelectorSettings.loadItemSettings();
-		}
-	});
-
 	if (eventBus) {
 		eventBus.on("update_currency", (data) => {
 			if (data && data.currency) {
@@ -578,6 +581,45 @@ onMounted(() => {
 			}
 		});
 	}
+
+	// Watch UI Profile for initialization (Source of Truth)
+	watch(uiPosProfile, async (newProfile) => {
+		if (newProfile && newProfile.name && !isInitialized.value) {
+			// Safety timeout to prevent infinite loading if memoryInit or store init hangs
+			if (initTimeout.value) clearTimeout(initTimeout.value);
+			initTimeout.value = setTimeout(() => {
+				if (!isInitialized.value) {
+					console.warn("ItemsSelector: Initialization taking too long, forcing isInitialized to true.");
+					isInitialized.value = true;
+				}
+			}, 10000);
+
+			try {
+				await memoryInitPromise;
+				
+				// Set local currency ref
+				selected_currency.value = newProfile.currency || "";
+
+				await itemsIntegration.initializeStore(newProfile, selectedCustomer.value, customer_price_list.value);
+				
+				isInitialized.value = true;
+				startItemWorker();
+				itemDetailFetcher.update_cur_items_details();
+				itemSync.startBackgroundSyncScheduler();
+				itemsSelectorSettings.loadItemSettings();
+			} catch (err) {
+				console.error("ItemsSelector: Initialization failed", err);
+				initError.value = err.message || err;
+				// Unblock UI even on error
+				isInitialized.value = true;
+			} finally {
+				if (initTimeout.value) {
+					clearTimeout(initTimeout.value);
+					initTimeout.value = null;
+				}
+			}
+		}
+	}, { immediate: true });
 
 	window.addEventListener("resize", checkItemContainerOverflow);
 	nextTick(() => {
@@ -587,6 +629,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+	if (initTimeout.value) clearTimeout(initTimeout.value);
 	itemSync.stopBackgroundSyncScheduler();
 	if (itemWorker.value) itemWorker.value.terminate();
 	if (eventBus) {
