@@ -54,6 +54,7 @@ import { useCustomersStore } from "../stores/customersStore.js";
 import { useSyncStore } from "../stores/syncStore.js";
 import { useToastStore } from "../stores/toastStore.js";
 import { useUIStore } from "../stores/uiStore.js";
+import { useItemsStore } from "../stores/itemsStore.js";
 import { storeToRefs } from "pinia";
 import {
 	getOpeningStorage,
@@ -116,6 +117,7 @@ const { get_closing_data } = usePosShift();
 const router = useRouter();
 const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
+const itemsStore = useItemsStore();
 const toastStore = useToastStore();
 const uiStore = useUIStore();
 
@@ -125,6 +127,7 @@ const { posProfile, isLoading, loadingText, lastInvoiceId } = storeToRefs(uiStor
 const route = useRoute();
 const { pendingInvoicesCount } = storeToRefs(syncStore);
 const { loadProgress, customersLoaded } = storeToRefs(customersStore);
+const { itemsLoaded, loadProgress: itemsLoadProgress } = storeToRefs(itemsStore);
 
 // State
 // const posProfile = ref({}); // Migrated to UI Store
@@ -184,6 +187,24 @@ watch(
 	(loaded) => {
 		if (loaded) {
 			markSourceLoaded("customers");
+		}
+	},
+	{ immediate: true },
+);
+
+watch(
+	itemsLoadProgress,
+	(progress) => {
+		setSourceProgress("items", progress);
+	},
+	{ immediate: true },
+);
+
+watch(
+	itemsLoaded,
+	(loaded) => {
+		if (loaded) {
+			markSourceLoaded("items");
 		}
 	},
 	{ immediate: true },

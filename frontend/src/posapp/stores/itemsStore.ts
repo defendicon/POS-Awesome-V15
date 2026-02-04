@@ -28,49 +28,49 @@ const LARGE_CATALOG_THRESHOLD = 5000;
 const LIMIT_SEARCH_FALLBACK = 500;
 
 export interface CacheHealth {
-  items: string;
-  priceList: string;
-  stock: string;
-  lastCheck: number | null;
+	items: string;
+	priceList: string;
+	stock: string;
+	lastCheck: number | null;
 }
 
 export interface PerformanceMetrics {
-  lastLoadTime: number;
-  averageLoadTime: number;
-  cacheHitRate: number;
-  totalRequests: number;
-  cachedRequests: number;
-  searchHits: number;
-  searchMisses: number;
+	lastLoadTime: number;
+	averageLoadTime: number;
+	cacheHitRate: number;
+	totalRequests: number;
+	cachedRequests: number;
+	searchHits: number;
+	searchMisses: number;
 }
 
 export interface BackgroundSyncState {
-  running: boolean;
-  token: number;
+	running: boolean;
+	token: number;
 }
 
 export interface CachedPagination {
-  enabled: boolean;
-  pageSize: number;
-  offset: number;
-  total: number;
-  loading: boolean;
-  search: string;
-  group: string;
+	enabled: boolean;
+	pageSize: number;
+	offset: number;
+	total: number;
+	loading: boolean;
+	search: string;
+	group: string;
 }
 
 export interface ItemStoreCache {
-  memory: {
-    searchResults: Map<string, { data: Item[]; timestamp: number }>;
-    priceListData: Map<string, { data: any[]; timestamp: number }>;
-    itemDetails: Map<string, { data: any; timestamp: number }>;
-    maxSize: number;
-    ttl: number;
-  };
-  session: {
-    enabled: boolean;
-    prefix: string;
-  };
+	memory: {
+		searchResults: Map<string, { data: Item[]; timestamp: number }>;
+		priceListData: Map<string, { data: any[]; timestamp: number }>;
+		itemDetails: Map<string, { data: any; timestamp: number }>;
+		maxSize: number;
+		ttl: number;
+	};
+	session: {
+		enabled: boolean;
+		prefix: string;
+	};
 }
 
 export const useItemsStore = defineStore("items", () => {
@@ -277,6 +277,14 @@ export const useItemsStore = defineStore("items", () => {
 
 		// Load cached items if available
 		await loadCachedItems();
+
+		// If still not loaded (e.g. empty cache), attempt a server load
+		if (!itemsLoaded.value || items.value.length === 0) {
+			await loadItems({ forceServer: false });
+		}
+
+		// Ensure we always signal readiness after initialization
+		itemsLoaded.value = true;
 	};
 
 	const loadItemGroups = async () => {
@@ -1325,6 +1333,8 @@ export const useItemsStore = defineStore("items", () => {
 			itemsLoaded.value = true;
 		} catch (error) {
 			console.warn("Failed to load cached items:", error);
+			// Still mark as loaded to unblock UI if something fails
+			itemsLoaded.value = true;
 		}
 	};
 

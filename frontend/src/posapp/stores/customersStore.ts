@@ -405,6 +405,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			console.error("Failed to fetch customers:", err);
 		} finally {
 			loadingCustomers.value = false;
+			customersLoaded.value = true;
 			await searchCustomers(searchTerm.value);
 		}
 	}

@@ -215,10 +215,15 @@ export default {
 			// Watch store for updates
 			this.$watch(
 				() => this.uiStore.posProfile,
-				(newProfile) => {
+				async (newProfile) => {
 					if (newProfile && newProfile.name) {
 						this.pos_profile = newProfile;
 						this.get_offers(newProfile.name, newProfile);
+
+						// Initialize Customers Store
+						const customersStore = useCustomersStore();
+						customersStore.setPosProfile(newProfile);
+						await customersStore.get_customer_names();
 					}
 				},
 				{ deep: true, immediate: true },
