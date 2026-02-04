@@ -326,7 +326,8 @@ const { items, filteredItems, customer_price_list, loading, isBackgroundLoading 
 
 const displayedItems = computed(() => {
 	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
-	const term = first_search.value.trim().toLowerCase();
+	const rawTerm = first_search.value;
+	const term = (typeof rawTerm === "string" ? rawTerm : "").trim().toLowerCase();
 	return filterAndPaginate(baseItems, {
 		searchTerm: term,
 		hideZeroRate: hide_zero_rate_items.value,

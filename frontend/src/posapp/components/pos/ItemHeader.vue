@@ -20,7 +20,7 @@
 					@keydown.enter="$emit('enter')"
 					@keydown="$emit('search-keydown', $event)"
 					@click:clear="$emit('clear-search')"
-					@input="$emit('search-input', $event)"
+					@input="$emit('search-input', $event.target.value)"
 					@paste="$emit('search-paste', $event)"
 					prepend-inner-icon="mdi-magnify"
 					@focus="$emit('focus')"
