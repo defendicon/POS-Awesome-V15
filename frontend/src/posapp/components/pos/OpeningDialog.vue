@@ -294,31 +294,28 @@ export default {
 									return m;
 								}
 							});
-							errorMsg = fullMessages.join('\n');
+							errorMsg = fullMessages.join('<br><br>');
 						} else if (err && err.message) {
 							errorMsg = err.message;
-						} else if (err && err.exc) {
-							const excMatch = err.exc.match(/ValidationError[:\s]*([\s\S]*?)(?:\n\n|$)/);
-							if (excMatch) {
-								errorMsg = excMatch[1];
-							}
 						}
 					} catch(parseErr) {
 						console.error("Error parsing server message:", parseErr);
 					}
 					
-					errorMsg = errorMsg
-						.replace(/<br\s*\/?>/gi, '\n')
-						.replace(/<[^>]*>/g, '')
-						.replace(/&nbsp;/g, ' ')
-						.replace(/\n{3,}/g, '\n\n')
-						.trim();
-					
-					alert(errorMsg);
 					vm.close_opening_dialog();
-					setTimeout(() => {
-						window.location.href = '/app';
-					}, 500);
+					
+					frappe.msgprint({
+						title: __('Cannot Open New Shift'),
+						indicator: 'red',
+						message: errorMsg,
+						primary_action: {
+							label: __('OK'),
+							action: function() {
+								frappe.hide_msgprint();
+								window.location.href = '/app';
+							}
+						}
+					});
 				});
 		},
 		go_desk() {
