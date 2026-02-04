@@ -1010,37 +1010,7 @@ export default {
 		},
 		// get_uoms, closeNewItemDialog, submitNewItem moved to NewItemDialog.vue
 
-		scheduleCardMetricsUpdate() {
-			if (this.metricsRaf) {
-				cancelAnimationFrame(this.metricsRaf);
-			}
-			this.metricsRaf = requestAnimationFrame(() => {
-				this.metricsRaf = null;
-				this.updateCardContainerMetrics();
-			});
-		},
-		getItemsContainerElement() {
-			const ref = this.$refs.itemsContainer;
-			if (!ref) {
-				return null;
-			}
-			if (typeof ref.getScrollerElement === "function") {
-				return ref.getScrollerElement();
-			}
-			return ref.$el || ref;
-		},
-		updateCardContainerMetrics() {
-			this.$nextTick(() => {
-				const el = this.getItemsContainerElement();
-				if (!el || typeof el.getBoundingClientRect !== "function") {
-					return;
-				}
-				const { width } = el.getBoundingClientRect();
-				if (width && Math.round(width) !== Math.round(this.cardContainerWidth)) {
-					this.cardContainerWidth = width;
-				}
-			});
-		},
+
 		async onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
 			const total = this.displayedItems ? this.displayedItems.length : 0;
 			if (!total) {
@@ -1067,99 +1037,8 @@ export default {
 		},
 
 		// Optimized scroll handler with throttling
-		onCardScroll() {
-			if (this.scrollThrottle) return;
 
-			this.scrollThrottle = requestAnimationFrame(() => {
-				try {
-					const el = this.getItemsContainerElement();
-					if (!el) return;
 
-					const scrollTop = el.scrollTop;
-					const clientHeight = el.clientHeight;
-					const scrollHeight = el.scrollHeight;
-
-					// Only trigger load more if we're near the bottom
-					if (scrollTop + clientHeight >= scrollHeight - 50) {
-						this.currentPage += 1;
-						this.loadVisibleItems();
-					}
-
-					this.lastScrollTop = scrollTop;
-				} catch (error) {
-					console.error("Error in card scroll handler:", error);
-				} finally {
-					this.scrollThrottle = null;
-				}
-			});
-		},
-		startItemWorker() {
-			// Avoid spawning duplicate workers which doubles script downloads and background threads
-			if (this.itemWorker || typeof Worker === "undefined") {
-				return;
-			}
-
-			try {
-				// Use the plain URL so the service worker can match the cached file
-				// even when offline. Using a query string causes cache lookups to fail
-				// which results in "Failed to fetch a worker script" errors.
-				const workerUrl = "/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
-				this.itemWorker = new Worker(workerUrl, { type: "classic" });
-				this.itemWorker.onerror = function (event) {
-					console.error("Worker error:", event);
-					console.error("Message:", event.message);
-					console.error("Filename:", event.filename);
-					console.error("Line number:", event.lineno);
-				};
-			} catch (e) {
-				console.error("Failed to start item worker", e);
-				this.itemWorker = null;
-			}
-		},
-		markStorageUnavailable(localOnly = false) {
-			if (localOnly) {
-				this.localStorageAvailable = false;
-				return;
-			}
-			this.storageAvailable = false;
-			this.localStorageAvailable = false;
-			this.itemsPageLimit = null;
-			if (this.itemWorker) {
-				this.itemWorker.terminate();
-				this.itemWorker = null;
-			}
-			if (this.pos_profile) {
-				this.pos_profile.posa_local_storage = false;
-			}
-		},
-		async ensureStorageHealth() {
-			let localHealthy = true;
-			try {
-				if (typeof localStorage !== "undefined") {
-					const t = "posa_test";
-					localStorage.setItem(t, "1");
-					localStorage.removeItem(t);
-				}
-			} catch (e) {
-				console.warn("localStorage unavailable", e);
-				localHealthy = false;
-			}
-			const dbHealthy = await checkDbHealth().catch(() => false);
-			if (dbHealthy) {
-				this.storageAvailable = true;
-				if (!localHealthy) {
-					this.markStorageUnavailable(true);
-				} else {
-					this.localStorageAvailable = true;
-				}
-				if (this.pos_profile && this.pos_profile.posa_local_storage) {
-					this.startItemWorker();
-				}
-			} else {
-				this.markStorageUnavailable();
-			}
-			return dbHealthy;
-		},
 		async loadVisibleItems(reset = false) {
 			this.loadProgress = 0;
 			this.eventBus.emit("data-load-progress", { name: "items", progress: 0 });
@@ -1469,26 +1348,7 @@ export default {
 		},
 
 
-		evaluateKeyboardScan() {
-			// Deprecated: Handled by useScannerInput
-		},
-		resetKeyboardScanDetection() {
-			// Deprecated: Handled by useScannerInput
-		},
-		// Scan methods moved to useScanProcessor
-		handleItemNotFound(scannedCode) {
-			console.warn("Item not found for scanned code:", scannedCode);
 
-			this.first_search = scannedCode;
-			this.search = scannedCode;
-
-			// Show error dialog directly
-			this.scanErrorDialog = true;
-			this.scanErrorMessage = `${this.__("Item not found")}: ${scannedCode}`;
-			this.scanErrorCode = scannedCode;
-			this.scanErrorDetails = this.__("This barcode could not be matched to any item.");
-			this.playScanTone("error");
-		},
 
 		currencySymbol(currency) {
 			return get_currency_symbol(currency);
@@ -1506,21 +1366,7 @@ export default {
 			return this.formatFloatPlain(value, prec);
 		},
 
-		currencySymbol(currency) {
-			return get_currency_symbol(currency);
-		},
-		format_currency(value, currency, precision) {
-			const prec = typeof precision === "number" ? precision : this.currency_precision;
-			return this.formatCurrencyPlain(value, prec);
-		},
-		ratePrecision(value) {
-			const numericValue = typeof value === "string" ? parseFloat(value) : value;
-			return Number.isInteger(numericValue) ? 0 : this.currency_precision;
-		},
-		format_number(value, precision) {
-			const prec = typeof precision === "number" ? precision : this.float_precision;
-			return this.formatFloatPlain(value, prec);
-		},
+
 		hasDecimalPrecision(value) {
 			// Check if the value has any decimal precision when converted by exchange rate
 			if (this.exchange_rate && this.exchange_rate !== 1) {
