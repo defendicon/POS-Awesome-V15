@@ -1161,7 +1161,13 @@ export default {
 			},
 		},
 		headers() {
-			return this.itemDisplay.headers;
+			return this.itemDisplay.headers.value;
+		},
+		memoizedFormatCurrency() {
+			return this.itemDisplay.memoizedFormatCurrency.value;
+		},
+		memoizedFormatNumber() {
+			return this.itemDisplay.memoizedFormatNumber.value;
 		},
 		active_price_list() {
 			return this.customer_price_list || (this.pos_profile && this.pos_profile.selling_price_list);
