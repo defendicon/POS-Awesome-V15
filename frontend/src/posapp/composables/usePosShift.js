@@ -71,7 +71,28 @@ export function usePosShift(openDialog) {
 					openDialog && openDialog();
 				}
 			})
-			.catch(() => {
+			.catch((err) => {
+				// Check if it's a validation error (like blocked shift)
+				let errorMsg = "";
+				if (err && err._server_messages) {
+					try {
+						const messages = JSON.parse(err._server_messages);
+						errorMsg = messages.map(m => {
+							const parsed = JSON.parse(m);
+							return parsed.message || m;
+						}).join('\n');
+					} catch(e) {
+						errorMsg = err.message || "Error checking shift status";
+					}
+				}
+				
+				// If there's a block error, show it prominently
+				if (errorMsg && errorMsg.includes('Cannot')) {
+					alert(errorMsg.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim());
+					return;
+				}
+				
+				// Otherwise try cached data or open dialog
 				const data = getOpeningStorage();
 				if (data) {
 					pos_profile.value = data.pos_profile;
@@ -124,11 +145,13 @@ export function usePosShift(openDialog) {
 						title: `POS Shift Closed`,
 						color: "success",
 					});
-					// Disabled auto-open: Cashier must manually open new shift
+					// DISABLED: Auto-open new shift - cashier must manually open
 					// check_opening_entry();
+					
+					// Redirect to desk after shift close
 					setTimeout(() => {
 						window.location.href = '/app';
-					}, 6000);
+					}, 4000);
 				}
 			});
 	}
