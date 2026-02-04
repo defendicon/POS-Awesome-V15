@@ -282,18 +282,38 @@ export default {
 				.catch((err) => {
 					vm.is_loading = false;
 					let errorMsg = "Cannot open new shift";
-					if (err && err._server_messages) {
-						try {
+					
+					try {
+						if (err && err._server_messages) {
 							const messages = JSON.parse(err._server_messages);
-							errorMsg = messages.map(m => {
-								const parsed = JSON.parse(m);
-								return parsed.message || m;
-							}).join('\n');
-						} catch(e) {
-							errorMsg = err.message || errorMsg;
+							const fullMessages = messages.map(m => {
+								try {
+									const parsed = JSON.parse(m);
+									return parsed.message || m;
+								} catch(e) {
+									return m;
+								}
+							});
+							errorMsg = fullMessages.join('\n');
+						} else if (err && err.message) {
+							errorMsg = err.message;
+						} else if (err && err.exc) {
+							const excMatch = err.exc.match(/ValidationError[:\s]*([\s\S]*?)(?:\n\n|$)/);
+							if (excMatch) {
+								errorMsg = excMatch[1];
+							}
 						}
+					} catch(parseErr) {
+						console.error("Error parsing server message:", parseErr);
 					}
-					errorMsg = errorMsg.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
+					
+					errorMsg = errorMsg
+						.replace(/<br\s*\/?>/gi, '\n')
+						.replace(/<[^>]*>/g, '')
+						.replace(/&nbsp;/g, ' ')
+						.replace(/\n{3,}/g, '\n\n')
+						.trim();
+					
 					alert(errorMsg);
 					vm.close_opening_dialog();
 					setTimeout(() => {
@@ -301,7 +321,6 @@ export default {
 					}, 500);
 				});
 		},
-
 		go_desk() {
 			frappe.set_route("/");
 			location.reload();
