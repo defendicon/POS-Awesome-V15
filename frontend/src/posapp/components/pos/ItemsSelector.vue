@@ -630,6 +630,7 @@ export default {
 			itemAvailability,
 			itemDetailFetcher,
 			itemSelection,
+			...itemSelection,
 			itemSync,
 			...itemsSelectorSearch,
 			...itemsSelectorSettings,
