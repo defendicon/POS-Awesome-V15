@@ -276,8 +276,29 @@ export default {
 							console.error("Failed to cache opening data", e);
 						}
 						vm.close_opening_dialog();
-						vm.is_loading = false;
 					}
+					vm.is_loading = false;
+				})
+				.catch((err) => {
+					vm.is_loading = false;
+					let errorMsg = "Cannot open new shift";
+					if (err && err._server_messages) {
+						try {
+							const messages = JSON.parse(err._server_messages);
+							errorMsg = messages.map(m => {
+								const parsed = JSON.parse(m);
+								return parsed.message || m;
+							}).join('\n');
+						} catch(e) {
+							errorMsg = err.message || errorMsg;
+						}
+					}
+					errorMsg = errorMsg.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
+					alert(errorMsg);
+					vm.close_opening_dialog();
+					setTimeout(() => {
+						window.location.href = '/app';
+					}, 500);
 				});
 		},
 
