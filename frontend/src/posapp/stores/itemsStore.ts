@@ -265,6 +265,7 @@ export const useItemsStore = defineStore("items", () => {
 
 	// Actions
 	const initialize = async (profile: POSProfile, cust: string | null = null, priceList: string | null = null) => {
+		console.log("[itemsStore] Initializing with profile:", profile?.name, "customer:", cust);
 		posProfile.value = profile;
 		customer.value = cust;
 		customerPriceList.value = priceList;
@@ -277,14 +278,17 @@ export const useItemsStore = defineStore("items", () => {
 
 		// Load cached items if available
 		await loadCachedItems();
+		console.log("[itemsStore] After loadCachedItems, itemsCount:", items.value.length, "itemsLoaded:", itemsLoaded.value);
 
 		// If still not loaded (e.g. empty cache), attempt a server load
 		if (!itemsLoaded.value || items.value.length === 0) {
+			console.log("[itemsStore] Cache empty or not loaded, fetching from server...");
 			await loadItems({ forceServer: false });
 		}
 
 		// Ensure we always signal readiness after initialization
 		itemsLoaded.value = true;
+		console.log("[itemsStore] Initialization complete. Final itemsCount:", items.value.length);
 	};
 
 	const loadItemGroups = async () => {
@@ -387,9 +391,11 @@ export const useItemsStore = defineStore("items", () => {
 			}
 
 			const fetchedItems = await itemService.getItems(args, abortController.signal);
+			console.log("[itemsStore] API returned", fetchedItems?.length, "items");
 
 			// Check if request is still valid
 			if (requestToken.value !== currentRequestToken) {
+				console.log("[itemsStore] Request token mismatch, discarding results");
 				return;
 			}
 
@@ -752,6 +758,7 @@ export const useItemsStore = defineStore("items", () => {
 
 	// Helper functions
 	const setItems = (newItems: Item[], options: { append?: boolean; totalCount?: number } = {}) => {
+		console.log("[itemsStore] setItems called with", newItems?.length, "items. options:", options);
 		const { append = false, totalCount: totalOverride } = options;
 		const normalizedGroup =
 			typeof itemGroup.value === "string" && itemGroup.value.length > 0 ? itemGroup.value : "ALL";
@@ -809,8 +816,9 @@ export const useItemsStore = defineStore("items", () => {
 			return filteredItems.value;
 		}
 
+		console.log("[itemsStore] Clearing limit search results (preserving itemsLoaded=true)");
 		setItems([], { totalCount: 0 });
-		itemsLoaded.value = false;
+		// itemsLoaded.value = false; // Removed to prevent blocking UI loading overlay
 		loadProgress.value = 0;
 		return filteredItems.value;
 	};

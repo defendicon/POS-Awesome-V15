@@ -152,6 +152,9 @@ let _sidebarObserver = null;
 // Event Bus
 const eventBus = instance?.proxy?.eventBus;
 
+// Initialize loading sources immediately in setup so watchers can mark them 100%
+initLoadingSources(["init", "items", "customers"]);
+
 // Computed
 const isDark = computed(() => $theme?.isDark || false);
 const loadingProgress = computed(() => loadingState.progress);
@@ -215,7 +218,7 @@ onMounted(() => {
 	pollForFrappeNav();
 
 	window.addEventListener("resize", adjust_frappe_sidebar_offset);
-	initLoadingSources(["init", "items", "customers"]);
+	// initLoadingSources move to setup to catch early store readiness
 	initializeData();
 	setupNetworkListeners(); // Local function wrapper
 	setupEventListeners();
