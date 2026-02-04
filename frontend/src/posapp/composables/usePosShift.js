@@ -128,7 +128,7 @@ export function usePosShift(openDialog) {
 					// check_opening_entry();
 					setTimeout(() => {
 						window.location.href = '/app';
-					}, 1500);
+					}, 6000);
 				}
 			});
 	}
