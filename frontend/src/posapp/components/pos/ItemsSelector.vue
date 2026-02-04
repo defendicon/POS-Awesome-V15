@@ -158,12 +158,12 @@
 	</div>
 </template>
 
-<script type="module">
+<script setup>
 /* eslint-disable no-unused-vars */
 /* global frappe, __, setLocalStockCache, flt, onScan, get_currency_symbol, current_items, wordCount */
 import format from "../../format";
 import _ from "lodash";
-import { getCurrentInstance, onMounted, ref, computed } from "vue";
+import { getCurrentInstance, onMounted, onBeforeUnmount, ref, computed, watch, nextTick, reactive } from "vue";
 import CameraScanner from "./CameraScanner.vue";
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
@@ -255,1467 +255,459 @@ import { useUIStore } from "../../stores/uiStore.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { storeToRefs } from "pinia";
 
-export default {
-	mixins: [format],
-	setup(props, { emit }) {
-		const responsive = useResponsive();
-		const rtl = useRtl();
-		const { fly } = useFlyAnimation();
-		const cartValidation = useCartValidation();
+const props = defineProps({
+	context: {
+		type: String,
+		default: "pos", // 'pos', 'purchase'
+	},
+	showOnlyBarcodeItems: {
+		type: Boolean,
+		default: false,
+	},
+});
 
-		// Initialize Pinia store integration
-		const itemsIntegration = useItemsIntegration({
-			// Disable integration debounce since ItemsSelector manages its own debounce
-			// This prevents a double-debounce delay (300ms + 300ms = 600ms)
-			enableDebounce: false,
-			debounceDelay: 300,
-		});
+const emit = defineEmits(["add-item"]);
 
-		const customersStore = useCustomersStore();
-		const toastStore = useToastStore();
-		const uiStore = useUIStore();
-		const invoiceStore = useInvoiceStore();
-		const itemAddition = useItemAddition(); // Initialize composable
-		const { selectedCustomer } = storeToRefs(customersStore);
+// 1. Initialize Composables and Stores
+const responsive = useResponsive();
+const rtl = useRtl();
+const { fly } = useFlyAnimation();
+const cartValidation = useCartValidation();
 
-		const {
-			showOnlyBarcodeItems: showOnlyBarcodeItemsRef,
-			memoizedSearch,
-			clearSearchCache,
-			fetchServerItemsTimestamp,
-			filterAndPaginate,
-		} = useItemSearch();
+const itemsIntegration = useItemsIntegration({
+	enableDebounce: false,
+	debounceDelay: 300,
+});
 
-		const scannerInput = useScannerInput();
-		const itemAvailability = useItemAvailability();
-		const itemDetailFetcher = useItemDetailFetcher();
-		const itemSelection = useItemSelection();
+const customersStore = useCustomersStore();
+const toastStore = useToastStore();
+const uiStore = useUIStore();
+const invoiceStore = useInvoiceStore();
+const itemAddition = useItemAddition();
+const { selectedCustomer } = storeToRefs(customersStore);
 
-		const itemSync = useItemSync();
-		const itemDisplay = useItemDisplay();
-		const itemsLoader = useItemsLoader();
-		const { setBatchQty, setSerialNo, getBatchAvailability } = useBatchSerial();
+const {
+	showOnlyBarcodeItems: showOnlyBarcodeItemsRef,
+	memoizedSearch,
+	clearSearchCache,
+	fetchServerItemsTimestamp,
+	filterAndPaginate,
+} = useItemSearch();
 
-		const {
-			windowWidth,
-			isOverflowing,
-			itemsContainerRef,
-			cardColumns,
-			cardGap,
-			cardPadding,
-			cardRowHeight,
-			cardSlotHeight,
-			cardSlotWidth,
-			cardColumnWidth,
-			checkItemContainerOverflow,
-			scheduleCardMetricsUpdate,
-			onListScroll: handleListScroll,
-		} = useItemSelectorLayout({
-			resizeDebounce: 100,
-			loadVisibleItems: () => {
-				const vm = getCurrentInstance()?.proxy;
-				if (vm && vm.currentPage !== undefined) {
-					vm.currentPage += 1;
-					vm.loadVisibleItems();
-				}
-			},
-		});
+const scannerInput = useScannerInput();
+const itemAvailability = useItemAvailability();
+const itemDetailFetcher = useItemDetailFetcher();
+const itemSelection = useItemSelection();
+const itemSync = useItemSync();
+const itemDisplay = useItemDisplay();
+const itemsLoader = useItemsLoader();
+const { setBatchQty, setSerialNo, getBatchAvailability } = useBatchSerial();
+const { storageAvailable, itemWorker, startItemWorker, ensureStorageHealth } = useItemStorageSafety();
+const {
+	ensureBarcodeIndex,
+	resetBarcodeIndex,
+	indexItem,
+	replaceBarcodeIndex,
+	lookupItemByBarcode,
+	searchItemsByCode: searchItemsByCodeFn,
+} = useBarcodeIndexing();
 
-		const instance = getCurrentInstance();
-		const getValidVM = () => {
-			return instance ? instance.proxy : null;
-		};
+// 2. Local State
+const newItemDialog = ref(false);
+const qty = ref(1);
+const search_input = ref("");
+const first_search = ref("");
+const items_view = ref("list");
+const itemsPerPage = ref(50);
+const background_sync_interval = ref(30);
+const hide_zero_rate_items = ref(false);
+const show_last_invoice_rate = ref(true);
+const enable_custom_items_per_page = ref(false);
+const items_per_page = ref(50);
+const clearingSearch = ref(false);
+const isDragging = ref(false);
 
-		const itemsSelectorSearch = useItemsSelectorSearch({
-			getVM: getValidVM,
-			scannerInput,
-			itemSelection,
-		});
+const flyConfig = reactive({ speed: 0.6, easing: "ease-in-out" });
+const pos_profile = computed(() => itemsIntegration.posProfile.value || {});
+const stock_settings = computed(() => itemsIntegration.stock_settings.value || {});
 
-		const itemsSelectorSettings = useItemsSelectorSettings({
-			getVM: getValidVM,
-			itemSync,
-		});
+// 3. Layout Integration
+const {
+	windowWidth,
+	isOverflowing,
+	itemsContainerRef,
+	cardColumns,
+	cardGap,
+	cardPadding,
+	cardRowHeight,
+	cardSlotHeight,
+	cardSlotWidth,
+	cardColumnWidth,
+	checkItemContainerOverflow,
+	scheduleCardMetricsUpdate,
+	onListScroll: handleListScroll,
+} = useItemSelectorLayout({
+	resizeDebounce: 100,
+	loadVisibleItems: () => itemsLoader.loadVisibleItems(),
+});
 
-		const itemsSelectorFocus = useItemsSelectorFocus({
-			getVM: getValidVM,
-			scannerInput,
-			itemSelection,
-		});
+// 4. Component Logic Proxies (for legacy/cross-composable calls)
+const instance = getCurrentInstance();
+const getValidVM = () => instance ? instance.proxy : null;
 
-		const {
-			lastInvoiceRates,
-			lastInvoiceRateLoading,
-			getLastInvoiceRate,
-			scheduleLastInvoiceRateRefresh,
-			fetchLastInvoiceRates,
-			clearLastInvoiceRateCache,
-		} = useLastInvoiceRate({
-			pos_profile: () => getValidVM()?.pos_profile,
-			customer: () => getValidVM()?.customer || selectedCustomer.value,
-			displayedItems: () => getValidVM()?.displayedItems,
-			show_last_invoice_rate: () => getValidVM()?.show_last_invoice_rate,
-			autoRefresh: true,
-		});
+// Search/Settings/Focus Logic
+const itemsSelectorSearch = useItemsSelectorSearch({ getVM: getValidVM, scannerInput, itemSelection });
+const itemsSelectorSettings = useItemsSelectorSettings({ getVM: getValidVM, itemSync });
+const itemsSelectorFocus = useItemsSelectorFocus({ getVM: getValidVM, scannerInput, itemSelection });
 
-		const { last_background_sync_time } = itemSync;
+// Last Invoice Rate
+const {
+	lastInvoiceRates,
+	lastInvoiceRateLoading,
+	getLastInvoiceRate,
+	scheduleLastInvoiceRateRefresh,
+	fetchLastInvoiceRates,
+	clearLastInvoiceRateCache,
+} = useLastInvoiceRate({
+	pos_profile: () => pos_profile.value,
+	customer: () => selectedCustomer.value,
+	displayedItems: () => displayedItems.value,
+	show_last_invoice_rate: () => show_last_invoice_rate.value,
+	autoRefresh: true,
+});
 
-		const { storageAvailable, itemWorker, ensureStorageHealth, markStorageUnavailable, startItemWorker } =
-			useItemStorageSafety();
+// 5. Computed logic
+const usesLimitSearch = computed(() => {
+	const rawValue = pos_profile.value?.pose_use_limit_search ?? pos_profile.value?.posa_use_limit_search;
+	if (typeof rawValue === "string") return ["1", "true", "yes"].includes(rawValue.trim().toLowerCase());
+	return Boolean(rawValue);
+});
 
-		const {
-			ensureBarcodeIndex,
-			resetBarcodeIndex,
-			indexItem,
-			replaceBarcodeIndex,
-			lookupItemByBarcode,
-			searchItemsByCode: searchItemsByCodeFn,
-		} = useBarcodeIndexing();
+const blockSaleBeyondAvailableQty = computed(() =>
+	parseBooleanSetting(pos_profile.value?.posa_block_sale_beyond_available_qty),
+);
 
-		const add_item = async (item, options = {}) => {
-			// In 'pos' context, we use the internal store logic directly
-			if (props.context === "pos") {
-				const vm = getValidVM();
-				if (!vm) return;
+const { items, filteredItems, customer_price_list, itemsLoaded, loading, isBackgroundLoading } = itemsIntegration;
 
-				// 1. Determine requested quantity from options or component state
-				let requestedQty = options.qty !== undefined ? options.qty : vm.qty;
+const displayedItems = computed(() => {
+	const baseItems = Array.isArray(filteredItems.value) ? filteredItems.value : [];
+	const term = first_search.value.trim().toLowerCase();
+	return filterAndPaginate(baseItems, {
+		searchTerm: term,
+		hideZeroRate: hide_zero_rate_items.value,
+		hideVariants: pos_profile.value?.posa_hide_variants_items,
+		onlyBarcode: showOnlyBarcodeItemsRef.value,
+		limit: enable_custom_items_per_page.value ? items_per_page.value : itemsPerPage.value,
+	});
+});
 
-				// Robust quantity parsing (Math.abs("") is 0, which we want to avoid)
-				if (requestedQty === "" || requestedQty == null) {
-					requestedQty = 1;
-				} else {
-					requestedQty = Math.abs(parseFloat(requestedQty) || 1);
-				}
+const debounce_qty = computed({
+	get() {
+		if (qty.value === null || qty.value === "") return "";
+		return pos_profile.value?.posa_hide_qty_decimals ? Math.trunc(qty.value) : qty.value;
+	},
+	set(value) {
+		let parsed = parseFloat(String(value).replace(/,/g, ""));
+		if (isNaN(parsed)) parsed = null;
+		if (pos_profile.value?.posa_hide_qty_decimals && parsed != null) parsed = Math.trunc(parsed);
+		qty.value = parsed;
+	},
+});
 
-				// Create a shallow copy to avoid mutating the reactive list
-				item = { ...item };
+const isLoadingOrSyncing = computed(() => loading.value || isBackgroundLoading.value || itemsIntegration.refreshInFlight?.value);
 
-				// Handle variant items
-				if (item.has_variants) {
-					await itemAddition.handleVariantItem(item, vm);
-					return;
-				}
+// 6. Detailed Item Addition Logic
+const add_item = async (item, options = {}) => {
+	if (props.context === "pos") {
+		let requestedQty = options.qty !== undefined ? options.qty : qty.value;
+		requestedQty = (requestedQty === "" || requestedQty == null) ? 1 : Math.abs(parseFloat(requestedQty) || 1);
 
-				// Use a Proxy to create a robust context that delegates to the component instance
-				// but allows local overrides and method binding
-				const context = new Proxy(vm, {
-					// ... (rest of proxy kept)
-					get(target, prop, receiver) {
-						// 1. Check options override
-						if (options && options[prop] !== undefined) {
-							return options[prop];
-						}
-						// 2. Map specific missing methods/properties
-						if (prop === "update_items_details") {
-							return vm.itemDetailFetcher?.update_items_details;
-						}
-						if (prop === "itemCurrencyUtils") {
-							return vm.itemCurrencyUtils;
-						}
-						if (prop === "items") {
-							// Map 'items' to invoiceStore items for merge logic (ItemsSelector uses 'items' for search results)
-							return vm.invoiceStore?.items || Reflect.get(target, "items", receiver);
-						}
+		item = { ...item };
+		if (item.has_variants) {
+			await itemAddition.handleVariantItem(item, {
+				pos_profile: pos_profile.value,
+				itemDetailFetcher,
+				add_item,
+				items: items.value,
+				invoiceStore,
+				toastStore,
+				uiStore,
+				customer: selectedCustomer.value,
+				active_price_list: itemsIntegration.active_price_list.value,
+				customer_price_list: customer_price_list.value,
+			});
+			return;
+		}
 
-						// Specific methods expected by useItemAddition / useStockUtils
-						if (prop === "setBatchQty" || prop === "set_batch_qty") {
-							return (...args) => vm.eventBus.emit("set_batch_qty", ...args);
-						}
-						if (prop === "setSerialNo" || prop === "set_serial_no") {
-							return (...args) => vm.eventBus.emit("set_serial_no", ...args);
-						}
-						if (prop === "calc_uom" || prop === "calcUom") {
-							return (...args) => vm.eventBus.emit("calc_uom", ...args);
-						}
-						if (prop === "calc_stock_qty" || prop === "calcStockQty") {
-							return (...args) => vm.eventBus.emit("calc_stock_qty", ...args);
-						}
-						if (prop === "triggerBackgroundFlush") {
-							return (...args) => vm.eventBus.emit("trigger_background_flush", ...args);
-						}
-						if (prop === "forceUpdate") {
-							return () => vm.$forceUpdate?.();
-						}
-
-						// 3. Delegate to component instance
-						const value = Reflect.get(target, prop, receiver);
-						// Bind functions to the original VM to ensure 'this' context is correct
-						if (typeof value === "function") {
-							return value.bind(target);
-						}
-						return value;
-					},
-					// Allow writing specific properties back to the VM (e.g. cache)
-					set(target, prop, value, receiver) {
-						// We can allow all writes to flow through to the VM, or restrict them.
-						// useItemAddition writes to _mergeIndexCache, items (via push/splice), etc.
-						return Reflect.set(target, prop, value, receiver);
-					},
-				});
-
-				// 2. Validate item before adding to cart
-				const { suppressNegativeWarning = false } = options;
-				if (props.context !== "purchase") {
-					const isValid = await cartValidation.validateCartItem(
-						item,
-						requestedQty,
-						vm.pos_profile,
-						vm.stock_settings,
-						null, // EventBus removed
-						blockSaleBeyondAvailableQty.value,
-						!suppressNegativeWarning,
-						true, // Skip server-side validation for instant add
-					);
-
-					if (!isValid) {
-						// Validation failed, error message already shown by validator
-						return;
-					}
-				}
-
-				// 3. Prepare item for cart (UOM, rate, qty)
-				await itemAddition.prepareItemForCart(item, requestedQty, context);
-
-				// 4. Add to cart
-				const result = await itemAddition.addItem(item, context);
-
-				// 5. Reset quantity in component
-				vm.qty = 1;
-
-				return result;
-			} else {
-				// In other contexts (e.g. Purchase Orders), we emit the event for the parent to handle
-				emit("add-item", item);
-			}
-		};
-
-		// Define computed properties for settings needed by scan processor
-		const posProfile = itemsIntegration.posProfile;
-		const searchCache = ref(new Map());
-
-		const float_precision = computed(() => {
-			const raw =
-				posProfile.value?.currency_precision || itemsIntegration.posProfile.value?.float_precision;
-			return raw !== undefined ? raw : 2;
-		});
-
-		const currency_precision = computed(() => posProfile.value?.currency_precision || 2);
-
-		const hide_qty_decimals = computed(() =>
-			posProfile.value?.posa_hide_qty_decimals ? !!posProfile.value.posa_hide_qty_decimals : false,
-		);
-
-		const blockSaleBeyondAvailableQty = computed(() =>
-			posProfile.value
-				? parseBooleanSetting(posProfile.value.posa_block_sale_beyond_available_qty)
-				: false,
-		);
-
-		const exchange_rate = computed(() => 1); // Default, update if needed from store
-
-		// Initialize useScanProcessor with context
-		const scanProcessor = useScanProcessor({
-			items: itemsIntegration.items,
-			pos_profile: posProfile, // Corrected variable name
-			active_price_list: itemsIntegration.active_price_list,
-			customer_price_list: itemsIntegration.customer_price_list,
-			itemDetailFetcher,
-			itemAddition: { addItem: add_item }, // Pass wrapper for correct context
-			barcodeIndex: {
-				lookupItemByBarcode,
-				searchItemsByCode: searchItemsByCodeFn,
-				ensureBarcodeIndex,
-				replaceBarcodeIndex,
-				indexItem,
-				resetBarcodeIndex,
-			},
-			scannerInput,
-			searchCache, // Use local ref
-			eventBus: getValidVM()?.eventBus || { emit: () => {} }, // Fallback safely
-			format_number: getValidVM()?.format_number || ((v) => v),
-			float_precision,
-			hide_qty_decimals,
-			blockSaleBeyondAvailableQty,
-			currency_precision,
-			exchange_rate,
-			format_currency: getValidVM()?.format_currency || ((v) => v),
-			ratePrecision: getValidVM()?.ratePrecision || (() => 2),
-			customer: itemsIntegration.customer,
-			// Callbacks or methods expected by processor
-			add_item_wrapper: add_item,
-			search_from_scanner_ref: scannerInput.search_from_scanner || ref(false), // scannerInput might have it, or create local
-			get_search: (code) => (getValidVM()?.get_search ? getValidVM().get_search(code) : code),
-			get_item_qty: (code) => (getValidVM()?.get_item_qty ? getValidVM().get_item_qty(code) : 1),
-			onItemAdded: () => {
-				const vm = getValidVM();
-				if (vm) {
-					vm.clearSearch();
-					vm.focusItemSearch();
-				}
-			},
-			onItemNotFound: (code) => {
-				// itemsIntegration might not expose these direct refs if they are wrapped in 'search' computed
-				// But let's try to set search value
-				if (getValidVM()) {
-					getValidVM().search = code;
-					getValidVM().first_search = code;
-				}
-			},
-			stock_settings: getValidVM()?.stock_settings, // might be undefined in setup, check lifecycle
-		});
-
-		// Register scan handler
-		onMounted(() => {
-			if (scannerInput && scannerInput.setScanHandler) {
-				scannerInput.setScanHandler(scanProcessor.processScannedItem);
-			}
-		});
-
-
-		// Register context for itemSelection
-		itemSelection.registerContext({
-			addItem: add_item,
-			clearSearch: itemsSelectorSearch.clearSearch,
-			focusItemSearch: itemsSelectorFocus.focusItemSearch,
-			fly,
-			get flyConfig() {
-				return getValidVM()?.flyConfig;
-			},
-			get displayedItems() {
-				return getValidVM()?.displayedItems || [];
-			},
-		});
-
-		return {
-			select_item: itemSelection.handleItemSelection,
-			click_item_row: itemSelection.handleRowClick,
-			add_item,
-			...responsive,
-			...rtl,
-			fly,
-			cartValidation,
-
-			// Layout
-			windowWidth,
-			isOverflowing,
-			itemsContainerRef,
-			cardColumns,
-			cardGap,
-			cardPadding,
-			cardRowHeight,
-			cardSlotHeight,
-			cardSlotWidth,
-			cardColumnWidth,
-			checkItemContainerOverflow,
-			scheduleCardMetricsUpdate,
-			handleListScroll,
-			...itemsIntegration,
-			...itemsSelectorSearch,
-			selectedCustomer,
-			toastStore,
-			uiStore,
+		const context = {
+			pos_profile: pos_profile.value,
+			stock_settings: stock_settings.value,
+			customer: selectedCustomer.value,
 			invoiceStore,
-			// Expose search composable
-			showOnlyBarcodeItemsRef,
-			memoizedSearch,
-			clearSearchCache,
-			fetchServerItemsTimestamp,
-			filterAndPaginate,
-			// Expose currency utils
-			itemCurrencyUtils: useItemCurrency(),
-			// Expose scanner input
-			scannerInput,
-			// Expose scanner state and methods for Template/Options API
-			scannerLocked: scannerInput.scannerLocked,
-			last_background_sync_time,
-			scanErrorDialog: scannerInput.scanErrorDialog,
-			scanErrorMessage: scannerInput.scanErrorMessage,
-			scanErrorCode: scannerInput.scanErrorCode,
-			scanErrorDetails: scannerInput.scanErrorDetails,
-			cameraScannerActive: scannerInput.cameraScannerActive,
-			acknowledgeScanError: scannerInput.acknowledgeScanError,
-			onBarcodeScanned: scannerInput.onBarcodeScanned,
-			// Expose scale barcode methods
-			ensureScaleBarcodeSettings: scannerInput.ensureScaleBarcodeSettings,
-			updateScaleBarcodeSettings: scannerInput.updateScaleBarcodeSettings,
-			getScaleBarcodePrefix: scannerInput.getScaleBarcodePrefix,
-			scaleBarcodeMatches: scannerInput.scaleBarcodeMatches,
-			playScanTone: scannerInput.playScanTone,
-			// Expose item availability
-			itemAvailability,
 			itemDetailFetcher,
-			itemSelection,
-			...itemSelection,
-			itemSync,
-			...itemsSelectorSearch,
-			...itemsSelectorSettings,
-			...itemsSelectorFocus,
-
-			// Batch/Serial methods
-			setBatchQty,
-			setSerialNo,
-			getBatchAvailability,
-			// Expose Scan Processor (replaces processScannedItem)
-			scanProcessor,
-			processScannedItem: scanProcessor.processScannedItem,
-			addScannedItemToInvoice: scanProcessor.addScannedItemToInvoice,
-			showMultipleItemsDialog: scanProcessor.showMultipleItemsDialog,
-			// Last Invoice Rate
-			lastInvoiceRates,
-			lastInvoiceRateLoading,
-			getLastInvoiceRate,
-			scheduleLastInvoiceRateRefresh,
-			fetchLastInvoiceRates,
-			clearLastInvoiceRateCache,
-			clearLastInvoiceRateCache,
-			// Storage Safety
-			storageAvailable,
-			itemWorker,
-			ensureStorageHealth,
-			markStorageUnavailable,
-			startItemWorker,
-			// Barcode Indexing
-			ensureBarcodeIndex,
-			resetBarcodeIndex,
-			indexItem,
-			replaceBarcodeIndex,
-			lookupItemByBarcode,
-			searchItemsByCodeFn,
-			itemDisplay,
-			itemsLoader,
+			items: invoiceStore.items,
+			...options,
 		};
-	},
-	components: {
-		CameraScanner,
-		ItemActionToolbar,
-		ItemSettingsDialog,
-		ItemHeader,
-		ItemsSelectorCards,
-		ItemsSelectorTable,
-		NewItemDialog,
-		ScanErrorDialog,
-	},
-	props: {
-		context: {
-			type: String,
-			default: "pos", // 'pos', 'purchase'
-		},
-		showOnlyBarcodeItems: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	data: () => ({
-		newItemDialog: false,
-		// newItemForm and uom_list moved to NewItemDialog.vue
-		pos_profile: {},
-		stock_settings: {},
-		flags: {},
-		customer: "",
-		items_view: "list",
-		first_search: "",
-		search_input: "",
-		search_backup: "",
-		// Limit the displayed items to avoid overly large lists
-		itemsPerPage: 50,
-		offersCount: 0,
-		appliedOffersCount: 0,
-		couponsCount: 0,
-		appliedCouponsCount: 0,
-		new_line: false,
-		qty: 1,
-		background_sync_timer: null,
-		background_sync_in_flight: false,
-		// last_background_sync_time: null, // Managed by composable
-		background_sync_details_in_flight: false,
-		abortController: null,
-		itemDetailsRequestCache: { key: null, promise: null, result: null },
-		itemDetailsRetryCount: 0,
-		itemDetailsRetryTimeout: null,
-		selected_currency: "",
-		exchange_rate: 1,
-		conversion_rate: 1,
-		prePopulateInProgress: false,
-		// itemWorker: null, // Managed by composable
-		flyConfig: { speed: 0.6, easing: "ease-in-out" },
-		// storageAvailable: true, // Managed by composable
-		localStorageAvailable: true,
-		stockUnsubscribe: null,
-		items_request_token: 0,
-		pendingGetItems: null,
-		lastGetItemsKey: "",
-		show_item_settings: false,
-		hide_qty_decimals: false,
-		temp_hide_qty_decimals: false,
-		hide_zero_rate_items: false,
-		temp_hide_zero_rate_items: false,
-		show_last_invoice_rate: true,
-		temp_show_last_invoice_rate: true,
-		enable_background_sync: true,
-		temp_enable_background_sync: true,
-		background_sync_interval: 30,
-		temp_background_sync_interval: 30,
-		isDragging: false,
-		// Items per page configuration
-		enable_custom_items_per_page: false,
-		temp_enable_custom_items_per_page: false,
-		items_per_page: 50,
-		temp_items_per_page: 50,
-		temp_force_server_items: false,
-		virtualScrollEnabled: true,
-		virtualScrollBuffer: 200,
-		renderBuffer: 10,
-		lastScrollTop: 0,
-		scrollThrottle: null,
-		searchDebounce: null,
-		// Prevent repeated server fetches when local storage is empty
-		fallbackAttempted: false,
-		cardContainerWidth: 0,
-		virtualScrollPending: false,
-		metricsRaf: null,
-		// Fixed page size for incremental item loading to avoid
-		// pulling the entire catalog at once.
-		itemsPageLimit: 100,
-		// Track if the current search was triggered by a scanner
-		pendingItemSearch: null,
-		loadProgress: 0,
-		totalItemCount: 0,
-		// Scanner state managed by useScannerInput
-		refreshInFlight: false,
-		clearingSearch: false,
 
-		// lastInvoiceRates removed (moved to composable)
-		// lastInvoiceRateScheduler removed
-	}),
-
-	watch: {
-		search_input(newValue) {
-			this.first_search = newValue;
-			this.clearHighlightedItem();
-			this.search_onchange();
-		},
-		customer: _.debounce(function () {
-			if (!this.customer) {
-				this.clearLastInvoiceRateCache();
-			}
-			this.scheduleLastInvoiceRateRefresh();
-
-			if (this.pos_profile.posa_force_reload_items) {
-				if (this.pos_profile.posa_smart_reload_mode) {
-					// When limit search is enabled there may be no items yet.
-					// Fallback to full reload if nothing is loaded
-					if (!this.itemsLoaded || !this.displayedItems.length) {
-						if (!isOffline()) {
-							this.get_items(true);
-						} else {
-							if (
-								this.pos_profile &&
-								(!this.pos_profile.posa_local_storage || !this.storageAvailable)
-							) {
-								this.get_items(true);
-							} else {
-								this.get_items();
-							}
-						}
-					} else {
-						// Only refresh prices for visible items when smart reload is enabled
-						this.$nextTick(() => this.itemDetailFetcher.refreshPricesForVisibleItems());
-					}
-				} else {
-					// Fall back to full reload
-					if (!isOffline()) {
-						this.get_items(true);
-					} else {
-						if (
-							this.pos_profile &&
-							(!this.pos_profile.posa_local_storage || !this.storageAvailable)
-						) {
-							this.get_items(true);
-						} else {
-							this.get_items();
-						}
-					}
-				}
-				return;
-			}
-			// When the customer changes, avoid reloading all items.
-			// Simply refresh prices for visible items only
-			if (this.itemsLoaded && this.displayedItems && this.displayedItems.length > 0) {
-				this.$nextTick(() => this.itemDetailFetcher.refreshPricesForVisibleItems());
-			} else {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					this.get_items(true);
-				} else {
-					this.get_items();
-				}
-			}
-		}, 300),
-		customer_price_list: _.debounce(async function () {
-			if (this.pos_profile.posa_force_reload_items) {
-				if (this.pos_profile.posa_smart_reload_mode) {
-					// When limit search is enabled there may be no items yet.
-					// Fallback to full reload if nothing is loaded
-					if (!this.itemsLoaded || !this.items.length) {
-						if (!isOffline()) {
-							this.get_items(true);
-						} else {
-							this.get_items();
-						}
-					} else {
-						// Only refresh prices for visible items when smart reload is enabled
-						this.$nextTick(() => this.itemDetailFetcher.refreshPricesForVisibleItems());
-					}
-				} else {
-					// Fall back to full reload
-					if (!isOffline()) {
-						this.get_items(true);
-					} else {
-						this.get_items();
-					}
-				}
-				return;
-			}
-			// Apply cached rates if available for immediate update
-			if (this.itemsLoaded && this.items && this.items.length > 0) {
-				const cached = await getCachedPriceListItems(this.customer_price_list);
-				if (cached && cached.length) {
-					const map = {};
-					cached.forEach((ci) => {
-						map[ci.item_code] = ci;
-					});
-					this.items.forEach((it) => {
-						const ci = map[it.item_code];
-						if (ci) {
-							const force =
-								this.pos_profile?.posa_force_price_from_customer_price_list !== false;
-							const price = ci.price_list_rate ?? ci.rate ?? 0;
-							if (force || price) {
-								it.rate = price;
-								it.price_list_rate = price;
-							}
-						}
-					});
-					this.eventBus.emit("set_all_items", this.items);
-					this.itemDetailFetcher.update_items_details(this.items);
-					return;
-				}
-			}
-			// No cache found - force a reload so prices are updated
-			if (!isOffline()) {
-				this.get_items(true);
-			} else {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					this.get_items(true);
-				} else {
-					this.get_items();
-				}
-			}
-		}, 300),
-		new_line() {
-			this.eventBus.emit("set_new_line", this.new_line);
-		},
-		item_group(newValue, oldValue) {
-			if (this.usesLimitSearch && newValue !== oldValue) {
-				if (this.pos_profile && (!this.pos_profile.posa_local_storage || !this.storageAvailable)) {
-					this.get_items(true);
-				} else {
-					this.get_items();
-				}
-			} else if (this.pos_profile && this.pos_profile.posa_local_storage && newValue !== oldValue) {
-				if (this.storageAvailable) {
-					this.loadVisibleItems(true);
-				} else {
-					this.get_items(true);
-				}
-			}
-		},
-		displayedItems(new_value, old_value) {
-			// Update item details if items changed
-			if (!this.usesLimitSearch && new_value.length !== old_value.length) {
-				this.itemDetailFetcher.update_items_details(new_value);
-			}
-			this.$nextTick(() => {
-				this.checkItemContainerOverflow();
-				this.scheduleCardMetricsUpdate();
-			});
-			this.scheduleLastInvoiceRateRefresh();
-			this.itemSelection.syncHighlightedItem();
-		},
-		// Automatically search when the query has at least 3 characters
-		first_search: _.debounce(function (val, oldVal) {
-			if (this.clearingSearch) {
-				return;
-			}
-			const newLen = (val || "").trim().length;
-			const oldLen = (oldVal || "").trim().length;
-
-			// Check if we should trigger search
-			if (newLen >= 3) {
-				// Call without arguments so search_onchange treats it like an Enter key/Auto trigger
-				this.search_onchange();
-			} else if (oldLen >= 3 && newLen === 0) {
-				// Reset items only when search is fully cleared
-				this.clearSearch();
-			}
-		}, 300),
-
-		// Refresh item prices whenever the user changes currency
-		selected_currency() {
-			if (this.formatCache) this.formatCache.clear();
-			this.applyCurrencyConversionToItems();
-		},
-
-		// Also react when exchange rate is adjusted manually
-		exchange_rate() {
-			this.applyCurrencyConversionToItems();
-		},
-		windowWidth() {
-			// Keep the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-			this.scheduleCardMetricsUpdate();
-		},
-		windowHeight() {
-			// Maintain the configured items per page on resize
-			this.itemsPerPage = this.items_per_page;
-			this.scheduleCardMetricsUpdate();
-		},
-		itemsLoaded(val) {
-			if (val) {
-				this.eventBus.emit("itemsLoaded");
-				this.eventBus.emit("data-loaded", "items");
-			}
-		},
-		items_view() {
-			this.$nextTick(() => {
-				if (this.items_view === "card") {
-					this.checkItemContainerOverflow();
-					this.scheduleCardMetricsUpdate();
-				} else {
-					this.isOverflowing = false;
-				}
-			});
-		},
-	},
-
-	methods: {
-		openNewItemDialog() {
-			this.newItemDialog = true;
-		},
-		// Formatting delegates to useItemDisplay composable
-		ratePrecision(value) {
-			return this.itemDisplay.ratePrecision(value);
-		},
-		format_currency(value, currency, precision) {
-			return this.itemDisplay.format_currency(value, currency, precision);
-		},
-		format_number(value, precision) {
-			return this.itemDisplay.format_number(value, precision);
-		},
-		currencySymbol(currency) {
-			return this.itemDisplay.currencySymbol(currency);
-		},
-		hasDecimalPrecision(value) {
-			return this.itemDisplay.hasDecimalPrecision(value);
-		},
-		// get_uoms, closeNewItemDialog, submitNewItem moved to NewItemDialog.vue
-
-
-		async onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
-			return await this.itemsLoader.onVirtualRangeUpdate(
-				_startIndex,
-				_endIndex,
-				_visibleStartIndex,
-				visibleEndIndex,
-			);
-		},
-
-		// Optimized scroll handler with throttling
-
-
-		async loadVisibleItems(reset = false) {
-			return await this.itemsLoader.loadVisibleItems(reset);
-		},
-		onListScroll(event) {
-			this.handleListScroll(event);
-		},
-
-		// checkItemContainerOverflow removed (handled by composable)
-		// scheduleCardMetricsUpdate removed (handled by composable)
-
-		// scheduleLastInvoiceRateRefresh removed (handled by composable)
-		// refreshLastInvoiceRatesForVisibleItems removed
-		// fetchLastInvoiceRates removed
-		// getLastInvoiceRate removed (but used in template, so mapped in setup return, we should ensure it's available on 'this' context via composition API support or manual mapping if not using <script setup>)
-		// Since we are using Options API with setup(), setup returns are exposed to template AND 'this'.
-
-		show_offers() {
-			this.eventBus.emit("show_offers", "true");
-		},
-		show_coupons() {
-			this.eventBus.emit("show_coupons", "true");
-		},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		onDragStart(event, item) {
-			this.isDragging = true;
-
-			// Set drag data
-			event.dataTransfer.setData(
-				"application/json",
-				JSON.stringify({
-					type: "item-from-selector",
-					item: item,
-				}),
-			);
-
-			// Set drag effect
-			event.dataTransfer.effectAllowed = "copy";
-
-			// Update store state for feedback
-			this.uiStore.setDraggedItem(item);
-		},
-		onDragEnd(event) {
-			this.isDragging = false;
-			// Reset store state
-			this.uiStore.setDraggedItem(null);
-		},
-		// ensureStorageHealth, markStorageUnavailable, startItemWorker moved to useItemStorageSafety.js
-	},
-
-	computed: {
-		usesLimitSearch() {
-			const rawValue =
-				this.pos_profile?.pose_use_limit_search ?? this.pos_profile?.posa_use_limit_search;
-
-			if (typeof rawValue === "string") {
-				const normalized = rawValue.trim().toLowerCase();
-				return normalized === "1" || normalized === "true" || normalized === "yes";
-			}
-
-			if (typeof rawValue === "number") {
-				return rawValue === 1;
-			}
-
-			return Boolean(rawValue);
-		},
-		limitSearchCap() {
-			if (!this.usesLimitSearch) {
-				return null;
-			}
-
-			const rawLimit = this.pos_profile?.posa_search_limit;
-			const parsed = parseInt(rawLimit, 10);
-
-			if (Number.isFinite(parsed) && parsed > 0) {
-				return parsed;
-			}
-
-			return 500;
-		},
-		blockSaleBeyondAvailableQty() {
-			return parseBooleanSetting(this.pos_profile?.posa_block_sale_beyond_available_qty);
-		},
-		displayedItems() {
-			// PERF: Avoid unnecessary array cloning ([...this.filteredItems]) as it creates garbage and O(N) cost on every render
-			const baseItems = Array.isArray(this.filteredItems) ? this.filteredItems : [];
-			const searchTerm = this.get_search(this.first_search).trim().toLowerCase();
-
-			return this.filterAndPaginate(baseItems, {
-				searchTerm,
-				hideZeroRate: this.hide_zero_rate_items,
-				hideVariants: this.pos_profile?.posa_hide_variants_items,
-				onlyBarcode: this.showOnlyBarcodeItemsRef,
-				limit: this.enable_custom_items_per_page ? this.items_per_page : this.itemsPerPage,
-			});
-		},
-		debounce_qty: {
-			get() {
-				// Display the raw quantity while typing to avoid forced decimal format
-				if (this.qty === null || this.qty === "") return "";
-				return this.hide_qty_decimals ? Math.trunc(this.qty) : this.qty;
-			},
-			set(value) {
-				let parsed = parseFloat(String(value).replace(/,/g, ""));
-				if (isNaN(parsed)) {
-					parsed = null;
-				}
-				if (this.hide_qty_decimals && parsed != null) {
-					parsed = Math.trunc(parsed);
-				}
-				this.qty = parsed;
-			},
-		},
-		headers() {
-			return this.itemDisplay.headers.value;
-		},
-		memoizedFormatCurrency() {
-			return this.itemDisplay.memoizedFormatCurrency.value;
-		},
-		memoizedFormatNumber() {
-			return this.itemDisplay.memoizedFormatNumber.value;
-		},
-		active_price_list() {
-			return this.customer_price_list || (this.pos_profile && this.pos_profile.selling_price_list);
-		},
-		isLoadingOrSyncing() {
-			return this.loading || this.isBackgroundLoading || this.refreshInFlight;
-		},
-	},
-
-	async created() {
-		const vm = this;
-		// Performance optimizations - non-reactive caches
-		this.searchCache = new Map();
-		this.itemCache = new Map();
-		this.formatCache = new Map();
-
-		// Initialize Composables
-		// this.lastInvoiceRate = useLastInvoiceRate(); // Initialized in setup()
-
-		// Initialize Availability Composable
-		this.itemAvailability.registerCallbacks({
-			getItems: () => this.items,
-			getDisplayedItems: () => this.displayedItems,
-			getFilteredItems: () => this.filteredItems,
-			updateItemsDetails: (items, options) =>
-				this.itemDetailFetcher.update_items_details(items, options),
-		});
-		this.itemAvailability.initAvailability();
-
-		// Configure Item Display with component context
-		this.itemDisplay.registerContext({
-			get context() {
-				return vm.context;
-			},
-			get pos_profile() {
-				return vm.pos_profile;
-			},
-			get float_precision() {
-				return vm.float_precision;
-			},
-			get currency_precision() {
-				return vm.currency_precision;
-			},
-			get exchange_rate() {
-				return vm.exchange_rate;
-			},
-			formatCurrencyPlain: (v, p) => this.formatCurrencyPlain(v, p),
-			formatFloatPlain: (v, p) => this.formatFloatPlain(v, p),
-		});
-
-		// Configure Items Loader with component context
-		this.itemsLoader.registerContext({
-			get eventBus() {
-				return vm.eventBus;
-			},
-			get itemsStore() {
-				return vm.itemsStore;
-			},
-			get itemDetailFetcher() {
-				return vm.itemDetailFetcher;
-			},
-			get ensureStorageHealth() {
-				return vm.ensureStorageHealth;
-			},
-			get loadItems() {
-				return vm.loadItems;
-			},
-			get appendCachedItemsPage() {
-				return vm.appendCachedItemsPage;
-			},
-			get get_search() {
-				return vm.get_search;
-			},
-			get first_search() {
-				return vm.first_search;
-			},
-			get item_group() {
-				return vm.item_group;
-			},
-			get usesLimitSearch() {
-				return vm.usesLimitSearch;
-			},
-			get limitSearchCap() {
-				return vm.limitSearchCap;
-			},
-			get items() {
-				return vm.items;
-			},
-			get totalItemCount() {
-				return vm.totalItemCount;
-			},
-			get displayedItems() {
-				return vm.displayedItems;
-			},
-			get cardColumns() {
-				return vm.cardColumns;
-			},
-			get hasMoreCachedItems() {
-				return vm.hasMoreCachedItems;
-			},
-			get loading() {
-				return vm.loading;
-			},
-			scheduleCardMetricsUpdate: () => vm.scheduleCardMetricsUpdate(),
-		});
-
-		// Configure Item Detail Fetcher with component context (Late Binding)
-		this.itemDetailFetcher.registerContext({
-			get pos_profile() {
-				return vm.pos_profile;
-			},
-			get active_price_list() {
-				return vm.active_price_list;
-			},
-			get items() {
-				return vm.items;
-			},
-			get displayedItems() {
-				return vm.displayedItems;
-			},
-			itemAvailability: this.itemAvailability,
-			itemCurrencyUtils: this.itemCurrencyUtils,
-			get usesLimitSearch() {
-				return vm.usesLimitSearch;
-			},
-			get storageAvailable() {
-				return vm.storageAvailable;
-			},
-			markStorageUnavailable: (args) => vm.markStorageUnavailable(args),
-			applyCurrencyConversionToItem: (item) => vm.applyCurrencyConversionToItem(item),
-			forceUpdate: () => vm.$forceUpdate(),
-		});
-
-		// Configure Item Selection with component context
-		this.itemSelection.registerContext({
-			get items() {
-				return vm.items;
-			},
-			get displayedItems() {
-				return vm.displayedItems;
-			},
-			addItem: (item) => vm.add_item(item),
-			clearSearch: () => vm.clearSearch(),
-			focusItemSearch: () => vm.focusItemSearch(),
-			fly: this.fly,
-			get flyConfig() {
-				return vm.flyConfig;
-			},
-			get items_view() {
-				return vm.items_view;
-			},
-		});
-
-		// Configure Scanner Input with component handler
-		this.scannerInput.setScanHandler((code) => this.processScannedItem(code));
-
-		// Configure Item Sync with component context
-		this.itemSync.registerContext({
-			get pos_profile() {
-				return vm.pos_profile;
-			},
-			get enable_background_sync() {
-				return vm.enable_background_sync;
-			},
-			get background_sync_interval() {
-				return vm.background_sync_interval;
-			},
-			get usesLimitSearch() {
-				return vm.usesLimitSearch;
-			},
-			itemsPageLimit: this.itemsPageLimit,
-			refreshModifiedItems: () => this.refreshModifiedItems(),
-			backgroundSyncItems: (args) => {
-				const normalizedSearch = this.get_search(this.first_search || "").trim();
-				return this.backgroundSyncItems({
-					groupFilter: this.item_group,
-					searchValue: normalizedSearch,
-					...args,
-				});
-			},
-			get_items: (force) => this.get_items(force),
-			search_onchange: (val) => this.search_onchange(val),
-			itemDetailFetcher: this.itemDetailFetcher,
-			eventBus: this.eventBus,
-			fetchServerItemsTimestamp: () => this.fetchServerItemsTimestamp(),
-			getItems: () => this.items,
-			getDisplayedItems: () => this.displayedItems,
-			onBackgroundLoadFinished: () => {
-				const pendingSearch = this.pendingItemSearch;
-				this.pendingItemSearch = null;
-				if (pendingSearch) {
-					this.search_onchange(pendingSearch);
-					if (this.search_onchange.flush) {
-						this.search_onchange.flush();
-					}
-					return;
-				}
-
-				if (this.pendingGetItems) {
-					const { force_server: forceServer } = this.pendingGetItems;
-					this.pendingGetItems = null;
-					this.get_items(!!forceServer);
-				}
-			},
-		});
-
-		// Watch for highlighted index changes (triggered by keyboard nav in composable)
-		this.$watch(
-			() => this.itemSelection.highlightedIndex,
-			(newIndex) => {
-				this.scrollHighlightedItemIntoView(newIndex);
-			},
+		const isValid = await cartValidation.validateCartItem(
+			item, requestedQty, pos_profile.value, stock_settings.value,
+			null, blockSaleBeyondAvailableQty.value, !options.suppressNegativeWarning, true
 		);
 
-		// Initialize the Pinia store with existing POS profile data
-		if (this.pos_profile && this.pos_profile.name) {
-			await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
-			console.log("Pinia store initialized successfully");
-		} else {
-			// Try to find POS profile from global state if missing in local data
-			if (frappe.boot && frappe.boot.pos_profile) {
-				this.pos_profile = frappe.boot.pos_profile;
-			} else if (window.cur_pos && window.cur_pos.pos_profile) {
-				this.pos_profile = window.cur_pos.pos_profile;
-			}
-
-			if (this.pos_profile && this.pos_profile.name) {
-				await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
-
-				// Start workers now that we have profile
-				this.startItemWorker();
-				this.itemDetailFetcher.update_cur_items_details();
-				this.itemSync.startBackgroundSyncScheduler();
-
-				console.log("Pinia store initialized successfully (from global state)");
-			}
+		if (isValid) {
+			await itemAddition.prepareItemForCart(item, requestedQty, context);
+			await itemAddition.addItem(item, context);
+			qty.value = 1;
 		}
-
-		// Keep legacy initialization for backward compatibility
-		this.replaceBarcodeIndex(this.items || []);
-
-		// Setup search debounce (now handled by store, but keeping for compatibility)
-		this.searchDebounce = _.debounce(() => {
-			// Removed get_items() - handled by store
-		}, 300);
-
-		// Load settings
-		this.loadItemSettings();
-		this.itemSync.ensureBackgroundSyncBaseline();
-		await this.scannerInput.ensureScaleBarcodeSettings();
-
-		// Initialize after memory is ready
-		memoryInitPromise.then(async () => {
-			try {
-				// Ensure POS profile is available
-				if (!this.pos_profile || !this.pos_profile.name) {
-					// Try to get POS profile from boot or current route
-					if (frappe.boot && frappe.boot.pos_profile) {
-						this.pos_profile = frappe.boot.pos_profile;
-					} else if (frappe.router && frappe.router.current_route) {
-						// Get from current route context
-						const route_context = frappe.router.current_route;
-						if (route_context.pos_profile) {
-							this.pos_profile = route_context.pos_profile;
-						}
-					}
-
-					// Final fallback to server/cache
-					if (!this.pos_profile || !this.pos_profile.name) {
-						this.pos_profile = await ensurePosProfile();
-					}
-
-					// Initialize store with fallback profile
-					if (this.pos_profile && this.pos_profile.name) {
-						await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
-					}
-				}
-
-				// Load initial items if we have a profile (now handled by store)
-				if (this.pos_profile && this.pos_profile.name) {
-					console.log("Loading items with POS Profile:", this.pos_profile.name);
-					// Removed get_items_groups() - handled by store
-					// Removed initializeItems() - handled by store initialization
-				} else {
-					console.warn("No POS Profile available during initialization");
-				}
-			} catch (error) {
-				console.error("Error during initialization:", error);
-			}
-
-			// Start workers if we have profile
-			if (this.pos_profile && this.pos_profile.name) {
-				this.startItemWorker();
-				this.itemDetailFetcher.update_cur_items_details();
-				this.itemSync.startBackgroundSyncScheduler();
-			}
-		});
-
-		// Event listeners - consolidated with store watchers
-
-		// Watch Store for Profile
-		this.$watch(
-			() => this.uiStore.posProfile,
-			async (newProfile) => {
-				if (newProfile && newProfile.name) {
-					this.pos_profile = newProfile;
-					await this.initializeStore(this.pos_profile, this.customer, this.customer_price_list);
-					this.startItemWorker();
-					this.itemDetailFetcher.update_cur_items_details();
-					this.itemSync.startBackgroundSyncScheduler();
-
-					await this.scannerInput.ensureScaleBarcodeSettings(true);
-					await this.scannerInput.ensureScaleBarcodeSettings(true);
-					// Removed get_items_groups() - handled by store
-					// Removed initializeItems() - handled by store initialization
-					this.items_view = this.pos_profile.posa_default_card_view ? "card" : "list";
-				}
-			},
-			{ deep: true, immediate: true },
-		);
-
-		// Store Watchers for UI Updates
-		this.$watch(
-			() => this.uiStore.offersCount,
-			(val) => {
-				this.offersCount = val;
-			},
-		);
-		this.$watch(
-			() => this.uiStore.appliedOffersCount,
-			(val) => {
-				this.appliedOffersCount = val;
-			},
-		);
-		this.$watch(
-			() => this.uiStore.couponsCount,
-			(val) => {
-				this.couponsCount = val;
-			},
-		);
-		this.$watch(
-			() => this.uiStore.appliedCouponsCount,
-			(val) => {
-				this.appliedCouponsCount = val;
-			},
-		);
-
-		// Watch Invoice for Quantities
-		this.eventBus.on("cart_quantities_updated", this.itemAvailability.handleCartQuantitiesUpdated);
-
-		// Watch for Settings Toggle
-		this.$watch(
-			() => this.uiStore.showItemSettings,
-			(val) => {
-				this.show_item_settings = val;
-			},
-		);
-		this.$watch(
-			() => this.show_item_settings,
-			(val) => {
-				if (val !== this.uiStore.showItemSettings) {
-					this.uiStore.setItemSettings(val);
-				}
-			},
-		);
-
-		// Watch for Top Item Selection
-		this.$watch(
-			() => this.uiStore.triggerTopItemSelection,
-			() => {
-				this.selectTopItem();
-			},
-		);
-
-		// Watch for Force Reload
-		this.$watch(
-			() => this.uiStore.forceReloadTrigger,
-			async () => {
-				await this.ensureStorageHealth();
-				if (!isOffline()) {
-					if (
-						this.pos_profile &&
-						(!this.pos_profile.posa_local_storage || !this.storageAvailable)
-					) {
-						await forceClearAllCache();
-					}
-					await this.refreshItems(); // Use Store refreshItems
-				} else {
-					if (
-						this.pos_profile &&
-						(!this.pos_profile.posa_local_storage || !this.storageAvailable)
-					) {
-						await forceClearAllCache();
-						await this.refreshItems(); // Use Store refreshItems
-					} else {
-						// Store handles offline load automatically or via cached items
-						// No need to call legacy get_items
-					}
-				}
-			},
-		);
-
-		// Watch for Stock Adjustments (replacing invoice_stock_adjusted event)
-		this.$watch(
-			() => this.uiStore.lastStockAdjustment,
-			(val) => {
-				if (val) {
-					this.itemAvailability.handleInvoiceStockAdjusted(val);
-				}
-			},
-		);
-
-		// Legacy support: update_cur_items_details is handled internally or via invoice updates
-		// update_customer_price_list is handled by useItemsIntegration via itemsStore watcher
-
-		// Trigger focus on item search
-		this.$watch(
-			() => this.uiStore.searchFocusTrigger,
-			() => {
-				this.focusItemSearch();
-			},
-		);
-
-		this.eventBus.on("server-online", async () => {
-			if (this.items && this.items.length > 0) {
-				await this.itemDetailFetcher.update_items_details(this.items);
-			}
-			await this.performBackgroundSync({ source: "server-online" });
-		});
-
-		// Workers are now started in memoryInitPromise.then or register_pos_profile
-
-		// Add new event listener for currency changes
-		this.eventBus.on("update_currency", (data) => {
-			this.selected_currency = data.currency;
-			this.exchange_rate = data.exchange_rate;
-			this.conversion_rate = data.conversion_rate ?? this.conversion_rate ?? 1;
-
-			// Refresh visible item prices when currency changes
-			this.applyCurrencyConversionToItems();
-			this.itemDetailFetcher.update_cur_items_details();
-		});
-	},
-
-	async mounted() {
-		this.$watch(
-			() => this.selectedCustomer,
-			(newCustomer) => {
-				const normalized = newCustomer || "";
-				if (this.customer !== normalized) {
-					this.customer = normalized;
-				}
-			},
-			{ immediate: true },
-		);
-		// Ensure POS profile is available
-		if (!this.pos_profile || !this.pos_profile.name) {
-			try {
-				// Try to get from global frappe context
-				if (frappe.boot && frappe.boot.pos_profile) {
-					this.pos_profile = frappe.boot.pos_profile;
-				} else if (window.cur_pos && window.cur_pos.pos_profile) {
-					this.pos_profile = window.cur_pos.pos_profile;
-				}
-			} catch (error) {
-				console.warn("Could not get POS profile in mounted:", error);
-			}
-		}
-
-		// Load items if we have a profile and haven't loaded yet
-		if (this.pos_profile && this.pos_profile.name && !this.itemsLoaded) {
-			// Removed get_items_groups() - handled by store
-			// Only load all items if NOT using limit search (memory optimization)
-			if (!this.usesLimitSearch) {
-				// Removed get_items() - handled by store
-			}
-		}
-
-		// Setup barcode scanner if enabled
-		if (this.pos_profile?.posa_enable_barcode_scanning) {
-			// Scanner initialized by composable
-		}
-
-		// Apply the configured items per page on mount
-		this.itemsPerPage = this.items_per_page;
-		window.addEventListener("resize", this.checkItemContainerOverflow);
-		this.$nextTick(() => {
-			this.checkItemContainerOverflow();
-			this.scheduleCardMetricsUpdate();
-		});
-	},
-
-	beforeUnmount() {
-		// Clear interval when component is destroyed
-		if (this.itemSync) {
-			this.itemSync.stopBackgroundSyncScheduler();
-		}
-
-		if (this.formatCache) {
-			this.formatCache.clear();
-		}
-
-		if (this.keyboardScanTimer) {
-			clearTimeout(this.keyboardScanTimer);
-			this.keyboardScanTimer = null;
-		}
-
-		if (typeof this.stockUnsubscribe === "function") {
-			this.stockUnsubscribe();
-			this.stockUnsubscribe = null;
-		}
-
-		if (this.itemDetailsRetryTimeout) {
-			clearTimeout(this.itemDetailsRetryTimeout);
-		}
-		this.itemDetailsRetryCount = 0;
-
-		// Call cleanup function for abort controller
-		if (this.cleanupBeforeDestroy) {
-			this.cleanupBeforeDestroy();
-		}
-
-		// Scanner & Audio context cleanup handled by useScannerInput
-		if (this.itemWorker) {
-			this.itemWorker.terminate();
-			this.itemWorker = null;
-		}
-
-		this.eventBus.off("update_currency");
-		this.eventBus.off("server-online");
-		this.eventBus.off("register_pos_profile");
-		this.eventBus.off("update_cur_items_details");
-		this.eventBus.off("update_offers_counters");
-		this.eventBus.off("update_coupons_counters");
-		this.eventBus.off("cart_quantities_updated", this.handleCartQuantitiesUpdated);
-		this.eventBus.off("invoice_stock_adjusted", this.handleInvoiceStockAdjusted);
-		this.eventBus.off("update_customer_price_list");
-		this.eventBus.off("force_reload_items");
-		// this.eventBus.off("focus_item_search"); // Handled by uiStore watcher
-		this.eventBus.off("select_top_item");
-		this.eventBus.off("toggle_item_selector_settings");
-		window.removeEventListener("resize", this.checkItemContainerOverflow);
-		if (this.metricsRaf) {
-			cancelAnimationFrame(this.metricsRaf);
-			this.metricsRaf = null;
-		}
-	},
+	} else {
+		emit("add-item", item);
+	}
 };
+
+// 7. Initialize Scan Processor
+const scanProcessor = useScanProcessor({
+	items, pos_profile, active_price_list: itemsIntegration.active_price_list,
+	customer_price_list, itemDetailFetcher, itemAddition: { addItem: add_item },
+	barcodeIndex: { lookupItemByBarcode, searchItemsByCode: searchItemsByCodeFn, ensureBarcodeIndex, replaceBarcodeIndex, indexItem, resetBarcodeIndex },
+	scannerInput, searchCache: ref(new Map()), eventBus: uiStore.eventBus,
+	format_number: itemDisplay.format_number, float_precision: computed(() => pos_profile.value?.float_precision || 2),
+	hide_qty_decimals: computed(() => !!pos_profile.value?.posa_hide_qty_decimals),
+	blockSaleBeyondAvailableQty, currency_precision: computed(() => pos_profile.value?.currency_precision || 2),
+	exchange_rate: computed(() => 1), format_currency: itemDisplay.format_currency, ratePrecision: itemDisplay.ratePrecision,
+	customer: selectedCustomer, onItemAdded: () => { clearSearch(); itemsSelectorFocus.focusItemSearch(); },
+	onItemNotFound: (code) => { search_input.value = code; first_search.value = code; },
+	stock_settings
+});
+
+// 8. Lifecycle and Context Registration
+onMounted(() => {
+	itemAvailability.registerCallbacks({
+		getItems: () => items.value,
+		getDisplayedItems: () => displayedItems.value,
+		getFilteredItems: () => filteredItems.value,
+		updateItemsDetails: (its, opts) => itemDetailFetcher.update_items_details(its, opts),
+	});
+
+	itemDisplay.registerContext({
+		get context() { return props.context; },
+		get pos_profile() { return pos_profile.value; },
+		get float_precision() { return pos_profile.value?.float_precision || 2; },
+		get currency_precision() { return pos_profile.value?.currency_precision || 2; },
+		get exchange_rate() { return 1; },
+	});
+
+	itemsLoader.registerContext({
+		get eventBus() { return uiStore.eventBus; },
+		get itemsStore() { return itemsIntegration.itemsStore; },
+		get itemDetailFetcher() { return itemDetailFetcher; },
+		get displayedItems() { return displayedItems.value; },
+		get cardColumns() { return cardColumns.value; },
+		get loading() { return loading.value; },
+	});
+
+	itemSelection.registerContext({
+		addItem: add_item,
+		clearSearch: () => itemsSelectorSearch.clearSearch(),
+		focusItemSearch: () => itemsSelectorFocus.focusItemSearch(),
+		fly, get flyConfig() { return flyConfig; },
+		get displayedItems() { return displayedItems.value; },
+	});
+
+	itemSync.registerContext({
+		get pos_profile() { return pos_profile.value; },
+		get enable_background_sync() { return itemsSelectorSettings.enable_background_sync.value; },
+		get background_sync_interval() { return itemsSelectorSettings.background_sync_interval.value; },
+		refreshModifiedItems: () => itemsIntegration.fetchModifiedItems(),
+		backgroundSyncItems: (args) => itemsIntegration.backgroundSyncItems(args),
+		get_items: (force) => itemsIntegration.refreshItems(force),
+		itemDetailFetcher,
+	});
+
+	if (scannerInput.setScanHandler) {
+		scannerInput.setScanHandler(scanProcessor.processScannedItem);
+	}
+
+	memoryInitPromise.then(async () => {
+		if (pos_profile.value?.name) {
+			await itemsIntegration.initializeStore(pos_profile.value, selectedCustomer.value, customer_price_list.value);
+			startItemWorker();
+			itemDetailFetcher.update_cur_items_details();
+			itemSync.startBackgroundSyncScheduler();
+		}
+	});
+
+	window.addEventListener("resize", checkItemContainerOverflow);
+	nextTick(() => {
+		checkItemContainerOverflow();
+		scheduleCardMetricsUpdate();
+	});
+});
+
+onBeforeUnmount(() => {
+	itemSync.stopBackgroundSyncScheduler();
+	if (itemWorker.value) itemWorker.value.terminate();
+	window.removeEventListener("resize", checkItemContainerOverflow);
+});
+
+// 9. Watchers
+watch(search_input, (val) => {
+	first_search.value = val;
+	itemSelection.clearHighlightedItem();
+});
+
+watch(selectedCustomer, () => {
+	clearLastInvoiceRateCache();
+	scheduleLastInvoiceRateRefresh();
+});
+
+watch(displayedItems, () => {
+	nextTick(() => {
+		checkItemContainerOverflow();
+		scheduleCardMetricsUpdate();
+	});
+	scheduleLastInvoiceRateRefresh();
+	itemSelection.syncHighlightedItem();
+});
+
+// 10. Template Helpers
+const clearSearch = () => {
+	clearingSearch.value = true;
+	search_input.value = "";
+	first_search.value = "";
+	clearingSearch.value = false;
+};
+
+const onDragStart = (event, item) => {
+	isDragging.value = true;
+	event.dataTransfer.setData("application/json", JSON.stringify({ type: "item-from-selector", item }));
+	event.dataTransfer.effectAllowed = "copy";
+	uiStore.setDraggedItem(item);
+};
+
+const onDragEnd = () => {
+	isDragging.value = false;
+	uiStore.setDraggedItem(null);
+};
+
+// Mapping for Template
+const ratePrecision = itemDisplay.ratePrecision;
+const format_currency = itemDisplay.format_currency;
+const format_number = itemDisplay.format_number;
+const currencySymbol = itemDisplay.currencySymbol;
+const headers = computed(() => itemDisplay.headers.value);
+const memoizedFormatCurrency = computed(() => itemDisplay.memoizedFormatCurrency.value);
+const memoizedFormatNumber = computed(() => itemDisplay.memoizedFormatNumber.value);
+const active_price_list = computed(() => customer_price_list.value || pos_profile.value?.selling_price_list);
+
+// 11. Template Props/Methods implementation
+const { scannerLocked, scanErrorDialog, scanErrorMessage, scanErrorCode, scanErrorDetails, cameraScannerActive, acknowledgeScanError, onBarcodeScanned } = scannerInput;
+const { responsiveStyles } = responsive;
+const { rtlClasses } = rtl;
+
+const formatBackgroundSyncTime = () => {
+    const lastSync = itemSync.last_background_sync_time?.value;
+    if (!lastSync) return __("Never");
+    const parsed = new Date(lastSync);
+    return Number.isNaN(parsed.getTime()) ? __("Never") : parsed.toLocaleTimeString();
+};
+
+const esc_event = () => itemsSelectorSearch.clearSearch();
+const onEnter = (e) => itemsSelectorSearch.handleEnter(e);
+const handleSearchKeydown = (e) => itemsSelectorSearch.handleSearchKeydown(e);
+const handleSearchInput = (val) => { search_input.value = val; };
+const handleSearchPaste = (e) => itemsSelectorSearch.handlePaste(e);
+const handleItemSearchFocus = () => itemsSelectorFocus.focusItemSearch();
+const clearQty = () => { qty.value = 1; };
+const startCameraScanning = () => { scannerInput.cameraScannerActive.value = true; };
+const toggleItemSettings = () => { 
+    temp_hide_qty_decimals.value = hide_qty_decimals.value;
+    temp_hide_zero_rate_items.value = hide_zero_rate_items.value;
+    temp_enable_custom_items_per_page.value = enable_custom_items_per_page.value;
+    temp_items_per_page.value = items_per_page.value;
+    temp_force_server_items.value = !!(pos_profile.value && pos_profile.value.posa_force_server_items);
+    temp_show_last_invoice_rate.value = show_last_invoice_rate.value;
+    temp_enable_background_sync.value = true;
+    temp_background_sync_interval.value = background_sync_interval.value;
+    show_item_settings.value = true;
+};
+const forceReloadItems = () => itemsIntegration.refreshItems(true);
+
+const applyItemSettings = (settings) => {
+	itemsSelectorSettings.applyItemSettings(settings);
+};
+
+const new_line = ref(false);
+const item_group = ref("");
+const items_group = computed(() => itemsIntegration.items_group.value || []);
+const offersCount = computed(() => invoiceStore.offersCount || 0);
+const couponsCount = computed(() => invoiceStore.couponsCount || 0);
+
+const virtualScrollBuffer = ref(200);
+const selected_currency = computed(() => itemsIntegration.selected_currency.value || "");
+
+const isItemHighlighted = (index) => itemSelection.highlightedIndex.value === index;
+const isNegative = (val) => val < 0;
+
+const headerProps = reactive({
+	'sort-icon': 'mdi-arrow-up',
+	'class': 'pos-table-header'
+});
+
+const getItemRowClass = (item) => {
+	return {
+		'pos-item-row': true,
+		'highlighted': itemSelection.highlightedIndex.value === items.value.indexOf(item)
+	};
+};
+
+const getItemRowProps = (item) => ({
+	'data-item-code': item.item_code,
+	'draggable': true
+});
+
+const handleItemCreated = (item) => {
+	newItemDialog.value = false;
+	itemsIntegration.refreshItems(true);
+};
+
+const onScannerOpened = () => { console.log("Scanner opened"); };
+const onScannerClosed = () => { scannerInput.cameraScannerActive.value = false; };
+
+const { show_item_settings, enable_background_sync } = itemsSelectorSettings;
+const temp_hide_qty_decimals = ref(false);
+const temp_hide_zero_rate_items = ref(false);
+const temp_enable_custom_items_per_page = ref(false);
+const temp_items_per_page = ref(50);
+const temp_force_server_items = ref(false);
+const temp_show_last_invoice_rate = ref(true);
+const temp_enable_background_sync = ref(true);
+const temp_background_sync_interval = ref(30);
+const localStorageAvailable = ref(true);
+
+defineExpose({
+	search_input, debounce_qty, qty, items_view, pos_profile, isLoadingOrSyncing, displayedItems,
+	headers, active_price_list, memoizedFormatCurrency, memoizedFormatNumber,
+	ratePrecision, format_currency, format_number, currencySymbol,
+	openNewItemDialog: () => { newItemDialog.value = true; },
+	clearSearch, onDragStart, onDragEnd,
+	select_item: itemSelection.handleItemSelection,
+	click_item_row: itemSelection.handleRowClick,
+	onVirtualRangeUpdate: (s, e, vs, ve) => itemsLoader.onVirtualRangeUpdate(s, e, vs, ve),
+	onListScroll: handleListScroll,
+	responsiveStyles, rtlClasses, scanErrorDialog, scanErrorMessage, scanErrorCode, scanErrorDetails,
+	acknowledgeScanError, formatBackgroundSyncTime, esc_event, onEnter, handleSearchKeydown,
+	handleSearchInput, handleSearchPaste, handleItemSearchFocus, clearQty, startCameraScanning,
+	toggleItemSettings, forceReloadItems, applyItemSettings, show_item_settings,
+	items_group, item_group, offersCount, couponsCount, virtualScrollBuffer, selected_currency,
+	getLastInvoiceRate, isItemHighlighted, isNegative, headerProps, getItemRowClass, getItemRowProps,
+	handleItemCreated, onBarcodeScanned, onScannerOpened, onScannerClosed, new_line,
+	hide_qty_decimals, hide_zero_rate_items, show_last_invoice_rate, enable_background_sync,
+	background_sync_interval, enable_custom_items_per_page, items_per_page, scannerLocked,
+    temp_hide_qty_decimals, temp_hide_zero_rate_items, temp_enable_custom_items_per_page,
+    temp_items_per_page, temp_force_server_items, temp_show_last_invoice_rate,
+    temp_enable_background_sync, temp_background_sync_interval, localStorageAvailable,
+    clearLastInvoiceRateCache, scheduleLastInvoiceRateRefresh, itemSync
+});
 </script>
 
 <style scoped>
