@@ -28,7 +28,7 @@
 						:is-invoice-selected="isInvoiceSelected"
 						:item-class="isSelected"
 						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrencyLocal"
+						:format-currency="formatCurrency"
 						:headers="invoices_headers"
 						@search="get_outstanding_invoices"
 						@clear-selection="selected_invoices = []"
@@ -45,7 +45,7 @@
 						:loading="unallocated_payments_loading"
 						:headers="unallocated_payments_headers"
 						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrencyLocal"
+						:format-currency="formatCurrency"
 						:payment-row-class="paymentRowClass"
 					/>
 
@@ -59,7 +59,7 @@
 						:pos-profile="pos_profile"
 						:headers="mpesa_payment_headers"
 						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrencyLocal"
+						:format-currency="formatCurrency"
 						@search="get_draft_mpesa_payments_register(payment_methods_list)"
 					/>
 				</v-card>
@@ -88,7 +88,7 @@
 						:requires-exchange-rate="requiresExchangeRate"
 						:total-of-diff="total_of_diff"
 						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrencyLocal"
+						:format-currency="formatCurrency"
 						:get-payment-method-currency="getPaymentMethodCurrency"
 						@validate-exchange-rate="validateExchangeRate"
 						@fetch-exchange-rate="fetchExchangeRate"
@@ -403,6 +403,9 @@ export default {
         const fetchExchangeRate = async () => {
             if (exchangeRateLoading.value || !requiresExchangeRate.value) {
                 exchangeRate.value = 1;
+                return;
+            }
+            if (!invoiceTotalCurrency.value || !companyCurrencyLocal.value) {
                 return;
             }
             exchangeRateLoading.value = true;
