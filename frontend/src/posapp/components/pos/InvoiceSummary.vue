@@ -124,207 +124,197 @@
 	</v-card>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue";
 import { loadItemSelectorSettings } from "../../utils/itemSelectorSettings.js";
 import InvoiceActionButtons from "./InvoiceActionButtons.vue";
 
-export default {
-	components: {
-		InvoiceActionButtons,
+defineOptions({
+	name: "InvoiceSummary",
+});
+
+const props = defineProps({
+	pos_profile: Object,
+	total_qty: [Number, String],
+	additional_discount: Number,
+	additional_discount_percentage: Number,
+	total_items_discount_amount: Number,
+	subtotal: Number,
+	displayCurrency: String,
+	formatFloat: Function,
+	formatCurrency: Function,
+	currencySymbol: Function,
+	discount_percentage_offer_name: [String, Number],
+	isNumber: Function,
+});
+
+const emit = defineEmits([
+	"update:additional_discount",
+	"update:additional_discount_percentage",
+	"update_discount_umount",
+	"save-and-clear",
+	"load-drafts",
+	"select-order",
+	"select-purchase-order",
+	"cancel-sale",
+	"open-returns",
+	"print-draft",
+	"apply-offers",
+	"show-payment",
+]);
+
+const saveLoading = ref(false);
+const loadDraftsLoading = ref(false);
+const selectOrderLoading = ref(false);
+const selectPurchaseOrderLoading = ref(false);
+const cancelLoading = ref(false);
+const returnsLoading = ref(false);
+const printLoading = ref(false);
+const applyOffersLoading = ref(false);
+const paymentLoading = ref(false);
+const isEditingAdditionalDiscount = ref(false);
+const isEditingAdditionalDiscountPercentage = ref(false);
+
+const additionalDiscountDisplay = ref(normalizeDiscountDisplay(props.additional_discount));
+const additionalDiscountPercentageDisplay = ref(
+	normalizeDiscountDisplay(props.additional_discount_percentage),
+);
+
+const hide_qty_decimals = computed(() => {
+	const opts = loadItemSelectorSettings();
+	return !!opts?.hide_qty_decimals;
+});
+
+watch(
+	() => props.additional_discount,
+	(value) => {
+		if (!isEditingAdditionalDiscount.value) {
+			additionalDiscountDisplay.value = normalizeDiscountDisplay(value);
+		}
 	},
-	props: {
-		pos_profile: Object,
-		total_qty: [Number, String],
-		additional_discount: Number,
-		additional_discount_percentage: Number,
-		total_items_discount_amount: Number,
-		subtotal: Number,
-		displayCurrency: String,
-		formatFloat: Function,
-		formatCurrency: Function,
-		currencySymbol: Function,
-		discount_percentage_offer_name: [String, Number],
-		isNumber: Function,
+);
+
+watch(
+	() => props.additional_discount_percentage,
+	(value) => {
+		if (!isEditingAdditionalDiscountPercentage.value) {
+			additionalDiscountPercentageDisplay.value = normalizeDiscountDisplay(value);
+		}
 	},
-	data() {
-		return {
-			// Loading states for better UX
-			saveLoading: false,
-			loadDraftsLoading: false,
-			selectOrderLoading: false,
-			selectPurchaseOrderLoading: false,
-			cancelLoading: false,
-			returnsLoading: false,
-			printLoading: false,
-			applyOffersLoading: false,
-			paymentLoading: false,
-			additionalDiscountDisplay: null,
-			additionalDiscountPercentageDisplay: null,
-			isEditingAdditionalDiscount: false,
-			isEditingAdditionalDiscountPercentage: false,
-		};
-	},
-	emits: [
-		"update:additional_discount",
-		"update:additional_discount_percentage",
-		"update_discount_umount",
-		"save-and-clear",
-		"load-drafts",
-		"select-order",
-		"select-purchase-order",
-		"cancel-sale",
-		"open-returns",
-		"print-draft",
-		"apply-offers",
-		"show-payment",
-	],
-	computed: {
-		hide_qty_decimals() {
-			const opts = loadItemSelectorSettings();
-			return !!opts?.hide_qty_decimals;
-		},
-	},
-	watch: {
-		additional_discount(value) {
-			if (!this.isEditingAdditionalDiscount) {
-				this.additionalDiscountDisplay = this.normalizeDiscountDisplay(value);
-			}
-		},
-		additional_discount_percentage(value) {
-			if (!this.isEditingAdditionalDiscountPercentage) {
-				this.additionalDiscountPercentageDisplay = this.normalizeDiscountDisplay(value);
-			}
-		},
-	},
-	created() {
-		this.additionalDiscountDisplay = this.normalizeDiscountDisplay(this.additional_discount);
-		this.additionalDiscountPercentageDisplay = this.normalizeDiscountDisplay(
-			this.additional_discount_percentage,
-		);
-	},
-	methods: {
-		normalizeDiscountDisplay(value) {
-			if (value === 0 || value === "0") {
-				return "";
-			}
-			return value;
-		},
-		// Debounced handlers for better performance
-		handleAdditionalDiscountUpdate(value) {
-			this.$emit("update:additional_discount", value);
-		},
+);
 
-		handleAdditionalDiscountFocus() {
-			this.isEditingAdditionalDiscount = true;
-		},
+function normalizeDiscountDisplay(value) {
+	if (value === 0 || value === "0") {
+		return "";
+	}
+	return value;
+}
 
-		handleAdditionalDiscountBlur() {
-			this.isEditingAdditionalDiscount = false;
-		},
+// Debounced handlers for better performance
+function handleAdditionalDiscountUpdate(value) {
+	emit("update:additional_discount", value);
+}
 
-		focusAdditionalDiscountField() {
-			const field = this.$refs.additionalDiscountField;
-			const input = field?.$el?.querySelector?.("input");
-			if (input?.disabled) {
-				return;
-			}
-			input?.focus?.();
-		},
+function handleAdditionalDiscountFocus() {
+	isEditingAdditionalDiscount.value = true;
+}
 
-		handleAdditionalDiscountPercentageUpdate(value) {
-			this.$emit("update:additional_discount_percentage", value);
-		},
+function handleAdditionalDiscountBlur() {
+	isEditingAdditionalDiscount.value = false;
+}
 
-		handleAdditionalDiscountPercentageFocus() {
-			this.isEditingAdditionalDiscountPercentage = true;
-		},
+function handleAdditionalDiscountPercentageUpdate(value) {
+	emit("update:additional_discount_percentage", value);
+}
 
-		handleAdditionalDiscountPercentageBlur() {
-			this.isEditingAdditionalDiscountPercentage = false;
-		},
+function handleAdditionalDiscountPercentageFocus() {
+	isEditingAdditionalDiscountPercentage.value = true;
+}
 
-		async handleSaveAndClear() {
-			this.saveLoading = true;
-			try {
-				await this.$emit("save-and-clear");
-			} finally {
-				this.saveLoading = false;
-			}
-		},
+function handleAdditionalDiscountPercentageBlur() {
+	isEditingAdditionalDiscountPercentage.value = false;
+}
 
-		async handleLoadDrafts() {
-			this.loadDraftsLoading = true;
-			try {
-				await this.$emit("load-drafts");
-			} finally {
-				this.loadDraftsLoading = false;
-			}
-		},
+async function handleSaveAndClear() {
+	saveLoading.value = true;
+	try {
+		await emit("save-and-clear");
+	} finally {
+		saveLoading.value = false;
+	}
+}
 
-		async handleSelectOrder() {
-			this.selectOrderLoading = true;
-			try {
-				await this.$emit("select-order");
-			} finally {
-				this.selectOrderLoading = false;
-			}
-		},
+async function handleLoadDrafts() {
+	loadDraftsLoading.value = true;
+	try {
+		await emit("load-drafts");
+	} finally {
+		loadDraftsLoading.value = false;
+	}
+}
 
-		async handleSelectPurchaseOrder() {
-			this.selectPurchaseOrderLoading = true;
-			try {
-				await this.$emit("select-purchase-order");
-			} finally {
-				this.selectPurchaseOrderLoading = false;
-			}
-		},
+async function handleSelectOrder() {
+	selectOrderLoading.value = true;
+	try {
+		await emit("select-order");
+	} finally {
+		selectOrderLoading.value = false;
+	}
+}
 
-		async handleCancelSale() {
-			this.cancelLoading = true;
-			try {
-				await this.$emit("cancel-sale");
-			} finally {
-				this.cancelLoading = false;
-			}
-		},
+async function handleSelectPurchaseOrder() {
+	selectPurchaseOrderLoading.value = true;
+	try {
+		await emit("select-purchase-order");
+	} finally {
+		selectPurchaseOrderLoading.value = false;
+	}
+}
 
-		async handleOpenReturns() {
-			this.returnsLoading = true;
-			try {
-				await this.$emit("open-returns");
-			} finally {
-				this.returnsLoading = false;
-			}
-		},
+async function handleCancelSale() {
+	cancelLoading.value = true;
+	try {
+		await emit("cancel-sale");
+	} finally {
+		cancelLoading.value = false;
+	}
+}
 
-		async handlePrintDraft() {
-			this.printLoading = true;
-			try {
-				await this.$emit("print-draft");
-			} finally {
-				this.printLoading = false;
-			}
-		},
+async function handleOpenReturns() {
+	returnsLoading.value = true;
+	try {
+		await emit("open-returns");
+	} finally {
+		returnsLoading.value = false;
+	}
+}
 
-		async handleApplyOffers() {
-			this.applyOffersLoading = true;
-			try {
-				await this.$emit("apply-offers");
-			} finally {
-				this.applyOffersLoading = false;
-			}
-		},
+async function handlePrintDraft() {
+	printLoading.value = true;
+	try {
+		await emit("print-draft");
+	} finally {
+		printLoading.value = false;
+	}
+}
 
-		async handleShowPayment() {
-			this.paymentLoading = true;
-			try {
-				await this.$emit("show-payment");
-			} finally {
-				this.paymentLoading = false;
-			}
-		},
-	},
-};
+async function handleApplyOffers() {
+	applyOffersLoading.value = true;
+	try {
+		await emit("apply-offers");
+	} finally {
+		applyOffersLoading.value = false;
+	}
+}
+
+async function handleShowPayment() {
+	paymentLoading.value = true;
+	try {
+		await emit("show-payment");
+	} finally {
+		paymentLoading.value = false;
+	}
+}
 </script>
 
 <style scoped>
@@ -332,8 +322,6 @@ export default {
 	background-color: var(--pos-card-bg) !important;
 	transition: all 0.3s ease;
 }
-
-
 
 /* Enhanced field styling */
 .summary-field {
@@ -350,6 +338,4 @@ export default {
 		font-size: 0.875rem;
 	}
 }
-
-
 </style>

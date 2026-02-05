@@ -123,7 +123,7 @@
 				>
 					<v-icon size="small">mdi-chevron-left</v-icon>
 				</v-btn>
-				
+
 				<div
 					v-if="!isEditingUom"
 					class="posa-cart-table__editor-display"
@@ -327,224 +327,248 @@
 	</tr>
 </template>
 
-<script>
-/* global __ */
-export default {
+<script setup>
+import { computed, nextTick, ref } from "vue";
+
+defineOptions({
 	name: "CartItemRow",
-	props: {
-		item: {
-			type: Object,
-			required: true,
-		},
-		posProfile: {
-			type: Object,
-			required: true,
-		},
-		isReturnInvoice: Boolean,
-		invoiceType: String,
-		displayCurrency: String,
-		formatFloat: Function,
-		formatCurrency: Function,
-		currencySymbol: Function,
-		isNumber: Function,
-		isNegative: Function,
-		hideQtyDecimals: Boolean,
-		isRTL: Boolean,
-		// Column visibility flags to avoid passing full headers array
-		showUom: Boolean,
-		showPriceListRate: Boolean,
-		showDiscountPercent: Boolean,
-		showDiscountAmount: Boolean,
-		showOffer: Boolean,
-	},
-	data() {
-		return {
-			isEditingQty: false,
-			editingQtyValue: "",
-			isEditingUom: false,
-			isEditingRate: false,
-			editingRateValue: "",
-			isEditingDiscountPercent: false,
-			editingDiscountPercentValue: "",
-			isEditingDiscountAmount: false,
-			editingDiscountAmountValue: "",
-		};
-	},
-	computed: {
-		memoDeps() {
-			return [
-				this.item.qty,
-				this.item.rate,
-				this.item.amount,
-				this.item.discount_amount,
-				this.item.discount_percentage,
-				this.item.uom,
-				this.item.item_name,
-				this.item.name_overridden,
-				this.item.pricing_rule_badge,
-				this.item.batch_no_is_expired,
-				this.item.posa_is_offer,
-				this.item.posa_offer_applied,
-				this.item.is_free_item,
-				this.item.price_list_rate,
-				// Include edit states to ensure UI updates when switching modes
-				this.isEditingQty,
-				this.isEditingRate,
-				this.isEditingUom,
-				this.isEditingDiscountPercent,
-				this.isEditingDiscountAmount,
-			];
-		},
-		qtyLength() {
-			return String(Math.abs(this.item.qty || 0)).replace(".", "").length;
-		},
-		disableDecrement() {
-			return (
-				!!this.item.posa_is_replace ||
-				(this.isReturnInvoice &&
-					(this.item.is_free_item || this.item.posa_is_offer || this.item.posa_is_replace))
-			);
-		},
-		disableIncrement() {
-			return (
-				!!this.item.posa_is_replace ||
-				this.item.disable_increment ||
-				(this.isReturnInvoice &&
-					(this.item.is_free_item || this.item.posa_is_offer || this.item.posa_is_replace))
-			);
-		},
-		disableInput() {
-			return (
-				this.isReturnInvoice &&
-				(this.item.is_free_item || this.item.posa_is_offer || this.item.posa_is_replace)
-			);
-		},
-		disableRateEdit() {
-			return (
-				!this.posProfile.posa_allow_user_to_edit_rate ||
-				!!this.item.posa_is_replace ||
-				!!this.item.posa_offer_applied
-			);
-		},
-		disableDiscountEdit() {
-			return (
-				!this.posProfile.posa_allow_user_to_edit_item_discount ||
-				!!this.item.posa_is_replace ||
-				!!this.item.posa_offer_applied
-			);
-		},
-	},
-	methods: {
-		openQtyEdit() {
-			this.isEditingQty = true;
-			this.editingQtyValue = "";
-			this.$nextTick(() => {
-				this.$refs.qtyInput?.focus();
-			});
-		},
-		closeQtyEdit() {
-			if (this.isEditingQty) {
-				if (this.editingQtyValue !== "" && this.editingQtyValue != null) {
-					const newQty = parseFloat(this.editingQtyValue);
-					// Emit event to update parent state
-					const val = !newQty || newQty <= 0 ? 1 : newQty;
-					this.$emit("update-qty", this.item, val);
-				}
-				this.isEditingQty = false;
-				this.editingQtyValue = "";
-			}
-		},
-		handleMinusClick() {
-			this.$emit("minus-click", this.item);
-		},
-		changeUom(direction) {
-			const uoms = this.item.item_uoms.map((u) => u.uom);
-			const currentIndex = uoms.indexOf(this.item.uom);
-			let newIndex = currentIndex + direction;
+});
 
-			if (newIndex < 0) {
-				newIndex = uoms.length - 1;
-			} else if (newIndex >= uoms.length) {
-				newIndex = 0;
-			}
-
-			const newUom = uoms[newIndex];
-			if (newUom !== this.item.uom) {
-				this.$emit("calc-uom", this.item, newUom);
-			}
-		},
-		handleUomSelect(newUom) {
-			if (newUom && newUom !== this.item.uom) {
-				this.$emit("calc-uom", this.item, newUom);
-			}
-			// Find the correct component instance to blur - ref is local now
-			this.$refs.uomSelect?.blur();
-		},
-		openRateEdit() {
-			if (this.disableRateEdit) return;
-			this.isEditingRate = true;
-			this.editingRateValue = "";
-			this.$nextTick(() => {
-				this.$refs.rateInput?.focus();
-			});
-		},
-		closeRateEdit() {
-			if (this.isEditingRate) {
-				if (this.editingRateValue !== "" && this.editingRateValue != null) {
-					const newRate = parseFloat(this.editingRateValue);
-					if (Number.isFinite(newRate) && newRate !== this.item.rate) {
-						// We need to pass the "event-like" object that useDiscounts expects or handle it in parent
-						// For isolation, let's emit value and let parent handler construct event if needed
-						// But ItemsTable methods expect (item, value, event)
-						this.$emit("update-rate", this.item, newRate);
-					}
-				}
-				this.isEditingRate = false;
-				this.editingRateValue = "";
-			}
-		},
-		openDiscountPercentEdit() {
-			if (this.disableDiscountEdit) return;
-			this.isEditingDiscountPercent = true;
-			this.editingDiscountPercentValue = "";
-			this.$nextTick(() => {
-				this.$refs.discountPercentInput?.focus();
-			});
-		},
-		closeDiscountPercentEdit() {
-			if (this.isEditingDiscountPercent) {
-				if (this.editingDiscountPercentValue !== "" && this.editingDiscountPercentValue != null) {
-					const newDiscount = parseFloat(this.editingDiscountPercentValue);
-					if (Number.isFinite(newDiscount) && newDiscount !== this.item.discount_percentage) {
-						this.$emit("update-discount-percent", this.item, newDiscount);
-					}
-				}
-				this.isEditingDiscountPercent = false;
-				this.editingDiscountPercentValue = "";
-			}
-		},
-		openDiscountAmountEdit() {
-			if (this.disableDiscountEdit) return;
-			this.isEditingDiscountAmount = true;
-			this.editingDiscountAmountValue = "";
-			this.$nextTick(() => {
-				this.$refs.discountAmountInput?.focus();
-			});
-		},
-		closeDiscountAmountEdit() {
-			if (this.isEditingDiscountAmount) {
-				if (this.editingDiscountAmountValue !== "" && this.editingDiscountAmountValue != null) {
-					const newDiscount = parseFloat(this.editingDiscountAmountValue);
-					if (Number.isFinite(newDiscount) && newDiscount !== this.item.discount_amount) {
-						this.$emit("update-discount-amount", this.item, newDiscount);
-					}
-				}
-				this.isEditingDiscountAmount = false;
-				this.editingDiscountAmountValue = "";
-			}
-		},
+const props = defineProps({
+	item: {
+		type: Object,
+		required: true,
 	},
-};
+	posProfile: {
+		type: Object,
+		required: true,
+	},
+	isReturnInvoice: Boolean,
+	invoiceType: String,
+	displayCurrency: String,
+	formatFloat: Function,
+	formatCurrency: Function,
+	currencySymbol: Function,
+	isNumber: Function,
+	isNegative: Function,
+	hideQtyDecimals: Boolean,
+	isRTL: Boolean,
+	// Column visibility flags to avoid passing full headers array
+	showUom: Boolean,
+	showPriceListRate: Boolean,
+	showDiscountPercent: Boolean,
+	showDiscountAmount: Boolean,
+	showOffer: Boolean,
+});
+
+const emit = defineEmits([
+	"open-name-dialog",
+	"reset-item-name",
+	"add-one",
+	"update-qty",
+	"minus-click",
+	"calc-uom",
+	"update-rate",
+	"update-discount-percent",
+	"update-discount-amount",
+]);
+
+const __ = window.__ || ((text) => text);
+
+const isEditingQty = ref(false);
+const editingQtyValue = ref("");
+const isEditingUom = ref(false);
+const isEditingRate = ref(false);
+const editingRateValue = ref("");
+const isEditingDiscountPercent = ref(false);
+const editingDiscountPercentValue = ref("");
+const isEditingDiscountAmount = ref(false);
+const editingDiscountAmountValue = ref("");
+
+const qtyInput = ref(null);
+const rateInput = ref(null);
+const discountPercentInput = ref(null);
+const discountAmountInput = ref(null);
+const uomSelect = ref(null);
+
+const memoDeps = computed(() => [
+	props.item.qty,
+	props.item.rate,
+	props.item.amount,
+	props.item.discount_amount,
+	props.item.discount_percentage,
+	props.item.uom,
+	props.item.item_name,
+	props.item.name_overridden,
+	props.item.pricing_rule_badge,
+	props.item.batch_no_is_expired,
+	props.item.posa_is_offer,
+	props.item.posa_offer_applied,
+	props.item.is_free_item,
+	props.item.price_list_rate,
+	// Include edit states to ensure UI updates when switching modes
+	isEditingQty.value,
+	isEditingRate.value,
+	isEditingUom.value,
+	isEditingDiscountPercent.value,
+	isEditingDiscountAmount.value,
+]);
+
+const qtyLength = computed(() => String(Math.abs(props.item.qty || 0)).replace(".", "").length);
+
+const disableDecrement = computed(
+	() =>
+		!!props.item.posa_is_replace ||
+		(props.isReturnInvoice &&
+			(props.item.is_free_item || props.item.posa_is_offer || props.item.posa_is_replace)),
+);
+
+const disableIncrement = computed(
+	() =>
+		!!props.item.posa_is_replace ||
+		props.item.disable_increment ||
+		(props.isReturnInvoice &&
+			(props.item.is_free_item || props.item.posa_is_offer || props.item.posa_is_replace)),
+);
+
+const disableInput = computed(
+	() =>
+		props.isReturnInvoice &&
+		(props.item.is_free_item || props.item.posa_is_offer || props.item.posa_is_replace),
+);
+
+const disableRateEdit = computed(
+	() =>
+		!props.posProfile.posa_allow_user_to_edit_rate ||
+		!!props.item.posa_is_replace ||
+		!!props.item.posa_offer_applied,
+);
+
+const disableDiscountEdit = computed(
+	() =>
+		!props.posProfile.posa_allow_user_to_edit_item_discount ||
+		!!props.item.posa_is_replace ||
+		!!props.item.posa_offer_applied,
+);
+
+function openQtyEdit() {
+	isEditingQty.value = true;
+	editingQtyValue.value = "";
+	nextTick(() => {
+		qtyInput.value?.focus();
+	});
+}
+
+function closeQtyEdit() {
+	if (isEditingQty.value) {
+		if (editingQtyValue.value !== "" && editingQtyValue.value != null) {
+			const newQty = parseFloat(editingQtyValue.value);
+			// Emit event to update parent state
+			const val = !newQty || newQty <= 0 ? 1 : newQty;
+			emit("update-qty", props.item, val);
+		}
+		isEditingQty.value = false;
+		editingQtyValue.value = "";
+	}
+}
+
+function handleMinusClick() {
+	emit("minus-click", props.item);
+}
+
+function changeUom(direction) {
+	const uoms = props.item.item_uoms.map((u) => u.uom);
+	const currentIndex = uoms.indexOf(props.item.uom);
+	let newIndex = currentIndex + direction;
+
+	if (newIndex < 0) {
+		newIndex = uoms.length - 1;
+	} else if (newIndex >= uoms.length) {
+		newIndex = 0;
+	}
+
+	const newUom = uoms[newIndex];
+	if (newUom !== props.item.uom) {
+		emit("calc-uom", props.item, newUom);
+	}
+}
+
+function handleUomSelect(newUom) {
+	if (newUom && newUom !== props.item.uom) {
+		emit("calc-uom", props.item, newUom);
+	}
+	// Find the correct component instance to blur - ref is local now
+	uomSelect.value?.blur();
+}
+
+function openRateEdit() {
+	if (disableRateEdit.value) return;
+	isEditingRate.value = true;
+	editingRateValue.value = "";
+	nextTick(() => {
+		rateInput.value?.focus();
+	});
+}
+
+function closeRateEdit() {
+	if (isEditingRate.value) {
+		if (editingRateValue.value !== "" && editingRateValue.value != null) {
+			const newRate = parseFloat(editingRateValue.value);
+			if (Number.isFinite(newRate) && newRate !== props.item.rate) {
+				// We need to pass the "event-like" object that useDiscounts expects or handle it in parent
+				// For isolation, let's emit value and let parent handler construct event if needed
+				// But ItemsTable methods expect (item, value, event)
+				emit("update-rate", props.item, newRate);
+			}
+		}
+		isEditingRate.value = false;
+		editingRateValue.value = "";
+	}
+}
+
+function openDiscountPercentEdit() {
+	if (disableDiscountEdit.value) return;
+	isEditingDiscountPercent.value = true;
+	editingDiscountPercentValue.value = "";
+	nextTick(() => {
+		discountPercentInput.value?.focus();
+	});
+}
+
+function closeDiscountPercentEdit() {
+	if (isEditingDiscountPercent.value) {
+		if (editingDiscountPercentValue.value !== "" && editingDiscountPercentValue.value != null) {
+			const newDiscount = parseFloat(editingDiscountPercentValue.value);
+			if (Number.isFinite(newDiscount) && newDiscount !== props.item.discount_percentage) {
+				emit("update-discount-percent", props.item, newDiscount);
+			}
+		}
+		isEditingDiscountPercent.value = false;
+		editingDiscountPercentValue.value = "";
+	}
+}
+
+function openDiscountAmountEdit() {
+	if (disableDiscountEdit.value) return;
+	isEditingDiscountAmount.value = true;
+	editingDiscountAmountValue.value = "";
+	nextTick(() => {
+		discountAmountInput.value?.focus();
+	});
+}
+
+function closeDiscountAmountEdit() {
+	if (isEditingDiscountAmount.value) {
+		if (editingDiscountAmountValue.value !== "" && editingDiscountAmountValue.value != null) {
+			const newDiscount = parseFloat(editingDiscountAmountValue.value);
+			if (Number.isFinite(newDiscount) && newDiscount !== props.item.discount_amount) {
+				emit("update-discount-amount", props.item, newDiscount);
+			}
+		}
+		isEditingDiscountAmount.value = false;
+		editingDiscountAmountValue.value = "";
+	}
+}
 </script>
 
 <style scoped>

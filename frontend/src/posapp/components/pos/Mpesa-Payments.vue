@@ -83,135 +83,156 @@
 	</v-row>
 </template>
 
-<script>
-/* global __, frappe */
-export default {
-	data: () => ({
-		dialog: false,
-		singleSelect: true,
-		selected: [],
-		dialog_data: "",
-		company: "",
-		customer: "",
-		mode_of_payment: "",
-		full_name: "",
-		mobile_no: "",
-		isLoading: false,
-		isSubmitting: false,
-		errorMessage: "",
-		headers: [
-			{
-				title: __("Full Name"),
-				value: "full_name",
-				align: "start",
-				sortable: true,
-			},
-			{
-				title: __("Mobile No"),
-				value: "mobile_no",
-				align: "start",
-				sortable: true,
-			},
-			{
-				title: __("Amount"),
-				value: "amount",
-				align: "start",
-				sortable: true,
-			},
-			{
-				title: __("Date"),
-				align: "start",
-				sortable: true,
-				value: "posting_date",
-			},
-		],
-	}),
-	computed: {},
-	watch: {},
-	methods: {
-		close_dialog() {
-			this.dialog = false;
-		},
-		search_by_enter(e) {
-			if (e.keyCode === 13) {
-				this.search();
-			}
-		},
-		async search() {
-			if (this.isLoading || this.isSubmitting) {
-				return;
-			}
+<script setup>
+import { inject, onBeforeUnmount, onMounted, ref } from "vue";
+import { formatUtils } from "../../format";
 
-			this.errorMessage = "";
-			this.isLoading = true;
+defineOptions({
+	name: "MpesaPayments",
+});
 
-			try {
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.m_pesa.get_mpesa_draft_payments",
-					args: {
-						company: this.company,
-						mode_of_payment: this.mode_of_payment,
-						mobile_no: this.mobile_no,
-						full_name: this.full_name,
-					},
-				});
+const frappe = window.frappe;
+const __ = window.__ || ((text) => text);
+const eventBus = inject("eventBus");
 
-				this.dialog_data = message;
-			} catch (error) {
-				console.error("Failed to search M-Pesa payments:", error);
-				this.errorMessage = __("Unable to fetch M-Pesa payments");
-			} finally {
-				this.isLoading = false;
-			}
-		},
-		async submit_dialog() {
-			if (this.isSubmitting || this.selected.length === 0) {
-				return;
-			}
+const dialog = ref(false);
+const selected = ref([]);
+const dialog_data = ref("");
+const company = ref("");
+const customer = ref("");
+const mode_of_payment = ref("");
+const full_name = ref("");
+const mobile_no = ref("");
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+const errorMessage = ref("");
 
-			this.errorMessage = "";
-			this.isSubmitting = true;
-
-			try {
-				const selected_payment = this.selected[0].name;
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.m_pesa.submit_mpesa_payment",
-					args: {
-						mpesa_payment: selected_payment,
-						customer: this.customer,
-					},
-				});
-
-				this.eventBus.emit("set_mpesa_payment", message);
-				this.dialog = false;
-			} catch (error) {
-				console.error("Failed to submit M-Pesa payment:", error);
-				this.errorMessage = __("Unable to submit the selected payment");
-			} finally {
-				this.isSubmitting = false;
-			}
-		},
-		formatCurrency(value) {
-			return this.$options.mixins[0].methods.formatCurrency.call(this, value, 2);
-		},
+const headers = [
+	{
+		title: __("Full Name"),
+		value: "full_name",
+		align: "start",
+		sortable: true,
 	},
-	created: function () {
-		this.eventBus.on("open_mpesa_payments", (data) => {
-			this.dialog = true;
-			this.full_name = "";
-			this.mobile_no = "";
-			this.company = data.company;
-			this.customer = data.customer;
-			this.mode_of_payment = data.mode_of_payment;
-			this.dialog_data = "";
-			this.selected = [];
-			this.errorMessage = "";
-			this.isLoading = false;
-			this.isSubmitting = false;
+	{
+		title: __("Mobile No"),
+		value: "mobile_no",
+		align: "start",
+		sortable: true,
+	},
+	{
+		title: __("Amount"),
+		value: "amount",
+		align: "start",
+		sortable: true,
+	},
+	{
+		title: __("Date"),
+		align: "start",
+		sortable: true,
+		value: "posting_date",
+	},
+];
+
+function close_dialog() {
+	dialog.value = false;
+}
+
+async function search() {
+	if (isLoading.value || isSubmitting.value) {
+		return;
+	}
+
+	errorMessage.value = "";
+	isLoading.value = true;
+
+	try {
+		const { message } = await frappe.call({
+			method: "posawesome.posawesome.api.m_pesa.get_mpesa_draft_payments",
+			args: {
+				company: company.value,
+				mode_of_payment: mode_of_payment.value,
+				mobile_no: mobile_no.value,
+				full_name: full_name.value,
+			},
 		});
-	},
-	beforeUnmount() {
-		this.eventBus.off("open_mpesa_payments");
-	},
-};
+
+		dialog_data.value = message;
+	} catch (error) {
+		console.error("Failed to search M-Pesa payments:", error);
+		errorMessage.value = __("Unable to fetch M-Pesa payments");
+	} finally {
+		isLoading.value = false;
+	}
+}
+
+async function submit_dialog() {
+	if (isSubmitting.value || selected.value.length === 0) {
+		return;
+	}
+
+	errorMessage.value = "";
+	isSubmitting.value = true;
+
+	try {
+		const selected_payment = selected.value[0].name;
+		const { message } = await frappe.call({
+			method: "posawesome.posawesome.api.m_pesa.submit_mpesa_payment",
+			args: {
+				mpesa_payment: selected_payment,
+				customer: customer.value,
+			},
+		});
+
+		eventBus?.emit("set_mpesa_payment", message);
+		dialog.value = false;
+	} catch (error) {
+		console.error("Failed to submit M-Pesa payment:", error);
+		errorMessage.value = __("Unable to submit the selected payment");
+	} finally {
+		isSubmitting.value = false;
+	}
+}
+
+function formatCurrency(value) {
+	if (value === null || value === undefined) {
+		value = 0;
+	}
+	let number = Number(formatUtils.fromArabicNumerals(String(value)).replace(/,/g, ""));
+	if (isNaN(number)) number = 0;
+	let prec = 2;
+	if (!Number.isInteger(prec) || prec < 0 || prec > 20) {
+		prec = Math.min(Math.max(parseInt(prec) || 2, 0), 20);
+	}
+
+	const locale = formatUtils.getNumberLocale();
+	let formatted = number.toLocaleString(locale, {
+		minimumFractionDigits: prec,
+		maximumFractionDigits: prec,
+		useGrouping: true,
+	});
+
+	formatted = formatUtils.toArabicNumerals(formatted);
+	return formatted;
+}
+
+onMounted(() => {
+	eventBus?.on("open_mpesa_payments", (data) => {
+		dialog.value = true;
+		full_name.value = "";
+		mobile_no.value = "";
+		company.value = data.company;
+		customer.value = data.customer;
+		mode_of_payment.value = data.mode_of_payment;
+		dialog_data.value = "";
+		selected.value = [];
+		errorMessage.value = "";
+		isLoading.value = false;
+		isSubmitting.value = false;
+	});
+});
+
+onBeforeUnmount(() => {
+	eventBus?.off("open_mpesa_payments");
+});
 </script>

@@ -42,15 +42,15 @@
 	</div>
 </template>
 
-<script>
-export default {
+<script setup>
+import { ref } from "vue";
+
+defineOptions({
 	name: "NavbarInfoGadgets",
-	data() {
-		return {
-			menu: false,
-		};
-	},
-};
+});
+
+const __ = window.__ || ((text) => text);
+const menu = ref(false);
 </script>
 
 <style scoped>

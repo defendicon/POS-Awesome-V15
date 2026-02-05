@@ -15,12 +15,7 @@
 			</v-card-text>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn
-					ref="confirmBtn"
-					color="error"
-					autofocus
-					@click="onConfirm"
-				>
+				<v-btn ref="confirmBtn" color="error" autofocus @click="onConfirm">
 					{{ __("Yes, Cancel sale") }}
 				</v-btn>
 				<v-btn color="warning" @click="$emit('update:modelValue', false)">{{ __("Back") }}</v-btn>
@@ -29,27 +24,35 @@
 	</v-dialog>
 </template>
 
-<script>
-export default {
-	props: {
-		modelValue: Boolean,
+<script setup>
+import { nextTick, ref, watch } from "vue";
+
+defineOptions({
+	name: "CancelSaleDialog",
+});
+
+const props = defineProps({
+	modelValue: Boolean,
+});
+
+const emit = defineEmits(["update:modelValue", "confirm"]);
+const confirmBtn = ref(null);
+const __ = window.__ || ((text) => text);
+
+function onConfirm() {
+	emit("confirm");
+}
+
+watch(
+	() => props.modelValue,
+	(val) => {
+		if (val) {
+			nextTick(() => {
+				setTimeout(() => {
+					confirmBtn.value?.$el?.focus();
+				}, 100);
+			});
+		}
 	},
-	emits: ["update:modelValue", "confirm"],
-	methods: {
-		onConfirm() {
-			this.$emit("confirm");
-		},
-	},
-	watch: {
-		modelValue(val) {
-			if (val) {
-				this.$nextTick(() => {
-					setTimeout(() => {
-						this.$refs.confirmBtn?.$el?.focus();
-					}, 100);
-				});
-			}
-		},
-	},
-};
+);
 </script>

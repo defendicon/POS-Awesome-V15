@@ -47,82 +47,84 @@
 	</v-navigation-drawer>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue";
 import { useRtl } from "../../composables/useRtl.js";
 
-export default {
+defineOptions({
 	name: "NavbarDrawer",
-	setup() {
-		const { isRtl, rtlStyles, rtlClasses } = useRtl();
-		return {
-			isRtl,
-			rtlStyles,
-			rtlClasses,
-		};
+});
+
+const props = defineProps({
+	drawer: Boolean,
+	company: String,
+	companyImg: String,
+	items: Array,
+	item: Number,
+	isDark: Boolean,
+});
+
+const emit = defineEmits(["update:drawer", "update:item"]);
+const { isRtl, rtlClasses } = useRtl();
+
+const mini = ref(false);
+const drawerOpen = ref(props.drawer);
+const activeItem = ref(props.item);
+const showSport = ref(true);
+let closeTimeout = null;
+
+const scrimColor = computed(() => {
+	// Use an opaque background in light mode so that
+	// underlying content doesn't show through the drawer
+	return props.isDark ? true : "rgba(255,255,255,1)";
+});
+
+watch(
+	() => props.drawer,
+	(val) => {
+		drawerOpen.value = val;
+		if (val) {
+			mini.value = false;
+		}
 	},
-	props: {
-		drawer: Boolean,
-		company: String,
-		companyImg: String,
-		items: Array,
-		item: Number,
-		isDark: Boolean,
+);
+
+watch(drawerOpen, (val) => {
+	document.body.style.overflow = val ? "hidden" : "";
+	emit("update:drawer", val);
+});
+
+watch(
+	() => props.item,
+	(val) => {
+		activeItem.value = val;
 	},
-	data() {
-		return {
-			mini: false,
-			drawerOpen: this.drawer,
-			activeItem: this.item,
-			showSport: true,
-		};
-	},
-	computed: {
-		scrimColor() {
-			// Use an opaque background in light mode so that
-			// underlying content doesn't show through the drawer
-			return this.isDark ? true : "rgba(255,255,255,1)";
-		},
-	},
-	watch: {
-		drawer(val) {
-			this.drawerOpen = val;
-			if (val) {
-				this.mini = false;
-			}
-		},
-		drawerOpen(val) {
-			document.body.style.overflow = val ? "hidden" : "";
-			this.$emit("update:drawer", val);
-		},
-		item(val) {
-			this.activeItem = val;
-		},
-		activeItem(val) {
-			this.$emit("update:item", val);
-		},
-	},
-	mounted() {},
-	methods: {
-		handleMouseLeave() {
-			if (!this.drawerOpen) return;
-			clearTimeout(this._closeTimeout);
-			this._closeTimeout = setTimeout(() => {
-				this.drawerOpen = false;
-				this.mini = true;
-			}, 250);
-		},
-		handleItemClick() {
-			// Close drawer after selection if mobile
-			if (window.innerWidth < 1024) {
-				this.closeDrawer();
-			}
-		},
-		closeDrawer() {
-			this.drawerOpen = false;
-			this.mini = true;
-		},
-	},
-};
+);
+
+watch(activeItem, (val) => {
+	emit("update:item", val);
+});
+
+function handleMouseLeave() {
+	if (!drawerOpen.value) return;
+	clearTimeout(closeTimeout);
+	closeTimeout = setTimeout(() => {
+		drawerOpen.value = false;
+		mini.value = true;
+	}, 250);
+}
+
+function handleItemClick() {
+	// Close drawer after selection if mobile
+	if (window.innerWidth < 1024) {
+		closeDrawer();
+	}
+}
+
+function closeDrawer() {
+	drawerOpen.value = false;
+	mini.value = true;
+}
 </script>
 
 <style scoped>

@@ -17,150 +17,155 @@
 	</div>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
+
+defineOptions({
+	name: "StatusIndicator",
+});
+
+const props = defineProps({
+	networkOnline: Boolean,
+	serverOnline: Boolean,
+	serverConnecting: Boolean,
+	isIpHost: Boolean,
+});
+
+const __ = window.__ || ((text) => text);
 const DEBUG = false;
 
-export default {
-	name: "StatusIndicator",
-	props: {
-		networkOnline: Boolean,
-		serverOnline: Boolean,
-		serverConnecting: Boolean,
-		isIpHost: Boolean,
-	},
-	computed: {
-		/**
-		 * Determines the color of the status icon based on current network and server connectivity.
-		 * @returns {string} A Vuetify color string ('green', 'red').
-		 */
-		statusColor() {
-			// Enhanced debugging with more context
-			if (DEBUG) {
-				console.log(
-					"StatusIndicator - Network:",
-					this.networkOnline,
-					"Server:",
-					this.serverOnline,
-					"Connecting:",
-					this.serverConnecting,
-					"IP Host:",
-					this.isIpHost,
-					"Host:",
-					window.location.hostname,
-				);
-			}
+const statusColor = computed(() => {
+	/**
+	 * Determines the color of the status icon based on current network and server connectivity.
+	 * @returns {string} A Vuetify color string ('green', 'red').
+	 */
+	if (DEBUG) {
+		console.log(
+			"StatusIndicator - Network:",
+			props.networkOnline,
+			"Server:",
+			props.serverOnline,
+			"Connecting:",
+			props.serverConnecting,
+			"IP Host:",
+			props.isIpHost,
+			"Host:",
+			window.location.hostname,
+		);
+	}
 
-			// Show yellow/orange when connecting
-			if (this.serverConnecting) {
-				return "orange";
-			}
+	// Show yellow/orange when connecting
+	if (props.serverConnecting) {
+		return "orange";
+	}
 
-			// For IP hosts (localhost, 127.0.0.1, IP addresses), prioritize network status
-			if (this.isIpHost) {
-				return this.networkOnline ? "green" : "red";
-			}
+	// For IP hosts (localhost, 127.0.0.1, IP addresses), prioritize network status
+	if (props.isIpHost) {
+		return props.networkOnline ? "green" : "red";
+	}
 
-			// For domain hosts, require both network and server connectivity
-			if (this.networkOnline && this.serverOnline) {
-				return "green";
-			}
+	// For domain hosts, require both network and server connectivity
+	if (props.networkOnline && props.serverOnline) {
+		return "green";
+	}
 
-			// Network online but server offline
-			if (this.networkOnline && !this.serverOnline) {
-				return "orange";
-			}
+	// Network online but server offline
+	if (props.networkOnline && !props.serverOnline) {
+		return "orange";
+	}
 
-			// Network offline
-			return "red";
-		},
-		/**
-		 * Determines the Material Design Icon to display based on network and server status.
-		 * @returns {string} A Material Design Icon class string.
-		 */
-		statusIcon() {
-			if (DEBUG) {
-				console.log(
-					"StatusIndicator - Determining icon for network:",
-					this.networkOnline,
-					"server:",
-					this.serverOnline,
-					"connecting:",
-					this.serverConnecting,
-				);
-			}
+	// Network offline
+	return "red";
+});
 
-			// Show loading icon when connecting
-			if (this.serverConnecting) {
-				return "mdi-wifi-sync";
-			}
+const statusIcon = computed(() => {
+	/**
+	 * Determines the Material Design Icon to display based on network and server status.
+	 * @returns {string} A Material Design Icon class string.
+	 */
+	if (DEBUG) {
+		console.log(
+			"StatusIndicator - Determining icon for network:",
+			props.networkOnline,
+			"server:",
+			props.serverOnline,
+			"connecting:",
+			props.serverConnecting,
+		);
+	}
 
-			// For IP hosts, show based on network status
-			if (this.isIpHost) {
-				return this.networkOnline ? "mdi-wifi" : "mdi-wifi-off";
-			}
+	// Show loading icon when connecting
+	if (props.serverConnecting) {
+		return "mdi-wifi-sync";
+	}
 
-			// Full connectivity
-			if (this.networkOnline && this.serverOnline) {
-				return "mdi-wifi";
-			}
+	// For IP hosts, show based on network status
+	if (props.isIpHost) {
+		return props.networkOnline ? "mdi-wifi" : "mdi-wifi-off";
+	}
 
-			// Network online but server issues
-			if (this.networkOnline && !this.serverOnline) {
-				return "mdi-wifi-strength-alert-outline";
-			}
+	// Full connectivity
+	if (props.networkOnline && props.serverOnline) {
+		return "mdi-wifi";
+	}
 
-			// Network offline
-			return "mdi-wifi-off";
-		},
-		/**
-		 * Provides a descriptive text for the tooltip that appears when hovering over the status icon.
-		 * This text is also used for the `title` attribute of the button.
-		 * @returns {string} A localized status message.
-		 */
-		statusText() {
-			const hostname = window.location.hostname;
-			const hostType = this.isIpHost ? "Local/IP Host" : "Domain Host";
+	// Network online but server issues
+	if (props.networkOnline && !props.serverOnline) {
+		return "mdi-wifi-strength-alert-outline";
+	}
 
-			if (this.serverConnecting) {
-				return this.__(`Connecting to server... (${hostType}: ${hostname})`);
-			}
+	// Network offline
+	return "mdi-wifi-off";
+});
 
-			if (!this.networkOnline) {
-				return this.__(`No Internet Connection (${hostType}: ${hostname})`);
-			}
+const statusText = computed(() => {
+	/**
+	 * Provides a descriptive text for the tooltip that appears when hovering over the status icon.
+	 * This text is also used for the `title` attribute of the button.
+	 * @returns {string} A localized status message.
+	 */
+	const hostname = window.location.hostname;
+	const hostType = props.isIpHost ? "Local/IP Host" : "Domain Host";
 
-			if (this.isIpHost) {
-				return this.__(`Connected to ${hostname}`);
-			}
+	if (props.serverConnecting) {
+		return __(`Connecting to server... (${hostType}: ${hostname})`);
+	}
 
-			if (this.serverOnline) {
-				return this.__(`Connected to Server (${hostname})`);
-			}
+	if (!props.networkOnline) {
+		return __(`No Internet Connection (${hostType}: ${hostname})`);
+	}
 
-			return this.__(`Server Offline (${hostname})`);
-		},
-		/**
-		 * Short, user-friendly connectivity label for the navbar.
-		 * @returns {string}
-		 */
-		connectivityLabel() {
-			if (this.serverConnecting) {
-				return this.__("Connecting");
-			}
+	if (props.isIpHost) {
+		return __(`Connected to ${hostname}`);
+	}
 
-			if (!this.networkOnline) {
-				return this.__("Offline");
-			}
+	if (props.serverOnline) {
+		return __(`Connected to Server (${hostname})`);
+	}
 
-			if (this.networkOnline && this.serverOnline) {
-				return this.__("Online");
-			}
+	return __(`Server Offline (${hostname})`);
+});
 
-			// Network is available but server is not responding
-			return this.__("Limited");
-		},
-	},
-};
+const connectivityLabel = computed(() => {
+	/**
+	 * Short, user-friendly connectivity label for the navbar.
+	 * @returns {string}
+	 */
+	if (props.serverConnecting) {
+		return __("Connecting");
+	}
+
+	if (!props.networkOnline) {
+		return __("Offline");
+	}
+
+	if (props.networkOnline && props.serverOnline) {
+		return __("Online");
+	}
+
+	// Network is available but server is not responding
+	return __("Limited");
+});
 </script>
 
 <style scoped>

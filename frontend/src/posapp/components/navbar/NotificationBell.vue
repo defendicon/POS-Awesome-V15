@@ -79,49 +79,49 @@
 	</div>
 </template>
 
-<script>
-export default {
+<script setup>
+import { ref, watch } from "vue";
+
+defineOptions({
 	name: "NotificationBell",
-	props: {
-		notifications: {
-			type: Array,
-			default: () => [],
-		},
-		unreadCount: {
-			type: Number,
-			default: 0,
-		},
+});
+
+const props = defineProps({
+	notifications: {
+		type: Array,
+		default: () => [],
 	},
-	data() {
-		return {
-			open: false,
-		};
+	unreadCount: {
+		type: Number,
+		default: 0,
 	},
-	watch: {
-		open(val) {
-			if (val) {
-				this.$emit("mark-read");
-			}
-		},
-	},
-	methods: {
-		clearAll() {
-			this.$emit("clear");
-		},
-		formatTimestamp(ts) {
-			if (!ts) {
-				return "";
-			}
-			try {
-				const date = new Date(ts);
-				return date.toLocaleString();
-			} catch {
-				return ts;
-			}
-		},
-	},
-	emits: ["mark-read", "clear"],
-};
+});
+
+const emit = defineEmits(["mark-read", "clear"]);
+const __ = window.__ || ((text) => text);
+const open = ref(false);
+
+watch(open, (value) => {
+	if (value) {
+		emit("mark-read");
+	}
+});
+
+function clearAll() {
+	emit("clear");
+}
+
+function formatTimestamp(ts) {
+	if (!ts) {
+		return "";
+	}
+	try {
+		const date = new Date(ts);
+		return date.toLocaleString();
+	} catch {
+		return ts;
+	}
+}
 </script>
 
 <style scoped>

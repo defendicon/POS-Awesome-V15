@@ -91,70 +91,75 @@
 	</v-dialog>
 </template>
 
-<script>
+<script setup>
+/* global frappe */
+import { computed, ref, watch } from "vue";
 import { formatBuildVersion } from "../../stores/updateStore.js";
 
-const BUILD_VERSION = typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
-
-export default {
+defineOptions({
 	name: "AboutDialog",
-	props: {
-		modelValue: Boolean,
+});
+
+const BUILD_VERSION = typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
+const __ = window.__ || ((text) => text);
+
+const props = defineProps({
+	modelValue: Boolean,
+});
+
+const emit = defineEmits(["update:modelValue"]);
+
+const dialogOpen = ref(props.modelValue);
+const loadingAppInfo = ref(false);
+const appInfoError = ref(false);
+const appInfo = ref([]);
+const buildVersion = ref(BUILD_VERSION);
+
+const formattedBuildVersion = computed(() =>
+	buildVersion.value ? formatBuildVersion(buildVersion.value) : null,
+);
+
+watch(
+	() => props.modelValue,
+	(val) => {
+		dialogOpen.value = val;
+		if (val) {
+			loadAppInfo();
+		}
 	},
-	data() {
-		return {
-			dialogOpen: this.modelValue,
-			loadingAppInfo: false,
-			appInfoError: false,
-			appInfo: [],
-			buildVersion: BUILD_VERSION,
-		};
-	},
-	computed: {
-		formattedBuildVersion() {
-			return this.buildVersion ? formatBuildVersion(this.buildVersion) : null;
-		},
-	},
-	watch: {
-		modelValue(val) {
-			this.dialogOpen = val;
-			if (val) {
-				this.loadAppInfo();
+);
+
+watch(dialogOpen, (val) => {
+	emit("update:modelValue", val);
+});
+
+function close() {
+	dialogOpen.value = false;
+}
+
+function loadAppInfo() {
+	loadingAppInfo.value = true;
+	appInfoError.value = false;
+
+	frappe.call({
+		method: "posawesome.posawesome.api.utilities.get_app_info",
+		callback: (r) => {
+			loadingAppInfo.value = false;
+			if (Array.isArray(r.message.apps)) {
+				appInfo.value = r.message.apps;
+				if (r.message.build_version) {
+					buildVersion.value = r.message.build_version;
+				}
+			} else {
+				appInfoError.value = true;
 			}
 		},
-		dialogOpen(val) {
-			this.$emit("update:modelValue", val);
+		error: () => {
+			loadingAppInfo.value = false;
+			appInfoError.value = true;
 		},
-	},
-	methods: {
-		close() {
-			this.dialogOpen = false;
-		},
-		loadAppInfo() {
-			this.loadingAppInfo = true;
-			this.appInfoError = false;
-
-			frappe.call({
-				method: "posawesome.posawesome.api.utilities.get_app_info",
-				callback: (r) => {
-					this.loadingAppInfo = false;
-					if (Array.isArray(r.message.apps)) {
-						this.appInfo = r.message.apps;
-						if (r.message.build_version) {
-							this.buildVersion = r.message.build_version;
-						}
-					} else {
-						this.appInfoError = true;
-					}
-				},
-				error: () => {
-					this.loadingAppInfo = false;
-					this.appInfoError = true;
-				},
-			});
-		},
-	},
-};
+	});
+}
 </script>
 
 <style scoped>

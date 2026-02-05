@@ -30,48 +30,38 @@
 	</v-snackbar>
 </template>
 
-<script>
-import { computed, watch, ref } from "vue";
+<script setup>
+import { computed, ref, watch } from "vue";
 import { useUpdateStore } from "../../stores/updateStore.js";
 import { useRtl } from "../../composables/useRtl.js";
 
-export default {
+defineOptions({
 	name: "UpdatePrompt",
-	setup() {
-		const updateStore = useUpdateStore();
-		const { isRtl } = useRtl();
-		const visible = ref(false);
+});
 
-		watch(
-			() => updateStore.shouldPrompt,
-			(shouldShow) => {
-				visible.value = shouldShow;
-			},
-			{ immediate: true },
-		);
+const updateStore = useUpdateStore();
+const { isRtl } = useRtl();
+const visible = ref(false);
 
-		const label = computed(() => updateStore.formattedAvailableVersion);
-
-		function reload() {
-			updateStore.resetSnooze();
-			updateStore.reloadNow();
-		}
-
-		function snooze() {
-			updateStore.snooze();
-			visible.value = false;
-		}
-
-		return {
-			updateStore,
-			visible,
-			label,
-			reload,
-			snooze,
-			isRtl,
-		};
+watch(
+	() => updateStore.shouldPrompt,
+	(shouldShow) => {
+		visible.value = shouldShow;
 	},
-};
+	{ immediate: true },
+);
+
+const label = computed(() => updateStore.formattedAvailableVersion);
+
+function reload() {
+	updateStore.resetSnooze();
+	updateStore.reloadNow();
+}
+
+function snooze() {
+	updateStore.snooze();
+	visible.value = false;
+}
 </script>
 
 <style scoped>

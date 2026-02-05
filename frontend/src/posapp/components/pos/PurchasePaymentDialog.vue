@@ -1,6 +1,6 @@
 <template>
 	<v-dialog v-model="dialog" max-width="600px" persistent>
-		<v-card class="pos-themed-card" style="max-height: 80vh; overflow: hidden;">
+		<v-card class="pos-themed-card" style="max-height: 80vh; overflow: hidden">
 			<v-card-title class="bg-primary text-white d-flex align-center py-3">
 				<span class="text-h6">{{ __("Payment") }}</span>
 				<v-spacer></v-spacer>
@@ -9,7 +9,7 @@
 				</span>
 			</v-card-title>
 
-			<v-card-text class="pa-0 overflow-y-auto" style="max-height: 60vh;">
+			<v-card-text class="pa-0 overflow-y-auto" style="max-height: 60vh">
 				<!-- Payment Summary -->
 				<v-row v-if="totalAmount > 0" class="pa-3 ma-0" dense>
 					<v-col cols="6">
@@ -45,10 +45,10 @@
 
 				<!-- Payment Inputs -->
 				<div class="pa-3">
-					<v-row 
-						v-for="(payment, index) in paymentLines" 
-						:key="payment.mode_of_payment" 
-						class="payments pa-1 ma-0 align-center" 
+					<v-row
+						v-for="(payment, index) in paymentLines"
+						:key="payment.mode_of_payment"
+						class="payments pa-1 ma-0 align-center"
 						dense
 					>
 						<v-col cols="6">
@@ -209,229 +209,261 @@
 	</v-dialog>
 </template>
 
-<script>
-/* global __, frappe */
-import format from "../../format";
+<script setup>
+/* global frappe */
+import { computed, ref, watch } from "vue";
+import { formatUtils } from "../../format";
 import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";
 
-export default {
+defineOptions({
 	name: "PurchasePaymentDialog",
-	mixins: [format],
-	props: {
-		modelValue: Boolean,
-		totalAmount: {
-			type: Number,
-			required: true,
-		},
-		currency: {
-			type: String,
-			default: "",
-		},
-		posProfile: {
-			type: Object,
-			required: true,
-		},
-		createInvoice: {
-			type: Boolean,
-			default: false,
-		},
+});
+
+const __ = window.__ || ((text) => text);
+
+const props = defineProps({
+	modelValue: Boolean,
+	totalAmount: {
+		type: Number,
+		required: true,
 	},
-	emits: ["update:modelValue", "submit"],
-	data() {
-		return {
-			paymentLines: [],
-			printFormats: [],
-			selectedPrintFormat: null,
-			printInvoice: this.createInvoice,
-			loading: false,
-			cashMOP: null, // Will be set to the cash mode of payment
-		};
+	currency: {
+		type: String,
+		default: "",
 	},
-	computed: {
-		dialog: {
-			get() {
-				return this.modelValue;
-			},
-			set(val) {
-				this.$emit("update:modelValue", val);
-			},
-		},
-		paidAmount() {
-			return this.paymentLines.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
-		},
-		remainingAmount() {
-			return this.totalAmount - this.paidAmount;
-		},
-		isPaymentValid() {
-			// For purchases, we typically want exact payment or overpayment (change)
-			// Or we could allow partial payments if configured
-			return this.paidAmount > 0 && this.remainingAmount <= 0;
-		},
+	posProfile: {
+		type: Object,
+		required: true,
 	},
-	watch: {
-		dialog(val) {
-			if (val) {
-				this.printInvoice = this.createInvoice;
-				this.initializePayments();
-				this.fetchPrintFormats();
-				this.loading = false;
-			}
-		},
-		printInvoice() {
-			this.fetchPrintFormats();
-		},
+	createInvoice: {
+		type: Boolean,
+		default: false,
 	},
-	methods: {
-		initializePayments() {
-			const modes = this.posProfile.payments || [];
-			this.paymentLines = modes.map((m) => ({
-				mode_of_payment: m.mode_of_payment,
-				amount: 0,
-				default: m.default,
-				type: m.type,
-			}));
+});
 
-			// Identify cash payment method
-			this.cashMOP = this.paymentLines.find(p => 
-				p.mode_of_payment.toLowerCase().includes('cash') || p.type === 'Cash'
-			);
+const emit = defineEmits(["update:modelValue", "submit"]);
+const currency_precision = ref(2);
 
-			// Auto-fill default payment method if exists
-			const defaultMode = this.paymentLines.find((p) => p.default) || this.paymentLines[0];
-			if (defaultMode) {
-				defaultMode.amount = this.totalAmount;
-			}
-		},
-		set_full_amount(payment) {
-			// Reset all other payments
-			this.paymentLines.forEach((p) => {
-				if (p !== payment) {
-					p.amount = 0;
-				}
-			});
-			// Set this payment to total amount
-			payment.amount = this.totalAmount;
-		},
-		set_rest_amount(payment) {
-			// If payment is 0 and there's remaining amount, auto-fill
-			if (payment.amount === 0 && this.remainingAmount > 0) {
-				payment.amount = this.remainingAmount;
-			}
-		},
-		handlePaymentAmountChange(payment, event) {
-			const val = parseFloat(event) || 0;
-			payment.amount = val;
-			
-			// Auto-balance: if this payment exceeds remaining, reduce others
-			if (this.remainingAmount < 0) {
-				this.autoBalancePayments(payment);
-			}
-		},
-		setPaymentToDenomination(payment, amount) {
-			payment.amount = amount;
-			// Auto-balance other payments if needed
-			if (this.remainingAmount < 0) {
-				this.autoBalancePayments(payment);
-			}
-		},
-		autoBalancePayments(excludePayment) {
-			const excess = Math.abs(this.remainingAmount);
-			if (excess <= 0) return;
+const paymentLines = ref([]);
+const printFormats = ref([]);
+const selectedPrintFormat = ref(null);
+const printInvoice = ref(props.createInvoice);
+const loading = ref(false);
 
-			// Find other payments with amount > 0 to reduce
-			const otherPayments = this.paymentLines.filter(
-				(p) => p !== excludePayment && parseFloat(p.amount) > 0
-			);
-
-			// Sort by amount descending to reduce larger chunks first
-			otherPayments.sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
-
-			let remainingExcess = excess;
-
-			for (const other of otherPayments) {
-				if (remainingExcess <= 0) break;
-				
-				const otherAmount = parseFloat(other.amount) || 0;
-				const reduction = Math.min(otherAmount, remainingExcess);
-				
-				other.amount = this.flt(otherAmount - reduction, this.currency_precision);
-				remainingExcess = this.flt(remainingExcess - reduction, this.currency_precision);
-			}
-		},
-		isCashLikePayment(payment) {
-			if (!payment) return false;
-			
-			// Check if it's the configured cash MOP or contains "cash" in name
-			const configuredCashMOP = String(this.posProfile?.posa_cash_mode_of_payment || "").toLowerCase();
-			const mode = String(payment.mode_of_payment || "").toLowerCase();
-			const type = String(payment.type || "").toLowerCase();
-			
-			if (type === "cash") return true;
-			if (configuredCashMOP && mode === configuredCashMOP) return true;
-			return mode.includes("cash");
-		},
-		getVisibleDenominations(payment) {
-			if (!this.isCashLikePayment(payment)) return [];
-			
-			const currentTotalPaid = this.paidAmount;
-			const currentPaymentAmount = parseFloat(payment.amount) || 0;
-			const otherPayments = currentTotalPaid - currentPaymentAmount;
-			const amountToPay = this.totalAmount - otherPayments;
-
-			if (amountToPay <= 0) return [];
-
-			return getSmartTenderSuggestions(amountToPay, this.currency);
-		},
-		currencySymbol(curr) {
-			return curr || "";
-		},
-		close() {
-			this.dialog = false;
-		},
-		submit(doPrint) {
-			this.loading = true;
-			const payments = this.paymentLines
-				.filter((p) => p.amount > 0)
-				.map((p) => ({
-					mode_of_payment: p.mode_of_payment,
-					amount: p.amount,
-				}));
-			
-			this.$emit("submit", {
-				payments,
-				print: doPrint,
-				print_format: this.selectedPrintFormat,
-				print_invoice: this.printInvoice,
-			});
-		},
-		async fetchPrintFormats() {
-			try {
-				const doctype = this.printInvoice ? "Purchase Invoice" : "Purchase Order";
-				const { message } = await frappe.call({
-					method: "posawesome.posawesome.api.print_formats.get_print_formats",
-					args: {
-						doctype: doctype,
-					},
-				});
-				this.printFormats = message || [];
-				this.selectedPrintFormat = null;
-
-				if (this.printFormats.length) {
-					if (
-						this.posProfile.print_format &&
-						this.printFormats.includes(this.posProfile.print_format)
-					) {
-						this.selectedPrintFormat = this.posProfile.print_format;
-					} else {
-						this.selectedPrintFormat = this.printFormats[0];
-					}
-				}
-			} catch (e) {
-				console.error("Failed to fetch print formats", e);
-			}
-		},
+const dialog = computed({
+	get() {
+		return props.modelValue;
 	},
+	set(val) {
+		emit("update:modelValue", val);
+	},
+});
+
+const paidAmount = computed(() =>
+	paymentLines.value.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0),
+);
+
+const remainingAmount = computed(() => props.totalAmount - paidAmount.value);
+
+const isPaymentValid = computed(() => paidAmount.value > 0 && remainingAmount.value <= 0);
+
+watch(
+	() => props.modelValue,
+	(val) => {
+		if (val) {
+			printInvoice.value = props.createInvoice;
+			initializePayments();
+			fetchPrintFormats();
+			loading.value = false;
+		}
+	},
+);
+
+watch(printInvoice, () => {
+	fetchPrintFormats();
+});
+
+const flt = (value, precision, number_format, rounding_method) => {
+	if (!precision && precision != 0) {
+		precision = currency_precision.value || 2;
+	}
+	if (!rounding_method) {
+		rounding_method = "Banker's Rounding (legacy)";
+	}
+	return window.flt(value, precision, number_format, rounding_method);
 };
+
+function formatCurrency(value, precision) {
+	if (value === null || value === undefined) {
+		value = 0;
+	}
+	let number = Number(formatUtils.fromArabicNumerals(String(value)).replace(/,/g, ""));
+	if (isNaN(number)) number = 0;
+	let prec = precision != null ? Number(precision) : Number(currency_precision.value) || 2;
+	if (!Number.isInteger(prec) || prec < 0 || prec > 20) {
+		prec = Math.min(Math.max(parseInt(prec) || 2, 0), 20);
+	}
+
+	const locale = formatUtils.getNumberLocale();
+	let formatted = number.toLocaleString(locale, {
+		minimumFractionDigits: prec,
+		maximumFractionDigits: prec,
+		useGrouping: true,
+	});
+
+	formatted = formatUtils.toArabicNumerals(formatted);
+	return formatted;
+}
+
+function initializePayments() {
+	const modes = props.posProfile.payments || [];
+	paymentLines.value = modes.map((m) => ({
+		mode_of_payment: m.mode_of_payment,
+		amount: 0,
+		default: m.default,
+		type: m.type,
+	}));
+
+	// Auto-fill default payment method if exists
+	const defaultMode = paymentLines.value.find((p) => p.default) || paymentLines.value[0];
+	if (defaultMode) {
+		defaultMode.amount = props.totalAmount;
+	}
+}
+
+function set_full_amount(payment) {
+	// Reset all other payments
+	paymentLines.value.forEach((p) => {
+		if (p !== payment) {
+			p.amount = 0;
+		}
+	});
+	// Set this payment to total amount
+	payment.amount = props.totalAmount;
+}
+
+function set_rest_amount(payment) {
+	// If payment is 0 and there's remaining amount, auto-fill
+	if (payment.amount === 0 && remainingAmount.value > 0) {
+		payment.amount = remainingAmount.value;
+	}
+}
+
+function handlePaymentAmountChange(payment, event) {
+	const val = parseFloat(event) || 0;
+	payment.amount = val;
+
+	// Auto-balance: if this payment exceeds remaining, reduce others
+	if (remainingAmount.value < 0) {
+		autoBalancePayments(payment);
+	}
+}
+
+function setPaymentToDenomination(payment, amount) {
+	payment.amount = amount;
+	// Auto-balance other payments if needed
+	if (remainingAmount.value < 0) {
+		autoBalancePayments(payment);
+	}
+}
+
+function autoBalancePayments(excludePayment) {
+	const excess = Math.abs(remainingAmount.value);
+	if (excess <= 0) return;
+
+	// Find other payments with amount > 0 to reduce
+	const otherPayments = paymentLines.value.filter((p) => p !== excludePayment && parseFloat(p.amount) > 0);
+
+	// Sort by amount descending to reduce larger chunks first
+	otherPayments.sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
+
+	let remainingExcess = excess;
+
+	for (const other of otherPayments) {
+		if (remainingExcess <= 0) break;
+
+		const otherAmount = parseFloat(other.amount) || 0;
+		const reduction = Math.min(otherAmount, remainingExcess);
+
+		other.amount = flt(otherAmount - reduction, currency_precision.value);
+		remainingExcess = flt(remainingExcess - reduction, currency_precision.value);
+	}
+}
+
+function isCashLikePayment(payment) {
+	if (!payment) return false;
+
+	// Check if it's the configured cash MOP or contains "cash" in name
+	const configuredCashMOP = String(props.posProfile?.posa_cash_mode_of_payment || "").toLowerCase();
+	const mode = String(payment.mode_of_payment || "").toLowerCase();
+	const type = String(payment.type || "").toLowerCase();
+
+	if (type === "cash") return true;
+	if (configuredCashMOP && mode === configuredCashMOP) return true;
+	return mode.includes("cash");
+}
+
+function getVisibleDenominations(payment) {
+	if (!isCashLikePayment(payment)) return [];
+
+	const currentTotalPaid = paidAmount.value;
+	const currentPaymentAmount = parseFloat(payment.amount) || 0;
+	const otherPayments = currentTotalPaid - currentPaymentAmount;
+	const amountToPay = props.totalAmount - otherPayments;
+
+	if (amountToPay <= 0) return [];
+
+	return getSmartTenderSuggestions(amountToPay, props.currency);
+}
+
+function currencySymbol(curr) {
+	return curr || "";
+}
+
+function close() {
+	dialog.value = false;
+}
+
+function submit(doPrint) {
+	loading.value = true;
+	const payments = paymentLines.value
+		.filter((p) => p.amount > 0)
+		.map((p) => ({
+			mode_of_payment: p.mode_of_payment,
+			amount: p.amount,
+		}));
+
+	emit("submit", {
+		payments,
+		print: doPrint,
+		print_format: selectedPrintFormat.value,
+		print_invoice: printInvoice.value,
+	});
+}
+
+async function fetchPrintFormats() {
+	try {
+		const doctype = printInvoice.value ? "Purchase Invoice" : "Purchase Order";
+		const { message } = await frappe.call({
+			method: "posawesome.posawesome.api.print_formats.get_print_formats",
+			args: {
+				doctype: doctype,
+			},
+		});
+		printFormats.value = message || [];
+		selectedPrintFormat.value = null;
+
+		if (printFormats.value.length) {
+			if (props.posProfile.print_format && printFormats.value.includes(props.posProfile.print_format)) {
+				selectedPrintFormat.value = props.posProfile.print_format;
+			} else {
+				selectedPrintFormat.value = printFormats.value[0];
+			}
+		}
+	} catch (e) {
+		console.error("Failed to fetch print formats", e);
+	}
+}
 </script>
 
 <style scoped>

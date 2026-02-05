@@ -132,8 +132,9 @@
 	</v-row>
 </template>
 
-<script>
-import format from "../../format";
+<script setup>
+/* global frappe */
+import { onMounted, ref, watch } from "vue";
 import {
 	getOpeningDialogStorage,
 	setOpeningDialogStorage,
@@ -142,172 +143,167 @@ import {
 	checkDbHealth,
 } from "../../../offline/index.js";
 
-export default {
-	mixins: [format],
-	props: ["dialog"],
+defineOptions({
+	name: "OpeningDialog",
+});
 
-	data() {
-		return {
-			isOpen: this.dialog ? this.dialog : false,
-			dialog_data: {},
-			is_loading: false,
-			companies: [],
-			company: "",
-			pos_profiles_data: [],
-			pos_profiles: [],
-			pos_profile: "",
-			payments_method_data: [],
-			payments_methods: [],
-			payments_methods_headers: [
-				{
-					title: __("Mode of Payment"),
-					align: "start",
-					sortable: false,
-					value: "mode_of_payment",
-				},
-				{
-					title: __("Opening Amount"),
-					value: "amount",
-					align: "center",
-					sortable: false,
-				},
-			],
-			itemsPerPage: 100,
-			max25chars: (v) => v.length <= 12 || "Input too long!",
-			pagination: {},
-			snack: false,
-			snackColor: "",
-			snackText: "",
-		};
+const props = defineProps({
+	dialog: Boolean,
+});
+
+const emit = defineEmits(["close", "register"]);
+const __ = window.__ || ((text) => text);
+const get_currency_symbol = window.get_currency_symbol;
+
+const isOpen = ref(props.dialog ? props.dialog : false);
+const is_loading = ref(false);
+const companies = ref([]);
+const company = ref("");
+const pos_profiles_data = ref([]);
+const pos_profiles = ref([]);
+const pos_profile = ref("");
+const payments_method_data = ref([]);
+const payments_methods = ref([]);
+const payments_methods_headers = [
+	{
+		title: __("Mode of Payment"),
+		align: "start",
+		sortable: false,
+		value: "mode_of_payment",
 	},
-
-	watch: {
-		company(val) {
-			this.pos_profiles = [];
-			this.pos_profiles_data.forEach((element) => {
-				if (element.company === val) {
-					this.pos_profiles.push(element.name);
-				}
-				if (this.pos_profiles.length) {
-					this.pos_profile = this.pos_profiles[0];
-				} else {
-					this.pos_profile = "";
-				}
-			});
-		},
-
-		pos_profile(val) {
-			this.payments_methods = [];
-			this.payments_method_data.forEach((element) => {
-				if (element.parent === val) {
-					this.payments_methods.push({
-						mode_of_payment: element.mode_of_payment,
-						amount: 0,
-						currency: element.currency,
-					});
-				}
-			});
-		},
+	{
+		title: __("Opening Amount"),
+		value: "amount",
+		align: "center",
+		sortable: false,
 	},
+];
+const itemsPerPage = ref(100);
+const max25chars = (v) => v.length <= 12 || "Input too long!";
 
-	methods: {
-		close_opening_dialog() {
-			this.$emit("close");
-		},
+const currencySymbol = (currency) => get_currency_symbol?.(currency);
 
-		async get_opening_dialog_data() {
-			const vm = this;
-			await initPromise;
-			await checkDbHealth();
+watch(
+	() => props.dialog,
+	(val) => {
+		isOpen.value = val ? val : false;
+	},
+);
 
-			// Load cached data first for offline usage
-			const cached = getOpeningDialogStorage();
-			if (cached) {
+watch(company, (val) => {
+	pos_profiles.value = [];
+	pos_profiles_data.value.forEach((element) => {
+		if (element.company === val) {
+			pos_profiles.value.push(element.name);
+		}
+		if (pos_profiles.value.length) {
+			pos_profile.value = pos_profiles.value[0];
+		} else {
+			pos_profile.value = "";
+		}
+	});
+});
+
+watch(pos_profile, (val) => {
+	payments_methods.value = [];
+	payments_method_data.value.forEach((element) => {
+		if (element.parent === val) {
+			payments_methods.value.push({
+				mode_of_payment: element.mode_of_payment,
+				amount: 0,
+				currency: element.currency,
+			});
+		}
+	});
+});
+
+function close_opening_dialog() {
+	emit("close");
+}
+
+async function get_opening_dialog_data() {
+	await initPromise;
+	await checkDbHealth();
+
+	// Load cached data first for offline usage
+	const cached = getOpeningDialogStorage();
+	if (cached) {
+		try {
+			companies.value = cached.companies.map((c) => c.name);
+			pos_profiles_data.value = cached.pos_profiles_data || [];
+			payments_method_data.value = cached.payments_method || [];
+			company.value = companies.value[0] || "";
+		} catch (e) {
+			console.error("Failed to parse opening dialog cache", e);
+		}
+	}
+
+	frappe.call({
+		method: "posawesome.posawesome.api.shifts.get_opening_dialog_data",
+		args: {},
+		callback: function (r) {
+			if (r.message) {
+				companies.value = r.message.companies.map((element) => element.name);
+				pos_profiles_data.value = r.message.pos_profiles_data;
+				payments_method_data.value = r.message.payments_method;
+				company.value = companies.value[0] || "";
 				try {
-					vm.companies = cached.companies.map((c) => c.name);
-					vm.pos_profiles_data = cached.pos_profiles_data || [];
-					vm.payments_method_data = cached.payments_method || [];
-					vm.company = vm.companies[0] || "";
+					setOpeningDialogStorage(r.message);
 				} catch (e) {
-					console.error("Failed to parse opening dialog cache", e);
+					console.error("Failed to cache opening dialog data", e);
 				}
 			}
-
-			frappe.call({
-				method: "posawesome.posawesome.api.shifts.get_opening_dialog_data",
-				args: {},
-				callback: function (r) {
-					if (r.message) {
-						vm.companies = r.message.companies.map((element) => element.name);
-						vm.pos_profiles_data = r.message.pos_profiles_data;
-						vm.payments_method_data = r.message.payments_method;
-						vm.company = vm.companies[0] || "";
-						try {
-							setOpeningDialogStorage(r.message);
-						} catch (e) {
-							console.error("Failed to cache opening dialog data", e);
-						}
-					}
-				},
-			});
 		},
+	});
+}
 
-		submit_dialog() {
-			if (!this.payments_methods.length || !this.company || !this.pos_profile) {
-				return;
+function submit_dialog() {
+	if (!payments_methods.value.length || !company.value || !pos_profile.value) {
+		return;
+	}
+
+	is_loading.value = true;
+
+	return frappe
+		.call("posawesome.posawesome.api.shifts.create_opening_voucher", {
+			pos_profile: pos_profile.value,
+			company: company.value,
+			balance_details: payments_methods.value,
+		})
+		.then((r) => {
+			if (r.message) {
+				emit("register", r.message);
+				try {
+					setOpeningStorage(r.message);
+				} catch (e) {
+					console.error("Failed to cache opening data", e);
+				}
+				// Close handles hiding the dialog, parent handles logic
+				emit("close");
+				is_loading.value = false;
 			}
+		});
+}
 
-			this.is_loading = true;
-			const vm = this;
+function go_desk() {
+	frappe.set_route("/");
+	location.reload();
+}
 
-			return frappe
-				.call("posawesome.posawesome.api.shifts.create_opening_voucher", {
-					pos_profile: this.pos_profile,
-					company: this.company,
-					balance_details: this.payments_methods,
-				})
-				.then((r) => {
-					if (r.message) {
-						vm.$emit("register", r.message);
-						try {
-							setOpeningStorage(r.message);
-						} catch (e) {
-							console.error("Failed to cache opening data", e);
-						}
-						// Close handles hiding the dialog, parent handles logic
-						vm.$emit("close");
-						vm.is_loading = false;
-					}
-				});
-		},
+function logout() {
+	const redirectTarget = "/app/posapp";
+	const loginPath = `/login?redirect-to=${encodeURIComponent(redirectTarget)}`;
+	frappe.call("logout").finally(() => {
+		const loginUrl =
+			frappe?.utils?.get_url?.(loginPath) ??
+			(frappe?.urllib?.get_base_url?.() ? `${frappe.urllib.get_base_url()}${loginPath}` : loginPath);
+		window.location.href = loginUrl;
+	});
+}
 
-		go_desk() {
-			frappe.set_route("/");
-			location.reload();
-		},
-
-		logout() {
-			const redirectTarget = "/app/posapp";
-			const loginPath = `/login?redirect-to=${encodeURIComponent(redirectTarget)}`;
-			frappe.call("logout").finally(() => {
-				const loginUrl =
-					frappe?.utils?.get_url?.(loginPath) ??
-					(frappe?.urllib?.get_base_url?.()
-						? `${frappe.urllib.get_base_url()}${loginPath}`
-						: loginPath);
-				window.location.href = loginUrl;
-			});
-		},
-	},
-
-	mounted() {
-		this.get_opening_dialog_data();
-	},
-
-	beforeUnmount() {
-		// Clean up event listeners if any were added
-	},
-};
+onMounted(() => {
+	get_opening_dialog_data();
+});
 </script>
 
 <style scoped>

@@ -31,28 +31,33 @@
 	</v-dialog>
 </template>
 
-<script>
-export default {
-	props: {
-		modelValue: {
-			type: Boolean,
-			default: false,
-		},
-		message: {
-			type: String,
-			default: "",
-		},
-		code: {
-			type: String,
-			default: "",
-		},
-		details: {
-			type: String,
-			default: "",
-		},
+<script setup>
+defineOptions({
+	name: "ScanErrorDialog",
+});
+
+defineProps({
+	modelValue: {
+		type: Boolean,
+		default: false,
 	},
-	emits: ["update:modelValue", "acknowledge"],
-};
+	message: {
+		type: String,
+		default: "",
+	},
+	code: {
+		type: String,
+		default: "",
+	},
+	details: {
+		type: String,
+		default: "",
+	},
+});
+
+defineEmits(["update:modelValue", "acknowledge"]);
+
+const __ = window.__ || ((text) => text);
 </script>
 
 <style scoped>

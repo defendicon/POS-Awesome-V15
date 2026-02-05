@@ -7,25 +7,22 @@
 	</transition>
 </template>
 
-<script>
+<script setup>
 import { computed } from "vue";
 import { useLoading } from "../../composables/useLoading.js";
 
-export default {
+defineOptions({
 	name: "LoadingOverlay",
-	props: {
-		visible: { type: Boolean, default: undefined },
-		message: { type: String, default: "" },
-	},
-	setup(props) {
-		const { overlayVisible } = useLoading();
-		const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		const isVisible = computed(() =>
-			props.visible !== undefined ? props.visible : overlayVisible.value,
-		);
-		return { isVisible, prefersReduced };
-	},
-};
+});
+
+const props = defineProps({
+	visible: { type: Boolean, default: undefined },
+	message: { type: String, default: "" },
+});
+
+const { overlayVisible } = useLoading();
+const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isVisible = computed(() => (props.visible !== undefined ? props.visible : overlayVisible.value));
 </script>
 
 <style scoped>

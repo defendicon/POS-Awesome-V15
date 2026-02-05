@@ -21,37 +21,39 @@
 	</v-overlay>
 </template>
 
-<script>
-export default {
+<script setup>
+defineOptions({
 	name: "LoadingOverlay",
-	props: {
-		loading: {
-			type: Boolean,
-			default: false,
-		},
-		message: {
-			type: String,
-			default: "",
-		},
-		progress: {
-			type: Number,
-			default: 0,
-		},
-		sources: {
-			type: Object,
-			default: () => ({}),
-		},
-		sourceMessages: {
-			type: Object,
-			default: () => ({}),
-		},
+});
+
+const props = defineProps({
+	loading: {
+		type: Boolean,
+		default: false,
 	},
-	methods: {
-		getLabel(name) {
-			return this.sourceMessages[name] || name;
-		},
+	message: {
+		type: String,
+		default: "",
 	},
-};
+	progress: {
+		type: Number,
+		default: 0,
+	},
+	sources: {
+		type: Object,
+		default: () => ({}),
+	},
+	sourceMessages: {
+		type: Object,
+		default: () => ({}),
+	},
+});
+
+const __ = window.__ || ((text) => text);
+
+function getLabel(name) {
+	return props.sourceMessages[name] || name;
+}
 </script>
 
 <style scoped>
