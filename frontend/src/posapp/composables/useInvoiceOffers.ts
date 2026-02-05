@@ -5,7 +5,7 @@ import { useToastStore } from "../stores/toastStore";
 import { storeToRefs } from "pinia";
 import itemService from "../services/itemService";
 import format from "../format"; // Assuming default export has helper methods or mixin structure
-import { formatUtils } from "../format.js"; // Based on invoiceOfferMethods import
+import { formatUtils } from "../format"; // Based on invoiceOfferMethods import
 import { isOffline } from "../../offline/index.js";
 import {
     appendDebugPrintParam,

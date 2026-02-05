@@ -28,8 +28,27 @@ export interface Frappe {
     };
     utils: {
         get_url: (path: string) => string;
+        is_rtl: () => boolean;
+        escape_html: (val: string) => string;
+    };
+    defaults: {
+        get_default: (key: string) => any;
+    };
+    boot: {
+        use_western_numerals?: boolean | number;
+        pos_profile?: {
+            use_western_numerals?: boolean | number;
+        };
     };
     render_template: (template: string, context: object) => string;
+    session: {
+        user: string;
+    }
+}
+
+declare global {
+    const get_currency_symbol: (currency: string) => string;
+    const flt: (value: any, precision?: number, number_format?: string, rounding_method?: string) => number;
 }
 
 export interface FrappeCallArgs {
