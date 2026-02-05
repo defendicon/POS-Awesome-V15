@@ -161,14 +161,12 @@
 	</div>
 </template>
 
-<script setup>
-/* eslint-disable no-unused-vars */
-/* global frappe, __, flt, memoryInitPromise */
-import { getCurrentInstance, onMounted, onBeforeUnmount, ref, computed, watch, nextTick, reactive, inject } from "vue";
+<script setup lang="ts">
+import { getCurrentInstance, onMounted, onBeforeUnmount, ref, computed, watch, nextTick, reactive, inject, type Ref } from "vue";
 import { storeToRefs } from "pinia";
 import format from "../../format";
 import _ from "lodash";
-import { memoryInitPromise, forceClearAllCache } from "../../../offline/index.js";
+import { memoryInitPromise } from "../../../offline/index";
 
 import CameraScanner from "./CameraScanner.vue";
 import ItemActionToolbar from "./ItemActionToolbar.vue";
@@ -179,34 +177,34 @@ import ItemsSelectorTable from "./ItemsSelectorTable.vue";
 import NewItemDialog from "./NewItemDialog.vue";
 import ScanErrorDialog from "./ScanErrorDialog.vue";
 
-import { useResponsive } from "../../composables/useResponsive.js";
-import { useRtl } from "../../composables/useRtl.js";
-import { useFlyAnimation } from "../../composables/useFlyAnimation.js";
-import { useCartValidation } from "../../composables/useCartValidation.js";
-import { useItemsIntegration } from "../../composables/useItemsIntegration.js";
-import { useItemSearch } from "../../composables/useItemSearch.js";
-import { useScannerInput } from "../../composables/useScannerInput.js";
-import { useItemAvailability } from "../../composables/useItemAvailability.js";
-import { useItemDetailFetcher } from "../../composables/useItemDetailFetcher.js";
-import { useItemAddition } from "../../composables/useItemAddition.js";
-import { useItemSelection } from "../../composables/useItemSelection.js";
-import { useItemSelectorLayout } from "../../composables/useItemSelectorLayout.js";
-import { useLastInvoiceRate } from "../../composables/useLastInvoiceRate.js";
-import { useItemSync } from "../../composables/useItemSync.js";
-import { useBatchSerial } from "../../composables/useBatchSerial.js";
-import { useItemStorageSafety } from "../../composables/useItemStorageSafety.js";
-import { useItemsSelectorSearch } from "../../composables/useItemsSelectorSearch.js";
-import { useItemsSelectorSettings } from "../../composables/useItemsSelectorSettings.js";
-import { useItemsSelectorFocus } from "../../composables/useItemsSelectorFocus.js";
-import { useItemDisplay } from "../../composables/useItemDisplay.js";
-import { useItemsLoader } from "../../composables/useItemsLoader.js";
-import { useBarcodeIndexing } from "../../composables/useBarcodeIndexing.js";
-import { useScanProcessor } from "../../composables/useScanProcessor.js";
+import { useResponsive } from "../../composables/useResponsive";
+import { useRtl } from "../../composables/useRtl";
+import { useFlyAnimation } from "../../composables/useFlyAnimation";
+import { useCartValidation } from "../../composables/useCartValidation";
+import { useItemsIntegration } from "../../composables/useItemsIntegration";
+import { useItemSearch } from "../../composables/useItemSearch";
+import { useScannerInput } from "../../composables/useScannerInput";
+import { useItemAvailability } from "../../composables/useItemAvailability";
+import { useItemDetailFetcher } from "../../composables/useItemDetailFetcher";
+import { useItemAddition } from "../../composables/useItemAddition";
+import { useItemSelection } from "../../composables/useItemSelection";
+import { useItemSelectorLayout } from "../../composables/useItemSelectorLayout";
+import { useLastInvoiceRate } from "../../composables/useLastInvoiceRate";
+import { useItemSync } from "../../composables/useItemSync";
+import { useBatchSerial } from "../../composables/useBatchSerial";
+import { useItemStorageSafety } from "../../composables/useItemStorageSafety";
+import { useItemsSelectorSearch } from "../../composables/useItemsSelectorSearch";
+import { useItemsSelectorSettings } from "../../composables/useItemsSelectorSettings";
+import { useItemsSelectorFocus } from "../../composables/useItemsSelectorFocus";
+import { useItemDisplay } from "../../composables/useItemDisplay";
+import { useItemsLoader } from "../../composables/useItemsLoader";
+import { useBarcodeIndexing } from "../../composables/useBarcodeIndexing";
+import { useScanProcessor } from "../../composables/useScanProcessor";
 
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { useToastStore } from "../../stores/toastStore.js";
-import { useUIStore } from "../../stores/uiStore.js";
-import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useCustomersStore } from "../../stores/customersStore";
+import { useToastStore } from "../../stores/toastStore";
+import { useUIStore } from "../../stores/uiStore";
+import { useInvoiceStore } from "../../stores/invoiceStore";
 
 import { parseBooleanSetting } from "../../utils/stock.js";
 
@@ -475,14 +473,15 @@ const scanProcessor = useScanProcessor({
 	items, pos_profile, active_price_list,
 	customer_price_list, itemDetailFetcher, itemAddition: { addItem: add_item },
 	barcodeIndex: { lookupItemByBarcode, searchItemsByCode: searchItemsByCodeFn, ensureBarcodeIndex, replaceBarcodeIndex, indexItem, resetBarcodeIndex },
-	scannerInput, searchCache: ref(new Map()), eventBus,
+	scannerInput, searchCache: ref(new Map()) as Ref<Map<any, any>>, eventBus,
 	format_number: itemDisplay.format_number, float_precision: computed(() => pos_profile.value?.float_precision || 2),
 	hide_qty_decimals: computed(() => !!pos_profile.value?.posa_hide_qty_decimals),
 	blockSaleBeyondAvailableQty, currency_precision: computed(() => pos_profile.value?.currency_precision || 2),
 	exchange_rate: computed(() => 1), format_currency: itemDisplay.format_currency, ratePrecision: itemDisplay.ratePrecision,
 	customer: selectedCustomer, onItemAdded: () => { clearSearch(); itemsSelectorFocus.focusItemSearch(); },
 	onItemNotFound: (code) => { search_input.value = code; first_search.value = code; },
-	stock_settings
+	stock_settings,
+	search_from_scanner_ref: scannerInput.searchFromScanner,
 });
 
 // 6. Template Helpers

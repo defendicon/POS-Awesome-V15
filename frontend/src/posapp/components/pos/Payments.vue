@@ -223,12 +223,12 @@ import PaymentCustomerCreditDetails from "./PaymentCustomerCreditDetails.vue";
 import PaymentOptions from "./PaymentOptions.vue";
 import PaymentSelectionFields from "./PaymentSelectionFields.vue";
 import PaymentDialogs from "./PaymentDialogs.vue";
-import { usePaymentCalculations } from "../../composables/usePaymentCalculations.js";
-import { usePaymentSubmission } from "../../composables/usePaymentSubmission.js";
-import { useRedemptionLogic } from "../../composables/useRedemptionLogic.js";
-import { usePaymentPrinting } from "../../composables/usePaymentPrinting.js";
-import { usePaymentMethods } from "../../composables/usePaymentMethods.js";
-import { useInvoiceDetails } from "../../composables/useInvoiceDetails.js";
+import { usePaymentCalculations } from "../../composables/usePaymentCalculations";
+import { usePaymentSubmission } from "../../composables/usePaymentSubmission";
+import { useRedemptionLogic } from "../../composables/useRedemptionLogic";
+import { usePaymentPrinting } from "../../composables/usePaymentPrinting";
+import { usePaymentMethods } from "../../composables/usePaymentMethods";
+import { useInvoiceDetails } from "../../composables/useInvoiceDetails";
 import { ref, computed, getCurrentInstance } from "vue";
 
 export default {

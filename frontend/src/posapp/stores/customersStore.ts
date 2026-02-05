@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+
+declare const frappe: any;
+declare const __: any;
 import type { Customer, POSProfile } from "../types/models";
 // @ts-ignore
 import {

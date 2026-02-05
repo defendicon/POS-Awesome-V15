@@ -1,6 +1,9 @@
 import { ref, computed, watch } from "vue";
 import { useUIStore } from "./stores/uiStore";
 
+declare const frappe: any;
+declare const __: any;
+
 // Type definitions for RTL and numeral systems
 export type NumeralsMode = "western" | "arabic-indic";
 

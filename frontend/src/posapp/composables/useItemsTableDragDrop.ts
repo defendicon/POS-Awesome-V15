@@ -1,5 +1,5 @@
 
-export function useItemsTableDragDrop(emit: (event: string, ...args: any[]) => void, eventBus: any) {
+export function useItemsTableDragDrop(emit: any, eventBus: any) {
     const onDragOverFromSelector = (event: DragEvent) => {
         // Check if drag data is from item selector
         const dragData = event.dataTransfer?.types.includes("application/json");

@@ -1,26 +1,36 @@
-import { ref, watch, computed, unref } from "vue";
+import { ref, watch, unref, type Ref } from "vue";
 
-export function useRedemptionLogic(options) {
+declare const frappe: any;
+
+export interface RedemptionLogicOptions {
+	invoiceDoc: Ref<any>;
+	posProfile: Ref<any>;
+	currencyPrecision: Ref<number>;
+	formatFloat: (val: any, prec?: number) => number;
+	stores?: {
+		toastStore?: any;
+	};
+	onClearAmounts?: () => void;
+}
+
+export function useRedemptionLogic(options: RedemptionLogicOptions) {
 	const {
 		invoiceDoc,
 		posProfile,
 		currencyPrecision,
 		formatFloat,
-		stores, // { toastStore }
+		stores,
 	} = options;
 
 	// State
 	const loyalty_amount = ref(0);
 	const redeemed_customer_credit = ref(0);
-	const customer_credit_dict = ref([]);
+	const customer_credit_dict = ref<any[]>([]);
 	const available_customer_credit = ref(0);
 	const available_points_amount = ref(0);
 
 	// Get available customer credit
-	const get_available_credit = (use_credit) => {
-		// Clear amounts logic should be handled by caller or via callback?
-		// In original code, it calls `this.clear_all_amounts()`.
-		// We can emit an event or call a callback.
+	const get_available_credit = (use_credit: boolean) => {
 		if (options.onClearAmounts) {
 			options.onClearAmounts();
 		}
@@ -36,13 +46,13 @@ export function useRedemptionLogic(options) {
 					customer,
 					company,
 				})
-				.then((r) => {
+				.then((r: any) => {
 					const data = r.message;
 					if (data && data.length) {
 						const doc = unref(invoiceDoc);
 						const amount = doc.rounded_total || doc.grand_total;
 						let remainAmount = amount;
-						data.forEach((row) => {
+						data.forEach((row: any) => {
 							if (remainAmount > 0) {
 								if (remainAmount >= row.total_credit) {
 									row.credit_to_redeem = row.total_credit;
@@ -67,7 +77,7 @@ export function useRedemptionLogic(options) {
 
 	// Watchers
 	watch(redeemed_customer_credit, (newVal) => {
-		const func = unref(formatFloat) || ((v) => parseFloat(v));
+		const func = formatFloat || ((v: any) => parseFloat(String(v)) || 0);
 		const limit = unref(available_customer_credit);
 		if (func(newVal) > func(limit)) {
 			redeemed_customer_credit.value = limit;
@@ -83,7 +93,7 @@ export function useRedemptionLogic(options) {
 	watch(
 		customer_credit_dict,
 		(newVal) => {
-			const func = unref(formatFloat) || ((v) => parseFloat(v));
+			const func = formatFloat || ((v: any) => parseFloat(String(v)) || 0);
 			const prec = unref(currencyPrecision) || 2;
 			const total = newVal.reduce((sum, row) => sum + func(row.credit_to_redeem || 0), 0);
 			redeemed_customer_credit.value = func(total, prec);
@@ -91,11 +101,7 @@ export function useRedemptionLogic(options) {
 		{ deep: true }
 	);
 
-	// Fetch Loyalty Points (Stub for now, need to find implementation if exists in Payments.vue)
-	// It wasn't visible in previous code blocks, but needed for completeness.
-	// I'll leave it as a placeholder or check if I can find it.
-	
-	// Assuming logic similar to credit:
+	// Fetch Loyalty Points - Placeholder
 	const get_loyalty_points = () => {
 		// TODO: Implement loyalty fetching
 	};
@@ -107,5 +113,6 @@ export function useRedemptionLogic(options) {
 		available_customer_credit,
 		available_points_amount,
 		get_available_credit,
+		get_loyalty_points,
 	};
 }

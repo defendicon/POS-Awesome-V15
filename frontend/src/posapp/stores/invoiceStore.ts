@@ -5,6 +5,9 @@
 
 import { defineStore } from "pinia";
 import { computed, ref, reactive, watch } from "vue";
+
+declare const frappe: any;
+declare const __: any;
 import type { CartItem, InvoiceDoc, InvoiceMetadata, DeliveryCharge } from "../types/models";
 
 const toNumber = (value: any): number => {

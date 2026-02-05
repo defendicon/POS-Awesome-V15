@@ -2,6 +2,9 @@
  * Stock Coordinator - Manages stock availability tracking and coordination
  */
 
+declare const frappe: any;
+declare const __: any;
+
 /**
  * Listener callback type for stock changes.
  */

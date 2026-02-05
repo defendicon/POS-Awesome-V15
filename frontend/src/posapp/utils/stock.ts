@@ -2,6 +2,8 @@
  * Utility functions for stock-related logic and message formatting.
  */
 
+declare const __: any;
+
 /**
  * Parses a value into a boolean based on standard Frappe/POS settings.
  * @param value The value to parse (string, number, or boolean)

@@ -44,10 +44,10 @@
 					:isNumber="isNumber"
 					:isNegative="memoizedIsNegative"
 					:hideQtyDecimals="hide_qty_decimals"
-					:isRTL="isRTL"
+					:isRTL="isRtl"
 					:showUom="isColumnVisible('uom')"
 					:showPriceListRate="isColumnVisible('price_list_rate')"
-					:showDiscountPercent="isColumnVisible('discount_value')"
+					:showDiscountPercent="isColumnVisible('discount_percentage')"
 					:showDiscountAmount="isColumnVisible('discount_amount')"
 					:showOffer="isColumnVisible('posa_is_offer')"
 					@update-qty="handleQtyUpdate"
@@ -117,14 +117,12 @@
 	</div>
 </template>
 
-<script>
-/* global process */
-import _ from "lodash";
-import { logComponentRender } from "../../utils/perf.js";
-import { getCurrentInstance, ref, computed, onBeforeUnmount } from "vue";
-import { useInvoiceStore } from "../../stores/invoiceStore.js";
-import { parseBooleanSetting } from "../../utils/stock.js";
-import { loadItemSelectorSettings } from "../../utils/itemSelectorSettings.js";
+<script setup lang="ts">
+import { ref, computed, onBeforeUnmount, onMounted, watch, getCurrentInstance } from "vue";
+import { useInvoiceStore } from "../../stores/invoiceStore";
+import { parseBooleanSetting } from "../../utils/stock";
+import { loadItemSelectorSettings } from "../../utils/itemSelectorSettings";
+import { logComponentRender } from "../../utils/perf";
 import CartItemRow from "./CartItemRow.vue";
 import ItemsTableExpandedRow from "./ItemsTableExpandedRow.vue";
 
@@ -133,385 +131,231 @@ import { useItemsTableDragDrop } from "../../composables/useItemsTableDragDrop";
 import { useItemsTableResponsive } from "../../composables/useItemsTableResponsive";
 import { useItemsTableMerge } from "../../composables/useItemsTableMerge";
 import { useItemsTableNameEdit } from "../../composables/useItemsTableNameEdit";
+import { useFormatters } from "../../composables/useFormatters";
+import { useRtl } from "../../composables/useRtl";
 import "./items-table-styles.css";
 
-export default {
-	name: "ItemsTable",
-	components: {
-		CartItemRow,
-		ItemsTableExpandedRow,
-	},
-	setup(props, { emit }) {
-		const { proxy } = getCurrentInstance();
-		const tableContainer = ref(null);
-		const eventBus = proxy?.eventBus;
-		const invoiceStore = useInvoiceStore();
-		
-		const { customItemFilter: searchFilter } = useItemsTableSearch();
-		const dragDropHandlers = useItemsTableDragDrop(emit, eventBus);
-		
-		const items = computed(() => invoiceStore.items);
-		const headers = computed(() => props.headers || []);
-		
-		const responsive = useItemsTableResponsive(
-			tableContainer,
-			headers
-		);
-		
-		const merge = useItemsTableMerge(items);
-		const nameEdit = useItemsTableNameEdit();
+// Global declarations for Frappe
+declare const __: (str: string, args?: any[]) => string;
 
-		// Cleanup merge cache on unmount
-		onBeforeUnmount(() => {
-			merge.clearMergeCache();
-		});
+interface Props {
+	headers?: any[];
+	expanded?: any[];
+	itemsPerPage?: number;
+	itemSearch?: string;
+	pos_profile?: any;
+	invoiceType?: string;
+	stock_settings?: any;
+	displayCurrency?: string;
+	formatFloat: (value: number, precision?: number | string) => string;
+	formatCurrency: (value: number, precision?: number | string) => string;
+	currencySymbol: (currency?: string) => string;
+	isNumber: (value: any) => boolean;
+	setFormatedQty: (item: any, field: string, value: any, force?: boolean, event?: any) => void;
+	setFormatedCurrency: (item: any, field: string, value: any, force?: boolean, event?: any) => void;
+	calcPrices: (item: any, value: any, event?: any) => void;
+	calcUom: (item: any, uom: string) => void;
+	setSerialNo: (item: any) => void;
+	setBatchQty: (item: any, event: any) => void;
+	validateDueDate: (item: any) => void;
+	removeItem: (item: any) => void;
+	subtractOne: (item: any) => void;
+	addOne: (item: any) => void;
+	isReturnInvoice?: boolean;
+	toggleOffer: (item: any) => void;
+	changePriceListRate: (item: any) => void;
+	isNegative: (value: any) => boolean;
+}
 
-		return { 
-			invoiceStore, 
-			eventBus, 
-			searchFilter, 
-			dragDropHandlers,
-			tableContainer,
-			items,
-			...responsive,
-			...merge,
-			...nameEdit
-		};
-	},
-	props: {
-		headers: Array,
-		expanded: Array,
-		itemsPerPage: Number,
-		itemSearch: String,
-		pos_profile: Object,
-		invoiceType: String,
-		stock_settings: Object,
-		displayCurrency: String,
-		formatFloat: Function,
-		formatCurrency: Function,
-		currencySymbol: Function,
-		isNumber: Function,
-		setFormatedQty: Function,
-		setFormatedCurrency: Function,
-		calcPrices: Function,
-		calcUom: Function,
-		setSerialNo: Function,
-		setBatchQty: Function,
-		validateDueDate: Function,
-		removeItem: Function,
-		subtractOne: Function,
-		addOne: Function,
-		isReturnInvoice: Boolean,
-		toggleOffer: Function,
-		changePriceListRate: Function,
-		isNegative: Function,
-	},
-	data() {
-		return {
-			draggedItem: null,
-			draggedIndex: null,
-			dragOverIndex: null,
-			isDragging: false,
-			pendingAdd: null,
-			// Performance optimization caches
-			expandedCache: new Map(),
-			lastUpdateTime: 0,
-		};
-	},
-	created() {
-		// Non-reactive cache for performance
-		this.formatCache = new Map();
-		this.qtyLengthCache = new Map();
-		// PERF: cache search normalization once per query to avoid repeating string ops for every row render
-		this._searchCache = { raw: null, normalized: "", terms: [] };
-	},
-	watch: {
-		displayCurrency() {
-			if (this.formatCache) this.formatCache.clear();
-		},
-		pos_profile: {
-			handler() {
-				if (this.formatCache) this.formatCache.clear();
-			},
-			deep: true,
-		},
-	},
-	computed: {
-		memoizedFormatFloat() {
-			return (value, precision) => {
-				if (value === null || value === undefined) return "";
-				const key = `f_${value}_${precision ?? "def"}`;
-				if (this.formatCache.has(key)) return this.formatCache.get(key);
-				const result = this.formatFloat(value, precision);
-				this.formatCache.set(key, result);
-				if (this.formatCache.size > 5000) this.formatCache.clear();
-				return result;
-			};
-		},
-		memoizedFormatCurrency() {
-			return (value, precision) => {
-				if (value === null || value === undefined) return "";
-				const key = `c_${value}_${precision ?? "def"}`;
-				if (this.formatCache.has(key)) return this.formatCache.get(key);
-				const result = this.formatCurrency(value, precision);
-				this.formatCache.set(key, result);
-				if (this.formatCache.size > 5000) this.formatCache.clear();
-				return result;
-			};
-		},
-		memoizedIsNegative() {
-			return (value) => {
-				if (typeof value === "number") return value < 0;
-				return this.isNegative(value);
-			};
-		},
-		invoice_doc() {
-			return this.invoiceStore.invoiceDoc || {};
-		},
-		blockSaleBeyondAvailableQty() {
-			if (["Order", "Quotation"].includes(this.invoiceType)) return false;
-			return parseBooleanSetting(this.pos_profile?.posa_block_sale_beyond_available_qty);
-		},
+const props = withDefaults(defineProps<Props>(), {
+	headers: () => [],
+	expanded: () => [],
+	isReturnInvoice: false,
+});
 
-		// Enhanced header props with responsive behavior
-		dynamicHeaderProps() {
-			return {
-				class: `responsive-header container-${this.breakpoint}`,
-			};
-		},
+const emit = defineEmits<{
+	(e: "update:expanded", val: any[]): void;
+	(e: "show-drop-feedback", val: boolean): void;
+	(e: "item-dropped", val: boolean): void;
+}>();
 
-		// Virtual scrolling configuration for optimal performance
-		virtualScrollConfig() {
-			const itemCount = this.items?.length || 0;
-			const containerHeight = this.containerHeight;
+const { proxy } = getCurrentInstance() as any;
+const eventBus = proxy?.eventBus;
+const invoiceStore = useInvoiceStore();
+const tableContainer = ref<HTMLElement | null>(null);
 
-			// Dynamic configuration based on dataset size and container
-			return {
-				itemHeight:
-					this.tableDensity === "compact" ? 48 : this.tableDensity === "comfortable" ? 72 : 60,
-				itemsPerPage: Math.max(20, Math.ceil(containerHeight / 60) + 5),
-				bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
-			};
-		},
+// Composables
+const { customItemFilter } = useItemsTableSearch();
+const dragDropHandlers = useItemsTableDragDrop(emit, eventBus);
+const { isRtl } = useRtl();
+const {
+	memoizedFormatFloat,
+	memoizedFormatCurrency,
+	memoizedQtyLength,
+	clearFormatCache,
+} = useFormatters({
+	formatFloat: props.formatFloat,
+	formatCurrency: props.formatCurrency,
+});
 
-		// Memoized quantity display length calculation with cache management
-		memoizedQtyLength() {
-			return (qty) => {
-				if (this.qtyLengthCache.has(qty)) return this.qtyLengthCache.get(qty);
-				const length = String(Math.abs(qty || 0)).replace(".", "").length;
-				this.qtyLengthCache.set(qty, length);
+const responsive = useItemsTableResponsive(tableContainer, computed(() => props.headers || []));
+const merge = useItemsTableMerge(computed(() => invoiceStore.items));
+const nameEdit = useItemsTableNameEdit();
 
-				// Limit cache size to prevent memory leaks
-				if (this.qtyLengthCache.size > 1000) {
-					const firstKey = this.qtyLengthCache.keys().next().value;
-					this.qtyLengthCache.delete(firstKey);
-				}
+// Computed
+const items = computed(() => invoiceStore.items);
+const invoice_doc = computed(() => invoiceStore.invoiceDoc || {});
 
-				return length;
-			};
-		},
+const memoizedIsNegative = computed(() => {
+	return (value: any) => {
+		if (typeof value === "number") return value < 0;
+		return props.isNegative(value);
+	};
+});
 
-		// Lazy loading helper for expanded content with cache
-		isItemExpanded() {
-			return (itemId) => {
-				const cacheKey = `${itemId}_${this.expanded.length}`;
+const blockSaleBeyondAvailableQty = computed(() => {
+	if (["Order", "Quotation"].includes(props.invoiceType || "")) return false;
+	return parseBooleanSetting(props.pos_profile?.posa_block_sale_beyond_available_qty);
+});
 
-				if (this.expandedCache.has(cacheKey)) {
-					return this.expandedCache.get(cacheKey);
-				}
+const {
+	breakpoint,
+	responsiveHeaders,
+	isColumnVisible,
+	containerStyles,
+	containerClasses,
+	tableClasses,
+	expandedContentClasses,
+	tableDensity,
+	containerHeight,
+} = responsive;
 
-				const isExpanded = this.expanded.includes(itemId);
-				this.expandedCache.set(cacheKey, isExpanded);
+const dynamicHeaderProps = computed(() => ({
+	class: `responsive-header container-${breakpoint.value}`,
+}));
 
-				// Clear cache periodically to prevent memory bloat
-				if (this.expandedCache.size > 100) {
-					this.expandedCache.clear();
-				}
+const virtualScrollConfig = computed(() => {
+	const itemCount = items.value?.length || 0;
+	const height = containerHeight.value || 600;
 
-				return isExpanded;
-			};
-		},
-		hide_qty_decimals() {
-			const opts = loadItemSelectorSettings();
-			return !!opts?.hide_qty_decimals;
-		},
-		isRTL() {
-			if (this._rtlComputed !== undefined) {
-				return this._rtlComputed;
-			}
+	return {
+		itemHeight:
+			tableDensity.value === "compact" ? 48 : tableDensity.value === "comfortable" ? 72 : 60,
+		itemsPerPage: Math.max(20, Math.ceil(height / 60) + 5),
+		bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
+	};
+});
 
-			const htmlDir = document.documentElement.getAttribute("dir");
-			const bodyDir = document.body.getAttribute("dir");
-			const computedDir = window.getComputedStyle(document.documentElement).direction;
-			const lang = document.documentElement.getAttribute("lang") || navigator.language;
-			const rtlLanguages = ["ar", "he", "fa", "ur", "yi"];
-			const isRTLLanguage = rtlLanguages.some((rtlLang) => lang.startsWith(rtlLang));
+const hide_qty_decimals = computed(() => {
+	const opts = loadItemSelectorSettings();
+	return !!opts?.hide_qty_decimals;
+});
 
-			this._rtlComputed =
-				htmlDir === "rtl" || bodyDir === "rtl" || computedDir === "rtl" || isRTLLanguage;
+// Watchers
+watch(() => props.displayCurrency, clearFormatCache);
+watch(() => props.pos_profile, clearFormatCache, { deep: true });
 
-			return this._rtlComputed;
-		},
-	},
-	methods: {
-		getSerialOptions(item) {
-			if (Array.isArray(item?.filtered_serial_no_data)) {
-				return item.filtered_serial_no_data;
-			}
-			return Array.isArray(item?.serial_no_data) ? item.serial_no_data : [];
-		},
-		focusItemField(index, field) {
-			const rows = this.$el?.querySelectorAll?.("tr.posa-cart-item-row");
-			const row = rows?.[index];
-			if (!row) {
-				return false;
-			}
-
-			row.scrollIntoView({ block: "center" });
-
-			const findCell = (key) => row.querySelector(`td[data-column-key='${key}']`);
-			const cell = findCell(field);
-			if (!cell) {
-				return false;
-			}
-
-			if (field === "qty") {
-				cell.querySelector(".pos-table__qty-display")?.click();
-				this.$nextTick(() => {
-					cell.querySelector(".pos-table__qty-input input")?.focus?.();
-				});
-				return true;
-			}
-
-			if (field === "uom") {
-				const input = cell.querySelector(".uom-select input") || cell.querySelector("input");
-				if (input) {
-					input.focus();
-					return true;
-				}
-				cell.querySelector(".uom-select")?.click?.();
-				return true;
-			}
-
-			if (field === "rate") {
-				cell.querySelector(".pos-table__editor-display")?.click();
-				this.$nextTick(() => {
-					cell.querySelector(".pos-table__editor-input input")?.focus?.();
-				});
-				return true;
-			}
-
-			return false;
-		},
-
-		customItemFilter(value, search, item) {
-			// Delegated to composable via setup
-			return this.searchFilter(value, search, item);
-		},
-
-		// Drag and Drop methods delegated to composable
-		onDragOverFromSelector(event) {
-			this.dragDropHandlers.onDragOverFromSelector(event);
-		},
-
-		onDragEnterFromSelector() {
-			this.dragDropHandlers.onDragEnterFromSelector();
-		},
-
-		onDragLeaveFromSelector(event) {
-			this.dragDropHandlers.onDragLeaveFromSelector(event);
-		},
-
-		onDropFromSelector(event) {
-			this.dragDropHandlers.onDropFromSelector(event);
-		},
-
-		handleQtyChange(item, event) {
-			const newQty = parseFloat(event.target.value) || 0;
-			if (newQty === 0) {
-				this.removeItem(item);
-			} else {
-				this.setFormatedQty(item, "qty", null, false, event.target.value);
-			}
-		},
-		handleMinusClick(item) {
-			if (this.isReturnInvoice) {
-				if (item.is_free_item || item.posa_is_offer || item.posa_is_replace) {
-					this.removeItem(item);
-					return;
-				}
-				if (item.qty < 0) {
-					this.addOne(item);
-				} else {
-					this.removeItem(item);
-				}
-			} else {
-				if (item.qty <= 1) {
-					this.removeItem(item);
-				} else {
-					this.subtractOne(item);
-				}
-			}
-		},
-
-		getQtyDisplayLength(qty) {
-			return this.memoizedQtyLength(qty);
-		},
-
-		handleExpandedUpdate(val) {
-			const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
-			this.$emit("update:expanded", mappedValues);
-		},
-
-		isColumnVisible(key) {
-			// responsiveHeaders already filters by visibility in useItemsTableResponsive
-			return this.responsiveHeaders.some((h) => h.key === key);
-		},
-
-		handleQtyUpdate(item, newQty) {
-			this.setFormatedQty(item, "qty", null, false, newQty);
-		},
-
-		handleRateUpdate(item, newRate) {
-			this.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
-			this.calcPrices(item, newRate, { target: { id: "rate" } });
-		},
-
-		handleDiscountPercentUpdate(item, newDiscount) {
-			this.setFormatedCurrency(item, "discount_percentage", null, false, {
-				target: { value: newDiscount },
-			});
-			this.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
-		},
-
-		handleDiscountAmountUpdate(item, newDiscount) {
-			this.setFormatedCurrency(item, "discount_amount", null, false, {
-				target: { value: newDiscount },
-			});
-			this.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
-		},
-
-		handleRowClick(event, item, toggleExpand, internalItem) {
-			if (toggleExpand) {
-				toggleExpand(internalItem);
-			}
-		},
-	},
-
-	mounted() {
-		logComponentRender(this, "ItemsTable", "mounted", {
-			rows: (this.items && this.items.length) || 0,
-		});
-
-		// Log performance metrics in development
-		if (process.env.NODE_ENV === "development") {
-			console.log("ItemsTable Modernization Phase 1.1 Complete", {
-				itemCount: (this.items && this.items.length) || 0,
-				breakpoint: this.breakpoint
-			});
-		}
-	},
+// Methods
+const getSerialOptions = (item: any) => {
+	if (Array.isArray(item?.filtered_serial_no_data)) {
+		return item.filtered_serial_no_data;
+	}
+	return Array.isArray(item?.serial_no_data) ? item.serial_no_data : [];
 };
+
+const handleExpandedUpdate = (val: any[]) => {
+	const mappedValues = val.map((v) => (typeof v === "object" ? v.posa_row_id : v));
+	emit("update:expanded", mappedValues);
+};
+
+const handleQtyChange = (item: any, event: any) => {
+	const newQty = parseFloat(event.target.value) || 0;
+	if (newQty === 0) {
+		props.removeItem(item);
+	} else {
+		props.setFormatedQty(item, "qty", null, false, event.target.value);
+	}
+};
+
+const handleMinusClick = (item: any) => {
+	if (props.isReturnInvoice) {
+		if (item.is_free_item || item.posa_is_offer || item.posa_is_replace) {
+			props.removeItem(item);
+			return;
+		}
+		if (item.qty < 0) {
+			props.addOne(item);
+		} else {
+			props.removeItem(item);
+		}
+	} else {
+		if (item.qty <= 1) {
+			props.removeItem(item);
+		} else {
+			props.subtractOne(item);
+		}
+	}
+};
+
+const handleQtyUpdate = (item: any, newQty: any) => {
+	props.setFormatedQty(item, "qty", null, false, newQty);
+};
+
+const handleRateUpdate = (item: any, newRate: any) => {
+	props.setFormatedCurrency(item, "rate", null, false, { target: { value: newRate } });
+	props.calcPrices(item, newRate, { target: { id: "rate" } });
+};
+
+const handleDiscountPercentUpdate = (item: any, newDiscount: any) => {
+	props.setFormatedCurrency(item, "discount_percentage", null, false, {
+		target: { value: newDiscount },
+	});
+	props.calcPrices(item, newDiscount, { target: { id: "discount_percentage" } });
+};
+
+const handleDiscountAmountUpdate = (item: any, newDiscount: any) => {
+	props.setFormatedCurrency(item, "discount_amount", null, false, {
+		target: { value: newDiscount },
+	});
+	props.calcPrices(item, newDiscount, { target: { id: "discount_amount" } });
+};
+
+const handleRowClick = (event: any, item: any, toggleExpand: any, internalItem: any) => {
+	if (toggleExpand) {
+		toggleExpand(internalItem);
+	}
+};
+
+const isItemExpanded = (itemId: any) => {
+	return props.expanded?.includes(itemId);
+};
+
+// Drag and Drop delegation
+const onDragOverFromSelector = (event: DragEvent) => dragDropHandlers.onDragOverFromSelector(event);
+const onDragEnterFromSelector = () => dragDropHandlers.onDragEnterFromSelector();
+const onDragLeaveFromSelector = (event: DragEvent) => dragDropHandlers.onDragLeaveFromSelector(event);
+const onDropFromSelector = (event: DragEvent) => dragDropHandlers.onDropFromSelector(event);
+
+// Name editing logic
+const {
+	editNameDialog,
+	editedName,
+	editNameTarget,
+	openNameDialog,
+	saveItemName,
+	resetItemName,
+} = nameEdit;
+
+// Life-cycle
+onMounted(() => {
+	logComponentRender({ $el: tableContainer.value }, "ItemsTable", "mounted", {
+		rows: items.value?.length || 0,
+	});
+});
+
+onBeforeUnmount(() => {
+	merge.clearMergeCache();
+});
 </script>
 
 <style>
@@ -521,7 +365,7 @@ export default {
 
 <style scoped>
 /* Scoped styles for ItemsTable component specific logic */
-.items-table-container {
+.posa-items-table-container {
 	position: relative;
 	transition: all 0.3s ease;
 }
