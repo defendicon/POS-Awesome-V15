@@ -1,6 +1,6 @@
 
 import { ref, computed, onMounted, onBeforeUnmount, type Ref } from 'vue';
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 export interface TableHeader {
     title: string;

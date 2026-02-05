@@ -79,26 +79,38 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from "vue";
 
 defineOptions({
 	name: "NotificationBell",
 });
 
-const props = defineProps({
-	notifications: {
-		type: Array,
-		default: () => [],
-	},
-	unreadCount: {
-		type: Number,
-		default: 0,
-	},
+interface NotificationItem {
+	id: string | number;
+	title: string;
+	detail?: string;
+	timestamp: string | number | Date;
+	color?: string;
+}
+
+interface Props {
+	notifications?: NotificationItem[];
+	unreadCount?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	notifications: () => [],
+	unreadCount: 0,
 });
 
-const emit = defineEmits(["mark-read", "clear"]);
-const __ = window.__ || ((text) => text);
+const emit = defineEmits<{
+	(e: "mark-read"): void;
+	(e: "clear"): void;
+}>();
+
+// @ts-ignore
+const __ = (window as any).__ || ((text: string) => text);
 const open = ref(false);
 
 watch(open, (value) => {
@@ -111,7 +123,7 @@ function clearAll() {
 	emit("clear");
 }
 
-function formatTimestamp(ts) {
+function formatTimestamp(ts: string | number | Date) {
 	if (!ts) {
 		return "";
 	}
@@ -119,7 +131,7 @@ function formatTimestamp(ts) {
 		const date = new Date(ts);
 		return date.toLocaleString();
 	} catch {
-		return ts;
+		return String(ts);
 	}
 }
 </script>

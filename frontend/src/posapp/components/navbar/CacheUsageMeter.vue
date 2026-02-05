@@ -79,34 +79,41 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
 
 defineOptions({
 	name: "CacheUsageMeter",
 });
 
-const props = defineProps({
-	cacheUsage: {
-		type: Number,
-		default: 0,
-	},
-	cacheUsageLoading: {
-		type: Boolean,
-		default: false,
-	},
-	cacheUsageDetails: {
-		type: Object,
-		default: () => ({
-			total: 0,
-			indexedDB: 0,
-			localStorage: 0,
-		}),
-	},
+interface CacheUsageDetails {
+	total: number;
+	indexedDB: number;
+	localStorage: number;
+}
+
+interface Props {
+	cacheUsage?: number;
+	cacheUsageLoading?: boolean;
+	cacheUsageDetails?: CacheUsageDetails;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	cacheUsage: 0,
+	cacheUsageLoading: false,
+	cacheUsageDetails: () => ({
+		total: 0,
+		indexedDB: 0,
+		localStorage: 0,
+	}),
 });
 
-const emit = defineEmits(["refresh"]);
-const __ = window.__ || ((text) => text);
+const emit = defineEmits<{
+	(e: "refresh"): void;
+}>();
+
+// @ts-ignore
+const __ = (window as any).__ || ((text: string) => text);
 
 const cacheUsageColor = computed(() => {
 	// Return color based on cache usage percentage
@@ -134,7 +141,7 @@ function refreshCacheUsage() {
 	emit("refresh");
 }
 
-function formatBytes(bytes) {
+function formatBytes(bytes: number) {
 	if (bytes === 0) return "0 Bytes";
 	const k = 1024;
 	const sizes = ["Bytes", "KB", "MB", "GB"];

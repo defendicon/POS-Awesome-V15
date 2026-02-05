@@ -1,6 +1,6 @@
 <template>
 	<v-snackbar
-		model-value="true"
+		:model-value="true"
 		v-if="visible"
 		class="pos-update-snackbar"
 		:location="isRtl ? 'bottom left' : 'bottom right'"
@@ -30,10 +30,10 @@
 	</v-snackbar>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useUpdateStore } from "../../stores/updateStore.js";
-import { useRtl } from "../../composables/useRtl.js";
+import { useUpdateStore } from "../../stores/updateStore";
+import { useRtl } from "../../composables/useRtl";
 
 defineOptions({
 	name: "UpdatePrompt",
@@ -42,6 +42,9 @@ defineOptions({
 const updateStore = useUpdateStore();
 const { isRtl } = useRtl();
 const visible = ref(false);
+
+// @ts-ignore
+const __ = (window as any).__ || ((s: string) => s);
 
 watch(
 	() => updateStore.shouldPrompt,

@@ -2,7 +2,7 @@
 	<div :class="['skeleton', { shimmer: !prefersReduced }]" :style="style"></div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
 import "../../styles/shimmer.css";
 
@@ -10,10 +10,16 @@ defineOptions({
 	name: "Skeleton",
 });
 
-const props = defineProps({
-	type: { type: String, default: "rect" },
-	width: { type: [String, Number], default: "100%" },
-	height: { type: [String, Number], default: "1rem" },
+interface Props {
+	type?: "rect" | "circle";
+	width?: string | number;
+	height?: string | number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	type: "rect",
+	width: "100%",
+	height: "1rem",
 });
 
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

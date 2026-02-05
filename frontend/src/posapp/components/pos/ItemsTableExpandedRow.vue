@@ -503,9 +503,8 @@ const emit = defineEmits<{
 	(e: 'qty-change', item: CartItem, event: any): void;
 }>();
 
-const __ = (str: string, args?: any[]) => window.__ ? window.__(str, args) : str;
-// @ts-ignore
-const frappe = window.frappe || { _: (s: string) => s };
+const __ = (window as any).__ || ((s: string) => s);
+const frappe = (window as any).frappe || { _: (s: string) => s };
 
 
 const onQtyChange = (item: CartItem, event: any) => {

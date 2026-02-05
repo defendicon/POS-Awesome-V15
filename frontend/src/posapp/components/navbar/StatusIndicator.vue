@@ -17,21 +17,29 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
 
 defineOptions({
 	name: "StatusIndicator",
 });
 
-const props = defineProps({
-	networkOnline: Boolean,
-	serverOnline: Boolean,
-	serverConnecting: Boolean,
-	isIpHost: Boolean,
+interface Props {
+	networkOnline?: boolean;
+	serverOnline?: boolean;
+	serverConnecting?: boolean;
+	isIpHost?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	networkOnline: false,
+	serverOnline: false,
+	serverConnecting: false,
+	isIpHost: false,
 });
 
-const __ = window.__ || ((text) => text);
+// @ts-ignore
+const __ = (window as any).__ || ((text: string) => text);
 const DEBUG = false;
 
 const statusColor = computed(() => {

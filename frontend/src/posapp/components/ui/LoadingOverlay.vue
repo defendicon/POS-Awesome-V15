@@ -7,17 +7,21 @@
 	</transition>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
-import { useLoading } from "../../composables/useLoading.js";
+import { useLoading } from "../../composables/useLoading";
 
 defineOptions({
 	name: "LoadingOverlay",
 });
 
-const props = defineProps({
-	visible: { type: Boolean, default: undefined },
-	message: { type: String, default: "" },
+interface Props {
+	visible?: boolean;
+	message?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	message: "",
 });
 
 const { overlayVisible } = useLoading();

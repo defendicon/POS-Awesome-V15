@@ -21,8 +21,8 @@
 				</div>
 				<div class="db-tooltip-detail flex items-center mb-1">
 					<v-icon size="14" color="info" class="mr-1">mdi-database-settings</v-icon>
-					<b>{{ dbStats.db_engine }}</b>
-					<span class="ml-2">{{ dbStats.db_version }}</span>
+					<b>{{ dbStats?.db_engine }}</b>
+					<span class="ml-2">{{ dbStats?.db_version }}</span>
 				</div>
 				<v-divider class="my-2" />
 				<div class="db-tooltip-section-title mb-1">{{ __("Usage Stats") }}</div>
@@ -31,29 +31,29 @@
 					{{ __("Size:") }} <b>{{ formattedDbSize }}</b>
 					<span class="ml-2 flex items-center"
 						><v-icon size="14" color="info" class="mr-1">mdi-table</v-icon>{{ __("Tables:") }}
-						<b>{{ dbStats.db_table_count }}</b></span
+						<b>{{ dbStats?.db_table_count }}</b></span
 					>
 					<span class="ml-2 flex items-center"
 						><v-icon size="14" color="info" class="mr-1">mdi-format-list-numbered</v-icon
-						>{{ __("Rows:") }} <b>{{ dbStats.db_total_rows }}</b></span
+						>{{ __("Rows:") }} <b>{{ dbStats?.db_total_rows }}</b></span
 					>
 				</div>
 				<div class="db-tooltip-detail flex items-center mb-1">
 					<v-icon size="14" color="info" class="mr-1">mdi-connection</v-icon>
-					{{ __("Connections:") }} <b>{{ dbStats.db_connections }}</b>
+					{{ __("Connections:") }} <b>{{ dbStats?.db_connections }}</b>
 					<span class="ml-2 flex items-center"
 						><v-icon size="14" color="warning" class="mr-1">mdi-timer-sand</v-icon
-						>{{ __("Slow Queries:") }} <b>{{ dbStats.db_slow_queries }}</b></span
+						>{{ __("Slow Queries:") }} <b>{{ dbStats?.db_slow_queries }}</b></span
 					>
 				</div>
 				<v-divider class="my-2" />
-				<div v-if="dbStats.db_top_tables && dbStats.db_top_tables.length">
+				<div v-if="dbStats?.db_top_tables && dbStats.db_top_tables.length">
 					<div class="db-tooltip-section-title mb-1 flex items-center">
 						<v-icon size="14" color="info" class="mr-1">mdi-database-outline</v-icon>
 						{{ __("Top Tables") }}
 					</div>
 					<ul class="db-top-tables ml-2">
-						<li v-for="t in dbStats.db_top_tables" :key="t.name" class="flex items-center mb-1">
+						<li v-for="t in dbStats?.db_top_tables" :key="t.name" class="flex items-center mb-1">
 							<v-icon size="12" color="info" class="mr-1">mdi-table</v-icon>
 							<b>{{ t.name }}</b
 							>: {{ formatBytes(t.size) }}
@@ -74,10 +74,12 @@
 	</div>
 </template>
 
+
 <script setup>
 import { computed, inject } from "vue";
 import { useDatabaseStats } from "../../composables/useDatabaseStats";
 
+// Using JavaScript composable
 const { dbStats, history, loading, error } = useDatabaseStats(10000, 30);
 const __ = inject("__", (txt) => txt);
 
@@ -93,8 +95,7 @@ function formatBytes(bytes) {
 
 const sparklinePoints = computed(() => {
 	const arr = history.value.map((h) => h.db_size || 0);
-	const w = 120,
-		h = 32;
+	const w = 120,	h = 32;
 	if (!arr.length) return "";
 	const max = Math.max(...arr, 100);
 	const min = 0;
@@ -102,6 +103,7 @@ const sparklinePoints = computed(() => {
 	return arr.map((v, i) => `${i * step},${h - ((v - min) / (max - min || 1)) * h}`).join(" ");
 });
 </script>
+
 
 <style scoped>
 /* Force LTR formatting for database gadget */
