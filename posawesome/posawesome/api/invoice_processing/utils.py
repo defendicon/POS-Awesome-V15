@@ -136,3 +136,11 @@ def get_latest_rate(from_currency: str, to_currency: str, cache=None):
         cache[key] = result
 
     return result
+
+@frappe.whitelist()
+def get_price_list_currency(price_list_name):
+    return frappe.db.get_value("Price List", price_list_name, "currency")
+
+@frappe.whitelist()
+def get_available_currencies():
+    return frappe.get_all("Currency", filters={"enabled": 1}, pluck="name")

@@ -7,7 +7,9 @@ from posawesome.posawesome.api.invoice_processing.utils import (
     _build_invoice_remarks,
     _set_return_valid_upto,
     _validate_return_window,
-    get_latest_rate
+    get_latest_rate,
+    get_price_list_currency,
+    get_available_currencies
 )
 from posawesome.posawesome.api.invoice_processing.stock import (
     _strip_client_freebies_from_payload,
