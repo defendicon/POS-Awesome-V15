@@ -7,7 +7,7 @@ def get_last_invoice_rates(customer, item_codes, company=None):
     Get the last invoice rate for a list of items for a specific customer.
     """
     if not company:
-        company = frappe.defaults.get_default("company")
+        company = frappe.db.get_default("company")
 
     if not customer or not item_codes:
         return []
