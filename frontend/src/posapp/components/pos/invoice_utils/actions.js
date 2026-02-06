@@ -75,7 +75,7 @@ export async function add_item(context, item, options = {}) {
     });
 
     const shouldNotify =
-        options?.notifyOnSuccess === true && !options?.skipNotification && context.eventBus?.emit;
+        options?.notifyOnSuccess === true && !options?.skipNotification && context.toastStore;
 
     if (shouldNotify) {
         const rawQty = typeof item?.qty === "number" ? item.qty : parseFloat(item?.qty);
@@ -185,7 +185,6 @@ export async function save_and_clear_invoice(context) {
 }
 
 export async function new_order(context, data = {}) {
-    let old_invoice = null;
     if (context.eventBus) context.eventBus.emit("set_customer_readonly", false);
     context.expanded = [];
     context.posa_offers = [];
@@ -250,7 +249,6 @@ export async function new_order(context, data = {}) {
             }
         });
     }
-    return old_invoice;
 }
 
 export async function get_invoice_from_order_doc(context) {
@@ -270,7 +268,7 @@ export async function get_invoice_from_order_doc(context) {
     } else {
         doc = context.invoice_doc;
     }
-    const Items = [];
+    const items = [];
     const updatedItemsData = get_invoice_items(context);
     doc.items.forEach((item) => {
         const updatedData = updatedItemsData.find(
@@ -296,11 +294,11 @@ export async function get_invoice_from_order_doc(context) {
             item.posa_notes = updatedData.posa_notes;
             item.posa_delivery_date = context.formatDateForDisplay ? context.formatDateForDisplay(updatedData.posa_delivery_date) : updatedData.posa_delivery_date;
             item.price_list_rate = updatedData.price_list_rate;
-            Items.push(item);
+            items.push(item);
         }
     });
 
-    doc.items = Items;
+    doc.items = items;
     const newItems = [...doc.items];
     const existingItemCodes = new Set(newItems.map((item) => item.item_code));
     updatedItemsData.forEach((updatedItem) => {

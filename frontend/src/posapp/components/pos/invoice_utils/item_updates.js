@@ -615,8 +615,6 @@ export async function flushBackgroundUpdates(context) {
 
 	if (itemsToUpdate.length === 0) return;
 
-	console.log(`Background flushing ${itemsToUpdate.length} items`);
-
 	try {
 		if (context.update_items_details) await context.update_items_details(itemsToUpdate);
 

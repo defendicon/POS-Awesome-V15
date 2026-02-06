@@ -90,36 +90,8 @@ export function _applyPriceListRate(context, item, newRate, priceCurrency) {
 }
 
 export function _computePriceConversion(context, rate, priceCurrency) {
-    const defaultCurrency = context.pos_profile.currency;
-    const selectedCurrency = context.selected_currency || defaultCurrency;
-    const itemCurrency = priceCurrency || selectedCurrency;
-
-    let exchange_rate = 1;
-    let conversion_rate = 1;
-
-    // Logic for exchange rates - assume context has this info or it's fetched
-    // This part in original code used this.exchange_rate etc.
-    // Simplifying:
-
-    // If rate is in USD (priceCurrency), and we work in PKR (default).
-    // And selected is USD.
-
-    // We need base_price_list_rate (PKR) and price_list_rate (selected currency).
-
     const plcConversionRate = context._getPlcConversionRate ? context._getPlcConversionRate() : 1;
-    // Actually validation logic uses this.
-
-    // Simplest approach: reuse existing helpers on context if available
-    // Otherwise implement:
-
-    const base_price_list_rate = rate * plcConversionRate; // Approximate?
-
-    // Precise logic from original file:
-    // const plcConversionRate = this._getPlcConversionRate();
-    // base_price_list_rate = data.price_list_rate * plcConversionRate;
-
-    // And:
-    // item.price_list_rate = this.flt(convertedPriceListRate, precision)
+    const base_price_list_rate = rate * plcConversionRate;
 
     return {
         price_list_rate: rate,

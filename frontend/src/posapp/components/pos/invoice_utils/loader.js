@@ -122,13 +122,6 @@ export async function load_invoice(context, data = {}, options = {}) {
         }
         : null;
 
-    console.log("load_invoice called with data:", {
-        is_return: data.is_return,
-        return_against: data.return_against,
-        customer: data.customer,
-        items_count: data.items ? data.items.length : 0,
-    });
-
     if (context.clear_invoice) {
         context.clear_invoice({ preserveStickies });
     }
@@ -156,14 +149,11 @@ export async function load_invoice(context, data = {}, options = {}) {
     }
 
     if (data.is_return) {
-        console.log("Processing return invoice");
         // For return without invoice case, check if there's a return_against
         // Only set customer readonly if this is a return with reference to an invoice
         if (data.return_against) {
-            console.log("Return has reference to invoice:", data.return_against);
             context.eventBus.emit("set_customer_readonly", true);
         } else {
-            console.log("Return without invoice reference, customer can be selected");
             // Allow customer selection for returns without invoice
             context.eventBus.emit("set_customer_readonly", false);
         }
@@ -185,7 +175,6 @@ export async function load_invoice(context, data = {}, options = {}) {
     context.posa_offers = data.posa_offers || [];
     context.items = data.items || [];
     context.packed_items = data.packed_items || [];
-    console.log("Items set:", context.items.length, "items");
 
     if (data.is_return && data.return_against) {
         context.items.forEach((item) => {
@@ -217,8 +206,6 @@ export async function load_invoice(context, data = {}, options = {}) {
         if (manualSnapshots.length && context._restoreManualSnapshots) {
             context._restoreManualSnapshots(context.items, manualSnapshots);
         }
-    } else {
-        console.log("Warning: No items in return invoice");
     }
 
     if (context.packed_items.length > 0) {
@@ -348,11 +335,4 @@ export async function load_invoice(context, data = {}, options = {}) {
     } else {
         context.eventBus.emit("set_pos_coupons", data.posa_coupons);
     }
-
-    console.log("load_invoice completed, invoice state:", {
-        invoiceType: context.invoiceType,
-        is_return: context.invoice_doc.is_return,
-        items: context.items.length,
-        customer: context.customer,
-    });
 }

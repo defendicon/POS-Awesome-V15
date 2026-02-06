@@ -2,19 +2,11 @@
 /* global __, frappe */
 
 export async function validate(context) {
-    console.log("Starting return validation");
-
     // For all returns, check if amounts are negative
     if (context.isReturnInvoice) {
-        console.log("Validating return invoice values");
-
         // Check if quantities are negative
         const positiveItems = context.items.filter((item) => item.qty >= 0 || item.stock_qty >= 0);
         if (positiveItems.length > 0) {
-            console.log(
-                "Found positive quantities in return items:",
-                positiveItems.map((i) => i.item_code),
-            );
             context.toastStore.show({
                 title: __(`Return items must have negative quantities`),
                 color: "error",
@@ -32,7 +24,6 @@ export async function validate(context) {
 
         // Ensure total amount is negative
         if (context.subtotal > 0) {
-            console.log("Return has positive subtotal:", context.subtotal);
             context.toastStore.show({
                 title: __(`Return total must be negative`),
                 color: "warning",
@@ -43,9 +34,6 @@ export async function validate(context) {
     // For return with reference to existing invoice
     const currentInvoice = context.invoice_doc;
     if (currentInvoice && currentInvoice.is_return && currentInvoice.return_against) {
-        console.log("Return doc:", context.invoice_doc);
-        console.log("Current items:", context.items);
-
         try {
             // Get original invoice items for comparison
             const original_items = await new Promise((resolve, reject) => {
@@ -59,7 +47,6 @@ export async function validate(context) {
                     },
                     callback: (r) => {
                         if (r.message) {
-                            console.log("Original invoice data:", r.message);
                             resolve(r.message.items || []);
                         } else {
                             reject(new Error("Original invoice not found"));
@@ -67,8 +54,6 @@ export async function validate(context) {
                     },
                 });
             });
-
-            console.log("Original invoice items:", original_items);
 
             // Validate each return item
             for (const item of context.items) {

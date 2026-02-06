@@ -10,8 +10,6 @@ export async function show_payment(context) {
     context._suppressClosePayments = true;
 
     try {
-        console.log("Starting show_payment process");
-
         if (!context.customer) {
             context.toastStore.show({
                 title: __(`Select a customer`),
