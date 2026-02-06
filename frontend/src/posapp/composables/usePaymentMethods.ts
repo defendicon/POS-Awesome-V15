@@ -1,4 +1,6 @@
 import { ref, unref, type Ref, type ComputedRef } from "vue";
+// @ts-ignore
+import { getSmartTenderSuggestions } from "../../utils/smartTender.js";
 
 declare const frappe: any;
 declare const __: (str: string, args?: any[]) => string;
@@ -38,7 +40,8 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 	const mpesa_modes = ref<string[]>([]);
 	const phone_dialog = ref(false);
 
-	const flt = (v: any) => (formatFloat ? formatFloat(v) : parseFloat(String(v)) || 0);
+	const flt = (v: any) =>
+		formatFloat ? formatFloat(v) : parseFloat(String(v)) || 0;
 
 	// Get M-Pesa payment modes from backend
 	const get_mpesa_modes = () => {
@@ -61,12 +64,126 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	// Check if payment is M-Pesa C2B
 	const is_mpesa_c2b_payment = (payment: any) => {
-		if (mpesa_modes.value.includes(payment.mode_of_payment) && payment.type === "Bank") {
+		if (
+			mpesa_modes.value.includes(payment.mode_of_payment) &&
+			payment.type === "Bank"
+		) {
 			payment.amount = 0;
 			return true;
 		} else {
 			return false;
 		}
+	};
+
+	const isCashLikePayment = (payment: any) => {
+		if (!payment) return false;
+
+		const profile = unref(posProfile);
+		const configuredCashMOP = String(
+			profile?.posa_cash_mode_of_payment || "",
+		).toLowerCase();
+		const type = String(payment.type || "").toLowerCase();
+
+		if (type === "cash") return true;
+
+		const mode = String(payment.mode_of_payment || "").toLowerCase();
+		if (configuredCashMOP && mode === configuredCashMOP) return true;
+
+		return mode.includes("cash");
+	};
+
+	const reset_cash_payments = () => {
+		const doc = unref(invoiceDoc);
+		if (!doc || !doc.payments) return;
+
+		doc.payments.forEach((payment: any) => {
+			if (payment.mode_of_payment.toLowerCase() === "cash") {
+				payment.amount = 0;
+			}
+		});
+	};
+
+	const autoBalancePayments = (
+		excludePayment: any,
+		currencyPrecision: number = 2,
+	) => {
+		const doc = unref(invoiceDoc);
+		if (!doc) return;
+
+		// Auto-subtract from other payments if we have an excess
+		const invoice_total = doc.rounded_total || doc.grand_total;
+
+		// Calculate current total paid
+		const current_total_paid = doc.payments.reduce(
+			(sum: number, p: any) => sum + flt(p.amount),
+			0,
+		);
+
+		const excess = flt(current_total_paid - invoice_total);
+
+		if (excess > 0) {
+			// Find other payments with amount > 0 to reduce
+			// We filter out the current payment being edited to avoid circular issues
+			const otherPayments = doc.payments.filter(
+				(p: any) => p !== excludePayment && flt(p.amount) > 0,
+			);
+
+			// Sort by amount descending to reduce larger chunks first
+			otherPayments.sort(
+				(a: any, b: any) => flt(b.amount) - flt(a.amount),
+			);
+
+			let remaining_excess = excess;
+
+			for (const other of otherPayments) {
+				if (remaining_excess <= 0) break;
+
+				const otherAmount = flt(other.amount);
+				const reduction = Math.min(otherAmount, remaining_excess);
+				const newAmount = flt(otherAmount - reduction); // formatFloat handles precision if provided
+
+				other.amount = newAmount;
+				if (other.base_amount !== undefined) {
+					// Approximate base amount update
+					// ideally we would use exchange rate but for now using simple ratio or 1 if not available
+					// This logic might need refinement if multi-currency is heavy used
+					const conversion_rate = doc.conversion_rate || 1;
+					other.base_amount = flt(newAmount / conversion_rate);
+				}
+
+				remaining_excess = flt(remaining_excess - reduction);
+			}
+		}
+	};
+
+	const getVisibleDenominations = (
+		payment: any,
+		currencyPrecision: number = 2,
+	) => {
+		const doc = unref(invoiceDoc);
+		if (!doc || !payment) return [];
+		const currency = doc.currency;
+
+		const current_total_paid = doc.payments.reduce(
+			(sum: number, p: any) => sum + flt(p.amount),
+			0,
+		);
+		const { amountByPayment } = { amountByPayment: new Map() }; // Placeholder if needed, but simple logic:
+		// Actually the original code used `this.paymentAmountSummary` which seems complex.
+		// Let's stick to the logic I saw in Payments.vue which seemed to use `total_payments`.
+		// Re-reading Payments.vue logic for `getVisibleDenominations`:
+		// const current_payment_amount = amountByPayment.get(payment) || 0;
+		// const other_payments = current_total_paid - current_payment_amount;
+
+		const current_payment_amount = flt(payment.amount);
+		const other_payments = current_total_paid - current_payment_amount;
+
+		const invoice_total = flt(doc.rounded_total || doc.grand_total);
+		const amount_to_pay = invoice_total - other_payments;
+
+		if (amount_to_pay <= 0) return [];
+
+		return getSmartTenderSuggestions(amount_to_pay, currency);
 	};
 
 	// Open M-Pesa payment dialog
@@ -90,14 +207,16 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		if (profile) {
 			profile.use_customer_credit = true;
 		}
-		
+
 		if (options.setRedeemCustomerCredit) {
 			options.setRedeemCustomerCredit(true);
 		}
 
 		const invoiceAmount = doc.rounded_total || doc.grand_total;
 		let amount =
-			payment.unallocated_amount > invoiceAmount ? invoiceAmount : payment.unallocated_amount;
+			payment.unallocated_amount > invoiceAmount
+				? invoiceAmount
+				: payment.unallocated_amount;
 		amount = amount > 0 ? amount : 0;
 		const advance = {
 			type: "Advance",
@@ -107,7 +226,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		};
 
 		clear_all_amounts();
-		
+
 		if (options.customerCreditDict) {
 			options.customerCreditDict.value.push(advance);
 		}
@@ -127,20 +246,25 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 		payment.amount = invoiceAmount;
 		if (payment.base_amount !== undefined) {
-			payment.base_amount = isReturn ? -Math.abs(invoiceAmount) : invoiceAmount;
+			payment.base_amount = isReturn
+				? -Math.abs(invoiceAmount)
+				: invoiceAmount;
 		}
 	};
 
 	const set_rest_amount = (payment: any, isReturn = false) => {
 		const doc = unref(invoiceDoc);
 		const invoiceAmount = doc.rounded_total || doc.grand_total;
-		const currentPaid = doc.payments.reduce((acc: number, p: any) => acc + flt(p.amount), 0);
+		const currentPaid = doc.payments.reduce(
+			(acc: number, p: any) => acc + flt(p.amount),
+			0,
+		);
 		const currentPaymentAmount = flt(payment.amount);
-		
+
 		const otherPayments = currentPaid - currentPaymentAmount;
 		let amount = invoiceAmount - otherPayments;
 		amount = flt(amount);
-		
+
 		payment.amount = amount;
 		if (payment.base_amount !== undefined) {
 			payment.base_amount = isReturn ? -Math.abs(amount) : amount;
@@ -176,13 +300,20 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 			doc.payments.forEach((payment: any) => {
 				payment.amount = flt(payment.amount);
 			});
-			
+
 			const argsData = {
 				...doc,
-				total_change: options.getTotalChange ? options.getTotalChange() : 0,
-				paid_change: options.getPaidChange ? options.getPaidChange() : 0,
-				credit_change: options.getCreditChange ? options.getCreditChange() : 0,
-				redeemed_customer_credit: options.redeemedCustomerCredit?.value || 0,
+				total_change: options.getTotalChange
+					? options.getTotalChange()
+					: 0,
+				paid_change: options.getPaidChange
+					? options.getPaidChange()
+					: 0,
+				credit_change: options.getCreditChange
+					? options.getCreditChange()
+					: 0,
+				redeemed_customer_credit:
+					options.redeemedCustomerCredit?.value || 0,
 				customer_credit_dict: options.customerCreditDict?.value || [],
 				is_cashback: options.isCashback?.value || false,
 			};
@@ -217,7 +348,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 						if (!message) {
 							stores.toastStore.show({
-								title: __("Payment request status could not be retrieved. Please try again"),
+								title: __(
+									"Payment request status could not be retrieved. Please try again",
+								),
 								color: "error",
 							});
 							resolve();
@@ -226,7 +359,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 						if (message.status !== "Paid") {
 							stores.toastStore.show({
-								title: __("Payment Request took too long to respond. Please try requesting for payment again"),
+								title: __(
+									"Payment Request took too long to respond. Please try requesting for payment again",
+								),
 								color: "error",
 							});
 							resolve();
@@ -245,7 +380,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 							doc.name,
 						);
 						Object.assign(doc, newDoc);
-						
+
 						if (onSubmit) onSubmit(null, true);
 						resolve();
 					} catch (error) {
@@ -275,5 +410,9 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		set_rest_amount,
 		clear_all_amounts,
 		request_payment,
+		autoBalancePayments,
+		getVisibleDenominations,
+		isCashLikePayment,
+		reset_cash_payments,
 	};
 }
