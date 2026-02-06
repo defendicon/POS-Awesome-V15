@@ -23,7 +23,9 @@ export interface PaymentSubmissionOptions {
 	creditChange?: Ref<number>;
 	redeemedCustomerCredit?: Ref<number>;
 	customerCreditDict?: Ref<any[]>;
-	diffPayment?: ComputedRef<number>;
+	diff_payment?: ComputedRef<number>;
+	is_credit_sale?: Ref<boolean>;
+	loyaltyAmount?: Ref<number>;
 	stores?: {
 		toastStore?: any;
 		syncStore?: any;
@@ -132,7 +134,136 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		}
 	};
 
-	const ensureReturnPaymentsAreNegative = () => {
+	const validateSubmission = async (payment_received = false) => {
+		const doc = unref(invoiceDoc);
+		const profile = unref(posProfile);
+		const type = unref(invoiceType);
+		const prec = unref(options.currencyPrecision) || 2;
+		const {
+			isCashback,
+			paidChange,
+			creditChange,
+			redeemedCustomerCredit,
+			customerCreditDict,
+			diff_payment,
+		} = options;
+
+		// 1. Ensure return payments are negative
+		if (doc.is_return) {
+			ensureReturnPaymentsAreNegative();
+		}
+
+		const total_payments = unref(options.diff_payment) !== undefined ? (unref(options.diff_payment)! < 0 ? -(unref(options.diff_payment)!) : 0) : 0;
+		// Wait, diffPayment is (invoice_total - total_payments). So total_payments = invoice_total - diffPayment.
+		// Actually, let's use the actual total_payments calculation if available, or just recalculate.
+
+		let current_total_payments = 0;
+		if (doc.payments) {
+			doc.payments.forEach((p: any) => {
+				current_total_payments += formatFloat(p.amount, prec);
+			});
+		}
+		// Add loyalty and credit
+		if (options.loyaltyAmount && unref(options.loyaltyAmount)) current_total_payments += unref(options.loyaltyAmount)!;
+		if (options.redeemedCustomerCredit && unref(options.redeemedCustomerCredit)) current_total_payments += unref(options.redeemedCustomerCredit)!;
+
+		const invoice_total = formatFloat(doc.rounded_total || doc.grand_total, prec);
+
+		// 2. Validate total payments
+		if (
+			!unref(options.is_credit_sale) &&
+			!doc.is_return &&
+			current_total_payments <= 0 &&
+			invoice_total > 0
+		) {
+			throw new Error(__("Please enter payment amount"));
+		}
+
+		// 3. Validate partial payments / cash payments
+		if (!unref(options.is_credit_sale) && !doc.is_return) {
+			let has_cash_payment = false;
+			let cash_amount = 0;
+			if (doc.payments) {
+				doc.payments.forEach((payment: any) => {
+					if (payment.mode_of_payment.toLowerCase().includes("cash")) {
+						has_cash_payment = true;
+						cash_amount = formatFloat(payment.amount, prec);
+					}
+				});
+			}
+
+			if (has_cash_payment && cash_amount > 0) {
+				if (
+					!profile.posa_allow_partial_payment &&
+					cash_amount < invoice_total &&
+					invoice_total > 0
+				) {
+					throw new Error(__("Cash payment cannot be less than invoice total when partial payment is not allowed"));
+				}
+			}
+
+			if (
+				!profile.posa_allow_partial_payment &&
+				current_total_payments < invoice_total &&
+				invoice_total > 0
+			) {
+				throw new Error(__("The amount paid is not complete"));
+			}
+		}
+
+		// 4. Validate phone payment
+		if (!payment_received && doc.payments) {
+			let phone_payment_is_valid = true;
+			doc.payments.forEach((payment: any) => {
+				if (
+					payment.type === "Phone" &&
+					![0, "0", "", null, undefined].includes(payment.amount)
+				) {
+					phone_payment_is_valid = false;
+				}
+			});
+			if (!phone_payment_is_valid) {
+				throw new Error(__("Please request phone payment or use another payment method"));
+			}
+		}
+
+		// 5. Validate paid_change
+		const diff = unref(diff_payment) || 0;
+		const changeLimit = Math.max(-diff, 0);
+		const pChange = unref(paidChange) || 0;
+		if (pChange > changeLimit + 0.001) {
+			throw new Error(__("Paid change cannot be greater than total change!"));
+		}
+
+		// 6. Validate cashback
+		const cChange = unref(creditChange) || 0;
+		let total_change_calc = formatFloat(pChange + Math.abs(cChange), prec);
+		if (unref(isCashback) && Math.abs(total_change_calc - changeLimit) > 0.01) {
+			throw new Error(__("Error in change calculations!"));
+		}
+
+		// 7. Validate customer credit redemption
+		if (customerCreditDict?.value?.length) {
+			let credit_calc_check = customerCreditDict.value.filter((row: any) => {
+				return formatFloat(row.credit_to_redeem, prec) > formatFloat(row.total_credit, prec);
+			});
+			if (credit_calc_check.length > 0) {
+				throw new Error(__("Redeemed credit cannot be greater than its total."));
+			}
+		}
+
+		if (
+			!doc.is_return &&
+			unref(redeemedCustomerCredit) !== undefined &&
+			unref(redeemedCustomerCredit)! > invoice_total
+		) {
+			throw new Error(__("Cannot redeem customer credit more than invoice total"));
+		}
+
+		return true;
+	};
+
+	function ensureReturnPaymentsAreNegative() {
 		const doc = unref(invoiceDoc);
 		if (!doc || !doc.is_return || !unref(options.isCashback)) {
 			return;
@@ -169,7 +300,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				}
 			});
 		}
-	};
+	}
 
 	const submitInvoice = async (print: boolean, callbacks: SubmissionCallbacks = {}): Promise<any> => {
 		const doc = unref(invoiceDoc);
@@ -182,7 +313,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			creditChange,
 			redeemedCustomerCredit,
 			customerCreditDict,
-			diffPayment,
+			diff_payment,
 		} = options;
 
 		const {
@@ -214,7 +345,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			});
 		}
 
-		const diff = unref(diffPayment) || 0;
+		const diff = unref(diff_payment) || 0;
 		const changeLimit = !doc.is_return ? Math.max(-diff, 0) : 0;
 		const pChange = !doc.is_return
 			? formatFloat(Math.min(unref(paidChange) || 0, changeLimit), prec)
@@ -260,7 +391,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				}
 
 				if (onFinishNavigation) onFinishNavigation(true);
-				
+
 				return { offline: true };
 			} catch (error: any) {
 				const errorMsg = error.message || __("Unknown error");
@@ -289,7 +420,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					invoice: doc?.name,
 					reason,
 				};
-				
+
 				stores?.toastStore?.show({
 					title: __("Error submitting invoice: No response from server"),
 					color: "error",
@@ -315,7 +446,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					invoice: responseInvoiceName,
 					reason: backgroundReason,
 				};
-				
+
 				stores?.toastStore?.show({
 					title: __("Error submitting invoice: {0}", [responseInvoiceName || ""]),
 					color: "error",
@@ -331,7 +462,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					// Return special status indicating background failure handled
 					return { backgroundFailure: true, reason: backgroundReason };
 				}
-				
+
 				const err: any = new Error(backgroundReason);
 				err.failedInfo = failedInfo;
 				throw err;
@@ -348,7 +479,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			if (stores?.invoiceStore?.invoiceDoc) {
 				stores.invoiceStore.invoiceDoc.docstatus = 1;
 			}
-			
+
 			if (stores?.uiStore) {
 				stores.uiStore.setLastInvoice(doc.name);
 			}
@@ -374,7 +505,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			const submittedCodes = submittedItems
 				.map((item) => (item ? item.item_code : null))
 				.filter((code) => code !== undefined && code !== null);
-			
+
 			if (stores?.uiStore) {
 				stores.uiStore.setLastStockAdjustment({
 					items: submittedItems,
@@ -408,7 +539,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					title: __("Fixing payment amounts for return invoice..."),
 					color: "warning",
 				});
-				
+
 				if (doc.payments) {
 					doc.payments.forEach((payment: any) => {
 						if (payment.amount > 0) payment.amount = -Math.abs(payment.amount);
@@ -437,10 +568,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 	};
 
 	return {
-		extractSubmissionErrorMessage,
-		formatStockErrors,
 		validateDueDate,
 		ensureReturnPaymentsAreNegative,
+		validateSubmission,
 		submitInvoice,
 	};
 }

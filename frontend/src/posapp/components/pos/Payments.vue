@@ -417,9 +417,8 @@ export default {
 
 		const {
 			validateDueDate,
-			extractSubmissionErrorMessage,
-			formatStockErrors,
 			ensureReturnPaymentsAreNegative,
+			validateSubmission,
 			submitInvoice,
 		} = usePaymentSubmission({
 			invoiceDoc: computed(() => invoiceStore.invoiceDoc),
@@ -431,7 +430,9 @@ export default {
 			creditChange: credit_change,
 			redeemedCustomerCredit: redeemed_customer_credit,
 			customerCreditDict: customer_credit_dict,
-			diffPayment: diff_payment,
+			diff_payment: diff_payment,
+			is_credit_sale: is_credit_sale,
+			loyaltyAmount: loyalty_amount,
 			formatFloat: (val, prec) => proxy.formatFloat(val, prec),
 			stores: {
 				toastStore,
@@ -869,137 +870,17 @@ export default {
 		async submit(event, payment_received = false, print = false) {
 			this.loading = true;
 			try {
-				// For return invoices, ensure payment amounts are negative
-				if (this.invoice_doc.is_return) {
-					this.ensureReturnPaymentsAreNegative();
-				}
-				// Validate total payments only if not credit sale and invoice total is not zero
-				if (
-					!this.is_credit_sale &&
-					!this.invoice_doc.is_return &&
-					this.total_payments <= 0 &&
-					(this.invoice_doc.rounded_total || this.invoice_doc.grand_total) > 0
-				) {
-					this.toastStore.show({
-						title: `Please enter payment amount`,
-						color: "error",
-					});
-					frappe.utils.play_sound("error");
-					return;
-				}
-				// Validate cash payments when credit sale is off
-				if (!this.is_credit_sale && !this.invoice_doc.is_return) {
-					let has_cash_payment = false;
-					let cash_amount = 0;
-					this.invoice_doc.payments.forEach((payment) => {
-						if (payment.mode_of_payment.toLowerCase().includes("cash")) {
-							has_cash_payment = true;
-							cash_amount = this.flt(payment.amount);
-						}
-					});
-					if (has_cash_payment && cash_amount > 0) {
-						if (
-							!this.pos_profile.posa_allow_partial_payment &&
-							cash_amount < (this.invoice_doc.rounded_total || this.invoice_doc.grand_total) &&
-							(this.invoice_doc.rounded_total || this.invoice_doc.grand_total) > 0
-						) {
-							this.toastStore.show({
-								title: `Cash payment cannot be less than invoice total when partial payment is not allowed`,
-								color: "error",
-							});
-							frappe.utils.play_sound("error");
-							return;
-						}
-					}
-				}
-				// Validate partial payments only if not credit sale and invoice total is not zero
-				if (
-					!this.is_credit_sale &&
-					!this.pos_profile.posa_allow_partial_payment &&
-					this.total_payments < (this.invoice_doc.rounded_total || this.invoice_doc.grand_total) &&
-					(this.invoice_doc.rounded_total || this.invoice_doc.grand_total) > 0
-				) {
-					this.toastStore.show({
-						title: `The amount paid is not complete`,
-						color: "error",
-					});
-					frappe.utils.play_sound("error");
-					return;
-				}
-				// Validate phone payment
-				let phone_payment_is_valid = true;
-				if (!payment_received) {
-					this.invoice_doc.payments.forEach((payment) => {
-						if (
-							payment.type === "Phone" &&
-							![0, "0", "", null, undefined].includes(payment.amount)
-						) {
-							phone_payment_is_valid = false;
-						}
-					});
-					if (!phone_payment_is_valid) {
-						this.toastStore.show({
-							title: __("Please request phone payment or use another payment method"),
-							color: "error",
-						});
-						frappe.utils.play_sound("error");
-						return;
-					}
-				}
-				// Validate paid_change
-				const changeLimit = Math.max(-this.diff_payment, 0);
-				if (this.paid_change > changeLimit) {
-					this.toastStore.show({
-						title: `Paid change cannot be greater than total change!`,
-						color: "error",
-					});
-					frappe.utils.play_sound("error");
-					return;
-				}
-				// Validate cashback
-				let total_change = this.flt(this.flt(this.paid_change) + this.flt(-this.credit_change));
-				if (this.is_cashback && total_change !== changeLimit) {
-					this.toastStore.show({
-						title: `Error in change calculations!`,
-						color: "error",
-					});
-					frappe.utils.play_sound("error");
-					return;
-				}
-				// Validate customer credit redemption
-				let credit_calc_check = this.customer_credit_dict.filter((row) => {
-					return this.flt(row.credit_to_redeem) > this.flt(row.total_credit);
-				});
-				if (credit_calc_check.length > 0) {
-					this.toastStore.show({
-						title: `Redeemed credit cannot be greater than its total.`,
-						color: "error",
-					});
-					frappe.utils.play_sound("error");
-					return;
-				}
-				if (
-					!this.invoice_doc.is_return &&
-					this.redeemed_customer_credit >
-						(this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
-				) {
-					this.toastStore.show({
-						title: `Cannot redeem customer credit more than invoice total`,
-						color: "error",
-					});
-					frappe.utils.play_sound("error");
-					return;
-				}
-				// Proceed to submit the invoice
-				// We rely on backend validation in submit_invoice to catch stock issues
+				await this.validateSubmission(payment_received);
 				await this.submit_invoice(print);
 			} catch (error) {
-				console.error("An error occurred during submission:", error);
-				// Optionally, emit a generic error message to the user
-				this.toastStore.show({
-					title: __("An unexpected error occurred. Please check the console for details."),
-					color: "error",
-				});
+				console.error("Submission error:", error);
+				if (error.message) {
+					this.toastStore.show({
+						title: error.message,
+						color: "error",
+					});
+					frappe.utils.play_sound("error");
+				}
 			} finally {
 				this.loading = false;
 			}

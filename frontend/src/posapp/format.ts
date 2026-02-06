@@ -206,6 +206,32 @@ export function useFormat() {
         currencySymbol,
         isNumber,
         isNegative,
+        setFormatedFloat(el: any, field_name: string, precision?: number, no_negative = false, event?: any) {
+            let input_val = event && event.target ? event.target.value : event;
+            if (typeof input_val === "string") {
+                input_val = fromArabicNumerals(input_val);
+                input_val = input_val.replace(/,/g, "");
+            }
+            const prec = precision !== undefined ? precision : float_precision.value;
+            let value = flt(input_val, prec);
+            if (isNaN(value)) value = 0;
+            if (no_negative && value < 0) value = Math.abs(value);
+            if (el && field_name) el[field_name] = value;
+            return value;
+        },
+        setFormatedCurrency(el: any, field_name: string, precision?: number, no_negative = false, event?: any) {
+            let input_val = event && event.target ? event.target.value : event;
+            if (typeof input_val === "string") {
+                input_val = fromArabicNumerals(input_val);
+                input_val = input_val.replace(/,/g, "");
+            }
+            const prec = precision !== undefined ? precision : currency_precision.value;
+            let value = flt(input_val, prec);
+            if (isNaN(value)) value = 0;
+            if (no_negative && value < 0) value = Math.abs(value);
+            if (el && field_name) el[field_name] = value;
+            return formatCurrency(value, precision);
+        }
     };
 }
 
@@ -270,6 +296,32 @@ export default {
             if (value === null || value === undefined) return false;
             const number = Number(fromArabicNumerals(String(value)).replace(/,/g, ""));
             return !isNaN(number) && number < 0;
+        },
+        setFormatedFloat(this: any, el: any, field_name: string, precision?: number, no_negative = false, event?: any) {
+            let input_val = event && event.target ? event.target.value : event;
+            if (typeof input_val === "string") {
+                input_val = fromArabicNumerals(input_val);
+                input_val = input_val.replace(/,/g, "");
+            }
+            const prec = precision !== undefined ? precision : (this.float_precision || 2);
+            let value = flt(input_val, prec);
+            if (isNaN(value)) value = 0;
+            if (no_negative && value < 0) value = Math.abs(value);
+            if (el && field_name) el[field_name] = value;
+            return value;
+        },
+        setFormatedCurrency(this: any, el: any, field_name: string, precision?: number, no_negative = false, event?: any) {
+            let input_val = event && event.target ? event.target.value : event;
+            if (typeof input_val === "string") {
+                input_val = fromArabicNumerals(input_val);
+                input_val = input_val.replace(/,/g, "");
+            }
+            const prec = precision !== undefined ? precision : (this.currency_precision || 2);
+            let value = flt(input_val, prec);
+            if (isNaN(value)) value = 0;
+            if (no_negative && value < 0) value = Math.abs(value);
+            if (el && field_name) el[field_name] = value;
+            return this.formatCurrency(value, precision);
         },
         formatDateForBackend(date: any): string | null {
             if (!date) return null;
