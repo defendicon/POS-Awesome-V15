@@ -1,16 +1,12 @@
 import { ref } from "vue";
-import { isOffline, getOpeningStorage, getStoredCustomer, getOfflineCustomers } from "../../offline/index.js";
+import { isOffline, getStoredCustomer } from "../../offline/index.js";
 import { useCustomersStore } from "../stores/customersStore.js";
-import { useUIStore } from "../stores/uiStore.js";
 
 export function usePosPayData({
 	posProfile,
 	company,
 	customerName,
-	toastStore,
 	eventBus,
-	currency_precision,
-	formatFloat,
 	currencySymbol,
 	formatCurrency,
 }) {

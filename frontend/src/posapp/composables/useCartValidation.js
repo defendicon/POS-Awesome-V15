@@ -23,7 +23,7 @@ export function useCartValidation() {
 		stockSettings,
 		eventBus, // Kept for signature compatibility but ignored
 		blockSaleBeyondAvailableQty = false,
-		showNegativeStockWarning = true,
+		_showNegativeStockWarning = true,
 		skipServerValidation = false,
 	) {
 		isValidating.value = true;
@@ -102,7 +102,7 @@ export function useCartValidation() {
 				stockSettings,
 				eventBus,
 				blockSaleBeyondAvailableQty,
-				showNegativeStockWarning,
+				_showNegativeStockWarning,
 			);
 		} finally {
 			isValidating.value = false;
@@ -155,7 +155,7 @@ export function useCartValidation() {
 		stockSettings,
 		eventBus,
 		blockSaleBeyondAvailableQty = false,
-		showNegativeStockWarning = true,
+		_showNegativeStockWarning = true,
 	) {
 		console.warn("Using fallback validation due to server validation failure");
 

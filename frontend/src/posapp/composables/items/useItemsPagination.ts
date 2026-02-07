@@ -1,9 +1,7 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import type { POSProfile } from "../../types/models";
 // @ts-ignore
-import {
-	getStoredItemsCount,
-} from "../../../offline/index.js";
+import { getStoredItemsCount } from "../../../offline/index.js";
 
 const DEFAULT_PAGE_SIZE = 200;
 const LARGE_CATALOG_THRESHOLD = 5000;
@@ -30,20 +28,10 @@ export function useItemsPagination() {
 		group: "ALL",
 	});
 
-	const normalizeBooleanSetting = (value: any): boolean => {
-		if (typeof value === "string") {
-			const normalized = value.trim().toLowerCase();
-			return normalized === "1" || normalized === "true" || normalized === "yes";
-		}
-
-		if (typeof value === "number") {
-			return value === 1;
-		}
-
-		return Boolean(value);
-	};
-
-	const resolveLimitSearchSize = (posProfile: POSProfile | null, limitSearchEnabled: boolean): number => {
+	const resolveLimitSearchSize = (
+		posProfile: POSProfile | null,
+		limitSearchEnabled: boolean,
+	): number => {
 		if (!limitSearchEnabled) {
 			return DEFAULT_PAGE_SIZE;
 		}
@@ -58,7 +46,11 @@ export function useItemsPagination() {
 		return LIMIT_SEARCH_FALLBACK;
 	};
 
-	const resolvePageSize = (posProfile: POSProfile | null, limitSearchEnabled: boolean, pageSize = DEFAULT_PAGE_SIZE): number => {
+	const resolvePageSize = (
+		posProfile: POSProfile | null,
+		limitSearchEnabled: boolean,
+		pageSize = DEFAULT_PAGE_SIZE,
+	): number => {
 		if (limitSearchEnabled) {
 			return resolveLimitSearchSize(posProfile, limitSearchEnabled);
 		}
@@ -69,11 +61,19 @@ export function useItemsPagination() {
 	const resetCachedPagination = (
 		options: { enabled?: boolean; total?: number; pageSize?: number } = {},
 		posProfile: POSProfile | null,
-		limitSearchEnabled: boolean
+		limitSearchEnabled: boolean,
 	) => {
-		const { enabled = false, total = 0, pageSize = DEFAULT_PAGE_SIZE } = options;
+		const {
+			enabled = false,
+			total = 0,
+			pageSize = DEFAULT_PAGE_SIZE,
+		} = options;
 
-		const resolvedPageSize = resolvePageSize(posProfile, limitSearchEnabled, pageSize);
+		const resolvedPageSize = resolvePageSize(
+			posProfile,
+			limitSearchEnabled,
+			pageSize,
+		);
 
 		cachedPagination.value.enabled = enabled;
 		cachedPagination.value.total = Number.isFinite(total) ? total : 0;
@@ -88,7 +88,7 @@ export function useItemsPagination() {
 		totalItemCount: { value: number },
 		posProfile: POSProfile | null,
 		shouldUseIndexedSearch: boolean,
-		limitSearchEnabled: boolean
+		limitSearchEnabled: boolean,
 	) => {
 		if (!shouldUseIndexedSearch) {
 			cachedPagination.value.enabled = false;
@@ -99,14 +99,26 @@ export function useItemsPagination() {
 
 		try {
 			const storedCount = await getStoredItemsCount().catch(() => 0);
-			const resolvedCount = Number.isFinite(storedCount) ? storedCount : 0;
+			const resolvedCount = Number.isFinite(storedCount)
+				? storedCount
+				: 0;
 
 			const shouldPaginate = resolvedCount > LARGE_CATALOG_THRESHOLD;
 			cachedPagination.value.enabled = shouldPaginate;
 			cachedPagination.value.total = resolvedCount;
-			cachedPagination.value.pageSize = resolvePageSize(posProfile, limitSearchEnabled, DEFAULT_PAGE_SIZE);
-			cachedPagination.value.offset = Math.min(resolvedCount, itemsLength);
-			totalItemCount.value = Math.max(totalItemCount.value, resolvedCount);
+			cachedPagination.value.pageSize = resolvePageSize(
+				posProfile,
+				limitSearchEnabled,
+				DEFAULT_PAGE_SIZE,
+			);
+			cachedPagination.value.offset = Math.min(
+				resolvedCount,
+				itemsLength,
+			);
+			totalItemCount.value = Math.max(
+				totalItemCount.value,
+				resolvedCount,
+			);
 		} catch (error) {
 			console.warn("Failed to update cached pagination state:", error);
 		}

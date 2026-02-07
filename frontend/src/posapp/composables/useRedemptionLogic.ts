@@ -6,7 +6,7 @@ export interface RedemptionLogicOptions {
 	invoiceDoc: Ref<any>;
 	posProfile: Ref<any>;
 	currencyPrecision: Ref<number>;
-	formatFloat: (val: any, prec?: number) => number;
+	formatFloat: (_val: any, _prec?: number) => number;
 	stores?: {
 		toastStore?: any;
 	};
@@ -14,13 +14,8 @@ export interface RedemptionLogicOptions {
 }
 
 export function useRedemptionLogic(options: RedemptionLogicOptions) {
-	const {
-		invoiceDoc,
-		posProfile,
-		currencyPrecision,
-		formatFloat,
-		stores,
-	} = options;
+	const { invoiceDoc, posProfile, currencyPrecision, formatFloat, stores } =
+		options;
 
 	// State
 	const loyalty_amount = ref(0);
@@ -42,10 +37,13 @@ export function useRedemptionLogic(options: RedemptionLogicOptions) {
 			if (!customer || !company) return;
 
 			frappe
-				.call("posawesome.posawesome.api.payments.get_available_credit", {
-					customer,
-					company,
-				})
+				.call(
+					"posawesome.posawesome.api.payments.get_available_credit",
+					{
+						customer,
+						company,
+					},
+				)
 				.then((r: any) => {
 					const data = r.message;
 					if (data && data.length) {
@@ -93,12 +91,16 @@ export function useRedemptionLogic(options: RedemptionLogicOptions) {
 	watch(
 		customer_credit_dict,
 		(newVal) => {
-			const func = formatFloat || ((v: any) => parseFloat(String(v)) || 0);
+			const func =
+				formatFloat || ((v: any) => parseFloat(String(v)) || 0);
 			const prec = unref(currencyPrecision) || 2;
-			const total = newVal.reduce((sum, row) => sum + func(row.credit_to_redeem || 0), 0);
+			const total = newVal.reduce(
+				(sum, row) => sum + func(row.credit_to_redeem || 0),
+				0,
+			);
 			redeemed_customer_credit.value = func(total, prec);
 		},
-		{ deep: true }
+		{ deep: true },
 	);
 
 	// Fetch Loyalty Points - Placeholder

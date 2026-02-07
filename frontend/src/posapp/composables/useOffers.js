@@ -1,10 +1,8 @@
-import { ref, getCurrentInstance } from "vue";
+import { ref } from "vue";
 import { useUIStore } from "../stores/uiStore.js";
 import { getCachedOffers, saveOffers } from "../../offline/index.js";
 
 export function useOffers() {
-	const { proxy } = getCurrentInstance();
-	const eventBus = proxy?.eventBus; // Keep until all migrated? No, we are migrating offers now.
 	const uiStore = useUIStore();
 	const offers = ref([]);
 

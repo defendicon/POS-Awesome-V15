@@ -1,5 +1,3 @@
-import { ref } from "vue";
-
 export function useInvoiceHandlers(
 	pos_profile,
 	company,
@@ -35,7 +33,7 @@ export function useInvoiceHandlers(
 		fetch_available_currencies();
 	};
 
-	const handleSetAllItems = (data) => {
+	const handleSetAllItems = (_data) => {
 		// Assuming allItems logic is handled elsewhere or not critical
 		// items.value = data; // Wait, items is a computed setter in original component usually
 		// But here we need to iterate over existing items to update details

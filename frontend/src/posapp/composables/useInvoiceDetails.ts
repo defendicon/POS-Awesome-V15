@@ -2,11 +2,11 @@ import { ref, unref, type Ref } from "vue";
 import { formatUtils } from "../format";
 import {
 	getSalesPersonsStorage,
-	setSalesPersonsStorage
+	setSalesPersonsStorage,
 } from "../../offline/index";
 
 declare const frappe: any;
-declare const __: (str: string, args?: any[]) => string;
+declare const __: (_str: string, _args?: any[]) => string;
 
 export interface InvoiceDetailsOptions {
 	invoiceDoc: Ref<any>;
@@ -50,18 +50,18 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 
 	const addresses = ref<Address[]>([]);
 	const sales_persons = ref<SalesPerson[]>([]);
-	
+
 	// Date states
 	const new_delivery_date = ref<string | null>(null);
 	const new_po_date = ref<string | null>(null);
 	const new_credit_due_date = ref<string | null>(null);
 	const credit_due_days = ref<number | null>(null);
 	const return_valid_upto_date = ref<string | null>(null);
-	
+
 	// Dialogs
 	const custom_days_dialog = ref(false);
 	const custom_days_value = ref<number | null>(null);
-	
+
 	const credit_due_presets = [7, 14, 30];
 
 	// Formatting helper
@@ -70,15 +70,15 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		if (typeof frappe !== "undefined" && frappe.datetime) {
 			return frappe.datetime.obj_to_str(date);
 		}
-		return String(date); 
+		return String(date);
 	};
-	
+
 	const formatDateDisplay = (date: any) => {
 		if (typeof frappe !== "undefined" && frappe.datetime) {
 			return frappe.datetime.obj_to_str(date);
 		}
 		if (date instanceof Date) {
-			return date.toISOString().split('T')[0];
+			return date.toISOString().split("T")[0];
 		}
 		return String(date);
 	};
@@ -88,7 +88,11 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 	const normalizeAddress = (address: any): Address | null => {
 		if (!address) return null;
 		const normalized = { ...address };
-		const fallback = normalized.address_title || normalized.address_line1 || normalized.name || "";
+		const fallback =
+			normalized.address_title ||
+			normalized.address_line1 ||
+			normalized.name ||
+			"";
 		normalized.address_title = normalized.address_title || fallback;
 		normalized.display_title = fallback;
 		return normalized as Address;
@@ -107,12 +111,16 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 			callback: function (r: any) {
 				if (!r.exc) {
 					const records = Array.isArray(r.message) ? r.message : [];
-					const normalized = records.map((row) => normalizeAddress(row)).filter((row): row is Address => row !== null);
+					const normalized = records
+						.map((row) => normalizeAddress(row))
+						.filter((row): row is Address => row !== null);
 					addresses.value = normalized;
-					
+
 					if (
 						doc.shipping_address_name &&
-						!normalized.some((row) => row.name === doc.shipping_address_name)
+						!normalized.some(
+							(row) => row.name === doc.shipping_address_name,
+						)
 					) {
 						doc.shipping_address_name = null;
 					}
@@ -143,7 +151,7 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		const record = (item && item.raw) || item || {};
 		const searchText = (queryText || "").toLowerCase();
 		if (!searchText) return true;
-		
+
 		const fields: (keyof Address)[] = [
 			"address_title",
 			"address_line1",
@@ -171,7 +179,7 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 				console.error(e);
 			}
 		}
-		
+
 		frappe.call({
 			method: "posawesome.posawesome.api.utilities.get_sales_person_names",
 			callback: function (r: any) {
@@ -203,9 +211,11 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 				doc.shipping_address_name = null;
 			}
 		} else if (stores?.invoiceStore) {
-			stores.invoiceStore.mergeInvoiceDoc({ posa_delivery_date: formatted });
+			stores.invoiceStore.mergeInvoiceDoc({
+				posa_delivery_date: formatted,
+			});
 		}
-		
+
 		if (!formatted) {
 			addresses.value = [];
 		}
@@ -227,14 +237,14 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 
 	const applyDuePreset = (days: number | string | null) => {
 		if (days === null || days === "") return;
-		
+
 		const westernDays = formatUtils.fromArabicNumerals(String(days));
 		const parsed = parseInt(westernDays, 10);
 		if (isNaN(parsed)) return;
-		
+
 		const d = new Date();
 		d.setDate(d.getDate() + parsed);
-		
+
 		new_credit_due_date.value = formatDateDisplay(d);
 		credit_due_days.value = parsed;
 		update_credit_due_date();
@@ -251,21 +261,30 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 	const calculateReturnValidUntil = (baseDate: any) => {
 		const formattedBase = formatDate(baseDate);
 		if (!formattedBase) return null;
-		
+
 		const parsed = new Date(formattedBase);
 		if (Number.isNaN(parsed.getTime())) return null;
-		
+
 		const profile = unref(posProfile);
 		const settings = unref(posSettings);
-		
-		const profileDays = parseInt(profile?.posa_return_validity_days ?? 0, 10);
-		const settingsDays = parseInt(settings?.posa_return_validity_days ?? 0, 10);
-		const daysSetting = Number.isFinite(profileDays) && profileDays > 0 ? profileDays : settingsDays;
-		
+
+		const profileDays = parseInt(
+			profile?.posa_return_validity_days ?? 0,
+			10,
+		);
+		const settingsDays = parseInt(
+			settings?.posa_return_validity_days ?? 0,
+			10,
+		);
+		const daysSetting =
+			Number.isFinite(profileDays) && profileDays > 0
+				? profileDays
+				: settingsDays;
+
 		if (Number.isFinite(daysSetting) && daysSetting > 0) {
 			parsed.setDate(parsed.getDate() + daysSetting);
 		}
-		
+
 		const year = parsed.getFullYear();
 		const month = `0${parsed.getMonth() + 1}`.slice(-2);
 		const day = `0${parsed.getDate()}`.slice(-2);
@@ -276,7 +295,8 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		const profile = unref(posProfile);
 		const settings = unref(posSettings);
 		const enabled = Boolean(
-			profile?.posa_enable_return_validity || settings?.posa_enable_return_validity
+			profile?.posa_enable_return_validity ||
+			settings?.posa_enable_return_validity,
 		);
 
 		if (!enabled || !doc || doc.is_return) {
@@ -290,7 +310,12 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		const existing = doc.posa_return_valid_upto;
 		const proposedDate =
 			existing ||
-			calculateReturnValidUntil(doc.posting_date || (typeof frappe !== "undefined" ? frappe.datetime.nowdate() : new Date().toISOString().split('T')[0]));
+			calculateReturnValidUntil(
+				doc.posting_date ||
+					(typeof frappe !== "undefined"
+						? frappe.datetime.nowdate()
+						: new Date().toISOString().split("T")[0]),
+			);
 
 		return_valid_upto_date.value = proposedDate;
 		doc.posa_return_valid_upto = proposedDate;
@@ -300,22 +325,24 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		const profile = unref(posProfile);
 		const settings = unref(posSettings);
 		const enabled = Boolean(
-			profile?.posa_enable_return_validity || settings?.posa_enable_return_validity
+			profile?.posa_enable_return_validity ||
+			settings?.posa_enable_return_validity,
 		);
 
 		if (!enabled) return;
 
 		const formatted = formatDate(value); // YYYY-MM-DD
-		return_valid_upto_date.value = formatDateDisplay(formatted); 
-		
+		return_valid_upto_date.value = formatDateDisplay(formatted);
+
 		const doc = unref(invoiceDoc);
 		if (doc) {
 			doc.posa_return_valid_upto = formatted;
 		} else if (stores?.invoiceStore) {
-			stores.invoiceStore.mergeInvoiceDoc({ posa_return_valid_upto: formatted });
+			stores.invoiceStore.mergeInvoiceDoc({
+				posa_return_valid_upto: formatted,
+			});
 		}
 	};
-
 
 	return {
 		addresses,
@@ -328,7 +355,7 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		custom_days_dialog,
 		custom_days_value,
 		return_valid_upto_date,
-		
+
 		get_addresses,
 		new_address,
 		addressFilter,

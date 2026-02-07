@@ -132,10 +132,6 @@ import { useRtl } from "../composables/useRtl";
 
 const ServerUsageGadget = defineAsyncComponent(() => import("./navbar/ServerUsageGadget.vue"));
 const DatabaseUsageGadget = defineAsyncComponent(() => import("./navbar/DatabaseUsageGadget.vue"));
-const DEFAULT_SNACK_TIMEOUT = 3000;
-const OFFLINE_WARNING_TITLE = "Connection lost. Some features might not work.";
-const OFFLINE_WARNING_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
-const OFFLINE_NOTIFICATION_KEY = "offline-connection-warning";
 
 import { useToastStore } from "../stores/toastStore.js";
 import { useUIStore } from "../stores/uiStore.js";

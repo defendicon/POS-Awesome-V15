@@ -1,14 +1,12 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 // @ts-ignore
 import {
-	getCachedPriceListItems,
 	clearPriceListCache,
 	isStockCacheReady,
 	getItemsLastSync,
 	clearItemDetailsCache,
 } from "../../../offline/index.js";
-import type { Item, POSProfile } from "../../types/models";
-import { useItemsMetrics } from "./useItemsMetrics";
+import type { Item } from "../../types/models";
 
 export interface CacheHealth {
 	items: string;
@@ -139,8 +137,12 @@ export function useItemsCache() {
 		}
 
 		// Limit cache size
-		if (cache.value.memory.searchResults.size > cache.value.memory.maxSize) {
-			const entries = Array.from(cache.value.memory.searchResults.entries());
+		if (
+			cache.value.memory.searchResults.size > cache.value.memory.maxSize
+		) {
+			const entries = Array.from(
+				cache.value.memory.searchResults.entries(),
+			);
 			entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 
 			const toRemove = Math.floor(entries.length * 0.2);
@@ -156,17 +158,25 @@ export function useItemsCache() {
 	const getCachedItems = async (cacheKey: string) => {
 		// Check memory cache first
 		const memCache = cache.value.memory.searchResults.get(cacheKey);
-		if (memCache && Date.now() - memCache.timestamp < cache.value.memory.ttl) {
+		if (
+			memCache &&
+			Date.now() - memCache.timestamp < cache.value.memory.ttl
+		) {
 			return memCache.data;
 		}
 
 		// Check session cache
 		if (cache.value.session.enabled) {
 			try {
-				const sessionData = sessionStorage.getItem(cache.value.session.prefix + cacheKey);
+				const sessionData = sessionStorage.getItem(
+					cache.value.session.prefix + cacheKey,
+				);
 				if (sessionData) {
 					const parsed = JSON.parse(sessionData);
-					if (Date.now() - parsed.timestamp < cache.value.memory.ttl) {
+					if (
+						Date.now() - parsed.timestamp <
+						cache.value.memory.ttl
+					) {
 						// Update memory cache
 						cache.value.memory.searchResults.set(cacheKey, parsed);
 						return parsed.data;
@@ -192,7 +202,10 @@ export function useItemsCache() {
 		// Store in session cache
 		if (cache.value.session.enabled) {
 			try {
-				sessionStorage.setItem(cache.value.session.prefix + cacheKey, JSON.stringify(cacheData));
+				sessionStorage.setItem(
+					cache.value.session.prefix + cacheKey,
+					JSON.stringify(cacheData),
+				);
 			} catch (e) {
 				console.warn("Session cache write failed:", e);
 			}
@@ -233,7 +246,11 @@ export function useItemsCache() {
 		});
 	};
 
-	const generateCacheKey = (search: string, group: string, priceList: string | null) => {
+	const generateCacheKey = (
+		search: string,
+		group: string,
+		priceList: string | null,
+	) => {
 		return `items_${search || "all"}_${group}_${priceList || "default"}`;
 	};
 

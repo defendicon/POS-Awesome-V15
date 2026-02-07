@@ -1,4 +1,4 @@
-import { computed, unref, type Ref, type ComputedRef } from "vue";
+import { computed, unref, type Ref } from "vue";
 import { formatUtils } from "../format";
 
 declare const window: any;
@@ -11,7 +11,7 @@ export interface PaymentCalculationOptions {
 	redeemedCustomerCredit: Ref<number>;
 	customerCreditDict: Ref<any[]>;
 	customerInfo: Ref<any>;
-	formatCurrency: (value: number, currency: string) => string;
+	formatCurrency: (_value: number, _currency: string) => string;
 }
 
 /**
@@ -33,7 +33,9 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 	// Local flt helper using global flt or falling back to parseFloat
 	const flt = (val: any, prec?: number): number => {
 		const precision = prec !== undefined ? prec : unref(currencyPrecision);
-		return typeof window !== "undefined" && window.flt ? window.flt(val, precision) : parseFloat(String(val)) || 0;
+		return typeof window !== "undefined" && window.flt
+			? window.flt(val, precision)
+			: parseFloat(String(val)) || 0;
 	};
 
 	/**
@@ -46,7 +48,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		const amountByPayment = new Map<any, number>();
 
 		payments.forEach((payment) => {
-			const amount = parseFloat(formatUtils.fromArabicNumerals(String(payment?.amount))) || 0;
+			const amount =
+				parseFloat(
+					formatUtils.fromArabicNumerals(String(payment?.amount)),
+				) || 0;
 			amountByPayment.set(payment, amount);
 			total += amount;
 		});
@@ -72,7 +77,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			if (doc.currency && doc.currency !== profile.currency) {
 				total += flt(lAmount / (doc.conversion_rate || 1));
 			} else {
-				total += parseFloat(formatUtils.fromArabicNumerals(String(lAmount))) || 0;
+				total +=
+					parseFloat(
+						formatUtils.fromArabicNumerals(String(lAmount)),
+					) || 0;
 			}
 		}
 
@@ -80,7 +88,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			if (doc.currency && doc.currency !== profile.currency) {
 				total += flt(rCredit / (doc.conversion_rate || 1));
 			} else {
-				total += parseFloat(formatUtils.fromArabicNumerals(String(rCredit))) || 0;
+				total +=
+					parseFloat(
+						formatUtils.fromArabicNumerals(String(rCredit)),
+					) || 0;
 			}
 		}
 
@@ -114,7 +125,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		if (!doc) return 0;
 
 		let invoice_total;
-		if (profile.posa_allow_multi_currency && doc.currency !== profile.currency) {
+		if (
+			profile.posa_allow_multi_currency &&
+			doc.currency !== profile.currency
+		) {
 			invoice_total = flt(doc.grand_total);
 		} else {
 			invoice_total = flt(doc.rounded_total || doc.grand_total);
@@ -131,7 +145,10 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		if (!doc) return 0;
 
 		let invoice_total;
-		if (profile.posa_allow_multi_currency && doc.currency !== profile.currency) {
+		if (
+			profile.posa_allow_multi_currency &&
+			doc.currency !== profile.currency
+		) {
 			invoice_total = flt(doc.grand_total);
 		} else {
 			invoice_total = flt(doc.rounded_total || doc.grand_total);
@@ -143,7 +160,11 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 
 	const isCashLikePayment = (payment: any) => {
 		const mop = payment?.mode_of_payment?.toLowerCase() || "";
-		return mop.includes("cash") || mop.includes("money") || mop.includes("نقدي");
+		return (
+			mop.includes("cash") ||
+			mop.includes("money") ||
+			mop.includes("نقدي")
+		);
 	};
 
 	const shouldAutoApplyCreditChange = computed(() => {
@@ -168,7 +189,9 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 	const diff_label = computed(() => {
 		const doc = unref(invoiceDoc);
 		const currency = doc ? doc.currency : "";
-		return diff_payment.value > 0 ? `To Be Paid (${currency})` : `Change (${currency})`;
+		return diff_payment.value > 0
+			? `To Be Paid (${currency})`
+			: `Change (${currency})`;
 	});
 
 	const total_payments_display = computed(() => {

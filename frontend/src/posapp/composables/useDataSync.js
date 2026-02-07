@@ -57,7 +57,7 @@ export function useDataSync(intervalSeconds = 30) {
 
 		isSyncing.value = true;
 		try {
-			const { size, count } = await itemsStore.refreshModifiedItems();
+			const { size } = await itemsStore.refreshModifiedItems();
 
 			const now = Date.now();
 			lastSyncTime.value = new Date();

@@ -28,6 +28,7 @@ export default [
 				...globals.browser,
 				frappe: "readonly",
 				__: "readonly",
+				$: "readonly",
 				get_currency_symbol: "readonly",
 				flt: "readonly",
 				workbox: "readonly",

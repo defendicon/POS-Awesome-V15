@@ -88,7 +88,7 @@ export function useItemsSync() {
 		itemList: Item[],
 		posProfile: POSProfile | null,
 		activePriceList: string,
-		getItemByCode: (code: string) => Item | undefined,
+		getItemByCode: (_code: string) => Item | undefined,
 	) => {
 		if (!itemList || itemList.length === 0) return;
 
@@ -119,7 +119,7 @@ export function useItemsSync() {
 		itemBatch: Item[],
 		posProfile: POSProfile | null,
 		activePriceList: string,
-		getItemByCode: (code: string) => Item | undefined,
+		getItemByCode: (_code: string) => Item | undefined,
 	) => {
 		try {
 			if (!posProfile) return;
@@ -160,7 +160,7 @@ export function useItemsSync() {
 		posProfile: POSProfile | null,
 		activePriceList: string,
 		customer: string | null,
-		updateItemsInPlace: (items: Item[]) => void,
+		updateItemsInPlace: (_items: Item[]) => void,
 		itemsMap: Map<string, Item>,
 	) => {
 		const lastSync = getItemsLastSync();
@@ -222,8 +222,8 @@ export function useItemsSync() {
 		posProfile: POSProfile | null,
 		activePriceList: string,
 		shouldPersistItems: boolean,
-		resolvePageSize: (pageSize?: number) => number,
-		setItems: (items: Item[], options?: any) => void,
+		resolvePageSize: (_pageSize?: number) => number,
+		setItems: (_items: Item[], _options?: any) => void,
 		updateCachedPaginationFromStorage: () => Promise<void>,
 		totalItemCount: { value: number },
 		itemsLoaded: { value: boolean },

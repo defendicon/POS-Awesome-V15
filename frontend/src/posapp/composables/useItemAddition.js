@@ -1,4 +1,3 @@
-import { nextTick } from "vue";
 import _ from "lodash";
 import { withPerf } from "../utils/perf.js";
 import { parseBooleanSetting } from "../utils/stock.js";
@@ -19,7 +18,6 @@ export function useItemAddition() {
 	const { runAsyncTask, scheduleItemTask } = useItemTasks();
 
 	const {
-		shouldIndexItem,
 		findMergeTarget,
 		refreshMergeCacheEntry,
 		invalidateMergeCache,

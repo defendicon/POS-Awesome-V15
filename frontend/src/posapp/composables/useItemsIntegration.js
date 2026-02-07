@@ -112,13 +112,13 @@ export function useItemsIntegration(options = {}) {
 		return await itemsStore.searchItems(term);
 	};
 
-	const update_items_details = async (itemList) => {
+	const update_items_details = async (_itemList) => {
 		// This is now handled automatically by the store in background
 		// Keep for compatibility but don't need to do anything
 		return Promise.resolve();
 	};
 
-	const memoizedSearch = (searchTerm, itemGroup) => {
+	const memoizedSearch = (searchTerm, _itemGroup) => {
 		// The store now handles memoization internally
 		return itemsStore.searchItems(searchTerm);
 	};

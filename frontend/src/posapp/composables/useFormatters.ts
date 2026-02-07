@@ -3,12 +3,12 @@ import { computed, reactive } from "vue";
 /**
  * Composable for memoized formatting of floats, currency, and quantities.
  * Prevents redundant formatting calculations during high-frequency renders (like virtual scrolling).
- * 
+ *
  * @param props - Object containing base formatting functions
  */
 export function useFormatters(props: {
-	formatFloat: (value: number, precision?: number | string) => string;
-	formatCurrency: (value: number, precision?: number | string) => string;
+	formatFloat: (_value: number, _precision?: number | string) => string;
+	formatCurrency: (_value: number, _precision?: number | string) => string;
 }) {
 	const formatCache = reactive(new Map<string, string>());
 	const qtyLengthCache = reactive(new Map<number, number>());
@@ -18,15 +18,18 @@ export function useFormatters(props: {
 	 * Caches results up to 5000 entries.
 	 */
 	const memoizedFormatFloat = computed(() => {
-		return (value: number | null | undefined, precision?: number | string) => {
+		return (
+			value: number | null | undefined,
+			precision?: number | string,
+		) => {
 			if (value === null || value === undefined) return "";
 			const key = `f_${value}_${precision ?? "def"}`;
 			const cached = formatCache.get(key);
 			if (cached !== undefined) return cached;
-			
+
 			const result = props.formatFloat(value, precision);
 			formatCache.set(key, result);
-			
+
 			if (formatCache.size > 5000) formatCache.clear();
 			return result;
 		};
@@ -37,7 +40,10 @@ export function useFormatters(props: {
 	 * Caches results up to 5000 entries.
 	 */
 	const memoizedFormatCurrency = computed(() => {
-		return (value: number | null | undefined, precision?: number | string) => {
+		return (
+			value: number | null | undefined,
+			precision?: number | string,
+		) => {
 			if (value === null || value === undefined) return "";
 			const key = `c_${value}_${precision ?? "def"}`;
 			const cached = formatCache.get(key);
@@ -45,7 +51,7 @@ export function useFormatters(props: {
 
 			const result = props.formatCurrency(value, precision);
 			formatCache.set(key, result);
-			
+
 			if (formatCache.size > 5000) formatCache.clear();
 			return result;
 		};
@@ -59,7 +65,7 @@ export function useFormatters(props: {
 		return (qty: number) => {
 			const cached = qtyLengthCache.get(qty);
 			if (cached !== undefined) return cached;
-			
+
 			const length = String(Math.abs(qty || 0)).replace(".", "").length;
 			qtyLengthCache.set(qty, length);
 

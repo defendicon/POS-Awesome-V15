@@ -3,20 +3,20 @@ import { ref, unref, type Ref, type ComputedRef } from "vue";
 import { getSmartTenderSuggestions } from "../../utils/smartTender.js";
 
 declare const frappe: any;
-declare const __: (str: string, args?: any[]) => string;
+declare const __: (_str: string, _args?: any[]) => string;
 
 export interface PaymentMethodsOptions {
 	invoiceDoc: Ref<any>;
 	posProfile: Ref<any>;
 	diffPayment?: ComputedRef<number>;
-	formatFloat?: (val: any) => number;
+	formatFloat?: (_val: any) => number;
 	stores: {
 		toastStore: any;
 		uiStore: any;
 	};
 	eventBus?: any;
-	onSubmit?: (args: any, submitPrint: boolean) => void;
-	setRedeemCustomerCredit?: (val: boolean) => void;
+	onSubmit?: (_args: any, _submitPrint: boolean) => void;
+	setRedeemCustomerCredit?: (_val: boolean) => void;
 	customerCreditDict?: Ref<any[]>;
 	redeemedCustomerCredit?: Ref<number>;
 	isCashback?: Ref<boolean>;
@@ -105,7 +105,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	const autoBalancePayments = (
 		excludePayment: any,
-		currencyPrecision: number = 2,
+		_currencyPrecision: number = 2,
 	) => {
 		const doc = unref(invoiceDoc);
 		if (!doc) return;
@@ -158,7 +158,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 
 	const getVisibleDenominations = (
 		payment: any,
-		currencyPrecision: number = 2,
+		_currencyPrecision: number = 2,
 	) => {
 		const doc = unref(invoiceDoc);
 		if (!doc || !payment) return [];
@@ -168,13 +168,6 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 			(sum: number, p: any) => sum + flt(p.amount),
 			0,
 		);
-		const { amountByPayment } = { amountByPayment: new Map() }; // Placeholder if needed, but simple logic:
-		// Actually the original code used `this.paymentAmountSummary` which seems complex.
-		// Let's stick to the logic I saw in Payments.vue which seemed to use `total_payments`.
-		// Re-reading Payments.vue logic for `getVisibleDenominations`:
-		// const current_payment_amount = amountByPayment.get(payment) || 0;
-		// const other_payments = current_total_paid - current_payment_amount;
-
 		const current_payment_amount = flt(payment.amount);
 		const other_payments = current_total_paid - current_payment_amount;
 
@@ -280,7 +273,7 @@ export function usePaymentMethods(options: PaymentMethodsOptions) {
 		}
 	};
 
-	const request_payment = async (params?: any) => {
+	const request_payment = async (_params?: any) => {
 		const doc = unref(invoiceDoc);
 		phone_dialog.value = false;
 

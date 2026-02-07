@@ -1,4 +1,4 @@
-import { ref, nextTick } from "vue";
+import { ref } from "vue";
 
 export function useInvoiceUI() {
 	const invoiceHeight = ref(null);
@@ -23,7 +23,8 @@ export function useInvoiceUI() {
 				invoiceHeight.value = saved;
 			} else {
 				invoiceHeight.value =
-					getComputedStyle(document.documentElement).getPropertyValue("--container-height") || "68vh";
+					getComputedStyle(document.documentElement).getPropertyValue("--container-height") ||
+					"68vh";
 			}
 		} catch (e) {
 			console.error("Failed to load invoice height:", e);

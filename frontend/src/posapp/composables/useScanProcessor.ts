@@ -1,6 +1,5 @@
 import { ref, type Ref, type ComputedRef } from "vue";
 import { useToastStore } from "../stores/toastStore";
-import { useUIStore } from "../stores/uiStore";
 import { perfMarkStart, perfMarkEnd } from "../utils/perf";
 import { formatStockShortageError, parseBooleanSetting } from "../utils/stock";
 import { saveItems, savePriceListItems } from "../../offline/index";
@@ -9,7 +8,7 @@ import { openItemSelectionDialog } from "../utils/itemSelectionDialog";
 import placeholderImage from "../components/pos/placeholder-image.png";
 
 declare const frappe: any;
-declare const __: (str: string, args?: any[]) => string;
+declare const __: (_str: string, _args?: any[]) => string;
 
 export interface ScanProcessorContext {
 	items: Ref<any[]>;
@@ -39,7 +38,11 @@ export interface ScanProcessorContext {
 	blockSaleBeyondAvailableQty: ComputedRef<boolean>;
 	currency_precision: ComputedRef<number>;
 	exchange_rate: ComputedRef<number>;
-	format_currency: (value: number, currency: string, precision: number) => string;
+	format_currency: (
+		value: number,
+		currency: string,
+		precision: number,
+	) => string;
 	ratePrecision: (val: any) => number;
 	customer: Ref<any>;
 	onItemAdded?: () => void;
@@ -48,7 +51,7 @@ export interface ScanProcessorContext {
 	// Callback for search focus or clear
 	get_search?: (code: string) => string;
 	get_item_qty?: (code: string) => string;
-    search_from_scanner_ref?: Ref<boolean>;
+	search_from_scanner_ref?: Ref<boolean>;
 }
 
 /**
@@ -90,12 +93,20 @@ export function useScanProcessor(context: ScanProcessorContext) {
 	const pendingScanCode = ref("");
 
 	const isNegativeStockEnabled = (item: any = null) => {
-		const allowNegativeSetting = parseBooleanSetting(context.stock_settings.value?.allow_negative_stock);
-		const allowNegativeItem = item ? parseBooleanSetting(item.allow_negative_stock) : false;
+		const allowNegativeSetting = parseBooleanSetting(
+			context.stock_settings.value?.allow_negative_stock,
+		);
+		const allowNegativeItem = item
+			? parseBooleanSetting(item.allow_negative_stock)
+			: false;
 		return allowNegativeSetting || allowNegativeItem;
 	};
 
-	const showScanError = (error: { message: string; code: string; details: string }) => {
+	const showScanError = (error: {
+		message: string;
+		code: string;
+		details: string;
+	}) => {
 		if (scannerInput.scanErrorDialog) {
 			scannerInput.scanErrorDialog.value = true;
 			scannerInput.scanErrorMessage.value = error.message;
@@ -116,11 +127,17 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			ratePrecision: ratePrecision,
 			placeholderImage,
 			translate: __,
-			onSelect: (item: any) => addScannedItemToInvoice(item, scannedCode, null, null),
+			onSelect: (item: any) =>
+				addScannedItemToInvoice(item, scannedCode, null, null),
 		});
 	};
 
-	const addScannedItemToInvoice = async (item: any, scannedCode: string, qtyFromBarcode: number | null = null, priceFromBarcode: number | null = null) => {
+	const addScannedItemToInvoice = async (
+		item: any,
+		scannedCode: string,
+		qtyFromBarcode: number | null = null,
+		priceFromBarcode: number | null = null,
+	) => {
 		console.log("Adding scanned item to invoice:", item, scannedCode);
 
 		// Clone the item to avoid mutating list data
@@ -128,7 +145,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 
 		// If the scanned barcode has a specific UOM, apply it
 		if (Array.isArray(newItem.item_barcode)) {
-			const barcodeMatch = newItem.item_barcode.find((b: any) => b.barcode === scannedCode);
+			const barcodeMatch = newItem.item_barcode.find(
+				(b: any) => b.barcode === scannedCode,
+			);
 			if (barcodeMatch && barcodeMatch.posa_uom) {
 				newItem.uom = barcodeMatch.posa_uom;
 
@@ -145,7 +164,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 
 					const uomInfo =
 						newItem.item_uoms &&
-						newItem.item_uoms.find((u: any) => u.uom === barcodeMatch.posa_uom);
+						newItem.item_uoms.find(
+							(u: any) => u.uom === barcodeMatch.posa_uom,
+						);
 					const conversionFactor =
 						uomInfo && uomInfo.conversion_factor
 							? parseFloat(uomInfo.conversion_factor)
@@ -153,18 +174,22 @@ export function useScanProcessor(context: ScanProcessorContext) {
 					const currentConversion = newItem.conversion_factor || 1;
 					const baseUnitRate =
 						parseFloat(
-							String((newItem.base_price_list_rate ||
-								newItem.base_rate ||
-								newItem.price_list_rate ||
-								newItem.rate ||
-								0) / (currentConversion || 1)),
+							String(
+								(newItem.base_price_list_rate ||
+									newItem.base_rate ||
+									newItem.price_list_rate ||
+									newItem.rate ||
+									0) / (currentConversion || 1),
+							),
 						) || 0;
 
 					if (res.message) {
 						const price = parseFloat(res.message);
 						newItem.rate = price;
 						newItem.price_list_rate = price;
-						const basePrice = conversionFactor ? price / conversionFactor : price;
+						const basePrice = conversionFactor
+							? price / conversionFactor
+							: price;
 						newItem.base_rate = basePrice;
 						newItem.base_price_list_rate = basePrice;
 						if (conversionFactor) {
@@ -232,7 +257,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		}
 
 		const requestedQtyRaw =
-			qtyFromBarcode !== null && !isNaN(qtyFromBarcode) ? qtyFromBarcode : (newItem.qty ?? 1);
+			qtyFromBarcode !== null && !isNaN(qtyFromBarcode)
+				? qtyFromBarcode
+				: (newItem.qty ?? 1);
 		const requestedQty = Math.abs(requestedQtyRaw || 1);
 		const availableQty =
 			typeof newItem.available_qty === "number"
@@ -256,7 +283,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 						requestedQty,
 					),
 					code: scannedCode,
-					details: __("Adjust the quantity or enable negative stock to continue."),
+					details: __(
+						"Adjust the quantity or enable negative stock to continue.",
+					),
 				});
 				return;
 			}
@@ -275,17 +304,24 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			if (typeof scannerInput.playScanTone === "function") {
 				scannerInput.playScanTone("success");
 			}
-			if (scannerInput.scannerLocked) scannerInput.scannerLocked.value = false;
-			
+			if (scannerInput.scannerLocked)
+				scannerInput.scannerLocked.value = false;
+
 			if (context.search_from_scanner_ref) {
 				context.search_from_scanner_ref.value = false;
 			}
 			pendingScanCode.value = "";
 
 			// Show success message
-			const itemName = newItem.item_name || newItem.item_code || scannedCode || __("Item");
+			const itemName =
+				newItem.item_name ||
+				newItem.item_code ||
+				scannedCode ||
+				__("Item");
 			const rawPrecision = Number(float_precision.value);
-			const precision = Number.isInteger(rawPrecision) ? Math.min(Math.max(rawPrecision, 0), 6) : 2;
+			const precision = Number.isInteger(rawPrecision)
+				? Math.min(Math.max(rawPrecision, 0), 6)
+				: 2;
 			const displayQty = Number.isInteger(requestedQty)
 				? requestedQty
 				: Number(requestedQty.toFixed(precision));
@@ -310,7 +346,6 @@ export function useScanProcessor(context: ScanProcessorContext) {
 
 			// Clear search after successful addition and refocus input via context callback
 			if (context.onItemAdded) context.onItemAdded();
-
 		} finally {
 			awaitingScanResult.value = false;
 		}
@@ -322,7 +357,7 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		if (typeof scannerInput.ensureScaleBarcodeSettings === "function") {
 			await scannerInput.ensureScaleBarcodeSettings();
 		}
-		
+
 		// Handle scale barcodes by extracting the item code and quantity
 		let searchCode = scannedCode;
 		let qtyFromBarcode: number | null = null;
@@ -341,13 +376,18 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			console.error("Failed to parse scale barcode via API:", error);
 		}
 
-		if (scaleResponse && scaleResponse.settings && typeof scannerInput.updateScaleBarcodeSettings === "function") {
+		if (
+			scaleResponse &&
+			scaleResponse.settings &&
+			typeof scannerInput.updateScaleBarcodeSettings === "function"
+		) {
 			scannerInput.updateScaleBarcodeSettings(scaleResponse.settings);
 		}
 
-		const configuredPrefix = typeof scannerInput.getScaleBarcodePrefix === "function" 
-			? scannerInput.getScaleBarcodePrefix() 
-			: null;
+		const configuredPrefix =
+			typeof scannerInput.getScaleBarcodePrefix === "function"
+				? scannerInput.getScaleBarcodePrefix()
+				: null;
 
 		if (
 			scaleResponse &&
@@ -370,7 +410,10 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			if (!Number.isNaN(parsedPrice)) {
 				priceFromBarcode = parsedPrice;
 			}
-		} else if (typeof scannerInput.scaleBarcodeMatches === "function" && scannerInput.scaleBarcodeMatches(scannedCode)) {
+		} else if (
+			typeof scannerInput.scaleBarcodeMatches === "function" &&
+			scannerInput.scaleBarcodeMatches(scannedCode)
+		) {
 			if (context.get_search && context.get_item_qty) {
 				searchCode = context.get_search(scannedCode);
 				qtyFromBarcode = parseFloat(context.get_item_qty(scannedCode));
@@ -389,16 +432,25 @@ export function useScanProcessor(context: ScanProcessorContext) {
 				const barcodeMatch =
 					item.barcode === searchCode ||
 					(Array.isArray(item.item_barcode) &&
-						item.item_barcode.some((b: any) => b.barcode === searchCode)) ||
+						item.item_barcode.some(
+							(b: any) => b.barcode === searchCode,
+						)) ||
 					(Array.isArray(item.barcodes) &&
-						item.barcodes.some((bc: any) => String(bc) === searchCode));
+						item.barcodes.some(
+							(bc: any) => String(bc) === searchCode,
+						));
 				return barcodeMatch || item.item_code === searchCode;
 			});
 		}
 
 		if (foundItem) {
 			console.log("Found item by processed code:", foundItem);
-			await addScannedItemToInvoice(foundItem, searchCode, qtyFromBarcode, priceFromBarcode);
+			await addScannedItemToInvoice(
+				foundItem,
+				searchCode,
+				qtyFromBarcode,
+				priceFromBarcode,
+			);
 			return;
 		}
 
@@ -444,11 +496,20 @@ export function useScanProcessor(context: ScanProcessorContext) {
 				}
 
 				await saveItems(items.value);
-				await savePriceListItems(customer_price_list.value, items.value);
-				if (eventBus && eventBus.emit) eventBus.emit("set_all_items", items.value);
+				await savePriceListItems(
+					customer_price_list.value,
+					items.value,
+				);
+				if (eventBus && eventBus.emit)
+					eventBus.emit("set_all_items", items.value);
 
 				await itemDetailFetcher.update_items_details([newItem]);
-				await addScannedItemToInvoice(newItem, searchCode, qtyFromBarcode, priceFromBarcode);
+				await addScannedItemToInvoice(
+					newItem,
+					searchCode,
+					qtyFromBarcode,
+					priceFromBarcode,
+				);
 				return;
 			}
 
@@ -458,7 +519,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			showScanError({
 				message: `${__("Item not found")}: ${scannedCode}`,
 				code: scannedCode,
-				details: __("Please verify the barcode or check the item's availability."),
+				details: __(
+					"Please verify the barcode or check the item's availability.",
+				),
 			});
 			return;
 		} catch (e: any) {
@@ -468,7 +531,9 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			showScanError({
 				message: `${__("Item not found")}: ${scannedCode}`,
 				code: scannedCode,
-				details: __("The system could not retrieve the item details. Please try again."),
+				details: __(
+					"The system could not retrieve the item details. Please try again.",
+				),
 			});
 			return;
 		} finally {

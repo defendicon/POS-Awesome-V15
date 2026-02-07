@@ -17,8 +17,8 @@ export function useItemDisplay() {
 		float_precision: 2,
 		currency_precision: 2,
 		exchange_rate: 1,
-		formatCurrencyPlain: (v, p) => v,
-		formatFloatPlain: (v, p) => v,
+		formatCurrencyPlain: (v, _p) => v,
+		formatFloatPlain: (v, _p) => v,
 	});
 
 	function registerContext(context) {

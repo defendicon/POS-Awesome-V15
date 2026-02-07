@@ -1,12 +1,6 @@
 import { ref, computed } from "vue";
 
-export function usePosPaySelection({
-	outstanding_invoices,
-	unallocated_payments,
-	mpesa_payments,
-	posProfile,
-	currency_filter,
-}) {
+export function usePosPaySelection({ posProfile, currency_filter }) {
 	const selected_invoices = ref([]);
 	const selected_payments = ref([]);
 	const selected_mpesa_payments = ref([]);

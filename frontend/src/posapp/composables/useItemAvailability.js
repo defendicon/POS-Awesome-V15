@@ -1,342 +1,337 @@
-
-import { ref, computed, watch, onUnmounted } from "vue";
+import { ref, onUnmounted } from "vue";
 import stockCoordinator from "../utils/stockCoordinator.js";
 import {
-    indexItemInBarcodeIndex,
-    lookupItemInBarcodeIndex,
-    replaceBarcodeIndex,
-    resetBarcodeIndex,
+	indexItemInBarcodeIndex,
+	lookupItemInBarcodeIndex,
+	replaceBarcodeIndex,
+	resetBarcodeIndex,
 } from "./useBarcodeIndexing.js";
-import { useUIStore } from "../stores/uiStore.js";
 
 export function useItemAvailability() {
-    // Callbacks/Getters (Mutable for late binding)
-    const callbacks = {
-        getItems: () => [],
-        getDisplayedItems: () => [],
-        getFilteredItems: () => [],
-        updateItemsDetails: async () => { },
-    };
+	// Callbacks/Getters (Mutable for late binding)
+	const callbacks = {
+		getItems: () => [],
+		getDisplayedItems: () => [],
+		getFilteredItems: () => [],
+		updateItemsDetails: async () => {},
+	};
 
-    const registerCallbacks = (newCallbacks) => {
-        Object.assign(callbacks, newCallbacks);
-    };
+	const registerCallbacks = (newCallbacks) => {
+		Object.assign(callbacks, newCallbacks);
+	};
 
-    const uiStore = useUIStore();
-    const barcodeIndex = ref(new Map());
-    const stockUnsubscribe = ref(null);
+	const barcodeIndex = ref(new Map());
+	const stockUnsubscribe = ref(null);
 
-    // --- Indexing ---
+	// --- Indexing ---
 
-    const indexItem = (item) => {
-        if (barcodeIndex.value) {
-            indexItemInBarcodeIndex(barcodeIndex.value, item);
-        }
-    };
+	const indexItem = (item) => {
+		if (barcodeIndex.value) {
+			indexItemInBarcodeIndex(barcodeIndex.value, item);
+		}
+	};
 
-    const lookupItemByBarcode = (code) => {
-        if (!barcodeIndex.value) return null;
-        return lookupItemInBarcodeIndex(barcodeIndex.value, code);
-    };
+	const lookupItemByBarcode = (code) => {
+		if (!barcodeIndex.value) return null;
+		return lookupItemInBarcodeIndex(barcodeIndex.value, code);
+	};
 
-    const rebuildBarcodeIndex = (newItems) => {
-        if (barcodeIndex.value) {
-            replaceBarcodeIndex(barcodeIndex.value, newItems || []);
-        }
-    };
+	const rebuildBarcodeIndex = (newItems) => {
+		if (barcodeIndex.value) {
+			replaceBarcodeIndex(barcodeIndex.value, newItems || []);
+		}
+	};
 
-    const clearBarcodeIndex = () => {
-        if (barcodeIndex.value) {
-            resetBarcodeIndex(barcodeIndex.value);
-        }
-    };
+	const clearBarcodeIndex = () => {
+		if (barcodeIndex.value) {
+			resetBarcodeIndex(barcodeIndex.value);
+		}
+	};
 
-    // --- Availability ---
+	// --- Availability ---
 
-    /**
-     * Syncs items with the latest stock state from StockCoordinator
-     */
-    const syncItemsWithStockState = (codes = null, options = {}) => {
-        const collections = [];
-        const items = callbacks.getItems();
-        const displayedItems = callbacks.getDisplayedItems();
-        const filteredItems = callbacks.getFilteredItems();
+	/**
+	 * Syncs items with the latest stock state from StockCoordinator
+	 */
+	const syncItemsWithStockState = (codes = null, options = {}) => {
+		const collections = [];
+		const items = callbacks.getItems();
+		const displayedItems = callbacks.getDisplayedItems();
+		const filteredItems = callbacks.getFilteredItems();
 
-        if (Array.isArray(items)) {
-            collections.push(items);
-        }
-        if (Array.isArray(displayedItems)) {
-            collections.push(displayedItems);
-        }
-        if (Array.isArray(filteredItems)) {
-            collections.push(filteredItems);
-        }
+		if (Array.isArray(items)) {
+			collections.push(items);
+		}
+		if (Array.isArray(displayedItems)) {
+			collections.push(displayedItems);
+		}
+		if (Array.isArray(filteredItems)) {
+			collections.push(filteredItems);
+		}
 
-        const codesSet = (() => {
-            if (codes === null) {
-                return null;
-            }
-            const iterable = Array.isArray(codes)
-                ? codes
-                : codes instanceof Set || typeof codes[Symbol.iterator] === "function"
-                    ? Array.from(codes)
-                    : [codes];
-            return new Set(
-                iterable
-                    .map((code) => (code !== undefined && code !== null ? String(code).trim() : ""))
-                    .filter(Boolean),
-            );
-        })();
+		const codesSet = (() => {
+			if (codes === null) {
+				return null;
+			}
+			const iterable = Array.isArray(codes)
+				? codes
+				: codes instanceof Set || typeof codes[Symbol.iterator] === "function"
+					? Array.from(codes)
+					: [codes];
+			return new Set(
+				iterable
+					.map((code) => (code !== undefined && code !== null ? String(code).trim() : ""))
+					.filter(Boolean),
+			);
+		})();
 
-        collections.forEach((collection) => {
-            stockCoordinator.applyAvailabilityToCollection(collection, codesSet, options);
-        });
-    };
+		collections.forEach((collection) => {
+			stockCoordinator.applyAvailabilityToCollection(collection, codesSet, options);
+		});
+	};
 
-    /**
-     * Prime stock state from loaded items
-     */
-    const primeStockState = (source = "items-selector") => {
-        const items = callbacks.getItems();
-        const displayedItems = callbacks.getDisplayedItems();
+	/**
+	 * Prime stock state from loaded items
+	 */
+	const primeStockState = (source = "items-selector") => {
+		const items = callbacks.getItems();
+		const displayedItems = callbacks.getDisplayedItems();
 
-        const allItems = Array.isArray(items) ? [...items] : [];
-        // Also include visible items if they differ
-        const extra = Array.isArray(displayedItems) ? displayedItems : [];
-        extra.forEach((item) => {
-            if (!allItems.includes(item)) {
-                allItems.push(item);
-            }
-        });
+		const allItems = Array.isArray(items) ? [...items] : [];
+		// Also include visible items if they differ
+		const extra = Array.isArray(displayedItems) ? displayedItems : [];
+		extra.forEach((item) => {
+			if (!allItems.includes(item)) {
+				allItems.push(item);
+			}
+		});
 
-        if (!allItems.length) {
-            return;
-        }
+		if (!allItems.length) {
+			return;
+		}
 
-        stockCoordinator.primeFromItems(allItems, { silent: true, source });
-        syncItemsWithStockState(
-            allItems
-                .map((item) =>
-                    item && item.item_code !== undefined ? String(item.item_code).trim() : null,
-                )
-                .filter(Boolean),
-            { updateBaseAvailable: false },
-        );
-    };
+		stockCoordinator.primeFromItems(allItems, { silent: true, source });
+		syncItemsWithStockState(
+			allItems
+				.map((item) => (item && item.item_code !== undefined ? String(item.item_code).trim() : null))
+				.filter(Boolean),
+			{ updateBaseAvailable: false },
+		);
+	};
 
-    /**
-     * Handle updates from StockCoordinator
-     */
-    const handleStockSnapshotUpdate = (event = {}) => {
-        const codes = Array.isArray(event.codes) ? event.codes : [];
-        if (!codes.length) {
-            return;
-        }
-        syncItemsWithStockState(codes, { updateBaseAvailable: false });
-    };
+	/**
+	 * Handle updates from StockCoordinator
+	 */
+	const handleStockSnapshotUpdate = (event = {}) => {
+		const codes = Array.isArray(event.codes) ? event.codes : [];
+		if (!codes.length) {
+			return;
+		}
+		syncItemsWithStockState(codes, { updateBaseAvailable: false });
+	};
 
-    /**
-     * Capture base availability (initial fetch state)
-     */
-    const captureBaseAvailability = (item, explicitActualQty = undefined) => {
-        if (!item) return;
+	/**
+	 * Capture base availability (initial fetch state)
+	 */
+	const captureBaseAvailability = (item, explicitActualQty = undefined) => {
+		if (!item) return;
 
-        let resolvedBase = null;
+		let resolvedBase = null;
 
-        if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
-            item._base_available_qty = item.available_qty;
-            resolvedBase = item.available_qty;
-        }
+		if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
+			item._base_available_qty = item.available_qty;
+			resolvedBase = item.available_qty;
+		}
 
-        const hasExplicit = typeof explicitActualQty === "number" && !Number.isNaN(explicitActualQty);
-        if (hasExplicit) {
-            item._base_actual_qty = explicitActualQty;
-            resolvedBase = explicitActualQty;
-        } else if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
-            item._base_actual_qty = item.actual_qty;
-            resolvedBase = item.actual_qty;
-        }
+		const hasExplicit = typeof explicitActualQty === "number" && !Number.isNaN(explicitActualQty);
+		if (hasExplicit) {
+			item._base_actual_qty = explicitActualQty;
+			resolvedBase = explicitActualQty;
+		} else if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
+			item._base_actual_qty = item.actual_qty;
+			resolvedBase = item.actual_qty;
+		}
 
-        if (resolvedBase !== null && item.item_code) {
-            stockCoordinator.updateBaseQuantities(
-                [
-                    {
-                        item_code: item.item_code,
-                        actual_qty: resolvedBase,
-                    },
-                ],
-                { silent: true, source: "items-selector" },
-            );
-        }
-    };
+		if (resolvedBase !== null && item.item_code) {
+			stockCoordinator.updateBaseQuantities(
+				[
+					{
+						item_code: item.item_code,
+						actual_qty: resolvedBase,
+					},
+				],
+				{ silent: true, source: "items-selector" },
+			);
+		}
+	};
 
-    /**
-     * Helper to get base actual qty
-     */
-    const getBaseActualQty = (item) => {
-        if (!item) return null;
+	/**
+	 * Helper to get base actual qty
+	 */
+	const getBaseActualQty = (item) => {
+		if (!item) return null;
 
-        if (typeof item._base_actual_qty === "number" && !Number.isNaN(item._base_actual_qty)) {
-            return item._base_actual_qty;
-        }
-        if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
-            item._base_actual_qty = item.actual_qty;
-            return item.actual_qty;
-        }
-        if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
-            item._base_available_qty = item.available_qty;
-            item._base_actual_qty = item.available_qty;
-            return item.available_qty;
-        }
-        return null;
-    };
+		if (typeof item._base_actual_qty === "number" && !Number.isNaN(item._base_actual_qty)) {
+			return item._base_actual_qty;
+		}
+		if (typeof item.actual_qty === "number" && !Number.isNaN(item.actual_qty)) {
+			item._base_actual_qty = item.actual_qty;
+			return item.actual_qty;
+		}
+		if (typeof item.available_qty === "number" && !Number.isNaN(item.available_qty)) {
+			item._base_available_qty = item.available_qty;
+			item._base_actual_qty = item.available_qty;
+			return item.available_qty;
+		}
+		return null;
+	};
 
-    /**
-     * Re-apply reservation logic to a specific item
-     */
-    const applyReservationToItem = (item) => {
-        if (!item || !item.item_code) return;
+	/**
+	 * Re-apply reservation logic to a specific item
+	 */
+	const applyReservationToItem = (item) => {
+		if (!item || !item.item_code) return;
 
-        const codeKey = String(item.item_code).trim();
-        if (!codeKey) return;
+		const codeKey = String(item.item_code).trim();
+		if (!codeKey) return;
 
-        if (getBaseActualQty(item) !== null) {
-            stockCoordinator.updateBaseQuantities(
-                [
-                    {
-                        item_code: codeKey,
-                        actual_qty: item._base_actual_qty,
-                    },
-                ],
-                { silent: true, source: "items-selector" },
-            );
-        }
+		if (getBaseActualQty(item) !== null) {
+			stockCoordinator.updateBaseQuantities(
+				[
+					{
+						item_code: codeKey,
+						actual_qty: item._base_actual_qty,
+					},
+				],
+				{ silent: true, source: "items-selector" },
+			);
+		}
 
-        stockCoordinator.applyAvailabilityToItem(item, { updateBaseAvailable: false });
-    };
+		stockCoordinator.applyAvailabilityToItem(item, { updateBaseAvailable: false });
+	};
 
-    /**
-     * Recompute availability for a list of codes
-     */
-    const recomputeAvailabilityForCodes = (codes = []) => {
-        if (!Array.isArray(codes) || !codes.length) return;
+	/**
+	 * Recompute availability for a list of codes
+	 */
+	const recomputeAvailabilityForCodes = (codes = []) => {
+		if (!Array.isArray(codes) || !codes.length) return;
 
-        const normalizedCodes = codes
-            .filter((code) => code !== undefined && code !== null && String(code).trim())
-            .map((code) => String(code).trim());
-        if (!normalizedCodes.length) return;
+		const normalizedCodes = codes
+			.filter((code) => code !== undefined && code !== null && String(code).trim())
+			.map((code) => String(code).trim());
+		if (!normalizedCodes.length) return;
 
-        const targetCodes = new Set(normalizedCodes);
-        syncItemsWithStockState(targetCodes, { updateBaseAvailable: false });
+		const targetCodes = new Set(normalizedCodes);
+		syncItemsWithStockState(targetCodes, { updateBaseAvailable: false });
 
-        targetCodes.forEach((code) => {
-            const indexedItem = lookupItemByBarcode(code);
-            if (indexedItem) {
-                applyReservationToItem(indexedItem);
-            }
-        });
-    };
+		targetCodes.forEach((code) => {
+			const indexedItem = lookupItemByBarcode(code);
+			if (indexedItem) {
+				applyReservationToItem(indexedItem);
+			}
+		});
+	};
 
-    // --- Event Handlers (External) ---
+	// --- Event Handlers (External) ---
 
-    const handleCartQuantitiesUpdated = (totals = {}) => {
-        const impacted = stockCoordinator.updateReservations(totals, {
-            source: "items-selector",
-        });
-        if (impacted.length) {
-            recomputeAvailabilityForCodes(impacted);
-        }
-    };
+	const handleCartQuantitiesUpdated = (totals = {}) => {
+		const impacted = stockCoordinator.updateReservations(totals, {
+			source: "items-selector",
+		});
+		if (impacted.length) {
+			recomputeAvailabilityForCodes(impacted);
+		}
+	};
 
-    const handleInvoiceStockAdjusted = async (payload = {}) => {
-        const collectedCodes = new Set();
-        const collectCode = (code) => {
-            if (code === undefined || code === null) return;
-            const normalized = String(code).trim();
-            if (normalized) collectedCodes.add(normalized);
-        };
-        const collectFromItems = (items) => {
-            if (!Array.isArray(items)) return;
-            items.forEach((entry) => {
-                if (!entry) return;
-                if (typeof entry === "string" || typeof entry === "number") collectCode(entry);
-                else if (entry.item_code !== undefined) collectCode(entry.item_code);
-            });
-        };
+	const handleInvoiceStockAdjusted = async (payload = {}) => {
+		const collectedCodes = new Set();
+		const collectCode = (code) => {
+			if (code === undefined || code === null) return;
+			const normalized = String(code).trim();
+			if (normalized) collectedCodes.add(normalized);
+		};
+		const collectFromItems = (items) => {
+			if (!Array.isArray(items)) return;
+			items.forEach((entry) => {
+				if (!entry) return;
+				if (typeof entry === "string" || typeof entry === "number") collectCode(entry);
+				else if (entry.item_code !== undefined) collectCode(entry.item_code);
+			});
+		};
 
-        if (Array.isArray(payload)) collectFromItems(payload);
-        else if (payload && typeof payload === "object") {
-            collectFromItems(payload.items);
-            collectFromItems(payload.item_codes);
-            if (payload.item_code !== undefined) collectCode(payload.item_code);
-        } else {
-            collectCode(payload);
-        }
+		if (Array.isArray(payload)) collectFromItems(payload);
+		else if (payload && typeof payload === "object") {
+			collectFromItems(payload.items);
+			collectFromItems(payload.item_codes);
+			if (payload.item_code !== undefined) collectCode(payload.item_code);
+		} else {
+			collectCode(payload);
+		}
 
-        if (!collectedCodes.size) return;
+		if (!collectedCodes.size) return;
 
-        const codes = Array.from(collectedCodes);
-        const targetCodes = new Set(codes);
-        const seenItems = new Set();
-        const candidates = [];
+		const codes = Array.from(collectedCodes);
+		const targetCodes = new Set(codes);
+		const seenItems = new Set();
+		const candidates = [];
 
-        const considerItem = (item) => {
-            if (!item || !item.item_code) return;
-            const code = String(item.item_code).trim();
-            if (!code || !targetCodes.has(code)) return;
-            if (seenItems.has(item)) return;
-            seenItems.add(item);
-            candidates.push(item);
-        };
+		const considerItem = (item) => {
+			if (!item || !item.item_code) return;
+			const code = String(item.item_code).trim();
+			if (!code || !targetCodes.has(code)) return;
+			if (seenItems.has(item)) return;
+			seenItems.add(item);
+			candidates.push(item);
+		};
 
-        const items = callbacks.getItems();
-        const displayedItems = callbacks.getDisplayedItems();
-        if (Array.isArray(items)) items.forEach(considerItem);
-        if (Array.isArray(displayedItems)) displayedItems.forEach(considerItem);
+		const items = callbacks.getItems();
+		const displayedItems = callbacks.getDisplayedItems();
+		if (Array.isArray(items)) items.forEach(considerItem);
+		if (Array.isArray(displayedItems)) displayedItems.forEach(considerItem);
 
-        targetCodes.forEach((code) => {
-            const indexed = lookupItemByBarcode(code);
-            if (indexed) considerItem(indexed);
-        });
+		targetCodes.forEach((code) => {
+			const indexed = lookupItemByBarcode(code);
+			if (indexed) considerItem(indexed);
+		});
 
-        try {
-            if (candidates.length && callbacks.updateItemsDetails) {
-                await callbacks.updateItemsDetails(candidates, { forceRefresh: true });
-            }
-        } catch (error) {
-            console.error("Failed to refresh item details after invoice submission", error);
-        } finally {
-            recomputeAvailabilityForCodes(codes);
-        }
-    };
+		try {
+			if (candidates.length && callbacks.updateItemsDetails) {
+				await callbacks.updateItemsDetails(candidates, { forceRefresh: true });
+			}
+		} catch (error) {
+			console.error("Failed to refresh item details after invoice submission", error);
+		} finally {
+			recomputeAvailabilityForCodes(codes);
+		}
+	};
 
-    // --- Lifecycle ---
-    const initAvailability = () => {
-        stockUnsubscribe.value = stockCoordinator.subscribe(handleStockSnapshotUpdate);
-    };
+	// --- Lifecycle ---
+	const initAvailability = () => {
+		stockUnsubscribe.value = stockCoordinator.subscribe(handleStockSnapshotUpdate);
+	};
 
-    onUnmounted(() => {
-        if (stockUnsubscribe.value) {
-            stockUnsubscribe.value();
-            stockUnsubscribe.value = null;
-        }
-    });
+	onUnmounted(() => {
+		if (stockUnsubscribe.value) {
+			stockUnsubscribe.value();
+			stockUnsubscribe.value = null;
+		}
+	});
 
-    return {
-        registerCallbacks,
-        barcodeIndex,
-        indexItem,
-        lookupItemByBarcode,
-        rebuildBarcodeIndex,
-        clearBarcodeIndex,
+	return {
+		registerCallbacks,
+		barcodeIndex,
+		indexItem,
+		lookupItemByBarcode,
+		rebuildBarcodeIndex,
+		clearBarcodeIndex,
 
-        syncItemsWithStockState,
-        primeStockState,
-        captureBaseAvailability,
-        applyReservationToItem,
-        recomputeAvailabilityForCodes,
-        handleCartQuantitiesUpdated,
-        handleInvoiceStockAdjusted,
-        initAvailability
-    };
+		syncItemsWithStockState,
+		primeStockState,
+		captureBaseAvailability,
+		applyReservationToItem,
+		recomputeAvailabilityForCodes,
+		handleCartQuantitiesUpdated,
+		handleInvoiceStockAdjusted,
+		initAvailability,
+	};
 }

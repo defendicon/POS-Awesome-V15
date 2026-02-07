@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 
 export interface PerformanceMetrics {
 	lastLoadTime: number;
@@ -27,20 +27,29 @@ export function useItemsMetrics() {
 
 		const { averageLoadTime, totalRequests } = performanceMetrics.value;
 		performanceMetrics.value.averageLoadTime =
-			totalRequests > 1 ? (averageLoadTime * (totalRequests - 1) + loadTime) / totalRequests : loadTime;
+			totalRequests > 1
+				? (averageLoadTime * (totalRequests - 1) + loadTime) /
+					totalRequests
+				: loadTime;
 
-		const { cachedRequests, totalRequests: total } = performanceMetrics.value;
-		performanceMetrics.value.cacheHitRate = total > 0 ? (cachedRequests / total) * 100 : 0;
+		const { cachedRequests, totalRequests: total } =
+			performanceMetrics.value;
+		performanceMetrics.value.cacheHitRate =
+			total > 0 ? (cachedRequests / total) * 100 : 0;
 	};
 
-	const getEstimatedMemoryUsage = (itemsCount: number, cacheSize: number, priceCacheSize: number) => {
+	const getEstimatedMemoryUsage = (
+		itemsCount: number,
+		cacheSize: number,
+		priceCacheSize: number,
+	) => {
 		try {
 			let usage = 0;
-			usage += itemsCount * 2 / 1024; // ~2KB per item estimate
-			usage += cacheSize * 1 / 1024; // ~1KB per cache entry
-			usage += priceCacheSize * 0.5 / 1024; // ~0.5KB per price entry
+			usage += (itemsCount * 2) / 1024; // ~2KB per item estimate
+			usage += (cacheSize * 1) / 1024; // ~1KB per cache entry
+			usage += (priceCacheSize * 0.5) / 1024; // ~0.5KB per price entry
 			return Math.round(usage * 100) / 100; // MB estimate
-		} catch (e) {
+		} catch {
 			return 0;
 		}
 	};

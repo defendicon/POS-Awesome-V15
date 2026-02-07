@@ -12,7 +12,6 @@ export function usePosPaySubmission({
 	selected_invoices,
 	selected_payments,
 	selected_mpesa_payments,
-	total_selected_invoices,
 	total_selected_payments,
 	total_selected_mpesa_payments,
 	total_payment_methods,

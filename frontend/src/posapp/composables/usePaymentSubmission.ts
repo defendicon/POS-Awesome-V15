@@ -7,16 +7,15 @@ import {
 } from "../../offline/index";
 import stockCoordinator from "../utils/stockCoordinator";
 
-declare const window: any;
 declare const frappe: any;
-declare const __: (str: string, args?: any[]) => string;
+declare const __: (_str: string, _args?: any[]) => string;
 
 export interface PaymentSubmissionOptions {
 	invoiceDoc: Ref<any>;
 	posProfile: Ref<any>;
 	stockSettings: Ref<any>;
 	invoiceType: Ref<string>;
-	formatFloat: (val: any, prec?: number) => number;
+	formatFloat: (_val: any, _prec?: number) => number;
 	currencyPrecision?: Ref<number>;
 	isCashback?: Ref<boolean>;
 	paidChange?: Ref<number>;
@@ -36,17 +35,23 @@ export interface PaymentSubmissionOptions {
 }
 
 export interface SubmissionCallbacks {
-	onSuccess?: (message: any) => void;
-	onPrint?: (doc: any) => void;
-	onFinishNavigation?: (success: boolean) => void;
-	onScheduleBackgroundCheck?: (name: string, doctype: string) => void;
+	onSuccess?: (_message: any) => void;
+	onPrint?: (_doc: any) => void;
+	onFinishNavigation?: (_success: boolean) => void;
+	onScheduleBackgroundCheck?: (_name: string, _doctype: string) => void;
 }
 
 export function usePaymentSubmission(options: PaymentSubmissionOptions) {
-	const { invoiceDoc, posProfile, stockSettings, invoiceType, formatFloat, stores } = options;
+	const {
+		invoiceDoc,
+		posProfile,
+		stockSettings,
+		invoiceType,
+		formatFloat,
+		stores,
+	} = options;
 
 	const formatStockErrors = (errors: any[]) => {
-		const doc = unref(invoiceDoc);
 		const settings = unref(stockSettings) || {};
 		const profile = unref(posProfile) || {};
 		const type = unref(invoiceType);
@@ -66,11 +71,12 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		const msg = errors
 			.map(
 				(e) =>
-					`${e.item_code} (${e.warehouse}) - ${formatFloat(e.available_qty)}`
+					`${e.item_code} (${e.warehouse}) - ${formatFloat(e.available_qty)}`,
 			)
 			.join("\n");
 
-		const blocking = !settings.allow_negative_stock || blockSaleBeyondAvailableQty;
+		const blocking =
+			!settings.allow_negative_stock || blockSaleBeyondAvailableQty;
 
 		return blocking
 			? __("Insufficient stock:\n{0}", [msg])
@@ -137,7 +143,6 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 	const validateSubmission = async (payment_received = false) => {
 		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
-		const type = unref(invoiceType);
 		const prec = unref(options.currencyPrecision) || 2;
 		const {
 			isCashback,
@@ -153,10 +158,6 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			ensureReturnPaymentsAreNegative();
 		}
 
-		const total_payments = unref(options.diff_payment) !== undefined ? (unref(options.diff_payment)! < 0 ? -(unref(options.diff_payment)!) : 0) : 0;
-		// Wait, diffPayment is (invoice_total - total_payments). So total_payments = invoice_total - diffPayment.
-		// Actually, let's use the actual total_payments calculation if available, or just recalculate.
-
 		let current_total_payments = 0;
 		if (doc.payments) {
 			doc.payments.forEach((p: any) => {
@@ -164,10 +165,18 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			});
 		}
 		// Add loyalty and credit
-		if (options.loyaltyAmount && unref(options.loyaltyAmount)) current_total_payments += unref(options.loyaltyAmount)!;
-		if (options.redeemedCustomerCredit && unref(options.redeemedCustomerCredit)) current_total_payments += unref(options.redeemedCustomerCredit)!;
+		if (options.loyaltyAmount && unref(options.loyaltyAmount))
+			current_total_payments += unref(options.loyaltyAmount)!;
+		if (
+			options.redeemedCustomerCredit &&
+			unref(options.redeemedCustomerCredit)
+		)
+			current_total_payments += unref(options.redeemedCustomerCredit)!;
 
-		const invoice_total = formatFloat(doc.rounded_total || doc.grand_total, prec);
+		const invoice_total = formatFloat(
+			doc.rounded_total || doc.grand_total,
+			prec,
+		);
 
 		// 2. Validate total payments
 		if (
@@ -185,7 +194,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			let cash_amount = 0;
 			if (doc.payments) {
 				doc.payments.forEach((payment: any) => {
-					if (payment.mode_of_payment.toLowerCase().includes("cash")) {
+					if (
+						payment.mode_of_payment.toLowerCase().includes("cash")
+					) {
 						has_cash_payment = true;
 						cash_amount = formatFloat(payment.amount, prec);
 					}
@@ -198,7 +209,11 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 					cash_amount < invoice_total &&
 					invoice_total > 0
 				) {
-					throw new Error(__("Cash payment cannot be less than invoice total when partial payment is not allowed"));
+					throw new Error(
+						__(
+							"Cash payment cannot be less than invoice total when partial payment is not allowed",
+						),
+					);
 				}
 			}
 
@@ -223,7 +238,11 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				}
 			});
 			if (!phone_payment_is_valid) {
-				throw new Error(__("Please request phone payment or use another payment method"));
+				throw new Error(
+					__(
+						"Please request phone payment or use another payment method",
+					),
+				);
 			}
 		}
 
@@ -232,23 +251,35 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 		const changeLimit = Math.max(-diff, 0);
 		const pChange = unref(paidChange) || 0;
 		if (pChange > changeLimit + 0.001) {
-			throw new Error(__("Paid change cannot be greater than total change!"));
+			throw new Error(
+				__("Paid change cannot be greater than total change!"),
+			);
 		}
 
 		// 6. Validate cashback
 		const cChange = unref(creditChange) || 0;
 		let total_change_calc = formatFloat(pChange + Math.abs(cChange), prec);
-		if (unref(isCashback) && Math.abs(total_change_calc - changeLimit) > 0.01) {
+		if (
+			unref(isCashback) &&
+			Math.abs(total_change_calc - changeLimit) > 0.01
+		) {
 			throw new Error(__("Error in change calculations!"));
 		}
 
 		// 7. Validate customer credit redemption
 		if (customerCreditDict?.value?.length) {
-			let credit_calc_check = customerCreditDict.value.filter((row: any) => {
-				return formatFloat(row.credit_to_redeem, prec) > formatFloat(row.total_credit, prec);
-			});
+			let credit_calc_check = customerCreditDict.value.filter(
+				(row: any) => {
+					return (
+						formatFloat(row.credit_to_redeem, prec) >
+						formatFloat(row.total_credit, prec)
+					);
+				},
+			);
 			if (credit_calc_check.length > 0) {
-				throw new Error(__("Redeemed credit cannot be greater than its total."));
+				throw new Error(
+					__("Redeemed credit cannot be greater than its total."),
+				);
 			}
 		}
 
@@ -257,7 +288,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			unref(redeemedCustomerCredit) !== undefined &&
 			unref(redeemedCustomerCredit)! > invoice_total
 		) {
-			throw new Error(__("Cannot redeem customer credit more than invoice total"));
+			throw new Error(
+				__("Cannot redeem customer credit more than invoice total"),
+			);
 		}
 
 		return true;
@@ -280,7 +313,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 		// If no payment set, set the default one
 		if (!hasPaymentSet && doc.payments) {
-			const default_payment = doc.payments.find((payment: any) => payment.default === 1);
+			const default_payment = doc.payments.find(
+				(payment: any) => payment.default === 1,
+			);
 			if (default_payment) {
 				const amount = doc.rounded_total || doc.grand_total;
 				default_payment.amount = -Math.abs(amount);
@@ -295,14 +330,20 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				if (payment.amount > 0) {
 					payment.amount = -Math.abs(payment.amount);
 				}
-				if (payment.base_amount !== undefined && payment.base_amount > 0) {
+				if (
+					payment.base_amount !== undefined &&
+					payment.base_amount > 0
+				) {
 					payment.base_amount = -Math.abs(payment.base_amount);
 				}
 			});
 		}
 	}
 
-	const submitInvoice = async (print: boolean, callbacks: SubmissionCallbacks = {}): Promise<any> => {
+	const submitInvoice = async (
+		print: boolean,
+		callbacks: SubmissionCallbacks = {},
+	): Promise<any> => {
 		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
 		const type = unref(invoiceType);
@@ -387,7 +428,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				}
 
 				if (stores?.customersStore?.setSelectedCustomer) {
-					stores.customersStore.setSelectedCustomer(profile?.customer || null);
+					stores.customersStore.setSelectedCustomer(
+						profile?.customer || null,
+					);
 				}
 
 				if (onFinishNavigation) onFinishNavigation(true);
@@ -409,7 +452,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				data,
 				doc,
 				type,
-				profile
+				profile,
 			);
 
 			const r = { message };
@@ -422,7 +465,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				};
 
 				stores?.toastStore?.show({
-					title: __("Error submitting invoice: No response from server"),
+					title: __(
+						"Error submitting invoice: No response from server",
+					),
 					color: "error",
 				});
 				const err: any = new Error(reason);
@@ -434,7 +479,10 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			const status = r.message?.status;
 			const responseInvoiceName = r.message?.name || doc?.name;
 			const backgroundReason =
-				r.message?.error || r.message?.exc || r.message?.exception || r.message?.message;
+				r.message?.error ||
+				r.message?.exc ||
+				r.message?.exception ||
+				r.message?.message;
 
 			const wasSubmitted =
 				docstatus === 1 ||
@@ -448,7 +496,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				};
 
 				stores?.toastStore?.show({
-					title: __("Error submitting invoice: {0}", [responseInvoiceName || ""]),
+					title: __("Error submitting invoice: {0}", [
+						responseInvoiceName || "",
+					]),
 					color: "error",
 					detail: backgroundReason,
 				});
@@ -457,10 +507,16 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				if (profile?.posa_allow_submissions_in_background_job) {
 					if (onFinishNavigation) onFinishNavigation(true);
 					if (onScheduleBackgroundCheck) {
-						onScheduleBackgroundCheck(responseInvoiceName, r.message?.doctype);
+						onScheduleBackgroundCheck(
+							responseInvoiceName,
+							r.message?.doctype,
+						);
 					}
 					// Return special status indicating background failure handled
-					return { backgroundFailure: true, reason: backgroundReason };
+					return {
+						backgroundFailure: true,
+						reason: backgroundReason,
+					};
 				}
 
 				const err: any = new Error(backgroundReason);
@@ -485,11 +541,12 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			}
 
 			stores?.toastStore?.show({
-				title: type === "Order" && profile?.posa_create_only_sales_order
-					? __("Sales Order {0} is Submitted", [r.message.name])
-					: type === "Quotation"
-						? __("Quotation {0} is Submitted", [r.message.name])
-						: __("Invoice {0} is Submitted", [r.message.name]),
+				title:
+					type === "Order" && profile?.posa_create_only_sales_order
+						? __("Sales Order {0} is Submitted", [r.message.name])
+						: type === "Quotation"
+							? __("Quotation {0} is Submitted", [r.message.name])
+							: __("Invoice {0} is Submitted", [r.message.name]),
 				color: "success",
 			});
 
@@ -517,11 +574,16 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			if (onFinishNavigation) onFinishNavigation(true);
 
 			if (stores?.customersStore?.setSelectedCustomer) {
-				stores.customersStore.setSelectedCustomer(profile?.customer || null);
+				stores.customersStore.setSelectedCustomer(
+					profile?.customer || null,
+				);
 			}
 
 			if (onScheduleBackgroundCheck) {
-				onScheduleBackgroundCheck(responseInvoiceName, r.message?.doctype);
+				onScheduleBackgroundCheck(
+					responseInvoiceName,
+					r.message?.doctype,
+				);
 			}
 
 			if (onSuccess) {
@@ -529,7 +591,6 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			}
 
 			return { success: true, message: r.message };
-
 		} catch (exc: any) {
 			console.error("Error submitting invoice:", exc);
 			const errorMsg = extractSubmissionErrorMessage(exc);
@@ -542,13 +603,22 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 				if (doc.payments) {
 					doc.payments.forEach((payment: any) => {
-						if (payment.amount > 0) payment.amount = -Math.abs(payment.amount);
-						if (payment.base_amount > 0) payment.base_amount = -Math.abs(payment.base_amount);
+						if (payment.amount > 0)
+							payment.amount = -Math.abs(payment.amount);
+						if (payment.base_amount > 0)
+							payment.base_amount = -Math.abs(
+								payment.base_amount,
+							);
 					});
 				}
 				// Retry
 				console.log("Retrying submission with fixed payment amounts");
-				return new Promise(resolve => setTimeout(() => resolve(submitInvoice(print, callbacks)), 500));
+				return new Promise((resolve) =>
+					setTimeout(
+						() => resolve(submitInvoice(print, callbacks)),
+						500,
+					),
+				);
 			}
 
 			stores?.toastStore?.show({

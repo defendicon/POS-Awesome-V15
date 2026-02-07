@@ -1,4 +1,4 @@
-import { ref, unref } from "vue";
+import { ref } from "vue";
 
 export function useClosingShift(eventBus) {
 	const closingDialog = ref(false);
@@ -28,9 +28,7 @@ export function useClosingShift(eventBus) {
 
 		const normalizeRates = (rates) => {
 			if (Array.isArray(rates)) {
-				return rates
-					.map((rate) => Number(rate))
-					.filter((rate) => Number.isFinite(rate) && rate > 0);
+				return rates.map((rate) => Number(rate)).filter((rate) => Number.isFinite(rate) && rate > 0);
 			}
 			if (rates === null || rates === undefined || rates === "") {
 				return [];
@@ -130,9 +128,7 @@ export function useClosingShift(eventBus) {
 			payments_by_mode: normalizePayments(payload.payments_by_mode),
 			credit_invoices: normalizeCredit(payload.credit_invoices),
 			sales_summary: {
-				gross_company_currency_total: toNumber(
-					payload.sales_summary?.gross_company_currency_total,
-				),
+				gross_company_currency_total: toNumber(payload.sales_summary?.gross_company_currency_total),
 				net_company_currency_total: toNumber(
 					payload.sales_summary?.net_company_currency_total ?? payload.company_currency_total,
 				),
@@ -194,9 +190,7 @@ export function useClosingShift(eventBus) {
 
 	const submitDialog = () => {
 		const payments = dialog_data.value.payment_reconciliation || dialog_data.value.payments || [];
-		const invalid = payments.some((p) =>
-			isNaN(parseFloat(p.closing_amount)),
-		);
+		const invalid = payments.some((p) => isNaN(parseFloat(p.closing_amount)));
 		if (invalid) {
 			// alert("Invalid closing amount"); // Or use toast if available
 			// We can throw error or return false to let component handle UI
