@@ -263,6 +263,8 @@ export function saveTaxTemplate(name, doc) {
 	}
 }
 
+export const setTaxTemplate = saveTaxTemplate;
+
 export function getTaxTemplate(name) {
 	try {
 		const cache = memory.tax_template_cache || {};

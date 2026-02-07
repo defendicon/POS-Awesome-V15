@@ -93,6 +93,16 @@ export function getCustomerStorage() {
 	return memory.customer_storage || [];
 }
 
+export async function getStoredCustomer(customerName) {
+	try {
+		const customers = getCustomerStorage();
+		return customers.find(c => c.name === customerName) || null;
+	} catch (e) {
+		console.error("Failed to get stored customer", e);
+		return null;
+	}
+}
+
 export function setCustomerStorage(customers) {
 	try {
 		memory.customer_storage = customers.map((c) => ({

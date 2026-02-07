@@ -210,3 +210,28 @@ export async function checkDbHealth() {
         console.error("DB Health Check Failed", e);
     }
 }
+
+export function queueHealthCheck() {
+    const threshold = 1000;
+    return (
+        memory.offline_invoices.length > threshold ||
+        memory.offline_customers.length > threshold ||
+        memory.offline_payments.length > threshold
+    );
+}
+
+export function purgeOldQueueEntries() {
+    const threshold = 1000;
+    const purge = (list) => {
+        if (list.length > threshold) {
+            // Keep the newest items
+            list.splice(0, list.length - threshold);
+        }
+    };
+    purge(memory.offline_invoices);
+    purge(memory.offline_customers);
+    purge(memory.offline_payments);
+    persist("offline_invoices");
+    persist("offline_customers");
+    persist("offline_payments");
+}

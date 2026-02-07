@@ -128,6 +128,10 @@ export function setLastSyncTotals(totals) {
 	persist("pos_last_sync_totals");
 }
 
+export function getLastSyncTotals() {
+    return memory.pos_last_sync_totals || { pending: 0, synced: 0, drafted: 0 };
+}
+
 // Add sync function to clear local cache when invoices are successfully synced
 export async function syncOfflineInvoices() {
 	// Prevent concurrent syncs which can lead to duplicate submissions
