@@ -344,6 +344,11 @@ const initializeData = async () => {
 	}
 
 	markSourceLoaded("init");
+
+	// Trigger initial customer load if online
+	if (navigator.onLine && !isOffline()) {
+		customersStore.get_customer_names();
+	}
 };
 
 const setupEventListeners = () => {
