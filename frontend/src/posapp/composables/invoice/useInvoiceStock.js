@@ -85,7 +85,9 @@ export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
 			applyStockStateToInvoiceItems(impacted);
 		}
 
-		eventBus.emit("cart_quantities_updated", totals);
+		if (eventBus) {
+			eventBus.emit("cart_quantities_updated", totals);
+		}
 	};
 
 	const primeInvoiceStockState = (source = "invoice") => {

@@ -2,7 +2,35 @@ import Dexie from "dexie/dist/dexie.mjs";
 
 // --- Dexie initialization ---------------------------------------------------
 export const db = new Dexie("posawesome_offline");
-db.version(1).stores({ keyval: "&key" });
+
+const BASE_SCHEMA = {
+	keyval: "&key",
+	queue: "&key",
+	cache: "&key",
+	items: "&item_code,item_name,item_group,*barcodes,*name_keywords,*serials,*batches",
+	item_prices: "&[price_list+item_code],price_list,item_code",
+	customers: "&name,customer_name,mobile_no,email_id,tax_id",
+	local_stock: "&key",
+	coupons: "&key",
+	item_groups: "&key",
+	translations: "&key",
+	pricing_rules: "&key",
+	settings: "&key",
+	sync_state: "&key",
+};
+
+// Start with version 1 using the full schema immediately
+// This ensures new installations get the correct schema
+db.version(1).stores(BASE_SCHEMA);
+
+// Keep higher versions if needed for upgrades, but map them to the same schema
+// if no structural changes are required, or define specific upgrades.
+// Since we are fixing a "Table customers does not exist" error, explicitly defining
+// it in the initial version is the safest bet.
+
+db.version(7).stores(BASE_SCHEMA);
+db.version(8).stores(BASE_SCHEMA);
+db.version(9).stores(BASE_SCHEMA);
 
 let persistWorker = null;
 if (typeof Worker !== "undefined") {
