@@ -209,7 +209,6 @@
 </template>
 
 <script>
-/* global frappe, __ */
 import format from "../../format";
 import InvoiceCustomerSection from "./InvoiceCustomerSection.vue";
 import DeliveryCharges from "./DeliveryCharges.vue";
@@ -256,7 +255,14 @@ export default {
 
 		const { activeView } = storeToRefs(uiStore);
 		const { selectedCustomer, refreshToken: customerRefreshToken } = storeToRefs(customersStore);
-		const { items, packedItems: packed_items, invoiceDoc: invoice_doc, discountAmount, additionalDiscount, additionalDiscountPercentage } = storeToRefs(invoiceStore);
+		const {
+			items,
+			packedItems: packed_items,
+			invoiceDoc: invoice_doc,
+			discountAmount,
+			additionalDiscount,
+			additionalDiscountPercentage,
+		} = storeToRefs(invoiceStore);
 
 		const invoiceType = ref("Invoice");
 		const currencyState = useInvoiceCurrency({}, {});
@@ -266,10 +272,10 @@ export default {
 		// New composables
 		const uiLogic = useInvoiceUI();
 		const printingLogic = useInvoicePrinting(
-			ref(uiStore.posProfile), 
+			ref(uiStore.posProfile),
 			(name) => uiStore.loadPrintPage(name), // Assuming this exists or passed via mixin/store
 			itemActions.save_and_clear_invoice, // Need to verify if this is available
-			invoice_doc
+			invoice_doc,
 		);
 		// Note: save_and_clear_invoice might be in methods mixin, not composable.
 		// We'll keep print logic partly in component if dependencies are complex.

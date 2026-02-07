@@ -1,6 +1,5 @@
 import { clearPriceListCache } from "../../../offline/index.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
-/* global frappe */
 
 export default {
 	// Watch for customer change and update related data

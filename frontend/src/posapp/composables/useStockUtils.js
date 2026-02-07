@@ -2,8 +2,6 @@ import { isOffline } from "../../offline/index.js";
 import { getBaseCurrency, getCompanyCurrency, toSelectedCurrency } from "../utils/currencyConversion.js";
 import { useToastStore } from "../stores/toastStore.js";
 
-/* global __, frappe */
-
 export function useStockUtils() {
 	const toastStore = useToastStore();
 	// Calculate UOM conversion and update item rates
@@ -103,10 +101,10 @@ export function useStockUtils() {
 				const offer =
 					context.posOffers && Array.isArray(context.posOffers)
 						? context.posOffers.find((o) => {
-							if (!o || !o.items) return false;
-							const items = typeof o.items === "string" ? JSON.parse(o.items) : o.items;
-							return Array.isArray(items) && items.includes(item.posa_row_id);
-						})
+								if (!o || !o.items) return false;
+								const items = typeof o.items === "string" ? JSON.parse(o.items) : o.items;
+								return Array.isArray(items) && items.includes(item.posa_row_id);
+							})
 						: null;
 
 				if (offer) {
@@ -185,10 +183,10 @@ export function useStockUtils() {
 			const offer =
 				context.posOffers && Array.isArray(context.posOffers)
 					? context.posOffers.find((o) => {
-						if (!o || !o.items) return false;
-						const items = typeof o.items === "string" ? JSON.parse(o.items) : o.items;
-						return Array.isArray(items) && items.includes(item.posa_row_id);
-					})
+							if (!o || !o.items) return false;
+							const items = typeof o.items === "string" ? JSON.parse(o.items) : o.items;
+							return Array.isArray(items) && items.includes(item.posa_row_id);
+						})
 					: null;
 
 			if (offer && offer.discount_type === "Rate") {

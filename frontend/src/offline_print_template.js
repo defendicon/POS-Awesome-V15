@@ -1,4 +1,3 @@
-/* global frappe */
 import { getPrintTemplate, getTermsAndConditions, memoryInitPromise } from "./offline/index.js";
 import nunjucks from "nunjucks";
 

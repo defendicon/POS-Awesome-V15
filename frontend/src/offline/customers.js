@@ -1,7 +1,5 @@
 import { memory, persist, isOffline, db } from "./db.js";
 
-/* global frappe */
-
 export function saveOfflineCustomer(entry) {
 	const key = "offline_customers";
 	const entries = memory.offline_customers;
@@ -96,7 +94,7 @@ export function getCustomerStorage() {
 export async function getStoredCustomer(customerName) {
 	try {
 		const customers = getCustomerStorage();
-		return customers.find(c => c.name === customerName) || null;
+		return customers.find((c) => c.name === customerName) || null;
 	} catch (e) {
 		console.error("Failed to get stored customer", e);
 		return null;

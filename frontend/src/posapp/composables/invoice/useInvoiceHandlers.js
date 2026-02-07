@@ -1,4 +1,3 @@
-/* global __ */
 import { ref } from "vue";
 
 export function useInvoiceHandlers(
@@ -19,7 +18,7 @@ export function useInvoiceHandlers(
 	return_doc,
 	additional_discount_percentage,
 	update_item_detail,
-	primeInvoiceStockState
+	primeInvoiceStockState,
 ) {
 	const handleRegisterPosProfile = (data) => {
 		pos_profile.value = data.pos_profile;

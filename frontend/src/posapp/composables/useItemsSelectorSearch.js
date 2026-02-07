@@ -1,4 +1,3 @@
-/* global flt */
 import _ from "lodash";
 import { shouldReloadOnSearchClear } from "../utils/searchUtils.js";
 import { isOffline } from "../../offline/index.js";

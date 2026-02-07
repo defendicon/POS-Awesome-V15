@@ -252,7 +252,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 import format, { formatUtils } from "../../format";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -576,7 +575,7 @@ export default {
 					} else {
 						vm.dialog_data = [];
 						vm.has_more_invoices = false;
-						vm.toastStore.show( {
+						vm.toastStore.show({
 							title: __("No invoices found"),
 							color: "warning",
 						});
@@ -585,7 +584,7 @@ export default {
 				error: function (err) {
 					vm.loading_more = false;
 					console.error("Error searching invoices:", err);
-					vm.toastStore.show( {
+					vm.toastStore.show({
 						title: __("Error searching invoices"),
 						color: "error",
 					});
@@ -710,7 +709,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true }
+			{ deep: true, immediate: true },
 		);
 	},
 	beforeUnmount() {
@@ -724,4 +723,3 @@ export default {
 	background-color: #ffebee !important;
 }
 </style>
-

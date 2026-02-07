@@ -82,7 +82,6 @@
 </template>
 
 <script>
-/* global frappe */
 import { ensurePosProfile } from "../../../utils/pos_profile.js";
 import _ from "lodash";
 import placeholderImage from "./placeholder-image.png";
@@ -170,7 +169,7 @@ export default {
 				if (!data) return;
 				const { item, items, profile, attrsMeta } = data;
 				console.log("variantsData update", data);
-				
+
 				this.parentItem = item || null;
 				this.items = Array.isArray(items) ? items : [];
 				this.filters = {};
@@ -204,7 +203,7 @@ export default {
 				});
 			},
 			deep: true,
-		}
+		},
 	},
 
 	methods: {

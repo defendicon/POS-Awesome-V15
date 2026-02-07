@@ -1,4 +1,3 @@
-/* global __, flt */
 import { parseBooleanSetting } from "../../../utils/stock";
 import { useStockUtils } from "../../../composables/useStockUtils.js";
 import { useBatchSerial } from "../../../composables/useBatchSerial.js";

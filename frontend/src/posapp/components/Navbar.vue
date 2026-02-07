@@ -115,7 +115,6 @@
 </template>
 
 <script>
-/* global frappe */
 import { defineAsyncComponent } from "vue";
 import NavbarAppBar from "./navbar/NavbarAppBar.vue";
 import NavbarDrawer from "./navbar/NavbarDrawer.vue";

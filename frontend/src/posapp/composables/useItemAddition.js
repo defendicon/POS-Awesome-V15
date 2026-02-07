@@ -12,8 +12,6 @@ import { useItemCreation } from "./item_addition/useItemCreation.js";
 import { useItemBatchSerial } from "./item_addition/useItemBatchSerial.js";
 import { useItemBundles } from "./item_addition/useItemBundles.js";
 
-/* global frappe, __ */
-
 export function useItemAddition() {
 	const toastStore = useToastStore();
 	const { calcStockQty } = useStockUtils();
@@ -83,7 +81,11 @@ export function useItemAddition() {
 		for (const [rowId, data] of currentUpdates) {
 			const item = context.invoiceStore.itemsData.get(rowId);
 			if (item) {
-				console.log("[useItemAddition] Merging item qty", { item_code: item.item_code, old_qty: item.qty, added: data.qty });
+				console.log("[useItemAddition] Merging item qty", {
+					item_code: item.item_code,
+					old_qty: item.qty,
+					added: data.qty,
+				});
 				item.qty += data.qty;
 				calcStockQty(item, item.qty);
 
@@ -219,7 +221,7 @@ export function useItemAddition() {
 				// Get sorted availability (taking existing cart items into account)
 				const batches = context.getBatchAvailability(new_item, context);
 				// Filter for usable batches
-				const usable_batches = batches.filter(b => b.available_qty > 0);
+				const usable_batches = batches.filter((b) => b.available_qty > 0);
 
 				// Standard Case: If no usable batches or only one needed/available
 				if (usable_batches.length === 0) {
@@ -346,7 +348,7 @@ export function useItemAddition() {
 					// Handle extra items from batch splitting
 					if (extra_items && extra_items.length > 0) {
 						console.log("[useItemAddition] Adding split batch items", extra_items.length);
-						extra_items.forEach(split_item => {
+						extra_items.forEach((split_item) => {
 							context.items.unshift(split_item);
 							// Replicate basic setup for split items
 							refreshMergeCacheEntry(context, split_item, 0);

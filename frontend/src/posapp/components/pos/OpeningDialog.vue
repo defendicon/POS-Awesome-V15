@@ -133,7 +133,6 @@
 </template>
 
 <script setup>
-/* global frappe */
 import { onMounted, ref, watch } from "vue";
 import {
 	getOpeningDialogStorage,

@@ -31,11 +31,7 @@
 				<v-select
 					:model-value="item.uom"
 					@update:model-value="(val) => $emit('update-uom', { item, value: val })"
-					:items="
-						item.item_uoms || [
-							{ uom: item.stock_uom, conversion_factor: 1 },
-						]
-					"
+					:items="item.item_uoms || [{ uom: item.stock_uom, conversion_factor: 1 }]"
 					item-title="uom"
 					item-value="uom"
 					density="compact"
@@ -157,9 +153,7 @@
 		</template>
 
 		<template v-slot:bottom>
-			<div
-				class="d-flex justify-end pa-4 font-weight-bold text-subtitle-1 border-t"
-			>
+			<div class="d-flex justify-end pa-4 font-weight-bold text-subtitle-1 border-t">
 				<span class="mr-4">{{ __("Total:") }}</span>
 				<span>{{ formatCurrency(totalAmount) }}</span>
 			</div>
@@ -168,7 +162,6 @@
 </template>
 
 <script>
-/* global __ */
 export default {
 	props: {
 		headers: Array,

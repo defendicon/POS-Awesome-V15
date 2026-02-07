@@ -220,7 +220,6 @@
 </template>
 
 <script>
-/* global __ */
 import ItemsSelector from "./ItemsSelector.vue";
 import { useItemsStore } from "../../stores/itemsStore";
 import { useToastStore } from "../../stores/toastStore";
@@ -343,7 +342,7 @@ export default {
 			}
 
 			if (!barcode) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("Item '{0}' has no barcode", [item.item_name]),
 					color: "warning",
 				});
@@ -407,7 +406,7 @@ export default {
 			// Filter out items without barcodes
 			const itemsToPrint = this.items.filter((item) => item.barcode);
 			if (itemsToPrint.length === 0) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("No items with barcodes to print"),
 					color: "error",
 				});
@@ -415,7 +414,7 @@ export default {
 			}
 
 			if (itemsToPrint.length < this.items.length) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("Skipping items without barcodes"),
 					color: "warning",
 				});
@@ -423,7 +422,7 @@ export default {
 
 			const printWindow = window.open("", "_blank");
 			if (!printWindow) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("Popup blocked. Please allow popups."),
 					color: "error",
 				});
@@ -463,7 +462,7 @@ export default {
 
 			const itemsToPrint = this.items.filter((item) => item.barcode);
 			if (itemsToPrint.length === 0) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("No items with barcodes to print"),
 					color: "error",
 				});
@@ -472,7 +471,7 @@ export default {
 
 			const printWindow = window.open("", "_blank");
 			if (!printWindow) {
-				this.toastStore.show( {
+				this.toastStore.show({
 					title: __("Popup blocked. Please allow popups."),
 					color: "error",
 				});
@@ -735,7 +734,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile || {};
 			},
-			{ deep: true, immediate: true }
+			{ deep: true, immediate: true },
 		);
 		/*
 		this.eventBus.on("register_pos_profile", (data) => {
@@ -919,4 +918,3 @@ export default {
 	font-size: 0.75rem;
 }
 </style>
-

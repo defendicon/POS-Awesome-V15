@@ -210,7 +210,6 @@
 </template>
 
 <script setup>
-/* global frappe */
 import { computed, ref, watch } from "vue";
 import { formatUtils } from "../../format";
 import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";

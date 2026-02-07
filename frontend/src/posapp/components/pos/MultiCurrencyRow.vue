@@ -43,9 +43,8 @@
 </template>
 
 <script setup lang="ts">
-/* global frappe */
-import { ref, watch, computed } from 'vue';
-import type { POSProfile } from '../../types/models';
+import { ref, watch, computed } from "vue";
+import type { POSProfile } from "../../types/models";
 
 interface Props {
 	pos_profile: POSProfile | any;
@@ -60,40 +59,40 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-	(e: 'update:selected_currency', val: string): void;
-	(e: 'update:plc_conversion_rate', val: number | undefined): void;
-	(e: 'update:conversion_rate', val: number | undefined): void;
+	(e: "update:selected_currency", val: string): void;
+	(e: "update:plc_conversion_rate", val: number | undefined): void;
+	(e: "update:conversion_rate", val: number | undefined): void;
 }>();
 
 const internal_selected_currency = ref(props.selected_currency);
 const internal_plc_rate = ref(props.plc_conversion_rate);
 const internal_conversion_rate = ref(props.conversion_rate);
 
-const currencyLabel = computed(() => frappe._('Currency'));
-const conversionRateLabel = computed(() => frappe._('Conversion Rate'));
-const priceListLabel = computed(() => 
-	'Price List ' + props.price_list_currency + ' to ' + internal_selected_currency.value
+const currencyLabel = computed(() => frappe._("Currency"));
+const conversionRateLabel = computed(() => frappe._("Conversion Rate"));
+const priceListLabel = computed(
+	() => "Price List " + props.price_list_currency + " to " + internal_selected_currency.value,
 );
 
 watch(
 	() => props.selected_currency,
 	(val) => {
 		internal_selected_currency.value = val;
-	}
+	},
 );
 
 watch(
 	() => props.plc_conversion_rate,
 	(val) => {
 		internal_plc_rate.value = val;
-	}
+	},
 );
 
 watch(
 	() => props.conversion_rate,
 	(val) => {
 		internal_conversion_rate.value = val;
-	}
+	},
 );
 
 const onCurrencyUpdate = (val: any) => {

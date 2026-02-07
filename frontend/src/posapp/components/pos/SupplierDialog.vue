@@ -1,5 +1,9 @@
 <template>
-	<v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="520px">
+	<v-dialog
+		:model-value="modelValue"
+		@update:model-value="$emit('update:modelValue', $event)"
+		max-width="520px"
+	>
 		<v-card>
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Create Supplier") }}</span>
@@ -56,13 +60,7 @@
 				<v-btn color="error" variant="text" @click="$emit('update:modelValue', false)">{{
 					__("Cancel")
 				}}</v-btn>
-				<v-btn
-					color="primary"
-					variant="tonal"
-					:loading="loading"
-					:disabled="loading"
-					@click="submit"
-				>
+				<v-btn color="primary" variant="tonal" :loading="loading" :disabled="loading" @click="submit">
 					{{ __("Create") }}
 				</v-btn>
 			</v-card-actions>
@@ -71,7 +69,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 export default {
 	props: {
 		modelValue: Boolean,

@@ -210,7 +210,6 @@
 </template>
 
 <script setup>
-/* global frappe, __ */
 import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick, unref } from "vue";
 import { storeToRefs } from "pinia";
 

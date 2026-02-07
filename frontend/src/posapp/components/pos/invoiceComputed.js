@@ -1,4 +1,3 @@
-/* global flt, __, get_currency_symbol */
 import { perfMarkStart, perfMarkEnd } from "../../utils/perf";
 
 import { parseBooleanSetting } from "../../utils/stock";

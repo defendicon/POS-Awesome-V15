@@ -159,7 +159,6 @@
 </style>
 
 <script>
-/* global frappe __ */
 import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
@@ -200,8 +199,6 @@ export default {
 		const readonlyState = ref(false);
 
 		let scrollContainer = null;
-
-
 
 		const { isOnline: networkOnline } = useOnlineStatus();
 
@@ -350,7 +347,7 @@ export default {
 		const edit_customer = () => {
 			customersStore.openUpdateCustomerDialog(customerInfo.value || {});
 		};
-		
+
 		const reload_customers = async () => {
 			if (!networkOnline.value) return;
 			await customersStore.reloadCustomers();
@@ -426,9 +423,8 @@ export default {
 						await customersStore.get_customer_names();
 					}
 				},
-				{ deep: true, immediate: true }
+				{ deep: true, immediate: true },
 			);
-
 
 			// registerBus("set_customer", (customer) => {
 			// 	customersStore.setSelectedCustomer(customer);
@@ -474,7 +470,7 @@ export default {
 			openNewCustomer,
 			focusCustomerSearch,
 			reload_customers,
-			networkOnline
+			networkOnline,
 		};
 	},
 };

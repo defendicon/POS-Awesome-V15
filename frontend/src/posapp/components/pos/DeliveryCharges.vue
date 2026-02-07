@@ -49,9 +49,8 @@
 </template>
 
 <script setup lang="ts">
-/* global frappe, __ */
-import { ref, watch, computed } from 'vue';
-import type { POSProfile, DeliveryCharge } from '../../types/models';
+import { ref, watch, computed } from "vue";
+import type { POSProfile, DeliveryCharge } from "../../types/models";
 
 interface Props {
 	pos_profile: POSProfile | any;
@@ -67,22 +66,22 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-	(e: 'update:selected_delivery_charge', val: any): void;
+	(e: "update:selected_delivery_charge", val: any): void;
 }>();
 
-const __ = (str: string) => window.__ ? window.__(str) : str;
+const __ = (str: string) => (window.__ ? window.__(str) : str);
 
 const internal_selected_delivery_charge = ref(props.selected_delivery_charge);
 const deliveryChargesInput = ref<any>(null);
 
-const deliveryChargesLabel = computed(() => frappe._('Delivery Charges'));
-const rateLabel = computed(() => frappe._('Delivery Charges Rate'));
+const deliveryChargesLabel = computed(() => frappe._("Delivery Charges"));
+const rateLabel = computed(() => frappe._("Delivery Charges Rate"));
 
 watch(
 	() => props.selected_delivery_charge,
 	(val) => {
 		internal_selected_delivery_charge.value = val;
-	}
+	},
 );
 
 const onUpdate = (val: any) => {

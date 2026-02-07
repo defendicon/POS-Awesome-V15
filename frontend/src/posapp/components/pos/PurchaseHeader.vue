@@ -16,11 +16,7 @@
 					:loading="supplierLoading"
 					@update:search="$emit('search-supplier', $event)"
 					:custom-filter="() => true"
-					:no-data-text="
-						supplierLoading
-							? __('Loading suppliers...')
-							: __('Suppliers not found')
-					"
+					:no-data-text="supplierLoading ? __('Loading suppliers...') : __('Suppliers not found')"
 					class="pos-themed-input"
 					clearable
 				>
@@ -111,7 +107,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 export default {
 	props: {
 		supplier: String,

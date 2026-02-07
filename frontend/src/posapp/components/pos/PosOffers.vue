@@ -89,7 +89,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 import format from "../../format";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -245,7 +244,7 @@ export default {
 						}
 					}
 					this.pos_offers.push(newOffer);
-					this.toastStore.show( {
+					this.toastStore.show({
 						title: __("New Offer Available"),
 						color: "warning",
 					});
@@ -334,9 +333,9 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true }
+			{ deep: true, immediate: true },
 		);
-		
+
 		/*
 		this.$nextTick(function () {
 			this.eventBus.on("register_pos_profile", (data) => {
@@ -356,4 +355,3 @@ export default {
 	},
 };
 </script>
-

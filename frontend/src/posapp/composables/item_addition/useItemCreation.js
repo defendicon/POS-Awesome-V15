@@ -1,5 +1,3 @@
-/* global frappe, __ */
-
 export function useItemCreation() {
 	// Create a new item object with default and calculated fields
 	const getNewItem = (item, context) => {

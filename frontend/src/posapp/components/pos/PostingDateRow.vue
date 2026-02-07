@@ -49,9 +49,8 @@
 </template>
 
 <script setup lang="ts">
-/* global frappe, __ */
-import { ref, watch, computed } from 'vue';
-import type { POSProfile } from '../../types/models';
+import { ref, watch, computed } from "vue";
+import type { POSProfile } from "../../types/models";
 
 interface Props {
 	pos_profile: POSProfile | any; // Loose typing for now to avoid breaking changes
@@ -64,32 +63,32 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const __ = (str: string) => window.__ ? window.__(str) : str;
+const __ = (str: string) => (window.__ ? window.__(str) : str);
 
 const emit = defineEmits<{
-	(e: 'update:posting_date_display', val: string): void;
-	(e: 'update:priceList', val: string): void;
+	(e: "update:posting_date_display", val: string): void;
+	(e: "update:priceList", val: string): void;
 }>();
 
 const internal_posting_date_display = ref(props.posting_date_display);
 const internal_price_list = ref(props.priceList);
 const postingDatePicker = ref<any>(null);
 
-const placeholderText = computed(() => frappe._('Posting Date'));
-const priceListLabel = computed(() => frappe._('Price List'));
+const placeholderText = computed(() => frappe._("Posting Date"));
+const priceListLabel = computed(() => frappe._("Price List"));
 
 watch(
 	() => props.posting_date_display,
 	(val) => {
 		internal_posting_date_display.value = val;
-	}
+	},
 );
 
 watch(
 	() => props.priceList,
 	(val) => {
 		internal_price_list.value = val;
-	}
+	},
 );
 
 const onUpdate = (val: any) => {

@@ -74,7 +74,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
@@ -250,7 +249,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true }
+			{ deep: true, immediate: true },
 		);
 		/*
 		this.$nextTick(function () {
@@ -285,4 +284,3 @@ export default {
 	box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 </style>
-

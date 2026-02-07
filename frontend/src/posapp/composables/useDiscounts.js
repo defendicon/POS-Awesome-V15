@@ -1,5 +1,3 @@
-/* global __, flt */
-
 import { toBaseCurrency, toSelectedCurrency } from "../utils/currencyConversion.js";
 import { useToastStore } from "../stores/toastStore.js";
 

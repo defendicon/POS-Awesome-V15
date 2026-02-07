@@ -39,7 +39,6 @@
 </template>
 
 <script setup>
-/* global frappe, $ */
 import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
 // Note paths updated to be relative to layouts/ directory

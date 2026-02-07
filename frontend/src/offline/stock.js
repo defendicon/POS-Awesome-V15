@@ -1,7 +1,5 @@
 import { memory, persist } from "./db.js";
 
-/* global frappe */
-
 export async function fetchItemStockQuantities(items, pos_profile, chunkSize = 100) {
 	const allItems = [];
 	try {

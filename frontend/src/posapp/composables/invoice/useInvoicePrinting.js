@@ -1,4 +1,3 @@
-/* global __ */
 import { useToastStore } from "../../stores/toastStore";
 
 export function useInvoicePrinting(pos_profile, load_print_page, save_and_clear_invoice, invoice_doc) {

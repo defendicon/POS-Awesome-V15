@@ -1,8 +1,6 @@
 import { memory, persist, isOffline } from "./db.js";
 import { syncOfflineCustomers } from "./customers.js";
 
-/* global frappe */
-
 export function saveOfflinePayment(entry) {
 	const key = "offline_payments";
 	const entries = memory.offline_payments;

@@ -35,12 +35,7 @@
 								:label="frappe._('QTY')"
 								class="pos-themed-input"
 								hide-details
-								:model-value="
-									formatFloat(
-										item.qty,
-										hide_qty_decimals ? 0 : undefined,
-									)
-								"
+								:model-value="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
 								@change="onQtyChange(item, $event)"
 								:rules="[isNumber]"
 								:disabled="!!item.posa_is_replace"
@@ -49,10 +44,7 @@
 							<div v-if="item.max_qty !== undefined" class="text-caption mt-1">
 								{{
 									__("In stock: {0}", [
-										formatFloat(
-											item._base_actual_qty,
-											hide_qty_decimals ? 0 : undefined,
-										),
+										formatFloat(item._base_actual_qty, hide_qty_decimals ? 0 : undefined),
 									])
 								}}
 							</div>
@@ -70,8 +62,7 @@
 								hide-details
 								@update:model-value="calcUom(item, $event)"
 								:disabled="
-									!!item.posa_is_replace ||
-									(isReturnInvoice && invoice_doc.return_against)
+									!!item.posa_is_replace || (isReturnInvoice && invoice_doc.return_against)
 								"
 								prepend-inner-icon="mdi-weight"
 							></v-select>
@@ -117,17 +108,9 @@
 								:label="frappe._('Discount %')"
 								class="pos-themed-input"
 								hide-details
-								:model-value="
-									formatFloat(Math.abs(item.discount_percentage || 0))
-								"
+								:model-value="formatFloat(Math.abs(item.discount_percentage || 0))"
 								@change="[
-									setFormatedCurrency(
-										item,
-										'discount_percentage',
-										null,
-										false,
-										$event,
-									),
+									setFormatedCurrency(item, 'discount_percentage', null, false, $event),
 									calcPrices(item, $event.target.value, $event),
 								]"
 								:disabled="
@@ -147,17 +130,9 @@
 								:label="frappe._('Discount Amount')"
 								class="pos-themed-input"
 								hide-details
-								:model-value="
-									formatCurrency(Math.abs(item.discount_amount || 0))
-								"
+								:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
 								@change="[
-									setFormatedCurrency(
-										item,
-										'discount_amount',
-										null,
-										false,
-										$event,
-									),
+									setFormatedCurrency(item, 'discount_amount', null, false, $event),
 									calcPrices(item, $event.target.value, $event),
 								]"
 								:disabled="
@@ -198,10 +173,7 @@
 								prepend-inner-icon="mdi-calculator"
 							></v-text-field>
 						</div>
-						<div
-							class="posa-form-field"
-							v-if="pos_profile.posa_allow_price_list_rate_change"
-						>
+						<div class="posa-form-field" v-if="pos_profile.posa_allow_price_list_rate_change">
 							<v-btn
 								size="small"
 								color="primary"
@@ -350,9 +322,7 @@
 				<!-- Batch Number Section -->
 				<div class="posa-form-section" v-if="item.has_batch_no || item.batch_no">
 					<div class="posa-section-header">
-						<v-icon size="small" class="section-icon"
-							>mdi-package-variant-closed</v-icon
-						>
+						<v-icon size="small" class="section-icon">mdi-package-variant-closed</v-icon>
 						<span class="posa-section-title">{{ __("Batch Information") }}</span>
 					</div>
 					<div class="posa-form-row">
@@ -398,15 +368,12 @@
 							>
 								<template v-slot:item="{ props, item }">
 									<v-list-item v-bind="props">
-										<v-list-item-title
-											v-html="getRaw(item).batch_no"
-										></v-list-item-title>
+										<v-list-item-title v-html="getRaw(item).batch_no"></v-list-item-title>
 										<v-list-item-subtitle class="d-flex align-center">
 											<span
 												v-html="
 													`Available QTY  '${
-														getRaw(item).available_qty ??
-														getRaw(item).batch_qty
+														getRaw(item).available_qty ?? getRaw(item).batch_qty
 													}' - Expiry Date ${getRaw(item).expiry_date}`
 												"
 											></span>
@@ -465,9 +432,8 @@
 </template>
 
 <script setup lang="ts">
-/* global frappe, __ */
-import { computed } from 'vue';
-import type { CartItem, POSProfile, InvoiceDoc } from '../../types/models';
+import { computed } from "vue";
+import type { CartItem, POSProfile, InvoiceDoc } from "../../types/models";
 
 interface Props {
 	item: CartItem | any;
@@ -479,13 +445,13 @@ interface Props {
 	invoice_doc?: InvoiceDoc | any;
 	hide_qty_decimals: boolean;
 	expandedContentClasses: any;
-	
+
 	// Formatters
 	formatFloat: (val: any, precision?: number) => string;
 	formatCurrency: (val: any, precision?: number) => string;
 	currencySymbol: (currency?: string) => string;
 	isNumber: (val: any) => boolean | string;
-	
+
 	// Actions
 	setFormatedCurrency: (item: any, field: string, value: any, force?: boolean, event?: any) => void;
 	calcPrices: (item: any, value: any, event?: any) => void;
@@ -500,15 +466,14 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-	(e: 'qty-change', item: CartItem, event: any): void;
+	(e: "qty-change", item: CartItem, event: any): void;
 }>();
 
 const __ = (window as any).__ || ((s: string) => s);
 const frappe = (window as any).frappe || { _: (s: string) => s };
 
-
 const onQtyChange = (item: CartItem, event: any) => {
-	emit('qty-change', item, event);
+	emit("qty-change", item, event);
 };
 
 const getRaw = (item: any) => item?.raw || {};

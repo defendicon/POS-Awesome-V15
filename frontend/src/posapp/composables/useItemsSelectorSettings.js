@@ -1,4 +1,3 @@
-/* global frappe, __ */
 import { normalizeBackgroundSyncInterval } from "../utils/backgroundSync.js";
 import { loadItemSelectorSettings, saveItemSelectorSettings } from "../utils/itemSelectorSettings.js";
 

@@ -1,4 +1,3 @@
-/* global frappe */
 import { memory, resetOfflineState, setLastSyncTotals, MAX_QUEUE_ITEMS, reduceCacheUsage } from "./cache.js";
 import { persist } from "./core.js";
 import { updateLocalStock } from "./stock.js";

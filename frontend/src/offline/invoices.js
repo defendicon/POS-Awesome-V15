@@ -3,8 +3,6 @@ import { syncOfflineCustomers, updateOfflineInvoicesCustomer } from "./customers
 import { updateLocalStock } from "./stock.js";
 import { reduceCacheUsage } from "./cache.js";
 
-/* global frappe */
-
 // Flag to avoid concurrent invoice syncs which can cause duplicate submissions
 let invoiceSyncInProgress = false;
 
@@ -129,7 +127,7 @@ export function setLastSyncTotals(totals) {
 }
 
 export function getLastSyncTotals() {
-    return memory.pos_last_sync_totals || { pending: 0, synced: 0, drafted: 0 };
+	return memory.pos_last_sync_totals || { pending: 0, synced: 0, drafted: 0 };
 }
 
 // Add sync function to clear local cache when invoices are successfully synced

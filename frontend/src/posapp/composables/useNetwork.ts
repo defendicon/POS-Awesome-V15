@@ -1,6 +1,5 @@
 // Network-related composable functions for Home.vue
 import { isManualOffline } from "../../offline/index.js";
-/* global frappe */
 
 type NetworkVm = {
 	networkOnline: boolean;

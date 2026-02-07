@@ -15,7 +15,12 @@
 					hint="Search by item code, serial number, batch no or barcode"
 					hide-details
 					:model-value="searchInput"
-					@update:model-value="(val) => { $emit('update:searchInput', val); $emit('search-input', val); }"
+					@update:model-value="
+						(val) => {
+							$emit('update:searchInput', val);
+							$emit('search-input', val);
+						}
+					"
 					@keydown.esc="$emit('esc')"
 					@keydown.enter="$emit('enter')"
 					@keydown="$emit('search-keydown', $event)"
@@ -127,7 +132,6 @@
 </template>
 
 <script setup>
-/* global frappe, __ */
 import { ref } from "vue";
 
 const props = defineProps({

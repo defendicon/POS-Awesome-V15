@@ -81,7 +81,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 import format from "../../format";
 import { useUIStore } from "../../stores/uiStore.js";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
@@ -101,7 +100,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true }
+			{ deep: true, immediate: true },
 		);
 	},
 	data: () => ({

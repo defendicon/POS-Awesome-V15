@@ -100,7 +100,6 @@
 </template>
 
 <script>
-/* global __, frappe */
 import format from "../../format";
 import { useUIStore } from "../../stores/uiStore.js";
 import { getOpeningStorage } from "../../../offline/index.js";
@@ -300,10 +299,17 @@ export default {
 				if (message?.purchase_order) {
 					toastStore.show({ title: __("Purchase Order created"), color: "success" });
 					if (print) {
-						let doctype = printInvoice && message.purchase_invoice ? "Purchase Invoice" : "Purchase Order";
-						let docname = printInvoice && message.purchase_invoice ? message.purchase_invoice : message.purchase_order;
-						const formatName = printFormat || pos_profile.value.print_format_for_purchase || "Standard";
-						const printUrl = frappe.urllib.get_full_url(`/printview?doctype=${doctype}&name=${docname}&print_format=${encodeURIComponent(formatName)}`);
+						let doctype =
+							printInvoice && message.purchase_invoice ? "Purchase Invoice" : "Purchase Order";
+						let docname =
+							printInvoice && message.purchase_invoice
+								? message.purchase_invoice
+								: message.purchase_order;
+						const formatName =
+							printFormat || pos_profile.value.print_format_for_purchase || "Standard";
+						const printUrl = frappe.urllib.get_full_url(
+							`/printview?doctype=${doctype}&name=${docname}&print_format=${encodeURIComponent(formatName)}`,
+						);
 						window.open(printUrl, "_blank")?.focus();
 					}
 					resetForm();
@@ -319,7 +325,13 @@ export default {
 			const cachedData = getOpeningStorage();
 			if (cachedData?.pos_profile) pos_profile.value = cachedData.pos_profile;
 
-			watch(() => uiStore.posProfile, (p) => { if (p) pos_profile.value = p; }, { immediate: true });
+			watch(
+				() => uiStore.posProfile,
+				(p) => {
+					if (p) pos_profile.value = p;
+				},
+				{ immediate: true },
+			);
 			watch(supplier, (val) => {
 				if (val) {
 					const s = supplierOptions.value.find((o) => o.name === val);
@@ -330,7 +342,9 @@ export default {
 			});
 
 			try {
-				const { message } = await frappe.call({ method: "posawesome.posawesome.api.purchase_orders.get_buying_price_list" });
+				const { message } = await frappe.call({
+					method: "posawesome.posawesome.api.purchase_orders.get_buying_price_list",
+				});
 				if (message) await itemsStore.updatePriceList(message);
 			} catch (e) {
 				console.error("Failed price list load", e);
@@ -341,20 +355,48 @@ export default {
 		});
 
 		onBeforeUnmount(() => {
-			if (pos_profile.value?.selling_price_list) itemsStore.updatePriceList(pos_profile.value.selling_price_list);
+			if (pos_profile.value?.selling_price_list)
+				itemsStore.updatePriceList(pos_profile.value.selling_price_list);
 		});
 
 		return {
-			pos_profile, receiveNow, purchaseItems, supplier, warehouse, transactionDate, scheduleDate,
-			createInvoice, supplierCurrency, totalAmount, submitLoading, errorMessage,
-			onAddItem, updateItemUom, updateItemQty, updateItemRate, updateItemReceivedQty, removeItem, resetForm,
-			supplierOptions, supplierLoading, supplierDialog, paymentDialog, supplierGroups, warehouseOptions,
-			warehouseLoading, handleSupplierSearch, handleSupplierCreated, openPaymentDialog, handlePaymentSubmit,
+			pos_profile,
+			receiveNow,
+			purchaseItems,
+			supplier,
+			warehouse,
+			transactionDate,
+			scheduleDate,
+			createInvoice,
+			supplierCurrency,
+			totalAmount,
+			submitLoading,
+			errorMessage,
+			onAddItem,
+			updateItemUom,
+			updateItemQty,
+			updateItemRate,
+			updateItemReceivedQty,
+			removeItem,
+			resetForm,
+			supplierOptions,
+			supplierLoading,
+			supplierDialog,
+			paymentDialog,
+			supplierGroups,
+			warehouseOptions,
+			warehouseLoading,
+			handleSupplierSearch,
+			handleSupplierCreated,
+			openPaymentDialog,
+			handlePaymentSubmit,
 			toastStore,
 		};
 	},
 	computed: {
-		allowCreateSupplier() { return !!this.pos_profile?.posa_allow_create_purchase_suppliers; },
+		allowCreateSupplier() {
+			return !!this.pos_profile?.posa_allow_create_purchase_suppliers;
+		},
 		itemHeaders() {
 			const h = [
 				{ title: __("Item"), key: "item_name", align: "start", width: "35%" },
@@ -362,18 +404,28 @@ export default {
 				{ title: __("Qty"), key: "qty", align: "center", width: "15%" },
 				{ title: __("Rate"), key: "rate", align: "center", width: "15%" },
 			];
-			if (this.receiveNow) h.push({ title: __("Received"), key: "received_qty", align: "center", width: "10%" });
-			h.push({ title: __("Amount"), key: "amount", align: "end", width: "10%" }, { title: "", key: "actions", align: "center", width: "50px" });
+			if (this.receiveNow)
+				h.push({ title: __("Received"), key: "received_qty", align: "center", width: "10%" });
+			h.push(
+				{ title: __("Amount"), key: "amount", align: "end", width: "10%" },
+				{ title: "", key: "actions", align: "center", width: "50px" },
+			);
 			return h;
 		},
 	},
 	methods: {
-		formatNumber(v) { return this.formatFloat(v, 2); },
-		currencySymbol(c) { return get_currency_symbol(c || this.pos_profile.currency); },
+		formatNumber(v) {
+			return this.formatFloat(v, 2);
+		},
+		currencySymbol(c) {
+			return get_currency_symbol(c || this.pos_profile.currency);
+		},
 	},
 };
 </script>
 
 <style scoped>
-.cursor-pointer { cursor: pointer; }
+.cursor-pointer {
+	cursor: pointer;
+}
 </style>

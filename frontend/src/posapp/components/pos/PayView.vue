@@ -111,7 +111,6 @@
 </template>
 
 <script>
-/* global frappe, __, get_currency_symbol, flt */
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, getCurrentInstance } from "vue";
 import { storeToRefs } from "pinia";
 import format from "../../format";

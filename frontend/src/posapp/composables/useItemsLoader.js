@@ -1,177 +1,174 @@
-/* global frappe */
 import { ref } from "vue";
 import { initPromise } from "../../offline/index.js";
 
 /**
  * useItemsLoader
- * 
+ *
  * Manages high-level item loading orchestration, including progress tracking,
  * virtual scrolling pagination, and initial data fetching.
  */
 export function useItemsLoader() {
-    const loadProgress = ref(0);
-    const virtualScrollPending = ref(false);
-    const ctxSource = ref(null);
+	const loadProgress = ref(0);
+	const virtualScrollPending = ref(false);
+	const ctxSource = ref(null);
 
-    function registerContext(context) {
-        ctxSource.value = context;
-    }
+	function registerContext(context) {
+		ctxSource.value = context;
+	}
 
-    const getCtx = (key) => {
-        if (ctxSource.value && ctxSource.value[key] !== undefined) {
-            return ctxSource.value[key];
-        }
-        return null;
-    };
+	const getCtx = (key) => {
+		if (ctxSource.value && ctxSource.value[key] !== undefined) {
+			return ctxSource.value[key];
+		}
+		return null;
+	};
 
-    /**
-     * Appends the next page of cached items to the current list.
-     */
-    async function appendCachedItemsPage() {
-        const loadPage = getCtx('appendCachedItemsPage');
-        if (typeof loadPage === 'function') {
-            return await loadPage();
-        }
-        return [];
-    }
+	/**
+	 * Appends the next page of cached items to the current list.
+	 */
+	async function appendCachedItemsPage() {
+		const loadPage = getCtx("appendCachedItemsPage");
+		if (typeof loadPage === "function") {
+			return await loadPage();
+		}
+		return [];
+	}
 
-    /**
-     * Loads visible items, optionally resetting the current view.
-     */
-    async function loadVisibleItems(reset = false) {
-        loadProgress.value = 0;
-        const eventBus = getCtx('eventBus');
-        if (eventBus) {
-            eventBus.emit("data-load-progress", { name: "items", progress: 0 });
-        }
+	/**
+	 * Loads visible items, optionally resetting the current view.
+	 */
+	async function loadVisibleItems(reset = false) {
+		loadProgress.value = 0;
+		const eventBus = getCtx("eventBus");
+		if (eventBus) {
+			eventBus.emit("data-load-progress", { name: "items", progress: 0 });
+		}
 
-        await initPromise;
-        const ensureStorageHealth = getCtx('ensureStorageHealth');
-        if (ensureStorageHealth) await ensureStorageHealth();
+		await initPromise;
+		const ensureStorageHealth = getCtx("ensureStorageHealth");
+		if (ensureStorageHealth) await ensureStorageHealth();
 
-        if (reset) {
-            const loadItems = getCtx('loadItems');
-            if (typeof loadItems === 'function') {
-                const get_search = getCtx('get_search') || ((v) => v);
-                await loadItems({
-                    searchValue: get_search(getCtx('first_search')),
-                    groupFilter: getCtx('item_group'),
-                    limit: getCtx('usesLimitSearch') ? getCtx('limitSearchCap') : undefined,
-                });
-            }
-        }
+		if (reset) {
+			const loadItems = getCtx("loadItems");
+			if (typeof loadItems === "function") {
+				const get_search = getCtx("get_search") || ((v) => v);
+				await loadItems({
+					searchValue: get_search(getCtx("first_search")),
+					groupFilter: getCtx("item_group"),
+					limit: getCtx("usesLimitSearch") ? getCtx("limitSearchCap") : undefined,
+				});
+			}
+		}
 
-        const pageItems = await appendCachedItemsPage();
+		const pageItems = await appendCachedItemsPage();
 
-        if (Array.isArray(pageItems) && pageItems.length) {
-            if (eventBus) {
-                eventBus.emit("set_all_items", getCtx('items'));
-            }
-            const itemDetailFetcher = getCtx('itemDetailFetcher');
-            if (itemDetailFetcher && typeof itemDetailFetcher.update_items_details === 'function') {
-                await itemDetailFetcher.update_items_details(pageItems);
-            }
+		if (Array.isArray(pageItems) && pageItems.length) {
+			if (eventBus) {
+				eventBus.emit("set_all_items", getCtx("items"));
+			}
+			const itemDetailFetcher = getCtx("itemDetailFetcher");
+			if (itemDetailFetcher && typeof itemDetailFetcher.update_items_details === "function") {
+				await itemDetailFetcher.update_items_details(pageItems);
+			}
 
-            const totalItemCount = getCtx('totalItemCount');
-            const items = getCtx('items') || [];
-            loadProgress.value = totalItemCount
-                ? Math.round((items.length / totalItemCount) * 100)
-                : 100;
+			const totalItemCount = getCtx("totalItemCount");
+			const items = getCtx("items") || [];
+			loadProgress.value = totalItemCount ? Math.round((items.length / totalItemCount) * 100) : 100;
 
-            if (eventBus) {
-                eventBus.emit("data-load-progress", {
-                    name: "items",
-                    progress: loadProgress.value,
-                });
-            }
-        }
-        return pageItems;
-    }
+			if (eventBus) {
+				eventBus.emit("data-load-progress", {
+					name: "items",
+					progress: loadProgress.value,
+				});
+			}
+		}
+		return pageItems;
+	}
 
-    /**
-     * Handles virtual scroll range updates to trigger lazy loading.
-     */
-    async function onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
-        const displayedItems = getCtx('displayedItems') || [];
-        const total = displayedItems.length;
-        if (!total) {
-            const scheduleCardMetricsUpdate = getCtx('scheduleCardMetricsUpdate');
-            if (typeof scheduleCardMetricsUpdate === 'function') scheduleCardMetricsUpdate();
-            return;
-        }
+	/**
+	 * Handles virtual scroll range updates to trigger lazy loading.
+	 */
+	async function onVirtualRangeUpdate(_startIndex, _endIndex, _visibleStartIndex, visibleEndIndex) {
+		const displayedItems = getCtx("displayedItems") || [];
+		const total = displayedItems.length;
+		if (!total) {
+			const scheduleCardMetricsUpdate = getCtx("scheduleCardMetricsUpdate");
+			if (typeof scheduleCardMetricsUpdate === "function") scheduleCardMetricsUpdate();
+			return;
+		}
 
-        const cardColumns = getCtx('cardColumns') || 1;
-        const threshold = Math.max(1, cardColumns * 2);
-        const nearEnd = visibleEndIndex >= total - threshold;
+		const cardColumns = getCtx("cardColumns") || 1;
+		const threshold = Math.max(1, cardColumns * 2);
+		const nearEnd = visibleEndIndex >= total - threshold;
 
-        const hasMoreCachedItems = getCtx('hasMoreCachedItems');
-        const loading = getCtx('loading');
+		const hasMoreCachedItems = getCtx("hasMoreCachedItems");
+		const loading = getCtx("loading");
 
-        if (nearEnd && hasMoreCachedItems && !virtualScrollPending.value && !loading) {
-            virtualScrollPending.value = true;
-            try {
-                await appendCachedItemsPage();
-            } catch (error) {
-                console.warn("Failed to append cached items page", error);
-            } finally {
-                virtualScrollPending.value = false;
-                const scheduleCardMetricsUpdate = getCtx('scheduleCardMetricsUpdate');
-                if (typeof scheduleCardMetricsUpdate === 'function') scheduleCardMetricsUpdate();
-            }
-        } else {
-            const scheduleCardMetricsUpdate = getCtx('scheduleCardMetricsUpdate');
-            if (typeof scheduleCardMetricsUpdate === 'function') scheduleCardMetricsUpdate();
-        }
-    }
+		if (nearEnd && hasMoreCachedItems && !virtualScrollPending.value && !loading) {
+			virtualScrollPending.value = true;
+			try {
+				await appendCachedItemsPage();
+			} catch (error) {
+				console.warn("Failed to append cached items page", error);
+			} finally {
+				virtualScrollPending.value = false;
+				const scheduleCardMetricsUpdate = getCtx("scheduleCardMetricsUpdate");
+				if (typeof scheduleCardMetricsUpdate === "function") scheduleCardMetricsUpdate();
+			}
+		} else {
+			const scheduleCardMetricsUpdate = getCtx("scheduleCardMetricsUpdate");
+			if (typeof scheduleCardMetricsUpdate === "function") scheduleCardMetricsUpdate();
+		}
+	}
 
-    /**
-     * Forces loading of quantities for currently displayed items.
-     */
-    function forceLoadQuantities() {
-        const displayedItems = getCtx('displayedItems');
-        if (displayedItems && displayedItems.length > 0) {
-            displayedItems.forEach((item) => {
-                if (item.actual_qty === undefined || item.actual_qty === null) {
-                    item.actual_qty = 0;
-                }
-            });
-            const itemDetailFetcher = getCtx('itemDetailFetcher');
-            if (itemDetailFetcher && typeof itemDetailFetcher.update_items_details === 'function') {
-                itemDetailFetcher.update_items_details(displayedItems);
-            }
-        }
-    }
+	/**
+	 * Forces loading of quantities for currently displayed items.
+	 */
+	function forceLoadQuantities() {
+		const displayedItems = getCtx("displayedItems");
+		if (displayedItems && displayedItems.length > 0) {
+			displayedItems.forEach((item) => {
+				if (item.actual_qty === undefined || item.actual_qty === null) {
+					item.actual_qty = 0;
+				}
+			});
+			const itemDetailFetcher = getCtx("itemDetailFetcher");
+			if (itemDetailFetcher && typeof itemDetailFetcher.update_items_details === "function") {
+				itemDetailFetcher.update_items_details(displayedItems);
+			}
+		}
+	}
 
-    /**
-     * Ensures all items in the lists have a defined actual_qty.
-     */
-    function ensureAllItemsHaveQuantities() {
-        const items = getCtx('items');
-        if (items && items.length > 0) {
-            items.forEach((item) => {
-                if (item.actual_qty === undefined || item.actual_qty === null) {
-                    item.actual_qty = 0;
-                }
-            });
-        }
-        const displayedItems = getCtx('displayedItems');
-        if (displayedItems && displayedItems.length > 0) {
-            displayedItems.forEach((item) => {
-                if (item.actual_qty === undefined || item.actual_qty === null) {
-                    item.actual_qty = 0;
-                }
-            });
-        }
-    }
+	/**
+	 * Ensures all items in the lists have a defined actual_qty.
+	 */
+	function ensureAllItemsHaveQuantities() {
+		const items = getCtx("items");
+		if (items && items.length > 0) {
+			items.forEach((item) => {
+				if (item.actual_qty === undefined || item.actual_qty === null) {
+					item.actual_qty = 0;
+				}
+			});
+		}
+		const displayedItems = getCtx("displayedItems");
+		if (displayedItems && displayedItems.length > 0) {
+			displayedItems.forEach((item) => {
+				if (item.actual_qty === undefined || item.actual_qty === null) {
+					item.actual_qty = 0;
+				}
+			});
+		}
+	}
 
-    return {
-        loadProgress,
-        virtualScrollPending,
-        registerContext,
-        loadVisibleItems,
-        appendCachedItemsPage,
-        onVirtualRangeUpdate,
-        forceLoadQuantities,
-        ensureAllItemsHaveQuantities
-    };
+	return {
+		loadProgress,
+		virtualScrollPending,
+		registerContext,
+		loadVisibleItems,
+		appendCachedItemsPage,
+		onVirtualRangeUpdate,
+		forceLoadQuantities,
+		ensureAllItemsHaveQuantities,
+	};
 }

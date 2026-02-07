@@ -1,4 +1,3 @@
-/* global frappe, __ */
 import { nextTick } from "vue";
 
 export function useItemBatchSerial() {
@@ -14,9 +13,7 @@ export function useItemBatchSerial() {
 
 	const showBatchDialog = (item, context) => {
 		const opts =
-			Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0
-				? item.batch_no_data
-				: null;
+			Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0 ? item.batch_no_data : null;
 		if (opts) {
 			const dialog = new frappe.ui.Dialog({
 				title: __("Select Batch"),
@@ -48,10 +45,7 @@ export function useItemBatchSerial() {
 	};
 
 	const handleItemExpansion = (item, context) => {
-		if (
-			(!context.pos_profile.posa_auto_set_batch && item.has_batch_no) ||
-			item.has_serial_no
-		) {
+		if ((!context.pos_profile.posa_auto_set_batch && item.has_batch_no) || item.has_serial_no) {
 			nextTick(() => {
 				if (Array.isArray(context.expanded)) {
 					context.expanded.push(item.posa_row_id);

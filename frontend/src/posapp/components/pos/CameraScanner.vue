@@ -238,7 +238,6 @@
 </style>
 
 <script setup>
-/* global frappe */
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { QrcodeStream } from "vue-qrcode-reader";
 import opencvProcessor from "../../utils/opencvProcessor";

@@ -82,167 +82,169 @@
 						@click="$emit('close-shift')"
 						class="menu-item-compact primary-action"
 					>
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact primary-icon">
-							<v-icon color="white" size="16">mdi-content-save-move-outline</v-icon>
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact primary-icon">
+								<v-icon color="white" size="16">mdi-content-save-move-outline</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Close Shift")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("End current session")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("Close Shift")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("End current session")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<v-list-item
-					v-if="posProfile.posa_allow_print_last_invoice"
-					@click="printLastInvoice"
-					class="menu-item-compact secondary-action"
-				>
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact secondary-icon">
-							<v-icon color="white" size="16">mdi-printer</v-icon>
+					<v-list-item
+						v-if="posProfile.posa_allow_print_last_invoice"
+						@click="printLastInvoice"
+						class="menu-item-compact secondary-action"
+					>
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact secondary-icon">
+								<v-icon color="white" size="16">mdi-printer</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Print Last Invoice")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Reprint previous transaction")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("Print Last Invoice")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("Reprint previous transaction")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<v-list-item @click="$emit('sync-invoices')" class="menu-item-compact info-action">
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact info-icon">
-							<v-icon color="white" size="16">mdi-sync</v-icon>
+					<v-list-item @click="$emit('sync-invoices')" class="menu-item-compact info-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact info-icon">
+								<v-icon color="white" size="16">mdi-sync</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Sync Offline Invoices")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Upload pending transactions")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("Sync Offline Invoices")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("Upload pending transactions")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<v-list-item @click="$emit('toggle-offline')" class="menu-item-compact warning-action">
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact warning-icon">
-							<v-icon color="white" size="16">mdi-wifi-off</v-icon>
+					<v-list-item @click="$emit('toggle-offline')" class="menu-item-compact warning-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact warning-icon">
+								<v-icon color="white" size="16">mdi-wifi-off</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								manualOffline ? __("Go Online") : __("Go Offline")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">
+								{{
+									manualOffline
+										? __("Disable offline mode")
+										: __("Work without server connection")
+								}}
+							</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							manualOffline ? __("Go Online") : __("Go Offline")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">
-							{{
-								manualOffline
-									? __("Disable offline mode")
-									: __("Work without server connection")
-							}}
-						</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<v-list-item
-					@click="$emit('clear-cache')"
-					:disabled="manualOffline || !networkOnline || !serverOnline"
-					class="menu-item-compact neutral-action"
-				>
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact neutral-icon">
-							<v-icon color="white" size="16">mdi-delete-sweep-outline</v-icon>
+					<v-list-item
+						@click="$emit('clear-cache')"
+						:disabled="manualOffline || !networkOnline || !serverOnline"
+						class="menu-item-compact neutral-action"
+					>
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact neutral-icon">
+								<v-icon color="white" size="16">mdi-delete-sweep-outline</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Clear Cache")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Remove local data and refresh")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("Clear Cache")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("Remove local data and refresh")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<v-divider class="menu-section-divider-compact"></v-divider>
+					<v-divider class="menu-section-divider-compact"></v-divider>
 
-				<v-list-item @click="$emit('show-about')" class="menu-item-compact neutral-action">
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact neutral-icon">
-							<v-icon color="white" size="16">mdi-information-outline</v-icon>
+					<v-list-item @click="$emit('show-about')" class="menu-item-compact neutral-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact neutral-icon">
+								<v-icon color="white" size="16">mdi-information-outline</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("About")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("App information")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("About")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("App information")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<!-- Language selection menu item -->
-				<v-list-item @click="showLanguageDialog = true" class="menu-item-compact primary-action">
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact primary-icon">
-							<v-icon color="white" size="16">mdi-translate</v-icon>
+					<!-- Language selection menu item -->
+					<v-list-item @click="showLanguageDialog = true" class="menu-item-compact primary-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact primary-icon">
+								<v-icon color="white" size="16">mdi-translate</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Language")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Change interface language")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("Language")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("Change interface language")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<!-- Theme toggle menu item -->
-				<v-list-item @click="$emit('toggle-theme')" class="menu-item-compact info-action">
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact info-icon">
-							<v-icon color="white" size="16">{{
-								$theme.isDark.value ? "mdi-white-balance-sunny" : "mdi-moon-waning-crescent"
-							}}</v-icon>
+					<!-- Theme toggle menu item -->
+					<v-list-item @click="$emit('toggle-theme')" class="menu-item-compact info-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact info-icon">
+								<v-icon color="white" size="16">{{
+									$theme.isDark.value
+										? "mdi-white-balance-sunny"
+										: "mdi-moon-waning-crescent"
+								}}</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								$theme.isDark.value ? __("Light Mode") : __("Dark Mode")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Switch theme appearance")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							$theme.isDark.value ? __("Light Mode") : __("Dark Mode")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("Switch theme appearance")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
+					</v-list-item>
 
-				<v-list-item @click="$emit('logout')" class="menu-item-compact danger-action">
-					<template v-slot:prepend>
-						<div class="menu-icon-wrapper-compact danger-icon">
-							<v-icon color="white" size="16">mdi-logout</v-icon>
+					<v-list-item @click="$emit('logout')" class="menu-item-compact danger-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact danger-icon">
+								<v-icon color="white" size="16">mdi-logout</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Logout")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Sign out of session")
+							}}</v-list-item-subtitle>
 						</div>
-					</template>
-					<div class="menu-content-compact">
-						<v-list-item-title class="menu-item-title-compact">{{
-							__("Logout")
-						}}</v-list-item-title>
-						<v-list-item-subtitle class="menu-item-subtitle-compact">{{
-							__("Sign out of session")
-						}}</v-list-item-subtitle>
-					</div>
-				</v-list-item>
-			</v-list>
+					</v-list-item>
+				</v-list>
 			</div>
 		</v-card>
 	</v-menu>
@@ -348,7 +350,6 @@
 </template>
 
 <script>
-/* global frappe */
 const FALLBACK_LANGUAGES = [
 	{ code: "en", name: "English", native_name: "English" },
 	{ code: "ar", name: "العربية", native_name: "العربية" },

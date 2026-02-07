@@ -71,7 +71,6 @@
 </template>
 
 <script>
-/* global __ */
 import format from "../../format";
 import { useUIStore } from "../../stores/uiStore.js";
 import { ref, inject, onMounted, onBeforeUnmount, watch } from "vue";
@@ -240,7 +239,6 @@ export default {
 	},
 };
 </script>
-
 
 <style scoped>
 .closing-dialog-card {

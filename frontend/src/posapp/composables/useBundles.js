@@ -1,5 +1,3 @@
-/* global frappe */
-
 const cache = new Map();
 
 export function useBundles() {

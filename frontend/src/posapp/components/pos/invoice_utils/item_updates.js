@@ -1,4 +1,3 @@
-/* global __, frappe */
 import stockCoordinator from "../../../utils/stockCoordinator";
 import { isOffline } from "../../../../offline/index.js";
 
@@ -386,7 +385,7 @@ export function _doesManualOverrideMatchItem(context, override, item) {
 			coerce(item.same_item) ||
 			Boolean(
 				(typeof item.auto_free_source === "string" && item.auto_free_source) ||
-					(typeof item.free_item_source === "string" && item.free_item_source),
+				(typeof item.free_item_source === "string" && item.free_item_source),
 			);
 
 		if (expectsFree !== itemIsFree) return false;

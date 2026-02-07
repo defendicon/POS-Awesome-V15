@@ -10,8 +10,6 @@ import {
 	saveItemDetailsCache,
 } from "../../../offline/index.js";
 
-/* global frappe */
-
 export interface BackgroundSyncState {
 	running: boolean;
 	token: number;
@@ -32,7 +30,10 @@ export function useItemsSync() {
 
 	const loadItemGroups = async (posProfile: POSProfile | null) => {
 		try {
-			if (posProfile?.item_groups?.length && posProfile.item_groups.length > 0) {
+			if (
+				posProfile?.item_groups?.length &&
+				posProfile.item_groups.length > 0
+			) {
 				const groups = ["ALL"];
 				posProfile.item_groups.forEach((element: any) => {
 					if (element.item_group !== "All Item Groups") {
@@ -61,7 +62,7 @@ export function useItemsSync() {
 		itemsBatch: Item[],
 		shouldPersist: boolean,
 		replaceExisting: boolean,
-		updateCachedPaginationCallback: () => Promise<void>
+		updateCachedPaginationCallback: () => Promise<void>,
 	) => {
 		if (!shouldPersist) {
 			return;
@@ -87,7 +88,7 @@ export function useItemsSync() {
 		itemList: Item[],
 		posProfile: POSProfile | null,
 		activePriceList: string,
-		getItemByCode: (code: string) => Item | undefined
+		getItemByCode: (code: string) => Item | undefined,
 	) => {
 		if (!itemList || itemList.length === 0) return;
 
@@ -102,7 +103,12 @@ export function useItemsSync() {
 					await new Promise((resolve) => setTimeout(resolve, 200));
 				}
 
-				await loadItemDetailsBatch(batch, posProfile, activePriceList, getItemByCode);
+				await loadItemDetailsBatch(
+					batch,
+					posProfile,
+					activePriceList,
+					getItemByCode,
+				);
 			}
 		} catch (error) {
 			console.error("Background item details loading failed:", error);
@@ -113,7 +119,7 @@ export function useItemsSync() {
 		itemBatch: Item[],
 		posProfile: POSProfile | null,
 		activePriceList: string,
-		getItemByCode: (code: string) => Item | undefined
+		getItemByCode: (code: string) => Item | undefined,
 	) => {
 		try {
 			if (!posProfile) return;
@@ -155,7 +161,7 @@ export function useItemsSync() {
 		activePriceList: string,
 		customer: string | null,
 		updateItemsInPlace: (items: Item[]) => void,
-		itemsMap: Map<string, Item>
+		itemsMap: Map<string, Item>,
 	) => {
 		const lastSync = getItemsLastSync();
 		if (!lastSync) return { size: 0, count: 0, items: [] };
@@ -168,7 +174,9 @@ export function useItemsSync() {
 				search_value: "",
 				customer: customer,
 				include_image: 0,
-				item_groups: posProfile?.item_groups?.map((g: any) => g.item_group) || [],
+				item_groups:
+					posProfile?.item_groups?.map((g: any) => g.item_group) ||
+					[],
 				modified_after: lastSync,
 				limit: 500,
 			};
@@ -205,7 +213,12 @@ export function useItemsSync() {
 	};
 
 	const backgroundSyncItems = async (
-		options: { reset?: boolean; groupFilter?: string; searchValue?: string; initialBatch?: Item[] } = {},
+		options: {
+			reset?: boolean;
+			groupFilter?: string;
+			searchValue?: string;
+			initialBatch?: Item[];
+		} = {},
 		posProfile: POSProfile | null,
 		activePriceList: string,
 		shouldPersistItems: boolean,
@@ -214,7 +227,7 @@ export function useItemsSync() {
 		updateCachedPaginationFromStorage: () => Promise<void>,
 		totalItemCount: { value: number },
 		itemsLoaded: { value: boolean },
-		items: { value: Item[] }
+		items: { value: Item[] },
 	) => {
 		const {
 			reset = false,
@@ -232,7 +245,9 @@ export function useItemsSync() {
 		}
 
 		const normalizedGroup =
-			typeof groupFilter === "string" && groupFilter.length > 0 ? groupFilter : "ALL";
+			typeof groupFilter === "string" && groupFilter.length > 0
+				? groupFilter
+				: "ALL";
 
 		const token = ++backgroundSyncState.value.token;
 		backgroundSyncState.value.running = true;
@@ -257,7 +272,10 @@ export function useItemsSync() {
 
 			const limit = resolvePageSize(DEFAULT_PAGE_SIZE);
 
-			while (backgroundSyncState.value.token === token && shouldPersistItems) {
+			while (
+				backgroundSyncState.value.token === token &&
+				shouldPersistItems
+			) {
 				// Clone posProfile and disable caching for this specific request
 				const requestProfile = JSON.parse(JSON.stringify(posProfile));
 				if (reset) {
@@ -271,7 +289,10 @@ export function useItemsSync() {
 					args: {
 						pos_profile: JSON.stringify(requestProfile),
 						price_list: activePriceList,
-						item_group: normalizedGroup !== "ALL" ? normalizedGroup.toLowerCase() : "",
+						item_group:
+							normalizedGroup !== "ALL"
+								? normalizedGroup.toLowerCase()
+								: "",
 						start_after: lastItemName,
 						limit,
 					},
@@ -281,7 +302,9 @@ export function useItemsSync() {
 					break;
 				}
 
-				const batch = Array.isArray(response.message) ? response.message : [];
+				const batch = Array.isArray(response.message)
+					? response.message
+					: [];
 				if (batch.length === 0) {
 					break;
 				}
@@ -290,14 +313,21 @@ export function useItemsSync() {
 				setItems(batch, { append: true });
 				appended.push(...batch);
 				loaded += batch.length;
-				lastItemName = batch[batch.length - 1]?.item_name || lastItemName;
+				lastItemName =
+					batch[batch.length - 1]?.item_name || lastItemName;
 
 				await updateCachedPaginationFromStorage();
 
 				if (totalItemCount.value > 0) {
-					loadProgress.value = Math.min(99, Math.round((loaded / totalItemCount.value) * 100));
+					loadProgress.value = Math.min(
+						99,
+						Math.round((loaded / totalItemCount.value) * 100),
+					);
 				} else if (loaded > 0) {
-					loadProgress.value = Math.min(99, Math.round((loaded / (loaded + limit)) * 100));
+					loadProgress.value = Math.min(
+						99,
+						Math.round((loaded / (loaded + limit)) * 100),
+					);
 				}
 
 				if (batch.length < limit) {

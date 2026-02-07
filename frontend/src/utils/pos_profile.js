@@ -1,4 +1,3 @@
-/* global frappe */
 import {
 	getOpeningStorage,
 	setOpeningStorage,

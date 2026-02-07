@@ -1,4 +1,3 @@
-/* global frappe, __ */
 const isAltOnly = (event) => event.altKey && !event.ctrlKey && !event.metaKey;
 const consumeEvent = (event) => {
 	event.preventDefault();

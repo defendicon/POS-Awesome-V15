@@ -92,7 +92,6 @@
 </template>
 
 <script setup>
-/* global frappe */
 import { computed, ref, watch } from "vue";
 import { formatBuildVersion } from "../../stores/updateStore.js";
 
