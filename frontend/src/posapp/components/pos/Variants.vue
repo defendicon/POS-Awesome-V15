@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import { ensurePosProfile } from "../../../utils/pos_profile.js";
+import { ensurePosProfile } from "../../../utils/pos_profile";
 import _ from "lodash";
 import placeholderImage from "./placeholder-image.png";
 import { getCurrentInstance } from "vue";

@@ -1,27 +1,24 @@
-/**
- * Cart Validation Composable
- * Centralized validation logic for cart items to ensure data consistency
- * and proper stock validation before adding items to cart.
- *
- * When Allow Negative Stock is enabled in Stock Settings,
- * negative stock items can be added to the cart without restriction.
- */
-
 import { ref } from "vue";
 import { useToastStore } from "../stores/toastStore.js";
-import { parseBooleanSetting, formatStockShortageError } from "../utils/stock.js";
+import {
+	parseBooleanSetting,
+	formatStockShortageError,
+} from "../utils/stock.js";
+
+declare const __: (_text: string, _args?: any[]) => string;
+declare const frappe: any;
 
 export function useCartValidation() {
 	const isValidating = ref(false);
-	const validationError = ref(null);
+	const validationError = ref<string | null>(null);
 	const toastStore = useToastStore();
 
 	async function validateCartItem(
-		item,
+		item: any,
 		requestedQty = 1,
-		posProfile,
-		stockSettings,
-		eventBus, // Kept for signature compatibility but ignored
+		posProfile: any,
+		stockSettings: any,
+		eventBus: any,
 		blockSaleBeyondAvailableQty = false,
 		_showNegativeStockWarning = true,
 		skipServerValidation = false,
@@ -30,22 +27,24 @@ export function useCartValidation() {
 		validationError.value = null;
 
 		try {
-			// Step 1: Basic validation
 			if (!item || !item.item_code) {
 				throw new Error("Invalid item data");
 			}
 
-			// Step 2: Variants check
 			if (item.has_variants) {
 				toastStore.show({
-					title: __("This is an item template. Please choose a variant."),
+					title: __(
+						"This is an item template. Please choose a variant.",
+					),
 					color: "warning",
 				});
 				return false;
 			}
 
-			// Step 3: Zero stock check
-			if (item.actual_qty === 0 && posProfile?.posa_display_items_in_stock) {
+			if (
+				item.actual_qty === 0 &&
+				posProfile?.posa_display_items_in_stock
+			) {
 				toastStore.show({
 					title: `No stock available for ${item.item_name}`,
 					color: "error",
@@ -61,7 +60,8 @@ export function useCartValidation() {
 					(parseBooleanSetting(stockSettings?.allow_negative_stock) ||
 						parseBooleanSetting(item?.allow_negative_stock));
 				const exceedsAvailable =
-					typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
+					typeof item.actual_qty === "number" &&
+					requestedQty > item.actual_qty;
 				const blockSale = !allowNegativeStock && exceedsAvailable;
 
 				if (blockSale) {
@@ -77,14 +77,22 @@ export function useCartValidation() {
 				}
 
 				if (!skipServerValidation) {
-					const stockValidationResult = await validateStockOnServer(item, requestedQty, posProfile);
+					const stockValidationResult = await validateStockOnServer(
+						item,
+						requestedQty,
+						posProfile,
+					);
 
 					if (!stockValidationResult.isValid) {
 						toastStore.show({
 							title: formatStockShortageError(
-								stockValidationResult.data?.item_name || item.item_name || item.item_code,
-								stockValidationResult.data?.available_qty ?? item.actual_qty,
-								stockValidationResult.data?.requested_qty ?? requestedQty,
+								stockValidationResult.data?.item_name ||
+									item.item_name ||
+									item.item_code,
+								stockValidationResult.data?.available_qty ??
+									item.actual_qty,
+								stockValidationResult.data?.requested_qty ??
+									requestedQty,
 							),
 							color: "error",
 						});
@@ -93,7 +101,7 @@ export function useCartValidation() {
 				}
 			}
 			return true;
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Cart validation error:", error);
 			validationError.value = error.message;
 			return performFallbackValidation(
@@ -109,7 +117,11 @@ export function useCartValidation() {
 		}
 	}
 
-	async function validateStockOnServer(item, requestedQty, posProfile) {
+	async function validateStockOnServer(
+		item: any,
+		requestedQty: number,
+		posProfile: any,
+	) {
 		try {
 			const testItem = {
 				item_code: item.item_code,
@@ -150,14 +162,16 @@ export function useCartValidation() {
 	}
 
 	function performFallbackValidation(
-		item,
-		requestedQty,
-		stockSettings,
-		eventBus,
+		item: any,
+		requestedQty: number,
+		stockSettings: any,
+		eventBus: any,
 		blockSaleBeyondAvailableQty = false,
 		_showNegativeStockWarning = true,
 	) {
-		console.warn("Using fallback validation due to server validation failure");
+		console.warn(
+			"Using fallback validation due to server validation failure",
+		);
 
 		const isStockItem = parseBooleanSetting(item?.is_stock_item);
 
@@ -179,7 +193,9 @@ export function useCartValidation() {
 				return false;
 			}
 
-			const exceedsAvailable = typeof item.actual_qty === "number" && requestedQty > item.actual_qty;
+			const exceedsAvailable =
+				typeof item.actual_qty === "number" &&
+				requestedQty > item.actual_qty;
 			const blockSale = !allowNegativeStock && exceedsAvailable;
 			if (blockSale) {
 				toastStore.show({
@@ -197,25 +213,16 @@ export function useCartValidation() {
 		return true;
 	}
 
-	/**
-	 * Validates multiple items for batch operations
-	 * @param {Array} items - Array of items to validate
-	 * @param {Object} posProfile - POS profile settings
-	 * @param {Object} stockSettings - Stock settings
-	 * @param {Object} eventBus - Event bus for notifications
-	 * @param {boolean} blockSaleBeyondAvailableQty - Block sales beyond available quantity
-	 * @returns {Promise<Object>} - Validation result with valid/invalid items
-	 */
 	async function validateCartItems(
-		items,
-		posProfile,
-		stockSettings,
-		eventBus,
+		items: any[],
+		posProfile: any,
+		stockSettings: any,
+		eventBus: any,
 		blockSaleBeyondAvailableQty = false,
 		showNegativeStockWarning = true,
 	) {
-		const validItems = [];
-		const invalidItems = [];
+		const validItems: any[] = [];
+		const invalidItems: any[] = [];
 
 		for (const item of items) {
 			const isValid = await validateCartItem(

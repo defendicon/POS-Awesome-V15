@@ -1,8 +1,13 @@
 import stockCoordinator from "../../utils/stockCoordinator";
 
-export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
-	const applyStockStateToInvoiceItems = (codes = null) => {
-		const collections = [];
+export function useInvoiceStock(
+	items: any,
+	packed_items: any,
+	eventBus: any,
+	forceUpdate: (() => void) | null,
+) {
+	const applyStockStateToInvoiceItems = (codes: unknown = null) => {
+		const collections: any[][] = [];
 		if (Array.isArray(items.value)) {
 			collections.push(items.value);
 		}
@@ -16,34 +21,46 @@ export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
 			if (codes === null) {
 				return null;
 			}
+			const iterableCandidate = codes as any;
 			const iterable = Array.isArray(codes)
 				? codes
-				: codes instanceof Set || (codes && typeof codes[Symbol.iterator] === "function")
-					? Array.from(codes)
+				: codes instanceof Set ||
+					  (codes &&
+							typeof iterableCandidate[Symbol.iterator] ===
+								"function")
+					? Array.from(iterableCandidate)
 					: [codes];
 			return new Set(
 				iterable
-					.map((code) => (code !== undefined && code !== null ? String(code).trim() : ""))
+					.map((code) =>
+						code !== undefined && code !== null
+							? String(code).trim()
+							: "",
+					)
 					.filter(Boolean),
 			);
 		})();
 
 		collections.forEach((collection) => {
-			stockCoordinator.applyAvailabilityToCollection(collection, codesSet, {
-				updateBaseAvailable: false,
-			});
+			stockCoordinator.applyAvailabilityToCollection(
+				collection,
+				codesSet,
+				{
+					updateBaseAvailable: false,
+				},
+			);
 		});
 
 		if (forceUpdate) forceUpdate();
 	};
 
 	const emitCartQuantities = () => {
-		const totals = {};
-		const normalizeNumber = (value) => {
+		const totals: Record<string, number> = {};
+		const normalizeNumber = (value: unknown) => {
 			const num = Number(value);
 			return Number.isFinite(num) ? num : null;
 		};
-		const accumulate = (line) => {
+		const accumulate = (line: any) => {
 			if (!line || !line.item_code) {
 				return;
 			}
@@ -58,7 +75,10 @@ export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
 				const qty = normalizeNumber(line.qty);
 				if (qty !== null) {
 					const conversion = normalizeNumber(line.conversion_factor);
-					const factor = conversion !== null && conversion !== 0 ? conversion : 1;
+					const factor =
+						conversion !== null && conversion !== 0
+							? conversion
+							: 1;
 					stockQty = qty * factor;
 				}
 			}
@@ -76,7 +96,9 @@ export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
 		};
 
 		(Array.isArray(items.value) ? items.value : []).forEach(accumulate);
-		(Array.isArray(packed_items.value) ? packed_items.value : []).forEach(accumulate);
+		(Array.isArray(packed_items.value) ? packed_items.value : []).forEach(
+			accumulate,
+		);
 
 		const impacted = stockCoordinator.updateReservations(totals, {
 			source: "invoice",
@@ -91,7 +113,7 @@ export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
 	};
 
 	const primeInvoiceStockState = (source = "invoice") => {
-		const baseItems = [];
+		const baseItems: any[] = [];
 		if (Array.isArray(items.value)) {
 			baseItems.push(...items.value);
 		}
@@ -104,12 +126,16 @@ export function useInvoiceStock(items, packed_items, eventBus, forceUpdate) {
 
 		stockCoordinator.primeFromItems(baseItems, { silent: true, source });
 		const codes = baseItems
-			.map((item) => (item && item.item_code !== undefined ? String(item.item_code).trim() : null))
+			.map((item) =>
+				item && item.item_code !== undefined
+					? String(item.item_code).trim()
+					: null,
+			)
 			.filter(Boolean);
 		applyStockStateToInvoiceItems(codes);
 	};
 
-	const handleStockCoordinatorUpdate = (event = {}) => {
+	const handleStockCoordinatorUpdate = (event: any = {}) => {
 		const codes = Array.isArray(event.codes) ? event.codes : [];
 		if (!codes.length) {
 			return;

@@ -1,9 +1,11 @@
 import { ref } from "vue";
 
-export function useClosingShift(eventBus) {
+declare const frappe: any;
+
+export function useClosingShift(eventBus: any) {
 	const closingDialog = ref(false);
-	const dialog_data = ref({});
-	const overview = ref(null);
+	const dialog_data = ref<any>({});
+	const overview = ref<any>(null);
 	const overviewLoading = ref(false);
 	const pos_profile = ref("");
 
@@ -13,7 +15,10 @@ export function useClosingShift(eventBus) {
 		overviewLoading.value = false;
 	};
 
-	const fetchOverview = (openingShift, posProfileCurrency) => {
+	const fetchOverview = (
+		openingShift: string,
+		posProfileCurrency: string,
+	) => {
 		overviewLoading.value = true;
 		overview.value = null;
 		if (!openingShift) {
@@ -21,14 +26,16 @@ export function useClosingShift(eventBus) {
 			return;
 		}
 
-		const toNumber = (value) => {
+		const toNumber = (value: unknown) => {
 			const number = Number(value);
 			return Number.isFinite(number) ? number : 0;
 		};
 
-		const normalizeRates = (rates) => {
+		const normalizeRates = (rates: unknown) => {
 			if (Array.isArray(rates)) {
-				return rates.map((rate) => Number(rate)).filter((rate) => Number.isFinite(rate) && rate > 0);
+				return rates
+					.map((rate) => Number(rate))
+					.filter((rate) => Number.isFinite(rate) && rate > 0);
 			}
 			if (rates === null || rates === undefined || rates === "") {
 				return [];
@@ -37,19 +44,24 @@ export function useClosingShift(eventBus) {
 			return Number.isFinite(numeric) && numeric > 0 ? [numeric] : [];
 		};
 
-		const normalizeCurrencyRows = (value, options = {}) => {
+		const normalizeCurrencyRows = (value: unknown, options: any = {}) => {
 			if (!Array.isArray(value)) {
 				return [];
 			}
 
-			const { includeCount = false, includeExchangeRates = false } = options;
+			const { includeCount = false, includeExchangeRates = false } =
+				options;
 
-			return value.map((row) => {
-				const record = {
+			return value.map((row: any) => {
+				const record: any = {
 					currency: row?.currency || "",
 					total: toNumber(row?.total),
-					company_currency_total: toNumber(row?.company_currency_total),
-					exchange_rates: includeExchangeRates ? normalizeRates(row?.exchange_rates) : [],
+					company_currency_total: toNumber(
+						row?.company_currency_total,
+					),
+					exchange_rates: includeExchangeRates
+						? normalizeRates(row?.exchange_rates)
+						: [],
 				};
 
 				if (includeCount) {
@@ -60,12 +72,12 @@ export function useClosingShift(eventBus) {
 			});
 		};
 
-		const normalizePayments = (value) => {
+		const normalizePayments = (value: unknown) => {
 			if (!Array.isArray(value)) {
 				return [];
 			}
 
-			return value.map((row) => ({
+			return value.map((row: any) => ({
 				mode_of_payment: row?.mode_of_payment || "",
 				currency: row?.currency || "",
 				total: toNumber(row?.total),
@@ -74,7 +86,7 @@ export function useClosingShift(eventBus) {
 			}));
 		};
 
-		const normalizeCredit = (credit = {}) => ({
+		const normalizeCredit = (credit: any = {}) => ({
 			count: toNumber(credit?.count),
 			company_currency_total: toNumber(credit?.company_currency_total),
 			by_currency: normalizeCurrencyRows(credit?.by_currency, {
@@ -83,25 +95,35 @@ export function useClosingShift(eventBus) {
 			}),
 		});
 
-		const normalizeChangeReturned = (change = {}) => {
-			const normalizeBranch = (branch = {}) => ({
-				company_currency_total: toNumber(branch?.company_currency_total),
+		const normalizeChangeReturned = (change: any = {}) => {
+			const normalizeBranch = (branch: any = {}) => ({
+				company_currency_total: toNumber(
+					branch?.company_currency_total,
+				),
 				by_currency: normalizeCurrencyRows(branch?.by_currency, {
 					includeExchangeRates: true,
 				}),
 			});
 
-			const invoiceChange = normalizeBranch(change?.invoice_change || change || {});
-			const overpaymentChange = normalizeBranch(change?.overpayment_change || {});
+			const invoiceChange = normalizeBranch(
+				change?.invoice_change || change || {},
+			);
+			const overpaymentChange = normalizeBranch(
+				change?.overpayment_change || {},
+			);
 
-			const primaryByCurrency = normalizeCurrencyRows(change?.by_currency, {
-				includeExchangeRates: true,
-			});
+			const primaryByCurrency = normalizeCurrencyRows(
+				change?.by_currency,
+				{
+					includeExchangeRates: true,
+				},
+			);
 
 			const totalCompanyCurrencyValue = change?.company_currency_total;
 			const totalCompanyCurrency = toNumber(totalCompanyCurrencyValue);
 			const derivedTotalCompanyCurrency =
-				invoiceChange.company_currency_total + overpaymentChange.company_currency_total;
+				invoiceChange.company_currency_total +
+				overpaymentChange.company_currency_total;
 			const hasTotalCompanyCurrency =
 				totalCompanyCurrencyValue !== undefined &&
 				totalCompanyCurrencyValue !== null &&
@@ -111,45 +133,68 @@ export function useClosingShift(eventBus) {
 				company_currency_total: hasTotalCompanyCurrency
 					? totalCompanyCurrency
 					: derivedTotalCompanyCurrency,
-				by_currency: primaryByCurrency.length ? primaryByCurrency : invoiceChange.by_currency,
+				by_currency: primaryByCurrency.length
+					? primaryByCurrency
+					: invoiceChange.by_currency,
 				invoice_change: invoiceChange,
 				overpayment_change: overpaymentChange,
 			};
 		};
 
-		const normalize = (payload = {}) => ({
+		const normalize = (payload: any = {}) => ({
 			total_invoices: toNumber(payload.total_invoices),
-			company_currency: payload.company_currency || posProfileCurrency || "",
+			company_currency:
+				payload.company_currency || posProfileCurrency || "",
 			company_currency_total: toNumber(payload.company_currency_total),
-			multi_currency_totals: normalizeCurrencyRows(payload.multi_currency_totals, {
-				includeCount: true,
-				includeExchangeRates: true,
-			}),
+			multi_currency_totals: normalizeCurrencyRows(
+				payload.multi_currency_totals,
+				{
+					includeCount: true,
+					includeExchangeRates: true,
+				},
+			),
 			payments_by_mode: normalizePayments(payload.payments_by_mode),
 			credit_invoices: normalizeCredit(payload.credit_invoices),
 			sales_summary: {
-				gross_company_currency_total: toNumber(payload.sales_summary?.gross_company_currency_total),
-				net_company_currency_total: toNumber(
-					payload.sales_summary?.net_company_currency_total ?? payload.company_currency_total,
+				gross_company_currency_total: toNumber(
+					payload.sales_summary?.gross_company_currency_total,
 				),
-				average_invoice_value: toNumber(payload.sales_summary?.average_invoice_value),
-				sale_invoices_count: toNumber(payload.sales_summary?.sale_invoices_count),
+				net_company_currency_total: toNumber(
+					payload.sales_summary?.net_company_currency_total ??
+						payload.company_currency_total,
+				),
+				average_invoice_value: toNumber(
+					payload.sales_summary?.average_invoice_value,
+				),
+				sale_invoices_count: toNumber(
+					payload.sales_summary?.sale_invoices_count,
+				),
 			},
 			returns: {
 				count: toNumber(payload.returns?.count),
-				company_currency_total: toNumber(payload.returns?.company_currency_total),
-				by_currency: normalizeCurrencyRows(payload.returns?.by_currency, {
-					includeCount: true,
-					includeExchangeRates: true,
-				}),
+				company_currency_total: toNumber(
+					payload.returns?.company_currency_total,
+				),
+				by_currency: normalizeCurrencyRows(
+					payload.returns?.by_currency,
+					{
+						includeCount: true,
+						includeExchangeRates: true,
+					},
+				),
 			},
 			change_returned: normalizeChangeReturned(payload.change_returned),
 			cash_expected: {
 				mode_of_payment: payload.cash_expected?.mode_of_payment || "",
-				company_currency_total: toNumber(payload.cash_expected?.company_currency_total),
-				by_currency: normalizeCurrencyRows(payload.cash_expected?.by_currency, {
-					includeExchangeRates: true,
-				}),
+				company_currency_total: toNumber(
+					payload.cash_expected?.company_currency_total,
+				),
+				by_currency: normalizeCurrencyRows(
+					payload.cash_expected?.by_currency,
+					{
+						includeExchangeRates: true,
+					},
+				),
 			},
 		});
 
@@ -164,11 +209,11 @@ export function useClosingShift(eventBus) {
 			overviewLoading.value = false;
 		};
 
-		const onSuccess = (r) => {
+		const onSuccess = (r: any) => {
 			overview.value = normalize(r && r.message ? r.message : {});
 		};
 
-		const onError = (err) => {
+		const onError = (err: unknown) => {
 			console.error("Failed to load shift overview", err);
 			overview.value = normalize();
 		};
@@ -189,11 +234,14 @@ export function useClosingShift(eventBus) {
 	};
 
 	const submitDialog = () => {
-		const payments = dialog_data.value.payment_reconciliation || dialog_data.value.payments || [];
-		const invalid = payments.some((p) => isNaN(parseFloat(p.closing_amount)));
+		const payments =
+			dialog_data.value.payment_reconciliation ||
+			dialog_data.value.payments ||
+			[];
+		const invalid = payments.some((p: any) =>
+			isNaN(parseFloat(p.closing_amount)),
+		);
 		if (invalid) {
-			// alert("Invalid closing amount"); // Or use toast if available
-			// We can throw error or return false to let component handle UI
 			return false;
 		}
 		if (eventBus) {

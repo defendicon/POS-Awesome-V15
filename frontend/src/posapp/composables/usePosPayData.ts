@@ -1,6 +1,18 @@
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { isOffline, getStoredCustomer } from "../../offline/index.js";
 import { useCustomersStore } from "../stores/customersStore.js";
+
+declare const frappe: any;
+declare const __: (_text: string, _args?: any[]) => string;
+
+type PosPayDataArgs = {
+	posProfile: Ref<any>;
+	company: Ref<any>;
+	customerName: Ref<string>;
+	eventBus: { emit: (_event: string, _payload?: unknown) => void };
+	currencySymbol: (_currency: string) => string;
+	formatCurrency: (_value: number) => string;
+};
 
 export function usePosPayData({
 	posProfile,
@@ -9,22 +21,22 @@ export function usePosPayData({
 	eventBus,
 	currencySymbol,
 	formatCurrency,
-}) {
-	const outstanding_invoices = ref([]);
-	const unallocated_payments = ref([]);
-	const mpesa_payments = ref([]);
+}: PosPayDataArgs) {
+	const outstanding_invoices = ref<any[]>([]);
+	const unallocated_payments = ref<any[]>([]);
+	const mpesa_payments = ref<any[]>([]);
 	const invoices_loading = ref(false);
 	const unallocated_payments_loading = ref(false);
 	const mpesa_payments_loading = ref(false);
 	const auto_reconcile_loading = ref(false);
 	const auto_reconcile_summary = ref("");
-	const customer_info = ref("");
+	const customer_info = ref<any>("");
 
-	const pos_profiles_list = ref([]);
+	const pos_profiles_list = ref<any[]>([]);
 	const mpesa_search_name = ref("");
 	const mpesa_search_mobile = ref("");
 
-	async function get_outstanding_invoices(posProfileSearch = null) {
+	async function get_outstanding_invoices(posProfileSearch: string | null = null) {
 		invoices_loading.value = true;
 
 		if (isOffline()) {
@@ -66,7 +78,7 @@ export function usePosPayData({
 				currency: posProfile.value.currency,
 			});
 			const payments = Array.isArray(r.message) ? r.message : [];
-			unallocated_payments.value = payments.map((payment) => ({
+			unallocated_payments.value = payments.map((payment: any) => ({
 				...payment,
 				is_credit_note: Boolean(payment?.is_credit_note),
 				mode_of_payment: payment?.is_credit_note ? __("Credit Note") : payment?.mode_of_payment,
@@ -76,7 +88,7 @@ export function usePosPayData({
 		}
 	}
 
-	async function get_draft_mpesa_payments_register(paymentMethodsList = []) {
+	async function get_draft_mpesa_payments_register(paymentMethodsList: unknown[] = []) {
 		if (!posProfile.value.posa_allow_mpesa_reconcile_payments) return;
 		mpesa_payments_loading.value = true;
 
@@ -100,7 +112,7 @@ export function usePosPayData({
 		}
 	}
 
-	async function autoReconcile(posProfileSearch = null) {
+	async function autoReconcile(posProfileSearch: string | null = null) {
 		if (!posProfile.value.posa_allow_reconcile_payments) return;
 		if (!customerName.value) {
 			frappe.msgprint(__("Please select a customer before reconciling."));
@@ -148,9 +160,9 @@ export function usePosPayData({
 			}
 
 			if (Array.isArray(skipped_payments) && skipped_payments.length) {
-				const escapeHtml = frappe.utils?.escape_html || ((value) => value);
+				const escapeHtml = frappe.utils?.escape_html || ((value: string) => value);
 				const skippedMessage = skipped_payments
-					.map((row) => `<div>${escapeHtml(row)}</div>`)
+					.map((row: string) => `<div>${escapeHtml(row)}</div>`)
 					.join("");
 				frappe.msgprint({
 					title: __("Skipped Payments"),
@@ -158,7 +170,7 @@ export function usePosPayData({
 					indicator: "orange",
 				});
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Auto reconciliation failed", error);
 			frappe.msgprint(error?.message || __("Failed to auto reconcile payments."));
 		} finally {
@@ -202,12 +214,10 @@ export function usePosPayData({
 	function set_mpesa_search_params() {
 		if (!posProfile.value.posa_allow_mpesa_reconcile_payments) return;
 		if (!customerName.value || !customer_info.value) return;
-		mpesa_search_name.value = customer_info.value.customer_name.split(" ")[0];
+		mpesa_search_name.value = String(customer_info.value.customer_name || "").split(" ")[0] || "";
 		if (customer_info.value.mobile_no) {
-			mpesa_search_mobile.value =
-				customer_info.value.mobile_no.substring(0, 4) +
-				" ***** " +
-				customer_info.value.mobile_no.substring(9);
+			const mobile = String(customer_info.value.mobile_no);
+			mpesa_search_mobile.value = mobile.substring(0, 4) + " ***** " + mobile.substring(9);
 		}
 	}
 

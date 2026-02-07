@@ -83,8 +83,8 @@ import Variants from "./Variants.vue";
 import Returns from "./Returns.vue";
 import MpesaPayments from "./Mpesa-Payments.vue";
 import { inject, ref, onMounted, onBeforeUnmount } from "vue";
-import { usePosShift } from "../../composables/usePosShift.js";
-import { useOffers } from "../../composables/useOffers.js";
+import { usePosShift } from "../../composables/usePosShift";
+import { useOffers } from "../../composables/useOffers";
 // Import the cache cleanup function
 import { clearExpiredCustomerBalances } from "../../../offline/index.js";
 import { useResponsive } from "../../composables/useResponsive";

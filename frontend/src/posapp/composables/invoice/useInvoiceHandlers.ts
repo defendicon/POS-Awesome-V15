@@ -1,43 +1,41 @@
 export function useInvoiceHandlers(
-	pos_profile,
-	company,
-	customer,
-	pos_opening_shift,
-	stock_settings,
-	invoiceType,
-	fetch_price_lists,
-	update_price_list,
-	fetch_available_currencies,
-	load_invoice,
-	items,
-	invoice_doc,
-	discount_amount,
-	additional_discount,
-	return_doc,
-	additional_discount_percentage,
-	update_item_detail,
-	primeInvoiceStockState,
+	pos_profile: any,
+	company: any,
+	customer: any,
+	pos_opening_shift: any,
+	stock_settings: any,
+	invoiceType: any,
+	fetch_price_lists: () => void,
+	update_price_list: () => void,
+	fetch_available_currencies: () => void,
+	load_invoice: (_data: any) => void,
+	items: any,
+	invoice_doc: any,
+	discount_amount: any,
+	additional_discount: any,
+	return_doc: any,
+	additional_discount_percentage: any,
+	update_item_detail: (_item: any) => void,
+	primeInvoiceStockState: () => void,
 ) {
-	const handleRegisterPosProfile = (data) => {
+	const handleRegisterPosProfile = (data: any) => {
 		pos_profile.value = data.pos_profile;
 		company.value = data.company || null;
 		customer.value = data.pos_profile.customer;
 		pos_opening_shift.value = data.pos_opening_shift;
 		stock_settings.value = data.stock_settings;
 
-		invoiceType.value = pos_profile.value.posa_default_sales_order ? "Order" : "Invoice";
+		invoiceType.value = pos_profile.value.posa_default_sales_order
+			? "Order"
+			: "Invoice";
 
-		// Pricing list initialization
 		fetch_price_lists();
 		update_price_list();
 		fetch_available_currencies();
 	};
 
-	const handleSetAllItems = (_data) => {
-		// Assuming allItems logic is handled elsewhere or not critical
-		// items.value = data; // Wait, items is a computed setter in original component usually
-		// But here we need to iterate over existing items to update details
-		items.value.forEach((item) => {
+	const handleSetAllItems = (_data: any) => {
+		items.value.forEach((item: any) => {
 			if (item._detailSynced !== true) {
 				update_item_detail(item);
 			}
@@ -45,19 +43,26 @@ export function useInvoiceHandlers(
 		primeInvoiceStockState();
 	};
 
-	const handleLoadReturnInvoice = (data) => {
-		console.log("Invoice component received load_return_invoice event with data:", data);
+	const handleLoadReturnInvoice = (data: any) => {
+		console.log(
+			"Invoice component received load_return_invoice event with data:",
+			data,
+		);
 		load_invoice(data.invoice_doc);
 		invoiceType.value = "Return";
 		invoice_doc.value.is_return = 1;
 		if (items.value && items.value.length) {
-			items.value.forEach((item) => {
+			items.value.forEach((item: any) => {
 				if (item.qty > 0) item.qty = -Math.abs(item.qty);
-				if (item.stock_qty > 0) item.stock_qty = -Math.abs(item.stock_qty);
+				if (item.stock_qty > 0)
+					item.stock_qty = -Math.abs(item.stock_qty);
 			});
 		}
 		if (data.return_doc) {
-			console.log("Return against existing invoice:", data.return_doc.name);
+			console.log(
+				"Return against existing invoice:",
+				data.return_doc.name,
+			);
 			discount_amount.value = data.return_doc.discount_amount || 0;
 			additional_discount.value = data.return_doc.discount_amount || 0;
 			return_doc.value = data.return_doc;

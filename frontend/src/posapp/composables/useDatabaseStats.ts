@@ -1,11 +1,13 @@
 import { ref, onUnmounted } from "vue";
 
+declare const frappe: any;
+
 export function useDatabaseStats(pollInterval = 10000, windowSize = 60) {
-	const dbStats = ref(null);
-	const history = ref([]);
+	const dbStats = ref<any>(null);
+	const history = ref<any[]>([]);
 	const loading = ref(true);
-	const error = ref(null);
-	let timer = null;
+	const error = ref<string | null>(null);
+	let timer: number | null = null;
 
 	async function fetchDatabaseStats() {
 		loading.value = true;
@@ -21,7 +23,7 @@ export function useDatabaseStats(pollInterval = 10000, windowSize = 60) {
 			} else {
 				error.value = "No data from server";
 			}
-		} catch (e) {
+		} catch (e: any) {
 			error.value = e.message || e;
 		} finally {
 			loading.value = false;

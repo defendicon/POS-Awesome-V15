@@ -212,7 +212,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { formatUtils } from "../../format";
-import { getSmartTenderSuggestions } from "../../../utils/smartTender.js";
+import { getSmartTenderSuggestions } from "../../../utils/smartTender";
 
 defineOptions({
 	name: "PurchasePaymentDialog",

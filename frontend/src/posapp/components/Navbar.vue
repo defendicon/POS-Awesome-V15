@@ -126,7 +126,7 @@ import AboutDialog from "./navbar/AboutDialog.vue";
 import OfflineInvoices from "./OfflineInvoices.vue";
 import posLogo from "./pos/pos.png";
 import { forceClearAllCache } from "../../offline/index.js";
-import { clearAllCaches } from "../../utils/clearAllCaches.js";
+import { clearAllCaches } from "../../utils/clearAllCaches";
 import { isOffline } from "../../offline/index.js";
 import { useRtl } from "../composables/useRtl";
 

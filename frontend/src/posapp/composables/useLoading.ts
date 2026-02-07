@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 // @ts-ignore
-import config from "../config/loading.js";
+import config from "../config/loading";
 
 const loaders = ref(new Map<string, number>());
 const overlayVisible = ref(false);
@@ -44,7 +44,10 @@ export function stop(id = "global") {
 	if (id === "global") manageOverlay();
 }
 
-export function withLoading<T>(fn: () => T | Promise<T>, id = "global"): Promise<T> {
+export function withLoading<T>(
+	fn: () => T | Promise<T>,
+	id = "global",
+): Promise<T> {
 	start(id);
 	return Promise.resolve()
 		.then(fn)
@@ -54,7 +57,14 @@ export function withLoading<T>(fn: () => T | Promise<T>, id = "global"): Promise
 export function useLoading() {
 	const isLoading = (id = "global") => computed(() => loaders.value.has(id));
 	const isAnyLoading = computed(() => loaders.value.size > 0);
-	return { start, stop, withLoading, isLoading, isAnyLoading, overlayVisible };
+	return {
+		start,
+		stop,
+		withLoading,
+		isLoading,
+		isAnyLoading,
+		overlayVisible,
+	};
 }
 
 export const isAnyLoading = computed(() => loaders.value.size > 0);

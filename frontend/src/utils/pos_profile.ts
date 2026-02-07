@@ -5,11 +5,12 @@ import {
 	setTermsAndConditions,
 } from "../offline/index.js";
 
-async function cachePrintTemplateAndTerms(profile) {
+declare const frappe: any;
+
+async function cachePrintTemplateAndTerms(profile: any) {
 	if (!profile || typeof frappe === "undefined" || !navigator.onLine) return;
 
 	try {
-		// always use built-in offline template instead of cached print formats
 		setPrintTemplate("");
 	} catch (e) {
 		console.error("Failed to reset print template", e);
@@ -35,7 +36,7 @@ async function cachePrintTemplateAndTerms(profile) {
 	}
 }
 
-function hasProfileChanged(currentProfile, nextProfile) {
+function hasProfileChanged(currentProfile: any, nextProfile: any) {
 	if (!nextProfile) return false;
 	if (!currentProfile) return true;
 	if (currentProfile.name !== nextProfile.name) return true;
@@ -45,8 +46,8 @@ function hasProfileChanged(currentProfile, nextProfile) {
 	return false;
 }
 
-function updateOpeningStorageProfile(profile) {
-	const cached = getOpeningStorage();
+function updateOpeningStorageProfile(profile: any) {
+	const cached = getOpeningStorage() as any;
 	if (cached?.pos_profile) {
 		setOpeningStorage({ ...cached, pos_profile: profile });
 	}
@@ -54,7 +55,11 @@ function updateOpeningStorageProfile(profile) {
 
 export async function ensurePosProfile() {
 	const bootProfile = frappe?.boot?.pos_profile;
-	if (bootProfile && bootProfile.warehouse && bootProfile.selling_price_list) {
+	if (
+		bootProfile &&
+		bootProfile.warehouse &&
+		bootProfile.selling_price_list
+	) {
 		await cachePrintTemplateAndTerms(bootProfile);
 		if (navigator.onLine) {
 			try {
@@ -62,7 +67,10 @@ export async function ensurePosProfile() {
 					method: "posawesome.posawesome.api.utils.get_active_pos_profile",
 					args: { user: frappe.session.user },
 				});
-				if (res.message && hasProfileChanged(bootProfile, res.message)) {
+				if (
+					res.message &&
+					hasProfileChanged(bootProfile, res.message)
+				) {
 					frappe.boot.pos_profile = res.message;
 					updateOpeningStorageProfile(res.message);
 					await cachePrintTemplateAndTerms(res.message);
@@ -88,7 +96,7 @@ export async function ensurePosProfile() {
 	} catch (e) {
 		console.error("Failed to fetch active POS profile", e);
 	}
-	const cached = getOpeningStorage();
+	const cached = getOpeningStorage() as any;
 	if (cached && cached.pos_profile) {
 		await cachePrintTemplateAndTerms(cached.pos_profile);
 		return cached.pos_profile;

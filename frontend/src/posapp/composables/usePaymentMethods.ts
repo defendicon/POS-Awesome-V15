@@ -1,6 +1,6 @@
 import { ref, unref, type Ref, type ComputedRef } from "vue";
 // @ts-ignore
-import { getSmartTenderSuggestions } from "../../utils/smartTender.js";
+import { getSmartTenderSuggestions } from "../../utils/smartTender";
 
 declare const frappe: any;
 declare const __: (_str: string, _args?: any[]) => string;

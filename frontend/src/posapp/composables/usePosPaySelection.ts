@@ -1,14 +1,21 @@
-import { ref, computed } from "vue";
+import { ref, computed, type Ref } from "vue";
 
-export function usePosPaySelection({ posProfile, currency_filter }) {
-	const selected_invoices = ref([]);
-	const selected_payments = ref([]);
-	const selected_mpesa_payments = ref([]);
-	const payment_methods = ref([]);
+declare const flt: (_value: unknown, _precision?: number) => number;
+
+type PosPaySelectionArgs = {
+	posProfile: Ref<any>;
+	currency_filter: Ref<string>;
+};
+
+export function usePosPaySelection({ posProfile, currency_filter }: PosPaySelectionArgs) {
+	const selected_invoices = ref<any[]>([]);
+	const selected_payments = ref<any[]>([]);
+	const selected_mpesa_payments = ref<any[]>([]);
+	const payment_methods = ref<any[]>([]);
 
 	const total_selected_invoices = computed(() => {
 		if (!selected_invoices.value.length) return 0;
-		return selected_invoices.value.reduce((acc, cur) => {
+		return selected_invoices.value.reduce((acc: number, cur: any) => {
 			const invoice_currency = cur.currency || posProfile.value.currency;
 			if (
 				currency_filter.value === "ALL" ||
@@ -23,17 +30,20 @@ export function usePosPaySelection({ posProfile, currency_filter }) {
 
 	const total_selected_payments = computed(() => {
 		if (!selected_payments.value.length) return 0;
-		return selected_payments.value.reduce((acc, cur) => acc + flt(cur?.unallocated_amount || 0), 0);
+		return selected_payments.value.reduce(
+			(acc: number, cur: any) => acc + flt(cur?.unallocated_amount || 0),
+			0,
+		);
 	});
 
 	const total_selected_mpesa_payments = computed(() => {
 		if (!selected_mpesa_payments.value.length) return 0;
-		return selected_mpesa_payments.value.reduce((acc, cur) => acc + flt(cur?.amount || 0), 0);
+		return selected_mpesa_payments.value.reduce((acc: number, cur: any) => acc + flt(cur?.amount || 0), 0);
 	});
 
 	const total_payment_methods = computed(() => {
 		if (!payment_methods.value.length) return 0;
-		return payment_methods.value.reduce((acc, cur) => {
+		return payment_methods.value.reduce((acc: number, cur: any) => {
 			const amount = parseFloat(cur?.amount || 0);
 			return acc + (isNaN(amount) ? 0 : amount);
 		}, 0);
@@ -46,8 +56,8 @@ export function usePosPaySelection({ posProfile, currency_filter }) {
 		return flt(invoiceTotal - paymentTotal);
 	});
 
-	function toggleInvoiceSelection(item, customerName, onCustomerSelected) {
-		const index = selected_invoices.value.findIndex((i) => i.voucher_no === item.voucher_no);
+	function toggleInvoiceSelection(item: any, customerName: Ref<string>, onCustomerSelected?: (_v: string) => void) {
+		const index = selected_invoices.value.findIndex((i: any) => i.voucher_no === item.voucher_no);
 		if (index > -1) {
 			selected_invoices.value.splice(index, 1);
 		} else {
@@ -58,8 +68,8 @@ export function usePosPaySelection({ posProfile, currency_filter }) {
 		}
 	}
 
-	function isInvoiceSelected(item) {
-		return selected_invoices.value.some((i) => i.voucher_no === item.voucher_no);
+	function isInvoiceSelected(item: any) {
+		return selected_invoices.value.some((i: any) => i.voucher_no === item.voucher_no);
 	}
 
 	function clearSelections() {

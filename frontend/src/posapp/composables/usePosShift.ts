@@ -10,15 +10,17 @@ import {
 	setTaxTemplate,
 } from "../../offline/index.js";
 
-export function usePosShift(openDialog) {
+declare const frappe: any;
+
+export function usePosShift(openDialog?: () => void) {
 	const instance = getCurrentInstance();
-	const proxy = instance?.proxy;
-	const eventBus = proxy?.eventBus || inject("eventBus");
+	const proxy: any = instance?.proxy;
+	const eventBus: any = proxy?.eventBus || inject("eventBus");
 	const toastStore = useToastStore();
 	const uiStore = useUIStore();
 
-	const pos_profile = ref(null);
-	const pos_opening_shift = ref(null);
+	const pos_profile = ref<any>(null);
+	const pos_opening_shift = ref<any>(null);
 
 	async function check_opening_entry() {
 		await initPromise;
@@ -27,7 +29,7 @@ export function usePosShift(openDialog) {
 			.call("posawesome.posawesome.api.shifts.check_opening_shift", {
 				user: frappe.session.user,
 			})
-			.then((r) => {
+			.then((r: any) => {
 				if (r.message) {
 					pos_profile.value = r.message.pos_profile;
 					pos_opening_shift.value = r.message.pos_opening_shift;
@@ -38,14 +40,16 @@ export function usePosShift(openDialog) {
 								doctype: "Sales Taxes and Charges Template",
 								name: pos_profile.value.taxes_and_charges,
 							},
-							callback: (res) => {
+							callback: (res: any) => {
 								if (res.message) {
-									setTaxTemplate(pos_profile.value.taxes_and_charges, res.message);
+									setTaxTemplate(
+										pos_profile.value.taxes_and_charges,
+										res.message,
+									);
 								}
 							},
 						});
 					}
-					// Update Store
 					uiStore.setRegisterData(r.message);
 
 					try {
@@ -61,12 +65,10 @@ export function usePosShift(openDialog) {
 					}
 				} else {
 					console.info("No opening shift found, opening dialog");
-					const data = getOpeningStorage();
+					const data: any = getOpeningStorage();
 					if (data) {
 						pos_profile.value = data.pos_profile;
 						pos_opening_shift.value = data.pos_opening_shift;
-
-						// Update Store
 						uiStore.setRegisterData(data);
 
 						try {
@@ -80,14 +82,12 @@ export function usePosShift(openDialog) {
 					openDialog && openDialog();
 				}
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error("Error checking opening entry", err);
-				const data = getOpeningStorage();
+				const data: any = getOpeningStorage();
 				if (data) {
 					pos_profile.value = data.pos_profile;
 					pos_opening_shift.value = data.pos_opening_shift;
-
-					// Update Store
 					uiStore.setRegisterData(data);
 
 					try {
@@ -103,7 +103,8 @@ export function usePosShift(openDialog) {
 	}
 
 	function get_closing_data() {
-		const cachedOpeningShift = getOpeningStorage()?.pos_opening_shift;
+		const cachedOpeningShift = (getOpeningStorage() as any)
+			?.pos_opening_shift;
 		if (!pos_opening_shift.value && cachedOpeningShift) {
 			pos_opening_shift.value = cachedOpeningShift;
 		}
@@ -115,36 +116,45 @@ export function usePosShift(openDialog) {
 				"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.make_closing_shift_from_opening",
 				{ opening_shift: pos_opening_shift.value },
 			)
-			.then((r) => {
+			.then((r: any) => {
 				if (r.message) {
 					eventBus?.emit("open_ClosingDialog", r.message);
 				}
 			});
 	}
 
-	function submit_closing_pos(data) {
+	function submit_closing_pos(data: any) {
 		console.log("Submitting closing shift", data);
 		frappe
-			.call("posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.submit_closing_shift", {
-				closing_shift: JSON.stringify(data),
-			})
-			.then((r) => {
+			.call(
+				"posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.submit_closing_shift",
+				{
+					closing_shift: JSON.stringify(data),
+				},
+			)
+			.then((r: any) => {
 				console.log("Submit result", r);
 				if (r.message) {
 					pos_profile.value = null;
 					pos_opening_shift.value = null;
 					clearOpeningStorage();
 					toastStore.show({
-						title: `POS Shift Closed`,
+						title: "POS Shift Closed",
 						color: "success",
 					});
 					check_opening_entry();
 				}
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error("Failed to submit closing shift", err);
 			});
 	}
 
-	return { pos_profile, pos_opening_shift, check_opening_entry, get_closing_data, submit_closing_pos };
+	return {
+		pos_profile,
+		pos_opening_shift,
+		check_opening_entry,
+		get_closing_data,
+		submit_closing_pos,
+	};
 }

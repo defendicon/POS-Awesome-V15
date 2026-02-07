@@ -1,18 +1,32 @@
 import { computed, unref } from "vue";
 
-export function useClosingSummary(overview, posProfile, dialogData, formatters) {
-	const { formatCurrencyWithSymbol, formatCount, formatCurrency, currencySymbol, __ } = formatters;
+type SummaryFormatters = {
+	formatCurrencyWithSymbol: (_value: number, _currency: string) => string;
+	formatCount: (_value: number) => string;
+	formatCurrency: (_value: number, _precision?: number) => string;
+	currencySymbol: (_currency: string) => string;
+	__: (_text: string, _args?: any[]) => string;
+};
+
+export function useClosingSummary(
+	overview: any,
+	posProfile: any,
+	dialogData: any,
+	formatters: SummaryFormatters,
+) {
+	const {
+		formatCurrencyWithSymbol,
+		formatCount,
+		formatCurrency,
+		currencySymbol,
+		__,
+	} = formatters;
 
 	const overviewCompanyCurrency = computed(() => {
 		const ov = unref(overview);
 		const prof = unref(posProfile);
 		const data = unref(dialogData);
-		return (
-			ov?.company_currency ||
-			prof?.currency ||
-			data?.currency ||
-			""
-		);
+		return ov?.company_currency || prof?.currency || data?.currency || "";
 	});
 
 	const companyCurrencySymbol = computed(() => {
@@ -35,20 +49,36 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 
 	const creditInvoices = computed(() => {
 		const ov = unref(overview);
-		return ov?.credit_invoices || { count: 0, company_currency_total: 0, by_currency: [] };
+		return (
+			ov?.credit_invoices || {
+				count: 0,
+				company_currency_total: 0,
+				by_currency: [],
+			}
+		);
 	});
 
 	const creditInvoicesByCurrency = computed(() => {
-		return Array.isArray(creditInvoices.value.by_currency) ? creditInvoices.value.by_currency : [];
+		return Array.isArray(creditInvoices.value.by_currency)
+			? creditInvoices.value.by_currency
+			: [];
 	});
 
 	const returnsSummary = computed(() => {
 		const ov = unref(overview);
-		return ov?.returns || { count: 0, company_currency_total: 0, by_currency: [] };
+		return (
+			ov?.returns || {
+				count: 0,
+				company_currency_total: 0,
+				by_currency: [],
+			}
+		);
 	});
 
 	const returnsByCurrency = computed(() => {
-		return Array.isArray(returnsSummary.value.by_currency) ? returnsSummary.value.by_currency : [];
+		return Array.isArray(returnsSummary.value.by_currency)
+			? returnsSummary.value.by_currency
+			: [];
 	});
 
 	const changeReturnedSummary = computed(() => {
@@ -58,7 +88,10 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				company_currency_total: 0,
 				by_currency: [],
 				invoice_change: { company_currency_total: 0, by_currency: [] },
-				overpayment_change: { company_currency_total: 0, by_currency: [] },
+				overpayment_change: {
+					company_currency_total: 0,
+					by_currency: [],
+				},
 			}
 		);
 	});
@@ -100,42 +133,60 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 	});
 
 	const overpaymentChangeByCurrencyMap = computed(() => {
-		const map = new Map();
-		(overpaymentChangeReturnedByCurrency.value || []).forEach((item) => {
-			const currency = item.currency || overviewCompanyCurrency.value || "";
-			map.set(currency, {
-				total: item.total || 0,
-				company_currency_total: item.company_currency_total || 0,
-			});
-		});
+		const map = new Map<
+			string,
+			{ total: number; company_currency_total: number }
+		>();
+		(overpaymentChangeReturnedByCurrency.value || []).forEach(
+			(item: any) => {
+				const currency =
+					item.currency || overviewCompanyCurrency.value || "";
+				map.set(currency, {
+					total: item.total || 0,
+					company_currency_total: item.company_currency_total || 0,
+				});
+			},
+		);
 		return map;
 	});
 
 	const changeReturnedRows = computed(() => {
-		const buildCurrencyMap = (items) => {
-			const map = new Map();
-			(items || []).forEach((item) => {
-				const currency = item.currency || overviewCompanyCurrency.value || "";
+		const buildCurrencyMap = (items: any[]) => {
+			const map = new Map<string, any>();
+			(items || []).forEach((item: any) => {
+				const currency =
+					item.currency || overviewCompanyCurrency.value || "";
 				const existing = map.get(currency) || {
 					currency,
 					total: 0,
 					company_currency_total: 0,
-					exchange_rates: new Set(),
+					exchange_rates: new Set<number>(),
 				};
 
 				existing.total += item.total || 0;
-				existing.company_currency_total += item.company_currency_total || 0;
-				(item.exchange_rates || []).forEach((rate) => existing.exchange_rates.add(rate));
+				existing.company_currency_total +=
+					item.company_currency_total || 0;
+				(item.exchange_rates || []).forEach((rate: number) =>
+					existing.exchange_rates.add(rate),
+				);
 				map.set(currency, existing);
 			});
 			return map;
 		};
 
-		const invoiceMap = buildCurrencyMap(invoiceChangeReturnedByCurrency.value);
-		const overpaymentMap = buildCurrencyMap(overpaymentChangeReturnedByCurrency.value);
+		const invoiceMap = buildCurrencyMap(
+			invoiceChangeReturnedByCurrency.value,
+		);
+		const overpaymentMap = buildCurrencyMap(
+			overpaymentChangeReturnedByCurrency.value,
+		);
 		const totalMap = buildCurrencyMap(changeReturnedByCurrency.value);
 
-		const currencies = new Set([...invoiceMap.keys(), ...overpaymentMap.keys(), ...totalMap.keys()]);
+		const currencies = new Set([
+			...invoiceMap.keys(),
+			...overpaymentMap.keys(),
+			...totalMap.keys(),
+		]);
 
 		const rows = Array.from(currencies).map((currency) => {
 			const invoiceEntry = invoiceMap.get(currency);
@@ -143,11 +194,15 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 			const totalEntry = totalMap.get(currency);
 
 			const invoiceTotal = invoiceEntry?.total || 0;
-			const invoiceCompanyTotal = invoiceEntry?.company_currency_total || 0;
-			const invoiceExchangeRates = new Set(invoiceEntry?.exchange_rates || []);
+			const invoiceCompanyTotal =
+				invoiceEntry?.company_currency_total || 0;
+			const invoiceExchangeRates = new Set(
+				invoiceEntry?.exchange_rates || [],
+			);
 
 			const overpaymentTotal = overpaymentEntry?.total || 0;
-			const overpaymentCompanyTotal = overpaymentEntry?.company_currency_total || 0;
+			const overpaymentCompanyTotal =
+				overpaymentEntry?.company_currency_total || 0;
 
 			const exchangeRates = new Set([
 				...invoiceExchangeRates,
@@ -155,7 +210,9 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				...(totalEntry?.exchange_rates || []),
 			]);
 
-			const total = totalEntry ? totalEntry.total || 0 : invoiceTotal + overpaymentTotal;
+			const total = totalEntry
+				? totalEntry.total || 0
+				: invoiceTotal + overpaymentTotal;
 			const companyTotal = totalEntry
 				? totalEntry.company_currency_total || 0
 				: invoiceCompanyTotal + overpaymentCompanyTotal;
@@ -172,7 +229,9 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 			};
 		});
 
-		return rows.sort((a, b) => (a.currency || "").localeCompare(b.currency || ""));
+		return rows.sort((a: any, b: any) =>
+			(a.currency || "").localeCompare(b.currency || ""),
+		);
 	});
 
 	const cashExpectedSummary = computed(() => {
@@ -223,9 +282,7 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				key: "total-invoices",
 				label: __("Total Invoices"),
 				value: formatCount(unref(overview)?.total_invoices || 0),
-				caption: `${__("Sales processed")}: ${formatCount(
-					salesSummary.value.sale_invoices_count || 0,
-				)}`,
+				caption: `${__("Sales processed")}: ${formatCount(salesSummary.value.sale_invoices_count || 0)}`,
 				icon: "mdi-receipt-text-multiple",
 				color: "accent-primary",
 			},
@@ -233,9 +290,7 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				key: "net-sales",
 				label: __("Net Sales"),
 				value: netSales,
-				caption: `${__("After returns")}: ${formatCurrency(
-					salesSummary.value.net_company_currency_total,
-				)}`,
+				caption: `${__("After returns")}: ${formatCurrency(salesSummary.value.net_company_currency_total)}`,
 				icon: "mdi-cash-multiple",
 				color: "accent-success",
 			},
@@ -251,9 +306,7 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				key: "average-ticket",
 				label: __("Average Ticket"),
 				value: avgInvoice,
-				caption: `${__("Across")}: ${formatCount(
-					salesSummary.value.sale_invoices_count || 0,
-				)} ${__("sales")}`,
+				caption: `${__("Across")}: ${formatCount(salesSummary.value.sale_invoices_count || 0)} ${__("sales")}`,
 				icon: "mdi-chart-donut",
 				color: "accent-info",
 			},
@@ -283,9 +336,7 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				key: "credit-sales",
 				label: __("Credit Outstanding"),
 				value: creditValue,
-				caption: `${__("Open invoices")}: ${formatCount(
-					creditInvoices.value.count || 0,
-				)}`,
+				caption: `${__("Open invoices")}: ${formatCount(creditInvoices.value.count || 0)}`,
 				icon: "mdi-account-cash-outline",
 				color: "accent-warning",
 			},
@@ -293,9 +344,7 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 				key: "returns",
 				label: __("Returns"),
 				value: returnsValue,
-				caption: `${__("Return count")}: ${formatCount(
-					returnsSummary.value.count || 0,
-				)}`,
+				caption: `${__("Return count")}: ${formatCount(returnsSummary.value.count || 0)}`,
 				icon: "mdi-undo-variant",
 				color: "accent-secondary",
 			},
@@ -320,8 +369,7 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 		];
 	});
 
-	// Helpers for template formatting
-	const shouldShowCompanyEquivalent = (row, currency) => {
+	const shouldShowCompanyEquivalent = (row: any, currency: string) => {
 		const resolvedCurrency = currency || row?.currency || "";
 		if (!resolvedCurrency) {
 			return false;
@@ -337,28 +385,42 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 		}
 
 		const amount = Number(row?.total);
-		if (Number.isFinite(amount) && Math.abs(amount - companyTotal) < 0.005) {
+		if (
+			Number.isFinite(amount) &&
+			Math.abs(amount - companyTotal) < 0.005
+		) {
 			return false;
 		}
 
 		return Math.abs(companyTotal) > 0.0001;
 	};
 
-	const showExchangeRates = (row, currency) => {
+	const showExchangeRates = (row: any, currency: string) => {
 		const resolvedCurrency = currency || row?.currency || "";
-		if (!resolvedCurrency || resolvedCurrency === overviewCompanyCurrency.value) {
+		if (
+			!resolvedCurrency ||
+			resolvedCurrency === overviewCompanyCurrency.value
+		) {
 			return false;
 		}
-		return Array.isArray(row?.exchange_rates) && row.exchange_rates.length > 0;
+		return (
+			Array.isArray(row?.exchange_rates) && row.exchange_rates.length > 0
+		);
 	};
 
-	const formatExchangeRates = (rates, sourceCurrency, targetCurrency) => {
+	const formatExchangeRates = (
+		rates: unknown[],
+		sourceCurrency: string,
+		targetCurrency: string,
+	) => {
 		if (!sourceCurrency || !targetCurrency) {
 			return "";
 		}
 
 		const validRates = Array.isArray(rates)
-			? rates.map((rate) => Number(rate)).filter((rate) => Number.isFinite(rate) && rate > 0)
+			? rates
+					.map((rate) => Number(rate))
+					.filter((rate) => Number.isFinite(rate) && rate > 0)
 			: [];
 
 		if (!validRates.length) {
@@ -374,12 +436,12 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 		return `${__("Exchange Rate")}: ${formattedRates.join(" • ")}`;
 	};
 
-	const isCashMode = (modeOfPayment) => {
+	const isCashMode = (modeOfPayment: string) => {
 		const cashMode = cashExpectedSummary.value?.mode_of_payment || "";
 		return Boolean(cashMode && modeOfPayment === cashMode);
 	};
 
-	const overpaymentDeductionForCurrency = (currency) => {
+	const overpaymentDeductionForCurrency = (currency: string) => {
 		const key = currency || overviewCompanyCurrency.value || "";
 		const entry = overpaymentChangeByCurrencyMap.value.get(key);
 		return entry?.total || 0;
@@ -396,7 +458,6 @@ export function useClosingSummary(overview, posProfile, dialogData, formatters) 
 		cashExpectedByCurrency,
 		primaryInsights,
 		secondaryInsights,
-		// Helpers
 		shouldShowCompanyEquivalent,
 		showExchangeRates,
 		formatExchangeRates,

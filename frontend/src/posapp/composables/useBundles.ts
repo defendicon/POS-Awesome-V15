@@ -1,7 +1,9 @@
-const cache = new Map();
+declare const frappe: any;
+
+const cache = new Map<string, { data: any[]; ts: number }>();
 
 export function useBundles() {
-	const getComponents = async (bundleCode) => {
+	const getComponents = async (bundleCode: string) => {
 		const cached = cache.get(bundleCode);
 		const now = Date.now();
 		if (cached && now - cached.ts < 60000) {
@@ -12,7 +14,8 @@ export function useBundles() {
 				method: "posawesome.posawesome.api.bundles.get_bundle_components",
 				args: { bundles: [bundleCode] },
 			});
-			const data = r.message && r.message[bundleCode] ? r.message[bundleCode] : [];
+			const data =
+				r.message && r.message[bundleCode] ? r.message[bundleCode] : [];
 			cache.set(bundleCode, { data, ts: now });
 			return data;
 		} catch (e) {

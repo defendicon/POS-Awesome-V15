@@ -1,12 +1,19 @@
 import { useToastStore } from "../../stores/toastStore";
 
-export function useInvoicePrinting(pos_profile, load_print_page, save_and_clear_invoice, invoice_doc) {
+declare const __: (_text: string, _args?: any[]) => string;
+
+export function useInvoicePrinting(
+	pos_profile: any,
+	load_print_page: (_name: string) => void,
+	save_and_clear_invoice: () => Promise<any>,
+	invoice_doc: any,
+) {
 	const toastStore = useToastStore();
 
 	const print_draft_invoice = async () => {
 		if (!pos_profile.value.posa_allow_print_draft_invoices) {
 			toastStore.show({
-				title: __(`You are not allowed to print draft invoices`),
+				title: __("You are not allowed to print draft invoices"),
 				color: "error",
 			});
 			return;

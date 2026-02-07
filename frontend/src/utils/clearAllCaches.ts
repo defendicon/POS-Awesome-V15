@@ -1,25 +1,30 @@
 const DEFAULT_INDEXED_DB_NAMES = ["posawesome_offline"];
 
-async function delay(ms) {
+async function delay(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function clearLocalStorage(keys = []) {
+export async function clearLocalStorage(keys: string[] = []) {
 	if (typeof localStorage === "undefined") return;
 	try {
 		if (keys.length) {
 			keys.forEach((k) => localStorage.removeItem(k));
 		} else {
-			Object.keys(localStorage).forEach((key) => localStorage.removeItem(key));
+			Object.keys(localStorage).forEach((key) =>
+				localStorage.removeItem(key),
+			);
 		}
-		console.log("[ClearAllCaches] localStorage cleared", keys.length ? keys : "all");
+		console.log(
+			"[ClearAllCaches] localStorage cleared",
+			keys.length ? keys : "all",
+		);
 	} catch (e) {
 		console.error("[ClearAllCaches] Failed to clear localStorage", e);
 		throw e;
 	}
 }
 
-export async function clearSessionStorage(keys = []) {
+export async function clearSessionStorage(keys: string[] = []) {
 	if (typeof sessionStorage === "undefined") return;
 	try {
 		if (keys.length) {
@@ -27,24 +32,30 @@ export async function clearSessionStorage(keys = []) {
 		} else {
 			sessionStorage.clear();
 		}
-		console.log("[ClearAllCaches] sessionStorage cleared", keys.length ? keys : "all");
+		console.log(
+			"[ClearAllCaches] sessionStorage cleared",
+			keys.length ? keys : "all",
+		);
 	} catch (e) {
 		console.error("[ClearAllCaches] Failed to clear sessionStorage", e);
 		throw e;
 	}
 }
 
-export async function clearIndexedDB(databases = []) {
+export async function clearIndexedDB(databases: string[] = []) {
 	if (typeof indexedDB === "undefined") return;
 	try {
 		let targets = Array.isArray(databases) ? [...databases] : [];
 
-		if (!targets.length && indexedDB.databases) {
+		if (!targets.length && (indexedDB as any).databases) {
 			try {
-				const infos = await indexedDB.databases();
-				targets = infos.map((d) => d && d.name).filter(Boolean);
+				const infos = await (indexedDB as any).databases();
+				targets = infos.map((d: any) => d && d.name).filter(Boolean);
 			} catch (enumerationError) {
-				console.warn("[ClearAllCaches] Failed to enumerate IndexedDB databases", enumerationError);
+				console.warn(
+					"[ClearAllCaches] Failed to enumerate IndexedDB databases",
+					enumerationError,
+				);
 			}
 		}
 		if (!targets.length) {
@@ -58,8 +69,8 @@ export async function clearIndexedDB(databases = []) {
 				(dbName) =>
 					new Promise((resolve, reject) => {
 						const req = indexedDB.deleteDatabase(dbName);
-						req.onsuccess = () => resolve();
-						req.onblocked = () => resolve();
+						req.onsuccess = () => resolve(true);
+						req.onblocked = () => resolve(true);
 						req.onerror = () => reject(req.error);
 					}),
 			),
@@ -73,35 +84,43 @@ export async function clearIndexedDB(databases = []) {
 	}
 }
 
-export async function clearCacheAPI(cacheNames = []) {
+export async function clearCacheAPI(cacheNames: string[] = []) {
 	if (typeof caches === "undefined") return;
 	try {
-		if (!cacheNames.length) {
-			cacheNames = await caches.keys();
+		let cacheTargets = cacheNames;
+		if (!cacheTargets.length) {
+			cacheTargets = await caches.keys();
 		}
-		await Promise.all(cacheNames.map((name) => caches.delete(name)));
-		console.log("[ClearAllCaches] Cache API cleared", cacheNames.length ? cacheNames : "all");
+		await Promise.all(cacheTargets.map((name) => caches.delete(name)));
+		console.log(
+			"[ClearAllCaches] Cache API cleared",
+			cacheTargets.length ? cacheTargets : "all",
+		);
 	} catch (e) {
 		console.error("[ClearAllCaches] Failed to clear Cache API", e);
 		throw e;
 	}
 }
 
-export async function unregisterServiceWorkers(scopes = []) {
+export async function unregisterServiceWorkers(scopes: string[] = []) {
 	if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
 		return;
 	}
 
 	const requestedScopes = Array.isArray(scopes) ? scopes.filter(Boolean) : [];
 
-	const unregister = async (registration) => {
+	const unregister = async (
+		registration: ServiceWorkerRegistration | null,
+	) => {
 		if (!registration) return;
 		try {
 			const scope = registration.scope;
 			await registration.unregister();
 			if (registration.active) {
 				try {
-					registration.active.postMessage({ type: "CLIENT_FORCE_UNREGISTER" });
+					registration.active.postMessage({
+						type: "CLIENT_FORCE_UNREGISTER",
+					});
 				} catch (postMessageError) {
 					console.warn(
 						`[ClearAllCaches] Failed to notify active service worker for scope ${scope}`,
@@ -111,7 +130,9 @@ export async function unregisterServiceWorkers(scopes = []) {
 			}
 			if (registration.waiting) {
 				try {
-					registration.waiting.postMessage({ type: "CLIENT_FORCE_UNREGISTER" });
+					registration.waiting.postMessage({
+						type: "CLIENT_FORCE_UNREGISTER",
+					});
 				} catch (postMessageError) {
 					console.warn(
 						`[ClearAllCaches] Failed to notify waiting service worker for scope ${scope}`,
@@ -121,7 +142,9 @@ export async function unregisterServiceWorkers(scopes = []) {
 			}
 			if (registration.installing) {
 				try {
-					registration.installing.postMessage({ type: "CLIENT_FORCE_UNREGISTER" });
+					registration.installing.postMessage({
+						type: "CLIENT_FORCE_UNREGISTER",
+					});
 				} catch (postMessageError) {
 					console.warn(
 						`[ClearAllCaches] Failed to notify installing service worker for scope ${scope}`,
@@ -131,15 +154,20 @@ export async function unregisterServiceWorkers(scopes = []) {
 			}
 			return scope;
 		} catch (error) {
-			console.error("[ClearAllCaches] Failed to unregister service worker", error);
+			console.error(
+				"[ClearAllCaches] Failed to unregister service worker",
+				error,
+			);
 			throw error;
 		}
 	};
 
 	try {
-		let registrations = [];
+		let registrations: ServiceWorkerRegistration[] = [];
 		if (navigator.serviceWorker.getRegistrations) {
-			registrations = await navigator.serviceWorker.getRegistrations();
+			registrations = Array.from(
+				await navigator.serviceWorker.getRegistrations(),
+			);
 		} else if (navigator.serviceWorker.getRegistration) {
 			const single = await navigator.serviceWorker.getRegistration();
 			if (single) {
@@ -149,19 +177,30 @@ export async function unregisterServiceWorkers(scopes = []) {
 
 		if (requestedScopes.length) {
 			registrations = registrations.filter((registration) =>
-				requestedScopes.some((scope) => registration.scope.includes(scope)),
+				requestedScopes.some((scope) =>
+					registration.scope.includes(scope),
+				),
 			);
-			// For scopes that did not have an eager registration fetch, try fetching directly
 			const missingScopes = requestedScopes.filter(
-				(scope) => !registrations.some((registration) => registration.scope.includes(scope)),
+				(scope) =>
+					!registrations.some((registration) =>
+						registration.scope.includes(scope),
+					),
 			);
-			if (missingScopes.length && navigator.serviceWorker.getRegistration) {
+			if (
+				missingScopes.length &&
+				navigator.serviceWorker.getRegistration
+			) {
 				const fetched = await Promise.all(
 					missingScopes.map((scope) =>
-						navigator.serviceWorker.getRegistration(scope).catch(() => null),
+						navigator.serviceWorker
+							.getRegistration(scope)
+							.catch(() => null),
 					),
 				);
-				registrations.push(...fetched.filter(Boolean));
+				registrations.push(
+					...(fetched.filter(Boolean) as ServiceWorkerRegistration[]),
+				);
 			}
 		}
 
@@ -170,35 +209,42 @@ export async function unregisterServiceWorkers(scopes = []) {
 		}
 
 		const scopesCleared = (
-			await Promise.all(registrations.map((registration) => unregister(registration)))
+			await Promise.all(
+				registrations.map((registration) => unregister(registration)),
+			)
 		).filter(Boolean);
 
 		if (scopesCleared.length) {
-			console.log("[ClearAllCaches] Service workers unregistered", scopesCleared);
+			console.log(
+				"[ClearAllCaches] Service workers unregistered",
+				scopesCleared,
+			);
 		}
 
-		// Allow the browser a brief moment to detach controllers before subsequent cache removal
 		await delay(100);
 	} catch (error) {
-		console.error("[ClearAllCaches] Failed during service worker cleanup", error);
+		console.error(
+			"[ClearAllCaches] Failed during service worker cleanup",
+			error,
+		);
 		throw error;
 	}
 }
 
-export async function clearAllCaches(
-	options = {
-		confirmBeforeClear: true,
-		onSuccess: () => {},
-		onError: () => {},
-		specificKeys: [],
-		specificDatabases: [],
-		specificCaches: [],
-		skipStorage: [],
-		skipServiceWorkers: false,
-		serviceWorkerScopes: [],
-	},
-) {
-	const opts = Object.assign(
+type ClearAllCachesOptions = {
+	confirmBeforeClear?: boolean;
+	onSuccess?: () => void;
+	onError?: (_error: unknown) => void;
+	specificKeys?: string[];
+	specificDatabases?: string[];
+	specificCaches?: string[];
+	skipStorage?: string[];
+	skipServiceWorkers?: boolean;
+	serviceWorkerScopes?: string[];
+};
+
+export async function clearAllCaches(options: ClearAllCachesOptions = {}) {
+	const opts: Required<ClearAllCachesOptions> = Object.assign(
 		{
 			confirmBeforeClear: true,
 			onSuccess: () => {},
@@ -215,7 +261,8 @@ export async function clearAllCaches(
 
 	try {
 		if (opts.confirmBeforeClear && typeof window !== "undefined") {
-			const confirmMsg = "Are you sure you want to clear application cache?";
+			const confirmMsg =
+				"Are you sure you want to clear application cache?";
 			if (!window.confirm(confirmMsg)) {
 				return;
 			}
@@ -225,7 +272,7 @@ export async function clearAllCaches(
 			await unregisterServiceWorkers(opts.serviceWorkerScopes);
 		}
 
-		const tasks = [];
+		const tasks: Array<Promise<void>> = [];
 		if (!opts.skipStorage.includes("localStorage")) {
 			tasks.push(clearLocalStorage(opts.specificKeys));
 		}
@@ -246,7 +293,6 @@ export async function clearAllCaches(
 	}
 }
 
-// Attach default UI and keyboard integrations when running in browser
 if (typeof window !== "undefined") {
 	document.addEventListener("keydown", (e) => {
 		if (e.ctrlKey && e.shiftKey && e.code === "KeyR") {
@@ -258,7 +304,9 @@ if (typeof window !== "undefined") {
 	document.addEventListener("DOMContentLoaded", () => {
 		const btn = document.getElementById("clear-cache-btn");
 		if (btn) {
-			btn.addEventListener("click", () => clearAllCaches().catch(() => {}));
+			btn.addEventListener("click", () =>
+				clearAllCaches().catch(() => {}),
+			);
 		}
 	});
 }

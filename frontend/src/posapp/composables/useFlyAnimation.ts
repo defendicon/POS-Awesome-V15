@@ -1,7 +1,16 @@
-export function useFlyAnimation(defaultOptions = {}) {
-	const activeClones = new Set();
+type FlyOptions = {
+	speed?: number;
+	easing?: string;
+};
 
-	const fly = (sourceEl, targetEl, options = {}) => {
+export function useFlyAnimation(defaultOptions: FlyOptions = {}) {
+	const activeClones = new Set<HTMLElement>();
+
+	const fly = (
+		sourceEl: Element | null,
+		targetEl: Element | null,
+		options: FlyOptions = {},
+	) => {
 		if (!sourceEl || !targetEl) {
 			return;
 		}
@@ -15,7 +24,7 @@ export function useFlyAnimation(defaultOptions = {}) {
 		const start = sourceEl.getBoundingClientRect();
 		const end = targetEl.getBoundingClientRect();
 
-		const clone = sourceEl.cloneNode(true);
+		const clone = sourceEl.cloneNode(true) as HTMLElement;
 		clone.style.position = "fixed";
 		clone.style.top = `${start.top}px`;
 		clone.style.left = `${start.left}px`;
@@ -24,11 +33,13 @@ export function useFlyAnimation(defaultOptions = {}) {
 		clone.style.margin = "0";
 		clone.style.pointerEvents = "none";
 		clone.style.transition = `transform ${speed}s ${easing}, opacity ${speed}s ${easing}`;
-		clone.style.zIndex = 1000;
+		clone.style.zIndex = "1000";
 		document.body.appendChild(clone);
 
-		const translateX = end.left + end.width / 2 - (start.left + start.width / 2);
-		const translateY = end.top + end.height / 2 - (start.top + start.height / 2);
+		const translateX =
+			end.left + end.width / 2 - (start.left + start.width / 2);
+		const translateY =
+			end.top + end.height / 2 - (start.top + start.height / 2);
 
 		requestAnimationFrame(() => {
 			clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(0.1)`;

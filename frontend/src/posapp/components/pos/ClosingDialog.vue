@@ -73,8 +73,8 @@
 <script>
 import { useUIStore } from "../../stores/uiStore.js";
 import { ref, inject, onMounted, onBeforeUnmount, watch } from "vue";
-import { useClosingShift } from "../../composables/useClosingShift.js";
-import { useClosingSummary } from "../../composables/useClosingSummary.js";
+import { useClosingShift } from "../../composables/useClosingShift";
+import { useClosingSummary } from "../../composables/useClosingSummary";
 
 import ClosingHeader from "./closing/ClosingHeader.vue";
 import ShiftOverview from "./closing/ShiftOverview.vue";

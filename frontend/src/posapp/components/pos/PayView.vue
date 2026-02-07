@@ -137,9 +137,9 @@ import { useUIStore } from "../../stores/uiStore.js";
 import { useToastStore } from "../../stores/toastStore.js";
 
 // Composables
-import { usePosPayData } from "../../composables/usePosPayData.js";
-import { usePosPaySelection } from "../../composables/usePosPaySelection.js";
-import { usePosPaySubmission } from "../../composables/usePosPaySubmission.js";
+import { usePosPayData } from "../../composables/usePosPayData";
+import { usePosPaySelection } from "../../composables/usePosPaySelection";
+import { usePosPaySubmission } from "../../composables/usePosPaySubmission";
 
 // Sub-components
 import PayInvoicesTable from "../pos_pay/PayInvoicesTable.vue";
