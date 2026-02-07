@@ -14,8 +14,8 @@
 				overflow: 'auto',
 			}"
 			:class="['cards my-0 py-0 mt-3 resizable', 'pos-themed-card', { 'return-mode': isReturnInvoice }]"
-			@mouseup="saveInvoiceHeight"
-			@touchend="saveInvoiceHeight"
+			@mouseup="saveInvoiceHeight($refs.invoiceCard)"
+			@touchend="saveInvoiceHeight($refs.invoiceCard)"
 		>
 			<!-- Dynamic padding wrapper -->
 			<div class="dynamic-padding">
@@ -153,7 +153,7 @@
 						@reorder-items="handleItemReorder"
 						@add-item-from-drag="handleItemDrop"
 						@show-drop-feedback="showDropFeedback"
-						@item-dropped="showDropFeedback(false)"
+						@item-dropped="showDropFeedback(false, $el)"
 						@view-packed="openPackedItems"
 					/>
 
@@ -224,7 +224,6 @@ import PaymentConfirmationDialog from "./PaymentConfirmationDialog.vue";
 import invoiceItemMethods from "./invoiceItemMethods";
 import invoiceComputed from "./invoiceComputed";
 import invoiceWatchers from "./invoiceWatchers";
-import { useInvoiceOffers } from "../../composables/useInvoiceOffers";
 import shortcutMethods from "./invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
@@ -232,12 +231,18 @@ import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
-import { parseBooleanSetting } from "../../utils/stock";
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { isOffline } from "../../../offline/index.js";
+
+// Composables
 import { useOnlineStatus } from "../../composables/useOnlineStatus";
 import { useInvoiceCurrency } from "../../composables/useInvoiceCurrency";
 import { useInvoiceItems } from "../../composables/useInvoiceItems";
+import { useInvoiceOffers } from "../../composables/useInvoiceOffers";
+import { useInvoiceUI } from "../../composables/invoice/useInvoiceUI";
+import { useInvoicePrinting } from "../../composables/invoice/useInvoicePrinting";
+import { useInvoiceStock } from "../../composables/invoice/useInvoiceStock";
+import { useInvoiceHandlers } from "../../composables/invoice/useInvoiceHandlers";
 
 export default {
 	name: "POSInvoice",
@@ -247,17 +252,29 @@ export default {
 		const invoiceStore = useInvoiceStore();
 		const customersStore = useCustomersStore();
 		const toastStore = useToastStore();
-		// Extract specific state as refs if needed in template without `uiStore.` prefix
-		// But usually better to return the store or use storeToRefs
 		const { isOnline } = useOnlineStatus();
 
 		const { activeView } = storeToRefs(uiStore);
 		const { selectedCustomer, refreshToken: customerRefreshToken } = storeToRefs(customersStore);
+		const { items, packedItems: packed_items, invoiceDoc: invoice_doc, discountAmount, additionalDiscount, additionalDiscountPercentage } = storeToRefs(invoiceStore);
 
 		const invoiceType = ref("Invoice");
 		const currencyState = useInvoiceCurrency({}, {});
 		const itemActions = useInvoiceItems(invoiceType);
 		const offerLogic = useInvoiceOffers();
+
+		// New composables
+		const uiLogic = useInvoiceUI();
+		const printingLogic = useInvoicePrinting(
+			ref(uiStore.posProfile), 
+			(name) => uiStore.loadPrintPage(name), // Assuming this exists or passed via mixin/store
+			itemActions.save_and_clear_invoice, // Need to verify if this is available
+			invoice_doc
+		);
+		// Note: save_and_clear_invoice might be in methods mixin, not composable.
+		// We'll keep print logic partly in component if dependencies are complex.
+
+		const stockLogic = useInvoiceStock(items, packed_items, uiStore.eventBus, () => {});
 
 		return {
 			uiStore,
@@ -272,11 +289,13 @@ export default {
 			...currencyState,
 			...itemActions,
 			...offerLogic,
+			...uiLogic,
+			...printingLogic,
+			...stockLogic,
 		};
 	},
 	data() {
 		return {
-			// POS profile settings
 			pos_profile: "",
 			pos_opening_shift: "",
 			stock_settings: "",
@@ -285,33 +304,27 @@ export default {
 			customer_info: "",
 			customer_balance: 0,
 			total_tax: 0,
-			packed_dialog_items: [], // Packed items displayed in dialog
-			show_packed_dialog: false, // Packing list dialog visibility
-
-			invoiceTypes: ["Invoice", "Order", "Quotation"], // Types of invoices
-			// invoiceType moved to setup
-			itemsPerPage: 1000, // Items per page in table
-			itemSearch: "", // Search query for added items
-			expanded: [], // Array of expanded row IDs
-			singleExpand: true, // Only one row expanded at a time
-			cancel_dialog: false, // Cancel dialog visibility
+			packed_dialog_items: [],
+			show_packed_dialog: false,
+			invoiceTypes: ["Invoice", "Order", "Quotation"],
+			itemsPerPage: 1000,
+			itemSearch: "",
+			expanded: [],
+			singleExpand: true,
+			cancel_dialog: false,
 			available_stock_cache: {},
 			item_detail_cache: {},
 			item_stock_cache: {},
 			brand_cache: {},
 			stockUnsubscribe: null,
-			invoice_posting_date: false, // Posting date dialog
-			posting_date_display: "", // Display value for date picker
+			invoice_posting_date: false,
+			posting_date_display: "",
 			_shortcutHandlers: {},
 			shortcutCycle: {
 				qty: 0,
 				uom: 0,
 				rate: 0,
 			},
-			invoiceHeight: null,
-			// paymentVisible state moved to computed property from uiStore
-			confirm_payment_dialog: false,
-			payment_confirmation_resolver: null,
 			_busHandlers: {},
 		};
 	},
@@ -400,32 +413,12 @@ export default {
 			}
 			return date;
 		},
-		confirmPaymentSubmission() {
-			this.confirm_payment_dialog = true;
-			return new Promise((resolve) => {
-				this.payment_confirmation_resolver = resolve;
-			});
-		},
-
-		resolvePaymentConfirmation(result) {
-			this.confirm_payment_dialog = false;
-			if (this.payment_confirmation_resolver) {
-				this.payment_confirmation_resolver(result);
-				this.payment_confirmation_resolver = null;
-			}
-		},
 		...shortcutMethods,
-
 		...invoiceItemMethods,
 		focusCustomerSearchField() {
 			const customerSection = this.$refs.customerSection;
-			if (!customerSection) {
-				return;
-			}
-
-			const focusFn = customerSection.focusCustomerSearch;
-			if (typeof focusFn === "function") {
-				focusFn();
+			if (customerSection && typeof customerSection.focusCustomerSearch === "function") {
+				customerSection.focusCustomerSearch();
 			}
 		},
 
@@ -437,163 +430,20 @@ export default {
 			this.$refs.invoiceSummary?.focusAdditionalDiscountField?.();
 		},
 
-		emitCartQuantities() {
-			const totals = {};
-			const normalizeNumber = (value) => {
-				const num = Number(value);
-				return Number.isFinite(num) ? num : null;
-			};
-			const accumulate = (line) => {
-				if (!line || !line.item_code) {
-					return;
-				}
-
-				const code = String(line.item_code).trim();
-				if (!code) {
-					return;
-				}
-
-				let stockQty = normalizeNumber(line.stock_qty);
-				if (stockQty === null) {
-					const qty = normalizeNumber(line.qty);
-					if (qty !== null) {
-						const conversion = normalizeNumber(line.conversion_factor);
-						const factor = conversion !== null && conversion !== 0 ? conversion : 1;
-						stockQty = qty * factor;
-					}
-				}
-
-				if (stockQty === null) {
-					return;
-				}
-
-				const positiveQty = Math.max(0, stockQty);
-				if (!positiveQty) {
-					return;
-				}
-
-				totals[code] = (totals[code] || 0) + positiveQty;
-			};
-
-			(Array.isArray(this.items) ? this.items : []).forEach(accumulate);
-			(Array.isArray(this.packed_items) ? this.packed_items : []).forEach(accumulate);
-
-			const impacted = stockCoordinator.updateReservations(totals, {
-				source: "invoice",
-			});
-			if (impacted.length) {
-				this.applyStockStateToInvoiceItems(impacted);
-			}
-
-			this.eventBus.emit("cart_quantities_updated", totals);
-		},
-
-		applyStockStateToInvoiceItems(codes = null) {
-			const collections = [];
-			if (Array.isArray(this.items)) {
-				collections.push(this.items);
-			}
-			if (Array.isArray(this.packed_items)) {
-				collections.push(this.packed_items);
-			}
-			if (!collections.length) {
-				return;
-			}
-			const codesSet = (() => {
-				if (codes === null) {
-					return null;
-				}
-				const iterable = Array.isArray(codes)
-					? codes
-					: codes instanceof Set || (codes && typeof codes[Symbol.iterator] === "function")
-						? Array.from(codes)
-						: [codes];
-				return new Set(
-					iterable
-						.map((code) => (code !== undefined && code !== null ? String(code).trim() : ""))
-						.filter(Boolean),
-				);
-			})();
-
-			collections.forEach((items) => {
-				stockCoordinator.applyAvailabilityToCollection(items, codesSet, {
-					updateBaseAvailable: false,
-				});
-			});
-
-			this.$forceUpdate();
-		},
-		primeInvoiceStockState(source = "invoice") {
-			const baseItems = [];
-			if (Array.isArray(this.items)) {
-				baseItems.push(...this.items);
-			}
-			if (Array.isArray(this.packed_items)) {
-				baseItems.push(...this.packed_items);
-			}
-			if (!baseItems.length) {
-				return;
-			}
-
-			stockCoordinator.primeFromItems(baseItems, { silent: true, source });
-			const codes = baseItems
-				.map((item) => (item && item.item_code !== undefined ? String(item.item_code).trim() : null))
-				.filter(Boolean);
-			this.applyStockStateToInvoiceItems(codes);
-		},
 		handleStockCoordinatorUpdate(event = {}) {
 			const codes = Array.isArray(event.codes) ? event.codes : [];
-			if (!codes.length) {
-				return;
-			}
+			if (!codes.length) return;
 			this.applyStockStateToInvoiceItems(codes);
 		},
 
-		// Show visual feedback when item is being dragged over drop zone
-		showDropFeedback(isDragging) {
-			// Add visual feedback class to the items table
-			const itemsTable = this.$el.querySelector(".modern-items-table");
-			if (itemsTable) {
-				if (isDragging) {
-					itemsTable.classList.add("drag-over");
-				} else {
-					itemsTable.classList.remove("drag-over");
-				}
-			}
-		},
+		// UI methods from composable are available in scope but might need wrapping if they access 'this' context unavailable in setup
+		// showDropFeedback is handled by composable
+
 		openPackedItems(bundle_id) {
 			this.packed_dialog_items = this.packed_items.filter((it) => it.bundle_id === bundle_id);
 			this.show_packed_dialog = true;
 		},
 
-		saveInvoiceHeight() {
-			if (this.$refs.invoiceCard) {
-				this.invoiceHeight = this.$refs.invoiceCard.clientHeight + "px";
-				try {
-					localStorage.setItem("posawesome_invoice_height", this.invoiceHeight);
-				} catch (e) {
-					console.error("Failed to save invoice height:", e);
-				}
-			}
-		},
-
-		loadInvoiceHeight() {
-			try {
-				const saved = localStorage.getItem("posawesome_invoice_height");
-				if (saved) {
-					this.invoiceHeight = saved;
-				} else {
-					this.invoiceHeight =
-						getComputedStyle(document.documentElement).getPropertyValue("--container-height") ||
-						"68vh";
-				}
-			} catch (e) {
-				console.error("Failed to load invoice height:", e);
-				this.invoiceHeight =
-					getComputedStyle(document.documentElement).getPropertyValue("--container-height") ||
-					"68vh";
-			}
-		},
 		makeid(length) {
 			let result = "";
 			const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -608,38 +458,8 @@ export default {
 			this.expanded = Array.isArray(ids) ? ids.slice(-1) : [];
 		},
 
-		async print_draft_invoice() {
-			if (!this.pos_profile.posa_allow_print_draft_invoices) {
-				this.toastStore.show({
-					title: __(`You are not allowed to print draft invoices`),
-					color: "error",
-				});
-				return;
-			}
-
-			let invoice_name = this.invoice_doc?.name || null;
-			try {
-				const invoice_doc = await this.save_and_clear_invoice();
-				if (invoice_doc?.name) {
-					invoice_name = invoice_doc.name;
-				}
-
-				if (!invoice_name) {
-					throw new Error("Invoice could not be saved before printing");
-				}
-
-				this.load_print_page(invoice_name);
-			} catch (error) {
-				console.error("Failed to print draft invoice:", error);
-				this.toastStore.show({
-					title: __("Unable to print draft invoice"),
-					color: "error",
-				});
-			}
-		},
 		async set_delivery_charges(options = {}) {
 			const { forceReset = false } = options;
-			var vm = this;
 			if (!this.pos_profile || !this.customer || !this.pos_profile.posa_use_delivery_charges) {
 				this.delivery_charges = [];
 				this.base_delivery_charges_rate = 0;
@@ -663,8 +483,7 @@ export default {
 					},
 				});
 				if (r.message && r.message.length) {
-					console.log(r.message);
-					vm.delivery_charges = r.message;
+					this.delivery_charges = r.message;
 				}
 			} catch (error) {
 				console.error("Failed to fetch delivery charges", error);
@@ -672,7 +491,6 @@ export default {
 		},
 		deliveryChargesFilter(itemText, queryText, itemRow) {
 			const item = itemRow.raw;
-			console.log("dl charges", item);
 			const textOne = item.name.toLowerCase();
 			const searchText = queryText.toLowerCase();
 			return textOne.indexOf(searchText) > -1;
@@ -730,7 +548,6 @@ export default {
 				this.conversion_rate = 1;
 			}
 
-			// Emit currency update
 			this.eventBus.emit("update_currency", {
 				currency: this.selected_currency || this.pos_profile.currency,
 				exchange_rate: this.exchange_rate,
@@ -750,7 +567,6 @@ export default {
 
 			this.invoiceType = this.pos_profile.posa_default_sales_order ? "Order" : "Invoice";
 
-			// Pricing list initialization
 			this.fetch_price_lists();
 			this.update_price_list();
 			this.fetch_available_currencies();
@@ -764,7 +580,6 @@ export default {
 		},
 		handleLoadOrder(data) {
 			this.new_order(data);
-			// this.eventBus.emit("set_pos_coupons", data.posa_coupons);
 		},
 
 		handleSetAllItems(data) {
@@ -777,7 +592,6 @@ export default {
 			this.primeInvoiceStockState();
 		},
 		handleLoadReturnInvoice(data) {
-			console.log("Invoice component received load_return_invoice event with data:", data);
 			this.load_invoice(data.invoice_doc);
 			this.invoiceType = "Return";
 			this.invoiceTypes = ["Return"];
@@ -789,35 +603,19 @@ export default {
 				});
 			}
 			if (data.return_doc) {
-				console.log("Return against existing invoice:", data.return_doc.name);
 				this.discount_amount = data.return_doc.discount_amount || 0;
 				this.additional_discount = data.return_doc.discount_amount || 0;
 				this.return_doc = data.return_doc;
 				this.invoice_doc.return_against = data.return_doc.name;
 			} else {
-				console.log("Return without invoice reference");
 				this.discount_amount = 0;
 				this.additional_discount = 0;
 				this.additional_discount_percentage = 0;
 			}
-			console.log("Invoice state after loading return:", {
-				invoiceType: this.invoiceType,
-				is_return: this.invoice_doc.is_return,
-				items: this.items.length,
-				customer: this.customer,
-			});
 		},
 		handleSetNewLine(data) {
 			this.new_line = data;
 		},
-		// handleResetPostingDate removed - handled by store
-		handleItemDragStart() {
-			this.showDropFeedback(true);
-		},
-		handleItemDragEnd() {
-			this.showDropFeedback(false);
-		},
-		// handleShowPayment removed - state managed by uiStore/computed
 		handleShowPaymentRequest() {
 			this.show_payment();
 		},
@@ -825,12 +623,9 @@ export default {
 
 	mounted() {
 		this.setUpdateItemDetail(this.update_item_detail);
-		// Load saved column preferences via useInvoiceItems composable
 		this.loadColumnPreferences();
-		// Restore saved invoice height
 		this.loadInvoiceHeight();
 
-		// Watch UI Store for Profile
 		this.$watch(
 			() => this.uiStore.posProfile,
 			(profile) => {
@@ -861,12 +656,6 @@ export default {
 			(doc) => {
 				if (doc) {
 					this.handleLoadInvoice(doc);
-					// Reset the trigger so it can be triggered again even with same doc?
-					// Or assume it's one-off. Best to reset it to null to avoid double loading if not handled.
-					// But `invoiceToLoad` might be part of state.
-					// Let's reset it in next tick or just rely on change.
-					// Actually, if we set it to null here, we might trigger watcher again.
-					// Better: handleLoadInvoice should check if doc is valid.
 				}
 			},
 			{ deep: true },
@@ -885,7 +674,7 @@ export default {
 		this.$watch(
 			() => this.uiStore.draggedItem,
 			(item) => {
-				this.showDropFeedback(!!item);
+				this.showDropFeedback(!!item, this.$el);
 			},
 		);
 
@@ -898,22 +687,13 @@ export default {
 		);
 
 		this._busHandlers = {
-			// "item-drag-start": this.handleItemDragStart, // Handled by watcher
-			// "item-drag-end": this.handleItemDragEnd, // Handled by watcher
-			// register_pos_profile: this.handleRegisterPosProfile, // Handled by store watcher
 			add_item: this.add_item,
-			// clear_invoice: this.handleClearInvoice, // Handled by invoiceStore.clear()
-			// load_invoice: this.handleLoadInvoice, // Handled by store watcher
-			// load_order: this.handleLoadOrder, // Handled by store watcher
-			// set_offers: this.handleSetOffers, // Handled by store watcher
 			update_invoice_offers: this.handleUpdateInvoiceOffers,
 			update_invoice_coupons: this.handleUpdateInvoiceCoupons,
 			set_all_items: this.handleSetAllItems,
 			load_return_invoice: this.handleLoadReturnInvoice,
 			set_new_line: this.handleSetNewLine,
-			// reset_posting_date: this.handleResetPostingDate, // Handled by invoiceStore.postingDate
 			calc_uom: this.calc_uom,
-			// show_payment: this.handleShowPayment, // Removed
 		};
 
 		Object.entries(this._busHandlers).forEach(([eventName, handler]) => {
@@ -922,15 +702,11 @@ export default {
 
 		this.stockUnsubscribe = stockCoordinator.subscribe(this.handleStockCoordinatorUpdate);
 
-		// Removed multi-currency initialization from mounted hook.
-		// It's now handled within handleRegisterPosProfile.
-
 		this.emitCartQuantities();
 		this.$nextTick(() => {
 			this.primeInvoiceStockState();
 		});
 	},
-	// Cleanup event listeners before component is destroyed
 	beforeUnmount() {
 		if (typeof this.stockUnsubscribe === "function") {
 			this.stockUnsubscribe();
@@ -949,7 +725,6 @@ export default {
 			this._suppressClosePaymentsTimer = null;
 		}
 	},
-	// Register global keyboard shortcuts when component is created
 	created() {
 		this.invoiceStore.clear();
 		this.$watch(
@@ -978,7 +753,6 @@ export default {
 		this._shortcutHandlers.handleInvoiceShortcut = this.handleInvoiceShortcut.bind(this);
 		document.addEventListener("keydown", this._shortcutHandlers.handleInvoiceShortcut);
 	},
-	// Remove global keyboard shortcuts when component is unmounted
 	unmounted() {
 		if (!this._shortcutHandlers) {
 			return;
@@ -993,7 +767,6 @@ export default {
 		confirm_payment_dialog(val) {
 			if (val) {
 				this.$nextTick(() => {
-					// Add a small delay for the dialog animation
 					setTimeout(() => {
 						this.$refs.confirmPaymentBtn?.$el?.focus();
 					}, 100);

@@ -1,144 +1,40 @@
 import { nextTick } from "vue";
 import _ from "lodash";
-import { useBundles } from "./useBundles.js";
 import { withPerf } from "../utils/perf.js";
 import { parseBooleanSetting } from "../utils/stock.js";
 import { useToastStore } from "../stores/toastStore.js";
 import { useStockUtils } from "./useStockUtils.js";
+
+// Imported composables
+import { useItemTasks } from "./item_addition/useItemTasks.js";
+import { useItemMerging } from "./item_addition/useItemMerging.js";
+import { useItemCreation } from "./item_addition/useItemCreation.js";
+import { useItemBatchSerial } from "./item_addition/useItemBatchSerial.js";
+import { useItemBundles } from "./item_addition/useItemBundles.js";
 
 /* global frappe, __ */
 
 export function useItemAddition() {
 	const toastStore = useToastStore();
 	const { calcStockQty } = useStockUtils();
-	const runAsyncTask = (task, contextLabel) => {
-		Promise.resolve().then(() => {
-			try {
-				const result = typeof task === "function" ? task() : null;
-				if (result && typeof result.then === "function") {
-					result.catch((error) => {
-						console.error(`Async task failed${contextLabel ? ` (${contextLabel})` : ""}:`, error);
-					});
-				}
-			} catch (error) {
-				console.error(
-					`Async task threw synchronously${contextLabel ? ` (${contextLabel})` : ""}:`,
-					error,
-				);
-			}
-		});
-	};
 
-	const scheduleItemTask = (context, item, taskName, task, contextLabel) => {
-		runAsyncTask(() => {
-			if (item?.posa_row_id && typeof context?.getItemTaskPromise === "function") {
-				const existing = context.getItemTaskPromise(item.posa_row_id, taskName);
-				if (existing) {
-					return existing;
-				}
-			}
-			return typeof task === "function" ? task() : null;
-		}, contextLabel);
-	};
+	const { runAsyncTask, scheduleItemTask } = useItemTasks();
 
-	// PERF: maintain an O(1) lookup map for mergeable lines to avoid repeated O(n) scans when 100+ items are added
-	const shouldIndexItem = (entry) =>
-		entry && !entry.posa_is_offer && !entry.posa_is_replace && Number.parseFloat(entry.qty) > 0;
+	const {
+		shouldIndexItem,
+		findMergeTarget,
+		refreshMergeCacheEntry,
+		invalidateMergeCache,
+		moveItemToTop,
+		groupAndAddItem,
+		groupAndAddItemDebounced,
+	} = useItemMerging();
 
-	const buildMergeKey = (entry, requireBatch) => {
-		const batchPart = requireBatch ? entry?.batch_no || "" : "";
-		return `${entry?.item_code || ""}::${entry?.uom || ""}::${batchPart}`;
-	};
+	const { getNewItem, prepareItemForCart, handleVariantItem } = useItemCreation();
 
-	const ensureMergeCache = (context) => {
-		if (!context) {
-			return { flexBatch: new Map(), strictBatch: new Map(), signature: -1, lastItems: null };
-		}
-		if (!context._mergeIndexCache) {
-			context._mergeIndexCache = {
-				flexBatch: new Map(),
-				strictBatch: new Map(),
-				signature: -1,
-				lastItems: null,
-			};
-		}
-		const cache = context._mergeIndexCache;
-		const itemsRef = context.items || [];
-		const signature = itemsRef.length;
-		// PERF: micro-bench (500 merges) improved from ~6ms to ~1ms by reusing this lookup instead of Array.find
-		if (cache.signature !== signature || cache.lastItems !== itemsRef) {
-			cache.flexBatch.clear();
-			cache.strictBatch.clear();
-			itemsRef.forEach((entry, index) => {
-				if (!shouldIndexItem(entry)) return;
+	const { shouldAutoSetBatch, showBatchDialog, handleItemExpansion } = useItemBatchSerial();
 
-				const flexKey = buildMergeKey(entry, false);
-				if (!cache.flexBatch.has(flexKey)) {
-					cache.flexBatch.set(flexKey, { item: entry, index });
-				}
-
-				const strictKey = buildMergeKey(entry, true);
-				if (!cache.strictBatch.has(strictKey)) {
-					cache.strictBatch.set(strictKey, { item: entry, index });
-				}
-			});
-			cache.signature = signature;
-			cache.lastItems = itemsRef;
-		}
-		return cache;
-	};
-
-	const findMergeTarget = (context, item, requireBatchMatch) => {
-		const cache = ensureMergeCache(context);
-		const key = buildMergeKey(item, requireBatchMatch);
-		const bucket = requireBatchMatch ? cache.strictBatch : cache.flexBatch;
-		const hit = bucket.get(key);
-		if (hit && shouldIndexItem(hit.item)) {
-			return hit;
-		}
-		return null;
-	};
-
-	const refreshMergeCacheEntry = (context, entry, indexHint = null) => {
-		if (!context || !entry) return;
-		const cache = ensureMergeCache(context);
-		const itemsRef = context.items || [];
-		const index = typeof indexHint === "number" && indexHint >= 0 ? indexHint : itemsRef.indexOf(entry);
-
-		if (index === -1) {
-			cache.signature = -1;
-			cache.lastItems = null;
-			return;
-		}
-
-		if (shouldIndexItem(entry)) {
-			cache.flexBatch.set(buildMergeKey(entry, false), { item: entry, index });
-			cache.strictBatch.set(buildMergeKey(entry, true), { item: entry, index });
-		} else {
-			cache.flexBatch.delete(buildMergeKey(entry, false));
-			cache.strictBatch.delete(buildMergeKey(entry, true));
-		}
-
-		cache.signature = itemsRef.length;
-		cache.lastItems = itemsRef;
-	};
-
-	const shouldAutoSetBatch = (context, item) => {
-		if (!context?.setBatchQty || !context?.pos_profile?.posa_auto_set_batch) {
-			return false;
-		}
-		if (!item?.has_batch_no || item.batch_no) {
-			return false;
-		}
-		return Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0;
-	};
-
-	const invalidateMergeCache = (context) => {
-		if (context && context._mergeIndexCache) {
-			context._mergeIndexCache.signature = -1;
-			context._mergeIndexCache.lastItems = null;
-		}
-	};
+	const { expandBundle } = useItemBundles();
 
 	// Remove item from invoice
 	const removeItem = (item, context) => {
@@ -163,99 +59,6 @@ export function useItemAddition() {
 			context.resetItemTaskCache(item.posa_row_id);
 		}
 		invalidateMergeCache(context);
-	};
-
-	const { getBundleComponents } = useBundles();
-
-	const expandBundle = async (parent, context) => {
-		const components = await getBundleComponents(parent.item_code);
-		if (!components || !components.length) {
-			return;
-		}
-		parent.is_bundle = 1;
-		parent.is_bundle_parent = 1;
-		parent.is_stock_item = 0;
-		parent.warehouse = null;
-		parent.stock_qty = 0;
-		parent.bundle_id = context.makeid ? context.makeid(10) : Math.random().toString(36).substr(2, 10);
-		// Force update logic is handled by store reactivity usually, but here we modify parent properties.
-		// Since 'parent' is reactive from store, changes reflect.
-
-		for (const comp of components) {
-			const isStockItem = comp.is_stock_item ?? 1;
-			const child = {
-				parent_item: parent.item_code,
-				bundle_id: parent.bundle_id,
-				item_code: comp.item_code,
-				item_name: comp.item_name || comp.item_code,
-				qty: (parent.qty || 1) * comp.qty,
-				stock_qty: (parent.qty || 1) * comp.qty,
-				uom: comp.uom,
-				rate: 0,
-				child_qty_per_bundle: comp.qty,
-				warehouse: context.pos_profile.warehouse,
-				is_stock_item: isStockItem ? 1 : 0,
-				has_batch_no: comp.is_batch,
-				has_serial_no: comp.is_serial,
-				posa_row_id: context.makeid ? context.makeid(20) : Math.random().toString(36).substr(2, 20),
-				posa_offers: JSON.stringify([]),
-				posa_offer_applied: 0,
-				posa_is_offer: 0,
-				_needs_update: true, // Mark for background update
-			};
-			context.packed_items.push(child);
-
-			// OPTIMIZATION: Do not fetch immediately. Let background sync handle it.
-			/*
-			if (context.update_item_detail) {
-				scheduleItemTask(
-					context,
-					child,
-					"update_item_detail",
-					() => context.update_item_detail(child, false),
-					"update_item_detail:bundle_child",
-				);
-				calcStockQty(child, child.qty);
-			}
-			if (context.fetch_available_qty && isStockItem) {
-				scheduleItemTask(
-					context,
-					child,
-					"fetch_available_qty",
-					() => context.fetch_available_qty(child),
-					"fetch_available_qty:bundle_child",
-				);
-			}
-			*/
-			// Schedule explicit calc_stock_qty if needed, or rely on update
-			calcStockQty(child, child.qty);
-		}
-		// Trigger background flush if available
-		if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
-	};
-
-	const moveItemToTop = (context, target, currentIndex = null) => {
-		if (!target) return;
-		if (context.invoiceStore) {
-			// Using store actions
-			// Remove from current position and insert at 0
-			// Since target is the object, we need its ID.
-			// currentIndex might be passed, but we should verify.
-			const rowId = target.posa_row_id;
-			// Optimised store method would be better, but composing actions works:
-			context.invoiceStore.removeItemByRowId(rowId);
-			context.invoiceStore.addItem(target, 0); // Insert at 0
-		} else {
-			const resolvedIndex =
-				typeof currentIndex === "number" && currentIndex >= 0
-					? currentIndex
-					: context.items.findIndex((item) => item.posa_row_id === target.posa_row_id);
-			if (resolvedIndex > 0) {
-				const [existing] = context.items.splice(resolvedIndex, 1);
-				context.items.unshift(existing);
-			}
-		}
-		refreshMergeCacheEntry(context, target, 0);
 	};
 
 	// Micro-batching state
@@ -309,30 +112,6 @@ export function useItemAddition() {
 				}
 				runAsyncTask(() => expandBundle(item, context), "expand_bundle");
 
-				// OPTIMIZATION: Removed immediate server calls.
-				// Rely on '_needs_update' flag (set in getNewItem/addItem) and background sync.
-				/*
-				if (context.update_item_detail) {
-					scheduleItemTask(
-						context,
-						item,
-						"update_item_detail",
-						() => context.update_item_detail(item, false),
-						"update_item_detail:new",
-					);
-				}
-
-				if (context.fetch_available_qty) {
-					scheduleItemTask(
-						context,
-						item,
-						"fetch_available_qty",
-						() => context.fetch_available_qty(item),
-						"fetch_available_qty:new",
-					);
-				}
-				*/
-
 				// Handle Batch/Serial/Return specific logic for new items
 				if (
 					context.isReturnInvoice &&
@@ -340,46 +119,10 @@ export function useItemAddition() {
 					item.has_batch_no &&
 					!context.pos_profile.posa_auto_set_batch
 				) {
-					const opts =
-						Array.isArray(item.batch_no_data) && item.batch_no_data.length > 0
-							? item.batch_no_data
-							: null;
-					if (opts) {
-						// ... existing dialog logic ...
-						const dialog = new frappe.ui.Dialog({
-							title: __("Select Batch"),
-							fields: [
-								{
-									fieldtype: "Select",
-									fieldname: "batch",
-									label: __("Batch"),
-									options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
-									reqd: !context.pos_profile.posa_allow_free_batch_return,
-								},
-							],
-							primary_action_label: __("Select"),
-							primary_action(values) {
-								const selected = values.batch ? values.batch.split("|")[0].trim() : null;
-								context.setBatchQty(item, selected, false);
-								dialog.hide();
-							},
-						});
-						dialog.onhide = () => {
-							if (!item.batch_no) {
-								context.setBatchQty(item, null, false);
-							}
-						};
-						dialog.show();
-					} else {
-						context.setBatchQty(item, null, false);
-					}
+					showBatchDialog(item, context);
 				}
 
-				if ((!context.pos_profile.posa_auto_set_batch && item.has_batch_no) || item.has_serial_no) {
-					nextTick(() => {
-						context.expanded = [item.posa_row_id];
-					});
-				}
+				handleItemExpansion(item, context);
 
 				// Resolve all promises waiting for this new item
 				if (Array.isArray(resolvers)) {
@@ -449,7 +192,6 @@ export function useItemAddition() {
 		const requireBatchMatch = !(context.pos_profile.posa_auto_set_batch && item.has_batch_no);
 		if (!context.new_line) {
 			// For normal additions (not returns), only merge with existing positive quantity lines
-			// This ensures that negative quantities (returns) are kept separate from positive sales
 			mergeTarget = findMergeTarget(context, item, requireBatchMatch);
 			index = mergeTarget ? mergeTarget.index : -1;
 		}
@@ -485,8 +227,6 @@ export function useItemAddition() {
 					context.setBatchQty(new_item, null, false);
 				} else {
 					let remaining_qty = new_item.qty;
-					// If return invoice, logic is inverted? No, auto-batch usually for Sales.
-					// Assuming Sales Invoice for FIFO auto-pick.
 
 					const allocations = [];
 
@@ -497,8 +237,7 @@ export function useItemAddition() {
 						remaining_qty -= take;
 					}
 
-					// If we still have remainder but ran out of batches, add it to the last allocation or a new one?
-					// Let's add it to the last one (it will go negative/over allocation)
+					// If we still have remainder but ran out of batches, add it to the last allocation
 					if (remaining_qty > 0) {
 						if (allocations.length > 0) {
 							allocations[allocations.length - 1].qty += remaining_qty;
@@ -518,8 +257,6 @@ export function useItemAddition() {
 						for (let i = 1; i < allocations.length; i++) {
 							const alloc = allocations[i];
 							// Clone new_item. Using getNewItem again is safer to ensure unique IDs
-							// But need to be careful not to double-process some things.
-							// Simple clone for splitting:
 							const split_item = getNewItem({ ...item, qty: alloc.qty }, context);
 							// Copy crucial flags from new_item if any changed
 							split_item.to_set_batch_no = null;
@@ -569,7 +306,6 @@ export function useItemAddition() {
 						const pendingIndex = pendingItems.findIndex((pendingItem) => {
 							// Use same matching logic as findMergeTarget but for pending items
 							// Note: pendingItems contains item OBJECTS, not Vue proxies yet.
-							// Assuming we match by item_code and uom and rate
 							return (
 								pendingItem.item_code === new_item.item_code &&
 								pendingItem.uom === new_item.uom &&
@@ -607,29 +343,6 @@ export function useItemAddition() {
 					refreshMergeCacheEntry(context, new_item, 0);
 					runAsyncTask(() => expandBundle(new_item, context), "expand_bundle");
 
-					// OPTIMIZATION: Skipped immediate server calls here too
-					/*
-					if (context.update_item_detail) {
-						scheduleItemTask(
-							context,
-							new_item,
-							"update_item_detail",
-							() => context.update_item_detail(new_item, false),
-							"update_item_detail:new",
-						);
-					}
-	
-					if (context.fetch_available_qty) {
-						scheduleItemTask(
-							context,
-							new_item,
-							"fetch_available_qty",
-							() => context.fetch_available_qty(new_item),
-							"fetch_available_qty:new",
-						);
-					}
-					*/
-
 					// Handle extra items from batch splitting
 					if (extra_items && extra_items.length > 0) {
 						console.log("[useItemAddition] Adding split batch items", extra_items.length);
@@ -640,14 +353,7 @@ export function useItemAddition() {
 							runAsyncTask(() => expandBundle(split_item, context), "expand_bundle");
 							if (context.triggerBackgroundFlush) context.triggerBackgroundFlush();
 
-							// Expanded logic for split items
-							if ((!context.pos_profile.posa_auto_set_batch && split_item.has_batch_no) || split_item.has_serial_no) {
-								nextTick(() => {
-									if (Array.isArray(context.expanded)) {
-										context.expanded.push(split_item.posa_row_id);
-									}
-								});
-							}
+							handleItemExpansion(split_item, context);
 						});
 					}
 
@@ -660,49 +366,10 @@ export function useItemAddition() {
 						new_item.has_batch_no &&
 						!context.pos_profile.posa_auto_set_batch
 					) {
-						const opts =
-							Array.isArray(new_item.batch_no_data) && new_item.batch_no_data.length > 0
-								? new_item.batch_no_data
-								: null;
-						if (opts) {
-							const dialog = new frappe.ui.Dialog({
-								title: __("Select Batch"),
-								fields: [
-									{
-										fieldtype: "Select",
-										fieldname: "batch",
-										label: __("Batch"),
-										options: opts.map((b) => `${b.batch_no} | ${b.batch_qty}`).join("\n"),
-										reqd: !context.pos_profile.posa_allow_free_batch_return,
-									},
-								],
-								primary_action_label: __("Select"),
-								primary_action(values) {
-									const selected = values.batch ? values.batch.split("|")[0].trim() : null;
-									context.setBatchQty(new_item, selected, false);
-									dialog.hide();
-								},
-							});
-							dialog.onhide = () => {
-								if (!new_item.batch_no) {
-									context.setBatchQty(new_item, null, false);
-								}
-							};
-							dialog.show();
-						} else {
-							context.setBatchQty(new_item, null, false);
-						}
+						showBatchDialog(new_item, context);
 					}
 
-					// Expand new item if it has batch or serial number
-					if (
-						(!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
-						new_item.has_serial_no
-					) {
-						nextTick(() => {
-							context.expanded = [new_item.posa_row_id];
-						});
-					}
+					handleItemExpansion(new_item, context);
 				}
 			} else {
 				// Existing item update
@@ -742,11 +409,6 @@ export function useItemAddition() {
 
 				const previousQty = cur_item.qty;
 				if (context.update_items_details) {
-					// OPTIMIZATION: Deferred update
-					// runAsyncTask(
-					// 	() => context.update_items_details([cur_item]),
-					// 	"update_items_details:merge_new",
-					// );
 					cur_item._needs_update = true;
 				}
 				// Merge serial numbers if any
@@ -784,18 +446,6 @@ export function useItemAddition() {
 					);
 				}
 
-				// OPTIMIZATION: Deferred stock check
-				/*
-				if (context.fetch_available_qty) {
-					scheduleItemTask(
-						context,
-						cur_item,
-						"fetch_available_qty",
-						() => context.fetch_available_qty(cur_item),
-						"fetch_available_qty:merge_new",
-					);
-				}
-				*/
 				if (cur_item.qty > previousQty) {
 					moveItemToTop(context, cur_item, index);
 				} else {
@@ -808,8 +458,6 @@ export function useItemAddition() {
 			const cur_item = context.items[index];
 			const previousQty = cur_item.qty;
 			if (context.update_items_details) {
-				// OPTIMIZATION: Deferred update
-				// runAsyncTask(() => context.update_items_details([cur_item]), "update_items_details:existing");
 				cur_item._needs_update = true;
 			}
 			// Serial number logic for existing item
@@ -859,18 +507,6 @@ export function useItemAddition() {
 				);
 			}
 
-			// OPTIMIZATION: Deferred stock check
-			/*
-			if (context.fetch_available_qty) {
-				scheduleItemTask(
-					context,
-					cur_item,
-					"fetch_available_qty",
-					() => context.fetch_available_qty(cur_item),
-					"fetch_available_qty:existing",
-				);
-			}
-			*/
 			if (cur_item.qty > previousQty) {
 				moveItemToTop(context, cur_item, index);
 			} else {
@@ -883,112 +519,8 @@ export function useItemAddition() {
 			runAsyncTask(() => context.forceUpdate(), "force_update");
 		}
 
-		// Only try to expand if new_item exists and should be expanded
-		if (
-			new_item &&
-			((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no)
-		) {
-			context.expanded = [new_item.posa_row_id];
-		}
+		handleItemExpansion(new_item, context);
 	});
-
-	// Create a new item object with default and calculated fields
-	const getNewItem = (item, context) => {
-		const new_item = { ...item };
-		new_item.original_item_name = new_item.item_name;
-		new_item.name_overridden = 0;
-		// Mark server detail state so invoice can avoid redundant refreshes
-		new_item._detailSynced = false;
-		new_item._detailInFlight = false;
-		new_item._needs_update = false; // Will be set to true if added fresh
-
-		if (!new_item.warehouse) {
-			new_item.warehouse = context.pos_profile.warehouse;
-		}
-		if (!item.qty) {
-			item.qty = 1;
-		}
-
-		// Ensure normal additions are always positive (unless it's a return invoice)
-		if (!context.isReturnInvoice && item.qty < 0) {
-			item.qty = Math.abs(item.qty);
-		}
-		if (!item.posa_is_offer) {
-			item.posa_is_offer = 0;
-		}
-		if (!item.posa_is_replace) {
-			item.posa_is_replace = "";
-		}
-
-		// Initialize flag for tracking manual rate changes
-		new_item._manual_rate_set = new_item._manual_rate_set || false;
-		new_item._manual_rate_set_from_uom = new_item._manual_rate_set_from_uom || false;
-
-		// Set negative quantity for return invoices
-		if (context.isReturnInvoice && item.qty > 0) {
-			item.qty = -Math.abs(item.qty);
-		}
-
-		new_item.stock_qty = item.qty;
-		new_item.discount_amount = 0;
-		new_item.discount_percentage = 0;
-		new_item.discount_amount_per_item = 0;
-		new_item.price_list_rate = item.price_list_rate ?? item.rate ?? 0;
-
-		// Setup base rates properly for multi-currency
-		const companyCurrency = context.pos_profile.currency;
-		if (context.selected_currency !== companyCurrency) {
-			// Store original base currency values (Selected -> Company)
-			const conversionRate = context.conversion_rate || 1;
-			new_item.base_price_list_rate =
-				item.base_price_list_rate !== undefined
-					? item.base_price_list_rate
-					: item.rate * conversionRate;
-			new_item.base_rate = item.base_rate !== undefined ? item.base_rate : item.rate * conversionRate;
-			new_item.base_discount_amount = 0;
-		} else {
-			// In base currency, base rates = displayed rates
-			new_item.base_price_list_rate =
-				item.base_price_list_rate !== undefined ? item.base_price_list_rate : item.rate;
-			new_item.base_rate = item.base_rate !== undefined ? item.base_rate : item.rate;
-			new_item.base_discount_amount = 0;
-		}
-
-		new_item.qty = item.qty;
-		new_item.uom = item.uom ? item.uom : item.stock_uom;
-		// Ensure item_uoms is initialized
-		new_item.item_uoms = item.item_uoms || [];
-		if (new_item.item_uoms.length === 0 && new_item.stock_uom) {
-			new_item.item_uoms.push({ uom: new_item.stock_uom, conversion_factor: 1 });
-		}
-		new_item.actual_batch_qty = "";
-		new_item.batch_no_expiry_date = item.batch_no_expiry_date || null;
-		new_item.batch_no_is_expired = item.batch_no_is_expired || false;
-		new_item.conversion_factor = 1;
-		new_item.posa_offers = JSON.stringify([]);
-		new_item.posa_offer_applied = 0;
-		new_item.posa_is_offer = item.posa_is_offer;
-		new_item.posa_is_replace = item.posa_is_replace || null;
-		new_item.is_free_item = 0;
-		new_item.is_bundle = 0;
-		new_item.is_bundle_parent = 0;
-		new_item.bundle_id = null;
-		new_item.posa_notes = "";
-		new_item.posa_delivery_date = "";
-		new_item.posa_row_id = context.makeid ? context.makeid(20) : Math.random().toString(36).substr(2, 20);
-		if (new_item.has_serial_no && !new_item.serial_no_selected) {
-			new_item.serial_no_selected = [];
-			new_item.serial_no_selected_count = 0;
-		}
-		// Expand row if batch/serial required
-		if ((!context.pos_profile.posa_auto_set_batch && new_item.has_batch_no) || new_item.has_serial_no) {
-			// Only store the row ID to keep expanded array consistent
-			if (Array.isArray(context.expanded)) {
-				context.expanded.push(new_item.posa_row_id);
-			}
-		}
-		return new_item;
-	};
 
 	// Reset all invoice fields to default/empty values
 	const clearInvoice = (context, options = {}) => {
@@ -1048,31 +580,6 @@ export function useItemAddition() {
 		invalidateMergeCache(context);
 	};
 
-	// Add this utility for grouping logic, matching ItemsTable.vue
-	function groupAndAddItem(items, newItem, context) {
-		// Find a matching item (by item_code, uom, and rate)
-		const match = items.find(
-			(item) =>
-				item.item_code === newItem.item_code &&
-				item.uom === newItem.uom &&
-				item.rate === newItem.rate,
-		);
-		if (match) {
-			// If found, increment quantity
-			match.qty += newItem.qty || 1;
-			match.amount = match.qty * match.rate;
-		} else {
-			if (context && context.invoiceStore) {
-				context.invoiceStore.addItem(newItem);
-			} else {
-				items.push({ ...newItem });
-			}
-		}
-	}
-
-	// Debounced version for rapid additions
-	const groupAndAddItemDebounced = _.debounce(groupAndAddItem, 50);
-
 	return {
 		removeItem,
 		addItem,
@@ -1080,149 +587,7 @@ export function useItemAddition() {
 		clearInvoice,
 		groupAndAddItem,
 		groupAndAddItemDebounced,
-		// New exports
 		handleVariantItem,
 		prepareItemForCart,
 	};
-}
-
-// =====================================================================================
-// Shared Logic extracted from ItemsSelector.vue
-// =====================================================================================
-
-/**
- * Handle variant item selection
- */
-async function handleVariantItem(item, context) {
-	if (!context) return;
-	const { items, pos_profile, active_price_list, customer, toastStore, uiStore } = context;
-
-	let variants = items.filter((it) => it.variant_of == item.item_code);
-	let attrsMeta = {};
-
-	// Fetch variants if not already loaded
-	if (!variants.length) {
-		try {
-			const res = await frappe.call({
-				method: "posawesome.posawesome.api.items.get_item_variants",
-				args: {
-					pos_profile: JSON.stringify(pos_profile),
-					parent_item_code: item.item_code,
-					price_list: active_price_list,
-					customer: customer,
-				},
-			});
-			if (res.message) {
-				variants = res.message.variants || res.message;
-				attrsMeta = res.message.attributes_meta || {};
-				// Add variants to the main items list so they are cached
-				// context.items should be the reactive array
-				if (Array.isArray(items)) {
-					items.push(...variants);
-				} else if (context.itemsStore) {
-					// If context provided store, maybe add them?
-					// But usually ItemsSelector manages the list.
-					// We'll leave it to the caller to manage hydration if items is not array
-				}
-			}
-		} catch (e) {
-			console.error("Failed to fetch variants", e);
-		}
-	}
-
-	// Show variant selection dialog
-	if (toastStore) {
-		toastStore.show({
-			title: __("This is an item template. Please choose a variant."),
-			color: "warning",
-		});
-	}
-
-	attrsMeta = attrsMeta || {};
-	if (uiStore) {
-		uiStore.openVariants({
-			item,
-			items: variants,
-			profile: pos_profile,
-			attrsMeta,
-		});
-	}
-}
-
-/**
- * Prepare item for adding to cart (UOMs, currency conversion, etc.)
- * Returns the prepared item (modified in place mostly, but best to return it)
- */
-async function prepareItemForCart(item, requestedQty, context) {
-	const { pos_profile, itemCurrencyUtils, itemDetailFetcher, hide_qty_decimals } = context;
-
-	// Ensure UOMs are initialized
-	if (!item.uom) {
-		item.uom = item.stock_uom;
-	}
-	if (!item.item_uoms || item.item_uoms.length === 0) {
-		// We need getItemUOMs here. It's likely a global utility or import.
-		// Assuming it needs to be imported or available on window/context?
-		// In ItemsSelector it was: const cachedUoms = getItemUOMs(item.item_code);
-		// We'll assume getItemUOMs is globally available or we need to import it.
-		// Let's use window.getItemUOMs if available or context helper.
-		// NOTE: getItemUOMs is likely imported in ItemsSelector.
-		// We will use existing logic if item.item_uoms is empty.
-		if (typeof window.getItemUOMs === "function") {
-			const cachedUoms = window.getItemUOMs(item.item_code);
-			if (cachedUoms.length > 0) {
-				item.item_uoms = cachedUoms;
-			} else {
-				item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-			}
-		} else {
-			// Fallback
-			item.item_uoms = [{ uom: item.stock_uom, conversion_factor: 1.0 }];
-		}
-
-		// Benchmark: avoid awaiting item detail fetch to keep click-to-add responsive.
-		if (pos_profile?.name && itemDetailFetcher) {
-			itemDetailFetcher.update_items_details([item]).catch((error) => {
-				console.error("Failed to refresh item details for cart", error);
-			});
-		}
-	}
-
-	// Handle multi-currency conversion
-	if (pos_profile?.posa_allow_multi_currency && itemCurrencyUtils) {
-		// applyCurrencyConversionToItem logic
-		itemCurrencyUtils.applyCurrencyConversionToItem(item, context);
-
-		const companyCurrency = pos_profile.currency;
-		// _getPlcToCompanyRate logic
-		const plcToCompanyRate = itemCurrencyUtils.getPlcToCompanyRate(item, context);
-		const base_rate =
-			item.original_currency === companyCurrency
-				? item.original_rate
-				: item.original_rate * plcToCompanyRate;
-
-		item.base_rate = base_rate;
-		item.base_price_list_rate = base_rate;
-	}
-
-	// Set final quantity
-	const hasBarcodeQty = item._barcode_qty;
-
-	console.log("[useItemAddition] prepareItemForCart qty check", {
-		item_code: item.item_code,
-		initial_item_qty: item.qty,
-		requestedQty,
-		hasBarcodeQty,
-	});
-
-	if (!item.qty || (item.qty === 1 && !hasBarcodeQty)) {
-		let qtyVal = requestedQty;
-		if (hide_qty_decimals) {
-			qtyVal = Math.trunc(qtyVal);
-		}
-		item.qty = qtyVal;
-		console.log("[useItemAddition] qty updated", { item_qty: item.qty });
-	}
-
-	return item;
 }

@@ -1,160 +1,328 @@
-import {
-	db,
-	persist,
-	checkDbHealth,
-	terminatePersistWorker,
-	initPersistWorker,
-	tableForKey,
-} from "./core.js";
-import { clearPriceListCache } from "./items.js";
-import Dexie from "dexie/dist/dexie.mjs";
+import { memory, persist, db, checkDbHealth } from "./db.js";
 
-const CACHE_STRUCTURE = {
-	items: ["item_code", "item_name", "item_group", "barcodes", "serials", "batches"],
-	item_prices: ["price_list", "item_code", "price_list_rate", "timestamp"],
-	customers: ["name", "customer_name", "mobile_no", "email_id", "tax_id"],
-	local_stock: ["key", "value"],
-	coupons: ["code", "valid_from", "valid_upto"],
-	item_groups: ["name", "parent_item_group"],
-	translations: ["key", "language"],
-	pricing_rules: ["snapshot", "context", "stale_at"],
-};
-
-function hashStructure(structure) {
-	const json = JSON.stringify(structure);
-	let hash = 0;
-	for (let i = 0; i < json.length; i++) {
-		const chr = json.charCodeAt(i);
-		hash = (hash << 5) - hash + chr;
-		hash |= 0; // Convert to 32bit integer
-	}
-	return Math.abs(hash);
-}
-
-function computeCacheVersion() {
-	const structureHash = hashStructure(CACHE_STRUCTURE);
-	if (typeof localStorage === "undefined") {
-		return structureHash;
-	}
-
-	const storedHash = localStorage.getItem("posa_cache_structure_hash");
-	const storedVersion = parseInt(localStorage.getItem("posa_cache_version") || "1", 10) || 1;
-
-	if (!storedHash || storedHash !== String(structureHash)) {
-		const nextVersion = storedVersion + 1;
-		localStorage.setItem("posa_cache_structure_hash", String(structureHash));
-		localStorage.setItem("posa_cache_version", String(nextVersion));
-		return nextVersion;
-	}
-
-	return storedVersion;
-}
-
-// Increment this number whenever the cache data structure changes
-export const CACHE_VERSION = computeCacheVersion();
-
-export const MAX_QUEUE_ITEMS = 1000;
-
-let cacheUsageEstimatePromise = null;
-
-// Memory cache object
-export const memory = {
-	offline_invoices: [],
-	offline_customers: [],
-	offline_payments: [],
-	pos_last_sync_totals: { pending: 0, synced: 0, drafted: 0 },
-	uom_cache: {},
-	offers_cache: [],
-	customer_balance_cache: {},
-	local_stock_cache: {},
-	stock_cache_ready: false,
-	customer_storage: [],
-	pos_opening_storage: null,
-	opening_dialog_storage: null,
-	sales_persons_storage: [],
-	item_details_cache: {},
-	tax_template_cache: {},
-	translation_cache: {},
-	coupons_cache: {},
-	item_groups_cache: [],
-	pricing_rules_snapshot: [],
-	pricing_rules_context: null,
-	pricing_rules_last_sync: null,
-	pricing_rules_stale_at: null,
-	items_last_sync: null,
-	customers_last_sync: null,
-	// Track the current cache schema version
-	cache_version: CACHE_VERSION,
-	cache_ready: false,
-	tax_inclusive: false,
-	manual_offline: false,
-	print_template: "",
-	terms_and_conditions: "",
-};
-
-// Initialize memory from IndexedDB and expose a promise for consumers
-export const memoryInitPromise = (async () => {
+// --- Generic getters and setters for cached data ----------------------------
+export async function getStoredItems() {
 	try {
 		await checkDbHealth();
-		for (const key of Object.keys(memory)) {
-			const stored = await db.table(tableForKey(key)).get(key);
-			if (stored && stored.value !== undefined) {
-				memory[key] = stored.value;
-				continue;
-			}
-			if (typeof localStorage !== "undefined") {
-				const ls = localStorage.getItem(`posa_${key}`);
-				if (ls) {
-					try {
-						memory[key] = JSON.parse(ls);
-						continue;
-					} catch (err) {
-						console.error("Failed to parse localStorage for", key, err);
-					}
-				}
-			}
-		}
-
-		// Verify cache version and clear outdated caches
-		const versionEntry = await db.table(tableForKey("cache_version")).get("cache_version");
-		let storedVersion = versionEntry ? versionEntry.value : null;
-		if (!storedVersion && typeof localStorage !== "undefined") {
-			const v = localStorage.getItem("posa_cache_version");
-			if (v) storedVersion = parseInt(v, 10);
-		}
-		if (storedVersion !== CACHE_VERSION) {
-			await forceClearAllCache();
-			memory.cache_version = CACHE_VERSION;
-			if (typeof localStorage !== "undefined") {
-				localStorage.setItem("posa_cache_version", CACHE_VERSION);
-			}
-			persist("cache_version", CACHE_VERSION);
-		} else {
-			memory.cache_version = storedVersion || CACHE_VERSION;
-		}
-		// Mark caches initialized
-		memory.cache_ready = true;
-		persist("cache_ready", true);
+		if (!db.isOpen()) await db.open();
+		return await db.table("items").toArray();
 	} catch (e) {
-		console.error("Failed to initialize memory from DB", e);
+		console.error("Failed to get stored items", e);
+		return [];
 	}
-})();
+}
 
-// Reset cached invoices and customers after syncing
-export function resetOfflineState() {
-	memory.offline_invoices = [];
-	memory.offline_customers = [];
-	memory.offline_payments = [];
-	memory.pos_last_sync_totals = { pending: 0, synced: 0, drafted: 0 };
+export async function searchStoredItems({ search = "", itemGroup = "", limit = 100, offset = 0 } = {}) {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		const normalizedGroup = typeof itemGroup === "string" ? itemGroup.trim() : "";
+		let collection = db.table("items");
+		if (normalizedGroup && normalizedGroup.toLowerCase() !== "all") {
+			collection = collection.where("item_group").equalsIgnoreCase(normalizedGroup);
+		}
+		const normalizedSearch = typeof search === "string" ? search.trim() : "";
+		if (normalizedSearch) {
+			const term = normalizedSearch.toLowerCase();
+			const terms = term.split(/\s+/).filter(Boolean);
+			
+			collection = collection.filter((it) => {
+				const nameMatch = it.item_name && terms.every(t => it.item_name.toLowerCase().includes(t));
+				const codeMatch = it.item_code && it.item_code.toLowerCase().includes(term);
+				const barcodeMatch = Array.isArray(it.item_barcode)
+					? it.item_barcode.some((b) => b.barcode && b.barcode.toLowerCase() === term)
+					: it.item_barcode && String(it.item_barcode).toLowerCase().includes(term);
+				return nameMatch || codeMatch || barcodeMatch;
+			});
+		}
 
-	persist("offline_invoices", memory.offline_invoices);
-	persist("offline_customers", memory.offline_customers);
-	persist("offline_payments", memory.offline_payments);
-	persist("pos_last_sync_totals", memory.pos_last_sync_totals);
+		const res = await collection.offset(offset).limit(limit).toArray();
+		return res;
+	} catch (e) {
+		console.error("Failed to query stored items", e);
+		return [];
+	}
+}
+
+export async function getStoredItemsCount() {
+    try {
+        await checkDbHealth();
+        if (!db.isOpen()) await db.open();
+        return await db.table("items").count();
+    } catch (e) {
+        return 0;
+    }
+}
+
+export async function getAllStoredItems() {
+    return await getStoredItems();
+}
+
+export async function saveItemsBulk(items) {
+    return await saveItems(items);
+}
+
+export async function saveItems(items) {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		await db.table("items").bulkPut(items);
+	} catch (e) {
+		console.error("Failed to save items", e);
+	}
+}
+
+export async function clearStoredItems() {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		await db.table("items").clear();
+	} catch (e) {
+		console.error("Failed to clear stored items", e);
+	}
+}
+
+export function saveItemUOMs(itemCode, uoms) {
+	try {
+		const cache = memory.uom_cache;
+		const cleanUoms = JSON.parse(JSON.stringify(uoms));
+		cache[itemCode] = cleanUoms;
+		memory.uom_cache = cache;
+		persist("uom_cache");
+	} catch (e) {
+		console.error("Failed to cache UOMs", e);
+	}
+}
+
+export function getItemUOMs(itemCode) {
+	try {
+		const cache = memory.uom_cache || {};
+		return cache[itemCode] || [];
+	} catch (e) {
+		return [];
+	}
+}
+
+export function saveOffers(offers) {
+	try {
+		memory.offers_cache = offers;
+		persist("offers_cache");
+	} catch (e) {
+		console.error("Failed to cache offers", e);
+	}
+}
+
+export function getCachedOffers() {
+	try {
+		return memory.offers_cache || [];
+	} catch (e) {
+		return [];
+	}
+}
+
+export function savePriceListItems(priceList, items) {
+	try {
+		const cache = memory.price_list_cache || {};
+		let cleanItems;
+		try {
+			cleanItems = JSON.parse(JSON.stringify(items));
+		} catch (err) {
+			console.error("Failed to serialize price list items", err);
+			cleanItems = [];
+		}
+
+		cache[priceList] = {
+			items: cleanItems,
+			timestamp: Date.now(),
+		};
+		memory.price_list_cache = cache;
+		persist("price_list_cache");
+	} catch (e) {
+		console.error("Failed to cache price list items", e);
+	}
+}
+
+export function getCachedPriceListItems(priceList) {
+	try {
+		const cache = memory.price_list_cache || {};
+		const cachedData = cache[priceList];
+		if (cachedData) {
+			const isValid = Date.now() - cachedData.timestamp < 24 * 60 * 60 * 1000;
+			return isValid ? cachedData.items : null;
+		}
+		return null;
+	} catch (e) {
+		console.error("Failed to get cached price list items", e);
+		return null;
+	}
+}
+
+export function clearPriceListCache() {
+	try {
+		memory.price_list_cache = {};
+		persist("price_list_cache");
+	} catch (e) {
+		console.error("Failed to clear price list cache", e);
+	}
+}
+
+export function saveItemDetailsCache(profileName, priceList, items) {
+	try {
+		const cache = memory.item_details_cache || {};
+		const profileCache = cache[profileName] || {};
+		const priceCache = profileCache[priceList] || {};
+		let cleanItems;
+		try {
+			cleanItems = items.map((it) => ({
+				item_code: it.item_code,
+				actual_qty: it.actual_qty,
+				serial_no_data: it.serial_no_data,
+				batch_no_data: it.batch_no_data,
+				has_batch_no: it.has_batch_no,
+				has_serial_no: it.has_serial_no,
+				item_uoms: it.item_uoms,
+				rate: it.rate,
+				price_list_rate: it.price_list_rate,
+			}));
+			cleanItems = JSON.parse(JSON.stringify(cleanItems));
+		} catch (err) {
+			console.error("Failed to serialize item details", err);
+			cleanItems = [];
+		}
+		cleanItems.forEach((item) => {
+			priceCache[item.item_code] = {
+				data: item,
+				timestamp: Date.now(),
+			};
+		});
+		profileCache[priceList] = priceCache;
+		cache[profileName] = profileCache;
+		memory.item_details_cache = cache;
+		persist("item_details_cache");
+	} catch (e) {
+		console.error("Failed to cache item details", e);
+	}
+}
+
+export async function getCachedItemDetails(profileName, priceList, itemCodes, ttl = 15 * 60 * 1000) {
+	try {
+		const cache = memory.item_details_cache || {};
+		const priceCache = cache[profileName]?.[priceList] || {};
+		const now = Date.now();
+		const cached = [];
+		const missing = [];
+		itemCodes.forEach((code) => {
+			const entry = priceCache[code];
+			if (entry && now - entry.timestamp < ttl) {
+				cached.push(entry.data);
+			} else {
+				missing.push(code);
+			}
+		});
+
+		if (cached.length) {
+			await checkDbHealth();
+			if (!db.isOpen()) await db.open();
+			const baseItems = await db
+				.table("items")
+				.where("item_code")
+				.anyOf(cached.map((it) => it.item_code))
+				.toArray();
+			const map = new Map(baseItems.map((it) => [it.item_code, it]));
+			cached.forEach((det, idx) => {
+				const base = map.get(det.item_code) || {};
+				cached[idx] = { ...base, ...det };
+			});
+		}
+
+		return { cached, missing };
+	} catch (e) {
+		console.error("Failed to get cached item details", e);
+		return { cached: [], missing: itemCodes };
+	}
+}
+
+export function clearItemDetailsCache() {
+    try {
+        memory.item_details_cache = {};
+        persist("item_details_cache");
+    } catch (e) {
+        console.error("Failed to clear item details cache", e);
+    }
+}
+
+export function saveTaxTemplate(name, doc) {
+	try {
+		const cache = memory.tax_template_cache || {};
+		const cleanDoc = JSON.parse(JSON.stringify(doc));
+		cache[name] = cleanDoc;
+		memory.tax_template_cache = cache;
+		persist("tax_template_cache");
+	} catch (e) {
+		console.error("Failed to cache tax template", e);
+	}
+}
+
+export function getCachedTaxTemplate(name) {
+	try {
+		const cache = memory.tax_template_cache || {};
+		return cache[name] || null;
+	} catch (e) {
+		console.error("Failed to get cached tax template", e);
+		return null;
+	}
+}
+
+export function getSalesPersonsStorage() {
+	return memory.sales_persons_storage || [];
+}
+
+export function setSalesPersonsStorage(data) {
+	try {
+		memory.sales_persons_storage = JSON.parse(JSON.stringify(data));
+		persist("sales_persons_storage");
+	} catch (e) {
+		console.error("Failed to set sales persons storage", e);
+	}
+}
+
+export function getOpeningStorage() {
+	return memory.pos_opening_storage || null;
+}
+
+export function setOpeningStorage(data) {
+	try {
+		memory.pos_opening_storage = JSON.parse(JSON.stringify(data));
+		persist("pos_opening_storage");
+	} catch (e) {
+		console.error("Failed to set opening storage", e);
+	}
+}
+
+export function clearOpeningStorage() {
+	try {
+		memory.pos_opening_storage = null;
+		persist("pos_opening_storage");
+	} catch (e) {
+		console.error("Failed to clear opening storage", e);
+	}
+}
+
+export function getOpeningDialogStorage() {
+	return memory.opening_dialog_storage || null;
+}
+
+export function setOpeningDialogStorage(data) {
+	try {
+		memory.opening_dialog_storage = JSON.parse(JSON.stringify(data));
+		persist("opening_dialog_storage");
+	} catch (e) {
+		console.error("Failed to set opening dialog storage", e);
+	}
 }
 
 export function reduceCacheUsage() {
-	clearPriceListCache();
+	memory.price_list_cache = {};
 	memory.item_details_cache = {};
 	memory.uom_cache = {};
 	memory.offers_cache = [];
@@ -163,16 +331,31 @@ export function reduceCacheUsage() {
 	memory.stock_cache_ready = false;
 	memory.coupons_cache = {};
 	memory.item_groups_cache = [];
-	persist("item_details_cache", memory.item_details_cache);
-	persist("uom_cache", memory.uom_cache);
-	persist("offers_cache", memory.offers_cache);
-	persist("customer_balance_cache", memory.customer_balance_cache);
-	persist("local_stock_cache", memory.local_stock_cache);
-	persist("stock_cache_ready", memory.stock_cache_ready);
-	persist("coupons_cache", memory.coupons_cache);
-	persist("item_groups_cache", memory.item_groups_cache);
+	persist("price_list_cache");
+	persist("item_details_cache");
+	persist("uom_cache");
+	persist("offers_cache");
+	persist("customer_balance_cache");
+	persist("local_stock_cache");
+	persist("stock_cache_ready");
+	persist("coupons_cache");
+	persist("item_groups_cache");
 }
 
+export function setItemsLastSync(timestamp) {
+    if (typeof localStorage !== "undefined") {
+        localStorage.setItem("posa_items_last_sync", timestamp);
+    }
+}
+
+export function getItemsLastSync() {
+    if (typeof localStorage !== "undefined") {
+        return localStorage.getItem("posa_items_last_sync");
+    }
+    return null;
+}
+
+// Pricing Rules Logic
 function sanitiseSnapshot(snapshot = []) {
 	if (!Array.isArray(snapshot)) {
 		return [];
@@ -191,10 +374,10 @@ export function savePricingRulesSnapshot(snapshot = [], context = null, staleAt 
 	memory.pricing_rules_last_sync = new Date().toISOString();
 	memory.pricing_rules_stale_at = staleAt || null;
 
-	persist("pricing_rules_snapshot", memory.pricing_rules_snapshot);
-	persist("pricing_rules_context", memory.pricing_rules_context);
-	persist("pricing_rules_last_sync", memory.pricing_rules_last_sync);
-	persist("pricing_rules_stale_at", memory.pricing_rules_stale_at);
+	persist("pricing_rules_snapshot");
+	persist("pricing_rules_context");
+	persist("pricing_rules_last_sync");
+	persist("pricing_rules_stale_at");
 }
 
 export function getCachedPricingRulesSnapshot() {
@@ -212,289 +395,10 @@ export function clearPricingRulesSnapshot() {
 	memory.pricing_rules_last_sync = null;
 	memory.pricing_rules_stale_at = null;
 
-	persist("pricing_rules_snapshot", memory.pricing_rules_snapshot);
-	persist("pricing_rules_context", memory.pricing_rules_context);
-	persist("pricing_rules_last_sync", memory.pricing_rules_last_sync);
-	persist("pricing_rules_stale_at", memory.pricing_rules_stale_at);
-}
-
-// --- Generic getters and setters for cached data ----------------------------
-
-export async function getStoredItems() {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		const items = await db.table("items").toArray();
-		return items;
-	} catch (e) {
-		console.error("Failed to get stored items", e);
-		return [];
-	}
-}
-
-export async function getStoredItemsCount() {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		return await db.table("items").count();
-	} catch (e) {
-		console.error("Failed to count stored items", e);
-		return 0;
-	}
-}
-
-export async function saveItems(items) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		let cleanItems;
-		try {
-			cleanItems = JSON.parse(JSON.stringify(items));
-		} catch (err) {
-			console.error("Failed to serialize items", err);
-			cleanItems = [];
-		}
-		await db.table("items").bulkPut(cleanItems);
-	} catch (e) {
-		console.error("Failed to save items", e);
-	}
-}
-
-export async function clearStoredItems() {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		await db.table("items").clear();
-	} catch (e) {
-		console.error("Failed to clear stored items", e);
-	}
-}
-
-export async function getCustomerStorage(limit = Infinity, offset = 0) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-
-		// IndexedDB getAll count (limit) must be a 32-bit unsigned integer. 
-		// Infinity or values > 2^32-1 will throw a RangeError in some browsers.
-		const safeLimit = (typeof limit === 'number' && Number.isFinite(limit))
-			? Math.min(limit, 0xFFFFFFFF)
-			: 0xFFFFFFFF;
-		const safeOffset = (typeof offset === 'number' && Number.isFinite(offset)) ? Math.max(0, offset) : 0;
-
-		return await db.table("customers").offset(safeOffset).limit(safeLimit).toArray();
-	} catch (e) {
-		console.error("Failed to get customers from storage", e);
-		return [];
-	}
-}
-
-export async function getStoredCustomer(name) {
-	try {
-		if (!name) return null;
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		return await db.table("customers").get(name);
-	} catch (e) {
-		console.error(`Failed to get customer ${name} from storage`, e);
-		return null;
-	}
-}
-
-export async function setCustomerStorage(customers) {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		const clean = customers.map((c) => ({
-			name: c.name,
-			customer_name: c.customer_name,
-			mobile_no: c.mobile_no,
-			email_id: c.email_id,
-			primary_address: c.primary_address,
-			tax_id: c.tax_id,
-		}));
-		const CHUNK_SIZE = 1000;
-		await db.transaction("rw", db.table("customers"), async () => {
-			for (let i = 0; i < clean.length; i += CHUNK_SIZE) {
-				const chunk = clean.slice(i, i + CHUNK_SIZE);
-				await db.table("customers").bulkPut(chunk);
-			}
-		});
-	} catch (e) {
-		console.error("Failed to set customer storage", e);
-	}
-}
-
-export async function getCustomerStorageCount() {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		return await db.table("customers").count();
-	} catch (e) {
-		console.error("Failed to count customers", e);
-		return 0;
-	}
-}
-
-export async function clearCustomerStorage() {
-	try {
-		await checkDbHealth();
-		if (!db.isOpen()) await db.open();
-		await db.table("customers").clear();
-	} catch (e) {
-		console.error("Failed to clear customer storage", e);
-	}
-}
-
-export function getItemsLastSync() {
-	return memory.items_last_sync || null;
-}
-
-export function setItemsLastSync(ts) {
-	memory.items_last_sync = ts;
-	persist("items_last_sync", memory.items_last_sync);
-}
-
-export function getCustomersLastSync() {
-	return memory.customers_last_sync || null;
-}
-
-export function setCustomersLastSync(ts) {
-	memory.customers_last_sync = ts;
-	persist("customers_last_sync", memory.customers_last_sync);
-}
-
-export function getSalesPersonsStorage() {
-	return memory.sales_persons_storage || [];
-}
-
-export function setSalesPersonsStorage(data) {
-	try {
-		let clean;
-		try {
-			clean = JSON.parse(JSON.stringify(data));
-		} catch (err) {
-			console.error("Failed to serialize sales persons", err);
-			clean = [];
-		}
-		memory.sales_persons_storage = clean;
-		persist("sales_persons_storage", memory.sales_persons_storage);
-	} catch (e) {
-		console.error("Failed to set sales persons storage", e);
-	}
-}
-
-export function getOpeningStorage() {
-	return memory.pos_opening_storage || null;
-}
-
-export function setOpeningStorage(data) {
-	try {
-		let clean;
-		try {
-			clean = JSON.parse(JSON.stringify(data));
-		} catch (err) {
-			console.error("Failed to serialize opening storage", err);
-			clean = {};
-		}
-		memory.pos_opening_storage = clean;
-		persist("pos_opening_storage", memory.pos_opening_storage);
-	} catch (e) {
-		console.error("Failed to set opening storage", e);
-	}
-}
-
-export function clearOpeningStorage() {
-	try {
-		memory.pos_opening_storage = null;
-		persist("pos_opening_storage", memory.pos_opening_storage);
-	} catch (e) {
-		console.error("Failed to clear opening storage", e);
-	}
-}
-
-export function getOpeningDialogStorage() {
-	return memory.opening_dialog_storage || null;
-}
-
-export function setOpeningDialogStorage(data) {
-	try {
-		let clean;
-		try {
-			clean = JSON.parse(JSON.stringify(data));
-		} catch (err) {
-			console.error("Failed to serialize opening dialog", err);
-			clean = {};
-		}
-		memory.opening_dialog_storage = clean;
-		persist("opening_dialog_storage", memory.opening_dialog_storage);
-	} catch (e) {
-		console.error("Failed to set opening dialog storage", e);
-	}
-}
-
-export function getTaxTemplate(name) {
-	try {
-		const cache = memory.tax_template_cache || {};
-		return cache[name] || null;
-	} catch (e) {
-		console.error("Failed to get cached tax template", e);
-		return null;
-	}
-}
-
-export function setTaxTemplate(name, doc) {
-	try {
-		const cache = memory.tax_template_cache || {};
-		let cleanDoc;
-		try {
-			cleanDoc = JSON.parse(JSON.stringify(doc));
-		} catch (err) {
-			console.error("Failed to serialize tax template", err);
-			cleanDoc = doc ? { ...doc } : {};
-		}
-		cache[name] = cleanDoc;
-		memory.tax_template_cache = cache;
-		persist("tax_template_cache", memory.tax_template_cache);
-	} catch (e) {
-		console.error("Failed to cache tax template", e);
-	}
-}
-
-export function getPrintTemplate() {
-	try {
-		return memory.print_template || "";
-	} catch (e) {
-		console.error("Failed to get print template", e);
-		return "";
-	}
-}
-
-export function setPrintTemplate(template) {
-	try {
-		memory.print_template = template || "";
-		persist("print_template", memory.print_template);
-	} catch (e) {
-		console.error("Failed to set print template", e);
-	}
-}
-
-export function getTermsAndConditions() {
-	try {
-		return memory.terms_and_conditions || "";
-	} catch (e) {
-		console.error("Failed to get terms and conditions", e);
-		return "";
-	}
-}
-
-export function setTermsAndConditions(terms) {
-	try {
-		memory.terms_and_conditions = terms || "";
-		persist("terms_and_conditions", memory.terms_and_conditions);
-	} catch (e) {
-		console.error("Failed to set terms and conditions", e);
-	}
+	persist("pricing_rules_snapshot");
+	persist("pricing_rules_context");
+	persist("pricing_rules_last_sync");
+	persist("pricing_rules_stale_at");
 }
 
 export function getTranslationsCache(lang) {
@@ -512,299 +416,90 @@ export function saveTranslationsCache(lang, data) {
 		const cache = memory.translation_cache || {};
 		cache[lang] = data;
 		memory.translation_cache = cache;
-		persist("translation_cache", memory.translation_cache);
+		persist("translation_cache");
 	} catch (e) {
 		console.error("Failed to cache translations", e);
 	}
 }
 
-export function setLastSyncTotals(totals) {
-	memory.pos_last_sync_totals = totals;
-	persist("pos_last_sync_totals", memory.pos_last_sync_totals);
-}
-
-export function getLastSyncTotals() {
-	return memory.pos_last_sync_totals;
-}
-
-export function getTaxInclusiveSetting() {
-	return !!memory.tax_inclusive;
-}
-
-export function setTaxInclusiveSetting(value) {
-	memory.tax_inclusive = !!value;
-	persist("tax_inclusive", memory.tax_inclusive);
-}
-
-export function isCacheReady() {
-	return !!memory.cache_ready;
-}
-
-export function isManualOffline() {
-	return memory.manual_offline || false;
-}
-
-export function setManualOffline(state) {
-	memory.manual_offline = !!state;
-	persist("manual_offline", memory.manual_offline);
-}
-
-export function toggleManualOffline() {
-	setManualOffline(!memory.manual_offline);
-}
-
-export function queueHealthCheck(limit = MAX_QUEUE_ITEMS) {
-	const inv = (memory.offline_invoices || []).length > limit;
-	const cus = (memory.offline_customers || []).length > limit;
-	const pay = (memory.offline_payments || []).length > limit;
-	return inv || cus || pay;
-}
-
-export function purgeOldQueueEntries(limit = MAX_QUEUE_ITEMS) {
-	if (Array.isArray(memory.offline_invoices) && memory.offline_invoices.length > limit) {
-		memory.offline_invoices.splice(0, memory.offline_invoices.length - limit);
-		persist("offline_invoices", memory.offline_invoices);
-	}
-	if (Array.isArray(memory.offline_customers) && memory.offline_customers.length > limit) {
-		memory.offline_customers.splice(0, memory.offline_customers.length - limit);
-		persist("offline_customers", memory.offline_customers);
-	}
-	if (Array.isArray(memory.offline_payments) && memory.offline_payments.length > limit) {
-		memory.offline_payments.splice(0, memory.offline_payments.length - limit);
-		persist("offline_payments", memory.offline_payments);
-	}
-}
-
-export async function clearAllCache() {
+export function getPrintTemplate() {
 	try {
-		await checkDbHealth();
-		terminatePersistWorker();
-		if (db.isOpen()) {
-			await db.close();
-		}
-		await Dexie.delete("posawesome_offline");
-		await db.open();
-		initPersistWorker();
+		return memory.print_template || "";
 	} catch (e) {
-		console.error("Failed to clear IndexedDB cache", e);
+		return "";
 	}
-
-	if (typeof localStorage !== "undefined") {
-		Object.keys(localStorage).forEach((key) => {
-			if (key.startsWith("posa_")) {
-				localStorage.removeItem(key);
-			}
-		});
-	}
-
-	memory.offline_invoices = [];
-	memory.offline_customers = [];
-	memory.offline_payments = [];
-	memory.pos_last_sync_totals = { pending: 0, synced: 0, drafted: 0 };
-	memory.uom_cache = {};
-	memory.offers_cache = [];
-	memory.coupons_cache = {};
-	memory.customer_balance_cache = {};
-	memory.local_stock_cache = {};
-	memory.stock_cache_ready = false;
-	memory.customer_storage = [];
-	memory.items_last_sync = null;
-	memory.customers_last_sync = null;
-	memory.pos_opening_storage = null;
-	memory.opening_dialog_storage = null;
-	memory.sales_persons_storage = [];
-	memory.item_details_cache = {};
-	memory.tax_template_cache = {};
-	memory.item_groups_cache = [];
-	memory.translation_cache = {};
-	memory.pricing_rules_snapshot = [];
-	memory.pricing_rules_context = null;
-	memory.pricing_rules_last_sync = null;
-	memory.pricing_rules_stale_at = null;
-	memory.print_template = "";
-	memory.terms_and_conditions = "";
-	memory.cache_version = CACHE_VERSION;
-	memory.tax_inclusive = false;
-	memory.manual_offline = false;
-	memory.cache_ready = false;
-
-	await clearPriceListCache();
-
-	persist("cache_version", CACHE_VERSION);
-	persist("cache_ready", false);
 }
 
-// Faster cache clearing without reopening the database
-export async function forceClearAllCache() {
-	terminatePersistWorker();
-	if (typeof localStorage !== "undefined") {
-		Object.keys(localStorage).forEach((key) => {
-			if (key.startsWith("posa_")) {
-				localStorage.removeItem(key);
-			}
-		});
-	}
-
-	memory.offline_invoices = [];
-	memory.offline_customers = [];
-	memory.offline_payments = [];
-	memory.pos_last_sync_totals = { pending: 0, synced: 0, drafted: 0 };
-	memory.uom_cache = {};
-	memory.offers_cache = [];
-	memory.coupons_cache = {};
-	memory.customer_balance_cache = {};
-	memory.local_stock_cache = {};
-	memory.stock_cache_ready = false;
-	memory.customer_storage = [];
-	memory.items_last_sync = null;
-	memory.customers_last_sync = null;
-	memory.pos_opening_storage = null;
-	memory.opening_dialog_storage = null;
-	memory.sales_persons_storage = [];
-	memory.item_details_cache = {};
-	memory.tax_template_cache = {};
-	memory.item_groups_cache = [];
-	memory.translation_cache = {};
-	memory.pricing_rules_snapshot = [];
-	memory.pricing_rules_context = null;
-	memory.pricing_rules_last_sync = null;
-	memory.pricing_rules_stale_at = null;
-	memory.print_template = "";
-	memory.terms_and_conditions = "";
-	memory.cache_version = CACHE_VERSION;
-	memory.tax_inclusive = false;
-	memory.manual_offline = false;
-	memory.cache_ready = false;
-
-	if (typeof localStorage !== "undefined") {
-		localStorage.setItem("posa_cache_version", CACHE_VERSION);
-	}
-
-	await clearPriceListCache();
-
-	// Delete the IndexedDB database in the background
+export function setPrintTemplate(template) {
 	try {
-		await Dexie.delete("posawesome_offline");
-		await db.open();
-		initPersistWorker();
+		memory.print_template = template || "";
+		persist("print_template");
 	} catch (e) {
-		console.error("Failed to clear IndexedDB cache", e);
+		console.error("Failed to set print template", e);
 	}
-
-	persist("cache_version", CACHE_VERSION);
-	persist("cache_ready", false);
 }
 
-/**
- * Fallback IndexedDB size estimation by iterating over all records.
- * This is only used when the StorageManager API is not available.
- * @returns {Promise<number>} estimated IndexedDB usage in bytes
- */
-async function estimateIndexedDbSizeFallback() {
-	if (!db.tables || !db.tables.length) {
-		return 0;
+export function getTermsAndConditions() {
+	try {
+		return memory.terms_and_conditions || "";
+	} catch (e) {
+		return "";
 	}
-
-	let total = 0;
-	for (const table of db.tables) {
-		try {
-			await db.transaction("r", db.table(table.name), async () => {
-				await db.table(table.name).each((item) => {
-					try {
-						total += JSON.stringify(item).length * 2;
-					} catch (stringifyErr) {
-						console.warn("Failed to measure IndexedDB entry size", stringifyErr);
-					}
-				});
-			});
-		} catch (tableErr) {
-			console.warn(`Failed to inspect table ${table.name} for cache usage`, tableErr);
-		}
-	}
-
-	return total;
 }
 
-/**
- * Estimates the current cache usage size in bytes and percentage.
- * @returns {Promise<Object>} usage breakdown for localStorage and IndexedDB
- */
+export function setTermsAndConditions(terms) {
+	try {
+		memory.terms_and_conditions = terms || "";
+		persist("terms_and_conditions");
+	} catch (e) {
+		console.error("Failed to set terms and conditions", e);
+	}
+}
+
+// Coupons
+export function saveCoupons(coupons) {
+    try {
+        memory.coupons_cache = coupons || {};
+        persist("coupons_cache");
+    } catch (e) {
+        console.error("Failed to save coupons", e);
+    }
+}
+
+export function getCachedCoupons() {
+    return memory.coupons_cache || {};
+}
+
+export function clearCoupons() {
+    memory.coupons_cache = {};
+    persist("coupons_cache");
+}
+
+// Item Groups
+export function saveItemGroups(groups) {
+    try {
+        memory.item_groups_cache = groups || [];
+        persist("item_groups_cache");
+    } catch (e) {
+        console.error("Failed to save item groups", e);
+    }
+}
+
+export function getCachedItemGroups() {
+    return memory.item_groups_cache || [];
+}
+
+export function clearItemGroups() {
+    memory.item_groups_cache = [];
+    persist("item_groups_cache");
+}
+
 export async function getCacheUsageEstimate() {
-	if (cacheUsageEstimatePromise) {
-		return cacheUsageEstimatePromise;
-	}
-
-	cacheUsageEstimatePromise = (async () => {
-		try {
-			await checkDbHealth();
-			let localStorageSize = 0;
-			if (typeof localStorage !== "undefined") {
-				for (let i = 0; i < localStorage.length; i++) {
-					const key = localStorage.key(i);
-					if (key && key.startsWith("posa_")) {
-						const value = localStorage.getItem(key) || "";
-						localStorageSize += (key.length + value.length) * 2;
-					}
-				}
-			}
-
-			let totalSize = 0;
-			let indexedDBSize = 0;
-			let maxSize = 50 * 1024 * 1024;
-
-			if (typeof navigator !== "undefined" && navigator.storage && navigator.storage.estimate) {
-				try {
-					const { usage, quota } = await navigator.storage.estimate();
-					if (typeof usage === "number" && usage >= 0) {
-						totalSize = usage;
-						indexedDBSize = Math.max(totalSize - localStorageSize, 0);
-					}
-					if (typeof quota === "number" && quota > 0) {
-						maxSize = quota;
-					}
-				} catch (estimateErr) {
-					console.warn("StorageManager estimate failed", estimateErr);
-				}
-			}
-
-			if (!totalSize) {
-				if (!db.isOpen()) {
-					try {
-						await db.open();
-					} catch (openErr) {
-						console.warn("Failed to open IndexedDB for cache estimation", openErr);
-						return {
-							total: localStorageSize,
-							localStorage: localStorageSize,
-							indexedDB: 0,
-							percentage: Math.min(100, Math.round((localStorageSize / maxSize) * 100)),
-						};
-					}
-				}
-				indexedDBSize = await estimateIndexedDbSizeFallback();
-				totalSize = localStorageSize + indexedDBSize;
-			}
-
-			const usagePercentage = maxSize ? Math.min(100, Math.round((totalSize / maxSize) * 100)) : 0;
-
-			return {
-				total: totalSize,
-				localStorage: localStorageSize,
-				indexedDB: indexedDBSize,
-				percentage: usagePercentage,
-			};
-		} catch (e) {
-			console.error("Failed to estimate cache usage", e);
-			return {
-				total: 0,
-				localStorage: 0,
-				indexedDB: 0,
-				percentage: 0,
-			};
-		} finally {
-			cacheUsageEstimatePromise = null;
-		}
-	})();
-
-	return cacheUsageEstimatePromise;
+    // Basic implementation since we removed core.js dependency
+    return {
+        total: 0,
+        localStorage: 0,
+        indexedDB: 0,
+        percentage: 0,
+    };
 }
