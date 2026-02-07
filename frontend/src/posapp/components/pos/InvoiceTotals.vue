@@ -50,10 +50,7 @@
 				class="sleek-field pos-themed-input"
 				hide-details
 				:model-value="
-					formatCurrency(
-						diff_payment < 0 ? -diff_payment : diff_payment,
-						displayCurrency,
-					)
+					formatCurrency(diff_payment < 0 ? -diff_payment : diff_payment, displayCurrency)
 				"
 				readonly
 				:prefix="currencySymbol()"
@@ -106,7 +103,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
 	invoice_doc: Object,
 	displayCurrency: String,
 	diff_payment: Number,

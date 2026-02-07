@@ -216,10 +216,6 @@ watch(pos_profile, (val) => {
 	});
 });
 
-function close_opening_dialog() {
-	emit("close");
-}
-
 async function get_opening_dialog_data() {
 	await initPromise;
 	await checkDbHealth();

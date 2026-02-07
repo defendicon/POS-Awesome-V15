@@ -1,25 +1,15 @@
-﻿import { ref, computed, watch, nextTick } from "vue";
+import { ref, computed, watch } from "vue";
 import { useInvoiceStore } from "../stores/invoiceStore";
 import { useUIStore } from "../stores/uiStore";
 import { useToastStore } from "../stores/toastStore";
 import { storeToRefs } from "pinia";
 import itemService from "../services/itemService";
-import format from "../format"; // Assuming default export has helper methods or mixin structure
-import { formatUtils } from "../format"; // Based on invoiceOfferMethods import
-import { isOffline } from "../../offline/index.js";
-import {
-	appendDebugPrintParam,
-	isDebugPrintEnabled,
-	silentPrint,
-	watchPrintWindow,
-} from "../plugins/print.js";
 
 // @ts-ignore
 const __ = window.__ || ((s) => s);
 // @ts-ignore
 const frappe = window.frappe;
 // @ts-ignore
-const flt = window.flt;
 
 export function useInvoiceOffers() {
 	const invoiceStore = useInvoiceStore();
@@ -31,20 +21,7 @@ export function useInvoiceOffers() {
 		update_item_detail_fn = fn;
 	};
 
-	const {
-		items,
-		packedItems: packed_items,
-		itemsData,
-		invoiceToLoad,
-		orderToLoad,
-		postingDate: storePostingDate,
-		discountAmount,
-		additionalDiscount,
-		additionalDiscountPercentage,
-		deliveryCharges,
-		deliveryChargesRate,
-		selectedDeliveryCharge,
-	} = storeToRefs(invoiceStore);
+	const { items, packedItems: packed_items } = storeToRefs(invoiceStore);
 	const { posProfile: pos_profile } = storeToRefs(uiStore);
 
 	// State
@@ -79,38 +56,6 @@ export function useInvoiceOffers() {
 
 	// Computed properties matching Invoice.vue context
 	const Total = computed(() => invoiceStore.grossTotal);
-	const price_list_currency = computed(
-		() => pos_profile.value?.price_list_currency,
-	);
-	const selected_currency = computed(() => invoiceStore.invoiceDoc?.currency); // Assuming invoiceStore has currency declared via doc
-	// Note: Invoice.vue has selected_currency in data/setup. We might need to accept it or rely on store.
-	// Assuming UI/Invoice store syncs currency. Let's use what we can or accept as arg?
-	// Actually useInvoiceCurrency handles selected_currency. It is not in invoiceStore by default?
-	// Let's assume passed in context or use Store if available.
-	// For now, we'll try to get it from invoiceStore if refactored, otherwise allow injection or ref.
-	// In Invoice.vue, selected_currency is in Setup returning ...useInvoiceCurrency.
-	// We will add it as an argument or ref.
-
-	// TEMPORARY: define selected_currency ref here if not provided, but ideally it should be synced.
-	// Getting it from uiStore or invoiceStore?
-	// Invoice.vue: const currencyState = useInvoiceCurrency(...)
-	// We will accept `currencyContext` as second argument.
-
-	// Format helpers
-	const currency_precision = computed(
-		() => pos_profile.value?.currency_precision || 2,
-	);
-
-	// Helper to mimic Vue's this.flt
-	const flt_local = (value: any, precision: number | null = null) => {
-		let prec = precision;
-		if (prec === null) prec = currency_precision.value;
-		const _value = Number(value);
-		if (isNaN(_value)) return 0;
-		if (Math.abs(_value) < 0.000001) return _value;
-		return Number((_value || 0).toFixed(prec as number));
-	};
-
 	const makeid = (length: number) => {
 		let result = "";
 		const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -820,16 +765,7 @@ export function useInvoiceOffers() {
 	};
 
 	const updatePosOffers = (offers: any[]) => {
-		// We probably don't need to emit anymore if we are centralizing state?
-		// But other components might listen?
-		// Let's keep emitting or just update state?
-		// Invoice.vue used to emit "update_pos_offers" (line 705)
-		// Check if anything LISTENS to this?
-		// Probably not. But let's check events.
-		// Invoice.vue had no listener for it.
-		// So it might be for external components.
-		// We will keep it but also update local state if needed?
-		// Actually this method just EMITS. It doesn't update local 'posa_offers'.
+		posOffers.value = Array.isArray(offers) ? offers : [];
 	};
 
 	const updateInvoiceOffers = async (offers: any[]) => {
@@ -1224,7 +1160,7 @@ export function useInvoiceOffers() {
 		}
 	};
 
-	const RemoveOnTotal = (offer: any) => {
+	const RemoveOnTotal = (_offer: any) => {
 		invoiceStore.setDiscountAmount(0);
 		discount_percentage_offer_name.value = null;
 	};
@@ -1283,7 +1219,7 @@ export function useInvoiceOffers() {
 		// primeInvoiceStockState? -> Needs another dependency or move logic here.
 	};
 
-	const applyPricingRulesForCart = async (force = false) => {
+	const applyPricingRulesForCart = async (_force = false) => {
 		// This logic usually triggers offer refresh?
 		// In Invoice.vue it was calling logic.
 		// Maybe this calls handelOffers?

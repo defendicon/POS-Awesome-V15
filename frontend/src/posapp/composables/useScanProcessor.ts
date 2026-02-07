@@ -16,41 +16,41 @@ export interface ScanProcessorContext {
 	active_price_list: Ref<string>;
 	customer_price_list: Ref<string | null>;
 	itemDetailFetcher: {
-		update_items_details: (items: any[]) => Promise<void>;
+		update_items_details: (_items: any[]) => Promise<void>;
 	};
 	itemAddition: {
-		addItem: (item: any, options?: any) => Promise<void>;
+		addItem: (_item: any, _options?: any) => Promise<void>;
 	};
 	barcodeIndex: {
 		ensureBarcodeIndex: () => any;
-		lookupItemByBarcode: (barcode: string) => any;
-		replaceBarcodeIndex: (items: any[]) => void;
-		indexItem: (item: any) => void;
-		searchItemsByCode: (code: string) => any[];
+		lookupItemByBarcode: (_barcode: string) => any;
+		replaceBarcodeIndex: (_items: any[]) => void;
+		indexItem: (_item: any) => void;
+		searchItemsByCode: (_code: string) => any[];
 		resetBarcodeIndex: () => void;
 	};
 	scannerInput: any;
 	searchCache?: Ref<Map<any, any>>;
 	eventBus?: any;
-	format_number: (val: any, precision?: number) => string;
+	format_number: (_val: any, _precision?: number) => string;
 	float_precision: ComputedRef<number>;
 	hide_qty_decimals: ComputedRef<boolean>;
 	blockSaleBeyondAvailableQty: ComputedRef<boolean>;
 	currency_precision: ComputedRef<number>;
 	exchange_rate: ComputedRef<number>;
 	format_currency: (
-		value: number,
-		currency: string,
-		precision: number,
+		_value: number,
+		_currency: string,
+		_precision: number,
 	) => string;
-	ratePrecision: (val: any) => number;
+	ratePrecision: (_val: any) => number;
 	customer: Ref<any>;
 	onItemAdded?: () => void;
-	onItemNotFound?: (code: string) => void;
+	onItemNotFound?: (_code: string) => void;
 	stock_settings: Ref<any>;
 	// Callback for search focus or clear
-	get_search?: (code: string) => string;
-	get_item_qty?: (code: string) => string;
+	get_search?: (_code: string) => string;
+	get_item_qty?: (_code: string) => string;
 	search_from_scanner_ref?: Ref<boolean>;
 }
 
@@ -75,11 +75,8 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		scannerInput,
 		searchCache,
 		eventBus,
-		format_number,
 		float_precision,
-		hide_qty_decimals,
 		blockSaleBeyondAvailableQty,
-		currency_precision,
 		// exchange_rate,
 		format_currency,
 		ratePrecision,

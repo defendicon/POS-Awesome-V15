@@ -25,7 +25,6 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
 const __ = window.__ || ((t) => t);
 defineEmits(["close"]);
 </script>

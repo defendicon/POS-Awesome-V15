@@ -10,21 +10,14 @@ type NetworkVm = {
 	checkNetworkConnectivity: () => Promise<void>;
 	checkFrappePing: () => Promise<boolean>;
 	checkCurrentOrigin: (
-		protocol: string,
-		hostname: string,
-		port?: string | number,
+		_protocol: string,
+		_hostname: string,
+		_port?: string | number,
 	) => Promise<boolean>;
 	checkExternalConnectivity: () => Promise<boolean>;
 	checkWebSocketConnectivity: () => Promise<boolean>;
 	$forceUpdate: () => void;
 };
-
-declare global {
-	interface Window {
-		serverOnline?: boolean;
-	}
-}
-
 // Debounce variables for network stability
 let consecutiveFailures = 0;
 let consecutiveSuccesses = 0;
@@ -76,7 +69,7 @@ function scheduleNextCheck(vm: NetworkVm) {
 			vm.serverConnecting = false;
 			vm.networkOnline = false;
 			vm.serverOnline = false;
-			window.serverOnline = false;
+			(window as any).serverOnline = false;
 			persistStatus(false, false);
 			vm.$forceUpdate();
 			scheduleNextCheck(vm);
@@ -118,7 +111,7 @@ export function setupNetworkListeners(this: NetworkVm) {
 		this.networkOnline = false;
 		this.internetReachable = false;
 		this.serverOnline = false;
-		window.serverOnline = false;
+		(window as any).serverOnline = false;
 		console.log("Network: Offline");
 		this.$forceUpdate();
 	});
@@ -129,7 +122,7 @@ export function setupNetworkListeners(this: NetworkVm) {
 	this.serverOnline = persisted.serverOnline;
 	this.internetReachable = false;
 	this.serverConnecting = false;
-	window.serverOnline = this.serverOnline;
+	(window as any).serverOnline = this.serverOnline;
 
 	if (!isManualOffline()) {
 		this.networkOnline = navigator.onLine;
@@ -143,7 +136,7 @@ export function setupNetworkListeners(this: NetworkVm) {
 		this.networkOnline = false;
 		this.internetReachable = false;
 		this.serverOnline = false;
-		window.serverOnline = false;
+		(window as any).serverOnline = false;
 		persistStatus(false, false);
 	}
 
@@ -213,7 +206,7 @@ export async function checkNetworkConnectivity(this: NetworkVm) {
 					this.networkOnline = isConnected;
 					this.internetReachable = isInternetReachable;
 					this.serverOnline = true;
-					window.serverOnline = true;
+					(window as any).serverOnline = true;
 					persistStatus(this.networkOnline, true);
 					console.log("Network: Connected");
 					this.$forceUpdate();
@@ -227,7 +220,7 @@ export async function checkNetworkConnectivity(this: NetworkVm) {
 					this.networkOnline = isConnected;
 					this.internetReachable = isInternetReachable;
 					this.serverOnline = false;
-					window.serverOnline = false;
+					(window as any).serverOnline = false;
 					persistStatus(this.networkOnline, false);
 					console.log("Network: Disconnected");
 					this.$forceUpdate();
@@ -244,7 +237,7 @@ export async function checkNetworkConnectivity(this: NetworkVm) {
 			this.networkOnline = navigator.onLine;
 			this.internetReachable = false;
 			this.serverOnline = false;
-			window.serverOnline = false;
+			(window as any).serverOnline = false;
 			persistStatus(this.networkOnline, false);
 			this.$forceUpdate();
 		}

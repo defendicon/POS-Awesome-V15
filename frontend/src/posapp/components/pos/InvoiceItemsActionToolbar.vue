@@ -24,11 +24,7 @@
 		>
 			{{ __("Columns") }}
 		</v-btn>
-		<v-dialog
-			v-model="showColumnSelector"
-			max-width="500px"
-			transition="dialog-bottom-transition"
-		>
+		<v-dialog v-model="showColumnSelector" max-width="500px" transition="dialog-bottom-transition">
 			<v-card>
 				<v-card-title class="text-h6 pa-4 d-flex align-center">
 					<span>{{ __("Select Columns to Display") }}</span>
@@ -79,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 const props = defineProps({
 	itemSearch: {

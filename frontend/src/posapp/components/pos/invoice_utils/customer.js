@@ -68,8 +68,6 @@ export function sync_invoice_customer_details(context, details = null) {
 
 export function _applyPriceListRate(context, item, newRate, priceCurrency) {
 	if (!item) return;
-	const currentRate = item.price_list_rate;
-	const currentBaseRate = item.base_price_list_rate;
 
 	if (context._computePriceConversion) {
 		const { price_list_rate, base_price_list_rate } = context._computePriceConversion(
@@ -87,7 +85,7 @@ export function _applyPriceListRate(context, item, newRate, priceCurrency) {
 	}
 }
 
-export function _computePriceConversion(context, rate, priceCurrency) {
+export function _computePriceConversion(context, rate, _priceCurrency) {
 	const plcConversionRate = context._getPlcConversionRate ? context._getPlcConversionRate() : 1;
 	const base_price_list_rate = rate * plcConversionRate;
 

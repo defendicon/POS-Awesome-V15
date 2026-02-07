@@ -432,7 +432,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import type { CartItem, POSProfile, InvoiceDoc } from "../../types/models";
 
 interface Props {
@@ -447,26 +446,26 @@ interface Props {
 	expandedContentClasses: any;
 
 	// Formatters
-	formatFloat: (val: any, precision?: number) => string;
-	formatCurrency: (val: any, precision?: number) => string;
-	currencySymbol: (currency?: string) => string;
-	isNumber: (val: any) => boolean | string;
+	formatFloat: (_val: any, _precision?: number) => string;
+	formatCurrency: (_val: any, _precision?: number) => string;
+	currencySymbol: (_currency?: string) => string;
+	isNumber: (_val: any) => boolean | string;
 
 	// Actions
-	setFormatedCurrency: (item: any, field: string, value: any, force?: boolean, event?: any) => void;
-	calcPrices: (item: any, value: any, event?: any) => void;
-	calcUom: (item: any, uom: string) => void;
-	changePriceListRate: (item: any) => void;
-	getSerialOptions: (item: any) => any[];
-	setSerialNo: (item: any) => void;
-	setBatchQty: (item: any, event: any) => void;
-	validateDueDate: (item: any) => void;
+	setFormatedCurrency: (_item: any, _field: string, _value: any, _force?: boolean, _event?: any) => void;
+	calcPrices: (_item: any, _value: any, _event?: any) => void;
+	calcUom: (_item: any, _uom: string) => void;
+	changePriceListRate: (_item: any) => void;
+	getSerialOptions: (_item: any) => any[];
+	setSerialNo: (_item: any) => void;
+	setBatchQty: (_item: any, _event: any) => void;
+	validateDueDate: (_item: any) => void;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
-	(e: "qty-change", item: CartItem, event: any): void;
+	"qty-change": [item: CartItem, event: any];
 }>();
 
 const __ = (window as any).__ || ((s: string) => s);

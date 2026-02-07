@@ -377,7 +377,7 @@ export function _syncAutoFreeLines(context, freebiesMap = new Map()) {
 	}
 
 	const removable = [];
-	context.items.forEach((line, index) => {
+	context.items.forEach((line) => {
 		if (line && line.auto_free_source && !expectedKeys.has(line.auto_free_source)) {
 			removable.push(line);
 		}

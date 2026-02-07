@@ -109,7 +109,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-	(e: "refresh"): void;
+	refresh: [];
 }>();
 
 // @ts-ignore

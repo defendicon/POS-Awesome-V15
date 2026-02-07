@@ -230,8 +230,7 @@ import { useToastStore } from "../../stores/toastStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
 import { storeToRefs } from "pinia";
 import stockCoordinator from "../../utils/stockCoordinator";
-import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { isOffline } from "../../../offline/index.js";
+import { ref } from "vue";
 
 // Composables
 import { useOnlineStatus } from "../../composables/useOnlineStatus";
@@ -241,7 +240,6 @@ import { useInvoiceOffers } from "../../composables/useInvoiceOffers";
 import { useInvoiceUI } from "../../composables/invoice/useInvoiceUI";
 import { useInvoicePrinting } from "../../composables/invoice/useInvoicePrinting";
 import { useInvoiceStock } from "../../composables/invoice/useInvoiceStock";
-import { useInvoiceHandlers } from "../../composables/invoice/useInvoiceHandlers";
 
 export default {
 	name: "POSInvoice",
@@ -255,14 +253,7 @@ export default {
 
 		const { activeView } = storeToRefs(uiStore);
 		const { selectedCustomer, refreshToken: customerRefreshToken } = storeToRefs(customersStore);
-		const {
-			items,
-			packedItems: packed_items,
-			invoiceDoc: invoice_doc,
-			discountAmount,
-			additionalDiscount,
-			additionalDiscountPercentage,
-		} = storeToRefs(invoiceStore);
+		const { items, packedItems: packed_items, invoiceDoc: invoice_doc } = storeToRefs(invoiceStore);
 
 		const invoiceType = ref("Invoice");
 		const currencyState = useInvoiceCurrency({}, {});

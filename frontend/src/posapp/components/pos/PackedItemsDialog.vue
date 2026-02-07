@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
 	modelValue: {
 		type: Boolean,
 		default: false,
@@ -87,7 +87,7 @@ const props = defineProps({
 	},
 });
 
-const emit = defineEmits(["update:modelValue"]);
+defineEmits(["update:modelValue"]);
 
 const headers = [
 	{ title: __("No."), key: "index" },

@@ -175,9 +175,7 @@ import {
 	type Ref,
 } from "vue";
 import { storeToRefs } from "pinia";
-import format from "../../format";
 import * as _ from "lodash";
-declare const frappe: any;
 import { memoryInitPromise } from "../../../offline/index";
 
 import CameraScanner from "./CameraScanner.vue";
@@ -203,7 +201,6 @@ import { useItemSelection } from "../../composables/useItemSelection";
 import { useItemSelectorLayout } from "../../composables/useItemSelectorLayout";
 import { useLastInvoiceRate } from "../../composables/useLastInvoiceRate";
 import { useItemSync } from "../../composables/useItemSync";
-import { useBatchSerial } from "../../composables/useBatchSerial";
 import { useItemStorageSafety } from "../../composables/useItemStorageSafety";
 import { useItemsSelectorSearch } from "../../composables/useItemsSelectorSearch";
 import { useItemsSelectorSettings } from "../../composables/useItemsSelectorSettings";
@@ -839,7 +836,7 @@ const getItemRowProps = (item) => ({
 	draggable: true,
 });
 
-const handleItemCreated = (item) => {
+const handleItemCreated = (_item) => {
 	newItemDialog.value = false;
 	itemsIntegration.get_items(true);
 };

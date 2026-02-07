@@ -120,7 +120,6 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, onMounted, watch, getCurrentInstance } from "vue";
 import { useInvoiceStore } from "../../stores/invoiceStore";
-import { parseBooleanSetting } from "../../utils/stock";
 import { loadItemSelectorSettings } from "../../utils/itemSelectorSettings";
 import { logComponentRender } from "../../utils/perf";
 import CartItemRow from "./CartItemRow.vue";
@@ -136,7 +135,7 @@ import { useRtl } from "../../composables/useRtl";
 import "./items-table-styles.css";
 
 // Global declarations for Frappe
-declare const __: (str: string, args?: any[]) => string;
+declare const __: (_str: string, _args?: any[]) => string;
 
 interface Props {
 	headers?: any[];
@@ -147,24 +146,24 @@ interface Props {
 	invoiceType?: string;
 	stock_settings?: any;
 	displayCurrency?: string;
-	formatFloat: (value: number, precision?: number | string) => string;
-	formatCurrency: (value: number, precision?: number | string) => string;
-	currencySymbol: (currency?: string) => string;
-	isNumber: (value: any) => boolean;
-	setFormatedQty: (item: any, field: string, value: any, force?: boolean, event?: any) => void;
-	setFormatedCurrency: (item: any, field: string, value: any, force?: boolean, event?: any) => void;
-	calcPrices: (item: any, value: any, event?: any) => void;
-	calcUom: (item: any, uom: string) => void;
-	setSerialNo: (item: any) => void;
-	setBatchQty: (item: any, event: any) => void;
-	validateDueDate: (item: any) => void;
-	removeItem: (item: any) => void;
-	subtractOne: (item: any) => void;
-	addOne: (item: any) => void;
+	formatFloat: (_value: number, _precision?: number | string) => string;
+	formatCurrency: (_value: number, _precision?: number | string) => string;
+	currencySymbol: (_currency?: string) => string;
+	isNumber: (_value: any) => boolean;
+	setFormatedQty: (_item: any, _field: string, _value: any, _force?: boolean, _event?: any) => void;
+	setFormatedCurrency: (_item: any, _field: string, _value: any, _force?: boolean, _event?: any) => void;
+	calcPrices: (_item: any, _value: any, _event?: any) => void;
+	calcUom: (_item: any, _uom: string) => void;
+	setSerialNo: (_item: any) => void;
+	setBatchQty: (_item: any, _event: any) => void;
+	validateDueDate: (_item: any) => void;
+	removeItem: (_item: any) => void;
+	subtractOne: (_item: any) => void;
+	addOne: (_item: any) => void;
 	isReturnInvoice?: boolean;
-	toggleOffer: (item: any) => void;
-	changePriceListRate: (item: any) => void;
-	isNegative: (value: any) => boolean;
+	toggleOffer: (_item: any) => void;
+	changePriceListRate: (_item: any) => void;
+	isNegative: (_value: any) => boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -174,9 +173,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-	(e: "update:expanded", val: any[]): void;
-	(e: "show-drop-feedback", val: boolean): void;
-	(e: "item-dropped", val: boolean): void;
+	"update:expanded": [val: any[]];
+	"show-drop-feedback": [val: boolean];
+	"item-dropped": [val: boolean];
 }>();
 
 const { proxy } = getCurrentInstance() as any;
@@ -188,17 +187,15 @@ const tableContainer = ref<HTMLElement | null>(null);
 const { customItemFilter } = useItemsTableSearch();
 const dragDropHandlers = useItemsTableDragDrop(emit, eventBus);
 const { isRtl } = useRtl();
-const {
-	memoizedFormatFloat,
-	memoizedFormatCurrency,
-	memoizedQtyLength,
-	clearFormatCache,
-} = useFormatters({
+const { memoizedFormatFloat, memoizedFormatCurrency, clearFormatCache } = useFormatters({
 	formatFloat: props.formatFloat,
 	formatCurrency: props.formatCurrency,
 });
 
-const responsive = useItemsTableResponsive(tableContainer, computed(() => props.headers || []));
+const responsive = useItemsTableResponsive(
+	tableContainer,
+	computed(() => props.headers || []),
+);
 const merge = useItemsTableMerge(computed(() => invoiceStore.items));
 const nameEdit = useItemsTableNameEdit();
 
@@ -211,11 +208,6 @@ const memoizedIsNegative = computed(() => {
 		if (typeof value === "number") return value < 0;
 		return props.isNegative(value);
 	};
-});
-
-const blockSaleBeyondAvailableQty = computed(() => {
-	if (["Order", "Quotation"].includes(props.invoiceType || "")) return false;
-	return parseBooleanSetting(props.pos_profile?.posa_block_sale_beyond_available_qty);
 });
 
 const {
@@ -239,8 +231,7 @@ const virtualScrollConfig = computed(() => {
 	const height = containerHeight.value || 600;
 
 	return {
-		itemHeight:
-			tableDensity.value === "compact" ? 48 : tableDensity.value === "comfortable" ? 72 : 60,
+		itemHeight: tableDensity.value === "compact" ? 48 : tableDensity.value === "comfortable" ? 72 : 60,
 		itemsPerPage: Math.max(20, Math.ceil(height / 60) + 5),
 		bufferSize: itemCount > 1000 ? 20 : itemCount > 500 ? 15 : 10,
 	};
@@ -337,14 +328,7 @@ const onDragLeaveFromSelector = (event: DragEvent) => dragDropHandlers.onDragLea
 const onDropFromSelector = (event: DragEvent) => dragDropHandlers.onDropFromSelector(event);
 
 // Name editing logic
-const {
-	editNameDialog,
-	editedName,
-	editNameTarget,
-	openNameDialog,
-	saveItemName,
-	resetItemName,
-} = nameEdit;
+const { editNameDialog, editedName, editNameTarget, openNameDialog, saveItemName, resetItemName } = nameEdit;
 
 // Life-cycle
 onMounted(() => {

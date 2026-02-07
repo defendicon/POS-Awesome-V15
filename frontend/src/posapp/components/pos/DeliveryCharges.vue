@@ -57,8 +57,8 @@ interface Props {
 	delivery_charges?: DeliveryCharge[] | any[];
 	selected_delivery_charge?: DeliveryCharge | string | null;
 	delivery_charges_rate?: number;
-	deliveryChargesFilter?: (val: any, query: string, item: any) => boolean;
-	formatCurrency: (val: number | undefined) => string;
+	deliveryChargesFilter?: (_val: any, _query: string, _item: any) => boolean;
+	formatCurrency: (_val: number | undefined) => string;
 	currencySymbol: () => string;
 	readonly?: boolean;
 }
@@ -66,7 +66,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-	(e: "update:selected_delivery_charge", val: any): void;
+	"update:selected_delivery_charge": [val: any];
 }>();
 
 const __ = (str: string) => (window.__ ? window.__(str) : str);

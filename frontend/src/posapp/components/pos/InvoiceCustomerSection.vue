@@ -26,7 +26,7 @@
 import { ref } from "vue";
 import Customer from "./Customer.vue";
 
-const props = defineProps({
+defineProps({
 	pos_profile: {
 		type: Object,
 		required: true,
@@ -42,7 +42,7 @@ const props = defineProps({
 	},
 });
 
-const emit = defineEmits(["update:modelValue"]);
+defineEmits(["update:modelValue"]);
 const customerComponent = ref(null);
 
 // Expose focus method for parent

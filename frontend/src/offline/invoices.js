@@ -1,5 +1,5 @@
 import { memory, persist, isOffline } from "./db.js";
-import { syncOfflineCustomers, updateOfflineInvoicesCustomer } from "./customers.js";
+import { syncOfflineCustomers } from "./customers.js";
 import { updateLocalStock } from "./stock.js";
 import { reduceCacheUsage } from "./cache.js";
 

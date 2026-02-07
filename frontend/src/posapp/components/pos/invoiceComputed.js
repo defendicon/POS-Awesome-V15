@@ -1,7 +1,5 @@
 import { perfMarkStart, perfMarkEnd } from "../../utils/perf";
 
-import { parseBooleanSetting } from "../../utils/stock";
-
 export default {
 	// Calculate total quantity of all items
 	total_qty() {

@@ -56,14 +56,14 @@
 </template>
 
 <script setup>
-import { inject, computed } from "vue";
+import { inject } from "vue";
 
 const props = defineProps({
 	payments: Array,
 	headers: Array,
 	itemsPerPage: {
 		type: Number,
-		default: 20
+		default: 20,
 	},
 	companyCurrencySymbol: String,
 	// Formatters

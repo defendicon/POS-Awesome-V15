@@ -442,7 +442,7 @@ export default {
           </head>
           <body>
             ${content}
-            <script src="/assets/posawesome/dist/js/libs/JsBarcode.all.min.js"><\/script>
+				<script src="/assets/posawesome/dist/js/libs/JsBarcode.all.min.js"></${"script"}>
             <script>
               window.onload = function() {
                 JsBarcode(".barcode").init();
@@ -451,7 +451,7 @@ export default {
                     window.close();
                 }, 500);
               }
-            <\/script>
+				</${"script"}>
           </body>
         </html>
       `);
@@ -506,8 +506,8 @@ export default {
               ${style}
               /* Adjustments for PDF generation if needed */
             </style>
-            <script src="/assets/posawesome/dist/js/libs/html2pdf.bundle.min.js"><\/script>
-            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"><\/script>
+				<script src="/assets/posawesome/dist/js/libs/html2pdf.bundle.min.js"></${"script"}>
+				<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></${"script"}>
           </head>
           <body>
             <div id="print-content">
@@ -533,7 +533,7 @@ export default {
                     });
                 }, 800);
               }
-            <\/script>
+				</${"script"}>
           </body>
         </html>
       `);

@@ -10,11 +10,7 @@
 		</div>
 
 		<div class="overview-wrapper" v-if="loading">
-			<v-progress-circular
-				color="primary"
-				indeterminate
-				size="32"
-			></v-progress-circular>
+			<v-progress-circular color="primary" indeterminate size="32"></v-progress-circular>
 		</div>
 
 		<div v-else class="overview-wrapper">
@@ -101,9 +97,7 @@
 												}}
 											</span>
 											<span
-												v-if="
-													shouldShowCompanyEquivalent(row, row.currency)
-												"
+												v-if="shouldShowCompanyEquivalent(row, row.currency)"
 												class="company-equivalent"
 											>
 												({{
@@ -149,10 +143,7 @@
 								{{ __("Credit sales remaining to be collected") }}
 							</p>
 						</div>
-						<div
-							v-if="creditInvoicesByCurrency.length"
-							class="overview-table-wrapper"
-						>
+						<div v-if="creditInvoicesByCurrency.length" class="overview-table-wrapper">
 							<table class="overview-table">
 								<thead>
 									<tr>
@@ -183,12 +174,7 @@
 														}}
 													</span>
 													<span
-														v-if="
-															shouldShowCompanyEquivalent(
-																row,
-																row.currency,
-															)
-														"
+														v-if="shouldShowCompanyEquivalent(row, row.currency)"
 														class="company-equivalent"
 													>
 														({{
@@ -235,10 +221,7 @@
 								{{ __("Processed returns impacting the shift totals") }}
 							</p>
 						</div>
-						<div
-							v-if="returnsByCurrency.length"
-							class="overview-table-wrapper"
-						>
+						<div v-if="returnsByCurrency.length" class="overview-table-wrapper">
 							<table class="overview-table">
 								<thead>
 									<tr>
@@ -252,10 +235,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr
-										v-for="row in returnsByCurrency"
-										:key="`return-${row.currency}`"
-									>
+									<tr v-for="row in returnsByCurrency" :key="`return-${row.currency}`">
 										<td>{{ row.currency }}</td>
 										<td class="text-end">
 											<div class="amount-with-base">
@@ -269,12 +249,7 @@
 														}}
 													</span>
 													<span
-														v-if="
-															shouldShowCompanyEquivalent(
-																row,
-																row.currency,
-															)
-														"
+														v-if="shouldShowCompanyEquivalent(row, row.currency)"
 														class="company-equivalent"
 													>
 														({{
@@ -321,15 +296,10 @@
 								{{ __("Change Returned") }}
 							</h5>
 							<p class="text-body-2 text-grey">
-								{{
-									__("Track how much cash was handed back to customers")
-								}}
+								{{ __("Track how much cash was handed back to customers") }}
 							</p>
 						</div>
-						<div
-							v-if="changeReturnedRows.length"
-							class="overview-table-wrapper"
-						>
+						<div v-if="changeReturnedRows.length" class="overview-table-wrapper">
 							<table class="overview-table">
 								<thead>
 									<tr>
@@ -505,10 +475,7 @@
 								{{ __("Expected cash on hand grouped by currency") }}
 							</p>
 						</div>
-						<div
-							v-if="cashExpectedByCurrency.length"
-							class="overview-table-wrapper"
-						>
+						<div v-if="cashExpectedByCurrency.length" class="overview-table-wrapper">
 							<table class="overview-table">
 								<thead>
 									<tr>
@@ -519,10 +486,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr
-										v-for="row in cashExpectedByCurrency"
-										:key="`cash-${row.currency}`"
-									>
+									<tr v-for="row in cashExpectedByCurrency" :key="`cash-${row.currency}`">
 										<td>{{ row.currency }}</td>
 										<td class="text-end">
 											<div class="amount-with-base">
@@ -536,12 +500,7 @@
 														}}
 													</span>
 													<span
-														v-if="
-															shouldShowCompanyEquivalent(
-																row,
-																row.currency,
-															)
-														"
+														v-if="shouldShowCompanyEquivalent(row, row.currency)"
 														class="company-equivalent"
 													>
 														({{
@@ -560,17 +519,12 @@
 													class="exchange-note"
 												>
 													{{
-														__(
-															"Overpayment change deducted: {0}",
-															[
-																formatCurrencyWithSymbol(
-																	overpaymentDeductionForCurrency(
-																		row.currency,
-																	),
-																	row.currency || overviewCompanyCurrency,
-																),
-															],
-														)
+														__("Overpayment change deducted: {0}", [
+															formatCurrencyWithSymbol(
+																overpaymentDeductionForCurrency(row.currency),
+																row.currency || overviewCompanyCurrency,
+															),
+														])
 													}}
 												</div>
 												<div
@@ -620,10 +574,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr
-								v-for="row in paymentsByMode"
-								:key="`${row.mode_of_payment}-${row.currency}`"
-							>
+							<tr v-for="row in paymentsByMode" :key="`${row.mode_of_payment}-${row.currency}`">
 								<td>{{ row.mode_of_payment }}</td>
 								<td>{{ row.currency }}</td>
 								<td class="text-end">
@@ -638,9 +589,7 @@
 												}}
 											</span>
 											<span
-												v-if="
-													shouldShowCompanyEquivalent(row, row.currency)
-												"
+												v-if="shouldShowCompanyEquivalent(row, row.currency)"
 												class="company-equivalent"
 											>
 												({{
@@ -678,9 +627,7 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
-
-const props = defineProps({
+defineProps({
 	loading: Boolean,
 	primaryInsights: Array,
 	secondaryInsights: Array,

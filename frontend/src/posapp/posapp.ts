@@ -32,13 +32,6 @@ import {
 
 attachProfilerHelpers();
 
-declare global {
-	interface Window {
-		Dexie: any;
-		frappe: any;
-	}
-}
-
 // Suppress known benign error from Frappe's shortcut.js (vendor)
 // This error occurs because POS view might not have the expected breadcrumb structure
 if (typeof window !== "undefined") {
@@ -58,8 +51,8 @@ if (typeof window !== "undefined") {
 }
 
 // Expose Dexie globally for libraries that expect a global Dexie instance
-if (typeof window !== "undefined" && !window.Dexie) {
-	window.Dexie = Dexie;
+if (typeof window !== "undefined" && !(window as any).Dexie) {
+	(window as any).Dexie = Dexie;
 }
 
 // Ensure frappe is available

@@ -56,7 +56,7 @@ interface Props {
 	pos_profile: POSProfile | any; // Loose typing for now to avoid breaking changes
 	posting_date_display?: string;
 	customer_balance?: number;
-	formatCurrency: (val: number | undefined) => string;
+	formatCurrency: (_val: number | undefined) => string;
 	priceList?: string;
 	priceLists?: string[];
 }
@@ -66,8 +66,8 @@ const props = defineProps<Props>();
 const __ = (str: string) => (window.__ ? window.__(str) : str);
 
 const emit = defineEmits<{
-	(e: "update:posting_date_display", val: string): void;
-	(e: "update:priceList", val: string): void;
+	"update:posting_date_display": [val: string];
+	"update:priceList": [val: string];
 }>();
 
 const internal_posting_date_display = ref(props.posting_date_display);

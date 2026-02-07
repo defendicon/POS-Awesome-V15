@@ -177,7 +177,7 @@ export default {
 		UpdateCustomer,
 		Skeleton,
 	},
-	setup(props, { emit, expose }) {
+	setup(props, { expose }) {
 		const { proxy } = getCurrentInstance();
 		const eventBus = proxy?.eventBus;
 		const customersStore = useCustomersStore();
@@ -405,7 +405,7 @@ export default {
 
 		const busHandlers = [];
 
-		const registerBus = (event, handler) => {
+		const _registerBus = (event, handler) => {
 			if (eventBus && typeof eventBus.on === "function") {
 				eventBus.on(event, handler);
 				busHandlers.push({ event, handler });

@@ -210,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick, unref } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 
 // Stores
@@ -221,15 +221,13 @@ import { useToastStore } from "../../stores/toastStore.js";
 import { useSyncStore } from "../../stores/syncStore.ts";
 
 // Composables
-import { useRtl } from "../../composables/useRtl";
 import { usePaymentCalculations } from "../../composables/usePaymentCalculations";
 import { usePaymentSubmission } from "../../composables/usePaymentSubmission";
 import { useRedemptionLogic } from "../../composables/useRedemptionLogic";
 import { usePaymentPrinting } from "../../composables/usePaymentPrinting";
 import { usePaymentMethods } from "../../composables/usePaymentMethods";
 import { useInvoiceDetails } from "../../composables/useInvoiceDetails";
-import { useFormat, formatUtils } from "../../format";
-import { parseBooleanSetting } from "../../utils/stock";
+import { useFormat } from "../../format";
 import { isOffline } from "../../../offline/index.js";
 
 // Components
@@ -253,7 +251,6 @@ const customersStore = useCustomersStore();
 const uiStore = useUIStore();
 const toastStore = useToastStore();
 const syncStore = useSyncStore();
-const { isRtl, rtlStyles, rtlClasses } = useRtl();
 
 // Destructure format utilities
 const {
@@ -266,8 +263,8 @@ const {
 	setFormatedCurrency,
 } = useFormat();
 
-const { selectedCustomer, customerInfo, refreshToken } = storeToRefs(customersStore);
-const { isFrozen, freezeTitle, freezeMessage, activeView } = storeToRefs(uiStore);
+const { selectedCustomer, customerInfo } = storeToRefs(customersStore);
+const { activeView } = storeToRefs(uiStore);
 
 // State
 const is_return = ref(false);
@@ -306,13 +303,6 @@ const invoice_doc = computed({
 });
 
 const displayCurrency = computed(() => (invoice_doc.value ? invoice_doc.value.currency : ""));
-
-const blockSaleBeyondAvailableQty = computed(() => {
-	if (["Order", "Quotation"].includes(invoiceType.value)) {
-		return false;
-	}
-	return parseBooleanSetting(pos_profile.value?.posa_block_sale_beyond_available_qty);
-});
 
 const validatePayment = computed(() => {
 	const profile = pos_profile.value;
@@ -369,7 +359,7 @@ const {
 	onClearAmounts: () => {},
 });
 
-const { loadPrintPage, printOfflineInvoice, openOfflineInvoicePreview } = usePaymentPrinting({
+const { loadPrintPage, printOfflineInvoice } = usePaymentPrinting({
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
 	posProfile: pos_profile,
 	invoiceType: invoiceType,
@@ -384,21 +374,13 @@ const paymentCalculations = usePaymentCalculations({
 	redeemedCustomerCredit: redeemed_customer_credit,
 	customerCreditDict: customer_credit_dict,
 	customerInfo: customer_info,
-	formatCurrency: (val, curr) => formatCurrency(val, currency_precision.value),
+	formatCurrency: (val, _curr) => formatCurrency(val, currency_precision.value),
 });
 
-const {
-	diff_payment,
-	total_payments,
-	total_payments_display,
-	diff_payment_display,
-	diff_label,
-	change_due,
-	paymentAmountSummary,
-} = paymentCalculations;
+const { diff_payment, total_payments, total_payments_display, diff_payment_display, diff_label, change_due } =
+	paymentCalculations;
 
 const {
-	mpesa_modes,
 	phone_dialog,
 	get_mpesa_modes,
 	is_mpesa_c2b_payment,
@@ -406,12 +388,10 @@ const {
 	set_mpesa_payment,
 	set_full_amount,
 	set_rest_amount,
-	clear_all_amounts,
 	request_payment,
 	autoBalancePayments,
 	getVisibleDenominations,
 	isCashLikePayment,
-	reset_cash_payments,
 } = usePaymentMethods({
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
 	posProfile: pos_profile,
@@ -486,13 +466,7 @@ const {
 	eventBus: eventBus,
 });
 
-const {
-	validateDueDate,
-	ensureReturnPaymentsAreNegative,
-	validateSubmission,
-	submitInvoice,
-	extractSubmissionErrorMessage,
-} = usePaymentSubmission({
+const { ensureReturnPaymentsAreNegative, validateSubmission, submitInvoice } = usePaymentSubmission({
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
 	posProfile: pos_profile,
 	stockSettings: stock_settings,
@@ -557,7 +531,7 @@ const finishSubmissionNavigation = (clearInvoice = false) => {
 	}
 };
 
-const handleShowPayment = (val) => {
+const handleShowPayment = () => {
 	paymentVisible.value = true;
 	nextTick(() => {
 		setTimeout(() => {
@@ -700,7 +674,7 @@ const scheduleBackgroundStatusCheck = (invoiceName, doctype) => {
 };
 
 // Submission Wrapper
-const submit = async (event, payment_received = false, print = false) => {
+const submit = async (_event, payment_received = false, print = false) => {
 	loading.value = true;
 	try {
 		await validateSubmission(payment_received);
@@ -732,7 +706,7 @@ const submitInvoiceWrapper = async (print) => {
 					}
 				}
 			},
-			onSuccess: (message) => {
+			onSuccess: () => {
 				customer_credit_dict.value = [];
 				redeem_customer_credit.value = false;
 				is_cashback.value = true;

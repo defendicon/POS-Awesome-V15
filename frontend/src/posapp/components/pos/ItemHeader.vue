@@ -134,7 +134,7 @@
 <script setup>
 import { ref } from "vue";
 
-const props = defineProps({
+defineProps({
 	searchInput: { type: String, default: "" },
 	qtyInput: { type: [String, Number], default: 1 },
 	newLine: { type: [Boolean, Array], default: false },
@@ -146,7 +146,7 @@ const props = defineProps({
 	context: { type: String, default: "pos" },
 });
 
-const emit = defineEmits([
+defineEmits([
 	"update:searchInput",
 	"update:qtyInput",
 	"update:newLine",

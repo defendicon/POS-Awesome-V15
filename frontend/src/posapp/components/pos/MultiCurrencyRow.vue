@@ -52,16 +52,16 @@ interface Props {
 	plc_conversion_rate?: number;
 	conversion_rate?: number;
 	available_currencies?: string[];
-	isNumber: (val: any) => boolean | string;
+	isNumber: (_val: any) => boolean | string;
 	price_list_currency?: string;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-	(e: "update:selected_currency", val: string): void;
-	(e: "update:plc_conversion_rate", val: number | undefined): void;
-	(e: "update:conversion_rate", val: number | undefined): void;
+	(_e: "update:selected_currency", _val: string): void;
+	(_e: "update:plc_conversion_rate", _val: number | undefined): void;
+	(_e: "update:conversion_rate", _val: number | undefined): void;
 }>();
 
 const internal_selected_currency = ref(props.selected_currency);

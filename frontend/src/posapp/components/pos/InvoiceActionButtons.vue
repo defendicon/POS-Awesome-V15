@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
 	pos_profile: {
 		type: Object,
 		required: true,
@@ -140,7 +140,7 @@ const props = defineProps({
 	paymentLoading: Boolean,
 });
 
-const emit = defineEmits([
+defineEmits([
 	"save-and-clear",
 	"load-drafts",
 	"select-order",
@@ -152,7 +152,6 @@ const emit = defineEmits([
 	"show-payment",
 ]);
 
-const frappe = window.frappe;
 const __ = window.__;
 </script>
 

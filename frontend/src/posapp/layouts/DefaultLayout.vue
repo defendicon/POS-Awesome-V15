@@ -39,8 +39,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance, inject } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } from "vue";
+import { useRouter } from "vue-router";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
 import ClosingDialog from "../components/pos/ClosingDialog.vue";
@@ -71,12 +71,6 @@ import {
 	getLastSyncTotals,
 } from "../../offline/index.js";
 import {
-	appendDebugPrintParam,
-	isDebugPrintEnabled,
-	silentPrint,
-	watchPrintWindow,
-} from "../plugins/print.js";
-import {
 	setupNetworkListeners as initNetworkListeners,
 	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
 } from "../composables/useNetwork";
@@ -100,7 +94,7 @@ const FRAPPE_NAV_SELECTORS = [
 const FRAPPE_NAV_SELECTOR_STRING = FRAPPE_NAV_SELECTORS.join(", ");
 
 // Composable setup
-const { isRtl, rtlStyles, rtlClasses } = useRtl();
+const { rtlClasses } = useRtl();
 // Use the global theme plugin via inject or assume it's available on globalProperties if not using composable yet
 // For Composition API, we can access $theme if provided, or rely on custom logic.
 // However, the original code used `this.$theme`. We can try injecting it if provided, or access via internal instance.
@@ -121,9 +115,8 @@ const toastStore = useToastStore();
 const uiStore = useUIStore();
 
 // UI Store State
-const { posProfile, isLoading, loadingText, lastInvoiceId } = storeToRefs(uiStore);
+const { posProfile, lastInvoiceId } = storeToRefs(uiStore);
 
-const route = useRoute();
 const { pendingInvoicesCount } = storeToRefs(syncStore);
 const { loadProgress, customersLoaded } = storeToRefs(customersStore);
 const { itemsLoaded, loadProgress: itemsLoadProgress } = storeToRefs(itemsStore);
@@ -155,7 +148,6 @@ const eventBus = instance?.proxy?.eventBus;
 initLoadingSources(["init", "items", "customers"]);
 
 // Computed
-const isDark = computed(() => $theme?.isDark || false);
 const loadingProgress = computed(() => loadingState.progress);
 const loadingActive = computed(() => loadingState.active);
 const loadingMessage = computed(() => loadingState.message);
