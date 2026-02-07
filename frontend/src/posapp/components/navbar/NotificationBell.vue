@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, toRefs, watch } from "vue";
 
 defineOptions({
 	name: "NotificationBell",
@@ -103,10 +103,11 @@ const props = withDefaults(defineProps<Props>(), {
 	notifications: () => [],
 	unreadCount: 0,
 });
+const { notifications, unreadCount } = toRefs(props);
 
 const emit = defineEmits<{
-	(e: "mark-read"): void;
-	(e: "clear"): void;
+	(_event: "mark-read"): void;
+	(_event: "clear"): void;
 }>();
 
 // @ts-ignore

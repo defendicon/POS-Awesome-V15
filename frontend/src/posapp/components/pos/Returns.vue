@@ -255,8 +255,6 @@
 import format, { formatUtils } from "../../format";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useUIStore } from "../../stores/uiStore.js";
-import { storeToRefs } from "pinia";
-import { useToastStore } from "../../stores/toastStore";
 
 export default {
 	mixins: [format],

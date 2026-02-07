@@ -163,7 +163,7 @@ export default {
 		const customersStore = useCustomersStore();
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
-		const { isRtl, rtlStyles, rtlClasses } = useRtl();
+		const { rtlStyles, rtlClasses } = useRtl();
 		const { selectedCustomer, refreshToken } = storeToRefs(customersStore);
 
 		// Core Data & State

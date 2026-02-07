@@ -111,8 +111,7 @@ import PurchasePaymentDialog from "./PurchasePaymentDialog.vue";
 import SupplierDialog from "./SupplierDialog.vue";
 import PurchaseHeader from "./PurchaseHeader.vue";
 import PurchaseItemsTable from "./PurchaseItemsTable.vue";
-import { ref, watch, onMounted, onBeforeUnmount, computed } from "vue";
-import { storeToRefs } from "pinia";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 
 export default {
 	mixins: [format],
@@ -127,7 +126,6 @@ export default {
 		const uiStore = useUIStore();
 		const toastStore = useToastStore();
 		const itemsStore = useItemsStore();
-		const { proxy } = uiStore; // or just use global proxy if needed, but usually we just use proxy from getCurrentInstance
 
 		const pos_profile = ref({});
 		const receiveNow = ref(false);
@@ -150,7 +148,6 @@ export default {
 			updateItemReceivedQty,
 			removeItem,
 			resetForm,
-			generateLineId,
 		} = usePurchaseOrder({
 			posProfile: pos_profile,
 			receiveNow: receiveNow,
@@ -314,7 +311,7 @@ export default {
 					}
 					resetForm();
 				}
-			} catch (error) {
+			} catch {
 				errorMessage.value = __("Unable to create purchase order");
 			} finally {
 				submitLoading.value = false;

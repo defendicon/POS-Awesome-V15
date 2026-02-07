@@ -13,6 +13,7 @@ export default [
 			"src/sw.js",
 			"src/posawesome.bundle.js",
 			"src/posawesome.bundle.*.js",
+			"**/*.d.ts",
 		],
 	},
 	{
@@ -45,7 +46,12 @@ export default [
 			...pluginVuetify.configs["flat/base"][0].rules,
 			"no-unused-vars": [
 				"warn",
-				{ argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+				{
+					argsIgnorePattern: "^_|^this$",
+					varsIgnorePattern: "^_",
+					caughtErrors: "all",
+					caughtErrorsIgnorePattern: "^_",
+				},
 			],
 			"no-redeclare": "warn",
 			"no-useless-escape": "warn",

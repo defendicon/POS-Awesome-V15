@@ -82,15 +82,7 @@ import NewAddress from "./NewAddress.vue";
 import Variants from "./Variants.vue";
 import Returns from "./Returns.vue";
 import MpesaPayments from "./Mpesa-Payments.vue";
-import {
-	getOpeningStorage,
-	setOpeningStorage,
-	clearOpeningStorage,
-	initPromise,
-	checkDbHealth,
-	setTaxTemplate,
-} from "../../../offline/index.js";
-import { getCurrentInstance, inject, ref, onMounted, onBeforeUnmount } from "vue";
+import { inject, ref, onMounted, onBeforeUnmount } from "vue";
 import { usePosShift } from "../../composables/usePosShift.js";
 import { useOffers } from "../../composables/useOffers.js";
 // Import the cache cleanup function
@@ -105,7 +97,6 @@ import { storeToRefs } from "pinia";
 
 export default {
 	setup() {
-		const instance = getCurrentInstance();
 		const eventBus = inject("eventBus");
 		const dialog = ref(false);
 		const responsive = useResponsive();
@@ -175,7 +166,7 @@ export default {
 			this.dialog = true;
 		},
 		get_pos_setting() {
-			frappe.db.get_doc("POS Settings", undefined).then((doc) => {
+			frappe.db.get_doc("POS Settings", undefined).then((_doc) => {
 				// Update store directly instead of emitting event
 				// If Payments.vue or others need this, they should watch uiStore.posSettings
 				// For now, we assume uiStore.setStockSettings or similar is sufficient,
