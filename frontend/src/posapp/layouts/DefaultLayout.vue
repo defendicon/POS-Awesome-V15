@@ -43,7 +43,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } 
 import { useRouter } from "vue-router";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
-import ClosingDialog from "../components/pos/ClosingDialog.vue";
+import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";
 import AppLoadingOverlay from "../components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "../components/ui/UpdatePrompt.vue";
 import { useLoading } from "../composables/useLoading.js";

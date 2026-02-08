@@ -1,0 +1,785 @@
+/* =================================================================
+   POS TABLE COMPONENT - REFACTORED STYLES
+   Clean, organized CSS with proper naming and no conflicts
+   ================================================================= */
+
+/* =================================================================
+   BASE TABLE STRUCTURE
+   ================================================================= */
+
+/* Main table container */
+.posa-cart-table {
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px var(--pos-shadow);
+	border: 1px solid var(--pos-border);
+	height: 100%;
+	width: 100%;
+	max-width: 100%;
+	display: flex;
+	flex-direction: column;
+	transition: all 0.3s ease;
+	background: var(--pos-card-bg);
+	margin: 0;
+	padding: 0;
+}
+
+/* Responsive table container */
+.posa-responsive-table-container {
+	position: relative;
+	transition: all 0.3s ease;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	will-change: width, height;
+	contain: layout style;
+}
+
+/* Items table container */
+.posa-items-table-container {
+	overflow-y: auto;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+/* =================================================================
+   TABLE STRUCTURE - HEADERS, ROWS, CELLS
+   ================================================================= */
+
+/* Table wrapper styling */
+.posa-cart-table .v-data-table__wrapper,
+.posa-cart-table .v-table__wrapper {
+	border-radius: 0;
+	height: 100%;
+	width: 100%;
+	max-width: 100%;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+/* Full width enforcement for nested elements */
+.posa-cart-table .v-data-table,
+.posa-cart-table .v-data-table-virtual,
+.posa-cart-table .v-table {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+}
+
+.posa-cart-table table {
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	border-collapse: collapse !important;
+	table-layout: auto !important;
+	border-spacing: 0;
+}
+
+/* Table headers */
+.posa-cart-table th {
+	font-weight: 600;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	padding: 12px;
+	border-bottom: 1px solid var(--pos-border);
+	background-color: var(--pos-table-header-bg);
+	color: var(--pos-text-primary);
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: auto;
+	text-align: center;
+	vertical-align: middle !important;
+	line-height: 1.2 !important;
+	height: 48px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	background-clip: padding-box;
+	border-radius: 0;
+	user-select: none;
+	cursor: default;
+	will-change: background-color, transform, box-shadow;
+	border: none;
+	outline: none;
+	box-sizing: border-box;
+	border-right: 1px solid var(--pos-border-light);
+	contain: layout style;
+}
+
+.posa-cart-table th:last-child {
+	border-right: none;
+}
+
+/* Header hover effects */
+.posa-cart-table th:hover {
+	background-color: var(--pos-hover-bg);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px var(--pos-shadow);
+	z-index: 2;
+}
+
+/* Header content styling */
+.posa-cart-table th .v-data-table-header__content {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	z-index: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.posa-cart-table th:hover .v-data-table-header__content {
+	color: var(--pos-primary);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-shadow: 0 1px 2px var(--pos-shadow-light);
+}
+
+/* Table rows */
+.posa-cart-table tr {
+	transition: background-color 0.2s ease;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+	width: 100% !important;
+	max-width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	min-height: var(--cell-height, 60px);
+}
+
+.posa-cart-table tr:hover {
+	background-color: var(--pos-hover-bg);
+}
+
+/* Table cells */
+.posa-cart-table td {
+	padding: 16px 12px;
+	vertical-align: middle;
+	height: 60px;
+	text-align: center;
+	color: var(--pos-text-primary);
+	position: relative;
+}
+
+.posa-cart-table td > div {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+/* =================================================================
+   QUANTITY COUNTER COMPONENT
+   ================================================================= */
+
+.posa-cart-table__qty-counter {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 4px;
+	min-width: 140px;
+	max-width: 160px;
+	width: auto;
+	height: auto;
+	background: var(--pos-surface-variant);
+	border-radius: 8px;
+	backdrop-filter: blur(10px);
+	border: 1px solid var(--pos-border-light);
+	transition: all 0.3s ease;
+	margin: 0 auto;
+	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+.posa-cart-table__qty-counter:hover {
+	background: var(--pos-hover-bg);
+	box-shadow: 0 4px 16px var(--pos-shadow);
+	transform: translateY(-1px);
+}
+
+.qty-control-btn,
+.posa-cart-table__qty-btn {
+	width: 24px !important;
+	height: 24px !important;
+	min-width: 24px !important;
+	border-radius: 6px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow:
+		0 2px 8px var(--pos-shadow-light),
+		0 1px 3px var(--pos-shadow-light) !important;
+	font-weight: 600 !important;
+	backdrop-filter: blur(10px) !important;
+	position: relative !important;
+	overflow: hidden !important;
+	flex-shrink: 0;
+}
+
+.qty-control-btn::before,
+.posa-cart-table__qty-btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--pos-hover-bg);
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+	z-index: 0;
+}
+
+.qty-control-btn:hover::before,
+.posa-cart-table__qty-btn:hover::before {
+	transform: translateX(0);
+}
+
+.qty-control-btn .v-icon,
+.posa-cart-table__qty-btn .v-icon {
+	position: relative;
+	z-index: 1;
+}
+
+.qty-control-btn.minus-btn,
+.posa-cart-table__qty-btn--minus {
+	background: var(--pos-button-warning-bg) !important;
+	color: var(--pos-button-warning-text) !important;
+	border: 2px solid var(--pos-button-warning-border) !important;
+}
+
+.qty-control-btn.minus-btn:hover,
+.posa-cart-table__qty-btn--minus:hover {
+	background: var(--pos-button-warning-hover-bg) !important;
+	color: var(--pos-button-warning-hover-text) !important;
+	box-shadow:
+		0 6px 20px var(--pos-shadow),
+		0 4px 8px var(--pos-shadow-light) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.qty-control-btn.plus-btn,
+.posa-cart-table__qty-btn--plus {
+	background: var(--pos-button-success-bg) !important;
+	color: var(--pos-button-success-text) !important;
+	border: 2px solid var(--pos-button-success-border) !important;
+}
+
+.qty-control-btn.plus-btn:hover,
+.posa-cart-table__qty-btn--plus:hover {
+	background: var(--pos-button-success-hover-bg) !important;
+	color: var(--pos-button-success-hover-text) !important;
+	box-shadow:
+		0 6px 20px var(--pos-shadow),
+		0 4px 8px var(--pos-shadow-light) !important;
+	transform: translateY(-2px) scale(1.05) !important;
+}
+
+.posa-cart-table__qty-display {
+	min-width: 40px;
+	max-width: 80px;
+	width: auto;
+	flex: 1 1 auto;
+	text-align: center;
+	font-weight: 600;
+	padding: 0 2px;
+	border-radius: 4px;
+	background: var(--pos-primary-container);
+	border: 1px solid var(--pos-primary-variant);
+	font-family:
+		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
+		sans-serif;
+	font-variant-numeric: lining-nums tabular-nums;
+	font-feature-settings:
+		"tnum" 1,
+		"lnum" 1,
+		"kern" 1;
+	color: var(--pos-primary);
+	font-size: 0.75rem;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 24px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	letter-spacing: -0.02em;
+	word-spacing: -0.1em;
+	direction: ltr;
+}
+
+.posa-cart-table__qty-display.negative-number,
+.posa-cart-table__qty-display--negative {
+	color: var(--pos-error);
+	background: var(--pos-error-container);
+	border-color: var(--pos-error);
+}
+
+.posa-cart-table__qty-display.large-number,
+.posa-cart-table__qty-display--large {
+	min-width: 70px;
+	max-width: 120px;
+	font-size: 0.75rem;
+	padding: 6px 3px;
+	letter-spacing: -0.04em;
+}
+
+/* =================================================================
+   EDITOR INPUTS (Rate, Discount, etc)
+   ================================================================= */
+
+.posa-cart-table__editor-box {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.posa-cart-table__editor-display {
+	min-width: 60px;
+	max-width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 6px;
+	border: 1px solid var(--pos-primary-variant);
+	/* Match Qty border strength */
+	background: var(--pos-primary-container);
+	/* Match Qty background strength */
+	color: var(--pos-primary-text);
+	/* Ensure text is visible */
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	height: 32px;
+	font-size: 0.9rem;
+}
+
+.posa-cart-table__editor-display:hover {
+	border-color: var(--pos-primary);
+	background: var(--pos-hover-bg);
+	box-shadow: 0 1px 3px var(--pos-shadow-light);
+}
+
+.posa-cart-table__editor-display .currency-symbol {
+	opacity: 0.7;
+	font-size: 0.8em;
+	font-weight: 500;
+}
+
+/* Input field overrides within the table */
+.posa-cart-table__editor-input,
+.posa-cart-table__qty-input {
+	width: 100%;
+	max-width: 100px;
+	margin: 0;
+	padding: 0;
+}
+
+.posa-cart-table__editor-input .v-field__input,
+.posa-cart-table__qty-input .v-field__input {
+	min-height: 32px !important;
+	height: 32px !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	text-align: center;
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+/* UOM specific styles */
+.uom-editor {
+	gap: 4px;
+	background: transparent;
+	justify-content: center;
+}
+
+.uom-select {
+	min-width: 80px;
+	max-width: 120px;
+}
+
+.uom-arrow {
+	width: 20px !important;
+	height: 20px !important;
+	min-width: 20px !important;
+	padding: 0 !important;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--pos-text-secondary);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.posa-cart-table__editor-box:hover .uom-arrow {
+	opacity: 1;
+}
+
+.uom-arrow:hover {
+	background: var(--pos-hover-bg);
+	color: var(--pos-primary);
+}
+
+/* =================================================================
+   ELIMINATE UNWANTED VUETIFY TABLE SPACERS AND EMPTY ROWS
+   ================================================================= */
+
+/* Hide empty placeholder/spacer rows generated by Vuetify */
+.posa-cart-table tr[style*="height: 0px"],
+.posa-cart-table tr[style*="height:0px"] {
+	display: none !important;
+	height: 0 !important;
+	line-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+}
+
+/* Hide empty cells within spacer rows */
+.posa-cart-table tr[style*="height: 0px"] td,
+.posa-cart-table tr[style*="height:0px"] td,
+.posa-cart-table td[style*="height: 0px"],
+.posa-cart-table td[style*="height:0px"] {
+	display: none !important;
+	height: 0 !important;
+	line-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+}
+
+/* Additional targeting for Vuetify virtual table placeholders */
+.posa-cart-table .v-data-table__tr--placeholder,
+.posa-cart-table .v-table__tr--placeholder {
+	display: none !important;
+}
+
+/* Ensure table rows have consistent spacing */
+.posa-cart-table tbody tr:not([style*="height: 0"]) {
+	height: var(--cell-height, 60px);
+	min-height: var(--cell-height, 60px);
+}
+
+/* Clean up any unwanted spacing from virtual scrolling */
+.posa-cart-table .v-virtual-scroll__item[style*="height: 0"],
+.posa-cart-table .v-virtual-scroll__spacer[style*="height: 0"] {
+	display: none !important;
+}
+
+/* Force table to have clean spacing */
+.posa-cart-table table {
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+
+/* Ensure tbody has no unwanted spacing */
+.posa-cart-table tbody {
+	border-spacing: 0;
+	vertical-align: top;
+	border-top: none;
+	border-bottom: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Hide any Vuetify generated dividers or spacers */
+.posa-cart-table .v-divider,
+.posa-cart-table .v-spacer {
+	display: none !important;
+}
+
+/* Additional cleanup for v-data-table-virtual specific elements */
+.posa-cart-table .v-data-table-virtual__spacer {
+	display: none !important;
+	height: 0 !important;
+}
+
+/* Hide empty measurement/calculation rows */
+.posa-cart-table tr[data-test-id],
+.posa-cart-table tr[data-testid],
+.posa-cart-table tr[class*="measurement"],
+.posa-cart-table tr[class*="placeholder"] {
+	display: none !important;
+}
+
+/* Clean up any row group spacing */
+.posa-cart-table tbody tr {
+	vertical-align: middle;
+}
+
+/* Remove any default table spacing that might create gaps */
+.posa-cart-table table,
+.posa-cart-table tbody,
+.posa-cart-table thead {
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* Ensure expanded rows don't create unwanted spacing */
+.posa-cart-table tr.v-data-table__expanded {
+	border: none;
+}
+
+/* Clean slate for table structure */
+.posa-cart-table * {
+	box-sizing: border-box;
+}
+
+/* Force removal of any invisible/zero-height elements that might cause spacing */
+.posa-cart-table [style*="display: none"],
+.posa-cart-table [style*="visibility: hidden"],
+.posa-cart-table [style*="opacity: 0"] {
+	display: none !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* =================================================================
+   EXPANDED ROW CONTENT
+   ================================================================= */
+
+.posa-expanded-row-cell {
+	padding: 0 !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	overflow: visible;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.posa-expanded-content {
+	padding: 24px;
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box;
+	background: var(--pos-card-bg);
+	border-radius: 0 0 8px 8px;
+	border: 1px solid var(--pos-border);
+	border-top: none;
+	animation: expandIn 0.3s ease forwards;
+	container-type: inline-size;
+	container-name: expanded-content;
+	margin: 0;
+	position: relative;
+	overflow: visible;
+}
+
+@keyframes expandIn {
+	from {
+		opacity: 0;
+		transform: translateY(-20px) scale(0.95);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.posa-form-section {
+	width: 100%;
+	padding: 24px;
+	box-sizing: border-box;
+	background: var(--pos-card-bg);
+	border-radius: 12px;
+	border: 1px solid var(--pos-border);
+	box-shadow: 0 2px 8px var(--pos-shadow);
+	transition: all 0.3s ease;
+}
+
+.posa-form-section:hover {
+	box-shadow: 0 4px 16px var(--pos-shadow-dark);
+	transform: translateY(-2px);
+}
+
+.posa-item-details-form {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.posa-section-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid var(--pos-primary);
+	position: relative;
+}
+
+.posa-section-header::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 60px;
+	height: 2px;
+	background: linear-gradient(90deg, var(--pos-primary), var(--pos-primary-container));
+	border-radius: 1px;
+}
+
+.posa-section-title {
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--pos-text-primary);
+}
+
+.posa-form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+	width: 100%;
+}
+
+.posa-form-field {
+	flex: 1;
+	min-width: 250px;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+/* =================================================================
+   RESPONSIVE DESIGN
+   ================================================================= */
+
+.posa-responsive-table-container.breakpoint-xs {
+	--table-padding: 8px;
+	--header-font-size: 0.65rem;
+	--cell-padding: 8px 4px;
+	--cell-height: 48px;
+}
+
+.posa-responsive-table-container.breakpoint-sm {
+	--table-padding: 12px;
+	--header-font-size: 0.7rem;
+	--cell-padding: 12px 6px;
+	--cell-height: 52px;
+}
+
+.posa-responsive-table-container.breakpoint-md {
+	--table-padding: 16px;
+	--header-font-size: 0.75rem;
+	--cell-padding: 14px 8px;
+	--cell-height: 56px;
+}
+
+.posa-responsive-table-container.breakpoint-lg {
+	--table-padding: 16px;
+	--header-font-size: 0.8rem;
+	--cell-padding: 16px 12px;
+	--cell-height: 60px;
+}
+
+.posa-responsive-table-container.breakpoint-xl {
+	--table-padding: 20px;
+	--header-font-size: 0.85rem;
+	--cell-padding: 18px 12px;
+	--cell-height: 64px;
+}
+
+/* Container-aware responsive adjustments */
+.posa-responsive-table-container.compact-view .posa-cart-table__qty-counter {
+	min-width: 110px;
+	max-width: 140px;
+	gap: 4px;
+}
+
+.posa-responsive-table-container.compact-view .posa-cart-table__qty-display {
+	min-width: 35px;
+	max-width: 65px;
+	height: 24px;
+	font-size: 0.7rem;
+	padding: 2px;
+}
+
+.posa-responsive-table-container.compact-view .qty-control-btn {
+	width: 20px !important;
+	height: 20px !important;
+	min-width: 20px !important;
+}
+
+/* =================================================================
+   RTL SUPPORT
+   ================================================================= */
+
+[dir="rtl"] .posa-cart-table__qty-counter {
+	flex-direction: row !important;
+}
+
+[dir="rtl"] .posa-cart-table__qty-counter .plus-btn {
+	order: 3 !important;
+}
+
+[dir="rtl"] .posa-cart-table__qty-counter .posa-cart-table__qty-display {
+	order: 2 !important;
+	direction: ltr !important;
+}
+
+[dir="rtl"] .posa-cart-table__qty-counter .minus-btn {
+	order: 1 !important;
+}
+
+/* =================================================================
+   UTILITY & PERFORMANCE
+   ================================================================= */
+
+.posa-cart-table th,
+.posa-cart-table td {
+	transition:
+		padding 0.2s ease,
+		font-size 0.2s ease,
+		width 0.2s ease;
+}
+
+.posa-cart-table th,
+.posa-cart-table th .v-data-table-header__content,
+.posa-cart-table th .v-icon {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	transform: translate3d(0, 0, 0);
+	-webkit-transform: translate3d(0, 0, 0);
+}
+
+.posa-cart-table .v-data-table__expanded__content,
+.posa-cart-table tr.v-data-table__expanded__content {
+	width: 100% !important;
+	border: none !important;
+	background: transparent !important;
+}

@@ -263,7 +263,7 @@ _Stability and Confidence._
 _Taming the monoliths. Breaking down massive components into smaller sub-components and composables before full migration._
 
 > [!IMPORTANT]
-> **Modularization-First Strategy**: For files over 1000 lines, we must complete decomposition (Phase 6) *before* attempting full Composition API migration (Phase 1.3). This ensures logic is cleanly separated and easier to test during the migration.
+> **Modularization-First Strategy**: For files over 1000 lines, we must complete decomposition (Phase 6) _before_ attempting full Composition API migration (Phase 1.3). This ensures logic is cleanly separated and easier to test during the migration.
 
 ## ✂️ 6.1 `ItemsSelector.vue` (5716 lines)
 
@@ -325,15 +325,18 @@ _Taming the monoliths. Breaking down massive components into smaller sub-compone
     - [ ] **Extract `useInvoiceData.ts`**: Centralize fetching and validation logic.
 
 ## ✂️ 6.3 `Payments.vue` (1,690 lines)
+
 - [x] **6.3.1 Decomposition Logic**: Completed decomposition into `PaymentMethods`, `PaymentSummary`, `InvoiceTotals`.
 - [ ] **6.3.2 Logic Extraction**: Extract remaining complex logic from `Payments.vue` into `usePayments.js` or `usePaymentBusinessLogic.js`.
 
 ## ✂️ 6.4 `PurchaseOrders.vue` (1,292 lines)
+
 - [ ] **6.4.1 Analysis**: Map out existing internal components and logic blocks.
 - [ ] **6.4.2 Decomposition**: Extract UI into `PurchaseOrderSummary.vue`, `PurchaseOrderItems.vue`, etc.
 - [ ] **6.4.3 Shared Logic**: Identify and reuse logic from `Invoice.vue` modularization.
 
 ## ✂️ 6.5 `Pay.vue` (1,754 lines)
+
 - [ ] **6.5.1 Extract Sub-Components**
     - `PaymentInvoices.vue`: The left panel showing outstanding invoices.
     - `PayMethodsTable.vue`: The "Make New Payment" and "Payments" table section.
@@ -341,6 +344,7 @@ _Taming the monoliths. Breaking down massive components into smaller sub-compone
     - `PaymentTotals.vue`: The totals summary sidebar.
 
 ## ✂️ 6.6 `NavbarAppBar.vue` & `NavbarMenu.vue` (~1,100 lines each)
+
 - [ ] **6.6.1 Decomposition**: Break down into smaller functional nav components.
 - [ ] **6.6.2 Logic Extraction**: Extract menu state and permission checks into a composable.
 
@@ -514,30 +518,31 @@ _The ultimate reliability upgrade. A strict, step-by-step path to type safety._
 
 ## 📝 Change Log / Progress
 
-| Date       | Item                                | Status      | Notes                                                                                                                                               |
-| ---------- | ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-01-25 | Journal Creation                    | Completed   | Roadmap established.                                                                                                                                |
-| 2026-01-25 | Phase 2.1 Refactor                  | Completed   | Created `toastStore`, `uiStore`, `socketStore` to replace Event Bus.                                                                                |
-| 2026-01-25 | Phase 2.2 Refactor                  | Completed   | Created `api.js`, `authService.js`, `invoiceService.js` to centralize API calls.                                                                    |
-| 2026-01-26 | Refactor `pending_invoices_changed` | Completed   | Created `syncStore.js` and updated `Payments.vue` and `Home.vue` to use it.                                                                         |
-| 2026-01-26 | Phase 2.2 Finalization              | Completed   | Implemented `itemService.js` and refactored `itemsStore.js` & `invoiceOfferMethods.js`. cleanup `customer_changed` event assumption.                |
-| 2026-01-26 | Phase 3.1 Design System             | Completed   | Migrated Vuetify theme to `plugins/vuetify.ts` and updated `posapp.js`.                                                                             |
-| 2026-01-26 | Phase 3.2 Micro-Interactions        | Completed   | Added page transitions to `Home.vue` and dialog transitions to `Invoice` and `CancelSaleDialog`.                                                    |
-| 2026-01-26 | Phase 4 Performance                 | Completed   | Verified Route Lazy Loading & Virtual Scrolling. Optimized `Home.vue` imports.                                                                      |
-| 2026-01-26 | Phase 5.1 Reliability               | Completed   | Implemented global error handler in `posapp.js` using `toastStore`.                                                                                 |
-| 2026-01-26 | Phase 1.2 Explicit Layouts          | Completed   | Created `DefaultLayout.vue`, `App.vue`, and updated Router.                                                                                         |
-| 2026-01-26 | Phase 1.3 Composition API           | Completed   | Refactored `DefaultLayout.vue` to `<script setup>` and removed Options API usage.                                                                   |
-| 2026-01-26 | Phase 2.1 Remove Event Bus          | Completed   | RefactoredView switching, Customer Dialogs, Invoice/Order Loading to use Stores.                                                                    |
-| 2026-01-28 | Phase 2.1 Final Cleanup             | Completed   | Removed remaining EventBus usage in `Payments.vue` and `Invoice.vue` (view switching, clearing invoice, posting date).                              |
-| 2026-01-30 | Phase 6.1 ItemsSelector Refactor    | In Progress | Extracted `useScannerInput.js`, `useItemAvailability.js`, `useItemCurrency.js`, `useItemDetailFetcher.js`, `useItemSelection.js`, `useItemSync.js`. |
-| 2026-01-30 | Bug Fixes                           | Completed   | Resolved multiple runtime errors including `vm is not defined` and `playScanTone`.                                                                  |
-| 2026-02-01 | Phase 6.1 Logic Consolidation       | Completed   | Extracted `useBarcodeIndexing`, `useItemStorageSafety`, `useItemSelectorLayout`. Consolidated `useItemAddition`.                                    |
-| 2026-02-01 | Scan & Addition Debugging           | Completed   | Fixed item merge issues, scan handler registration, and adding items via Proxy wrapper.                                                             |
-| 2026-02-01 | Phase 6.2 Payments Refactoring      | Completed   | Decomposed `Payments.vue` into `PaymentMethods`, `PaymentSummary`, `InvoiceTotals`. Migrated logic to `usePayments.js` & `<script setup>`.          |
-| 2026-02-01 | Phase 6.5 ClosingDialog Refactor    | Completed   | Decomposed into `ShiftOverview`, `PaymentReconciliation`, `ClosingHeader`. Stable and theme-aware.                                                  |
-| 2026-02-01 | Stabilization & Fixes               | Completed   | Fixed ClosingDialog Dark Mode, Shifts Submission Event flow, and Items Table toggle visibility.                                                     |
-| 2026-02-01 | Phase 7 initialization              | In Progress | Verified `tsconfig.json` and dependencies.                                                                                                          |
-| 2026-02-02 | Bug Fixes: Payment & Offers       | Completed   | Fixed `mode_of_payment` TypeError and Item Selector Offer reactivity via synchronous stock updates. |
-| 2026-02-02 | ItemsTable.vue Decomposition        | In Progress | Extracted Search, DragDrop, and ExpandedRow. Planning extraction of Responsive and Merge logic.      |
-| 2026-02-02 | Phase 7: TypeScript Migration      | In Progress | Migrated `useOnlineStatus.ts`, `api.ts`, `invoiceStore.ts`, and `customersStore.ts`.                 |
-| 2026-02-02 | Style Fixes: ItemsTable & Expanded | Completed   | Restored missing `items-table-styles.css` import, matched original responsive dimensions, and fixed `:deep()` selectors by using global CSS targeting. Cleaned up redundant child styles. |
+| Date       | Item                                 | Status      | Notes                                                                                                                                                                                                                      |
+| ---------- | ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-01-25 | Journal Creation                     | Completed   | Roadmap established.                                                                                                                                                                                                       |
+| 2026-01-25 | Phase 2.1 Refactor                   | Completed   | Created `toastStore`, `uiStore`, `socketStore` to replace Event Bus.                                                                                                                                                       |
+| 2026-01-25 | Phase 2.2 Refactor                   | Completed   | Created `api.js`, `authService.js`, `invoiceService.js` to centralize API calls.                                                                                                                                           |
+| 2026-01-26 | Refactor `pending_invoices_changed`  | Completed   | Created `syncStore.js` and updated `Payments.vue` and `Home.vue` to use it.                                                                                                                                                |
+| 2026-01-26 | Phase 2.2 Finalization               | Completed   | Implemented `itemService.js` and refactored `itemsStore.js` & `invoiceOfferMethods.js`. cleanup `customer_changed` event assumption.                                                                                       |
+| 2026-01-26 | Phase 3.1 Design System              | Completed   | Migrated Vuetify theme to `plugins/vuetify.ts` and updated `posapp.js`.                                                                                                                                                    |
+| 2026-01-26 | Phase 3.2 Micro-Interactions         | Completed   | Added page transitions to `Home.vue` and dialog transitions to `Invoice` and `CancelSaleDialog`.                                                                                                                           |
+| 2026-01-26 | Phase 4 Performance                  | Completed   | Verified Route Lazy Loading & Virtual Scrolling. Optimized `Home.vue` imports.                                                                                                                                             |
+| 2026-01-26 | Phase 5.1 Reliability                | Completed   | Implemented global error handler in `posapp.js` using `toastStore`.                                                                                                                                                        |
+| 2026-01-26 | Phase 1.2 Explicit Layouts           | Completed   | Created `DefaultLayout.vue`, `App.vue`, and updated Router.                                                                                                                                                                |
+| 2026-01-26 | Phase 1.3 Composition API            | Completed   | Refactored `DefaultLayout.vue` to `<script setup>` and removed Options API usage.                                                                                                                                          |
+| 2026-01-26 | Phase 2.1 Remove Event Bus           | Completed   | RefactoredView switching, Customer Dialogs, Invoice/Order Loading to use Stores.                                                                                                                                           |
+| 2026-01-28 | Phase 2.1 Final Cleanup              | Completed   | Removed remaining EventBus usage in `Payments.vue` and `Invoice.vue` (view switching, clearing invoice, posting date).                                                                                                     |
+| 2026-01-30 | Phase 6.1 ItemsSelector Refactor     | In Progress | Extracted `useScannerInput.js`, `useItemAvailability.js`, `useItemCurrency.js`, `useItemDetailFetcher.js`, `useItemSelection.js`, `useItemSync.js`.                                                                        |
+| 2026-01-30 | Bug Fixes                            | Completed   | Resolved multiple runtime errors including `vm is not defined` and `playScanTone`.                                                                                                                                         |
+| 2026-02-01 | Phase 6.1 Logic Consolidation        | Completed   | Extracted `useBarcodeIndexing`, `useItemStorageSafety`, `useItemSelectorLayout`. Consolidated `useItemAddition`.                                                                                                           |
+| 2026-02-01 | Scan & Addition Debugging            | Completed   | Fixed item merge issues, scan handler registration, and adding items via Proxy wrapper.                                                                                                                                    |
+| 2026-02-01 | Phase 6.2 Payments Refactoring       | Completed   | Decomposed `Payments.vue` into `PaymentMethods`, `PaymentSummary`, `InvoiceTotals`. Migrated logic to `usePayments.js` & `<script setup>`.                                                                                 |
+| 2026-02-01 | Phase 6.5 ClosingDialog Refactor     | Completed   | Decomposed into `ShiftOverview`, `PaymentReconciliation`, `ClosingHeader`. Stable and theme-aware.                                                                                                                         |
+| 2026-02-01 | Stabilization & Fixes                | Completed   | Fixed ClosingDialog Dark Mode, Shifts Submission Event flow, and Items Table toggle visibility.                                                                                                                            |
+| 2026-02-01 | Phase 7 initialization               | In Progress | Verified `tsconfig.json` and dependencies.                                                                                                                                                                                 |
+| 2026-02-02 | Bug Fixes: Payment & Offers          | Completed   | Fixed `mode_of_payment` TypeError and Item Selector Offer reactivity via synchronous stock updates.                                                                                                                        |
+| 2026-02-02 | ItemsTable.vue Decomposition         | In Progress | Extracted Search, DragDrop, and ExpandedRow. Planning extraction of Responsive and Merge logic.                                                                                                                            |
+| 2026-02-02 | Phase 7: TypeScript Migration        | In Progress | Migrated `useOnlineStatus.ts`, `api.ts`, `invoiceStore.ts`, and `customersStore.ts`.                                                                                                                                       |
+| 2026-02-02 | Style Fixes: ItemsTable & Expanded   | Completed   | Restored missing `items-table-styles.css` import, matched original responsive dimensions, and fixed `:deep()` selectors by using global CSS targeting. Cleaned up redundant child styles.                                  |
+| 2026-02-08 | POS Component Folder Reorg (Batch 1) | Completed   | Started feature-first organization under `components/pos/flows/` by moving `Drafts.vue`, `SalesOrders.vue`, and `Returns.vue`; updated imports in moved files and `Pos.vue`; validated with ESLint, TypeScript, and build. |

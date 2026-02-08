@@ -210,20 +210,20 @@
 
 <script>
 import format from "../../format";
-import InvoiceCustomerSection from "./InvoiceCustomerSection.vue";
-import DeliveryCharges from "./DeliveryCharges.vue";
-import PostingDateRow from "./PostingDateRow.vue";
-import MultiCurrencyRow from "./MultiCurrencyRow.vue";
-import CancelSaleDialog from "./CancelSaleDialog.vue";
-import InvoiceSummary from "./InvoiceSummary.vue";
-import ItemsTable from "./ItemsTable.vue";
-import InvoiceItemsActionToolbar from "./InvoiceItemsActionToolbar.vue";
-import PackedItemsDialog from "./PackedItemsDialog.vue";
-import PaymentConfirmationDialog from "./PaymentConfirmationDialog.vue";
-import invoiceItemMethods from "./invoiceItemMethods";
-import invoiceComputed from "./invoiceComputed";
-import invoiceWatchers from "./invoiceWatchers";
-import shortcutMethods from "./invoiceShortcuts";
+import InvoiceCustomerSection from "./invoice/InvoiceCustomerSection.vue";
+import DeliveryCharges from "./invoice/DeliveryCharges.vue";
+import PostingDateRow from "./invoice/PostingDateRow.vue";
+import MultiCurrencyRow from "./invoice/MultiCurrencyRow.vue";
+import CancelSaleDialog from "./invoice/CancelSaleDialog.vue";
+import InvoiceSummary from "./invoice/InvoiceSummary.vue";
+import ItemsTable from "./invoice/ItemsTable.vue";
+import InvoiceItemsActionToolbar from "./invoice/InvoiceItemsActionToolbar.vue";
+import PackedItemsDialog from "./invoice/PackedItemsDialog.vue";
+import PaymentConfirmationDialog from "./payments/PaymentConfirmationDialog.vue";
+import invoiceItemMethods from "./invoice/invoiceItemMethods";
+import invoiceComputed from "./invoice/invoiceComputed";
+import invoiceWatchers from "./invoice/invoiceWatchers";
+import shortcutMethods from "./invoice/invoiceShortcuts";
 import { useInvoiceStore } from "../../stores/invoiceStore.js";
 import { useCustomersStore } from "../../stores/customersStore.js";
 import { useToastStore } from "../../stores/toastStore.js";

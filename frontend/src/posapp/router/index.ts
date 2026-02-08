@@ -5,17 +5,18 @@ const routes = [
 	{ path: "/", redirect: "/pos" },
 	{
 		path: "/pos",
-		component: () => import("../components/pos/Pos.vue"),
+		component: () => import("../components/pos/shell/Pos.vue"),
 		meta: { title: "POS", layout: "default" },
 	},
 	{
 		path: "/orders",
-		component: () => import("../components/pos/PurchaseOrders.vue"),
+		component: () =>
+			import("../components/pos/purchase/PurchaseOrders.vue"),
 		meta: { title: "Orders", layout: "default" },
 	},
 	{
 		path: "/payments",
-		component: () => import("../components/pos/PayView.vue"),
+		component: () => import("../components/pos/shell/PayView.vue"),
 		meta: { title: "Payments", layout: "default" },
 	},
 	{
@@ -25,12 +26,12 @@ const routes = [
 	},
 	{
 		path: "/barcode",
-		component: () => import("../components/pos/BarcodePrinting.vue"),
+		component: () => import("../components/pos/shell/BarcodePrinting.vue"),
 		meta: { title: "Barcode Printing", layout: "default" },
 	},
 	{
 		path: "/closing",
-		component: () => import("../components/pos/ClosingDialog.vue"),
+		component: () => import("../components/pos/shell/ClosingDialog.vue"),
 		meta: { title: "Close Shift", layout: "default" },
 	},
 	{

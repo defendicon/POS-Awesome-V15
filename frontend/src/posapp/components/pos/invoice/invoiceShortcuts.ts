@@ -1,0 +1,295 @@
+const isAltOnly = (event: KeyboardEvent) =>
+	event.altKey && !event.ctrlKey && !event.metaKey;
+const consumeEvent = (event: KeyboardEvent) => {
+	event.preventDefault();
+	event.stopPropagation();
+};
+const isDigit = (event: KeyboardEvent, digit: number) =>
+	event.key === String(digit) ||
+	event.code === `Digit${digit}` ||
+	event.code === `Numpad${digit}`;
+const isBackquote = (event: KeyboardEvent) =>
+	event.key === "`" || event.code === "Backquote";
+const isLetter = (event: KeyboardEvent, letter: string) => {
+	const normalized = letter.toLowerCase();
+	const keyValue = event.key?.toLowerCase?.();
+	return (
+		keyValue === normalized || event.code === `Key${letter.toUpperCase()}`
+	);
+};
+
+type ShortcutField = "qty" | "uom" | "rate";
+
+interface InvoiceShortcutsVm {
+	toastStore: { show: (_payload: { title: string; color: string }) => void };
+	eventBus: { emit: (_event: string, _payload?: unknown) => void };
+	uiStore: {
+		setActiveView: (_view: string) => void;
+		triggerItemSearchFocus: () => void;
+		selectTopItem: () => void;
+		toggleItemSettings: () => void;
+	};
+	$refs: {
+		customerComponent?: {
+			openNewCustomer?: () => void;
+			selectFirstCustomer?: () => void;
+		};
+		deliveryChargesComponent?: { focusDeliveryCharges?: () => void };
+		postingDateComponent?: { focusPostingDate?: () => void };
+		itemSearchField?: {
+			focus?: () => void;
+			$el?: { querySelector?: (_s: string) => { focus?: () => void } };
+		};
+		itemsTable?: {
+			focusItemField?: (_index: number, _field: ShortcutField) => void;
+		};
+	};
+	items?: Array<Record<string, unknown>>;
+	paymentVisible?: boolean;
+	cancel_dialog?: boolean;
+	shortcutCycle?: Record<ShortcutField, number>;
+	close_payments?: () => void;
+	focusCustomerSearchField?: () => void;
+	get_draft_orders?: () => void;
+	open_returns?: () => void;
+	show_payment?: () => Promise<void> | void;
+	focusAdditionalDiscountField?: () => void;
+	remove_item?: (_item: Record<string, unknown>) => void;
+	get_draft_invoices?: () => void;
+	save_and_clear_invoice?: () => void;
+	confirmPaymentSubmission: () => Promise<boolean>;
+	focusItemTableField: (_field: ShortcutField) => void;
+}
+
+const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
+	{
+		async handleInvoiceShortcut(event: KeyboardEvent) {
+			if (event.defaultPrevented) {
+				return;
+			}
+
+			const key = event.key;
+
+			if (key === "F4") {
+				consumeEvent(event);
+				this.toastStore.show({
+					title: __("Profile switching is not available yet"),
+					color: "warning",
+				});
+				return;
+			}
+
+			if (key === "F6") {
+				consumeEvent(event);
+				this.$refs.customerComponent?.openNewCustomer?.();
+				return;
+			}
+
+			if (key === "F7") {
+				consumeEvent(event);
+				this.eventBus.emit("open_shift_details");
+				return;
+			}
+
+			if (key === "F8") {
+				consumeEvent(event);
+				this.toastStore.show({
+					title: __("POS lock is not available yet"),
+					color: "warning",
+				});
+				return;
+			}
+
+			if (!isAltOnly(event)) {
+				return;
+			}
+
+			if (isDigit(event, 1)) {
+				consumeEvent(event);
+				if (typeof this.close_payments === "function") {
+					this.close_payments();
+				} else {
+					this.uiStore.setActiveView("items");
+				}
+				return;
+			}
+
+			if (isDigit(event, 2)) {
+				consumeEvent(event);
+				this.cancel_dialog = true;
+				return;
+			}
+
+			if (isDigit(event, 3)) {
+				consumeEvent(event);
+				this.uiStore.triggerItemSearchFocus();
+				return;
+			}
+
+			if (isDigit(event, 4)) {
+				consumeEvent(event);
+				this.uiStore.selectTopItem();
+				return;
+			}
+
+			if (isDigit(event, 5)) {
+				consumeEvent(event);
+				this.focusCustomerSearchField?.();
+				return;
+			}
+
+			if (isDigit(event, 6)) {
+				consumeEvent(event);
+				this.$refs.customerComponent?.selectFirstCustomer?.();
+				return;
+			}
+
+			if (isDigit(event, 7)) {
+				consumeEvent(event);
+				this.get_draft_orders?.();
+				return;
+			}
+
+			if (isDigit(event, 8)) {
+				consumeEvent(event);
+				this.open_returns?.();
+				return;
+			}
+
+			if (isDigit(event, 9)) {
+				consumeEvent(event);
+				this.$refs.deliveryChargesComponent?.focusDeliveryCharges?.();
+				return;
+			}
+
+			if (isBackquote(event)) {
+				consumeEvent(event);
+				this.$refs.postingDateComponent?.focusPostingDate?.();
+				return;
+			}
+
+			if (key === "PageUp") {
+				consumeEvent(event);
+				this.show_payment?.();
+				return;
+			}
+
+			if (key === "Home") {
+				consumeEvent(event);
+				frappe.set_route("/");
+				location.reload();
+				return;
+			}
+
+			if (isLetter(event, "q")) {
+				consumeEvent(event);
+				this.focusItemTableField("qty");
+				return;
+			}
+
+			if (isLetter(event, "a")) {
+				consumeEvent(event);
+				this.focusAdditionalDiscountField?.();
+				return;
+			}
+
+			if (isLetter(event, "u")) {
+				consumeEvent(event);
+				this.focusItemTableField("uom");
+				return;
+			}
+
+			if (isLetter(event, "r")) {
+				consumeEvent(event);
+				this.focusItemTableField("rate");
+				return;
+			}
+
+			if (isLetter(event, "e")) {
+				consumeEvent(event);
+				const firstItem = this.items?.[0];
+				if (firstItem) {
+					this.remove_item?.(firstItem);
+				}
+				return;
+			}
+
+			if (isLetter(event, "f")) {
+				consumeEvent(event);
+				const input = this.$refs.itemSearchField;
+				if (input?.focus) {
+					input.focus();
+				} else {
+					input?.$el?.querySelector?.("input")?.focus?.();
+				}
+				return;
+			}
+
+			if (isLetter(event, "l")) {
+				consumeEvent(event);
+				this.get_draft_invoices?.();
+				return;
+			}
+
+			if (isLetter(event, "m")) {
+				consumeEvent(event);
+				this.uiStore.toggleItemSettings();
+				return;
+			}
+
+			if (isLetter(event, "s")) {
+				consumeEvent(event);
+				this.save_and_clear_invoice?.();
+				return;
+			}
+
+			if (isLetter(event, "d")) {
+				consumeEvent(event);
+				this.show_payment?.();
+				return;
+			}
+
+			const isPaymentShortcut = isLetter(event, "x");
+			const isPrintShortcut = isLetter(event, "p");
+			if (isPaymentShortcut || isPrintShortcut) {
+				if (this.paymentVisible) {
+					return;
+				}
+				consumeEvent(event);
+
+				const shouldPrint = isPrintShortcut;
+				const shouldSubmit = await this.confirmPaymentSubmission();
+				if (!shouldSubmit) {
+					return;
+				}
+				await this.show_payment?.();
+				if (this.paymentVisible) {
+					this.eventBus.emit("submit_payment_shortcut", {
+						print: shouldPrint,
+					});
+				}
+			}
+		},
+
+		focusItemTableField(field: ShortcutField) {
+			const count = this.items?.length || 0;
+			if (!count) {
+				return;
+			}
+
+			if (!this.shortcutCycle) {
+				this.shortcutCycle = { qty: 0, uom: 0, rate: 0 };
+			}
+
+			let index = Number.isInteger(this.shortcutCycle[field])
+				? this.shortcutCycle[field]
+				: 0;
+			if (index >= count) {
+				index = 0;
+			}
+			this.shortcutCycle[field] = (index + 1) % count;
+			this.$refs.itemsTable?.focusItemField?.(index, field);
+		},
+	};
+
+export default invoiceShortcuts;

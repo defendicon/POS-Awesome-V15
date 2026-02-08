@@ -231,17 +231,17 @@ import { useFormat } from "../../format";
 import { isOffline } from "../../../offline/index";
 
 // Components
-import PaymentSummary from "./PaymentSummary.vue";
-import InvoiceTotals from "./InvoiceTotals.vue";
-import PaymentActionButtons from "./PaymentActionButtons.vue";
-import PaymentMethods from "./PaymentMethods.vue";
-import PaymentRedemption from "./PaymentRedemption.vue";
-import PaymentAdditionalInfo from "./PaymentAdditionalInfo.vue";
-import PaymentPurchaseOrder from "./PaymentPurchaseOrder.vue";
-import PaymentCustomerCreditDetails from "./PaymentCustomerCreditDetails.vue";
-import PaymentOptions from "./PaymentOptions.vue";
-import PaymentSelectionFields from "./PaymentSelectionFields.vue";
-import PaymentDialogs from "./PaymentDialogs.vue";
+import PaymentSummary from "./payments/PaymentSummary.vue";
+import InvoiceTotals from "./payments/InvoiceTotals.vue";
+import PaymentActionButtons from "./payments/PaymentActionButtons.vue";
+import PaymentMethods from "./payments/PaymentMethods.vue";
+import PaymentRedemption from "./payments/PaymentRedemption.vue";
+import PaymentAdditionalInfo from "./payments/PaymentAdditionalInfo.vue";
+import PaymentPurchaseOrder from "./payments/PaymentPurchaseOrder.vue";
+import PaymentCustomerCreditDetails from "./payments/PaymentCustomerCreditDetails.vue";
+import PaymentOptions from "./payments/PaymentOptions.vue";
+import PaymentSelectionFields from "./payments/PaymentSelectionFields.vue";
+import PaymentDialogs from "./payments/PaymentDialogs.vue";
 
 const { proxy } = getCurrentInstance();
 const eventBus = proxy.eventBus;
