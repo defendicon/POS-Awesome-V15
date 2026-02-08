@@ -131,15 +131,15 @@ import {
 	watchPrintWindow,
 } from "../../../plugins/print";
 
-import { useRtl } from "../../../composables/useRtl";
+import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useToastStore } from "../../../stores/toastStore.js";
 
 // Composables
-import { usePosPayData } from "../../../composables/usePosPayData";
-import { usePosPaySelection } from "../../../composables/usePosPaySelection";
-import { usePosPaySubmission } from "../../../composables/usePosPaySubmission";
+import { usePosPayData } from "../../../composables/pos/payments/usePosPayData";
+import { usePosPaySelection } from "../../../composables/pos/payments/usePosPaySelection";
+import { usePosPaySubmission } from "../../../composables/pos/payments/usePosPaySubmission";
 
 // Sub-components
 import PayInvoicesTable from "../../pos_pay/PayInvoicesTable.vue";

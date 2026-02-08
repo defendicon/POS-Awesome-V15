@@ -1,4 +1,4 @@
-import { useItemAddition } from "../../../composables/useItemAddition";
+import { useItemAddition } from "../../../composables/pos/items/useItemAddition";
 import { get_invoice_doc, get_invoice_items, get_payments } from "./document";
 import { _logPriceListDebug, _buildPriceListSnapshot } from "./currency";
 

@@ -97,8 +97,8 @@
 
 <script setup lang="ts">
 import { computed, inject } from "vue";
-import { useCpuLoad } from "../../composables/useCpuLoad";
-import { useServerCpu } from "../../composables/useServerCpu";
+import { useCpuLoad } from "../../composables/core/useCpuLoad";
+import { useServerCpu } from "../../composables/core/useServerCpu";
 
 const { cpuLag, history } = useCpuLoad(1000, 60);
 const __ = inject("__", (txt: string) => txt);

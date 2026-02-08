@@ -1,6 +1,6 @@
 import { parseBooleanSetting } from "../../../utils/stock";
-import { useStockUtils } from "../../../composables/useStockUtils";
-import { useBatchSerial } from "../../../composables/useBatchSerial";
+import { useStockUtils } from "../../../composables/pos/shared/useStockUtils";
+import { useBatchSerial } from "../../../composables/pos/shared/useBatchSerial";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const flt: (_value: unknown, _precision?: number) => number;
@@ -26,19 +26,26 @@ export function calc_stock_qty(context: any, item: any, value: any) {
 	}
 
 	const blockSale = Boolean(
-		context.pos_profile?.posa_block_sale_beyond_available_qty || context.blockSaleBeyondAvailableQty,
+		context.pos_profile?.posa_block_sale_beyond_available_qty ||
+		context.blockSaleBeyondAvailableQty,
 	);
 	const allowNegativeStock =
 		!blockSale &&
 		(parseBooleanSetting(context.stock_settings?.allow_negative_stock) ||
 			parseBooleanSetting(item?.allow_negative_stock));
 	let clamped = false;
-	if (blockSale && !allowNegativeStock && item.max_qty !== undefined && flt(item.qty) > item.max_qty) {
+	if (
+		blockSale &&
+		!allowNegativeStock &&
+		item.max_qty !== undefined &&
+		flt(item.qty) > item.max_qty
+	) {
 		context.toastStore.show({
 			title: __("Quantity exceeds available stock"),
-			text: __("The quantity for {0} has been adjusted to the maximum available stock.", [
-				item.item_name,
-			]),
+			text: __(
+				"The quantity for {0} has been adjusted to the maximum available stock.",
+				[item.item_name],
+			),
 			color: "warning",
 		});
 		item.qty = item.max_qty;
@@ -54,7 +61,8 @@ export function calc_stock_qty(context: any, item: any, value: any) {
 	if (clamped) {
 		if (context.calc_item_price) context.calc_item_price(item);
 	} else if (!context._applyingPricingRules) {
-		if (context.schedulePricingRuleApplication) context.schedulePricingRuleApplication();
+		if (context.schedulePricingRuleApplication)
+			context.schedulePricingRuleApplication();
 	}
 }
 
@@ -66,15 +74,20 @@ export function update_qty_limits(context: any, item: any) {
 	}
 
 	if (item && item._base_actual_qty !== undefined) {
-		item.max_qty = flt(item._base_actual_qty / (item.conversion_factor || 1));
+		item.max_qty = flt(
+			item._base_actual_qty / (item.conversion_factor || 1),
+		);
 
 		// Set increment disable flag based on stock limits
 		const blockSale = Boolean(
-			context.pos_profile?.posa_block_sale_beyond_available_qty || context.blockSaleBeyondAvailableQty,
+			context.pos_profile?.posa_block_sale_beyond_available_qty ||
+			context.blockSaleBeyondAvailableQty,
 		);
 		const allowNegativeStock =
 			!blockSale &&
-			(parseBooleanSetting(context.stock_settings?.allow_negative_stock) ||
+			(parseBooleanSetting(
+				context.stock_settings?.allow_negative_stock,
+			) ||
 				parseBooleanSetting(item?.allow_negative_stock));
 
 		if (allowNegativeStock) {
@@ -83,14 +96,16 @@ export function update_qty_limits(context: any, item: any) {
 			item.disable_increment = item.qty >= item.max_qty;
 		} else {
 			item.disable_increment =
-				!parseBooleanSetting(context.stock_settings?.allow_negative_stock) &&
-				item.qty >= item.max_qty;
+				!parseBooleanSetting(
+					context.stock_settings?.allow_negative_stock,
+				) && item.qty >= item.max_qty;
 		}
 	}
 }
 
 export async function fetch_available_qty(context: any, item: any) {
-	if (!item || !item.item_code || !item.warehouse || item.is_stock_item === 0) return;
+	if (!item || !item.item_code || !item.warehouse || item.is_stock_item === 0)
+		return;
 
 	// Use cache methods from context or import? They were methods on mixin.
 	// context._getStockCacheKey etc.
@@ -98,9 +113,13 @@ export async function fetch_available_qty(context: any, item: any) {
 	// Actually we extracted them to cache.js but haven't decided if mixin exposes them directly.
 	// The mixin (invoiceItemMethods) will import * from cache.js and expose them.
 
-	const key = context._getStockCacheKey ? context._getStockCacheKey(item) : null;
+	const key = context._getStockCacheKey
+		? context._getStockCacheKey(item)
+		: null;
 	if (key) {
-		const cachedQty = context._getCachedStockQty ? context._getCachedStockQty(key) : null;
+		const cachedQty = context._getCachedStockQty
+			? context._getCachedStockQty(key)
+			: null;
 		if (cachedQty !== null && cachedQty !== undefined) {
 			item.available_qty = cachedQty;
 			update_qty_limits(context, item);
@@ -123,13 +142,18 @@ export async function fetch_available_qty(context: any, item: any) {
 				},
 			});
 			const qty =
-				response.message && response.message.length ? flt(response.message[0].available_qty) : 0;
+				response.message && response.message.length
+					? flt(response.message[0].available_qty)
+					: 0;
 
 			if (key) {
 				if (context._storeStockQty) context._storeStockQty(key, qty);
 				// legacy cache support?
 				if (context.available_stock_cache) {
-					context.available_stock_cache[key] = { qty, ts: Date.now() };
+					context.available_stock_cache[key] = {
+						qty,
+						ts: Date.now(),
+					};
 				}
 			}
 			item.available_qty = qty;
@@ -152,7 +176,12 @@ export function set_serial_no(context: any, item: any) {
 	return setSerialNo(item, context);
 }
 
-export function set_batch_qty(context: any, item: any, value: any, update = true) {
+export function set_batch_qty(
+	context: any,
+	item: any,
+	value: any,
+	update = true,
+) {
 	// legacy delegate
 	return setBatchQty(item, value, update, context);
 }

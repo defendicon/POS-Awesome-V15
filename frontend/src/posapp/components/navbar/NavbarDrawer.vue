@@ -49,7 +49,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { useRtl } from "../../composables/useRtl";
+import { useRtl } from "../../composables/core/useRtl";
 
 defineOptions({
 	name: "NavbarDrawer",

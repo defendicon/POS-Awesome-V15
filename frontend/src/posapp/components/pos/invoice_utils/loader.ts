@@ -1,5 +1,9 @@
-import { isOffline, saveCustomerBalance, getCachedCustomerBalance } from "../../../../offline/index";
-import { useDiscounts } from "../../../composables/useDiscounts";
+import {
+	isOffline,
+	saveCustomerBalance,
+	getCachedCustomerBalance,
+} from "../../../../offline/index";
+import { useDiscounts } from "../../../composables/pos/shared/useDiscounts";
 
 declare const __: (_text: string, _args?: any[]) => string;
 declare const flt: (_value: unknown, _precision?: number) => number;
@@ -57,7 +61,9 @@ export async function fetch_customer_balance(context: any) {
 				context.customer_balance = 0;
 				context.toastStore.show({
 					title: __("Customer balance unavailable offline"),
-					text: __("Balance will be updated when connection is restored"),
+					text: __(
+						"Balance will be updated when connection is restored",
+					),
 					color: "warning",
 				});
 				return;
@@ -97,9 +103,18 @@ export async function fetch_customer_balance(context: any) {
 	}
 }
 
-export async function load_invoice(context: any, data: any = {}, options: any = {}) {
-	const { preserveAdditionalDiscountPercentage = false, preserveStickies = false } = options || {};
-	const usePercentageDiscount = Boolean(context.pos_profile?.posa_use_percentage_discount);
+export async function load_invoice(
+	context: any,
+	data: any = {},
+	options: any = {},
+) {
+	const {
+		preserveAdditionalDiscountPercentage = false,
+		preserveStickies = false,
+	} = options || {};
+	const usePercentageDiscount = Boolean(
+		context.pos_profile?.posa_use_percentage_discount,
+	);
 	// Note: flt global assumption
 	const previousDiscountPercentage: number = usePercentageDiscount
 		? flt(context.additional_discount_percentage)
@@ -115,7 +130,8 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 				delivery_charge: context.selected_delivery_charge,
 				delivery_rate: context.delivery_charges_rate,
 				additional_discount: context.additional_discount,
-				additional_discount_percentage: context.additional_discount_percentage,
+				additional_discount_percentage:
+					context.additional_discount_percentage,
 			}
 		: null;
 
@@ -129,9 +145,13 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 			context.selected_delivery_charge = stickyData.delivery_charge;
 			context.delivery_charges_rate = stickyData.delivery_rate;
 		}
-		if (data.additional_discount === undefined && data.additional_discount_percentage === undefined) {
+		if (
+			data.additional_discount === undefined &&
+			data.additional_discount_percentage === undefined
+		) {
 			context.additional_discount = stickyData.additional_discount;
-			context.additional_discount_percentage = stickyData.additional_discount_percentage;
+			context.additional_discount_percentage =
+				stickyData.additional_discount_percentage;
 			context.discount_amount = context.additional_discount;
 		}
 	}
@@ -158,7 +178,10 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 		if (!context.invoiceTypes.includes("Quotation")) {
 			context.invoiceTypes = ["Invoice", "Order", "Quotation"];
 		}
-	} else if (data.doctype === "Sales Order" && context.pos_profile?.posa_create_only_sales_order) {
+	} else if (
+		data.doctype === "Sales Order" &&
+		context.pos_profile?.posa_create_only_sales_order
+	) {
 		context.invoiceType = "Order";
 		if (!context.invoiceTypes.includes("Order")) {
 			context.invoiceTypes = ["Invoice", "Order", "Quotation"];
@@ -188,7 +211,8 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 					: Math.random().toString(36).substr(2, 9);
 			}
 			if (item.batch_no) {
-				if (context.set_batch_qty) context.set_batch_qty(item, item.batch_no);
+				if (context.set_batch_qty)
+					context.set_batch_qty(item, item.batch_no);
 			}
 			if (!item.original_item_name) {
 				item.original_item_name = item.item_name;
@@ -207,7 +231,8 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 	}
 
 	if (context.packed_items.length > 0) {
-		if (context.update_items_details) context.update_items_details(context.packed_items);
+		if (context.update_items_details)
+			context.update_items_details(context.packed_items);
 		context.packed_items.forEach((pi) => {
 			if (!pi.posa_row_id) {
 				pi.posa_row_id = context.makeid
@@ -221,7 +246,9 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 	if (context.set_delivery_charges) await context.set_delivery_charges();
 
 	context.posting_date = context.formatDateForBackend
-		? context.formatDateForBackend(data.posting_date || frappe.datetime.nowdate())
+		? context.formatDateForBackend(
+				data.posting_date || frappe.datetime.nowdate(),
+			)
 		: data.posting_date || new Date().toISOString().slice(0, 10);
 	if (data.posa_delivery_charges) {
 		context.selected_delivery_charge = context.delivery_charges.find(
@@ -231,7 +258,8 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 	}
 	const docDiscountAmount = flt(data.discount_amount);
 	const docDiscountPercentage =
-		data.additional_discount_percentage !== undefined && data.additional_discount_percentage !== null
+		data.additional_discount_percentage !== undefined &&
+		data.additional_discount_percentage !== null
 			? flt(data.additional_discount_percentage)
 			: 0;
 	const docIsReturn = Boolean(data.is_return);
@@ -253,7 +281,9 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 			const totalsForPercentage: number[] = [];
 
 			if (context.Total) {
-				const signedTotal = docIsReturn ? -Math.abs(context.Total) : context.Total;
+				const signedTotal = docIsReturn
+					? -Math.abs(context.Total)
+					: context.Total;
 				if (signedTotal) {
 					totalsForPercentage.push(signedTotal);
 				}
@@ -261,7 +291,9 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 
 			if (data.total !== undefined && data.total !== null) {
 				const docTotal = flt(data.total);
-				const signedDocTotal = docIsReturn ? -Math.abs(docTotal) : docTotal;
+				const signedDocTotal = docIsReturn
+					? -Math.abs(docTotal)
+					: docTotal;
 				if (signedDocTotal) {
 					totalsForPercentage.push(signedDocTotal);
 				}
@@ -269,7 +301,9 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 
 			if (data.net_total !== undefined && data.net_total !== null) {
 				const docNetTotal = flt(data.net_total);
-				const signedNetTotal = docIsReturn ? -Math.abs(docNetTotal) : docNetTotal;
+				const signedNetTotal = docIsReturn
+					? -Math.abs(docNetTotal)
+					: docNetTotal;
 				if (signedNetTotal) {
 					totalsForPercentage.push(signedNetTotal);
 				}
@@ -309,7 +343,10 @@ export async function load_invoice(context: any, data: any = {}, options: any = 
 			});
 		}
 
-		context.additional_discount = context.flt(context.additional_discount, context.currency_precision);
+		context.additional_discount = context.flt(
+			context.additional_discount,
+			context.currency_precision,
+		);
 		context.discount_amount = context.additional_discount;
 	} else {
 		context.discount_amount = docDiscountAmount;

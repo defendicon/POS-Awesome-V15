@@ -125,8 +125,8 @@
 
 <script setup lang="ts">
 import { computed, inject } from "vue";
-import { useClientLoad } from "../../composables/useClientLoad";
-import { useServerStats } from "../../composables/useServerStats";
+import { useClientLoad } from "../../composables/core/useClientLoad";
+import { useServerStats } from "../../composables/core/useServerStats";
 
 const { cpuLag, history, memoryUsage, device } = useClientLoad(1000, 60);
 const __ = inject("__", (txt: string) => txt);

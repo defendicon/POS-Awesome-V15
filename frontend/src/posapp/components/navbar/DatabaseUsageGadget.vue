@@ -74,10 +74,9 @@
 	</div>
 </template>
 
-
 <script setup>
 import { computed, inject } from "vue";
-import { useDatabaseStats } from "../../composables/useDatabaseStats";
+import { useDatabaseStats } from "../../composables/core/useDatabaseStats";
 
 // Using JavaScript composable
 const { dbStats, history, loading, error } = useDatabaseStats(10000, 30);
@@ -95,7 +94,8 @@ function formatBytes(bytes) {
 
 const sparklinePoints = computed(() => {
 	const arr = history.value.map((h) => h.db_size || 0);
-	const w = 120,	h = 32;
+	const w = 120,
+		h = 32;
 	if (!arr.length) return "";
 	const max = Math.max(...arr, 100);
 	const min = 0;
@@ -103,7 +103,6 @@ const sparklinePoints = computed(() => {
 	return arr.map((v, i) => `${i * step},${h - ((v - min) / (max - min || 1)) * h}`).join(" ");
 });
 </script>
-
 
 <style scoped>
 /* Force LTR formatting for database gadget */

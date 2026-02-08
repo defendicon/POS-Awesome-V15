@@ -1,4 +1,4 @@
-import { useDiscounts } from "../../../composables/useDiscounts";
+import { useDiscounts } from "../../../composables/pos/shared/useDiscounts";
 
 const { updateDiscountAmount, calcPrices, calcItemPrice } = useDiscounts();
 

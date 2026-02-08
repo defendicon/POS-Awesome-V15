@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { start, stop } from "../composables/useLoading";
+import { start, stop } from "../composables/core/useLoading";
 
 const routes = [
 	{ path: "/", redirect: "/pos" },

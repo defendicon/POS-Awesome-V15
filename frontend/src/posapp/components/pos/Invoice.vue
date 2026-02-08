@@ -233,13 +233,13 @@ import stockCoordinator from "../../utils/stockCoordinator";
 import { ref } from "vue";
 
 // Composables
-import { useOnlineStatus } from "../../composables/useOnlineStatus";
-import { useInvoiceCurrency } from "../../composables/useInvoiceCurrency";
-import { useInvoiceItems } from "../../composables/useInvoiceItems";
-import { useInvoiceOffers } from "../../composables/useInvoiceOffers";
-import { useInvoiceUI } from "../../composables/invoice/useInvoiceUI";
-import { useInvoicePrinting } from "../../composables/invoice/useInvoicePrinting";
-import { useInvoiceStock } from "../../composables/invoice/useInvoiceStock";
+import { useOnlineStatus } from "../../composables/core/useOnlineStatus";
+import { useInvoiceCurrency } from "../../composables/pos/invoice/useInvoiceCurrency";
+import { useInvoiceItems } from "../../composables/pos/invoice/useInvoiceItems";
+import { useInvoiceOffers } from "../../composables/pos/invoice/useInvoiceOffers";
+import { useInvoiceUI } from "../../composables/pos/invoice/useInvoiceUI";
+import { useInvoicePrinting } from "../../composables/pos/invoice/useInvoicePrinting";
+import { useInvoiceStock } from "../../composables/pos/invoice/useInvoiceStock";
 
 export default {
 	name: "POSInvoice",

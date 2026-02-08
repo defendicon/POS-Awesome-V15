@@ -3,7 +3,7 @@ import {
 	useTheme,
 	setVuetifyInstance,
 	type VuetifyInstance,
-} from "../composables/useTheme";
+} from "../composables/core/useTheme";
 
 export default {
 	install(app: App, { vuetify }: { vuetify?: VuetifyInstance } = {}) {

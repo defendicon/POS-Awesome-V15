@@ -1,5 +1,5 @@
 import axios from "axios";
-import { start, stop } from "../composables/useLoading";
+import { start, stop } from "../composables/core/useLoading";
 
 const api = axios.create();
 

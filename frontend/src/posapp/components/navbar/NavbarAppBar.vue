@@ -213,7 +213,7 @@
 </template>
 
 <script>
-import { useRtl } from "../../composables/useRtl";
+import { useRtl } from "../../composables/core/useRtl";
 import posLogo from "../pos/pos.png";
 import NavbarInfoGadgets from "./NavbarInfoGadgets.vue";
 

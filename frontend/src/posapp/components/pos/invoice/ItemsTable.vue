@@ -125,13 +125,13 @@ import { logComponentRender } from "../../../utils/perf";
 import CartItemRow from "./CartItemRow.vue";
 import ItemsTableExpandedRow from "./ItemsTableExpandedRow.vue";
 
-import { useItemsTableSearch } from "../../../composables/useItemsTableSearch";
-import { useItemsTableDragDrop } from "../../../composables/useItemsTableDragDrop";
-import { useItemsTableResponsive } from "../../../composables/useItemsTableResponsive";
-import { useItemsTableMerge } from "../../../composables/useItemsTableMerge";
-import { useItemsTableNameEdit } from "../../../composables/useItemsTableNameEdit";
-import { useFormatters } from "../../../composables/useFormatters";
-import { useRtl } from "../../../composables/useRtl";
+import { useItemsTableSearch } from "../../../composables/pos/items/useItemsTableSearch";
+import { useItemsTableDragDrop } from "../../../composables/pos/items/useItemsTableDragDrop";
+import { useItemsTableResponsive } from "../../../composables/pos/items/useItemsTableResponsive";
+import { useItemsTableMerge } from "../../../composables/pos/items/useItemsTableMerge";
+import { useItemsTableNameEdit } from "../../../composables/pos/items/useItemsTableNameEdit";
+import { useFormatters } from "../../../composables/core/useFormatters";
+import { useRtl } from "../../../composables/core/useRtl";
 import "./items-table-styles.css";
 
 // Global declarations for Frappe

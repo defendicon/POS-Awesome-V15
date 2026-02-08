@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useUpdateStore } from "../../stores/updateStore";
-import { useRtl } from "../../composables/useRtl";
+import { useRtl } from "../../composables/core/useRtl";
 
 defineOptions({
 	name: "UpdatePrompt",

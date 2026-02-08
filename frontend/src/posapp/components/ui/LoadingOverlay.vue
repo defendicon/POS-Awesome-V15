@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useLoading } from "../../composables/useLoading";
+import { useLoading } from "../../composables/core/useLoading";
 
 defineOptions({
 	name: "LoadingOverlay",

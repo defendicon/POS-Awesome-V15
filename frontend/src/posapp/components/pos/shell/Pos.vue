@@ -83,12 +83,12 @@ import Variants from "../items/Variants.vue";
 import Returns from "../flows/Returns.vue";
 import MpesaPayments from "../payments/Mpesa-Payments.vue";
 import { inject, ref, onMounted, onBeforeUnmount } from "vue";
-import { usePosShift } from "../../../composables/usePosShift";
-import { useOffers } from "../../../composables/useOffers";
+import { usePosShift } from "../../../composables/pos/shared/usePosShift";
+import { useOffers } from "../../../composables/pos/shared/useOffers";
 // Import the cache cleanup function
 import { clearExpiredCustomerBalances } from "../../../../offline/index";
-import { useResponsive } from "../../../composables/useResponsive";
-import { useRtl } from "../../../composables/useRtl";
+import { useResponsive } from "../../../composables/core/useResponsive";
+import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useInvoiceStore } from "../../../stores/invoiceStore.js";

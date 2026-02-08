@@ -1,0 +1,234 @@
+import { ref, onUnmounted } from "vue";
+import {
+	getItemsLastSync,
+	setItemsLastSync,
+	isOffline,
+} from "../../../../offline/index";
+import {
+	normalizeBackgroundSyncInterval,
+	shouldRunBackgroundSync,
+} from "../../../utils/backgroundSync.js";
+
+/**
+ * useItemSync Composable
+ *
+ * Manages background synchronization and incremental loading of items.
+ */
+export function useItemSync() {
+	type SyncItem = { [key: string]: unknown };
+	type ItemDetailFetcher = {
+		update_items_details: (
+			_items: SyncItem[],
+			_options?: { forceRefresh?: boolean },
+		) => Promise<void>;
+		refreshAllItemDetailsInBatches: (_batchSize?: number) => Promise<void>;
+	};
+	type EventBus = { emit: (_event: string, _payload?: unknown) => void };
+	type ItemSyncContext = {
+		pos_profile: unknown;
+		enable_background_sync: boolean;
+		background_sync_interval: number;
+		usesLimitSearch: boolean;
+		itemsPageLimit: number;
+		refreshModifiedItems: null | (() => Promise<{ items?: SyncItem[] }>);
+		backgroundSyncItems: null | ((_args?: unknown) => unknown);
+		get_items: null | ((_force?: boolean) => Promise<unknown>);
+		search_onchange:
+			| null
+			| ((_value?: string, _fromScanner?: boolean) => Promise<unknown>);
+		itemDetailFetcher: ItemDetailFetcher | null;
+		eventBus: EventBus | null;
+		fetchServerItemsTimestamp: null | (() => Promise<string | null>);
+		getItems: () => SyncItem[];
+		getDisplayedItems: () => SyncItem[];
+		onBackgroundLoadFinished?: () => void;
+	};
+
+	// State
+	const background_sync_timer = ref<ReturnType<typeof setInterval> | null>(
+		null,
+	);
+	const background_sync_in_flight = ref(false);
+	const isBackgroundLoading = ref(false);
+	const last_background_sync_time = ref<string | null>(null);
+
+	// Context (Late Binding)
+	const ctx: ItemSyncContext = {
+		pos_profile: null,
+		enable_background_sync: true,
+		background_sync_interval: 30,
+		usesLimitSearch: false,
+		itemsPageLimit: 100,
+		// Methods to be provided via context
+		refreshModifiedItems: null,
+		backgroundSyncItems: null,
+		get_items: null,
+		search_onchange: null,
+		itemDetailFetcher: null,
+		eventBus: null,
+		fetchServerItemsTimestamp: null,
+		// Data references
+		getItems: () => [],
+		getDisplayedItems: () => [],
+	};
+
+	function registerContext(context: Partial<ItemSyncContext>) {
+		Object.assign(ctx, context);
+	}
+
+	function startBackgroundSyncScheduler() {
+		stopBackgroundSyncScheduler();
+		if (!ctx.enable_background_sync) {
+			return;
+		}
+
+		const intervalMs =
+			normalizeBackgroundSyncInterval(ctx.background_sync_interval) *
+			1000;
+		background_sync_timer.value = setInterval(() => {
+			performBackgroundSync({ source: "interval" });
+		}, intervalMs);
+
+		performBackgroundSync({ source: "initial" });
+	}
+
+	function stopBackgroundSyncScheduler() {
+		if (background_sync_timer.value) {
+			clearInterval(background_sync_timer.value);
+			background_sync_timer.value = null;
+		}
+	}
+
+	async function ensureBackgroundSyncBaseline() {
+		const lastSync = getItemsLastSync();
+		if (lastSync) {
+			last_background_sync_time.value = lastSync;
+			return lastSync;
+		}
+
+		if (ctx.fetchServerItemsTimestamp) {
+			const serverTimestamp = await ctx.fetchServerItemsTimestamp();
+			if (serverTimestamp) {
+				setItemsLastSync(serverTimestamp);
+				last_background_sync_time.value = serverTimestamp;
+				return serverTimestamp;
+			}
+		}
+
+		return null;
+	}
+
+	async function performBackgroundSync({
+		source = "manual",
+	}: { source?: string } = {}) {
+		if (
+			!shouldRunBackgroundSync({
+				posProfile: ctx.pos_profile,
+				enableBackgroundSync: ctx.enable_background_sync,
+				backgroundSyncInFlight: background_sync_in_flight.value,
+				isOffline: isOffline(),
+				usesLimitSearch: ctx.usesLimitSearch,
+			})
+		) {
+			return;
+		}
+
+		background_sync_in_flight.value = true;
+		try {
+			await ensureBackgroundSyncBaseline();
+
+			if (ctx.refreshModifiedItems) {
+				const { items: updatedItems } =
+					await ctx.refreshModifiedItems();
+
+				if (updatedItems && updatedItems.length) {
+					if (ctx.itemDetailFetcher) {
+						await ctx.itemDetailFetcher.update_items_details(
+							updatedItems,
+							{ forceRefresh: true },
+						);
+					}
+					if (ctx.eventBus) {
+						ctx.eventBus.emit("set_all_items", ctx.getItems());
+					}
+				}
+			}
+
+			if (ctx.itemDetailFetcher) {
+				// Refresh cached quantities/prices for all items so non-visible items stay in sync.
+				await ctx.itemDetailFetcher.refreshAllItemDetailsInBatches(
+					ctx.itemsPageLimit || 100,
+				);
+
+				const displayed = ctx.getDisplayedItems();
+				if (displayed && displayed.length > 0) {
+					await ctx.itemDetailFetcher.update_items_details(displayed);
+				}
+			}
+
+			last_background_sync_time.value = new Date().toISOString();
+		} catch (error) {
+			console.error(`Background sync failed (${source})`, error);
+		} finally {
+			background_sync_in_flight.value = false;
+		}
+	}
+
+	function kickoffBackgroundSync(): Promise<SyncItem[]> {
+		if (isBackgroundLoading.value || ctx.usesLimitSearch) {
+			return Promise.resolve([]);
+		}
+
+		isBackgroundLoading.value = true;
+
+		if (!ctx.backgroundSyncItems) {
+			isBackgroundLoading.value = false;
+			return Promise.resolve([]);
+		}
+
+		return Promise.resolve(ctx.backgroundSyncItems())
+			.then((appended) => {
+				if (Array.isArray(appended) && appended.length) {
+					if (ctx.eventBus) {
+						ctx.eventBus.emit("set_all_items", ctx.getItems());
+					}
+				}
+				return Array.isArray(appended) ? appended : [];
+			})
+			.finally(() => {
+				finishBackgroundLoad();
+			});
+	}
+
+	function finishBackgroundLoad() {
+		isBackgroundLoading.value = false;
+
+		// Note: pendingItemSearch handling might still be needed in the component
+		// if it needs to re-trigger search after background load.
+		// We can expose a way to tell the component to re-check pending state.
+
+		if (ctx.onBackgroundLoadFinished) {
+			ctx.onBackgroundLoadFinished();
+		}
+	}
+
+	onUnmounted(() => {
+		stopBackgroundSyncScheduler();
+	});
+
+	return {
+		// State
+		background_sync_in_flight,
+		isBackgroundLoading,
+		last_background_sync_time,
+
+		// Methods
+		registerContext,
+		startBackgroundSyncScheduler,
+		stopBackgroundSyncScheduler,
+		performBackgroundSync,
+		ensureBackgroundSyncBaseline,
+		kickoffBackgroundSync,
+		finishBackgroundLoad,
+	};
+}

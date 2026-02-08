@@ -46,8 +46,8 @@ import Navbar from "../components/Navbar.vue";
 import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";
 import AppLoadingOverlay from "../components/ui/LoadingOverlay.vue";
 import UpdatePrompt from "../components/ui/UpdatePrompt.vue";
-import { useLoading } from "../composables/useLoading.js";
-import { usePosShift } from "../composables/usePosShift";
+import { useLoading } from "../composables/core/useLoading.js";
+import { usePosShift } from "../composables/pos/shared/usePosShift";
 import { loadingState, initLoadingSources, setSourceProgress, markSourceLoaded } from "../utils/loading.js";
 import { useCustomersStore } from "../stores/customersStore.js";
 import { useSyncStore } from "../stores/syncStore.js";
@@ -73,8 +73,8 @@ import {
 import {
 	setupNetworkListeners as initNetworkListeners,
 	checkNetworkConnectivity as utilsCheckNetworkConnectivity,
-} from "../composables/useNetwork";
-import { useRtl } from "../composables/useRtl";
+} from "../composables/core/useNetwork";
+import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
 
 /**

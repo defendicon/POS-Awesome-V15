@@ -16,11 +16,11 @@ import {
 } from "../../offline/index";
 
 // Composables
-import { useItemsCache } from "../composables/items/useItemsCache";
-import { useItemsSearch } from "../composables/items/useItemsSearch";
-import { useItemsSync } from "../composables/items/useItemsSync";
-import { useItemsPagination } from "../composables/items/useItemsPagination";
-import { useItemsMetrics } from "../composables/items/useItemsMetrics";
+import { useItemsCache } from "../composables/pos/items/store/useItemsCache";
+import { useItemsSearch } from "../composables/pos/items/store/useItemsSearch";
+import { useItemsSync } from "../composables/pos/items/store/useItemsSync";
+import { useItemsPagination } from "../composables/pos/items/store/useItemsPagination";
+import { useItemsMetrics } from "../composables/pos/items/store/useItemsMetrics";
 
 export const useItemsStore = defineStore("items", () => {
 	// Core State

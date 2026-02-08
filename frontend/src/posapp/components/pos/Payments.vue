@@ -221,12 +221,12 @@ import { useToastStore } from "../../stores/toastStore.js";
 import { useSyncStore } from "../../stores/syncStore.ts";
 
 // Composables
-import { usePaymentCalculations } from "../../composables/usePaymentCalculations";
-import { usePaymentSubmission } from "../../composables/usePaymentSubmission";
-import { useRedemptionLogic } from "../../composables/useRedemptionLogic";
-import { usePaymentPrinting } from "../../composables/usePaymentPrinting";
-import { usePaymentMethods } from "../../composables/usePaymentMethods";
-import { useInvoiceDetails } from "../../composables/useInvoiceDetails";
+import { usePaymentCalculations } from "../../composables/pos/payments/usePaymentCalculations";
+import { usePaymentSubmission } from "../../composables/pos/payments/usePaymentSubmission";
+import { useRedemptionLogic } from "../../composables/pos/payments/useRedemptionLogic";
+import { usePaymentPrinting } from "../../composables/pos/payments/usePaymentPrinting";
+import { usePaymentMethods } from "../../composables/pos/payments/usePaymentMethods";
+import { useInvoiceDetails } from "../../composables/pos/invoice/useInvoiceDetails";
 import { useFormat } from "../../format";
 import { isOffline } from "../../../offline/index";
 
