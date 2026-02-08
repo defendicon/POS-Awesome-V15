@@ -109,9 +109,35 @@ export default {
 			this.uiStore.closeDrafts();
 		},
 
-		submit_dialog() {
+		async submit_dialog() {
 			if (this.selected.length > 0) {
-				this.invoiceStore.triggerLoadInvoice(this.selected[0]);
+				const selectedDraft = this.selected[0];
+				const doctype =
+					selectedDraft?.doctype ||
+					(this.uiStore.posProfile?.create_pos_invoice_instead_of_sales_invoice
+						? "POS Invoice"
+						: "Sales Invoice");
+
+				try {
+					const { message } = await frappe.call({
+						method: "posawesome.posawesome.api.invoices.get_draft_invoice_doc",
+						args: {
+							invoice_name: selectedDraft.name,
+							doctype,
+						},
+					});
+					if (message) {
+						this.invoiceStore.triggerLoadInvoice(message);
+					}
+				} catch (error) {
+					console.error("Error loading draft invoice:", error);
+					this.toastStore.show({
+						title: __("Unable to load draft invoice"),
+						color: "error",
+					});
+					return;
+				}
+
 				this.uiStore.closeDrafts();
 			} else {
 				this.toastStore.show({

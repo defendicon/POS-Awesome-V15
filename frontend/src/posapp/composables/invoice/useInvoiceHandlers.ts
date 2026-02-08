@@ -44,10 +44,6 @@ export function useInvoiceHandlers(
 	};
 
 	const handleLoadReturnInvoice = (data: any) => {
-		console.log(
-			"Invoice component received load_return_invoice event with data:",
-			data,
-		);
 		load_invoice(data.invoice_doc);
 		invoiceType.value = "Return";
 		invoice_doc.value.is_return = 1;
@@ -59,16 +55,11 @@ export function useInvoiceHandlers(
 			});
 		}
 		if (data.return_doc) {
-			console.log(
-				"Return against existing invoice:",
-				data.return_doc.name,
-			);
 			discount_amount.value = data.return_doc.discount_amount || 0;
 			additional_discount.value = data.return_doc.discount_amount || 0;
 			return_doc.value = data.return_doc;
 			invoice_doc.value.return_against = data.return_doc.name;
 		} else {
-			console.log("Return without invoice reference");
 			discount_amount.value = 0;
 			additional_discount.value = 0;
 			additional_discount_percentage.value = 0;

@@ -357,7 +357,7 @@ const FALLBACK_LANGUAGES = [
 	{ code: "pt", name: "Português", native_name: "Português" },
 ];
 
-import { useInvoicePrinting } from "../../composables/useInvoicePrinting";
+import { useLastInvoicePrinting } from "../../composables/useLastInvoicePrinting";
 
 export default {
 	name: "NavbarMenu",
@@ -368,7 +368,7 @@ export default {
 		serverOnline: Boolean,
 	},
 	setup() {
-		const { printLastInvoice } = useInvoicePrinting();
+		const { printLastInvoice } = useLastInvoicePrinting();
 		return { printLastInvoice };
 	},
 	data() {

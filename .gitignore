@@ -1,5 +1,7 @@
 .DS_Store
 *.pyc
+__pycache__/
+**/__pycache__/
 *.egg-info
 *.swp
 tags
@@ -12,5 +14,9 @@ posawesome/public/dist
 package-lock.json
 frappe-bench/
 vite.log
+*.log
+bench.log
+bench_start.log
+frontend/build_log_*.txt
 dist-electron/
 nul

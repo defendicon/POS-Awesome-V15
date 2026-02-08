@@ -341,7 +341,7 @@ export async function searchStoredItems({
 
 			const handleArray = (
 				source: any[],
-				extractor?: (entry: any) => unknown,
+				extractor?: (_entry: any) => unknown,
 			) => {
 				if (!Array.isArray(source)) {
 					return;

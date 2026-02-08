@@ -1,4 +1,6 @@
 import frappe
+import time
+from collections import defaultdict
 from frappe import _
 from frappe.utils import (
     cint,
@@ -7,6 +9,7 @@ from frappe.utils import (
     nowdate,
 )
 from posawesome.posawesome.api.invoice_processing.utils import _get_return_validity_settings
+from posawesome.posawesome.api.utils import log_perf_event
 
 @frappe.whitelist()
 def search_invoices_for_return(
@@ -45,6 +48,7 @@ def search_invoices_for_return(
         - invoices: List of invoice documents
         - has_more: Boolean indicating if there are more invoices to load
     """
+    started_at = time.perf_counter()
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
     # Start with base filters
@@ -54,11 +58,13 @@ def search_invoices_for_return(
         "is_return": 0,
     }
 
-    # Convert page to integer if it's a string
-    if page and isinstance(page, str):
-        page = int(page)
-    else:
-        page = 1  # Default to page 1
+    # Normalize page number input
+    try:
+        page = int(page or 1)
+    except (TypeError, ValueError):
+        page = 1
+    if page < 1:
+        page = 1
 
     # Items per page - can be adjusted based on performance requirements
     page_length = 100
@@ -128,83 +134,59 @@ def search_invoices_for_return(
             filters["customer"] = ["in", customer_ids]
         # If customer search criteria provided but no matches found, return empty
         elif any([customer_name, customer_id, mobile_no, tax_id]):
+            log_perf_event(
+                "search_invoices_for_return",
+                started_at,
+                doctype=doctype,
+                page=page,
+                rows=0,
+                customer_matches=0,
+                early_exit=1,
+            )
             return {"invoices": [], "has_more": False}
 
-    # Count total invoices matching the criteria (for has_more flag)
-    total_count = frappe.db.count(doctype, filters=filters)
-
-    # Get invoices matching all criteria with pagination
+    # Get invoices matching all criteria with pagination (+1 row for has_more)
     invoices_list = frappe.get_list(
         doctype,
         filters=filters,
-        fields=["*"],
+        fields=[
+            "name",
+            "company",
+            "customer",
+            "customer_name",
+            "posting_date",
+            "posting_time",
+            "grand_total",
+            "currency",
+            "discount_amount",
+            "additional_discount_percentage",
+            "posa_return_valid_upto",
+            "is_return",
+        ],
         limit_start=start,
-        limit_page_length=page_length,
+        limit_page_length=page_length + 1,
         order_by="posting_date desc, name desc",
     )
 
+    has_more = len(invoices_list) > page_length
+    if has_more:
+        invoices_list = invoices_list[:page_length]
+
     if not invoices_list:
-        return {"invoices": [], "has_more": False}
-
-    invoice_names = [d.name for d in invoices_list]
-
-    # Pre-fetch child tables
-    meta = frappe.get_meta(doctype)
-    item_doctype = meta.get_field("items").options
-    payment_doctype = meta.get_field("payments").options
-
-    # Items
-    all_items = frappe.get_all(
-        item_doctype,
-        filters={"parent": ["in", invoice_names]},
-        fields=["*"],
-        order_by="idx",
-    )
-    items_map = {}
-    for item in all_items:
-        items_map.setdefault(item.parent, []).append(item)
-
-    # Payments
-    all_payments = frappe.get_all(
-        payment_doctype,
-        filters={"parent": ["in", invoice_names]},
-        fields=["*"],
-        order_by="idx",
-    )
-    payments_map = {}
-    for payment in all_payments:
-        payments_map.setdefault(payment.parent, []).append(payment)
-
-    # Returns check
-    all_returns = frappe.get_all(
-        doctype,
-        filters={"return_against": ["in", invoice_names], "docstatus": 1, "is_return": 1},
-        fields=["name", "return_against"],
-    )
-
-    returned_qty_map = {}
-    if all_returns:
-        return_names = [r.name for r in all_returns]
-        return_items = frappe.get_all(
-            item_doctype,
-            filters={"parent": ["in", return_names]},
-            fields=["item_code", "qty", "parent"],
+        log_perf_event(
+            "search_invoices_for_return",
+            started_at,
+            doctype=doctype,
+            page=page,
+            rows=0,
+            has_more=0,
+            customer_matches=len(customer_ids),
         )
-
-        # Map return ID -> Original Invoice ID
-        return_to_orig = {r.name: r.return_against for r in all_returns}
-
-        for r_item in return_items:
-            orig_inv = return_to_orig.get(r_item.parent)
-            if orig_inv:
-                key = (orig_inv, r_item.item_code)
-                returned_qty_map[key] = returned_qty_map.get(key, 0) + abs(flt(r_item.qty))
+        return {"invoices": [], "has_more": False}
 
     data = []
     for invoice in invoices_list:
-        # Attach children
-        invoice["items"] = items_map.get(invoice.name, [])
-        invoice["payments"] = payments_map.get(invoice.name, [])
+        invoice["doctype"] = doctype
 
         # Validation checks logic
         validity_date = invoice.get("posa_return_valid_upto")
@@ -213,34 +195,145 @@ def search_invoices_for_return(
             expired = getdate(nowdate()) > getdate(validity_date)
         invoice["posa_return_expired"] = cint(expired)
 
-        filtered_items = []
-        has_any_return = False
-
-        for item in invoice["items"]:
-            # returned_qty_map key is (invoice.name, item.item_code)
-            ret_qty = returned_qty_map.get((invoice.name, item.item_code), 0)
-            if ret_qty > 0:
-                has_any_return = True
-
-            remaining_qty = item.qty - ret_qty
-            if remaining_qty > 0:
-                item.qty = remaining_qty
-                filtered_items.append(item)
-
-        invoice["items"] = filtered_items
-        invoice["is_fully_returned"] = 0
-
-        # If items were originally present but now empty after filtering, it's fully returned
-        if items_map.get(invoice.name) and not filtered_items:
-            invoice["is_fully_returned"] = 1
-
         data.append(invoice)
 
-    return {
+    total_count = (start + len(data) + 1) if has_more else (start + len(data))
+
+    result = {
         "invoices": data,
-        "has_more": (start + page_length) < total_count,
+        "has_more": has_more,
         "total_count": total_count,
     }
+    log_perf_event(
+        "search_invoices_for_return",
+        started_at,
+        doctype=doctype,
+        page=page,
+        rows=len(data),
+        has_more=int(bool(has_more)),
+        customer_matches=len(customer_ids),
+    )
+    return result
+
+
+@frappe.whitelist()
+def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoice"):
+    """Return one invoice with returnable item quantities after past returns."""
+    started_at = time.perf_counter()
+    enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
+
+    invoice_doc = frappe.get_cached_doc(doctype, invoice_name)
+    invoice = {
+        "name": invoice_doc.name,
+        "doctype": doctype,
+        "customer": invoice_doc.customer,
+        "customer_name": invoice_doc.customer_name,
+        "grand_total": invoice_doc.grand_total,
+        "currency": invoice_doc.currency,
+        "discount_amount": invoice_doc.discount_amount,
+        "additional_discount_percentage": invoice_doc.additional_discount_percentage,
+        "posa_return_valid_upto": invoice_doc.get("posa_return_valid_upto"),
+        "payments": [
+            {
+                "mode_of_payment": payment.get("mode_of_payment"),
+                "amount": payment.get("amount"),
+                "base_amount": payment.get("base_amount"),
+                "default": payment.get("default"),
+                "account": payment.get("account"),
+                "type": payment.get("type"),
+                "currency": payment.get("currency"),
+                "conversion_rate": payment.get("conversion_rate"),
+            }
+            for payment in (invoice_doc.get("payments") or [])
+        ],
+    }
+
+    meta = frappe.get_meta(doctype)
+    item_field = meta.get_field("items")
+    item_doctype = item_field.options if item_field else None
+    if not item_doctype:
+        log_perf_event(
+            "get_invoice_for_return",
+            started_at,
+            doctype=doctype,
+            invoice=invoice_name,
+            rows=0,
+            fully_returned=0,
+        )
+        return invoice
+
+    returned_items = frappe.get_all(
+        doctype,
+        filters={
+            "return_against": invoice_name,
+            "docstatus": 1,
+            "is_return": 1,
+        },
+        fields=["name"],
+    )
+
+    returned_qty_by_code = defaultdict(float)
+    returned_names = [row.name for row in returned_items]
+    if returned_names:
+        returned_rows = frappe.get_all(
+            item_doctype,
+            filters={"parent": ["in", returned_names], "parenttype": doctype},
+            fields=["item_code", "qty"],
+        )
+        for row in returned_rows:
+            item_code = row.get("item_code")
+            if not item_code:
+                continue
+            returned_qty_by_code[item_code] += abs(flt(row.get("qty") or 0))
+
+    filtered_items = []
+    for item in invoice_doc.get("items") or []:
+        item_code = item.get("item_code")
+        remaining_qty = flt(item.get("qty") or 0) - flt(returned_qty_by_code.get(item_code, 0))
+        if remaining_qty > 0:
+            filtered_items.append(
+                {
+                    "name": item.get("name"),
+                    "item_code": item.get("item_code"),
+                    "item_name": item.get("item_name"),
+                    "description": item.get("description"),
+                    "uom": item.get("uom"),
+                    "stock_uom": item.get("stock_uom"),
+                    "conversion_factor": item.get("conversion_factor"),
+                    "warehouse": item.get("warehouse"),
+                    "batch_no": item.get("batch_no"),
+                    "serial_no": item.get("serial_no"),
+                    "is_free_item": item.get("is_free_item"),
+                    "rate": item.get("rate"),
+                    "price_list_rate": item.get("price_list_rate"),
+                    "discount_percentage": item.get("discount_percentage"),
+                    "discount_amount": item.get("discount_amount"),
+                    "net_rate": item.get("net_rate"),
+                    "net_amount": item.get("net_amount"),
+                    "qty": remaining_qty,
+                    "stock_qty": item.get("stock_qty"),
+                    "amount": item.get("amount"),
+                }
+            )
+
+    invoice["items"] = filtered_items
+    invoice["is_fully_returned"] = 1 if (invoice_doc.items and not filtered_items) else 0
+
+    validity_date = invoice.get("posa_return_valid_upto")
+    expired = False
+    if enforce_return_validity and validity_date:
+        expired = getdate(nowdate()) > getdate(validity_date)
+    invoice["posa_return_expired"] = cint(expired)
+
+    log_perf_event(
+        "get_invoice_for_return",
+        started_at,
+        doctype=doctype,
+        invoice=invoice_name,
+        rows=len(filtered_items),
+        fully_returned=int(bool(invoice.get("is_fully_returned"))),
+    )
+    return invoice
 
 
 @frappe.whitelist()
@@ -248,11 +341,21 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
     """
     Ensure that return items do not exceed the quantity from the original invoice.
     """
-    original_invoice = frappe.get_doc(doctype, original_invoice_name)
+    meta = frappe.get_meta(doctype)
+    item_field = meta.get_field("items")
+    item_doctype = item_field.options if item_field else None
+    if not item_doctype:
+        return {"valid": True}
+
     original_item_qty = {}
 
-    for item in original_invoice.items:
-        original_item_qty[item.item_code] = original_item_qty.get(item.item_code, 0) + item.qty
+    original_items = frappe.get_all(
+        item_doctype,
+        filters={"parent": original_invoice_name, "parenttype": doctype},
+        fields=["item_code", "qty"],
+    )
+    for item in original_items:
+        original_item_qty[item.item_code] = original_item_qty.get(item.item_code, 0) + flt(item.qty or 0)
 
     returned_items = frappe.get_all(
         doctype,
@@ -264,11 +367,16 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
         fields=["name"],
     )
 
-    for returned_invoice in returned_items:
-        ret_doc = frappe.get_doc(doctype, returned_invoice.name)
-        for item in ret_doc.items:
+    returned_names = [row.name for row in returned_items]
+    if returned_names:
+        returned_rows = frappe.get_all(
+            item_doctype,
+            filters={"parent": ["in", returned_names], "parenttype": doctype},
+            fields=["item_code", "qty"],
+        )
+        for item in returned_rows:
             if item.item_code in original_item_qty:
-                original_item_qty[item.item_code] -= abs(item.qty)
+                original_item_qty[item.item_code] -= abs(flt(item.qty or 0))
 
     for item in return_items:
         item_code = item.get("item_code")

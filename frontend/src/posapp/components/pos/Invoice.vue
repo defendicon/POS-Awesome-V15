@@ -655,7 +655,7 @@ export default {
 					this.handleLoadInvoice(doc);
 				}
 			},
-			{ deep: true },
+			{ deep: false },
 		);
 
 		this.$watch(
@@ -665,7 +665,7 @@ export default {
 					this.handleLoadOrder(doc);
 				}
 			},
-			{ deep: true },
+			{ deep: false },
 		);
 
 		this.$watch(

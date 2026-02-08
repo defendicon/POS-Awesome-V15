@@ -49,13 +49,6 @@ export default defineConfig({
 					src: "node_modules/html2pdf.js/dist/html2pdf.bundle.min.js",
 					dest: "libs",
 				},
-				{
-					src: "src/sw.ts",
-					dest: "../www",
-					transform(contents) {
-						return contents.replace(/__BUILD_VERSION__/g, buildVersion);
-					},
-				},
 			],
 		}),
 	],

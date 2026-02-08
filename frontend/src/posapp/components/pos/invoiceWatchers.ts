@@ -55,7 +55,6 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		if (newValue === oldValue) {
 			return;
 		}
-		console.log("Customer watcher triggered:", { newValue, oldValue });
 		this.close_payments();
 		const customersStore = useCustomersStore();
 		customersStore.setSelectedCustomer(this.customer || null);

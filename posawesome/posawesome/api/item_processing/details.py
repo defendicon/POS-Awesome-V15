@@ -2,22 +2,41 @@ import frappe
 from frappe.utils import nowdate
 from posawesome.posawesome.api.item_fetchers import ItemDetailAggregator, get_batches
 from posawesome.posawesome.api.item_processing.stock import get_stock_availability
-from posawesome.posawesome.api.utils import _ensure_pos_profile
+from posawesome.posawesome.api.utils import _ensure_pos_profile, log_perf_event
 from frappe import _, as_json
 import json
+import time
 
 @frappe.whitelist()
 def get_items_details(pos_profile, items_data, price_list=None, customer=None):
     """Bulk fetch item details for a list of items."""
 
+    started_at = time.perf_counter()
+
     pos_profile, _ = _ensure_pos_profile(pos_profile)
     items_data = json.loads(items_data)
 
     if not items_data:
+        log_perf_event(
+            "get_items_details",
+            started_at,
+            profile=pos_profile.get("name"),
+            items=0,
+            cache_enabled=int(bool(pos_profile.get("posa_use_server_cache"))),
+        )
         return []
 
     aggregator = ItemDetailAggregator(pos_profile, price_list=price_list, customer=customer)
-    return aggregator.build_details(items_data)
+    result = aggregator.build_details(items_data)
+    log_perf_event(
+        "get_items_details",
+        started_at,
+        profile=pos_profile.get("name"),
+        items=len(items_data),
+        rows=len(result or []),
+        cache_enabled=int(bool(pos_profile.get("posa_use_server_cache"))),
+    )
+    return result
 
 
 @frappe.whitelist()
@@ -106,7 +125,17 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     if not doc and company:
         doc = frappe._dict({"doctype": "Sales Invoice", "company": company})
 
-    max_discount = frappe.get_value("Item", item_code, "max_discount")
+    item_meta = frappe._dict(
+        frappe.db.get_value(
+            "Item",
+            item_code,
+            ["max_discount", "allow_negative_stock", "stock_uom"],
+            as_dict=True,
+        )
+        or {}
+    )
+
+    max_discount = item_meta.get("max_discount")
     res = get_item_details(
         item,
         doc,
@@ -117,7 +146,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     res["max_discount"] = max_discount
     res["batch_no_data"] = batch_no_data
     res["serial_no_data"] = serial_no_data
-    res["allow_negative_stock"] = frappe.db.get_value("Item", item_code, "allow_negative_stock")
+    res["allow_negative_stock"] = item_meta.get("allow_negative_stock")
 
     # Add UOMs data directly from item document
     uoms = frappe.get_all(
@@ -127,7 +156,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     )
 
     # Add stock UOM if not already in uoms list
-    stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
+    stock_uom = item_meta.get("stock_uom")
     if stock_uom:
         stock_uom_exists = False
         for uom_data in uoms:

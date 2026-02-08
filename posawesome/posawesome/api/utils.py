@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from functools import cache
 
 import frappe
@@ -169,6 +170,24 @@ def fetch_sales_person_names():
             "POS Sales Person Error",
         )
         return []
+
+
+def is_perf_logging_enabled() -> bool:
+    """Return True when lightweight POS performance logging is enabled."""
+
+    return bool(frappe.conf.get("posa_perf_log_enabled"))
+
+
+def log_perf_event(event: str, started_at: float, **context):
+    """Emit a structured performance log line when enabled."""
+
+    if not is_perf_logging_enabled():
+        return
+
+    elapsed_ms = round((time.perf_counter() - started_at) * 1000, 2)
+    context_parts = [f"{key}={context[key]}" for key in sorted(context.keys())]
+    context_str = " ".join(context_parts)
+    logger.info("[POSA_PERF] event=%s elapsed_ms=%s %s", event, elapsed_ms, context_str)
 
 
 @cache

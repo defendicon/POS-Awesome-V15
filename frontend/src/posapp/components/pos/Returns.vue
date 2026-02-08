@@ -598,23 +598,51 @@ export default {
 			this.perform_search();
 		},
 		return_without_invoice() {
-			console.log("Starting return without invoice flow");
 			const invoice_doc = {};
 			invoice_doc.items = [];
 			invoice_doc.is_return = 1;
 			const data = { invoice_doc };
-			console.log("Emitting load_return_invoice event with data:", data);
 			this.eventBus.emit("load_return_invoice", data);
 			this.invoicesDialog = false;
 		},
-		submit_dialog() {
+		async submit_dialog() {
 			if (this.selected.length > 0) {
-				console.log("Starting return with invoice flow");
-				const return_doc = this.selected[0];
+				const selectedInvoice = this.selected[0];
+				const doctype =
+					this.pos_profile && this.pos_profile.create_pos_invoice_instead_of_sales_invoice
+						? "POS Invoice"
+						: "Sales Invoice";
+
+				let return_doc = null;
+				try {
+					const { message } = await frappe.call({
+						method: "posawesome.posawesome.api.invoices.get_invoice_for_return",
+						args: {
+							invoice_name: selectedInvoice.name,
+							pos_profile: this.pos_profile?.name,
+							doctype,
+						},
+					});
+					return_doc = message;
+				} catch (error) {
+					console.error("Error loading invoice for return:", error);
+					this.toastStore.show({
+						title: __("Error loading invoice details"),
+						color: "error",
+					});
+					return;
+				}
+
+				if (!return_doc || !Array.isArray(return_doc.items) || return_doc.items.length === 0) {
+					this.toastStore.show({
+						title: __("No returnable items found for this invoice"),
+						color: "warning",
+					});
+					return;
+				}
+
 				const invoice_doc = {};
 				const items = [];
-
-				console.log("Original return doc:", return_doc);
 
 				return_doc.items.forEach((item) => {
 					const new_item = { ...item };
@@ -675,7 +703,6 @@ export default {
 				invoice_doc.company = this.company;
 
 				const data = { invoice_doc, return_doc };
-				console.log("Emitting load_return_invoice event with data:", data);
 
 				this.eventBus.emit("load_return_invoice", data);
 				this.invoicesDialog = false;
@@ -702,8 +729,6 @@ export default {
 			this.page = 1;
 			this.has_more_invoices = false;
 			this.searched_once = false;
-			this.has_more_invoices = false;
-			this.searched_once = false;
 		});
 
 		this.$watch(
@@ -711,7 +736,7 @@ export default {
 			(profile) => {
 				if (profile) this.pos_profile = profile;
 			},
-			{ deep: true, immediate: true },
+			{ deep: false, immediate: true },
 		);
 	},
 	beforeUnmount() {

@@ -1,6 +1,12 @@
 # Copyright (c) 2020, Youssef Restom and contributors
 # For license information, please see license.txt
 
+"""Public item API facade.
+
+Keep whitelisted paths in this module stable for clients and route heavy
+implementation work to `posawesome.posawesome.api.item_processing` modules.
+"""
+
 import json
 from frappe import _, as_json
 import frappe

@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -15,6 +16,7 @@ from posawesome.posawesome.api.utils import (
     get_active_pos_profile,
     get_item_groups,
     _ensure_pos_profile,
+    log_perf_event,
 )
 from posawesome.posawesome.api.item_processing.barcode import search_serial_or_batch_or_barcode_number
 from posawesome.posawesome.api.item_processing.details import get_items_details
@@ -302,6 +304,8 @@ def _shape_item_row(
     item: Dict[str, Any],
     detail: Dict[str, Any],
     plan: SearchPlan,
+    template_attributes_map: Optional[Dict[str, List[Dict[str, Any]]]] = None,
+    variant_attributes_map: Optional[Dict[str, List[Dict[str, Any]]]] = None,
 ) -> Optional[Dict[str, Any]]:
     """Merge item and detail data while respecting stock and template settings."""
 
@@ -311,17 +315,11 @@ def _shape_item_row(
 
     attributes = ""
     if plan.posa_show_template_items and item.get("has_variants"):
-        # Import dynamically to avoid circular import if needed, though get_item_attributes is in details.py
-        from posawesome.posawesome.api.item_processing.details import get_item_attributes
-        attributes = get_item_attributes(item.get("name"))
+        attributes = (template_attributes_map or {}).get(item.get("name"), [])
 
     item_attributes: Any = ""
     if plan.posa_show_template_items and item.get("variant_of"):
-        item_attributes = frappe.get_all(
-            "Item Variant Attribute",
-            fields=["attribute", "attribute_value"],
-            filters={"parent": item.get("name"), "parentfield": "attributes"},
-        )
+        item_attributes = (variant_attributes_map or {}).get(item.get("name"), [])
 
     if (
         plan.posa_display_items_in_stock
@@ -335,6 +333,72 @@ def _shape_item_row(
     row.update(detail or {})
     row.update({"attributes": attributes or "", "item_attributes": item_attributes or ""})
     return row
+
+
+def _build_attribute_maps(
+    items_data: Sequence[Dict[str, Any]],
+    plan: SearchPlan,
+) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, List[Dict[str, Any]]]]:
+    """Build per-page template and variant attribute maps to avoid N+1 queries."""
+
+    if not plan.posa_show_template_items or not items_data:
+        return {}, {}
+
+    template_names = [item.get("name") for item in items_data if item.get("has_variants") and item.get("name")]
+    variant_names = [item.get("name") for item in items_data if item.get("variant_of") and item.get("name")]
+
+    template_attributes_map: Dict[str, List[Dict[str, Any]]] = {}
+    variant_attributes_map: Dict[str, List[Dict[str, Any]]] = {}
+
+    if template_names:
+        template_rows = frappe.get_all(
+            "Item Variant Attribute",
+            fields=["parent", "attribute"],
+            filters={"parent": ["in", template_names], "parentfield": "attributes"},
+        )
+        attrs_by_parent: Dict[str, set] = {}
+        for row in template_rows:
+            parent = row.get("parent")
+            attribute = row.get("attribute")
+            if not parent or not attribute:
+                continue
+            attrs_by_parent.setdefault(parent, set()).add(attribute)
+
+        all_attributes = sorted({attr for attrs in attrs_by_parent.values() for attr in attrs})
+        attr_docs = {}
+        if all_attributes:
+            for doc in frappe.get_all(
+                "Item Attribute",
+                fields=["name", "attribute_name"],
+                filters={"name": ["in", all_attributes]},
+            ):
+                attr_docs[doc.get("name")] = doc
+
+        for parent, attrs in attrs_by_parent.items():
+            template_attributes_map[parent] = [
+                attr_docs[attr]
+                for attr in sorted(attrs)
+                if attr in attr_docs
+            ]
+
+    if variant_names:
+        variant_rows = frappe.get_all(
+            "Item Variant Attribute",
+            fields=["parent", "attribute", "attribute_value"],
+            filters={"parent": ["in", variant_names], "parentfield": "attributes"},
+        )
+        for row in variant_rows:
+            parent = row.get("parent")
+            if not parent:
+                continue
+            variant_attributes_map.setdefault(parent, []).append(
+                {
+                    "attribute": row.get("attribute"),
+                    "attribute_value": row.get("attribute_value"),
+                }
+            )
+
+    return template_attributes_map, variant_attributes_map
 
 
 def _run_item_query(
@@ -384,10 +448,17 @@ def _run_item_query(
             customer=customer,
         )
         detail_map = {d["item_code"]: d for d in details}
+        template_attributes_map, variant_attributes_map = _build_attribute_maps(items_data, plan)
 
         for item in items_data:
             detail = detail_map.get(item.get("item_code"), {})
-            row = _shape_item_row(dict(item), detail, plan)
+            row = _shape_item_row(
+                dict(item),
+                detail,
+                plan,
+                template_attributes_map=template_attributes_map,
+                variant_attributes_map=variant_attributes_map,
+            )
             if not row:
                 continue
             if not _matches_search_words(row, plan.search_words, plan.word_filter_active):
@@ -501,6 +572,7 @@ def get_items(
     include_image=False,
     item_groups=None,
 ):
+    started_at = time.perf_counter()
     profile_ctx = _normalize_profile_context(pos_profile)
     groups_ctx = _prepare_item_groups(profile_ctx.profile_name, item_groups)
 
@@ -536,7 +608,7 @@ def get_items(
         )
 
     if profile_ctx.use_price_list_cache:
-        return __get_items(
+        result = __get_items(
             profile_ctx.profile_name,
             profile_ctx.warehouse,
             price_list,
@@ -551,8 +623,18 @@ def get_items(
             include_image,
             groups_ctx.groups_tuple,
         )
+        log_perf_event(
+            "get_items",
+            started_at,
+            profile=profile_ctx.profile_name,
+            rows=len(result or []),
+            cache_path=1,
+            search=1 if search_value else 0,
+            groups=len(groups_ctx.groups_tuple),
+        )
+        return result
 
-    return _execute_item_search(
+    result = _execute_item_search(
         profile_ctx.pos_profile_json,
         price_list,
         item_group,
@@ -566,6 +648,16 @@ def get_items(
         include_image,
         groups_ctx.groups,
     )
+    log_perf_event(
+        "get_items",
+        started_at,
+        profile=profile_ctx.profile_name,
+        rows=len(result or []),
+        cache_path=0,
+        search=1 if search_value else 0,
+        groups=len(groups_ctx.groups),
+    )
+    return result
 
 
 @frappe.whitelist()

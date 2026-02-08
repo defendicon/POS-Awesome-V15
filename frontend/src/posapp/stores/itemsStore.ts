@@ -212,16 +212,34 @@ export const useItemsStore = defineStore("items", () => {
 	});
 
 	const itemStats = computed(() => {
+		const groups = new Set<string>();
+		let withImages = 0;
+		let withStock = 0;
+		let lowStock = 0;
+
+		items.value.forEach((item) => {
+			if (item.item_group) {
+				groups.add(item.item_group);
+			}
+			if (item.image) {
+				withImages += 1;
+			}
+			const qty = item.actual_qty || 0;
+			if (qty > 0) {
+				withStock += 1;
+			}
+			if (qty < 5) {
+				lowStock += 1;
+			}
+		});
+
 		return {
 			total: items.value.length,
 			filtered: filteredItems.value.length,
-			groups: [...new Set(items.value.map((item) => item.item_group))]
-				.length,
-			withImages: items.value.filter((item) => item.image).length,
-			withStock: items.value.filter((item) => (item.actual_qty || 0) > 0)
-				.length,
-			lowStock: items.value.filter((item) => (item.actual_qty || 0) < 5)
-				.length,
+			groups: groups.size,
+			withImages,
+			withStock,
+			lowStock,
 		};
 	});
 

@@ -881,10 +881,8 @@ watch(sales_person, (newVal) => {
 				allocated_percentage: 100,
 			},
 		];
-		console.log("Updated sales_team with sales_person:", newVal);
 	} else {
 		invoice_doc.value.sales_team = [];
-		console.log("Cleared sales_team");
 	}
 });
 
