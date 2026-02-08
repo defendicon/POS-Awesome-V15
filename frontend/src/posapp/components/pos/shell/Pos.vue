@@ -79,7 +79,7 @@ import PosCoupons from "../offers/PosCoupons.vue";
 import Drafts from "../flows/Drafts.vue";
 import SalesOrders from "../flows/SalesOrders.vue";
 import NewAddress from "../customer/NewAddress.vue";
-import Variants from "../Variants.vue";
+import Variants from "../items/Variants.vue";
 import Returns from "../flows/Returns.vue";
 import MpesaPayments from "../payments/Mpesa-Payments.vue";
 import { inject, ref, onMounted, onBeforeUnmount } from "vue";

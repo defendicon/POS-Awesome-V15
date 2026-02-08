@@ -82,12 +82,12 @@
 </template>
 
 <script>
-import { ensurePosProfile } from "../../../utils/pos_profile";
+import { ensurePosProfile } from "../../../../utils/pos_profile";
 import _ from "lodash";
-import placeholderImage from "./placeholder-image.png";
+import placeholderImage from "../placeholder-image.png";
 import { getCurrentInstance } from "vue";
-import { useUIStore } from "../../stores/uiStore.js";
-import { useInvoiceStore } from "../../stores/invoiceStore.js";
+import { useUIStore } from "../../../stores/uiStore.js";
+import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 export default {
 	setup() {
 		const { proxy } = getCurrentInstance();

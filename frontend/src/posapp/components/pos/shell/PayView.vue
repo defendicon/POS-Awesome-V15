@@ -114,7 +114,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, getCurrentInstance } from "vue";
 import { storeToRefs } from "pinia";
 import format from "../../../format";
-import Customer from "../Customer.vue";
+import Customer from "../customer/Customer.vue";
 import {
 	initPromise,
 	checkDbHealth,

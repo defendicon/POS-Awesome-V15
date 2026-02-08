@@ -162,12 +162,12 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
-import UpdateCustomer from "./dialogs/customer/UpdateCustomer.vue";
-import Skeleton from "../ui/Skeleton.vue";
-import { useCustomersStore } from "../../stores/customersStore.js";
-import { useOnlineStatus } from "../../composables/useOnlineStatus";
-import { useToastStore } from "../../stores/toastStore.js";
-import { useUIStore } from "../../stores/uiStore.js";
+import UpdateCustomer from "../dialogs/customer/UpdateCustomer.vue";
+import Skeleton from "../../ui/Skeleton.vue";
+import { useCustomersStore } from "../../../stores/customersStore.js";
+import { useOnlineStatus } from "../../../composables/useOnlineStatus";
+import { useToastStore } from "../../../stores/toastStore.js";
+import { useUIStore } from "../../../stores/uiStore.js";
 
 export default {
 	props: {
