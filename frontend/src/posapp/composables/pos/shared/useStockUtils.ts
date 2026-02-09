@@ -43,6 +43,47 @@ export function useStockUtils() {
 
 		// Store old conversion factor for ratio calculation
 		const old_conversion_factor = item.conversion_factor || 1;
+		const oldBaseRateRaw = Number.parseFloat(
+			String(item.base_rate ?? item.rate ?? 0),
+		);
+		const oldBasePriceListRaw = Number.parseFloat(
+			String(
+				item.base_price_list_rate ??
+					item.price_list_rate ??
+					oldBaseRateRaw,
+			),
+		);
+		const oldBaseRate = Number.isFinite(oldBaseRateRaw)
+			? oldBaseRateRaw
+			: 0;
+		const oldBasePriceListRate = Number.isFinite(oldBasePriceListRaw)
+			? oldBasePriceListRaw
+			: oldBaseRate;
+
+		// Keep a stock-unit baseline so repeated UOM switches always recalculate
+		// from a stable source, even after a UOM-specific rate was applied.
+		if (
+			item.original_base_rate === undefined ||
+			item.original_base_rate === null ||
+			!Number.isFinite(Number.parseFloat(String(item.original_base_rate)))
+		) {
+			item.original_base_rate =
+				old_conversion_factor !== 0
+					? oldBaseRate / old_conversion_factor
+					: oldBaseRate;
+		}
+		if (
+			item.original_base_price_list_rate === undefined ||
+			item.original_base_price_list_rate === null ||
+			!Number.isFinite(
+				Number.parseFloat(String(item.original_base_price_list_rate)),
+			)
+		) {
+			item.original_base_price_list_rate =
+				old_conversion_factor !== 0
+					? oldBasePriceListRate / old_conversion_factor
+					: oldBasePriceListRate;
+		}
 
 		// Update conversion factor
 		item.conversion_factor = new_uom.conversion_factor;
@@ -224,7 +265,14 @@ export function useStockUtils() {
 		}
 
 		// Store original base rates if not already stored
-		if (!item.original_base_rate && !item.posa_offer_applied) {
+		if (
+			!item.posa_offer_applied &&
+			(item.original_base_rate === undefined ||
+				item.original_base_rate === null ||
+				!Number.isFinite(
+					Number.parseFloat(String(item.original_base_rate)),
+				))
+		) {
 			item.original_base_rate = item.base_rate / old_conversion_factor;
 			item.original_base_price_list_rate =
 				item.base_price_list_rate / old_conversion_factor;
@@ -356,11 +404,25 @@ export function useStockUtils() {
 			if (item.batch_price) {
 				item.base_rate = item.batch_price * item.conversion_factor;
 				item.base_price_list_rate = item.base_rate;
-			} else if (item.original_base_rate) {
-				item.base_rate =
-					item.original_base_rate * item.conversion_factor;
+			} else {
+				const originalBaseRateRaw = Number.parseFloat(
+					String(item.original_base_rate),
+				);
+				const originalBasePriceListRaw = Number.parseFloat(
+					String(item.original_base_price_list_rate),
+				);
+				const originalBaseRate = Number.isFinite(originalBaseRateRaw)
+					? originalBaseRateRaw
+					: 0;
+				const originalBasePriceListRate = Number.isFinite(
+					originalBasePriceListRaw,
+				)
+					? originalBasePriceListRaw
+					: originalBaseRate;
+
+				item.base_rate = originalBaseRate * item.conversion_factor;
 				item.base_price_list_rate =
-					item.original_base_price_list_rate * item.conversion_factor;
+					originalBasePriceListRate * item.conversion_factor;
 			}
 
 			// Convert to selected currency
