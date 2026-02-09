@@ -31,6 +31,9 @@ export function usePosPayData({
 	const auto_reconcile_loading = ref(false);
 	const auto_reconcile_summary = ref("");
 	const customer_info = ref<any>("");
+	const outstandingReqToken = ref(0);
+	const unallocatedReqToken = ref(0);
+	const mpesaReqToken = ref(0);
 
 	const pos_profiles_list = ref<any[]>([]);
 	const mpesa_search_name = ref("");
@@ -40,6 +43,10 @@ export function usePosPayData({
 		posProfileSearch: string | null = null,
 	) {
 		invoices_loading.value = true;
+		const requestToken = ++outstandingReqToken.value;
+		const requestCustomer = customerName.value;
+		const requestCompany = company.value;
+		const requestCurrency = posProfile.value?.currency;
 
 		if (!customerName.value || !company.value) {
 			outstanding_invoices.value = [];
@@ -64,17 +71,37 @@ export function usePosPayData({
 					include_all_currencies: true,
 				},
 			);
-			if (r.message) {
-				outstanding_invoices.value = r.message;
+
+			if (
+				requestToken !== outstandingReqToken.value ||
+				requestCustomer !== customerName.value ||
+				requestCompany !== company.value ||
+				requestCurrency !== posProfile.value?.currency
+			) {
+				return;
+			}
+
+			outstanding_invoices.value = Array.isArray(r.message)
+				? r.message
+				: [];
+		} catch {
+			if (requestToken === outstandingReqToken.value) {
+				outstanding_invoices.value = [];
 			}
 		} finally {
-			invoices_loading.value = false;
+			if (requestToken === outstandingReqToken.value) {
+				invoices_loading.value = false;
+			}
 		}
 	}
 
 	async function get_unallocated_payments() {
 		if (!posProfile.value.posa_allow_reconcile_payments) return;
 		unallocated_payments_loading.value = true;
+		const requestToken = ++unallocatedReqToken.value;
+		const requestCustomer = customerName.value;
+		const requestCompany = company.value;
+		const requestCurrency = posProfile.value?.currency;
 
 		if (!customerName.value || !company.value || isOffline()) {
 			unallocated_payments.value = [];
@@ -91,6 +118,16 @@ export function usePosPayData({
 					currency: posProfile.value.currency,
 				},
 			);
+
+			if (
+				requestToken !== unallocatedReqToken.value ||
+				requestCustomer !== customerName.value ||
+				requestCompany !== company.value ||
+				requestCurrency !== posProfile.value?.currency
+			) {
+				return;
+			}
+
 			const payments = Array.isArray(r.message) ? r.message : [];
 			unallocated_payments.value = payments.map((payment: any) => ({
 				...payment,
@@ -99,8 +136,14 @@ export function usePosPayData({
 					? __("Credit Note")
 					: payment?.mode_of_payment,
 			}));
+		} catch {
+			if (requestToken === unallocatedReqToken.value) {
+				unallocated_payments.value = [];
+			}
 		} finally {
-			unallocated_payments_loading.value = false;
+			if (requestToken === unallocatedReqToken.value) {
+				unallocated_payments_loading.value = false;
+			}
 		}
 	}
 
@@ -109,6 +152,8 @@ export function usePosPayData({
 	) {
 		if (!posProfile.value.posa_allow_mpesa_reconcile_payments) return;
 		mpesa_payments_loading.value = true;
+		const requestToken = ++mpesaReqToken.value;
+		const requestCompany = company.value;
 
 		if (!company.value) {
 			mpesa_payments.value = [];
@@ -133,9 +178,21 @@ export function usePosPayData({
 					payment_methods_list: paymentMethodsList,
 				},
 			);
+			if (
+				requestToken !== mpesaReqToken.value ||
+				requestCompany !== company.value
+			) {
+				return;
+			}
 			mpesa_payments.value = r.message || [];
+		} catch {
+			if (requestToken === mpesaReqToken.value) {
+				mpesa_payments.value = [];
+			}
 		} finally {
-			mpesa_payments_loading.value = false;
+			if (requestToken === mpesaReqToken.value) {
+				mpesa_payments_loading.value = false;
+			}
 		}
 	}
 

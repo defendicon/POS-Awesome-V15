@@ -117,7 +117,9 @@ export const useCustomersStore = defineStore("customers", () => {
 
 	const filteredCustomers = computed(() => customers.value);
 
-	const isLoadComplete = computed(() => customersLoaded.value && loadProgress.value >= 100);
+	const isLoadComplete = computed(
+		() => customersLoaded.value && loadProgress.value >= 100,
+	);
 
 	async function ensureDatabase() {
 		await memoryInitPromise;
@@ -155,7 +157,10 @@ export const useCustomersStore = defineStore("customers", () => {
 		let collection = db.table("customers");
 		const normalizedTerm = normalizeSearchTerm(searchTerm.value);
 		if (normalizedTerm) {
-			const searchParts = normalizedTerm.toLowerCase().split(/\s+/).filter(Boolean);
+			const searchParts = normalizedTerm
+				.toLowerCase()
+				.split(/\s+/)
+				.filter(Boolean);
 			collection = collection.filter((customer: Customer) => {
 				if (!customer) {
 					return false;
@@ -175,12 +180,17 @@ export const useCustomersStore = defineStore("customers", () => {
 					return true;
 				}
 
-				return searchParts.every((part) => values.some((value) => value.includes(part)));
+				return searchParts.every((part) =>
+					values.some((value) => value.includes(part)),
+				);
 			});
 		}
 
 		const offset = page.value * PAGE_SIZE;
-		const results = await collection.offset(offset).limit(PAGE_SIZE).toArray();
+		const results = await collection
+			.offset(offset)
+			.limit(PAGE_SIZE)
+			.toArray();
 
 		if (append) {
 			customers.value = [...customers.value, ...results];
@@ -222,13 +232,20 @@ export const useCustomersStore = defineStore("customers", () => {
 			return count;
 		}
 		if (nextCustomerStart.value) {
-			await backgroundLoadCustomers(nextCustomerStart.value, getCustomersLastSync());
+			await backgroundLoadCustomers(
+				nextCustomerStart.value,
+				getCustomersLastSync(),
+			);
 			await performSearch({ append: true });
 		}
 		return count;
 	}
 
-	function fetchCustomerPage(startAfter: string | null, modifiedAfter: string | null, limit: number): Promise<Customer[]> {
+	function fetchCustomerPage(
+		startAfter: string | null,
+		modifiedAfter: string | null,
+		limit: number,
+	): Promise<Customer[]> {
 		const serializedProfile = getSerializedProfile(posProfile.value);
 		return new Promise((resolve, reject) => {
 			if (!serializedProfile) {
@@ -252,7 +269,10 @@ export const useCustomersStore = defineStore("customers", () => {
 		});
 	}
 
-	async function backgroundLoadCustomers(startAfter: string | null, syncSince: string | null) {
+	async function backgroundLoadCustomers(
+		startAfter: string | null,
+		syncSince: string | null,
+	) {
 		if (!posProfile.value || isOffline()) {
 			return;
 		}
@@ -265,14 +285,22 @@ export const useCustomersStore = defineStore("customers", () => {
 		try {
 			let cursor: string | null = startAfter;
 			while (cursor) {
-				const rows: Customer[] = await fetchCustomerPage(cursor, syncSince, limit);
+				const rows: Customer[] = await fetchCustomerPage(
+					cursor,
+					syncSince,
+					limit,
+				);
 				if (rows.length) {
 					await setCustomerStorage(rows);
 					loadedCustomerCount.value += rows.length;
 					if (totalCustomerCount.value) {
 						const progress = Math.min(
-							99,
-							Math.round((loadedCustomerCount.value / totalCustomerCount.value) * 100),
+							100,
+							Math.round(
+								(loadedCustomerCount.value /
+									totalCustomerCount.value) *
+									100,
+							),
 						);
 						loadProgress.value = progress;
 					}
@@ -292,6 +320,13 @@ export const useCustomersStore = defineStore("customers", () => {
 			console.error("Failed to background load customers", err);
 		} finally {
 			isCustomerBackgroundLoading.value = false;
+			if (
+				!nextCustomerStart.value &&
+				customersLoaded.value &&
+				loadProgress.value >= 99
+			) {
+				loadProgress.value = 100;
+			}
 			if (pendingCustomerSearch.value !== null) {
 				const term = pendingCustomerSearch.value;
 				pendingCustomerSearch.value = null;
@@ -317,22 +352,35 @@ export const useCustomersStore = defineStore("customers", () => {
 			const serverCount = response.message || 0;
 			totalCustomerCount.value = serverCount;
 			loadedCustomerCount.value = localCount;
-			loadProgress.value = serverCount ? Math.round((localCount / serverCount) * 100) : 0;
+			loadProgress.value = serverCount
+				? Math.round((localCount / serverCount) * 100)
+				: 0;
 
 			if (serverCount > localCount) {
 				const syncSince = getCustomersLastSync();
-				const rows: Customer[] = await fetchCustomerPage(null, syncSince, PAGE_SIZE);
+				const rows: Customer[] = await fetchCustomerPage(
+					null,
+					syncSince,
+					PAGE_SIZE,
+				);
 				if (rows.length) {
 					await setCustomerStorage(rows);
 					loadedCustomerCount.value += rows.length;
 					if (totalCustomerCount.value) {
 						loadProgress.value = Math.min(
 							100,
-							Math.round((loadedCustomerCount.value / totalCustomerCount.value) * 100),
+							Math.round(
+								(loadedCustomerCount.value /
+									totalCustomerCount.value) *
+									100,
+							),
 						);
 					}
 				}
-				const startAfter = rows.length === PAGE_SIZE ? rows[rows.length - 1]?.name || null : null;
+				const startAfter =
+					rows.length === PAGE_SIZE
+						? rows[rows.length - 1]?.name || null
+						: null;
 				if (startAfter) {
 					await backgroundLoadCustomers(startAfter, syncSince);
 				} else {
@@ -375,7 +423,12 @@ export const useCustomersStore = defineStore("customers", () => {
 
 		let syncSince = getCustomersLastSync();
 		// Ensure syncSince is a valid ISO string or null.
-		if (!syncSince || syncSince === "null" || syncSince === "undefined" || !syncSince.trim()) {
+		if (
+			!syncSince ||
+			syncSince === "null" ||
+			syncSince === "undefined" ||
+			!syncSince.trim()
+		) {
 			syncSince = null;
 		}
 
@@ -388,7 +441,9 @@ export const useCustomersStore = defineStore("customers", () => {
 					args: { pos_profile: serializedProfile },
 				});
 				totalCustomerCount.value = countResponse.message || 0;
-				console.log(`Server reports ${totalCustomerCount.value} customers`);
+				console.log(
+					`Server reports ${totalCustomerCount.value} customers`,
+				);
 			} catch (err) {
 				console.error("Failed to fetch customer count", err);
 				totalCustomerCount.value = 0;
@@ -396,7 +451,11 @@ export const useCustomersStore = defineStore("customers", () => {
 
 			// Force fetch page 1
 			console.log("Fetching first page of customers...");
-			const rows: Customer[] = await fetchCustomerPage(null, syncSince, PAGE_SIZE);
+			const rows: Customer[] = await fetchCustomerPage(
+				null,
+				syncSince,
+				PAGE_SIZE,
+			);
 			console.log(`Fetched ${rows.length} customers in first page`);
 
 			if (rows.length) {
@@ -406,10 +465,16 @@ export const useCustomersStore = defineStore("customers", () => {
 			if (totalCustomerCount.value) {
 				loadProgress.value = Math.min(
 					100,
-					Math.round((loadedCustomerCount.value / totalCustomerCount.value) * 100),
+					Math.round(
+						(loadedCustomerCount.value / totalCustomerCount.value) *
+							100,
+					),
 				);
 			}
-			nextCustomerStart.value = rows.length === PAGE_SIZE ? rows[rows.length - 1]?.name || null : null;
+			nextCustomerStart.value =
+				rows.length === PAGE_SIZE
+					? rows[rows.length - 1]?.name || null
+					: null;
 			if (nextCustomerStart.value) {
 				backgroundLoadCustomers(nextCustomerStart.value, syncSince);
 			} else {
@@ -431,7 +496,9 @@ export const useCustomersStore = defineStore("customers", () => {
 		if (!customer || !customer.name) {
 			return;
 		}
-		const existingIndex = customers.value.findIndex((c) => c.name === customer.name);
+		const existingIndex = customers.value.findIndex(
+			(c) => c.name === customer.name,
+		);
 		if (existingIndex !== -1) {
 			const updated = [...customers.value];
 			updated.splice(existingIndex, 1, customer);

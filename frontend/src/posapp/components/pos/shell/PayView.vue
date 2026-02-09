@@ -602,6 +602,9 @@ export default {
 				}
 				if (normalized === customer_name.value) return;
 				clearSelections();
+				outstanding_invoices.value = [];
+				unallocated_payments.value = [];
+				mpesa_payments.value = [];
 				customer_name.value = normalized;
 				if (!companyCurrency.value) await fetchCompanyCurrency();
 				fetch_customer_details();

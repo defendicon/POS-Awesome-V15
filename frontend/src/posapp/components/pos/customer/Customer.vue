@@ -368,10 +368,6 @@ export default {
 				return;
 			}
 			const term = value || "";
-			if (isCustomerBackgroundLoading.value) {
-				customersStore.queueSearch(term);
-				return;
-			}
 			searchDebounce(term);
 		};
 
