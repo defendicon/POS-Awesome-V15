@@ -19,11 +19,21 @@
 			<template v-slot:item.rate="{ item }">
 				<div v-if="context !== 'purchase'">
 					<div class="text-primary">
-						{{ currencySymbol(item.original_currency || posProfile.currency) }}
+						{{
+							currencySymbol(
+								item.original_currency ||
+									item.currency ||
+									item.price_list_currency ||
+									posProfile.currency,
+							)
+						}}
 						{{
 							formatCurrency(
 								item.original_rate ?? item.rate ?? 0,
-								item.original_currency || posProfile.currency,
+								item.original_currency ||
+									item.currency ||
+									item.price_list_currency ||
+									posProfile.currency,
 								ratePrecision(item.original_rate ?? item.rate ?? 0),
 							)
 						}}
@@ -50,7 +60,13 @@
 					</div>
 					<div
 						v-if="
-							posProfile.posa_allow_multi_currency && selectedCurrency !== posProfile.currency
+							posProfile.posa_allow_multi_currency &&
+							selectedCurrency &&
+							selectedCurrency !==
+								(item.original_currency ||
+									item.currency ||
+									item.price_list_currency ||
+									posProfile.currency)
 						"
 						class="text-success"
 					>

@@ -101,7 +101,12 @@ const emit = defineEmits(["click", "dragstart", "dragend"]);
 
 const primaryCurrency = computed(() => {
 	if (props.context === "purchase") return props.posProfile.currency;
-	return props.item.original_currency || props.posProfile.currency;
+	return (
+		props.item.original_currency ||
+		props.item.currency ||
+		props.item.price_list_currency ||
+		props.posProfile.currency
+	);
 });
 
 const primaryRate = computed(() => {
@@ -121,7 +126,8 @@ const showSecondaryPrice = computed(() => {
 	return (
 		props.context !== "purchase" &&
 		props.posProfile.posa_allow_multi_currency &&
-		props.selectedCurrency !== props.posProfile.currency
+		Boolean(props.selectedCurrency) &&
+		props.selectedCurrency !== primaryCurrency.value
 	);
 });
 
