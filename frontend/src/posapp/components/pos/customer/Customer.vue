@@ -1,100 +1,111 @@
 <template>
 	<!-- ? Disable dropdown if either readonly or loadingCustomers is true -->
 	<div class="customer-input-wrapper">
-		<Skeleton v-if="loadingCustomers" height="48" class="w-100" />
-		<v-autocomplete
-			v-else
-			ref="customerDropdown"
-			class="customer-autocomplete sleek-field pos-themed-input"
-			density="compact"
-			clearable
-			variant="solo"
-			color="primary"
-			:label="frappe._('Customer')"
-			v-model="internalCustomer"
-			:items="filteredCustomers"
-			item-title="customer_name"
-			item-value="name"
-			:no-data-text="
-				isCustomerBackgroundLoading ? __('Loading customer data...') : __('Customers not found')
-			"
-			hide-details
-			:customFilter="() => true"
-			:disabled="effectiveReadonly || loadingCustomers"
-			:menu-props="{ closeOnContentClick: false }"
-			@update:menu="onCustomerMenuToggle"
-			@update:modelValue="onCustomerChange"
-			@update:search="onCustomerSearch"
-			@keydown.enter="handleEnter"
-			:virtual-scroll="true"
-			:virtual-scroll-item-height="48"
-		>
-			<!-- Edit icon (left) -->
-			<template #prepend-inner>
-				<v-tooltip text="Edit customer">
-					<template #activator="{ props }">
-						<v-icon
-							v-bind="props"
-							class="icon-button"
-							@mousedown.prevent.stop
-							@click.stop="edit_customer"
-						>
-							mdi-account-edit
-						</v-icon>
-					</template>
-				</v-tooltip>
-				<v-tooltip text="Reload Customers">
-					<template #activator="{ props }">
-						<v-icon
-							v-bind="props"
-							class="icon-button ml-1"
-							:class="{ 'disabled-icon': !networkOnline }"
-							@mousedown.prevent.stop
-							@click.stop="reload_customers"
-						>
-							mdi-reload
-						</v-icon>
-					</template>
-				</v-tooltip>
-			</template>
+		<div class="customer-field-shell">
+			<v-autocomplete
+				ref="customerDropdown"
+				class="customer-autocomplete sleek-field pos-themed-input"
+				density="compact"
+				clearable
+				variant="solo"
+				color="primary"
+				:label="customerFieldLabel"
+				:placeholder="customerFieldPlaceholder"
+				:loading="isCustomerSearchLocked"
+				v-model="internalCustomer"
+				:items="filteredCustomers"
+				item-title="customer_name"
+				item-value="name"
+				:no-data-text="customerNoDataText"
+				hide-details
+				:customFilter="() => true"
+				:disabled="effectiveReadonly || isCustomerSearchLocked"
+				:menu-props="{ closeOnContentClick: false }"
+				@update:menu="onCustomerMenuToggle"
+				@update:modelValue="onCustomerChange"
+				@update:search="onCustomerSearch"
+				@keydown.enter="handleEnter"
+				:virtual-scroll="true"
+				:virtual-scroll-item-height="48"
+			>
+				<!-- Edit icon (left) -->
+				<template #prepend-inner>
+					<v-tooltip text="Edit customer">
+						<template #activator="{ props }">
+							<v-icon
+								v-bind="props"
+								class="icon-button"
+								@mousedown.prevent.stop
+								@click.stop="edit_customer"
+							>
+								mdi-account-edit
+							</v-icon>
+						</template>
+					</v-tooltip>
+					<v-tooltip text="Reload Customers">
+						<template #activator="{ props }">
+							<v-icon
+								v-bind="props"
+								class="icon-button ml-1"
+								:class="{ 'disabled-icon': !networkOnline }"
+								@mousedown.prevent.stop
+								@click.stop="reload_customers"
+							>
+								mdi-reload
+							</v-icon>
+						</template>
+					</v-tooltip>
+				</template>
 
-			<!-- Add icon (right) -->
-			<template #append-inner>
-				<v-tooltip text="Add new customer">
-					<template #activator="{ props }">
-						<v-icon
-							v-bind="props"
-							class="icon-button"
-							@mousedown.prevent.stop
-							@click.stop="new_customer"
-						>
-							mdi-plus
-						</v-icon>
-					</template>
-				</v-tooltip>
-			</template>
+				<!-- Add icon (right) -->
+				<template #append-inner>
+					<span v-if="isCustomerSearchLocked" class="customer-load-percent">
+						{{ customerLoadPercent }}%
+					</span>
+					<v-tooltip text="Add new customer">
+						<template #activator="{ props }">
+							<v-icon
+								v-bind="props"
+								class="icon-button"
+								@mousedown.prevent.stop
+								@click.stop="new_customer"
+							>
+								mdi-plus
+							</v-icon>
+						</template>
+					</v-tooltip>
+				</template>
 
-			<!-- Dropdown display -->
-			<template #item="{ props, item }">
-				<v-list-item v-bind="props">
-					<v-list-item-subtitle v-if="item.raw.customer_name !== item.raw.name">
-						<div v-html="`ID: ${item.raw.name}`"></div>
-					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.tax_id">
-						<div v-html="`TAX ID: ${item.raw.tax_id}`"></div>
-					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.email_id">
-						<div v-html="`Email: ${item.raw.email_id}`"></div>
-					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.mobile_no">
-						<div v-html="`Mobile No: ${item.raw.mobile_no}`"></div>
-					</v-list-item-subtitle>
-					<v-list-item-subtitle v-if="item.raw.primary_address">
-						<div v-html="`Primary Address: ${item.raw.primary_address}`"></div>
-					</v-list-item-subtitle>
-				</v-list-item>
-			</template>
-		</v-autocomplete>
+				<!-- Dropdown display -->
+				<template #item="{ props, item }">
+					<v-list-item v-bind="props">
+						<v-list-item-subtitle v-if="item.raw.customer_name !== item.raw.name">
+							<div v-html="`ID: ${item.raw.name}`"></div>
+						</v-list-item-subtitle>
+						<v-list-item-subtitle v-if="item.raw.tax_id">
+							<div v-html="`TAX ID: ${item.raw.tax_id}`"></div>
+						</v-list-item-subtitle>
+						<v-list-item-subtitle v-if="item.raw.email_id">
+							<div v-html="`Email: ${item.raw.email_id}`"></div>
+						</v-list-item-subtitle>
+						<v-list-item-subtitle v-if="item.raw.mobile_no">
+							<div v-html="`Mobile No: ${item.raw.mobile_no}`"></div>
+						</v-list-item-subtitle>
+						<v-list-item-subtitle v-if="item.raw.primary_address">
+							<div v-html="`Primary Address: ${item.raw.primary_address}`"></div>
+						</v-list-item-subtitle>
+					</v-list-item>
+				</template>
+			</v-autocomplete>
+			<v-progress-linear
+				v-if="isCustomerSearchLocked"
+				:model-value="customerLoadPercent"
+				height="4"
+				color="primary"
+				class="customer-load-bar"
+				rounded
+			/>
+		</div>
 
 		<!-- Update customer modal -->
 		<div class="mt-4">
@@ -122,6 +133,29 @@
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 	transition: box-shadow 0.3s ease;
 	background-color: var(--pos-input-bg);
+}
+
+.customer-field-shell {
+	position: relative;
+	width: 100%;
+}
+
+.customer-load-bar {
+	position: absolute;
+	left: 10px;
+	right: 10px;
+	bottom: 6px;
+	z-index: 2;
+	opacity: 0.95;
+}
+
+.customer-load-percent {
+	font-size: 0.72rem;
+	font-weight: 700;
+	margin-right: 8px;
+	color: rgb(var(--v-theme-primary));
+	min-width: 42px;
+	text-align: right;
 }
 
 .customer-autocomplete:hover {
@@ -163,7 +197,6 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, n
 import { storeToRefs } from "pinia";
 import _ from "lodash";
 import UpdateCustomer from "../dialogs/customer/UpdateCustomer.vue";
-import Skeleton from "../../ui/Skeleton.vue";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useOnlineStatus } from "../../../composables/core/useOnlineStatus";
 import { useToastStore } from "../../../stores/toastStore.js";
@@ -175,7 +208,6 @@ export default {
 	},
 	components: {
 		UpdateCustomer,
-		Skeleton,
 	},
 	setup(props, { expose }) {
 		const { proxy } = getCurrentInstance();
@@ -188,6 +220,7 @@ export default {
 			filteredCustomers,
 			loadingCustomers,
 			isCustomerBackgroundLoading,
+			loadProgress,
 			selectedCustomer,
 			customerInfo,
 		} = storeToRefs(customersStore);
@@ -203,6 +236,27 @@ export default {
 		const { isOnline: networkOnline } = useOnlineStatus();
 
 		const effectiveReadonly = computed(() => readonlyState.value && networkOnline.value);
+		const isCustomerSearchLocked = computed(
+			() => loadingCustomers.value || isCustomerBackgroundLoading.value,
+		);
+		const customerLoadPercent = computed(() =>
+			Math.max(0, Math.min(100, Math.round(loadProgress.value || 0))),
+		);
+		const customerFieldLabel = computed(() =>
+			isCustomerSearchLocked.value
+				? `${frappe._("Loading customers")} ${customerLoadPercent.value}%`
+				: frappe._("Customer"),
+		);
+		const customerFieldPlaceholder = computed(() =>
+			isCustomerSearchLocked.value
+				? `${__("Loading customers...")} ${customerLoadPercent.value}%`
+				: __("Search customer"),
+		);
+		const customerNoDataText = computed(() =>
+			isCustomerSearchLocked.value
+				? `${__("Loading customers...")} ${customerLoadPercent.value}%`
+				: __("Customers not found"),
+		);
 
 		const searchDebounce = _.debounce((term) => {
 			customersStore.queueSearch(term || "");
@@ -310,6 +364,9 @@ export default {
 		};
 
 		const onCustomerSearch = (value) => {
+			if (isCustomerSearchLocked.value) {
+				return;
+			}
 			const term = value || "";
 			if (isCustomerBackgroundLoading.value) {
 				customersStore.queueSearch(term);
@@ -458,6 +515,11 @@ export default {
 			filteredCustomers,
 			loadingCustomers,
 			isCustomerBackgroundLoading,
+			isCustomerSearchLocked,
+			customerLoadPercent,
+			customerFieldLabel,
+			customerFieldPlaceholder,
+			customerNoDataText,
 			internalCustomer,
 			effectiveReadonly,
 			onCustomerMenuToggle,
