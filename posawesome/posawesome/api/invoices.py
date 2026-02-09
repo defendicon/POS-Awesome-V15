@@ -5,6 +5,7 @@
 
 import frappe
 import time
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from posawesome.posawesome.api.invoice_processing.utils import (
     _get_return_validity_settings,
     _build_invoice_remarks,
@@ -108,3 +109,61 @@ def delete_invoice(invoice):
 
     frappe.delete_doc(doctype, invoice, force=1)
     return _("Invoice {0} Deleted").format(invoice)
+
+
+@frappe.whitelist()
+def fetch_exchange_rate_pair(from_currency, to_currency):
+    """Return exchange rate payload expected by POS multi-currency UI."""
+
+    if not from_currency or not to_currency:
+        frappe.throw("from_currency and to_currency are required")
+
+    if from_currency == to_currency:
+        from frappe.utils import nowdate
+
+        return {
+            "exchange_rate": 1,
+            "date": nowdate(),
+        }
+
+    exchange_rate, rate_date = get_latest_rate(from_currency, to_currency)
+    return {
+        "exchange_rate": exchange_rate,
+        "date": rate_date,
+    }
+
+
+@frappe.whitelist()
+def create_sales_invoice_from_order(sales_order):
+    """Backward-compatible facade for legacy frontend method path."""
+
+    if not sales_order:
+        frappe.throw("sales_order is required")
+
+    if not frappe.db.exists("Sales Order", sales_order):
+        frappe.throw(f"Sales Order {sales_order} does not exist")
+
+    invoice_doc = make_sales_invoice(sales_order)
+    invoice_doc.flags.ignore_permissions = True
+    invoice_doc.run_method("set_missing_values")
+    invoice_doc.run_method("calculate_taxes_and_totals")
+    return invoice_doc
+
+
+@frappe.whitelist()
+def delete_sales_invoice(sales_invoice):
+    """Backward-compatible facade for legacy frontend method path."""
+
+    if not sales_invoice:
+        frappe.throw("sales_invoice is required")
+
+    if frappe.db.exists("Sales Invoice", sales_invoice):
+        frappe.delete_doc("Sales Invoice", sales_invoice, force=1)
+    return True
+
+
+@frappe.whitelist()
+def update_invoice_from_order(data):
+    """Backward-compatible facade used by order-to-invoice flow."""
+
+    return update_invoice(data)
