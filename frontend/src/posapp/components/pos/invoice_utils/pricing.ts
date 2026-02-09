@@ -822,7 +822,13 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 			) || 0;
 
 		const manualFromUom = item._manual_rate_set_from_uom === true;
-		const manualOverride = item._manual_rate_set === true && !manualFromUom;
+		const isConvertedUom =
+			manualFromUom &&
+			(item.uom !== item.stock_uom ||
+				Number(item.conversion_factor || 1) !== 1);
+		const manualLocked =
+			item._manual_rate_set === true &&
+			(!manualFromUom || isConvertedUom);
 		const priceLocked = item.locked_price === true;
 		const offerApplied =
 			item.posa_offer_applied === true ||
@@ -830,7 +836,7 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 			item.posa_offer_applied === "1";
 
 		let allowServerRateUpdate =
-			!manualOverride && !priceLocked && !offerApplied;
+			!manualLocked && !priceLocked && !offerApplied;
 
 		if (allowServerRateUpdate) {
 			const parentKey = item.posa_row_id || item.name || targetId || null;

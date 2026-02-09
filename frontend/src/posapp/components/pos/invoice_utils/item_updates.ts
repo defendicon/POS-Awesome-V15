@@ -14,7 +14,9 @@ export async function update_items_details(context: any, items: any[]) {
 			args: {
 				pos_profile: JSON.stringify(context.pos_profile),
 				items_data: JSON.stringify(items),
-				price_list: context.get_price_list ? context.get_price_list() : null,
+				price_list: context.get_price_list
+					? context.get_price_list()
+					: null,
 			},
 		});
 
@@ -48,43 +50,69 @@ export async function update_items_details(context: any, items: any[]) {
 					Array.isArray(item.batch_no_data) &&
 					item.batch_no_data.length > 0
 				) {
-					if (context.set_batch_qty) context.set_batch_qty(item, null, false);
+					if (context.set_batch_qty)
+						context.set_batch_qty(item, null, false);
 				}
 
 				if (updated_item.price_list_currency) {
 					item.price_list_currency = updated_item.price_list_currency;
 				}
 
-				if (updated_item.rate !== undefined || updated_item.price_list_rate !== undefined) {
-					const force = context.pos_profile?.posa_force_price_from_customer_price_list !== false;
-					const price = updated_item.price_list_rate ?? updated_item.rate ?? 0;
+				if (
+					updated_item.rate !== undefined ||
+					updated_item.price_list_rate !== undefined
+				) {
+					const force =
+						context.pos_profile
+							?.posa_force_price_from_customer_price_list !==
+						false;
+					const price =
+						updated_item.price_list_rate ?? updated_item.rate ?? 0;
 					const priceCurrency =
 						updated_item.currency ||
 						updated_item.price_list_currency ||
 						item.price_list_currency ||
 						context.selected_currency;
+					const manualFromUom =
+						item._manual_rate_set_from_uom === true;
+					const isConvertedUom =
+						manualFromUom &&
+						(item.uom !== item.stock_uom ||
+							Number(item.conversion_factor || 1) !== 1);
 					const manualLocked =
-						item._manual_rate_set === true && item._manual_rate_set_from_uom !== true;
+						item._manual_rate_set === true &&
+						(!manualFromUom || isConvertedUom);
 					const shouldOverrideRate =
-						!item.locked_price && !item.posa_offer_applied && !manualLocked;
+						!item.locked_price &&
+						!item.posa_offer_applied &&
+						!manualLocked;
 
 					if (shouldOverrideRate) {
 						if (force || price) {
 							if (context._applyPriceListRate)
-								context._applyPriceListRate(item, price, priceCurrency);
+								context._applyPriceListRate(
+									item,
+									price,
+									priceCurrency,
+								);
 						}
 					} else if (!item.price_list_rate && (force || price)) {
 						if (context._computePriceConversion) {
-							const converted = context._computePriceConversion(price, priceCurrency);
+							const converted = context._computePriceConversion(
+								price,
+								priceCurrency,
+							);
 							if (converted.base_price_list_rate !== undefined) {
-								item.base_price_list_rate = converted.base_price_list_rate;
+								item.base_price_list_rate =
+									converted.base_price_list_rate;
 							}
 							item.price_list_rate = converted.price_list_rate;
 						}
 					}
 				}
 
-				const resolvedCurrency = context.selected_currency || updated_item.currency;
+				const resolvedCurrency =
+					context.selected_currency || updated_item.currency;
 				if (resolvedCurrency) {
 					item.currency = resolvedCurrency;
 				}
@@ -99,7 +127,11 @@ export async function update_items_details(context: any, items: any[]) {
 	}
 }
 
-export async function update_item_detail(context: any, item: any, force_update = false) {
+export async function update_item_detail(
+	context: any,
+	item: any,
+	force_update = false,
+) {
 	if (context.queueItemTask) {
 		return context.queueItemTask(
 			item,
@@ -111,7 +143,11 @@ export async function update_item_detail(context: any, item: any, force_update =
 	return _performItemDetailUpdate(context, item, force_update);
 }
 
-export async function _performItemDetailUpdate(context: any, item: any, force_update = false) {
+export async function _performItemDetailUpdate(
+	context: any,
+	item: any,
+	force_update = false,
+) {
 	if (!item || !item.item_code) return;
 
 	if (item._manual_rate_set && !force_update) return;
@@ -120,9 +156,13 @@ export async function _performItemDetailUpdate(context: any, item: any, force_up
 
 	if (!force_update && item._detailSynced) return;
 
-	const cacheKey = context._getItemDetailCacheKey ? context._getItemDetailCacheKey(item) : null;
+	const cacheKey = context._getItemDetailCacheKey
+		? context._getItemDetailCacheKey(item)
+		: null;
 	if (!force_update && cacheKey) {
-		const cachedPayload = context._getCachedItemDetail ? context._getCachedItemDetail(cacheKey) : null;
+		const cachedPayload = context._getCachedItemDetail
+			? context._getCachedItemDetail(cacheKey)
+			: null;
 		if (cachedPayload) {
 			_applyItemDetailPayload(context, item, cachedPayload, {
 				forceUpdate: force_update,
@@ -138,13 +178,17 @@ export async function _performItemDetailUpdate(context: any, item: any, force_up
 	item._detailInFlight = true;
 
 	try {
-		const currentDoc = context.get_invoice_doc ? context.get_invoice_doc() : {};
+		const currentDoc = context.get_invoice_doc
+			? context.get_invoice_doc()
+			: {};
 		const response = await frappe.call({
 			method: "posawesome.posawesome.api.items.get_item_detail",
 			args: {
 				warehouse: item.warehouse || context.pos_profile.warehouse,
 				doc: currentDoc,
-				price_list: context.get_price_list ? context.get_price_list() : null,
+				price_list: context.get_price_list
+					? context.get_price_list()
+					: null,
 				item: {
 					item_code: item.item_code,
 					customer: context.customer,
@@ -154,7 +198,8 @@ export async function _performItemDetailUpdate(context: any, item: any, force_up
 					conversion_rate: 1,
 					currency: context.pos_profile.currency,
 					qty: item.qty,
-					price_list_rate: item.base_price_list_rate ?? item.price_list_rate ?? 0,
+					price_list_rate:
+						item.base_price_list_rate ?? item.price_list_rate ?? 0,
 					child_docname: `New ${currentDoc.doctype} Item 1`,
 					cost_center: context.pos_profile.cost_center,
 					pos_profile: context.pos_profile.name,
@@ -162,7 +207,9 @@ export async function _performItemDetailUpdate(context: any, item: any, force_up
 					tax_category: "",
 					transaction_type: "selling",
 					update_stock: context.pos_profile.update_stock,
-					price_list: context.get_price_list ? context.get_price_list() : null,
+					price_list: context.get_price_list
+						? context.get_price_list()
+						: null,
 					has_batch_no: item.has_batch_no,
 					has_serial_no: item.has_serial_no,
 					serial_no: item.serial_no,
@@ -175,8 +222,12 @@ export async function _performItemDetailUpdate(context: any, item: any, force_up
 		const data = response?.message;
 		if (!data) return;
 
-		_applyItemDetailPayload(context, item, data, { forceUpdate: force_update, fromCache: false });
-		if (cacheKey && context._storeItemDetailCache) context._storeItemDetailCache(cacheKey, data);
+		_applyItemDetailPayload(context, item, data, {
+			forceUpdate: force_update,
+			fromCache: false,
+		});
+		if (cacheKey && context._storeItemDetailCache)
+			context._storeItemDetailCache(cacheKey, data);
 		item._detailSynced = true;
 		if (context.$forceUpdate) context.$forceUpdate();
 	} catch (error) {
@@ -190,7 +241,12 @@ export async function _performItemDetailUpdate(context: any, item: any, force_up
 	}
 }
 
-export function _applyItemDetailPayload(context: any, item: any, data: any, options: any = {}) {
+export function _applyItemDetailPayload(
+	context: any,
+	item: any,
+	data: any,
+	options: any = {},
+) {
 	const { forceUpdate = false } = options;
 
 	if (!item.warehouse) {
@@ -211,7 +267,9 @@ export function _applyItemDetailPayload(context: any, item: any, data: any, opti
 	item.item_uoms = data.item_uoms || [];
 
 	if (Array.isArray(item.item_uoms) && item.item_uoms.length) {
-		const existingIndex = item.item_uoms.findIndex((uom) => uom.uom === item.uom);
+		const existingIndex = item.item_uoms.findIndex(
+			(uom) => uom.uom === item.uom,
+		);
 		if (existingIndex === -1) {
 			item.item_uoms.push({
 				uom: item.uom,
@@ -242,7 +300,8 @@ export function _applyItemDetailPayload(context: any, item: any, data: any, opti
 	item.actual_qty = data.actual_qty;
 	item.available_qty = data.actual_qty;
 
-	const hasCode = item && item.item_code !== undefined && item.item_code !== null;
+	const hasCode =
+		item && item.item_code !== undefined && item.item_code !== null;
 	const baseActualQty = Number(data.actual_qty);
 	if (hasCode && Number.isFinite(baseActualQty)) {
 		item._base_actual_qty = baseActualQty;
@@ -259,7 +318,9 @@ export function _applyItemDetailPayload(context: any, item: any, data: any, opti
 	}
 
 	if (hasCode) {
-		stockCoordinator.applyAvailabilityToItem(item, { updateBaseAvailable: false });
+		stockCoordinator.applyAvailabilityToItem(item, {
+			updateBaseAvailable: false,
+		});
 	}
 
 	if (context.update_qty_limits) {
@@ -285,9 +346,12 @@ export function _applyItemDetailPayload(context: any, item: any, data: any, opti
 
 	if (!item.locked_price) {
 		if (forceUpdate || !item.base_rate) {
-			const plcConversionRate = context._getPlcConversionRate ? context._getPlcConversionRate() : 1;
+			const plcConversionRate = context._getPlcConversionRate
+				? context._getPlcConversionRate()
+				: 1;
 			if (data.price_list_rate !== 0 || !item.base_price_list_rate) {
-				item.base_price_list_rate = data.price_list_rate * plcConversionRate;
+				item.base_price_list_rate =
+					data.price_list_rate * plcConversionRate;
 			}
 			if (context._applyPriceListRate) {
 				const priceCurrency =
@@ -295,7 +359,11 @@ export function _applyItemDetailPayload(context: any, item: any, data: any, opti
 					data.price_list_currency ||
 					item.price_list_currency ||
 					context.selected_currency;
-				context._applyPriceListRate(item, data.price_list_rate, priceCurrency);
+				context._applyPriceListRate(
+					item,
+					data.price_list_rate,
+					priceCurrency,
+				);
 			}
 		}
 	}
@@ -311,7 +379,10 @@ export function _collectManualRateOverrides(context: any, items: any[]) {
 				name: item.name || null,
 				posa_row_id: item.posa_row_id || null,
 				item_code: item.item_code || null,
-				idx: item.idx !== undefined && item.idx !== null ? Number(item.idx) : null,
+				idx:
+					item.idx !== undefined && item.idx !== null
+						? Number(item.idx)
+						: null,
 				batch_no: item.batch_no || null,
 				serial_no: item.serial_no || null,
 			};
@@ -320,23 +391,28 @@ export function _collectManualRateOverrides(context: any, items: any[]) {
 				if (typeof context._isFreeLine === "function") {
 					return context._isFreeLine(item);
 				}
-				const coerce = (value) => value === true || value === 1 || value === "1";
+				const coerce = (value) =>
+					value === true || value === 1 || value === "1";
 				return (
 					coerce(item?.is_free_item) ||
 					coerce(item?.same_item) ||
-					(typeof item?.auto_free_source === "string" && item.auto_free_source) ||
-					(typeof item?.free_item_source === "string" && item.free_item_source)
+					(typeof item?.auto_free_source === "string" &&
+						item.auto_free_source) ||
+					(typeof item?.free_item_source === "string" &&
+						item.free_item_source)
 				);
 			};
 
 			if (determineFreeLine()) {
 				keys.is_free_item = 1;
-				if (item.auto_free_source) keys.auto_free_source = item.auto_free_source;
+				if (item.auto_free_source)
+					keys.auto_free_source = item.auto_free_source;
 				if (item.parent_row_id) keys.parent_row_id = item.parent_row_id;
 				const rawRule = Array.isArray(item.pricing_rules)
 					? item.pricing_rules.find((rule) => !!rule)
 					: item.pricing_rules;
-				const normalizedRule = rawRule || item.source_rule || item.pricing_rule || null;
+				const normalizedRule =
+					rawRule || item.source_rule || item.pricing_rule || null;
 				if (normalizedRule) keys.source_rule = normalizedRule;
 			}
 
@@ -359,7 +435,11 @@ export function _collectManualRateOverrides(context: any, items: any[]) {
 		});
 }
 
-export function _doesManualOverrideMatchItem(context: any, override: any, item: any) {
+export function _doesManualOverrideMatchItem(
+	context: any,
+	override: any,
+	item: any,
+) {
 	if (!override?.keys || !item) return false;
 
 	const {
@@ -376,19 +456,23 @@ export function _doesManualOverrideMatchItem(context: any, override: any, item: 
 	} = override.keys;
 
 	if (name && item.name && name === item.name) return true;
-	if (posa_row_id && item.posa_row_id && posa_row_id === item.posa_row_id) return true;
+	if (posa_row_id && item.posa_row_id && posa_row_id === item.posa_row_id)
+		return true;
 
 	const coerce = (value) => value === true || value === 1 || value === "1";
 
 	if (is_free_item !== undefined && is_free_item !== null) {
 		const expectsFree = coerce(is_free_item);
 		const itemIsFree =
-			(typeof context._isFreeLine === "function" && context._isFreeLine(item)) ||
+			(typeof context._isFreeLine === "function" &&
+				context._isFreeLine(item)) ||
 			coerce(item.is_free_item) ||
 			coerce(item.same_item) ||
 			Boolean(
-				(typeof item.auto_free_source === "string" && item.auto_free_source) ||
-				(typeof item.free_item_source === "string" && item.free_item_source),
+				(typeof item.auto_free_source === "string" &&
+					item.auto_free_source) ||
+				(typeof item.free_item_source === "string" &&
+					item.free_item_source),
 			);
 
 		if (expectsFree !== itemIsFree) return false;
@@ -398,7 +482,8 @@ export function _doesManualOverrideMatchItem(context: any, override: any, item: 
 		const itemSource =
 			typeof item.auto_free_source === "string" && item.auto_free_source
 				? item.auto_free_source
-				: typeof item.free_item_source === "string" && item.free_item_source
+				: typeof item.free_item_source === "string" &&
+					  item.free_item_source
 					? item.free_item_source
 					: null;
 		if (itemSource && itemSource !== auto_free_source) return false;
@@ -413,13 +498,17 @@ export function _doesManualOverrideMatchItem(context: any, override: any, item: 
 		const rawRule = Array.isArray(item.pricing_rules)
 			? item.pricing_rules.find((rule) => !!rule)
 			: item.pricing_rules;
-		const itemRule = rawRule || item.source_rule || item.pricing_rule || null;
+		const itemRule =
+			rawRule || item.source_rule || item.pricing_rule || null;
 		if (itemRule && itemRule !== source_rule) return false;
 	}
 
 	if (item_code && item.item_code === item_code) {
 		if (idx !== null && idx !== undefined) {
-			const itemIdx = item.idx !== undefined && item.idx !== null ? Number(item.idx) : null;
+			const itemIdx =
+				item.idx !== undefined && item.idx !== null
+					? Number(item.idx)
+					: null;
 			if (itemIdx !== null && itemIdx === idx) return true;
 		}
 
@@ -432,24 +521,36 @@ export function _doesManualOverrideMatchItem(context: any, override: any, item: 
 	return false;
 }
 
-export function _assignManualOverrideValues(context: any, item: any, values: any = {}) {
+export function _assignManualOverrideValues(
+	context: any,
+	item: any,
+	values: any = {},
+) {
 	if (!item || !values) return;
 
 	item._manual_rate_set = true;
 	item._manual_rate_set_from_uom = false;
 
 	if (values.uom) item.uom = values.uom;
-	if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
+	if (
+		values.conversion_factor !== undefined &&
+		values.conversion_factor !== null
+	) {
 		item.conversion_factor = values.conversion_factor;
 	}
 
-	if (values.price_list_rate !== undefined) item.price_list_rate = values.price_list_rate;
-	if (values.base_price_list_rate !== undefined) item.base_price_list_rate = values.base_price_list_rate;
+	if (values.price_list_rate !== undefined)
+		item.price_list_rate = values.price_list_rate;
+	if (values.base_price_list_rate !== undefined)
+		item.base_price_list_rate = values.base_price_list_rate;
 	if (values.rate !== undefined) item.rate = values.rate;
 	if (values.base_rate !== undefined) item.base_rate = values.base_rate;
-	if (values.discount_amount !== undefined) item.discount_amount = values.discount_amount;
-	if (values.base_discount_amount !== undefined) item.base_discount_amount = values.base_discount_amount;
-	if (values.discount_percentage !== undefined) item.discount_percentage = values.discount_percentage;
+	if (values.discount_amount !== undefined)
+		item.discount_amount = values.discount_amount;
+	if (values.base_discount_amount !== undefined)
+		item.base_discount_amount = values.base_discount_amount;
+	if (values.discount_percentage !== undefined)
+		item.discount_percentage = values.discount_percentage;
 
 	if (values.amount !== undefined) {
 		item.amount = values.amount;
@@ -461,22 +562,37 @@ export function _assignManualOverrideValues(context: any, item: any, values: any
 
 	if (values.base_amount !== undefined) {
 		item.base_amount = values.base_amount;
-	} else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
+	} else if (
+		typeof item.qty === "number" &&
+		typeof item.base_rate === "number"
+	) {
 		item.base_amount = context.flt
 			? context.flt(item.qty * item.base_rate, context.currency_precision)
 			: item.qty * item.base_rate;
 	}
 }
 
-export function _applyManualRateOverridesToDoc(context: any, doc: any, overrides: any[]) {
-	if (!doc || !Array.isArray(doc.items) || !Array.isArray(overrides) || !overrides.length) return;
+export function _applyManualRateOverridesToDoc(
+	context: any,
+	doc: any,
+	overrides: any[],
+) {
+	if (
+		!doc ||
+		!Array.isArray(doc.items) ||
+		!Array.isArray(overrides) ||
+		!overrides.length
+	)
+		return;
 
 	const remaining = [...overrides];
 
 	doc.items.forEach((item) => {
 		if (!item || !remaining.length) return;
 
-		const index = remaining.findIndex((entry) => _doesManualOverrideMatchItem(context, entry, item));
+		const index = remaining.findIndex((entry) =>
+			_doesManualOverrideMatchItem(context, entry, item),
+		);
 		if (index === -1) return;
 
 		const override = remaining.splice(index, 1)[0];
@@ -488,7 +604,9 @@ export function _buildManualOverrideKeyFromItem(context: any, item: any) {
 	if (!item) return null;
 
 	const idx =
-		item.idx !== undefined && item.idx !== null && !Number.isNaN(Number(item.idx))
+		item.idx !== undefined &&
+		item.idx !== null &&
+		!Number.isNaN(Number(item.idx))
 			? Number(item.idx)
 			: null;
 
@@ -517,7 +635,9 @@ export function _snapshotManualValuesFromDocItems(context: any, items: any[]) {
 			const rate = Number(item?.rate ?? 0);
 			const priceListRate = Number(item?.price_list_rate ?? rate);
 			const baseRate = Number(item?.base_rate ?? 0);
-			const basePriceListRate = Number(item?.base_price_list_rate ?? baseRate);
+			const basePriceListRate = Number(
+				item?.base_price_list_rate ?? baseRate,
+			);
 			const discountAmount = Number(item?.discount_amount ?? 0);
 			const baseDiscountAmount = Number(item?.base_discount_amount ?? 0);
 			const discountPercentage = Number(item?.discount_percentage ?? 0);
@@ -554,8 +674,13 @@ export function _snapshotManualValuesFromDocItems(context: any, items: any[]) {
 		.filter((entry) => entry !== null);
 }
 
-export function _restoreManualSnapshots(context: any, items: any[], snapshots: any[]) {
-	if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length) return;
+export function _restoreManualSnapshots(
+	context: any,
+	items: any[],
+	snapshots: any[],
+) {
+	if (!Array.isArray(items) || !Array.isArray(snapshots) || !snapshots.length)
+		return;
 
 	const remaining = [...snapshots];
 
@@ -563,7 +688,11 @@ export function _restoreManualSnapshots(context: any, items: any[], snapshots: a
 		if (!item || !remaining.length) return;
 
 		const index = remaining.findIndex((snapshot) =>
-			_doesManualOverrideMatchItem(context, { keys: snapshot.keys }, item),
+			_doesManualOverrideMatchItem(
+				context,
+				{ keys: snapshot.keys },
+				item,
+			),
 		);
 
 		if (index === -1) return;
@@ -577,23 +706,38 @@ export function _restoreManualSnapshots(context: any, items: any[], snapshots: a
 			if (values.uom !== undefined) {
 				item.uom = values.uom;
 			}
-			if (values.conversion_factor !== undefined && values.conversion_factor !== null) {
+			if (
+				values.conversion_factor !== undefined &&
+				values.conversion_factor !== null
+			) {
 				item.conversion_factor = values.conversion_factor;
 			}
 
 			if (values.amount !== undefined) {
 				item.amount = values.amount;
-			} else if (typeof item.qty === "number" && typeof item.rate === "number") {
+			} else if (
+				typeof item.qty === "number" &&
+				typeof item.rate === "number"
+			) {
 				item.amount = context.flt
-					? context.flt(item.qty * item.rate, context.currency_precision)
+					? context.flt(
+							item.qty * item.rate,
+							context.currency_precision,
+						)
 					: item.qty * item.rate;
 			}
 
 			if (values.base_amount !== undefined) {
 				item.base_amount = values.base_amount;
-			} else if (typeof item.qty === "number" && typeof item.base_rate === "number") {
+			} else if (
+				typeof item.qty === "number" &&
+				typeof item.base_rate === "number"
+			) {
 				item.base_amount = context.flt
-					? context.flt(item.qty * item.base_rate, context.currency_precision)
+					? context.flt(
+							item.qty * item.base_rate,
+							context.currency_precision,
+						)
 					: item.qty * item.base_rate;
 			}
 		}
@@ -604,7 +748,9 @@ export async function flushBackgroundUpdates(context: any) {
 	if (isOffline()) return;
 
 	const itemsToUpdate: any[] = [];
-	const items = context.invoiceStore ? context.invoiceStore.items.value : context.items;
+	const items = context.invoiceStore
+		? context.invoiceStore.items.value
+		: context.items;
 
 	if (!Array.isArray(items)) return;
 
@@ -618,14 +764,16 @@ export async function flushBackgroundUpdates(context: any) {
 	if (itemsToUpdate.length === 0) return;
 
 	try {
-		if (context.update_items_details) await context.update_items_details(itemsToUpdate);
+		if (context.update_items_details)
+			await context.update_items_details(itemsToUpdate);
 
 		itemsToUpdate.forEach((item) => {
 			item._needs_update = false;
 			item._detailSynced = true;
 		});
 
-		if (context.schedulePricingRuleApplication) context.schedulePricingRuleApplication();
+		if (context.schedulePricingRuleApplication)
+			context.schedulePricingRuleApplication();
 	} catch (e) {
 		console.error("Background flush failed", e);
 	}
@@ -639,8 +787,10 @@ export function _normalizeReturnDocTotals(context: any, doc: any) {
 	if (doc.grand_total > 0) doc.grand_total = negate(doc.grand_total);
 	if (doc.rounded_total > 0) doc.rounded_total = negate(doc.rounded_total);
 	if (doc.total > 0) doc.total = negate(doc.total);
-	if (doc.base_grand_total > 0) doc.base_grand_total = negate(doc.base_grand_total);
-	if (doc.base_rounded_total > 0) doc.base_rounded_total = negate(doc.base_rounded_total);
+	if (doc.base_grand_total > 0)
+		doc.base_grand_total = negate(doc.base_grand_total);
+	if (doc.base_rounded_total > 0)
+		doc.base_rounded_total = negate(doc.base_rounded_total);
 	if (doc.base_total > 0) doc.base_total = negate(doc.base_total);
 
 	if (Array.isArray(doc.items)) {
@@ -648,14 +798,16 @@ export function _normalizeReturnDocTotals(context: any, doc: any) {
 			if (item.qty > 0) item.qty = negate(item.qty);
 			if (item.stock_qty > 0) item.stock_qty = negate(item.stock_qty);
 			if (item.amount > 0) item.amount = negate(item.amount);
-			if (item.base_amount > 0) item.base_amount = negate(item.base_amount);
+			if (item.base_amount > 0)
+				item.base_amount = negate(item.base_amount);
 		});
 	}
 
 	if (Array.isArray(doc.payments)) {
 		doc.payments.forEach((payment) => {
 			if (payment.amount > 0) payment.amount = negate(payment.amount);
-			if (payment.base_amount > 0) payment.base_amount = negate(payment.base_amount);
+			if (payment.base_amount > 0)
+				payment.base_amount = negate(payment.base_amount);
 		});
 	}
 
