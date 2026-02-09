@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import nowdate, getdate, flt
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import get_outstanding_invoices as get_erpnext_outstanding_invoices
 
 @frappe.whitelist()
 def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None,
@@ -13,176 +14,79 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         include_all_currencies (bool): If True, returns invoices in ALL currencies instead of filtering
     """
     try:
+        if not customer or not company:
+            return []
+
         party_account = get_party_account("Customer", customer, company)
         customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
 
-        frappe.logger().debug(
-            f"Fetching outstanding invoices for customer: {customer}, party_account: {party_account}"
+        outstanding_invoices = get_erpnext_outstanding_invoices(
+            "Customer",
+            customer,
+            [party_account],
         )
 
-        # Build filters
-        filters = {
-            "company": company,
-            "customer": customer,
-            "outstanding_amount": (">", 0),
-            "docstatus": 1,
-            "is_return": 0,
-        }
+        sales_invoice_meta = {}
+        sales_invoice_names = [
+            row.get("voucher_no")
+            for row in outstanding_invoices
+            if row.get("voucher_type") == "Sales Invoice"
+        ]
+        if sales_invoice_names:
+            sales_invoice_meta = {
+                row.get("name"): row
+                for row in frappe.get_all(
+                    "Sales Invoice",
+                    filters={"name": ("in", sales_invoice_names)},
+                    fields=["name", "pos_profile", "currency", "customer_name"],
+                )
+            }
 
-        # Only add currency filter if NOT including all currencies
-        if not include_all_currencies and currency:
-            filters["currency"] = currency
-
-        if pos_profile:
-            filters["pos_profile"] = pos_profile
-
-        # Get all outstanding invoices directly from Sales Invoice
-        outstanding_invoices = frappe.get_all(
-            "Sales Invoice",
-            filters=filters,
-            fields=[
-                "name as voucher_no",
-                "outstanding_amount",
-                "grand_total as invoice_amount",
-                "due_date",
-                "posting_date",
-                "currency",  # Always fetch currency
-                "party_account_currency",
-                "pos_profile",
-                "customer",
-                "customer_name",
-            ],
-            order_by="posting_date desc",
-        )
-
-        # Ensure all amounts are properly formatted
+        normalized_rows = []
         for invoice in outstanding_invoices:
-            invoice.outstanding_amount = flt(invoice.outstanding_amount)
-            invoice.invoice_amount = flt(invoice.invoice_amount)
-            invoice.voucher_type = "Sales Invoice"
+            outstanding_amount = flt(invoice.get("outstanding_amount"))
+            if outstanding_amount <= 0:
+                continue
 
-        # === JOURNAL ENTRY LOGIC (Keep your corrected version from previous fix) ===
-        journal_entries = []
-        if customer and company:
-            conditions = []
-            params = {"company": company, "customer": customer}
+            voucher_type = invoice.get("voucher_type")
+            voucher_no = invoice.get("voucher_no")
+            meta = sales_invoice_meta.get(voucher_no) if voucher_type == "Sales Invoice" else {}
 
-            if party_account:
-                conditions.append("jea.account = %(party_account)s")
-                params["party_account"] = party_account
+            row_currency = invoice.get("currency") or (meta or {}).get("currency")
+            if currency and not include_all_currencies and row_currency != currency:
+                continue
 
-            # Only filter by currency if NOT including all currencies
-            if not include_all_currencies and currency:
-                conditions.append("jea.account_currency = %(currency)s")
-                params["currency"] = currency
+            row_pos_profile = (meta or {}).get("pos_profile")
+            if pos_profile and voucher_type == "Sales Invoice" and row_pos_profile != pos_profile:
+                continue
 
-            condition_sql = ""
-            if conditions:
-                condition_sql = " AND " + " AND ".join(conditions)
-
-            # Get raw Journal Entry lines
-            journal_lines = frappe.db.sql(
-                f"""
-                    SELECT
-                        je.name AS voucher_no,
-                        je.posting_date AS posting_date,
-                        jea.debit_in_account_currency AS debit,
-                        jea.credit_in_account_currency AS credit,
-                        jea.account_currency AS currency,
-                        jea.account AS account
-                    FROM `tabJournal Entry Account` jea
-                    INNER JOIN `tabJournal Entry` je ON je.name = jea.parent
-                    WHERE je.docstatus = 1
-                        AND je.company = %(company)s
-                        AND jea.party_type = 'Customer'
-                        AND jea.party = %(customer)s
-                        AND (jea.reference_type IS NULL OR jea.reference_type = '')
-                        AND (jea.reference_name IS NULL OR jea.reference_name = '')
-                        {condition_sql}
-                """,
-                params,
-                as_dict=True,
+            normalized_rows.append(
+                frappe._dict(
+                    {
+                        "voucher_no": voucher_no,
+                        "voucher_type": voucher_type,
+                        "outstanding_amount": outstanding_amount,
+                        "invoice_amount": flt(invoice.get("invoice_amount")) or outstanding_amount,
+                        "due_date": invoice.get("due_date") or invoice.get("posting_date"),
+                        "posting_date": invoice.get("posting_date"),
+                        "currency": row_currency,
+                        "pos_profile": row_pos_profile,
+                        "customer": customer,
+                        "customer_name": (meta or {}).get("customer_name") or customer_name,
+                    }
+                )
             )
 
-            # Aggregate by voucher_no to get net outstanding
-            je_totals = {}
-            for line in journal_lines:
-                voucher_no = line.voucher_no
-                if voucher_no not in je_totals:
-                    je_totals[voucher_no] = {
-                        "debit": 0,
-                        "credit": 0,
-                        "posting_date": line.posting_date,
-                        "currency": line.currency,
-                        "account": line.account,
-                    }
-                je_totals[voucher_no]["debit"] += flt(line.debit)
-                je_totals[voucher_no]["credit"] += flt(line.credit)
-
-            # Check allocations and create entries (keep your existing logic)
-            journal_entry_names = list(je_totals.keys())
-            allocated_map = {}
-            if journal_entry_names:
-                allocated_rows = frappe.db.sql(
-                    """
-                        SELECT
-                            per.reference_name AS voucher_no,
-                            SUM(per.allocated_amount) AS allocated_amount
-                        FROM `tabPayment Entry Reference` per
-                        INNER JOIN `tabPayment Entry` pe ON pe.name = per.parent
-                        WHERE pe.docstatus = 1
-                            AND pe.party_type = 'Customer'
-                            AND pe.party = %(customer)s
-                            AND pe.company = %(company)s
-                            AND per.reference_doctype = 'Journal Entry'
-                            AND per.reference_name IN %(voucher_nos)s
-                        GROUP BY per.reference_name
-                    """,
-                    {
-                        "voucher_nos": tuple(journal_entry_names),
-                        "customer": customer,
-                        "company": company,
-                    },
-                    as_dict=True,
-                )
-                allocated_map = {
-                    row.voucher_no: flt(row.allocated_amount) for row in allocated_rows or []
-                }
-
-            # Create consolidated Journal Entry records
-            for voucher_no, totals in je_totals.items():
-                net_outstanding = flt(totals["debit"]) - flt(totals["credit"])
-                allocated_amount = flt(allocated_map.get(voucher_no, 0))
-                net_outstanding = max(0, net_outstanding - allocated_amount)
-                
-                if net_outstanding > 0:
-                    journal_entries.append(
-                        frappe._dict(
-                            {
-                                "voucher_no": voucher_no,
-                                "outstanding_amount": net_outstanding,
-                                "invoice_amount": net_outstanding,
-                                "due_date": totals["posting_date"],
-                                "posting_date": totals["posting_date"],
-                                "currency": totals["currency"],
-                                "pos_profile": None,
-                                "customer": customer,
-                                "customer_name": customer_name,
-                                "voucher_type": "Journal Entry",
-                            }
-                        )
-                    )
-
-        outstanding_invoices = outstanding_invoices + journal_entries
-        outstanding_invoices = sorted(
-            outstanding_invoices,
+        normalized_rows = sorted(
+            normalized_rows,
             key=lambda inv: (
-                getdate(inv.get("posting_date")) if inv.get("posting_date") else getdate(nowdate())
+                getdate(inv.get("posting_date")) if inv.get("posting_date") else getdate(nowdate()),
+                inv.get("voucher_no"),
             ),
             reverse=True,
         )
 
-        return outstanding_invoices
+        return normalized_rows
     except Exception as e:
         frappe.logger().error(f"Error in get_outstanding_invoices: {str(e)}")
         return []
@@ -220,6 +124,7 @@ def get_unallocated_payments(
             "unallocated_amount",
             "mode_of_payment",
             "paid_from_account_currency as currency",
+            "paid_from as account",
         ],
         order_by="posting_date asc",
     )
@@ -245,12 +150,83 @@ def get_unallocated_payments(
                 "unallocated_amount",
                 "mode_of_payment",
                 "paid_from_account_currency as currency",
+                "paid_from as account",
             ],
             order_by="posting_date asc",
         )
     for payment in unallocated_payment:
         payment["voucher_type"] = "Payment Entry"
         payment["is_credit_note"] = 0
+
+    party_account = get_party_account("Customer", customer, company)
+    journal_conditions = [
+        "je.docstatus = 1",
+        "je.company = %(company)s",
+        "jea.party_type = 'Customer'",
+        "jea.party = %(customer)s",
+        "jea.account = %(party_account)s",
+        "(jea.reference_type IS NULL OR jea.reference_type = '' OR jea.reference_type = 'Sales Order')",
+        "(jea.reference_name IS NULL OR jea.reference_name = '')",
+        "(jea.credit_in_account_currency - jea.debit_in_account_currency) > 0",
+    ]
+    params = {
+        "company": company,
+        "customer": customer,
+        "party_account": party_account,
+    }
+
+    if currency and not include_all_currencies:
+        journal_conditions.append("jea.account_currency = %(currency)s")
+        params["currency"] = currency
+
+    journal_entries = frappe.db.sql(
+        f"""
+            SELECT
+                je.name AS name,
+                je.posting_date AS posting_date,
+                je.remark AS remarks,
+                jea.name AS reference_row,
+                jea.account AS account,
+                jea.account_currency AS currency,
+                (jea.credit_in_account_currency - jea.debit_in_account_currency) AS unallocated_amount,
+                jea.cost_center AS cost_center,
+                jea.exchange_rate AS exchange_rate,
+                jea.is_advance AS is_advance
+            FROM `tabJournal Entry` je
+            INNER JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
+            WHERE {' AND '.join(journal_conditions)}
+            ORDER BY je.posting_date ASC
+        """,
+        params,
+        as_dict=True,
+    )
+
+    customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
+    for journal in journal_entries:
+        amount = flt(journal.get("unallocated_amount"))
+        if amount <= 0:
+            continue
+
+        unallocated_payment.append(
+            {
+                "name": journal.get("name"),
+                "paid_amount": amount,
+                "received_amount": amount,
+                "customer_name": customer_name,
+                "posting_date": journal.get("posting_date"),
+                "unallocated_amount": amount,
+                "mode_of_payment": _("Journal Entry"),
+                "currency": journal.get("currency") or currency,
+                "voucher_type": "Journal Entry",
+                "is_credit_note": 0,
+                "reference_row": journal.get("reference_row"),
+                "account": journal.get("account") or party_account,
+                "remarks": journal.get("remarks"),
+                "cost_center": journal.get("cost_center"),
+                "exchange_rate": flt(journal.get("exchange_rate")) or 1,
+                "is_advance": journal.get("is_advance"),
+            }
+        )
 
     credit_notes = frappe.get_all(
         "Sales Invoice",
@@ -317,3 +293,30 @@ def get_available_pos_profiles(company, currency):
         pluck="name",
     )
     return pos_profiles_list
+
+
+@frappe.whitelist()
+def get_unreconciled_entries(
+    customer,
+    company,
+    currency=None,
+    pos_profile=None,
+    mode_of_payment=None,
+    include_all_currencies=False,
+):
+    return {
+        "invoices": get_outstanding_invoices(
+            customer=customer,
+            company=company,
+            currency=currency,
+            pos_profile=pos_profile,
+            include_all_currencies=include_all_currencies,
+        ),
+        "payments": get_unallocated_payments(
+            customer=customer,
+            company=company,
+            currency=currency,
+            mode_of_payment=mode_of_payment,
+            include_all_currencies=include_all_currencies,
+        ),
+    }

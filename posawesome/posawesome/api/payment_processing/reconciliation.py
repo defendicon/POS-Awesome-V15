@@ -219,6 +219,106 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
             )
             continue
 
+        if payment.get("voucher_type") == "Journal Entry":
+            unallocated_before = flt(payment.get("unallocated_amount"))
+            if unallocated_before <= 0:
+                skipped_payments.append(
+                    _("Journal Entry {0} has no unallocated amount remaining.").format(payment_name)
+                )
+                continue
+
+            remaining_amount = unallocated_before
+            entry_list = []
+            invoice_allocations = []
+            party_account = payment.get("account") or get_party_account("Customer", customer, company)
+
+            for invoice in outstanding_invoices:
+                if remaining_amount <= 0:
+                    break
+
+                outstanding = flt(invoice.get("outstanding_amount"))
+                if outstanding <= 0:
+                    continue
+
+                allocation = min(remaining_amount, outstanding)
+                if allocation <= 0:
+                    continue
+
+                entry_list.append(
+                    frappe._dict(
+                        {
+                            "voucher_type": "Journal Entry",
+                            "voucher_no": payment_name,
+                            "voucher_detail_no": payment.get("reference_row"),
+                            "against_voucher_type": invoice.get("voucher_type") or "Sales Invoice",
+                            "against_voucher": invoice.get("voucher_no"),
+                            "account": party_account,
+                            "party_type": "Customer",
+                            "party": customer,
+                            "dr_or_cr": "credit_in_account_currency",
+                            "unreconciled_amount": unallocated_before,
+                            "unadjusted_amount": unallocated_before,
+                            "allocated_amount": allocation,
+                            "grand_total": outstanding,
+                            "outstanding_amount": outstanding,
+                            "exchange_rate": flt(payment.get("exchange_rate")) or 1,
+                            "is_advance": cint(payment.get("is_advance")),
+                            "difference_amount": 0,
+                            "cost_center": payment.get("cost_center"),
+                        }
+                    )
+                )
+
+                invoice_allocations.append(
+                    {
+                        "invoice": invoice.get("voucher_no"),
+                        "amount": allocation,
+                    }
+                )
+
+                invoice["outstanding_amount"] = outstanding - allocation
+                remaining_amount -= allocation
+
+            if not entry_list:
+                skipped_payments.append(
+                    _("No outstanding invoices were available to reconcile Journal Entry {0}.").format(
+                        payment_name
+                    )
+                )
+                continue
+
+            try:
+                reconcile_against_document(entry_list)
+            except Exception as exc:
+                _restore_outstandings(invoice_allocations)
+                skipped_payments.append(
+                    _("Failed to reconcile Journal Entry {0}: {1}").format(payment_name, frappe._(str(exc)))
+                )
+                frappe.log_error(
+                    title="POS Auto Reconcile Error",
+                    message=f"Failed to auto reconcile journal entry {payment_name}: {str(exc)}",
+                )
+                continue
+
+            allocated_amount = flt(unallocated_before - remaining_amount)
+            if allocated_amount <= 0:
+                _restore_outstandings(invoice_allocations)
+                skipped_payments.append(
+                    _("No allocation was recorded for Journal Entry {0}.").format(payment_name)
+                )
+                continue
+
+            total_allocated += allocated_amount
+            allocations.append(
+                {
+                    "payment_entry": payment_name,
+                    "allocated_amount": allocated_amount,
+                    "allocations": invoice_allocations,
+                    "type": "Journal Entry",
+                }
+            )
+            continue
+
         try:
             pe_doc = frappe.get_doc("Payment Entry", payment_name)
         except Exception as exc:
