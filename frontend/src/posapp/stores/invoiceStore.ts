@@ -377,6 +377,7 @@ export const useInvoiceStore = defineStore("invoice", () => {
 		itemsMap,
 		setInvoiceDoc,
 		mergeInvoiceDoc,
+		touch,
 		setItems,
 		addItem,
 		addItems,
