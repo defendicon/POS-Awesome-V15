@@ -130,6 +130,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 	const getWriteOffLimit = (profile: any): number | null => {
 		if (!profile) return null;
 		const possibleLimitFields = [
+			"write_off_limit",
 			"posa_max_write_off_amount",
 			"max_write_off_amount",
 			"write_off_amount",
@@ -233,6 +234,11 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			current_total_payments + writeOffAmount,
 			prec,
 		);
+		const writeOffLimit = getWriteOffLimit(profile);
+		const writeOffCappedByLimit =
+			Boolean(unref(options.is_write_off_change)) &&
+			writeOffLimit !== null &&
+			diff > writeOffLimit + 0.001;
 		const hasAnySettlement =
 			effective_total_payments > 0 ||
 			(Array.isArray(doc.payments)
@@ -243,6 +249,19 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 				: false);
 
 		// 2. Validate total payments
+		if (
+			writeOffCappedByLimit &&
+			!profile.posa_allow_partial_payment &&
+			effective_total_payments < invoice_total - 0.001
+		) {
+			throw new Error(
+				__(
+					"Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.",
+					[writeOffLimit],
+				),
+			);
+		}
+
 		if (
 			!unref(options.is_credit_sale) &&
 			!doc.is_return &&
@@ -518,6 +537,7 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			total_change: changeLimit,
 			paid_change: pChange,
 			credit_change: cChange,
+			is_credit_sale: unref(options.is_credit_sale) ? 1 : 0,
 			is_write_off_change: unref(options.is_write_off_change) ? 1 : 0,
 			write_off_amount: writeOffAmount,
 			redeemed_customer_credit: unref(redeemedCustomerCredit),

@@ -38,6 +38,7 @@ def _resolve_write_off_limit(pos_profile_doc):
         return None
 
     candidate_fields = (
+        "write_off_limit",
         "posa_max_write_off_amount",
         "max_write_off_amount",
         "write_off_amount",
@@ -79,6 +80,32 @@ def _apply_write_off_settings(invoice_doc, data):
     write_off_limit = _resolve_write_off_limit(profile_doc)
     if write_off_limit is not None:
         effective_write_off = min(effective_write_off, write_off_limit)
+
+    allow_partial_payment = cint(profile_doc.get("posa_allow_partial_payment")) if profile_doc else 0
+    is_credit_sale = cint(data.get("is_credit_sale"))
+
+    settled_by_payments = 0
+    for payment in invoice_doc.get("payments") or []:
+        settled_by_payments += max(flt(payment.get("amount")), 0)
+
+    settled_by_loyalty = max(flt(invoice_doc.get("loyalty_amount")), 0)
+    settled_by_customer_credit = max(flt(data.get("redeemed_customer_credit")), 0)
+    remaining_after_write_off = invoice_total - (
+        settled_by_payments + settled_by_loyalty + settled_by_customer_credit + effective_write_off
+    )
+
+    if (
+        write_off_limit is not None
+        and requested_write_off > write_off_limit
+        and remaining_after_write_off > 0.001
+        and not allow_partial_payment
+        and not is_credit_sale
+    ):
+        frappe.throw(
+            _(
+                "Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount."
+            ).format(write_off_limit)
+        )
 
     precision_write_off = invoice_doc.precision("write_off_amount") or 2
     precision_base_write_off = invoice_doc.precision("base_write_off_amount") or 2
