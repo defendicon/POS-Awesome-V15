@@ -33,6 +33,9 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 	// Local flt helper using global flt or falling back to parseFloat
 	const flt = (val: any, prec?: number): number => {
 		const precision = prec !== undefined ? prec : unref(currencyPrecision);
+		if (typeof val === "string") {
+			val = formatUtils.fromArabicNumerals(val).replace(/,/g, "");
+		}
 		return typeof window !== "undefined" && window.flt
 			? window.flt(val, precision)
 			: parseFloat(String(val)) || 0;
@@ -48,10 +51,7 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 		const amountByPayment = new Map<any, number>();
 
 		payments.forEach((payment) => {
-			const amount =
-				parseFloat(
-					formatUtils.fromArabicNumerals(String(payment?.amount)),
-				) || 0;
+			const amount = flt(payment?.amount);
 			amountByPayment.set(payment, amount);
 			total += amount;
 		});
@@ -77,10 +77,7 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			if (doc.currency && doc.currency !== profile.currency) {
 				total += flt(lAmount / (doc.conversion_rate || 1));
 			} else {
-				total +=
-					parseFloat(
-						formatUtils.fromArabicNumerals(String(lAmount)),
-					) || 0;
+				total += flt(lAmount);
 			}
 		}
 
@@ -88,10 +85,7 @@ export function usePaymentCalculations(options: PaymentCalculationOptions) {
 			if (doc.currency && doc.currency !== profile.currency) {
 				total += flt(rCredit / (doc.conversion_rate || 1));
 			} else {
-				total +=
-					parseFloat(
-						formatUtils.fromArabicNumerals(String(rCredit)),
-					) || 0;
+				total += flt(rCredit);
 			}
 		}
 
