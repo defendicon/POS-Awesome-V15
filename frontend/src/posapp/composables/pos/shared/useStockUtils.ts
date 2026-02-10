@@ -252,7 +252,14 @@ export function useStockUtils() {
 			item.rate = toSelectedCurrency(context, base_rate);
 			item.discount_amount = toSelectedCurrency(context, base_discount);
 
+
 			if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+			if (context.invoiceStore) {
+				context.invoiceStore.touch();
+				if (context.invoiceStore.recalculateTotals) {
+					context.invoiceStore.recalculateTotals();
+				}
+			}
 			if (context.forceUpdate) context.forceUpdate();
 
 			console.log("[useStockUtils] calcUom DONE (specific price)", {
@@ -260,7 +267,7 @@ export function useStockUtils() {
 				rate: item.rate,
 				price_list_rate: item.price_list_rate,
 				base_rate: item.base_rate,
-				base_price_list_rate: item.base_price_list_rate
+				base_price_list_rate: item.base_price_list_rate,
 			});
 			return;
 		}
@@ -460,6 +467,12 @@ export function useStockUtils() {
 
 		// Update item details
 		if (context.calc_stock_qty) context.calc_stock_qty(item, item.qty);
+		if (context.invoiceStore) {
+			context.invoiceStore.touch();
+			if (context.invoiceStore.recalculateTotals) {
+				context.invoiceStore.recalculateTotals();
+			}
+		}
 		if (context.forceUpdate) context.forceUpdate();
 
 		console.log("[useStockUtils] calcUom DONE (proportionate)", {
@@ -469,7 +482,7 @@ export function useStockUtils() {
 			rate: item.rate,
 			price_list_rate: item.price_list_rate,
 			orig_base: item.original_base_rate,
-			orig_base_pl: item.original_base_price_list_rate
+			orig_base_pl: item.original_base_price_list_rate,
 		});
 	};
 

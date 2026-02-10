@@ -391,28 +391,37 @@ const discountPercentInput = ref(null);
 const discountAmountInput = ref(null);
 const uomSelect = ref(null);
 
-const memoDeps = computed(() => [
-	props.item.qty,
-	props.item.rate,
-	props.item.amount,
-	props.item.discount_amount,
-	props.item.discount_percentage,
-	props.item.uom,
-	props.item.item_name,
-	props.item.name_overridden,
-	props.item.pricing_rule_badge,
-	props.item.batch_no_is_expired,
-	props.item.posa_is_offer,
-	props.item.posa_offer_applied,
-	props.item.is_free_item,
-	props.item.price_list_rate,
-	// Include edit states to ensure UI updates when switching modes
-	isEditingQty.value,
-	isEditingRate.value,
-	isEditingUom.value,
-	isEditingDiscountPercent.value,
-	isEditingDiscountAmount.value,
-]);
+const memoDeps = computed(() => {
+	const deps = [
+		props.item.qty,
+		props.item.rate,
+		props.item.amount,
+		props.item.discount_amount,
+		props.item.discount_percentage,
+		props.item.uom,
+		props.item.item_name,
+		props.item.name_overridden,
+		props.item.pricing_rule_badge,
+		props.item.batch_no_is_expired,
+		props.item.posa_is_offer,
+		props.item.posa_offer_applied,
+		props.item.is_free_item,
+		props.item.price_list_rate,
+		// Include edit states to ensure UI updates when switching modes
+		isEditingQty.value,
+		isEditingRate.value,
+		isEditingUom.value,
+		isEditingDiscountPercent.value,
+		isEditingDiscountAmount.value,
+	];
+	console.log(`[CartItemRow] memoDeps updated for ${props.item.item_code}`, {
+		uom: props.item.uom,
+		rate: props.item.rate,
+		price_list_rate: props.item.price_list_rate,
+		qty: props.item.qty,
+	});
+	return deps;
+});
 
 const qtyLength = computed(() => String(Math.abs(props.item.qty || 0)).replace(".", "").length);
 
