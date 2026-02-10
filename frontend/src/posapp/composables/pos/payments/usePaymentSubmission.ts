@@ -229,21 +229,25 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			doc.rounded_total || doc.grand_total,
 			prec,
 		);
-		const payable_after_write_off = formatFloat(
-			Math.max(invoice_total - writeOffAmount, 0),
-			prec,
-		);
-		current_total_payments = formatFloat(
+		const effective_total_payments = formatFloat(
 			current_total_payments + writeOffAmount,
 			prec,
 		);
+		const hasAnySettlement =
+			effective_total_payments > 0 ||
+			(Array.isArray(doc.payments)
+				? doc.payments.some(
+						(payment: any) =>
+							formatFloat(payment?.amount || 0, prec) > 0,
+					)
+				: false);
 
 		// 2. Validate total payments
 		if (
 			!unref(options.is_credit_sale) &&
 			!doc.is_return &&
-			current_total_payments <= 0 &&
-			payable_after_write_off > 0
+			!hasAnySettlement &&
+			invoice_total > 0
 		) {
 			throw new Error(__("Please enter payment amount"));
 		}
@@ -266,8 +270,9 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			if (has_cash_payment && cash_amount > 0) {
 				if (
 					!profile.posa_allow_partial_payment &&
-					cash_amount < payable_after_write_off &&
-					payable_after_write_off > 0
+					formatFloat(cash_amount + writeOffAmount, prec) <
+						invoice_total &&
+					invoice_total > 0
 				) {
 					throw new Error(
 						__(
@@ -279,8 +284,8 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 
 			if (
 				!profile.posa_allow_partial_payment &&
-				current_total_payments < payable_after_write_off &&
-				payable_after_write_off > 0
+				effective_total_payments < invoice_total &&
+				invoice_total > 0
 			) {
 				throw new Error(__("The amount paid is not complete"));
 			}
