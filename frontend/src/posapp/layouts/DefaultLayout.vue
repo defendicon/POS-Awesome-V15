@@ -40,7 +40,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, getCurrentInstance } from "vue";
-import { useRouter } from "vue-router";
 // Note paths updated to be relative to layouts/ directory
 import Navbar from "../components/Navbar.vue";
 import ClosingDialog from "../components/pos/shell/ClosingDialog.vue";
@@ -107,7 +106,6 @@ const $theme = instance?.proxy?.$theme || { toggle: () => {}, isDark: false }; /
 // Utils
 const { overlayVisible: globalLoading } = useLoading();
 const { get_closing_data } = usePosShift();
-const router = useRouter();
 const syncStore = useSyncStore();
 const customersStore = useCustomersStore();
 const itemsStore = useItemsStore();
@@ -224,7 +222,6 @@ onBeforeUnmount(() => {
 		eventBus.off("data-load-progress");
 		eventBus.off("print_last_invoice");
 		eventBus.off("sync_invoices");
-		eventBus.off("open_purchase_orders");
 	}
 
 	window.removeEventListener("resize", adjust_frappe_sidebar_offset);
@@ -383,10 +380,6 @@ const setupEventListeners = () => {
 		// Manual trigger to sync offline invoices
 		eventBus.on("sync_invoices", () => {
 			handleSyncInvoices();
-		});
-
-		eventBus.on("open_purchase_orders", () => {
-			router.push("/orders");
 		});
 	}
 
@@ -603,7 +596,7 @@ const adjust_frappe_sidebar_offset = () => {
 
 .page-content {
 	flex: 1;
-	overflow-y: auto;
+	overflow: hidden;
 	padding-top: 8px;
 }
 

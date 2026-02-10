@@ -183,9 +183,6 @@ export async function get_draft_orders(context: any) {
 	}
 }
 
-export function open_purchase_orders(context: any) {
-	context.eventBus.emit("open_purchase_orders");
-}
 
 export function open_returns(context: any) {
 	context.eventBus.emit("open_returns", context.pos_profile.company);

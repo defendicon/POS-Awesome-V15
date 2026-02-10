@@ -39,20 +39,6 @@
 				{{ __("Select S.O") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="pos_profile.posa_allow_purchase_order == 1">
-			<v-btn
-				block
-				color="secondary"
-				theme="dark"
-				prepend-icon="mdi-cart-plus"
-				@click="$emit('select-purchase-order')"
-				class="summary-btn"
-				:loading="selectPurchaseOrderLoading"
-			>
-				{{ __("Purchase Order") }}
-			</v-btn>
-		</v-col>
-
 		<v-col cols="6">
 			<v-btn
 				block
@@ -66,6 +52,7 @@
 				{{ __("Cancel Sale") }}
 			</v-btn>
 		</v-col>
+
 		<v-col cols="6" v-if="pos_profile.posa_allow_return == 1">
 			<v-btn
 				block
@@ -132,7 +119,6 @@ defineProps({
 	saveLoading: Boolean,
 	loadDraftsLoading: Boolean,
 	selectOrderLoading: Boolean,
-	selectPurchaseOrderLoading: Boolean,
 	cancelLoading: Boolean,
 	returnsLoading: Boolean,
 	printLoading: Boolean,
@@ -144,7 +130,6 @@ defineEmits([
 	"save-and-clear",
 	"load-drafts",
 	"select-order",
-	"select-purchase-order",
 	"cancel-sale",
 	"open-returns",
 	"print-draft",

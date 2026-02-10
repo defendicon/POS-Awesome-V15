@@ -112,7 +112,6 @@
 					@save-and-clear="handleSaveAndClear"
 					@load-drafts="handleLoadDrafts"
 					@select-order="handleSelectOrder"
-					@select-purchase-order="handleSelectPurchaseOrder"
 					@cancel-sale="handleCancelSale"
 					@open-returns="handleOpenReturns"
 					@print-draft="handlePrintDraft"
@@ -155,7 +154,6 @@ const emit = defineEmits([
 	"save-and-clear",
 	"load-drafts",
 	"select-order",
-	"select-purchase-order",
 	"cancel-sale",
 	"open-returns",
 	"print-draft",
@@ -166,7 +164,6 @@ const emit = defineEmits([
 const saveLoading = ref(false);
 const loadDraftsLoading = ref(false);
 const selectOrderLoading = ref(false);
-const selectPurchaseOrderLoading = ref(false);
 const cancelLoading = ref(false);
 const returnsLoading = ref(false);
 const printLoading = ref(false);
@@ -259,15 +256,6 @@ async function handleSelectOrder() {
 		await emit("select-order");
 	} finally {
 		selectOrderLoading.value = false;
-	}
-}
-
-async function handleSelectPurchaseOrder() {
-	selectPurchaseOrderLoading.value = true;
-	try {
-		await emit("select-purchase-order");
-	} finally {
-		selectPurchaseOrderLoading.value = false;
 	}
 }
 

@@ -330,9 +330,6 @@ const invoiceItemMethods: Record<string, unknown> &
 	get_draft_orders() {
 		return Dialogs.get_draft_orders(this);
 	},
-	open_purchase_orders() {
-		return Dialogs.open_purchase_orders(this);
-	},
 	open_returns() {
 		return Dialogs.open_returns(this);
 	},
