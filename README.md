@@ -70,6 +70,7 @@ After clearing site data go to browser settings and delete cache and images data
 - Updates are checked **only against the current git branch**.
 - The update dialog shows **all commits ahead** (commit message + date).
 - Dismissed updates will reappear only when a **new commit** is available.
+- It only check for updates on the current branch you are on. It will not update in backend.
 
 ---
 
