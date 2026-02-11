@@ -32,6 +32,11 @@ def make_closing_shift_from_opening(opening_shift):
     closing_shift.total_quantity = 0
 
     company_currency = frappe.get_cached_value("Company", closing_shift.company, "default_currency")
+    cash_mode_of_payment = frappe.get_value(
+        "POS Profile",
+        opening_shift.get("pos_profile"),
+        "posa_cash_mode_of_payment",
+    ) or "Cash"
 
     invoices = get_pos_invoices(opening_shift.get("name"), doctype)
 
@@ -94,13 +99,6 @@ def make_closing_shift_from_opening(opening_shift):
         for p in d.payments:
             existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
             if existing_pay:
-                cash_mode_of_payment = frappe.get_value(
-                    "POS Profile",
-                    opening_shift.get("pos_profile"),
-                    "posa_cash_mode_of_payment",
-                )
-                if not cash_mode_of_payment:
-                    cash_mode_of_payment = "Cash"
                 conversion_rate = d.get("conversion_rate")
                 if existing_pay[0].mode_of_payment == cash_mode_of_payment:
                     amount = get_base_value(p, "amount", "base_amount", conversion_rate) - get_base_value(
@@ -148,6 +146,27 @@ def make_closing_shift_from_opening(opening_shift):
                         "mode_of_payment": py.mode_of_payment,
                         "opening_amount": 0,
                         "expected_amount": signed_amount,
+                    }
+                )
+            )
+
+    cash_movements = frappe.get_all(
+        "POS Cash Movement",
+        filters={"pos_opening_shift": opening_shift.get("name"), "docstatus": 1},
+        fields=["amount"],
+    )
+    cash_movement_total = sum(flt(row.get("amount")) for row in cash_movements)
+    if cash_movement_total:
+        existing_cash = [pay for pay in payments if pay.mode_of_payment == cash_mode_of_payment]
+        if existing_cash:
+            existing_cash[0].expected_amount -= cash_movement_total
+        else:
+            payments.append(
+                frappe._dict(
+                    {
+                        "mode_of_payment": cash_mode_of_payment,
+                        "opening_amount": 0,
+                        "expected_amount": -cash_movement_total,
                     }
                 )
             )

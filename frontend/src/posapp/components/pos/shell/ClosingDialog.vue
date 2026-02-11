@@ -16,6 +16,7 @@
 								:returns-by-currency="returnsByCurrency"
 								:change-returned-rows="changeReturnedRows"
 								:cash-expected-by-currency="cashExpectedByCurrency"
+								:cash-movement-summary="cashMovementSummary"
 								:payments-by-mode="paymentsByMode"
 								:overview-company-currency="overviewCompanyCurrency"
 								:format-currency-with-symbol="formatCurrencyWithSymbol"

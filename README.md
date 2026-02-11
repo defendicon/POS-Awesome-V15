@@ -117,6 +117,67 @@ The POS frontend has been migrated to TypeScript. If you add new modules, prefer
 
 ---
 
+### POS Cash Movement (Journal Entry Based)
+
+Use this feature to post shift-level cash expenses and cash deposits from POS App without touching monolithic accounting flows.
+
+#### Usage Notes
+
+- Open POS App and go to `Cash Movement` from the side menu (visible only if enabled in POS Profile).
+- Submit `Expense` to book: **Dr Expense Account, Cr POS Cash Account**.
+- Submit `Deposit` to book: **Dr Back Office Cash Account, Cr POS Cash Account**.
+- Entries are saved as `POS Cash Movement` and linked to a submitted `Journal Entry`.
+- History supports:
+  - Submitted/Cancelled/Draft filters
+  - Expense/Deposit filters
+  - Journal Entry reference visibility
+  - Cancel action (profile-controlled)
+  - Delete action for cancelled records (profile-controlled)
+
+#### Admin Configuration (POS Profile)
+
+Configure these fields in `POS Profile`:
+
+- `Enable Cash Movement`
+- `Allow POS Expense`
+- `Allow Cash Deposit`
+- `Default POS Expense Account`
+- `Back Office Cash Account`
+- `Allow Cancel Submitted Cash Movement`
+- `Allow Delete Cancelled Cash Movement`
+- `Require Cash Movement Remarks`
+- `Cash Movement Max Amount`
+
+Recommended setup:
+
+- Set a dedicated `Cash` mode of payment and map it correctly at company level.
+- Set `Default POS Expense Account` and `Back Office Cash Account` before enabling user access.
+- Enable cancel/delete only for trusted operational roles.
+
+#### Offline + Sync Behavior
+
+- Cash movements queue locally when POS is offline.
+- Sync runs from:
+  - Main sync action in POS layout
+  - Manual sync button in Cash Movement screen when queue exists
+- Duplicate-safe replay uses `client_request_id` idempotency.
+
+#### Closing Shift Impact
+
+- Submitted cash movements are included in shift overview.
+- Expected cash on hand is reduced by submitted cash movement total.
+- Closing screen shows a dedicated submitted cash movement summary.
+
+#### Known Limitations / Guardrails
+
+- Backend permissioned runtime tests require a full Frappe/ERPNext bench environment.
+- Cash movement amounts are currently reconciled in company currency for closing impact.
+- If profile flags are disabled mid-shift, creation and management actions are blocked by backend checks.
+
+For deployment details, see `CASH_MOVEMENT_ROLLOUT.md`.
+
+---
+
 ### Debugging (Quick Tips)
 
 - Check browser console for errors and attached logs with issue for better debugging.

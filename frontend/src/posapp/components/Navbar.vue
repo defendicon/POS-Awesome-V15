@@ -224,12 +224,13 @@ export default {
 			drawer: false,
 			mini: true,
 			item: 0,
-			items: [
+			baseItems: [
 				{ text: "POS", icon: "mdi-network-pos", to: "/pos" },
 				{ text: "Payments", icon: "mdi-credit-card", to: "/payments" },
 				{ text: "Purchase Order", icon: "mdi-cart-plus", to: "/orders" },
 				{ text: "Barcode Printing", icon: "mdi-barcode", to: "/barcode" },
 			],
+			items: [],
 			company: "POS Awesome",
 			companyImg: posLogo,
 			showAboutDialog: false,
@@ -251,6 +252,13 @@ export default {
 			deep: true,
 			immediate: true,
 		},
+		posProfile: {
+			handler() {
+				this.updateNavigationItems();
+			},
+			deep: true,
+			immediate: true,
+		},
 	},
 	computed: {
 		appBarColor() {
@@ -258,6 +266,7 @@ export default {
 		},
 	},
 	mounted() {
+		this.updateNavigationItems();
 		this.initializeNavbar();
 		this.setupEventListeners();
 	},
@@ -302,6 +311,17 @@ export default {
 					}
 				}
 			}
+		},
+		updateNavigationItems() {
+			const items = [...this.baseItems];
+			if (this.posProfile?.posa_enable_cash_movement) {
+				items.push({
+					text: "Cash Movement",
+					icon: "mdi-cash-sync",
+					to: "/cash-movement",
+				});
+			}
+			this.items = items;
 		},
 
 		initializeNavbar() {

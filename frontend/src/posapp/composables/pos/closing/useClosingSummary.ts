@@ -245,6 +245,18 @@ export function useClosingSummary(
 		);
 	});
 
+	const cashMovementSummary = computed(() => {
+		const ov = unref(overview);
+		return (
+			ov?.cash_movements || {
+				count: 0,
+				company_currency_total: 0,
+				by_currency: [],
+				by_type: [],
+			}
+		);
+	});
+
 	const cashExpectedByCurrency = computed(() => {
 		return Array.isArray(cashExpectedSummary.value.by_currency)
 			? cashExpectedSummary.value.by_currency
@@ -326,6 +338,10 @@ export function useClosingSummary(
 			changeReturnedSummary.value.company_currency_total,
 			overviewCompanyCurrency.value,
 		);
+		const cashMovementValue = formatCurrencyWithSymbol(
+			cashMovementSummary.value.company_currency_total,
+			overviewCompanyCurrency.value,
+		);
 		const cashValue = formatCurrencyWithSymbol(
 			cashExpectedSummary.value.company_currency_total,
 			overviewCompanyCurrency.value,
@@ -357,12 +373,23 @@ export function useClosingSummary(
 				color: "accent-info",
 			},
 			{
+				key: "cash-movements",
+				label: __("Cash Movements"),
+				value: cashMovementValue,
+				caption: `${__("Submitted entries")}: ${formatCount(cashMovementSummary.value.count || 0)}`,
+				icon: "mdi-cash-sync",
+				color: "accent-warning",
+			},
+			{
 				key: "cash-expected",
 				label: __("Expected Cash"),
 				value: cashValue,
-				caption: cashExpectedSummary.value.mode_of_payment
-					? `${__("Mode")}: ${cashExpectedSummary.value.mode_of_payment}`
-					: __("No cash mode configured"),
+				caption:
+					cashExpectedSummary.value.mode_of_payment && cashMovementSummary.value.company_currency_total
+						? `${__("Mode")}: ${cashExpectedSummary.value.mode_of_payment} | ${__("Cash movement deduction applied")}`
+						: cashExpectedSummary.value.mode_of_payment
+							? `${__("Mode")}: ${cashExpectedSummary.value.mode_of_payment}`
+							: __("No cash mode configured"),
 				icon: "mdi-safe",
 				color: "accent-success",
 			},
@@ -456,6 +483,7 @@ export function useClosingSummary(
 		returnsByCurrency,
 		changeReturnedRows,
 		cashExpectedByCurrency,
+		cashMovementSummary,
 		primaryInsights,
 		secondaryInsights,
 		shouldShowCompanyEquivalent,

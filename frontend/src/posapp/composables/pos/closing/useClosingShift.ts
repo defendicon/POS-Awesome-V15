@@ -141,6 +141,20 @@ export function useClosingShift(eventBus: any) {
 			};
 		};
 
+		const normalizeCashMovements = (movements: any = {}) => ({
+			count: toNumber(movements?.count),
+			company_currency_total: toNumber(movements?.company_currency_total),
+			by_currency: normalizeCurrencyRows(movements?.by_currency, {
+				includeExchangeRates: true,
+			}),
+			by_type: Array.isArray(movements?.by_type)
+				? movements.by_type.map((row: any) => ({
+						movement_type: row?.movement_type || "",
+						total: toNumber(row?.total),
+					}))
+				: [],
+		});
+
 		const normalize = (payload: any = {}) => ({
 			total_invoices: toNumber(payload.total_invoices),
 			company_currency:
@@ -196,6 +210,7 @@ export function useClosingShift(eventBus: any) {
 					},
 				),
 			},
+			cash_movements: normalizeCashMovements(payload.cash_movements),
 		});
 
 		const request = frappe.call(

@@ -72,6 +72,10 @@ def get_closing_shift_overview(pos_opening_shift):
     overpayment_change_company_currency_total = 0
     overpayment_change_totals_by_currency = {}
     total_change_totals_by_currency = {}
+    cash_movement_count = 0
+    cash_movement_company_currency_total = 0
+    cash_movement_totals_by_type = {}
+    cash_movement_totals_by_currency = {}
 
     cash_mode_of_payment = frappe.db.get_value("POS Profile", pos_profile, "posa_cash_mode_of_payment")
     if not cash_mode_of_payment:
@@ -502,6 +506,37 @@ def get_closing_shift_overview(pos_opening_shift):
                 entry_rate,
             )
 
+    cash_movements = frappe.get_all(
+        "POS Cash Movement",
+        filters={"pos_opening_shift": opening_shift_doc.name, "docstatus": 1},
+        fields=["movement_type", "amount"],
+    )
+    for movement in cash_movements:
+        movement_amount = abs(flt(movement.get("amount")))
+        if not movement_amount:
+            continue
+        cash_movement_count += 1
+        cash_movement_company_currency_total += movement_amount
+
+        movement_type = movement.get("movement_type") or "Unknown"
+        type_row = cash_movement_totals_by_type.setdefault(
+            movement_type,
+            {"movement_type": movement_type, "total": 0},
+        )
+        type_row["total"] += movement_amount
+
+        currency_row = cash_movement_totals_by_currency.setdefault(
+            company_currency,
+            {
+                "currency": company_currency,
+                "total": 0,
+                "company_currency_total": 0,
+                "exchange_rates": set(),
+            },
+        )
+        currency_row["total"] += movement_amount
+        currency_row["company_currency_total"] += movement_amount
+
     if cash_mode_of_payment:
         for row in payments_by_mode.values():
             if row["mode_of_payment"] != cash_mode_of_payment:
@@ -514,6 +549,21 @@ def get_closing_shift_overview(pos_opening_shift):
                 base_overpayment_change = overpayment_change_row.get("company_currency_total")
                 if base_overpayment_change:
                     row["company_currency_total"] -= flt(base_overpayment_change)
+
+        if cash_movement_company_currency_total:
+            cash_key = (cash_mode_of_payment, company_currency)
+            cash_row = payments_by_mode.setdefault(
+                cash_key,
+                {
+                    "mode_of_payment": cash_mode_of_payment,
+                    "currency": company_currency,
+                    "total": 0,
+                    "company_currency_total": 0,
+                    "exchange_rates": set(),
+                },
+            )
+            cash_row["total"] -= flt(cash_movement_company_currency_total)
+            cash_row["company_currency_total"] -= flt(cash_movement_company_currency_total)
 
     cash_expected_totals = []
     cash_expected_company_currency_total = 0
@@ -584,6 +634,18 @@ def get_closing_shift_overview(pos_opening_shift):
         output.sort(key=lambda r: (r.get("mode_of_payment") or "", r.get("currency") or ""))
         return output
 
+    def prepare_movement_type_rows(container):
+        output = []
+        for row in container.values():
+            output.append(
+                {
+                    "movement_type": row.get("movement_type"),
+                    "total": flt(row.get("total")),
+                }
+            )
+        output.sort(key=lambda r: (r.get("movement_type") or ""))
+        return output
+
     return {
         "total_invoices": total_invoices,
         "company_currency": company_currency,
@@ -627,6 +689,12 @@ def get_closing_shift_overview(pos_opening_shift):
                 cash_expected_totals,
                 key=lambda row: (row.get("currency") or ""),
             ),
+        },
+        "cash_movements": {
+            "count": cash_movement_count,
+            "company_currency_total": flt(cash_movement_company_currency_total),
+            "by_currency": prepare_currency_rows(cash_movement_totals_by_currency),
+            "by_type": prepare_movement_type_rows(cash_movement_totals_by_type),
         },
     }
 

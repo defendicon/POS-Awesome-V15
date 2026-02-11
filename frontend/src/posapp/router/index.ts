@@ -30,6 +30,11 @@ const routes = [
 		meta: { title: "Barcode Printing", layout: "default" },
 	},
 	{
+		path: "/cash-movement",
+		component: () => import("../components/pos/cash/CashMovementView.vue"),
+		meta: { title: "Cash Movement", layout: "default" },
+	},
+	{
 		path: "/closing",
 		component: () => import("../components/pos/shell/ClosingDialog.vue"),
 		meta: { title: "Close Shift", layout: "default" },

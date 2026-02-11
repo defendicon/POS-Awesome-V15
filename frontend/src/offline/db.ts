@@ -51,6 +51,7 @@ export const memory: AnyRecord = {
 	offline_invoices: [],
 	offline_customers: [],
 	offline_payments: [],
+	offline_cash_movements: [],
 	pos_last_sync_totals: { pending: 0, synced: 0, drafted: 0 },
 	uom_cache: {},
 	offers_cache: [],
@@ -211,6 +212,7 @@ export async function clearAllCache() {
 	memory.offline_invoices = [];
 	memory.offline_customers = [];
 	memory.offline_payments = [];
+	memory.offline_cash_movements = [];
 	memory.pos_last_sync_totals = { pending: 0, synced: 0, drafted: 0 };
 	memory.uom_cache = {};
 	memory.offers_cache = [];
@@ -257,7 +259,8 @@ export function queueHealthCheck() {
 	return (
 		memory.offline_invoices.length > threshold ||
 		memory.offline_customers.length > threshold ||
-		memory.offline_payments.length > threshold
+		memory.offline_payments.length > threshold ||
+		memory.offline_cash_movements.length > threshold
 	);
 }
 
@@ -272,7 +275,9 @@ export function purgeOldQueueEntries() {
 	purge(memory.offline_invoices);
 	purge(memory.offline_customers);
 	purge(memory.offline_payments);
+	purge(memory.offline_cash_movements);
 	persist("offline_invoices");
 	persist("offline_customers");
 	persist("offline_payments");
+	persist("offline_cash_movements");
 }

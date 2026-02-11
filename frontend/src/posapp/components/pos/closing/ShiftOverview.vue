@@ -549,6 +549,53 @@
 							{{ __("No cash expected for this shift.") }}
 						</div>
 					</div>
+					<div class="table-section mt-4">
+						<div class="table-header mb-2">
+							<h5 class="text-subtitle-1 text-grey-darken-2 mb-1">
+								{{ __("Submitted Cash Movements") }}
+							</h5>
+							<p class="text-body-2 text-grey">
+								{{ __("Expenses and deposits posted during this shift") }}
+							</p>
+						</div>
+						<div v-if="cashMovementSummary?.count" class="overview-table-wrapper">
+							<table class="overview-table">
+								<thead>
+									<tr>
+										<th>{{ __("Movement Type") }}</th>
+										<th class="text-end">{{ __("Amount") }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr
+										v-for="row in cashMovementSummary.by_type || []"
+										:key="`cash-movement-${row.movement_type}`"
+									>
+										<td>{{ row.movement_type }}</td>
+										<td class="text-end">
+											{{ formatCurrencyWithSymbol(row.total || 0, overviewCompanyCurrency) }}
+										</td>
+									</tr>
+									<tr>
+										<td><strong>{{ __("Total") }}</strong></td>
+										<td class="text-end">
+											<strong>
+												{{
+													formatCurrencyWithSymbol(
+														cashMovementSummary.company_currency_total || 0,
+														overviewCompanyCurrency,
+													)
+												}}
+											</strong>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div v-else class="overview-empty text-body-2">
+							{{ __("No submitted cash movements in this shift.") }}
+						</div>
+					</div>
 				</v-col>
 			</v-row>
 
@@ -636,6 +683,7 @@ defineProps({
 	returnsByCurrency: Array,
 	changeReturnedRows: Array,
 	cashExpectedByCurrency: Array,
+	cashMovementSummary: Object,
 	paymentsByMode: Array,
 	overviewCompanyCurrency: String,
 	// Functions

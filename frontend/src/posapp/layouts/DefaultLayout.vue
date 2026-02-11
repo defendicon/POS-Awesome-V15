@@ -67,6 +67,8 @@ import {
 	isManualOffline as getIsManualOffline,
 	syncOfflineInvoices,
 	getPendingOfflineInvoiceCount,
+	getPendingOfflineCashMovementCount,
+	syncOfflineCashMovements,
 	isOffline,
 	getLastSyncTotals,
 } from "../../offline/index";
@@ -451,9 +453,16 @@ const handleCloseShift = () => {
 
 const handleSyncInvoices = async () => {
 	const pending = getPendingOfflineInvoiceCount();
+	const pendingCashMovements = getPendingOfflineCashMovementCount();
 	if (pending) {
 		toastStore.show({
 			title: `${pending} invoice${pending > 1 ? "s" : ""} pending for sync`,
+			color: "warning",
+		});
+	}
+	if (pendingCashMovements) {
+		toastStore.show({
+			title: `${pendingCashMovements} cash movement${pendingCashMovements > 1 ? "s" : ""} pending for sync`,
 			color: "warning",
 		});
 	}
@@ -461,6 +470,7 @@ const handleSyncInvoices = async () => {
 		return;
 	}
 	const result = await syncOfflineInvoices();
+	const cashMovementResult = await syncOfflineCashMovements();
 	if (result && (result.synced || result.drafted)) {
 		if (result.synced) {
 			toastStore.show({
@@ -474,6 +484,12 @@ const handleSyncInvoices = async () => {
 				color: "warning",
 			});
 		}
+	}
+	if (cashMovementResult?.synced) {
+		toastStore.show({
+			title: `${cashMovementResult.synced} offline cash movement${cashMovementResult.synced > 1 ? "s" : ""} synced`,
+			color: "success",
+		});
 	}
 	syncStore.updatePendingCount();
 	syncTotals.value = result || syncTotals.value;

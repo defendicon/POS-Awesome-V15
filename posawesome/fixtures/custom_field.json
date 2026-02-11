@@ -7738,5 +7738,103 @@
 		"options": "POS Awesome Print Format Rule",
 		"insert_after": "posa_open_print_in_new_tab",
 		"name": "POS Profile-posa_print_format_rules"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_enable_cash_movement",
+		"fieldtype": "Check",
+		"label": "Enable Cash Movement",
+		"default": "0",
+		"insert_after": "posa_print_format_rules",
+		"name": "POS Profile-posa_enable_cash_movement"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_allow_pos_expense",
+		"fieldtype": "Check",
+		"label": "Allow POS Expense",
+		"default": "0",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1",
+		"insert_after": "posa_enable_cash_movement",
+		"name": "POS Profile-posa_allow_pos_expense"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_allow_cash_deposit",
+		"fieldtype": "Check",
+		"label": "Allow Cash Deposit",
+		"default": "0",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1",
+		"insert_after": "posa_allow_pos_expense",
+		"name": "POS Profile-posa_allow_cash_deposit"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_default_expense_account",
+		"fieldtype": "Link",
+		"label": "Default POS Expense Account",
+		"options": "Account",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1 && doc.posa_allow_pos_expense==1",
+		"insert_after": "posa_allow_cash_deposit",
+		"name": "POS Profile-posa_default_expense_account"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_back_office_cash_account",
+		"fieldtype": "Link",
+		"label": "Back Office Cash Account",
+		"options": "Account",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1 && doc.posa_allow_cash_deposit==1",
+		"insert_after": "posa_default_expense_account",
+		"name": "POS Profile-posa_back_office_cash_account"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_allow_cancel_submitted_cash_movement",
+		"fieldtype": "Check",
+		"label": "Allow Cancel Submitted Cash Movement",
+		"default": "0",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1",
+		"insert_after": "posa_back_office_cash_account",
+		"name": "POS Profile-posa_allow_cancel_submitted_cash_movement"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_allow_delete_cancelled_cash_movement",
+		"fieldtype": "Check",
+		"label": "Allow Delete Cancelled Cash Movement",
+		"default": "0",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1",
+		"insert_after": "posa_allow_cancel_submitted_cash_movement",
+		"name": "POS Profile-posa_allow_delete_cancelled_cash_movement"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_require_cash_movement_remarks",
+		"fieldtype": "Check",
+		"label": "Require Cash Movement Remarks",
+		"default": "1",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1",
+		"insert_after": "posa_allow_delete_cancelled_cash_movement",
+		"name": "POS Profile-posa_require_cash_movement_remarks"
+	},
+	{
+		"doctype": "Custom Field",
+		"dt": "POS Profile",
+		"fieldname": "posa_cash_movement_max_amount",
+		"fieldtype": "Currency",
+		"label": "Cash Movement Max Amount",
+		"options": "Company:company:default_currency",
+		"depends_on": "eval:doc.posa_enable_cash_movement==1",
+		"insert_after": "posa_require_cash_movement_remarks",
+		"name": "POS Profile-posa_cash_movement_max_amount"
 	}
 ]
