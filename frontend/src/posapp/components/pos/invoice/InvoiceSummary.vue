@@ -7,6 +7,28 @@
 			<!-- Summary Info -->
 			<v-col cols="12" md="7">
 				<v-row dense>
+					<v-col
+						cols="12"
+						v-if="
+							return_discount_meta &&
+							!pos_profile.posa_use_percentage_discount &&
+							!isFullReturnDiscount(return_discount_meta.ratio)
+						"
+					>
+						<v-alert
+							density="compact"
+							type="info"
+							variant="tonal"
+							class="summary-field"
+						>
+							{{ __("Prorated return discount") }}:
+							{{ formatRatio(return_discount_meta.ratio) }} —
+							{{ __("Original") }}:
+							{{ formatCurrency(return_discount_meta.original_discount) }},
+							{{ __("Applied") }}:
+							{{ formatCurrency(return_discount_meta.prorated_discount) }}
+						</v-alert>
+					</v-col>
 					<!-- Total Qty -->
 					<v-col cols="6">
 						<v-text-field
@@ -63,29 +85,6 @@
 							class="summary-field"
 						/>
 					</v-col>
-					<v-col
-						cols="12"
-						v-if="
-							return_discount_meta &&
-							!pos_profile.posa_use_percentage_discount &&
-							!isFullReturnDiscount(return_discount_meta.ratio)
-						"
-					>
-						<v-alert
-							density="compact"
-							type="info"
-							variant="tonal"
-							class="summary-field"
-						>
-							{{ __("Prorated return discount") }}:
-							{{ formatRatio(return_discount_meta.ratio) }} —
-							{{ __("Original") }}:
-							{{ formatCurrency(return_discount_meta.original_discount) }},
-							{{ __("Applied") }}:
-							{{ formatCurrency(return_discount_meta.prorated_discount) }}
-						</v-alert>
-					</v-col>
-
 					<!-- Items Discount -->
 					<v-col cols="6">
 						<v-text-field

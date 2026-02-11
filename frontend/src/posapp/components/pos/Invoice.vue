@@ -487,7 +487,15 @@ export default {
 			this.expanded = Array.isArray(ids) ? ids.slice(-1) : [];
 		},
 
-		applyReturnDiscountProration() {
+		applyReturnDiscountProration(options = {}) {
+			const { defer } = options || {};
+			if (defer && typeof this.$nextTick === "function") {
+				this.$nextTick(() => {
+					setTimeout(() => this.applyReturnDiscountProration(), 0);
+				});
+				return;
+			}
+
 			if (
 				!this.isReturnInvoice ||
 				this.pos_profile?.posa_use_percentage_discount ||
@@ -849,7 +857,8 @@ export default {
 			load_return_invoice: this.handleLoadReturnInvoice,
 			set_new_line: this.handleSetNewLine,
 			calc_uom: this.calc_uom,
-			recalculate_return_discount: this.applyReturnDiscountProration,
+			recalculate_return_discount: (payload) =>
+				this.applyReturnDiscountProration(payload),
 			reset_invoice_type_to_invoice: () => {
 				this.invoiceType = "Invoice";
 				this.invoiceTypes = ["Invoice", "Order", "Quotation"];

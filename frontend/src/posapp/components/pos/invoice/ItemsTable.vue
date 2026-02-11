@@ -266,7 +266,7 @@ const handleQtyChange = (item: any, event: any) => {
 	} else {
 		props.setFormatedQty(item, "qty", null, false, event.target.value);
 	}
-	eventBus?.emit("recalculate_return_discount");
+	eventBus?.emit("recalculate_return_discount", { defer: true });
 };
 
 const handleMinusClick = (item: any) => {
@@ -285,12 +285,12 @@ const handleMinusClick = (item: any) => {
 		// subtract_one handles the sign-aware logic (e.g. -5 -> -4 in returns)
 		props.subtractOne(item);
 	}
-	eventBus?.emit("recalculate_return_discount");
+	eventBus?.emit("recalculate_return_discount", { defer: true });
 };
 
 const handleQtyUpdate = (item: any, newQty: any) => {
 	props.setFormatedQty(item, "qty", null, false, newQty);
-	eventBus?.emit("recalculate_return_discount");
+	eventBus?.emit("recalculate_return_discount", { defer: true });
 };
 
 const handleRateUpdate = (item: any, newRate: any) => {
