@@ -9,3 +9,4 @@ posawesome.patches.add_promotional_scheme_link_to_workspace
 posawesome.patches.recreate_pos_awesome_workspace
 posawesome.patches.add_pos_cash_movement_settings
 posawesome.patches.add_cash_movement_to_workspace
+posawesome.patches.reorganize_pos_profile_sections
