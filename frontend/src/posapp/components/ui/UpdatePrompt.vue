@@ -32,11 +32,9 @@
 				</div>
 			</v-card-text>
 			<v-card-actions class="update-actions">
-				<v-btn variant="text" color="primary" @click="dismiss">
+				<v-spacer></v-spacer>
+				<v-btn variant="elevated" color="primary" @click="dismiss">
 					{{ __("Dismiss") }}
-				</v-btn>
-				<v-btn variant="elevated" color="primary" @click="reload">
-					{{ updateStore.reloading ? __("Updating...") : __("Reload Now") }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -70,11 +68,6 @@ watch(
 const label = computed(() => updateStore.formattedAvailableVersion);
 const detail = computed(() => updateStore.formattedAvailableDetails);
 const branch = computed(() => updateStore.formattedAvailableBranch);
-
-function reload() {
-	updateStore.resetSnooze();
-	updateStore.reloadNow();
-}
 
 function dismiss() {
 	updateStore.dismissUpdate();
