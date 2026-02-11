@@ -174,7 +174,7 @@ export const useUpdateStore = defineStore("update", {
 			if (!state.availableMessage && !state.availableCommitDate) {
 				return null;
 			}
-			const bits = [];
+			const bits: string[] = [];
 			if (state.availableMessage) {
 				bits.push(state.availableMessage);
 			}
@@ -413,14 +413,16 @@ export const useUpdateStore = defineStore("update", {
 					this.setAvailableVersion(buildVersion);
 				}
 				if (r?.message?.remote_ahead) {
-					const remoteAhead = r.message.remote_ahead || {};
-					const branches = Object.keys(remoteAhead);
-					if (branches.length) {
+					const remoteAhead = r.message
+						.remote_ahead as Record<string, string> | null;
+					const branches = Object.keys(remoteAhead || {});
+					const branch = branches[0];
+					if (branch) {
 						const sample = r.message.remote_sample || {};
 						this.availableBranch =
-							r.message.remote_sample_branch || branches[0];
+							r.message.remote_sample_branch || branch;
 						this.availableCommit =
-							sample.commit_hash || remoteAhead[branches[0]];
+							sample.commit_hash || remoteAhead?.[branch] || null;
 						this.availableMessage =
 							sample.commit_message?.trim() || null;
 						this.availableCommitDate =
