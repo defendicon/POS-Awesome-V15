@@ -293,7 +293,6 @@ def _get_current_branch(app_path: str) -> str:
 
 @frappe.whitelist()
 def get_remote_update_info() -> Dict[str, Any]:
-    """Return remote branch heads and latest commit info (public repo)."""
     data: Dict[str, Any] = {"build_version": get_build_version()}
     base = _get_git_commit_info("posawesome")
     if base:
