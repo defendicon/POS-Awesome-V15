@@ -490,6 +490,49 @@ export default {
 			this.expanded = Array.isArray(ids) ? ids.slice(-1) : [];
 		},
 
+		applyReturnDiscountProration() {
+			if (
+				!this.isReturnInvoice ||
+				this.pos_profile?.posa_use_percentage_discount ||
+				!this.return_doc ||
+				typeof this.return_doc !== "object"
+			) {
+				return;
+			}
+
+			const originalDiscount = Math.abs(
+				Number(this.return_doc.discount_amount || 0),
+			);
+			const originalTotal = Math.abs(
+				Number(
+					this.return_doc.total ??
+						this.return_doc.net_total ??
+						this.return_doc.grand_total ??
+						0,
+				),
+			);
+			const returnTotal = Math.abs(Number(this.Total || 0));
+
+			if (!originalDiscount || !originalTotal || !returnTotal) {
+				return;
+			}
+
+			const ratio = Math.min(1, returnTotal / originalTotal);
+			const prorated = -Math.abs(originalDiscount * ratio);
+
+			console.log("[POSA][Returns] Event auto-prorate discount", {
+				originalDiscount,
+				originalTotal,
+				returnTotal,
+				ratio,
+				prorated,
+			});
+
+			this.discount_amount = prorated;
+			this.additional_discount = prorated;
+			this.additional_discount_percentage = 0;
+		},
+
 		async set_delivery_charges(options = {}) {
 			const { forceReset = false } = options;
 			if (!this.pos_profile || !this.customer || !this.pos_profile.posa_use_delivery_charges) {
@@ -801,6 +844,7 @@ export default {
 			load_return_invoice: this.handleLoadReturnInvoice,
 			set_new_line: this.handleSetNewLine,
 			calc_uom: this.calc_uom,
+			recalculate_return_discount: this.applyReturnDiscountProration,
 			reset_invoice_type_to_invoice: () => {
 				this.invoiceType = "Invoice";
 				this.invoiceTypes = ["Invoice", "Order", "Quotation"];
