@@ -732,6 +732,7 @@ def get_payment_reconciliation_details(closing_shift_doc):
             continue
 
         invoice_doc = frappe.get_cached_doc(doctype, invoice)
+        invoice_doc.check_permission("read")
         currency = invoice_doc.get("currency") or company_currency
         conversion_rate = (
             invoice_doc.get("conversion_rate")
@@ -772,6 +773,7 @@ def get_payment_reconciliation_details(closing_shift_doc):
             continue
 
         payment_doc = frappe.get_cached_doc("Payment Entry", payment_entry)
+        payment_doc.check_permission("read")
         multiplier = -1 if payment_doc.get("payment_type") == "Pay" else 1
         currency = (
             payment_doc.get("paid_from_account_currency")
