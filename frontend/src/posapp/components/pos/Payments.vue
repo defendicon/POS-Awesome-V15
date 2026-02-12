@@ -355,7 +355,7 @@ const {
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
 	posProfile: pos_profile,
 	currencyPrecision: currency_precision,
-	formatFloat: (val, prec) => formatFloat(val, prec),
+	formatFloat: (val, prec) => flt(val, prec),
 	stores: { toastStore },
 	onClearAmounts: () => {},
 });
@@ -481,7 +481,7 @@ const { ensureReturnPaymentsAreNegative, validateSubmission, submitInvoice } = u
 	diff_payment: diff_payment,
 	is_credit_sale: is_credit_sale,
 	loyaltyAmount: loyalty_amount,
-	formatFloat: (val, prec) => formatFloat(val, prec),
+	formatFloat: (val, prec) => flt(val, prec),
 	stores: {
 		toastStore,
 		syncStore,
