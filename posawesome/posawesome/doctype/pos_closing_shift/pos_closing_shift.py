@@ -85,3 +85,7 @@ class POSClosingShift(Document):
 
     def delete_draft_invoices(self):
         delete_draft_invoices(self.pos_opening_shift, self.pos_profile)
+
+    @frappe.whitelist()
+    def get_payment_reconciliation_details(self):
+        return get_payment_reconciliation_details(self)
