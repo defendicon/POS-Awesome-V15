@@ -5,6 +5,29 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_outstanding_invoices as get_erpnext_outstanding_invoices
 from erpnext.controllers.accounts_controller import get_advance_payment_entries_for_regional
 
+MAX_OUTSTANDING_PAGE_LENGTH = 500
+
+
+def _coerce_text_filter(value, field_label):
+    if value is None:
+        return None
+    if isinstance(value, (list, tuple, dict, set)):
+        frappe.throw(_("Invalid {0} filter").format(field_label))
+
+    coerced = str(value).strip()
+    if not coerced:
+        return None
+    return coerced
+
+
+def _coerce_non_negative_int(value, default=0):
+    try:
+        parsed = cint(value)
+    except Exception:
+        return default
+    return max(parsed, 0)
+
+
 @frappe.whitelist()
 def get_outstanding_invoices(customer=None, company=None, currency=None, pos_profile=None,
                              include_all_currencies=False, page_start=0, page_length=None):
@@ -15,11 +38,21 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         include_all_currencies (bool): If True, returns invoices in ALL currencies instead of filtering
     """
     try:
+        customer = _coerce_text_filter(customer, _("Customer"))
+        company = _coerce_text_filter(company, _("Company"))
+        currency = _coerce_text_filter(currency, _("Currency"))
+        pos_profile = _coerce_text_filter(pos_profile, _("POS Profile"))
+        include_all_currencies = bool(
+            _coerce_non_negative_int(include_all_currencies, default=0)
+        )
+
         if not customer or not company:
             return []
 
-        page_start = max(cint(page_start or 0), 0)
-        page_length = cint(page_length) if page_length not in (None, "") else 0
+        page_start = _coerce_non_negative_int(page_start, default=0)
+        page_length = _coerce_non_negative_int(page_length, default=0)
+        if page_length:
+            page_length = min(page_length, MAX_OUTSTANDING_PAGE_LENGTH)
 
         # Fast-path for POS Pay list view: fetch paginated Sales Invoices directly
         # to avoid expensive full-ledger reconciliation queries on very large customers.
@@ -35,7 +68,7 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
             if currency and not include_all_currencies:
                 filters["currency"] = currency
 
-            rows = frappe.get_all(
+            rows = frappe.get_list(
                 "Sales Invoice",
                 filters=filters,
                 fields=[
@@ -89,7 +122,7 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
         if sales_invoice_names:
             sales_invoice_meta = {
                 row.get("name"): row
-                for row in frappe.get_all(
+                for row in frappe.get_list(
                     "Sales Invoice",
                     filters={"name": ("in", sales_invoice_names)},
                     fields=["name", "pos_profile", "currency", "customer_name"],
@@ -154,6 +187,17 @@ def get_unallocated_payments(
     mode_of_payment=None,
     include_all_currencies=False,
 ):
+    customer = _coerce_text_filter(customer, _("Customer"))
+    company = _coerce_text_filter(company, _("Company"))
+    currency = _coerce_text_filter(currency, _("Currency"))
+    mode_of_payment = _coerce_text_filter(mode_of_payment, _("Mode of Payment"))
+    include_all_currencies = bool(
+        _coerce_non_negative_int(include_all_currencies, default=0)
+    )
+
+    if not customer or not company:
+        return []
+
     customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
     party_account = get_party_account("Customer", customer, company)
 
@@ -169,7 +213,7 @@ def get_unallocated_payments(
         filters["paid_from_account_currency"] = currency
     if mode_of_payment:
         filters.update({"mode_of_payment": mode_of_payment})
-    unallocated_payment = frappe.get_all(
+    unallocated_payment = frappe.get_list(
         "Payment Entry",
         filters=filters,
         fields=[
@@ -195,7 +239,7 @@ def get_unallocated_payments(
     ):
         fallback_filters = dict(filters)
         fallback_filters.pop("paid_from_account_currency", None)
-        unallocated_payment = frappe.get_all(
+        unallocated_payment = frappe.get_list(
             "Payment Entry",
             filters=fallback_filters,
             fields=[
@@ -346,7 +390,7 @@ def get_unallocated_payments(
         )
         existing_keys.add(key)
 
-    credit_notes = frappe.get_all(
+    credit_notes = frappe.get_list(
         "Sales Invoice",
         filters={
             "customer": customer,
