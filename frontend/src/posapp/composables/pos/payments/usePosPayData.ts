@@ -22,6 +22,7 @@ export function usePosPayData({
 	currencySymbol,
 	formatCurrency,
 }: PosPayDataArgs) {
+	const OUTSTANDING_INVOICES_PAGE_LENGTH = 300;
 	const outstanding_invoices = ref<any[]>([]);
 	const unallocated_payments = ref<any[]>([]);
 	const mpesa_payments = ref<any[]>([]);
@@ -40,7 +41,7 @@ export function usePosPayData({
 	const mpesa_search_mobile = ref("");
 
 	async function get_outstanding_invoices(
-		posProfileSearch: string | null = null,
+		posProfileSearch?: string | null,
 	) {
 		invoices_loading.value = true;
 		const requestToken = ++outstandingReqToken.value;
@@ -60,14 +61,21 @@ export function usePosPayData({
 		}
 
 		try {
+			const resolvedPosProfile =
+				typeof posProfileSearch === "undefined"
+					? posProfile.value?.name || null
+					: posProfileSearch || null;
+
 			const r = await frappe.call(
 				"posawesome.posawesome.api.payment_entry.get_outstanding_invoices",
 				{
 					customer: customerName.value,
 					company: company.value,
 					currency: posProfile.value.currency,
-					pos_profile: posProfileSearch || null,
+					pos_profile: resolvedPosProfile,
 					include_all_currencies: true,
+					page_start: 0,
+					page_length: OUTSTANDING_INVOICES_PAGE_LENGTH,
 				},
 			);
 
