@@ -63,7 +63,7 @@ export const useItemsSelectorSearch = ({
 			scal_qty = pesokg;
 		}
 		if (vm.hide_qty_decimals) {
-			scal_qty = Math.trunc(Number(scal_qty));
+			scal_qty = Math.round(Number(scal_qty));
 		}
 		return scal_qty;
 	};

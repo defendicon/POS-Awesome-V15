@@ -87,7 +87,7 @@
 			</template>
 			<template v-slot:item.actual_qty="{ item }">
 				<span class="golden--text" :class="{ 'negative-number': isNegative(item.actual_qty) }">
-					{{ formatNumber(item.actual_qty, hideQtyDecimals ? 0 : 4) }}
+					{{ formatActualQty(item.actual_qty) }}
 				</span>
 			</template>
 		</v-data-table-virtual>
@@ -97,7 +97,7 @@
 <script setup>
 import { ref } from "vue";
 
-defineProps({
+const props = defineProps({
 	displayedItems: { type: Array, default: () => [] },
 	headers: { type: Array, default: () => [] },
 	headerProps: { type: Object, default: () => ({}) },
@@ -124,6 +124,17 @@ const handleRowClick = (event, data) => {
 
 const handleListScroll = (event) => {
 	emit("list-scroll", event);
+};
+
+const formatActualQty = (value) => {
+	const numericQty = Number(value ?? 0);
+	if (!Number.isFinite(numericQty)) {
+		return 0;
+	}
+	if (props.hideQtyDecimals) {
+		return props.formatNumber(Math.round(numericQty), 0);
+	}
+	return props.formatNumber(numericQty, 4);
 };
 
 const tableRef = ref(null);

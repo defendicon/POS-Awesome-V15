@@ -37,7 +37,7 @@
 					:pos-profile="pos_profile"
 					:scanner-locked="scannerLocked"
 					:enable-background-sync="enable_background_sync"
-					:last-sync-time="formatBackgroundSyncTime()"
+					:last-sync-time="lastSyncTimeLabel"
 					:sync-status="syncStatus"
 					:context="context"
 					@esc="esc_event"
@@ -358,12 +358,12 @@ const displayedItems = computed(() => {
 const debounce_qty = computed({
 	get() {
 		if (qty.value === null) return "";
-		return pos_profile.value?.posa_hide_qty_decimals ? Math.trunc(qty.value) : qty.value;
+		return hide_qty_decimals.value ? Math.round(qty.value) : qty.value;
 	},
 	set(value) {
 		let parsed: number | null = parseFloat(String(value).replace(/,/g, ""));
 		if (isNaN(parsed)) parsed = null;
-		if (pos_profile.value?.posa_hide_qty_decimals && parsed != null) parsed = Math.trunc(parsed);
+		if (hide_qty_decimals.value && parsed != null) parsed = Math.round(parsed);
 		qty.value = parsed as any;
 	},
 });
@@ -378,6 +378,13 @@ const syncStatus = computed(() => {
 	if (loading.value) return __("Loading items...");
 	if (isBackgroundLoading.value) return __("Syncing offline catalog...");
 	return "";
+});
+
+const lastSyncTimeLabel = computed(() => {
+	const lastSync = itemSync.last_background_sync_time?.value;
+	if (!lastSync) return __("Never");
+	const parsed = new Date(lastSync);
+	return Number.isNaN(parsed.getTime()) ? __("Never") : parsed.toLocaleTimeString();
 });
 
 // 4. Initialization logic for Composables needing Context
@@ -528,7 +535,7 @@ const scanProcessor = useScanProcessor({
 	eventBus,
 	format_number: itemDisplay.format_number,
 	float_precision: computed(() => pos_profile.value?.float_precision || 2),
-	hide_qty_decimals: computed(() => !!pos_profile.value?.posa_hide_qty_decimals),
+	hide_qty_decimals: computed(() => !!hide_qty_decimals.value),
 	blockSaleBeyondAvailableQty,
 	currency_precision: computed(() => pos_profile.value?.currency_precision || 2),
 	exchange_rate: computed(() => selected_exchange_rate.value),
@@ -594,13 +601,6 @@ const syncSelectorPriceList = async (incomingPriceList: unknown) => {
 
 	await itemsIntegration.get_items(true);
 	itemDetailFetcher.update_cur_items_details();
-};
-
-const formatBackgroundSyncTime = () => {
-	const lastSync = itemSync.last_background_sync_time?.value;
-	if (!lastSync) return __("Never");
-	const parsed = new Date(lastSync);
-	return Number.isNaN(parsed.getTime()) ? __("Never") : parsed.toLocaleTimeString();
 };
 
 const toggleItemSettings = () => {
@@ -849,7 +849,10 @@ const handleSearchInput = (val) => {
 	search_input.value = val;
 };
 const handleSearchPaste = (e) => itemsSelectorFocus.handleSearchPaste(e);
-const handleItemSearchFocus = () => itemsSelectorFocus.focusItemSearch();
+const handleItemSearchFocus = () => {
+	clearSearch();
+	itemsSelectorFocus.focusItemSearch();
+};
 const clearQty = () => {
 	qty.value = null as any;
 };
@@ -933,7 +936,7 @@ defineExpose({
 	scanErrorCode,
 	scanErrorDetails,
 	acknowledgeScanError,
-	formatBackgroundSyncTime,
+	lastSyncTimeLabel,
 	esc_event,
 	onEnter,
 	handleSearchKeydown,

@@ -51,6 +51,7 @@ export function useItemSync() {
 	const background_sync_in_flight = ref(false);
 	const isBackgroundLoading = ref(false);
 	const last_background_sync_time = ref<string | null>(null);
+	const BG_SYNC_LOG = "[POSA][BackgroundSync]";
 
 	// Context (Late Binding)
 	const ctx: ItemSyncContext = {
@@ -78,6 +79,18 @@ export function useItemSync() {
 
 	function startBackgroundSyncScheduler() {
 		stopBackgroundSyncScheduler();
+		console.debug(`${BG_SYNC_LOG} scheduler start requested`, {
+			enabled: ctx.enable_background_sync,
+			intervalSeconds: normalizeBackgroundSyncInterval(
+				ctx.background_sync_interval,
+			),
+		});
+		// Always hydrate last sync from local cache so UI can show it
+		// even before the next network sync cycle runs.
+		ensureBackgroundSyncBaseline().catch((error) => {
+			console.warn("Failed to load background sync baseline", error);
+		});
+
 		if (!ctx.enable_background_sync) {
 			return;
 		}
@@ -88,6 +101,7 @@ export function useItemSync() {
 		background_sync_timer.value = setInterval(() => {
 			performBackgroundSync({ source: "interval" });
 		}, intervalMs);
+		console.debug(`${BG_SYNC_LOG} scheduler active`, { intervalMs });
 
 		performBackgroundSync({ source: "initial" });
 	}
@@ -96,6 +110,7 @@ export function useItemSync() {
 		if (background_sync_timer.value) {
 			clearInterval(background_sync_timer.value);
 			background_sync_timer.value = null;
+			console.debug(`${BG_SYNC_LOG} scheduler stopped`);
 		}
 	}
 
@@ -103,6 +118,9 @@ export function useItemSync() {
 		const lastSync = getItemsLastSync();
 		if (lastSync) {
 			last_background_sync_time.value = lastSync;
+			console.debug(`${BG_SYNC_LOG} baseline loaded from local cache`, {
+				lastSync,
+			});
 			return lastSync;
 		}
 
@@ -111,16 +129,37 @@ export function useItemSync() {
 			if (serverTimestamp) {
 				setItemsLastSync(serverTimestamp);
 				last_background_sync_time.value = serverTimestamp;
+				console.debug(`${BG_SYNC_LOG} baseline fetched from server`, {
+					serverTimestamp,
+				});
 				return serverTimestamp;
 			}
 		}
 
+		console.debug(`${BG_SYNC_LOG} baseline unavailable`);
 		return null;
 	}
 
 	async function performBackgroundSync({
 		source = "manual",
 	}: { source?: string } = {}) {
+		const skipReasons: string[] = [];
+		if (!ctx.pos_profile || !(ctx.pos_profile as any)?.name) {
+			skipReasons.push("missing_pos_profile");
+		}
+		if (!ctx.enable_background_sync) {
+			skipReasons.push("disabled");
+		}
+		if (background_sync_in_flight.value) {
+			skipReasons.push("in_flight");
+		}
+		if (isOffline()) {
+			skipReasons.push("offline");
+		}
+		if (ctx.usesLimitSearch) {
+			skipReasons.push("limit_search_enabled");
+		}
+
 		if (
 			!shouldRunBackgroundSync({
 				posProfile: ctx.pos_profile,
@@ -130,16 +169,27 @@ export function useItemSync() {
 				usesLimitSearch: ctx.usesLimitSearch,
 			})
 		) {
+			console.debug(`${BG_SYNC_LOG} skipped`, { source, skipReasons });
 			return;
 		}
 
 		background_sync_in_flight.value = true;
+		const startedAt = Date.now();
+		let modifiedCount = 0;
 		try {
+			console.debug(`${BG_SYNC_LOG} started`, { source });
 			await ensureBackgroundSyncBaseline();
 
 			if (ctx.refreshModifiedItems) {
 				const { items: updatedItems } =
 					await ctx.refreshModifiedItems();
+				modifiedCount = Array.isArray(updatedItems)
+					? updatedItems.length
+					: 0;
+				console.debug(`${BG_SYNC_LOG} modified items fetched`, {
+					source,
+					modifiedCount,
+				});
 
 				if (updatedItems && updatedItems.length) {
 					if (ctx.itemDetailFetcher) {
@@ -166,9 +216,17 @@ export function useItemSync() {
 				}
 			}
 
-			last_background_sync_time.value = new Date().toISOString();
+			const syncedAt = new Date().toISOString();
+			last_background_sync_time.value = syncedAt;
+			setItemsLastSync(syncedAt);
+			console.debug(`${BG_SYNC_LOG} completed`, {
+				source,
+				modifiedCount,
+				durationMs: Date.now() - startedAt,
+				syncedAt,
+			});
 		} catch (error) {
-			console.error(`Background sync failed (${source})`, error);
+			console.error(`${BG_SYNC_LOG} failed`, { source, error });
 		} finally {
 			background_sync_in_flight.value = false;
 		}

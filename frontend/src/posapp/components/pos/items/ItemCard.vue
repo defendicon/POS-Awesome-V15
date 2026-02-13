@@ -69,7 +69,7 @@
 							'negative-number': isNegative(item.actual_qty),
 						}"
 					>
-						{{ formatNumber(item.actual_qty, hideQtyDecimals ? 0 : 4) || 0 }}
+						{{ formattedActualQty }}
 					</span>
 					<span class="stock-uom">{{ item.stock_uom || "" }}</span>
 				</div>
@@ -129,6 +129,17 @@ const showSecondaryPrice = computed(() => {
 		Boolean(props.selectedCurrency) &&
 		props.selectedCurrency !== primaryCurrency.value
 	);
+});
+
+const formattedActualQty = computed(() => {
+	const numericQty = Number(props.item.actual_qty ?? 0);
+	if (!Number.isFinite(numericQty)) {
+		return 0;
+	}
+	if (props.hideQtyDecimals) {
+		return props.formatNumber(Math.round(numericQty), 0);
+	}
+	return props.formatNumber(numericQty, 4);
 });
 
 const onClick = (event) => {
