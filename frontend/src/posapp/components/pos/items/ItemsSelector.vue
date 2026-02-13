@@ -358,12 +358,12 @@ const displayedItems = computed(() => {
 const debounce_qty = computed({
 	get() {
 		if (qty.value === null) return "";
-		return pos_profile.value?.posa_hide_qty_decimals ? Math.trunc(qty.value) : qty.value;
+		return hide_qty_decimals.value ? Math.trunc(qty.value) : qty.value;
 	},
 	set(value) {
 		let parsed: number | null = parseFloat(String(value).replace(/,/g, ""));
 		if (isNaN(parsed)) parsed = null;
-		if (pos_profile.value?.posa_hide_qty_decimals && parsed != null) parsed = Math.trunc(parsed);
+		if (hide_qty_decimals.value && parsed != null) parsed = Math.trunc(parsed);
 		qty.value = parsed as any;
 	},
 });
@@ -528,7 +528,7 @@ const scanProcessor = useScanProcessor({
 	eventBus,
 	format_number: itemDisplay.format_number,
 	float_precision: computed(() => pos_profile.value?.float_precision || 2),
-	hide_qty_decimals: computed(() => !!pos_profile.value?.posa_hide_qty_decimals),
+	hide_qty_decimals: computed(() => !!hide_qty_decimals.value),
 	blockSaleBeyondAvailableQty,
 	currency_precision: computed(() => pos_profile.value?.currency_precision || 2),
 	exchange_rate: computed(() => selected_exchange_rate.value),

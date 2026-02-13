@@ -15,6 +15,11 @@ type SearchItem = {
 	serial_no_data?: Array<{ serial_no?: string }>;
 	batch_no_data?: Array<{ batch_no?: string }>;
 	rate?: number | string;
+	original_rate?: number | string;
+	price_list_rate?: number | string;
+	standard_rate?: number | string;
+	base_rate?: number | string;
+	base_price_list_rate?: number | string;
 	variant_of?: string;
 	_search_index?: string;
 	[key: string]: unknown;
@@ -210,6 +215,23 @@ export function useItemSearch() {
 
 		const result: SearchItem[] = [];
 		const activeTerms = searchTerms || [];
+		const resolveItemRate = (item: SearchItem): number => {
+			const candidates = [
+				item.original_rate,
+				item.rate,
+				item.price_list_rate,
+				item.standard_rate,
+				item.base_rate,
+				item.base_price_list_rate,
+			];
+			for (const candidate of candidates) {
+				const parsed = Number(candidate);
+				if (Number.isFinite(parsed)) {
+					return parsed;
+				}
+			}
+			return 0;
+		};
 		for (let i = 0; i < items.length; i++) {
 			const item = items[i];
 			if (!item) continue;
@@ -237,7 +259,7 @@ export function useItemSearch() {
 
 			// 2. Zero Rate Filter
 			if (hideZeroRate) {
-				if (parseFloat(String(item.rate ?? 0)) <= 0) continue;
+				if (resolveItemRate(item) <= 0) continue;
 			}
 
 			// 3. Variant Filter
