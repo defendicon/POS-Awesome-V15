@@ -849,7 +849,10 @@ const handleSearchInput = (val) => {
 	search_input.value = val;
 };
 const handleSearchPaste = (e) => itemsSelectorFocus.handleSearchPaste(e);
-const handleItemSearchFocus = () => itemsSelectorFocus.focusItemSearch();
+const handleItemSearchFocus = () => {
+	clearSearch();
+	itemsSelectorFocus.focusItemSearch();
+};
 const clearQty = () => {
 	qty.value = null as any;
 };
