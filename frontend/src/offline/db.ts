@@ -184,6 +184,7 @@ export function persist(key: string, value: unknown = memory[key]) {
 		}
 		try {
 			persistWorker.postMessage({ type: "persist", key, value: clean });
+			return;
 		} catch (e) {
 			console.error("Failed to persist via worker", key, e);
 		}
