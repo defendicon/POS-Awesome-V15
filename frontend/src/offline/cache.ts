@@ -17,6 +17,7 @@ export async function searchStoredItems({
 	itemGroup = "",
 	limit = 100,
 	offset = 0,
+	scope = "",
 } = {}) {
 	try {
 		await checkDbHealth();
@@ -28,6 +29,11 @@ export async function searchStoredItems({
 			collection = collection
 				.where("item_group")
 				.equalsIgnoreCase(normalizedGroup);
+		}
+		if (scope) {
+			collection = collection.filter(
+				(it) => String(it.profile_scope || "") === String(scope),
+			);
 		}
 		const normalizedSearch =
 			typeof search === "string" ? search.trim() : "";
@@ -70,29 +76,71 @@ export async function getStoredItemsCount() {
 	}
 }
 
-export async function getAllStoredItems() {
-	return await getStoredItems();
-}
-
-export async function saveItemsBulk(items) {
-	return await saveItems(items);
-}
-
-export async function saveItems(items) {
+export async function getStoredItemsCountByScope(scope = "") {
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		await db.table("items").bulkPut(items);
+		if (!scope) {
+			return await db.table("items").count();
+		}
+		return await db
+			.table("items")
+			.filter((it) => String(it.profile_scope || "") === String(scope))
+			.count();
+	} catch {
+		return 0;
+	}
+}
+
+export async function getAllStoredItems(scope = "") {
+	if (!scope) {
+		return await getStoredItems();
+	}
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		return await db
+			.table("items")
+			.filter((it) => String(it.profile_scope || "") === String(scope))
+			.toArray();
+	} catch (e) {
+		console.error("Failed to read scoped stored items", e);
+		return [];
+	}
+}
+
+export async function saveItemsBulk(items, scope = "") {
+	return await saveItems(items, scope);
+}
+
+export async function saveItems(items, scope = "") {
+	try {
+		await checkDbHealth();
+		if (!db.isOpen()) await db.open();
+		const scopedItems = Array.isArray(items)
+			? items.map((it) => ({
+					...it,
+					profile_scope: scope || it?.profile_scope || "",
+				}))
+			: [];
+		await db.table("items").bulkPut(scopedItems);
 	} catch (e) {
 		console.error("Failed to save items", e);
 	}
 }
 
-export async function clearStoredItems() {
+export async function clearStoredItems(scope = "") {
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		await db.table("items").clear();
+		if (!scope) {
+			await db.table("items").clear();
+			return;
+		}
+		await db
+			.table("items")
+			.filter((it) => String(it.profile_scope || "") === String(scope))
+			.delete();
 	} catch (e) {
 		console.error("Failed to clear stored items", e);
 	}

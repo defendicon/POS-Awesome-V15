@@ -649,7 +649,8 @@ export function useScanProcessor(context: ScanProcessorContext) {
 					searchCache.value.clear();
 				}
 
-				await saveItems(items.value);
+				const profileScope = `${pos_profile.value?.name || "no_profile"}_${pos_profile.value?.warehouse || "no_warehouse"}`;
+				await saveItems(items.value, profileScope);
 				await savePriceListItems(
 					customer_price_list.value,
 					items.value,

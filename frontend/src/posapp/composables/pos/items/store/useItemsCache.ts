@@ -250,8 +250,9 @@ export function useItemsCache() {
 		search: string,
 		group: string,
 		priceList: string | null,
+		scope: string = "global",
 	) => {
-		return `items_${search || "all"}_${group}_${priceList || "default"}`;
+		return `items_${scope}_${search || "all"}_${group}_${priceList || "default"}`;
 	};
 
 	return {

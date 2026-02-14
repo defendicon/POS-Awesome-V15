@@ -8,6 +8,7 @@ import {
 	setOpeningStorage,
 	clearOpeningStorage,
 	setTaxTemplate,
+	isOffline,
 } from "../../../../offline/index";
 
 declare const frappe: any;
@@ -21,6 +22,18 @@ export function usePosShift(openDialog?: () => void) {
 
 	const pos_profile = ref<any>(null);
 	const pos_opening_shift = ref<any>(null);
+
+	const isCachedOpeningValidForCurrentUser = (data: any) => {
+		if (!data || !data.pos_profile || !data.pos_opening_shift) {
+			return false;
+		}
+		const currentUser = frappe?.session?.user;
+		const cachedUser = data?.pos_opening_shift?.user;
+		if (!currentUser || !cachedUser) {
+			return false;
+		}
+		return currentUser === cachedUser;
+	};
 
 	async function check_opening_entry() {
 		await initPromise;
@@ -65,27 +78,14 @@ export function usePosShift(openDialog?: () => void) {
 					}
 				} else {
 					console.info("No opening shift found, opening dialog");
-					const data: any = getOpeningStorage();
-					if (data) {
-						pos_profile.value = data.pos_profile;
-						pos_opening_shift.value = data.pos_opening_shift;
-						uiStore.setRegisterData(data);
-
-						try {
-							frappe.realtime.emit("pos_profile_registered");
-						} catch (e) {
-							console.warn("Realtime emit failed", e);
-						}
-						console.info("LoadPosProfile (cached)");
-						return;
-					}
+					clearOpeningStorage();
 					openDialog && openDialog();
 				}
 			})
 			.catch((err: unknown) => {
 				console.error("Error checking opening entry", err);
 				const data: any = getOpeningStorage();
-				if (data) {
+				if (isOffline() && isCachedOpeningValidForCurrentUser(data)) {
 					pos_profile.value = data.pos_profile;
 					pos_opening_shift.value = data.pos_opening_shift;
 					uiStore.setRegisterData(data);
@@ -97,6 +97,9 @@ export function usePosShift(openDialog?: () => void) {
 					}
 					console.info("LoadPosProfile (cached)");
 					return;
+				}
+				if (!isOffline()) {
+					clearOpeningStorage();
 				}
 				openDialog && openDialog();
 			});

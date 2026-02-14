@@ -120,6 +120,7 @@ import {
 	checkDbHealth,
 	setOpeningStorage,
 	getOpeningStorage,
+	clearOpeningStorage,
 	isOffline,
 	getPendingOfflinePaymentCount,
 	syncOfflinePayments,
@@ -525,18 +526,7 @@ export default {
 					setOpeningStorage(r.message);
 					payment_methods_list.value = pos_profile.value.payments.map((p) => p.mode_of_payment);
 				} else {
-					const cached = getOpeningStorage();
-					if (cached) {
-						pos_profile.value = cached.pos_profile;
-						pos_opening_shift.value = cached.pos_opening_shift;
-						company.value = cached.company.name;
-						companyCurrency.value = cached.company?.default_currency;
-						uiStore.setRegisterData(cached);
-						proxy?.eventBus?.emit("payments_register_pos_profile", cached);
-						set_payment_methods();
-						await loadPaymentMethodCurrencies();
-						payment_methods_list.value = pos_profile.value.payments.map((p) => p.mode_of_payment);
-					}
+					clearOpeningStorage();
 				}
 				get_pos_profiles();
 				if (customer_name.value) {
@@ -546,6 +536,23 @@ export default {
 				}
 			} catch (e) {
 				console.error("Error checking opening entry", e);
+				const cached = getOpeningStorage();
+				const currentUser = frappe?.session?.user;
+				const cachedUser = cached?.pos_opening_shift?.user;
+				if (isOffline() && cached && currentUser && cachedUser === currentUser) {
+						pos_profile.value = cached.pos_profile;
+						pos_opening_shift.value = cached.pos_opening_shift;
+						company.value = cached.company.name;
+						companyCurrency.value = cached.company?.default_currency;
+						uiStore.setRegisterData(cached);
+						proxy?.eventBus?.emit("payments_register_pos_profile", cached);
+						set_payment_methods();
+						await loadPaymentMethodCurrencies();
+						payment_methods_list.value = pos_profile.value.payments.map((p) => p.mode_of_payment);
+				}
+				if (!isOffline()) {
+					clearOpeningStorage();
+				}
 			}
 		};
 
