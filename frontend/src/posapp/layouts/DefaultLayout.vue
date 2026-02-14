@@ -78,6 +78,7 @@ import {
 } from "../composables/core/useNetwork";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
+import { isCachedOpeningValidForCurrentUser } from "../utils/openingCache";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -322,8 +323,13 @@ const initializeData = async () => {
 	checkDbHealth().catch(() => {});
 	// Load POS profile from cache or storage
 	const openingData = getOpeningStorage();
-	if (openingData && openingData.pos_profile) {
-		posProfile.value = openingData.pos_profile;
+	if (
+		openingData &&
+		openingData.pos_profile &&
+		isOffline() &&
+		isCachedOpeningValidForCurrentUser(openingData, frappe?.session?.user)
+	) {
+		uiStore.setRegisterData(openingData);
 		if (navigator.onLine) {
 			await refreshTaxInclusiveSetting();
 		}
@@ -358,8 +364,14 @@ const initializeData = async () => {
 
 	markSourceLoaded("init");
 
-	// Trigger initial customer load if online
-	if (navigator.onLine && !isOffline()) {
+	// Trigger initial customer load only when POS profile is already available
+	if (
+		navigator.onLine &&
+		!isOffline() &&
+		posProfile.value &&
+		posProfile.value.name
+	) {
+		customersStore.setPosProfile(posProfile.value);
 		customersStore.get_customer_names();
 	}
 };

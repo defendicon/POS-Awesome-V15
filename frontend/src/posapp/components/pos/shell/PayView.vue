@@ -120,6 +120,7 @@ import {
 	checkDbHealth,
 	setOpeningStorage,
 	getOpeningStorage,
+	clearOpeningStorage,
 	isOffline,
 	getPendingOfflinePaymentCount,
 	syncOfflinePayments,
@@ -135,6 +136,7 @@ import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useToastStore } from "../../../stores/toastStore.js";
+import { isCachedOpeningValidForCurrentUser } from "../../../utils/openingCache";
 
 // Composables
 import { usePosPayData } from "../../../composables/pos/payments/usePosPayData";
@@ -525,18 +527,7 @@ export default {
 					setOpeningStorage(r.message);
 					payment_methods_list.value = pos_profile.value.payments.map((p) => p.mode_of_payment);
 				} else {
-					const cached = getOpeningStorage();
-					if (cached) {
-						pos_profile.value = cached.pos_profile;
-						pos_opening_shift.value = cached.pos_opening_shift;
-						company.value = cached.company.name;
-						companyCurrency.value = cached.company?.default_currency;
-						uiStore.setRegisterData(cached);
-						proxy?.eventBus?.emit("payments_register_pos_profile", cached);
-						set_payment_methods();
-						await loadPaymentMethodCurrencies();
-						payment_methods_list.value = pos_profile.value.payments.map((p) => p.mode_of_payment);
-					}
+					clearOpeningStorage();
 				}
 				get_pos_profiles();
 				if (customer_name.value) {
@@ -546,6 +537,24 @@ export default {
 				}
 			} catch (e) {
 				console.error("Error checking opening entry", e);
+				const cached = getOpeningStorage();
+				if (
+					isOffline() &&
+					isCachedOpeningValidForCurrentUser(cached, frappe?.session?.user)
+				) {
+						pos_profile.value = cached.pos_profile;
+						pos_opening_shift.value = cached.pos_opening_shift;
+						company.value = cached.company.name;
+						companyCurrency.value = cached.company?.default_currency;
+						uiStore.setRegisterData(cached);
+						proxy?.eventBus?.emit("payments_register_pos_profile", cached);
+						set_payment_methods();
+						await loadPaymentMethodCurrencies();
+						payment_methods_list.value = pos_profile.value.payments.map((p) => p.mode_of_payment);
+				}
+				if (!isOffline()) {
+					clearOpeningStorage();
+				}
 			}
 		};
 

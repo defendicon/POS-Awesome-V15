@@ -62,6 +62,7 @@ export function useItemsSync() {
 		itemsBatch: Item[],
 		shouldPersist: boolean,
 		replaceExisting: boolean,
+		scope: string,
 		updateCachedPaginationCallback: () => Promise<void>,
 	) => {
 		if (!shouldPersist) {
@@ -74,10 +75,10 @@ export function useItemsSync() {
 
 		try {
 			if (replaceExisting) {
-				await clearStoredItems();
+				await clearStoredItems(scope);
 			}
 
-			await saveItemsBulk(itemsBatch);
+			await saveItemsBulk(itemsBatch, scope);
 			await updateCachedPaginationCallback();
 		} catch (error) {
 			console.error("Failed to persist items batch:", error);
@@ -160,6 +161,7 @@ export function useItemsSync() {
 		posProfile: POSProfile | null,
 		activePriceList: string,
 		customer: string | null,
+		scope: string,
 		updateItemsInPlace: (_items: Item[]) => void,
 		itemsMap: Map<string, Item>,
 	) => {
@@ -187,7 +189,7 @@ export function useItemsSync() {
 
 			if (fetchedItems.length > 0) {
 				updateItemsInPlace(fetchedItems);
-				await saveItemsBulk(fetchedItems);
+				await saveItemsBulk(fetchedItems, scope);
 				resolvedItems = fetchedItems
 					.map((item) => itemsMap.get(item.item_code))
 					.filter((item): item is Item => !!item);
@@ -221,6 +223,7 @@ export function useItemsSync() {
 		} = {},
 		posProfile: POSProfile | null,
 		activePriceList: string,
+		scope: string,
 		shouldPersistItems: boolean,
 		resolvePageSize: (_pageSize?: number) => number,
 		setItems: (_items: Item[], _options?: any) => void,
@@ -258,9 +261,9 @@ export function useItemsSync() {
 
 		try {
 			if (reset) {
-				await clearStoredItems();
+				await clearStoredItems(scope);
 				if (Array.isArray(initialBatch) && initialBatch.length) {
-					await saveItemsBulk(initialBatch);
+					await saveItemsBulk(initialBatch, scope);
 					await updateCachedPaginationFromStorage();
 				}
 			}
@@ -309,7 +312,7 @@ export function useItemsSync() {
 					break;
 				}
 
-				await saveItemsBulk(batch);
+				await saveItemsBulk(batch, scope);
 				setItems(batch, { append: true });
 				appended.push(...batch);
 				loaded += batch.length;

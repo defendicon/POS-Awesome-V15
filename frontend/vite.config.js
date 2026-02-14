@@ -59,6 +59,7 @@ export default defineConfig({
 	},
 	build: {
 		target: "esnext",
+		modulePreload: false,
 		outDir: "../posawesome/public/dist/js",
 		emptyOutDir: true,
 		cssCodeSplit: false,

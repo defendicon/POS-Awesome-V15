@@ -9,7 +9,7 @@ import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
 // @ts-ignore
 import {
-	getStoredItemsCount,
+	getStoredItemsCountByScope,
 	getAllStoredItems,
 	searchStoredItems,
 	getCachedPriceListItems,
@@ -149,6 +149,14 @@ export const useItemsStore = defineStore("items", () => {
 		return Boolean(posProfile.value?.posa_local_storage);
 	};
 
+	const getCacheScope = () => {
+		const profileName = posProfile.value?.name || "no_profile";
+		const warehouse = posProfile.value?.warehouse || "no_warehouse";
+		return `${profileName}_${warehouse}`;
+	};
+
+	const getStorageScope = () => getCacheScope();
+
 	const setItems = (
 		newItems: Item[],
 		options: { append?: boolean; totalCount?: number } = {},
@@ -286,7 +294,9 @@ export const useItemsStore = defineStore("items", () => {
 				return;
 			}
 
-			const cachedCount = await getStoredItemsCount().catch(() => 0);
+			const cachedCount = await getStoredItemsCountByScope(
+				getStorageScope(),
+			).catch(() => 0);
 			const resolvedCount = Number.isFinite(cachedCount)
 				? cachedCount
 				: 0;
@@ -306,7 +316,9 @@ export const useItemsStore = defineStore("items", () => {
 			});
 
 			if (!shouldPaginate) {
-				const cachedItems = await getAllStoredItems().catch(() => []);
+				const cachedItems = await getAllStoredItems(
+					getStorageScope(),
+				).catch(() => []);
 				if (Array.isArray(cachedItems) && cachedItems.length) {
 					setItems(cachedItems, { totalCount: resolvedCount });
 					cachedPagination.value.offset = cachedItems.length;
@@ -320,6 +332,7 @@ export const useItemsStore = defineStore("items", () => {
 				itemGroup: itemGroup.value,
 				limit: cachedPagination.value.pageSize,
 				offset: 0,
+				scope: getStorageScope(),
 			});
 
 			const safeInitial = Array.isArray(initialItems) ? initialItems : [];
@@ -346,6 +359,7 @@ export const useItemsStore = defineStore("items", () => {
 			options,
 			posProfile.value,
 			activePriceList.value,
+			getStorageScope(),
 			shouldPersistItems(),
 			resolvePageSize,
 			setItems,
@@ -400,6 +414,7 @@ export const useItemsStore = defineStore("items", () => {
 				searchValue,
 				normalizedGroup,
 				priceList,
+				getCacheScope(),
 			);
 
 			const resolvedLimit =
@@ -482,6 +497,7 @@ export const useItemsStore = defineStore("items", () => {
 					fetchedItems,
 					shouldPersistItems(),
 					forceServer,
+					getStorageScope(),
 					async () => {
 						await updateCachedPaginationFromStorage(
 							items.value.length,
@@ -617,7 +633,7 @@ export const useItemsStore = defineStore("items", () => {
 			}
 		}
 
-		const cacheKey = `search_${term}_${itemGroup.value}`;
+		const cacheKey = `search_${getCacheScope()}_${activePriceList.value || "default"}_${term}_${itemGroup.value}`;
 		const cached = getCachedSearchResult(cacheKey);
 		if (cached) {
 			filteredItems.value = cached;
@@ -640,6 +656,7 @@ export const useItemsStore = defineStore("items", () => {
 					itemGroup: normalizedGroup,
 					limit: cachedPagination.value.pageSize,
 					offset: 0,
+					scope: getStorageScope(),
 				});
 
 				searchResults = Array.isArray(results) ? results : [];
@@ -725,6 +742,7 @@ export const useItemsStore = defineStore("items", () => {
 				itemGroup: cachedPagination.value.group,
 				limit: cachedPagination.value.pageSize,
 				offset: cachedPagination.value.offset,
+				scope: getStorageScope(),
 			});
 
 			const safePage = Array.isArray(nextPage) ? nextPage : [];
@@ -781,6 +799,7 @@ export const useItemsStore = defineStore("items", () => {
 			itemGroup: normalizedGroup,
 			limit: cachedPagination.value.pageSize,
 			offset: 0,
+			scope: getStorageScope(),
 		});
 
 		const safePage = Array.isArray(firstPage) ? firstPage : [];
@@ -794,7 +813,7 @@ export const useItemsStore = defineStore("items", () => {
 		customerPriceList.value = newPriceList;
 
 		try {
-			const cacheKey = `price_list_${newPriceList}`;
+			const cacheKey = `price_list_${getCacheScope()}_${newPriceList}`;
 			let priceData = getCachedPriceList(cacheKey);
 
 			if (!priceData) {
@@ -924,6 +943,7 @@ export const useItemsStore = defineStore("items", () => {
 			posProfile.value,
 			activePriceList.value,
 			customer.value,
+			getStorageScope(),
 			(updates) => updateItemsInPlace(updates),
 			itemsMap.value,
 		);

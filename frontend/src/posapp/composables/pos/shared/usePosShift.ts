@@ -8,7 +8,9 @@ import {
 	setOpeningStorage,
 	clearOpeningStorage,
 	setTaxTemplate,
+	isOffline,
 } from "../../../../offline/index";
+import { isCachedOpeningValidForCurrentUser } from "../../../utils/openingCache";
 
 declare const frappe: any;
 
@@ -65,27 +67,17 @@ export function usePosShift(openDialog?: () => void) {
 					}
 				} else {
 					console.info("No opening shift found, opening dialog");
-					const data: any = getOpeningStorage();
-					if (data) {
-						pos_profile.value = data.pos_profile;
-						pos_opening_shift.value = data.pos_opening_shift;
-						uiStore.setRegisterData(data);
-
-						try {
-							frappe.realtime.emit("pos_profile_registered");
-						} catch (e) {
-							console.warn("Realtime emit failed", e);
-						}
-						console.info("LoadPosProfile (cached)");
-						return;
-					}
+					clearOpeningStorage();
 					openDialog && openDialog();
 				}
 			})
 			.catch((err: unknown) => {
 				console.error("Error checking opening entry", err);
 				const data: any = getOpeningStorage();
-				if (data) {
+				if (
+					isOffline() &&
+					isCachedOpeningValidForCurrentUser(data, frappe?.session?.user)
+				) {
 					pos_profile.value = data.pos_profile;
 					pos_opening_shift.value = data.pos_opening_shift;
 					uiStore.setRegisterData(data);
@@ -97,6 +89,9 @@ export function usePosShift(openDialog?: () => void) {
 					}
 					console.info("LoadPosProfile (cached)");
 					return;
+				}
+				if (!isOffline()) {
+					clearOpeningStorage();
 				}
 				openDialog && openDialog();
 			});
