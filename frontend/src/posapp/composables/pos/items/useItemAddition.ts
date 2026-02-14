@@ -354,9 +354,7 @@ export function useItemAddition() {
 			}
 			let index = -1;
 			let mergeTarget: any = null;
-			const requireBatchMatch = !(
-				context.pos_profile.posa_auto_set_batch && item.has_batch_no
-			);
+			const requireBatchMatch = Boolean(item.has_batch_no);
 			if (!context.new_line) {
 				// For normal additions (not returns), only merge with existing positive quantity lines
 				mergeTarget = findMergeTarget(context, item, requireBatchMatch);
@@ -531,7 +529,9 @@ export function useItemAddition() {
 										pendingItem.item_code ===
 											new_item.item_code &&
 										pendingItem.uom === new_item.uom &&
-										pendingItem.rate === new_item.rate
+										pendingItem.rate === new_item.rate &&
+										(pendingItem.batch_no || "") ===
+											(new_item.batch_no || "")
 									);
 								},
 							);

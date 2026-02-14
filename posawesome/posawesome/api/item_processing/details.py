@@ -46,12 +46,17 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     today = nowdate()
     item_code = item.get("item_code")
     batch_no_data = []
+    non_expired_batch_qty = 0
     serial_no_data = []
     if warehouse and item.get("has_batch_no"):
         batch_rows = get_batches(warehouse, (item_code,))
         for row in batch_rows:
             if not row.batch_no:
                 continue
+            is_expired = bool(row.expiry_date and str(row.expiry_date) <= str(today))
+            if is_expired:
+                continue
+            non_expired_batch_qty += row.batch_qty or 0
             batch_no_data.append(
                 {
                     "batch_no": row.batch_no,
@@ -59,7 +64,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
                     "expiry_date": row.expiry_date,
                     "batch_price": row.batch_price,
                     "manufacturing_date": row.manufacturing_date,
-                    "is_expired": bool(row.expiry_date and str(row.expiry_date) <= str(today)),
+                    "is_expired": False,
                 }
             )
     if warehouse and item.get("has_serial_no"):
@@ -142,7 +147,10 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
         overwrite_warehouse=False,
     )
     if item.get("is_stock_item") and warehouse:
-        res["actual_qty"] = get_stock_availability(item_code, warehouse)
+        if item.get("has_batch_no"):
+            res["actual_qty"] = non_expired_batch_qty
+        else:
+            res["actual_qty"] = get_stock_availability(item_code, warehouse)
     res["max_discount"] = max_discount
     res["batch_no_data"] = batch_no_data
     res["serial_no_data"] = serial_no_data

@@ -62,3 +62,44 @@ describe("useBatchSerial.setSerialNo", () => {
 		expect(item.qty).toBe(1);
 	});
 });
+
+describe("useBatchSerial.setBatchQty", () => {
+	it("ignores expired batches and picks next non-expired batch", () => {
+		const { setBatchQty } = useBatchSerial();
+		const context: any = {
+			items: [],
+			price_list_currency: "USD",
+			selected_currency: "USD",
+			exchange_rate: 1,
+			currency_precision: 2,
+			flt: (value: any) => Number(value),
+			forceUpdate: vi.fn(),
+		};
+
+		const item: any = {
+			item_code: "ITEM-BATCH",
+			qty: 3,
+			has_batch_no: 1,
+			has_serial_no: 0,
+			batch_no_data: [
+				{
+					batch_no: "B-EXPIRED",
+					batch_qty: 10,
+					is_expired: true,
+				},
+				{
+					batch_no: "B-VALID",
+					batch_qty: 5,
+					is_expired: false,
+				},
+			],
+		};
+
+		setBatchQty(item, null, false, context);
+
+		expect(item.batch_no).toBe("B-VALID");
+		expect(item.batch_no_data.map((b: any) => b.batch_no)).toEqual([
+			"B-VALID",
+		]);
+	});
+});

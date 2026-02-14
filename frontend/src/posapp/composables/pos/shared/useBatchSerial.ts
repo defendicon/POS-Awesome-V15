@@ -110,7 +110,7 @@ export function useBatchSerial() {
 		const source_batches = Array.isArray(item.batch_no_data)
 			? item.batch_no_data
 			: [];
-		const normalized_batch_data: any[] = source_batches
+		let normalized_batch_data: any[] = source_batches
 			.map((batch, index) => {
 				const baseQty =
 					Number(
@@ -154,6 +154,10 @@ export function useBatchSerial() {
 				qtyToAllocate -= deduction;
 			});
 		});
+
+		normalized_batch_data = normalized_batch_data.filter(
+			(batch) => !batch.is_expired,
+		);
 
 		normalized_batch_data.sort((a, b) => {
 			const aExpired = a.is_expired;
