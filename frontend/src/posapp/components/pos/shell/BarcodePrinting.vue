@@ -312,13 +312,6 @@ export default {
 						? this.itemsStore.posProfile
 						: {};
 
-			// Check if item already exists
-			const existingItem = this.items.find((i) => i.item_code === item.item_code);
-			if (existingItem) {
-				existingItem.qty += 1;
-				return;
-			}
-
 			// 1. Try to find barcode in the passed item object
 			let barcode = item.barcode;
 			let itemBarcodes = Array.isArray(item.item_barcode) ? item.item_barcode : [];
@@ -424,8 +417,10 @@ export default {
 			// If empty or invalid, default to 1
 			const qty = parseInt(this.addItemQty) || 1;
 
-			// Check if item already exists
-			const existingItem = this.items.find((i) => i.item_code === item.item_code);
+			// Check if item already exists (same item + same UOM)
+			const existingItem = this.items.find(
+				(i) => i.item_code === item.item_code && (i.uom || "") === (item.uom || ""),
+			);
 			if (existingItem) {
 				existingItem.qty += qty;
 				// Optional: Move to top if desired, but user only asked for new items to be at top
