@@ -479,16 +479,16 @@ export function useItemDetailFetcher() {
 								actual_qty: updated_item.actual_qty,
 								has_batch_no: updated_item.has_batch_no,
 								has_serial_no: updated_item.has_serial_no,
-								batch_no_data:
-									updated_item.batch_no_data &&
-									updated_item.batch_no_data.length > 0
-										? updated_item.batch_no_data
-										: item.batch_no_data,
-								serial_no_data:
-									updated_item.serial_no_data &&
-									updated_item.serial_no_data.length > 0
-										? updated_item.serial_no_data
-										: item.serial_no_data,
+								batch_no_data: Array.isArray(
+									updated_item.batch_no_data,
+								)
+									? updated_item.batch_no_data
+									: item.batch_no_data,
+								serial_no_data: Array.isArray(
+									updated_item.serial_no_data,
+								)
+									? updated_item.serial_no_data
+									: item.serial_no_data,
 								item_uoms:
 									updated_item.item_uoms &&
 									updated_item.item_uoms.length > 0
