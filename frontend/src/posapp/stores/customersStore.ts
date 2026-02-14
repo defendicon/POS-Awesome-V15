@@ -114,6 +114,37 @@ export const useCustomersStore = defineStore("customers", () => {
 	const refreshToken = ref(0);
 	const isUpdateCustomerDialogOpen = ref(false);
 	const customerToUpdate = ref<Customer | null>(null);
+	let customerFetchPromise: Promise<void> | null = null;
+	const customerLoadLogState = {
+		local: false,
+		server: false,
+		final: false,
+	};
+
+	function resetCustomerLoadLogState() {
+		customerLoadLogState.local = false;
+		customerLoadLogState.server = false;
+		customerLoadLogState.final = false;
+	}
+
+	function logLocalCustomerCount(count: number) {
+		if (customerLoadLogState.local) return;
+		console.log(`Local customer count: ${count}`);
+		customerLoadLogState.local = true;
+	}
+
+	function logServerCustomerCount(count: number) {
+		if (customerLoadLogState.server) return;
+		console.log(`Server customer count: ${count}`);
+		customerLoadLogState.server = true;
+	}
+
+	function logFinalLoadedCustomerCount() {
+		if (customerLoadLogState.final) return;
+		const count = Number(loadedCustomerCount.value || customers.value.length || 0);
+		console.log(`Customers loaded: ${count}`);
+		customerLoadLogState.final = true;
+	}
 
 	const filteredCustomers = computed(() => customers.value);
 
@@ -314,6 +345,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					setCustomersLastSync(new Date().toISOString());
 					loadProgress.value = 100;
 					customersLoaded.value = true;
+					logFinalLoadedCustomerCount();
 				}
 			}
 		} catch (err) {
@@ -350,6 +382,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				args: { pos_profile: serializedProfile },
 			});
 			const serverCount = response.message || 0;
+			logServerCustomerCount(serverCount);
 			totalCustomerCount.value = serverCount;
 			loadedCustomerCount.value = localCount;
 			loadProgress.value = serverCount
@@ -387,20 +420,25 @@ export const useCustomersStore = defineStore("customers", () => {
 					setCustomersLastSync(new Date().toISOString());
 					loadProgress.value = 100;
 					customersLoaded.value = true;
+					logFinalLoadedCustomerCount();
 				}
 				await searchCustomers(searchTerm.value);
 			} else if (serverCount < localCount) {
 				await clearCustomerStorage();
 				setCustomersLastSync(null);
 				resetPagination();
-				await get_customer_names();
+				await load_customer_names_internal();
+			} else {
+				if (customersLoaded.value || localCount > 0) {
+					logFinalLoadedCustomerCount();
+				}
 			}
 		} catch (err) {
 			console.error("Error verifying customer count:", err);
 		}
 	}
 
-	async function get_customer_names() {
+	async function load_customer_names_internal() {
 		if (!posProfile.value) {
 			console.debug("Customer fetch skipped: POS Profile not ready");
 			return;
@@ -412,12 +450,15 @@ export const useCustomersStore = defineStore("customers", () => {
 
 		await ensureDatabase();
 		const localCount = await getCustomerStorageCount();
-		console.log(`Checking local customer count: ${localCount}`);
+		logLocalCustomerCount(localCount);
 
 		if (localCount > 0) {
 			customersLoaded.value = true;
 			await searchCustomers(searchTerm.value);
 			await verifyServerCustomerCount();
+			if (!nextCustomerStart.value) {
+				logFinalLoadedCustomerCount();
+			}
 			return;
 		}
 
@@ -441,22 +482,17 @@ export const useCustomersStore = defineStore("customers", () => {
 					args: { pos_profile: serializedProfile },
 				});
 				totalCustomerCount.value = countResponse.message || 0;
-				console.log(
-					`Server reports ${totalCustomerCount.value} customers`,
-				);
+				logServerCustomerCount(totalCustomerCount.value);
 			} catch (err) {
 				console.error("Failed to fetch customer count", err);
 				totalCustomerCount.value = 0;
 			}
 
-			// Force fetch page 1
-			console.log("Fetching first page of customers...");
 			const rows: Customer[] = await fetchCustomerPage(
 				null,
 				syncSince,
 				PAGE_SIZE,
 			);
-			console.log(`Fetched ${rows.length} customers in first page`);
 
 			if (rows.length) {
 				await setCustomerStorage(rows);
@@ -481,6 +517,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				setCustomersLastSync(new Date().toISOString());
 				loadProgress.value = 100;
 				customersLoaded.value = true;
+				logFinalLoadedCustomerCount();
 			}
 			customersLoaded.value = true;
 		} catch (err) {
@@ -490,6 +527,18 @@ export const useCustomersStore = defineStore("customers", () => {
 			customersLoaded.value = true;
 			await searchCustomers(searchTerm.value);
 		}
+	}
+
+	async function get_customer_names() {
+		if (customerFetchPromise) {
+			return customerFetchPromise;
+		}
+
+		resetCustomerLoadLogState();
+		customerFetchPromise = load_customer_names_internal().finally(() => {
+			customerFetchPromise = null;
+		});
+		return customerFetchPromise;
 	}
 
 	async function addOrUpdateCustomer(customer: Customer) {
@@ -547,6 +596,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		loadedCustomerCount.value = 0;
 		customersLoaded.value = false;
 		nextCustomerStart.value = null;
+		resetCustomerLoadLogState();
 	}
 
 	return {
