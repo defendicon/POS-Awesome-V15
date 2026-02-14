@@ -136,6 +136,7 @@ import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
 import { useUIStore } from "../../../stores/uiStore.js";
 import { useToastStore } from "../../../stores/toastStore.js";
+import { isCachedOpeningValidForCurrentUser } from "../../../utils/openingCache";
 
 // Composables
 import { usePosPayData } from "../../../composables/pos/payments/usePosPayData";
@@ -537,9 +538,10 @@ export default {
 			} catch (e) {
 				console.error("Error checking opening entry", e);
 				const cached = getOpeningStorage();
-				const currentUser = frappe?.session?.user;
-				const cachedUser = cached?.pos_opening_shift?.user;
-				if (isOffline() && cached && currentUser && cachedUser === currentUser) {
+				if (
+					isOffline() &&
+					isCachedOpeningValidForCurrentUser(cached, frappe?.session?.user)
+				) {
 						pos_profile.value = cached.pos_profile;
 						pos_opening_shift.value = cached.pos_opening_shift;
 						company.value = cached.company.name;

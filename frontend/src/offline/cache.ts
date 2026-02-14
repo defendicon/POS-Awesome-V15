@@ -144,6 +144,9 @@ export async function clearStoredItems(scope = "") {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
 		if (!hasScope(scope)) {
+			console.warn(
+				"clearStoredItems called without scope; clearing all cached items.",
+			);
 			await db.table("items").clear();
 			return;
 		}
