@@ -355,6 +355,14 @@ const displayedItems = computed(() => {
 	});
 });
 
+watch(
+	() => props.showOnlyBarcodeItems,
+	(value) => {
+		showOnlyBarcodeItemsRef.value = !!value;
+	},
+	{ immediate: true },
+);
+
 const debounce_qty = computed({
 	get() {
 		if (qty.value === null) return "";
