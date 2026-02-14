@@ -78,6 +78,7 @@ import {
 } from "../composables/core/useNetwork";
 import { useRtl } from "../composables/core/useRtl";
 import authService from "../services/authService.js";
+import { isCachedOpeningValidForCurrentUser } from "../utils/openingCache";
 
 /**
  * Frappe Desk UI selectors to hide in POS view.
@@ -326,7 +327,7 @@ const initializeData = async () => {
 		openingData &&
 		openingData.pos_profile &&
 		isOffline() &&
-		isCachedOpeningValidForCurrentUser(openingData)
+		isCachedOpeningValidForCurrentUser(openingData, frappe?.session?.user)
 	) {
 		uiStore.setRegisterData(openingData);
 		if (navigator.onLine) {
@@ -624,18 +625,6 @@ const setup_sidebar_observer = () => {
 
 const adjust_frappe_sidebar_offset = () => {
 	document.documentElement.style.setProperty("--posa-desk-sidebar-width", "0px");
-};
-
-const isCachedOpeningValidForCurrentUser = (openingData) => {
-	if (!openingData || !openingData.pos_profile || !openingData.pos_opening_shift) {
-		return false;
-	}
-	const currentUser = frappe?.session?.user;
-	const cachedUser = openingData?.pos_opening_shift?.user;
-	if (!currentUser || !cachedUser) {
-		return false;
-	}
-	return currentUser === cachedUser;
 };
 </script>
 

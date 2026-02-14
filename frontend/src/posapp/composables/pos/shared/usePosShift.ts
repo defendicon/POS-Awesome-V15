@@ -10,6 +10,7 @@ import {
 	setTaxTemplate,
 	isOffline,
 } from "../../../../offline/index";
+import { isCachedOpeningValidForCurrentUser } from "../../../utils/openingCache";
 
 declare const frappe: any;
 
@@ -22,18 +23,6 @@ export function usePosShift(openDialog?: () => void) {
 
 	const pos_profile = ref<any>(null);
 	const pos_opening_shift = ref<any>(null);
-
-	const isCachedOpeningValidForCurrentUser = (data: any) => {
-		if (!data || !data.pos_profile || !data.pos_opening_shift) {
-			return false;
-		}
-		const currentUser = frappe?.session?.user;
-		const cachedUser = data?.pos_opening_shift?.user;
-		if (!currentUser || !cachedUser) {
-			return false;
-		}
-		return currentUser === cachedUser;
-	};
 
 	async function check_opening_entry() {
 		await initPromise;
@@ -85,7 +74,10 @@ export function usePosShift(openDialog?: () => void) {
 			.catch((err: unknown) => {
 				console.error("Error checking opening entry", err);
 				const data: any = getOpeningStorage();
-				if (isOffline() && isCachedOpeningValidForCurrentUser(data)) {
+				if (
+					isOffline() &&
+					isCachedOpeningValidForCurrentUser(data, frappe?.session?.user)
+				) {
 					pos_profile.value = data.pos_profile;
 					pos_opening_shift.value = data.pos_opening_shift;
 					uiStore.setRegisterData(data);

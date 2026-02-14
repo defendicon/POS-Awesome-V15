@@ -1,6 +1,21 @@
 import { memory, persist, db, checkDbHealth } from "./db";
 
+const normalizeScope = (scope: unknown): string => String(scope || "");
+const hasScope = (scope: unknown): boolean => normalizeScope(scope).length > 0;
+const isMatchingScope = (row: any, scope: unknown): boolean =>
+	normalizeScope(row?.profile_scope) === normalizeScope(scope);
+
+const filterByScope = (collection: any, scope: unknown) => {
+	if (!hasScope(scope)) {
+		return collection;
+	}
+	return collection.filter((it: any) => isMatchingScope(it, scope));
+};
+
 // --- Generic getters and setters for cached data ----------------------------
+/**
+ * @deprecated Avoid unscoped reads. Prefer `getAllStoredItems(scope)` with an explicit scope.
+ */
 export async function getStoredItems() {
 	try {
 		await checkDbHealth();
@@ -30,11 +45,7 @@ export async function searchStoredItems({
 				.where("item_group")
 				.equalsIgnoreCase(normalizedGroup);
 		}
-		if (scope) {
-			collection = collection.filter(
-				(it) => String(it.profile_scope || "") === String(scope),
-			);
-		}
+		collection = filterByScope(collection, scope);
 		const normalizedSearch =
 			typeof search === "string" ? search.trim() : "";
 		if (normalizedSearch) {
@@ -71,7 +82,8 @@ export async function getStoredItemsCount() {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
 		return await db.table("items").count();
-	} catch {
+	} catch (e) {
+		console.error("Failed to count stored items", e);
 		return 0;
 	}
 }
@@ -80,29 +92,27 @@ export async function getStoredItemsCountByScope(scope = "") {
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		if (!scope) {
+		if (!hasScope(scope)) {
 			return await db.table("items").count();
 		}
-		return await db
-			.table("items")
-			.filter((it) => String(it.profile_scope || "") === String(scope))
-			.count();
-	} catch {
+		return await filterByScope(db.table("items"), scope).count();
+	} catch (e) {
+		console.error("Failed to count scoped stored items", e);
 		return 0;
 	}
 }
 
 export async function getAllStoredItems(scope = "") {
-	if (!scope) {
+	if (!hasScope(scope)) {
+		console.warn(
+			"getAllStoredItems called without scope; returning all items (deprecated behavior).",
+		);
 		return await getStoredItems();
 	}
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		return await db
-			.table("items")
-			.filter((it) => String(it.profile_scope || "") === String(scope))
-			.toArray();
+		return await filterByScope(db.table("items"), scope).toArray();
 	} catch (e) {
 		console.error("Failed to read scoped stored items", e);
 		return [];
@@ -133,14 +143,11 @@ export async function clearStoredItems(scope = "") {
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
-		if (!scope) {
+		if (!hasScope(scope)) {
 			await db.table("items").clear();
 			return;
 		}
-		await db
-			.table("items")
-			.filter((it) => String(it.profile_scope || "") === String(scope))
-			.delete();
+		await filterByScope(db.table("items"), scope).delete();
 	} catch (e) {
 		console.error("Failed to clear stored items", e);
 	}
