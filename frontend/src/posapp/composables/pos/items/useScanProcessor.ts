@@ -142,6 +142,10 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		batchNo: string | null;
 	};
 
+	type ScanMeta = {
+		isScaleBarcode?: boolean;
+	};
+
 	const extractScanAssignmentFromItem = (
 		item: any,
 		rawCode: string,
@@ -184,6 +188,7 @@ export function useScanProcessor(context: ScanProcessorContext) {
 		qtyFromBarcode: number | null = null,
 		priceFromBarcode: number | null = null,
 		scanAssignment: ScanAssignment = { serialNo: null, batchNo: null },
+		scanMeta: ScanMeta = {},
 	) => {
 		logScanFlow("Preparing scanned item add", {
 			scannedCode,
@@ -191,10 +196,19 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			scanAssignment,
 			qtyFromBarcode,
 			priceFromBarcode,
+			isScaleBarcode: Boolean(scanMeta?.isScaleBarcode),
 		});
 
 		// Clone the item to avoid mutating list data
 		const newItem = { ...item };
+		newItem._scanned_barcode = scannedCode;
+		if (scanMeta?.isScaleBarcode) {
+			newItem._is_scale_barcode = true;
+			newItem._scanned_scale_barcode = scannedCode;
+			if (!String(newItem.barcode || "").trim()) {
+				newItem.barcode = scannedCode;
+			}
+		}
 
 		// If the scanned barcode has a specific UOM, apply it
 		if (Array.isArray(newItem.item_barcode)) {
@@ -544,6 +558,11 @@ export function useScanProcessor(context: ScanProcessorContext) {
 			priceFromBarcode,
 			scaleParsed: Boolean(scaleResponse && scaleResponse.item_code),
 		});
+		const isScaleBarcodeScan = Boolean(
+			(scaleResponse && scaleResponse.item_code) ||
+				qtyFromBarcode !== null ||
+				priceFromBarcode !== null,
+		);
 
 		if (!foundItem && qtyFromBarcode === null) {
 			const searchSerialNo = parseBooleanSetting(
@@ -604,6 +623,7 @@ export function useScanProcessor(context: ScanProcessorContext) {
 				qtyFromBarcode,
 				priceFromBarcode,
 				scanAssignment,
+				{ isScaleBarcode: isScaleBarcodeScan },
 			);
 			return;
 		}
@@ -673,6 +693,7 @@ export function useScanProcessor(context: ScanProcessorContext) {
 					qtyFromBarcode,
 					priceFromBarcode,
 					scanAssignment,
+					{ isScaleBarcode: isScaleBarcodeScan },
 				);
 				return;
 			}

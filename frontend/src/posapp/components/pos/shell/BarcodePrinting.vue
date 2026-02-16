@@ -161,7 +161,7 @@
 										@blur="closeQtyEdit(item)"
 										@keydown.enter.prevent="closeQtyEdit(item)"
 										@click.stop
-										:id="'qty-input-' + item.item_code"
+										:id="'qty-input-' + item._row_id"
 										:autofocus="true"
 										type="number"
 										hide-details
@@ -206,12 +206,12 @@
 					<div
 						v-if="
 							pendingAddItem &&
-							pendingAddItem.barcode &&
-							String(pendingAddItem.barcode).length < 8
+							(pendingAddItem._is_scale_barcode ||
+								(pendingAddItem.barcode && String(pendingAddItem.barcode).length < 8))
 						"
 						class="text-caption text-medium-emphasis mb-2"
 					>
-						{{ __("If this is a scaled item, please enter weight in grams.") }}
+						{{ __("Scale barcode detected. Quantity here is the number of labels to print.") }}
 					</div>
 					<v-select
 						v-if="pendingAddItem && getItemUomOptions(pendingAddItem).length > 1"
@@ -228,6 +228,7 @@
 						:label="__('Quantity')"
 						type="number"
 						min="1"
+						step="1"
 						variant="outlined"
 						autofocus
 						@keydown.enter="confirmAddItem"
@@ -301,6 +302,56 @@ export default {
 			// Fallback
 			return { type: "A4", cols: 3, rows: 7 };
 		},
+		normalizeLabelQty(value) {
+			const parsed = Number(value);
+			if (!Number.isFinite(parsed) || parsed <= 0) {
+				return 1;
+			}
+			return Math.max(1, Math.round(parsed));
+		},
+		escapeHtml(value) {
+			return String(value ?? "")
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#39;");
+		},
+		isScaleBarcodePayload(item) {
+			if (!item || typeof item !== "object") return false;
+			return Boolean(
+				item._is_scale_barcode ||
+					item._scanned_scale_barcode ||
+					item._scale_qty ||
+					item._scale_price ||
+					(item._barcode_qty && item._scanned_barcode),
+			);
+		},
+		extractScaleScannedBarcode(item) {
+			if (!this.isScaleBarcodePayload(item)) return "";
+			const scanned =
+				item._scanned_scale_barcode || item._scanned_barcode || item.barcode || "";
+			return String(scanned || "").trim();
+		},
+		getPrintableItems({ notify = true } = {}) {
+			const itemsToPrint = this.items.filter((item) => String(item?.barcode || "").trim());
+			if (!notify) {
+				return itemsToPrint;
+			}
+
+			if (itemsToPrint.length === 0) {
+				this.toastStore.show({
+					title: __("No items with barcodes to print"),
+					color: "error",
+				});
+			} else if (itemsToPrint.length < this.items.length) {
+				this.toastStore.show({
+					title: __("Skipping items without barcodes"),
+					color: "warning",
+				});
+			}
+			return itemsToPrint;
+		},
 		async onAddItem(item) {
 			if (!item) return;
 
@@ -313,7 +364,8 @@ export default {
 						: {};
 
 			// 1. Try to find barcode in the passed item object
-			let barcode = item.barcode;
+			const scannedScaleBarcode = this.extractScaleScannedBarcode(item);
+			let barcode = scannedScaleBarcode || item.barcode;
 			let itemBarcodes = Array.isArray(item.item_barcode) ? item.item_barcode : [];
 			let itemUoms = Array.isArray(item.item_uoms) ? item.item_uoms : [];
 			if (!itemUoms.length && itemBarcodes.length > 0) {
@@ -326,7 +378,7 @@ export default {
 			let defaultUom = item.uom || item.stock_uom || itemUoms?.[0]?.uom || "";
 
 			// 2. Resolve barcode from item_barcode/UOM mapping when available
-			if (itemBarcodes.length > 0) {
+			if (!scannedScaleBarcode && itemBarcodes.length > 0) {
 				const resolved = this.resolveBarcodeForUom({ item_barcode: itemBarcodes, barcode }, defaultUom);
 				if (resolved) {
 					barcode = resolved;
@@ -365,7 +417,7 @@ export default {
 							}
 							defaultUom =
 								details.uom || item.uom || item.stock_uom || itemUoms?.[0]?.uom || defaultUom;
-							if (itemBarcodes.length > 0) {
+							if (!scannedScaleBarcode && itemBarcodes.length > 0) {
 								const resolved = this.resolveBarcodeForUom(
 									{ item_barcode: itemBarcodes, barcode: details.barcode || barcode },
 									defaultUom,
@@ -385,6 +437,10 @@ export default {
 				}
 			}
 
+			if (!barcode && scannedScaleBarcode) {
+				barcode = scannedScaleBarcode;
+			}
+
 			if (!barcode) {
 				this.toastStore.show({
 					title: __("Item '{0}' has no barcode", [item.item_name]),
@@ -398,36 +454,41 @@ export default {
 				defaultUom = itemUoms[0].uom;
 			}
 
+			const isScaleBarcode = this.isScaleBarcodePayload(item);
+			const initialLabelQty = isScaleBarcode ? 1 : this.normalizeLabelQty(item.qty);
+
 			this.pendingAddItem = {
 				_row_id: this.nextRowId++,
 				item_code: item.item_code,
 				item_name: item.item_name,
-				barcode: barcode || "",
-				qty: 1,
+				barcode: String(barcode || "").trim(),
+				qty: initialLabelQty,
 				price: item.rate || item.standard_rate || 0,
 				item_barcode: itemBarcodes,
 				item_uoms: itemUoms,
 				uom: defaultUom || "",
+				_is_scale_barcode: isScaleBarcode,
+				_scanned_barcode: scannedScaleBarcode,
 			};
-			this.addItemQty = ""; // Start empty
+			this.addItemQty = initialLabelQty;
 			this.addItemDialog = true;
 		},
 		confirmAddItem() {
 			if (!this.pendingAddItem) return;
 
 			const item = this.pendingAddItem;
-			// If empty or invalid, default to 1
-			const qty = parseInt(this.addItemQty) || 1;
+			const qty = this.normalizeLabelQty(this.addItemQty);
+			const normalizedBarcode = String(item.barcode || "").trim();
 
-			// Check if item already exists (same item + same UOM)
+			// Keep scale barcodes distinct by merging only when barcode is exactly the same.
 			const existingItem = this.items.find(
-				(i) => i.item_code === item.item_code && (i.uom || "") === (item.uom || ""),
+				(i) =>
+					i.item_code === item.item_code &&
+					(i.uom || "") === (item.uom || "") &&
+					String(i.barcode || "").trim() === normalizedBarcode,
 			);
 			if (existingItem) {
 				existingItem.qty += qty;
-				// Optional: Move to top if desired, but user only asked for new items to be at top
-				// However, if we updated it, it might be nice to see it.
-				// Let's keep existing logic: update in place.
 			} else {
 				item.qty = qty;
 				this.items.unshift(item);
@@ -477,6 +538,11 @@ export default {
 			return "";
 		},
 		onItemUomChange(item) {
+			if (item._is_scale_barcode && item._scanned_barcode) {
+				item.barcode = String(item._scanned_barcode);
+				return;
+			}
+
 			const nextBarcode = this.resolveBarcodeForUom(item, item.uom);
 			if (nextBarcode) {
 				item.barcode = nextBarcode;
@@ -504,27 +570,15 @@ export default {
 		},
 		getPrintWindowContent() {
 			const style = this.getPrintStyles();
-			const content = this.generatePrintContent(this.items.filter((item) => item.barcode));
+			const content = this.generatePrintContent(this.getPrintableItems({ notify: false }));
 			return { style, content };
 		},
 		printLabels() {
 			if (!this.items.length) return;
 
-			// Filter out items without barcodes
-			const itemsToPrint = this.items.filter((item) => item.barcode);
-			if (itemsToPrint.length === 0) {
-				this.toastStore.show({
-					title: __("No items with barcodes to print"),
-					color: "error",
-				});
+			const itemsToPrint = this.getPrintableItems();
+			if (!itemsToPrint.length) {
 				return;
-			}
-
-			if (itemsToPrint.length < this.items.length) {
-				this.toastStore.show({
-					title: __("Skipping items without barcodes"),
-					color: "warning",
-				});
 			}
 
 			const printWindow = window.open("", "_blank");
@@ -567,14 +621,8 @@ export default {
 		downloadPdf() {
 			if (!this.items.length) return;
 
-			const itemsToPrint = this.items.filter((item) => item.barcode);
-			if (itemsToPrint.length === 0) {
-				this.toastStore.show({
-					title: __("No items with barcodes to print"),
-					color: "error",
-				});
-				return;
-			}
+			const itemsToPrint = this.getPrintableItems();
+			if (!itemsToPrint.length) return;
 
 			const printWindow = window.open("", "_blank");
 			if (!printWindow) {
@@ -610,11 +658,11 @@ export default {
           <head>
             <title>Download PDF</title>
             <style>
-              ${style}
-              /* Adjustments for PDF generation if needed */
-            </style>
+			              ${style}
+			              /* Adjustments for PDF generation if needed */
+			            </style>
 				<script src="/assets/posawesome/dist/js/libs/html2pdf.bundle.min.js"></${"script"}>
-				<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></${"script"}>
+				<script src="/assets/posawesome/dist/js/libs/JsBarcode.all.min.js"></${"script"}>
           </head>
           <body>
             <div id="print-content">
@@ -756,7 +804,10 @@ export default {
 			}
 
 			items.forEach((item) => {
-				for (let i = 0; i < item.qty; i++) {
+				const labelsCount = this.normalizeLabelQty(item.qty);
+				const safeItemName = this.escapeHtml(item.item_name || item.item_code || "");
+				const safeBarcode = this.escapeHtml(item.barcode || "");
+				for (let i = 0; i < labelsCount; i++) {
 					let batchSerialHtml = "";
 					if (this.includeBatchSerial) {
 						let text = "";
@@ -770,22 +821,22 @@ export default {
 								text += `Serial: ${item.serial_no_data[0].serial_no}`;
 						}
 						if (text.trim()) {
-							batchSerialHtml = `<div class="batch-serial">${text.trim()}</div>`;
+							batchSerialHtml = `<div class="batch-serial">${this.escapeHtml(text.trim())}</div>`;
 						}
 					}
 
 					let priceHtml = "";
 					if (this.includePrice) {
-						priceHtml = `<div class="price">Price: ${this.formatCurrency(item.price)}</div>`;
+						priceHtml = `<div class="price">Price: ${this.escapeHtml(this.formatCurrency(item.price))}</div>`;
 					}
 
 					html += `
             <div class="label">
-              <div class="item-name">${item.item_name}</div>
+              <div class="item-name">${safeItemName}</div>
               <div class="barcode-container">
                  <img class="barcode"
                       jsbarcode-format="auto"
-                      jsbarcode-value="${item.barcode}"
+                      jsbarcode-value="${safeBarcode}"
                       jsbarcode-textmargin="0"
                       jsbarcode-fontoptions="bold"
                       jsbarcode-height="40"
@@ -818,17 +869,14 @@ export default {
 			item._editingQty = true;
 			this.editingQtyValue = ""; // Clear value on open
 			this.$nextTick(() => {
-				const input = document.getElementById("qty-input-" + item.item_code);
+				const input = document.getElementById("qty-input-" + item._row_id);
 				if (input) input.focus();
 			});
 		},
 		closeQtyEdit(item) {
 			if (item._editingQty) {
 				if (this.editingQtyValue !== "" && this.editingQtyValue != null) {
-					const newQty = parseFloat(this.editingQtyValue);
-					if (newQty && newQty > 0) {
-						item.qty = newQty;
-					}
+					item.qty = this.normalizeLabelQty(this.editingQtyValue);
 				}
 				item._editingQty = false;
 				this.editingQtyValue = "";
