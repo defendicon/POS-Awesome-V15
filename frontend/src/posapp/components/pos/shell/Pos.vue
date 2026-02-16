@@ -94,6 +94,7 @@ import { useUIStore } from "../../../stores/uiStore.js";
 import { useInvoiceStore } from "../../../stores/invoiceStore.js";
 import { useItemsStore } from "../../../stores/itemsStore.js";
 import { storeToRefs } from "pinia";
+import { useCustomerDisplayPublisher } from "../../../composables/pos/shared/useCustomerDisplayPublisher";
 
 export default {
 	setup() {
@@ -108,7 +109,12 @@ export default {
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
 		const itemsStore = useItemsStore();
-		const { activeView } = storeToRefs(uiStore);
+		const { activeView, posProfile } = storeToRefs(uiStore);
+
+		useCustomerDisplayPublisher({
+			posProfile,
+			eventBus,
+		});
 
 		onMounted(() => {
 			if (eventBus) {

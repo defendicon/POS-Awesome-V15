@@ -40,6 +40,12 @@ const routes = [
 		meta: { title: "Close Shift", layout: "default" },
 	},
 	{
+		path: "/customer-display",
+		component: () =>
+			import("../components/customer_display/CustomerDisplay.vue"),
+		meta: { title: "Customer Display", layout: "display" },
+	},
+	{
 		path: "/:pathMatch(.*)*",
 		redirect: "/pos",
 	},

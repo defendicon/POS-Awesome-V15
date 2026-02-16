@@ -59,6 +59,7 @@
 					:server-online="serverOnline"
 					@close-shift="openCloseShift"
 					@sync-invoices="syncPendingInvoices"
+					@open-customer-display="$emit('open-customer-display')"
 					@toggle-offline="toggleManualOffline"
 					@clear-cache="clearCache"
 					@show-about="showAboutDialog = true"
@@ -606,6 +607,7 @@ export default {
 		"change-page",
 		"close-shift",
 		"sync-invoices",
+		"open-customer-display",
 		"toggle-offline",
 		"toggle-theme",
 		"logout",

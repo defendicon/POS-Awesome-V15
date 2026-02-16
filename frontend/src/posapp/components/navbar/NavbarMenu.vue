@@ -133,6 +133,26 @@
 						</div>
 					</v-list-item>
 
+					<v-list-item
+						v-if="isEnabledSetting(posProfile.posa_enable_customer_display)"
+						@click="$emit('open-customer-display')"
+						class="menu-item-compact primary-action"
+					>
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact primary-icon">
+								<v-icon color="white" size="16">mdi-monitor-eye</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Open Customer Display")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Show cart on customer-facing screen")
+							}}</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
 					<v-list-item @click="$emit('toggle-offline')" class="menu-item-compact warning-action">
 						<template v-slot:prepend>
 							<div class="menu-icon-wrapper-compact warning-icon">
@@ -597,6 +617,16 @@ export default {
 			this.notification.show = false;
 		},
 
+		isEnabledSetting(value) {
+			if (value === undefined || value === null) return false;
+			if (typeof value === "string") {
+				const normalized = value.trim().toLowerCase();
+				return ["1", "true", "yes", "on"].includes(normalized);
+			}
+			if (typeof value === "number") return value === 1;
+			return Boolean(value);
+		},
+
 		async checkForUpdates() {
 			try {
 				await this.updateStore.checkForUpdates(true);
@@ -621,6 +651,7 @@ export default {
 	emits: [
 		"close-shift",
 		"sync-invoices",
+		"open-customer-display",
 		"toggle-offline",
 		"clear-cache",
 		"show-about",

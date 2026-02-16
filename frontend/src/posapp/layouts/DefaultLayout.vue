@@ -27,6 +27,7 @@
 				@toggle-offline="handleToggleOffline"
 				@toggle-theme="handleToggleTheme"
 				@logout="handleLogout"
+				@open-customer-display="handleOpenCustomerDisplay"
 				@refresh-cache-usage="handleRefreshCacheUsage"
 				@update-after-delete="handleUpdateAfterDelete"
 			/>
@@ -529,6 +530,10 @@ const handleLogout = () => {
 	authService.logout().finally(() => {
 		window.location.href = "/app";
 	});
+};
+
+const handleOpenCustomerDisplay = () => {
+	eventBus?.emit("open_customer_display");
 };
 
 const handleRefreshCacheUsage = () => {

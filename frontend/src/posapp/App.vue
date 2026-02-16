@@ -15,12 +15,17 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 
 const DefaultLayout = defineAsyncComponent(() => import("./layouts/DefaultLayout.vue"));
+const CustomerDisplayLayout = defineAsyncComponent(
+	() => import("./layouts/CustomerDisplayLayout.vue"),
+);
 
 const layoutComponent = computed(() => {
 	const layout = route.meta.layout || "default";
 	switch (layout) {
 		case "default":
 			return DefaultLayout;
+		case "display":
+			return CustomerDisplayLayout;
 		default:
 			return DefaultLayout;
 	}

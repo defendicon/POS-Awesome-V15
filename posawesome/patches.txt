@@ -10,3 +10,4 @@ posawesome.patches.recreate_pos_awesome_workspace
 posawesome.patches.add_pos_cash_movement_settings
 posawesome.patches.add_cash_movement_to_workspace
 posawesome.patches.reorganize_pos_profile_sections
+posawesome.patches.add_customer_display_settings
