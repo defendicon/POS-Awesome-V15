@@ -7,17 +7,21 @@ declare const frappe: any;
 
 export async function fetch_customer_details(context: any) {
 	try {
-		if (!context.customer) return;
+		const customer =
+			typeof context.customer === "string"
+				? context.customer.trim()
+				: "";
+		if (!customer) return;
 
 		context.customer_info = {};
-		const cachedCustomer = await getStoredCustomer(context.customer);
+		const cachedCustomer = await getStoredCustomer(customer);
 		if (cachedCustomer) {
 			context.customer_info = cachedCustomer;
 		}
 
 		const r = await frappe.call({
 			method: "posawesome.posawesome.api.customers.get_customer_info",
-			args: { customer: context.customer },
+			args: { customer },
 		});
 
 		if (r?.message) {

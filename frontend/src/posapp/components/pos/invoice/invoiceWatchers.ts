@@ -106,8 +106,13 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 		this.close_payments();
 		const customersStore = useCustomersStore();
 		customersStore.setSelectedCustomer(this.customer || null);
-		this.fetch_customer_details();
-		this.fetch_customer_balance();
+		const hasCustomer =
+			typeof this.customer === "string" &&
+			this.customer.trim().length > 0;
+		if (hasCustomer) {
+			this.fetch_customer_details();
+			this.fetch_customer_balance();
+		}
 		this.set_delivery_charges();
 		this.sync_invoice_customer_details();
 	},

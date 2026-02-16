@@ -145,7 +145,11 @@ def get_customers_count(pos_profile):
 
 
 @frappe.whitelist()
-def get_customer_info(customer):
+def get_customer_info(customer=None):
+    customer = cstr(customer or "").strip()
+    if not customer:
+        return {}
+
     customer = frappe.get_doc("Customer", customer)
 
     res = {"loyalty_points": None, "conversion_factor": None}

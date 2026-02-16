@@ -283,11 +283,15 @@ export function usePosPayData({
 	}
 
 	async function fetch_customer_details() {
-		if (!customerName.value) return;
+		const customer =
+			typeof customerName.value === "string"
+				? customerName.value.trim()
+				: "";
+		if (!customer) return;
 
 		if (isOffline()) {
 			try {
-				const cached = await getStoredCustomer(customerName.value);
+				const cached = await getStoredCustomer(customer);
 				if (cached) {
 					customer_info.value = { ...cached };
 					set_mpesa_search_params();
@@ -303,7 +307,7 @@ export function usePosPayData({
 		try {
 			const r = await frappe.call({
 				method: "posawesome.posawesome.api.customers.get_customer_info",
-				args: { customer: customerName.value },
+				args: { customer },
 			});
 			if (r.message && !r.exc) {
 				customer_info.value = { ...r.message };
