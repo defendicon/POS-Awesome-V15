@@ -221,9 +221,7 @@
 					<div class="text-subtitle-1 mb-2">{{ pendingAddItem.item_name }}</div>
 					<div
 						v-if="
-							pendingAddItem &&
-							(pendingAddItem._is_scale_barcode ||
-								(pendingAddItem.barcode && String(pendingAddItem.barcode).length < 8))
+							pendingAddItem && shouldShowScaleGramsInput(pendingAddItem)
 						"
 						class="text-caption text-medium-emphasis mb-2"
 					>
@@ -332,7 +330,7 @@ export default {
 				{ title: __("Item Name"), key: "item_name", width: "24%" },
 				{ title: __("UOM"), key: "uom", width: "12%" },
 				{ title: __("Barcode"), key: "barcode", width: "20%" },
-				{ title: __("Grams"), key: "grams", width: "12%" },
+				{ title: __("Weight (g)"), key: "grams", width: "12%" },
 				{ title: __("Quantity"), key: "qty", align: "center", width: "12%" },
 				{ title: "", key: "actions", align: "center", sortable: false, width: "4%" },
 			];
@@ -432,18 +430,7 @@ export default {
 			return this.scaleBarcodeSettings;
 		},
 		shouldShowScaleGramsInput(item) {
-			if (!item || !this.isKgUom(item.uom)) return false;
-			if (!this.isScaleSettingsConfigured()) return false;
-			const templateBarcode =
-				item._scale_template_barcode ||
-				item._scanned_scale_barcode ||
-				item._scanned_barcode ||
-				item.barcode;
-			return Boolean(
-				item._is_scale_barcode ||
-					this.isScaleBarcodePayload(item) ||
-					this.isPotentialScaleTemplate(templateBarcode),
-			);
+			return Boolean(item && this.isKgUom(item.uom) && this.isScaleSettingsConfigured());
 		},
 		async generateScaleBarcodeForItem(item, grams, { silent = false } = {}) {
 			if (!item) return false;
