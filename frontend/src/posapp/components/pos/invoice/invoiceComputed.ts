@@ -102,13 +102,9 @@ const invoiceComputed: Record<string, unknown> & ThisType<InvoiceComputedVm> = {
 			sum = Math.abs(sum);
 		}
 
-		// Subtract additional discount
-		const additional_discount = this.flt(this.additional_discount);
-		if (this.isReturnInvoice) {
-			sum += additional_discount;
-		} else {
-			sum -= additional_discount;
-		}
+		// Always reduce total by discount magnitude.
+		const additional_discount = Math.abs(this.flt(this.additional_discount));
+		sum -= additional_discount;
 
 		// Add delivery charges
 		const delivery_charges = this.flt(this.delivery_charges_rate);

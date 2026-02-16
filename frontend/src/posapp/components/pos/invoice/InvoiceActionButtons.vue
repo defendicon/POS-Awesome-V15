@@ -92,6 +92,19 @@
 				{{ __("Apply Offers") }}
 			</v-btn>
 		</v-col>
+		<v-col cols="6" v-if="showCustomerDisplayButton">
+			<v-btn
+				block
+				color="indigo"
+				theme="dark"
+				prepend-icon="mdi-monitor"
+				@click="$emit('open-customer-display')"
+				class="summary-btn"
+				:loading="customerDisplayLoading"
+			>
+				{{ __("Customer Screen") }}
+			</v-btn>
+		</v-col>
 		<v-col cols="12">
 			<v-btn
 				block
@@ -110,7 +123,10 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from "vue";
+import { parseBooleanSetting } from "../../../utils/stock";
+
+const props = defineProps({
 	pos_profile: {
 		type: Object,
 		required: true,
@@ -124,6 +140,7 @@ defineProps({
 	printLoading: Boolean,
 	applyOffersLoading: Boolean,
 	paymentLoading: Boolean,
+	customerDisplayLoading: Boolean,
 });
 
 defineEmits([
@@ -135,9 +152,13 @@ defineEmits([
 	"print-draft",
 	"apply-offers",
 	"show-payment",
+	"open-customer-display",
 ]);
 
 const __ = window.__;
+const showCustomerDisplayButton = computed(() =>
+	parseBooleanSetting(props.pos_profile?.posa_enable_customer_display),
+);
 </script>
 
 <style scoped>

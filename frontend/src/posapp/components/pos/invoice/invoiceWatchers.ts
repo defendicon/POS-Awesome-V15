@@ -182,6 +182,14 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 	},
 	// Watch for additional discount and update percentage accordingly
 	additional_discount() {
+		const normalizedDiscount = Number(this.additional_discount || 0);
+		if (this.isReturnInvoice && normalizedDiscount > 0) {
+			const forcedNegative = -Math.abs(normalizedDiscount);
+			this.additional_discount = forcedNegative;
+			this.discount_amount = forcedNegative;
+			return;
+		}
+
 		if (!this.additional_discount || this.additional_discount == 0) {
 			this.additional_discount_percentage = 0;
 		} else if (this.pos_profile.posa_use_percentage_discount) {
