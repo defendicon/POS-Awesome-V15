@@ -204,6 +204,7 @@
 			@print-draft="print_draft_invoice"
 			@apply-offers="apply_offers_and_reload"
 			@show-payment="handleShowPaymentRequest"
+			@open-customer-display="handleOpenCustomerDisplayRequest"
 		/>
 	</div>
 </template>
@@ -778,6 +779,11 @@ export default {
 		},
 		handleShowPaymentRequest() {
 			this.show_payment();
+		},
+		handleOpenCustomerDisplayRequest() {
+			if (this.eventBus && typeof this.eventBus.emit === "function") {
+				this.eventBus.emit("open_customer_display");
+			}
 		},
 	},
 

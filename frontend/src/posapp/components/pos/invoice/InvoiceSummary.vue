@@ -130,6 +130,7 @@
 					:printLoading="printLoading"
 					:applyOffersLoading="applyOffersLoading"
 					:paymentLoading="paymentLoading"
+					:customerDisplayLoading="customerDisplayLoading"
 					@save-and-clear="handleSaveAndClear"
 					@load-drafts="handleLoadDrafts"
 					@select-order="handleSelectOrder"
@@ -138,6 +139,7 @@
 					@print-draft="handlePrintDraft"
 					@apply-offers="handleApplyOffers"
 					@show-payment="handleShowPayment"
+					@open-customer-display="handleOpenCustomerDisplay"
 				/>
 			</v-col>
 		</v-row>
@@ -181,6 +183,7 @@ const emit = defineEmits([
 	"print-draft",
 	"apply-offers",
 	"show-payment",
+	"open-customer-display",
 ]);
 
 const saveLoading = ref(false);
@@ -191,6 +194,7 @@ const returnsLoading = ref(false);
 const printLoading = ref(false);
 const applyOffersLoading = ref(false);
 const paymentLoading = ref(false);
+const customerDisplayLoading = ref(false);
 const isEditingAdditionalDiscount = ref(false);
 const isEditingAdditionalDiscountPercentage = ref(false);
 
@@ -334,6 +338,15 @@ async function handleShowPayment() {
 		await emit("show-payment");
 	} finally {
 		paymentLoading.value = false;
+	}
+}
+
+async function handleOpenCustomerDisplay() {
+	customerDisplayLoading.value = true;
+	try {
+		await emit("open-customer-display");
+	} finally {
+		customerDisplayLoading.value = false;
 	}
 }
 </script>

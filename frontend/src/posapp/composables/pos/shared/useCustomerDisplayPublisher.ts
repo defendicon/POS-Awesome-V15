@@ -104,9 +104,8 @@ export function useCustomerDisplayPublisher({
 		const delivery_charges = toNumber(invoiceStore.deliveryChargesRate);
 		const is_return = Boolean(invoiceStore.invoiceDoc?.is_return);
 		const gross_total = is_return ? Math.abs(item_total) : item_total;
-		const subtotal = is_return
-			? gross_total + additional_discount + delivery_charges
-			: gross_total - additional_discount + delivery_charges;
+		const discount_magnitude = Math.abs(additional_discount);
+		const subtotal = gross_total - discount_magnitude + delivery_charges;
 		const total_amount = toFiniteOrNull(subtotal) ?? item_total;
 		const customer_name = getCustomerName(
 			invoiceStore.invoiceDoc,
