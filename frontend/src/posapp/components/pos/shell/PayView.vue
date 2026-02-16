@@ -427,7 +427,7 @@ export default {
 			clearSelections,
 			load_print_page,
 			eventBus: proxy?.eventBus,
-			get_outstanding_invoices,
+			get_outstanding_invoices: refreshOutstandingInvoices,
 			get_unallocated_payments,
 			get_draft_mpesa_payments_register,
 			set_mpesa_search_params,
@@ -531,7 +531,7 @@ export default {
 				}
 				get_pos_profiles();
 				if (customer_name.value) {
-					get_outstanding_invoices();
+					refreshOutstandingInvoices();
 					get_unallocated_payments();
 					get_draft_mpesa_payments_register(payment_methods_list.value);
 				}
@@ -579,6 +579,9 @@ export default {
 
 		const paymentRowClass = (item) => (item?.is_credit_note ? "credit-note-row" : "");
 		const isSelected = (item) => (isInvoiceSelected(item) ? "selected-row bg-primary bg-lighten-4" : "");
+		function refreshOutstandingInvoices() {
+			return get_outstanding_invoices(pos_profile_search.value || null);
+		}
 
 		const submit = () => processPayment({ printAfter: false });
 		const submit_and_print = () => processPayment({ printAfter: true });
@@ -618,7 +621,7 @@ export default {
 						!outstanding_invoices.value.length &&
 						!unallocated_payments.value.length
 					) {
-						get_outstanding_invoices();
+						refreshOutstandingInvoices();
 						get_unallocated_payments();
 						get_draft_mpesa_payments_register(payment_methods_list.value);
 					}
@@ -631,7 +634,7 @@ export default {
 				customer_name.value = normalized;
 				if (!companyCurrency.value) await fetchCompanyCurrency();
 				fetch_customer_details();
-				get_outstanding_invoices();
+				refreshOutstandingInvoices();
 				get_unallocated_payments();
 				get_draft_mpesa_payments_register(payment_methods_list.value);
 			},
@@ -655,7 +658,7 @@ export default {
 
 		watch(company, (newCompany, oldCompany) => {
 			if (!newCompany || newCompany === oldCompany || !customer_name.value) return;
-			get_outstanding_invoices();
+			refreshOutstandingInvoices();
 			get_unallocated_payments();
 			get_draft_mpesa_payments_register(payment_methods_list.value);
 		});
