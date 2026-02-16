@@ -7,13 +7,6 @@ import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import type { Item, POSProfile } from "../types/models";
 import itemService from "../services/itemService";
-// @ts-ignore
-import {
-	getStoredItemsCountByScope,
-	getAllStoredItems,
-	searchStoredItems,
-	getCachedPriceListItems,
-} from "../../offline/index";
 
 // Composables
 import { useItemsCache } from "../composables/pos/items/store/useItemsCache";
@@ -23,6 +16,77 @@ import { useItemsPagination } from "../composables/pos/items/store/useItemsPagin
 import { useItemsMetrics } from "../composables/pos/items/store/useItemsMetrics";
 
 export const useItemsStore = defineStore("items", () => {
+	type OfflineModule = Record<string, any>;
+	let offlineApiPromise: Promise<OfflineModule> | null = null;
+
+	const getOfflineApi = async (): Promise<OfflineModule> => {
+		if (!offlineApiPromise) {
+			offlineApiPromise = import("../../offline/index")
+				.then((mod) => mod as OfflineModule)
+				.catch((error) => {
+					offlineApiPromise = null;
+					console.warn("Failed to load offline module", error);
+					return {};
+				});
+		}
+		return await offlineApiPromise;
+	};
+
+	const getOfflineFn = async (name: string) => {
+		const api = await getOfflineApi();
+		return api[name];
+	};
+
+	const getStoredItemsCountByScopeCompat = async (scope = "") => {
+		const scopedCountFn = await getOfflineFn("getStoredItemsCountByScope");
+		if (typeof scopedCountFn === "function") {
+			return await scopedCountFn(scope);
+		}
+
+		const legacyCountFn = await getOfflineFn("getStoredItemsCount");
+		if (typeof legacyCountFn === "function") {
+			console.warn(
+				"offline/index.js missing getStoredItemsCountByScope; using legacy getStoredItemsCount fallback.",
+			);
+			return await legacyCountFn();
+		}
+
+		return 0;
+	};
+
+	const getAllStoredItemsCompat = async (scope = "") => {
+		const scopedGetAllFn = await getOfflineFn("getAllStoredItems");
+		if (typeof scopedGetAllFn === "function") {
+			return await scopedGetAllFn(scope);
+		}
+
+		const legacyGetAllFn = await getOfflineFn("getStoredItems");
+		if (typeof legacyGetAllFn === "function") {
+			console.warn(
+				"offline/index.js missing getAllStoredItems; using legacy getStoredItems fallback.",
+			);
+			return await legacyGetAllFn();
+		}
+
+		return [];
+	};
+
+	const searchStoredItemsCompat = async (args: any) => {
+		const searchFn = await getOfflineFn("searchStoredItems");
+		if (typeof searchFn !== "function") {
+			return [];
+		}
+		return await searchFn(args);
+	};
+
+	const getCachedPriceListItemsCompat = async (priceList: string) => {
+		const fn = await getOfflineFn("getCachedPriceListItems");
+		if (typeof fn !== "function") {
+			return null;
+		}
+		return await fn(priceList);
+	};
+
 	// Core State
 	const items = ref<Item[]>([]);
 	const filteredItems = ref<Item[]>([]);
@@ -294,7 +358,7 @@ export const useItemsStore = defineStore("items", () => {
 				return;
 			}
 
-			const cachedCount = await getStoredItemsCountByScope(
+			const cachedCount = await getStoredItemsCountByScopeCompat(
 				getStorageScope(),
 			).catch(() => 0);
 			const resolvedCount = Number.isFinite(cachedCount)
@@ -316,7 +380,7 @@ export const useItemsStore = defineStore("items", () => {
 			});
 
 			if (!shouldPaginate) {
-				const cachedItems = await getAllStoredItems(
+				const cachedItems = await getAllStoredItemsCompat(
 					getStorageScope(),
 				).catch(() => []);
 				if (Array.isArray(cachedItems) && cachedItems.length) {
@@ -327,7 +391,7 @@ export const useItemsStore = defineStore("items", () => {
 				return;
 			}
 
-			const initialItems = await searchStoredItems({
+			const initialItems = await searchStoredItemsCompat({
 				search: "",
 				itemGroup: itemGroup.value,
 				limit: cachedPagination.value.pageSize,
@@ -651,7 +715,7 @@ export const useItemsStore = defineStore("items", () => {
 					itemGroup.value.length > 0
 						? itemGroup.value
 						: "ALL";
-				const results = await searchStoredItems({
+				const results = await searchStoredItemsCompat({
 					search: term,
 					itemGroup: normalizedGroup,
 					limit: cachedPagination.value.pageSize,
@@ -737,7 +801,7 @@ export const useItemsStore = defineStore("items", () => {
 		cachedPagination.value.loading = true;
 
 		try {
-			const nextPage = await searchStoredItems({
+			const nextPage = await searchStoredItemsCompat({
 				search: cachedPagination.value.search || "",
 				itemGroup: cachedPagination.value.group,
 				limit: cachedPagination.value.pageSize,
@@ -794,7 +858,7 @@ export const useItemsStore = defineStore("items", () => {
 		cachedPagination.value.offset = 0;
 		cachedPagination.value.search = "";
 
-		const firstPage = await searchStoredItems({
+		const firstPage = await searchStoredItemsCompat({
 			search: "",
 			itemGroup: normalizedGroup,
 			limit: cachedPagination.value.pageSize,
@@ -817,7 +881,7 @@ export const useItemsStore = defineStore("items", () => {
 			let priceData = getCachedPriceList(cacheKey);
 
 			if (!priceData) {
-				priceData = await getCachedPriceListItems(newPriceList);
+				priceData = await getCachedPriceListItemsCompat(newPriceList);
 				if (priceData && priceData.length > 0) {
 					setCachedPriceList(cacheKey, priceData);
 				}
