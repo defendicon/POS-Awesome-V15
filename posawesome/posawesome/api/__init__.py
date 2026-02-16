@@ -21,6 +21,7 @@ from .invoices import (
     validate_return_items,
 )
 from .items import (
+    build_scale_barcode,
     get_item_attributes,
     get_item_brand,
     get_item_detail,

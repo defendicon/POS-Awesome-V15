@@ -20,6 +20,7 @@ from posawesome.posawesome.api.item_processing.stock import (
 from posawesome.posawesome.api.item_processing.barcode import (
     parse_scale_barcode,
     get_items_from_barcode,
+    build_scale_barcode,
     search_serial_or_batch_or_barcode_number
 )
 from posawesome.posawesome.api.item_processing.details import (
