@@ -430,7 +430,7 @@ export default {
 			return this.scaleBarcodeSettings;
 		},
 		shouldShowScaleGramsInput(item) {
-			return Boolean(item && this.isKgUom(item.uom) && this.isScaleSettingsConfigured());
+			return Boolean(item && this.isKgUom(item.uom));
 		},
 		async generateScaleBarcodeForItem(item, grams, { silent = false } = {}) {
 			if (!item) return false;
