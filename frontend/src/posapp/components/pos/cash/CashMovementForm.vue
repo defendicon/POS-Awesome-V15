@@ -1,6 +1,19 @@
 <template>
 	<v-card class="pa-4 pos-themed-card">
-		<div class="text-h6 mb-1">{{ __("Cash Movement") }}</div>
+		<div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-1">
+			<div class="text-h6">{{ __("Cash Movement") }}</div>
+			<div style="min-width: 190px; max-width: 220px; width: 100%;">
+				<v-text-field
+					v-model="postingDate"
+					type="date"
+					variant="outlined"
+					density="compact"
+					hide-details
+					:label="__('Posting Date')"
+					:disabled="submitting || !enabled"
+				/>
+			</div>
+		</div>
 		<div class="text-body-2 text-grey mb-4">
 			{{ __("Book expense or deposit from active shift.") }}
 		</div>
@@ -48,16 +61,6 @@
 					@focus="onAmountFocus"
 					@blur="onAmountBlur"
 					@update:model-value="onAmountInput"
-				/>
-			</v-col>
-			<v-col cols="12" md="4">
-				<v-text-field
-					v-model="postingDate"
-					type="date"
-					variant="outlined"
-					density="compact"
-					:label="__('Posting Date')"
-					:disabled="submitting || !enabled"
 				/>
 			</v-col>
 			<v-col cols="12" md="4" v-if="movementType === 'Expense'">
@@ -139,6 +142,8 @@ const props = defineProps<{
 	context: any;
 	submitting: boolean;
 	resetToken?: number;
+	prefillToken?: number;
+	prefillData?: any;
 }>();
 
 const emit = defineEmits<{
@@ -355,6 +360,29 @@ function resetFormState() {
 	}
 }
 
+function applyPrefillData(data: any) {
+	if (!data) return;
+
+	const nextMovementType = data.movementType || data.movement_type;
+	if (nextMovementType === "Expense" || nextMovementType === "Deposit") {
+		movementType.value = nextMovementType;
+	}
+
+	const nextAmount = Number(data.amount);
+	if (Number.isFinite(nextAmount) && nextAmount > 0) {
+		amount.value = nextAmount;
+	}
+
+	postingDate.value = String(data.postingDate || data.posting_date || getTodayDate()).slice(0, 10);
+	againstName.value = String(data.againstName || data.against_name || "");
+	remarks.value = String(data.remarks || "");
+	expenseAccount.value = String(data.expenseAccount || data.expense_account || "");
+	targetAccount.value = String(data.targetAccount || data.target_account || "");
+
+	ensureOptionExists(expenseAccountOptions.value, expenseAccount.value);
+	ensureOptionExists(targetAccountOptions.value, targetAccount.value);
+}
+
 function getTodayDate() {
 	return new Date().toISOString().slice(0, 10);
 }
@@ -363,6 +391,13 @@ watch(
 	() => props.resetToken,
 	() => {
 		resetFormState();
+	},
+);
+
+watch(
+	() => props.prefillToken,
+	() => {
+		applyPrefillData(props.prefillData);
 	},
 );
 </script>

@@ -37,6 +37,8 @@
 					:context="context"
 					:submitting="submitting"
 					:reset-token="formResetToken"
+					:prefill-token="prefillToken"
+					:prefill-data="prefillData"
 					@submit="handleSubmit"
 				/>
 			</v-col>
@@ -59,29 +61,6 @@
 			</v-col>
 		</v-row>
 
-		<v-dialog v-model="duplicateDialogOpen" max-width="420">
-			<v-card>
-				<v-card-title>{{ __("Select Posting Date") }}</v-card-title>
-				<v-card-text>
-					<VueDatePicker
-						v-model="duplicatePostingDate"
-						model-type="yyyy-MM-dd"
-						format="yyyy-MM-dd"
-						:enable-time-picker="false"
-						auto-apply
-						class="sleek-field pos-themed-input"
-					/>
-				</v-card-text>
-				<v-card-actions class="justify-end">
-					<v-btn variant="text" @click="closeDuplicateDialog" :disabled="actionLoading">
-						{{ __("Cancel") }}
-					</v-btn>
-					<v-btn color="primary" @click="confirmDuplicate" :loading="actionLoading">
-						{{ __("Duplicate") }}
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
 	</div>
 </template>
 
@@ -116,7 +95,6 @@ const {
 	submitMovement,
 	cancelMovement,
 	deleteMovement,
-	duplicateMovement,
 } = useCashMovement();
 
 const contextLoaded = ref(false);
@@ -124,9 +102,8 @@ const syncingOffline = ref(false);
 const pendingOfflineCount = ref(0);
 const historyStatus = ref("");
 const historyMovementType = ref("");
-const duplicateDialogOpen = ref(false);
-const duplicatePostingDate = ref(getTodayDate());
-const duplicateTarget = ref<any>(null);
+const prefillToken = ref(0);
+const prefillData = ref<any>(null);
 const formResetToken = ref(0);
 const errorMessage = computed(() => error.value);
 
@@ -227,33 +204,17 @@ async function handleSubmit(payload: any) {
 
 function handleDuplicate(row: any) {
 	if (!row?.name) return;
-	duplicateTarget.value = row;
-	duplicatePostingDate.value = (row.posting_date || getTodayDate()).slice(0, 10);
-	duplicateDialogOpen.value = true;
-}
-
-function closeDuplicateDialog() {
-	duplicateDialogOpen.value = false;
-	duplicateTarget.value = null;
-}
-
-async function confirmDuplicate() {
-	if (!duplicateTarget.value?.name) {
-		closeDuplicateDialog();
-		return;
-	}
-	try {
-		await duplicateMovement(duplicateTarget.value.name, duplicatePostingDate.value);
-		toastStore.show({ title: __("Cash movement duplicated"), color: "success" });
-		closeDuplicateDialog();
-		await refreshHistory();
-	} catch (err: any) {
-		toastStore.show({ title: err?.message || __("Failed to duplicate cash movement"), color: "error" });
-	}
-}
-
-function getTodayDate() {
-	return new Date().toISOString().slice(0, 10);
+	prefillData.value = {
+		movement_type: row.movement_type,
+		amount: row.amount,
+		posting_date: row.posting_date,
+		against_name: row.against_name,
+		remarks: row.remarks,
+		expense_account: row.expense_account,
+		target_account: row.target_account,
+	};
+	prefillToken.value += 1;
+	toastStore.show({ title: __("Data loaded in form. Review and submit."), color: "info" });
 }
 
 async function handleCancel(row: any) {

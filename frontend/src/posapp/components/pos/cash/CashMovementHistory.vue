@@ -59,7 +59,7 @@
 				</v-chip>
 			</template>
 			<template #item.actions="{ item }">
-				<div class="d-flex ga-2 justify-end">
+				<div class="d-flex flex-column ga-1 align-end">
 					<v-btn
 						size="x-small"
 						color="info"
