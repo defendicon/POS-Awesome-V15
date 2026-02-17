@@ -23,21 +23,14 @@
 		<v-row dense class="mb-2">
 			<v-col cols="12" md="4">
 				<v-text-field
-					:model-value="selectedSearchText"
+					:model-value="localSearchText"
 					variant="outlined"
 					density="compact"
 					clearable
 					hide-details
 					prepend-inner-icon="mdi-magnify"
 					:label="__('Search')"
-					:disabled="loading"
-					@update:model-value="
-						$emit('filter-change', {
-							status: selectedStatus,
-							movementType: selectedMovementType,
-							searchText: $event || '',
-						})
-					"
+					@update:model-value="onSearchInput"
 				/>
 			</v-col>
 			<v-col cols="12" md="4">
@@ -48,13 +41,7 @@
 					density="compact"
 					:label="__('Status')"
 					:disabled="loading"
-					@update:model-value="
-						$emit('filter-change', {
-							status: $event,
-							movementType: selectedMovementType,
-							searchText: selectedSearchText,
-						})
-					"
+					@update:model-value="emitFilterChange({ status: $event })"
 				/>
 			</v-col>
 			<v-col cols="12" md="4">
@@ -65,13 +52,7 @@
 					density="compact"
 					:label="__('Movement Type')"
 					:disabled="loading"
-					@update:model-value="
-						$emit('filter-change', {
-							status: selectedStatus,
-							movementType: $event,
-							searchText: selectedSearchText,
-						})
-					"
+					@update:model-value="emitFilterChange({ movementType: $event })"
 				/>
 			</v-col>
 		</v-row>
@@ -128,6 +109,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from "vue";
+
 const __ = window.__ || ((text: string, _args?: any[]) => text);
 
 const props = defineProps<{
@@ -142,13 +125,45 @@ const props = defineProps<{
 	pendingOfflineCount: number;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
 	(e: "refresh"): void;
 	(e: "duplicate", row: any): void;
 	(e: "cancel", row: any): void;
 	(e: "delete", row: any): void;
 	(e: "filter-change", payload: { status: string; movementType: string; searchText: string }): void;
 }>();
+
+const localSearchText = ref("");
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(
+	() => props.selectedSearchText,
+	(value) => {
+		localSearchText.value = value || "";
+	},
+	{ immediate: true },
+);
+
+function emitFilterChange(payload: Partial<{ status: string; movementType: string; searchText: string }>) {
+	const nextStatus = payload.status ?? props.selectedStatus;
+	const nextMovementType = payload.movementType ?? props.selectedMovementType;
+	const nextSearchText = payload.searchText ?? localSearchText.value ?? "";
+	emit("filter-change", {
+		status: nextStatus,
+		movementType: nextMovementType,
+		searchText: nextSearchText,
+	});
+}
+
+function onSearchInput(value: string | null) {
+	localSearchText.value = value || "";
+	if (searchTimer) {
+		clearTimeout(searchTimer);
+	}
+	searchTimer = setTimeout(() => {
+		emitFilterChange({ searchText: localSearchText.value });
+	}, 350);
+}
 
 const statusFilters = [
 	{ title: __("All"), value: "" },
