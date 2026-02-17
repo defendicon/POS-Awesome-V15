@@ -53,6 +53,7 @@ export function useCashMovement() {
 		amount: number;
 		againstName?: string;
 		postingDate?: string;
+		sourceAccount?: string;
 		remarks: string;
 		posProfileName: string;
 		posOpeningShiftName: string;
@@ -81,6 +82,7 @@ export function useCashMovement() {
 				posting_date: args.postingDate,
 				amount: args.amount,
 				against_name: args.againstName,
+				source_account: args.sourceAccount,
 				remarks: args.remarks,
 				expense_account: args.expenseAccount,
 				target_account: args.targetAccount,

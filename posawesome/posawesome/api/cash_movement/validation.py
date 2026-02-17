@@ -56,8 +56,29 @@ def validate_remarks(remarks, profile_doc):
         frappe.throw(_("Remarks are required for cash movement in this POS Profile."))
 
 
-def resolve_source_cash_account(profile_doc):
+def extract_allowed_accounts(rows):
+    accounts = []
+    for row in rows or []:
+        account = None
+        if isinstance(row, str):
+            account = row
+        elif isinstance(row, dict):
+            account = row.get("account")
+        else:
+            account = getattr(row, "account", None)
+
+        account = (account or "").strip()
+        if account and account not in accounts:
+            accounts.append(account)
+    return accounts
+
+
+def _resolve_default_source_cash_account(profile_doc):
     company = profile_doc.company
+    configured_default = (profile_doc.get("posa_default_source_account") or "").strip()
+    if configured_default:
+        return configured_default
+
     mode_of_payment = profile_doc.get("posa_cash_mode_of_payment") or "Cash"
 
     account = frappe.db.get_value(
@@ -79,10 +100,46 @@ def resolve_source_cash_account(profile_doc):
     frappe.throw(_("Unable to resolve POS cash account from POS Profile cash mode of payment."))
 
 
+def resolve_source_cash_account(payload, profile_doc):
+    payload = payload or {}
+    selected_source = (payload.get("source_account") or "").strip()
+    allow_override = bool(profile_doc.get("posa_allow_source_account_override"))
+    allowed_sources = extract_allowed_accounts(profile_doc.get("posa_allowed_source_accounts"))
+
+    if selected_source and not allow_override:
+        frappe.throw(_("Source account override is disabled for this POS Profile."))
+
+    if selected_source and allowed_sources and selected_source not in allowed_sources:
+        frappe.throw(_("Selected source account is not allowed for this POS Profile."))
+
+    source_account = selected_source or _resolve_default_source_cash_account(profile_doc)
+    if not selected_source and allowed_sources and source_account not in allowed_sources:
+        source_account = allowed_sources[0]
+
+    if allowed_sources and source_account not in allowed_sources:
+        frappe.throw(_("Selected source account is not allowed for this POS Profile."))
+
+    account_type = frappe.db.get_value("Account", source_account, "account_type")
+    if account_type != "Cash":
+        frappe.throw(_("Source account must be a Cash account."))
+
+    return source_account
+
+
 def resolve_target_account(payload, profile_doc, movement_type):
     movement_type = (movement_type or "").strip()
     if movement_type == "Expense":
-        account = payload.get("expense_account") or profile_doc.get("posa_default_expense_account")
+        account = (payload.get("expense_account") or profile_doc.get("posa_default_expense_account") or "").strip()
+        allowed_expense_accounts = extract_allowed_accounts(profile_doc.get("posa_allowed_expense_accounts"))
+
+        if not account and allowed_expense_accounts:
+            account = allowed_expense_accounts[0]
+
+        if allowed_expense_accounts and account not in allowed_expense_accounts:
+            if payload.get("expense_account"):
+                frappe.throw(_("Selected expense account is not allowed for this POS Profile."))
+            account = allowed_expense_accounts[0]
+
         if not account:
             frappe.throw(_("Expense account is required for POS Expense."))
         return account, account
