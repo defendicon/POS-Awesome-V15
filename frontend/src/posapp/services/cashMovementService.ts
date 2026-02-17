@@ -40,6 +40,10 @@ const cashMovementService = {
 		return api.call(`${baseMethod}.cancel_cash_movement`, { name });
 	},
 
+	duplicate(name: string, posting_date?: string) {
+		return api.call(`${baseMethod}.duplicate_cash_movement`, { name, posting_date });
+	},
+
 	remove(name: string) {
 		return api.call(`${baseMethod}.delete_cash_movement`, { name });
 	},

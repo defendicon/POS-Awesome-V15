@@ -95,6 +95,47 @@ class TestCashMovementService(unittest.TestCase):
         mock_resolve_target_account.assert_not_called()
         mock_validate_account_company.assert_not_called()
 
+    @patch("posawesome.posawesome.api.cash_movement.service._create_cash_movement")
+    @patch("posawesome.posawesome.api.cash_movement.service.ensure_owner_or_manager")
+    @patch("posawesome.posawesome.api.cash_movement.service.frappe")
+    def test_duplicate_cash_movement_supports_posting_date(
+        self,
+        mock_frappe,
+        mock_ensure_owner_or_manager,
+        mock_create_cash_movement,
+    ):
+        source_doc = SimpleNamespace(
+            docstatus=2,
+            pos_profile="POS-PROFILE-1",
+            pos_opening_shift="POS-OPEN-1",
+            amount=250,
+            against_name="Walk-in Customer",
+            remarks="Re-enter cancelled move",
+            movement_type="Expense",
+            expense_account="Expenses - MC",
+            target_account="Expenses - MC",
+        )
+        source_doc.get = lambda key, default=None: getattr(source_doc, key, default)
+        mock_frappe.get_doc.return_value = source_doc
+        mock_create_cash_movement.return_value = {"name": "POS-CM-.26.-00009"}
+
+        result = service.duplicate_cash_movement("POS-CM-.26.-00001", posting_date="2026-02-17")
+
+        self.assertEqual(result, {"name": "POS-CM-.26.-00009"})
+        mock_ensure_owner_or_manager.assert_called_once_with(source_doc)
+        mock_create_cash_movement.assert_called_once_with(
+            {
+                "pos_profile": "POS-PROFILE-1",
+                "pos_opening_shift": "POS-OPEN-1",
+                "amount": 250,
+                "against_name": "Walk-in Customer",
+                "remarks": "Re-enter cancelled move",
+                "expense_account": "Expenses - MC",
+                "posting_date": "2026-02-17",
+            },
+            "Expense",
+        )
+
 
 class TestCashMovementQueries(unittest.TestCase):
     @patch("posawesome.posawesome.api.cash_movement.queries.frappe.get_all")

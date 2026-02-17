@@ -52,6 +52,7 @@ export function useCashMovement() {
 		movementType: "Expense" | "Deposit";
 		amount: number;
 		againstName?: string;
+		postingDate?: string;
 		remarks: string;
 		posProfileName: string;
 		posOpeningShiftName: string;
@@ -77,6 +78,7 @@ export function useCashMovement() {
 			const payload = {
 				pos_profile: args.posProfileName,
 				pos_opening_shift: args.posOpeningShiftName,
+				posting_date: args.postingDate,
 				amount: args.amount,
 				against_name: args.againstName,
 				remarks: args.remarks,
@@ -112,6 +114,15 @@ export function useCashMovement() {
 		}
 	}
 
+	async function duplicateMovement(name: string, postingDate?: string) {
+		actionLoading.value = true;
+		try {
+			return await cashMovementService.duplicate(name, postingDate);
+		} finally {
+			actionLoading.value = false;
+		}
+	}
+
 	return {
 		loading,
 		submitting,
@@ -124,5 +135,6 @@ export function useCashMovement() {
 		submitMovement,
 		cancelMovement,
 		deleteMovement,
+		duplicateMovement,
 	};
 }

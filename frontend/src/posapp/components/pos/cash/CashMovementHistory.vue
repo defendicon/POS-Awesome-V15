@@ -62,6 +62,15 @@
 				<div class="d-flex ga-2 justify-end">
 					<v-btn
 						size="x-small"
+						color="info"
+						variant="tonal"
+						:disabled="![1, 2].includes(item.docstatus) || actionLoading"
+						@click="$emit('duplicate', item)"
+					>
+						{{ __("Duplicate") }}
+					</v-btn>
+					<v-btn
+						size="x-small"
 						color="warning"
 						variant="tonal"
 						:disabled="!allowCancel || item.docstatus !== 1 || actionLoading"
@@ -100,6 +109,7 @@ const props = defineProps<{
 
 defineEmits<{
 	(e: "refresh"): void;
+	(e: "duplicate", row: any): void;
 	(e: "cancel", row: any): void;
 	(e: "delete", row: any): void;
 	(e: "filter-change", payload: { status: string; movementType: string }): void;
@@ -120,9 +130,9 @@ const movementTypeFilters = [
 
 const headers: any[] = [
 	{ title: __("Date"), key: "posting_date" },
+	{ title: __("Against Name"), key: "against_name" },
 	{ title: __("Type"), key: "movement_type" },
 	{ title: __("Amount"), key: "amount", align: "end" },
-	{ title: __("Against Name"), key: "against_name" },
 	{ title: __("Source"), key: "source_account" },
 	{ title: __("Target"), key: "target_account" },
 	{ title: __("Remarks"), key: "remarks" },

@@ -63,10 +63,12 @@ describe("cash movement service methods", () => {
 		call.mockResolvedValueOnce({ ok: 1 });
 		call.mockResolvedValueOnce({ ok: 1 });
 		call.mockResolvedValueOnce({ ok: 1 });
+		call.mockResolvedValueOnce({ ok: 1 });
 
 		await cashMovementService.createExpense({ amount: 50 });
 		await cashMovementService.createDeposit({ amount: 75 });
 		await cashMovementService.cancel("POS-CM-.26.-00001");
+		await cashMovementService.duplicate("POS-CM-.26.-00001", "2026-02-17");
 
 		expect(call).toHaveBeenNthCalledWith(
 			1,
@@ -82,6 +84,11 @@ describe("cash movement service methods", () => {
 			3,
 			"posawesome.posawesome.api.cash_movement.service.cancel_cash_movement",
 			{ name: "POS-CM-.26.-00001" },
+		);
+		expect(call).toHaveBeenNthCalledWith(
+			4,
+			"posawesome.posawesome.api.cash_movement.service.duplicate_cash_movement",
+			{ name: "POS-CM-.26.-00001", posting_date: "2026-02-17" },
 		);
 	});
 });

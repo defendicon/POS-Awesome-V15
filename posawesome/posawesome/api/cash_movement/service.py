@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import nowdate
+from frappe.utils import getdate, nowdate
 
 from .permissions import (
     ensure_cancel_allowed,
@@ -200,3 +200,32 @@ def delete_cash_movement(name):
 
     movement_doc.delete(ignore_permissions=True)
     return {"deleted": name}
+
+
+@frappe.whitelist()
+def duplicate_cash_movement(name, posting_date=None):
+    movement_doc = frappe.get_doc("POS Cash Movement", name)
+    ensure_owner_or_manager(movement_doc)
+    if movement_doc.docstatus not in (1, 2):
+        frappe.throw(_("Only submitted or cancelled cash movements can be duplicated."))
+
+    payload = {
+        "pos_profile": movement_doc.pos_profile,
+        "pos_opening_shift": movement_doc.pos_opening_shift,
+        "amount": movement_doc.amount,
+        "against_name": movement_doc.get("against_name"),
+        "remarks": movement_doc.remarks,
+    }
+
+    if movement_doc.movement_type == "Expense":
+        payload["expense_account"] = movement_doc.expense_account
+    else:
+        payload["target_account"] = movement_doc.target_account
+
+    if posting_date:
+        try:
+            payload["posting_date"] = str(getdate(posting_date))
+        except Exception:
+            frappe.throw(_("Invalid posting date."))
+
+    return _create_cash_movement(payload, movement_doc.movement_type)

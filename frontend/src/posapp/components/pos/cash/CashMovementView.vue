@@ -51,12 +51,37 @@
 					:selected-movement-type="historyMovementType"
 					:pending-offline-count="pendingOfflineCount"
 					@refresh="refreshHistory"
+					@duplicate="handleDuplicate"
 					@cancel="handleCancel"
 					@delete="handleDelete"
 					@filter-change="handleFilterChange"
 				/>
 			</v-col>
 		</v-row>
+
+		<v-dialog v-model="duplicateDialogOpen" max-width="420">
+			<v-card>
+				<v-card-title>{{ __("Select Posting Date") }}</v-card-title>
+				<v-card-text>
+					<VueDatePicker
+						v-model="duplicatePostingDate"
+						model-type="yyyy-MM-dd"
+						format="yyyy-MM-dd"
+						:enable-time-picker="false"
+						auto-apply
+						class="sleek-field pos-themed-input"
+					/>
+				</v-card-text>
+				<v-card-actions class="justify-end">
+					<v-btn variant="text" @click="closeDuplicateDialog" :disabled="actionLoading">
+						{{ __("Cancel") }}
+					</v-btn>
+					<v-btn color="primary" @click="confirmDuplicate" :loading="actionLoading">
+						{{ __("Duplicate") }}
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 
@@ -91,6 +116,7 @@ const {
 	submitMovement,
 	cancelMovement,
 	deleteMovement,
+	duplicateMovement,
 } = useCashMovement();
 
 const contextLoaded = ref(false);
@@ -98,6 +124,9 @@ const syncingOffline = ref(false);
 const pendingOfflineCount = ref(0);
 const historyStatus = ref("");
 const historyMovementType = ref("");
+const duplicateDialogOpen = ref(false);
+const duplicatePostingDate = ref(getTodayDate());
+const duplicateTarget = ref<any>(null);
 const formResetToken = ref(0);
 const errorMessage = computed(() => error.value);
 
@@ -146,6 +175,7 @@ async function handleSubmit(payload: any) {
 		const requestPayload = {
 			pos_profile: posProfileName.value,
 			pos_opening_shift: openingShiftName.value,
+			posting_date: payload.postingDate,
 			amount: payload.amount,
 			against_name: payload.againstName,
 			remarks: payload.remarks,
@@ -179,6 +209,7 @@ async function handleSubmit(payload: any) {
 			movementType: payload.movementType,
 			amount: payload.amount,
 			againstName: payload.againstName,
+			postingDate: payload.postingDate,
 			remarks: payload.remarks,
 			expenseAccount: payload.expenseAccount,
 			targetAccount: payload.targetAccount,
@@ -192,6 +223,37 @@ async function handleSubmit(payload: any) {
 	} catch (err: any) {
 		toastStore.show({ title: err?.message || __("Failed to submit cash movement"), color: "error" });
 	}
+}
+
+function handleDuplicate(row: any) {
+	if (!row?.name) return;
+	duplicateTarget.value = row;
+	duplicatePostingDate.value = (row.posting_date || getTodayDate()).slice(0, 10);
+	duplicateDialogOpen.value = true;
+}
+
+function closeDuplicateDialog() {
+	duplicateDialogOpen.value = false;
+	duplicateTarget.value = null;
+}
+
+async function confirmDuplicate() {
+	if (!duplicateTarget.value?.name) {
+		closeDuplicateDialog();
+		return;
+	}
+	try {
+		await duplicateMovement(duplicateTarget.value.name, duplicatePostingDate.value);
+		toastStore.show({ title: __("Cash movement duplicated"), color: "success" });
+		closeDuplicateDialog();
+		await refreshHistory();
+	} catch (err: any) {
+		toastStore.show({ title: err?.message || __("Failed to duplicate cash movement"), color: "error" });
+	}
+}
+
+function getTodayDate() {
+	return new Date().toISOString().slice(0, 10);
 }
 
 async function handleCancel(row: any) {

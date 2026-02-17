@@ -17,6 +17,15 @@
 
 		<v-row dense>
 			<v-col cols="12" md="4">
+				<v-text-field
+					v-model="againstName"
+					variant="outlined"
+					density="compact"
+					:label="__('Against Name')"
+					:disabled="submitting || !enabled"
+				/>
+			</v-col>
+			<v-col cols="12" md="4">
 				<v-select
 					v-model="movementType"
 					:items="movementTypes"
@@ -43,10 +52,11 @@
 			</v-col>
 			<v-col cols="12" md="4">
 				<v-text-field
-					v-model="againstName"
+					v-model="postingDate"
+					type="date"
 					variant="outlined"
 					density="compact"
-					:label="__('Against Name')"
+					:label="__('Posting Date')"
 					:disabled="submitting || !enabled"
 				/>
 			</v-col>
@@ -137,6 +147,7 @@ const emit = defineEmits<{
 
 const movementType = ref<MovementType | null>("Expense");
 const amount = ref<number | string | null>(0);
+const postingDate = ref<string>(getTodayDate());
 const remarks = ref<string>("");
 const againstName = ref<string>("");
 const expenseAccount = ref<string>("");
@@ -303,6 +314,7 @@ function onSubmit(type: MovementType) {
 		movementType: type,
 		amount: Number(amount.value || 0),
 		againstName: againstName.value,
+		postingDate: postingDate.value,
 		remarks: remarks.value,
 		expenseAccount: expenseAccount.value,
 		targetAccount: targetAccount.value,
@@ -330,6 +342,7 @@ function onAmountBlur() {
 
 function resetFormState() {
 	amount.value = 0;
+	postingDate.value = getTodayDate();
 	againstName.value = "";
 	remarks.value = "";
 	expenseAccount.value = props.context?.default_expense_account || "";
@@ -340,6 +353,10 @@ function resetFormState() {
 		const first = allowed[0];
 		movementType.value = first ? first.value : null;
 	}
+}
+
+function getTodayDate() {
+	return new Date().toISOString().slice(0, 10);
 }
 
 watch(
