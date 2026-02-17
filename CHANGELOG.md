@@ -2,6 +2,230 @@
 
 All notable changes.
 
+Release 15.19.0 — February 17, 2026
+### ✨ Features
+- Add dynamic exchange rate fetching to Pay.vue 
+- add multi-currency support for purchase orders 
+- creat print purchase invoice option instead purchase order in payment. 
+- Introduce Barcode Printing and related packages 
+- introduce item selector in PO 
+- introduce payments in PO submission workflow. 
+- new update available dialogue from git 
+- proratio implemented on additional amount 
+- separate workspace for purchase order 
+- seperate workspace for purchase order 
+- improve PO workflow: default date today and required; fetch items on item search; auto-fill receive_qty when receiving stock; add purchase invoice toggle (po)
+_Total: 11 changes_
+
+### 🐞 Bug Fixes
+- account for unconsolidated POS Invoices in stock availability 
+- add backend logic for scale barcode items 
+- add fallback wrappers 
+- add item add/remove hook fro recalculation additional discount 
+- add logs for checking full background sync flow and fix last sync time 
+- add missing currency fields in item add context 
+- add new item icon and item stock validation removed. 
+- add new uom on new line 
+- add permissions 
+- add print format option and link payment entry with PO 
+- add toggle button for swithing PO and PI Printing 
+- add uom selection dialogue in qty dialogue 
+- add yarn install in package.json to install fonts and icons 
+- added cross sote context 
+- added detailed logs in barcode item addition flow in printing 
+- added development-time warning 
+- added direct event hook. 
+- added filters for searching entries 
+- added missing reconcilliation logics in pospay 
+- added missing write off logic 
+- added safeguard to itemstore.js 
+- added weight field for scale barcode items 
+- adding check for global pos profile in intializing logic. 
+- adding Show only items with barcode and custom printing option 
+- allow item addition in return workflow 
+- apply on filter 
+- apply permission aware query and hardened related endpoints 
+- apply styling to columns 
+- Attempted to load items without POS Profile 
+- Attribute Error 
+- Attribute Error 
+- auto allocation outstanding invoices on payment submission 
+- auto serial and batch assignment on fifo 
+- auto update rows fix for non top rows 
+- autocomplete custom filter 
+- backend search filter 
+- Background detail fetcher over writting 
+- barcode setting exception 
+- batch item qty addition flow 
+- blank list of unallocated payments 
+- branch name and current branch commits show 
+- build error 
+- calculate delivery charges in customer screen 
+- closing shift error 
+- collapsable and reordering fields 
+- confirmation windows dialogue with vuetify dialogue 
+- context prop 
+- convert text field of uom to autocomplete. 
+- correctly update yarn.lock and node_modules 
+- critical bugs and navigation interference 
+- currency conversion logic 
+- currency sign not changing 
+- customer loading 
+- customer screen total calculations and item amount total by changing uom 
+- dark mode and uom selection 
+- disable field on loading 
+- disable unnecessary preload links in config 
+- duplicate doc only fill fields rather than submit doc. 
+- enforced the "POS Profile First" rule. 
+- ensuring count never drops below 0 
+- expense accounts fetched 
+- fast path issue in outstanding list 
+- fetch advances from sales order 
+- fetch barcode from local data and server 
+- fetch customer pricelist rates 
+- fetch delivery charges 
+- focus handler in item search to clear field 
+- freeze original total / discount for calculation 
+- gloab error 
+- hide ERPNext 16 sidebar in POSAwesome interface 
+- Highlighted Yes Button For Speed Processing. 
+- Highlighted Yes, Cancel Sale Button For Speed Processing on Cancel Dialogue. 
+- implement shared component usage via import 
+- implementation of customer reload function 
+- implementing manual focus handling 
+- import getcurrentinstance to make it more robust. 
+- import warn from vue 
+- improve backend logic for buying prices 
+- Improve pricing rule logic for item groups 
+- improve purchase payment dialog UI and currency handling 
+- improve speed of changing rates and qty with ui 
+- improve usability of purchases order 
+- include all ahead commits upto 20 not only last commit 
+- introduce buying price list in PO 
+- introduce context prop 
+- Introduce Customer Reload Function 
+- introduce local fonts and icons 
+- invoice watchers for returns 
+- issue blank Discount on Other Item 
+- item addition on first line and default purchase uom. 
+- item merging in sales return 
+- item selection improvements 
+- item selector settings working 
+- item store backward compatiblity, branch switching friendly, and introdcue hash strategy 
+- limit write off amount and allow in partial payment 
+- loading order of pos profile and customer 
+- memory leak and code duplication 
+- multi currency filter in payments 
+- multi currency logics 
+- multiple windows opening for customer screen 
+- non-existent field fetching 
+- numeric issue in PO Submission 
+- Offer and auto offer application 
+- Offer Applying Logic 
+- optimized item selection in Purchase Order 
+- order of cancellation of expense 
+- order of fields and add posting date field with duplicate doc feature 
+- outstanding amount correctly show with autorefresh upon entering customer 
+- paid amount and change amount random number showing and payment entry from cash on extra amount paid on other than default payment method 
+- paid amount and paid change inconsistency issue 
+- patch order of execution on migration 
+- payment amount error on submission 
+- payment fetch trigger timing 
+- payment section template 
+- persist serial and batch selection 
+- PI linkage to PO rather than PR 
+- po status after completing. 
+- polish UI 
+- POS Submission, uom change responsiveness, credit PO submission 
+- pospay show wrong outstanding invoices 
+- Price list rate not updating to single unit 
+- pricing rule logic on other items 
+- rate and uom fix 
+- recursive scheme in promotional scheme 
+- refactored calculate Offer Qty 
+- refactors duplicated code logics into shared component 
+- reintroduce early return 
+- remove custom print option 
+- remove duoble button in PO and improve payment submissions. 
+- remove duplicated code 
+- remove extra logs of customer loading 
+- remove forcefully timer 
+- remove reload button in update notification 
+- remove unnecessary comment 
+- removed the premature warning 
+- Removing dependencies and go to cdn 
+- Replace Window Dialogue With Vuetify Dialogue 
+- request animation error. 
+- reset form after submit and cash movement workspace 
+- resolve currency validation for purchase invoices 
+- restore missing backend method 
+- return invoice quantity issues 
+- returns calculation in customer screen 
+- round off decimals in hide decimal in qty field 
+- router configuration and bundle build version 
+- Safety Guard Added 
+- salesorder advance allocation 
+- scale barcode item detection and item addition logic 
+- scale barcode meta data, correct flow of adding items 
+- select company issue on payments opening 
+- Set Default Customer After Reload Customer List. 
+- settings field after migrate 
+- show buying prince in po rather than selling price 
+- show onl barcode items filter 
+- show only bacode items in item selector 
+- show unallocated payments in pospay 
+- show weight field on kg uom 
+- split line when multiple batches present 
+- stale fallback issue in item detail fetcher 
+- status on completing pi and pr 
+- submission error on cash edit 
+- Supplier name issue in PO 
+- Thermal Printing Size Fix and pdf button addition. 
+- total miscalculated before invoice save 
+- type script error 
+- UI improvements 
+- UI reactivity issue 
+- Unbound Local Error and optimize N+1 Query 
+- unbound variables 
+- unconditional wacher call and added defensive checks 
+- unomount po component when coming to sale invoice 
+- uom calculation with conversion factor 
+- uom change responsive issue 
+- uom conversion and supplier laoding disabled 
+- uom conversion persistence 
+- uom rate change issue 
+- UOM reversion issue 
+- uom selectin in barcode printing 
+- uom selection implemented 
+- update conversion factor logic for uom 
+- update offer applying logic by introducing item store. 
+- visibility of pay entry in outstanding list. 
+- watch for total changes 
+- write off option 
+- wrong cached pos prfile fallback and offline item cache profile / warehouse scoped isolation 
+- harden pos boot path and runtime asset loading (pos)
+_Total: 186 changes_
+
+### 📝 Docs
+- add detailed repo improvement audit and roadmap 
+_Total: 1 changes_
+
+### 🧰 Maintenance
+- Add 'nul' to the .gitignore file. 
+- cleanup invoice utils and actions 
+- migrate remaining components to script setup 
+- Redundant Condition Remove. 
+- useOnlineStatus to address memory leaks 
+- useOnlineStatus.js 
+- consolidate storage runtime into db module (offline)
+_Total: 7 changes_
+
+— Changelog auto-generated by semantic-release. Thanks to all contributors! 🙌
+
+# Changelog
+
+All notable changes.
+
 Release 15.18.0 — January 17, 2026
 ### ✨ Features
 - add multi-currency payment support with custom exchange rates 
