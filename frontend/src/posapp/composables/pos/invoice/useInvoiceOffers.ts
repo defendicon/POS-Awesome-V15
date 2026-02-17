@@ -1047,6 +1047,44 @@ export function useInvoiceOffers() {
 		return item || null;
 	};
 
+	const parseFiniteNumber = (value: any, fallback = 0) => {
+		const numeric = Number.parseFloat(String(value));
+		return Number.isFinite(numeric) ? numeric : fallback;
+	};
+
+	const clampNumber = (value: number, min: number, max: number) => {
+		return Math.min(max, Math.max(min, value));
+	};
+
+	const resolveOfferBasePrice = (item: any, conversionRate = 1) => {
+		const invalid = Number.NaN;
+		const candidates = [
+			item?.original_base_price_list_rate,
+			item?.base_price_list_rate,
+			parseFiniteNumber(item?.original_price_list_rate, invalid) *
+				conversionRate,
+			parseFiniteNumber(item?.price_list_rate, invalid) * conversionRate,
+			item?.original_base_rate,
+			item?.base_rate,
+			parseFiniteNumber(item?.original_rate, invalid) * conversionRate,
+			parseFiniteNumber(item?.rate, invalid) * conversionRate,
+		];
+
+		for (const candidate of candidates) {
+			const numeric = parseFiniteNumber(candidate, invalid);
+			if (Number.isFinite(numeric) && numeric > 0) {
+				return numeric;
+			}
+		}
+		for (const candidate of candidates) {
+			const numeric = parseFiniteNumber(candidate, invalid);
+			if (Number.isFinite(numeric)) {
+				return numeric;
+			}
+		}
+		return 0;
+	};
+
 	const ApplyOnGiveProduct = async (
 		offer: any,
 		item_code: string | null = null,
@@ -1059,30 +1097,57 @@ export function useInvoiceOffers() {
 		}
 
 		const new_item = { ...item };
-		new_item.qty = offer.given_qty;
-		new_item.stock_qty = offer.given_qty;
+		const givenQty = Math.max(parseFiniteNumber(offer?.given_qty, 0), 0);
+		new_item.qty = givenQty;
+		new_item.stock_qty = givenQty;
 		new_item.posa_is_offer = 1;
 		new_item.is_free_item = 1;
 		new_item.posa_row_id = makeid(20);
 
 		const conversionRate = 1; // Simplified for now, or get from context
+		const offerDiscountType = String(offer?.discount_type || "").trim();
+		const basePrice = resolveOfferBasePrice(new_item, conversionRate);
 
-		if (offer.discount_type === "Rate") {
-			new_item.base_rate = offer.rate;
-			new_item.rate = offer.rate / conversionRate;
-		} else if (offer.discount_type === "Discount Percentage") {
-			new_item.discount_percentage = offer.discount_percentage;
-			const rate =
-				new_item.base_price_list_rate || new_item.price_list_rate;
-			const discount = (rate * offer.discount_percentage) / 100;
-			new_item.base_rate = rate - discount;
+		if (basePrice > 0) {
+			new_item.base_price_list_rate = basePrice;
+			new_item.price_list_rate = basePrice / conversionRate;
+		}
+
+		if (offerDiscountType === "Rate") {
+			const newBaseRate = Math.max(
+				parseFiniteNumber(offer?.rate, basePrice),
+				0,
+			);
+			const baseDiscount = Math.max(basePrice - newBaseRate, 0);
+			new_item.base_rate = newBaseRate;
 			new_item.rate = new_item.base_rate / conversionRate;
-		} else if (offer.discount_type === "Discount Amount") {
-			const rate =
-				new_item.base_price_list_rate || new_item.price_list_rate;
-			const discount = offer.discount_amount;
-			new_item.base_rate = rate - discount;
+			new_item.base_discount_amount = baseDiscount;
+			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.discount_percentage = basePrice
+				? (baseDiscount / basePrice) * 100
+				: 0;
+		} else if (offerDiscountType === "Discount Percentage") {
+			const percent = clampNumber(
+				parseFiniteNumber(offer?.discount_percentage, 0),
+				0,
+				100,
+			);
+			const baseDiscount = (basePrice * percent) / 100;
+			new_item.discount_percentage = percent;
+			new_item.base_discount_amount = baseDiscount;
+			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.base_rate = Math.max(basePrice - baseDiscount, 0);
 			new_item.rate = new_item.base_rate / conversionRate;
+		} else if (offerDiscountType === "Discount Amount") {
+			const amount = parseFiniteNumber(offer?.discount_amount, 0);
+			const baseDiscount = clampNumber(amount, 0, basePrice);
+			new_item.base_discount_amount = baseDiscount;
+			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.base_rate = Math.max(basePrice - baseDiscount, 0);
+			new_item.rate = new_item.base_rate / conversionRate;
+			new_item.discount_percentage = basePrice
+				? (baseDiscount / basePrice) * 100
+				: 0;
 		}
 
 		if (update_item_detail_fn) update_item_detail_fn(new_item);
@@ -1102,24 +1167,49 @@ export function useInvoiceOffers() {
 
 			item.posa_offer_applied = 1;
 			item._manual_rate_set = true;
+			item._manual_rate_set_from_uom = false;
 
 			const conversionRate = 1; // Simplified
-			const base_price =
-				item.base_price_list_rate ||
-				item.price_list_rate * conversionRate;
+			const offerDiscountType = String(offer?.discount_type || "").trim();
+			const basePrice = resolveOfferBasePrice(item, conversionRate);
+			item.base_price_list_rate = basePrice;
+			item.price_list_rate = basePrice / conversionRate;
 
-			if (offer.discount_type === "Rate") {
-				item.base_rate = offer.rate;
+			if (offerDiscountType === "Rate") {
+				const newBaseRate = Math.max(
+					parseFiniteNumber(offer?.rate, basePrice),
+					0,
+				);
+				const baseDiscount = Math.max(basePrice - newBaseRate, 0);
+				item.base_rate = newBaseRate;
 				item.rate = item.base_rate / conversionRate;
-			} else if (offer.discount_type === "Discount Percentage") {
-				item.discount_percentage = offer.discount_percentage;
-				const discount = (base_price * offer.discount_percentage) / 100;
-				item.base_rate = base_price - discount;
+				item.base_discount_amount = baseDiscount;
+				item.discount_amount = baseDiscount / conversionRate;
+				item.discount_percentage = basePrice
+					? (baseDiscount / basePrice) * 100
+					: 0;
+			} else if (offerDiscountType === "Discount Percentage") {
+				const percent = clampNumber(
+					parseFiniteNumber(offer?.discount_percentage, 0),
+					0,
+					100,
+				);
+				const baseDiscount = (basePrice * percent) / 100;
+				item.discount_percentage = percent;
+				item.base_discount_amount = baseDiscount;
+				item.discount_amount = baseDiscount / conversionRate;
+				item.base_rate = Math.max(basePrice - baseDiscount, 0);
 				item.rate = item.base_rate / conversionRate;
-			} else if (offer.discount_type === "Discount Amount") {
-				const discount = offer.discount_amount;
-				item.base_rate = base_price - discount;
+			} else if (offerDiscountType === "Discount Amount") {
+				const amount = parseFiniteNumber(offer?.discount_amount, 0);
+				const baseDiscount = clampNumber(amount, 0, basePrice);
+				item.base_discount_amount = baseDiscount;
+				item.discount_amount = baseDiscount / conversionRate;
+				item.base_rate = Math.max(basePrice - baseDiscount, 0);
 				item.rate = item.base_rate / conversionRate;
+				item.discount_percentage = basePrice
+					? (baseDiscount / basePrice) * 100
+					: 0;
 			}
 
 			if (update_item_detail_fn) update_item_detail_fn(item);
@@ -1138,15 +1228,41 @@ export function useInvoiceOffers() {
 			if (!item || !offerItems.includes(item.posa_row_id)) return;
 
 			item.posa_offer_applied = 0;
-			// Restore original price if available
-			if (item.original_price_list_rate) {
-				item.price_list_rate = item.original_price_list_rate;
-				item.rate = item.original_price_list_rate;
-				item.base_price_list_rate = item.original_base_price_list_rate;
-				item.base_rate = item.original_base_rate;
+			item._manual_rate_set = false;
+			item._manual_rate_set_from_uom = false;
+			const originalPriceListRate = parseFiniteNumber(
+				item.original_price_list_rate,
+				Number.NaN,
+			);
+			const originalBasePriceListRate = parseFiniteNumber(
+				item.original_base_price_list_rate,
+				Number.NaN,
+			);
+			const originalRate = parseFiniteNumber(item.original_rate, Number.NaN);
+			const originalBaseRate = parseFiniteNumber(
+				item.original_base_rate,
+				Number.NaN,
+			);
+
+			if (Number.isFinite(originalPriceListRate)) {
+				item.price_list_rate = originalPriceListRate;
+			}
+			if (Number.isFinite(originalBasePriceListRate)) {
+				item.base_price_list_rate = originalBasePriceListRate;
+			}
+			if (Number.isFinite(originalRate)) {
+				item.rate = originalRate;
+			} else if (Number.isFinite(originalPriceListRate)) {
+				item.rate = originalPriceListRate;
+			}
+			if (Number.isFinite(originalBaseRate)) {
+				item.base_rate = originalBaseRate;
+			} else if (Number.isFinite(originalBasePriceListRate)) {
+				item.base_rate = originalBasePriceListRate;
 			}
 			item.discount_percentage = 0;
 			item.discount_amount = 0;
+			item.base_discount_amount = 0;
 
 			if (update_item_detail_fn) update_item_detail_fn(item);
 		});
@@ -1160,13 +1276,21 @@ export function useInvoiceOffers() {
 	};
 
 	const ApplyOnTotal = (offer: any) => {
-		if (offer.discount_type === "Discount Percentage") {
-			const total = Total.value || 0;
-			const discount = (total * offer.discount_percentage) / 100;
+		const offerDiscountType = String(offer?.discount_type || "").trim();
+		if (offerDiscountType === "Discount Percentage") {
+			const total = parseFiniteNumber(Total.value, 0);
+			const percent = clampNumber(
+				parseFiniteNumber(offer?.discount_percentage, 0),
+				0,
+				100,
+			);
+			const discount = (total * percent) / 100;
 			invoiceStore.setDiscountAmount(discount);
 			discount_percentage_offer_name.value = offer.name;
-		} else if (offer.discount_type === "Discount Amount") {
-			invoiceStore.setDiscountAmount(offer.discount_amount);
+		} else if (offerDiscountType === "Discount Amount") {
+			invoiceStore.setDiscountAmount(
+				parseFiniteNumber(offer?.discount_amount, 0),
+			);
 		}
 	};
 
