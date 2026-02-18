@@ -270,8 +270,8 @@ const handleQtyChange = (item: any, event: any) => {
 };
 
 const handleMinusClick = (item: any) => {
-	// For free items, offers, or replacements, always remove
-	if (item.is_free_item || item.posa_is_offer || item.posa_is_replace) {
+	// Replacement rows should still be removed directly.
+	if (item.posa_is_replace) {
 		props.removeItem(item);
 		return;
 	}

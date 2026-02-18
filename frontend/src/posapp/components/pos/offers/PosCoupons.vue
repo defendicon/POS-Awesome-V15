@@ -116,8 +116,10 @@ export default {
 		back_to_invoice() {
 			this.uiStore.setActiveView("items");
 		},
-		add_coupon(new_coupon) {
-			if (!this.customer || !new_coupon) {
+		add_coupon(new_coupon, options = {}) {
+			const silentDuplicate = !!options.silentDuplicate;
+			const normalizedCoupon = String(new_coupon || "").trim().toUpperCase();
+			if (!this.customer || !normalizedCoupon) {
 				this.toastStore.show({
 					title: __("Select a customer to use coupon"),
 					color: "error",
@@ -125,19 +127,23 @@ export default {
 				return;
 			}
 			const coupons = this.posa_coupons || [];
-			const exist = coupons.find((el) => el.coupon_code == new_coupon);
+			const exist = coupons.find(
+				(el) => String(el.coupon_code || "").trim().toUpperCase() == normalizedCoupon,
+			);
 			if (exist) {
-				this.toastStore.show({
-					title: __("This coupon already used !"),
-					color: "error",
-				});
+				if (!silentDuplicate) {
+					this.toastStore.show({
+						title: __("This coupon already used !"),
+						color: "error",
+					});
+				}
 				return;
 			}
 			const vm = this;
 			frappe.call({
 				method: "posawesome.posawesome.api.offers.get_pos_coupon",
 				args: {
-					coupon: new_coupon,
+					coupon: normalizedCoupon,
 					customer: vm.customer,
 					company: vm.pos_profile.company,
 				},
@@ -179,7 +185,7 @@ export default {
 					if (r.message) {
 						const coupons = r.message;
 						coupons.forEach((coupon_code) => {
-							vm.add_coupon(coupon_code);
+							vm.add_coupon(coupon_code, { silentDuplicate: true });
 						});
 					}
 				},
@@ -188,8 +194,9 @@ export default {
 
 		updatePosCoupons(offers) {
 			if (!this.posa_coupons) return;
+			const offerList = Array.isArray(offers) ? offers : [];
 			this.posa_coupons.forEach((coupon) => {
-				const offer = offers.find((el) => el.offer_applied && el.coupon == coupon.coupon);
+				const offer = offerList.find((el) => el.offer_applied && el.coupon == coupon.coupon);
 				if (offer) {
 					coupon.applied = 1;
 				} else {

@@ -102,6 +102,10 @@ export const useUIStore = defineStore("ui", () => {
   function setOffers(data: any[]) {
     offers.value = data || [];
   }
+  const applicableOffers = ref<any[]>([]);
+  function setApplicableOffers(data: any[]) {
+    applicableOffers.value = data || [];
+  }
 
   // Dialogs & Focus Triggers
   const searchFocusTrigger = ref(0);
@@ -207,6 +211,7 @@ export const useUIStore = defineStore("ui", () => {
     posOpeningShift,
     lastInvoiceId,
     offers,
+    applicableOffers,
     currency,
     company,
     setLoading,
@@ -218,6 +223,7 @@ export const useUIStore = defineStore("ui", () => {
     setRegisterData,
     setLastInvoice,
     setOffers,
+    setApplicableOffers,
     searchFocusTrigger,
     triggerItemSearchFocus,
     newAddressDialog,

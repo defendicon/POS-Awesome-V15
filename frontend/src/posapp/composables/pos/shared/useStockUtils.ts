@@ -11,6 +11,22 @@ export function useStockUtils() {
 	// Calculate UOM conversion and update item rates
 	const calcUom = async (item: any, value: any, context: any) => {
 		if (!item || !value) return;
+		const fixedOfferUom =
+			item?.posa_is_offer && item?._offer_constraints?.fixed_uom
+				? String(item._offer_constraints.fixed_uom).trim()
+				: "";
+		if (fixedOfferUom && String(value).trim() !== fixedOfferUom) {
+			item.uom = fixedOfferUom;
+			toastStore.show({
+				title: __("Offer UOM cannot be changed"),
+				detail: __("Allowed UOM is {0}", [fixedOfferUom]),
+				color: "error",
+			});
+			if (context?.forceUpdate) {
+				context.forceUpdate();
+			}
+			return;
+		}
 		item._uom_calc_token = Number(item._uom_calc_token || 0) + 1;
 		const activeUomCalcToken = item._uom_calc_token;
 		item.uom = value;

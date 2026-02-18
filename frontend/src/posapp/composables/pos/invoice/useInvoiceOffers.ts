@@ -4,6 +4,7 @@ import { useUIStore } from "../../../stores/uiStore";
 import { useToastStore } from "../../../stores/toastStore";
 import { storeToRefs } from "pinia";
 import itemService from "../../../services/itemService";
+import { bus } from "../../../bus";
 
 // @ts-ignore
 const __ = window.__ || ((s) => s);
@@ -63,6 +64,7 @@ export function useInvoiceOffers() {
 	let _offerRefreshHandle: any = null;
 	const _lastAppliedOffersDigest = ref<string | null>(null);
 	const _cachedOfferResults = ref<Map<string, any>>(new Map());
+	const _manuallySuppressedAutoOffers = ref<Set<string>>(new Set());
 
 	// Computed properties matching Invoice.vue context
 	const Total = computed(() => invoiceStore.grossTotal);
@@ -76,6 +78,18 @@ export function useInvoiceOffers() {
 			);
 		}
 		return result;
+	};
+
+	const normalizeOfferRowId = (value: any) => String(value ?? "").trim();
+	const getOfferRowId = (offer: any) =>
+		normalizeOfferRowId(offer?.row_id || offer?.name);
+	const ensureOfferIdentity = (offer: any) => {
+		if (!offer || typeof offer !== "object") return offer;
+		const rowId = getOfferRowId(offer);
+		if (rowId) {
+			offer.row_id = rowId;
+		}
+		return offer;
 	};
 
 	// Methods converted from invoiceOfferMethods.js
@@ -196,16 +210,33 @@ export function useInvoiceOffers() {
 		return brand;
 	};
 
+	const parseArrayField = (value: any) => {
+		if (Array.isArray(value)) return value;
+		if (typeof value === "string") {
+			try {
+				const parsed = JSON.parse(value);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch (_error) {
+				return [];
+			}
+		}
+		return [];
+	};
+
 	const checkOfferIsAppley = (item: any, offer: any) => {
 		let applied = false;
-		const item_offers = item.posa_offers
-			? JSON.parse(item.posa_offers)
-			: [];
+		const item_offers = parseArrayField(item?.posa_offers);
+		const offerRowId = getOfferRowId(offer);
+		if (!offerRowId) return false;
 		for (const row_id of item_offers) {
 			const exist_offer = posa_offers.value.find(
-				(el: any) => row_id == el.row_id,
+				(el: any) =>
+					normalizeOfferRowId(row_id) === getOfferRowId(el),
 			);
-			if (exist_offer && exist_offer.offer_name == offer.name) {
+			if (
+				exist_offer &&
+				getOfferRowId(exist_offer) === offerRowId
+			) {
 				applied = true;
 				break;
 			}
@@ -227,13 +258,17 @@ export function useInvoiceOffers() {
 			changedRowIds,
 		});
 		try {
-			const sourceOffers = Array.isArray(posOffers.value)
+			const sourceOffers = (Array.isArray(posOffers.value)
 				? posOffers.value
-				: [];
+				: []
+			).map((offer: any) => ensureOfferIdentity(offer));
 			if (!sourceOffers.length) {
 				offerDebugLog("[useInvoiceOffers] No source offers available");
+				bus.emit("update_pos_offers", []);
+				uiStore.setApplicableOffers([]);
 				updatePosOffers([]);
 				_cachedOfferResults.value.clear();
+				_manuallySuppressedAutoOffers.value.clear();
 				return;
 			}
 
@@ -298,22 +333,29 @@ export function useInvoiceOffers() {
 			const offers = sourceOffers
 				.map((offer: any) => cache.get(offer.name))
 				.filter((entry: any) => !!entry);
+			setItemGiveOffer(offers);
+			pruneManualSuppression(offers);
+			bus.emit("update_pos_offers", offers);
+			uiStore.setApplicableOffers(offers);
+			const effectiveOffers = offers.filter((offer: any) =>
+				shouldProcessOfferInAutoRefresh(offer),
+			);
 
 			offerDebugLog(
 				"[useInvoiceOffers] Evaluation complete. Derived offers:",
 				offers.length,
+			);
+			offerDebugLog(
+				"[useInvoiceOffers] Effective offers for application:",
+				effectiveOffers.length,
 			);
 
 			// BREAK INFINITE LOOP: Compare current offers with previous ones
 			// We use a more granular digest that includes affected item quantities/rates AND the resulting benefits
 			// This ensures we react to qty changes (e.g. from item selector) but break on identical results.
 			const currentOffersDigest = JSON.stringify(
-				offers.map((o) => {
-					const ids = Array.isArray(o.items)
-						? o.items
-						: typeof o.items === "string"
-							? JSON.parse(o.items)
-							: [];
+				effectiveOffers.map((o) => {
+					const ids = parseArrayField(o?.items);
 					const itemState = ids.map((id: string) => {
 						const it = itemMap.get(id);
 						// Include qty and rate to detect changes that affect benefit calculations
@@ -352,8 +394,7 @@ export function useInvoiceOffers() {
 
 			_lastAppliedOffersDigest.value = currentOffersDigest;
 
-			setItemGiveOffer(offers);
-			await updateInvoiceOffers(offers);
+			await updateInvoiceOffers(effectiveOffers, { origin: "auto" });
 		} catch (error) {
 			console.error("Failed to process offers:", error);
 		}
@@ -530,38 +571,41 @@ export function useInvoiceOffers() {
 	};
 
 	const getCheapestItem = (offer: any) => {
-		let itemsRowID = [];
-		if (typeof offer.items === "string") {
-			itemsRowID = JSON.parse(offer.items);
-		} else {
-			itemsRowID = offer.items;
-		}
+		const itemsRowID = parseArrayField(offer?.items);
 		const itemsList: any[] = [];
 		itemsRowID.forEach((row_id: string) => {
 			const it = getItemFromRowID(row_id);
 			if (it) itemsList.push(it);
 		});
-		if (itemsList.length === 0) return null;
-		return itemsList.reduce((res, obj) => {
-			return !obj.posa_is_replace &&
-				!obj.posa_is_offer &&
-				obj.price_list_rate < res.price_list_rate
-				? obj
-				: res;
+		const eligibleItems = itemsList.filter(
+			(entry: any) => entry && !entry.posa_is_replace && !entry.posa_is_offer,
+		);
+		if (eligibleItems.length === 0) return null;
+		return eligibleItems.reduce((res, obj) => {
+			const resRate = parseFiniteNumber(
+				res?.price_list_rate ?? res?.rate,
+				Number.POSITIVE_INFINITY,
+			);
+			const objRate = parseFiniteNumber(
+				obj?.price_list_rate ?? obj?.rate,
+				Number.POSITIVE_INFINITY,
+			);
+			return objRate < resRate ? obj : res;
 		});
 	};
 
 	const setItemGiveOffer = (offers: any[]) => {
 		offers.forEach((offer) => {
+			if (!offer || offer.offer !== "Give Product") return;
+
 			if (
-				offer.apply_on == "Item Code" &&
 				offer.apply_type == "Item Code" &&
 				offer.replace_item
 			) {
-				offer.give_item = offer.item;
-				offer.apply_item_code = offer.item;
+				const itemCode = offer.item || offer.apply_item_code;
+				offer.give_item = itemCode;
+				offer.apply_item_code = itemCode;
 			} else if (
-				offer.apply_on == "Item Group" &&
 				offer.apply_type == "Item Group" &&
 				offer.replace_cheapest_item
 			) {
@@ -569,6 +613,8 @@ export function useInvoiceOffers() {
 				const offerItemCode = cheapest ? cheapest.item_code : null;
 				offer.give_item = offerItemCode;
 				offer.apply_item_code = offerItemCode;
+			} else if (!offer.give_item && offer.apply_type === "Item Code") {
+				offer.give_item = offer.apply_item_code || offer.item || null;
 			}
 		});
 	};
@@ -619,16 +665,71 @@ export function useInvoiceOffers() {
 		}
 	};
 
+	const pruneManualSuppression = (availableOffers: any[]) => {
+		if (!_manuallySuppressedAutoOffers.value.size) return;
+		const availableIds = new Set(
+			(Array.isArray(availableOffers) ? availableOffers : [])
+				.map((offer: any) => getOfferRowId(offer))
+				.filter(Boolean),
+		);
+		for (const rowId of Array.from(_manuallySuppressedAutoOffers.value)) {
+			if (!availableIds.has(rowId)) {
+				_manuallySuppressedAutoOffers.value.delete(rowId);
+			}
+		}
+	};
+
+	const syncManualAutoOfferSuppression = (selectedOffers: any[]) => {
+		const selectedIds = new Set(
+			(Array.isArray(selectedOffers) ? selectedOffers : [])
+				.map((offer: any) => getOfferRowId(offer))
+				.filter(Boolean),
+		);
+
+		posa_offers.value.forEach((invoiceOffer: any) => {
+			const rowId = getOfferRowId(invoiceOffer);
+			if (!rowId) return;
+			if (!selectedIds.has(rowId)) {
+				_manuallySuppressedAutoOffers.value.add(rowId);
+			}
+		});
+
+		selectedIds.forEach((rowId) => {
+			_manuallySuppressedAutoOffers.value.delete(rowId);
+		});
+	};
+
+	const isOfferAutoEnabled = (offer: any) => {
+		const raw = offer?.auto;
+		if (typeof raw === "string") {
+			const normalized = raw.trim().toLowerCase();
+			return normalized === "1" || normalized === "true" || normalized === "yes";
+		}
+		return raw === 1 || raw === true;
+	};
+
+	const shouldProcessOfferInAutoRefresh = (offer: any) => {
+		if (!offer) return false;
+		const rowId = getOfferRowId(offer);
+		const isSuppressed =
+			!!rowId && _manuallySuppressedAutoOffers.value.has(rowId);
+		if (isOfferAutoEnabled(offer)) {
+			return !isSuppressed;
+		}
+		return posa_offers.value.some(
+			(invoiceOffer: any) =>
+				invoiceOffer &&
+				getOfferRowId(invoiceOffer) === rowId,
+		);
+	};
+
 	const calculateOfferQty = (offer: any) => {
 		const base_qty = offer.given_qty || 1;
 		if (!offer.is_recursive) return base_qty;
 
 		let transaction_qty = 0;
 		if (offer.items) {
-			const itemsRowID =
-				typeof offer.items === "string"
-					? JSON.parse(offer.items)
-					: offer.items;
+			const itemsRowID = parseArrayField(offer.items);
 			if (Array.isArray(itemsRowID)) {
 				itemsRowID.forEach((row_id) => {
 					const row_item = getItemFromRowID(row_id);
@@ -775,28 +876,42 @@ export function useInvoiceOffers() {
 	};
 
 	const updatePosOffers = (offers: any[]) => {
-		posOffers.value = Array.isArray(offers) ? offers : [];
+		posOffers.value = (Array.isArray(offers) ? offers : []).map(
+			(offer: any) => ensureOfferIdentity(offer),
+		);
 	};
 
-	const updateInvoiceOffers = async (offers: any[]) => {
+	const updateInvoiceOffers = async (
+		offers: any[],
+		options: { origin?: "auto" | "manual" } = {},
+	) => {
+		const origin = options?.origin || "manual";
+		if (origin === "manual") {
+			syncManualAutoOfferSuppression(offers);
+		}
 		if (isApplyingOffer.value) return;
 		isApplyingOffer.value = true;
 		try {
-			// Logic copying from invoiceOfferMethods.js lines 708+
-			posa_offers.value.forEach((invoiceOffer) => {
+			// Remove stale applied offers first. Iterate on a snapshot to avoid
+			// skipping entries while mutating posa_offers.
+			const appliedOffersSnapshot = [...posa_offers.value];
+			appliedOffersSnapshot.forEach((invoiceOffer) => {
+				const invoiceOfferRowId = getOfferRowId(invoiceOffer);
 				const existOffer = offers.find(
-					(offer) => invoiceOffer.row_id == offer.row_id,
+					(offer) => getOfferRowId(offer) === invoiceOfferRowId,
 				);
 				if (!existOffer) {
 					removeApplyOffer(invoiceOffer);
 				}
 			});
 			for (const offer of offers) {
+				ensureOfferIdentity(offer);
+				const offerRowId = getOfferRowId(offer);
 				const existOffer = posa_offers.value.find(
-					(invoiceOffer) => invoiceOffer.row_id == offer.row_id,
+					(invoiceOffer) => getOfferRowId(invoiceOffer) === offerRowId,
 				);
 				if (existOffer) {
-					existOffer.items = JSON.stringify(offer.items);
+					existOffer.items = JSON.stringify(parseArrayField(offer.items));
 					// Logic for Give Product replacement
 					if (
 						existOffer.offer === "Give Product" &&
@@ -829,29 +944,12 @@ export function useInvoiceOffers() {
 
 						// ... (omitted complex logic replacement for brevity, trust user to verify or complete?)
 						// I must try to include it.
-						let updated_item_offers: any[] = [];
-						if (Array.isArray(offer.items)) {
-							updated_item_offers = offer.items.filter(
-								(row_id: any) =>
-									row_id != item_to_remove.posa_row_id,
-							);
-						} else if (typeof offer.items === "string") {
-							try {
-								const parsed = JSON.parse(offer.items);
-								if (Array.isArray(parsed)) {
-									updated_item_offers = parsed.filter(
-										(row_id: any) =>
-											row_id !=
-											item_to_remove.posa_row_id,
-									);
-								}
-							} catch (error) {
-								console.warn(
-									"Invalid offer items payload",
-									error,
-								);
-							}
-						}
+						const updated_item_offers = parseArrayField(
+							offer.items,
+						).filter(
+							(row_id: any) =>
+								row_id != item_to_remove.posa_row_id,
+						);
 						offer.items = updated_item_offers;
 
 						const isItem = invoiceStore.itemsData.has(
@@ -898,10 +996,12 @@ export function useInvoiceOffers() {
 	};
 
 	const removeApplyOffer = (invoiceOffer: any) => {
+		ensureOfferIdentity(invoiceOffer);
+		const invoiceOfferRowId = getOfferRowId(invoiceOffer);
 		if (invoiceOffer.offer === "Item Price") {
 			RemoveOnPrice(invoiceOffer);
 			const index = posa_offers.value.findIndex(
-				(el) => el.row_id === invoiceOffer.row_id,
+				(el) => getOfferRowId(el) === invoiceOfferRowId,
 			);
 			if (index > -1) posa_offers.value.splice(index, 1);
 		}
@@ -911,7 +1011,7 @@ export function useInvoiceOffers() {
 				(item) => item.posa_row_id == invoiceOffer.give_item_row_id,
 			);
 			const index = posa_offers.value.findIndex(
-				(el) => el.row_id === invoiceOffer.row_id,
+				(el) => getOfferRowId(el) === invoiceOfferRowId,
 			);
 			if (index > -1) posa_offers.value.splice(index, 1);
 			if (item_to_remove) {
@@ -932,13 +1032,13 @@ export function useInvoiceOffers() {
 		if (invoiceOffer.offer === "Grand Total") {
 			RemoveOnTotal(invoiceOffer);
 			const index = posa_offers.value.findIndex(
-				(el) => el.row_id === invoiceOffer.row_id,
+				(el) => getOfferRowId(el) === invoiceOfferRowId,
 			);
 			if (index > -1) posa_offers.value.splice(index, 1);
 		}
 		if (invoiceOffer.offer === "Loyalty Point") {
 			const index = posa_offers.value.findIndex(
-				(el) => el.row_id === invoiceOffer.row_id,
+				(el) => getOfferRowId(el) === invoiceOfferRowId,
 			);
 			if (index > -1) posa_offers.value.splice(index, 1);
 		}
@@ -946,6 +1046,9 @@ export function useInvoiceOffers() {
 	};
 
 	const applyNewOffer = async (offer: any) => {
+		ensureOfferIdentity(offer);
+		let appliedSuccessfully = true;
+
 		if (offer.offer === "Item Price") {
 			ApplyOnPrice(offer);
 		}
@@ -956,6 +1059,8 @@ export function useInvoiceOffers() {
 			if (item) {
 				invoiceStore.addItem(item, 0);
 				offer.give_item_row_id = item.posa_row_id;
+			} else {
+				appliedSuccessfully = false;
 			}
 		}
 		if (offer.offer === "Grand Total") {
@@ -963,6 +1068,10 @@ export function useInvoiceOffers() {
 		}
 		if (offer.offer === "Loyalty Point") {
 			// Already handled in its own way usually, but let's be consistent
+		}
+		if (!appliedSuccessfully) {
+			offer.offer_applied = false;
+			return false;
 		}
 
 		toastStore.show({
@@ -974,10 +1083,10 @@ export function useInvoiceOffers() {
 
 		const newOffer = {
 			offer_name: offer.name,
-			row_id: offer.row_id,
+			row_id: getOfferRowId(offer),
 			apply_on: offer.apply_on,
 			offer: offer.offer,
-			items: JSON.stringify(offer.items),
+			items: JSON.stringify(parseArrayField(offer.items)),
 			give_item: offer.give_item,
 			give_item_row_id: offer.give_item_row_id,
 			offer_applied: offer.offer_applied,
@@ -986,6 +1095,7 @@ export function useInvoiceOffers() {
 		};
 		posa_offers.value.push(newOffer);
 		addOfferToItems(newOffer);
+		return true;
 	};
 
 	const notifyOfferItemUnavailable = (itemCode = "") => {
@@ -1047,80 +1157,362 @@ export function useInvoiceOffers() {
 		return item || null;
 	};
 
+	const parseFiniteNumber = (value: any, fallback = 0) => {
+		const numeric = Number.parseFloat(String(value));
+		return Number.isFinite(numeric) ? numeric : fallback;
+	};
+
+	const parseOfferItemRowIds = (offer: any) => {
+		if (!offer) return [];
+		return parseArrayField(offer.items);
+	};
+
+	const resolveGiveProductItemCode = (
+		offer: any,
+		item_code: string | null = null,
+	) => {
+		const normalizedCandidates: string[] = [];
+		const addCandidate = (raw: any) => {
+			const code = raw ? String(raw).trim() : "";
+			if (
+				!code ||
+				code.toLowerCase() === "nothing" ||
+				code.toLowerCase() === "null" ||
+				code.toLowerCase() === "undefined"
+			) {
+				return;
+			}
+			if (!normalizedCandidates.includes(code)) {
+				normalizedCandidates.push(code);
+			}
+		};
+
+		addCandidate(item_code);
+		addCandidate(offer?.give_item);
+		addCandidate(offer?.apply_item_code);
+		if (offer?.replace_item) {
+			addCandidate(offer?.item);
+		}
+		if (offer?.replace_cheapest_item) {
+			const cheapest = getCheapestItem(offer);
+			addCandidate(cheapest?.item_code);
+		}
+
+		const offerRowIds = parseOfferItemRowIds(offer);
+		offerRowIds.forEach((row_id: string) => {
+			const rowItem = getItemFromRowID(row_id);
+			addCandidate(rowItem?.item_code);
+		});
+
+		if (!normalizedCandidates.length && offer?.apply_type === "Item Group") {
+			const groupName = offer?.apply_item_group || offer?.item_group;
+			if (groupName) {
+				const threshold = parseFiniteNumber(offer?.less_then, 0);
+				const combined = [...(items.value || []), ...(packed_items.value || [])]
+					.filter((entry) => {
+						if (!entry || entry.posa_is_offer || entry.posa_is_replace) {
+							return false;
+						}
+						if (entry.item_group !== groupName) return false;
+						if (threshold > 0) {
+							const rate = parseFiniteNumber(
+								entry.price_list_rate ?? entry.rate,
+								0,
+							);
+							return rate < threshold;
+						}
+						return true;
+					})
+					.sort((a, b) => {
+						const rateA = parseFiniteNumber(a.price_list_rate ?? a.rate, 0);
+						const rateB = parseFiniteNumber(b.price_list_rate ?? b.rate, 0);
+						return rateA - rateB;
+					});
+
+				if (combined.length) {
+					addCandidate(combined[0]?.item_code);
+				}
+
+				if (!normalizedCandidates.length) {
+					const catalog = (allItems.value || [])
+						.filter((entry) => entry && entry.item_group === groupName)
+						.filter((entry) => {
+							if (threshold <= 0) return true;
+							const rate = parseFiniteNumber(
+								entry.price_list_rate ?? entry.rate,
+								0,
+							);
+							return rate < threshold;
+						})
+						.sort((a, b) => {
+							const rateA = parseFiniteNumber(a.price_list_rate ?? a.rate, 0);
+							const rateB = parseFiniteNumber(b.price_list_rate ?? b.rate, 0);
+							return rateA - rateB;
+						});
+					if (catalog.length) {
+						addCandidate(catalog[0]?.item_code);
+					}
+				}
+			}
+		}
+
+		return normalizedCandidates[0] || "";
+	};
+
+	const clampNumber = (value: number, min: number, max: number) => {
+		return Math.min(max, Math.max(min, value));
+	};
+
+	const resolveOfferConversionFactor = (
+		item: any,
+		selectedUomData?: any,
+	) => {
+		const candidates = [
+			selectedUomData?.conversion_factor,
+			item?.conversion_factor,
+			item?.uom_conversion_factor,
+		];
+		for (const raw of candidates) {
+			const parsed = Math.max(parseFiniteNumber(raw, 0), 0);
+			if (parsed > 0) {
+				return parsed;
+			}
+		}
+		return 1;
+	};
+
+	const resolveOfferBasePrice = (item: any, conversionRate = 1) => {
+		const invalid = Number.NaN;
+		const candidates = [
+			item?.original_base_price_list_rate,
+			item?.base_price_list_rate,
+			parseFiniteNumber(item?.original_price_list_rate, invalid) *
+				conversionRate,
+			parseFiniteNumber(item?.price_list_rate, invalid) * conversionRate,
+			item?.original_base_rate,
+			item?.base_rate,
+			parseFiniteNumber(item?.original_rate, invalid) * conversionRate,
+			parseFiniteNumber(item?.rate, invalid) * conversionRate,
+		];
+
+		for (const candidate of candidates) {
+			const numeric = parseFiniteNumber(candidate, invalid);
+			if (Number.isFinite(numeric) && numeric > 0) {
+				return numeric;
+			}
+		}
+		for (const candidate of candidates) {
+			const numeric = parseFiniteNumber(candidate, invalid);
+			if (Number.isFinite(numeric)) {
+				return numeric;
+			}
+		}
+		return 0;
+	};
+
 	const ApplyOnGiveProduct = async (
 		offer: any,
 		item_code: string | null = null,
 	) => {
-		if (!item_code) item_code = offer.give_item;
-		const item = await resolveOfferItem(item_code!);
-		if (!item) {
-			notifyOfferItemUnavailable(item_code || (offer && offer.give_item));
+		const resolvedItemCode = resolveGiveProductItemCode(offer, item_code);
+		if (!resolvedItemCode) {
+			notifyOfferItemUnavailable(item_code || offer?.give_item || "");
 			return null;
 		}
 
+		const item = await resolveOfferItem(resolvedItemCode);
+		if (!item) {
+			notifyOfferItemUnavailable(resolvedItemCode);
+			return null;
+		}
+		offer.give_item = resolvedItemCode;
+
 		const new_item = { ...item };
-		new_item.qty = offer.given_qty;
-		new_item.stock_qty = offer.given_qty;
+		const givenQty = Math.max(parseFiniteNumber(offer?.given_qty, 0), 0);
+		const normalizedItemUoms = Array.isArray(new_item.item_uoms)
+			? [...new_item.item_uoms]
+			: [];
+		const stockUom = new_item.stock_uom ? String(new_item.stock_uom).trim() : "";
+		if (
+			stockUom &&
+			!normalizedItemUoms.some(
+				(entry: any) =>
+					entry && String(entry.uom || "").trim() === stockUom,
+			)
+		) {
+			normalizedItemUoms.push({ uom: stockUom, conversion_factor: 1 });
+		}
+		const selectedUom =
+			(new_item.uom ? String(new_item.uom).trim() : "") ||
+			stockUom ||
+			(normalizedItemUoms[0]?.uom
+				? String(normalizedItemUoms[0].uom).trim()
+				: "");
+		if (selectedUom) {
+			new_item.uom = selectedUom;
+		}
+		const selectedUomData = normalizedItemUoms.find(
+			(entry: any) =>
+				entry && String(entry.uom || "").trim() === String(selectedUom || ""),
+		);
+		const conversionFactor = resolveOfferConversionFactor(
+			new_item,
+			selectedUomData,
+		);
+		new_item.item_uoms = normalizedItemUoms;
+		new_item.conversion_factor = conversionFactor;
+		new_item.qty = givenQty;
+		new_item.stock_qty = givenQty * conversionFactor;
+		new_item.base_qty = new_item.stock_qty;
 		new_item.posa_is_offer = 1;
 		new_item.is_free_item = 1;
 		new_item.posa_row_id = makeid(20);
 
-		const conversionRate = 1; // Simplified for now, or get from context
+		const conversionRate = conversionFactor;
+		const offerDiscountType = String(offer?.discount_type || "").trim();
+		const basePrice = resolveOfferBasePrice(new_item, conversionRate);
 
-		if (offer.discount_type === "Rate") {
-			new_item.base_rate = offer.rate;
-			new_item.rate = offer.rate / conversionRate;
-		} else if (offer.discount_type === "Discount Percentage") {
-			new_item.discount_percentage = offer.discount_percentage;
-			const rate =
-				new_item.base_price_list_rate || new_item.price_list_rate;
-			const discount = (rate * offer.discount_percentage) / 100;
-			new_item.base_rate = rate - discount;
-			new_item.rate = new_item.base_rate / conversionRate;
-		} else if (offer.discount_type === "Discount Amount") {
-			const rate =
-				new_item.base_price_list_rate || new_item.price_list_rate;
-			const discount = offer.discount_amount;
-			new_item.base_rate = rate - discount;
-			new_item.rate = new_item.base_rate / conversionRate;
+		if (basePrice > 0) {
+			new_item.base_price_list_rate = basePrice;
+			new_item.price_list_rate = basePrice / conversionRate;
 		}
 
-		if (update_item_detail_fn) update_item_detail_fn(new_item);
+		if (offerDiscountType === "Rate") {
+			const newBaseRate = Math.max(
+				parseFiniteNumber(offer?.rate, basePrice),
+				0,
+			);
+			const baseDiscount = Math.max(basePrice - newBaseRate, 0);
+			new_item.base_rate = newBaseRate;
+			new_item.rate = new_item.base_rate / conversionRate;
+			new_item.base_discount_amount = baseDiscount;
+			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.discount_percentage = basePrice
+				? (baseDiscount / basePrice) * 100
+				: 0;
+		} else if (offerDiscountType === "Discount Percentage") {
+			const percent = clampNumber(
+				parseFiniteNumber(offer?.discount_percentage, 0),
+				0,
+				100,
+			);
+			const baseDiscount = (basePrice * percent) / 100;
+			new_item.discount_percentage = percent;
+			new_item.base_discount_amount = baseDiscount;
+			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.base_rate = Math.max(basePrice - baseDiscount, 0);
+			new_item.rate = new_item.base_rate / conversionRate;
+		} else if (offerDiscountType === "Discount Amount") {
+			const amount = parseFiniteNumber(offer?.discount_amount, 0);
+			const baseDiscount = clampNumber(amount, 0, basePrice);
+			new_item.base_discount_amount = baseDiscount;
+			new_item.discount_amount = baseDiscount / conversionRate;
+			new_item.base_rate = Math.max(basePrice - baseDiscount, 0);
+			new_item.rate = new_item.base_rate / conversionRate;
+			new_item.discount_percentage = basePrice
+				? (baseDiscount / basePrice) * 100
+				: 0;
+		}
+		new_item._offer_constraints = {
+			max_qty: givenQty,
+			fixed_uom: new_item.uom || new_item.stock_uom || "",
+			discount_type: offerDiscountType,
+			min_base_rate: parseFiniteNumber(new_item.base_rate, 0),
+			max_base_discount_amount: parseFiniteNumber(
+				new_item.base_discount_amount,
+				0,
+			),
+			max_discount_percentage: parseFiniteNumber(
+				new_item.discount_percentage,
+				0,
+			),
+		};
+
+		if (update_item_detail_fn) {
+			update_item_detail_fn(new_item);
+		}
+		new_item._manual_rate_set = true;
+		new_item._manual_rate_set_from_uom = true;
 		return new_item;
 	};
 
 	const ApplyOnPrice = (offer: any) => {
 		const combined = [...items.value, ...packed_items.value];
-		const offerItems = Array.isArray(offer.items)
-			? offer.items
-			: typeof offer.items === "string"
-				? JSON.parse(offer.items)
-				: [];
+		const offerItems = parseArrayField(offer?.items);
 
 		combined.forEach((item) => {
 			if (!item || !offerItems.includes(item.posa_row_id)) return;
 
 			item.posa_offer_applied = 1;
 			item._manual_rate_set = true;
+			item._manual_rate_set_from_uom = false;
 
-			const conversionRate = 1; // Simplified
-			const base_price =
-				item.base_price_list_rate ||
-				item.price_list_rate * conversionRate;
+			const normalizedItemUoms = Array.isArray(item.item_uoms)
+				? item.item_uoms
+				: [];
+			const selectedUom = item.uom ? String(item.uom).trim() : "";
+			const selectedUomData = normalizedItemUoms.find(
+				(entry: any) =>
+					entry &&
+					String(entry.uom || "").trim() === String(selectedUom || ""),
+			);
+			const conversionRate = resolveOfferConversionFactor(item, selectedUomData);
+			item.conversion_factor = conversionRate;
+			const offerDiscountType = String(offer?.discount_type || "").trim();
+			const basePrice = resolveOfferBasePrice(item, conversionRate);
+			item.base_price_list_rate = basePrice;
+			item.price_list_rate = basePrice / conversionRate;
 
-			if (offer.discount_type === "Rate") {
-				item.base_rate = offer.rate;
+			if (offerDiscountType === "Rate") {
+				const newBaseRate = Math.max(
+					parseFiniteNumber(offer?.rate, basePrice),
+					0,
+				);
+				const baseDiscount = Math.max(basePrice - newBaseRate, 0);
+				item.base_rate = newBaseRate;
 				item.rate = item.base_rate / conversionRate;
-			} else if (offer.discount_type === "Discount Percentage") {
-				item.discount_percentage = offer.discount_percentage;
-				const discount = (base_price * offer.discount_percentage) / 100;
-				item.base_rate = base_price - discount;
+				item.base_discount_amount = baseDiscount;
+				item.discount_amount = baseDiscount / conversionRate;
+				item.discount_percentage = basePrice
+					? (baseDiscount / basePrice) * 100
+					: 0;
+			} else if (offerDiscountType === "Discount Percentage") {
+				const percent = clampNumber(
+					parseFiniteNumber(offer?.discount_percentage, 0),
+					0,
+					100,
+				);
+				const baseDiscount = (basePrice * percent) / 100;
+				item.discount_percentage = percent;
+				item.base_discount_amount = baseDiscount;
+				item.discount_amount = baseDiscount / conversionRate;
+				item.base_rate = Math.max(basePrice - baseDiscount, 0);
 				item.rate = item.base_rate / conversionRate;
-			} else if (offer.discount_type === "Discount Amount") {
-				const discount = offer.discount_amount;
-				item.base_rate = base_price - discount;
+			} else if (offerDiscountType === "Discount Amount") {
+				const amount = parseFiniteNumber(offer?.discount_amount, 0);
+				const baseDiscount = clampNumber(amount, 0, basePrice);
+				item.base_discount_amount = baseDiscount;
+				item.discount_amount = baseDiscount / conversionRate;
+				item.base_rate = Math.max(basePrice - baseDiscount, 0);
 				item.rate = item.base_rate / conversionRate;
+				item.discount_percentage = basePrice
+					? (baseDiscount / basePrice) * 100
+					: 0;
 			}
+			item._offer_constraints = {
+				max_qty: null,
+				fixed_uom: "",
+				discount_type: offerDiscountType,
+				min_base_rate: parseFiniteNumber(item.base_rate, 0),
+				max_base_discount_amount: parseFiniteNumber(
+					item.base_discount_amount,
+					0,
+				),
+				max_discount_percentage: parseFiniteNumber(
+					item.discount_percentage,
+					0,
+				),
+			};
 
 			if (update_item_detail_fn) update_item_detail_fn(item);
 		});
@@ -1128,25 +1520,48 @@ export function useInvoiceOffers() {
 
 	const RemoveOnPrice = (offer: any) => {
 		const combined = [...items.value, ...packed_items.value];
-		const offerItems = Array.isArray(offer.items)
-			? offer.items
-			: typeof offer.items === "string"
-				? JSON.parse(offer.items)
-				: [];
+		const offerItems = parseArrayField(offer?.items);
 
 		combined.forEach((item) => {
 			if (!item || !offerItems.includes(item.posa_row_id)) return;
 
 			item.posa_offer_applied = 0;
-			// Restore original price if available
-			if (item.original_price_list_rate) {
-				item.price_list_rate = item.original_price_list_rate;
-				item.rate = item.original_price_list_rate;
-				item.base_price_list_rate = item.original_base_price_list_rate;
-				item.base_rate = item.original_base_rate;
+			item._manual_rate_set = false;
+			item._manual_rate_set_from_uom = false;
+			const originalPriceListRate = parseFiniteNumber(
+				item.original_price_list_rate,
+				Number.NaN,
+			);
+			const originalBasePriceListRate = parseFiniteNumber(
+				item.original_base_price_list_rate,
+				Number.NaN,
+			);
+			const originalRate = parseFiniteNumber(item.original_rate, Number.NaN);
+			const originalBaseRate = parseFiniteNumber(
+				item.original_base_rate,
+				Number.NaN,
+			);
+
+			if (Number.isFinite(originalPriceListRate)) {
+				item.price_list_rate = originalPriceListRate;
+			}
+			if (Number.isFinite(originalBasePriceListRate)) {
+				item.base_price_list_rate = originalBasePriceListRate;
+			}
+			if (Number.isFinite(originalRate)) {
+				item.rate = originalRate;
+			} else if (Number.isFinite(originalPriceListRate)) {
+				item.rate = originalPriceListRate;
+			}
+			if (Number.isFinite(originalBaseRate)) {
+				item.base_rate = originalBaseRate;
+			} else if (Number.isFinite(originalBasePriceListRate)) {
+				item.base_rate = originalBasePriceListRate;
 			}
 			item.discount_percentage = 0;
 			item.discount_amount = 0;
+			item.base_discount_amount = 0;
+			item._offer_constraints = null;
 
 			if (update_item_detail_fn) update_item_detail_fn(item);
 		});
@@ -1160,13 +1575,21 @@ export function useInvoiceOffers() {
 	};
 
 	const ApplyOnTotal = (offer: any) => {
-		if (offer.discount_type === "Discount Percentage") {
-			const total = Total.value || 0;
-			const discount = (total * offer.discount_percentage) / 100;
+		const offerDiscountType = String(offer?.discount_type || "").trim();
+		if (offerDiscountType === "Discount Percentage") {
+			const total = parseFiniteNumber(Total.value, 0);
+			const percent = clampNumber(
+				parseFiniteNumber(offer?.discount_percentage, 0),
+				0,
+				100,
+			);
+			const discount = (total * percent) / 100;
 			invoiceStore.setDiscountAmount(discount);
 			discount_percentage_offer_name.value = offer.name;
-		} else if (offer.discount_type === "Discount Amount") {
-			invoiceStore.setDiscountAmount(offer.discount_amount);
+		} else if (offerDiscountType === "Discount Amount") {
+			invoiceStore.setDiscountAmount(
+				parseFiniteNumber(offer?.discount_amount, 0),
+			);
 		}
 	};
 
@@ -1177,19 +1600,15 @@ export function useInvoiceOffers() {
 
 	const addOfferToItems = (offer: any) => {
 		const combined = [...items.value, ...packed_items.value];
-		const offerItems = Array.isArray(offer.items)
-			? offer.items
-			: typeof offer.items === "string"
-				? JSON.parse(offer.items)
-				: [];
+		const offerItems = parseArrayField(offer?.items);
+		const offerRowId = getOfferRowId(offer);
+		if (!offerRowId) return;
 
 		combined.forEach((item) => {
 			if (!item || !offerItems.includes(item.posa_row_id)) return;
-			const itemOffers = item.posa_offers
-				? JSON.parse(item.posa_offers)
-				: [];
-			if (!itemOffers.includes(offer.row_id)) {
-				itemOffers.push(offer.row_id);
+			const itemOffers = parseArrayField(item?.posa_offers);
+			if (!itemOffers.includes(offerRowId)) {
+				itemOffers.push(offerRowId);
 				item.posa_offers = JSON.stringify(itemOffers);
 			}
 		});
@@ -1197,10 +1616,12 @@ export function useInvoiceOffers() {
 
 	const deleteOfferFromItems = (offer: any) => {
 		const combined = [...items.value, ...packed_items.value];
+		const offerRowId = getOfferRowId(offer);
+		if (!offerRowId) return;
 		combined.forEach((item) => {
 			if (!item || !item.posa_offers) return;
-			const itemOffers = JSON.parse(item.posa_offers);
-			const index = itemOffers.indexOf(offer.row_id);
+			const itemOffers = parseArrayField(item.posa_offers);
+			const index = itemOffers.indexOf(offerRowId);
 			if (index > -1) {
 				itemOffers.splice(index, 1);
 				item.posa_offers = JSON.stringify(itemOffers);
@@ -1210,7 +1631,9 @@ export function useInvoiceOffers() {
 
 	// Handlers for Invoice.vue
 	const handleSetOffers = (data: any) => {
-		posOffers.value = data;
+		posOffers.value = (Array.isArray(data) ? data : []).map((offer: any) =>
+			ensureOfferIdentity(offer),
+		);
 	};
 
 	const handleUpdateInvoiceCoupons = (data: any) => {
@@ -1246,7 +1669,8 @@ export function useInvoiceOffers() {
 
 		handleSetOffers,
 		handelOffers,
-		handleUpdateInvoiceOffers: updateInvoiceOffers,
+		handleUpdateInvoiceOffers: (offers: any[]) =>
+			updateInvoiceOffers(offers, { origin: "manual" }),
 		handleUpdateInvoiceCoupons,
 		handleSetAllItems,
 		scheduleOfferRefresh,

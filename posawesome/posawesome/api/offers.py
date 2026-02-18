@@ -3,7 +3,6 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import json
 
 import frappe
 from frappe.utils import cstr, flt, getdate, nowdate
@@ -82,6 +81,21 @@ def get_offers(profile):
         )
         or []
     )
+
+    for offer in data:
+        # Ensure deterministic identifier for frontend offer lifecycle logic.
+        offer["row_id"] = cstr(offer.get("row_id") or offer.get("name"))
+        offer["offer_applied"] = flt(offer.get("offer_applied") or 0)
+        offer["auto"] = flt(offer.get("auto") or 0)
+        offer["min_qty"] = flt(offer.get("min_qty") or 0)
+        offer["max_qty"] = flt(offer.get("max_qty") or 0)
+        offer["min_amt"] = flt(offer.get("min_amt") or 0)
+        offer["max_amt"] = flt(offer.get("max_amt") or 0)
+        if not cstr(offer.get("discount_type")).strip():
+            inferred_discount_type = _infer_discount_type_from_values(offer)
+            if inferred_discount_type:
+                offer["discount_type"] = inferred_discount_type
+        offer = _normalize_discount_fields(offer)
 
     promotional_scheme_offers = _get_promotional_scheme_offers(pos_profile) or []
 
@@ -348,6 +362,16 @@ def _map_discount_type(rate_or_discount):
         "Discount Amount": "Discount Amount",
     }
     return mapping.get(rate_or_discount, "Discount Percentage")
+
+
+def _infer_discount_type_from_values(offer):
+    if flt(offer.get("rate")) > 0:
+        return "Rate"
+    if flt(offer.get("discount_amount")) > 0:
+        return "Discount Amount"
+    if flt(offer.get("discount_percentage")) > 0:
+        return "Discount Percentage"
+    return None
 
 
 def _normalize_discount_fields(offer):

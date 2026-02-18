@@ -28,7 +28,8 @@
 							:disabled="
 								(item.offer == 'Give Product' &&
 									!item.give_item &&
-									(!item.replace_cheapest_item || !item.replace_item)) ||
+									!item.replace_cheapest_item &&
+									!item.replace_item) ||
 								(item.offer == 'Grand Total' &&
 									discount_percentage_offer_name &&
 									discount_percentage_offer_name != item.name)
@@ -180,6 +181,20 @@ export default {
 			item.offer_applied = false;
 			this.forceUpdateItem();
 		},
+		normalizeOfferRowId(value) {
+			return String(value ?? "").trim();
+		},
+		getOfferId(offer) {
+			return this.normalizeOfferRowId(offer?.row_id || offer?.name);
+		},
+		normalizeOfferIdentity(offer) {
+			if (!offer || typeof offer !== "object") return offer;
+			const rowId = this.getOfferId(offer);
+			if (rowId) {
+				offer.row_id = rowId;
+			}
+			return offer;
+		},
 		makeid(length) {
 			let result = "";
 			const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -190,21 +205,25 @@ export default {
 			return result;
 		},
 		updatePosOffers(offers) {
+			const incoming = (Array.isArray(offers) ? offers : []).map((offer) =>
+				this.normalizeOfferIdentity({ ...offer }),
+			);
 			const toRemove = [];
 			this.pos_offers.forEach((pos_offer) => {
-				const offer = offers.find((offer) => offer.name === pos_offer.name);
+				const offer = incoming.find(
+					(offer) => this.getOfferId(offer) === this.getOfferId(pos_offer),
+				);
 				if (!offer) {
-					toRemove.push(pos_offer.row_id);
+					toRemove.push(this.getOfferId(pos_offer));
 				}
 			});
 			this.removeOffers(toRemove);
-			offers.forEach((offer) => {
-				const pos_offer = this.pos_offers.find((pos_offer) => offer.name === pos_offer.name);
+			incoming.forEach((offer) => {
+				const pos_offer = this.pos_offers.find(
+					(pos_offer) => this.getOfferId(offer) === this.getOfferId(pos_offer),
+				);
 				if (pos_offer) {
 					pos_offer.items = offer.items;
-					if (pos_offer.offer === "Grand Total" && !this.discount_percentage_offer_name) {
-						pos_offer.offer_applied = !!pos_offer.auto;
-					}
 					if (
 						offer.apply_on == "Item Group" &&
 						offer.apply_type == "Item Group" &&
@@ -216,10 +235,14 @@ export default {
 				} else {
 					const newOffer = { ...offer };
 					if (!offer.row_id) {
-						newOffer.row_id = this.makeid(20);
+						newOffer.row_id = this.getOfferId(offer) || this.makeid(20);
 					}
 					if (offer.apply_type == "Item Code") {
-						newOffer.give_item = offer.apply_item_code || "Nothing";
+						if (offer.replace_item) {
+							newOffer.give_item = offer.item || offer.apply_item_code || null;
+						} else {
+							newOffer.give_item = offer.apply_item_code || null;
+						}
 					}
 					if (offer.offer_applied) {
 						newOffer.offer_applied = !!offer.offer_applied;
@@ -252,7 +275,12 @@ export default {
 			});
 		},
 		removeOffers(offers_id_list) {
-			this.pos_offers = this.pos_offers.filter((offer) => !offers_id_list.includes(offer.row_id));
+			const normalized = new Set(
+				(offers_id_list || []).map((id) => this.normalizeOfferRowId(id)),
+			);
+			this.pos_offers = this.pos_offers.filter(
+				(offer) => !normalized.has(this.getOfferId(offer)),
+			);
 		},
 		handelOffers() {
 			const applyedOffers = this.pos_offers.filter((offer) => offer.offer_applied);
@@ -323,7 +351,7 @@ export default {
 			if (newCustomer === oldCustomer) {
 				return;
 			}
-			this.offers = [];
+			this.pos_offers = [];
 		},
 	},
 
@@ -332,6 +360,15 @@ export default {
 			() => this.uiStore.posProfile,
 			(profile) => {
 				if (profile) this.pos_profile = profile;
+			},
+			{ deep: true, immediate: true },
+		);
+		this.$watch(
+			() => this.uiStore.applicableOffers,
+			(offers) => {
+				if (Array.isArray(offers)) {
+					this.updatePosOffers(offers);
+				}
 			},
 			{ deep: true, immediate: true },
 		);

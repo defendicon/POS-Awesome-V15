@@ -93,8 +93,7 @@
 								]"
 								:disabled="
 									!pos_profile.posa_allow_user_to_edit_rate ||
-									!!item.posa_is_replace ||
-									!!item.posa_offer_applied
+									!!item.posa_is_replace
 								"
 								prepend-inner-icon="mdi-currency-usd"
 							></v-text-field>
