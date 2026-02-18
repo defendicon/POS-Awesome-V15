@@ -19,6 +19,54 @@ def _recompute_card_break_counts(links):
             card_break.link_count = (card_break.link_count or 0) + 1
 
 
+def _set_link_indexes(links):
+    for idx, link in enumerate(links, start=1):
+        link.idx = idx
+
+
+def _remove_cash_movement_links(workspace):
+    links = workspace.links or []
+    changed = False
+    for idx in range(len(links) - 1, -1, -1):
+        link = links[idx]
+        if (link.type == "Link" and link.link_to == LINK_TO) or (
+            link.type == "Card Break" and link.label == CARD_LABEL
+        ):
+            links.pop(idx)
+            changed = True
+
+    if changed:
+        _recompute_card_break_counts(links)
+        _set_link_indexes(links)
+
+    return changed
+
+
+def _remove_cash_movement_content(workspace):
+    if not workspace.content:
+        return False
+
+    try:
+        content = json.loads(workspace.content)
+    except Exception:
+        return False
+
+    filtered_content = [
+        block
+        for block in content
+        if not (
+            block.get("type") == "card"
+            and (block.get("data") or {}).get("card_name") == CARD_LABEL
+        )
+    ]
+
+    if len(filtered_content) == len(content):
+        return False
+
+    workspace.content = json.dumps(filtered_content, separators=(",", ":"))
+    return True
+
+
 def _ensure_workspace_content(workspace):
     content = []
     if workspace.content:
@@ -63,13 +111,20 @@ def execute():
     if not frappe.db.table_exists("DocType"):
         return
 
-    if not frappe.db.exists("DocType", LINK_TO):
-        return
-
     if not frappe.db.exists("Workspace", WORKSPACE_NAME):
         return
 
     workspace = frappe.get_doc("Workspace", WORKSPACE_NAME)
+    has_cash_movement_doctype = frappe.db.exists("DocType", LINK_TO)
+    if not has_cash_movement_doctype:
+        removed_links = _remove_cash_movement_links(workspace)
+        removed_content = _remove_cash_movement_content(workspace)
+        if removed_links or removed_content:
+            if not workspace.get("type"):
+                workspace.type = "Workspace"
+            workspace.save(ignore_permissions=True)
+        return
+
     links = workspace.links or []
 
     has_card_break = any(link.type == "Card Break" and link.label == CARD_LABEL for link in links)
@@ -104,8 +159,9 @@ def execute():
 
     links = workspace.links or []
     _recompute_card_break_counts(links)
-    for idx, link in enumerate(links, start=1):
-        link.idx = idx
+    _set_link_indexes(links)
 
     _ensure_workspace_content(workspace)
+    if not workspace.get("type"):
+        workspace.type = "Workspace"
     workspace.save(ignore_permissions=True)

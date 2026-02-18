@@ -82,4 +82,6 @@ def execute():
     for idx, link in enumerate(links, start=1):
         link.idx = idx
 
+    if not workspace.get("type"):
+        workspace.type = "Workspace"
     workspace.save(ignore_permissions=True)
