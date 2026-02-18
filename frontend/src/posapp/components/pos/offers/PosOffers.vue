@@ -219,7 +219,11 @@ export default {
 						newOffer.row_id = this.makeid(20);
 					}
 					if (offer.apply_type == "Item Code") {
-						newOffer.give_item = offer.apply_item_code || "Nothing";
+						if (offer.replace_item) {
+							newOffer.give_item = offer.item || offer.apply_item_code || null;
+						} else {
+							newOffer.give_item = offer.apply_item_code || null;
+						}
 					}
 					if (offer.offer_applied) {
 						newOffer.offer_applied = !!offer.offer_applied;

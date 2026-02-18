@@ -553,15 +553,16 @@ export function useInvoiceOffers() {
 
 	const setItemGiveOffer = (offers: any[]) => {
 		offers.forEach((offer) => {
+			if (!offer || offer.offer !== "Give Product") return;
+
 			if (
-				offer.apply_on == "Item Code" &&
 				offer.apply_type == "Item Code" &&
 				offer.replace_item
 			) {
-				offer.give_item = offer.item;
-				offer.apply_item_code = offer.item;
+				const itemCode = offer.item || offer.apply_item_code;
+				offer.give_item = itemCode;
+				offer.apply_item_code = itemCode;
 			} else if (
-				offer.apply_on == "Item Group" &&
 				offer.apply_type == "Item Group" &&
 				offer.replace_cheapest_item
 			) {
@@ -569,6 +570,8 @@ export function useInvoiceOffers() {
 				const offerItemCode = cheapest ? cheapest.item_code : null;
 				offer.give_item = offerItemCode;
 				offer.apply_item_code = offerItemCode;
+			} else if (!offer.give_item && offer.apply_type === "Item Code") {
+				offer.give_item = offer.apply_item_code || offer.item || null;
 			}
 		});
 	};
@@ -946,6 +949,8 @@ export function useInvoiceOffers() {
 	};
 
 	const applyNewOffer = async (offer: any) => {
+		let appliedSuccessfully = true;
+
 		if (offer.offer === "Item Price") {
 			ApplyOnPrice(offer);
 		}
@@ -956,6 +961,8 @@ export function useInvoiceOffers() {
 			if (item) {
 				invoiceStore.addItem(item, 0);
 				offer.give_item_row_id = item.posa_row_id;
+			} else {
+				appliedSuccessfully = false;
 			}
 		}
 		if (offer.offer === "Grand Total") {
@@ -963,6 +970,10 @@ export function useInvoiceOffers() {
 		}
 		if (offer.offer === "Loyalty Point") {
 			// Already handled in its own way usually, but let's be consistent
+		}
+		if (!appliedSuccessfully) {
+			offer.offer_applied = false;
+			return false;
 		}
 
 		toastStore.show({
@@ -986,6 +997,7 @@ export function useInvoiceOffers() {
 		};
 		posa_offers.value.push(newOffer);
 		addOfferToItems(newOffer);
+		return true;
 	};
 
 	const notifyOfferItemUnavailable = (itemCode = "") => {
@@ -1052,6 +1064,112 @@ export function useInvoiceOffers() {
 		return Number.isFinite(numeric) ? numeric : fallback;
 	};
 
+	const parseOfferItemRowIds = (offer: any) => {
+		if (!offer) return [];
+		if (Array.isArray(offer.items)) return offer.items;
+		if (typeof offer.items === "string") {
+			try {
+				const parsed = JSON.parse(offer.items);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch (_error) {
+				return [];
+			}
+		}
+		return [];
+	};
+
+	const resolveGiveProductItemCode = (
+		offer: any,
+		item_code: string | null = null,
+	) => {
+		const normalizedCandidates: string[] = [];
+		const addCandidate = (raw: any) => {
+			const code = raw ? String(raw).trim() : "";
+			if (
+				!code ||
+				code.toLowerCase() === "nothing" ||
+				code.toLowerCase() === "null" ||
+				code.toLowerCase() === "undefined"
+			) {
+				return;
+			}
+			if (!normalizedCandidates.includes(code)) {
+				normalizedCandidates.push(code);
+			}
+		};
+
+		addCandidate(item_code);
+		addCandidate(offer?.give_item);
+		addCandidate(offer?.apply_item_code);
+		if (offer?.replace_item) {
+			addCandidate(offer?.item);
+		}
+		if (offer?.replace_cheapest_item) {
+			const cheapest = getCheapestItem(offer);
+			addCandidate(cheapest?.item_code);
+		}
+
+		const offerRowIds = parseOfferItemRowIds(offer);
+		offerRowIds.forEach((row_id: string) => {
+			const rowItem = getItemFromRowID(row_id);
+			addCandidate(rowItem?.item_code);
+		});
+
+		if (!normalizedCandidates.length && offer?.apply_type === "Item Group") {
+			const groupName = offer?.apply_item_group || offer?.item_group;
+			if (groupName) {
+				const threshold = parseFiniteNumber(offer?.less_then, 0);
+				const combined = [...(items.value || []), ...(packed_items.value || [])]
+					.filter((entry) => {
+						if (!entry || entry.posa_is_offer || entry.posa_is_replace) {
+							return false;
+						}
+						if (entry.item_group !== groupName) return false;
+						if (threshold > 0) {
+							const rate = parseFiniteNumber(
+								entry.price_list_rate ?? entry.rate,
+								0,
+							);
+							return rate < threshold;
+						}
+						return true;
+					})
+					.sort((a, b) => {
+						const rateA = parseFiniteNumber(a.price_list_rate ?? a.rate, 0);
+						const rateB = parseFiniteNumber(b.price_list_rate ?? b.rate, 0);
+						return rateA - rateB;
+					});
+
+				if (combined.length) {
+					addCandidate(combined[0]?.item_code);
+				}
+
+				if (!normalizedCandidates.length) {
+					const catalog = (allItems.value || [])
+						.filter((entry) => entry && entry.item_group === groupName)
+						.filter((entry) => {
+							if (threshold <= 0) return true;
+							const rate = parseFiniteNumber(
+								entry.price_list_rate ?? entry.rate,
+								0,
+							);
+							return rate < threshold;
+						})
+						.sort((a, b) => {
+							const rateA = parseFiniteNumber(a.price_list_rate ?? a.rate, 0);
+							const rateB = parseFiniteNumber(b.price_list_rate ?? b.rate, 0);
+							return rateA - rateB;
+						});
+					if (catalog.length) {
+						addCandidate(catalog[0]?.item_code);
+					}
+				}
+			}
+		}
+
+		return normalizedCandidates[0] || "";
+	};
+
 	const clampNumber = (value: number, min: number, max: number) => {
 		return Math.min(max, Math.max(min, value));
 	};
@@ -1089,12 +1207,18 @@ export function useInvoiceOffers() {
 		offer: any,
 		item_code: string | null = null,
 	) => {
-		if (!item_code) item_code = offer.give_item;
-		const item = await resolveOfferItem(item_code!);
-		if (!item) {
-			notifyOfferItemUnavailable(item_code || (offer && offer.give_item));
+		const resolvedItemCode = resolveGiveProductItemCode(offer, item_code);
+		if (!resolvedItemCode) {
+			notifyOfferItemUnavailable(item_code || offer?.give_item || "");
 			return null;
 		}
+
+		const item = await resolveOfferItem(resolvedItemCode);
+		if (!item) {
+			notifyOfferItemUnavailable(resolvedItemCode);
+			return null;
+		}
+		offer.give_item = resolvedItemCode;
 
 		const new_item = { ...item };
 		const givenQty = Math.max(parseFiniteNumber(offer?.given_qty, 0), 0);
