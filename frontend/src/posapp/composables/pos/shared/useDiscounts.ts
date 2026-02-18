@@ -58,6 +58,44 @@ export function useDiscounts() {
 		item._manual_rate_set_from_uom = false;
 	};
 
+	const getEffectiveOfferMinBaseRate = (
+		item: any,
+		maxDiscountPct: number,
+		maxBaseDiscountAmount: number,
+		minBaseRate: number,
+	) => {
+		const candidates: number[] = [];
+		const basePriceListRate = Number(item.base_price_list_rate || 0);
+		const safeBasePriceListRate = Number.isFinite(basePriceListRate)
+			? Math.max(basePriceListRate, 0)
+			: 0;
+
+		if (Number.isFinite(minBaseRate) && minBaseRate >= 0) {
+			candidates.push(minBaseRate);
+		}
+
+		if (
+			Number.isFinite(maxBaseDiscountAmount) &&
+			maxBaseDiscountAmount >= 0
+		) {
+			candidates.push(
+				Math.max(safeBasePriceListRate - maxBaseDiscountAmount, 0),
+			);
+		}
+
+		if (Number.isFinite(maxDiscountPct) && maxDiscountPct >= 0) {
+			const pctRateFloor =
+				safeBasePriceListRate * (1 - Math.min(maxDiscountPct, 100) / 100);
+			candidates.push(Math.max(pctRateFloor, 0));
+		}
+
+		if (!candidates.length) {
+			return null;
+		}
+
+		return Math.max(...candidates);
+	};
+
 	const enforceOfferPriceLimits = (
 		item: any,
 		fieldId: string,
@@ -73,8 +111,36 @@ export function useDiscounts() {
 		const maxBaseDiscountAmount = Number(limits.max_base_discount_amount);
 		const minBaseRate = Number(limits.min_base_rate);
 		const epsilon = 0.000001;
+		const effectiveMinBaseRate = getEffectiveOfferMinBaseRate(
+			item,
+			maxDiscountPct,
+			maxBaseDiscountAmount,
+			minBaseRate,
+		);
 
 		let violationMessage = "";
+
+		if (
+			fieldId === "rate" &&
+			effectiveMinBaseRate != null &&
+			Number(item.base_rate || 0) < effectiveMinBaseRate - epsilon
+		) {
+			applyOfferRateFloor(item, context, effectiveMinBaseRate);
+			toastStore.show({
+				title: __("Rate adjusted to maximum allowed discount"),
+				detail: __(
+					"Minimum allowed rate for this offer item is {0}.",
+					[
+						flt(
+							toSelectedCurrency(context, effectiveMinBaseRate),
+							context.currency_precision,
+						),
+					],
+				),
+				color: "error",
+			});
+			return false;
+		}
 
 		if (
 			Number.isFinite(maxDiscountPct) &&
@@ -104,23 +170,6 @@ export function useDiscounts() {
 			minBaseRate >= 0 &&
 			Number(item.base_rate || 0) < minBaseRate - epsilon
 		) {
-			if (fieldId === "rate") {
-				applyOfferRateFloor(item, context, minBaseRate);
-				toastStore.show({
-					title: __("Rate adjusted to maximum allowed discount"),
-					detail: __(
-						"Minimum allowed rate for this offer item is {0}.",
-						[
-							flt(
-								toSelectedCurrency(context, minBaseRate),
-								context.currency_precision,
-							),
-						],
-					),
-					color: "error",
-				});
-				return false;
-			}
 			violationMessage = __(
 				"Minimum allowed rate for this offer item is {0}.",
 				[flt(toSelectedCurrency(context, minBaseRate), context.currency_precision)],
