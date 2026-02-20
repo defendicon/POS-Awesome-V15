@@ -54,10 +54,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import {
-	createCustomerDisplayTransport,
-	type CustomerDisplaySnapshot,
-} from "../../utils/customerDisplay";
+import { createCustomerDisplayTransport, type CustomerDisplaySnapshot } from "../../utils/customerDisplay";
 
 declare const __: (_text: string, _args?: any[]) => string;
 
@@ -88,9 +85,7 @@ const emptySnapshot = (): CustomerDisplaySnapshot => ({
 const snapshot = ref<CustomerDisplaySnapshot>(emptySnapshot());
 
 let unsubscribe: (() => void) | null = null;
-let transport:
-	| ReturnType<typeof createCustomerDisplayTransport>
-	| null = null;
+let transport: ReturnType<typeof createCustomerDisplayTransport> | null = null;
 
 const syncSubscription = () => {
 	if (unsubscribe) {

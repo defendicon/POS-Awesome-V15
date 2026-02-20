@@ -573,11 +573,18 @@
 									>
 										<td>{{ row.movement_type }}</td>
 										<td class="text-end">
-											{{ formatCurrencyWithSymbol(row.total || 0, overviewCompanyCurrency) }}
+											{{
+												formatCurrencyWithSymbol(
+													row.total || 0,
+													overviewCompanyCurrency,
+												)
+											}}
 										</td>
 									</tr>
 									<tr>
-										<td><strong>{{ __("Total") }}</strong></td>
+										<td>
+											<strong>{{ __("Total") }}</strong>
+										</td>
 										<td class="text-end">
 											<strong>
 												{{
