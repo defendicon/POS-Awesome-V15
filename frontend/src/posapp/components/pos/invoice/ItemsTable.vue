@@ -39,6 +39,17 @@
 					<div class="text-h6 font-weight-regular">{{ __("Your cart is empty") }}</div>
 					<div class="text-body-2 mt-2 text-center" style="max-width: 300px">
 						{{ __("Scan a barcode or use the search bar to add items to the transaction.") }}
+						<div class="mt-4 text-caption text-medium-emphasis">
+							<v-icon icon="mdi-keyboard-outline" size="small" class="mr-1" />
+							{{ __("Press") }}
+							<kbd
+								class="d-inline-flex align-center bg-surface-variant px-2 py-1 rounded border font-weight-bold mx-1 text-high-emphasis"
+								style="border-color: rgba(var(--v-border-color), var(--v-border-opacity))"
+							>
+								Alt + 3
+							</kbd>
+							{{ __("to search") }}
+						</div>
 					</div>
 				</div>
 			</template>
