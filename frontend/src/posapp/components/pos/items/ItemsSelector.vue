@@ -346,6 +346,10 @@ const blockSaleBeyondAvailableQty = computed(() => {
 	);
 });
 
+const deferStockValidationToPayment = computed(() =>
+	["Order", "Quotation"].includes(current_invoice_type.value),
+);
+
 const { items, filteredItems, customer_price_list, loading, isBackgroundLoading } = itemsIntegration;
 
 const displayedItems = computed(() => {
@@ -515,6 +519,7 @@ const add_item = async (item, optionsOrQty: any = {}) => {
 			!options.suppressNegativeWarning,
 			true,
 			isReturnInvoice.value,
+			deferStockValidationToPayment.value,
 		);
 
 		if (isValid) {
@@ -553,6 +558,7 @@ const scanProcessor = useScanProcessor({
 	float_precision: computed(() => pos_profile.value?.float_precision || 2),
 	hide_qty_decimals: computed(() => !!hide_qty_decimals.value),
 	blockSaleBeyondAvailableQty,
+	deferStockValidationToPayment,
 	currency_precision: computed(() => pos_profile.value?.currency_precision || 2),
 	exchange_rate: computed(() => selected_exchange_rate.value),
 	selected_currency,

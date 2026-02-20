@@ -23,6 +23,7 @@ export function useCartValidation() {
 		_showNegativeStockWarning = true,
 		skipServerValidation = false,
 		isReturnInvoice = false,
+		deferStockValidationToPayment = false,
 	) {
 		isValidating.value = true;
 		validationError.value = null;
@@ -40,6 +41,11 @@ export function useCartValidation() {
 					color: "warning",
 				});
 				return false;
+			}
+
+			// Allow adding lines in Order/Quotation; enforce stock at Invoice payment/submit stage.
+			if (deferStockValidationToPayment && !isReturnInvoice) {
+				return true;
 			}
 
 			if (
@@ -114,6 +120,7 @@ export function useCartValidation() {
 				blockSaleBeyondAvailableQty,
 				_showNegativeStockWarning,
 				isReturnInvoice,
+				deferStockValidationToPayment,
 			);
 		} finally {
 			isValidating.value = false;
@@ -172,10 +179,15 @@ export function useCartValidation() {
 		blockSaleBeyondAvailableQty = false,
 		_showNegativeStockWarning = true,
 		isReturnInvoice = false,
+		deferStockValidationToPayment = false,
 	) {
 		console.warn(
 			"Using fallback validation due to server validation failure",
 		);
+
+		if (deferStockValidationToPayment && !isReturnInvoice) {
+			return true;
+		}
 
 		const isStockItem = parseBooleanSetting(item?.is_stock_item);
 
@@ -225,6 +237,7 @@ export function useCartValidation() {
 		blockSaleBeyondAvailableQty = false,
 		showNegativeStockWarning = true,
 		isReturnInvoice = false,
+		deferStockValidationToPayment = false,
 	) {
 		const validItems: any[] = [];
 		const invalidItems: any[] = [];
@@ -240,6 +253,7 @@ export function useCartValidation() {
 				showNegativeStockWarning,
 				false,
 				isReturnInvoice,
+				deferStockValidationToPayment,
 			);
 
 			if (isValid) {

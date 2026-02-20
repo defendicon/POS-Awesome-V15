@@ -40,6 +40,7 @@ export interface ScanProcessorContext {
 	float_precision: ComputedRef<number>;
 	hide_qty_decimals: ComputedRef<boolean>;
 	blockSaleBeyondAvailableQty: ComputedRef<boolean>;
+	deferStockValidationToPayment?: ComputedRef<boolean> | Ref<boolean> | boolean;
 	currency_precision: ComputedRef<number>;
 	exchange_rate: ComputedRef<number>;
 	format_currency: (
@@ -110,6 +111,12 @@ export function useScanProcessor(context: ScanProcessorContext) {
 
 	const isReturnMode = () => {
 		const value = context.isReturnInvoice;
+		if (typeof value === "boolean") return value;
+		return Boolean(value?.value);
+	};
+
+	const shouldDeferStockValidation = () => {
+		const value = context.deferStockValidationToPayment;
 		if (typeof value === "boolean") return value;
 		return Boolean(value?.value);
 	};
@@ -366,7 +373,12 @@ export function useScanProcessor(context: ScanProcessorContext) {
 					? newItem.actual_qty
 					: null;
 
-		if (!isReturnMode() && availableQty !== null && availableQty < requestedQty) {
+		if (
+			!isReturnMode() &&
+			!shouldDeferStockValidation() &&
+			availableQty !== null &&
+			availableQty < requestedQty
+		) {
 			const negativeStockEnabled = isNegativeStockEnabled(newItem);
 			const exceedsAvailable = availableQty < requestedQty;
 			const shouldBlock =
