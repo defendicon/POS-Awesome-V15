@@ -341,9 +341,7 @@ const blockSaleBeyondAvailableQty = computed(() => {
 	if (["Order", "Quotation"].includes(current_invoice_type.value)) {
 		return false;
 	}
-	return parseBooleanSetting(
-		pos_profile.value?.posa_block_sale_beyond_available_qty,
-	);
+	return parseBooleanSetting(pos_profile.value?.posa_block_sale_beyond_available_qty);
 });
 
 const deferStockValidationToPayment = computed(() =>

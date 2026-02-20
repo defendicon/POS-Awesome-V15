@@ -15,17 +15,10 @@
 							!isFullReturnDiscount(return_discount_meta.ratio)
 						"
 					>
-						<v-alert
-							density="compact"
-							type="info"
-							variant="tonal"
-							class="summary-field"
-						>
+						<v-alert density="compact" type="info" variant="tonal" class="summary-field">
 							{{ __("Prorated return discount") }}:
-							{{ formatRatio(return_discount_meta.ratio) }} —
-							{{ __("Original") }}:
-							{{ formatCurrency(return_discount_meta.original_discount) }},
-							{{ __("Applied") }}:
+							{{ formatRatio(return_discount_meta.ratio) }} — {{ __("Original") }}:
+							{{ formatCurrency(return_discount_meta.original_discount) }}, {{ __("Applied") }}:
 							{{ formatCurrency(return_discount_meta.prorated_discount) }}
 						</v-alert>
 					</v-col>

@@ -404,22 +404,14 @@ export default {
 			},
 		},
 		return_discount_meta() {
-			if (
-				!this.isReturnInvoice ||
-				!this.return_doc ||
-				this.pos_profile?.posa_use_percentage_discount
-			) {
+			if (!this.isReturnInvoice || !this.return_doc || this.pos_profile?.posa_use_percentage_discount) {
 				return null;
 			}
 
-			const originalDiscount = Math.abs(
-				Number(this.return_discount_base_amount || 0),
-			);
+			const originalDiscount = Math.abs(Number(this.return_discount_base_amount || 0));
 			if (!originalDiscount) return null;
 
-			const originalTotal = Math.abs(
-				Number(this.return_discount_base_total || 0),
-			);
+			const originalTotal = Math.abs(Number(this.return_discount_base_total || 0));
 			if (!originalTotal) return null;
 
 			const returnTotal = Math.abs(Number(this.Total || 0));
@@ -509,12 +501,8 @@ export default {
 				return;
 			}
 
-			const originalDiscount = Math.abs(
-				Number(this.return_discount_base_amount || 0),
-			);
-			const originalTotal = Math.abs(
-				Number(this.return_discount_base_total || 0),
-			);
+			const originalDiscount = Math.abs(Number(this.return_discount_base_amount || 0));
+			const originalTotal = Math.abs(Number(this.return_discount_base_total || 0));
 			const returnTotal = Math.abs(Number(this.Total || 0));
 
 			if (!originalDiscount || !originalTotal || !returnTotal) {
@@ -672,18 +660,11 @@ export default {
 		calcProratedReturnDiscount(returnDoc) {
 			if (!returnDoc) return 0;
 
-			const originalDiscount = Math.abs(
-				Number(returnDoc.discount_amount || 0),
-			);
+			const originalDiscount = Math.abs(Number(returnDoc.discount_amount || 0));
 			if (!originalDiscount) return 0;
 
 			const originalTotal = Math.abs(
-				Number(
-					returnDoc.total ??
-						returnDoc.net_total ??
-						returnDoc.grand_total ??
-						0,
-				),
+				Number(returnDoc.total ?? returnDoc.net_total ?? returnDoc.grand_total ?? 0),
 			);
 			if (!originalTotal) return 0;
 
@@ -725,9 +706,7 @@ export default {
 			if (data.return_doc) {
 				this.return_doc = data.return_doc;
 				this.invoice_doc.return_against = data.return_doc.name;
-				this.return_discount_base_amount = Math.abs(
-					Number(data.return_doc.discount_amount || 0),
-				);
+				this.return_discount_base_amount = Math.abs(Number(data.return_doc.discount_amount || 0));
 				this.return_discount_base_total = Math.abs(
 					Number(
 						data.return_doc.total ??
@@ -738,32 +717,23 @@ export default {
 				);
 				console.log("[POSA][Returns] Loaded return doc", {
 					return_against: data.return_doc.name,
-					is_percentage:
-						!!this.pos_profile?.posa_use_percentage_discount,
+					is_percentage: !!this.pos_profile?.posa_use_percentage_discount,
 					discount_amount: data.return_doc.discount_amount,
-					discount_percentage:
-						data.return_doc.additional_discount_percentage,
+					discount_percentage: data.return_doc.additional_discount_percentage,
 					original_total:
-						data.return_doc.total ??
-						data.return_doc.net_total ??
-						data.return_doc.grand_total,
+						data.return_doc.total ?? data.return_doc.net_total ?? data.return_doc.grand_total,
 					base_total: this.return_discount_base_total,
 					base_discount: this.return_discount_base_amount,
 				});
 
 				if (this.pos_profile?.posa_use_percentage_discount) {
-					if (
-						data.return_doc.additional_discount_percentage !==
-						undefined
-					) {
+					if (data.return_doc.additional_discount_percentage !== undefined) {
 						this.additional_discount_percentage =
 							data.return_doc.additional_discount_percentage || 0;
 					}
 					this.update_discount_umount();
 				} else {
-					const prorated = this.calcProratedReturnDiscount(
-						data.return_doc,
-					);
+					const prorated = this.calcProratedReturnDiscount(data.return_doc);
 					this.discount_amount = prorated;
 					this.additional_discount = prorated;
 					this.additional_discount_percentage = 0;
@@ -866,8 +836,7 @@ export default {
 			load_return_invoice: this.handleLoadReturnInvoice,
 			set_new_line: this.handleSetNewLine,
 			calc_uom: this.calc_uom,
-			recalculate_return_discount: (payload) =>
-				this.applyReturnDiscountProration(payload),
+			recalculate_return_discount: (payload) => this.applyReturnDiscountProration(payload),
 			reset_invoice_type_to_invoice: () => {
 				this.invoiceType = "Invoice";
 				this.invoiceTypes = ["Invoice", "Order", "Quotation"];
