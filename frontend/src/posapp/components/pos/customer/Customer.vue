@@ -62,6 +62,18 @@
 					<span v-if="isCustomerSearchLocked" class="customer-load-percent">
 						{{ customerLoadPercent }}%
 					</span>
+					<v-tooltip text="Alt + 5" location="bottom">
+						<template #activator="{ props }">
+							<v-icon
+								v-bind="props"
+								size="small"
+								class="mr-2 text-medium-emphasis"
+								style="cursor: help"
+							>
+								mdi-keyboard-outline
+							</v-icon>
+						</template>
+					</v-tooltip>
 					<v-tooltip text="Add new customer">
 						<template #activator="{ props }">
 							<v-icon

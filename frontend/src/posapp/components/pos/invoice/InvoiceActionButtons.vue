@@ -11,6 +11,7 @@
 				:loading="saveLoading"
 			>
 				{{ __("Save & Clear") }}
+				<v-tooltip activator="parent" location="bottom">Alt + S</v-tooltip>
 			</v-btn>
 		</v-col>
 		<v-col cols="6">
@@ -24,6 +25,7 @@
 				:loading="loadDraftsLoading"
 			>
 				{{ __("Load Drafts") }}
+				<v-tooltip activator="parent" location="bottom">Alt + L</v-tooltip>
 			</v-btn>
 		</v-col>
 		<v-col cols="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
@@ -50,6 +52,7 @@
 				:loading="cancelLoading"
 			>
 				{{ __("Cancel Sale") }}
+				<v-tooltip activator="parent" location="bottom">Alt + 2</v-tooltip>
 			</v-btn>
 		</v-col>
 
@@ -117,6 +120,7 @@
 				:loading="paymentLoading"
 			>
 				{{ __("PAY") }}
+				<v-tooltip activator="parent" location="bottom">Alt + D</v-tooltip>
 			</v-btn>
 		</v-col>
 	</v-row>
