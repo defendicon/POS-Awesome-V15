@@ -17,7 +17,12 @@
 
 			* {
 				box-sizing: border-box;
-				font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+				font-family:
+					"Inter",
+					"Segoe UI",
+					system-ui,
+					-apple-system,
+					sans-serif;
 			}
 
 			body {
@@ -26,9 +31,9 @@
 				display: grid;
 				place-items: center;
 				padding: 24px;
-				background: radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.08), transparent 32%),
-					radial-gradient(circle at 90% 20%, rgba(248, 113, 113, 0.08), transparent 30%),
-					var(--bg);
+				background:
+					radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.08), transparent 32%),
+					radial-gradient(circle at 90% 20%, rgba(248, 113, 113, 0.08), transparent 30%), var(--bg);
 				color: var(--text);
 			}
 
@@ -71,7 +76,9 @@
 				border-radius: 12px;
 				font-weight: 700;
 				cursor: pointer;
-				transition: transform 0.12s ease, box-shadow 0.12s ease;
+				transition:
+					transform 0.12s ease,
+					box-shadow 0.12s ease;
 				color: #0b172a;
 			}
 
@@ -101,7 +108,10 @@
 		<div class="card">
 			<div class="icon">📡</div>
 			<h1>Offline Mode</h1>
-			<p>We can't reach the network or your server right now. Your local cache is available, but syncing requires the server.</p>
+			<p>
+				We can't reach the network or your server right now. Your local cache is available, but
+				syncing requires the server.
+			</p>
 			<p id="server-label" class="small"></p>
 			<div class="actions">
 				<button id="retry" class="primary" type="button">Retry connection</button>

@@ -19,7 +19,12 @@
 
 			* {
 				box-sizing: border-box;
-				font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+				font-family:
+					"Inter",
+					"Segoe UI",
+					system-ui,
+					-apple-system,
+					sans-serif;
 			}
 
 			body {
@@ -27,9 +32,9 @@
 				min-height: 100vh;
 				display: grid;
 				place-items: center;
-				background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.08), transparent 35%),
-					radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.08), transparent 30%),
-					var(--bg);
+				background:
+					radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.08), transparent 35%),
+					radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.08), transparent 30%), var(--bg);
 				color: var(--text);
 				padding: 24px;
 			}
@@ -91,7 +96,10 @@
 				border-radius: 12px;
 				font-weight: 700;
 				cursor: pointer;
-				transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+				transition:
+					transform 0.12s ease,
+					box-shadow 0.12s ease,
+					opacity 0.2s ease;
 				color: #0b172a;
 			}
 
@@ -159,14 +167,21 @@
 		<div class="card">
 			<h1>POS Awesome Desktop</h1>
 			<p class="description">
-				POS Awesome Desktop needs your server URL to launch. Enter your ERPNext / POS Awesome server URL below;
-				we will automatically add the <code>/app/posapp</code> path and save the URL locally for the next
-				startup.
+				POS Awesome Desktop needs your server URL to launch. Enter your ERPNext / POS Awesome server
+				URL below; we will automatically add the <code>/app/posapp</code> path and save the URL
+				locally for the next startup.
 			</p>
 
 			<form id="server-form">
 				<label for="server-url">Server URL</label>
-				<input id="server-url" type="text" name="server-url" placeholder="https://pos.example.com" autocomplete="off" required />
+				<input
+					id="server-url"
+					type="text"
+					name="server-url"
+					placeholder="https://pos.example.com"
+					autocomplete="off"
+					required
+				/>
 				<div class="actions">
 					<button class="primary" type="submit">Save &amp; Launch</button>
 					<button class="secondary" type="button" id="open-saved">Open saved server</button>
@@ -178,7 +193,10 @@
 
 			<div class="hint">
 				<ul>
-					<li>Example: <strong>https://yourdomain.com</strong> (we will append <code>/app/posapp</code>).</li>
+					<li>
+						Example: <strong>https://yourdomain.com</strong> (we will append
+						<code>/app/posapp</code>).
+					</li>
 					<li>The saved URL is stored in IndexedDB plus disk for offline caching.</li>
 					<li>Open settings again using the <em>Change server</em> option in the app menu.</li>
 				</ul>

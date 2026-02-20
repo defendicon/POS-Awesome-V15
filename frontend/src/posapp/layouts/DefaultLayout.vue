@@ -222,8 +222,7 @@ onMounted(() => {
 
 	updateStore.initializeFromStorage();
 	// @ts-ignore
-	const BUILD_VERSION =
-		typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
+	const BUILD_VERSION = typeof __BUILD_VERSION__ !== "undefined" ? __BUILD_VERSION__ : null;
 	if (BUILD_VERSION) {
 		updateStore.setCurrentVersion(BUILD_VERSION);
 	}
@@ -231,10 +230,7 @@ onMounted(() => {
 		window.location.reload();
 	});
 	updateStore.checkForUpdates(true);
-	updateInterval = setInterval(
-		() => updateStore.checkForUpdates(),
-		24 * 60 * 60 * 1000,
-	);
+	updateInterval = setInterval(() => updateStore.checkForUpdates(), 24 * 60 * 60 * 1000);
 });
 
 onBeforeUnmount(() => {
@@ -366,12 +362,7 @@ const initializeData = async () => {
 	markSourceLoaded("init");
 
 	// Trigger initial customer load only when POS profile is already available
-	if (
-		navigator.onLine &&
-		!isOffline() &&
-		posProfile.value &&
-		posProfile.value.name
-	) {
+	if (navigator.onLine && !isOffline() && posProfile.value && posProfile.value.name) {
 		customersStore.setPosProfile(posProfile.value);
 		customersStore.get_customer_names();
 	}
