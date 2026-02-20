@@ -2,7 +2,7 @@
 	<v-card class="pa-4 pos-themed-card">
 		<div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-1">
 			<div class="text-h6">{{ __("Cash Movement") }}</div>
-			<div style="min-width: 190px; max-width: 220px; width: 100%;">
+			<div style="min-width: 190px; max-width: 220px; width: 100%">
 				<v-text-field
 					v-model="postingDate"
 					type="date"
@@ -110,7 +110,11 @@
 					hide-no-data
 					variant="outlined"
 					density="compact"
-					:label="targetAccountLocked ? __('Back Office Cash Account') : __('Back Office Cash Account (Optional Override)')"
+					:label="
+						targetAccountLocked
+							? __('Back Office Cash Account')
+							: __('Back Office Cash Account (Optional Override)')
+					"
 					:disabled="submitting || !enabled || targetAccountLocked"
 				/>
 			</v-col>

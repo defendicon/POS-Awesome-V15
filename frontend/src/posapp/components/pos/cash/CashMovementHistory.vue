@@ -6,12 +6,7 @@
 				<div class="text-body-2 text-grey">{{ __("Latest entries for current shift") }}</div>
 			</div>
 			<div class="d-flex align-center ga-2">
-				<v-chip
-					v-if="pendingOfflineCount > 0"
-					color="warning"
-					size="small"
-					variant="tonal"
-				>
+				<v-chip v-if="pendingOfflineCount > 0" color="warning" size="small" variant="tonal">
 					{{ __("Offline Queue: {0}", [pendingOfflineCount]) }}
 				</v-chip>
 				<v-btn variant="outlined" size="small" @click="$emit('refresh')" :disabled="loading">

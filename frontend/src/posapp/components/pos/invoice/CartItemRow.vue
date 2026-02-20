@@ -466,15 +466,10 @@ const disableInput = computed(
 		(props.item.is_free_item || props.item.posa_is_offer || props.item.posa_is_replace),
 );
 
-const disableUomEdit = computed(
-	() =>
-		!!props.item.posa_is_replace,
-);
+const disableUomEdit = computed(() => !!props.item.posa_is_replace);
 
 const disableRateEdit = computed(
-	() =>
-		!props.posProfile.posa_allow_user_to_edit_rate ||
-		!!props.item.posa_is_replace,
+	() => !props.posProfile.posa_allow_user_to_edit_rate || !!props.item.posa_is_replace,
 );
 
 const disableDiscountEdit = computed(

@@ -8,10 +8,9 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	const pageRef = (wrapper && wrapper.page) || page;
 	const BOOT_RETRY_KEY = "posa_boot_retry_once";
 	const detectBootFailureCode = (error) => {
-		const message =
-			(error && error.message ? String(error.message) : String(error || ""))
-				.toLowerCase()
-				.trim();
+		const message = (error && error.message ? String(error.message) : String(error || ""))
+			.toLowerCase()
+			.trim();
 
 		if (message.includes("timed out waiting for frappe.posapp.posapp")) {
 			return "posa_boot_timeout";
@@ -49,8 +48,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 
 	const handleBootstrapFailure = (error) => {
 		const failureCode = detectBootFailureCode(error);
-		const failureDetail =
-			error && error.message ? String(error.message) : String(error || "");
+		const failureDetail = error && error.message ? String(error.message) : String(error || "");
 		console.error("POS App bootstrap failed", {
 			failureCode,
 			failureDetail,
@@ -84,8 +82,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 		frappe.msgprint({
 			title: "POS Awesome",
 			indicator: "red",
-			message:
-				`POS app failed to start (${failureCode}). Please clear browser cache or refresh assets, then reload /app/posapp.`,
+			message: `POS app failed to start (${failureCode}). Please clear browser cache or refresh assets, then reload /app/posapp.`,
 		});
 	};
 
@@ -120,11 +117,7 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 		"<link href='/assets/posawesome/node_modules/vuetify/dist/vuetify.min.css' rel='stylesheet'>",
 	);
 
-	if (
-		pageRef._posaTaxInclusiveHandler &&
-		frappe.realtime &&
-		typeof frappe.realtime.off === "function"
-	) {
+	if (pageRef._posaTaxInclusiveHandler && frappe.realtime && typeof frappe.realtime.off === "function") {
 		frappe.realtime.off("pos_profile_registered", pageRef._posaTaxInclusiveHandler);
 	}
 
@@ -232,7 +225,12 @@ frappe.pages["posapp"].on_page_unload = function (wrapper) {
 
 	// Only unmount if this specific page's app instance exists
 	// This prevents interference when navigating within ERPNext outside POS
-	if (wrapper && wrapper.page && wrapper.page.$PosApp && typeof wrapper.page.$PosApp.unmount === "function") {
+	if (
+		wrapper &&
+		wrapper.page &&
+		wrapper.page.$PosApp &&
+		typeof wrapper.page.$PosApp.unmount === "function"
+	) {
 		wrapper.page.$PosApp.unmount();
 		wrapper.page.$PosApp = null;
 	}
