@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { mount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeAll } from "vitest";
 import { createTestingPinia } from "@pinia/testing";

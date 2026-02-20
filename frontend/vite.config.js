@@ -105,7 +105,6 @@ export default defineConfig({
 	test: {
 		include: ["tests/**/*.spec.{js,ts}", "tests/**/*.test.{js,ts}"],
 		exclude: ["tests/smoke/**"],
-		environment: "jsdom",
 		server: {
 			deps: {
 				inline: ["vuetify"],
