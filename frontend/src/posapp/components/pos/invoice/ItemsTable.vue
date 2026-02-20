@@ -26,11 +26,22 @@
 			hide-default-footer
 			:single-expand="true"
 			:header-props="dynamicHeaderProps"
-			:no-data-text="__('No items in cart')"
 			@update:expanded="handleExpandedUpdate"
 			:search="itemSearch"
 			:custom-filter="customItemFilter"
 		>
+			<template v-slot:no-data>
+				<div class="d-flex flex-column align-center justify-center py-10 text-medium-emphasis">
+					<v-icon icon="mdi-cart-outline" size="64" color="medium-emphasis" class="mb-4" />
+					<div class="text-h6 font-weight-regular">{{ __("Your cart is empty") }}</div>
+					<div class="text-body-2 mt-2 text-center" style="max-width: 300px">
+						{{
+							__("Scan a barcode or use the search bar to add items to the transaction.")
+						}}
+					</div>
+				</div>
+			</template>
+
 			<template v-slot:item="{ item, toggleExpand, internalItem }">
 				<CartItemRow
 					:item="item"
