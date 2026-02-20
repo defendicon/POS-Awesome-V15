@@ -38,7 +38,9 @@
 							<span class="commit-hash" v-if="commit.commit_short">
 								{{ commit.commit_short }}
 							</span>
-							<span class="commit-message">{{ commit.commit_message || commit.commit_hash }}</span>
+							<span class="commit-message">{{
+								commit.commit_message || commit.commit_hash
+							}}</span>
 							<span class="commit-date" v-if="commit.commit_date">
 								{{ commit.commit_date }}
 							</span>
