@@ -452,7 +452,6 @@
 	color: var(--pos-text-secondary) !important;
 }
 
-
 /* ==========================================================================
    POSAwesome - Hide Frappe Desk Elements in POS View
    Target only when in POSApp route to avoid affecting ERPNext functionality
@@ -467,42 +466,42 @@ body[data-page-route="posapp"] .layout-side-section,
 body[data-page-route="posapp"] .page-head,
 body[data-page-route="posapp"] .navbar.navbar-default.navbar-fixed-top,
 body[data-page-route="posapp"] .sidebar-overlay {
-    display: none !important;
+	display: none !important;
 }
 
 /* Ensure POSApp takes full width without sidebar offset */
 body[data-page-route="posapp"] {
-    --posa-desk-sidebar-width: 0px !important;
-    --sidebar-width: 0px !important;
+	--posa-desk-sidebar-width: 0px !important;
+	--sidebar-width: 0px !important;
 }
 
 /* Remove padding/margin that Frappe adds for sidebar */
 body[data-page-route="posapp"] .container1 {
-    padding-inline-start: 0 !important;
-    margin-inline-start: 0 !important;
+	padding-inline-start: 0 !important;
+	margin-inline-start: 0 !important;
 }
 
 /* Ensure content fills the entire viewport */
 body[data-page-route="posapp"] .main-content {
-    width: 100vw !important;
-    max-width: 100vw !important;
+	width: 100vw !important;
+	max-width: 100vw !important;
 }
 
 /* Hide any remaining Frappe UI elements that might appear */
 body[data-page-route="posapp"] .page-container,
 body[data-page-route="posapp"] .content.page-wrapper {
-    padding: 0 !important;
-    margin: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
 }
 
 /* Override Frappe's layout constraints */
 body[data-page-route="posapp"] #body {
-    display: block !important;
-    height: 100vh !important;
-    overflow: hidden !important;
+	display: block !important;
+	height: 100vh !important;
+	overflow: hidden !important;
 }
 
 /* Ensure no residual sidebar space */
 body[data-page-route="posapp"] .desk-container {
-    padding-left: 0 !important;
+	padding-left: 0 !important;
 }

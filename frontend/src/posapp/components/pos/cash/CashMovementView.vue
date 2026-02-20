@@ -12,13 +12,7 @@
 			</v-btn>
 		</div>
 
-		<v-alert
-			v-if="errorMessage"
-			type="error"
-			variant="tonal"
-			density="compact"
-			class="mb-3"
-		>
+		<v-alert v-if="errorMessage" type="error" variant="tonal" density="compact" class="mb-3">
 			{{ errorMessage }}
 		</v-alert>
 
@@ -61,7 +55,6 @@
 				/>
 			</v-col>
 		</v-row>
-
 	</div>
 </template>
 
@@ -227,9 +220,7 @@ function handleDuplicate(row: any) {
 async function handleCancel(row: any) {
 	if (!row?.name) return;
 	try {
-		const confirmed = window.confirm(
-			__("Cancel cash movement {0}?", [row.name]),
-		);
+		const confirmed = window.confirm(__("Cancel cash movement {0}?", [row.name]));
 		if (!confirmed) {
 			return;
 		}
@@ -244,9 +235,7 @@ async function handleCancel(row: any) {
 async function handleDelete(row: any) {
 	if (!row?.name) return;
 	try {
-		const confirmed = window.confirm(
-			__("Delete cancelled cash movement {0}?", [row.name]),
-		);
+		const confirmed = window.confirm(__("Delete cancelled cash movement {0}?", [row.name]));
 		if (!confirmed) {
 			return;
 		}
@@ -288,7 +277,11 @@ async function handleSyncOffline() {
 	}
 }
 
-watch([posProfileName, openingShiftName], () => {
-	initialize();
-}, { immediate: true });
+watch(
+	[posProfileName, openingShiftName],
+	() => {
+		initialize();
+	},
+	{ immediate: true },
+);
 </script>

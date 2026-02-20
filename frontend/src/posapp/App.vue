@@ -18,23 +18,17 @@
 <script setup>
 import { computed, defineAsyncComponent } from "vue";
 import { useRoute } from "vue-router";
-import {
-	isStandaloneCustomerDisplayMode,
-} from "./utils/customerDisplay";
+import { isStandaloneCustomerDisplayMode } from "./utils/customerDisplay";
 
 const route = useRoute();
 
 const DefaultLayout = defineAsyncComponent(() => import("./layouts/DefaultLayout.vue"));
-const CustomerDisplayLayout = defineAsyncComponent(
-	() => import("./layouts/CustomerDisplayLayout.vue"),
-);
+const CustomerDisplayLayout = defineAsyncComponent(() => import("./layouts/CustomerDisplayLayout.vue"));
 const CustomerDisplay = defineAsyncComponent(
 	() => import("./components/customer_display/CustomerDisplay.vue"),
 );
 
-const standaloneCustomerDisplayMode = computed(() =>
-	isStandaloneCustomerDisplayMode(),
-);
+const standaloneCustomerDisplayMode = computed(() => isStandaloneCustomerDisplayMode());
 
 const layoutComponent = computed(() => {
 	const layout = route.meta.layout || "default";
