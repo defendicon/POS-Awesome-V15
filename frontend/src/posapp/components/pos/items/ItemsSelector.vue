@@ -830,6 +830,20 @@ watch(selectedCustomer, () => {
 	scheduleLastInvoiceRateRefresh();
 });
 
+watch(
+	() => uiStore.searchFocusTrigger,
+	() => {
+		itemsSelectorFocus.focusItemSearch();
+	},
+);
+
+watch(
+	() => uiStore.triggerTopItemSelection,
+	() => {
+		itemSelection.selectTopItem();
+	},
+);
+
 watch(displayedItems, () => {
 	nextTick(() => {
 		checkItemContainerOverflow();

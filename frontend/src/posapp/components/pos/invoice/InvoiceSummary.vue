@@ -53,7 +53,9 @@
 								!!discount_percentage_offer_name
 							"
 							class="summary-field"
-						/>
+						>
+							<v-tooltip activator="parent" location="bottom">Alt + A</v-tooltip>
+						</v-text-field>
 					</v-col>
 
 					<v-col cols="6" v-else>
@@ -76,7 +78,9 @@
 								!!discount_percentage_offer_name
 							"
 							class="summary-field"
-						/>
+						>
+							<v-tooltip activator="parent" location="bottom">Alt + A</v-tooltip>
+						</v-text-field>
 					</v-col>
 					<!-- Items Discount -->
 					<v-col cols="6">

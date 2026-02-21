@@ -100,6 +100,7 @@
 						class="settings-btn"
 					>
 						{{ __("Settings") }}
+						<v-tooltip activator="parent" location="bottom">Alt + M</v-tooltip>
 					</v-btn>
 					<v-spacer></v-spacer>
 					<span

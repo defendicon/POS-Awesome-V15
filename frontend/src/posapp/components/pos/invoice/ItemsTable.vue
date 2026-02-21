@@ -30,6 +30,29 @@
 			:search="itemSearch"
 			:custom-filter="customItemFilter"
 		>
+			<!-- Header Tooltips -->
+			<template v-slot:header.qty="{ column }">
+				<div class="d-inline-flex align-center cursor-help">
+					{{ column.title }}
+					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
+				</div>
+				<v-tooltip activator="parent" location="bottom">Alt + Q</v-tooltip>
+			</template>
+			<template v-slot:header.uom="{ column }">
+				<div class="d-inline-flex align-center cursor-help">
+					{{ column.title }}
+					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
+				</div>
+				<v-tooltip activator="parent" location="bottom">Alt + U</v-tooltip>
+			</template>
+			<template v-slot:header.rate="{ column }">
+				<div class="d-inline-flex align-center cursor-help">
+					{{ column.title }}
+					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
+				</div>
+				<v-tooltip activator="parent" location="bottom">Alt + R</v-tooltip>
+			</template>
+
 			<template v-slot:no-data>
 				<div
 					class="d-flex flex-column align-center justify-center py-10 text-medium-emphasis"
@@ -54,9 +77,10 @@
 				</div>
 			</template>
 
-			<template v-slot:item="{ item, toggleExpand, internalItem }">
+			<template v-slot:item="{ item, index, toggleExpand, internalItem }">
 				<CartItemRow
 					:item="item"
+					:index="index"
 					:posProfile="pos_profile"
 					:isReturnInvoice="isReturnInvoice"
 					:invoiceType="invoiceType"
@@ -353,6 +377,24 @@ const onDropFromSelector = (event: DragEvent) => dragDropHandlers.onDropFromSele
 
 // Name editing logic
 const { editNameDialog, editedName, editNameTarget, openNameDialog, saveItemName, resetItemName } = nameEdit;
+
+const focusItemField = (index: number, field: string) => {
+	const selector = `tr[data-row-index="${index}"] td[data-column-key="${field}"]`;
+	const cell = tableContainer.value?.querySelector(selector);
+	if (cell) {
+		const interactive = cell.querySelector(
+			".posa-cart-table__qty-display, .posa-cart-table__editor-display",
+		) as HTMLElement;
+		if (interactive) {
+			interactive.click();
+			interactive.focus();
+		}
+	}
+};
+
+defineExpose({
+	focusItemField,
+});
 
 // Life-cycle
 onMounted(() => {

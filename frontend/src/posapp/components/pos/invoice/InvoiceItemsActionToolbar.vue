@@ -13,7 +13,9 @@
 			hide-details
 			clearable
 			autocomplete="off"
-		></v-text-field>
+		>
+			<v-tooltip activator="parent" location="bottom">Alt + F</v-tooltip>
+		</v-text-field>
 		<v-btn
 			density="compact"
 			variant="text"
