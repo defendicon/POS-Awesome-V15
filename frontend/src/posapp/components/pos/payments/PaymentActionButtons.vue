@@ -15,6 +15,9 @@
 					:class="{ 'submit-highlight': highlightSubmit }"
 				>
 					{{ __("Submit") }}
+					<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+						>Ctrl + X</v-tooltip
+					>
 				</v-btn>
 			</v-col>
 			<v-col cols="6" class="pl-1">
@@ -28,6 +31,9 @@
 					:disabled="loading || validatePayment"
 				>
 					{{ __("Submit & Print") }}
+					<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+						>Alt + P</v-tooltip
+					>
 				</v-btn>
 			</v-col>
 			<v-col cols="12">
@@ -40,6 +46,9 @@
 					@click="$emit('cancel')"
 				>
 					{{ __("Cancel Payment") }}
+					<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+						>Alt + 1</v-tooltip
+					>
 				</v-btn>
 			</v-col>
 		</v-row>

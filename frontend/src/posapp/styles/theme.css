@@ -452,6 +452,39 @@
 	color: var(--pos-text-secondary) !important;
 }
 
+/* Keep shortcut hint text readable in dark mode tooltips */
+.posa-shortcut-tooltip {
+	color: var(--pos-text-primary) !important;
+}
+
+.posa-shortcut-hint-text,
+.posa-shortcut-hint-kbd {
+	color: var(--pos-text-primary) !important;
+}
+
+[data-theme="dark"] .posa-shortcut-tooltip,
+[data-theme-mode="dark"] .posa-shortcut-tooltip,
+.v-theme--dark .posa-shortcut-tooltip {
+	color: #ffffff !important;
+}
+
+[data-theme="dark"] .posa-shortcut-hint-text,
+[data-theme-mode="dark"] .posa-shortcut-hint-text,
+.v-theme--dark .posa-shortcut-hint-text,
+[data-theme="dark"] .posa-shortcut-hint-kbd,
+[data-theme-mode="dark"] .posa-shortcut-hint-kbd,
+.v-theme--dark .posa-shortcut-hint-kbd {
+	color: #ffffff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	[data-theme-mode="automatic"] .posa-shortcut-tooltip,
+	[data-theme-mode="automatic"] .posa-shortcut-hint-text,
+	[data-theme-mode="automatic"] .posa-shortcut-hint-kbd {
+		color: #ffffff !important;
+	}
+}
+
 /* ==========================================================================
    POSAwesome - Hide Frappe Desk Elements in POS View
    Target only when in POSApp route to avoid affecting ERPNext functionality

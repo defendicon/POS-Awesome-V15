@@ -11,13 +11,38 @@ export const useItemsSelectorFocus = ({
 }: FocusDependencies) => {
 	const getVm = (): any => (typeof getVM === "function" ? getVM() : null);
 
+	const resolveFocusableElement = (candidate: any): any => {
+		if (!candidate) return null;
+		if (typeof candidate.focus === "function") return candidate;
+
+		if (candidate?.$el) {
+			const input = candidate.$el.querySelector?.("input, textarea");
+			if (input && typeof input.focus === "function") return input;
+		}
+
+		const inner = candidate?.value;
+		if (inner) {
+			if (typeof inner.focus === "function") return inner;
+			if (inner?.$el) {
+				const input = inner.$el.querySelector?.("input, textarea");
+				if (input && typeof input.focus === "function") return input;
+			}
+		}
+
+		return null;
+	};
+
 	const getSearchInputField = () => {
 		const vm = getVm();
 		if (!vm) return null;
 		// Benchmark: use exposed ref to avoid DOM querying for focus/blur actions.
 		const header = vm.$refs.itemHeader;
 		const inputRef = header?.debounce_search;
-		return inputRef?.value ?? inputRef ?? null;
+		return (
+			resolveFocusableElement(inputRef) ||
+			resolveFocusableElement(header) ||
+			null
+		);
 	};
 
 	const focusItemSearch = () => {
@@ -36,6 +61,9 @@ export const useItemsSelectorFocus = ({
 			const input = getSearchInputField();
 			if (input && typeof input.focus === "function") {
 				input.focus();
+				if (typeof input.select === "function") {
+					input.select();
+				}
 			}
 		});
 	};

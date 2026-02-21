@@ -30,17 +30,16 @@ interface InvoiceShortcutsVm {
 		toggleItemSettings: () => void;
 	};
 	$refs: {
-		customerComponent?: {
+		customerSection?: {
 			openNewCustomer?: () => void;
 			selectFirstCustomer?: () => void;
 		};
 		deliveryChargesComponent?: { focusDeliveryCharges?: () => void };
 		postingDateComponent?: { focusPostingDate?: () => void };
-		itemSearchField?: {
-			focus?: () => void;
-			$el?: { querySelector?: (_s: string) => { focus?: () => void } };
+		actionToolbar?: {
+			focusSearch?: () => void;
 		};
-		itemsTable?: {
+		itemsTableRef?: {
 			focusItemField?: (_index: number, _field: ShortcutField) => void;
 		};
 	};
@@ -81,7 +80,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (key === "F6") {
 				consumeEvent(event);
-				this.$refs.customerComponent?.openNewCustomer?.();
+				this.$refs.customerSection?.openNewCustomer?.();
 				return;
 			}
 
@@ -122,7 +121,9 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isDigit(event, 3)) {
 				consumeEvent(event);
+				this.uiStore.setActiveView("items");
 				this.uiStore.triggerItemSearchFocus();
+				this.eventBus.emit("focus_item_search");
 				return;
 			}
 
@@ -140,7 +141,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isDigit(event, 6)) {
 				consumeEvent(event);
-				this.$refs.customerComponent?.selectFirstCustomer?.();
+				this.$refs.customerSection?.selectFirstCustomer?.();
 				return;
 			}
 
@@ -216,12 +217,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 
 			if (isLetter(event, "f")) {
 				consumeEvent(event);
-				const input = this.$refs.itemSearchField;
-				if (input?.focus) {
-					input.focus();
-				} else {
-					input?.$el?.querySelector?.("input")?.focus?.();
-				}
+				this.$refs.actionToolbar?.focusSearch?.();
 				return;
 			}
 
@@ -288,7 +284,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 				index = 0;
 			}
 			this.shortcutCycle[field] = (index + 1) % count;
-			this.$refs.itemsTable?.focusItemField?.(index, field);
+			this.$refs.itemsTableRef?.focusItemField?.(index, field);
 		},
 	};
 

@@ -52,8 +52,22 @@ const focusCustomerSearch = () => {
 	}
 };
 
+const openNewCustomer = () => {
+	if (customerComponent.value && typeof customerComponent.value.openNewCustomer === "function") {
+		customerComponent.value.openNewCustomer();
+	}
+};
+
+const selectFirstCustomer = () => {
+	if (customerComponent.value && typeof customerComponent.value.selectFirstCustomer === "function") {
+		customerComponent.value.selectFirstCustomer();
+	}
+};
+
 defineExpose({
 	focusCustomerSearch,
+	openNewCustomer,
+	selectFirstCustomer,
 });
 
 const frappe = window.frappe;

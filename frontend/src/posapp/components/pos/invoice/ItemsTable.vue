@@ -30,6 +30,35 @@
 			:search="itemSearch"
 			:custom-filter="customItemFilter"
 		>
+			<!-- Header Tooltips -->
+			<template v-slot:header.qty="{ column }">
+				<div class="d-inline-flex align-center cursor-help">
+					{{ column.title }}
+					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
+				</div>
+				<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+					>Alt + Q</v-tooltip
+				>
+			</template>
+			<template v-slot:header.uom="{ column }">
+				<div class="d-inline-flex align-center cursor-help">
+					{{ column.title }}
+					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
+				</div>
+				<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+					>Alt + U</v-tooltip
+				>
+			</template>
+			<template v-slot:header.rate="{ column }">
+				<div class="d-inline-flex align-center cursor-help">
+					{{ column.title }}
+					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
+				</div>
+				<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+					>Alt + R</v-tooltip
+				>
+			</template>
+
 			<template v-slot:no-data>
 				<div
 					class="d-flex flex-column align-center justify-center py-10 text-medium-emphasis"
@@ -39,13 +68,25 @@
 					<div class="text-h6 font-weight-regular">{{ __("Your cart is empty") }}</div>
 					<div class="text-body-2 mt-2 text-center" style="max-width: 300px">
 						{{ __("Scan a barcode or use the search bar to add items to the transaction.") }}
+						<div class="mt-4 text-caption text-medium-emphasis posa-shortcut-hint-text">
+							<v-icon icon="mdi-keyboard-outline" size="small" class="mr-1" />
+							{{ __("Press") }}
+							<kbd
+								class="d-inline-flex align-center bg-surface-variant px-2 py-1 rounded border font-weight-bold mx-1 text-high-emphasis posa-shortcut-hint-kbd"
+								style="border-color: rgba(var(--v-border-color), var(--v-border-opacity))"
+							>
+								Alt + 3
+							</kbd>
+							{{ __("to search") }}
+						</div>
 					</div>
 				</div>
 			</template>
 
-			<template v-slot:item="{ item, toggleExpand, internalItem }">
+			<template v-slot:item="{ item, index, toggleExpand, internalItem }">
 				<CartItemRow
 					:item="item"
+					:index="index"
 					:posProfile="pos_profile"
 					:isReturnInvoice="isReturnInvoice"
 					:invoiceType="invoiceType"
@@ -342,6 +383,57 @@ const onDropFromSelector = (event: DragEvent) => dragDropHandlers.onDropFromSele
 
 // Name editing logic
 const { editNameDialog, editedName, editNameTarget, openNameDialog, saveItemName, resetItemName } = nameEdit;
+
+const getInteractiveFieldEl = (index: number, field: string): HTMLElement | null => {
+	const selector = `tr[data-row-index="${index}"] td[data-column-key="${field}"]`;
+	const cell = tableContainer.value?.querySelector(selector);
+	if (!cell) {
+		return null;
+	}
+	return cell.querySelector(
+		".posa-cart-table__qty-display, .posa-cart-table__editor-display",
+	) as HTMLElement | null;
+};
+
+const tryFocusItemField = (index: number, field: string): boolean => {
+	const interactive = getInteractiveFieldEl(index, field);
+	if (!interactive) {
+		return false;
+	}
+	interactive.click();
+	interactive.focus();
+	return true;
+};
+
+const focusItemField = (index: number, field: string) => {
+	if (tryFocusItemField(index, field)) {
+		return;
+	}
+
+	// Virtual table may not have rendered the target row yet, so scroll first and retry.
+	const tableWrapper = tableContainer.value?.querySelector(
+		".v-table__wrapper, .v-data-table__wrapper",
+	) as HTMLElement | null;
+	if (!tableWrapper) {
+		return;
+	}
+
+	const rowHeight = virtualScrollConfig.value?.itemHeight || 60;
+	tableWrapper.scrollTop = Math.max(0, index * rowHeight);
+
+	requestAnimationFrame(() => {
+		if (tryFocusItemField(index, field)) {
+			return;
+		}
+		setTimeout(() => {
+			tryFocusItemField(index, field);
+		}, 40);
+	});
+};
+
+defineExpose({
+	focusItemField,
+});
 
 // Life-cycle
 onMounted(() => {

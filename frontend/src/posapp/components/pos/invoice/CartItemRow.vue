@@ -1,5 +1,5 @@
 <template>
-	<tr class="posa-cart-item-row" v-memo="memoDeps">
+	<tr class="posa-cart-item-row" v-memo="memoDeps" :data-row-index="index">
 		<!-- Item Name Column -->
 		<td class="text-start" :data-column-key="'item_name'">
 			<div class="d-flex align-center">
@@ -372,6 +372,7 @@ const props = defineProps({
 	isNegative: Function,
 	hideQtyDecimals: Boolean,
 	isRTL: Boolean,
+	index: Number,
 	// Column visibility flags to avoid passing full headers array
 	showUom: Boolean,
 	showPriceListRate: Boolean,
