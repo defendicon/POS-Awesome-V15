@@ -1,24 +1,17 @@
 <template>
 	<!-- Main Invoice Wrapper -->
-	<div class="pa-0">
+	<div class="pa-0 d-flex flex-column h-100">
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
 
 		<!-- Main Invoice Card (contains all invoice content) -->
 		<v-card
 			ref="invoiceCard"
-			:style="{
-				height: invoiceHeight || 'var(--container-height)',
-				maxHeight: invoiceHeight || 'var(--container-height)',
-				resize: 'vertical',
-				overflow: 'auto',
-			}"
-			:class="['cards my-0 py-0 mt-3 resizable', 'pos-themed-card', { 'return-mode': isReturnInvoice }]"
-			@mouseup="saveInvoiceHeight($refs.invoiceCard)"
-			@touchend="saveInvoiceHeight($refs.invoiceCard)"
+			class="cards my-0 py-0 mt-3 flex-grow-1 d-flex flex-column overflow-hidden pos-themed-card"
+			:class="{ 'return-mode': isReturnInvoice }"
 		>
 			<!-- Dynamic padding wrapper -->
-			<div class="dynamic-padding">
+			<div class="dynamic-padding d-flex flex-column h-100 overflow-hidden">
 				<v-alert
 					type="info"
 					density="compact"
@@ -105,7 +98,7 @@
 				/>
 
 				<!-- Items Table Section (Main items list for invoice) -->
-				<div class="items-table-wrapper">
+				<div class="items-table-wrapper flex-grow-1 d-flex flex-column overflow-hidden">
 					<!-- Refactored Action Toolbar -->
 					<InvoiceItemsActionToolbar
 						ref="actionToolbar"
@@ -123,6 +116,7 @@
 
 					<!-- ItemsTable component with reorder event handler -->
 					<ItemsTable
+						class="flex-grow-1"
 						ref="itemsTableRef"
 						:headers="items_headers"
 						v-model:expanded="expanded"
@@ -180,6 +174,7 @@
 
 		<!-- Payment Section -->
 		<InvoiceSummary
+			class="flex-shrink-0"
 			ref="invoiceSummary"
 			:pos_profile="pos_profile"
 			:total_qty="total_qty"
@@ -760,7 +755,6 @@ export default {
 	mounted() {
 		this.setUpdateItemDetail(this.update_item_detail);
 		this.loadColumnPreferences();
-		this.loadInvoiceHeight();
 
 		this.$watch(
 			() => this.uiStore.posProfile,

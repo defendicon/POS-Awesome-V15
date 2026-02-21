@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="pos-main-container dynamic-container"
+		class="pos-main-container dynamic-container d-flex flex-column h-100"
 		:class="rtlClasses"
 		:style="[responsiveStyles, rtlStyles]"
 	>
@@ -16,7 +16,7 @@
 			@close="closeOpeningDialog"
 			@register="handleRegisterPosData"
 		></OpeningDialog>
-		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row">
+		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row flex-grow-1 h-100">
 			<v-col
 				v-show="activeView === 'items'"
 				xl="5"
@@ -24,7 +24,7 @@
 				md="5"
 				sm="5"
 				cols="12"
-				class="pos dynamic-col"
+				class="pos dynamic-col d-flex flex-column h-100"
 			>
 				<ItemsSelector context="pos" />
 			</v-col>
@@ -62,8 +62,15 @@
 				<Payments></Payments>
 			</v-col>
 
-			<v-col xl="7" lg="7" md="7" sm="7" cols="12" class="pos dynamic-col">
-				<Invoice></Invoice>
+			<v-col
+				xl="7"
+				lg="7"
+				md="7"
+				sm="7"
+				cols="12"
+				class="pos dynamic-col d-flex flex-column h-100"
+			>
+				<Invoice class="flex-grow-1"></Invoice>
 			</v-col>
 		</v-row>
 	</div>
