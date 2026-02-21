@@ -723,6 +723,16 @@ onMounted(async () => {
 	if (scannerInput.setScanHandler) {
 		scannerInput.setScanHandler(scanProcessor.processScannedItem);
 	}
+	if (scannerInput.setInputHandlers) {
+		scannerInput.setInputHandlers({
+			get: () => String(search_input.value ?? ""),
+			set: (val: string) => {
+				search_input.value = val ?? "";
+			},
+			clear: () => clearSearch(),
+			focus: () => itemsSelectorFocus.focusItemSearch(),
+		});
+	}
 
 	if (eventBus) {
 		eventBus.on("update_currency", (data) => {
@@ -744,6 +754,7 @@ onMounted(async () => {
 			syncSelectorPriceList(priceList);
 		});
 		eventBus.on("update_invoice_type", handleInvoiceTypeUpdate);
+		eventBus.on("focus_item_search", handleFocusItemSearchEvent);
 	}
 
 	// Watch UI Profile for initialization (Source of Truth)
@@ -814,6 +825,7 @@ onBeforeUnmount(() => {
 		eventBus.off("update_currency");
 		eventBus.off("update_customer_price_list");
 		eventBus.off("update_invoice_type", handleInvoiceTypeUpdate);
+		eventBus.off("focus_item_search", handleFocusItemSearchEvent);
 	}
 	window.removeEventListener("resize", checkItemContainerOverflow);
 });
@@ -876,6 +888,9 @@ const {
 } = scannerInput;
 const { responsiveStyles } = responsive;
 const { rtlClasses } = rtl;
+const handleFocusItemSearchEvent = () => {
+	itemsSelectorFocus.focusItemSearch();
+};
 
 // Proxy functions for template
 const esc_event = () => clearSearch();

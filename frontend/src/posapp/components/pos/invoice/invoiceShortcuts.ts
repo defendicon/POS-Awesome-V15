@@ -123,6 +123,7 @@ const invoiceShortcuts: Record<string, unknown> & ThisType<InvoiceShortcutsVm> =
 				consumeEvent(event);
 				this.uiStore.setActiveView("items");
 				this.uiStore.triggerItemSearchFocus();
+				this.eventBus.emit("focus_item_search");
 				return;
 			}
 

@@ -384,18 +384,51 @@ const onDropFromSelector = (event: DragEvent) => dragDropHandlers.onDropFromSele
 // Name editing logic
 const { editNameDialog, editedName, editNameTarget, openNameDialog, saveItemName, resetItemName } = nameEdit;
 
-const focusItemField = (index: number, field: string) => {
+const getInteractiveFieldEl = (index: number, field: string): HTMLElement | null => {
 	const selector = `tr[data-row-index="${index}"] td[data-column-key="${field}"]`;
 	const cell = tableContainer.value?.querySelector(selector);
-	if (cell) {
-		const interactive = cell.querySelector(
-			".posa-cart-table__qty-display, .posa-cart-table__editor-display",
-		) as HTMLElement;
-		if (interactive) {
-			interactive.click();
-			interactive.focus();
-		}
+	if (!cell) {
+		return null;
 	}
+	return cell.querySelector(
+		".posa-cart-table__qty-display, .posa-cart-table__editor-display",
+	) as HTMLElement | null;
+};
+
+const tryFocusItemField = (index: number, field: string): boolean => {
+	const interactive = getInteractiveFieldEl(index, field);
+	if (!interactive) {
+		return false;
+	}
+	interactive.click();
+	interactive.focus();
+	return true;
+};
+
+const focusItemField = (index: number, field: string) => {
+	if (tryFocusItemField(index, field)) {
+		return;
+	}
+
+	// Virtual table may not have rendered the target row yet, so scroll first and retry.
+	const tableWrapper = tableContainer.value?.querySelector(
+		".v-table__wrapper, .v-data-table__wrapper",
+	) as HTMLElement | null;
+	if (!tableWrapper) {
+		return;
+	}
+
+	const rowHeight = virtualScrollConfig.value?.itemHeight || 60;
+	tableWrapper.scrollTop = Math.max(0, index * rowHeight);
+
+	requestAnimationFrame(() => {
+		if (tryFocusItemField(index, field)) {
+			return;
+		}
+		setTimeout(() => {
+			tryFocusItemField(index, field);
+		}, 40);
+	});
 };
 
 defineExpose({

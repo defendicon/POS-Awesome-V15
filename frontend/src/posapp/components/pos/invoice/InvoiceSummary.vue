@@ -154,7 +154,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { loadItemSelectorSettings } from "../../../utils/itemSelectorSettings";
 import InvoiceActionButtons from "./InvoiceActionButtons.vue";
 
@@ -204,6 +204,7 @@ const paymentLoading = ref(false);
 const customerDisplayLoading = ref(false);
 const isEditingAdditionalDiscount = ref(false);
 const isEditingAdditionalDiscountPercentage = ref(false);
+const additionalDiscountField = ref(null);
 
 const additionalDiscountDisplay = ref(normalizeDiscountDisplay(props.additional_discount));
 const additionalDiscountPercentageDisplay = ref(
@@ -275,6 +276,28 @@ function isFullReturnDiscount(value) {
 	const ratio = Number.isFinite(Number(value)) ? Number(value) : 0;
 	return Math.abs(ratio - 1) < 0.0001;
 }
+
+async function focusAdditionalDiscountField() {
+	await nextTick();
+	const field = additionalDiscountField.value;
+	if (!field) {
+		return;
+	}
+
+	if (typeof field.focus === "function") {
+		field.focus();
+	}
+
+	const inputEl = field?.$el?.querySelector?.("input:not([disabled]), textarea:not([disabled])");
+	if (inputEl) {
+		inputEl.focus();
+		inputEl.select?.();
+	}
+}
+
+defineExpose({
+	focusAdditionalDiscountField,
+});
 
 async function handleSaveAndClear() {
 	saveLoading.value = true;
