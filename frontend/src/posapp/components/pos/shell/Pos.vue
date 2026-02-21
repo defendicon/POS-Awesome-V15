@@ -57,9 +57,9 @@
 				md="5"
 				sm="5"
 				cols="12"
-				class="pos dynamic-col"
+				class="pos dynamic-col d-flex flex-column h-100"
 			>
-				<Payments></Payments>
+				<Payments class="flex-grow-1"></Payments>
 			</v-col>
 
 			<v-col

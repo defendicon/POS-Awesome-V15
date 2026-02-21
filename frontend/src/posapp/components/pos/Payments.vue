@@ -1,9 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-	<div class="pa-0">
+	<div class="pa-0 d-flex flex-column h-100">
 		<v-card
-			class="selection mx-auto pa-1 my-0 mt-3 pos-themed-card"
-			style="max-height: 68vh; height: 68vh"
+			class="selection mx-auto pa-1 my-0 mt-3 pos-themed-card flex-grow-1 d-flex flex-column overflow-hidden"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -12,7 +11,7 @@
 				location="top"
 				color="info"
 			></v-progress-linear>
-			<div ref="paymentContainer" class="overflow-y-auto pa-2" style="max-height: 67vh">
+			<div ref="paymentContainer" class="overflow-y-auto pa-2 flex-grow-1">
 				<!-- Payment Summary (Paid, To Be Paid, Change) -->
 				<PaymentSummary
 					:invoice_doc="invoice_doc"
@@ -187,6 +186,7 @@
 
 		<!-- Action Buttons -->
 		<PaymentActionButtons
+			class="flex-shrink-0"
 			ref="submitButton"
 			:loading="loading"
 			:validatePayment="validatePayment"
