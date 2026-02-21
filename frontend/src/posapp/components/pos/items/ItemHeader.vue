@@ -100,7 +100,12 @@
 						class="settings-btn"
 					>
 						{{ __("Settings") }}
-						<v-tooltip activator="parent" location="bottom">Alt + M</v-tooltip>
+						<v-tooltip
+							activator="parent"
+							location="bottom"
+							content-class="posa-shortcut-tooltip"
+							>Alt + M</v-tooltip
+						>
 					</v-btn>
 					<v-spacer></v-spacer>
 					<span

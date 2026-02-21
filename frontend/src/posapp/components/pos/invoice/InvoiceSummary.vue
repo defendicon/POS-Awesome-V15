@@ -54,7 +54,12 @@
 							"
 							class="summary-field"
 						>
-							<v-tooltip activator="parent" location="bottom">Alt + A</v-tooltip>
+							<v-tooltip
+								activator="parent"
+								location="bottom"
+								content-class="posa-shortcut-tooltip"
+								>Alt + A</v-tooltip
+							>
 						</v-text-field>
 					</v-col>
 
@@ -79,7 +84,12 @@
 							"
 							class="summary-field"
 						>
-							<v-tooltip activator="parent" location="bottom">Alt + A</v-tooltip>
+							<v-tooltip
+								activator="parent"
+								location="bottom"
+								content-class="posa-shortcut-tooltip"
+								>Alt + A</v-tooltip
+							>
 						</v-text-field>
 					</v-col>
 					<!-- Items Discount -->

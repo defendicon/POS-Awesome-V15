@@ -36,21 +36,27 @@
 					{{ column.title }}
 					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
 				</div>
-				<v-tooltip activator="parent" location="bottom">Alt + Q</v-tooltip>
+				<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+					>Alt + Q</v-tooltip
+				>
 			</template>
 			<template v-slot:header.uom="{ column }">
 				<div class="d-inline-flex align-center cursor-help">
 					{{ column.title }}
 					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
 				</div>
-				<v-tooltip activator="parent" location="bottom">Alt + U</v-tooltip>
+				<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+					>Alt + U</v-tooltip
+				>
 			</template>
 			<template v-slot:header.rate="{ column }">
 				<div class="d-inline-flex align-center cursor-help">
 					{{ column.title }}
 					<v-icon icon="mdi-keyboard-outline" size="x-small" class="ml-1 text-medium-emphasis" />
 				</div>
-				<v-tooltip activator="parent" location="bottom">Alt + R</v-tooltip>
+				<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+					>Alt + R</v-tooltip
+				>
 			</template>
 
 			<template v-slot:no-data>
@@ -62,11 +68,11 @@
 					<div class="text-h6 font-weight-regular">{{ __("Your cart is empty") }}</div>
 					<div class="text-body-2 mt-2 text-center" style="max-width: 300px">
 						{{ __("Scan a barcode or use the search bar to add items to the transaction.") }}
-						<div class="mt-4 text-caption text-medium-emphasis">
+						<div class="mt-4 text-caption text-medium-emphasis posa-shortcut-hint-text">
 							<v-icon icon="mdi-keyboard-outline" size="small" class="mr-1" />
 							{{ __("Press") }}
 							<kbd
-								class="d-inline-flex align-center bg-surface-variant px-2 py-1 rounded border font-weight-bold mx-1 text-high-emphasis"
+								class="d-inline-flex align-center bg-surface-variant px-2 py-1 rounded border font-weight-bold mx-1 text-high-emphasis posa-shortcut-hint-kbd"
 								style="border-color: rgba(var(--v-border-color), var(--v-border-opacity))"
 							>
 								Alt + 3

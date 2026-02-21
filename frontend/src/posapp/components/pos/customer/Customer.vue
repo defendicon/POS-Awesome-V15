@@ -62,7 +62,7 @@
 					<span v-if="isCustomerSearchLocked" class="customer-load-percent">
 						{{ customerLoadPercent }}%
 					</span>
-					<v-tooltip text="Alt + 5" location="bottom">
+					<v-tooltip text="Alt + 5" location="bottom" content-class="posa-shortcut-tooltip">
 						<template #activator="{ props }">
 							<v-icon
 								v-bind="props"

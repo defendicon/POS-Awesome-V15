@@ -14,7 +14,9 @@
 			clearable
 			autocomplete="off"
 		>
-			<v-tooltip activator="parent" location="bottom">Alt + F</v-tooltip>
+			<v-tooltip activator="parent" location="bottom" content-class="posa-shortcut-tooltip"
+				>Alt + F</v-tooltip
+			>
 		</v-text-field>
 		<v-btn
 			density="compact"
