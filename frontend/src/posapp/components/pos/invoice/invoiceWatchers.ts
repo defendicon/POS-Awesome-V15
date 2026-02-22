@@ -53,6 +53,7 @@ interface InvoiceWatchersVm {
 	clearItemDetailCache?: () => void;
 	clearItemStockCache?: () => void;
 	update_item_rates: () => void;
+	_applyingPricingRules?: boolean;
 }
 
 const applyReturnDiscountProration = (context: InvoiceWatchersVm) => {
@@ -150,11 +151,18 @@ const invoiceWatchers: Record<string, unknown> & ThisType<InvoiceWatchersVm> = {
 				this.emitCartQuantities();
 			}
 
-			if (typeof this.schedulePricingRuleApplication === "function") {
+			const pricingRunInProgress = this._applyingPricingRules === true;
+			if (
+				!pricingRunInProgress &&
+				typeof this.schedulePricingRuleApplication === "function"
+			) {
 				this.schedulePricingRuleApplication();
 			}
 
-			if (typeof this.scheduleOfferRefresh === "function") {
+			if (
+				!pricingRunInProgress &&
+				typeof this.scheduleOfferRefresh === "function"
+			) {
 				this.scheduleOfferRefresh();
 			}
 			applyReturnDiscountProration(this);
