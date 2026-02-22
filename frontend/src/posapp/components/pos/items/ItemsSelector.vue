@@ -290,7 +290,19 @@ const itemsPerPage = ref(50);
 const clearingSearch = ref(false);
 const isDragging = ref(false);
 const new_line = ref(false);
-const item_group = ref("");
+const item_group = computed({
+	get: () => {
+		const selectedGroup = itemsIntegration.item_group.value;
+		return typeof selectedGroup === "string" && selectedGroup.length > 0
+			? selectedGroup
+			: "ALL";
+	},
+	set: (value: string) => {
+		const normalized =
+			typeof value === "string" && value.length > 0 ? value : "ALL";
+		itemsIntegration.item_group.value = normalized;
+	},
+});
 const current_invoice_type = ref("Invoice");
 const virtualScrollBuffer = ref(200);
 const localStorageAvailable = ref(true);
