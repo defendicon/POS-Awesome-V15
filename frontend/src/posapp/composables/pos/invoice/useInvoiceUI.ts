@@ -6,9 +6,61 @@ export function useInvoiceUI() {
 	let payment_confirmation_resolver: ((_result: boolean) => void) | null =
 		null;
 
+	const getViewportHeight = () => {
+		if (typeof window === "undefined") {
+			return 768;
+		}
+		return window.innerHeight || 768;
+	};
+
+	const getMaxInvoiceHeightPx = () => {
+		const viewportHeight = getViewportHeight();
+		if (viewportHeight <= 800) return Math.round(viewportHeight * 0.48);
+		if (viewportHeight <= 900) return Math.round(viewportHeight * 0.56);
+		return Math.round(viewportHeight * 0.68);
+	};
+
+	const getDefaultInvoiceHeight = () => {
+		if (typeof document === "undefined") {
+			return "68vh";
+		}
+		return (
+			getComputedStyle(document.documentElement)
+				.getPropertyValue("--container-height")
+				.trim() || "68vh"
+		);
+	};
+
+	const parseHeightToPx = (value: string | null | undefined) => {
+		if (!value || typeof value !== "string") return null;
+		const trimmed = value.trim();
+		const parsed = Number.parseFloat(trimmed);
+		if (!Number.isFinite(parsed)) return null;
+		if (trimmed.endsWith("vh")) {
+			return (getViewportHeight() * parsed) / 100;
+		}
+		return parsed;
+	};
+
+	const clampInvoiceHeight = (
+		value: string | null | undefined,
+		fallback: string,
+	) => {
+		const fallbackPx = parseHeightToPx(fallback) ?? getMaxInvoiceHeightPx();
+		const requestedPx = parseHeightToPx(value) ?? fallbackPx;
+		const maxPx = getMaxInvoiceHeightPx();
+		const minPx = Math.min(320, maxPx);
+		const clamped = Math.max(minPx, Math.min(requestedPx, maxPx));
+		return `${Math.round(clamped)}px`;
+	};
+
 	const saveInvoiceHeight = (element: HTMLElement | null) => {
 		if (element) {
-			invoiceHeight.value = element.clientHeight + "px";
+			const defaultHeight = getDefaultInvoiceHeight();
+			invoiceHeight.value = clampInvoiceHeight(
+				`${element.clientHeight}px`,
+				defaultHeight,
+			);
 			try {
 				localStorage.setItem(
 					"posawesome_invoice_height",
@@ -21,22 +73,17 @@ export function useInvoiceUI() {
 	};
 
 	const loadInvoiceHeight = () => {
+		const defaultHeight = getDefaultInvoiceHeight();
 		try {
 			const saved = localStorage.getItem("posawesome_invoice_height");
-			if (saved) {
-				invoiceHeight.value = saved;
-			} else {
-				invoiceHeight.value =
-					getComputedStyle(document.documentElement).getPropertyValue(
-						"--container-height",
-					) || "68vh";
-			}
+			invoiceHeight.value = clampInvoiceHeight(
+				saved || defaultHeight,
+				defaultHeight,
+			);
+			localStorage.setItem("posawesome_invoice_height", invoiceHeight.value);
 		} catch (e) {
 			console.error("Failed to load invoice height:", e);
-			invoiceHeight.value =
-				getComputedStyle(document.documentElement).getPropertyValue(
-					"--container-height",
-				) || "68vh";
+			invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
 		}
 	};
 

@@ -41,6 +41,17 @@ export function useResponsive() {
 		}
 
 		cardHeightVh = Math.max(30, Math.min(cardHeightVh, 70));
+		let containerHeightVh = 68;
+		if (windowHeight.value <= 800) {
+			containerHeightVh = 48;
+		} else if (windowHeight.value <= 900) {
+			containerHeightVh = 56;
+		}
+
+		// Keep small-width layouts usable while still protecting short-height screens.
+		if (windowWidth.value <= 768) {
+			containerHeightVh = Math.min(containerHeightVh, 55);
+		}
 
 		return {
 			"--dynamic-xs": `${dynamicSpacing.value.xs}px`,
@@ -48,7 +59,7 @@ export function useResponsive() {
 			"--dynamic-md": `${dynamicSpacing.value.md}px`,
 			"--dynamic-lg": `${dynamicSpacing.value.lg}px`,
 			"--dynamic-xl": `${dynamicSpacing.value.xl}px`,
-			"--container-height": `${Math.round(68 * heightScale.value)}vh`,
+			"--container-height": `${containerHeightVh}vh`,
 			"--card-height": `${cardHeightVh}vh`,
 			"--font-scale": averageScale.value.toFixed(2),
 		};
