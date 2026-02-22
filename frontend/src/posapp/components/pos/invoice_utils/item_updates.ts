@@ -8,6 +8,13 @@ export async function update_items_details(context: any, items: any[]) {
 	if (!items?.length) return;
 	if (!context.pos_profile) return;
 
+	const currentDoc = context.get_invoice_doc
+		? context.get_invoice_doc()
+		: context.invoice_doc;
+	const lockReturnPricing = Boolean(
+		currentDoc?.is_return && currentDoc?.return_against,
+	);
+
 	try {
 		const response = await frappe.call({
 			method: "posawesome.posawesome.api.items.get_items_details",
@@ -76,6 +83,7 @@ export async function update_items_details(context: any, items: any[]) {
 					const manualLocked =
 						item._manual_rate_set === true;
 					const shouldOverrideRate =
+						!lockReturnPricing &&
 						!item.locked_price &&
 						!item.posa_offer_applied &&
 						!manualLocked;
@@ -89,7 +97,11 @@ export async function update_items_details(context: any, items: any[]) {
 									priceCurrency,
 								);
 						}
-					} else if (!item.price_list_rate && (force || price)) {
+					} else if (
+						!lockReturnPricing &&
+						!item.price_list_rate &&
+						(force || price)
+					) {
 						if (context._computePriceConversion) {
 							const converted = context._computePriceConversion(
 								price,
@@ -241,6 +253,13 @@ export function _applyItemDetailPayload(
 	options: any = {},
 ) {
 	const { forceUpdate = false } = options;
+	const currentDoc = context.get_invoice_doc
+		? context.get_invoice_doc()
+		: context.invoice_doc;
+	const lockReturnPricing = Boolean(
+		currentDoc?.is_return && currentDoc?.return_against,
+	);
+	const preserveLockedPrice = item?.locked_price === true || lockReturnPricing;
 
 	if (!item.warehouse) {
 		item.warehouse = context.pos_profile.warehouse;
@@ -276,10 +295,16 @@ export function _applyItemDetailPayload(
 	}
 
 	item.allow_change_warehouse = data.allow_change_warehouse;
-	item.locked_price = data.locked_price;
+	item.locked_price = preserveLockedPrice
+		? true
+		: data.locked_price === true ||
+			data.locked_price === 1 ||
+			data.locked_price === "1";
 	item.description = data.description;
 	item.item_tax_template = data.item_tax_template;
-	item.discount_percentage = data.discount_percentage;
+	if (!lockReturnPricing) {
+		item.discount_percentage = data.discount_percentage;
+	}
 	item.warehouse = data.warehouse || item.warehouse;
 	item.has_batch_no = data.has_batch_no;
 	item.has_serial_no = data.has_serial_no;

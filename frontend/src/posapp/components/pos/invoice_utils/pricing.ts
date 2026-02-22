@@ -827,14 +827,24 @@ export async function _applyServerPricingRules(context: any, ctx: any = {}) {
 				update.discount_percentage ?? item.discount_percentage ?? 0,
 			) || 0;
 
-		const priceLocked = item.locked_price === true;
+		const priceLocked =
+			item.locked_price === true ||
+			item.locked_price === 1 ||
+			item.locked_price === "1";
 		const offerApplied =
 			item.posa_offer_applied === true ||
 			item.posa_offer_applied === 1 ||
 			item.posa_offer_applied === "1";
+		const lockReturnPricing = Boolean(
+			context?.invoice_doc?.is_return &&
+				context?.invoice_doc?.return_against,
+		);
 
 		let allowServerRateUpdate =
-			item._manual_rate_set !== true && !priceLocked && !offerApplied;
+			item._manual_rate_set !== true &&
+			!priceLocked &&
+			!offerApplied &&
+			!lockReturnPricing;
 
 		if (allowServerRateUpdate) {
 			const parentKey = item.posa_row_id || item.name || targetId || null;
