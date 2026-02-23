@@ -1,10 +1,11 @@
-import { ref, watch, unref, type Ref } from "vue";
+import { ref, watch, computed, unref, type Ref } from "vue";
 
 declare const frappe: any;
 
 export interface RedemptionLogicOptions {
 	invoiceDoc: Ref<any>;
 	posProfile: Ref<any>;
+	customerInfo?: Ref<any>;
 	currencyPrecision: Ref<number>;
 	formatFloat: (_val: any, _prec?: number) => number;
 	stores?: {
@@ -14,15 +15,39 @@ export interface RedemptionLogicOptions {
 }
 
 export function useRedemptionLogic(options: RedemptionLogicOptions) {
-	const { invoiceDoc, posProfile, currencyPrecision, formatFloat, stores } =
+	const { invoiceDoc, posProfile, customerInfo, currencyPrecision, formatFloat, stores } =
 		options;
 
 	// State
 	const loyalty_amount = ref(0);
 	const redeemed_customer_credit = ref(0);
 	const customer_credit_dict = ref<any[]>([]);
-	const available_customer_credit = ref(0);
-	const available_points_amount = ref(0);
+	const available_customer_credit = computed(() => {
+		return customer_credit_dict.value.reduce(
+			(total, row) => total + normalizeFloat(row?.total_credit || 0),
+			0,
+		);
+	});
+
+	const available_points_amount = computed(() => {
+		const info = unref(customerInfo) || {};
+		const doc = unref(invoiceDoc);
+		const profile = unref(posProfile);
+
+		if (!doc || !info?.loyalty_points) {
+			return 0;
+		}
+
+		let amount =
+			normalizeFloat(info.loyalty_points) *
+			normalizeFloat(info.conversion_factor || 1);
+
+		if (doc.currency && profile?.currency && doc.currency !== profile.currency) {
+			amount = normalizeFloat(amount / normalizeFloat(doc.conversion_rate || 1));
+		}
+
+		return amount;
+	});
 
 	// Get available customer credit
 	const get_available_credit = (use_credit: boolean) => {
@@ -74,10 +99,16 @@ export function useRedemptionLogic(options: RedemptionLogicOptions) {
 	};
 
 	// Watchers
+	const normalizeFloat = (value: any, precision?: number) => {
+		const parser =
+			formatFloat || ((v: any) => parseFloat(String(v)) || 0);
+		const prec = precision ?? unref(currencyPrecision) ?? 2;
+		return parser(value, prec);
+	};
+
 	watch(redeemed_customer_credit, (newVal) => {
-		const func = formatFloat || ((v: any) => parseFloat(String(v)) || 0);
 		const limit = unref(available_customer_credit);
-		if (func(newVal) > func(limit)) {
+		if (normalizeFloat(newVal) > normalizeFloat(limit)) {
 			redeemed_customer_credit.value = limit;
 			if (stores?.toastStore) {
 				stores.toastStore.show({
@@ -91,21 +122,18 @@ export function useRedemptionLogic(options: RedemptionLogicOptions) {
 	watch(
 		customer_credit_dict,
 		(newVal) => {
-			const func =
-				formatFloat || ((v: any) => parseFloat(String(v)) || 0);
-			const prec = unref(currencyPrecision) || 2;
 			const total = newVal.reduce(
-				(sum, row) => sum + func(row.credit_to_redeem || 0),
+				(sum, row) => sum + normalizeFloat(row.credit_to_redeem || 0),
 				0,
 			);
-			redeemed_customer_credit.value = func(total, prec);
+			redeemed_customer_credit.value = normalizeFloat(total);
 		},
 		{ deep: true },
 	);
 
-	// Fetch Loyalty Points - Placeholder
+	// Kept for backward compatibility with previous interface.
 	const get_loyalty_points = () => {
-		// TODO: Implement loyalty fetching
+		return unref(available_points_amount);
 	};
 
 	return {

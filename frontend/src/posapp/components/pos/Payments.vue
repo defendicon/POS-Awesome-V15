@@ -68,9 +68,7 @@
 					:format-currency="formatCurrency"
 					:format-float="formatFloat"
 					:currency-symbol="currencySymbol"
-					@set-formatted-currency="
-						(data) => setFormatedCurrency(null, data.field, null, false, data.value)
-					"
+					@set-formatted-currency="handleRedemptionFormattedCurrency"
 				/>
 
 				<v-divider></v-divider>
@@ -354,6 +352,7 @@ const {
 } = useRedemptionLogic({
 	invoiceDoc: computed(() => invoiceStore.invoiceDoc),
 	posProfile: pos_profile,
+	customerInfo: customer_info,
 	currencyPrecision: currency_precision,
 	formatFloat: (val, prec) => flt(val, prec),
 	stores: { toastStore },
@@ -563,6 +562,19 @@ const handleShowPayment = () => {
 const handleCreditChangeUpdate = (value) => {
 	setFormatedCurrency(credit_change, "value", null, false, value);
 	updateCreditChange(credit_change.value);
+};
+
+const handleRedemptionFormattedCurrency = (data) => {
+	if (!data?.field) return;
+
+	if (data.field === "loyalty_amount") {
+		setFormatedCurrency(loyalty_amount, "value", null, false, data.value);
+		return;
+	}
+
+	if (data.field === "redeemed_customer_credit") {
+		setFormatedCurrency(redeemed_customer_credit, "value", null, false, data.value);
+	}
 };
 
 const updateCreditChange = (rawValue) => {
@@ -982,6 +994,13 @@ watch(selectedCustomer, (newCustomer, oldCustomer) => {
 	redeem_customer_credit.value = false;
 	is_cashback.value = true;
 	is_credit_return.value = false;
+	loyalty_amount.value = 0;
+
+	if (invoice_doc.value) {
+		invoice_doc.value.loyalty_amount = 0;
+		invoice_doc.value.redeem_loyalty_points = 0;
+		invoice_doc.value.loyalty_points = 0;
+	}
 });
 
 // Lifecycle
