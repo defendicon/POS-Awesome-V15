@@ -5,6 +5,7 @@ import {
 	silentPrint,
 	watchPrintWindow,
 } from "../../plugins/print";
+import { printDocumentViaQz } from "../../services/qzTray";
 
 declare const frappe: any;
 
@@ -21,7 +22,7 @@ export function useLastInvoicePrinting() {
 		return Boolean(value);
 	}
 
-	function printLastInvoice() {
+	async function printLastInvoice() {
 		const lastInvoiceId = uiStore.lastInvoiceId;
 		const posProfile = uiStore.posProfile;
 
@@ -110,6 +111,18 @@ export function useLastInvoicePrinting() {
 		}
 
 		if (useSilentPrint) {
+			try {
+				await printDocumentViaQz({
+					doctype,
+					name: lastInvoiceId,
+					printFormat: pf || "Standard",
+					letterhead: letter_head || null,
+					noLetterhead: letter_head ? "0" : "1",
+				});
+				return;
+			} catch (error) {
+				console.warn("QZ Tray print failed, falling back to browser print", error);
+			}
 			silentPrint(url, printOptions);
 			return;
 		}

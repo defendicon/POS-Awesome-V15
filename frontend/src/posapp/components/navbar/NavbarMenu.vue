@@ -117,6 +117,26 @@
 						</div>
 					</v-list-item>
 
+					<v-list-item
+						v-if="isEnabledSetting(posProfile.posa_silent_print)"
+						@click="showQzTrayDialog = true"
+						class="menu-item-compact primary-action"
+					>
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact primary-icon">
+								<v-icon color="white" size="16">mdi-printer-wireless</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("QZ Tray Setup")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Connect printer and manage certificate")
+							}}</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
 					<v-list-item @click="$emit('sync-invoices')" class="menu-item-compact info-action">
 						<template v-slot:prepend>
 							<div class="menu-icon-wrapper-compact info-icon">
@@ -373,6 +393,8 @@
 		</v-card>
 	</v-dialog>
 
+	<QzTrayDialog v-model="showQzTrayDialog" />
+
 	<!-- Notification Snackbars -->
 	<v-snackbar
 		v-model="notification.show"
@@ -399,9 +421,13 @@ const FALLBACK_LANGUAGES = [
 
 import { useLastInvoicePrinting } from "../../composables/core/useLastInvoicePrinting";
 import { useUpdateStore } from "../../stores/updateStore";
+import QzTrayDialog from "./QzTrayDialog.vue";
 
 export default {
 	name: "NavbarMenu",
+	components: {
+		QzTrayDialog,
+	},
 	props: {
 		posProfile: { type: Object, default: () => ({}) },
 		manualOffline: Boolean,
@@ -416,6 +442,7 @@ export default {
 	data() {
 		return {
 			showLanguageDialog: false,
+			showQzTrayDialog: false,
 			selectedLanguage: "en",
 			currentLanguage: "en",
 			availableLanguages: FALLBACK_LANGUAGES,

@@ -6,6 +6,7 @@ import {
 	silentPrint,
 	watchPrintWindow,
 } from "../../../plugins/print";
+import { printDocumentViaQz } from "../../../services/qzTray";
 import { isOffline } from "../../../../offline/index";
 
 declare const frappe: any;
@@ -54,7 +55,7 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		win.print();
 	};
 
-	const loadPrintPage = () => {
+	const loadPrintPage = async () => {
 		const doc = unref(invoiceDoc);
 		const profile = unref(posProfile);
 		const type = unref(invoiceType);
@@ -143,6 +144,20 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 		}
 
 		if (profile.posa_silent_print) {
+			if (!isOffline()) {
+				try {
+					await printDocumentViaQz({
+						doctype,
+						name: doc.name,
+						printFormat: print_format || "Standard",
+						letterhead: profile.letter_head || null,
+						noLetterhead: letter_head,
+					});
+					return;
+				} catch (error) {
+					console.warn("QZ Tray print failed, falling back to browser print", error);
+				}
+			}
 			silentPrint(url, printOptions);
 		} else {
 			const printWindow = window.open(url, "Print");

@@ -28,6 +28,7 @@
 		"mitt": "^3.0.1",
 		"nunjucks": "^3.2.4",
 		"pinia": "^3.0.3",
+		"qz-tray": "2.2.5",
 		"socket.io-client": "^4.8.1",
 		"vite": "^6.2.4",
 		"vite-plugin-static-copy": "^3.1.1",
@@ -38,9 +39,9 @@
 		"vuetify": "^3.7.5"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.56.1",
 		"@eslint/js": "^9.16.0",
 		"@pinia/testing": "^1.0.3",
+		"@playwright/test": "^1.56.1",
 		"@types/lodash": "^4.17.23",
 		"@types/node": "^25.2.0",
 		"@typescript-eslint/parser": "^8.54.0",

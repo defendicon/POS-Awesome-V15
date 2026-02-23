@@ -131,6 +131,7 @@ import {
 	silentPrint,
 	watchPrintWindow,
 } from "../../../plugins/print";
+import { printDocumentViaQz } from "../../../services/qzTray";
 
 import { useRtl } from "../../../composables/core/useRtl";
 import { useCustomersStore } from "../../../stores/customersStore.js";
@@ -286,7 +287,7 @@ export default {
 			currency_filter,
 		});
 
-		const load_print_page = (payment_name) => {
+		const load_print_page = async (payment_name) => {
 			if (!payment_name) return;
 			const debugPrint = isDebugPrintEnabled();
 			let url =
@@ -297,6 +298,19 @@ export default {
 			url = appendDebugPrintParam(url, debugPrint);
 			const printOptions = { allowOfflineFallback: isOffline(), triggerPrint: "1", debugPrint };
 			if (pos_profile.value?.posa_silent_print) {
+				if (!isOffline()) {
+					try {
+						await printDocumentViaQz({
+							doctype: "Payment Entry",
+							name: payment_name,
+							printFormat: "Standard",
+							noLetterhead: 1,
+						});
+						return;
+					} catch (error) {
+						console.warn("QZ Tray print failed, falling back to browser print", error);
+					}
+				}
 				silentPrint(url, printOptions);
 			} else {
 				const printWindow = window.open(url, "_blank");
