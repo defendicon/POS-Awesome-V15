@@ -125,6 +125,8 @@ function setupSecurity() {
 						qzCertStatus.value = "trusted";
 						qzCertReady.value = true;
 						saveCertReady(true);
+					} else {
+						qzCertStatus.value = "untrusted";
 					}
 					resolve(signature || undefined);
 				})

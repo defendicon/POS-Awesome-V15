@@ -55,13 +55,14 @@ def _require_cryptography():
 
 @frappe.whitelist()
 def get_certificate() -> str:
-    """Return the public QZ certificate PEM."""
+    """Return the public QZ certificate PEM.
+
+    Returns an empty string when certificate is not configured yet so
+    frontend can gracefully fall back without server error noise.
+    """
     cert_path = _cert_path()
     if not os.path.exists(cert_path):
-        frappe.throw(
-            _("QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate."),
-            title=_("QZ Certificate Missing"),
-        )
+        return ""
     return _read_text(cert_path)
 
 
@@ -83,15 +84,15 @@ def get_certificate_download() -> dict[str, str]:
 
 @frappe.whitelist()
 def sign_message(message: str) -> str:
-    """Return base64 encoded RSA-PKCS1v15-SHA512 signature."""
+    """Return base64 encoded RSA-PKCS1v15-SHA512 signature.
+
+    Returns empty string when key is not configured yet.
+    """
     key_path = _key_path()
     if not os.path.exists(key_path):
-        frappe.throw(
-            _("QZ Tray private key not found. Ask an administrator to run Setup QZ Certificate."),
-            title=_("QZ Key Missing"),
-        )
+        return ""
 
-    _, hashes, serialization, padding, _, _ = _require_cryptography()
+    _x509, hashes, serialization, padding, _rsa, _name_oid = _require_cryptography()
     private_key = serialization.load_pem_private_key(_read_bytes(key_path), password=None)
     signature = private_key.sign(
         (message or "").encode("utf-8"),
@@ -118,7 +119,7 @@ def setup_qz_certificate() -> dict[str, str]:
 
     os.makedirs(_qz_dir(), exist_ok=True)
 
-    x509, hashes, serialization, _, rsa, NameOID = _require_cryptography()
+    x509, hashes, serialization, _padding, rsa, NameOID = _require_cryptography()
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     with open(key_path, "wb") as file:
