@@ -26,16 +26,15 @@ class DummyClosingShift:
 class TestClosingShiftCashMovementIntegration(unittest.TestCase):
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation.get_payments_entries")
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation.get_pos_invoices")
-    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation.submit_printed_invoices")
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation._ensure_opening_shift_access")
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.creation.frappe")
     def test_make_closing_shift_deducts_cash_movements_from_cash_expected(
         self,
         mock_frappe,
-        mock_submit_printed_invoices,
+        mock_ensure_opening_shift_access,
         mock_get_pos_invoices,
         mock_get_payments_entries,
     ):
-        mock_submit_printed_invoices.return_value = None
         mock_get_pos_invoices.return_value = []
         mock_get_payments_entries.return_value = []
         mock_frappe.get_cached_value.return_value = "USD"
@@ -45,6 +44,18 @@ class TestClosingShiftCashMovementIntegration(unittest.TestCase):
         closing_doc = DummyClosingShift()
         mock_frappe.new_doc.return_value = closing_doc
         mock_frappe._dict.side_effect = lambda d: SimpleNamespace(**d)
+        mock_ensure_opening_shift_access.return_value = SimpleNamespace(
+            name="POS-OPEN-1",
+            docstatus=1,
+            status="Open",
+            period_start_date="2026-02-11 08:00:00",
+            pos_profile="POS-PROFILE-1",
+            user="cashier@example.com",
+            company="My Co",
+            get=lambda key, default=None: {
+                "balance_details": [{"mode_of_payment": "Cash", "amount": 50}],
+            }.get(key, default),
+        )
 
         opening_shift = {
             "name": "POS-OPEN-1",
@@ -67,10 +78,12 @@ class TestClosingShiftCashMovementIntegration(unittest.TestCase):
 
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.get_payments_entries")
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.get_pos_invoices")
+    @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview._ensure_opening_shift_access")
     @patch("posawesome.posawesome.doctype.pos_closing_shift.closing_processing.overview.frappe")
     def test_overview_includes_cash_movements_and_adjusts_cash_expected(
         self,
         mock_frappe,
+        mock_ensure_opening_shift_access,
         mock_get_pos_invoices,
         mock_get_payments_entries,
     ):
@@ -80,7 +93,7 @@ class TestClosingShiftCashMovementIntegration(unittest.TestCase):
         mock_frappe.db.get_value.side_effect = lambda dt, name, field: (
             0 if field == "create_pos_invoice_instead_of_sales_invoice" else "Cash"
         )
-        mock_frappe.get_doc.return_value = SimpleNamespace(
+        mock_ensure_opening_shift_access.return_value = SimpleNamespace(
             doctype="POS Opening Shift",
             name="POS-OPEN-1",
             pos_profile="POS-PROFILE-1",

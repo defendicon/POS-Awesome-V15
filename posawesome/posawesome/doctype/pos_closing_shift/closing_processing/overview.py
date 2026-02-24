@@ -4,6 +4,7 @@ from collections import defaultdict
 from frappe import _
 from posawesome.posawesome.doctype.pos_closing_shift.closing_processing.utils import get_base_value
 from posawesome.posawesome.doctype.pos_closing_shift.closing_processing.data import (
+    _ensure_opening_shift_access,
     get_pos_invoices,
     get_payments_entries,
 )
@@ -35,13 +36,13 @@ def get_closing_shift_overview(pos_opening_shift):
     elif opening_shift_name is None:
         opening_shift_name = getattr(payload, "name", None)
 
-    if not opening_shift_doc:
-        if not opening_shift_name:
-            frappe.throw(_("Invalid POS Opening Shift data provided."))
-        opening_shift_doc = frappe.get_doc("POS Opening Shift", opening_shift_name)
+    if opening_shift_doc:
+        opening_shift_name = opening_shift_doc.name
 
-    if opening_shift_doc.doctype != "POS Opening Shift":
+    if not opening_shift_name:
         frappe.throw(_("Unable to resolve POS Opening Shift."))
+
+    opening_shift_doc = _ensure_opening_shift_access(opening_shift_name)
 
     pos_profile = opening_shift_doc.pos_profile
     company = opening_shift_doc.company

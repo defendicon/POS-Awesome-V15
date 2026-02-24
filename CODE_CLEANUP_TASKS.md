@@ -72,6 +72,11 @@
 - [x] Scoped and restored global account-permission bypass flags across order/quotation/purchase save-submit flows in `posawesome/posawesome/api/sales_orders.py`, `posawesome/posawesome/api/quotations.py`, and `posawesome/posawesome/api/purchase_orders.py`.
 - [x] Scoped and restored account-permission bypass flags for customer-credit journal/payment posting in `posawesome/posawesome/api/payments.py`.
 - [x] Scoped and restored account-permission bypass flags in invoice draft/save/submit paths in `posawesome/posawesome/api/invoice_processing/creation.py`.
+- [x] Removed client-trusted closing-shift payload assumptions and enforced opening-shift access checks for invoice/payment fetch APIs in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/data.py`.
+- [x] Hardened closing-shift creation/submission to resolve trusted opening-shift docs server-side and restrict editable submit fields in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/creation.py`.
+- [x] Added opening-shift access enforcement to closing-shift overview generation in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/overview.py`.
+- [x] Replaced dynamic SQL doctype interpolation with safe doctype allowlisting/get-all queries for draft cleanup/submission helpers in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/invoices.py`.
+- [x] Updated closing-shift cash-movement integration tests to align with server-side opening-shift access enforcement in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/test_cash_movement_integration.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

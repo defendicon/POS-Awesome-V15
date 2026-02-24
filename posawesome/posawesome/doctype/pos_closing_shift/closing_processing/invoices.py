@@ -1,8 +1,12 @@
 import frappe
-from frappe import _, DoesNotExistError
+from frappe import _
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
     consolidate_pos_invoices,
 )
+
+
+VALID_INVOICE_DOCTYPES = {"Sales Invoice", "POS Invoice"}
+
 
 def _set_closing_entry_invoices(closing_shift_doc):
     """Set `pos_closing_entry` on linked invoices."""
@@ -83,23 +87,26 @@ def delete_draft_invoices(pos_opening_shift, pos_profile):
             )
             else "Sales Invoice"
         )
-        data = frappe.db.sql(
-            f"""
-        select
-            name
-        from
-            `tab{doctype}`
-        where
-            docstatus = 0 and posa_is_printed = 0 and posa_pos_opening_shift = %s
-        """,
-            (pos_opening_shift),
-            as_dict=1,
+        if doctype not in VALID_INVOICE_DOCTYPES:
+            frappe.throw(_("Invalid invoice doctype for draft cleanup."))
+
+        data = frappe.get_all(
+            doctype,
+            filters={
+                "docstatus": 0,
+                "posa_is_printed": 0,
+                "posa_pos_opening_shift": pos_opening_shift,
+            },
+            fields=["name"],
         )
 
         for invoice in data:
             frappe.delete_doc(doctype, invoice.name, force=1)
 
 def submit_printed_invoices(pos_opening_shift, doctype):
+    if doctype not in VALID_INVOICE_DOCTYPES:
+        frappe.throw(_("Invalid invoice doctype for submission."))
+
     invoices_list = frappe.get_all(
         doctype,
         filters={
