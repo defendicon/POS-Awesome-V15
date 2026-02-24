@@ -46,7 +46,10 @@ def get_last_invoice_rates(customer, item_codes, company=None):
 
     if isinstance(item_codes, str):
         import json
-        item_codes = json.loads(item_codes)
+        try:
+            item_codes = json.loads(item_codes)
+        except Exception:
+            frappe.throw(_("item_codes must be a valid JSON list."))
 
     if not isinstance(item_codes, (list, tuple)):
         frappe.throw(_("item_codes must be a list."))
