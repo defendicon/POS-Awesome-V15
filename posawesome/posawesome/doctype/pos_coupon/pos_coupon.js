@@ -24,15 +24,15 @@ frappe.ui.form.on("POS Coupon", {
 		}
 	},
 	make_coupon_code: function (frm) {
-		var coupon_name = frm.doc.coupon_name;
+		var coupon_name = (frm.doc.coupon_name || "").toString();
 		var coupon_code;
 		if (frm.doc.coupon_type == "Gift Card") {
-			coupon_code = Math.random().toString(12).substring(2, 12).toUpperCase();
+			coupon_code = generateRandomCode(10);
 		} else if (frm.doc.coupon_type == "Promotional") {
 			coupon_name = coupon_name.replace(/\s/g, "");
 			coupon_code = coupon_name.toUpperCase().slice(0, 8);
 		}
-		frm.doc.coupon_code = coupon_code;
+		frm.doc.coupon_code = coupon_code || "";
 		frm.refresh_field("coupon_code");
 	},
 	refresh: function (frm) {
@@ -43,3 +43,16 @@ frappe.ui.form.on("POS Coupon", {
 		}
 	},
 });
+
+function generateRandomCode(length) {
+	const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	const codeLength = Math.max(1, Number(length) || 1);
+
+	if (window.crypto && window.crypto.getRandomValues) {
+		const randomBytes = new Uint8Array(codeLength);
+		window.crypto.getRandomValues(randomBytes);
+		return Array.from(randomBytes, (byte) => charset[byte % charset.length]).join("");
+	}
+
+	return frappe.utils.get_random(codeLength).toUpperCase();
+}

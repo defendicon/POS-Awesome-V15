@@ -35,11 +35,12 @@ frappe.ui.form.on("Referral Code", {
 		}
 	},
 	make_referral_code: function (frm) {
-		let referral_name = frm.doc.referral_name;
+		let referral_name = (frm.doc.referral_name || "").toString();
 		let referral_code;
 		if (!referral_name) {
-			frm.doc.referral_name = frm.doc.party + Math.random().toString(5).substring(2, 5).toUpperCase();
-			referral_code = Math.random().toString(12).substring(2, 12).toUpperCase();
+			const party = (frm.doc.party || "").toString().trim();
+			frm.doc.referral_name = `${party}${generateRandomCode(3)}`;
+			referral_code = generateRandomCode(10);
 		} else {
 			referral_name = referral_name.replace(/\s/g, "");
 			referral_code = referral_name.toUpperCase().slice(0, 8);
@@ -49,3 +50,16 @@ frappe.ui.form.on("Referral Code", {
 		frm.refresh_field("referral_code");
 	},
 });
+
+function generateRandomCode(length) {
+	const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	const codeLength = Math.max(1, Number(length) || 1);
+
+	if (window.crypto && window.crypto.getRandomValues) {
+		const randomBytes = new Uint8Array(codeLength);
+		window.crypto.getRandomValues(randomBytes);
+		return Array.from(randomBytes, (byte) => charset[byte % charset.length]).join("");
+	}
+
+	return frappe.utils.get_random(codeLength).toUpperCase();
+}

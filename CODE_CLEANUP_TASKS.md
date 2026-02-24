@@ -93,6 +93,10 @@
 - [x] Refactored delivery-charge profile matching to deduplicate inputs, avoid empty child queries, and remove repeated scans in `posawesome/posawesome/doctype/delivery_charges/delivery_charges.py`.
 - [x] Removed dead commented `frappe` imports from thin doctype wrappers/tests in `posawesome/posawesome/doctype/{pos_closing_shift_taxes,pos_coupon_detail,pos_closing_shift_detail,pos_offer_detail,sales_invoice_reference,pos_opening_shift_detail,pos_payment_entry_reference,delivery_charges/test_delivery_charges.py,mpesa_c2b_register_url/test_mpesa_c2b_register_url.py,mpesa_payment_register/test_mpesa_payment_register.py,pos_opening_shift/test_pos_opening_shift.py,pos_coupon/test_pos_coupon.py,pos_closing_shift/test_pos_closing_shift.py,pos_offer/test_pos_offer.py,referral_code/test_referral_code.py}`.
 - [x] Added company read-permission enforcement to default-warehouse lookup and removed excessive/noisy sales-person logging/fetch limits in `posawesome/posawesome/api/utils.py`.
+- [x] Replaced predictable client-side coupon/referral code generation with cryptographically strong randomness fallback and null-safe string handling in `posawesome/posawesome/doctype/{pos_coupon/pos_coupon.js,referral_code/referral_code.js}`.
+- [x] Fixed numeric validation precedence bugs and corrected validation messages in `posawesome/posawesome/doctype/pos_offer/pos_offer.js`.
+- [x] Prevented draft-opening-shift setup from overwriting existing values and guarded profile payment iteration in `posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.js`.
+- [x] Removed dead commented refresh handlers in `posawesome/posawesome/doctype/{mpesa_c2b_register_url/mpesa_c2b_register_url.js,mpesa_payment_register/mpesa_payment_register.js}`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
