@@ -1,7 +1,7 @@
 import frappe
 import json
 from frappe import _
-from frappe.utils import nowdate, flt, fmt_money, cint
+from frappe.utils import nowdate, flt, fmt_money, cint, cstr, escape_html
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import reconcile_dr_cr_note
 from erpnext.accounts.utils import reconcile_against_document
@@ -9,12 +9,58 @@ from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from posawesome.posawesome.api.payment_processing.creation import create_payment_entry
 from posawesome.posawesome.api.payment_processing.data import get_outstanding_invoices
 
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _assert_pos_profile_access(profile_name):
+    profile_name = cstr(profile_name).strip()
+    if not profile_name:
+        frappe.throw(_("POS Profile is required"))
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_doc.name})
+    if has_explicit_assignments and not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+    return profile_doc
+
+
+def _assert_opening_shift_access(shift_name, profile_name=None):
+    if not shift_name:
+        frappe.throw(_("POS Opening Shift is required"))
+
+    shift = frappe.get_doc("POS Opening Shift", shift_name)
+    if shift.status != "Open":
+        frappe.throw(_("POS Opening Shift {0} is not open.").format(shift.name))
+
+    if profile_name and shift.pos_profile != profile_name:
+        frappe.throw(_("POS Opening Shift {0} is not for POS Profile {1}.").format(shift.name, profile_name))
+
+    if shift.user != frappe.session.user and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not allowed to use POS Opening Shift {0}.").format(shift.name))
+
+    return shift
+
+
+def _safe_html(value):
+    return escape_html(cstr(value or ""))
+
+
 @frappe.whitelist()
 def process_pos_payment(payload):
-    data = json.loads(payload)
+    data = json.loads(payload) if isinstance(payload, str) else payload
+    if not isinstance(data, dict):
+        frappe.throw(_("Invalid payment payload"))
     data = frappe._dict(data)
-    if not data.pos_profile.get("posa_use_pos_awesome_payments"):
-        frappe.throw(_("POS Awesome Payments is not enabled for this POS Profile"))
 
     # Log short summary only to avoid truncation
     frappe.log_error(
@@ -34,13 +80,22 @@ def process_pos_payment(payload):
     if not data.pos_opening_shift_name:
         frappe.throw(_("POS Opening Shift is required"))
 
-    company = data.company
+    profile_doc = _assert_pos_profile_access(data.pos_profile_name)
+    _assert_opening_shift_access(data.pos_opening_shift_name, profile_doc.name)
+
+    if not cint(profile_doc.get("posa_use_pos_awesome_payments")):
+        frappe.throw(_("POS Awesome Payments is not enabled for this POS Profile"))
+
+    if data.company and profile_doc.company and data.company != profile_doc.company:
+        frappe.throw(_("Company mismatch with selected POS Profile."))
+
+    company = data.company or profile_doc.company
     currency = data.currency
     customer = data.customer
     pos_opening_shift_name = data.pos_opening_shift_name
-    allow_make_new_payments = data.pos_profile.get("posa_allow_make_new_payments")
-    allow_reconcile_payments = data.pos_profile.get("posa_allow_reconcile_payments")
-    allow_mpesa_reconcile_payments = data.pos_profile.get("posa_allow_mpesa_reconcile_payments")
+    allow_make_new_payments = cint(profile_doc.get("posa_allow_make_new_payments"))
+    allow_reconcile_payments = cint(profile_doc.get("posa_allow_reconcile_payments"))
+    allow_mpesa_reconcile_payments = cint(profile_doc.get("posa_allow_mpesa_reconcile_payments"))
     today = nowdate()
 
     # prepare invoice list once so allocations can update remaining amounts
@@ -325,7 +380,7 @@ def process_pos_payment(payload):
                     posting_date=today,
                     reference_no=pos_opening_shift_name,
                     reference_date=today,
-                    cost_center=data.pos_profile.get("cost_center"),
+                    cost_center=profile_doc.get("cost_center"),
                     submit=0,
                 )
 
@@ -376,8 +431,8 @@ def process_pos_payment(payload):
         msg += "<tbody>"
         for payment_entry in new_payments_entry:
             msg += "<tr><td>{0}</td><td>{1}</td></tr>".format(
-                payment_entry.get("name"),
-                payment_entry.get("paid_amount") or payment_entry.get("amount"),
+                _safe_html(payment_entry.get("name")),
+                _safe_html(payment_entry.get("paid_amount") or payment_entry.get("amount")),
             )
         msg += "</tbody>"
         msg += "</table>"
@@ -388,8 +443,8 @@ def process_pos_payment(payload):
         msg += "<tbody>"
         for payment in reconciled_payments:
             msg += "<tr><td>{0}</td><td>{1}</td></tr>".format(
-                payment.get("payment_entry"),
-                payment.get("allocated_amount"),
+                _safe_html(payment.get("payment_entry")),
+                _safe_html(payment.get("allocated_amount")),
             )
         msg += "</tbody>"
         msg += "</table>"
@@ -399,7 +454,7 @@ def process_pos_payment(payload):
         msg += "<thead><tr><th>Error</th></tr></thead>"
         msg += "<tbody>"
         for error in errors:
-            msg += "<tr><td>{0}</td></tr>".format(error)
+            msg += "<tr><td>{0}</td></tr>".format(_safe_html(error))
         msg += "</tbody>"
         msg += "</table>"
     if len(msg) > 0:
