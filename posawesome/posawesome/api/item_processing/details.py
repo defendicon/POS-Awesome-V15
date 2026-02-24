@@ -13,6 +13,32 @@ import time
 MAX_ITEM_DETAILS_BULK = 500
 
 
+def _coerce_doc_payload(doc):
+    if doc is None:
+        return None
+
+    if isinstance(doc, str):
+        raw_value = doc.strip()
+        if not raw_value:
+            return None
+        try:
+            doc = json.loads(raw_value)
+        except Exception:
+            # Some callers pass only docname; keep a minimal mapping instead of failing.
+            return frappe._dict({"name": raw_value})
+
+    if isinstance(doc, dict):
+        return frappe._dict(doc)
+
+    if hasattr(doc, "as_dict"):
+        try:
+            return frappe._dict(doc.as_dict())
+        except Exception:
+            return None
+
+    return None
+
+
 def _coerce_item_payload(item):
     if isinstance(item, str):
         try:
@@ -83,6 +109,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=None):
     from erpnext.stock.get_item_details import get_item_details
     item = _coerce_item_payload(item)
+    doc = _coerce_doc_payload(doc)
     today = nowdate()
     item_code = item.get("item_code")
     if not item_code:
@@ -172,9 +199,9 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
         item["conversion_rate"] = exchange_rate
 
         if doc:
-            doc.price_list_currency = price_list_currency
-            doc.plc_conversion_rate = exchange_rate
-            doc.conversion_rate = exchange_rate
+            doc["price_list_currency"] = price_list_currency
+            doc["plc_conversion_rate"] = exchange_rate
+            doc["conversion_rate"] = exchange_rate
 
     # Add company and doctype to the item args for ERPNext validation
     if company:
