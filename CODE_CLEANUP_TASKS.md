@@ -18,6 +18,8 @@
 - [x] Added POS profile access enforcement for sales order create/update/submit flows in `posawesome/posawesome/api/sales_orders.py`.
 - [x] Added POS profile access enforcement for quotation create/update/submit flows in `posawesome/posawesome/api/quotations.py`.
 - [x] Hardened invoice deletion endpoints with explicit draft/access checks in `posawesome/posawesome/api/invoices.py`.
+- [x] Added company-level access checks to sales order search endpoint in `posawesome/posawesome/api/sales_orders.py`.
+- [x] Added shift/profile access checks for draft invoice fetch and order-to-invoice conversion in `posawesome/posawesome/api/invoices.py`.
 - [x] Restricted sensitive server/build/database usage endpoints to System Manager in `posawesome/posawesome/api/utilities.py`.
 - [x] Fixed POS profile trust boundary and cross-user profile lookup controls in `posawesome/posawesome/api/utils.py`.
 

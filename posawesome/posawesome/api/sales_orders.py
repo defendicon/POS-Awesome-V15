@@ -61,6 +61,31 @@ def _enforce_order_access(data, existing_doc=None):
     return profile_doc
 
 
+def _assert_company_access(company):
+    if _can_manage_all_pos_profiles() or frappe.has_permission("Sales Order", "read"):
+        return
+
+    profile_names = frappe.get_all(
+        "POS Profile User",
+        filters={"user": frappe.session.user},
+        pluck="parent",
+    )
+    if not profile_names:
+        frappe.throw(_("You are not allowed to access sales orders for this company."))
+
+    allowed_companies = {
+        row.company
+        for row in frappe.get_all(
+            "POS Profile",
+            filters={"name": ["in", profile_names]},
+            fields=["company"],
+        )
+        if row.company
+    }
+    if company not in allowed_companies:
+        frappe.throw(_("You are not allowed to access sales orders for company {0}.").format(company))
+
+
 def _payment_entry_job(order_name, payments):
     """Background task to create payment entries."""
     so_doc = frappe.get_doc("Sales Order", order_name)
@@ -69,6 +94,7 @@ def _payment_entry_job(order_name, payments):
 
 @frappe.whitelist()
 def search_orders(company, currency, order_name=None):
+    _assert_company_access(company)
     filters = {
         "billing_status": ["in", ["Not Billed", "Partly Billed"]],
         "docstatus": 1,

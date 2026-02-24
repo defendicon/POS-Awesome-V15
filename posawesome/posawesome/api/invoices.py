@@ -49,6 +49,26 @@ def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
 
 
+def _assert_shift_access(pos_opening_shift):
+    shift_user = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "user")
+    if not shift_user:
+        frappe.throw(frappe._("POS Opening Shift {0} was not found.").format(pos_opening_shift))
+    if shift_user != frappe.session.user and not _can_manage_all_pos_profiles():
+        frappe.throw(frappe._("You are not allowed to access this shift."))
+
+
+def _assert_pos_profile_access(profile_name):
+    if not profile_name:
+        return
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_name, "user": frappe.session.user},
+    )
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_name})
+    if has_explicit_assignments and not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(frappe._("You are not assigned to POS Profile {0}.").format(profile_name))
+
+
 def _assert_delete_access(doctype, invoice_name):
     doc = frappe.get_doc(doctype, invoice_name)
     if doc.docstatus != 0:
@@ -74,6 +94,7 @@ def _assert_delete_access(doctype, invoice_name):
 @frappe.whitelist()
 def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
     started_at = time.perf_counter()
+    _assert_shift_access(pos_opening_shift)
     filters = {
         "posa_pos_opening_shift": pos_opening_shift,
         "docstatus": 0,
@@ -111,6 +132,13 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 def get_draft_invoice_doc(invoice_name, doctype="Sales Invoice"):
     started_at = time.perf_counter()
     doc = frappe.get_cached_doc(doctype, invoice_name)
+    if doc.docstatus != 0:
+        frappe.throw(frappe._("Only draft invoices can be opened from POS draft API."))
+    shift_name = doc.get("posa_pos_opening_shift")
+    if shift_name:
+        _assert_shift_access(shift_name)
+    else:
+        _assert_pos_profile_access(doc.get("pos_profile"))
     log_perf_event(
         "get_draft_invoice_doc",
         started_at,
@@ -170,6 +198,15 @@ def create_sales_invoice_from_order(sales_order):
 
     if not frappe.db.exists("Sales Order", sales_order):
         frappe.throw(f"Sales Order {sales_order} does not exist")
+
+    order_doc = frappe.get_doc("Sales Order", sales_order)
+    _assert_pos_profile_access(order_doc.get("pos_profile"))
+    if (
+        not order_doc.get("pos_profile")
+        and not frappe.has_permission("Sales Order", "read", sales_order)
+        and not _can_manage_all_pos_profiles()
+    ):
+        frappe.throw(frappe._("You are not allowed to access Sales Order {0}.").format(sales_order))
 
     invoice_doc = make_sales_invoice(sales_order)
     invoice_doc.flags.ignore_permissions = True
