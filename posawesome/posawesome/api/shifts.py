@@ -5,9 +5,46 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import cint, nowdate
+from frappe.utils import cint, cstr
 from frappe import _
 from .utilities import get_version
+
+
+def _can_manage_other_users():
+    return "System Manager" in frappe.get_roles()
+
+
+def _resolve_shift_user(user=None):
+    session_user = frappe.session.user
+    requested_user = cstr(user or session_user).strip()
+    if requested_user != session_user and not _can_manage_other_users():
+        frappe.throw(_("You are not permitted to access another user's shift data."))
+    return requested_user
+
+
+def _assert_pos_profile_access(pos_profile_name, expected_company=None):
+    profile = frappe.db.get_value(
+        "POS Profile",
+        pos_profile_name,
+        ["name", "company", "disabled"],
+        as_dict=True,
+    )
+    if not profile:
+        frappe.throw(_("POS Profile {0} was not found.").format(pos_profile_name))
+    if cint(profile.disabled):
+        frappe.throw(_("POS Profile {0} is disabled.").format(pos_profile_name))
+
+    if expected_company and profile.company != expected_company:
+        frappe.throw(_("POS Profile {0} does not belong to company {1}.").format(pos_profile_name, expected_company))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": pos_profile_name, "user": frappe.session.user},
+    )
+    if not has_access and not _can_manage_other_users():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(pos_profile_name))
+
+    return profile
 
 
 @frappe.whitelist()
@@ -58,7 +95,20 @@ def get_opening_dialog_data():
 
 @frappe.whitelist()
 def create_opening_voucher(pos_profile, company, balance_details):
-    balance_details = json.loads(balance_details)
+    if isinstance(balance_details, str):
+        try:
+            balance_details = json.loads(balance_details)
+        except Exception:
+            frappe.throw(_("Balance details must be a valid JSON array."))
+    if not isinstance(balance_details, list):
+        frappe.throw(_("Balance details must be a list."))
+
+    pos_profile_name = cstr(pos_profile).strip()
+    if not pos_profile_name:
+        frappe.throw(_("POS Profile is required."))
+
+    requested_company = cstr(company).strip()
+    profile = _assert_pos_profile_access(pos_profile_name, requested_company or None)
 
     new_pos_opening = frappe.get_doc(
         {
@@ -66,8 +116,8 @@ def create_opening_voucher(pos_profile, company, balance_details):
             "period_start_date": frappe.utils.get_datetime(),
             "posting_date": frappe.utils.getdate(),
             "user": frappe.session.user,
-            "pos_profile": pos_profile,
-            "company": company,
+            "pos_profile": profile.name,
+            "company": profile.company,
             "docstatus": 1,
         }
     )
@@ -82,10 +132,11 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
 @frappe.whitelist()
 def check_opening_shift(user):
+    shift_user = _resolve_shift_user(user)
     open_vouchers = frappe.db.get_all(
         "POS Opening Shift",
         filters={
-            "user": user,
+            "user": shift_user,
             "pos_closing_shift": ["is", "not set"],
             "docstatus": 1,
             "status": "Open",

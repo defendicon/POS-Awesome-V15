@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, nowdate, getdate
+from frappe.utils import cint, cstr, flt, nowdate, getdate
 from erpnext.accounts.party import get_party_account
 
 
@@ -13,26 +13,68 @@ from .utils import get_active_pos_profile, get_default_warehouse
 
 
 
-def _resolve_pos_profile(pos_profile):
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _resolve_profile_name(pos_profile):
     if isinstance(pos_profile, dict):
-        return pos_profile
+        return cstr(
+            pos_profile.get("name")
+            or pos_profile.get("pos_profile")
+            or pos_profile.get("profile")
+        ).strip()
 
     if isinstance(pos_profile, str):
         raw_value = pos_profile.strip()
-        if raw_value:
-            try:
-                decoded = json.loads(raw_value)
-            except Exception:
-                decoded = raw_value
+        if not raw_value:
+            return ""
+        try:
+            decoded = json.loads(raw_value)
+        except Exception:
+            decoded = raw_value
 
-            if isinstance(decoded, dict):
-                return decoded
-            if isinstance(decoded, str) and decoded:
-                return frappe.get_doc("POS Profile", decoded).as_dict()
+        if isinstance(decoded, dict):
+            return _resolve_profile_name(decoded)
+        return cstr(decoded).strip()
+
+    return ""
+
+
+def _load_authorized_pos_profile(profile_name):
+    profile_name = cstr(profile_name).strip()
+    if not profile_name:
+        return None
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if cint(profile_doc.disabled):
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    if not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+    return profile_doc.as_dict()
+
+
+def _resolve_pos_profile(pos_profile):
+    profile_name = _resolve_profile_name(pos_profile)
+    if profile_name:
+        profile = _load_authorized_pos_profile(profile_name)
+        if profile:
+            return profile
 
     profile = get_active_pos_profile()
     if not profile:
         frappe.throw(_("POS Profile is required to create purchase documents."))
+    active_profile_name = _resolve_profile_name(profile)
+    if active_profile_name:
+        authorized_profile = _load_authorized_pos_profile(active_profile_name)
+        if authorized_profile:
+            return authorized_profile
     return profile
 
 

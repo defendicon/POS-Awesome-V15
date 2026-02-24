@@ -11,6 +11,8 @@
 - [x] Reused centralized print helper for offline invoice preview/print flows in `frontend/src/posapp/composables/pos/payments/usePaymentPrinting.ts`.
 - [x] Reused centralized print helper for barcode print/PDF windows in `frontend/src/posapp/components/pos/shell/BarcodePrinting.vue`.
 - [x] Hardened app branch/root lookup logic and batch helper wiring in `posawesome/posawesome/api/utilities.py`.
+- [x] Added shift-user/profile authorization and stricter opening-voucher input validation in `posawesome/posawesome/api/shifts.py`.
+- [x] Fixed POS profile trust boundary by resolving and authorizing purchase profile data server-side in `posawesome/posawesome/api/purchase_orders.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
