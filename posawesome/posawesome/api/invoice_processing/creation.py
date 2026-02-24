@@ -30,6 +30,7 @@ from posawesome.posawesome.api.invoice_processing.stock import (
 from posawesome.posawesome.api.payment_processing.utils import get_bank_cash_account as get_bank_account
 from posawesome.posawesome.api.utilities import ensure_child_doctype, set_batch_nos_for_bundels
 from posawesome.posawesome.api.payments import redeeming_customer_credit
+from posawesome.posawesome.api.utils import get_active_pos_profile
 import json
 from frappe.utils import money_in_words
 from frappe.utils.background_jobs import enqueue
@@ -111,6 +112,18 @@ def _resolve_invoice_doctype(invoice_name=None, pos_profile_name=None):
     return "Sales Invoice"
 
 
+def _resolve_profile_from_opening_shift(payload, existing_doc=None):
+    shift_name = cstr(
+        payload.get("pos_opening_shift_name")
+        or payload.get("pos_opening_shift")
+        or payload.get("posa_pos_opening_shift")
+        or (existing_doc.get("posa_pos_opening_shift") if existing_doc else "")
+    ).strip()
+    if not shift_name:
+        return ""
+    return cstr(frappe.db.get_value("POS Opening Shift", shift_name, "pos_profile")).strip()
+
+
 def _assert_invoice_profile_access(payload, existing_doc=None, doctype_hint=None):
     profile_name = _extract_profile_name(payload.get("pos_profile"))
     existing_profile = cstr(existing_doc.get("pos_profile") if existing_doc else "").strip()
@@ -119,6 +132,10 @@ def _assert_invoice_profile_access(payload, existing_doc=None, doctype_hint=None
         frappe.throw(_("You cannot change POS Profile on an existing invoice."))
 
     effective_profile = existing_profile or profile_name
+    if not effective_profile:
+        effective_profile = _resolve_profile_from_opening_shift(payload, existing_doc)
+    if not effective_profile:
+        effective_profile = _extract_profile_name(get_active_pos_profile())
     if effective_profile:
         payload["pos_profile"] = _ensure_pos_profile_access(effective_profile)
         return payload["pos_profile"]

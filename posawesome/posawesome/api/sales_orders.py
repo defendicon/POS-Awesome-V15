@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import cstr, getdate, nowdate
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
+from posawesome.posawesome.api.utils import get_active_pos_profile
 
 MAX_ORDER_ITEMS = 500
 MAX_ORDER_SEARCH_LIMIT = 200
@@ -34,6 +35,9 @@ def _ensure_pos_profile_access(profile_name):
     if not profile_name:
         frappe.throw(_("POS Profile is required for sales order operations."))
 
+    if not frappe.db.exists("POS Profile", profile_name):
+        frappe.throw(_("POS Profile {0} was not found.").format(profile_name))
+
     profile_doc = frappe.get_doc("POS Profile", profile_name)
     if profile_doc.disabled:
         frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
@@ -42,7 +46,8 @@ def _ensure_pos_profile_access(profile_name):
         "POS Profile User",
         {"parent": profile_doc.name, "user": frappe.session.user},
     )
-    if not has_access and not _can_manage_all_pos_profiles():
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_doc.name})
+    if has_explicit_assignments and not has_access and not _can_manage_all_pos_profiles():
         frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
 
     return profile_doc
@@ -71,6 +76,45 @@ def _safe_limit(value, default=50):
     return min(max(parsed, 1), MAX_ORDER_SEARCH_LIMIT)
 
 
+def _resolve_profile_name(pos_profile):
+    if isinstance(pos_profile, dict):
+        return cstr(
+            pos_profile.get("name")
+            or pos_profile.get("pos_profile")
+            or pos_profile.get("profile")
+        ).strip()
+
+    if isinstance(pos_profile, str):
+        raw_value = pos_profile.strip()
+        if not raw_value:
+            return ""
+        try:
+            decoded = json.loads(raw_value)
+        except Exception:
+            decoded = raw_value
+
+        if isinstance(decoded, dict):
+            return _resolve_profile_name(decoded)
+        return cstr(decoded).strip()
+
+    return ""
+
+
+def _resolve_profile_from_opening_shift(data):
+    if not isinstance(data, dict):
+        return ""
+
+    shift_name = cstr(
+        data.get("pos_opening_shift_name")
+        or data.get("pos_opening_shift")
+        or data.get("posa_pos_opening_shift")
+    ).strip()
+    if not shift_name:
+        return ""
+
+    return cstr(frappe.db.get_value("POS Opening Shift", shift_name, "pos_profile")).strip()
+
+
 def _assert_items_limit(data):
     if not isinstance(data, dict):
         return
@@ -84,18 +128,21 @@ def _assert_items_limit(data):
 
 
 def _resolve_payload_profile_name(data, existing_doc=None):
-    if isinstance(data.get("pos_profile"), dict):
-        profile_name = data.get("pos_profile", {}).get("name")
-    else:
-        profile_name = data.get("pos_profile")
+    profile_name = _resolve_profile_name(data.get("pos_profile"))
     if not profile_name and existing_doc:
-        profile_name = existing_doc.get("pos_profile")
+        profile_name = _resolve_profile_name(existing_doc.get("pos_profile"))
+    if not profile_name:
+        profile_name = _resolve_profile_from_opening_shift(data)
+    if not profile_name:
+        profile_name = _resolve_profile_name(get_active_pos_profile())
     return cstr(profile_name).strip()
 
 
 def _enforce_order_access(data, existing_doc=None):
     profile_name = _resolve_payload_profile_name(data, existing_doc)
     profile_doc = _ensure_pos_profile_access(profile_name)
+    if isinstance(data, dict):
+        data["pos_profile"] = profile_doc.name
 
     if existing_doc and existing_doc.get("pos_profile") != profile_doc.name:
         frappe.throw(_("You cannot change POS Profile on an existing Sales Order."))

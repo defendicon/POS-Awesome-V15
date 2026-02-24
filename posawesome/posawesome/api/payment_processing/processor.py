@@ -8,6 +8,7 @@ from erpnext.accounts.utils import reconcile_against_document
 from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from posawesome.posawesome.api.payment_processing.creation import create_payment_entry
 from posawesome.posawesome.api.payment_processing.data import get_outstanding_invoices
+from posawesome.posawesome.api.utils import get_active_pos_profile
 
 MAX_PAYMENT_METHODS = 100
 MAX_SELECTED_PAYMENTS = 200
@@ -37,6 +38,48 @@ def _assert_pos_profile_access(profile_name):
         frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
 
     return profile_doc
+
+
+def _resolve_profile_name(pos_profile):
+    if isinstance(pos_profile, dict):
+        return cstr(
+            pos_profile.get("name")
+            or pos_profile.get("pos_profile")
+            or pos_profile.get("profile")
+        ).strip()
+
+    if isinstance(pos_profile, str):
+        raw_value = pos_profile.strip()
+        if not raw_value:
+            return ""
+        try:
+            decoded = json.loads(raw_value)
+        except Exception:
+            decoded = raw_value
+
+        if isinstance(decoded, dict):
+            return _resolve_profile_name(decoded)
+        return cstr(decoded).strip()
+
+    return ""
+
+
+def _resolve_profile_from_opening_shift(shift_name):
+    shift_name = cstr(shift_name).strip()
+    if not shift_name:
+        return ""
+    return cstr(frappe.db.get_value("POS Opening Shift", shift_name, "pos_profile")).strip()
+
+
+def _resolve_effective_pos_profile(data):
+    profile_name = _resolve_profile_name(data.get("pos_profile_name"))
+    if not profile_name:
+        profile_name = _resolve_profile_name(data.get("pos_profile"))
+    if not profile_name:
+        profile_name = _resolve_profile_from_opening_shift(data.get("pos_opening_shift_name"))
+    if not profile_name:
+        profile_name = _resolve_profile_name(get_active_pos_profile())
+    return cstr(profile_name).strip()
 
 
 def _assert_opening_shift_access(shift_name, profile_name=None):
@@ -116,10 +159,12 @@ def process_pos_payment(payload):
         frappe.throw(_("Company is required"))
     if not data.currency:
         frappe.throw(_("Currency is required"))
-    if not data.pos_profile_name:
-        frappe.throw(_("POS Profile is required"))
     if not data.pos_opening_shift_name:
         frappe.throw(_("POS Opening Shift is required"))
+
+    data.pos_profile_name = _resolve_effective_pos_profile(data)
+    if not data.pos_profile_name:
+        frappe.throw(_("POS Profile is required"))
 
     profile_doc = _assert_pos_profile_access(data.pos_profile_name)
     _assert_opening_shift_access(data.pos_opening_shift_name, profile_doc.name)

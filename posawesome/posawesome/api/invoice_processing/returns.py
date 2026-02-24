@@ -11,7 +11,7 @@ from frappe.utils import (
     nowdate,
 )
 from posawesome.posawesome.api.invoice_processing.utils import _get_return_validity_settings
-from posawesome.posawesome.api.utils import log_perf_event
+from posawesome.posawesome.api.utils import log_perf_event, get_active_pos_profile
 from posawesome.posawesome.api.payment_processing.data import (
     _assert_company_access,
     _assert_pos_profile_access,
@@ -32,6 +32,30 @@ def _normalize_return_doctype(doctype):
     if normalized not in ALLOWED_RETURN_DOCTYPES:
         frappe.throw(_("Unsupported return doctype: {0}").format(normalized or doctype))
     return normalized
+
+
+def _extract_profile_name(pos_profile):
+    if isinstance(pos_profile, dict):
+        return cstr(
+            pos_profile.get("name")
+            or pos_profile.get("pos_profile")
+            or pos_profile.get("profile")
+            or ""
+        ).strip()
+
+    if isinstance(pos_profile, str):
+        raw_value = pos_profile.strip()
+        if not raw_value:
+            return ""
+        try:
+            decoded = json.loads(raw_value)
+        except Exception:
+            decoded = raw_value
+        if isinstance(decoded, dict):
+            return _extract_profile_name(decoded)
+        return cstr(decoded).strip()
+
+    return ""
 
 @frappe.whitelist()
 def search_invoices_for_return(
@@ -77,10 +101,18 @@ def search_invoices_for_return(
     customer_id = _coerce_text_filter(customer_id, _("Customer ID"))
     mobile_no = _coerce_text_filter(mobile_no, _("Mobile Number"))
     tax_id = _coerce_text_filter(tax_id, _("Tax ID"))
-    pos_profile = _coerce_text_filter(pos_profile, _("POS Profile"))
+    pos_profile = _extract_profile_name(pos_profile)
 
     if not company:
         frappe.throw(_("Company is required"))
+
+    if not pos_profile:
+        active_profile_name = _extract_profile_name(get_active_pos_profile())
+        if active_profile_name:
+            active_company = frappe.get_cached_value("POS Profile", active_profile_name, "company")
+            if active_company == company:
+                pos_profile = active_profile_name
+
     _assert_company_access(company)
     _assert_pos_profile_access(pos_profile)
 
@@ -280,15 +312,20 @@ def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoic
     """Return one invoice with returnable item quantities after past returns."""
     doctype = _normalize_return_doctype(doctype)
     invoice_name = _coerce_text_filter(invoice_name, _("Invoice"))
-    pos_profile = _coerce_text_filter(pos_profile, _("POS Profile"))
+    pos_profile = _extract_profile_name(pos_profile)
     if not invoice_name:
         frappe.throw(_("Invoice is required"))
-    _assert_pos_profile_access(pos_profile)
 
     started_at = time.perf_counter()
+    invoice_doc = frappe.get_cached_doc(doctype, invoice_name)
+    if not pos_profile:
+        pos_profile = cstr(invoice_doc.get("pos_profile")).strip()
+    if not pos_profile:
+        pos_profile = _extract_profile_name(get_active_pos_profile())
+
+    _assert_pos_profile_access(pos_profile)
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
-    invoice_doc = frappe.get_cached_doc(doctype, invoice_name)
     if not frappe.has_permission(doctype, "read", invoice_doc.name) and not _can_manage_all_pos_profiles():
         frappe.throw(_("Not permitted to access {0} {1}.").format(doctype, invoice_doc.name))
     _assert_company_access(invoice_doc.company)
