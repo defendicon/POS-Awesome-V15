@@ -119,6 +119,10 @@
 - 2026-02-24 Batch 13 (Payments Height Clamp + Conflict Cleanup):
   - Removed generic `selection` class from `Payments.vue` card to avoid cross-component style collisions.
   - Applied explicit `height/max-height: var(--container-height)` to payment card so inner scroll region always has bounded height and remains functional on reduced window sizes.
+- 2026-02-24 Batch 14 (Payments Footer Bottom-Border Alignment):
+  - Updated payments action footer visual alignment to match invoice-summary style: removed floating shadow and added explicit bottom border.
+  - Removed outer card padding on payments card so action buttons align directly with the card bottom edge.
+  - Added compact horizontal footer padding to preserve button spacing while keeping edge alignment.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -172,6 +176,7 @@
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 11.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 12.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 13.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 14.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.

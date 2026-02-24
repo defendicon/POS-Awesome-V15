@@ -2,7 +2,7 @@
 <template>
 	<div class="pa-0 payments-view">
 		<v-card
-			class="mx-auto pa-1 my-0 pos-themed-card payments-main-card"
+			class="mx-auto pa-0 my-0 pos-themed-card payments-main-card"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -1195,10 +1195,12 @@ onBeforeUnmount(() => {
 	margin-top: 0;
 	padding-top: var(--posa-space-2xs);
 	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
+	padding-inline: var(--posa-space-2xs);
 	border-top: 1px solid var(--pos-border);
+	border-bottom: 1px solid var(--pos-border);
 	background: rgb(var(--v-theme-surface));
 	z-index: 4;
-	box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.1);
+	box-shadow: none;
 }
 
 /* Remove readonly styling */
