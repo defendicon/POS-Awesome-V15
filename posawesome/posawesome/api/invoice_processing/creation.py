@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils import (
+    cstr,
     cint,
     flt,
     getdate,
@@ -31,6 +32,88 @@ from posawesome.posawesome.api.payments import redeeming_customer_credit
 import json
 from frappe.utils import money_in_words
 from frappe.utils.background_jobs import enqueue
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _extract_profile_name(pos_profile):
+    if isinstance(pos_profile, dict):
+        return cstr(
+            pos_profile.get("name")
+            or pos_profile.get("pos_profile")
+            or pos_profile.get("profile")
+            or ""
+        ).strip()
+    if isinstance(pos_profile, str):
+        raw_value = pos_profile.strip()
+        if not raw_value:
+            return ""
+        try:
+            decoded = json.loads(raw_value)
+        except Exception:
+            decoded = raw_value
+        if isinstance(decoded, dict):
+            return _extract_profile_name(decoded)
+        return cstr(decoded or "").strip()
+    return ""
+
+
+def _ensure_pos_profile_access(profile_name):
+    profile_name = cstr(profile_name).strip()
+    if not profile_name:
+        return None
+
+    if not frappe.db.exists("POS Profile", profile_name):
+        frappe.throw(_("POS Profile {0} was not found.").format(profile_name))
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_doc.name})
+    if has_explicit_assignments and not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+    return profile_doc.name
+
+
+def _resolve_invoice_doctype(invoice_name=None, pos_profile_name=None):
+    if invoice_name:
+        if frappe.db.exists("POS Invoice", invoice_name):
+            return "POS Invoice"
+        if frappe.db.exists("Sales Invoice", invoice_name):
+            return "Sales Invoice"
+
+    if pos_profile_name and frappe.db.get_value(
+        "POS Profile", pos_profile_name, "create_pos_invoice_instead_of_sales_invoice"
+    ):
+        return "POS Invoice"
+
+    return "Sales Invoice"
+
+
+def _assert_invoice_profile_access(payload, existing_doc=None, doctype_hint=None):
+    profile_name = _extract_profile_name(payload.get("pos_profile"))
+    existing_profile = cstr(existing_doc.get("pos_profile") if existing_doc else "").strip()
+
+    if existing_profile and profile_name and existing_profile != profile_name:
+        frappe.throw(_("You cannot change POS Profile on an existing invoice."))
+
+    effective_profile = existing_profile or profile_name
+    if effective_profile:
+        payload["pos_profile"] = _ensure_pos_profile_access(effective_profile)
+        return payload["pos_profile"]
+
+    doctype = doctype_hint or (existing_doc.doctype if existing_doc else "Sales Invoice")
+    if not _can_manage_all_pos_profiles() and not frappe.has_permission(doctype, "write"):
+        frappe.throw(_("POS Profile is required for invoice operations."))
+    return None
 
 
 def _resolve_write_off_limit(pos_profile_doc):
@@ -154,16 +237,13 @@ def _sanitize_delivery_dates(payload):
 @frappe.whitelist()
 def update_invoice(data):
     currency_cache = {}
-    data = json.loads(data)
+    data = json.loads(data) if isinstance(data, str) else data
+    if not isinstance(data, dict):
+        frappe.throw(_("Invalid invoice payload."))
     _sanitize_delivery_dates(data)
     _strip_client_freebies_from_payload(data)
-    # Determine doctype based on POS Profile setting
-    pos_profile = data.get("pos_profile")
-    doctype = "Sales Invoice"
-    if pos_profile and frappe.db.get_value(
-        "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
-    ):
-        doctype = "POS Invoice"
+    pos_profile = _assert_invoice_profile_access(data)
+    doctype = _resolve_invoice_doctype(data.get("name"), pos_profile)
 
     # Ensure the document type is set for new invoices to prevent validation errors
     data.setdefault("doctype", doctype)
@@ -172,8 +252,10 @@ def update_invoice(data):
 
     if data.get("name"):
         invoice_doc = frappe.get_doc(doctype, data.get("name"))
+        _assert_invoice_profile_access(data, existing_doc=invoice_doc, doctype_hint=doctype)
         invoice_doc.update(data)
     else:
+        _assert_invoice_profile_access(data, doctype_hint=doctype)
         invoice_doc = frappe.get_doc(data)
 
     # Set currency from data before set_missing_values
@@ -376,28 +458,28 @@ def update_invoice(data):
 @frappe.whitelist()
 def submit_invoice(invoice, data, submit_in_background=False):
     from posawesome.posawesome.api.invoice_processing.payment import _create_change_payment_entries
-    data = json.loads(data)
-    invoice = json.loads(invoice)
+    data = json.loads(data) if isinstance(data, str) else data
+    invoice = json.loads(invoice) if isinstance(invoice, str) else invoice
+    if not isinstance(data, dict) or not isinstance(invoice, dict):
+        frappe.throw(_("Invalid invoice submission payload."))
     _sanitize_delivery_dates(invoice)
     submit_in_background = cint(submit_in_background)
     _strip_client_freebies_from_payload(invoice)
-    pos_profile = invoice.get("pos_profile")
-    doctype = "Sales Invoice"
-    if pos_profile and frappe.db.get_value(
-        "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
-    ):
-        doctype = "POS Invoice"
+    pos_profile = _assert_invoice_profile_access(invoice)
 
     invoice_name = invoice.get("name")
+    doctype = _resolve_invoice_doctype(invoice_name, pos_profile)
     if not invoice_name or not frappe.db.exists(doctype, invoice_name):
         created = update_invoice(json.dumps(invoice))
         invoice_name = created.get("name")
+        doctype = _resolve_invoice_doctype(invoice_name, pos_profile)
         invoice_doc = frappe.get_doc(doctype, invoice_name)
     else:
         # Prevent TimestampMismatchError by relying on server-side timestamp
         if "modified" in invoice:
             del invoice["modified"]
         invoice_doc = frappe.get_doc(doctype, invoice_name)
+        _assert_invoice_profile_access(invoice, existing_doc=invoice_doc, doctype_hint=doctype)
         invoice_doc.update(invoice)
 
     _deduplicate_free_items(invoice_doc)
@@ -592,8 +674,11 @@ def validate_cart_items(items, pos_profile=None):
     if isinstance(items, str):
         items = json.loads(items)
 
-    if pos_profile and not frappe.db.exists("POS Profile", pos_profile):
-        pos_profile = None
+    if not isinstance(items, list):
+        frappe.throw(_("Items payload must be a list."))
+
+    if pos_profile:
+        pos_profile = _ensure_pos_profile_access(pos_profile)
 
     if not _should_block(pos_profile):
         return []
