@@ -19,7 +19,7 @@
 				:no-data-text="customerNoDataText"
 				hide-details
 				:customFilter="() => true"
-				:disabled="effectiveReadonly || isCustomerSearchLocked"
+				:disabled="isCustomerSearchLocked"
 				:menu-props="{ closeOnContentClick: false }"
 				@update:menu="onCustomerMenuToggle"
 				@update:modelValue="onCustomerChange"
@@ -80,19 +80,19 @@
 				<template #item="{ props, item }">
 					<v-list-item v-bind="props">
 						<v-list-item-subtitle v-if="item.raw.customer_name !== item.raw.name">
-							<div v-html="`ID: ${item.raw.name}`"></div>
+							<div>{{ `ID: ${item.raw.name}` }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.tax_id">
-							<div v-html="`TAX ID: ${item.raw.tax_id}`"></div>
+							<div>{{ `TAX ID: ${item.raw.tax_id}` }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.email_id">
-							<div v-html="`Email: ${item.raw.email_id}`"></div>
+							<div>{{ `Email: ${item.raw.email_id}` }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.mobile_no">
-							<div v-html="`Mobile No: ${item.raw.mobile_no}`"></div>
+							<div>{{ `Mobile No: ${item.raw.mobile_no}` }}</div>
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-if="item.raw.primary_address">
-							<div v-html="`Primary Address: ${item.raw.primary_address}`"></div>
+							<div>{{ `Primary Address: ${item.raw.primary_address}` }}</div>
 						</v-list-item-subtitle>
 					</v-list-item>
 				</template>
@@ -193,7 +193,7 @@
 </style>
 
 <script>
-import { ref, computed, watch, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
 import UpdateCustomer from "../dialogs/customer/UpdateCustomer.vue";
@@ -210,8 +210,6 @@ export default {
 		UpdateCustomer,
 	},
 	setup(props, { expose }) {
-		const { proxy } = getCurrentInstance();
-		const eventBus = proxy?.eventBus;
 		const customersStore = useCustomersStore();
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
@@ -229,13 +227,11 @@ export default {
 		const tempSelectedCustomer = ref(null);
 		const isMenuOpen = ref(false);
 		const customerDropdown = ref(null);
-		const readonlyState = ref(false);
 
 		let scrollContainer = null;
 
 		const { isOnline: networkOnline } = useOnlineStatus();
 
-		const effectiveReadonly = computed(() => readonlyState.value && networkOnline.value);
 		const isCustomerSearchLocked = computed(
 			() => loadingCustomers.value || isCustomerBackgroundLoading.value,
 		);
@@ -456,15 +452,6 @@ export default {
 
 		expose({ focusCustomerSearch, selectFirstCustomer, openNewCustomer });
 
-		const busHandlers = [];
-
-		const _registerBus = (event, handler) => {
-			if (eventBus && typeof eventBus.on === "function") {
-				eventBus.on(event, handler);
-				busHandlers.push({ event, handler });
-			}
-		};
-
 		onMounted(async () => {
 			await customersStore.searchCustomers("");
 
@@ -479,29 +466,9 @@ export default {
 				{ deep: true, immediate: true },
 			);
 
-			// registerBus("set_customer", (customer) => {
-			// 	customersStore.setSelectedCustomer(customer);
-			// 	internalCustomer.value = customer || null;
-			// });
-
-			// registerBus("add_customer_to_list", async (customer) => {
-			// 	await customersStore.addOrUpdateCustomer(customer);
-			// 	internalCustomer.value = customer?.name || null;
-			// });
-
-			// registerBus("set_customer_readonly", (value) => {
-			// 	readonlyState.value = Boolean(value);
-			// });
-
-			// registerBus("set_customer_info_to_edit", (data) => {
-			// 	customersStore.setCustomerInfo(data || {});
-			// });
 		});
 
 		onBeforeUnmount(() => {
-			busHandlers.forEach(({ event, handler }) => {
-				eventBus?.off(event, handler);
-			});
 			searchDebounce.cancel();
 			detachScrollListener();
 		});
@@ -517,7 +484,6 @@ export default {
 			customerFieldPlaceholder,
 			customerNoDataText,
 			internalCustomer,
-			effectiveReadonly,
 			onCustomerMenuToggle,
 			onCustomerChange,
 			onCustomerSearch,

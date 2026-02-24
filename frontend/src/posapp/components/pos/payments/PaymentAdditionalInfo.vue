@@ -50,38 +50,28 @@
 					<template v-slot:item="{ props, item }">
 						<v-list-item v-bind="props">
 							<v-list-item-title class="text-primary text-subtitle-1">
-								<div
-									v-html="(item?.raw && item.raw.address_title) || item.address_title"
-								></div>
+								<div>{{ getAddressField(item, "address_title") }}</div>
 							</v-list-item-title>
 							<v-list-item-subtitle>
-								<div
-									v-html="(item?.raw && item.raw.address_line1) || item.address_line1"
-								></div>
+								<div>{{ getAddressField(item, "address_line1") }}</div>
 							</v-list-item-subtitle>
-							<v-list-item-subtitle
-								v-if="(item?.raw && item.raw.address_line2) || item.address_line2"
-							>
-								<div
-									v-html="(item?.raw && item.raw.address_line2) || item.address_line2"
-								></div>
+							<v-list-item-subtitle v-if="getAddressField(item, 'address_line2')">
+								<div>{{ getAddressField(item, "address_line2") }}</div>
 							</v-list-item-subtitle>
-							<v-list-item-subtitle v-if="(item?.raw && item.raw.city) || item.city">
-								<div v-html="(item?.raw && item.raw.city) || item.city"></div>
+							<v-list-item-subtitle v-if="getAddressField(item, 'city')">
+								<div>{{ getAddressField(item, "city") }}</div>
 							</v-list-item-subtitle>
-							<v-list-item-subtitle v-if="(item?.raw && item.raw.state) || item.state">
-								<div v-html="(item?.raw && item.raw.state) || item.state"></div>
+							<v-list-item-subtitle v-if="getAddressField(item, 'state')">
+								<div>{{ getAddressField(item, "state") }}</div>
 							</v-list-item-subtitle>
-							<v-list-item-subtitle v-if="(item?.raw && item.raw.country) || item.country">
-								<div v-html="(item?.raw && item.raw.country) || item.country"></div>
+							<v-list-item-subtitle v-if="getAddressField(item, 'country')">
+								<div>{{ getAddressField(item, "country") }}</div>
 							</v-list-item-subtitle>
-							<v-list-item-subtitle v-if="(item?.raw && item.raw.mobile_no) || item.mobile_no">
-								<div v-html="(item?.raw && item.raw.mobile_no) || item.mobile_no"></div>
+							<v-list-item-subtitle v-if="getAddressField(item, 'mobile_no')">
+								<div>{{ getAddressField(item, "mobile_no") }}</div>
 							</v-list-item-subtitle>
-							<v-list-item-subtitle
-								v-if="(item?.raw && item.raw.address_type) || item.address_type"
-							>
-								<div v-html="(item?.raw && item.raw.address_type) || item.address_type"></div>
+							<v-list-item-subtitle v-if="getAddressField(item, 'address_type')">
+								<div>{{ getAddressField(item, "address_type") }}</div>
 							</v-list-item-subtitle>
 						</v-list-item>
 					</template>
@@ -166,6 +156,7 @@ defineEmits(["update:newDeliveryDate", "update:returnValidUptoDate", "new-addres
 
 const $frappe = inject("frappe", window.frappe);
 const $__ = inject("__", window.__);
+const getAddressField = (item, fieldName) => item?.raw?.[fieldName] || item?.[fieldName] || "";
 </script>
 
 <style scoped>
