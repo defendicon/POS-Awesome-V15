@@ -105,6 +105,7 @@
 - [x] Consolidated duplicate cash-account query filters and validated language-options payload shape in `posawesome/posawesome/api/pos_profile.js`.
 - [x] Corrected malformed file header comment in `posawesome/posawesome/api/status_updater.py`.
 - [x] Completed remaining repository sweep with pattern-based validation for unsafe SQL f-strings, raw `v-html` rendering, stale commented imports, and insecure `Math.random` use in backend doctype scripts; no further actionable issues found in scanned scope.
+- [x] Fixed POS profile parsing regression by restoring JSON decoding support and nested profile-name extraction in `posawesome/posawesome/api/utils.py` to prevent false “POS profile data is missing or invalid” failures in item search APIs.
 
 ## Pending
 None.

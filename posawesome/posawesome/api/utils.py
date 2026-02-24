@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import time
 from functools import cache
@@ -29,15 +30,19 @@ def _assert_company_read_access(company: str) -> None:
 
 def _extract_profile_name(pos_profile) -> str:
     if isinstance(pos_profile, dict):
-        return (
-            str(
-                pos_profile.get("name")
-                or pos_profile.get("pos_profile")
-                or pos_profile.get("profile")
-                or ""
-            )
-            .strip()
-        )
+        for key in ("name", "pos_profile", "profile"):
+            value = pos_profile.get(key)
+            if value is None:
+                continue
+            if isinstance(value, (dict, str)):
+                extracted = _extract_profile_name(value)
+                if extracted:
+                    return extracted
+            else:
+                candidate = str(value).strip()
+                if candidate:
+                    return candidate
+        return ""
 
     if isinstance(pos_profile, str):
         raw_value = pos_profile.strip()
