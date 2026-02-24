@@ -46,6 +46,12 @@ export function useResponsive() {
 			containerHeightVh = 48;
 		} else if (windowHeight.value <= 900) {
 			containerHeightVh = 54;
+		} else if (windowHeight.value <= 1100) {
+			containerHeightVh = 60;
+		} else if (windowHeight.value <= 1300) {
+			containerHeightVh = 63;
+		} else {
+			containerHeightVh = 66;
 		}
 
 		// Keep small-width layouts usable while still protecting short-height screens.

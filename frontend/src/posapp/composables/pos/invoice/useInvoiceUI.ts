@@ -1,7 +1,11 @@
-import { ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
 export function useInvoiceUI() {
+	const LEGACY_HEIGHT_KEY = "posawesome_invoice_height";
+	const HEIGHT_PREFERENCE_KEY = "posawesome_invoice_height_v2";
+
 	const invoiceHeight = ref<string | null>(null);
+	const savedHeightRatio = ref<number | null>(null);
 	const confirm_payment_dialog = ref(false);
 	let payment_confirmation_resolver: ((_result: boolean) => void) | null =
 		null;
@@ -17,7 +21,9 @@ export function useInvoiceUI() {
 		const viewportHeight = getViewportHeight();
 		if (viewportHeight <= 800) return Math.round(viewportHeight * 0.48);
 		if (viewportHeight <= 900) return Math.round(viewportHeight * 0.54);
-		return Math.round(viewportHeight * 0.6);
+		if (viewportHeight <= 1100) return Math.round(viewportHeight * 0.6);
+		if (viewportHeight <= 1300) return Math.round(viewportHeight * 0.63);
+		return Math.round(viewportHeight * 0.66);
 	};
 
 	const getDefaultInvoiceHeight = () => {
@@ -54,6 +60,56 @@ export function useInvoiceUI() {
 		return `${Math.round(clamped)}px`;
 	};
 
+	const toHeightRatio = (heightPx: number | null) => {
+		if (!Number.isFinite(heightPx as number) || heightPx == null) return null;
+		const viewportHeight = getViewportHeight();
+		if (viewportHeight <= 0) return null;
+		return (heightPx as number) / viewportHeight;
+	};
+
+	const saveHeightPreference = (ratio: number | null) => {
+		try {
+			if (ratio == null || !Number.isFinite(ratio) || ratio <= 0) {
+				localStorage.removeItem(HEIGHT_PREFERENCE_KEY);
+				return;
+			}
+			localStorage.setItem(
+				HEIGHT_PREFERENCE_KEY,
+				JSON.stringify({
+					ratio,
+				}),
+			);
+		} catch (e) {
+			console.error("Failed to persist invoice height preference:", e);
+		}
+	};
+
+	const loadHeightPreference = () => {
+		try {
+			const raw = localStorage.getItem(HEIGHT_PREFERENCE_KEY);
+			if (!raw) return null;
+			const parsed = JSON.parse(raw);
+			const ratio = Number(parsed?.ratio);
+			if (!Number.isFinite(ratio) || ratio <= 0 || ratio > 1.5) {
+				return null;
+			}
+			return ratio;
+		} catch (e) {
+			console.error("Failed to parse invoice height preference:", e);
+			return null;
+		}
+	};
+
+	const applyHeightFromRatio = () => {
+		if (savedHeightRatio.value == null) {
+			invoiceHeight.value = null;
+			return;
+		}
+		const defaultHeight = getDefaultInvoiceHeight();
+		const requestedPx = savedHeightRatio.value * getViewportHeight();
+		invoiceHeight.value = clampInvoiceHeight(`${requestedPx}px`, defaultHeight);
+	};
+
 	const saveInvoiceHeight = (element: HTMLElement | null) => {
 		if (element) {
 			const defaultHeight = getDefaultInvoiceHeight();
@@ -62,10 +118,11 @@ export function useInvoiceUI() {
 				defaultHeight,
 			);
 			try {
-				localStorage.setItem(
-					"posawesome_invoice_height",
-					invoiceHeight.value,
+				savedHeightRatio.value = toHeightRatio(
+					parseHeightToPx(invoiceHeight.value),
 				);
+				saveHeightPreference(savedHeightRatio.value);
+				localStorage.removeItem(LEGACY_HEIGHT_KEY);
 			} catch (e) {
 				console.error("Failed to save invoice height:", e);
 			}
@@ -73,19 +130,33 @@ export function useInvoiceUI() {
 	};
 
 	const loadInvoiceHeight = () => {
-		const defaultHeight = getDefaultInvoiceHeight();
 		try {
-			const saved = localStorage.getItem("posawesome_invoice_height");
-			invoiceHeight.value = clampInvoiceHeight(
-				saved || defaultHeight,
-				defaultHeight,
-			);
-			localStorage.setItem("posawesome_invoice_height", invoiceHeight.value);
+			savedHeightRatio.value = loadHeightPreference();
+			// Drop legacy fixed px storage to keep layout adaptive across screens.
+			localStorage.removeItem(LEGACY_HEIGHT_KEY);
+			applyHeightFromRatio();
 		} catch (e) {
 			console.error("Failed to load invoice height:", e);
-			invoiceHeight.value = clampInvoiceHeight(defaultHeight, defaultHeight);
+			savedHeightRatio.value = null;
+			invoiceHeight.value = null;
 		}
 	};
+
+	const handleResize = () => {
+		applyHeightFromRatio();
+	};
+
+	onMounted(() => {
+		if (typeof window !== "undefined") {
+			window.addEventListener("resize", handleResize);
+		}
+	});
+
+	onBeforeUnmount(() => {
+		if (typeof window !== "undefined") {
+			window.removeEventListener("resize", handleResize);
+		}
+	});
 
 	const confirmPaymentSubmission = () => {
 		confirm_payment_dialog.value = true;

@@ -57,14 +57,32 @@ describe("checkout UI regressions", () => {
 		wrapper.unmount();
 	});
 
-	it("caps invoice card height using the new 60%/54% limits", () => {
+	it("increases container height for very tall screens", async () => {
+		setViewport(1600, 1400);
+		const wrapper = mount(ResponsiveHarness);
+		await nextTick();
+
+		expect((wrapper.vm as any).responsiveStyles["--container-height"]).toBe("66vh");
+		wrapper.unmount();
+	});
+
+	it("uses adaptive default when no explicit invoice-height preference is saved", () => {
+		const ui = useInvoiceUI();
+		ui.loadInvoiceHeight();
+		expect(ui.invoiceHeight.value).toBeNull();
+	});
+
+	it("caps invoice card height using the saved ratio and viewport-specific max", () => {
 		setViewport(1400, 1000);
+		localStorage.setItem(
+			"posawesome_invoice_height_v2",
+			JSON.stringify({ ratio: 0.9 }),
+		);
 		const tallViewportUi = useInvoiceUI();
 		tallViewportUi.loadInvoiceHeight();
 		expect(tallViewportUi.invoiceHeight.value).toBe("600px");
 
 		setViewport(1400, 850);
-		localStorage.setItem("posawesome_invoice_height", "900px");
 		const mediumViewportUi = useInvoiceUI();
 		mediumViewportUi.loadInvoiceHeight();
 		expect(mediumViewportUi.invoiceHeight.value).toBe("459px");
