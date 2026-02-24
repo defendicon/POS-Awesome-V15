@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
@@ -16,6 +17,16 @@ MAX_ORDER_SEARCH_TEXT = 140
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
+
+
+@contextmanager
+def _account_permission_override():
+    previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
+    frappe.flags.ignore_account_permission = True
+    try:
+        yield
+    finally:
+        frappe.flags.ignore_account_permission = previous_ignore_account_permission
 
 
 def _ensure_pos_profile_access(profile_name):
@@ -214,9 +225,9 @@ def update_sales_order(data):
         so_doc = frappe.get_doc(data)
 
     so_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     so_doc.docstatus = 0
-    so_doc.save()
+    with _account_permission_override():
+        so_doc.save()
     return so_doc
 
 
@@ -250,9 +261,9 @@ def _create_payment_entries(so_doc, payments):
         )
 
         pe.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        pe.save()
-        pe.submit()
+        with _account_permission_override():
+            pe.save()
+            pe.submit()
 
 
 @frappe.whitelist()
@@ -274,9 +285,9 @@ def submit_sales_order(order):
     payments = order.get("payments")
 
     so_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    so_doc.save()
-    so_doc.submit()
+    with _account_permission_override():
+        so_doc.save()
+        so_doc.submit()
 
     if payments:
         frappe.enqueue(

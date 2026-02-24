@@ -1,4 +1,5 @@
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
@@ -10,6 +11,16 @@ MAX_QUOTATION_ITEMS = 500
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
+
+
+@contextmanager
+def _account_permission_override():
+    previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
+    frappe.flags.ignore_account_permission = True
+    try:
+        yield
+    finally:
+        frappe.flags.ignore_account_permission = previous_ignore_account_permission
 
 
 def _ensure_pos_profile_access(profile_name):
@@ -132,9 +143,9 @@ def update_quotation(data):
         doc = frappe.get_doc(data)
 
     doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     doc.docstatus = 0
-    doc.save()
+    with _account_permission_override():
+        doc.save()
     return doc
 
 
@@ -156,8 +167,8 @@ def submit_quotation(order):
         doc = frappe.get_doc(order)
 
     doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    doc.save()
-    doc.submit()
+    with _account_permission_override():
+        doc.save()
+        doc.submit()
 
     return {"name": doc.name, "status": doc.docstatus}

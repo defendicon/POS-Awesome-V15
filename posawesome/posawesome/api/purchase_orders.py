@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
@@ -21,6 +22,16 @@ MAX_PURCHASE_SEARCH_TEXT = 140
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
+
+
+@contextmanager
+def _account_permission_override():
+    previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
+    frappe.flags.ignore_account_permission = True
+    try:
+        yield
+    finally:
+        frappe.flags.ignore_account_permission = previous_ignore_account_permission
 
 
 def _resolve_profile_name(pos_profile):
@@ -271,9 +282,9 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
         frappe.throw(_("No items to receive. Please enter received quantities."))
 
     receipt.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    receipt.insert()
-    receipt.submit()
+    with _account_permission_override():
+        receipt.insert()
+        receipt.submit()
     return receipt.name
 
 
@@ -623,8 +634,8 @@ def create_purchase_order(data):
         frappe.throw(_("Purchase order requires at least one item with quantity."))
 
     po_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    po_doc.save()
+    with _account_permission_override():
+        po_doc.save()
 
     # Persist a safe draft first so if any downstream step fails (submit/PR/PI/payment),
     # the operator does not lose the created PO.
@@ -632,7 +643,8 @@ def create_purchase_order(data):
 
     try:
         if cint(payload.get("submit", 1)):
-            po_doc.submit()
+            with _account_permission_override():
+                po_doc.submit()
 
         receipt_name = None
         receipt_doc = None
@@ -774,7 +786,7 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
         frappe.throw(_("No items to invoice. Please ensure there are items on the Purchase Order."))
 
     invoice.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    invoice.insert()
-    invoice.submit()
+    with _account_permission_override():
+        invoice.insert()
+        invoice.submit()
     return invoice.name

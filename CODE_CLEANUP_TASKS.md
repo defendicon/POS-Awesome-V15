@@ -69,6 +69,7 @@
 - [x] Corrected stale copyright headers in `posawesome/posawesome/api/invoice.js` and `posawesome/posawesome/api/pos_profile.js`.
 - [x] Consolidated duplicate offer-link query wiring in `posawesome/posawesome/api/company.js`.
 - [x] Refactored duplicated test item setup into a shared helper and hardened pagination assertions in `posawesome/posawesome/api/test_items_numeric_code.py`.
+- [x] Scoped and restored global account-permission bypass flags across order/quotation/purchase save-submit flows in `posawesome/posawesome/api/sales_orders.py`, `posawesome/posawesome/api/quotations.py`, and `posawesome/posawesome/api/purchase_orders.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
