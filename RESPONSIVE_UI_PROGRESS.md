@@ -95,6 +95,10 @@
   - Removed stacked top margin inside `PaymentActionButtons.vue` card and normalized button content wrapping.
   - Hardened payment action area in `Payments.vue` as non-shrinking footer section with safe bottom padding.
   - Reduced main payment card top spacing pressure to avoid bottom clipping within desktop split layout.
+- 2026-02-24 Batch 7 (Checkout Flow Regression + Low-Height Payments Hardening):
+  - Fixed missing `@select-order` binding in `Invoice.vue` so `Select S.O` button opens Sales Orders dialog again.
+  - Reworked `Payments.vue` structure to keep action buttons inside main payment card and remove margin-driven clipping.
+  - Added low-height-safe payment layout behavior (gap-based spacing, hidden overflow on card shell, scroll padding, footer border/background) to prevent hidden submit buttons and cut cash fields when panel height is reduced.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -113,6 +117,7 @@
 - [Done] Barcode printing layout responsive cleanup.
 - [Done] Desktop invoice summary alignment with item-selector bottom section.
 - [Done] Payments action buttons clipping fix (desktop + responsive safeguard).
+- [Done] `Select S.O` button dialog trigger regression fix.
 
 ## In Progress
 - Phase 3 continued:
@@ -136,6 +141,7 @@
 - Automated test execution:
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts tests/cashMovement.spec.ts` -> `PASS` (12 tests).
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests).
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 7.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.
@@ -166,6 +172,7 @@
 - `frontend/src/posapp/components/pos/items/CameraScanner.vue`
 - `frontend/src/posapp/components/pos/Invoice.vue`
 - `frontend/src/posapp/components/pos/invoice/InvoiceSummary.vue`
+- `frontend/src/posapp/components/pos/Invoice.vue`
 - `frontend/src/posapp/components/pos/payments/Mpesa-Payments.vue`
 - `frontend/src/posapp/components/pos/payments/PaymentActionButtons.vue`
 - `frontend/src/posapp/components/pos/payments/PaymentSummary.vue`

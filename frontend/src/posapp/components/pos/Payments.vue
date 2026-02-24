@@ -2,7 +2,7 @@
 <template>
 	<div class="pa-0 payments-view">
 		<v-card
-			class="selection mx-auto pa-1 my-0 mt-3 pos-themed-card payments-main-card"
+			class="selection mx-auto pa-1 my-0 pos-themed-card payments-main-card"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -180,19 +180,18 @@
 					@update:print-format="print_format = $event"
 				/>
 			</div>
+			<!-- Action Buttons -->
+			<PaymentActionButtons
+				class="payments-actions"
+				ref="submitButton"
+				:loading="loading"
+				:validatePayment="validatePayment"
+				:highlightSubmit="highlightSubmit"
+				@submit="submit"
+				@submit-and-print="submit(undefined, false, true)"
+				@cancel="back_to_invoice"
+			/>
 		</v-card>
-
-		<!-- Action Buttons -->
-		<PaymentActionButtons
-			class="payments-actions"
-			ref="submitButton"
-			:loading="loading"
-			:validatePayment="validatePayment"
-			:highlightSubmit="highlightSubmit"
-			@submit="submit"
-			@submit-and-print="submit(undefined, false, true)"
-			@cancel="back_to_invoice"
-		/>
 		<!-- Dialogs Section (Custom Days, Phone Payment) -->
 		<PaymentDialogs
 			:custom-days-dialog="custom_days_dialog"
@@ -1136,6 +1135,7 @@ onBeforeUnmount(() => {
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
+	gap: var(--posa-space-2xs);
 }
 
 .payments-main-card {
@@ -1144,19 +1144,23 @@ onBeforeUnmount(() => {
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--posa-radius-md);
-	margin-top: var(--posa-space-2xs) !important;
+	overflow: hidden;
 }
 
 .payments-scroll {
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: auto;
+	scroll-padding-bottom: calc(68px + var(--posa-space-sm));
 }
 
 .payments-actions {
 	flex: 0 0 auto;
-	margin-top: var(--posa-space-2xs);
+	margin-top: 0;
+	padding-top: var(--posa-space-2xs);
 	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
+	border-top: 1px solid var(--pos-border);
+	background: rgb(var(--v-theme-surface));
 }
 
 /* Remove readonly styling */
@@ -1226,10 +1230,6 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
-	.payments-main-card {
-		margin-top: var(--posa-space-2xs) !important;
-	}
-
 	.payments-scroll {
 		padding: var(--posa-space-xs) !important;
 	}
