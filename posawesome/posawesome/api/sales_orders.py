@@ -4,11 +4,61 @@
 import json
 
 import frappe
-from erpnext.accounts.party import get_party_account
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-from frappe.utils import getdate, nowdate
+from frappe import _
+from frappe.utils import cstr, getdate, nowdate
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _ensure_pos_profile_access(profile_name):
+    profile_name = cstr(profile_name).strip()
+    if not profile_name:
+        frappe.throw(_("POS Profile is required for sales order operations."))
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    if not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+    return profile_doc
+
+
+def _extract_payload(raw_payload):
+    if isinstance(raw_payload, str):
+        return json.loads(raw_payload)
+    if isinstance(raw_payload, dict):
+        return raw_payload
+    frappe.throw(_("Invalid sales order payload."))
+
+
+def _resolve_payload_profile_name(data, existing_doc=None):
+    if isinstance(data.get("pos_profile"), dict):
+        profile_name = data.get("pos_profile", {}).get("name")
+    else:
+        profile_name = data.get("pos_profile")
+    if not profile_name and existing_doc:
+        profile_name = existing_doc.get("pos_profile")
+    return cstr(profile_name).strip()
+
+
+def _enforce_order_access(data, existing_doc=None):
+    profile_name = _resolve_payload_profile_name(data, existing_doc)
+    profile_doc = _ensure_pos_profile_access(profile_name)
+
+    if existing_doc and existing_doc.get("pos_profile") != profile_doc.name:
+        frappe.throw(_("You cannot change POS Profile on an existing Sales Order."))
+
+    return profile_doc
 
 
 def _payment_entry_job(order_name, payments):
@@ -86,12 +136,16 @@ def _map_delivery_dates(data):
 @frappe.whitelist()
 def update_sales_order(data):
     """Create or update a Sales Order document."""
-    data = json.loads(data)
+    data = _extract_payload(data)
+    if cstr(data.get("doctype") or "Sales Order").strip() != "Sales Order":
+        data["doctype"] = "Sales Order"
     _map_delivery_dates(data)
     if data.get("name") and frappe.db.exists("Sales Order", data.get("name")):
         so_doc = frappe.get_doc("Sales Order", data.get("name"))
+        _enforce_order_access(data, so_doc)
         so_doc.update(data)
     else:
+        _enforce_order_access(data)
         so_doc = frappe.get_doc(data)
 
     so_doc.flags.ignore_permissions = True
@@ -139,12 +193,16 @@ def _create_payment_entries(so_doc, payments):
 @frappe.whitelist()
 def submit_sales_order(order):
     """Submit sales order and create payment entries."""
-    order = json.loads(order)
+    order = _extract_payload(order)
+    if cstr(order.get("doctype") or "Sales Order").strip() != "Sales Order":
+        order["doctype"] = "Sales Order"
     _map_delivery_dates(order)
     if order.get("name") and frappe.db.exists("Sales Order", order.get("name")):
         so_doc = frappe.get_doc("Sales Order", order.get("name"))
+        _enforce_order_access(order, so_doc)
         so_doc.update(order)
     else:
+        _enforce_order_access(order)
         so_doc = frappe.get_doc(order)
 
     payments = order.get("payments")

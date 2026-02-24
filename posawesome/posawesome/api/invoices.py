@@ -44,6 +44,33 @@ from posawesome.posawesome.api.invoice_processing.data import (
 )
 from posawesome.posawesome.api.utils import log_perf_event
 
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _assert_delete_access(doctype, invoice_name):
+    doc = frappe.get_doc(doctype, invoice_name)
+    if doc.docstatus != 0:
+        frappe.throw(frappe._("Only draft invoices can be deleted."))
+
+    if frappe.has_permission(doctype, "delete", invoice_name):
+        return doc
+    if _can_manage_all_pos_profiles():
+        return doc
+
+    shift_name = doc.get("posa_pos_opening_shift")
+    if shift_name:
+        shift_user = frappe.db.get_value("POS Opening Shift", shift_name, "user")
+        if shift_user == frappe.session.user:
+            return doc
+
+    if doc.owner == frappe.session.user:
+        return doc
+
+    frappe.throw(frappe._("You are not allowed to delete this invoice."))
+
+
 @frappe.whitelist()
 def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
     started_at = time.perf_counter()
@@ -107,7 +134,8 @@ def delete_invoice(invoice):
     ):
         frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
 
-    frappe.delete_doc(doctype, invoice, force=1)
+    _assert_delete_access(doctype, invoice)
+    frappe.delete_doc(doctype, invoice)
     return _("Invoice {0} Deleted").format(invoice)
 
 
@@ -158,7 +186,8 @@ def delete_sales_invoice(sales_invoice):
         frappe.throw("sales_invoice is required")
 
     if frappe.db.exists("Sales Invoice", sales_invoice):
-        frappe.delete_doc("Sales Invoice", sales_invoice, force=1)
+        _assert_delete_access("Sales Invoice", sales_invoice)
+        frappe.delete_doc("Sales Invoice", sales_invoice)
     return True
 
 

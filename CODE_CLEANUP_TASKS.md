@@ -15,6 +15,9 @@
 - [x] Fixed POS profile trust boundary by resolving and authorizing purchase profile data server-side in `posawesome/posawesome/api/purchase_orders.py`.
 - [x] Added authorized POS profile resolution and stricter customer/address update guards in `posawesome/posawesome/api/customers.py`.
 - [x] Added doctype validation guard in `posawesome/posawesome/api/print_formats.py`.
+- [x] Added POS profile access enforcement for sales order create/update/submit flows in `posawesome/posawesome/api/sales_orders.py`.
+- [x] Added POS profile access enforcement for quotation create/update/submit flows in `posawesome/posawesome/api/quotations.py`.
+- [x] Hardened invoice deletion endpoints with explicit draft/access checks in `posawesome/posawesome/api/invoices.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

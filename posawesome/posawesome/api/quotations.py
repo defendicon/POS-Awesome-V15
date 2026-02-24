@@ -1,7 +1,60 @@
 import json
 
 import frappe
+from frappe import _
+from frappe.utils import cstr
 from frappe.utils import getdate
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _ensure_pos_profile_access(profile_name):
+    profile_name = cstr(profile_name).strip()
+    if not profile_name:
+        frappe.throw(_("POS Profile is required for quotation operations."))
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    if not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+    return profile_doc
+
+
+def _extract_payload(raw_payload):
+    if isinstance(raw_payload, str):
+        return json.loads(raw_payload)
+    if isinstance(raw_payload, dict):
+        return raw_payload
+    frappe.throw(_("Invalid quotation payload."))
+
+
+def _resolve_payload_profile_name(data, existing_doc=None):
+    if isinstance(data.get("pos_profile"), dict):
+        profile_name = data.get("pos_profile", {}).get("name")
+    else:
+        profile_name = data.get("pos_profile")
+    if not profile_name and existing_doc:
+        profile_name = existing_doc.get("pos_profile")
+    return cstr(profile_name).strip()
+
+
+def _enforce_quotation_access(data, existing_doc=None):
+    profile_name = _resolve_payload_profile_name(data, existing_doc)
+    profile_doc = _ensure_pos_profile_access(profile_name)
+
+    if existing_doc and existing_doc.get("pos_profile") != profile_doc.name:
+        frappe.throw(_("You cannot change POS Profile on an existing Quotation."))
+
+    return profile_doc
 
 
 def _map_delivery_dates(data):
@@ -47,13 +100,17 @@ def _ensure_customer_fields(data):
 @frappe.whitelist()
 def update_quotation(data):
     """Create or update a Quotation document."""
-    data = json.loads(data)
+    data = _extract_payload(data)
+    if cstr(data.get("doctype") or "Quotation").strip() != "Quotation":
+        data["doctype"] = "Quotation"
     _map_delivery_dates(data)
     _ensure_customer_fields(data)
     if data.get("name") and frappe.db.exists("Quotation", data.get("name")):
         doc = frappe.get_doc("Quotation", data.get("name"))
+        _enforce_quotation_access(data, doc)
         doc.update(data)
     else:
+        _enforce_quotation_access(data)
         doc = frappe.get_doc(data)
 
     doc.flags.ignore_permissions = True
@@ -66,13 +123,17 @@ def update_quotation(data):
 @frappe.whitelist()
 def submit_quotation(order):
     """Submit quotation document."""
-    order = json.loads(order)
+    order = _extract_payload(order)
+    if cstr(order.get("doctype") or "Quotation").strip() != "Quotation":
+        order["doctype"] = "Quotation"
     _map_delivery_dates(order)
     _ensure_customer_fields(order)
     if order.get("name") and frappe.db.exists("Quotation", order.get("name")):
         doc = frappe.get_doc("Quotation", order.get("name"))
+        _enforce_quotation_access(order, doc)
         doc.update(order)
     else:
+        _enforce_quotation_access(order)
         doc = frappe.get_doc(order)
 
     doc.flags.ignore_permissions = True
