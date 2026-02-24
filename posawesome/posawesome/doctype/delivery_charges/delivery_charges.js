@@ -3,20 +3,14 @@
 
 frappe.ui.form.on("Delivery Charges", {
 	setup: function (frm) {
-		frm.set_query("shipping_account", function (doc) {
+		const companyFilter = function (doc) {
 			return {
 				filters: { company: doc.company },
 			};
-		});
-		frm.set_query("cost_center", function (doc) {
-			return {
-				filters: { company: doc.company },
-			};
-		});
-		frm.set_query("pos_profile", "profiles", function (doc) {
-			return {
-				filters: { company: doc.company },
-			};
-		});
+		};
+
+		frm.set_query("shipping_account", companyFilter);
+		frm.set_query("cost_center", companyFilter);
+		frm.set_query("pos_profile", "profiles", companyFilter);
 	},
 });

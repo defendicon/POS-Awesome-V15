@@ -4,12 +4,13 @@
 // render
 frappe.listview_settings["POS Opening Shift"] = {
 	get_indicator: function (doc) {
-		var status_color = {
+		const statusColor = {
 			Draft: "grey",
 			Open: "orange",
 			Closed: "green",
 			Cancelled: "red",
 		};
-		return [__(doc.status), status_color[doc.status], "status,=," + doc.status];
+		const status = doc.status || "Draft";
+		return [__(status), statusColor[status] || "blue", "status,=," + status];
 	},
 };

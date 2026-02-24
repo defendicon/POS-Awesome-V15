@@ -98,6 +98,8 @@
 - [x] Prevented draft-opening-shift setup from overwriting existing values and guarded profile payment iteration in `posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.js`.
 - [x] Removed dead commented refresh handlers in `posawesome/posawesome/doctype/{mpesa_c2b_register_url/mpesa_c2b_register_url.js,mpesa_payment_register/mpesa_payment_register.js}`.
 - [x] Hardened POS closing-shift client wiring with defensive array/response guards for invoice/payment/tax aggregation and safe reconciliation HTML fallback in `posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.js`.
+- [x] Consolidated duplicate company-filter query wiring in `posawesome/posawesome/doctype/delivery_charges/delivery_charges.js`.
+- [x] Added safe status/color fallbacks in list indicators for `posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift_list.js`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
