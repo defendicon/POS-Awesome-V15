@@ -1,4 +1,6 @@
 import frappe
+from frappe import _
+from frappe.utils import flt
 from frappe.utils import nowdate
 from posawesome.posawesome.api.payment_processing.utils import (
     get_party_account,
@@ -14,21 +16,19 @@ def create_direct_journal_entry(
     mode_of_payment=None,
 ):
     """Create a journal entry directly to handle payment allocation and bypass payment entry reconciliation issues"""
+    _unused_invoices_list = invoices_list  # keep argument for backward compatibility
     try:
-        frappe.log_error(
-            f"Creating direct journal entry for {customer} with amount {payment_amount}",
-            "Direct JE Debug",
-        )
+        payment_amount = abs(flt(payment_amount))
+        if payment_amount <= 0:
+            frappe.throw(_("Payment amount must be greater than zero."))
 
         # Get today's date
         today = nowdate()
 
         # Get receivable account
         receivable_account = get_party_account("Customer", customer, company)
-        frappe.log_error(f"Using receivable account: {receivable_account}", "Direct JE Debug")
 
         if not receivable_account:
-            frappe.log_error("Receivable account not found, trying default", "Direct JE Debug")
             receivable_account = frappe.get_cached_value("Company", company, "default_receivable_account")
 
         if not receivable_account:
@@ -38,10 +38,6 @@ def create_direct_journal_entry(
 
         # If bank_account is not provided, try to get it from mode_of_payment
         if not bank_account:
-            frappe.log_error(
-                f"Bank account not provided, trying mode_of_payment: {mode_of_payment}",
-                "Direct JE Debug",
-            )
             if mode_of_payment:
                 # Get mode of payment account for this company
                 payment_account = frappe.get_value(
@@ -52,23 +48,14 @@ def create_direct_journal_entry(
 
                 if payment_account:
                     bank_account = payment_account
-                    frappe.log_error(
-                        f"Found payment account from mode_of_payment: {bank_account}",
-                        "Direct JE Debug",
-                    )
                 else:
                     # Use bank/cash account
                     bank = get_bank_cash_account(company, mode_of_payment)
                     if bank and bank.get("account"):
                         bank_account = bank.get("account")
-                        frappe.log_error(
-                            f"Found bank account from get_bank_cash_account: {bank_account}",
-                            "Direct JE Debug",
-                        )
 
             # If still no bank account, use cash account as fallback
             if not bank_account:
-                frappe.log_error("No bank account found, using Cash account", "Direct JE Debug")
                 cash_account = frappe.get_value(
                     "Mode of Payment Account",
                     {"parent": "Cash", "company": company},
@@ -81,14 +68,10 @@ def create_direct_journal_entry(
                     # Final fallback - try to get company's default cash account
                     bank_account = frappe.get_value("Company", company, "default_cash_account")
 
-                frappe.log_error(f"Using fallback cash account: {bank_account}", "Direct JE Debug")
-
         if not bank_account:
             frappe.throw(
                 "Could not determine bank/cash account for payment. Please set default cash account for company."
             )
-
-        frappe.log_error(f"Final bank/cash account: {bank_account}", "Direct JE Debug")
 
         # Create Journal Entry
         je = frappe.new_doc("Journal Entry")
@@ -125,8 +108,6 @@ def create_direct_journal_entry(
 
         je.save(ignore_permissions=True)
         je.submit()
-
-        frappe.log_error(f"Created Journal Entry: {je.name}", "Direct JE Debug")
 
         return je.name
 

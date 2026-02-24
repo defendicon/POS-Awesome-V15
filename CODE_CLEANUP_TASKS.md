@@ -28,6 +28,10 @@
 - [x] Added company access checks and input limits to last-invoice-rate lookup in `posawesome/posawesome/api/invoice_processing/data.py`.
 - [x] Added company/profile authorization checks for payment data and POS profile listing endpoints in `posawesome/posawesome/api/payment_processing/data.py`.
 - [x] Removed client-trusted profile flags and enforced profile/shift authorization in POS payment processor in `posawesome/posawesome/api/payment_processing/processor.py`.
+- [x] Added payload validation and server-side permission checks for payment-request creation and credit lookup in `posawesome/posawesome/api/payments.py`.
+- [x] Added company authorization and strict mode-of-payment payload validation in `posawesome/posawesome/api/payment_processing/utils.py`.
+- [x] Added explicit company/profile authorization and profile-company consistency checks in `posawesome/posawesome/api/payment_processing/reconciliation.py`.
+- [x] Removed noisy dead debug logging and validated journal payment amount inputs in `posawesome/posawesome/api/payment_processing/journal_entry.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

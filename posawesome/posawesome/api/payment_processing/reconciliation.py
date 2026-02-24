@@ -6,7 +6,10 @@ from erpnext.accounts.utils import reconcile_against_document
 from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import reconcile_dr_cr_note
 from posawesome.posawesome.api.payment_processing.data import (
     get_outstanding_invoices,
-    get_unallocated_payments
+    get_unallocated_payments,
+    _assert_company_access,
+    _assert_pos_profile_access,
+    _coerce_text_filter,
 )
 
 @frappe.whitelist()
@@ -19,10 +22,23 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
     can refresh its UI accordingly.
     """
 
+    customer = _coerce_text_filter(customer, _("Customer"))
+    company = _coerce_text_filter(company, _("Company"))
+    currency = _coerce_text_filter(currency, _("Currency"))
+    pos_profile = _coerce_text_filter(pos_profile, _("POS Profile"))
+
     if not customer:
         frappe.throw(_("Customer is required"))
     if not company:
         frappe.throw(_("Company is required"))
+
+    _assert_company_access(company)
+    _assert_pos_profile_access(pos_profile)
+
+    if pos_profile:
+        profile_company = frappe.get_cached_value("POS Profile", pos_profile, "company")
+        if profile_company and profile_company != company:
+            frappe.throw(_("POS Profile {0} does not belong to company {1}.").format(pos_profile, company))
 
     outstanding_invoices = get_outstanding_invoices(
         customer=customer,

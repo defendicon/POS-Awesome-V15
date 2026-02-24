@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate, flt
+from frappe.utils import nowdate, flt, cstr
 from frappe import _
 from erpnext.accounts.party import get_party_bank_account
 from erpnext.accounts.doctype.payment_request.payment_request import (
@@ -19,32 +19,105 @@ def get_posawesome_credit_redeem_remark(invoice_name):
     return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
 
 
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _assert_company_access(company, action_label):
+    company = cstr(company).strip()
+    if not company:
+        frappe.throw(_("Company is required"))
+
+    if _can_manage_all_pos_profiles() or frappe.has_permission("Sales Invoice", "read"):
+        return company
+
+    profile_names = frappe.get_all(
+        "POS Profile User",
+        filters={"user": frappe.session.user},
+        pluck="parent",
+    )
+    if not profile_names:
+        frappe.throw(_("You are not allowed to {0}.").format(action_label))
+
+    allowed_companies = {
+        row.company
+        for row in frappe.get_all(
+            "POS Profile",
+            filters={"name": ["in", profile_names]},
+            fields=["company"],
+        )
+        if row.company
+    }
+    if company not in allowed_companies:
+        frappe.throw(_("You are not allowed to {0} for company {1}.").format(action_label, company))
+    return company
+
+
+def _coerce_payment_doc_payload(doc):
+    if isinstance(doc, str):
+        try:
+            doc = json.loads(doc)
+        except Exception:
+            frappe.throw(_("Invalid payment request payload"))
+
+    if not isinstance(doc, dict):
+        frappe.throw(_("Payment request payload must be a JSON object"))
+
+    return frappe._dict(doc)
+
+
 @frappe.whitelist()
 def create_payment_request(doc):
-    doc = json.loads(doc)
-    for pay in doc.get("payments"):
+    doc = _coerce_payment_doc_payload(doc)
+    invoice_name = cstr(doc.get("name")).strip()
+    if not invoice_name:
+        frappe.throw(_("Sales Invoice is required"))
+
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
+    if not invoice_doc.has_permission("read") and not _can_manage_all_pos_profiles():
+        frappe.throw(_("Not permitted to access Sales Invoice {0}.").format(invoice_doc.name))
+
+    _assert_company_access(invoice_doc.company, _("create payment requests"))
+
+    contact_mobile = cstr(doc.get("contact_mobile")).strip()
+    payments = doc.get("payments") or []
+    if not isinstance(payments, list):
+        frappe.throw(_("payments must be a list"))
+
+    for pay in payments:
+        if not isinstance(pay, dict):
+            continue
         if pay.get("type") == "Phone":
-            if pay.get("amount") <= 0:
+            if flt(pay.get("amount")) <= 0:
                 frappe.throw(_("Payment amount cannot be less than or equal to 0"))
 
-            if not doc.get("contact_mobile"):
+            if not contact_mobile:
                 frappe.throw(_("Please enter the phone number first"))
 
-            pay_req = get_existing_payment_request(doc, pay)
+            pay_req = get_existing_payment_request(invoice_doc, pay, contact_mobile)
             if not pay_req:
-                pay_req = get_new_payment_request(doc, pay)
+                pay_req = get_new_payment_request(invoice_doc, pay, contact_mobile)
                 pay_req.submit()
             else:
                 pay_req.request_phone_payment()
 
             return pay_req
 
+    frappe.throw(_("No valid phone payment method found"))
 
-def get_new_payment_request(doc, mop):
+
+def get_new_payment_request(doc, mop, recipient_id):
+    payment_account = cstr((mop or {}).get("account")).strip()
+    mode_of_payment = cstr((mop or {}).get("mode_of_payment")).strip()
+    if not payment_account:
+        frappe.throw(_("Payment account is required"))
+    if not mode_of_payment:
+        frappe.throw(_("Mode of payment is required"))
+
     payment_gateway_account = frappe.db.get_value(
         "Payment Gateway Account",
         {
-            "payment_account": mop.get("account"),
+            "payment_account": payment_account,
         },
         ["name"],
     )
@@ -52,8 +125,8 @@ def get_new_payment_request(doc, mop):
     args = {
         "dt": "Sales Invoice",
         "dn": doc.get("name"),
-        "recipient_id": doc.get("contact_mobile"),
-        "mode_of_payment": mop.get("mode_of_payment"),
+        "recipient_id": recipient_id,
+        "mode_of_payment": mode_of_payment,
         "payment_gateway_account": payment_gateway_account,
         "payment_request_type": "Inward",
         "party_type": "Customer",
@@ -72,11 +145,15 @@ def get_payment_gateway_account(args):
     )
 
 
-def get_existing_payment_request(doc, pay):
+def get_existing_payment_request(doc, pay, recipient_id):
+    payment_account = cstr((pay or {}).get("account")).strip()
+    if not payment_account:
+        return None
+
     payment_gateway_account = frappe.db.get_value(
         "Payment Gateway Account",
         {
-            "payment_account": pay.get("account"),
+            "payment_account": payment_account,
         },
         ["name"],
     )
@@ -86,7 +163,7 @@ def get_existing_payment_request(doc, pay):
         "reference_doctype": "Sales Invoice",
         "reference_name": doc.get("name"),
         "payment_gateway_account": payment_gateway_account,
-        "email_to": doc.get("contact_mobile"),
+        "email_to": recipient_id,
     }
     pr = frappe.db.exists(args)
     if pr:
@@ -99,6 +176,11 @@ def make_payment_request(**args):
     args = frappe._dict(args)
 
     ref_doc = frappe.get_doc(args.dt, args.dn)
+    if not ref_doc.has_permission("read") and not _can_manage_all_pos_profiles():
+        frappe.throw(_("Not permitted to access {0} {1}.").format(args.dt, args.dn))
+
+    _assert_company_access(ref_doc.get("company"), _("create payment requests"))
+
     gateway_account = get_payment_gateway_account(args.get("payment_gateway_account"))
     if not gateway_account:
         frappe.throw(_("Payment Gateway Account not found"))
@@ -182,7 +264,12 @@ def make_payment_request(**args):
         if args.order_type == "Shopping Cart" or args.mute_email:
             pr.flags.mute_email = True
 
-        pr.insert(ignore_permissions=True)
+        can_create_payment_request = frappe.has_permission("Payment Request", "create")
+        if not can_create_payment_request:
+            has_source_write = ref_doc.has_permission("write")
+            if not has_source_write and not _can_manage_all_pos_profiles():
+                frappe.throw(_("Not permitted to create Payment Request for {0}.").format(ref_doc.name))
+        pr.insert(ignore_permissions=not can_create_payment_request)
         if args.submit_doc:
             pr.submit()
 
@@ -313,6 +400,11 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
 @frappe.whitelist()
 def get_available_credit(customer, company):
+    customer = cstr(customer).strip()
+    company = _assert_company_access(company, _("view available customer credit"))
+    if not customer:
+        return []
+
     total_credit = []
 
     outstanding_invoices = frappe.get_all(
