@@ -37,7 +37,11 @@
 				>
 					{{ __("Offer Item") }}
 				</v-chip>
-				<v-tooltip v-if="item.pricing_rule_badge" location="bottom">
+				<v-tooltip
+					v-if="item.pricing_rule_badge"
+					location="bottom"
+					content-class="posa-pricing-rule-tooltip"
+				>
 					<template #activator="{ props }">
 						<v-chip v-bind="props" color="primary" size="x-small" class="ml-1">
 							{{ item.pricing_rule_badge.label }}
@@ -107,6 +111,7 @@
 					density="compact"
 					variant="outlined"
 					class="posa-cart-table__qty-input"
+					hide-details
 					@blur="closeQtyEdit"
 					@keydown.enter.prevent="closeQtyEdit"
 					@click.stop
@@ -487,9 +492,9 @@ const disableDiscountEdit = computed(
 function openQtyEdit() {
 	if (disableInput.value) return;
 	isEditingQty.value = true;
-	editingQtyValue.value = "";
+	editingQtyValue.value = props.item.qty != null ? String(props.item.qty) : "";
 	nextTick(() => {
-		qtyInput.value?.focus();
+		qtyInput.value?.focus?.();
 	});
 }
 
@@ -558,7 +563,7 @@ function openRateEdit() {
 	isEditingRate.value = true;
 	editingRateValue.value = "";
 	nextTick(() => {
-		rateInput.value?.focus();
+		rateInput.value?.focus?.();
 	});
 }
 
@@ -583,7 +588,7 @@ function openDiscountPercentEdit() {
 	isEditingDiscountPercent.value = true;
 	editingDiscountPercentValue.value = "";
 	nextTick(() => {
-		discountPercentInput.value?.focus();
+		discountPercentInput.value?.focus?.();
 	});
 }
 
@@ -605,7 +610,7 @@ function openDiscountAmountEdit() {
 	isEditingDiscountAmount.value = true;
 	editingDiscountAmountValue.value = "";
 	nextTick(() => {
-		discountAmountInput.value?.focus();
+		discountAmountInput.value?.focus?.();
 	});
 }
 
@@ -665,6 +670,14 @@ function closeDiscountAmountEdit() {
 .negative-number {
 	color: var(--pos-error) !important;
 	font-weight: 600;
+}
+
+:deep(.v-overlay__content.posa-pricing-rule-tooltip) {
+	background: var(--pos-card-bg) !important;
+	color: var(--pos-text-primary) !important;
+	border: 1px solid var(--pos-border) !important;
+	box-shadow: 0 4px 12px var(--pos-shadow) !important;
+	max-width: 320px;
 }
 
 /* Add minimal padding for table cells as per ItemsTable.vue styles */

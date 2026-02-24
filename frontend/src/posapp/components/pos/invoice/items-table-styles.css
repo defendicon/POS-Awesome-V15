@@ -404,6 +404,12 @@
 	padding: 0;
 }
 
+.posa-cart-table__qty-input {
+	flex: 1 1 auto;
+	min-width: 52px;
+	max-width: 88px;
+}
+
 .posa-cart-table__editor-input .v-field__input,
 .posa-cart-table__qty-input .v-field__input {
 	min-height: 32px !important;
@@ -413,6 +419,27 @@
 	text-align: center;
 	font-weight: 600;
 	font-size: 0.9rem;
+}
+
+.posa-cart-table__qty-input .v-input__details {
+	display: none !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+}
+
+.posa-cart-table__qty-input .v-field {
+	min-height: 24px !important;
+}
+
+.posa-cart-table__qty-input input[type="number"]::-webkit-outer-spin-button,
+.posa-cart-table__qty-input input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.posa-cart-table__qty-input input[type="number"] {
+	appearance: textfield;
+	-moz-appearance: textfield;
 }
 
 /* UOM specific styles */

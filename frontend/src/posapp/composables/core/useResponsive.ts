@@ -41,11 +41,11 @@ export function useResponsive() {
 		}
 
 		cardHeightVh = Math.max(30, Math.min(cardHeightVh, 70));
-		let containerHeightVh = 68;
+		let containerHeightVh = 60;
 		if (windowHeight.value <= 800) {
 			containerHeightVh = 48;
 		} else if (windowHeight.value <= 900) {
-			containerHeightVh = 56;
+			containerHeightVh = 54;
 		}
 
 		// Keep small-width layouts usable while still protecting short-height screens.

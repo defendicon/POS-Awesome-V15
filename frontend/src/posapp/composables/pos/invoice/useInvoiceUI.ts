@@ -16,18 +16,18 @@ export function useInvoiceUI() {
 	const getMaxInvoiceHeightPx = () => {
 		const viewportHeight = getViewportHeight();
 		if (viewportHeight <= 800) return Math.round(viewportHeight * 0.48);
-		if (viewportHeight <= 900) return Math.round(viewportHeight * 0.56);
-		return Math.round(viewportHeight * 0.68);
+		if (viewportHeight <= 900) return Math.round(viewportHeight * 0.54);
+		return Math.round(viewportHeight * 0.6);
 	};
 
 	const getDefaultInvoiceHeight = () => {
 		if (typeof document === "undefined") {
-			return "68vh";
+			return "60vh";
 		}
 		return (
 			getComputedStyle(document.documentElement)
 				.getPropertyValue("--container-height")
-				.trim() || "68vh"
+				.trim() || "60vh"
 		);
 	};
 
