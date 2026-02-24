@@ -1144,6 +1144,7 @@ onBeforeUnmount(() => {
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--posa-radius-md);
+	margin-top: var(--posa-space-2xs) !important;
 }
 
 .payments-scroll {
@@ -1153,7 +1154,9 @@ onBeforeUnmount(() => {
 }
 
 .payments-actions {
-	margin-top: var(--posa-space-xs);
+	flex: 0 0 auto;
+	margin-top: var(--posa-space-2xs);
+	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
 }
 
 /* Remove readonly styling */

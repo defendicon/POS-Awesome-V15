@@ -1,5 +1,5 @@
 <template>
-	<v-card flat class="cards mb-0 mt-3 pa-0">
+	<v-card flat class="cards mb-0 pa-0 payment-action-card">
 		<v-row align="start" no-gutters>
 			<v-col cols="12" sm="6">
 				<v-btn
@@ -59,6 +59,21 @@ const __ = window.__;
 </script>
 
 <style scoped>
+.payment-action-card {
+	margin-top: 0 !important;
+	overflow: visible;
+}
+
+.payment-action-card :deep(.v-btn) {
+	min-height: 44px;
+}
+
+.payment-action-card :deep(.v-btn__content) {
+	white-space: normal;
+	text-align: center;
+	line-height: 1.2;
+}
+
 .payment-action-col {
 	padding-inline-start: 4px;
 }

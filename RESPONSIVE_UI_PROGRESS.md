@@ -90,6 +90,11 @@
     - moved summary card spacing control to parent panel for deterministic desktop alignment
     - added desktop-only top border treatment to summary card for consistent section separation
     - retained mobile behavior
+- 2026-02-24 Batch 6 (Payments Action Buttons Clipping Fix):
+  - Reopened payment action area due reported button cutting/clipping in Payments screen.
+  - Removed stacked top margin inside `PaymentActionButtons.vue` card and normalized button content wrapping.
+  - Hardened payment action area in `Payments.vue` as non-shrinking footer section with safe bottom padding.
+  - Reduced main payment card top spacing pressure to avoid bottom clipping within desktop split layout.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -107,6 +112,7 @@
 - [Done] M-Pesa payments dialog responsive cleanup.
 - [Done] Barcode printing layout responsive cleanup.
 - [Done] Desktop invoice summary alignment with item-selector bottom section.
+- [Done] Payments action buttons clipping fix (desktop + responsive safeguard).
 
 ## In Progress
 - Phase 3 continued:
@@ -119,13 +125,17 @@
 - No product-behavior decision blockers detected yet.
 
 ## Reopened Items
-- None.
+- Payments action area (`Payments.vue` + `PaymentActionButtons.vue`):
+  - Reason: User-reported regression: buttons were getting cut in payment view.
+  - Action: Reworked internal margin + footer sizing behavior to keep full button visibility.
+  - Status: Closed in Batch 6.
 
 ## QA Results by Viewport
 - Structural/code-level viewport validation:
   - Updated breakpoints and layout rules validated against target buckets: 320, 360, 375, 390, 414, 480, 600, 768, 820, 1024, 1280, 1366, 1440, 1600, 1920 (CSS/markup verification).
 - Automated test execution:
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts tests/cashMovement.spec.ts` -> `PASS` (12 tests).
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests).
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.
