@@ -39,6 +39,9 @@ frappe.ui.form.on("POS Closing Shift", {
 		return frappe.db
 			.get_doc("POS Opening Shift", frm.doc.pos_opening_shift)
 			.then(({ balance_details }) => {
+				if (!Array.isArray(balance_details)) {
+					return;
+				}
 				balance_details.forEach((detail) => {
 					frm.add_child("payment_reconciliation", {
 						mode_of_payment: detail.mode_of_payment,
@@ -71,7 +74,7 @@ frappe.ui.form.on("POS Closing Shift", {
 				pos_opening_shift: frm.doc.pos_opening_shift,
 			},
 			callback: (r) => {
-				let pos_payments = r.message;
+				const pos_payments = Array.isArray(r.message) ? r.message : [];
 				set_form_payments_data(pos_payments, frm);
 				refresh_fields(frm);
 				set_html_data(frm);
@@ -104,6 +107,9 @@ async function set_form_data(data, frm) {
 }
 
 function set_form_payments_data(data, frm) {
+	if (!Array.isArray(data)) {
+		return;
+	}
 	data.forEach((d) => {
 		add_to_pos_payments(d, frm);
 		add_pos_payment_to_payments(d, frm);
@@ -180,7 +186,8 @@ function add_pos_payment_to_payments(p, frm) {
 }
 
 function add_to_taxes(d, frm, conversion_rate) {
-	d.taxes.forEach((t) => {
+	const taxes = Array.isArray(d.taxes) ? d.taxes : [];
+	taxes.forEach((t) => {
 		const tax = frm.doc.taxes.find((tx) => tx.account_head === t.account_head && tx.rate === t.rate);
 		if (tax) {
 			tax.amount += flt(get_base_value(t, "tax_amount", "base_tax_amount", conversion_rate));
@@ -219,7 +226,8 @@ function set_html_data(frm) {
 		method: "get_payment_reconciliation_details",
 		doc: frm.doc,
 		callback: (r) => {
-			frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
+			const detailsHtml = typeof r.message === "string" ? r.message : "";
+			frm.get_field("payment_reconciliation_details").$wrapper.html(detailsHtml);
 		},
 	});
 }
