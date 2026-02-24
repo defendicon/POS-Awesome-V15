@@ -9,6 +9,11 @@ from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 from posawesome.posawesome.api.payment_processing.creation import create_payment_entry
 from posawesome.posawesome.api.payment_processing.data import get_outstanding_invoices
 
+MAX_PAYMENT_METHODS = 100
+MAX_SELECTED_PAYMENTS = 200
+MAX_SELECTED_INVOICES = 500
+MAX_SELECTED_MPESA_PAYMENTS = 200
+
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
@@ -57,10 +62,46 @@ def _safe_html(value):
 
 @frappe.whitelist()
 def process_pos_payment(payload):
-    data = json.loads(payload) if isinstance(payload, str) else payload
+    if isinstance(payload, str):
+        try:
+            data = json.loads(payload)
+        except Exception:
+            frappe.throw(_("Invalid payment payload"))
+    else:
+        data = payload
     if not isinstance(data, dict):
         frappe.throw(_("Invalid payment payload"))
     data = frappe._dict(data)
+
+    def _coerce_list(value, label, max_len):
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            frappe.throw(_("{0} must be a list").format(label))
+        if len(value) > max_len:
+            frappe.throw(_("{0} has too many entries").format(label))
+        return value
+
+    data.selected_invoices = _coerce_list(
+        data.get("selected_invoices"),
+        _("Selected invoices"),
+        MAX_SELECTED_INVOICES,
+    )
+    data.payment_methods = _coerce_list(
+        data.get("payment_methods"),
+        _("Payment methods"),
+        MAX_PAYMENT_METHODS,
+    )
+    data.selected_payments = _coerce_list(
+        data.get("selected_payments"),
+        _("Selected payments"),
+        MAX_SELECTED_PAYMENTS,
+    )
+    data.selected_mpesa_payments = _coerce_list(
+        data.get("selected_mpesa_payments"),
+        _("Selected M-Pesa payments"),
+        MAX_SELECTED_MPESA_PAYMENTS,
+    )
 
     # Log short summary only to avoid truncation
     frappe.log_error(

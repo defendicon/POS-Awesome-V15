@@ -56,6 +56,7 @@
 - [x] Added customer read authorization checks to balance/info/address endpoints in `posawesome/posawesome/api/customers.py`.
 - [x] Added stock-lookup authorization guard for item brand lookup endpoint in `posawesome/posawesome/api/items.py`.
 - [x] Added currency-metadata access guard for selling price-list endpoint in `posawesome/posawesome/api/utilities.py`.
+- [x] Added safe payload parsing and capped list sizes for POS payment processor inputs in `posawesome/posawesome/api/payment_processing/processor.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
