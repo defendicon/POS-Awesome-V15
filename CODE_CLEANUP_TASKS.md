@@ -88,6 +88,8 @@
 - [x] Removed dead referral validation stub and made referral-code creation idempotent/sanitized in `posawesome/posawesome/doctype/referral_code/referral_code.py`.
 - [x] Hardened frontend client-error logging payload parsing with size bounds and safe JSON-shape handling in `posawesome/posawesome/api/utilities.py`.
 - [x] Removed dead commented import from `posawesome/posawesome/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.py`.
+- [x] Removed dead commented import from `posawesome/posawesome/doctype/pos_offer/pos_offer.py`.
+- [x] Removed dead commented import and fixed indentation style in `posawesome/posawesome/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
