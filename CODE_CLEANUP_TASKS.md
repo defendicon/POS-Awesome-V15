@@ -106,6 +106,7 @@
 - [x] Corrected malformed file header comment in `posawesome/posawesome/api/status_updater.py`.
 - [x] Completed remaining repository sweep with pattern-based validation for unsafe SQL f-strings, raw `v-html` rendering, stale commented imports, and insecure `Math.random` use in backend doctype scripts; no further actionable issues found in scanned scope.
 - [x] Fixed POS profile parsing regression by restoring JSON decoding support and nested profile-name extraction in `posawesome/posawesome/api/utils.py` to prevent false “POS profile data is missing or invalid” failures in item search APIs.
+- [x] Fixed customer sync pagination mismatch by separating local page size from server sync batch size (500 cap), and added automatic full resync when cached count is lower than server count with an existing sync marker in `frontend/src/posapp/stores/customersStore.ts`.
 
 ## Pending
 None.

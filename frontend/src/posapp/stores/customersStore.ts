@@ -17,7 +17,8 @@ import {
 	isOffline,
 } from "../../offline/index";
 
-const PAGE_SIZE = 1000;
+const LOCAL_PAGE_SIZE = 1000;
+const SERVER_SYNC_PAGE_SIZE = 500;
 const CUSTOMER_SCOPE_STORAGE_KEY = "posa_customers_profile_scope";
 
 function getCustomerProfileScope(profile: POSProfile | null): string {
@@ -269,10 +270,10 @@ export const useCustomersStore = defineStore("customers", () => {
 			});
 		}
 
-		const offset = page.value * PAGE_SIZE;
+		const offset = page.value * LOCAL_PAGE_SIZE;
 		const results = await collection
 			.offset(offset)
-			.limit(PAGE_SIZE)
+			.limit(LOCAL_PAGE_SIZE)
 			.toArray();
 
 		if (append) {
@@ -281,7 +282,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			customers.value = results;
 		}
 
-		hasMore.value = results.length === PAGE_SIZE;
+		hasMore.value = results.length === LOCAL_PAGE_SIZE;
 		if (hasMore.value) {
 			page.value += 1;
 		}
@@ -311,7 +312,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			return 0;
 		}
 		const count = await performSearch({ append: true });
-		if (count === PAGE_SIZE) {
+		if (count === LOCAL_PAGE_SIZE) {
 			return count;
 		}
 		if (nextCustomerStart.value) {
@@ -363,7 +364,7 @@ export const useCustomersStore = defineStore("customers", () => {
 		if (!serializedProfile) {
 			return;
 		}
-		const limit = PAGE_SIZE;
+		const limit = SERVER_SYNC_PAGE_SIZE;
 		isCustomerBackgroundLoading.value = true;
 		try {
 			let cursor: string | null = startAfter;
@@ -443,10 +444,24 @@ export const useCustomersStore = defineStore("customers", () => {
 
 			if (serverCount > localCount) {
 				const syncSince = getCustomersLastSync();
+				if (syncSince) {
+					console.warn(
+						`Customer cache appears incomplete (${localCount}/${serverCount}); running full resync.`,
+					);
+					await clearCustomerStorage();
+					setCustomersLastSync(null);
+					resetPagination();
+					nextCustomerStart.value = null;
+					loadProgress.value = 0;
+					loadedCustomerCount.value = 0;
+					customersLoaded.value = false;
+					await load_customer_names_internal();
+					return;
+				}
 				const rows: Customer[] = await fetchCustomerPage(
 					null,
 					syncSince,
-					PAGE_SIZE,
+					SERVER_SYNC_PAGE_SIZE,
 				);
 				if (rows.length) {
 					await setCustomerStorage(rows);
@@ -463,7 +478,7 @@ export const useCustomersStore = defineStore("customers", () => {
 					}
 				}
 				const startAfter =
-					rows.length === PAGE_SIZE
+					rows.length === SERVER_SYNC_PAGE_SIZE
 						? rows[rows.length - 1]?.name || null
 						: null;
 				if (startAfter) {
@@ -544,7 +559,7 @@ export const useCustomersStore = defineStore("customers", () => {
 			const rows: Customer[] = await fetchCustomerPage(
 				null,
 				syncSince,
-				PAGE_SIZE,
+				SERVER_SYNC_PAGE_SIZE,
 			);
 
 			if (rows.length) {
@@ -561,7 +576,7 @@ export const useCustomersStore = defineStore("customers", () => {
 				);
 			}
 			nextCustomerStart.value =
-				rows.length === PAGE_SIZE
+				rows.length === SERVER_SYNC_PAGE_SIZE
 					? rows[rows.length - 1]?.name || null
 					: null;
 			if (nextCustomerStart.value) {
