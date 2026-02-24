@@ -1,6 +1,37 @@
 import frappe
 from frappe import _
 
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _assert_company_access(company):
+    if _can_manage_all_pos_profiles() or frappe.has_permission("Sales Invoice", "read"):
+        return
+
+    profile_names = frappe.get_all(
+        "POS Profile User",
+        filters={"user": frappe.session.user},
+        pluck="parent",
+    )
+    if not profile_names:
+        frappe.throw(_("You are not allowed to access invoice rates for this company."))
+
+    allowed_companies = {
+        row.company
+        for row in frappe.get_all(
+            "POS Profile",
+            filters={"name": ["in", profile_names]},
+            fields=["company"],
+        )
+        if row.company
+    }
+
+    if company not in allowed_companies:
+        frappe.throw(_("You are not allowed to access invoice rates for company {0}.").format(company))
+
+
 @frappe.whitelist()
 def get_last_invoice_rates(customer, item_codes, company=None):
     """
@@ -8,6 +39,7 @@ def get_last_invoice_rates(customer, item_codes, company=None):
     """
     if not company:
         company = frappe.db.get_default("company")
+    _assert_company_access(company)
 
     if not customer or not item_codes:
         return []
@@ -15,6 +47,13 @@ def get_last_invoice_rates(customer, item_codes, company=None):
     if isinstance(item_codes, str):
         import json
         item_codes = json.loads(item_codes)
+
+    if not isinstance(item_codes, (list, tuple)):
+        frappe.throw(_("item_codes must be a list."))
+
+    item_codes = [str(code).strip() for code in item_codes if str(code).strip()]
+    if len(item_codes) > 500:
+        frappe.throw(_("Too many item codes requested at once."))
 
     if not item_codes:
         return []

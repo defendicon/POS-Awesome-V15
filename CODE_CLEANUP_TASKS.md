@@ -25,6 +25,7 @@
 - [x] Added strict payload validation for bundle component lookups in `posawesome/posawesome/api/bundles.py`.
 - [x] Added authorization gates for item price updates in `posawesome/posawesome/api/item_processing/price.py`.
 - [x] Added POS profile authorization and safer doctype/payload guards in invoice update/submit flows in `posawesome/posawesome/api/invoice_processing/creation.py`.
+- [x] Added company access checks and input limits to last-invoice-rate lookup in `posawesome/posawesome/api/invoice_processing/data.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
