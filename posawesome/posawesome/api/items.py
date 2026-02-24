@@ -42,11 +42,6 @@ from posawesome.posawesome.api.item_processing.search import (
 )
 from posawesome.posawesome.api.utils import _ensure_pos_profile
 
-def build_item_cache(item_code):
-    """Build item cache for faster access."""
-    # Implementation for building item cache
-    pass
-
 @frappe.whitelist()
 def get_item_brand(item_code):
     """Return normalized brand for an item, falling back to its template's brand."""
