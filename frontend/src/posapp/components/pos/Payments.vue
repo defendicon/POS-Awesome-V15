@@ -1144,14 +1144,29 @@ onBeforeUnmount(() => {
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--posa-radius-md);
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-gutter: stable both-edges;
 }
 
 .payments-scroll {
-	flex: 1 1 auto;
+	flex: 1 0 auto;
 	min-height: 0;
-	overflow: auto;
-	scroll-padding-bottom: calc(68px + var(--posa-space-sm));
+	overflow: visible;
+}
+
+.payments-main-card::-webkit-scrollbar {
+	width: 10px;
+}
+
+.payments-main-card::-webkit-scrollbar-thumb {
+	background: rgba(var(--v-theme-on-surface), 0.26);
+	border-radius: 999px;
+}
+
+.payments-main-card::-webkit-scrollbar-track {
+	background: rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .payments-actions {
@@ -1161,6 +1176,9 @@ onBeforeUnmount(() => {
 	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
 	border-top: 1px solid var(--pos-border);
 	background: rgb(var(--v-theme-surface));
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
 }
 
 /* Remove readonly styling */

@@ -99,6 +99,9 @@
   - Fixed missing `@select-order` binding in `Invoice.vue` so `Select S.O` button opens Sales Orders dialog again.
   - Reworked `Payments.vue` structure to keep action buttons inside main payment card and remove margin-driven clipping.
   - Added low-height-safe payment layout behavior (gap-based spacing, hidden overflow on card shell, scroll padding, footer border/background) to prevent hidden submit buttons and cut cash fields when panel height is reduced.
+- 2026-02-24 Batch 8 (Payments Vertical Scroller):
+  - Converted `Payments.vue` main card into explicit vertical scroll container so payment content can move up/down reliably.
+  - Added sticky bottom actions inside the same scroll context and visible scrollbar styling for easier navigation on dense payment forms.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -142,6 +145,7 @@
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts tests/cashMovement.spec.ts` -> `PASS` (12 tests).
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests).
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 7.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 8.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.
