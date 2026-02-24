@@ -1,5 +1,8 @@
 <template>
-	<v-card class="cards mb-0 mt-3 py-2 px-3 rounded-lg pos-themed-card" style="overflow: auto">
+	<v-card
+		class="cards invoice-summary-card mb-0 py-2 px-3 rounded-lg pos-themed-card"
+		style="overflow: auto"
+	>
 		<v-row dense align="start" class="invoice-summary-row">
 			<!-- Summary Info -->
 			<v-col cols="12" md="7">

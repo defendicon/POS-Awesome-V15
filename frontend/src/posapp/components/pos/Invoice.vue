@@ -981,6 +981,7 @@ export default {
 
 .invoice-summary-panel {
 	margin-top: auto;
+	padding-top: var(--dynamic-sm);
 	width: 100%;
 	max-width: 100%;
 }
@@ -1140,6 +1141,13 @@ export default {
 	width: calc(100% + 2 * var(--dynamic-sm));
 	max-width: calc(100% + 2 * var(--dynamic-sm));
 	box-sizing: border-box;
+}
+
+@media (min-width: 960px) {
+	.invoice-summary-panel :deep(.invoice-summary-card) {
+		margin-top: 0 !important;
+		border-top: 1px solid var(--pos-border);
+	}
 }
 
 /* New styles for improved column switches */

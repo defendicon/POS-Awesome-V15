@@ -85,6 +85,11 @@
     - `BarcodePrinting.vue` converted from brittle `h-100` assumptions to resilient flex shell with mobile split layout and overflow-safe table rendering
   - Offline invoices dialog:
     - `OfflineInvoices.vue` made scrollable with bounded card height and explicit table min-width strategy for small screens
+- 2026-02-24 Batch 5 (Desktop Alignment Tweak):
+  - POS invoice summary bottom alignment adjusted to match the item-selector bottom section on desktop:
+    - moved summary card spacing control to parent panel for deterministic desktop alignment
+    - added desktop-only top border treatment to summary card for consistent section separation
+    - retained mobile behavior
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -101,6 +106,7 @@
 - [Done] Sales Orders and Drafts dialogs responsive cleanup.
 - [Done] M-Pesa payments dialog responsive cleanup.
 - [Done] Barcode printing layout responsive cleanup.
+- [Done] Desktop invoice summary alignment with item-selector bottom section.
 
 ## In Progress
 - Phase 3 continued:
@@ -148,6 +154,8 @@
 - `frontend/src/posapp/components/pos/cash/CashMovementForm.vue`
 - `frontend/src/posapp/components/pos/cash/CashMovementHistory.vue`
 - `frontend/src/posapp/components/pos/items/CameraScanner.vue`
+- `frontend/src/posapp/components/pos/Invoice.vue`
+- `frontend/src/posapp/components/pos/invoice/InvoiceSummary.vue`
 - `frontend/src/posapp/components/pos/payments/Mpesa-Payments.vue`
 - `frontend/src/posapp/components/pos/payments/PaymentActionButtons.vue`
 - `frontend/src/posapp/components/pos/payments/PaymentSummary.vue`
