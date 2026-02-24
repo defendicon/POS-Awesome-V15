@@ -14,10 +14,21 @@ from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, flt, getdate, nowdate
+from posawesome.posawesome.api.payment_processing.data import _assert_company_access
 
 
 # ---------------------------------------------------------------------------
 # Helpers
+
+MAX_PRICING_RULE_CART_LINES = 500
+
+
+def _coerce_text(value):
+    if value is None:
+        return ""
+    if isinstance(value, (list, tuple, dict, set)):
+        frappe.throw(_("Invalid request payload"))
+    return str(value).strip()
 
 
 def _parse_params(params, kwargs):
@@ -177,10 +188,18 @@ def get_active_pricing_rules(params: dict | None = None, **kwargs):
     """Return active selling pricing rules for the POS context."""
 
     ctx = _parse_params(params, kwargs)
+    ctx.company = _coerce_text(ctx.get("company"))
+    ctx.price_list = _coerce_text(ctx.get("price_list"))
+    ctx.currency = _coerce_text(ctx.get("currency"))
+    ctx.customer = _coerce_text(ctx.get("customer"))
+    ctx.customer_group = _coerce_text(ctx.get("customer_group"))
+    ctx.territory = _coerce_text(ctx.get("territory"))
+
     if not ctx.get("company"):
         frappe.throw(_("Company is required"))
     if not ctx.get("price_list"):
         frappe.throw(_("Price List is required"))
+    _assert_company_access(ctx.company)
 
     ctx_date = _coerce_date(ctx.get("date"))
 
@@ -390,13 +409,26 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         cart = frappe.parse_json(cart_payload)
     else:
         cart = frappe._dict(cart_payload)
+    if not isinstance(cart, dict):
+        frappe.throw(_("Invalid cart payload"))
+    cart = frappe._dict(cart)
 
     ctx = frappe._dict(cart.get("context") or {})
     if not ctx:
         frappe.throw(_("Context is required"))
+    ctx.company = _coerce_text(ctx.get("company"))
+    if not ctx.company:
+        frappe.throw(_("Company is required"))
+    _assert_company_access(ctx.company)
 
     lines = cart.get("lines") or []
     free_lines = cart.get("free_lines") or []
+    if not isinstance(lines, list) or not isinstance(free_lines, list):
+        frappe.throw(_("Cart lines must be arrays"))
+    if len(lines) > MAX_PRICING_RULE_CART_LINES:
+        frappe.throw(_("Too many cart lines in one request."))
+    lines = [frappe._dict(line) for line in lines if isinstance(line, dict)]
+    free_lines = [frappe._dict(line) for line in free_lines if isinstance(line, dict)]
 
     # Bulk fetch item details (item_group, brand) to ensure pricing rules work correctly
     # even if the frontend payload is incomplete.

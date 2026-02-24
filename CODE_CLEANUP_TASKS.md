@@ -34,6 +34,8 @@
 - [x] Removed noisy dead debug logging and validated journal payment amount inputs in `posawesome/posawesome/api/payment_processing/journal_entry.py`.
 - [x] Restricted QZ certificate/signing endpoints to authorized POS users and added sign-payload validation in `posawesome/posawesome/api/qz.py`.
 - [x] Fixed unreachable tax-inclusive logic by correcting control flow in `posawesome/posawesome/api/invoice.py`.
+- [x] Added company/profile authorization and input guards for offer, coupon, and delivery-charge endpoints in `posawesome/posawesome/api/offers.py`.
+- [x] Added company access checks and cart payload validation limits for pricing-rule APIs in `posawesome/posawesome/api/pricing_rules.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

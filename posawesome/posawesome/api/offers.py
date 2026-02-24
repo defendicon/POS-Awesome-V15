@@ -10,16 +10,57 @@ from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_cod
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
 )
+from posawesome.posawesome.api.payment_processing.data import (
+    _assert_company_access,
+    _assert_pos_profile_access,
+    _coerce_text_filter,
+)
+
+
+def _extract_profile_name(profile):
+    if isinstance(profile, dict):
+        return cstr(
+            profile.get("name")
+            or profile.get("pos_profile")
+            or profile.get("profile")
+            or ""
+        ).strip()
+
+    raw_value = cstr(profile).strip()
+    if not raw_value:
+        return ""
+
+    try:
+        parsed = frappe.parse_json(raw_value)
+    except Exception:
+        parsed = raw_value
+
+    if isinstance(parsed, dict):
+        return _extract_profile_name(parsed)
+    return cstr(parsed).strip()
 
 
 @frappe.whitelist()
 def get_pos_coupon(coupon, customer, company):
+    coupon = _coerce_text_filter(coupon, "Coupon")
+    customer = _coerce_text_filter(customer, "Customer")
+    company = _coerce_text_filter(company, "Company")
+    if not coupon or not customer or not company:
+        frappe.throw("Coupon, customer and company are required")
+    _assert_company_access(company)
+
     res = check_coupon_code(coupon, customer, company)
     return res
 
 
 @frappe.whitelist()
 def get_active_gift_coupons(customer, company):
+    customer = _coerce_text_filter(customer, "Customer")
+    company = _coerce_text_filter(company, "Company")
+    if not customer or not company:
+        return []
+    _assert_company_access(company)
+
     coupons = []
     today = getdate(nowdate())
     coupons_data = frappe.get_all(
@@ -51,7 +92,14 @@ def _is_coupon_active(coupon_data, today):
 
 @frappe.whitelist()
 def get_offers(profile):
+    profile = _extract_profile_name(profile)
+    if not profile:
+        frappe.throw("POS Profile is required")
+    _assert_pos_profile_access(profile)
+
     pos_profile = frappe.get_doc("POS Profile", profile)
+    _assert_company_access(pos_profile.company)
+
     company = pos_profile.company
     warehouse = pos_profile.warehouse
     date = nowdate()
@@ -104,7 +152,21 @@ def get_offers(profile):
 
 @frappe.whitelist()
 def get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name=None):
-    return _get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name)
+    company = _coerce_text_filter(company, "Company")
+    pos_profile_name = _extract_profile_name(pos_profile)
+    customer = _coerce_text_filter(customer, "Customer")
+    shipping_address_name = _coerce_text_filter(shipping_address_name, "Shipping Address")
+
+    if not company or not pos_profile_name or not customer:
+        frappe.throw("Company, POS Profile and customer are required")
+
+    _assert_company_access(company)
+    _assert_pos_profile_access(pos_profile_name)
+    profile_company = frappe.get_cached_value("POS Profile", pos_profile_name, "company")
+    if profile_company and profile_company != company:
+        frappe.throw("POS Profile company mismatch.")
+
+    return _get_applicable_delivery_charges(company, pos_profile_name, customer, shipping_address_name)
 
 
 def _get_promotional_scheme_offers(pos_profile):
