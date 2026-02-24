@@ -27,6 +27,8 @@ from posawesome.utils import get_build_version
 from posawesome.posawesome.api.payment_processing.data import _assert_pos_profile_access
 from posawesome.posawesome.api.invoice_processing.utils import _assert_currency_lookup_access
 
+MAX_CLIENT_ERROR_PAYLOAD_BYTES = 64 * 1024
+
 
 def _require_system_manager():
     if "System Manager" not in frappe.get_roles():
@@ -426,8 +428,6 @@ def get_language_options():
     Always include English (``en``) in the list so that users can explicitly
     select it in the POS profile.
     """
-    import os
-
     languages = {"en"}
 
     def normalize(code: str) -> str:
@@ -741,6 +741,37 @@ def _sanitize_client_error_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _parse_client_error_payload(payload: Any) -> Dict[str, Any]:
+    if isinstance(payload, dict):
+        return payload
+
+    if isinstance(payload, str):
+        text_payload = payload.strip()
+        if not text_payload:
+            return {}
+
+        if len(text_payload.encode("utf-8")) > MAX_CLIENT_ERROR_PAYLOAD_BYTES:
+            return {
+                "kind": "oversized_payload",
+                "message": _clip_text(text_payload, 1000),
+            }
+
+        try:
+            parsed_payload = json.loads(text_payload)
+        except ValueError:
+            return {"kind": "invalid_json", "message": _clip_text(text_payload, 1000)}
+
+        if isinstance(parsed_payload, dict):
+            return parsed_payload
+
+        return {
+            "kind": "invalid_payload_shape",
+            "message": _clip_text(parsed_payload, 1000),
+        }
+
+    return {"message": _clip_text(payload)}
+
+
 def _is_cache_valid():
     """Check if language cache is still valid."""
     if not _LANGUAGE_CACHE["last_updated"]:
@@ -929,14 +960,8 @@ def get_language_info(lang_code):
 def log_client_error(payload=None):
     """Capture frontend runtime errors in server logs for debugging."""
     try:
-        if isinstance(payload, str):
-            parsed_payload = json.loads(payload)
-        elif isinstance(payload, dict):
-            parsed_payload = payload
-        else:
-            parsed_payload = {"message": _clip_text(payload)}
-
-        sanitized_payload = _sanitize_client_error_payload(parsed_payload)
+        parsed_payload = _parse_client_error_payload(payload)
+        sanitized_payload = _sanitize_client_error_payload(parsed_payload or {})
         title = f"POS Client Error [{sanitized_payload.get('kind', 'unknown')}]"
         message = {
             "user": frappe.session.user,

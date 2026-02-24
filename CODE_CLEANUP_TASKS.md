@@ -86,6 +86,7 @@
 - [x] Added robust timeout/error handling for external M-Pesa C2B URL registration calls in `posawesome/posawesome/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.py`.
 - [x] Fixed coupon one-use validation to scope usage counts by coupon and normalized coupon-code/name handling in `posawesome/posawesome/doctype/pos_coupon/pos_coupon.py`.
 - [x] Removed dead referral validation stub and made referral-code creation idempotent/sanitized in `posawesome/posawesome/doctype/referral_code/referral_code.py`.
+- [x] Hardened frontend client-error logging payload parsing with size bounds and safe JSON-shape handling in `posawesome/posawesome/api/utilities.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
