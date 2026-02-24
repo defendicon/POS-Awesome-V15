@@ -62,6 +62,8 @@ const __ = window.__;
 .payment-action-card {
 	margin-top: 0 !important;
 	overflow: visible;
+	position: relative;
+	z-index: 1;
 }
 
 .payment-action-card :deep(.v-btn) {
@@ -82,6 +84,16 @@ const __ = window.__;
 	.payment-action-col {
 		padding-inline-start: 0;
 		padding-top: 6px;
+	}
+}
+
+@media (max-height: 780px) {
+	.payment-action-card :deep(.v-btn) {
+		min-height: 40px;
+	}
+
+	.payment-action-card :deep(.v-btn__content) {
+		font-size: 0.86rem;
 	}
 }
 </style>

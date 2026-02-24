@@ -102,6 +102,12 @@
 - 2026-02-24 Batch 8 (Payments Vertical Scroller):
   - Converted `Payments.vue` main card into explicit vertical scroll container so payment content can move up/down reliably.
   - Added sticky bottom actions inside the same scroll context and visible scrollbar styling for easier navigation on dense payment forms.
+- 2026-02-24 Batch 9 (Payments Sticky Actions + Responsive Scroll Refinement):
+  - Removed auto-scroll-to-submit behavior on payment view open; now payment content resets to top so cash/payment method fields are not initially clipped.
+  - Kept action buttons (`Submit`, `Submit & Print`, `Cancel`) sticky at bottom and tuned scroll paddings for mobile + low-height screens.
+  - Added responsive density adjustments for payment action buttons and improved scroll containment behavior.
+- 2026-02-24 Batch 10 (Visible Payments Scrollbar):
+  - Forced vertical scrollbar visibility on payment content pane (`overflow-y: scroll`) for clearer discoverability of up/down scrolling.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -146,6 +152,8 @@
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests).
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 7.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 8.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 9.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 10.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.
@@ -183,6 +191,7 @@
 - `frontend/src/posapp/components/pos/payments/PaymentMethods.vue`
 - `frontend/src/posapp/components/pos/payments/PaymentOptions.vue`
 - `frontend/src/posapp/components/pos/payments/PaymentDialogs.vue`
+- `frontend/src/posapp/components/pos/payments/PaymentActionButtons.vue`
 - `frontend/src/posapp/components/pos/flows/SalesOrders.vue`
 - `frontend/src/posapp/components/pos/flows/Drafts.vue`
 - `frontend/src/posapp/components/pos/shell/ClosingDialog.vue`

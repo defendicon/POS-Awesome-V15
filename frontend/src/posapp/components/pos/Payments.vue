@@ -547,13 +547,23 @@ const handleShowPayment = () => {
 	paymentVisible.value = true;
 	nextTick(() => {
 		setTimeout(() => {
+			const container = paymentContainer.value;
+			if (container && typeof container.scrollTo === "function") {
+				container.scrollTo({ top: 0, behavior: "auto" });
+			} else if (container) {
+				container.scrollTop = 0;
+			}
+
 			const btn = submitButton.value;
 			const el = btn && btn.$el ? btn.$el : btn;
-			if (el) {
-				el.scrollIntoView({ behavior: "smooth", block: "center" });
-				el.focus();
-				highlightSubmit.value = true;
+			if (el && typeof el.focus === "function") {
+				try {
+					el.focus({ preventScroll: true });
+				} catch (error) {
+					el.focus();
+				}
 			}
+			highlightSubmit.value = true;
 		}, 100);
 	});
 };
@@ -1133,6 +1143,8 @@ onBeforeUnmount(() => {
 .payments-view {
 	height: 100%;
 	min-height: 0;
+	width: 100%;
+	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: var(--posa-space-2xs);
@@ -1141,31 +1153,37 @@ onBeforeUnmount(() => {
 .payments-main-card {
 	flex: 1 1 auto;
 	min-height: 0;
+	height: 100%;
+	max-height: 100%;
+	width: 100%;
+	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--posa-radius-md);
-	overflow-y: auto;
-	overflow-x: hidden;
-	-webkit-overflow-scrolling: touch;
-	scrollbar-gutter: stable both-edges;
+	overflow: hidden;
 }
 
 .payments-scroll {
-	flex: 1 0 auto;
+	flex: 1 1 auto;
 	min-height: 0;
-	overflow: visible;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
+	scrollbar-gutter: stable both-edges;
+	scroll-padding-bottom: calc(84px + var(--posa-space-sm));
 }
 
-.payments-main-card::-webkit-scrollbar {
+.payments-scroll::-webkit-scrollbar {
 	width: 10px;
 }
 
-.payments-main-card::-webkit-scrollbar-thumb {
+.payments-scroll::-webkit-scrollbar-thumb {
 	background: rgba(var(--v-theme-on-surface), 0.26);
 	border-radius: 999px;
 }
 
-.payments-main-card::-webkit-scrollbar-track {
+.payments-scroll::-webkit-scrollbar-track {
 	background: rgba(var(--v-theme-on-surface), 0.08);
 }
 
@@ -1179,6 +1197,7 @@ onBeforeUnmount(() => {
 	position: sticky;
 	bottom: 0;
 	z-index: 2;
+	box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Remove readonly styling */
@@ -1250,6 +1269,22 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
 	.payments-scroll {
 		padding: var(--posa-space-xs) !important;
+		scroll-padding-bottom: calc(92px + var(--posa-space-xs));
+	}
+
+	.payments-actions {
+		padding-top: var(--posa-space-3xs);
+	}
+}
+
+@media (max-height: 780px) {
+	.payments-scroll {
+		scroll-padding-bottom: calc(100px + var(--posa-space-xs));
+	}
+
+	.payments-actions {
+		padding-top: var(--posa-space-3xs);
+		padding-bottom: max(var(--posa-space-3xs), env(safe-area-inset-bottom));
 	}
 }
 </style>
