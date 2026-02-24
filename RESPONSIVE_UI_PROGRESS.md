@@ -112,6 +112,10 @@
   - Removed rigid `height: 100%` from payments card shell and switched to pure flex sizing so action footer stays visible at bottom on smaller windows.
   - Converted payment content pane back to functional `overflow-y: auto` scrolling and eliminated false always-on scrollbar behavior.
   - Normalized parent overflow/gap rules so `Submit / Submit & Print / Cancel` remain visible while only content area scrolls.
+- 2026-02-24 Batch 12 (Payments Scroll Chain Stabilization):
+  - Reworked `Payments.vue` layout chain to a single flex column shell and moved action buttons inside the payment main card footer.
+  - Isolated payment form content into a dedicated `payments-scroll` region (`overflow-y: scroll`) so only the body scrolls while action buttons stay visible.
+  - Removed sticky positioning dependency from action footer to avoid viewport/bottom clipping regressions in constrained-height windows.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -147,6 +151,10 @@
   - Reason: User-reported regression: buttons were getting cut in payment view.
   - Action: Reworked internal margin + footer sizing behavior to keep full button visibility.
   - Status: Closed in Batch 6.
+- Payments scroll/footer behavior (`Payments.vue`):
+  - Reason: User-reported regression persisted: scrollbar visible but non-functional; buttons still dropping below screen.
+  - Action: Reopened and refactored to a stable flex+footer architecture with dedicated scrolling body (Batch 12).
+  - Status: Closed in Batch 12.
 
 ## QA Results by Viewport
 - Structural/code-level viewport validation:
@@ -159,6 +167,7 @@
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 9.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 10.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 11.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 12.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.

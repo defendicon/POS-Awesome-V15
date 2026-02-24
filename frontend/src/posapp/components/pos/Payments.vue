@@ -180,18 +180,18 @@
 					@update:print-format="print_format = $event"
 				/>
 			</div>
+			<!-- Action Buttons -->
+			<PaymentActionButtons
+				class="payments-actions"
+				ref="submitButton"
+				:loading="loading"
+				:validatePayment="validatePayment"
+				:highlightSubmit="highlightSubmit"
+				@submit="submit"
+				@submit-and-print="submit(undefined, false, true)"
+				@cancel="back_to_invoice"
+			/>
 		</v-card>
-		<!-- Action Buttons -->
-		<PaymentActionButtons
-			class="payments-actions"
-			ref="submitButton"
-			:loading="loading"
-			:validatePayment="validatePayment"
-			:highlightSubmit="highlightSubmit"
-			@submit="submit"
-			@submit-and-print="submit(undefined, false, true)"
-			@cancel="back_to_invoice"
-		/>
 		<!-- Dialogs Section (Custom Days, Phone Payment) -->
 		<PaymentDialogs
 			:custom-days-dialog="custom_days_dialog"
@@ -1145,9 +1145,9 @@ onBeforeUnmount(() => {
 	min-height: 0;
 	width: 100%;
 	max-width: 100%;
+	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
-	gap: 0;
 	overflow: hidden;
 }
 
@@ -1165,7 +1165,9 @@ onBeforeUnmount(() => {
 .payments-scroll {
 	flex: 1 1 auto;
 	min-height: 0;
-	overflow-y: auto;
+	height: auto;
+	max-height: 100%;
+	overflow-y: scroll;
 	overflow-x: hidden;
 	-webkit-overflow-scrolling: touch;
 	overscroll-behavior: contain;
@@ -1193,8 +1195,7 @@ onBeforeUnmount(() => {
 	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
 	border-top: 1px solid var(--pos-border);
 	background: rgb(var(--v-theme-surface));
-	position: relative;
-	z-index: 1;
+	z-index: 4;
 	box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.1);
 }
 
