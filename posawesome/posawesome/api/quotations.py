@@ -110,9 +110,12 @@ def _resolve_profile_from_opening_shift(data):
 
 
 def _resolve_payload_profile_name(data, existing_doc=None):
+    if existing_doc:
+        existing_profile = _resolve_profile_name(existing_doc.get("pos_profile"))
+        if existing_profile:
+            return cstr(existing_profile).strip()
+
     profile_name = _resolve_profile_name(data.get("pos_profile"))
-    if not profile_name and existing_doc:
-        profile_name = _resolve_profile_name(existing_doc.get("pos_profile"))
     if not profile_name:
         profile_name = _resolve_profile_from_opening_shift(data)
     if not profile_name:
@@ -125,9 +128,6 @@ def _enforce_quotation_access(data, existing_doc=None):
     profile_doc = _ensure_pos_profile_access(profile_name)
     if isinstance(data, dict):
         data["pos_profile"] = profile_doc.name
-
-    if existing_doc and existing_doc.get("pos_profile") != profile_doc.name:
-        frappe.throw(_("You cannot change POS Profile on an existing Quotation."))
 
     return profile_doc
 

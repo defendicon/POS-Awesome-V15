@@ -125,11 +125,8 @@ def _resolve_profile_from_opening_shift(payload, existing_doc=None):
 
 
 def _assert_invoice_profile_access(payload, existing_doc=None, doctype_hint=None):
-    profile_name = _extract_profile_name(payload.get("pos_profile"))
     existing_profile = cstr(existing_doc.get("pos_profile") if existing_doc else "").strip()
-
-    if existing_profile and profile_name and existing_profile != profile_name:
-        frappe.throw(_("You cannot change POS Profile on an existing invoice."))
+    profile_name = _extract_profile_name(payload.get("pos_profile"))
 
     effective_profile = existing_profile or profile_name
     if not effective_profile:
