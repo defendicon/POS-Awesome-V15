@@ -38,6 +38,10 @@
 - [x] Added company access checks and cart payload validation limits for pricing-rule APIs in `posawesome/posawesome/api/pricing_rules.py`.
 - [x] Restricted return-invoice search/fetch/validation APIs with doctype allowlisting, company/profile authorization, and payload guards in `posawesome/posawesome/api/invoice_processing/returns.py`.
 - [x] Removed unused dead `build_item_cache` stub from `posawesome/posawesome/api/items.py`.
+- [x] Added strict payload validation and profile/company consistency checks for item detail endpoints in `posawesome/posawesome/api/item_processing/details.py`.
+- [x] Added authorization gates and bulk request limits for stock availability APIs in `posawesome/posawesome/api/item_processing/stock.py`.
+- [x] Added access controls and barcode/search input length guards for barcode lookup APIs in `posawesome/posawesome/api/item_processing/barcode.py`.
+- [x] Added item search pagination/filter bounds and protected item-group listing endpoint in `posawesome/posawesome/api/item_processing/search.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

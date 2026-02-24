@@ -4,6 +4,40 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt, json
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 
+MAX_STOCK_ITEMS_BULK = 500
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _has_pos_profile_assignment():
+    return bool(frappe.db.exists("POS Profile User", {"user": frappe.session.user}))
+
+
+def _assert_stock_lookup_access():
+    if _can_manage_all_pos_profiles():
+        return
+    if frappe.has_permission("Item", "read") or frappe.has_permission("Sales Invoice", "read"):
+        return
+    if _has_pos_profile_assignment():
+        return
+    frappe.throw(frappe._("You are not allowed to access stock lookup APIs."))
+
+
+def _coerce_items_payload(items):
+    if isinstance(items, str):
+        try:
+            items = json.loads(items)
+        except Exception:
+            frappe.throw(frappe._("Invalid items payload"))
+    if not isinstance(items, list):
+        frappe.throw(frappe._("items must be a list"))
+    if len(items) > MAX_STOCK_ITEMS_BULK:
+        frappe.throw(frappe._("Too many items requested in one call."))
+    return [row for row in items if isinstance(row, dict)]
+
+
 def get_stock_availability(item_code, warehouse):
     """Return total available quantity for an item in the given warehouse.
 
@@ -43,6 +77,8 @@ def get_bulk_stock_availability(items):
     Returns:
         dict: key=(item_code, warehouse, batch_no), value=qty
     """
+    _assert_stock_lookup_access()
+    items = _coerce_items_payload(items)
     if not items:
         return {}
 
@@ -123,8 +159,8 @@ def get_available_qty(items):
             in stock UOM.
     """
 
-    if isinstance(items, str):
-        items = json.loads(items)
+    _assert_stock_lookup_access()
+    items = _coerce_items_payload(items)
 
     result = []
     for it in items or []:

@@ -20,6 +20,11 @@ from posawesome.posawesome.api.utils import (
 )
 from posawesome.posawesome.api.item_processing.barcode import search_serial_or_batch_or_barcode_number
 from posawesome.posawesome.api.item_processing.details import get_items_details
+from posawesome.posawesome.api.item_processing.stock import _assert_stock_lookup_access
+
+MAX_ITEMS_PAGE_LIMIT = 500
+MAX_ITEM_GROUP_FILTERS = 500
+MAX_SEARCH_VALUE_LENGTH = 140
 
 @dataclass(frozen=True)
 class ProfileContext:
@@ -102,6 +107,8 @@ def _build_search_plan(
 
     limit = _to_positive_int(limit)
     offset = _to_positive_int(offset)
+    if limit is not None:
+        limit = min(limit, MAX_ITEMS_PAGE_LIMIT)
 
     filters: Dict[str, Any] = {"disabled": 0, "is_sales_item": 1, "is_fixed_asset": 0}
     if start_after:
@@ -125,6 +132,8 @@ def _build_search_plan(
 
     if search_value:
         raw_search_value = cstr(search_value).strip()
+        if len(raw_search_value) > MAX_SEARCH_VALUE_LENGTH:
+            raw_search_value = raw_search_value[:MAX_SEARCH_VALUE_LENGTH]
         data = search_serial_or_batch_or_barcode_number(raw_search_value, search_serial_no, search_batch_no)
 
         tokens = re.split(r"\s+", raw_search_value)
@@ -172,6 +181,7 @@ def _build_search_plan(
     if use_limit_search:
         raw_search_limit = pos_profile.get("posa_search_limit")
         search_limit = _to_positive_int(raw_search_limit) or 500
+        search_limit = min(search_limit, MAX_ITEMS_PAGE_LIMIT)
 
     limit_page_length: Optional[int] = None
     limit_start: Optional[int] = None
@@ -551,6 +561,9 @@ def _prepare_item_groups(profile_name: Optional[str], item_groups) -> ItemGroupC
     if not groups and profile_name:
         groups = get_item_groups(profile_name)
 
+    groups = [cstr(group).strip() for group in groups if cstr(group).strip()]
+    if len(groups) > MAX_ITEM_GROUP_FILTERS:
+        groups = groups[:MAX_ITEM_GROUP_FILTERS]
     groups = expand_item_groups(groups or [])
     groups_tuple = tuple(sorted(groups)) if groups else tuple()
 
@@ -662,6 +675,7 @@ def get_items(
 
 @frappe.whitelist()
 def get_items_groups():
+    _assert_stock_lookup_access()
     return frappe.db.sql(
         """select name from `tabItem Group`
 		where is_group = 0 order by name limit 500""",

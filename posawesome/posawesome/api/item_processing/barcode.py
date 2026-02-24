@@ -2,6 +2,34 @@ import frappe
 from frappe.utils import cint, cstr, flt
 from typing import Any, Dict, Optional
 
+MAX_BARCODE_LENGTH = 128
+MAX_LOOKUP_TEXT_LENGTH = 140
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _has_pos_profile_assignment():
+    return bool(frappe.db.exists("POS Profile User", {"user": frappe.session.user}))
+
+
+def _assert_item_lookup_access():
+    if _can_manage_all_pos_profiles():
+        return
+    if frappe.has_permission("Item", "read") or frappe.has_permission("Sales Invoice", "read"):
+        return
+    if _has_pos_profile_assignment():
+        return
+    frappe.throw(frappe._("You are not allowed to access barcode lookup APIs."))
+
+
+def _coerce_lookup_text(value: Optional[str], label: str, max_len: int = MAX_LOOKUP_TEXT_LENGTH) -> str:
+    normalized = cstr(value or "").strip()
+    if len(normalized) > max_len:
+        frappe.throw(frappe._("{0} exceeds the maximum allowed length.").format(label))
+    return normalized
+
 
 def _get_scale_barcode_settings():
     """Return the Scale Barcode Settings single document if it exists."""
@@ -247,6 +275,8 @@ def _parse_scale_barcode_data(barcode: str) -> Optional[Dict[str, Any]]:
 @frappe.whitelist()
 def parse_scale_barcode(barcode: str):
     """Public API to parse a scale barcode and return decoded data."""
+    _assert_item_lookup_access()
+    barcode = _coerce_lookup_text(barcode, "Barcode", max_len=MAX_BARCODE_LENGTH)
 
     settings = _get_scale_barcode_settings()
     metadata: Optional[Dict[str, Any]] = _get_scale_settings_metadata(settings) if settings else None
@@ -272,6 +302,10 @@ def build_scale_barcode(
     price: Optional[float] = None,
 ):
     """Build a scale barcode using Scale Barcode Settings."""
+    _assert_item_lookup_access()
+    barcode_template = _coerce_lookup_text(barcode_template, "Barcode Template", max_len=MAX_BARCODE_LENGTH)
+    item_code = _coerce_lookup_text(item_code, "Item Code", max_len=MAX_LOOKUP_TEXT_LENGTH)
+    uom = _coerce_lookup_text(uom, "UOM", max_len=40)
 
     settings = _get_scale_barcode_settings()
     if not settings:
@@ -387,6 +421,13 @@ def build_scale_barcode(
 
 @frappe.whitelist()
 def get_items_from_barcode(selling_price_list, currency, barcode):
+    _assert_item_lookup_access()
+    selling_price_list = _coerce_lookup_text(selling_price_list, "Selling Price List", max_len=140)
+    currency = _coerce_lookup_text(currency, "Currency", max_len=10)
+    barcode = _coerce_lookup_text(barcode, "Barcode", max_len=MAX_BARCODE_LENGTH)
+    if not selling_price_list or not currency or not barcode:
+        return None
+
     scale_data = _parse_scale_barcode_data(barcode)
     item_code = None
     scale_qty = None
@@ -455,6 +496,11 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
 @frappe.whitelist()
 def search_serial_or_batch_or_barcode_number(search_value, search_serial_no=None, search_batch_no=None):
     """Search for items by serial number, batch number, or barcode."""
+    _assert_item_lookup_access()
+    search_value = _coerce_lookup_text(search_value, "Search Value", max_len=MAX_LOOKUP_TEXT_LENGTH)
+    if not search_value:
+        return {}
+
     # Search by barcode
     barcode_data = frappe.db.get_value(
         "Item Barcode",

@@ -1,11 +1,51 @@
 import frappe
 from frappe.utils import nowdate
 from posawesome.posawesome.api.item_fetchers import ItemDetailAggregator, get_batches
-from posawesome.posawesome.api.item_processing.stock import get_stock_availability
+from posawesome.posawesome.api.item_processing.stock import (
+    get_stock_availability,
+    _assert_stock_lookup_access,
+)
 from posawesome.posawesome.api.utils import _ensure_pos_profile, log_perf_event
 from frappe import _, as_json
 import json
 import time
+
+MAX_ITEM_DETAILS_BULK = 500
+
+
+def _coerce_item_payload(item):
+    if isinstance(item, str):
+        try:
+            item = json.loads(item)
+        except Exception:
+            frappe.throw(_("Invalid item payload"))
+    if not isinstance(item, dict):
+        frappe.throw(_("Item payload must be a JSON object"))
+    return frappe._dict(item)
+
+
+def _coerce_items_data(items_data):
+    if isinstance(items_data, str):
+        try:
+            items_data = json.loads(items_data)
+        except Exception:
+            frappe.throw(_("Invalid items payload"))
+
+    if not isinstance(items_data, list):
+        frappe.throw(_("items_data must be a list"))
+    if len(items_data) > MAX_ITEM_DETAILS_BULK:
+        frappe.throw(_("Too many items requested in one call."))
+
+    sanitized = []
+    for row in items_data:
+        if not isinstance(row, dict):
+            continue
+        item_code = frappe.utils.cstr(row.get("item_code")).strip()
+        if not item_code:
+            continue
+        sanitized.append(row)
+    return sanitized
+
 
 @frappe.whitelist()
 def get_items_details(pos_profile, items_data, price_list=None, customer=None):
@@ -14,7 +54,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
     started_at = time.perf_counter()
 
     pos_profile, _ = _ensure_pos_profile(pos_profile)
-    items_data = json.loads(items_data)
+    items_data = _coerce_items_data(items_data)
 
     if not items_data:
         log_perf_event(
@@ -42,9 +82,26 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 @frappe.whitelist()
 def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=None):
     from erpnext.stock.get_item_details import get_item_details
-    item = json.loads(item)
+    item = _coerce_item_payload(item)
     today = nowdate()
     item_code = item.get("item_code")
+    if not item_code:
+        frappe.throw(_("item_code is required"))
+
+    pos_profile_name = frappe.utils.cstr(item.get("pos_profile")).strip()
+    profile_company = None
+    if pos_profile_name:
+        profile_doc = frappe.get_doc("POS Profile", pos_profile_name)
+        _ensure_pos_profile(profile_doc.name)
+        profile_company = profile_doc.company
+    else:
+        _assert_stock_lookup_access()
+
+    if company and profile_company and company != profile_company:
+        frappe.throw(_("Company does not match the selected POS Profile."))
+    if not company and profile_company:
+        company = profile_company
+
     batch_no_data = []
     non_expired_batch_qty = 0
     serial_no_data = []
@@ -184,6 +241,10 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
 def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=None):
     """Return variants of an item along with attribute metadata."""
     pos_profile, pos_profile_json = _ensure_pos_profile(pos_profile)
+    parent_item_code = frappe.utils.cstr(parent_item_code).strip()
+    if not parent_item_code:
+        return {"variants": [], "attributes_meta": {}}
+
     price_list = price_list or pos_profile.get("selling_price_list")
 
     fields = [
@@ -270,6 +331,11 @@ def get_item_optional_attributes(item_code):
 @frappe.whitelist()
 def get_item_attributes(item_code):
     """Get item attributes."""
+    _assert_stock_lookup_access()
+    item_code = frappe.utils.cstr(item_code).strip()
+    if not item_code:
+        return []
+
     return frappe.get_all(
         "Item Attribute",
         fields=["name", "attribute_name"],
