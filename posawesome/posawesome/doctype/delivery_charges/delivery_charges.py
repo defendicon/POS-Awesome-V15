@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 import json
 from frappe.model.document import Document
+from frappe.utils import cstr
 
 
 class DeliveryCharges(Document):
@@ -15,11 +16,17 @@ class DeliveryCharges(Document):
 
     def validate_profiles(self):
         profiles = []
+        seen_profiles = set()
         for row in self.profiles:
-            if row.pos_profile not in profiles:
-                profiles.append(row.pos_profile)
-            else:
+            profile_name = cstr(row.pos_profile).strip()
+            if not profile_name:
+                continue
+
+            if profile_name in seen_profiles:
                 frappe.throw("Duplicate POS Profile in Delivery Charges")
+            seen_profiles.add(profile_name)
+            profiles.append(profile_name)
+
         self.set_profiles_list(profiles)
 
     def set_profiles_list(self, profiles_list):
@@ -37,6 +44,17 @@ def get_applicable_delivery_charges(
     delivery_charges=None,
     restrict=False,
 ):
+    def _unique_non_empty(values):
+        seen = set()
+        result = []
+        for value in values:
+            normalized = cstr(value).strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            result.append(normalized)
+        return result
+
     charges = []
     address_list = []
     delivery_charges_list = []
@@ -55,7 +73,7 @@ def get_applicable_delivery_charges(
                 pluck="parent",
             )
         )
-    for address in address_list:
+    for address in _unique_non_empty(address_list):
         address_charges = frappe.get_cached_value("Address", address, "posa_delivery_charges")
         if address_charges:
             delivery_charges_list.append(address_charges)
@@ -64,7 +82,8 @@ def get_applicable_delivery_charges(
     if delivery_charges:
         delivery_charges_list.append(delivery_charges)
 
-    if len(delivery_charges_list) > 0:
+    delivery_charges_list = _unique_non_empty(delivery_charges_list)
+    if delivery_charges_list:
         delivery_charges_filters["name"] = ["in", delivery_charges_list]
     if restrict:
         delivery_charges_filters["profiles_list"] = ["not in", ["", None]]
@@ -74,18 +93,23 @@ def get_applicable_delivery_charges(
         filters=delivery_charges_filters,
         fields=["*"],
     )
+    if not delivery_charges_items:
+        return []
+
     delivery_charges_list = [i.name for i in delivery_charges_items]
 
-    delivery_profiels_filters = {"parent": ("in", delivery_charges_list)}
+    delivery_profiles_filters = {"parent": ("in", delivery_charges_list)}
     if pos_profile:
-        delivery_profiels_filters["pos_profile"] = pos_profile
-    delivery_profiels = frappe.get_all(
+        delivery_profiles_filters["pos_profile"] = pos_profile
+    delivery_profiles = frappe.get_all(
         "Delivery Charges POS Profile",
-        filters=delivery_profiels_filters,
+        filters=delivery_profiles_filters,
         fields=["*"],
     )
+    profile_by_parent = {profile.parent: profile for profile in delivery_profiles}
+
     for charge in delivery_charges_items:
-        profile = next((i for i in delivery_profiels if i.parent == charge.name), None)
+        profile = profile_by_parent.get(charge.name)
         if profile:
             charge.rate = profile.rate
             charges.append(charge)

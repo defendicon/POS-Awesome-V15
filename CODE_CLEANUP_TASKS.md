@@ -90,6 +90,7 @@
 - [x] Removed dead commented import from `posawesome/posawesome/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.py`.
 - [x] Removed dead commented import from `posawesome/posawesome/doctype/pos_offer/pos_offer.py`.
 - [x] Removed dead commented import and fixed indentation style in `posawesome/posawesome/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.py`.
+- [x] Refactored delivery-charge profile matching to deduplicate inputs, avoid empty child queries, and remove repeated scans in `posawesome/posawesome/doctype/delivery_charges/delivery_charges.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
