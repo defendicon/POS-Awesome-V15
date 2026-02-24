@@ -47,6 +47,7 @@
 - [x] Added stock-lookup authorization guard for UOM-specific price fetch endpoint in `posawesome/posawesome/api/item_processing/price.py`.
 - [x] Added permission checks for price-list/currency metadata utility endpoints in `posawesome/posawesome/api/invoice_processing/utils.py`.
 - [x] Added doctype read-permission enforcement for print-format lookup in `posawesome/posawesome/api/print_formats.py`.
+- [x] Added invoice doctype allowlisting for draft APIs and guarded exchange-rate lookup access in `posawesome/posawesome/api/invoices.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

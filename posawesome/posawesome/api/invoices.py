@@ -5,6 +5,7 @@
 
 import frappe
 import time
+from frappe.utils import cstr
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from posawesome.posawesome.api.invoice_processing.utils import (
     _get_return_validity_settings,
@@ -13,7 +14,8 @@ from posawesome.posawesome.api.invoice_processing.utils import (
     _validate_return_window,
     get_latest_rate,
     get_price_list_currency,
-    get_available_currencies
+    get_available_currencies,
+    _assert_currency_lookup_access,
 )
 from posawesome.posawesome.api.invoice_processing.stock import (
     _strip_client_freebies_from_payload,
@@ -43,6 +45,8 @@ from posawesome.posawesome.api.invoice_processing.data import (
     get_last_invoice_rates
 )
 from posawesome.posawesome.api.utils import log_perf_event
+
+ALLOWED_INVOICE_DOCTYPES = {"Sales Invoice", "POS Invoice"}
 
 
 def _can_manage_all_pos_profiles():
@@ -91,9 +95,17 @@ def _assert_delete_access(doctype, invoice_name):
     frappe.throw(frappe._("You are not allowed to delete this invoice."))
 
 
+def _normalize_invoice_doctype(doctype):
+    normalized = cstr(doctype or "Sales Invoice").strip()
+    if normalized not in ALLOWED_INVOICE_DOCTYPES:
+        frappe.throw(frappe._("Unsupported invoice doctype: {0}").format(normalized or doctype))
+    return normalized
+
+
 @frappe.whitelist()
 def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
     started_at = time.perf_counter()
+    doctype = _normalize_invoice_doctype(doctype)
     _assert_shift_access(pos_opening_shift)
     filters = {
         "posa_pos_opening_shift": pos_opening_shift,
@@ -131,6 +143,7 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 @frappe.whitelist()
 def get_draft_invoice_doc(invoice_name, doctype="Sales Invoice"):
     started_at = time.perf_counter()
+    doctype = _normalize_invoice_doctype(doctype)
     doc = frappe.get_cached_doc(doctype, invoice_name)
     if doc.docstatus != 0:
         frappe.throw(frappe._("Only draft invoices can be opened from POS draft API."))
@@ -170,6 +183,9 @@ def delete_invoice(invoice):
 @frappe.whitelist()
 def fetch_exchange_rate_pair(from_currency, to_currency):
     """Return exchange rate payload expected by POS multi-currency UI."""
+    _assert_currency_lookup_access()
+    from_currency = cstr(from_currency).strip()
+    to_currency = cstr(to_currency).strip()
 
     if not from_currency or not to_currency:
         frappe.throw("from_currency and to_currency are required")
