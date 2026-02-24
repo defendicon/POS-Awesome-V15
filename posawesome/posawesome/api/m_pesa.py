@@ -9,6 +9,7 @@ import frappe
 import requests
 from frappe.utils import cstr, flt
 from requests.auth import HTTPBasicAuth
+from posawesome.posawesome.api.payment_processing.data import _assert_company_access, _coerce_text_filter
 
 CALLBACK_ACCEPTED = {"ResultCode": 0, "ResultDesc": "Accepted"}
 CALLBACK_REJECTED = {"ResultCode": 1, "ResultDesc": "Rejected"}
@@ -27,6 +28,7 @@ MPESA_CALLBACK_FIELDS = (
     "MiddleName",
     "LastName",
 )
+MAX_MPESA_PAYMENT_METHODS = 100
 
 
 def get_token(app_key, app_secret, base_url):
@@ -151,6 +153,11 @@ def validation(**kwargs):
 
 @frappe.whitelist()
 def get_mpesa_mode_of_payment(company):
+    company = _coerce_text_filter(company, "Company")
+    if not company:
+        return []
+    _assert_company_access(company)
+
     modes = frappe.get_all(
         "Mpesa C2B Register URL",
         filters={"company": company, "register_status": "Success"},
@@ -173,6 +180,9 @@ def _parse_payment_methods(payment_methods_list):
     else:
         frappe.throw("Invalid payment methods list type")
 
+    if len(parsed) > MAX_MPESA_PAYMENT_METHODS:
+        frappe.throw("Too many payment methods supplied")
+
     methods = [_clip_text(value, 140) for value in parsed if cstr(value).strip()]
     return methods
 
@@ -185,6 +195,11 @@ def get_mpesa_draft_payments(
     full_name=None,
     payment_methods_list=None,
 ):
+    company = _coerce_text_filter(company, "Company")
+    if not company:
+        return []
+    _assert_company_access(company)
+
     filters = {"company": company, "docstatus": 0}
     safe_mode_of_payment = _clip_text(mode_of_payment, 140)
     safe_mobile_no = _clip_text(mobile_no, 40)
@@ -221,10 +236,16 @@ def get_mpesa_draft_payments(
 
 @frappe.whitelist()
 def submit_mpesa_payment(mpesa_payment, customer):
+    mpesa_payment = _coerce_text_filter(mpesa_payment, "M-Pesa Payment")
+    customer = _coerce_text_filter(customer, "Customer")
+
+    if not mpesa_payment:
+        frappe.throw("M-Pesa payment is required")
     if not customer:
         frappe.throw("Customer is required")
 
     doc = frappe.get_doc("Mpesa Payment Register", mpesa_payment)
+    _assert_company_access(doc.company)
     if doc.docstatus != 0:
         frappe.throw("Mpesa payment is already submitted")
 

@@ -42,6 +42,8 @@
 - [x] Added authorization gates and bulk request limits for stock availability APIs in `posawesome/posawesome/api/item_processing/stock.py`.
 - [x] Added access controls and barcode/search input length guards for barcode lookup APIs in `posawesome/posawesome/api/item_processing/barcode.py`.
 - [x] Added item search pagination/filter bounds and protected item-group listing endpoint in `posawesome/posawesome/api/item_processing/search.py`.
+- [x] Added company authorization and payload limits for M-Pesa payment lookup/submit endpoints in `posawesome/posawesome/api/m_pesa.py`.
+- [x] Fixed missing language-code validator and added translation/language/profile input guards in `posawesome/posawesome/api/utilities.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

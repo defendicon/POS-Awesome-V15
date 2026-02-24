@@ -24,11 +24,26 @@ import functools
 
 from .utils import get_item_groups, fetch_sales_person_names
 from posawesome.utils import get_build_version
+from posawesome.posawesome.api.payment_processing.data import _assert_pos_profile_access
 
 
 def _require_system_manager():
     if "System Manager" not in frappe.get_roles():
         frappe.throw(_("Only System Manager can access this resource."))
+
+
+LANGUAGE_CODE_PATTERN = re.compile(r"^[a-zA-Z]{2,3}([_-][a-zA-Z0-9]{2,8})*$")
+
+
+def _validate_language_code(lang_code):
+    code = cstr(lang_code).strip()
+    if not code:
+        return False, _("Language code is required.")
+    if len(code) > 20:
+        return False, _("Language code is too long.")
+    if not LANGUAGE_CODE_PATTERN.match(code):
+        return False, _("Invalid language code format.")
+    return True, ""
 
 
 def get_version():
@@ -440,6 +455,11 @@ def get_translation_dict(lang: str) -> dict:
     """Return translations for the given language from all installed apps."""
     from frappe.translate import get_translations_from_csv
 
+    is_valid, error_msg = _validate_language_code(lang)
+    if not is_valid:
+        frappe.throw(error_msg)
+    lang = cstr(lang).strip().lower().replace("_", "-")
+
     if lang == "en":
         # English is the base language and does not have a separate
         # translation file. Return an empty dict to avoid file lookups.
@@ -473,8 +493,10 @@ def get_translation_dict(lang: str) -> dict:
 @frappe.whitelist()
 def get_pos_profile_tax_inclusive(pos_profile: str):
     """Return the 'posa_tax_inclusive' setting for the given POS Profile."""
+    pos_profile = cstr(pos_profile).strip()
     if not pos_profile:
         return None
+    _assert_pos_profile_access(pos_profile)
     return frappe.get_cached_value("POS Profile", pos_profile, "posa_tax_inclusive")
 
 
@@ -823,6 +845,11 @@ def get_current_user_language():
 def set_current_user_language(lang_code):
     """Set language with optimized database operations."""
     try:
+        is_valid, error_msg = _validate_language_code(lang_code)
+        if not is_valid:
+            return {"success": False, "message": cstr(error_msg)}
+        lang_code = cstr(lang_code).strip().lower().replace("_", "-")
+
         user = frappe.session.user
         if user == "Guest":
             return {
@@ -867,6 +894,7 @@ def get_language_info(lang_code):
         is_valid, error_msg = _validate_language_code(lang_code)
         if not is_valid:
             return {"success": False, "message": error_msg}
+        lang_code = cstr(lang_code).strip().lower().replace("_", "-")
 
         available_languages = get_available_languages()
         language = next((lang for lang in available_languages if lang["code"] == lang_code), None)
