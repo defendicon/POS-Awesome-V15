@@ -9,6 +9,10 @@ from frappe.utils import cstr, getdate, nowdate
 
 from posawesome.posawesome.api.payment_entry import create_payment_entry
 
+MAX_ORDER_ITEMS = 500
+MAX_ORDER_SEARCH_LIMIT = 200
+MAX_ORDER_SEARCH_TEXT = 140
+
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
@@ -35,10 +39,37 @@ def _ensure_pos_profile_access(profile_name):
 
 def _extract_payload(raw_payload):
     if isinstance(raw_payload, str):
-        return json.loads(raw_payload)
+        try:
+            return json.loads(raw_payload)
+        except Exception:
+            frappe.throw(_("Invalid sales order payload."))
     if isinstance(raw_payload, dict):
         return raw_payload
     frappe.throw(_("Invalid sales order payload."))
+
+
+def _safe_text(value, max_len=MAX_ORDER_SEARCH_TEXT):
+    return cstr(value or "").strip()[:max_len]
+
+
+def _safe_limit(value, default=50):
+    try:
+        parsed = int(value or default)
+    except Exception:
+        parsed = default
+    return min(max(parsed, 1), MAX_ORDER_SEARCH_LIMIT)
+
+
+def _assert_items_limit(data):
+    if not isinstance(data, dict):
+        return
+    items = data.get("items")
+    if items is None:
+        return
+    if not isinstance(items, list):
+        frappe.throw(_("Sales order items must be a list."))
+    if len(items) > MAX_ORDER_ITEMS:
+        frappe.throw(_("Too many sales order items in one request."))
 
 
 def _resolve_payload_profile_name(data, existing_doc=None):
@@ -93,7 +124,14 @@ def _payment_entry_job(order_name, payments):
 
 
 @frappe.whitelist()
-def search_orders(company, currency, order_name=None):
+def search_orders(company, currency, order_name=None, limit=50):
+    company = _safe_text(company, 140)
+    currency = _safe_text(currency, 10)
+    order_name = _safe_text(order_name, MAX_ORDER_SEARCH_TEXT)
+    limit = _safe_limit(limit, default=50)
+    if not company or not currency:
+        return []
+
     _assert_company_access(company)
     filters = {
         "billing_status": ["in", ["Not Billed", "Partly Billed"]],
@@ -107,7 +145,7 @@ def search_orders(company, currency, order_name=None):
         "Sales Order",
         filters=filters,
         fields=["name"],
-        limit_page_length=0,
+        limit_page_length=limit,
         order_by="customer",
     )
     data = []
@@ -163,6 +201,7 @@ def _map_delivery_dates(data):
 def update_sales_order(data):
     """Create or update a Sales Order document."""
     data = _extract_payload(data)
+    _assert_items_limit(data)
     if cstr(data.get("doctype") or "Sales Order").strip() != "Sales Order":
         data["doctype"] = "Sales Order"
     _map_delivery_dates(data)
@@ -220,6 +259,7 @@ def _create_payment_entries(so_doc, payments):
 def submit_sales_order(order):
     """Submit sales order and create payment entries."""
     order = _extract_payload(order)
+    _assert_items_limit(order)
     if cstr(order.get("doctype") or "Sales Order").strip() != "Sales Order":
         order["doctype"] = "Sales Order"
     _map_delivery_dates(order)

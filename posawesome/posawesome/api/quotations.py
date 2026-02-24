@@ -5,6 +5,8 @@ from frappe import _
 from frappe.utils import cstr
 from frappe.utils import getdate
 
+MAX_QUOTATION_ITEMS = 500
+
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
@@ -31,10 +33,25 @@ def _ensure_pos_profile_access(profile_name):
 
 def _extract_payload(raw_payload):
     if isinstance(raw_payload, str):
-        return json.loads(raw_payload)
+        try:
+            return json.loads(raw_payload)
+        except Exception:
+            frappe.throw(_("Invalid quotation payload."))
     if isinstance(raw_payload, dict):
         return raw_payload
     frappe.throw(_("Invalid quotation payload."))
+
+
+def _assert_items_limit(data):
+    if not isinstance(data, dict):
+        return
+    items = data.get("items")
+    if items is None:
+        return
+    if not isinstance(items, list):
+        frappe.throw(_("Quotation items must be a list."))
+    if len(items) > MAX_QUOTATION_ITEMS:
+        frappe.throw(_("Too many quotation items in one request."))
 
 
 def _resolve_payload_profile_name(data, existing_doc=None):
@@ -101,6 +118,7 @@ def _ensure_customer_fields(data):
 def update_quotation(data):
     """Create or update a Quotation document."""
     data = _extract_payload(data)
+    _assert_items_limit(data)
     if cstr(data.get("doctype") or "Quotation").strip() != "Quotation":
         data["doctype"] = "Quotation"
     _map_delivery_dates(data)
@@ -124,6 +142,7 @@ def update_quotation(data):
 def submit_quotation(order):
     """Submit quotation document."""
     order = _extract_payload(order)
+    _assert_items_limit(order)
     if cstr(order.get("doctype") or "Quotation").strip() != "Quotation":
         order["doctype"] = "Quotation"
     _map_delivery_dates(order)
