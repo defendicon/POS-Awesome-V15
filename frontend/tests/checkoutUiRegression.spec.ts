@@ -7,6 +7,9 @@ import { useInvoiceUI } from "../src/posapp/composables/pos/invoice/useInvoiceUI
 import cartItemRowSource from "../src/posapp/components/pos/invoice/CartItemRow.vue?raw";
 import invoiceSummarySource from "../src/posapp/components/pos/invoice/InvoiceSummary.vue?raw";
 import itemActionToolbarSource from "../src/posapp/components/pos/items/ItemActionToolbar.vue?raw";
+import posShellSource from "../src/posapp/components/pos/shell/Pos.vue?raw";
+import itemsSelectorSource from "../src/posapp/components/pos/items/ItemsSelector.vue?raw";
+import invoiceSource from "../src/posapp/components/pos/Invoice.vue?raw";
 
 function setViewport(width: number, height: number) {
 	Object.defineProperty(window, "innerWidth", {
@@ -60,6 +63,17 @@ describe("checkout UI regressions", () => {
 		expect(invoiceSummarySource).not.toContain("resizable");
 		expect(itemActionToolbarSource).not.toContain("resize: vertical");
 		expect(itemActionToolbarSource).not.toContain("resizable");
+	});
+
+	it("anchors checkout bottom panels using full-height flex layout", () => {
+		expect(posShellSource).toContain("min-height: calc(100vh - 72px)");
+		expect(posShellSource).toContain("display: flex;");
+		expect(itemsSelectorSource).toContain('class="items-selector-shell"');
+		expect(itemsSelectorSource).toContain('class="items-selector-toolbar"');
+		expect(itemsSelectorSource).toContain("margin-top: auto !important;");
+		expect(invoiceSource).toContain('class="pa-0 invoice-shell"');
+		expect(invoiceSource).toContain('class="invoice-summary-panel"');
+		expect(invoiceSource).toContain(".invoice-summary-panel");
 	});
 
 	it("keeps desktop checkout container height adaptive for medium screens", async () => {

@@ -1,6 +1,6 @@
 <template>
 	<!-- Main Invoice Wrapper -->
-	<div class="pa-0">
+	<div class="pa-0 invoice-shell">
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
 
@@ -13,7 +13,11 @@
 				resize: 'vertical',
 				overflow: 'auto',
 			}"
-			:class="['cards my-0 py-0 mt-3 resizable', 'pos-themed-card', { 'return-mode': isReturnInvoice }]"
+			:class="[
+				'cards my-0 py-0 mt-3 resizable invoice-main-card',
+				'pos-themed-card',
+				{ 'return-mode': isReturnInvoice },
+			]"
 			@mouseup="saveInvoiceHeight($refs.invoiceCard)"
 			@touchend="saveInvoiceHeight($refs.invoiceCard)"
 		>
@@ -180,6 +184,7 @@
 
 		<!-- Payment Section -->
 		<InvoiceSummary
+			class="invoice-summary-panel"
 			ref="invoiceSummary"
 			:pos_profile="pos_profile"
 			:total_qty="total_qty"
@@ -956,6 +961,22 @@ export default {
 </script>
 
 <style scoped>
+.invoice-shell {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.invoice-main-card {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.invoice-summary-panel {
+	margin-top: auto;
+}
+
 /* Card background adjustments */
 .cards {
 	background-color: var(--surface-secondary) !important;

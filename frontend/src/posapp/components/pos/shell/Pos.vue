@@ -270,12 +270,17 @@ export default {
 .dynamic-main-row {
 	padding: 0;
 	margin: 0;
+	min-height: calc(100vh - 72px);
+	align-items: stretch;
 }
 
 .dynamic-col {
 	padding: var(--dynamic-sm);
 	transition: padding 0.3s ease;
 	margin-top: var(--dynamic-sm);
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 	/* Add top margin for better separation */
 }
 
@@ -288,6 +293,10 @@ export default {
 	.dynamic-col {
 		padding: var(--dynamic-xs);
 		margin-top: var(--dynamic-xs);
+	}
+
+	.dynamic-main-row {
+		min-height: calc(100vh - 64px);
 	}
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-	<div :style="responsiveStyles">
+	<div class="items-selector-shell" :style="responsiveStyles">
 		<ScanErrorDialog
 			v-model="scanErrorDialog"
 			:message="scanErrorMessage"
@@ -135,6 +135,7 @@
 			</div>
 		</v-card>
 		<ItemActionToolbar
+			class="items-selector-toolbar"
 			v-model="item_group"
 			:items-group="items_group"
 			v-model:items-view="items_view"
@@ -1034,6 +1035,22 @@ defineExpose({
 </script>
 
 <style scoped>
+.items-selector-shell {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.dynamic-card {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.items-selector-toolbar {
+	margin-top: auto !important;
+}
+
 /* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
