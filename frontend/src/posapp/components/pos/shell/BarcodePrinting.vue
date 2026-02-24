@@ -291,6 +291,7 @@ import { useToastStore } from "../../../stores/toastStore";
 import { mapStores } from "pinia";
 import format from "../../../format";
 import { useUIStore } from "../../../stores/uiStore.js";
+import { openWindowWithHtml } from "../../../plugins/print";
 
 export default {
 	name: "BarcodePrinting",
@@ -1213,15 +1214,6 @@ export default {
 				return;
 			}
 
-			const printWindow = window.open("", "_blank");
-			if (!printWindow) {
-				this.toastStore.show({
-					title: __("Popup blocked. Please allow popups."),
-					color: "error",
-				});
-				return;
-			}
-
 			const style = this.getPrintStyles();
 			const content = this.generatePrintContent(itemsToPrint);
 			this.logDebug("printLabels:render", {
@@ -1230,7 +1222,7 @@ export default {
 				content_length: content?.length || 0,
 			});
 
-			printWindow.document.write(`
+			const printHtml = `
         <html>
           <head>
             <title>Print Barcodes</title>
@@ -1252,8 +1244,17 @@ export default {
 				</${"script"}>
           </body>
         </html>
-      `);
-			printWindow.document.close();
+      `;
+
+			const printWindow = openWindowWithHtml(printHtml, "_blank");
+			if (!printWindow) {
+				this.toastStore.show({
+					title: __("Popup blocked. Please allow popups."),
+					color: "error",
+				});
+				return;
+			}
+
 			this.logDebug("printLabels:window-ready", {
 				items_to_print: itemsToPrint.length,
 			});
@@ -1269,15 +1270,6 @@ export default {
 			if (!itemsToPrint.length) {
 				this.logDebug("downloadPdf:abort-no-printable-items", {
 					items_count: this.items.length,
-				});
-				return;
-			}
-
-			const printWindow = window.open("", "_blank");
-			if (!printWindow) {
-				this.toastStore.show({
-					title: __("Popup blocked. Please allow popups."),
-					color: "error",
 				});
 				return;
 			}
@@ -1308,7 +1300,7 @@ export default {
 				content_length: content?.length || 0,
 			});
 
-			printWindow.document.write(`
+			const printHtml = `
         <html>
           <head>
             <title>Download PDF</title>
@@ -1346,8 +1338,17 @@ export default {
 				</${"script"}>
           </body>
         </html>
-      `);
-			printWindow.document.close();
+      `;
+
+			const printWindow = openWindowWithHtml(printHtml, "_blank");
+			if (!printWindow) {
+				this.toastStore.show({
+					title: __("Popup blocked. Please allow popups."),
+					color: "error",
+				});
+				return;
+			}
+
 			this.logDebug("downloadPdf:window-ready", {
 				items_to_print: itemsToPrint.length,
 			});

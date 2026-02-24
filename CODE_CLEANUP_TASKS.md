@@ -7,6 +7,10 @@
 - [x] Replaced unsafe offer description HTML rendering with escaped multiline text in `frontend/src/posapp/components/pos/offers/PosOffers.vue`.
 - [x] Removed unsafe delivery-charge `v-html` bindings in `frontend/src/posapp/components/pos/invoice/DeliveryCharges.vue`.
 - [x] Removed unsafe batch option `v-html` rendering and centralized subtitle formatting in `frontend/src/posapp/components/pos/invoice/ItemsTableExpandedRow.vue`.
+- [x] Refactored print rendering into guarded helpers and removed duplicated window-write logic in `frontend/src/posapp/plugins/print.ts`.
+- [x] Reused centralized print helper for offline invoice preview/print flows in `frontend/src/posapp/composables/pos/payments/usePaymentPrinting.ts`.
+- [x] Reused centralized print helper for barcode print/PDF windows in `frontend/src/posapp/components/pos/shell/BarcodePrinting.vue`.
+- [x] Hardened app branch/root lookup logic and batch helper wiring in `posawesome/posawesome/api/utilities.py`.
 
 ## Pending
-- [ ] Review and harden remaining print-flow `document.write` usage in `frontend/src/posapp`.
+- [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

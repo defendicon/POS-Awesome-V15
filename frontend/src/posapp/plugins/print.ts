@@ -33,6 +33,44 @@ const DEFAULT_TIMEOUT = 10000;
 const DEBUG_PRINT_PARAM = "debug_print";
 const TRIGGER_PRINT_PARAM = "trigger_print";
 
+function normalizePrintHtml(html: unknown) {
+	return typeof html === "string" ? html : "";
+}
+
+export function writeHtmlToWindow(
+	targetWindow: Window | null | undefined,
+	html: unknown,
+) {
+	if (!targetWindow) return false;
+
+	const content = normalizePrintHtml(html);
+	if (!content) return false;
+
+	try {
+		targetWindow.document.open();
+		targetWindow.document.write(content);
+		targetWindow.document.close();
+		return true;
+	} catch (err) {
+		console.warn("Unable to render HTML in print target", err);
+		return false;
+	}
+}
+
+export function openWindowWithHtml(html: unknown, target = "_blank") {
+	const targetWindow = window.open("", target);
+	if (!targetWindow) return null;
+	if (!writeHtmlToWindow(targetWindow, html)) {
+		try {
+			targetWindow.close();
+		} catch {
+			// ignore close failures
+		}
+		return null;
+	}
+	return targetWindow;
+}
+
 function getWindowHref(targetWindow: Window | null | undefined) {
 	try {
 		return targetWindow?.location?.href || "";
@@ -122,15 +160,14 @@ function showSessionMessage(targetWindow: Window | null | undefined) {
 	try {
 		const message =
 			"Unable to load the online print view. Your session may have expired. Please sign in again and re-open the print view.";
-		targetWindow.document.open();
-		targetWindow.document.write(
+		writeHtmlToWindow(
+			targetWindow,
 			`<div style="font-family:sans-serif;padding:24px;line-height:1.5;">
 				<h2 style="margin:0 0 12px;">Print view unavailable</h2>
 				<p style="margin:0 0 12px;">${message}</p>
 				<p style="margin:0;">Once signed in, retry from POS Awesome.</p>
 			</div>`,
 		);
-		targetWindow.document.close();
 	} catch (err) {
 		console.warn("Unable to show session warning in print window", err);
 	}
@@ -274,28 +311,10 @@ async function fallbackToOfflinePrint(
 
 		let target: Window | null =
 			existingWindow && !existingWindow.closed ? existingWindow : null;
-		if (target) {
-			try {
-				target.document.open();
-			} catch (err) {
-				console.warn(
-					"Failed to reuse print window for offline fallback",
-					err,
-				);
-				target = null;
-			}
+		if (!target || !writeHtmlToWindow(target, html)) {
+			target = openWindowWithHtml(html, "_blank");
+			if (!target) return false;
 		}
-
-		if (!target) {
-			target = window.open("", "_blank");
-			if (!target) {
-				return false;
-			}
-			target.document.open();
-		}
-
-		target.document.write(html);
-		target.document.close();
 		const shouldPrint = options.shouldPrint ?? true;
 		logPrintDebug({
 			debugPrint: resolveDebugPrint(target, options),

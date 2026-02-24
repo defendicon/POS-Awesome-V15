@@ -5,7 +5,8 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cstr, add_to_date, get_datetime
+from frappe import _
+from frappe.utils import cstr, add_to_date, get_datetime, flt
 from typing import List, Dict, Any
 import time
 import os
@@ -37,11 +38,14 @@ def get_version():
 
 def get_app_branch(app):
     """Returns branch of an app"""
-    import subprocess
-
     try:
+        app_path = frappe.get_app_path(app)
+        if not app_path:
+            return ""
         branch = subprocess.check_output(
-            "cd ../apps/{0} && git rev-parse --abbrev-ref HEAD".format(app), shell=True
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=app_path,
+            stderr=subprocess.DEVNULL,
         )
         branch = branch.decode("utf-8")
         branch = branch.strip()
@@ -52,19 +56,26 @@ def get_app_branch(app):
 
 def get_root_of(doctype):
     """Get root element of a DocType with a tree structure"""
-    # Security: Validate doctype to prevent SQL injection since it's used in FROM clause
-    if not re.match(r"^[a-zA-Z0-9 _-]+$", doctype):
+    safe_doctype = cstr(doctype).strip()
+    # Security: allow only expected DocType identifier characters.
+    if not safe_doctype or not re.match(r"^[a-zA-Z0-9 _]+$", safe_doctype):
         return None
 
-    result = frappe.db.sql(
-        """select t1.name from `tab{0}` t1 where
-		(select count(*) from `tab{1}` t2 where
-			t2.lft < t1.lft and t2.rgt > t1.rgt) = 0
-		and t1.rgt > t1.lft""".format(
-            doctype, doctype
+    # Guard against arbitrary table access.
+    if not frappe.db.exists("DocType", safe_doctype):
+        return None
+
+    try:
+        root = frappe.get_all(
+            safe_doctype,
+            fields=["name"],
+            order_by="lft asc",
+            limit_page_length=1,
         )
-    )
-    return result[0][0] if result else None
+    except Exception:
+        return None
+
+    return root[0].name if root else None
 
 
 def get_child_nodes(group_type, root):
@@ -120,6 +131,11 @@ def add_taxes_from_tax_template(item, parent_doc):
 
 def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
     """Automatically select `batch_no` for outgoing items in item table"""
+    try:
+        from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty
+    except Exception:
+        frappe.throw(_("Batch selection helpers are unavailable in this environment."))
+
     for d in doc.packed_items:
         qty = d.get("stock_qty") or d.get("transfer_qty") or d.get("qty") or 0
         has_batch_no = frappe.db.get_value("Item", d.item_code, "has_batch_no")

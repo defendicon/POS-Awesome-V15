@@ -3,6 +3,7 @@ import renderOfflineInvoiceHTML from "../../../../offline_print_template";
 import {
 	appendDebugPrintParam,
 	isDebugPrintEnabled,
+	openWindowWithHtml,
 	silentPrint,
 	watchPrintWindow,
 } from "../../../plugins/print";
@@ -27,10 +28,8 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 	) => {
 		if (!invoice) return;
 		const html = await renderOfflineInvoiceHTML(invoice);
-		const win = window.open("", "_blank");
+		const win = openWindowWithHtml(html, "_blank");
 		if (!win) return;
-		win.document.write(html);
-		win.document.close();
 		win.focus();
 		if (debugPrint) {
 			console.log("[POSAwesome][Print Debug]", {
@@ -47,10 +46,8 @@ export function usePaymentPrinting(options: PaymentPrintingOptions) {
 	const printOfflineInvoice = async (invoice: any) => {
 		if (!invoice) return;
 		const html = await renderOfflineInvoiceHTML(invoice);
-		const win = window.open("", "_blank");
+		const win = openWindowWithHtml(html, "_blank");
 		if (!win) return;
-		win.document.write(html);
-		win.document.close();
 		win.focus();
 		win.print();
 	};
