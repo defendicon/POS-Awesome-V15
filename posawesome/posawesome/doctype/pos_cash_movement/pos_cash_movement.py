@@ -6,6 +6,13 @@ from frappe.utils import flt
 from posawesome.posawesome.api.cash_movement.posting import cancel_journal_entry
 
 
+MANAGER_ROLES = {"System Manager", "Administrator"}
+
+
+def _is_manager():
+    return bool(MANAGER_ROLES.intersection(set(frappe.get_roles() or [])))
+
+
 class POSCashMovement(Document):
     def validate(self):
         self._validate_amount()
@@ -47,6 +54,10 @@ class POSCashMovement(Document):
 
         if opening_shift.user != self.user:
             frappe.throw(_("User must match the selected POS Opening Shift user."))
+        if opening_shift.docstatus != 1 or opening_shift.status != "Open":
+            frappe.throw(_("POS Opening Shift must be submitted and open for cash movement."))
+        if self.user != frappe.session.user and not _is_manager():
+            frappe.throw(_("You are not allowed to create cash movement records for another user."))
 
     def _validate_accounts(self):
         if not self.source_account or not self.target_account:

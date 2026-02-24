@@ -79,6 +79,9 @@
 - [x] Updated closing-shift cash-movement integration tests to align with server-side opening-shift access enforcement in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/test_cash_movement_integration.py`.
 - [x] Added pagination/input bounds and safe address JSON parsing guards in customer APIs in `posawesome/posawesome/api/customers.py`.
 - [x] Added payment-request payload bounds, contact-mobile validation, and reference doctype allowlisting in `posawesome/posawesome/api/payments.py`.
+- [x] Added profile assignment/user ownership checks for opening-shift validation in `posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py`.
+- [x] Added opening-shift consistency and user-ownership checks for closing-shift validation in `posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py`.
+- [x] Added open-shift status and user-ownership checks in cash movement doctype validation in `posawesome/posawesome/doctype/pos_cash_movement/pos_cash_movement.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

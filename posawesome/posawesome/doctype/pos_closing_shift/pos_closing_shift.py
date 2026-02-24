@@ -27,8 +27,38 @@ from posawesome.posawesome.doctype.pos_closing_shift.closing_processing.invoices
     consolidate_closing_shift_invoices
 )
 
+
+MANAGER_ROLES = {"System Manager", "Administrator"}
+
+
+def _is_manager():
+    return bool(MANAGER_ROLES.intersection(set(frappe.get_roles() or [])))
+
+
 class POSClosingShift(Document):
     def validate(self):
+        opening_shift = frappe.db.get_value(
+            "POS Opening Shift",
+            self.pos_opening_shift,
+            ["name", "status", "docstatus", "user", "pos_profile", "company"],
+            as_dict=True,
+        )
+        if not opening_shift:
+            frappe.throw(_("Selected POS Opening Shift does not exist."))
+        if opening_shift.docstatus != 1 or opening_shift.status != "Open":
+            frappe.throw(
+                _("Selected POS Opening Shift should be open."),
+                title=_("Invalid Opening Entry"),
+            )
+        if opening_shift.user != self.user:
+            frappe.throw(_("Selected POS Opening Shift user does not match this closing shift user."))
+        if opening_shift.pos_profile != self.pos_profile:
+            frappe.throw(_("Selected POS Opening Shift profile does not match this closing shift profile."))
+        if opening_shift.company != self.company:
+            frappe.throw(_("Selected POS Opening Shift company does not match this closing shift company."))
+        if self.user != frappe.session.user and not _is_manager():
+            frappe.throw(_("You are not allowed to create closing shifts for another user."))
+
         user = frappe.get_all(
             "POS Closing Shift",
             filters={
@@ -49,11 +79,6 @@ class POSClosingShift(Document):
                 title=_("Invalid Period"),
             )
 
-        if frappe.db.get_value("POS Opening Shift", self.pos_opening_shift, "status") != "Open":
-            frappe.throw(
-                _("Selected POS Opening Shift should be open."),
-                title=_("Invalid Opening Entry"),
-            )
         self.update_payment_reconciliation()
 
     def update_payment_reconciliation(self):
