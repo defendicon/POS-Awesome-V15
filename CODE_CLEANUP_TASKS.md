@@ -13,6 +13,8 @@
 - [x] Hardened app branch/root lookup logic and batch helper wiring in `posawesome/posawesome/api/utilities.py`.
 - [x] Added shift-user/profile authorization and stricter opening-voucher input validation in `posawesome/posawesome/api/shifts.py`.
 - [x] Fixed POS profile trust boundary by resolving and authorizing purchase profile data server-side in `posawesome/posawesome/api/purchase_orders.py`.
+- [x] Added authorized POS profile resolution and stricter customer/address update guards in `posawesome/posawesome/api/customers.py`.
+- [x] Added doctype validation guard in `posawesome/posawesome/api/print_formats.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

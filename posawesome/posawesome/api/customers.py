@@ -14,6 +14,59 @@ from frappe.utils.caching import redis_cache
 from .utils import fetch_sales_person_names
 
 
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _extract_pos_profile_name(pos_profile_input):
+    if isinstance(pos_profile_input, dict):
+        return cstr(
+            pos_profile_input.get("name")
+            or pos_profile_input.get("pos_profile")
+            or pos_profile_input.get("profile")
+        ).strip()
+
+    raw_value = cstr(pos_profile_input).strip()
+    if not raw_value:
+        return ""
+
+    try:
+        parsed = json.loads(raw_value)
+    except Exception:
+        parsed = raw_value
+
+    if isinstance(parsed, dict):
+        return _extract_pos_profile_name(parsed)
+    return cstr(parsed).strip()
+
+
+def _resolve_authorized_pos_profile(pos_profile_input):
+    profile_name = _extract_pos_profile_name(pos_profile_input)
+    if not profile_name:
+        frappe.throw(_("POS Profile is required"))
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    if not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+    return profile_doc
+
+
+def _ensure_customer_write_permission(customer_name):
+    if frappe.has_permission("Customer", "write", customer_name):
+        return
+    if _can_manage_all_pos_profiles():
+        return
+    frappe.throw(_("Not permitted to update customer {0}.").format(customer_name))
+
+
 def get_customer_groups(pos_profile):
     customer_groups = []
     if pos_profile.get("customer_groups"):
@@ -84,7 +137,14 @@ def get_customer_balance(customer):
 
 @frappe.whitelist()
 def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
-    _pos_profile = json.loads(pos_profile)
+    pos_profile_doc = _resolve_authorized_pos_profile(pos_profile)
+    _pos_profile = {
+        "name": pos_profile_doc.name,
+        "customer_groups": pos_profile_doc.get("customer_groups") or [],
+        "posa_server_cache_duration": pos_profile_doc.get("posa_server_cache_duration"),
+        "posa_use_server_cache": pos_profile_doc.get("posa_use_server_cache"),
+    }
+    serialized_profile = json.dumps(_pos_profile, sort_keys=True)
     ttl = _pos_profile.get("posa_server_cache_duration")
     if ttl:
         ttl = int(ttl) * 60
@@ -129,14 +189,14 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
         return customers
 
     if _pos_profile.get("posa_use_server_cache") and not (limit or offset or start_after or modified_after):
-        return __get_customer_names(pos_profile, limit, offset, start_after, modified_after)
+        return __get_customer_names(serialized_profile, limit, offset, start_after, modified_after)
     else:
-        return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
+        return _get_customer_names(serialized_profile, limit, offset, start_after, modified_after)
 
 
 @frappe.whitelist()
 def get_customers_count(pos_profile):
-    pos_profile = json.loads(pos_profile)
+    pos_profile = _resolve_authorized_pos_profile(pos_profile).as_dict()
     filters = {"disabled": 0}
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
@@ -249,7 +309,16 @@ def create_customer(
     city=None,
     country=None,
 ):
-    pos_profile = json.loads(pos_profile_doc)
+    pos_profile = _resolve_authorized_pos_profile(pos_profile_doc).as_dict()
+    customer_name = cstr(customer_name).strip()
+    if not customer_name:
+        frappe.throw(_("Customer name is required"))
+
+    requested_company = cstr(company).strip()
+    profile_company = cstr(pos_profile.get("company")).strip()
+    if requested_company and profile_company and requested_company != profile_company:
+        frappe.throw(_("POS Profile company mismatch."))
+    company = profile_company or requested_company
 
     # Format birthday to MySQL compatible format (YYYY-MM-DD) if provided
     formatted_birthday = None
@@ -314,6 +383,9 @@ def create_customer(
             frappe.throw(_("Customer already exists"))
 
     elif method == "update":
+        if not customer_id:
+            frappe.throw(_("Customer ID is required for updates"))
+        _ensure_customer_write_permission(customer_id)
         customer_doc = frappe.get_doc("Customer", customer_id)
         customer_doc.customer_name = customer_name
         customer_doc.tax_id = tax_id
@@ -367,6 +439,15 @@ def create_customer(
 
 @frappe.whitelist()
 def set_customer_info(customer, fieldname, value=""):
+    customer = cstr(customer).strip()
+    fieldname = cstr(fieldname).strip()
+    if not customer:
+        frappe.throw(_("Customer is required"))
+    if fieldname not in {"loyalty_program", "email_id", "mobile_no"}:
+        frappe.throw(_("Unsupported customer info field: {0}").format(fieldname))
+
+    _ensure_customer_write_permission(customer)
+
     if fieldname == "loyalty_program":
         frappe.db.set_value("Customer", customer, "loyalty_program", value)
 
@@ -428,19 +509,30 @@ def get_customer_addresses(customer):
 
 @frappe.whitelist()
 def make_address(args):
-    args = json.loads(args)
+    if isinstance(args, str):
+        args = json.loads(args)
+    if not isinstance(args, dict):
+        frappe.throw(_("Address payload must be a JSON object"))
+
+    customer = cstr(args.get("customer")).strip()
+    if not customer:
+        frappe.throw(_("Customer is required to create an address"))
+    if not frappe.db.exists("Customer", customer):
+        frappe.throw(_("Customer {0} does not exist").format(customer))
+    _ensure_customer_write_permission(customer)
+
     address = frappe.get_doc(
         {
             "doctype": "Address",
-            "address_title": args.get("name"),
-            "address_line1": args.get("address_line1"),
-            "address_line2": args.get("address_line2"),
-            "city": args.get("city"),
-            "state": args.get("state"),
-            "pincode": args.get("pincode"),
-            "country": args.get("country"),
+            "address_title": cstr(args.get("name")).strip(),
+            "address_line1": cstr(args.get("address_line1")).strip(),
+            "address_line2": cstr(args.get("address_line2")).strip(),
+            "city": cstr(args.get("city")).strip(),
+            "state": cstr(args.get("state")).strip(),
+            "pincode": cstr(args.get("pincode")).strip(),
+            "country": cstr(args.get("country")).strip(),
             "address_type": "Shipping",
-            "links": [{"link_doctype": args.get("doctype"), "link_name": args.get("customer")}],
+            "links": [{"link_doctype": "Customer", "link_name": customer}],
         }
     ).insert()
 
