@@ -2,8 +2,12 @@ import frappe
 from frappe import _
 
 
+MANAGER_ROLES = {"System Manager", "Administrator"}
+
+
 def is_manager():
-    return frappe.has_role(("System Manager", "Administrator"))
+    user_roles = set(frappe.get_roles() or [])
+    return bool(MANAGER_ROLES.intersection(user_roles))
 
 
 def ensure_feature_enabled(profile_doc):

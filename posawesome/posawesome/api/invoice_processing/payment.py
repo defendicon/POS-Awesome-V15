@@ -1,17 +1,29 @@
 import frappe
 from frappe import _
 from frappe.utils import (
-    cint,
     flt,
-    getdate,
     nowdate,
 )
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from posawesome.posawesome.api.payment_processing.utils import get_party_account
-from posawesome.posawesome.api.payment_processing.utils import get_bank_cash_account as get_bank_account_processing
+
+
+def _save_and_submit_payment_entry(payment_entry):
+    previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
+    payment_entry.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    try:
+        payment_entry.save()
+        payment_entry.submit()
+    finally:
+        frappe.flags.ignore_account_permission = previous_ignore_account_permission
+
 
 def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_account=None):
     """Create change-related Payment Entries after the invoice is submitted."""
+
+    if not isinstance(data, dict):
+        frappe.throw(_("Invalid payment payload for change entries."))
 
     credit_change_amount = flt(data.get("credit_change"))
     paid_change_amount = flt(data.get("paid_change"))
@@ -149,10 +161,7 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
             advance_payment_entry.reference_no = reference_no
             advance_payment_entry.reference_date = posting_date
 
-        advance_payment_entry.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        advance_payment_entry.save()
-        advance_payment_entry.submit()
+        _save_and_submit_payment_entry(advance_payment_entry)
 
     if paid_change_amount > 0:
         change_payment_entry = frappe.new_doc("Payment Entry")
@@ -187,7 +196,4 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
         change_payment_entry.set_missing_values()
         change_payment_entry.set_amounts()
 
-        change_payment_entry.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        change_payment_entry.save()
-        change_payment_entry.submit()
+        _save_and_submit_payment_entry(change_payment_entry)

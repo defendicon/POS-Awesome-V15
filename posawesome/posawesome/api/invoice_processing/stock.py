@@ -2,7 +2,7 @@ import frappe
 from frappe.utils import cint, flt, cstr, getdate, nowdate
 from frappe import _
 from erpnext.stock.doctype.batch.batch import get_batch_qty
-from posawesome.posawesome.api.items import get_bulk_stock_availability, get_stock_availability
+from posawesome.posawesome.api.items import get_bulk_stock_availability
 from posawesome.posawesome.api.invoice_processing.utils import _sanitize_item_name
 
 def _is_stock_item(item):
@@ -39,18 +39,6 @@ def _allow_negative_stock(item, global_allow_negative=None):
         flag = frappe.get_cached_value("Item", item.get("item_code"), "allow_negative_stock")
 
     return bool(cint(flag or 0))
-
-
-def _get_available_stock(item):
-    """Return available stock qty for an item row."""
-    warehouse = item.get("warehouse")
-    batch_no = item.get("batch_no")
-    item_code = item.get("item_code")
-    if not item_code or not warehouse:
-        return 0
-    if batch_no:
-        return get_batch_qty(batch_no, warehouse) or 0
-    return get_stock_availability(item_code, warehouse)
 
 
 def _collect_stock_errors(items):
@@ -310,7 +298,6 @@ def _strip_client_freebies_from_payload(payload):
 
         auto_marker = row.get("auto_free_source")
         is_free = cint(row.get("is_free_item"))
-        has_name = bool(row.get("name"))
 
         if auto_marker:
             modified = True

@@ -7,9 +7,41 @@ from frappe.utils import flt
 from posawesome.posawesome.api.payment_processing.utils import get_bank_cash_account
 
 
+MAX_PAYLOAD_LENGTH = 20000
+MAX_CLIENT_REQUEST_ID_LENGTH = 140
+MAX_REMARKS_LENGTH = 1000
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles() or "Administrator" in frappe.get_roles()
+
+
+def _ensure_profile_assignment(profile_name):
+    if _can_manage_all_pos_profiles():
+        return
+
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_name})
+    if not has_explicit_assignments:
+        return
+
+    if not frappe.db.exists("POS Profile User", {"parent": profile_name, "user": frappe.session.user}):
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_name))
+
+
 def parse_payload(payload):
     if isinstance(payload, str):
-        return frappe._dict(json.loads(payload))
+        payload = payload.strip()
+        if not payload:
+            return frappe._dict()
+        if len(payload) > MAX_PAYLOAD_LENGTH:
+            frappe.throw(_("Cash movement payload is too large."))
+        try:
+            payload = json.loads(payload)
+        except Exception:
+            frappe.throw(_("Invalid payload for cash movement."))
+        if not isinstance(payload, dict):
+            frappe.throw(_("Invalid payload for cash movement."))
+        return frappe._dict(payload)
     if isinstance(payload, dict):
         return frappe._dict(payload)
     frappe.throw(_("Invalid payload for cash movement."))
@@ -28,9 +60,17 @@ def get_opening_shift(opening_shift_name):
 
 
 def get_pos_profile(profile_name):
+    profile_name = str(profile_name or "").strip()
     if not profile_name:
         frappe.throw(_("POS Profile is required."))
-    return frappe.get_doc("POS Profile", profile_name)
+    if not frappe.db.exists("POS Profile", profile_name):
+        frappe.throw(_("POS Profile is required."))
+    _ensure_profile_assignment(profile_name)
+
+    profile_doc = frappe.get_doc("POS Profile", profile_name)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+    return profile_doc
 
 
 def validate_company_consistency(opening_shift, profile_doc):
@@ -52,7 +92,10 @@ def validate_amount(amount, profile_doc):
 
 
 def validate_remarks(remarks, profile_doc):
-    if profile_doc.get("posa_require_cash_movement_remarks") and not (remarks or "").strip():
+    clean_remarks = (remarks or "").strip()
+    if len(clean_remarks) > MAX_REMARKS_LENGTH:
+        frappe.throw(_("Remarks cannot exceed {0} characters.").format(MAX_REMARKS_LENGTH))
+    if profile_doc.get("posa_require_cash_movement_remarks") and not clean_remarks:
         frappe.throw(_("Remarks are required for cash movement in this POS Profile."))
 
 
@@ -168,21 +211,48 @@ def resolve_target_account(payload, profile_doc, movement_type):
 
 
 def validate_account_company(account, company, label):
-    if not frappe.db.exists("Account", account):
+    account_data = frappe.db.get_value(
+        "Account",
+        account,
+        ["name", "company", "is_group", "disabled"],
+        as_dict=True,
+    )
+    if not account_data:
         frappe.throw(_("{0} is invalid.").format(label))
-    account_company = frappe.db.get_value("Account", account, "company")
+    if account_data.disabled:
+        frappe.throw(_("{0} cannot be a disabled account.").format(label))
+    if account_data.is_group:
+        frappe.throw(_("{0} must be a ledger account.").format(label))
+    account_company = account_data.company
     if account_company and account_company != company:
         frappe.throw(_("{0} must belong to company {1}.").format(label, company))
 
 
-def ensure_no_duplicate_client_request(client_request_id):
-    if not client_request_id:
+def _normalize_client_request_id(client_request_id):
+    value = str(client_request_id or "").strip()
+    if not value:
         return None
-    existing_name = frappe.db.get_value(
+    if len(value) > MAX_CLIENT_REQUEST_ID_LENGTH:
+        frappe.throw(
+            _("client_request_id cannot exceed {0} characters.").format(MAX_CLIENT_REQUEST_ID_LENGTH)
+        )
+    return value
+
+
+def ensure_no_duplicate_client_request(client_request_id, expected_user=None, expected_shift=None):
+    normalized_request_id = _normalize_client_request_id(client_request_id)
+    if not normalized_request_id:
+        return None
+    existing_row = frappe.db.get_value(
         "POS Cash Movement",
-        {"client_request_id": client_request_id},
-        "name",
+        {"client_request_id": normalized_request_id},
+        ["name", "user", "pos_opening_shift"],
+        as_dict=True,
     )
-    if existing_name:
-        return frappe.get_doc("POS Cash Movement", existing_name)
+    if existing_row:
+        if expected_user and existing_row.user != expected_user:
+            frappe.throw(_("client_request_id was already used by another user."))
+        if expected_shift and existing_row.pos_opening_shift != expected_shift:
+            frappe.throw(_("client_request_id was already used for another opening shift."))
+        return frappe.get_doc("POS Cash Movement", existing_row.name)
     return None

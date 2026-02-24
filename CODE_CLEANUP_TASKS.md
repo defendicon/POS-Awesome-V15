@@ -59,6 +59,11 @@
 - [x] Added safe payload parsing and capped list sizes for POS payment processor inputs in `posawesome/posawesome/api/payment_processing/processor.py`.
 - [x] Added opening-balance row limits and row-type sanitization in `posawesome/posawesome/api/shifts.py`.
 - [x] Added safe JSON parsing guard for invoice-rate item-code lists in `posawesome/posawesome/api/invoice_processing/data.py`.
+- [x] Hardened cash movement services with profile-assignment checks, safe payload parsing, bounded search/pagination filters, and scoped client-request idempotency in `posawesome/posawesome/api/cash_movement/{validation.py,queries.py,service.py,permissions.py}`.
+- [x] Prevented global account-permission flag leakage during journal and change-payment posting flows in `posawesome/posawesome/api/cash_movement/posting.py` and `posawesome/posawesome/api/invoice_processing/payment.py`.
+- [x] Added strict required-field, amount, date, and bank-account validation for payment entry creation in `posawesome/posawesome/api/payment_processing/creation.py`.
+- [x] Removed dead/unused code paths and stale imports in `posawesome/posawesome/api/invoice_processing/stock.py`, `posawesome/posawesome/api/payment_entry.py`, `posawesome/posawesome/api/status_updater.py`, and `posawesome/posawesome/api/taxes.py`.
+- [x] Updated cash movement unit mocks to reflect hardened duplicate-request lookup shape in `posawesome/posawesome/api/cash_movement/test_cash_movement.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

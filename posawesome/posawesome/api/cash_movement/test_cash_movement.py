@@ -9,16 +9,25 @@ class TestCashMovementValidation(unittest.TestCase):
     @patch("posawesome.posawesome.api.cash_movement.validation.frappe")
     def test_duplicate_client_request_returns_existing_doc(self, mock_frappe):
         existing_doc = SimpleNamespace(name="POS-CM-.26.-00001")
-        mock_frappe.db.get_value.return_value = existing_doc.name
+        mock_frappe.db.get_value.return_value = {
+            "name": existing_doc.name,
+            "user": "cashier@example.com",
+            "pos_opening_shift": "POS-OPEN-1",
+        }
         mock_frappe.get_doc.return_value = existing_doc
 
-        result = validation.ensure_no_duplicate_client_request("dup-1")
+        result = validation.ensure_no_duplicate_client_request(
+            "dup-1",
+            expected_user="cashier@example.com",
+            expected_shift="POS-OPEN-1",
+        )
 
         self.assertEqual(result, existing_doc)
         mock_frappe.db.get_value.assert_called_once_with(
             "POS Cash Movement",
             {"client_request_id": "dup-1"},
-            "name",
+            ["name", "user", "pos_opening_shift"],
+            as_dict=True,
         )
         mock_frappe.get_doc.assert_called_once_with("POS Cash Movement", existing_doc.name)
 

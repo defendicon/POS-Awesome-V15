@@ -52,9 +52,13 @@ def create_journal_entry(
     )
 
     je.flags.ignore_permissions = True
+    previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
     frappe.flags.ignore_account_permission = True
-    je.save()
-    je.submit()
+    try:
+        je.save()
+        je.submit()
+    finally:
+        frappe.flags.ignore_account_permission = previous_ignore_account_permission
     return je.name
 
 
@@ -70,5 +74,9 @@ def cancel_journal_entry(journal_entry_name):
         je.flags.ignore_permissions = True
         # Cash movement keeps a hard link to JE for audit trail; allow JE cancel from this controlled path.
         je.flags.ignore_links = True
+        previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
         frappe.flags.ignore_account_permission = True
-        je.cancel()
+        try:
+            je.cancel()
+        finally:
+            frappe.flags.ignore_account_permission = previous_ignore_account_permission

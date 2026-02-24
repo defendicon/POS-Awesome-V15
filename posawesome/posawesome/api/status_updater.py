@@ -4,18 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import comma_or, nowdate, getdate
+from frappe.utils import nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
-
-
-class OverAllowanceError(frappe.ValidationError):
-    pass
-
-
-def validate_status(status, options):
-    if status not in options:
-        frappe.throw(_("Status must be one of {0}").format(comma_or(options)))
 
 
 status_map = {

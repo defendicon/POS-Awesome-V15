@@ -1,7 +1,7 @@
 import frappe
 import erpnext
 from frappe import _
-from frappe.utils import nowdate, flt
+from frappe.utils import getdate, nowdate, flt
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.utils import get_exchange_rate
@@ -24,7 +24,23 @@ def create_payment_entry(
     cost_center=None,
     submit=0,
 ):
+    if not company:
+        frappe.throw(_("Company is required"))
+    if not customer:
+        frappe.throw(_("Customer is required"))
+    if not mode_of_payment:
+        frappe.throw(_("Mode of Payment is required"))
+
+    amount = flt(amount)
+    if amount <= 0:
+        frappe.throw(_("Amount must be greater than zero"))
+
     date = nowdate() if not posting_date else posting_date
+    try:
+        date = str(getdate(date))
+    except Exception:
+        frappe.throw(_("Invalid posting date"))
+
     party_type = "Customer"
 
     # Cache commonly used values
@@ -34,6 +50,8 @@ def create_payment_entry(
 
     # Get party account and currency in one call
     party_account = get_party_account(party_type, customer, company)
+    if not party_account:
+        frappe.throw(_("Unable to determine party account for customer {0}.").format(customer))
     party_account_currency = get_account_currency(party_account)
 
     if party_account_currency != currency:
@@ -46,6 +64,10 @@ def create_payment_entry(
 
     # Get bank details in one call
     bank = get_bank_cash_account(company, mode_of_payment)
+    if not bank or not bank.get("account") or not bank.get("account_currency"):
+        frappe.throw(
+            _("Unable to resolve bank/cash account for mode of payment {0}.").format(mode_of_payment)
+        )
 
     # Get exchange rate
     if exchange_rate and flt(exchange_rate) > 0:
@@ -93,7 +115,6 @@ def create_payment_entry(
     if exchange_rate and flt(exchange_rate) > 0:
         pe.source_exchange_rate = flt(exchange_rate)
         pe.target_exchange_rate = flt(exchange_rate)
-        frappe.logger().info(f"Set custom exchange rate: {exchange_rate}")
 
 
     if party_account and bank:

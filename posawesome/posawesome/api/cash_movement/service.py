@@ -28,10 +28,15 @@ from .validation import (
 
 
 def _enforce_shift_access(pos_opening_shift):
-    shift_user = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "user")
-    if not shift_user:
+    shift_data = frappe.db.get_value(
+        "POS Opening Shift",
+        pos_opening_shift,
+        ["name", "user"],
+        as_dict=True,
+    )
+    if not shift_data:
         frappe.throw(_("POS Opening Shift not found."))
-    if shift_user != frappe.session.user and not is_manager():
+    if shift_data.user != frappe.session.user and not is_manager():
         frappe.throw(_("You are not allowed to access this shift."))
 
 
@@ -50,9 +55,16 @@ def _create_cash_movement(payload, movement_type):
     amount = validate_amount(data.get("amount"), profile_doc)
     remarks = (data.get("remarks") or "").strip()
     against_name = (data.get("against_name") or "").strip()
+    if len(against_name) > 140:
+        frappe.throw(_("Against name cannot exceed 140 characters."))
     validate_remarks(remarks, profile_doc)
 
-    existing = ensure_no_duplicate_client_request(data.get("client_request_id"))
+    client_request_id = (data.get("client_request_id") or "").strip() or None
+    existing = ensure_no_duplicate_client_request(
+        client_request_id,
+        expected_user=frappe.session.user,
+        expected_shift=opening_shift.name,
+    )
     if existing:
         return existing.as_dict()
 
@@ -65,10 +77,16 @@ def _create_cash_movement(payload, movement_type):
     if movement_type == "Deposit" and source_account == target_account:
         frappe.throw(_("Source and target accounts cannot be the same for cash deposit."))
 
+    posting_date = data.get("posting_date") or nowdate()
+    try:
+        posting_date = str(getdate(posting_date))
+    except Exception:
+        frappe.throw(_("Invalid posting date."))
+
     movement_doc = frappe.get_doc(
         {
             "doctype": "POS Cash Movement",
-            "posting_date": data.get("posting_date") or nowdate(),
+            "posting_date": posting_date,
             "company": profile_doc.company,
             "pos_profile": profile_doc.name,
             "pos_opening_shift": opening_shift.name,
@@ -80,7 +98,7 @@ def _create_cash_movement(payload, movement_type):
             "target_account": target_account,
             "expense_account": expense_account,
             "remarks": remarks,
-            "client_request_id": data.get("client_request_id"),
+            "client_request_id": client_request_id,
         }
     )
     movement_doc.flags.ignore_permissions = True
@@ -105,6 +123,8 @@ def _create_cash_movement(payload, movement_type):
 @frappe.whitelist()
 def get_cash_movement_context(pos_profile=None, pos_opening_shift=None):
     profile_name = pos_profile
+    if pos_opening_shift:
+        _enforce_shift_access(pos_opening_shift)
     if not profile_name and pos_opening_shift:
         profile_name = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile")
     if not profile_name:
