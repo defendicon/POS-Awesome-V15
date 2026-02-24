@@ -116,6 +116,9 @@
   - Reworked `Payments.vue` layout chain to a single flex column shell and moved action buttons inside the payment main card footer.
   - Isolated payment form content into a dedicated `payments-scroll` region (`overflow-y: scroll`) so only the body scrolls while action buttons stay visible.
   - Removed sticky positioning dependency from action footer to avoid viewport/bottom clipping regressions in constrained-height windows.
+- 2026-02-24 Batch 13 (Payments Height Clamp + Conflict Cleanup):
+  - Removed generic `selection` class from `Payments.vue` card to avoid cross-component style collisions.
+  - Applied explicit `height/max-height: var(--container-height)` to payment card so inner scroll region always has bounded height and remains functional on reduced window sizes.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -153,8 +156,8 @@
   - Status: Closed in Batch 6.
 - Payments scroll/footer behavior (`Payments.vue`):
   - Reason: User-reported regression persisted: scrollbar visible but non-functional; buttons still dropping below screen.
-  - Action: Reopened and refactored to a stable flex+footer architecture with dedicated scrolling body (Batch 12).
-  - Status: Closed in Batch 12.
+  - Action: Reopened and refactored to a stable flex+footer architecture with dedicated scrolling body (Batch 12), then bounded payment card height via `--container-height` and removed shared class conflict (Batch 13).
+  - Status: Closed in Batch 13.
 
 ## QA Results by Viewport
 - Structural/code-level viewport validation:
@@ -168,6 +171,7 @@
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 10.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 11.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 12.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 13.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.

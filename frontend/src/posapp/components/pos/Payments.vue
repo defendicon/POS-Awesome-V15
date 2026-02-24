@@ -2,7 +2,7 @@
 <template>
 	<div class="pa-0 payments-view">
 		<v-card
-			class="selection mx-auto pa-1 my-0 pos-themed-card payments-main-card"
+			class="mx-auto pa-1 my-0 pos-themed-card payments-main-card"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -1154,6 +1154,8 @@ onBeforeUnmount(() => {
 .payments-main-card {
 	flex: 1 1 auto;
 	min-height: 0;
+	height: var(--container-height);
+	max-height: var(--container-height);
 	width: 100%;
 	max-width: 100%;
 	display: flex;
