@@ -3,7 +3,7 @@
 		class="cards mb-0 mt-3 py-2 px-3 rounded-lg resizable pos-themed-card"
 		style="resize: vertical; overflow: auto"
 	>
-		<v-row dense>
+		<v-row dense align="start" class="invoice-summary-row">
 			<!-- Summary Info -->
 			<v-col cols="12" md="7">
 				<v-row dense>
@@ -118,7 +118,7 @@
 			</v-col>
 
 			<!-- Action Buttons -->
-			<v-col cols="12" md="5">
+			<v-col cols="12" md="5" class="invoice-summary-actions-col">
 				<InvoiceActionButtons
 					:pos_profile="pos_profile"
 					:saveLoading="saveLoading"
@@ -355,6 +355,14 @@ async function handleOpenCustomerDisplay() {
 .cards {
 	background-color: var(--pos-card-bg) !important;
 	transition: all 0.3s ease;
+}
+
+.invoice-summary-row {
+	align-items: flex-start;
+}
+
+.invoice-summary-actions-col {
+	align-self: flex-start;
 }
 
 /* Enhanced field styling */

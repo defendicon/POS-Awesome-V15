@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useResponsive } from "../src/posapp/composables/core/useResponsive";
 import { useInvoiceUI } from "../src/posapp/composables/pos/invoice/useInvoiceUI";
 import cartItemRowSource from "../src/posapp/components/pos/invoice/CartItemRow.vue?raw";
+import invoiceSummarySource from "../src/posapp/components/pos/invoice/InvoiceSummary.vue?raw";
 
 function setViewport(width: number, height: number) {
 	Object.defineProperty(window, "innerWidth", {
@@ -46,6 +47,11 @@ describe("checkout UI regressions", () => {
 			"editingQtyValue.value = props.item.qty != null ? String(props.item.qty) : \"\";",
 		);
 		expect(cartItemRowSource).toContain("qtyInput.value?.focus?.();");
+	});
+
+	it("keeps invoice summary columns top-aligned to avoid blank space under buttons", () => {
+		expect(invoiceSummarySource).toContain('<v-row dense align="start" class="invoice-summary-row">');
+		expect(invoiceSummarySource).toContain('<v-col cols="12" md="5" class="invoice-summary-actions-col">');
 	});
 
 	it("keeps desktop checkout container height at 60vh", async () => {
