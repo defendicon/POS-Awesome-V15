@@ -45,7 +45,7 @@
 						<td :colspan="items_headers.length">
 							<v-row class="mt-2">
 								<v-col v-if="item.description">
-									<div class="text-primary" v-html="handleNewLine(item.description)"></div>
+									<div class="text-primary offer-description">{{ item.description }}</div>
 								</v-col>
 								<v-col v-if="item.offer == 'Give Product'">
 									<v-autocomplete
@@ -286,13 +286,6 @@ export default {
 			const applyedOffers = this.pos_offers.filter((offer) => offer.offer_applied);
 			this.eventBus.emit("update_invoice_offers", applyedOffers);
 		},
-		handleNewLine(str) {
-			if (str) {
-				return str.replace(/(?:\r\n|\r|\n)/g, "<br />");
-			} else {
-				return "";
-			}
-		},
 		get_give_items(offer) {
 			if (offer.apply_type === "Item Code") {
 				return [
@@ -392,3 +385,9 @@ export default {
 	},
 };
 </script>
+
+<style scoped>
+.offer-description {
+	white-space: pre-line;
+}
+</style>

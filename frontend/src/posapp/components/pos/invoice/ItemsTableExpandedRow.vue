@@ -367,15 +367,9 @@
 							>
 								<template v-slot:item="{ props, item }">
 									<v-list-item v-bind="props">
-										<v-list-item-title v-html="getRaw(item).batch_no"></v-list-item-title>
+										<v-list-item-title>{{ getRaw(item).batch_no }}</v-list-item-title>
 										<v-list-item-subtitle class="d-flex align-center">
-											<span
-												v-html="
-													`Available QTY  '${
-														getRaw(item).available_qty ?? getRaw(item).batch_qty
-													}' - Expiry Date ${getRaw(item).expiry_date}`
-												"
-											></span>
+											<span>{{ getBatchInfoText(item) }}</span>
 											<v-chip
 												v-if="getRaw(item).is_expired"
 												color="error"
@@ -475,6 +469,11 @@ const onQtyChange = (item: CartItem, event: any) => {
 };
 
 const getRaw = (item: any) => item?.raw || {};
+const getBatchInfoText = (item: any) => {
+	const rawItem = getRaw(item);
+	const availableQty = rawItem.available_qty ?? rawItem.batch_qty;
+	return `Available QTY '${availableQty}' - Expiry Date ${rawItem.expiry_date}`;
+};
 </script>
 
 <style scoped>
