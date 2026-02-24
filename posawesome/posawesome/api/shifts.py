@@ -9,6 +9,8 @@ from frappe.utils import cint, cstr
 from frappe import _
 from .utilities import get_version
 
+MAX_OPENING_BALANCE_ROWS = 200
+
 
 def _can_manage_other_users():
     return "System Manager" in frappe.get_roles()
@@ -102,6 +104,9 @@ def create_opening_voucher(pos_profile, company, balance_details):
             frappe.throw(_("Balance details must be a valid JSON array."))
     if not isinstance(balance_details, list):
         frappe.throw(_("Balance details must be a list."))
+    if len(balance_details) > MAX_OPENING_BALANCE_ROWS:
+        frappe.throw(_("Too many opening balance rows in one request."))
+    balance_details = [row for row in balance_details if isinstance(row, dict)]
 
     pos_profile_name = cstr(pos_profile).strip()
     if not pos_profile_name:
