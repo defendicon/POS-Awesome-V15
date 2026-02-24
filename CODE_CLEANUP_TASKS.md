@@ -87,6 +87,7 @@
 - [x] Fixed coupon one-use validation to scope usage counts by coupon and normalized coupon-code/name handling in `posawesome/posawesome/doctype/pos_coupon/pos_coupon.py`.
 - [x] Removed dead referral validation stub and made referral-code creation idempotent/sanitized in `posawesome/posawesome/doctype/referral_code/referral_code.py`.
 - [x] Hardened frontend client-error logging payload parsing with size bounds and safe JSON-shape handling in `posawesome/posawesome/api/utilities.py`.
+- [x] Removed dead commented import from `posawesome/posawesome/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
