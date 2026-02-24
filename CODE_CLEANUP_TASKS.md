@@ -67,6 +67,8 @@
 - [x] Added bounded item-code normalization and defensive cache TTL coercion to prevent oversized fan-out lookups in `posawesome/posawesome/api/item_fetchers.py`.
 - [x] Sanitized and length-bounded referral code validation while removing dead hook parameters in `posawesome/posawesome/api/customer.py`.
 - [x] Corrected stale copyright headers in `posawesome/posawesome/api/invoice.js` and `posawesome/posawesome/api/pos_profile.js`.
+- [x] Consolidated duplicate offer-link query wiring in `posawesome/posawesome/api/company.js`.
+- [x] Refactored duplicated test item setup into a shared helper and hardened pagination assertions in `posawesome/posawesome/api/test_items_numeric_code.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

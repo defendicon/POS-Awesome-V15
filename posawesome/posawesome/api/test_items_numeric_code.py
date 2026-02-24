@@ -8,6 +8,27 @@ from posawesome.posawesome.api.items import get_items
 
 
 class TestNumericItemCodes(FrappeTestCase):
+    def _upsert_item(self, item_code, item_name, **extra_fields):
+        if frappe.db.exists("Item", item_code):
+            item = frappe.get_doc("Item", item_code)
+            item.item_name = item_name
+            for field_name, field_value in extra_fields.items():
+                item.set(field_name, field_value)
+            item.save(ignore_permissions=True)
+            return
+
+        payload = {
+            "doctype": "Item",
+            "item_code": item_code,
+            "item_name": item_name,
+            "stock_uom": "Nos",
+            "item_group": "All Item Groups",
+            "is_sales_item": 1,
+            "is_fixed_asset": 0,
+        }
+        payload.update(extra_fields)
+        frappe.get_doc(payload).insert(ignore_permissions=True, ignore_mandatory=True)
+
     def setUp(self):
         items = [
             ("ALPHA-TEST", "Alpha"),
@@ -15,30 +36,13 @@ class TestNumericItemCodes(FrappeTestCase):
             ("002", "Gamma"),
         ]
         for code, name in items:
-            if frappe.db.exists("Item", code):
-                item = frappe.get_doc("Item", code)
-                item.item_name = name
-                item.is_sales_item = 1
-                item.is_fixed_asset = 0
-                item.save(ignore_permissions=True)
-            else:
-                frappe.get_doc(
-                    {
-                        "doctype": "Item",
-                        "item_code": code,
-                        "item_name": name,
-                        "stock_uom": "Nos",
-                        "is_stock_item": 0,
-                        "item_group": "All Item Groups",
-                        "is_sales_item": 1,
-                        "is_fixed_asset": 0,
-                    }
-                ).insert(ignore_permissions=True, ignore_mandatory=True)
+            self._upsert_item(code, name, is_stock_item=0)
 
     def test_numeric_code_appears_without_search(self):
         pos_profile = json.dumps({"name": "TestProfile"})
         with patch("posawesome.posawesome.api.items.get_items_details", return_value=[]):
             first_page = get_items(pos_profile, limit=2)
+            self.assertTrue(first_page)
             last_name = first_page[-1]["item_name"]
             second_page = get_items(pos_profile, limit=2, start_after=last_name)
         codes = [i["item_code"] for i in second_page]
@@ -50,17 +54,11 @@ class TestNumericItemCodes(FrappeTestCase):
         barcode = "123456789"
 
         if not frappe.db.exists("Item", item_code):
-            frappe.get_doc(
-                {
-                    "doctype": "Item",
-                    "item_code": item_code,
-                    "item_name": "Test Item Whitespace",
-                    "stock_uom": "Nos",
-                    "item_group": "All Item Groups",
-                    "is_sales_item": 1,
-                    "barcodes": [{"barcode": barcode}],
-                }
-            ).insert(ignore_permissions=True)
+            self._upsert_item(
+                item_code,
+                "Test Item Whitespace",
+                barcodes=[{"barcode": barcode}],
+            )
 
         pos_profile = json.dumps({"name": "TestProfile"})
 
