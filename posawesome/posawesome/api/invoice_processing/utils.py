@@ -11,6 +11,25 @@ from frappe.utils import (
 )
 from erpnext.setup.utils import get_exchange_rate
 
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _has_pos_profile_assignment():
+    return bool(frappe.db.exists("POS Profile User", {"user": frappe.session.user}))
+
+
+def _assert_currency_lookup_access():
+    if _can_manage_all_pos_profiles():
+        return
+    if frappe.has_permission("Price List", "read") or frappe.has_permission("Currency", "read"):
+        return
+    if _has_pos_profile_assignment():
+        return
+    frappe.throw(_("You are not allowed to access currency metadata."))
+
+
 def _get_return_validity_settings(pos_profile: str | None = None):
     """Return whether return validity is enabled and the default days window.
 
@@ -139,8 +158,13 @@ def get_latest_rate(from_currency: str, to_currency: str, cache=None):
 
 @frappe.whitelist()
 def get_price_list_currency(price_list):
+    _assert_currency_lookup_access()
+    price_list = frappe.utils.cstr(price_list).strip()
+    if not price_list:
+        return None
     return frappe.db.get_value("Price List", price_list, "currency")
 
 @frappe.whitelist()
 def get_available_currencies():
+    _assert_currency_lookup_access()
     return frappe.get_all("Currency", filters={"enabled": 1}, fields=["name"])

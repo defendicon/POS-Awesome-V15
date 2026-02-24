@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from posawesome.posawesome.api.item_processing.stock import _assert_stock_lookup_access
 
 @frappe.whitelist()
 def update_price_list_rate(item_code, price_list, rate, uom=None, pos_profile=None):
@@ -42,6 +43,7 @@ def update_price_list_rate(item_code, price_list, rate, uom=None, pos_profile=No
 @frappe.whitelist()
 def get_price_for_uom(item_code, price_list, uom):
     """Return Item Price for the given item, price list and UOM if it exists."""
+    _assert_stock_lookup_access()
     if not (item_code and price_list and uom):
         return None
 

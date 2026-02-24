@@ -44,6 +44,9 @@
 - [x] Added item search pagination/filter bounds and protected item-group listing endpoint in `posawesome/posawesome/api/item_processing/search.py`.
 - [x] Added company authorization and payload limits for M-Pesa payment lookup/submit endpoints in `posawesome/posawesome/api/m_pesa.py`.
 - [x] Fixed missing language-code validator and added translation/language/profile input guards in `posawesome/posawesome/api/utilities.py`.
+- [x] Added stock-lookup authorization guard for UOM-specific price fetch endpoint in `posawesome/posawesome/api/item_processing/price.py`.
+- [x] Added permission checks for price-list/currency metadata utility endpoints in `posawesome/posawesome/api/invoice_processing/utils.py`.
+- [x] Added doctype read-permission enforcement for print-format lookup in `posawesome/posawesome/api/print_formats.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
