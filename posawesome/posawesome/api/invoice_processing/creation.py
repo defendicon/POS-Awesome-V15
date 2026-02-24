@@ -1,4 +1,5 @@
 import frappe
+from contextlib import contextmanager
 from frappe import _
 from frappe.utils import (
     cstr,
@@ -38,6 +39,16 @@ MAX_INVOICE_ITEMS = 500
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
+
+
+@contextmanager
+def _account_permission_override():
+    previous_ignore_account_permission = frappe.flags.get("ignore_account_permission")
+    frappe.flags.ignore_account_permission = True
+    try:
+        yield
+    finally:
+        frappe.flags.ignore_account_permission = previous_ignore_account_permission
 
 
 def _extract_profile_name(pos_profile):
@@ -462,9 +473,9 @@ def update_invoice(data):
         invoice_doc.base_paid_amount = flt(sum(p.base_amount for p in invoice_doc.payments))
 
     invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     invoice_doc.docstatus = 0
-    invoice_doc.save()
+    with _account_permission_override():
+        invoice_doc.save()
 
     # Return both the invoice doc and the updated data
     response = invoice_doc.as_dict()
@@ -588,9 +599,9 @@ def submit_invoice(invoice, data, submit_in_background=False):
     _apply_write_off_settings(invoice_doc, data)
 
     invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
-    invoice_doc.save()
+    with _account_permission_override():
+        invoice_doc.save()
 
     if data.get("due_date"):
         frappe.db.set_value(
@@ -624,7 +635,8 @@ def submit_invoice(invoice, data, submit_in_background=False):
             },
         )
     else:
-        invoice_doc.submit()
+        with _account_permission_override():
+            invoice_doc.submit()
 
         _create_change_payment_entries(invoice_doc, data, pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)
@@ -649,7 +661,6 @@ def submit_in_background_job(kwargs):
             return
 
         invoice_doc.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
 
         # Re-run validations that may be impacted while queued (stock, credit limits)
         _validate_stock_on_invoice(invoice_doc)
@@ -674,9 +685,9 @@ def submit_in_background_job(kwargs):
             if not invoice_doc.loyalty_redemption_cost_center:
                 invoice_doc.loyalty_redemption_cost_center = invoice_doc.cost_center
 
-        invoice_doc.save()
-
-        invoice_doc.submit()
+        with _account_permission_override():
+            invoice_doc.save()
+            invoice_doc.submit()
 
         _create_change_payment_entries(invoice_doc, data, invoice_doc.pos_profile, cash_account)
         redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments)

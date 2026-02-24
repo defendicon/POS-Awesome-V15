@@ -70,6 +70,8 @@
 - [x] Consolidated duplicate offer-link query wiring in `posawesome/posawesome/api/company.js`.
 - [x] Refactored duplicated test item setup into a shared helper and hardened pagination assertions in `posawesome/posawesome/api/test_items_numeric_code.py`.
 - [x] Scoped and restored global account-permission bypass flags across order/quotation/purchase save-submit flows in `posawesome/posawesome/api/sales_orders.py`, `posawesome/posawesome/api/quotations.py`, and `posawesome/posawesome/api/purchase_orders.py`.
+- [x] Scoped and restored account-permission bypass flags for customer-credit journal/payment posting in `posawesome/posawesome/api/payments.py`.
+- [x] Scoped and restored account-permission bypass flags in invoice draft/save/submit paths in `posawesome/posawesome/api/invoice_processing/creation.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
