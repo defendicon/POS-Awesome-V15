@@ -66,7 +66,9 @@ describe("checkout UI regressions", () => {
 	});
 
 	it("anchors checkout bottom panels using full-height flex layout", () => {
+		expect(posShellSource).toContain("height: calc(100vh - 72px)");
 		expect(posShellSource).toContain("min-height: calc(100vh - 72px)");
+		expect(posShellSource).toContain("class=\"dynamic-panel\"");
 		expect(posShellSource).toContain("display: flex;");
 		expect(itemsSelectorSource).toContain('class="items-selector-shell"');
 		expect(itemsSelectorSource).toContain('class="items-selector-toolbar"');

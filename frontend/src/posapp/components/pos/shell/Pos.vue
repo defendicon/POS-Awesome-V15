@@ -26,7 +26,7 @@
 				cols="12"
 				class="pos dynamic-col"
 			>
-				<ItemsSelector context="pos" />
+				<ItemsSelector context="pos" class="dynamic-panel" />
 			</v-col>
 			<v-col
 				v-show="activeView === 'offers'"
@@ -37,7 +37,7 @@
 				cols="12"
 				class="pos dynamic-col"
 			>
-				<PosOffers></PosOffers>
+				<PosOffers class="dynamic-panel"></PosOffers>
 			</v-col>
 			<v-col
 				v-show="activeView === 'coupons'"
@@ -48,7 +48,7 @@
 				cols="12"
 				class="pos dynamic-col"
 			>
-				<PosCoupons></PosCoupons>
+				<PosCoupons class="dynamic-panel"></PosCoupons>
 			</v-col>
 			<v-col
 				v-show="activeView === 'payment'"
@@ -59,11 +59,11 @@
 				cols="12"
 				class="pos dynamic-col"
 			>
-				<Payments></Payments>
+				<Payments class="dynamic-panel"></Payments>
 			</v-col>
 
 			<v-col xl="7" lg="7" md="7" sm="7" cols="12" class="pos dynamic-col">
-				<Invoice></Invoice>
+				<Invoice class="dynamic-panel"></Invoice>
 			</v-col>
 		</v-row>
 	</div>
@@ -270,8 +270,10 @@ export default {
 .dynamic-main-row {
 	padding: 0;
 	margin: 0;
+	height: calc(100vh - 72px);
 	min-height: calc(100vh - 72px);
 	align-items: stretch;
+	overflow: hidden;
 }
 
 .dynamic-col {
@@ -281,7 +283,15 @@ export default {
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
+	padding-bottom: 0;
 	/* Add top margin for better separation */
+}
+
+.dynamic-panel {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
 }
 
 @media (max-width: 768px) {
@@ -293,10 +303,13 @@ export default {
 	.dynamic-col {
 		padding: var(--dynamic-xs);
 		margin-top: var(--dynamic-xs);
+		padding-bottom: 0;
 	}
 
 	.dynamic-main-row {
 		min-height: calc(100vh - 64px);
+		height: auto;
+		overflow: visible;
 	}
 }
 </style>
