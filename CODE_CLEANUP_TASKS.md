@@ -92,6 +92,7 @@
 - [x] Removed dead commented import and fixed indentation style in `posawesome/posawesome/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.py`.
 - [x] Refactored delivery-charge profile matching to deduplicate inputs, avoid empty child queries, and remove repeated scans in `posawesome/posawesome/doctype/delivery_charges/delivery_charges.py`.
 - [x] Removed dead commented `frappe` imports from thin doctype wrappers/tests in `posawesome/posawesome/doctype/{pos_closing_shift_taxes,pos_coupon_detail,pos_closing_shift_detail,pos_offer_detail,sales_invoice_reference,pos_opening_shift_detail,pos_payment_entry_reference,delivery_charges/test_delivery_charges.py,mpesa_c2b_register_url/test_mpesa_c2b_register_url.py,mpesa_payment_register/test_mpesa_payment_register.py,pos_opening_shift/test_pos_opening_shift.py,pos_coupon/test_pos_coupon.py,pos_closing_shift/test_pos_closing_shift.py,pos_offer/test_pos_offer.py,referral_code/test_referral_code.py}`.
+- [x] Added company read-permission enforcement to default-warehouse lookup and removed excessive/noisy sales-person logging/fetch limits in `posawesome/posawesome/api/utils.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

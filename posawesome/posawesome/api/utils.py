@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 import time
 from functools import cache
@@ -12,10 +11,20 @@ HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 
 
 logger = logging.getLogger(__name__)
+SALES_PERSON_FETCH_LIMIT = 5000
 
 
 def _can_manage_all_pos_profiles() -> bool:
     return "System Manager" in frappe.get_roles()
+
+
+def _assert_company_read_access(company: str) -> None:
+    from frappe import _
+
+    if not company:
+        return
+    if not frappe.has_permission("Company", "read", company):
+        frappe.throw(_("You are not permitted to access company {0}.").format(company))
 
 
 def _extract_profile_name(pos_profile) -> str:
@@ -160,6 +169,7 @@ def get_default_warehouse(company=None):
     company = company or frappe.defaults.get_default("company")
     if not company:
         return None
+    _assert_company_read_access(company)
     warehouse = frappe.db.get_value("Company", company, "default_warehouse")
     if not warehouse:
         warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
@@ -168,8 +178,6 @@ def get_default_warehouse(company=None):
 
 def fetch_sales_person_names():
     """Return the list of enabled sales persons allowed for the active POS profile."""
-
-    logger.info("Fetching sales persons...")
 
     try:
         profile = get_active_pos_profile()
@@ -187,14 +195,10 @@ def fetch_sales_person_names():
             "Sales Person",
             filters=filters,
             fields=["name", "sales_person_name"],
-            limit_page_length=100000,
+            limit_page_length=SALES_PERSON_FETCH_LIMIT,
         )
 
-        logger.info(
-            "Found %s sales persons: %s",
-            len(sales_persons),
-            json.dumps(sales_persons),
-        )
+        logger.debug("Found %s sales persons", len(sales_persons))
 
         return sales_persons
     except Exception as exc:
