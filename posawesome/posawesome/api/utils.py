@@ -14,6 +14,49 @@ HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 logger = logging.getLogger(__name__)
 
 
+def _can_manage_all_pos_profiles() -> bool:
+    return "System Manager" in frappe.get_roles()
+
+
+def _extract_profile_name(pos_profile) -> str:
+    if isinstance(pos_profile, dict):
+        return (
+            str(
+                pos_profile.get("name")
+                or pos_profile.get("pos_profile")
+                or pos_profile.get("profile")
+                or ""
+            )
+            .strip()
+        )
+
+    if isinstance(pos_profile, str):
+        raw_value = pos_profile.strip()
+        if not raw_value:
+            return ""
+        try:
+            decoded_value = json.loads(raw_value)
+        except Exception:
+            decoded_value = raw_value
+        if isinstance(decoded_value, dict):
+            return _extract_profile_name(decoded_value)
+        return str(decoded_value or "").strip()
+
+    return ""
+
+
+def _ensure_profile_assignment(profile_name: str) -> None:
+    if _can_manage_all_pos_profiles():
+        return
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_name})
+    if not has_explicit_assignments:
+        return
+    if not frappe.db.exists("POS Profile User", {"parent": profile_name, "user": frappe.session.user}):
+        from frappe import _
+
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_name))
+
+
 def expand_item_groups(item_groups):
     """Expand any parent item groups to include their children.
 
@@ -69,37 +112,22 @@ def _ensure_pos_profile(pos_profile):
     from frappe import _
     from frappe import as_json
 
+    profile_name = _extract_profile_name(pos_profile)
     profile_dict = None
     profile_json = None
 
-    if isinstance(pos_profile, dict):
-        profile_dict = pos_profile
-        profile_json = as_json(pos_profile)
-    elif isinstance(pos_profile, str):
-        raw_value = pos_profile.strip()
-        if raw_value:
-            try:
-                decoded_value = json.loads(raw_value)
-            except Exception:
-                decoded_value = raw_value
-
-            if isinstance(decoded_value, dict):
-                profile_dict = decoded_value
-                profile_json = raw_value
-            elif isinstance(decoded_value, str):
-                if decoded_value:
-                    profile_doc = frappe.get_doc("POS Profile", decoded_value)
-                    profile_dict = profile_doc.as_dict()
-                else:
-                    profile_dict = get_active_pos_profile()
-            elif decoded_value is None:
-                profile_dict = get_active_pos_profile()
-        else:
-            profile_dict = get_active_pos_profile()
-    elif pos_profile is None:
+    if profile_name:
+        if not frappe.db.exists("POS Profile", profile_name):
+            frappe.throw(_("POS profile data is missing or invalid."))
+        _ensure_profile_assignment(profile_name)
+        profile_doc = frappe.get_doc("POS Profile", profile_name)
+        if profile_doc.disabled:
+            frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+        profile_dict = profile_doc.as_dict()
+    else:
         profile_dict = get_active_pos_profile()
 
-    if profile_dict and not profile_json:
+    if profile_dict:
         profile_json = as_json(profile_dict)
 
     if not profile_dict or not profile_json:
@@ -111,12 +139,18 @@ def _ensure_pos_profile(pos_profile):
 @frappe.whitelist()
 def get_active_pos_profile(user=None):
     """Return the active POS profile for the given user."""
-    user = user or frappe.session.user
+    requested_user = user or frappe.session.user
+    if requested_user != frappe.session.user and not _can_manage_all_pos_profiles():
+        frappe.throw(frappe._("You are not permitted to access another user's POS profile."))
+
+    user = requested_user
     profile = frappe.db.get_value("POS Profile User", {"user": user}, "parent")
     if not profile:
         profile = frappe.db.get_single_value("POS Settings", "pos_profile")
     if not profile:
         return None
+    if user == frappe.session.user:
+        _ensure_profile_assignment(profile)
     return frappe.get_doc("POS Profile", profile).as_dict()
 
 

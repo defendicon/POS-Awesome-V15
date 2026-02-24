@@ -26,6 +26,11 @@ from .utils import get_item_groups, fetch_sales_person_names
 from posawesome.utils import get_build_version
 
 
+def _require_system_manager():
+    if "System Manager" not in frappe.get_roles():
+        frappe.throw(_("Only System Manager can access this resource."))
+
+
 def get_version():
     branch_name = get_app_branch("erpnext")
     if "12" in branch_name:
@@ -173,6 +178,7 @@ def get_app_info() -> Dict[str, List[Dict[str, str]]]:
     """
     Return a list of installed apps and their versions.
     """
+    _require_system_manager()
     # Get installed apps using Frappe's built-in function
     installed_apps = frappe.get_installed_apps()
 
@@ -223,6 +229,7 @@ def _get_git_commit_info(app_name: str = "posawesome") -> Dict[str, Any]:
 @frappe.whitelist()
 def get_build_info() -> Dict[str, Any]:
     """Return build version + latest git commit info for update prompts."""
+    _require_system_manager()
     data: Dict[str, Any] = {"build_version": get_build_version()}
     data.update(_get_git_commit_info("posawesome"))
     return data
@@ -344,6 +351,7 @@ def _get_current_branch(app_path: str) -> str:
 
 @frappe.whitelist()
 def get_remote_update_info() -> Dict[str, Any]:
+    _require_system_manager()
     data: Dict[str, Any] = {"build_version": get_build_version()}
     base = _get_git_commit_info("posawesome")
     if base:
@@ -472,6 +480,7 @@ def get_pos_profile_tax_inclusive(pos_profile: str):
 
 @frappe.whitelist()
 def get_database_usage():
+    _require_system_manager()
     db_size = None
     db_connections = None
     db_slow_queries = None
@@ -559,6 +568,7 @@ def get_database_usage():
 
 @frappe.whitelist()
 def get_server_usage():
+    _require_system_manager()
     global _PSUTIL_MISSING_LOGGED
 
     cpu_percent = None
