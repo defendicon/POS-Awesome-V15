@@ -50,6 +50,7 @@
 - [x] Added invoice doctype allowlisting for draft APIs and guarded exchange-rate lookup access in `posawesome/posawesome/api/invoices.py`.
 - [x] Added robust JSON parsing and item-count limits for invoice update/submit/cart validation APIs in `posawesome/posawesome/api/invoice_processing/creation.py`.
 - [x] Hardened purchase-order APIs with payload validation, bounded search limits, and explicit read-access checks in `posawesome/posawesome/api/purchase_orders.py`.
+- [x] Added stock lookup authorization and request-size limits for bundle component API in `posawesome/posawesome/api/bundles.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
