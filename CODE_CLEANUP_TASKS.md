@@ -32,6 +32,8 @@
 - [x] Added company authorization and strict mode-of-payment payload validation in `posawesome/posawesome/api/payment_processing/utils.py`.
 - [x] Added explicit company/profile authorization and profile-company consistency checks in `posawesome/posawesome/api/payment_processing/reconciliation.py`.
 - [x] Removed noisy dead debug logging and validated journal payment amount inputs in `posawesome/posawesome/api/payment_processing/journal_entry.py`.
+- [x] Restricted QZ certificate/signing endpoints to authorized POS users and added sign-payload validation in `posawesome/posawesome/api/qz.py`.
+- [x] Fixed unreachable tax-inclusive logic by correcting control flow in `posawesome/posawesome/api/invoice.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

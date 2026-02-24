@@ -13,6 +13,31 @@ import frappe
 from frappe import _
 
 
+MAX_SIGN_MESSAGE_LENGTH = 20000
+
+
+def _can_manage_all_pos_profiles() -> bool:
+    return "System Manager" in frappe.get_roles()
+
+
+def _has_pos_profile_access(user: str) -> bool:
+    if frappe.db.exists("POS Profile User", {"user": user}):
+        return True
+
+    # Backward compatibility: when no explicit profile-user rows are configured,
+    # allow users that can already read Sales Invoices.
+    has_profile_assignments = frappe.db.exists("POS Profile User", {})
+    return not has_profile_assignments and frappe.has_permission("Sales Invoice", "read")
+
+
+def _assert_qz_access() -> None:
+    if _can_manage_all_pos_profiles():
+        return
+    if _has_pos_profile_access(frappe.session.user):
+        return
+    frappe.throw(_("You are not allowed to use QZ Tray signing endpoints."))
+
+
 def _qz_dir() -> str:
     return frappe.get_site_path("private", "qz")
 
@@ -60,6 +85,7 @@ def get_certificate() -> str:
     Returns an empty string when certificate is not configured yet so
     frontend can gracefully fall back without server error noise.
     """
+    _assert_qz_access()
     cert_path = _cert_path()
     if not os.path.exists(cert_path):
         return ""
@@ -69,6 +95,7 @@ def get_certificate() -> str:
 @frappe.whitelist()
 def get_certificate_download() -> dict[str, str]:
     """Return certificate PEM + default company name for file naming."""
+    _assert_qz_access()
     cert_path = _cert_path()
     if not os.path.exists(cert_path):
         frappe.throw(
@@ -88,6 +115,15 @@ def sign_message(message: str) -> str:
 
     Returns empty string when key is not configured yet.
     """
+    _assert_qz_access()
+
+    if message is None:
+        message = ""
+    if not isinstance(message, str):
+        frappe.throw(_("Message must be a string."))
+    if len(message) > MAX_SIGN_MESSAGE_LENGTH:
+        frappe.throw(_("Message is too large to sign in one request."))
+
     key_path = _key_path()
     if not os.path.exists(key_path):
         return ""
