@@ -5,13 +5,15 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import strip
+from frappe.utils import cstr, strip
 from frappe.utils import getdate, today
 
 
 class POSCoupon(Document):
     def autoname(self):
-        self.coupon_name = strip(self.coupon_name)
+        self.coupon_name = strip(cstr(self.coupon_name))
+        if not self.coupon_name:
+            frappe.throw(_("Coupon Name is required"))
         self.name = self.coupon_name
 
         if not self.coupon_code:
@@ -74,12 +76,17 @@ class POSCoupon(Document):
 
 
 def check_coupon_code(coupon_code, customer=None, company=None):
+    coupon_code = cstr(coupon_code).strip().upper()
     res = {"coupon": None}
-    if not frappe.db.exists("POS Coupon", {"coupon_code": coupon_code.upper()}):
+    if not coupon_code:
         res["msg"] = _("Sorry, this coupon code not exists")
         return res
 
-    coupon = frappe.get_doc("POS Coupon", {"coupon_code": coupon_code.upper()})
+    if not frappe.db.exists("POS Coupon", {"coupon_code": coupon_code}):
+        res["msg"] = _("Sorry, this coupon code not exists")
+        return res
+
+    coupon = frappe.get_doc("POS Coupon", {"coupon_code": coupon_code})
     pos_offer = frappe.get_doc("POS Offer", coupon.pos_offer)
 
     if coupon.valid_from:
@@ -119,8 +126,9 @@ def check_coupon_code(coupon_code, customer=None, company=None):
         count = frappe.db.count(
             "POS Coupon Detail",
             filters={
+                "coupon": coupon.name,
                 "parentfield": "posa_coupons",
-                "parenttype": "Sales Invoice",
+                "parenttype": ["in", ["Sales Invoice", "POS Invoice"]],
                 "docstatus": 1,
                 "customer": customer,
             },

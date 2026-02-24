@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 from posawesome.posawesome.api.payment_entry import create_payment_entry
 
 
@@ -34,7 +35,7 @@ class MpesaPaymentRegister(Document):
             self.mode_of_payment = register_url_list[0].mode_of_payment
 
     def before_submit(self):
-        if not self.transamount:
+        if flt(self.transamount) <= 0:
             frappe.throw(_("Trans Amount is required"))
         if not self.company:
             frappe.throw(_("Company is required"))
@@ -46,15 +47,15 @@ class MpesaPaymentRegister(Document):
 
     def create_payment_entry(self):
         payment_entry = create_payment_entry(
-            self.company,
-            self.customer,
-            self.transamount,
-            self.currency,
-            self.mode_of_payment,
-            self.posting_date,
-            self.transid,
-            self.posting_date,
-            None,
-            self.submit_payment,
+            company=self.company,
+            customer=self.customer,
+            amount=self.transamount,
+            currency=self.currency,
+            mode_of_payment=self.mode_of_payment,
+            reference_date=self.posting_date,
+            reference_no=self.transid,
+            posting_date=self.posting_date,
+            cost_center=None,
+            submit=self.submit_payment,
         )
         return payment_entry.name

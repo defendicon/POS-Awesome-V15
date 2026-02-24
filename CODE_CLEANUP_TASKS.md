@@ -82,6 +82,9 @@
 - [x] Added profile assignment/user ownership checks for opening-shift validation in `posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py`.
 - [x] Added opening-shift consistency and user-ownership checks for closing-shift validation in `posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py`.
 - [x] Added open-shift status and user-ownership checks in cash movement doctype validation in `posawesome/posawesome/doctype/pos_cash_movement/pos_cash_movement.py`.
+- [x] Fixed M-Pesa payment-entry wiring by switching to explicit keyword arguments and enforcing positive transaction amount in `posawesome/posawesome/doctype/mpesa_payment_register/mpesa_payment_register.py`.
+- [x] Added robust timeout/error handling for external M-Pesa C2B URL registration calls in `posawesome/posawesome/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.py`.
+- [x] Fixed coupon one-use validation to scope usage counts by coupon and normalized coupon-code/name handling in `posawesome/posawesome/doctype/pos_coupon/pos_coupon.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
