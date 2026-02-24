@@ -1,8 +1,10 @@
 import frappe
 import time
+import json
 from collections import defaultdict
 from frappe import _
 from frappe.utils import (
+    cstr,
     cint,
     flt,
     getdate,
@@ -10,6 +12,26 @@ from frappe.utils import (
 )
 from posawesome.posawesome.api.invoice_processing.utils import _get_return_validity_settings
 from posawesome.posawesome.api.utils import log_perf_event
+from posawesome.posawesome.api.payment_processing.data import (
+    _assert_company_access,
+    _assert_pos_profile_access,
+    _coerce_text_filter,
+)
+
+
+ALLOWED_RETURN_DOCTYPES = {"Sales Invoice", "POS Invoice"}
+MAX_RETURN_ITEMS = 500
+
+
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _normalize_return_doctype(doctype):
+    normalized = cstr(doctype or "Sales Invoice").strip()
+    if normalized not in ALLOWED_RETURN_DOCTYPES:
+        frappe.throw(_("Unsupported return doctype: {0}").format(normalized or doctype))
+    return normalized
 
 @frappe.whitelist()
 def search_invoices_for_return(
@@ -48,6 +70,43 @@ def search_invoices_for_return(
         - invoices: List of invoice documents
         - has_more: Boolean indicating if there are more invoices to load
     """
+    doctype = _normalize_return_doctype(doctype)
+    company = _coerce_text_filter(company, _("Company"))
+    invoice_name = _coerce_text_filter(invoice_name, _("Invoice"))
+    customer_name = _coerce_text_filter(customer_name, _("Customer Name"))
+    customer_id = _coerce_text_filter(customer_id, _("Customer ID"))
+    mobile_no = _coerce_text_filter(mobile_no, _("Mobile Number"))
+    tax_id = _coerce_text_filter(tax_id, _("Tax ID"))
+    pos_profile = _coerce_text_filter(pos_profile, _("POS Profile"))
+
+    if not company:
+        frappe.throw(_("Company is required"))
+    _assert_company_access(company)
+    _assert_pos_profile_access(pos_profile)
+
+    if pos_profile:
+        profile_company = frappe.get_cached_value("POS Profile", pos_profile, "company")
+        if profile_company and profile_company != company:
+            frappe.throw(_("POS Profile {0} does not belong to company {1}.").format(pos_profile, company))
+
+    parsed_from_date = None
+    parsed_to_date = None
+    if from_date:
+        parsed_from_date = getdate(from_date)
+    if to_date:
+        parsed_to_date = getdate(to_date)
+    if parsed_from_date and parsed_to_date and parsed_from_date > parsed_to_date:
+        frappe.throw(_("from_date cannot be greater than to_date."))
+
+    parsed_min_amount = flt(min_amount) if min_amount not in (None, "") else None
+    parsed_max_amount = flt(max_amount) if max_amount not in (None, "") else None
+    if (
+        parsed_min_amount is not None
+        and parsed_max_amount is not None
+        and parsed_max_amount < parsed_min_amount
+    ):
+        frappe.throw(_("max_amount cannot be less than min_amount."))
+
     started_at = time.perf_counter()
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
@@ -76,24 +135,24 @@ def search_invoices_for_return(
 
     # Add date range filters if provided
     if from_date:
-        filters["posting_date"] = [">=", from_date]
+        filters["posting_date"] = [">=", parsed_from_date]
 
     if to_date:
         if "posting_date" in filters:
-            filters["posting_date"] = ["between", [from_date, to_date]]
+            filters["posting_date"] = ["between", [parsed_from_date, parsed_to_date]]
         else:
-            filters["posting_date"] = ["<=", to_date]
+            filters["posting_date"] = ["<=", parsed_to_date]
 
     # Add amount filters if provided
-    if min_amount:
-        filters["grand_total"] = [">=", float(min_amount)]
+    if parsed_min_amount is not None:
+        filters["grand_total"] = [">=", parsed_min_amount]
 
-    if max_amount:
+    if parsed_max_amount is not None:
         if "grand_total" in filters:
             # If min_amount was already set, change to between
-            filters["grand_total"] = ["between", [float(min_amount), float(max_amount)]]
+            filters["grand_total"] = ["between", [parsed_min_amount, parsed_max_amount]]
         else:
-            filters["grand_total"] = ["<=", float(max_amount)]
+            filters["grand_total"] = ["<=", parsed_max_amount]
 
     # If any customer search criteria is provided, find matching customers
     customer_ids = []
@@ -219,10 +278,26 @@ def search_invoices_for_return(
 @frappe.whitelist()
 def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoice"):
     """Return one invoice with returnable item quantities after past returns."""
+    doctype = _normalize_return_doctype(doctype)
+    invoice_name = _coerce_text_filter(invoice_name, _("Invoice"))
+    pos_profile = _coerce_text_filter(pos_profile, _("POS Profile"))
+    if not invoice_name:
+        frappe.throw(_("Invoice is required"))
+    _assert_pos_profile_access(pos_profile)
+
     started_at = time.perf_counter()
     enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
     invoice_doc = frappe.get_cached_doc(doctype, invoice_name)
+    if not frappe.has_permission(doctype, "read", invoice_doc.name) and not _can_manage_all_pos_profiles():
+        frappe.throw(_("Not permitted to access {0} {1}.").format(doctype, invoice_doc.name))
+    _assert_company_access(invoice_doc.company)
+
+    if pos_profile and invoice_doc.get("pos_profile") and invoice_doc.get("pos_profile") != pos_profile:
+        frappe.throw(
+            _("Invoice {0} does not belong to POS Profile {1}.").format(invoice_doc.name, pos_profile)
+        )
+
     invoice = {
         "name": invoice_doc.name,
         "doctype": doctype,
@@ -343,6 +418,35 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
     """
     Ensure that return items do not exceed the quantity from the original invoice.
     """
+    doctype = _normalize_return_doctype(doctype)
+    original_invoice_name = _coerce_text_filter(original_invoice_name, _("Invoice"))
+    if not original_invoice_name:
+        return {"valid": False, "message": _("Original invoice is required.")}
+
+    if isinstance(return_items, str):
+        try:
+            return_items = json.loads(return_items)
+        except Exception:
+            return {"valid": False, "message": _("Invalid return items payload.")}
+    if not isinstance(return_items, list):
+        return {"valid": False, "message": _("Return items must be a list.")}
+    if len(return_items) > MAX_RETURN_ITEMS:
+        return {"valid": False, "message": _("Too many return items in one request.")}
+
+    if not frappe.db.exists(doctype, original_invoice_name):
+        return {
+            "valid": False,
+            "message": _("Invoice {0} was not found.").format(original_invoice_name),
+        }
+
+    original_invoice_doc = frappe.get_doc(doctype, original_invoice_name)
+    if (
+        not frappe.has_permission(doctype, "read", original_invoice_doc.name)
+        and not _can_manage_all_pos_profiles()
+    ):
+        return {"valid": False, "message": _("Not permitted to access the original invoice.")}
+    _assert_company_access(original_invoice_doc.company)
+
     meta = frappe.get_meta(doctype)
     item_field = meta.get_field("items")
     item_doctype = item_field.options if item_field else None
@@ -381,8 +485,10 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
                 original_item_qty[item.item_code] -= abs(flt(item.qty or 0))
 
     for item in return_items:
-        item_code = item.get("item_code")
-        return_qty = abs(item.get("qty", 0))
+        if not isinstance(item, dict):
+            continue
+        item_code = cstr(item.get("item_code")).strip()
+        return_qty = abs(flt(item.get("qty", 0)))
         if item_code in original_item_qty and return_qty > original_item_qty[item_code]:
             return {
                 "valid": False,

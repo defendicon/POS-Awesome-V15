@@ -36,6 +36,7 @@
 - [x] Fixed unreachable tax-inclusive logic by correcting control flow in `posawesome/posawesome/api/invoice.py`.
 - [x] Added company/profile authorization and input guards for offer, coupon, and delivery-charge endpoints in `posawesome/posawesome/api/offers.py`.
 - [x] Added company access checks and cart payload validation limits for pricing-rule APIs in `posawesome/posawesome/api/pricing_rules.py`.
+- [x] Restricted return-invoice search/fetch/validation APIs with doctype allowlisting, company/profile authorization, and payload guards in `posawesome/posawesome/api/invoice_processing/returns.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
