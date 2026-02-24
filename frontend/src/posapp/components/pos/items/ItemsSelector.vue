@@ -15,6 +15,9 @@
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
+				width: '100%',
+				maxWidth: '100%',
+				minWidth: 0,
 				resize: 'vertical',
 				overflow: 'auto',
 				position: 'relative',
@@ -1040,11 +1043,17 @@ defineExpose({
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
+	min-width: 0;
+	width: 100%;
+	max-width: 100%;
 }
 
 .dynamic-card {
 	flex: 1 1 auto;
 	min-height: 0;
+	min-width: 0;
+	width: 100%;
+	max-width: 100%;
 }
 
 .items-selector-toolbar {

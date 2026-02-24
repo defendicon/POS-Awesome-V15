@@ -66,16 +66,21 @@ describe("checkout UI regressions", () => {
 	});
 
 	it("anchors checkout bottom panels using full-height flex layout", () => {
-		expect(posShellSource).toContain("height: calc(100vh - 72px)");
-		expect(posShellSource).toContain("min-height: calc(100vh - 72px)");
+		expect(posShellSource).toContain("@media (min-width: 960px)");
+		expect(posShellSource).toContain("height: 100%");
+		expect(posShellSource).toContain("sm=\"12\"");
 		expect(posShellSource).toContain("class=\"dynamic-panel\"");
+		expect(posShellSource).toContain("min-width: 0;");
 		expect(posShellSource).toContain("display: flex;");
 		expect(itemsSelectorSource).toContain('class="items-selector-shell"');
 		expect(itemsSelectorSource).toContain('class="items-selector-toolbar"');
 		expect(itemsSelectorSource).toContain("margin-top: auto !important;");
+		expect(itemsSelectorSource).toContain("width: '100%'");
+		expect(itemsSelectorSource).toContain("min-width: 0;");
 		expect(invoiceSource).toContain('class="pa-0 invoice-shell"');
 		expect(invoiceSource).toContain('class="invoice-summary-panel"');
 		expect(invoiceSource).toContain(".invoice-summary-panel");
+		expect(invoiceSource).toContain("width: 100%;");
 	});
 
 	it("keeps desktop checkout container height adaptive for medium screens", async () => {

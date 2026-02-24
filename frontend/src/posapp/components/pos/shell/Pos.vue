@@ -22,7 +22,7 @@
 				xl="5"
 				lg="5"
 				md="5"
-				sm="5"
+				sm="12"
 				cols="12"
 				class="pos dynamic-col"
 			>
@@ -33,7 +33,7 @@
 				xl="5"
 				lg="5"
 				md="5"
-				sm="5"
+				sm="12"
 				cols="12"
 				class="pos dynamic-col"
 			>
@@ -44,7 +44,7 @@
 				xl="5"
 				lg="5"
 				md="5"
-				sm="5"
+				sm="12"
 				cols="12"
 				class="pos dynamic-col"
 			>
@@ -55,14 +55,14 @@
 				xl="5"
 				lg="5"
 				md="5"
-				sm="5"
+				sm="12"
 				cols="12"
 				class="pos dynamic-col"
 			>
 				<Payments class="dynamic-panel"></Payments>
 			</v-col>
 
-			<v-col xl="7" lg="7" md="7" sm="7" cols="12" class="pos dynamic-col">
+			<v-col xl="7" lg="7" md="7" sm="12" cols="12" class="pos dynamic-col">
 				<Invoice class="dynamic-panel"></Invoice>
 			</v-col>
 		</v-row>
@@ -265,15 +265,18 @@ export default {
 	/*padding-top: calc(25px + var(--dynamic-lg));*/
 	/* Navbar height (25px) + larger spacing */
 	transition: all 0.3s ease;
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
 }
 
 .dynamic-main-row {
 	padding: 0;
 	margin: 0;
-	height: calc(100vh - 72px);
-	min-height: calc(100vh - 72px);
 	align-items: stretch;
-	overflow: hidden;
+	flex: 1 1 auto;
+	min-height: 0;
 }
 
 .dynamic-col {
@@ -283,6 +286,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
+	min-width: 0;
 	padding-bottom: 0;
 	/* Add top margin for better separation */
 }
@@ -290,6 +294,9 @@ export default {
 .dynamic-panel {
 	flex: 1 1 auto;
 	min-height: 0;
+	min-width: 0;
+	width: 100%;
+	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 }
@@ -307,9 +314,22 @@ export default {
 	}
 
 	.dynamic-main-row {
-		min-height: calc(100vh - 64px);
 		height: auto;
 		overflow: visible;
+	}
+}
+
+@media (max-width: 959px) {
+	.dynamic-main-row {
+		height: auto;
+		overflow: visible;
+	}
+}
+
+@media (min-width: 960px) {
+	.dynamic-main-row {
+		height: 100%;
+		overflow: hidden;
 	}
 }
 </style>
