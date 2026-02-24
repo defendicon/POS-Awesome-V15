@@ -25,6 +25,7 @@ import functools
 from .utils import get_item_groups, fetch_sales_person_names
 from posawesome.utils import get_build_version
 from posawesome.posawesome.api.payment_processing.data import _assert_pos_profile_access
+from posawesome.posawesome.api.invoice_processing.utils import _assert_currency_lookup_access
 
 
 def _require_system_manager():
@@ -180,6 +181,7 @@ def get_company_domain(company):
 @frappe.whitelist()
 def get_selling_price_lists():
     """Return all selling price lists"""
+    _assert_currency_lookup_access()
     return frappe.get_all(
         "Price List",
         filters={"selling": 1},
