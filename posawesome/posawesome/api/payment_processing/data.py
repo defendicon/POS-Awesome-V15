@@ -8,6 +8,52 @@ from erpnext.controllers.accounts_controller import get_advance_payment_entries_
 MAX_OUTSTANDING_PAGE_LENGTH = 500
 
 
+def _can_manage_all_pos_profiles():
+    return "System Manager" in frappe.get_roles()
+
+
+def _assert_company_access(company):
+    if _can_manage_all_pos_profiles() or frappe.has_permission("Sales Invoice", "read"):
+        return
+
+    profile_names = frappe.get_all(
+        "POS Profile User",
+        filters={"user": frappe.session.user},
+        pluck="parent",
+    )
+    if not profile_names:
+        frappe.throw(_("You are not allowed to access payment data for this company."))
+
+    allowed_companies = {
+        row.company
+        for row in frappe.get_all(
+            "POS Profile",
+            filters={"name": ["in", profile_names]},
+            fields=["company"],
+        )
+        if row.company
+    }
+    if company not in allowed_companies:
+        frappe.throw(_("You are not allowed to access payment data for company {0}.").format(company))
+
+
+def _assert_pos_profile_access(pos_profile):
+    if not pos_profile:
+        return
+
+    profile_doc = frappe.get_doc("POS Profile", pos_profile)
+    if profile_doc.disabled:
+        frappe.throw(_("POS Profile {0} is disabled.").format(profile_doc.name))
+
+    has_access = frappe.db.exists(
+        "POS Profile User",
+        {"parent": profile_doc.name, "user": frappe.session.user},
+    )
+    has_explicit_assignments = frappe.db.exists("POS Profile User", {"parent": profile_doc.name})
+    if has_explicit_assignments and not has_access and not _can_manage_all_pos_profiles():
+        frappe.throw(_("You are not assigned to POS Profile {0}.").format(profile_doc.name))
+
+
 def _coerce_text_filter(value, field_label):
     if value is None:
         return None
@@ -72,6 +118,8 @@ def get_outstanding_invoices(customer=None, company=None, currency=None, pos_pro
 
         if not customer or not company:
             return []
+        _assert_company_access(company)
+        _assert_pos_profile_access(pos_profile)
 
         page_start = _coerce_non_negative_int(page_start, default=0)
         page_length = _coerce_non_negative_int(page_length, default=0)
@@ -172,6 +220,7 @@ def get_unallocated_payments(
 
     if not customer or not company:
         return []
+    _assert_company_access(company)
 
     customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
     party_account = get_party_account("Customer", customer, company)
@@ -423,6 +472,12 @@ def get_unallocated_payments(
 
 @frappe.whitelist()
 def get_available_pos_profiles(company, currency):
+    company = _coerce_text_filter(company, _("Company"))
+    currency = _coerce_text_filter(currency, _("Currency"))
+    if not company or not currency:
+        return []
+    _assert_company_access(company)
+
     pos_profiles_list = frappe.get_list(
         "POS Profile",
         filters={"disabled": 0, "company": company, "currency": currency},
