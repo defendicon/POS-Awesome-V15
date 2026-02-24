@@ -53,6 +53,7 @@
 - [x] Added stock lookup authorization and request-size limits for bundle component API in `posawesome/posawesome/api/bundles.py`.
 - [x] Hardened sales-order APIs with safe JSON parsing, bounded search results, and item-count limits in `posawesome/posawesome/api/sales_orders.py`.
 - [x] Hardened quotation APIs with safe JSON parsing and item-count limits in `posawesome/posawesome/api/quotations.py`.
+- [x] Added customer read authorization checks to balance/info/address endpoints in `posawesome/posawesome/api/customers.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

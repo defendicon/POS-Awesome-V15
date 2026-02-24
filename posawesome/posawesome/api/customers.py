@@ -67,6 +67,16 @@ def _ensure_customer_write_permission(customer_name):
     frappe.throw(_("Not permitted to update customer {0}.").format(customer_name))
 
 
+def _ensure_customer_read_permission(customer_name):
+    if frappe.has_permission("Customer", "read", customer_name):
+        return
+    if _can_manage_all_pos_profiles():
+        return
+    if frappe.db.exists("POS Profile User", {"user": frappe.session.user}):
+        return
+    frappe.throw(_("Not permitted to access customer {0}.").format(customer_name))
+
+
 def get_customer_groups(pos_profile):
     customer_groups = []
     if pos_profile.get("customer_groups"):
@@ -111,6 +121,7 @@ def get_customer_group_condition(pos_profile):
 def get_customer_balance(customer):
     if not customer:
         return {"balance": 0, "customer_name": None}
+    _ensure_customer_read_permission(customer)
 
     try:
         customer_doc = frappe.get_doc("Customer", customer)
@@ -209,6 +220,7 @@ def get_customer_info(customer=None):
     customer = cstr(customer or "").strip()
     if not customer:
         return {}
+    _ensure_customer_read_permission(customer)
 
     customer = frappe.get_doc("Customer", customer)
 
@@ -483,6 +495,11 @@ def set_customer_info(customer, fieldname, value=""):
 
 @frappe.whitelist()
 def get_customer_addresses(customer):
+    customer = cstr(customer).strip()
+    if not customer:
+        return []
+    _ensure_customer_read_permission(customer)
+
     return frappe.db.sql(
         """
         SELECT
