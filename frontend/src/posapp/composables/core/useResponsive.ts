@@ -41,22 +41,25 @@ export function useResponsive() {
 		}
 
 		cardHeightVh = Math.max(30, Math.min(cardHeightVh, 70));
-		let containerHeightVh = 60;
-		if (windowHeight.value <= 800) {
-			containerHeightVh = 48;
-		} else if (windowHeight.value <= 900) {
-			containerHeightVh = 54;
-		} else if (windowHeight.value <= 1100) {
-			containerHeightVh = 60;
-		} else if (windowHeight.value <= 1300) {
-			containerHeightVh = 63;
-		} else {
-			containerHeightVh = 66;
+		// Keep the invoice/items containers responsive to actual viewport height.
+		// This reduces empty space on tall screens while still keeping action areas visible.
+		let reservedSpacePx = 340;
+		if (windowWidth.value <= 480) {
+			reservedSpacePx = 420;
+		} else if (windowWidth.value <= 768) {
+			reservedSpacePx = 390;
+		} else if (windowWidth.value <= 1024) {
+			reservedSpacePx = 360;
 		}
+		const availableHeightPx = Math.max(0, windowHeight.value - reservedSpacePx);
+		let containerHeightVh = Math.round(
+			(availableHeightPx / Math.max(windowHeight.value, 1)) * 100,
+		);
+		containerHeightVh = Math.max(48, Math.min(containerHeightVh, 72));
 
 		// Keep small-width layouts usable while still protecting short-height screens.
 		if (windowWidth.value <= 768) {
-			containerHeightVh = Math.min(containerHeightVh, 55);
+			containerHeightVh = Math.min(containerHeightVh, 58);
 		}
 
 		return {

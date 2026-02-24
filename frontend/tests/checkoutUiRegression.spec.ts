@@ -62,12 +62,12 @@ describe("checkout UI regressions", () => {
 		expect(itemActionToolbarSource).not.toContain("resizable");
 	});
 
-	it("keeps desktop checkout container height at 60vh", async () => {
+	it("keeps desktop checkout container height adaptive for medium screens", async () => {
 		setViewport(1400, 1000);
 		const wrapper = mount(ResponsiveHarness);
 		await nextTick();
 
-		expect((wrapper.vm as any).responsiveStyles["--container-height"]).toBe("60vh");
+		expect((wrapper.vm as any).responsiveStyles["--container-height"]).toBe("66vh");
 		wrapper.unmount();
 	});
 
@@ -76,7 +76,7 @@ describe("checkout UI regressions", () => {
 		const wrapper = mount(ResponsiveHarness);
 		await nextTick();
 
-		expect((wrapper.vm as any).responsiveStyles["--container-height"]).toBe("66vh");
+		expect((wrapper.vm as any).responsiveStyles["--container-height"]).toBe("72vh");
 		wrapper.unmount();
 	});
 
