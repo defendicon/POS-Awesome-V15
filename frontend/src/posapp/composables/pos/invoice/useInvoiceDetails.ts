@@ -1,5 +1,5 @@
 import { ref, unref, type Ref } from "vue";
-import { formatUtils } from "../../../format";
+import { formatUtils, normalizeDateForBackend } from "../../../format";
 import {
 	getSalesPersonsStorage,
 	setSalesPersonsStorage,
@@ -68,19 +68,28 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 	const formatDate = (date: any) => {
 		if (!date) return null;
 		if (typeof frappe !== "undefined" && frappe.datetime) {
-			return frappe.datetime.obj_to_str(date);
+			const formatted = frappe.datetime.obj_to_str(date);
+			const normalized = normalizeDateForBackend(formatted);
+			if (normalized) {
+				return normalized;
+			}
 		}
-		return String(date);
+		return normalizeDateForBackend(date);
 	};
 
 	const formatDateDisplay = (date: any) => {
+		if (!date) return "";
 		if (typeof frappe !== "undefined" && frappe.datetime) {
-			return frappe.datetime.obj_to_str(date);
+			const formatted = frappe.datetime.obj_to_str(date);
+			const normalized = normalizeDateForBackend(formatted);
+			if (normalized) {
+				return normalized;
+			}
 		}
 		if (date instanceof Date) {
 			return date.toISOString().split("T")[0];
 		}
-		return String(date);
+		return normalizeDateForBackend(date) || "";
 	};
 
 	// --- Address Logic ---
@@ -245,7 +254,7 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		const d = new Date();
 		d.setDate(d.getDate() + parsed);
 
-		new_credit_due_date.value = formatDateDisplay(d);
+		new_credit_due_date.value = formatDateDisplay(d) || null;
 		credit_due_days.value = parsed;
 		update_credit_due_date();
 	};
@@ -332,7 +341,7 @@ export function useInvoiceDetails(options: InvoiceDetailsOptions) {
 		if (!enabled) return;
 
 		const formatted = formatDate(value); // YYYY-MM-DD
-		return_valid_upto_date.value = formatDateDisplay(formatted);
+		return_valid_upto_date.value = formatDateDisplay(formatted) || null;
 
 		const doc = unref(invoiceDoc);
 		if (doc) {

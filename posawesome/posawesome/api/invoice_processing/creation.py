@@ -116,10 +116,46 @@ def _apply_write_off_settings(invoice_doc, data):
         effective_write_off * conversion_rate, precision_base_write_off
     )
 
+
+def _safe_date_string(value):
+    if value in (None, ""):
+        return None
+
+    if isinstance(value, str):
+        normalized = value.strip()
+        if not normalized:
+            return None
+        if normalized.lower() in {"invalid date", "nan", "none", "null", "undefined"}:
+            return None
+        value = normalized
+
+    try:
+        return str(getdate(value))
+    except Exception:
+        return None
+
+
+def _sanitize_delivery_dates(payload):
+    if not isinstance(payload, dict):
+        return
+
+    if "posa_delivery_date" in payload:
+        payload["posa_delivery_date"] = _safe_date_string(payload.get("posa_delivery_date"))
+
+    items = payload.get("items")
+    if not isinstance(items, list):
+        return
+
+    for item in items:
+        if isinstance(item, dict) and "posa_delivery_date" in item:
+            item["posa_delivery_date"] = _safe_date_string(item.get("posa_delivery_date"))
+
+
 @frappe.whitelist()
 def update_invoice(data):
     currency_cache = {}
     data = json.loads(data)
+    _sanitize_delivery_dates(data)
     _strip_client_freebies_from_payload(data)
     # Determine doctype based on POS Profile setting
     pos_profile = data.get("pos_profile")
@@ -342,6 +378,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
     from posawesome.posawesome.api.invoice_processing.payment import _create_change_payment_entries
     data = json.loads(data)
     invoice = json.loads(invoice)
+    _sanitize_delivery_dates(invoice)
     submit_in_background = cint(submit_in_background)
     _strip_client_freebies_from_payload(invoice)
     pos_profile = invoice.get("pos_profile")

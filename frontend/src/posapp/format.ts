@@ -132,6 +132,79 @@ export const formatUtils = {
 	getNumberLocale,
 };
 
+const INVALID_DATE_MARKERS = new Set([
+	"invalid date",
+	"nan",
+	"none",
+	"null",
+	"undefined",
+]);
+
+function buildIsoDate(
+	yearInput: number | string,
+	monthInput: number | string,
+	dayInput: number | string,
+): string | null {
+	const year = Number.parseInt(String(yearInput), 10);
+	const month = Number.parseInt(String(monthInput), 10);
+	const day = Number.parseInt(String(dayInput), 10);
+
+	if (
+		!Number.isFinite(year) ||
+		!Number.isFinite(month) ||
+		!Number.isFinite(day)
+	) {
+		return null;
+	}
+
+	const parsed = new Date(year, month - 1, day);
+	if (
+		parsed.getFullYear() !== year ||
+		parsed.getMonth() !== month - 1 ||
+		parsed.getDate() !== day
+	) {
+		return null;
+	}
+
+	return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
+		2,
+		"0",
+	)}`;
+}
+
+export function normalizeDateForBackend(date: any): string | null {
+	if (date === null || typeof date === "undefined") return null;
+
+	if (date instanceof Date) {
+		if (Number.isNaN(date.getTime())) return null;
+		return buildIsoDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+	}
+
+	const normalized = fromArabicNumerals(String(date)).trim();
+	if (!normalized) return null;
+
+	if (INVALID_DATE_MARKERS.has(normalized.toLowerCase())) {
+		return null;
+	}
+
+	if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(normalized)) {
+		const [year, month, day] = normalized.split("-");
+		return buildIsoDate(year || "", month || "", day || "");
+	}
+
+	if (/^\d{1,2}[/-]\d{1,2}[/-]\d{4}$/.test(normalized)) {
+		const parts = normalized.split(/[/-]/);
+		return buildIsoDate(parts[2] || "", parts[1] || "", parts[0] || "");
+	}
+
+	const parsed = new Date(normalized);
+	if (Number.isNaN(parsed.getTime())) {
+		return null;
+	}
+
+	return buildIsoDate(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate());
+}
+
 // --- Composable: useFormat ---
 
 /**
@@ -429,27 +502,7 @@ export default {
 			return this.formatCurrency(value, precision);
 		},
 		formatDateForBackend(date: any): string | null {
-			if (!date) return null;
-			if (typeof date === "string") {
-				const western = fromArabicNumerals(date);
-				if (/^\d{4}-\d{2}-\d{2}$/.test(western)) return western;
-				if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(western)) {
-					const parts = western.split("-");
-					const d = parts[0] || "";
-					const m = parts[1] || "";
-					const y = parts[2] || "";
-					return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-				}
-				date = western;
-			}
-			const parsed = new Date(fromArabicNumerals(String(date)));
-			if (!isNaN(parsed.getTime())) {
-				const year = parsed.getFullYear();
-				const month = `0${parsed.getMonth() + 1}`.slice(-2);
-				const day = `0${parsed.getDate()}`.slice(-2);
-				return `${year}-${month}-${day}`;
-			}
-			return fromArabicNumerals(String(date));
+			return normalizeDateForBackend(date);
 		},
 	},
 	mounted(this: any) {
