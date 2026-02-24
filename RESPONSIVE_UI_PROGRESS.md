@@ -108,6 +108,10 @@
   - Added responsive density adjustments for payment action buttons and improved scroll containment behavior.
 - 2026-02-24 Batch 10 (Visible Payments Scrollbar):
   - Forced vertical scrollbar visibility on payment content pane (`overflow-y: scroll`) for clearer discoverability of up/down scrolling.
+- 2026-02-24 Batch 11 (Payments Footer Pinning + Functional Scroll):
+  - Removed rigid `height: 100%` from payments card shell and switched to pure flex sizing so action footer stays visible at bottom on smaller windows.
+  - Converted payment content pane back to functional `overflow-y: auto` scrolling and eliminated false always-on scrollbar behavior.
+  - Normalized parent overflow/gap rules so `Submit / Submit & Print / Cancel` remain visible while only content area scrolls.
 
 ## Completed Items
 - [Done] Phase 0 tracker creation.
@@ -154,6 +158,7 @@
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 8.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 9.
   - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 10.
+  - `cd frontend; cmd /c yarn vitest run tests/checkoutUiRegression.spec.ts` -> `PASS` (8 tests) after Batch 11.
 - Build/type-check status:
   - `cd frontend; yarn -s type-check` -> fails due pre-existing dependency issue: `Cannot find module 'qz-tray'`.
   - `cd frontend; yarn build` -> blocked by same pre-existing `qz-tray` type resolution issue.

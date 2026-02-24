@@ -180,18 +180,18 @@
 					@update:print-format="print_format = $event"
 				/>
 			</div>
-			<!-- Action Buttons -->
-			<PaymentActionButtons
-				class="payments-actions"
-				ref="submitButton"
-				:loading="loading"
-				:validatePayment="validatePayment"
-				:highlightSubmit="highlightSubmit"
-				@submit="submit"
-				@submit-and-print="submit(undefined, false, true)"
-				@cancel="back_to_invoice"
-			/>
 		</v-card>
+		<!-- Action Buttons -->
+		<PaymentActionButtons
+			class="payments-actions"
+			ref="submitButton"
+			:loading="loading"
+			:validatePayment="validatePayment"
+			:highlightSubmit="highlightSubmit"
+			@submit="submit"
+			@submit-and-print="submit(undefined, false, true)"
+			@cancel="back_to_invoice"
+		/>
 		<!-- Dialogs Section (Custom Days, Phone Payment) -->
 		<PaymentDialogs
 			:custom-days-dialog="custom_days_dialog"
@@ -1147,14 +1147,13 @@ onBeforeUnmount(() => {
 	max-width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: var(--posa-space-2xs);
+	gap: 0;
+	overflow: hidden;
 }
 
 .payments-main-card {
 	flex: 1 1 auto;
 	min-height: 0;
-	height: 100%;
-	max-height: 100%;
 	width: 100%;
 	max-width: 100%;
 	display: flex;
@@ -1166,12 +1165,12 @@ onBeforeUnmount(() => {
 .payments-scroll {
 	flex: 1 1 auto;
 	min-height: 0;
-	overflow-y: scroll;
+	overflow-y: auto;
 	overflow-x: hidden;
 	-webkit-overflow-scrolling: touch;
 	overscroll-behavior: contain;
 	scrollbar-gutter: stable both-edges;
-	scroll-padding-bottom: calc(84px + var(--posa-space-sm));
+	padding-bottom: var(--posa-space-xs);
 }
 
 .payments-scroll::-webkit-scrollbar {
@@ -1194,9 +1193,8 @@ onBeforeUnmount(() => {
 	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
 	border-top: 1px solid var(--pos-border);
 	background: rgb(var(--v-theme-surface));
-	position: sticky;
-	bottom: 0;
-	z-index: 2;
+	position: relative;
+	z-index: 1;
 	box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.1);
 }
 
@@ -1269,7 +1267,6 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
 	.payments-scroll {
 		padding: var(--posa-space-xs) !important;
-		scroll-padding-bottom: calc(92px + var(--posa-space-xs));
 	}
 
 	.payments-actions {
@@ -1279,7 +1276,7 @@ onBeforeUnmount(() => {
 
 @media (max-height: 780px) {
 	.payments-scroll {
-		scroll-padding-bottom: calc(100px + var(--posa-space-xs));
+		padding-bottom: var(--posa-space-3xs);
 	}
 
 	.payments-actions {
