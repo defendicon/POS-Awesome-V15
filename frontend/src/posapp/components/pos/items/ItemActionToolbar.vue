@@ -1,5 +1,5 @@
 <template>
-	<v-card class="cards mb-0 mt-3 dynamic-padding resizable" style="resize: vertical; overflow: auto">
+	<v-card class="cards mb-0 mt-3 dynamic-padding" style="overflow: auto">
 		<v-row no-gutters align="center" justify="center" class="dynamic-spacing-sm">
 			<v-col cols="12" class="mb-2">
 				<v-select

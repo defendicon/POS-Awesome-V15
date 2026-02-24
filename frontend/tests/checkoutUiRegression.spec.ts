@@ -6,6 +6,7 @@ import { useResponsive } from "../src/posapp/composables/core/useResponsive";
 import { useInvoiceUI } from "../src/posapp/composables/pos/invoice/useInvoiceUI";
 import cartItemRowSource from "../src/posapp/components/pos/invoice/CartItemRow.vue?raw";
 import invoiceSummarySource from "../src/posapp/components/pos/invoice/InvoiceSummary.vue?raw";
+import itemActionToolbarSource from "../src/posapp/components/pos/items/ItemActionToolbar.vue?raw";
 
 function setViewport(width: number, height: number) {
 	Object.defineProperty(window, "innerWidth", {
@@ -52,6 +53,13 @@ describe("checkout UI regressions", () => {
 	it("keeps invoice summary columns top-aligned to avoid blank space under buttons", () => {
 		expect(invoiceSummarySource).toContain('<v-row dense align="start" class="invoice-summary-row">');
 		expect(invoiceSummarySource).toContain('<v-col cols="12" md="5" class="invoice-summary-actions-col">');
+	});
+
+	it("keeps checkout utility cards auto-height (no manual vertical resize handles)", () => {
+		expect(invoiceSummarySource).not.toContain("resize: vertical");
+		expect(invoiceSummarySource).not.toContain("resizable");
+		expect(itemActionToolbarSource).not.toContain("resize: vertical");
+		expect(itemActionToolbarSource).not.toContain("resizable");
 	});
 
 	it("keeps desktop checkout container height at 60vh", async () => {
