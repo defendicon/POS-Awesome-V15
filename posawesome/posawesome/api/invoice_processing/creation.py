@@ -33,6 +33,8 @@ import json
 from frappe.utils import money_in_words
 from frappe.utils.background_jobs import enqueue
 
+MAX_INVOICE_ITEMS = 500
+
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
@@ -234,12 +236,29 @@ def _sanitize_delivery_dates(payload):
             item["posa_delivery_date"] = _safe_date_string(item.get("posa_delivery_date"))
 
 
+def _assert_items_payload_limit(payload, label="items"):
+    if not isinstance(payload, dict):
+        return
+    items = payload.get("items")
+    if items is None:
+        return
+    if not isinstance(items, list):
+        frappe.throw(_("Invalid {0} payload.").format(label))
+    if len(items) > MAX_INVOICE_ITEMS:
+        frappe.throw(_("Too many invoice items in a single request."))
+
+
 @frappe.whitelist()
 def update_invoice(data):
     currency_cache = {}
-    data = json.loads(data) if isinstance(data, str) else data
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except Exception:
+            frappe.throw(_("Invalid invoice payload."))
     if not isinstance(data, dict):
         frappe.throw(_("Invalid invoice payload."))
+    _assert_items_payload_limit(data)
     _sanitize_delivery_dates(data)
     _strip_client_freebies_from_payload(data)
     pos_profile = _assert_invoice_profile_access(data)
@@ -458,10 +477,19 @@ def update_invoice(data):
 @frappe.whitelist()
 def submit_invoice(invoice, data, submit_in_background=False):
     from posawesome.posawesome.api.invoice_processing.payment import _create_change_payment_entries
-    data = json.loads(data) if isinstance(data, str) else data
-    invoice = json.loads(invoice) if isinstance(invoice, str) else invoice
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except Exception:
+            frappe.throw(_("Invalid invoice submission payload."))
+    if isinstance(invoice, str):
+        try:
+            invoice = json.loads(invoice)
+        except Exception:
+            frappe.throw(_("Invalid invoice submission payload."))
     if not isinstance(data, dict) or not isinstance(invoice, dict):
         frappe.throw(_("Invalid invoice submission payload."))
+    _assert_items_payload_limit(invoice)
     _sanitize_delivery_dates(invoice)
     submit_in_background = cint(submit_in_background)
     _strip_client_freebies_from_payload(invoice)
@@ -672,10 +700,15 @@ def validate_cart_items(items, pos_profile=None):
     """
 
     if isinstance(items, str):
-        items = json.loads(items)
+        try:
+            items = json.loads(items)
+        except Exception:
+            frappe.throw(_("Items payload must be a list."))
 
     if not isinstance(items, list):
         frappe.throw(_("Items payload must be a list."))
+    if len(items) > MAX_INVOICE_ITEMS:
+        frappe.throw(_("Too many cart items in a single request."))
 
     if pos_profile:
         pos_profile = _ensure_pos_profile_access(pos_profile)
