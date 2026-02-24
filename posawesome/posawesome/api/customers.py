@@ -14,6 +14,12 @@ from frappe.utils.caching import redis_cache
 from .utils import fetch_sales_person_names
 
 
+MAX_CUSTOMER_QUERY_LIMIT = 500
+MAX_CUSTOMER_QUERY_OFFSET = 50000
+MAX_CUSTOMER_START_AFTER_LENGTH = 140
+MAX_ADDRESS_PAYLOAD_LENGTH = 10000
+
+
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
 
@@ -148,6 +154,20 @@ def get_customer_balance(customer):
 
 @frappe.whitelist()
 def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
+    def _safe_limit(value, default=MAX_CUSTOMER_QUERY_LIMIT):
+        try:
+            parsed = int(value if value is not None else default)
+        except Exception:
+            parsed = default
+        return min(max(parsed, 1), MAX_CUSTOMER_QUERY_LIMIT)
+
+    def _safe_offset(value, default=0):
+        try:
+            parsed = int(value if value is not None else default)
+        except Exception:
+            parsed = default
+        return min(max(parsed, 0), MAX_CUSTOMER_QUERY_OFFSET)
+
     pos_profile_doc = _resolve_authorized_pos_profile(pos_profile)
     _pos_profile = {
         "name": pos_profile_doc.name,
@@ -155,10 +175,23 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
         "posa_server_cache_duration": pos_profile_doc.get("posa_server_cache_duration"),
         "posa_use_server_cache": pos_profile_doc.get("posa_use_server_cache"),
     }
+
+    limit = _safe_limit(limit)
+    offset = _safe_offset(offset)
+    start_after = cstr(start_after).strip()
+    if len(start_after) > MAX_CUSTOMER_START_AFTER_LENGTH:
+        frappe.throw(_("start_after is too long."))
+    modified_after = cstr(modified_after).strip()
+    if modified_after and len(modified_after) > 64:
+        frappe.throw(_("modified_after is too long."))
+
     serialized_profile = json.dumps(_pos_profile, sort_keys=True)
     ttl = _pos_profile.get("posa_server_cache_duration")
     if ttl:
-        ttl = int(ttl) * 60
+        try:
+            ttl = int(ttl) * 60
+        except Exception:
+            ttl = None
 
     @redis_cache(ttl=ttl or 1800)
     def __get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
@@ -527,7 +560,13 @@ def get_customer_addresses(customer):
 @frappe.whitelist()
 def make_address(args):
     if isinstance(args, str):
-        args = json.loads(args)
+        raw_payload = args.strip()
+        if len(raw_payload) > MAX_ADDRESS_PAYLOAD_LENGTH:
+            frappe.throw(_("Address payload is too large"))
+        try:
+            args = json.loads(raw_payload)
+        except Exception:
+            frappe.throw(_("Address payload must be a valid JSON object"))
     if not isinstance(args, dict):
         frappe.throw(_("Address payload must be a JSON object"))
 

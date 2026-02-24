@@ -77,6 +77,8 @@
 - [x] Added opening-shift access enforcement to closing-shift overview generation in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/overview.py`.
 - [x] Replaced dynamic SQL doctype interpolation with safe doctype allowlisting/get-all queries for draft cleanup/submission helpers in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/invoices.py`.
 - [x] Updated closing-shift cash-movement integration tests to align with server-side opening-shift access enforcement in `posawesome/posawesome/doctype/pos_closing_shift/closing_processing/test_cash_movement_integration.py`.
+- [x] Added pagination/input bounds and safe address JSON parsing guards in customer APIs in `posawesome/posawesome/api/customers.py`.
+- [x] Added payment-request payload bounds, contact-mobile validation, and reference doctype allowlisting in `posawesome/posawesome/api/payments.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

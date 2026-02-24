@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import json
 from contextlib import contextmanager
+import re
 import frappe
 from frappe.utils import nowdate, flt, cstr
 from frappe import _
@@ -14,6 +15,12 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_existing_payment_request_amount,
 )
 from posawesome.posawesome.api.utilities import ensure_child_doctype
+
+
+MAX_PAYMENT_ROWS = 100
+MAX_CONTACT_MOBILE_LENGTH = 30
+MAX_REFERENCE_NAME_LENGTH = 140
+ALLOWED_PAYMENT_REFERENCE_DOCTYPES = {"Sales Invoice", "Sales Order"}
 
 
 def get_posawesome_credit_redeem_remark(invoice_name):
@@ -77,6 +84,17 @@ def _coerce_payment_doc_payload(doc):
     return frappe._dict(doc)
 
 
+def _normalize_contact_mobile(raw_value):
+    contact_mobile = cstr(raw_value).strip()
+    if not contact_mobile:
+        return ""
+    if len(contact_mobile) > MAX_CONTACT_MOBILE_LENGTH:
+        frappe.throw(_("Contact mobile number is too long"))
+    if not re.fullmatch(r"^[0-9+\-\s()]+$", contact_mobile):
+        frappe.throw(_("Contact mobile number contains invalid characters"))
+    return contact_mobile
+
+
 @frappe.whitelist()
 def create_payment_request(doc):
     doc = _coerce_payment_doc_payload(doc)
@@ -90,10 +108,12 @@ def create_payment_request(doc):
 
     _assert_company_access(invoice_doc.company, _("create payment requests"))
 
-    contact_mobile = cstr(doc.get("contact_mobile")).strip()
+    contact_mobile = _normalize_contact_mobile(doc.get("contact_mobile"))
     payments = doc.get("payments") or []
     if not isinstance(payments, list):
         frappe.throw(_("payments must be a list"))
+    if len(payments) > MAX_PAYMENT_ROWS:
+        frappe.throw(_("Too many payment rows in one request"))
 
     for pay in payments:
         if not isinstance(pay, dict):
@@ -166,7 +186,7 @@ def get_existing_payment_request(doc, pay, recipient_id):
         {
             "payment_account": payment_account,
         },
-        ["name"],
+        "name",
     )
 
     args = {
@@ -185,6 +205,15 @@ def make_payment_request(**args):
     """Make payment request"""
 
     args = frappe._dict(args)
+    args.dt = cstr(args.get("dt")).strip()
+    args.dn = cstr(args.get("dn")).strip()
+
+    if args.dt not in ALLOWED_PAYMENT_REFERENCE_DOCTYPES:
+        frappe.throw(_("Unsupported reference doctype for payment request"))
+    if not args.dn:
+        frappe.throw(_("Reference document name is required"))
+    if len(args.dn) > MAX_REFERENCE_NAME_LENGTH:
+        frappe.throw(_("Reference document name is too long"))
 
     ref_doc = frappe.get_doc(args.dt, args.dn)
     if not ref_doc.has_permission("read") and not _can_manage_all_pos_profiles():
