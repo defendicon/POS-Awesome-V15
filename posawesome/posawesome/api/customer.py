@@ -18,12 +18,15 @@ from posawesome.posawesome.doctype.referral_code.referral_code import (
 from . import customers
 
 
-def after_insert(doc, method):
+MAX_REFERRAL_CODE_LENGTH = 140
+
+
+def after_insert(doc, _method):
     create_customer_referral_code(doc)
     create_gift_coupon(doc)
 
 
-def validate(doc, method):
+def validate(doc, _method):
     validate_referral_code(doc)
 
 
@@ -50,14 +53,20 @@ def create_gift_coupon(doc):
 
 
 def validate_referral_code(doc):
-    referral_code = doc.posa_referral_code
-    exist = None
-    if referral_code:
-        exist = frappe.db.exists("Referral Code", referral_code)
-        if not exist:
-            exist = frappe.db.exists("Referral Code", {"referral_code": referral_code})
-        if not exist:
-            frappe.throw(_("This Referral Code {0} not exists").format(referral_code))
+    referral_code = str(doc.posa_referral_code or "").strip()
+    if not referral_code:
+        return
+
+    if len(referral_code) > MAX_REFERRAL_CODE_LENGTH:
+        frappe.throw(_("Referral code cannot exceed {0} characters.").format(MAX_REFERRAL_CODE_LENGTH))
+
+    exists = frappe.db.exists("Referral Code", referral_code)
+    if not exists:
+        exists = frappe.db.exists("Referral Code", {"referral_code": referral_code})
+    if not exists:
+        frappe.throw(_("This Referral Code {0} not exists").format(referral_code))
+
+    doc.posa_referral_code = referral_code
 
 
 @frappe.whitelist()

@@ -64,6 +64,9 @@
 - [x] Added strict required-field, amount, date, and bank-account validation for payment entry creation in `posawesome/posawesome/api/payment_processing/creation.py`.
 - [x] Removed dead/unused code paths and stale imports in `posawesome/posawesome/api/invoice_processing/stock.py`, `posawesome/posawesome/api/payment_entry.py`, `posawesome/posawesome/api/status_updater.py`, and `posawesome/posawesome/api/taxes.py`.
 - [x] Updated cash movement unit mocks to reflect hardened duplicate-request lookup shape in `posawesome/posawesome/api/cash_movement/test_cash_movement.py`.
+- [x] Added bounded item-code normalization and defensive cache TTL coercion to prevent oversized fan-out lookups in `posawesome/posawesome/api/item_fetchers.py`.
+- [x] Sanitized and length-bounded referral code validation while removing dead hook parameters in `posawesome/posawesome/api/customer.py`.
+- [x] Corrected stale copyright headers in `posawesome/posawesome/api/invoice.js` and `posawesome/posawesome/api/pos_profile.js`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.

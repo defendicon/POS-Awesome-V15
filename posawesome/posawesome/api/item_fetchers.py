@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import frappe
+from frappe import _
 from erpnext.setup.utils import get_exchange_rate
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
@@ -13,10 +14,26 @@ from frappe.utils import flt, nowdate
 from frappe.utils.caching import redis_cache
 
 
+DEFAULT_CACHE_TTL = 300
+MAX_CACHE_TTL = 3600
+MAX_ITEM_CODES = 500
+
+
 def _resolve_cache_ttl(ttl: Optional[int]) -> int:
     """Return a numeric TTL value while falling back to the default window."""
 
-    return int(ttl) if ttl else 300
+    if ttl is None:
+        return DEFAULT_CACHE_TTL
+
+    try:
+        resolved_ttl = int(ttl)
+    except Exception:
+        return DEFAULT_CACHE_TTL
+
+    if resolved_ttl <= 0:
+        return DEFAULT_CACHE_TTL
+
+    return min(resolved_ttl, MAX_CACHE_TTL)
 
 
 def _cache_wrapper(store: Dict[int, Callable[..., Any]], ttl: Optional[int], fn: Callable[..., Any]):
@@ -33,7 +50,19 @@ def _cache_wrapper(store: Dict[int, Callable[..., Any]], ttl: Optional[int], fn:
 def _normalize_codes(codes: Iterable[str]) -> Tuple[str, ...]:
     """Return a sorted tuple of unique item codes while dropping falsy values."""
 
-    return tuple(sorted({code for code in codes if code}))
+    values = set()
+    for code in (codes or []):
+        if code is None:
+            continue
+        code_text = str(code).strip()
+        if not code_text:
+            continue
+        values.add(code_text)
+
+    normalized = tuple(sorted(values))
+    if len(normalized) > MAX_ITEM_CODES:
+        frappe.throw(_("Too many item codes requested in one call."))
+    return normalized
 
 
 _price_cache: Dict[int, Callable[..., Any]] = {}
@@ -105,8 +134,9 @@ def get_item_prices(
 ):
     """Fetch Item Price data with optional redis caching based on TTL."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_price_cache, ttl, _fetch_item_prices)
-    return cached(price_list, currency, tuple(item_codes), customer or "", today or nowdate())
+    return cached(price_list, currency, normalized_codes, customer or "", today or nowdate())
 
 
 def _fetch_bin_qty(warehouse: str, item_codes: Tuple[str, ...]):
@@ -139,8 +169,9 @@ def _fetch_bin_qty(warehouse: str, item_codes: Tuple[str, ...]):
 def get_bin_qty(warehouse: Optional[str], item_codes: Sequence[str], ttl: Optional[int] = None):
     """Return cached Bin quantities when a warehouse and codes are provided."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_bin_cache, ttl, _fetch_bin_qty)
-    return cached(warehouse, tuple(item_codes))
+    return cached(warehouse, normalized_codes)
 
 
 def _fetch_item_meta(item_codes: Tuple[str, ...]):
@@ -158,8 +189,9 @@ def _fetch_item_meta(item_codes: Tuple[str, ...]):
 def get_item_meta(item_codes: Sequence[str], ttl: Optional[int] = None):
     """Fetch Item metadata with caching support."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_meta_cache, ttl, _fetch_item_meta)
-    return cached(tuple(item_codes))
+    return cached(normalized_codes)
 
 
 def _fetch_barcodes(item_codes: Tuple[str, ...]):
@@ -177,8 +209,9 @@ def _fetch_barcodes(item_codes: Tuple[str, ...]):
 def get_barcodes(item_codes: Sequence[str], ttl: Optional[int] = None):
     """Fetch Item Barcode entries while respecting the configured TTL."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_barcode_cache, ttl, _fetch_barcodes)
-    return cached(tuple(item_codes))
+    return cached(normalized_codes)
 
 
 def _fetch_uoms(item_codes: Tuple[str, ...]):
@@ -196,8 +229,9 @@ def _fetch_uoms(item_codes: Tuple[str, ...]):
 def get_uoms(item_codes: Sequence[str], ttl: Optional[int] = None):
     """Fetch UOM Conversion Detail rows with redis caching support."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_uom_cache, ttl, _fetch_uoms)
-    return cached(tuple(item_codes))
+    return cached(normalized_codes)
 
 
 def _normalize_warehouses(warehouse: Optional[str]) -> Tuple[str, ...]:
@@ -319,8 +353,9 @@ def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
 def get_batches(warehouse: Optional[str], item_codes: Sequence[str], ttl: Optional[int] = None):
     """Fetch batch availability constrained to the provided warehouse."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_batch_cache, ttl, _fetch_batches)
-    return cached(warehouse, tuple(item_codes))
+    return cached(warehouse, normalized_codes)
 
 
 def _fetch_serials(warehouse: str, item_codes: Tuple[str, ...]):
@@ -342,8 +377,9 @@ def _fetch_serials(warehouse: str, item_codes: Tuple[str, ...]):
 def get_serials(warehouse: Optional[str], item_codes: Sequence[str], ttl: Optional[int] = None):
     """Fetch serial number data while honouring the redis cache TTL."""
 
+    normalized_codes = _normalize_codes(item_codes)
     cached = _cache_wrapper(_serial_cache, ttl, _fetch_serials)
-    return cached(warehouse, tuple(item_codes))
+    return cached(warehouse, normalized_codes)
 
 
 @dataclass(frozen=True)
