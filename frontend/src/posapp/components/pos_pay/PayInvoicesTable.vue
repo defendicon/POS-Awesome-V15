@@ -110,36 +110,38 @@
 			</v-col>
 		</v-row>
 
-		<v-data-table
-			:headers="headers"
-			:items="filteredInvoices"
-			item-key="voucher_no"
-			class="elevation-1 mt-0"
-			:loading="loading"
-			@click:row="(e, { item }) => $emit('select-row', item)"
-			:row-props="invoiceRowProps"
-		>
-			<template v-slot:item.actions="{ item }">
-				<v-checkbox
-					:model-value="isInvoiceSelected(item)"
-					color="primary"
-					@click.stop="$emit('select-row', item)"
-				>
-				</v-checkbox>
-			</template>
-			<template v-slot:item.invoice_amount="{ item }">
-				{{ currencySymbol(item.currency) }}
-				{{ formatCurrency(item.invoice_amount) }}
-			</template>
-			<template v-slot:item.outstanding_amount="{ item }">
-				<span class="text-primary"
-					>{{
-						currencySymbol(item?.party_account_currency || item?.currency || posProfile.currency)
-					}}
-					{{ formatCurrency(item?.outstanding_amount || 0) }}</span
-				>
-			</template>
-		</v-data-table>
+		<div class="pay-table-wrapper posa-scroll-x">
+			<v-data-table
+				:headers="headers"
+				:items="filteredInvoices"
+				item-key="voucher_no"
+				class="elevation-1 mt-0"
+				:loading="loading"
+				@click:row="(e, { item }) => $emit('select-row', item)"
+				:row-props="invoiceRowProps"
+			>
+				<template v-slot:item.actions="{ item }">
+					<v-checkbox
+						:model-value="isInvoiceSelected(item)"
+						color="primary"
+						@click.stop="$emit('select-row', item)"
+					>
+					</v-checkbox>
+				</template>
+				<template v-slot:item.invoice_amount="{ item }">
+					{{ currencySymbol(item.currency) }}
+					{{ formatCurrency(item.invoice_amount) }}
+				</template>
+				<template v-slot:item.outstanding_amount="{ item }">
+					<span class="text-primary"
+						>{{
+							currencySymbol(item?.party_account_currency || item?.currency || posProfile.currency)
+						}}
+						{{ formatCurrency(item?.outstanding_amount || 0) }}</span
+					>
+				</template>
+			</v-data-table>
+		</div>
 		<v-divider></v-divider>
 	</div>
 </template>
@@ -197,3 +199,19 @@ const invoiceRowProps = ({ item }) => {
 	return rowClass ? { class: rowClass } : {};
 };
 </script>
+
+<style scoped>
+.pay-table-wrapper {
+	max-width: 100%;
+}
+
+.pay-table-wrapper :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 960px) {
+	.pay-table-wrapper :deep(table) {
+		min-width: 980px;
+	}
+}
+</style>

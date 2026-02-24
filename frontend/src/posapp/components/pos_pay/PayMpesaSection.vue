@@ -20,7 +20,7 @@
             </v-col>
         </v-row>
         <v-row align="center" no-gutters class="mb-1">
-            <v-col md="4" cols="12" class="mr-1">
+            <v-col md="4" cols="12" class="pr-md-1">
                 <v-text-field
                     density="compact"
                     variant="outlined"
@@ -32,7 +32,7 @@
                     clearable
                 ></v-text-field>
             </v-col>
-            <v-col md="4" cols="12" class="mr-1">
+            <v-col md="4" cols="12" class="pr-md-1 mt-2 mt-md-0">
                 <v-text-field
                     density="compact"
                     variant="outlined"
@@ -45,7 +45,7 @@
                 ></v-text-field>
             </v-col>
             <v-col> </v-col>
-            <v-col md="3" cols="12">
+            <v-col md="3" cols="12" class="mt-2 mt-md-0">
                 <v-btn
                     block
                     color="warning"
@@ -55,23 +55,25 @@
                 >
             </v-col>
         </v-row>
-        <v-data-table
-            :headers="headers"
-            :items="payments"
-            item-key="name"
-            class="elevation-1 mt-0"
-            show-select
-            v-model="internalSelectedPayments"
-            :loading="loading"
-            checkbox-color="primary"
-        >
-            <template v-slot:item.amount="{ item }">
-                <span class="text-primary">
-                    {{ currencySymbol(item.currency) }}
-                    {{ formatCurrency(item.amount) }}
-                </span>
-            </template>
-        </v-data-table>
+		<div class="pay-table-wrapper posa-scroll-x">
+			<v-data-table
+				:headers="headers"
+				:items="payments"
+				item-key="name"
+				class="elevation-1 mt-0"
+				show-select
+				v-model="internalSelectedPayments"
+				:loading="loading"
+				checkbox-color="primary"
+			>
+				<template v-slot:item.amount="{ item }">
+					<span class="text-primary">
+						{{ currencySymbol(item.currency) }}
+						{{ formatCurrency(item.amount) }}
+					</span>
+				</template>
+			</v-data-table>
+		</div>
     </div>
 </template>
 
@@ -108,3 +110,19 @@ const internalSearchMobile = computed({
     set: (val) => emit('update:searchMobile', val)
 });
 </script>
+
+<style scoped>
+.pay-table-wrapper {
+	max-width: 100%;
+}
+
+.pay-table-wrapper :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 960px) {
+	.pay-table-wrapper :deep(table) {
+		min-width: 820px;
+	}
+}
+</style>

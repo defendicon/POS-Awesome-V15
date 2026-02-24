@@ -1,104 +1,103 @@
 <template>
-	<div fluid :class="rtlClasses">
-		<v-row v-show="!dialog">
-			<v-col md="8" cols="12" class="pb-2 pr-0">
-				<v-card
-					class="main mx-auto mt-3 p-3 pb-16 overflow-y-auto pos-themed-card"
-					style="max-height: 94vh; height: 94vh"
-				>
-					<Customer></Customer>
-					<v-divider></v-divider>
+	<div :class="['pay-view-shell', rtlClasses]">
+		<v-row v-show="!dialog" class="pay-view-row">
+			<v-col md="8" cols="12" class="pay-main-col">
+				<v-card class="pay-main-card pos-themed-card">
+					<div class="pay-main-scroll">
+						<Customer></Customer>
+						<v-divider></v-divider>
 
-					<PayInvoicesTable
-						v-model:pos-profile-search="pos_profile_search"
-						v-model:currency-filter="currency_filter"
-						:invoices="outstanding_invoices"
-						:filtered-invoices="filtered_outstanding_invoices"
-						:pos-profile="pos_profile"
-						:pos-profiles-list="pos_profiles_list"
-						:currencies="invoice_currencies"
-						:outstanding-by-currency="outstanding_by_currency"
-						:total-outstanding="total_outstanding_amount"
-						:total-selected="total_selected_invoices"
-						:selected-count="selected_invoices.length"
-						:loading="invoices_loading"
-						:auto-reconcile-loading="auto_reconcile_loading"
-						:auto-reconcile-summary="auto_reconcile_summary"
-						:customer-name="customer_name"
-						:is-invoice-selected="isInvoiceSelected"
-						:item-class="isSelected"
-						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrency"
-						:headers="invoices_headers"
-						@search="get_outstanding_invoices"
-						@clear-selection="selected_invoices = []"
-						@auto-reconcile="autoReconcile"
-						@select-row="
-							toggleInvoiceSelection($event, customer_name, (cust) =>
-								customersStore.setSelectedCustomer(cust),
-							)
-						"
-					/>
+						<PayInvoicesTable
+							v-model:pos-profile-search="pos_profile_search"
+							v-model:currency-filter="currency_filter"
+							:invoices="outstanding_invoices"
+							:filtered-invoices="filtered_outstanding_invoices"
+							:pos-profile="pos_profile"
+							:pos-profiles-list="pos_profiles_list"
+							:currencies="invoice_currencies"
+							:outstanding-by-currency="outstanding_by_currency"
+							:total-outstanding="total_outstanding_amount"
+							:total-selected="total_selected_invoices"
+							:selected-count="selected_invoices.length"
+							:loading="invoices_loading"
+							:auto-reconcile-loading="auto_reconcile_loading"
+							:auto-reconcile-summary="auto_reconcile_summary"
+							:customer-name="customer_name"
+							:is-invoice-selected="isInvoiceSelected"
+							:item-class="isSelected"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							:headers="invoices_headers"
+							@search="get_outstanding_invoices"
+							@clear-selection="selected_invoices = []"
+							@auto-reconcile="autoReconcile"
+							@select-row="
+								toggleInvoiceSelection($event, customer_name, (cust) =>
+									customersStore.setSelectedCustomer(cust),
+								)
+							"
+						/>
 
-					<PayUnallocatedTable
-						v-model:selected-payments="selected_payments"
-						:payments="unallocated_payments"
-						:pos-profile="pos_profile"
-						:total-unallocated="total_unallocated_amount"
-						:total-selected="total_selected_payments"
-						:loading="unallocated_payments_loading"
-						:headers="unallocated_payments_headers"
-						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrency"
-						:payment-row-class="paymentRowClass"
-					/>
+						<PayUnallocatedTable
+							v-model:selected-payments="selected_payments"
+							:payments="unallocated_payments"
+							:pos-profile="pos_profile"
+							:total-unallocated="total_unallocated_amount"
+							:total-selected="total_selected_payments"
+							:loading="unallocated_payments_loading"
+							:headers="unallocated_payments_headers"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							:payment-row-class="paymentRowClass"
+						/>
 
-					<PayMpesaSection
-						v-model:selected-payments="selected_mpesa_payments"
-						v-model:search-name="mpesa_search_name"
-						v-model:search-mobile="mpesa_search_mobile"
-						:payments="mpesa_payments"
-						:total-selected="total_selected_mpesa_payments"
-						:loading="mpesa_payments_loading"
-						:pos-profile="pos_profile"
-						:headers="mpesa_payment_headers"
-						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrency"
-						@search="get_draft_mpesa_payments_register(payment_methods_list)"
-					/>
+						<PayMpesaSection
+							v-model:selected-payments="selected_mpesa_payments"
+							v-model:search-name="mpesa_search_name"
+							v-model:search-mobile="mpesa_search_mobile"
+							:payments="mpesa_payments"
+							:total-selected="total_selected_mpesa_payments"
+							:loading="mpesa_payments_loading"
+							:pos-profile="pos_profile"
+							:headers="mpesa_payment_headers"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							@search="get_draft_mpesa_payments_register(payment_methods_list)"
+						/>
+					</div>
 				</v-card>
 			</v-col>
 
-			<v-col md="4" cols="12" class="pb-3">
-				<v-card
-					class="invoices mx-auto mt-3 p-3 pos-themed-card"
-					style="max-height: 94vh; height: 94vh"
-				>
-					<PayTotalsSidebar
-						v-model:exchange-rate="exchangeRate"
-						:pos-profile="pos_profile"
-						:total-selected-invoices="total_selected_invoices"
-						:selected-invoices-count="selected_invoices.length"
-						:total-selected-payments="total_selected_payments"
-						:total-selected-mpesa="total_selected_mpesa_payments"
-						:payment-methods="payment_methods"
-						:filtered-payment-methods="filtered_payment_methods"
-						:invoice-total-currency="invoiceTotalCurrency"
-						:payment-total-currency="paymentTotalCurrency"
-						:mpesa-total-currency="mpesaTotalCurrency"
-						:company-currency="companyCurrency"
-						:exchange-rate-loading="exchangeRateLoading"
-						:exchange-rate-error="exchangeRateError"
-						:requires-exchange-rate="requiresExchangeRate"
-						:total-of-diff="total_of_diff"
-						:currency-symbol="currencySymbol"
-						:format-currency="formatCurrency"
-						:get-payment-method-currency="getPaymentMethodCurrency"
-						@validate-exchange-rate="validateExchangeRate"
-						@fetch-exchange-rate="fetchExchangeRate"
-					/>
+			<v-col md="4" cols="12" class="pay-side-col">
+				<v-card class="pay-side-card pos-themed-card">
+					<div class="pay-side-scroll">
+						<PayTotalsSidebar
+							v-model:exchange-rate="exchangeRate"
+							:pos-profile="pos_profile"
+							:total-selected-invoices="total_selected_invoices"
+							:selected-invoices-count="selected_invoices.length"
+							:total-selected-payments="total_selected_payments"
+							:total-selected-mpesa="total_selected_mpesa_payments"
+							:payment-methods="payment_methods"
+							:filtered-payment-methods="filtered_payment_methods"
+							:invoice-total-currency="invoiceTotalCurrency"
+							:payment-total-currency="paymentTotalCurrency"
+							:mpesa-total-currency="mpesaTotalCurrency"
+							:company-currency="companyCurrency"
+							:exchange-rate-loading="exchangeRateLoading"
+							:exchange-rate-error="exchangeRateError"
+							:requires-exchange-rate="requiresExchangeRate"
+							:total-of-diff="total_of_diff"
+							:currency-symbol="currencySymbol"
+							:format-currency="formatCurrency"
+							:get-payment-method-currency="getPaymentMethodCurrency"
+							@validate-exchange-rate="validateExchangeRate"
+							@fetch-exchange-rate="fetchExchangeRate"
+						/>
+					</div>
 
 					<PayActionButtons
+						class="pay-side-actions"
 						:loading="isSubmitting"
 						:disabled="false"
 						@submit="submit"
@@ -762,12 +761,77 @@ export default {
 };
 </script>
 
-<style>
-.selected-row {
+<style scoped>
+.pay-view-shell {
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.pay-view-row {
+	flex: 1 1 auto;
+	min-height: 0;
+	margin: 0 !important;
+}
+
+.pay-main-col,
+.pay-side-col {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	min-width: 0;
+	padding-top: var(--posa-space-xs);
+}
+
+.pay-main-card,
+.pay-side-card {
+	flex: 1 1 auto;
+	min-height: 0;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	padding: var(--posa-space-sm);
+	border-radius: var(--posa-radius-md);
+}
+
+.pay-main-scroll,
+.pay-side-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+}
+
+.pay-side-actions {
+	margin-top: var(--posa-space-xs);
+}
+
+.pay-main-card :deep(.v-table__wrapper),
+.pay-side-card :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 960px) {
+	.pay-main-col,
+	.pay-side-col {
+		padding-top: var(--posa-space-2xs);
+	}
+
+	.pay-main-card,
+	.pay-side-card {
+		padding: var(--posa-space-xs);
+	}
+
+	.pay-main-card :deep(.v-data-table table) {
+		min-width: 860px;
+	}
+}
+
+:deep(.selected-row) {
 	background-color: #e3f2fd !important;
 }
 
-.credit-note-row {
+:deep(.credit-note-row) {
 	background-color: rgba(76, 175, 80, 0.08) !important;
 }
 

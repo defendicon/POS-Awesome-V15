@@ -1,7 +1,7 @@
 <template>
 	<v-card flat class="cards mb-0 mt-3 pa-0">
 		<v-row align="start" no-gutters>
-			<v-col cols="6">
+			<v-col cols="12" sm="6">
 				<v-btn
 					ref="submitButton"
 					block
@@ -17,7 +17,7 @@
 					{{ __("Submit") }}
 				</v-btn>
 			</v-col>
-			<v-col cols="6" class="pl-1">
+			<v-col cols="12" sm="6" class="payment-action-col">
 				<v-btn
 					block
 					size="large"
@@ -57,3 +57,16 @@ defineEmits(["submit", "submit-and-print", "cancel"]);
 
 const __ = window.__;
 </script>
+
+<style scoped>
+.payment-action-col {
+	padding-inline-start: 4px;
+}
+
+@media (max-width: 600px) {
+	.payment-action-col {
+		padding-inline-start: 0;
+		padding-top: 6px;
+	}
+}
+</style>

@@ -2,7 +2,7 @@
 	<v-card class="pa-4 pos-themed-card">
 		<div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-1">
 			<div class="text-h6">{{ __("Cash Movement") }}</div>
-			<div style="min-width: 190px; max-width: 220px; width: 100%;">
+			<div class="posting-date-wrap">
 				<v-text-field
 					v-model="postingDate"
 					type="date"
@@ -125,7 +125,7 @@
 					:disabled="submitting || !enabled"
 				/>
 			</v-col>
-			<v-col cols="12" class="d-flex ga-2">
+			<v-col cols="12" class="cash-form-actions d-flex ga-2">
 				<v-btn
 					color="primary"
 					:disabled="submitting || !enabled || !allowExpense || movementType !== 'Expense'"
@@ -503,3 +503,29 @@ watch(
 	},
 );
 </script>
+
+<style scoped>
+.posting-date-wrap {
+	min-width: 190px;
+	max-width: 240px;
+	width: 100%;
+}
+
+.cash-form-actions {
+	flex-wrap: wrap;
+}
+
+.cash-form-actions .v-btn {
+	min-height: var(--posa-touch-target);
+}
+
+@media (max-width: 768px) {
+	.posting-date-wrap {
+		max-width: 100%;
+	}
+
+	.cash-form-actions .v-btn {
+		flex: 1 1 100%;
+	}
+}
+</style>

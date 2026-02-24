@@ -381,7 +381,7 @@ export default {
 	flex-direction: row;
 	/* Default to normal row */
 	flex-shrink: 0;
-	min-width: max-content;
+	min-width: 0;
 }
 
 .pos-navbar-title-compact {
@@ -541,7 +541,7 @@ export default {
 	overflow: visible !important;
 	display: flex;
 	align-items: center;
-	min-width: max-content;
+	min-width: 0;
 	flex-shrink: 0;
 	/* Use same blue as Menu button - matching gradient blue */
 	color: #1976d2 !important;
@@ -944,14 +944,14 @@ export default {
 }
 
 .mobile-navbar .mobile-btn {
-	min-width: 36px !important;
-	min-height: 36px !important;
+	min-width: 40px !important;
+	min-height: 40px !important;
 	padding: 6px !important;
 }
 
 .mobile-navbar .nav-icon {
-	min-width: 36px !important;
-	min-height: 36px !important;
+	min-width: 40px !important;
+	min-height: 40px !important;
 	padding: 6px !important;
 }
 
@@ -977,6 +977,9 @@ export default {
 
 	.mobile-navbar .pos-navbar-title {
 		font-size: 0.9rem !important;
+		max-width: 120px;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.mobile-navbar .pos-navbar-title-light {
@@ -985,9 +988,9 @@ export default {
 
 	.mobile-navbar .mobile-btn,
 	.mobile-navbar .nav-icon {
-		min-width: 32px !important;
-		min-height: 32px !important;
-		padding: 4px !important;
+		min-width: 40px !important;
+		min-height: 40px !important;
+		padding: 6px !important;
 	}
 
 	/* Hide hamburger icon text on very small screens */

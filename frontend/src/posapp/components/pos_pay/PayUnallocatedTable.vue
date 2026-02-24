@@ -22,43 +22,45 @@
 				</p>
 			</v-col>
 		</v-row>
-		<v-data-table
-			:headers="headers"
-			:items="payments"
-			item-key="name"
-			class="elevation-1 mt-0"
-			:loading="loading"
-			:row-props="paymentRowProps"
-		>
-			<template v-slot:item.select="{ item }">
-				<v-checkbox
-					v-model="internalSelectedPayments"
-					:value="item"
-					color="primary"
-					hide-details
-					@click.stop
-				></v-checkbox>
-			</template>
-			<template v-slot:item.mode_of_payment="{ item }">
-				<span>
-					{{ item?.is_credit_note ? __("Credit Note") : item?.mode_of_payment }}
-				</span>
-			</template>
-			<template v-slot:item.reference_invoice="{ item }">
-				<span v-if="item?.is_credit_note && item?.reference_invoice">
-					{{ item.reference_invoice }}
-				</span>
-			</template>
-			<template v-slot:item.paid_amount="{ item }">
-				{{ currencySymbol(item.currency) }}
-				{{ formatCurrency(item.paid_amount) }}
-			</template>
-			<template v-slot:item.unallocated_amount="{ item }">
-				<span class="text-primary"
-					>{{ currencySymbol(item.currency) }} {{ formatCurrency(item.unallocated_amount) }}</span
-				>
-			</template>
-		</v-data-table>
+		<div class="pay-table-wrapper posa-scroll-x">
+			<v-data-table
+				:headers="headers"
+				:items="payments"
+				item-key="name"
+				class="elevation-1 mt-0"
+				:loading="loading"
+				:row-props="paymentRowProps"
+			>
+				<template v-slot:item.select="{ item }">
+					<v-checkbox
+						v-model="internalSelectedPayments"
+						:value="item"
+						color="primary"
+						hide-details
+						@click.stop
+					></v-checkbox>
+				</template>
+				<template v-slot:item.mode_of_payment="{ item }">
+					<span>
+						{{ item?.is_credit_note ? __("Credit Note") : item?.mode_of_payment }}
+					</span>
+				</template>
+				<template v-slot:item.reference_invoice="{ item }">
+					<span v-if="item?.is_credit_note && item?.reference_invoice">
+						{{ item.reference_invoice }}
+					</span>
+				</template>
+				<template v-slot:item.paid_amount="{ item }">
+					{{ currencySymbol(item.currency) }}
+					{{ formatCurrency(item.paid_amount) }}
+				</template>
+				<template v-slot:item.unallocated_amount="{ item }">
+					<span class="text-primary"
+						>{{ currencySymbol(item.currency) }} {{ formatCurrency(item.unallocated_amount) }}</span
+					>
+				</template>
+			</v-data-table>
+		</div>
 		<v-divider></v-divider>
 	</div>
 </template>
@@ -94,3 +96,19 @@ const paymentRowProps = ({ item }) => {
 	return rowClass ? { class: rowClass } : {};
 };
 </script>
+
+<style scoped>
+.pay-table-wrapper {
+	max-width: 100%;
+}
+
+.pay-table-wrapper :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 960px) {
+	.pay-table-wrapper :deep(table) {
+		min-width: 900px;
+	}
+}
+</style>

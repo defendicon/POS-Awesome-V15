@@ -1,14 +1,14 @@
 <template>
-	<div class="pa-0 h-100">
-		<v-row class="h-100 ma-0">
+	<div class="pa-0 purchase-orders-shell">
+		<v-row class="ma-0 purchase-orders-row">
 			<!-- Left Column: Item Selector -->
-			<v-col cols="12" md="5" class="h-100 pa-0 border-e">
+			<v-col cols="12" md="5" class="pa-0 border-e purchase-selector-col">
 				<ItemsSelector context="purchase" @add-item="onAddItem" />
 			</v-col>
 
 			<!-- Right Column: Purchase Order Form (Cart) -->
-			<v-col cols="12" md="7" class="h-100 pa-0">
-				<v-card class="h-100 d-flex flex-column pos-themed-card" flat>
+			<v-col cols="12" md="7" class="pa-0 purchase-form-col">
+				<v-card class="d-flex flex-column pos-themed-card purchase-form-card" flat>
 					<v-card-title class="py-2 px-4 bg-primary text-white d-flex align-center">
 						<span class="text-h6">{{ __("Create Purchase Order") }}</span>
 						<v-spacer></v-spacer>
@@ -21,7 +21,7 @@
 						></v-btn>
 					</v-card-title>
 
-					<v-card-text class="flex-grow-1 overflow-y-auto pa-4">
+					<v-card-text class="flex-grow-1 overflow-y-auto pa-4 purchase-form-scroll">
 						<!-- Header Section -->
 						<PurchaseHeader
 							v-model:supplier="supplier"
@@ -63,7 +63,7 @@
 						</v-alert>
 					</v-card-text>
 
-					<v-card-actions class="pa-4 border-t">
+					<v-card-actions class="pa-4 border-t purchase-form-actions">
 						<v-spacer></v-spacer>
 						<v-btn
 							:loading="submitLoading"
@@ -454,7 +454,46 @@ export default {
 </script>
 
 <style scoped>
+.purchase-orders-shell {
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.purchase-orders-row {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.purchase-selector-col,
+.purchase-form-col {
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.purchase-form-card {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.purchase-form-scroll {
+	min-height: 0;
+}
+
+.purchase-form-actions {
+	flex-shrink: 0;
+}
+
 .cursor-pointer {
 	cursor: pointer;
+}
+
+@media (max-width: 960px) {
+	.purchase-selector-col {
+		border-right: 0 !important;
+		border-bottom: 1px solid var(--pos-border);
+	}
 }
 </style>

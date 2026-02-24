@@ -89,4 +89,30 @@ const menu = ref(false);
 	width: 100%;
 	justify-content: space-between;
 }
+
+.gadgets-row {
+	flex-wrap: nowrap;
+	gap: 0;
+}
+
+.gadget-col {
+	min-width: 0;
+	flex: 1 1 220px;
+}
+
+@media (max-width: 1200px) {
+	.gadgets-row {
+		flex-direction: column !important;
+	}
+
+	.gadgets-row :deep(.v-divider--vertical) {
+		display: none;
+	}
+
+	.gadget-col + .gadget-col {
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+	}
+}
 </style>

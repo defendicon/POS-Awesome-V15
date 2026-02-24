@@ -3,7 +3,8 @@
 		<!-- Switches for Write Off and Credit Sale -->
 		<v-row class="pa-1" align="start" no-gutters>
 			<v-col
-				cols="6"
+				cols="12"
+				sm="6"
 				v-if="posProfile.posa_allow_write_off_change && diffPayment > 0 && !invoiceDoc.is_return"
 			>
 				<v-switch
@@ -14,14 +15,14 @@
 					@update:model-value="$emit('update:isWriteOffChange', $event)"
 				></v-switch>
 			</v-col>
-			<v-col cols="6" v-if="posProfile.posa_allow_credit_sale && !invoiceDoc.is_return">
+			<v-col cols="12" sm="6" v-if="posProfile.posa_allow_credit_sale && !invoiceDoc.is_return">
 				<v-switch
 					:model-value="isCreditSale"
 					:label="$frappe._('Credit Sale?')"
 					@update:model-value="$emit('update:isCreditSale', $event)"
 				></v-switch>
 			</v-col>
-			<v-col cols="6" v-if="invoiceDoc.is_return && posProfile.use_cashback">
+			<v-col cols="12" sm="6" v-if="invoiceDoc.is_return && posProfile.use_cashback">
 				<v-switch
 					:model-value="isCashback"
 					flat
@@ -30,7 +31,7 @@
 					@update:model-value="$emit('update:isCashback', $event)"
 				></v-switch>
 			</v-col>
-			<v-col cols="6" v-if="invoiceDoc.is_return">
+			<v-col cols="12" sm="6" v-if="invoiceDoc.is_return">
 				<v-switch
 					:model-value="isCreditReturn"
 					flat
@@ -39,7 +40,7 @@
 					@update:model-value="$emit('update:isCreditReturn', $event)"
 				></v-switch>
 			</v-col>
-			<v-col cols="6" v-if="isCreditSale">
+			<v-col cols="12" v-if="isCreditSale">
 				<VueDatePicker
 					:model-value="newCreditDueDate"
 					model-type="format"
@@ -76,7 +77,7 @@
 					</v-chip>
 				</div>
 			</v-col>
-			<v-col cols="6" v-if="!invoiceDoc.is_return && posProfile.use_customer_credit">
+			<v-col cols="12" sm="6" v-if="!invoiceDoc.is_return && posProfile.use_customer_credit">
 				<v-switch
 					:model-value="redeemCustomerCredit"
 					flat

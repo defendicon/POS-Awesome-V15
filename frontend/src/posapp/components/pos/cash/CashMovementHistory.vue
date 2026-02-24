@@ -57,54 +57,56 @@
 			</v-col>
 		</v-row>
 
-		<v-data-table
-			:items="rows"
-			:headers="headers"
-			item-key="name"
-			:loading="loading"
-			density="compact"
-			class="elevation-0"
-		>
-			<template #item.posting_date="{ item }">
-				{{ formatPostingDate(item.posting_date) }}
-			</template>
-			<template #item.docstatus="{ item }">
-				<v-chip size="small" :color="statusColor(item.docstatus)">
-					{{ statusLabel(item.docstatus) }}
-				</v-chip>
-			</template>
-			<template #item.actions="{ item }">
-				<div class="d-flex flex-column ga-1 align-end">
-					<v-btn
-						size="x-small"
-						color="info"
-						variant="tonal"
-						:disabled="![1, 2].includes(item.docstatus) || actionLoading"
-						@click="$emit('duplicate', item)"
-					>
-						{{ __("Duplicate") }}
-					</v-btn>
-					<v-btn
-						size="x-small"
-						color="warning"
-						variant="tonal"
-						:disabled="!allowCancel || item.docstatus !== 1 || actionLoading"
-						@click="$emit('cancel', item)"
-					>
-						{{ __("Cancel") }}
-					</v-btn>
-					<v-btn
-						size="x-small"
-						color="error"
-						variant="tonal"
-						:disabled="!allowDelete || item.docstatus !== 2 || actionLoading"
-						@click="$emit('delete', item)"
-					>
-						{{ __("Delete") }}
-					</v-btn>
-				</div>
-			</template>
-		</v-data-table>
+		<div class="cash-history-table posa-scroll-x">
+			<v-data-table
+				:items="rows"
+				:headers="headers"
+				item-key="name"
+				:loading="loading"
+				density="compact"
+				class="elevation-0"
+			>
+				<template #item.posting_date="{ item }">
+					{{ formatPostingDate(item.posting_date) }}
+				</template>
+				<template #item.docstatus="{ item }">
+					<v-chip size="small" :color="statusColor(item.docstatus)">
+						{{ statusLabel(item.docstatus) }}
+					</v-chip>
+				</template>
+				<template #item.actions="{ item }">
+					<div class="d-flex flex-column ga-1 align-end">
+						<v-btn
+							size="x-small"
+							color="info"
+							variant="tonal"
+							:disabled="![1, 2].includes(item.docstatus) || actionLoading"
+							@click="$emit('duplicate', item)"
+						>
+							{{ __("Duplicate") }}
+						</v-btn>
+						<v-btn
+							size="x-small"
+							color="warning"
+							variant="tonal"
+							:disabled="!allowCancel || item.docstatus !== 1 || actionLoading"
+							@click="$emit('cancel', item)"
+						>
+							{{ __("Cancel") }}
+						</v-btn>
+						<v-btn
+							size="x-small"
+							color="error"
+							variant="tonal"
+							:disabled="!allowDelete || item.docstatus !== 2 || actionLoading"
+							@click="$emit('delete', item)"
+						>
+							{{ __("Delete") }}
+						</v-btn>
+					</div>
+				</template>
+			</v-data-table>
+		</div>
 	</v-card>
 </template>
 
@@ -222,3 +224,19 @@ function formatPostingDate(value: string) {
 	return `${dd}-${mm}-${yyyy}`;
 }
 </script>
+
+<style scoped>
+.cash-history-table {
+	max-width: 100%;
+}
+
+.cash-history-table :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 960px) {
+	.cash-history-table :deep(table) {
+		min-width: 940px;
+	}
+}
+</style>

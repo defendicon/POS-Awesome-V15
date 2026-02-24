@@ -87,4 +87,27 @@ defineEmits(["close"]);
 .header-divider {
 	border-color: rgba(var(--v-border-color), var(--v-border-opacity));
 }
+
+@media (max-width: 768px) {
+	.closing-header {
+		padding: 14px !important;
+	}
+
+	.header-content {
+		gap: 12px;
+	}
+
+	.header-icon-wrapper {
+		padding: 10px;
+		border-radius: 12px;
+	}
+
+	.header-title {
+		font-size: 1.1rem;
+	}
+
+	.header-subtitle {
+		font-size: 0.8rem;
+	}
+}
 </style>

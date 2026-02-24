@@ -1,8 +1,8 @@
 <template>
-	<div class="pa-0 h-100">
-		<v-row class="h-100 ma-0">
+	<div class="pa-0 barcode-printing-shell">
+		<v-row class="ma-0 barcode-printing-layout">
 			<!-- Left Column: Item Selector -->
-			<v-col cols="12" md="5" class="h-100 pa-0 border-e d-flex flex-column">
+			<v-col cols="12" md="5" class="pa-0 border-e d-flex flex-column barcode-selector-col">
 				<ItemsSelector
 					context="barcode"
 					:showOnlyBarcodeItems="true"
@@ -12,8 +12,8 @@
 			</v-col>
 
 			<!-- Right Column: Barcode Printing -->
-			<v-col cols="12" md="7" class="h-100 pa-0">
-				<v-card class="h-100 d-flex flex-column pos-themed-card" flat>
+			<v-col cols="12" md="7" class="pa-0 barcode-preview-col">
+				<v-card class="d-flex flex-column pos-themed-card barcode-print-card" flat>
 					<v-card-title class="py-2 px-4 bg-primary text-white d-flex align-center">
 						<span class="text-h6">{{ __("Barcode Label Printing") }}</span>
 						<v-spacer></v-spacer>
@@ -26,7 +26,7 @@
 						></v-btn>
 					</v-card-title>
 
-					<v-card-text class="flex-grow-1 overflow-y-auto pa-4">
+					<v-card-text class="flex-grow-1 overflow-y-auto pa-4 barcode-print-content">
 						<!-- Configuration -->
 						<v-row dense class="mb-2 align-center">
 							<v-col cols="12" md="3">
@@ -112,14 +112,15 @@
 						<v-divider class="my-3"></v-divider>
 
 						<!-- Items List -->
-						<v-data-table
-							:headers="headers"
-							:items="items"
-							density="compact"
-							class="elevation-1 border rounded"
-							:items-per-page="-1"
-							hide-default-footer
-						>
+						<div class="barcode-items-table-wrap">
+							<v-data-table
+								:headers="headers"
+								:items="items"
+								density="compact"
+								class="elevation-1 border rounded barcode-items-table"
+								:items-per-page="-1"
+								hide-default-footer
+							>
 							<template v-slot:item.uom="{ item }">
 								<v-select
 									v-if="getItemUomOptions(item).length"
@@ -205,7 +206,8 @@
 									@click="removeItem(item)"
 								></v-btn>
 							</template>
-						</v-data-table>
+							</v-data-table>
+						</div>
 					</v-card-text>
 				</v-card>
 			</v-col>
@@ -1602,6 +1604,42 @@ export default {
 </script>
 
 <style scoped>
+.barcode-printing-shell {
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.barcode-printing-layout {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.barcode-selector-col,
+.barcode-preview-col {
+	min-height: 0;
+}
+
+.barcode-print-card {
+	height: 100%;
+	min-height: 0;
+}
+
+.barcode-print-content {
+	min-height: 0;
+}
+
+.barcode-items-table-wrap {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.barcode-items-table {
+	min-width: 840px;
+}
+
 .qty-control-btn {
 	width: 24px !important;
 	height: 24px !important;
@@ -1769,5 +1807,26 @@ export default {
 	padding: 0;
 	min-height: 24px;
 	font-size: 0.75rem;
+}
+
+@media (max-width: 960px) {
+	.barcode-printing-layout {
+		display: block;
+	}
+
+	.barcode-selector-col {
+		border-inline-end: 0 !important;
+		border-bottom: 1px solid var(--pos-border);
+		max-height: 56dvh;
+		overflow: auto;
+	}
+
+	.barcode-preview-col {
+		min-height: 44dvh;
+	}
+
+	.barcode-items-table {
+		min-width: 760px;
+	}
 }
 </style>

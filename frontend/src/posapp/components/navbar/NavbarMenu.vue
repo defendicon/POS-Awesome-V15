@@ -1,6 +1,6 @@
 <template>
 	<v-menu
-		:min-width="isMobile ? 280 : 240"
+		:min-width="menuMinWidth"
 		:close-on-content-click="true"
 		:location="isMobile ? 'bottom end' : 'bottom end'"
 		:offset="[0, 4]"
@@ -485,6 +485,9 @@ export default {
 		isDesktop() {
 			return this.windowWidth >= 1024;
 		},
+		menuMinWidth() {
+			return this.isMobile ? Math.min(280, this.windowWidth - 20) : 240;
+		},
 		// Display name for mobile menu
 		displayUserName() {
 			// Show POS profile name if available, otherwise show user name
@@ -715,10 +718,10 @@ export default {
 	margin: 0 !important;
 	padding: 6px !important;
 	border-radius: 12px !important;
-	min-width: 36px !important;
-	max-width: 36px !important;
-	width: 36px !important;
-	height: 36px !important;
+	min-width: 40px !important;
+	max-width: 40px !important;
+	width: 40px !important;
+	height: 40px !important;
 	background: rgba(25, 118, 210, 0.08) !important;
 	border: 1px solid rgba(25, 118, 210, 0.12) !important;
 }
@@ -771,7 +774,8 @@ export default {
 		0 0 0 1px rgba(255, 255, 255, 0.3) inset;
 	backdrop-filter: blur(20px) saturate(1.2);
 	min-width: 260px;
-	max-width: 280px;
+	max-width: min(320px, calc(100vw - 16px));
+	width: min(320px, calc(100vw - 16px));
 	margin-top: 2px;
 	display: flex;
 	flex-direction: column;
@@ -968,8 +972,9 @@ export default {
 /* Compact Responsive Design */
 @media (max-width: 768px) {
 	.menu-card-compact {
-		min-width: 280px;
-		max-width: 320px;
+		min-width: min(280px, calc(100vw - 16px));
+		max-width: min(320px, calc(100vw - 16px));
+		width: min(320px, calc(100vw - 16px));
 		border-radius: 14px;
 		min-height: 300px;
 	}
@@ -1000,8 +1005,9 @@ export default {
 
 @media (max-width: 480px) {
 	.menu-card-compact {
-		min-width: 260px;
-		max-width: 300px;
+		min-width: min(260px, calc(100vw - 16px));
+		max-width: min(300px, calc(100vw - 16px));
+		width: min(300px, calc(100vw - 16px));
 	}
 
 	.menu-item-compact {

@@ -3,7 +3,7 @@
 		<!-- Custom Days Dialog -->
 		<v-dialog
 			:model-value="customDaysDialog"
-			max-width="300px"
+			max-width="360px"
 			@update:model-value="$emit('update:customDaysDialog', $event)"
 		>
 			<v-card>
@@ -26,7 +26,7 @@
 						></v-text-field>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="payment-dialog-actions">
 					<v-spacer></v-spacer>
 					<v-btn color="error" theme="dark" @click="$emit('update:customDaysDialog', false)">
 						{{ $__("Close") }}
@@ -41,7 +41,7 @@
 		<!-- Phone Payment Dialog -->
 		<v-dialog
 			:model-value="phoneDialog"
-			max-width="400px"
+			max-width="420px"
 			@update:model-value="$emit('update:phoneDialog', $event)"
 		>
 			<v-card v-if="invoiceDoc">
@@ -62,7 +62,7 @@
 						></v-text-field>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="payment-dialog-actions">
 					<v-spacer></v-spacer>
 					<v-btn color="error" theme="dark" @click="$emit('update:phoneDialog', false)">
 						{{ $__("Close") }}
@@ -113,5 +113,16 @@ const $__ = inject("__", window.__);
 <style scoped>
 .pos-themed-input :deep(.v-field__input) {
 	font-weight: 500;
+}
+
+.payment-dialog-actions {
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+@media (max-width: 600px) {
+	.payment-dialog-actions :deep(.v-btn) {
+		flex: 1 1 100%;
+	}
 }
 </style>

@@ -3,7 +3,7 @@
 		v-model="drawerOpen"
 		:rail="mini"
 		expand-on-hover
-		width="220"
+		:width="drawerWidth"
 		:class="['drawer-custom', { 'drawer-visible': drawerOpen }, rtlClasses]"
 		@mouseleave="handleMouseLeave"
 		temporary
@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRtl } from "../../composables/core/useRtl";
 
 defineOptions({
@@ -71,7 +71,18 @@ const mini = ref(false);
 const drawerOpen = ref(props.drawer);
 const activeItem = ref(props.item);
 const showSport = ref(true);
+const windowWidth = ref(window.innerWidth);
 let closeTimeout = null;
+
+const drawerWidth = computed(() => {
+	if (windowWidth.value <= 600) {
+		return Math.min(280, windowWidth.value - 12);
+	}
+	if (windowWidth.value <= 1024) {
+		return 260;
+	}
+	return 300;
+});
 
 const scrimColor = computed(() => {
 	// Use an opaque background in light mode so that
@@ -125,6 +136,23 @@ function closeDrawer() {
 	drawerOpen.value = false;
 	mini.value = true;
 }
+
+const handleResize = () => {
+	windowWidth.value = window.innerWidth;
+};
+
+onMounted(() => {
+	window.addEventListener("resize", handleResize, { passive: true });
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("resize", handleResize);
+	document.body.style.overflow = "";
+	if (closeTimeout) {
+		clearTimeout(closeTimeout);
+		closeTimeout = null;
+	}
+});
 </script>
 
 <style scoped>
@@ -163,6 +191,9 @@ function closeDrawer() {
 	font-size: 1rem;
 	color: #0097a7;
 	font-family: "Roboto", sans-serif;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* Styling for icons within the navigation drawer list items */
@@ -249,28 +280,20 @@ function closeDrawer() {
 	display: block !important;
 }
 
-/* Responsive adjustments for width and dark theme */
-@media (max-width: 900px) and (orientation: landscape) {
-	.drawer-custom.drawer-visible {
-		width: 180px !important;
-	}
-}
-
-@media (min-width: 601px) and (max-width: 1024px) {
-	.drawer-custom.drawer-visible {
-		width: 240px !important;
-	}
-}
-
-@media (min-width: 1025px) {
-	.drawer-custom.drawer-visible {
-		width: 300px !important;
-	}
-}
-
 @media (max-width: 1024px) {
 	.drawer-custom.drawer-visible {
 		background-color: var(--pos-navbar-bg) !important;
+	}
+}
+
+@media (max-width: 600px) {
+	.drawer-header,
+	.drawer-header-mini {
+		height: 56px;
+	}
+
+	.drawer-company {
+		font-size: 0.9rem;
 	}
 }
 </style>

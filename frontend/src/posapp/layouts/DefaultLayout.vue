@@ -636,6 +636,7 @@ const adjust_frappe_sidebar_offset = () => {
 <style scoped>
 .container1 {
 	/* Use dynamic viewport units for better mobile support */
+	min-height: 100dvh;
 	height: 100dvh;
 	max-height: 100dvh;
 	overflow: hidden;
@@ -646,21 +647,35 @@ const adjust_frappe_sidebar_offset = () => {
 .main-content {
 	/* Fill the available height of the container */
 	height: 100%;
+	width: 100%;
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 }
 
 .page-content {
-	flex: 1;
-	overflow: hidden;
-	padding-top: 8px;
+	flex: 1 1 auto;
+	min-height: 0;
+	min-width: 0;
+	overflow: auto;
+	padding-top: clamp(4px, 0.7vw, 10px);
+	padding-inline: clamp(8px, 1.1vw, 16px);
+	padding-bottom: clamp(8px, 1vw, 14px);
 }
 
 /* Ensure proper spacing and prevent layout shifts */
 :deep(.v-main__wrap) {
 	display: flex;
 	flex-direction: column;
-	min-height: 100%;
+	min-height: 0;
 	height: 100%;
+	min-width: 0;
+}
+
+@media (max-width: 768px) {
+	.page-content {
+		padding-inline: 8px;
+		padding-bottom: 10px;
+	}
 }
 </style>

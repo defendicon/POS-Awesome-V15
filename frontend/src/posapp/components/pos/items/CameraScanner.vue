@@ -5,7 +5,7 @@
 		persistent="false"
 		:scrim="false"
 		:retain-focus="false"
-		location="top right"
+		:location="dialogLocation"
 		content-class="camera-scanner-dialog"
 	>
 		<v-card>
@@ -39,7 +39,7 @@
 							@error="onError"
 							@camera-on="onCameraReady"
 							@camera-off="isScanning = false"
-							style="width: 100%; height: 400px; object-fit: cover"
+							class="scanner-stream"
 						>
 							<!-- Overlay -->
 							<div v-if="!scanResult" class="scanning-overlay">
@@ -150,6 +150,12 @@
 	border-radius: 8px;
 	box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
 }
+
+.scanner-stream {
+	width: 100%;
+	height: clamp(220px, 44vh, 420px);
+	object-fit: cover;
+}
 .barcode-scanner {
 	position: relative;
 }
@@ -224,16 +230,26 @@
 .status-messages {
 	background: rgba(255, 255, 255, 0.95);
 }
-.camera-scanner-dialog {
+:deep(.camera-scanner-dialog) {
 	align-self: flex-start;
 	justify-self: flex-end;
 	margin: 16px;
+	width: min(520px, calc(100vw - 16px));
+	max-width: calc(100vw - 16px);
 }
 .scanner-container:hover .scanning-overlay {
 	opacity: 0.9;
 }
 .scanner-container .scanning-overlay {
 	transition: opacity 0.3s ease;
+}
+
+@media (max-width: 768px) {
+	:deep(.camera-scanner-dialog) {
+		margin: 8px;
+		width: calc(100vw - 12px);
+		max-width: calc(100vw - 12px);
+	}
 }
 </style>
 
@@ -266,6 +282,7 @@ const isScanning = ref(false);
 const torchActive = ref(false);
 const selectedDeviceId = ref(null);
 const cameras = ref([]);
+const viewportWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1024);
 
 // OpenCV controls
 const openCVEnabled = ref(true);
@@ -325,6 +342,9 @@ const readerFormats = computed(() => {
 	if (props.scanType === "Barcode") return availableFormats.filter((f) => f !== "qr_code");
 	return availableFormats;
 });
+
+const isMobileViewport = computed(() => viewportWidth.value < 768);
+const dialogLocation = computed(() => (isMobileViewport.value ? "top" : "top right"));
 
 // Implementation of opencvTrackFunction before it's used in computed
 const opencvTrackFunction = (detectedCodes, ctx) => {
@@ -624,6 +644,10 @@ const handleEscKey = (event) => {
 	}
 };
 
+const handleViewportResize = () => {
+	viewportWidth.value = window.innerWidth || viewportWidth.value;
+};
+
 // Watchers
 watch(scannerDialog, (newVal) => {
 	if (newVal) {
@@ -641,6 +665,9 @@ onMounted(async () => {
 	if (typeof document !== "undefined") {
 		document.addEventListener("keydown", handleEscKey);
 	}
+	if (typeof window !== "undefined") {
+		window.addEventListener("resize", handleViewportResize, { passive: true });
+	}
 	// Initialize OpenCV
 	try {
 		await opencvProcessor.ensureInitialized();
@@ -654,6 +681,9 @@ onMounted(async () => {
 onBeforeUnmount(async () => {
 	if (typeof document !== "undefined") {
 		document.removeEventListener("keydown", handleEscKey);
+	}
+	if (typeof window !== "undefined") {
+		window.removeEventListener("resize", handleViewportResize);
 	}
 	stopScanning();
 	try {

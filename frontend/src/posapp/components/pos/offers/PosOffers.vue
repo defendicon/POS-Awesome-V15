@@ -1,12 +1,11 @@
 <template>
-	<div>
-		<v-card class="selection mx-auto mt-3 pos-themed-card" style="max-height: 80vh; height: 80vh">
+	<div class="offers-shell">
+		<v-card class="selection mx-auto mt-3 pos-themed-card offers-card">
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Offers") }}</span>
 			</v-card-title>
 			<div
-				class="my-0 py-0 overflow-y-auto"
-				style="max-height: 75vh"
+				class="my-0 py-0 offers-scroll"
 				@mouseover="style = 'cursor: pointer'"
 			>
 				<v-data-table
@@ -71,12 +70,12 @@
 			</div>
 		</v-card>
 
-		<v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
+		<v-card flat class="cards mb-0 mt-3 py-0 offers-actions-card">
 			<v-row align="start" no-gutters>
 				<v-col cols="12">
 					<v-btn
 						block
-						class="pa-1"
+						class="pa-1 offers-back-btn"
 						size="large"
 						color="warning"
 						theme="dark"
@@ -387,6 +386,45 @@ export default {
 </script>
 
 <style scoped>
+.offers-shell {
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.offers-card {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	border-radius: var(--posa-radius-md);
+}
+
+.offers-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+}
+
+.offers-actions-card {
+	flex-shrink: 0;
+}
+
+.offers-back-btn {
+	min-height: var(--posa-touch-target);
+}
+
+:deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 900px) {
+	:deep(.v-data-table table) {
+		min-width: 720px;
+	}
+}
+
 .offer-description {
 	white-space: pre-line;
 }

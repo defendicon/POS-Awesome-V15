@@ -1,10 +1,10 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="draftsDialog" max-width="900px">
+		<v-dialog v-model="draftsDialog" max-width="960px" scrollable>
 			<!-- <template v-slot:activator="{ on, attrs }">
         <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
       </template>-->
-			<v-card variant="flat" class="pos-themed-card">
+			<v-card variant="flat" class="pos-themed-card drafts-dialog-card">
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Load Sales Invoice") }}</span>
 				</v-card-title>
@@ -15,30 +15,32 @@
 					<v-container>
 						<v-row no-gutters>
 							<v-col cols="12" class="pa-1">
-								<v-data-table
-									:headers="headers"
-									:items="draftsData"
-									item-value="name"
-									class="elevation-1"
-									:theme="$theme.isDark ? 'dark' : 'light'"
-									show-select
-									v-model="selected"
-									select-strategy="single"
-									return-object
-								>
-									<template v-slot:item.posting_time="{ item }">
-										{{ item.posting_time.split(".")[0] }}
-									</template>
-									<template v-slot:item.grand_total="{ item }">
-										{{ currencySymbol(item.currency) }}
-										{{ formatCurrency(item.grand_total) }}
-									</template>
-								</v-data-table>
+								<div class="drafts-table-wrap">
+									<v-data-table
+										:headers="headers"
+										:items="draftsData"
+										item-value="name"
+										class="elevation-1 drafts-table"
+										:theme="$theme.isDark ? 'dark' : 'light'"
+										show-select
+										v-model="selected"
+										select-strategy="single"
+										return-object
+									>
+										<template v-slot:item.posting_time="{ item }">
+											{{ item.posting_time.split(".")[0] }}
+										</template>
+										<template v-slot:item.grand_total="{ item }">
+											{{ currencySymbol(item.currency) }}
+											{{ formatCurrency(item.grand_total) }}
+										</template>
+									</v-data-table>
+								</div>
 							</v-col>
 						</v-row>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="drafts-actions">
 					<v-spacer></v-spacer>
 					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
 					<v-btn color="success" theme="dark" @click="submit_dialog">Load Sale</v-btn>
@@ -160,3 +162,34 @@ export default {
 	},
 };
 </script>
+
+<style scoped>
+.drafts-dialog-card {
+	max-height: min(88dvh, 780px);
+}
+
+.drafts-table-wrap {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.drafts-table {
+	min-width: 760px;
+}
+
+.drafts-actions {
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+@media (max-width: 768px) {
+	.drafts-table {
+		min-width: 680px;
+	}
+
+	.drafts-actions :deep(.v-btn) {
+		flex: 1 1 100%;
+	}
+}
+</style>

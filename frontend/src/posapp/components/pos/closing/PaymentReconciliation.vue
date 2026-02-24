@@ -9,49 +9,51 @@
 			</p>
 		</div>
 
-		<v-data-table
-			:headers="headers"
-			:items="payments"
-			item-key="mode_of_payment"
-			class="elevation-0 rounded-lg white-table"
-			:items-per-page="itemsPerPage"
-			hide-default-footer
-			density="compact"
-		>
-			<template v-slot:item.closing_amount="props">
-				<v-text-field
-					v-model="props.item.closing_amount"
-					:rules="[closingAmountRule]"
-					:label="$frappe._('Edit')"
-					single-line
-					counter
-					type="number"
-					density="compact"
-					variant="outlined"
-					color="primary"
-					class="pos-themed-input"
-					hide-details
-					:prefix="companyCurrencySymbol"
-				></v-text-field>
-			</template>
-			<template v-slot:item.difference="{ item }">
-				{{ companyCurrencySymbol }}
-				{{ formatCurrency(calculateDifference(item)) }}
-			</template>
-			<template v-slot:item.opening_amount="{ item }">
-				{{ companyCurrencySymbol }}
-				{{ formatCurrency(item.opening_amount) }}</template
+		<div class="reconciliation-table-wrap">
+			<v-data-table
+				:headers="headers"
+				:items="payments"
+				item-key="mode_of_payment"
+				class="elevation-0 rounded-lg white-table reconciliation-table"
+				:items-per-page="itemsPerPage"
+				hide-default-footer
+				density="compact"
 			>
-			<template v-slot:item.expected_amount="{ item }">
-				{{ companyCurrencySymbol }}
-				{{ formatCurrency(item.expected_amount) }}</template
-			>
-			<template v-slot:item.variance_percent="{ item }">
-				<span :class="['variance-chip', varianceClass(item)]">
-					{{ formatVariancePercent(item) }}
-				</span>
-			</template>
-		</v-data-table>
+				<template v-slot:item.closing_amount="props">
+					<v-text-field
+						v-model="props.item.closing_amount"
+						:rules="[closingAmountRule]"
+						:label="$frappe._('Edit')"
+						single-line
+						counter
+						type="number"
+						density="compact"
+						variant="outlined"
+						color="primary"
+						class="pos-themed-input"
+						hide-details
+						:prefix="companyCurrencySymbol"
+					></v-text-field>
+				</template>
+				<template v-slot:item.difference="{ item }">
+					{{ companyCurrencySymbol }}
+					{{ formatCurrency(calculateDifference(item)) }}
+				</template>
+				<template v-slot:item.opening_amount="{ item }">
+					{{ companyCurrencySymbol }}
+					{{ formatCurrency(item.opening_amount) }}</template
+				>
+				<template v-slot:item.expected_amount="{ item }">
+					{{ companyCurrencySymbol }}
+					{{ formatCurrency(item.expected_amount) }}</template
+				>
+				<template v-slot:item.variance_percent="{ item }">
+					<span :class="['variance-chip', varianceClass(item)]">
+						{{ formatVariancePercent(item) }}
+					</span>
+				</template>
+			</v-data-table>
+		</div>
 	</div>
 </template>
 
@@ -135,6 +137,16 @@ const varianceClass = (item) => {
 	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
+.reconciliation-table-wrap {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.reconciliation-table {
+	min-width: 760px;
+}
+
 .pos-themed-input :deep(.v-field__outline__start),
 .pos-themed-input :deep(.v-field__outline__end) {
 	border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
@@ -162,5 +174,11 @@ const varianceClass = (item) => {
 .variance-neutral {
 	background-color: rgba(var(--v-theme-on-surface), 0.05);
 	opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+	.reconciliation-table {
+		min-width: 680px;
+	}
 }
 </style>

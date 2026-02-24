@@ -1,6 +1,6 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="isOpen" persistent max-width="800px" max-height="90vh">
+		<v-dialog v-model="isOpen" persistent max-width="800px" max-height="90vh" scrollable>
 			<v-card elevation="8" class="opening-dialog-card">
 				<!-- Header Section - White Background with Blue Text -->
 				<v-card-title class="opening-dialog-header">
@@ -69,7 +69,7 @@
 									:items-per-page="itemsPerPage"
 									hide-default-footer
 									density="compact"
-									:height="'300px'"
+									:height="tableHeight"
 									fixed-header
 								>
 									<template v-slot:item.amount="{ item }">
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import {
 	getOpeningDialogStorage,
 	setOpeningDialogStorage,
@@ -179,6 +179,8 @@ const payments_methods_headers = [
 ];
 const itemsPerPage = ref(100);
 const max25chars = (v) => v.length <= 12 || "Input too long!";
+const windowWidth = ref(window.innerWidth);
+const tableHeight = computed(() => (windowWidth.value <= 600 ? "220px" : "300px"));
 
 const currencySymbol = (currency) => get_currency_symbol?.(currency);
 
@@ -296,8 +298,17 @@ function logout() {
 	});
 }
 
+const handleResize = () => {
+	windowWidth.value = window.innerWidth;
+};
+
 onMounted(() => {
+	window.addEventListener("resize", handleResize, { passive: true });
 	get_opening_dialog_data();
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("resize", handleResize);
 });
 </script>
 
@@ -636,6 +647,7 @@ onMounted(() => {
 	border-top: 1px solid #e0e0e0;
 	padding: 16px 24px;
 	gap: 12px;
+	flex-wrap: wrap;
 }
 
 .pos-action-btn {
@@ -702,5 +714,20 @@ onMounted(() => {
 
 .dialog-actions-container {
 	border-top: 1px solid var(--pos-border);
+}
+
+@media (max-width: 768px) {
+	.dialog-actions-container {
+		padding: 12px;
+	}
+
+	.dialog-actions-container :deep(.v-spacer) {
+		display: none;
+	}
+
+	.pos-action-btn {
+		flex: 1 1 100%;
+		min-width: 100%;
+	}
 }
 </style>

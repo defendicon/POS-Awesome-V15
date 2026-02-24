@@ -1,35 +1,38 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="ordersDialog" max-width="900px">
+		<v-dialog v-model="ordersDialog" max-width="960px" scrollable>
 			<!-- <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
             </template>-->
-			<v-card>
+			<v-card class="sales-orders-dialog-card">
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Select Sales Orders") }}</span>
 				</v-card-title>
 				<v-card-text class="pa-0">
 					<v-container>
 						<v-row class="mb-4">
-							<v-text-field
-								color="primary"
-								:label="frappe._('Order ID')"
-								hide-details
-								v-model="order_name"
-								density="compact"
-								clearable
-								class="mx-4 pos-themed-input"
-							></v-text-field>
-							<v-btn
-								variant="text"
-								class="ml-2"
-								color="primary"
-								theme="dark"
-								:loading="isLoading"
-								:disabled="isLoading || isSubmitting"
-								@click="search_orders"
-								>{{ __("Search") }}</v-btn
-							>
+							<v-col cols="12" sm="8">
+								<v-text-field
+									color="primary"
+									:label="frappe._('Order ID')"
+									hide-details
+									v-model="order_name"
+									density="compact"
+									clearable
+									class="pos-themed-input"
+								></v-text-field>
+							</v-col>
+							<v-col cols="12" sm="4" class="d-flex justify-end align-end">
+								<v-btn
+									variant="text"
+									color="primary"
+									theme="dark"
+									:loading="isLoading"
+									:disabled="isLoading || isSubmitting"
+									@click="search_orders"
+									>{{ __("Search") }}</v-btn
+								>
+							</v-col>
 						</v-row>
 						<v-row v-if="errorMessage">
 							<v-col cols="12" class="pt-0">
@@ -40,29 +43,31 @@
 						</v-row>
 						<v-row no-gutters>
 							<v-col cols="12" class="pa-1">
-								<v-data-table
-									:headers="headers"
-									:items="dialog_data"
-									item-key="name"
-									class="elevation-1"
-									show-select
-									v-model="selected"
-									return-object
-									select-strategy="single"
-								>
-									<!-- <template v-slot:item.posting_time="{ item }">
+								<div class="sales-orders-table-wrap">
+									<v-data-table
+										:headers="headers"
+										:items="dialog_data"
+										item-key="name"
+										class="elevation-1 sales-orders-table"
+										show-select
+										v-model="selected"
+										return-object
+										select-strategy="single"
+									>
+										<!-- <template v-slot:item.posting_time="{ item }">
                           {{ item.posting_time.split(".")[0] }}
                         </template> -->
-									<template v-slot:item.grand_total="{ item }">
-										{{ currencySymbol(item.currency) }}
-										{{ formatCurrency(item.grand_total) }}
-									</template>
-								</v-data-table>
+										<template v-slot:item.grand_total="{ item }">
+											{{ currencySymbol(item.currency) }}
+											{{ formatCurrency(item.grand_total) }}
+										</template>
+									</v-data-table>
+								</div>
 							</v-col>
 						</v-row>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="sales-orders-actions">
 					<v-spacer></v-spacer>
 					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
 					<v-btn
@@ -273,3 +278,34 @@ export default {
 	// },
 };
 </script>
+
+<style scoped>
+.sales-orders-dialog-card {
+	max-height: min(88dvh, 780px);
+}
+
+.sales-orders-table-wrap {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.sales-orders-table {
+	min-width: 760px;
+}
+
+.sales-orders-actions {
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+@media (max-width: 768px) {
+	.sales-orders-table {
+		min-width: 680px;
+	}
+
+	.sales-orders-actions :deep(.v-btn) {
+		flex: 1 1 100%;
+	}
+}
+</style>

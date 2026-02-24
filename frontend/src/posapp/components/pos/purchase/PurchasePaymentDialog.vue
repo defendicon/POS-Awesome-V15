@@ -1,6 +1,6 @@
 <template>
 	<v-dialog v-model="dialog" max-width="600px" persistent>
-		<v-card class="pos-themed-card" style="max-height: 80vh; overflow: hidden">
+		<v-card class="pos-themed-card purchase-payment-card">
 			<v-card-title class="bg-primary text-white d-flex align-center py-3">
 				<span class="text-h6">{{ __("Payment") }}</span>
 				<v-spacer></v-spacer>
@@ -9,7 +9,7 @@
 				</span>
 			</v-card-title>
 
-			<v-card-text class="pa-0 overflow-y-auto" style="max-height: 60vh">
+			<v-card-text class="pa-0 purchase-payment-scroll">
 				<!-- Payment Summary -->
 				<v-row v-if="totalAmount > 0" class="pa-3 ma-0" dense>
 					<v-col cols="6">
@@ -164,7 +164,7 @@
 
 			<v-card-actions class="pa-4 border-t bg-surface">
 				<v-row align="start" no-gutters class="w-100">
-					<v-col cols="6" class="pr-1">
+					<v-col cols="12" sm="6" class="pr-sm-1">
 						<v-btn
 							block
 							size="large"
@@ -178,7 +178,7 @@
 							{{ __("Submit") }}
 						</v-btn>
 					</v-col>
-					<v-col cols="6" class="pl-1">
+					<v-col cols="12" sm="6" class="pl-sm-1 mt-2 mt-sm-0">
 						<v-btn
 							block
 							size="large"
@@ -474,6 +474,16 @@ async function fetchPrintFormats() {
 </script>
 
 <style scoped>
+.purchase-payment-card {
+	max-height: min(86dvh, 760px);
+	overflow: hidden;
+}
+
+.purchase-payment-scroll {
+	max-height: calc(min(86dvh, 760px) - 196px);
+	overflow: auto;
+}
+
 .v-text-field {
 	composes: pos-form-field;
 }
@@ -588,5 +598,15 @@ async function fetchPrintFormats() {
 .v-dialog .v-card-text::-webkit-scrollbar-thumb {
 	background-color: rgb(var(--v-theme-primary));
 	border-radius: 3px;
+}
+
+@media (max-width: 600px) {
+	.purchase-payment-card {
+		max-height: min(90dvh, 780px);
+	}
+
+	.purchase-payment-scroll {
+		max-height: calc(min(90dvh, 780px) - 220px);
+	}
 }
 </style>

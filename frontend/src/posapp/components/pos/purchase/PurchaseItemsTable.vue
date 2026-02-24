@@ -1,13 +1,14 @@
 <template>
-	<v-data-table
-		:headers="headers"
-		:items="items"
-		item-key="line_id"
-		class="elevation-1 border rounded"
-		density="compact"
-		hide-default-footer
-		:items-per-page="-1"
-	>
+	<div class="purchase-items-table posa-scroll-x">
+		<v-data-table
+			:headers="headers"
+			:items="items"
+			item-key="line_id"
+			class="elevation-1 border rounded"
+			density="compact"
+			hide-default-footer
+			:items-per-page="-1"
+		>
 		<template v-slot:item.item_name="{ item }">
 			<div class="py-1">
 				<div class="font-weight-bold">{{ item.item_name }}</div>
@@ -131,8 +132,7 @@
 				min="0"
 				:model-value="item.received_qty"
 				@update:model-value="(val) => $emit('update-received-qty', { item, value: val })"
-				class="pos-themed-input"
-				style="width: 80px"
+				class="pos-themed-input received-qty-field"
 			></v-text-field>
 		</template>
 
@@ -158,7 +158,8 @@
 				<span>{{ formatCurrency(totalAmount) }}</span>
 			</div>
 		</template>
-	</v-data-table>
+		</v-data-table>
+	</div>
 </template>
 
 <script>
@@ -226,6 +227,23 @@ export default {
 </script>
 
 <style scoped>
+.purchase-items-table {
+	max-width: 100%;
+}
+
+.purchase-items-table :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+.purchase-items-table :deep(table) {
+	min-width: 860px;
+}
+
+.received-qty-field {
+	width: 80px;
+	max-width: 100%;
+}
+
 .pos-table__qty-counter {
 	display: flex;
 	align-items: center;
@@ -467,5 +485,11 @@ export default {
 	opacity: 0.7;
 	margin-right: 2px;
 	font-size: 0.85em;
+}
+
+@media (max-width: 960px) {
+	.purchase-items-table :deep(table) {
+		min-width: 980px;
+	}
 }
 </style>

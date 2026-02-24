@@ -1,13 +1,13 @@
 <template>
-	<div>
-		<v-card class="selection mx-auto mt-3 pos-themed-card" style="max-height: 80vh; height: 80vh">
+	<div class="coupons-shell">
+		<v-card class="selection mx-auto mt-3 pos-themed-card coupons-card">
 			<v-card-title>
 				<span class="text-h6 text-primary">{{ __("Coupons") }}</span>
 			</v-card-title>
 
 			<!-- Input and Button Row - Same Level -->
 			<v-row class="px-4 pb-2" no-gutters>
-				<v-col cols="8" class="pr-2">
+				<v-col cols="12" sm="8" class="pr-sm-2">
 					<v-text-field
 						density="compact"
 						variant="outlined"
@@ -20,7 +20,7 @@
 					>
 					</v-text-field>
 				</v-col>
-				<v-col cols="4">
+				<v-col cols="12" sm="4" class="mt-2 mt-sm-0">
 					<v-btn
 						class="add-coupon-btn"
 						color="success"
@@ -34,8 +34,7 @@
 			</v-row>
 
 			<div
-				class="my-0 py-0 overflow-y-auto"
-				style="max-height: 75vh"
+				class="my-0 py-0 coupons-scroll"
 				@mouseover="style = 'cursor: pointer'"
 			>
 				<v-data-table
@@ -55,12 +54,12 @@
 			</div>
 		</v-card>
 
-		<v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
+		<v-card flat class="cards mb-0 mt-3 py-0 coupons-actions-card">
 			<v-row align="start" no-gutters>
 				<v-col cols="12">
 					<v-btn
 						block
-						class="pa-1"
+						class="pa-1 coupons-back-btn"
 						size="large"
 						color="warning"
 						theme="dark"
@@ -276,6 +275,45 @@ export default {
 </script>
 
 <style scoped>
+.coupons-shell {
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.coupons-card {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	border-radius: var(--posa-radius-md);
+}
+
+.coupons-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+}
+
+.coupons-actions-card {
+	flex-shrink: 0;
+}
+
+.coupons-back-btn {
+	min-height: var(--posa-touch-target);
+}
+
+:deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
+@media (max-width: 900px) {
+	:deep(.v-data-table table) {
+		min-width: 680px;
+	}
+}
+
 .coupon-input {
 	height: 40px;
 }

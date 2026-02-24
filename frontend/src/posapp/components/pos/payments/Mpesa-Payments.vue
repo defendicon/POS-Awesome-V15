@@ -1,73 +1,80 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="dialog" max-width="800px" min-width="800px">
-			<v-card>
+		<v-dialog v-model="dialog" :max-width="dialogMaxWidth" scrollable>
+			<v-card class="mpesa-dialog-card">
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Select Payment") }}</span>
 				</v-card-title>
-				<v-container>
+				<v-container class="py-3">
 					<v-row class="mb-4">
-						<v-text-field
-							color="primary"
-							:label="frappe._('Full Name')"
-							class="pos-themed-input mx-4"
-							hide-details
-							v-model="full_name"
-							density="compact"
-							clearable
-						></v-text-field>
-						<v-text-field
-							color="primary"
-							:label="frappe._('Mobile No')"
-							class="pos-themed-input mx-4"
-							hide-details
-							v-model="mobile_no"
-							density="compact"
-							clearable
-						></v-text-field>
-						<v-btn
-							variant="text"
-							class="ml-2"
-							color="primary"
-							theme="dark"
-							:loading="isLoading"
-							:disabled="isLoading || isSubmitting"
-							@click="search"
-							>{{ __("Search") }}</v-btn
-						>
+						<v-col cols="12" sm="6" class="py-1">
+							<v-text-field
+								color="primary"
+								:label="frappe._('Full Name')"
+								class="pos-themed-input"
+								hide-details
+								v-model="full_name"
+								density="compact"
+								clearable
+							></v-text-field>
+						</v-col>
+						<v-col cols="12" sm="6" class="py-1">
+							<v-text-field
+								color="primary"
+								:label="frappe._('Mobile No')"
+								class="pos-themed-input"
+								hide-details
+								v-model="mobile_no"
+								density="compact"
+								clearable
+							></v-text-field>
+						</v-col>
+						<v-col cols="12" class="py-1 d-flex justify-end">
+							<v-btn
+								variant="text"
+								color="primary"
+								theme="dark"
+								:loading="isLoading"
+								:disabled="isLoading || isSubmitting"
+								@click="search"
+								>{{ __("Search") }}</v-btn
+							>
+						</v-col>
 					</v-row>
 					<v-row v-if="errorMessage">
 						<v-col cols="12" class="pt-0">
-							<v-alert type="error" density="compact" border="start" class="mx-4">
+							<v-alert type="error" density="compact" border="start">
 								{{ errorMessage }}
 							</v-alert>
 						</v-col>
 					</v-row>
 					<v-row>
 						<v-col cols="12" class="pa-1" v-if="dialog_data">
-							<v-data-table
-								:headers="headers"
-								:items="dialog_data"
-								item-key="name"
-								class="elevation-1"
-								show-select
-								v-model="selected"
-								return-object
-								select-strategy="single"
-							>
-								<template v-slot:item.amount="{ item }">{{
-									formatCurrency(item.amount)
-								}}</template>
-								<template v-slot:item.posting_date="{ item }">{{
-									item.posting_date.slice(0, 16)
-								}}</template>
-							</v-data-table>
+							<div class="mpesa-table-wrap">
+								<v-data-table
+									:headers="headers"
+									:items="dialog_data"
+									item-key="name"
+									class="elevation-1 mpesa-table"
+									show-select
+									v-model="selected"
+									return-object
+									select-strategy="single"
+								>
+									<template v-slot:item.amount="{ item }">{{
+										formatCurrency(item.amount)
+									}}</template>
+									<template v-slot:item.posting_date="{ item }">{{
+										item.posting_date.slice(0, 16)
+									}}</template>
+								</v-data-table>
+							</div>
 						</v-col>
 					</v-row>
 				</v-container>
-				<v-card-actions class="mt-4">
+				<v-card-actions class="mt-2 mpesa-actions">
 					<v-spacer></v-spacer>
-					<v-btn color="error mx-2" theme="dark" @click="close_dialog">Close</v-btn>
+					<v-btn color="error" class="mx-2" theme="dark" @click="close_dialog">Close</v-btn>
 					<v-btn
 						v-if="selected.length"
 						color="success"
@@ -84,7 +91,7 @@
 </template>
 
 <script setup>
-import { inject, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { formatUtils } from "../../../format";
 
 defineOptions({
@@ -106,6 +113,11 @@ const mobile_no = ref("");
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const errorMessage = ref("");
+const windowWidth = ref(window.innerWidth);
+const dialogMaxWidth = computed(() => (windowWidth.value < 600 ? "calc(100vw - 16px)" : "860px"));
+const handleResize = () => {
+	windowWidth.value = window.innerWidth;
+};
 
 const headers = [
 	{
@@ -217,6 +229,8 @@ function formatCurrency(value) {
 }
 
 onMounted(() => {
+	window.addEventListener("resize", handleResize, { passive: true });
+
 	eventBus?.on("open_mpesa_payments", (data) => {
 		dialog.value = true;
 		full_name.value = "";
@@ -233,6 +247,43 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+	window.removeEventListener("resize", handleResize);
 	eventBus?.off("open_mpesa_payments");
 });
 </script>
+
+<style scoped>
+.mpesa-dialog-card {
+	max-height: min(88dvh, 760px);
+}
+
+.mpesa-table-wrap {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.mpesa-table {
+	min-width: 760px;
+}
+
+.mpesa-actions {
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+@media (max-width: 768px) {
+	.mpesa-table {
+		min-width: 680px;
+	}
+
+	.mpesa-actions {
+		justify-content: stretch;
+	}
+
+	.mpesa-actions :deep(.v-btn) {
+		flex: 1 1 100%;
+		margin: 0 !important;
+	}
+}
+</style>

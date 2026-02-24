@@ -1,9 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-	<div class="pa-0">
+	<div class="pa-0 payments-view">
 		<v-card
-			class="selection mx-auto pa-1 my-0 mt-3 pos-themed-card"
-			style="max-height: 68vh; height: 68vh"
+			class="selection mx-auto pa-1 my-0 mt-3 pos-themed-card payments-main-card"
 		>
 			<v-progress-linear
 				:active="loading"
@@ -12,7 +11,7 @@
 				location="top"
 				color="info"
 			></v-progress-linear>
-			<div ref="paymentContainer" class="overflow-y-auto pa-2" style="max-height: 67vh">
+			<div ref="paymentContainer" class="payments-scroll pa-2">
 				<!-- Payment Summary (Paid, To Be Paid, Change) -->
 				<PaymentSummary
 					:invoice_doc="invoice_doc"
@@ -185,6 +184,7 @@
 
 		<!-- Action Buttons -->
 		<PaymentActionButtons
+			class="payments-actions"
 			ref="submitButton"
 			:loading="loading"
 			:validatePayment="validatePayment"
@@ -1131,6 +1131,31 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.payments-view {
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.payments-main-card {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	border-radius: var(--posa-radius-md);
+}
+
+.payments-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+}
+
+.payments-actions {
+	margin-top: var(--posa-space-xs);
+}
+
 /* Remove readonly styling */
 .v-text-field--readonly {
 	cursor: text;
@@ -1195,5 +1220,15 @@ onBeforeUnmount(() => {
 .pos-themed-card {
 	background-color: rgb(var(--v-theme-surface));
 	color: rgb(var(--v-theme-on-surface));
+}
+
+@media (max-width: 768px) {
+	.payments-main-card {
+		margin-top: var(--posa-space-2xs) !important;
+	}
+
+	.payments-scroll {
+		padding: var(--posa-space-xs) !important;
+	}
 }
 </style>

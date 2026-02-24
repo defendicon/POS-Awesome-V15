@@ -1,7 +1,7 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="invoicesDialog" max-width="800px" min-width="800px">
-			<v-card>
+		<v-dialog v-model="invoicesDialog" max-width="960px" width="min(960px, 96vw)">
+			<v-card class="return-dialog-card">
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Select Return Invoice") }}</span>
 				</v-card-title>
@@ -144,7 +144,7 @@
 					</v-row>
 
 					<!-- Action buttons -->
-					<v-row class="mt-2 mb-2">
+					<v-row class="mt-2 mb-2 return-actions-row">
 						<v-spacer></v-spacer>
 						<v-btn
 							variant="text"
@@ -175,46 +175,48 @@
 					<!-- Results -->
 					<v-row>
 						<v-col cols="12" class="pa-0 mt-1" v-if="dialog_data && dialog_data.length > 0">
-							<v-data-table
-								:headers="headers"
-								:items="dialog_data"
-								item-key="name"
-								class="elevation-1"
-								show-select
-								v-model="selected"
-								select-strategy="single"
-								return-object
-								:row-props="returnRowProps"
-								:footer-props="{
-									'items-per-page-options': [10, 25, 50, 100],
-									'items-per-page-text': 'Invoices per page',
-								}"
-								:items-per-page="25"
-							>
-								<template v-slot:item.posting_date="{ item }">
-									{{ formatDateDisplay(item.posting_date) }}
-								</template>
-								<template v-slot:item.posa_return_valid_upto="{ item }">
-									<div class="d-flex align-center">
-										<span v-if="item.posa_return_valid_upto">
-											{{ formatDateDisplay(item.posa_return_valid_upto) }}
-										</span>
-										<v-chip
-											v-if="item.posa_return_expired"
-											color="error"
-											size="small"
-											class="ml-2"
-											label
-										>
-											{{ __("Return window passed") }}
-										</v-chip>
-									</div>
-								</template>
-								<template v-slot:item.grand_total="{ item }">
-									{{ currencySymbol(item.currency) }}
-									{{ formatCurrency(item.grand_total) }}
-								</template>
-							</v-data-table>
+							<div class="return-results-table posa-scroll-x">
+								<v-data-table
+									:headers="headers"
+									:items="dialog_data"
+									item-key="name"
+									class="elevation-1"
+									show-select
+									v-model="selected"
+									select-strategy="single"
+									return-object
+									:row-props="returnRowProps"
+									:footer-props="{
+										'items-per-page-options': [10, 25, 50, 100],
+										'items-per-page-text': 'Invoices per page',
+									}"
+									:items-per-page="25"
+								>
+									<template v-slot:item.posting_date="{ item }">
+										{{ formatDateDisplay(item.posting_date) }}
+									</template>
+									<template v-slot:item.posa_return_valid_upto="{ item }">
+										<div class="d-flex align-center">
+											<span v-if="item.posa_return_valid_upto">
+												{{ formatDateDisplay(item.posa_return_valid_upto) }}
+											</span>
+											<v-chip
+												v-if="item.posa_return_expired"
+												color="error"
+												size="small"
+												class="ml-2"
+												label
+											>
+												{{ __("Return window passed") }}
+											</v-chip>
+										</div>
+									</template>
+									<template v-slot:item.grand_total="{ item }">
+										{{ currencySymbol(item.currency) }}
+										{{ formatCurrency(item.grand_total) }}
+									</template>
+								</v-data-table>
+							</div>
 
 							<!-- Load More button at the bottom of results -->
 							<div class="text-center mt-3" v-if="has_more_invoices">
@@ -746,7 +748,31 @@ export default {
 </script>
 
 <style scoped>
+.return-dialog-card {
+	max-height: min(92dvh, 900px);
+	display: flex;
+	flex-direction: column;
+}
+
+.return-actions-row {
+	gap: 8px;
+}
+
+.return-results-table {
+	max-width: 100%;
+}
+
+.return-results-table :deep(.v-table__wrapper) {
+	overflow: auto;
+}
+
 .return-expired-row {
 	background-color: #ffebee !important;
+}
+
+@media (max-width: 768px) {
+	.return-actions-row {
+		margin-top: 4px;
+	}
 }
 </style>

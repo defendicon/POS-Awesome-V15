@@ -1,5 +1,5 @@
 <template>
-	<v-dialog v-model="dialogOpen" max-width="650" persistent>
+	<v-dialog v-model="dialogOpen" max-width="650" persistent scrollable>
 		<v-card class="about-dialog-card-improved">
 			<v-card-title class="about-header-improved pa-5">
 				<div class="header-content-improved">
@@ -196,6 +196,7 @@ function loadAppInfo() {
 	gap: 16px;
 	padding-right: 60px;
 	/* Space for close button */
+	flex-wrap: wrap;
 }
 
 .header-icon-wrapper-improved {
@@ -235,6 +236,7 @@ function loadAppInfo() {
 .header-stats-improved {
 	display: flex;
 	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .status-chip-improved {
@@ -379,6 +381,19 @@ function loadAppInfo() {
 	.header-content-improved {
 		gap: 12px;
 		padding-right: 50px;
+	}
+
+	.dialog-actions-improved {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.dialog-actions-improved :deep(.v-spacer) {
+		display: none;
+	}
+
+	.close-btn-action-improved {
+		width: 100%;
 	}
 
 	.content-container-improved {

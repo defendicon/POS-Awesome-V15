@@ -1,6 +1,12 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="dialog" max-width="1200px" persistent transition="fade-transition">
+		<v-dialog
+			v-model="dialog"
+			max-width="1200px"
+			persistent
+			scrollable
+			transition="fade-transition"
+		>
 			<v-card class="pos-card offline-invoices-card elevation-12">
 				<!-- Revamped Modern Header -->
 				<v-card-title class="offline-header pa-8">
@@ -313,6 +319,7 @@ function removeInvoice(index) {
 	background-color: var(--pos-card-bg) !important;
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
 	border: 1px solid var(--pos-border);
+	max-height: min(90dvh, 900px);
 }
 
 /* ========== REVAMPED HEADER SECTION ========== */
@@ -560,6 +567,7 @@ function removeInvoice(index) {
 	border: 1px solid var(--pos-border);
 	border-radius: var(--border-radius-lg);
 	overflow: hidden;
+	min-width: 820px;
 }
 
 .white-table :deep(th),
@@ -681,6 +689,10 @@ function removeInvoice(index) {
 		margin: 0 -16px;
 		padding: 0 16px;
 	}
+
+	.white-table {
+		min-width: 700px;
+	}
 }
 
 @media (max-width: 480px) {
@@ -700,6 +712,10 @@ function removeInvoice(index) {
 	.header-main-content {
 		width: 100%;
 		padding-right: 60px;
+	}
+
+	.white-table {
+		min-width: 620px;
 	}
 }
 

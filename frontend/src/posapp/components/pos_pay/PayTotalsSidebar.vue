@@ -3,10 +3,10 @@
     <div class="totals-wrapper">
         <h4 class="text-primary">Totals</h4>
         <v-row>
-            <v-col md="7" class="mt-1">
+            <v-col cols="12" md="7" class="mt-1">
                 <span>{{ __("Total Invoices:") }}</span>
             </v-col>
-            <v-col md="5">
+            <v-col cols="12" md="5">
                 <v-text-field
                     class="p-0 m-0 pos-themed-input"
                     density="compact"
@@ -24,10 +24,10 @@
         </v-row>
 
         <v-row v-if="totalSelectedPayments">
-            <v-col md="7" class="mt-1"
+            <v-col cols="12" md="7" class="mt-1"
                 ><span>{{ __("Total Payments:") }}</span></v-col
             >
-            <v-col md="5">
+            <v-col cols="12" md="5">
                 <v-text-field
                     class="p-0 m-0 pos-themed-input"
                     density="compact"
@@ -42,10 +42,10 @@
         </v-row>
 
         <v-row v-if="totalSelectedMpesa">
-            <v-col md="7" class="mt-1"
+            <v-col cols="12" md="7" class="mt-1"
                 ><span>{{ __("Total Mpesa:") }}</span></v-col
             >
-            <v-col md="5">
+            <v-col cols="12" md="5">
                 <v-text-field
                     class="p-0 m-0 pos-themed-input"
                     density="compact"
@@ -67,10 +67,10 @@
                 v-for="method in filteredPaymentMethods"
                 :key="method.row_id"
             >
-                <v-col md="7"
+                <v-col cols="12" md="7"
                     ><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
                 </v-col>
-                <v-col md="5">
+                <v-col cols="12" md="5">
                     <div class="d-flex align-center">
                         <div class="mr-1 text-primary">
                             {{ currencySymbol(getPaymentMethodCurrency(method.mode_of_payment)) }}
@@ -91,12 +91,12 @@
 
         <v-divider v-if="requiresExchangeRate"></v-divider>
         <v-row v-if="requiresExchangeRate" class="mb-2">
-            <v-col md="7" class="mt-1">
+            <v-col cols="12" md="7" class="mt-1">
                 <span class="text-primary">
                     {{ __("Exchange Rate") }} (1 {{ invoiceTotalCurrency }} = ? {{ companyCurrency }}):
                 </span>
             </v-col>
-            <v-col md="5">
+            <v-col cols="12" md="5">
                 <div class="d-flex align-center">
                     <div class="mr-1 text-primary">
                         {{ currencySymbol(companyCurrency) }}
@@ -136,10 +136,10 @@
 
         <v-divider></v-divider>
         <v-row>
-            <v-col md="7">
+            <v-col cols="12" md="7">
                 <h4 class="text-primary mt-1">{{ __("Difference:") }}</h4>
             </v-col>
-            <v-col md="5">
+            <v-col cols="12" md="5">
                 <v-text-field
                     class="p-0 m-0 pos-themed-input"
                     density="compact"
@@ -187,3 +187,15 @@ const internalExchangeRate = computed({
     set: (val) => emit('update:exchangeRate', val)
 });
 </script>
+
+<style scoped>
+.totals-wrapper {
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 960px) {
+	.totals-wrapper :deep(.v-row) {
+		row-gap: 4px;
+	}
+}
+</style>

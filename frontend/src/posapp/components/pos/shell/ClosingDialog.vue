@@ -1,10 +1,10 @@
 <template>
-	<v-dialog v-model="closingDialog" max-width="900px" persistent>
+	<v-dialog v-model="closingDialog" max-width="980px" persistent scrollable>
 		<v-card elevation="8" class="closing-dialog-card">
 			<ClosingHeader @close="closeDialog" />
 
-			<v-card-text class="pa-0 white-background">
-				<v-container class="pa-6">
+			<v-card-text class="pa-0 white-background closing-dialog-body">
+				<v-container class="pa-6 closing-dialog-content">
 					<v-row class="mb-6">
 						<v-col cols="12" class="pa-1">
 							<ShiftOverview
@@ -244,15 +244,29 @@ export default {
 .closing-dialog-card {
 	border-radius: 16px;
 	overflow: hidden;
+	max-height: min(90dvh, 860px);
+	display: flex;
+	flex-direction: column;
 }
 
 .white-background {
 	background-color: rgb(var(--v-theme-surface));
 }
 
+.closing-dialog-body {
+	flex: 1 1 auto;
+	overflow: auto;
+}
+
+.closing-dialog-content {
+	min-width: 0;
+}
+
 .dialog-actions-container {
 	padding: 16px 24px;
 	border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+	flex-wrap: wrap;
+	gap: 10px;
 }
 
 .pos-action-btn {
@@ -269,5 +283,27 @@ export default {
 
 .submit-action-btn {
 	margin-left: 16px;
+}
+
+@media (max-width: 768px) {
+	.closing-dialog-content {
+		padding: 12px !important;
+	}
+
+	.dialog-actions-container {
+		padding: 12px;
+	}
+
+	.dialog-actions-container :deep(.v-spacer) {
+		display: none;
+	}
+
+	.pos-action-btn {
+		flex: 1 1 100%;
+	}
+
+	.submit-action-btn {
+		margin-left: 0;
+	}
 }
 </style>

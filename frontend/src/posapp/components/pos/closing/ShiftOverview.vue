@@ -892,4 +892,50 @@ const __ = window.__ || ((t) => t);
 	opacity: 0.6;
 	font-style: italic;
 }
+
+@media (max-width: 960px) {
+	.table-header {
+		margin-bottom: 14px;
+	}
+
+	.table-section {
+		padding: 14px;
+	}
+
+	.insight-card,
+	.insight-card.compact {
+		padding: 12px;
+		gap: 10px;
+	}
+
+	.insight-icon {
+		width: 40px;
+		height: 40px;
+	}
+
+	.insight-value {
+		font-size: 1.05rem;
+	}
+
+	.overview-table th,
+	.overview-table td {
+		padding: 10px;
+		font-size: 0.8rem;
+	}
+}
+
+@media (max-width: 600px) {
+	.amount-with-base,
+	.amount-primary {
+		align-items: flex-start;
+	}
+
+	.text-end {
+		text-align: left !important;
+	}
+
+	.exchange-note {
+		margin-top: 6px;
+	}
+}
 </style>

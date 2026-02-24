@@ -148,8 +148,8 @@ function formatTimestamp(ts: string | number | Date) {
 }
 
 .notification-card {
-	min-width: 320px;
-	max-width: 400px;
+	min-width: min(320px, calc(100vw - 24px));
+	max-width: min(400px, calc(100vw - 24px));
 }
 
 .notification-card__header {
@@ -250,5 +250,19 @@ function formatTimestamp(ts: string | number | Date) {
 
 .empty-subtitle {
 	font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+	.notification-card__header {
+		padding: 10px 12px;
+	}
+
+	.notification-list {
+		max-height: 300px;
+	}
+
+	.notification-item {
+		padding-inline: 8px;
+	}
 }
 </style>
