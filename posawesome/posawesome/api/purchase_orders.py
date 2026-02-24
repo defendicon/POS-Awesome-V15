@@ -12,6 +12,12 @@ from erpnext.accounts.party import get_party_account
 from .utils import get_active_pos_profile, get_default_warehouse
 
 
+MAX_PURCHASE_ITEMS = 500
+MAX_PURCHASE_PAYMENTS = 100
+MAX_PURCHASE_SEARCH_LIMIT = 200
+MAX_PURCHASE_SEARCH_TEXT = 140
+
+
 
 def _can_manage_all_pos_profiles():
     return "System Manager" in frappe.get_roles()
@@ -76,6 +82,36 @@ def _resolve_pos_profile(pos_profile):
         if authorized_profile:
             return authorized_profile
     return profile
+
+
+def _coerce_payload(data, label):
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except Exception:
+            frappe.throw(_("{0} payload is invalid JSON.").format(label))
+    if not isinstance(data, dict):
+        frappe.throw(_("{0} payload must be a JSON object.").format(label))
+    return data
+
+
+def _safe_text(value, max_len=MAX_PURCHASE_SEARCH_TEXT):
+    return cstr(value or "").strip()[:max_len]
+
+
+def _safe_limit(value, default=20, max_limit=MAX_PURCHASE_SEARCH_LIMIT):
+    try:
+        parsed = int(value or default)
+    except Exception:
+        parsed = default
+    return min(max(parsed, 1), max_limit)
+
+
+def _assert_purchase_read_access(doctype):
+    if _can_manage_all_pos_profiles() or frappe.has_permission(doctype, "read"):
+        return
+    profile = _resolve_pos_profile(None)
+    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
 
 
 def _ensure_allowed(profile, flag, label):
@@ -243,7 +279,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
 
 @frappe.whitelist()
 def create_supplier(data):
-    payload = json.loads(data) if isinstance(data, str) else data
+    payload = _coerce_payload(data, _("Supplier"))
     profile = _resolve_pos_profile(payload.get("pos_profile"))
     _ensure_allowed(profile, "posa_allow_create_purchase_suppliers", _("Create suppliers"))
 
@@ -278,6 +314,10 @@ def create_supplier(data):
 
 @frappe.whitelist()
 def search_suppliers(search_text=None, limit=20):
+    _assert_purchase_read_access("Supplier")
+    limit = _safe_limit(limit)
+    search_text = _safe_text(search_text)
+
     filters = {"disabled": 0}
     or_filters = None
     if search_text:
@@ -300,12 +340,13 @@ def search_suppliers(search_text=None, limit=20):
 
 @frappe.whitelist()
 def get_buying_price_list():
+    _assert_purchase_read_access("Price List")
     return _resolve_buying_price_list()
 
 
 @frappe.whitelist()
 def create_purchase_item(data):
-    payload = json.loads(data) if isinstance(data, str) else data
+    payload = _coerce_payload(data, _("Item"))
     profile = _resolve_pos_profile(payload.get("pos_profile"))
     _ensure_allowed(profile, "posa_allow_create_purchase_items", _("Create items"))
 
@@ -469,7 +510,7 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
 @frappe.whitelist()
 def create_purchase_order(data):
 
-    payload = json.loads(data) if isinstance(data, str) else data
+    payload = _coerce_payload(data, _("Purchase Order"))
     profile = _resolve_pos_profile(payload.get("pos_profile"))
     _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
 
@@ -494,6 +535,10 @@ def create_purchase_order(data):
     schedule_date = payload.get("schedule_date") or transaction_date
 
     items = payload.get("items") or []
+    if not isinstance(items, list):
+        frappe.throw(_("Purchase order items must be a list."))
+    if len(items) > MAX_PURCHASE_ITEMS:
+        frappe.throw(_("Too many purchase order items in one request."))
     if not items:
         frappe.throw(_("Purchase order requires at least one item."))
 
@@ -602,6 +647,10 @@ def create_purchase_order(data):
             )
 
         payments = payload.get("payments")
+        if payments and not isinstance(payments, list):
+            frappe.throw(_("payments must be a list."))
+        if isinstance(payments, list) and len(payments) > MAX_PURCHASE_PAYMENTS:
+            frappe.throw(_("Too many payments in one request."))
         if payments:
             # Use PI if created, otherwise PO
             ref_doc = frappe.get_doc("Purchase Invoice", invoice_name) if invoice_name else po_doc
@@ -624,6 +673,10 @@ def create_purchase_order(data):
 
 @frappe.whitelist()
 def search_items(search_text=None, limit=20):
+    _assert_purchase_read_access("Item")
+    limit = _safe_limit(limit)
+    search_text = _safe_text(search_text)
+
     filters = {"disabled": 0}
     or_filters = None
     if search_text:
