@@ -16,10 +16,21 @@ def get_bundle_components(bundles):
         item_code, qty, uom, is_batch, is_serial.
     """
     if isinstance(bundles, str):
-        bundles = json.loads(bundles)
+        try:
+            bundles = json.loads(bundles)
+        except Exception:
+            frappe.throw(_("Invalid bundles payload. Expected a JSON array of item codes."))
+
+    if bundles is None:
+        bundles = []
+    if not isinstance(bundles, (list, tuple)):
+        frappe.throw(_("Invalid bundles payload. Expected a list of item codes."))
 
     result = {}
-    for code in bundles or []:
+    for code in bundles:
+        code = frappe.as_unicode(code or "").strip()
+        if not code:
+            continue
         if not frappe.db.exists("Product Bundle", code):
             result[code] = []
             continue

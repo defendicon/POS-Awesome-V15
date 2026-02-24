@@ -22,6 +22,8 @@
 - [x] Added shift/profile access checks for draft invoice fetch and order-to-invoice conversion in `posawesome/posawesome/api/invoices.py`.
 - [x] Restricted sensitive server/build/database usage endpoints to System Manager in `posawesome/posawesome/api/utilities.py`.
 - [x] Fixed POS profile trust boundary and cross-user profile lookup controls in `posawesome/posawesome/api/utils.py`.
+- [x] Added strict payload validation for bundle component lookups in `posawesome/posawesome/api/bundles.py`.
+- [x] Added authorization gates for item price updates in `posawesome/posawesome/api/item_processing/price.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
