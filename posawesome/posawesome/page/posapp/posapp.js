@@ -7,6 +7,8 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 	});
 	const pageRef = (wrapper && wrapper.page) || page;
 	const BOOT_RETRY_KEY = "posa_boot_retry_once";
+	const POSA_VUETIFY_CSS_ID = "posa-vuetify-css";
+	const TAX_INCLUSIVE_CACHE_KEY = "posa_tax_inclusive";
 	const detectBootFailureCode = (error) => {
 		const message =
 			(error && error.message ? String(error.message) : String(error || ""))
@@ -116,9 +118,13 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 
 	$("div.navbar-fixed-top").find(".container").css("padding", "0");
 
-	$("head").append(
-		"<link href='/assets/posawesome/node_modules/vuetify/dist/vuetify.min.css' rel='stylesheet'>",
-	);
+	if (!document.getElementById(POSA_VUETIFY_CSS_ID)) {
+		const cssLink = document.createElement("link");
+		cssLink.id = POSA_VUETIFY_CSS_ID;
+		cssLink.rel = "stylesheet";
+		cssLink.href = "/assets/posawesome/node_modules/vuetify/dist/vuetify.min.css";
+		document.head.appendChild(cssLink);
+	}
 
 	if (
 		pageRef._posaTaxInclusiveHandler &&
@@ -130,17 +136,38 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 
 	// Listen for POS Profile registration
 	pageRef._posaTaxInclusiveHandler = () => {
+		const readCacheValue = () => {
+			try {
+				return localStorage.getItem(TAX_INCLUSIVE_CACHE_KEY);
+			} catch (_err) {
+				return null;
+			}
+		};
+
+		const writeCacheValue = (value) => {
+			try {
+				localStorage.setItem(TAX_INCLUSIVE_CACHE_KEY, JSON.stringify(value));
+			} catch (_err) {}
+		};
+
+		const syncOfflineTaxInclusiveSetting = (value) => {
+			import("/assets/posawesome/dist/js/offline/index.js")
+				.then((m) => {
+					if (m && m.setTaxInclusiveSetting) {
+						m.setTaxInclusiveSetting(value);
+					}
+				})
+				.catch(() => {});
+		};
+
 		const update_totals_based_on_tax_inclusive = () => {
-			console.log("Updating totals based on tax inclusive settings");
 			const posProfile = pageRef.$PosApp && pageRef.$PosApp.pos_profile;
 
 			if (!posProfile) {
-				console.error("POS Profile is not set.");
 				return;
 			}
 
-			const cacheKey = "posa_tax_inclusive";
-			const cachedValue = localStorage.getItem(cacheKey);
+			const cachedValue = readCacheValue();
 
 			const applySetting = (taxInclusive) => {
 				const totalAmountField = document.getElementById("input-v-25");
@@ -149,13 +176,9 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 				if (totalAmountField && grandTotalField) {
 					if (taxInclusive) {
 						totalAmountField.value = grandTotalField.value;
-						console.log("Total amount copied from grand total:", grandTotalField.value);
 					} else {
 						totalAmountField.value = "";
-						console.log("Total amount cleared because checkbox is unchecked.");
 					}
-				} else {
-					console.error("Could not find total amount or grand total field by ID.");
 				}
 			};
 
@@ -168,21 +191,9 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 					callback: function (response) {
 						if (response.message !== undefined) {
 							const posa_tax_inclusive = response.message;
-							try {
-								localStorage.setItem(cacheKey, JSON.stringify(posa_tax_inclusive));
-							} catch (err) {
-								console.warn("Failed to cache tax inclusive setting", err);
-							}
+							writeCacheValue(posa_tax_inclusive);
 							applySetting(posa_tax_inclusive);
-							import("/assets/posawesome/dist/js/offline/index.js")
-								.then((m) => {
-									if (m && m.setTaxInclusiveSetting) {
-										m.setTaxInclusiveSetting(posa_tax_inclusive);
-									}
-								})
-								.catch(() => {});
-						} else {
-							console.error("Error fetching POS Profile or POS Profile not found.");
+							syncOfflineTaxInclusiveSetting(posa_tax_inclusive);
 						}
 					},
 				});
@@ -197,16 +208,8 @@ frappe.pages["posapp"].on_page_load = async function (wrapper) {
 				try {
 					const val = JSON.parse(cachedValue);
 					applySetting(val);
-					import("/assets/posawesome/dist/js/offline/index.js")
-						.then((m) => {
-							if (m && m.setTaxInclusiveSetting) {
-								m.setTaxInclusiveSetting(val);
-							}
-						})
-						.catch(() => {});
-				} catch (e) {
-					console.warn("Failed to parse cached tax inclusive value", e);
-				}
+					syncOfflineTaxInclusiveSetting(val);
+				} catch (_err) {}
 				return;
 			}
 

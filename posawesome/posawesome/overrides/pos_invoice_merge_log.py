@@ -153,11 +153,11 @@ class CustomPOSInvoiceMergeLog(ERPNextPOSInvoiceMergeLog):
 
         conversion_rate = invoice.conversion_rate or 1
         cleaned = []
-        for idx, payment in enumerate(invoice.get("payments", []), start=1):
+        for payment in invoice.get("payments", []):
             if abs(flt(payment.amount)) <= tolerance:
                 continue
 
-            payment.idx = idx
+            payment.idx = len(cleaned) + 1
             payment.base_amount = flt(payment.amount * conversion_rate, precision_base_paid)
             cleaned.append(payment)
 

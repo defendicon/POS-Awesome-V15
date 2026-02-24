@@ -100,6 +100,10 @@
 - [x] Hardened POS closing-shift client wiring with defensive array/response guards for invoice/payment/tax aggregation and safe reconciliation HTML fallback in `posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.js`.
 - [x] Consolidated duplicate company-filter query wiring in `posawesome/posawesome/doctype/delivery_charges/delivery_charges.js`.
 - [x] Added safe status/color fallbacks in list indicators for `posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift_list.js`.
+- [x] Fixed payment-row reindexing during consolidated return cleanup to avoid stale/gapped child row indices in `posawesome/posawesome/overrides/pos_invoice_merge_log.py`.
+- [x] Hardened POS page bootstrap wiring by preventing duplicate CSS injection, guarding localStorage access, and deduplicating offline tax-inclusive sync logic in `posawesome/posawesome/page/posapp/posapp.js`.
+- [x] Consolidated duplicate cash-account query filters and validated language-options payload shape in `posawesome/posawesome/api/pos_profile.js`.
+- [x] Corrected malformed file header comment in `posawesome/posawesome/api/status_updater.py`.
 
 ## Pending
 - [ ] Continue broader backend API audit for permission boundaries and input validation across remaining modules.
