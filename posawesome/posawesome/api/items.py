@@ -15,7 +15,8 @@ from posawesome.posawesome.api.utils import get_active_pos_profile
 from posawesome.posawesome.api.item_processing.stock import (
     get_stock_availability,
     get_bulk_stock_availability,
-    get_available_qty
+    get_available_qty,
+    _assert_stock_lookup_access,
 )
 from posawesome.posawesome.api.item_processing.barcode import (
     parse_scale_barcode,
@@ -45,6 +46,7 @@ from posawesome.posawesome.api.utils import _ensure_pos_profile
 @frappe.whitelist()
 def get_item_brand(item_code):
     """Return normalized brand for an item, falling back to its template's brand."""
+    _assert_stock_lookup_access()
     if not item_code:
         return ""
     data = frappe.db.get_value("Item", item_code, ["brand", "variant_of"], as_dict=True)
