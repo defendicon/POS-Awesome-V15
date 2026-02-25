@@ -152,8 +152,10 @@ const __ = window.__;
 .payment-method-btn {
 	height: 100%;
 	min-height: 56px;
-	border-radius: var(--posa-radius-sm);
-	font-weight: 600;
+	border-radius: 6px;
+	font-weight: 500;
+	font-size: 0.875rem;
+	letter-spacing: 0;
 	text-transform: none;
 	justify-content: center;
 	transition: background-color 0.2s ease, color 0.2s ease;
