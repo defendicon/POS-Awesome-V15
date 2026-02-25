@@ -1,7 +1,7 @@
 <template>
 	<div v-if="payments && payments.length">
-		<v-row class="payments pa-1" v-for="payment in payments" :key="payment.name">
-			<v-col cols="12" sm="6" v-if="!isMpesaC2bPayment(payment)">
+		<v-row class="payments payment-method-row pa-1" v-for="payment in payments" :key="payment.name">
+			<v-col cols="12" sm="6" v-if="!isMpesaC2bPayment(payment)" class="payment-input-col">
 				<v-text-field
 					density="compact"
 					variant="solo"
@@ -17,12 +17,12 @@
 					:readonly="isReturn"
 				></v-text-field>
 			</v-col>
-			<v-col cols="12" sm="6" v-if="!isMpesaC2bPayment(payment)">
+			<v-col cols="12" sm="6" v-if="!isMpesaC2bPayment(payment)" class="payment-button-col">
 				<v-btn
 					block
 					color="primary"
-					theme="dark"
 					class="payment-method-btn"
+					variant="outlined"
 					@click="$emit('set-full-amount', payment)"
 				>
 					{{ payment.mode_of_payment }}
@@ -56,7 +56,13 @@
 
 			<!-- M-Pesa Payment Button (if payment is M-Pesa) -->
 			<v-col cols="12" v-if="isMpesaC2bPayment(payment)" class="pt-0">
-				<v-btn block color="success" theme="dark" @click="$emit('mpesa-dialog', payment)">
+				<v-btn
+					block
+					color="success"
+					variant="outlined"
+					class="payment-method-btn"
+					@click="$emit('mpesa-dialog', payment)"
+				>
 					{{ __("Get Payments") }} {{ payment.mode_of_payment }}
 				</v-btn>
 			</v-col>
@@ -71,7 +77,8 @@
 				<v-btn
 					block
 					color="success"
-					theme="dark"
+					variant="outlined"
+					class="payment-method-btn"
 					:disabled="payment.amount === 0"
 					@click="$emit('request-payment', payment)"
 				>
@@ -108,3 +115,47 @@ defineEmits([
 const frappe = window.frappe;
 const __ = window.__;
 </script>
+
+<style scoped>
+.payment-method-row {
+	align-items: stretch;
+	margin-bottom: 2px;
+}
+
+.payment-input-col,
+.payment-button-col {
+	display: flex;
+}
+
+.payment-input-col :deep(.v-input),
+.payment-button-col :deep(.v-btn) {
+	width: 100%;
+}
+
+.payment-method-btn {
+	min-height: 40px;
+	border-width: 1px;
+	border-color: var(--pos-border) !important;
+	border-radius: var(--posa-radius-sm);
+	font-weight: 600;
+	text-transform: none;
+	justify-content: center;
+	transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.payment-method-btn:hover,
+.payment-method-btn:focus-visible {
+	border-color: rgb(var(--v-theme-primary)) !important;
+	transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+	.payment-method-row {
+		margin-bottom: 6px;
+	}
+
+	.payment-button-col {
+		padding-top: 4px;
+	}
+}
+</style>
