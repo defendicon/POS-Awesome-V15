@@ -139,30 +139,32 @@ const __ = window.__;
 }
 
 .payment-input-col :deep(.v-field) {
-	min-height: 40px;
+	min-height: 56px;
+	border: 1px solid var(--pos-border);
+	border-radius: var(--posa-radius-sm);
 }
 
 .payment-button-col :deep(.v-btn) {
 	height: 100%;
-	min-height: 40px;
+	min-height: 56px;
 }
 
 .payment-method-btn {
 	height: 100%;
-	min-height: 40px;
+	min-height: 56px;
 	border-width: 1px;
-	border-color: rgba(var(--v-theme-primary), 0.5) !important;
+	border-color: var(--pos-border) !important;
 	border-radius: var(--posa-radius-sm);
 	font-weight: 600;
 	text-transform: none;
 	justify-content: center;
-	transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+	transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .payment-method-btn:hover,
 .payment-method-btn:focus-visible {
 	border-color: rgb(var(--v-theme-primary)) !important;
-	transform: translateY(-1px);
+	box-shadow: 0 0 0 1px rgba(var(--v-theme-primary), 0.35) inset;
 }
 
 @media (max-width: 600px) {
@@ -176,7 +178,7 @@ const __ = window.__;
 
 	.payment-button-col :deep(.v-btn),
 	.payment-method-btn {
-		min-height: 42px;
+		min-height: 52px;
 	}
 }
 </style>
