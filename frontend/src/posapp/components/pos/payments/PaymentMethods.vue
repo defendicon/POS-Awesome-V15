@@ -1,6 +1,11 @@
 <template>
 	<div v-if="payments && payments.length">
-		<v-row class="payments payment-method-row pa-1" v-for="payment in payments" :key="payment.name">
+		<v-row
+			class="payments payment-method-row pa-1 ma-0"
+			v-for="payment in payments"
+			:key="payment.name"
+			align="stretch"
+		>
 			<v-col cols="12" sm="6" v-if="!isMpesaC2bPayment(payment)" class="payment-input-col">
 				<v-text-field
 					density="compact"
@@ -125,6 +130,7 @@ const __ = window.__;
 .payment-input-col,
 .payment-button-col {
 	display: flex;
+	align-items: stretch;
 }
 
 .payment-input-col :deep(.v-input),
@@ -132,10 +138,20 @@ const __ = window.__;
 	width: 100%;
 }
 
+.payment-input-col :deep(.v-field) {
+	min-height: 40px;
+}
+
+.payment-button-col :deep(.v-btn) {
+	height: 100%;
+	min-height: 40px;
+}
+
 .payment-method-btn {
+	height: 100%;
 	min-height: 40px;
 	border-width: 1px;
-	border-color: var(--pos-border) !important;
+	border-color: rgba(var(--v-theme-primary), 0.5) !important;
 	border-radius: var(--posa-radius-sm);
 	font-weight: 600;
 	text-transform: none;
@@ -156,6 +172,11 @@ const __ = window.__;
 
 	.payment-button-col {
 		padding-top: 4px;
+	}
+
+	.payment-button-col :deep(.v-btn),
+	.payment-method-btn {
+		min-height: 42px;
 	}
 }
 </style>
