@@ -140,7 +140,7 @@ def search_invoices_for_return(
         frappe.throw(_("max_amount cannot be less than min_amount."))
 
     started_at = time.perf_counter()
-    enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
+    enforce_return_validity, _return_validity_days = _get_return_validity_settings(pos_profile)
 
     # Start with base filters
     filters = {
@@ -324,7 +324,7 @@ def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoic
         pos_profile = _extract_profile_name(get_active_pos_profile())
 
     _assert_pos_profile_access(pos_profile)
-    enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
+    enforce_return_validity, _return_validity_days = _get_return_validity_settings(pos_profile)
 
     if not frappe.has_permission(doctype, "read", invoice_doc.name) and not _can_manage_all_pos_profiles():
         frappe.throw(_("Not permitted to access {0} {1}.").format(doctype, invoice_doc.name))
