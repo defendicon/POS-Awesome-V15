@@ -1156,6 +1156,8 @@ onBeforeUnmount(() => {
 .payments-main-card {
 	flex: 1 1 auto;
 	min-height: 0;
+	height: var(--container-height);
+	max-height: var(--container-height);
 	width: 100%;
 	max-width: 100%;
 	display: flex;
@@ -1165,8 +1167,8 @@ onBeforeUnmount(() => {
 }
 
 .payments-summary-panel {
-	margin-top: 0;
-	padding-top: var(--posa-space-2xs);
+	margin-top: auto;
+	padding-top: var(--dynamic-sm);
 	width: 100%;
 	max-width: 100%;
 }
