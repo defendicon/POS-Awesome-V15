@@ -180,6 +180,8 @@
 					@update:print-format="print_format = $event"
 				/>
 			</div>
+		</v-card>
+		<div class="payments-summary-panel">
 			<!-- Action Buttons -->
 			<PaymentActionButtons
 				class="payments-actions"
@@ -191,7 +193,7 @@
 				@submit-and-print="submit(undefined, false, true)"
 				@cancel="back_to_invoice"
 			/>
-		</v-card>
+		</div>
 		<!-- Dialogs Section (Custom Days, Phone Payment) -->
 		<PaymentDialogs
 			:custom-days-dialog="custom_days_dialog"
@@ -1164,6 +1166,13 @@ onBeforeUnmount(() => {
 	overflow: hidden;
 }
 
+.payments-summary-panel {
+	margin-top: auto;
+	padding-top: var(--dynamic-sm);
+	width: 100%;
+	max-width: 100%;
+}
+
 .payments-scroll {
 	flex: 1 1 auto;
 	min-height: 0;
@@ -1193,14 +1202,9 @@ onBeforeUnmount(() => {
 .payments-actions {
 	flex: 0 0 auto;
 	margin-top: 0;
-	padding-top: var(--posa-space-2xs);
+	padding-top: 0;
 	padding-bottom: max(var(--posa-space-2xs), env(safe-area-inset-bottom));
-	padding-inline: var(--posa-space-2xs);
-	border-top: 1px solid var(--pos-border);
-	border-bottom: 1px solid var(--pos-border);
-	background: rgb(var(--v-theme-surface));
-	z-index: 4;
-	box-shadow: none;
+	padding-inline: 0;
 }
 
 /* Remove readonly styling */
@@ -1275,7 +1279,7 @@ onBeforeUnmount(() => {
 	}
 
 	.payments-actions {
-		padding-top: var(--posa-space-3xs);
+		padding-top: 0;
 	}
 }
 
