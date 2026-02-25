@@ -26,8 +26,8 @@
 				<v-btn
 					block
 					color="primary"
+					theme="dark"
 					class="payment-method-btn"
-					variant="outlined"
 					@click="$emit('set-full-amount', payment)"
 				>
 					{{ payment.mode_of_payment }}
@@ -64,7 +64,7 @@
 				<v-btn
 					block
 					color="success"
-					variant="outlined"
+					theme="dark"
 					class="payment-method-btn"
 					@click="$emit('mpesa-dialog', payment)"
 				>
@@ -82,7 +82,7 @@
 				<v-btn
 					block
 					color="success"
-					variant="outlined"
+					theme="dark"
 					class="payment-method-btn"
 					:disabled="payment.amount === 0"
 					@click="$emit('request-payment', payment)"
@@ -152,19 +152,11 @@ const __ = window.__;
 .payment-method-btn {
 	height: 100%;
 	min-height: 56px;
-	border-width: 1px;
-	border-color: var(--pos-border) !important;
 	border-radius: var(--posa-radius-sm);
 	font-weight: 600;
 	text-transform: none;
 	justify-content: center;
-	transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.payment-method-btn:hover,
-.payment-method-btn:focus-visible {
-	border-color: rgb(var(--v-theme-primary)) !important;
-	box-shadow: 0 0 0 1px rgba(var(--v-theme-primary), 0.35) inset;
+	transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 @media (max-width: 600px) {
