@@ -174,30 +174,37 @@
 							@update:redeem-customer-credit="redeem_customer_credit = $event"
 							@get-available-credit="get_available_credit"
 						/>
-						<PaymentCustomerCreditDetails
-							:invoice-doc="invoice_doc"
-							:available-customer-credit="available_customer_credit"
-							:redeem-customer-credit="redeem_customer_credit"
+					<PaymentCustomerCreditDetails
+						:invoice-doc="invoice_doc"
+						:available-customer-credit="available_customer_credit"
+						:redeem-customer-credit="redeem_customer_credit"
 							:customer-credit-dict="customer_credit_dict"
 							:credit-source-label="creditSourceLabel"
 							:format-currency="formatCurrency"
 							:currency-symbol="currencySymbol"
-							@set-formatted-currency="
-								(data) => setFormatedCurrency(data.target, data.field, null, false, data.value)
-							"
-						/>
-						<PaymentSelectionFields
-							:sales-persons="sales_persons"
-							:sales-person="sales_person"
-							:readonly="readonly"
-							:print-formats="print_formats"
-							:print-format="print_format"
-							@update:sales-person="sales_person = $event"
-							@update:print-format="print_format = $event"
-						/>
-					</section>
-				</div>
+						@set-formatted-currency="
+							(data) => setFormatedCurrency(data.target, data.field, null, false, data.value)
+						"
+					/>
+				</section>
+
+				<section class="payment-section payment-section--meta">
+					<div class="payment-section__header">
+						<p class="payment-section__eyebrow">{{ __("Output") }}</p>
+						<h3 class="payment-section__title">{{ __("Sales Person and Print") }}</h3>
+					</div>
+					<PaymentSelectionFields
+						:sales-persons="sales_persons"
+						:sales-person="sales_person"
+						:readonly="readonly"
+						:print-formats="print_formats"
+						:print-format="print_format"
+						@update:sales-person="sales_person = $event"
+						@update:print-format="print_format = $event"
+					/>
+				</section>
 			</div>
+		</div>
 		</v-card>
 
 		<div :class="['payment-footer', { 'payment-footer--dialog': dialogMode }]">
@@ -1241,7 +1248,8 @@ onBeforeUnmount(() => {
 	grid-template-areas:
 		"summary adjustments"
 		"methods adjustments"
-		"settlement order";
+		"settlement order"
+		"settlement meta";
 }
 
 .payment-section {
@@ -1277,6 +1285,10 @@ onBeforeUnmount(() => {
 
 .payment-sections--dialog .payment-section--order {
 	grid-area: order;
+}
+
+.payment-sections--dialog .payment-section--meta {
+	grid-area: meta;
 }
 
 .payment-section--summary {
