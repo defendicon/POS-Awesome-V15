@@ -1,10 +1,22 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="draftsDialog" max-width="900px">
+		<v-dialog
+			v-model="draftsDialog"
+			max-width="900px"
+			:theme="isDarkTheme ? 'dark' : 'light'"
+			content-class="drafts-dialog-content"
+		>
 			<!-- <template v-slot:activator="{ on, attrs }">
         <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
       </template>-->
-			<v-card variant="flat" class="pos-themed-card">
+			<v-card
+				variant="flat"
+				:theme="isDarkTheme ? 'dark' : 'light'"
+				:class="[
+					'pos-themed-card drafts-dialog-card',
+					isDarkTheme ? 'drafts-dialog-card--dark' : 'drafts-dialog-card--light',
+				]"
+			>
 				<v-card-title>
 					<span class="text-h5 text-primary">{{ __("Load Sales Invoice") }}</span>
 				</v-card-title>
@@ -19,8 +31,11 @@
 									:headers="headers"
 									:items="draftsData"
 									item-value="name"
-									class="elevation-1"
-									:theme="$theme.isDark ? 'dark' : 'light'"
+									:class="[
+										'elevation-1 drafts-dialog-table',
+										isDarkTheme ? 'drafts-dialog-table--dark' : 'drafts-dialog-table--light',
+									]"
+									:theme="isDarkTheme ? 'dark' : 'light'"
 									show-select
 									v-model="selected"
 									select-strategy="single"
@@ -54,6 +69,7 @@ import { useToastStore } from "../../../stores/toastStore";
 import { useUIStore } from "../../../stores/uiStore";
 import { useInvoiceStore } from "../../../stores/invoiceStore";
 import { storeToRefs } from "pinia";
+import { useTheme } from "../../../composables/core/useTheme";
 
 export default {
 	// props: ["draftsDialog"],
@@ -62,8 +78,16 @@ export default {
 		const toastStore = useToastStore();
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
+		const theme = useTheme();
 		const { draftsDialog, draftsData } = storeToRefs(uiStore);
-		return { toastStore, uiStore, invoiceStore, draftsDialog, draftsData };
+		return {
+			toastStore,
+			uiStore,
+			invoiceStore,
+			draftsDialog,
+			draftsData,
+			isDarkTheme: theme.isDark,
+		};
 	},
 	data: () => ({
 		// draftsDialog: false, // Moved to uiStore
@@ -160,3 +184,71 @@ export default {
 	},
 };
 </script>
+
+<style scoped>
+.drafts-dialog-content {
+	background: transparent !important;
+}
+
+.drafts-dialog-card {
+	background: var(--pos-surface-raised) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+.drafts-dialog-table {
+	background: var(--pos-surface) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+.drafts-dialog-card--light {
+	background: #ffffff !important;
+	color: #212121 !important;
+	border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.drafts-dialog-card--dark {
+	background: #242b33 !important;
+	color: #ffffff !important;
+}
+
+.drafts-dialog-table--light {
+	background: #ffffff !important;
+	color: #212121 !important;
+}
+
+.drafts-dialog-table--dark {
+	background: #1e1e1e !important;
+	color: #ffffff !important;
+}
+
+.drafts-dialog-card :deep(.v-card-title),
+.drafts-dialog-card :deep(.v-card-subtitle),
+.drafts-dialog-card :deep(.v-card-text),
+.drafts-dialog-card :deep(.v-card-actions) {
+	background: transparent !important;
+	color: var(--pos-text-primary) !important;
+}
+
+.drafts-dialog-card--light :deep(.v-card-title),
+.drafts-dialog-card--light :deep(.v-card-subtitle),
+.drafts-dialog-card--light :deep(.v-card-text),
+.drafts-dialog-card--light :deep(.v-card-actions),
+.drafts-dialog-card--light :deep(.v-table),
+.drafts-dialog-card--light :deep(.v-table__wrapper),
+.drafts-dialog-card--light :deep(table),
+.drafts-dialog-card--light :deep(thead),
+.drafts-dialog-card--light :deep(tbody),
+.drafts-dialog-card--light :deep(tr),
+.drafts-dialog-card--light :deep(th),
+.drafts-dialog-card--light :deep(td) {
+	background: #ffffff !important;
+	color: #212121 !important;
+}
+
+.drafts-dialog-card--dark :deep(.v-card-title),
+.drafts-dialog-card--dark :deep(.v-card-subtitle),
+.drafts-dialog-card--dark :deep(.v-card-text),
+.drafts-dialog-card--dark :deep(.v-card-actions) {
+	color: #ffffff !important;
+}
+</style>

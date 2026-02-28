@@ -30,32 +30,37 @@
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
-				<ItemHeader
-					v-model:search-input="search_input"
-					v-model:qty-input="debounce_qty"
-					v-model:new-line="new_line"
-					:pos-profile="pos_profile"
-					:scanner-locked="scannerLocked"
-					:enable-background-sync="enable_background_sync"
-					:last-sync-time="lastSyncTimeLabel"
-					:sync-status="syncStatus"
-					:context="context"
-					@esc="esc_event"
-					@enter="onEnter"
-					@search-keydown="handleSearchKeydown"
-					@clear-search="clearSearch"
-					@clear-search-and-qty="clearSearchAndQty"
-					@search-input="handleSearchInput"
-					@search-paste="handleSearchPaste"
-					@focus="handleItemSearchFocus"
-					@clear-qty="clearQty"
-					@blur-qty="onQtyBlur"
-					@start-camera="startCameraScanning"
-					@open-new-item="openNewItemDialog"
-					@toggle-settings="toggleItemSettings"
-					@reload-items="forceReloadItems"
-					ref="itemHeader"
-				/>
+				<v-card flat class="selector-section-card selector-header-card pos-themed-card">
+					<div class="section-card-heading">
+						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
+					</div>
+					<ItemHeader
+						v-model:search-input="search_input"
+						v-model:qty-input="debounce_qty"
+						v-model:new-line="new_line"
+						:pos-profile="pos_profile"
+						:scanner-locked="scannerLocked"
+						:enable-background-sync="enable_background_sync"
+						:last-sync-time="lastSyncTimeLabel"
+						:sync-status="syncStatus"
+						:context="context"
+						@esc="esc_event"
+						@enter="onEnter"
+						@search-keydown="handleSearchKeydown"
+						@clear-search="clearSearch"
+						@clear-search-and-qty="clearSearchAndQty"
+						@search-input="handleSearchInput"
+						@search-paste="handleSearchPaste"
+						@focus="handleItemSearchFocus"
+						@clear-qty="clearQty"
+						@blur-qty="onQtyBlur"
+						@start-camera="startCameraScanning"
+						@open-new-item="openNewItemDialog"
+						@toggle-settings="toggleItemSettings"
+						@reload-items="forceReloadItems"
+						ref="itemHeader"
+					/>
+				</v-card>
 
 				<ItemSettingsDialog
 					v-model="show_item_settings"
@@ -72,66 +77,71 @@
 					@save="applyItemSettings"
 				/>
 
-				<v-row class="items">
-					<v-col cols="12" class="pt-0 mt-0">
-						<ItemsSelectorCards
-							v-if="items_view === 'card'"
-							ref="itemsContainer"
-							:displayed-items="displayedItems"
-							:is-loading="isLoadingOrSyncing"
-							:search-input="search_input"
-							:item-group="item_group"
-							:is-overflowing="isOverflowing"
-							:card-slot-height="cardSlotHeight"
-							:card-columns="cardColumns"
-							:card-slot-width="cardSlotWidth"
-							:card-column-width="cardColumnWidth"
-							:card-row-height="cardRowHeight"
-							:virtual-scroll-buffer="virtualScrollBuffer"
-							:pos-profile="pos_profile"
-							:context="context"
-							:selected-currency="selected_currency"
-							:hide-qty-decimals="hide_qty_decimals"
-							:get-last-invoice-rate="getLastInvoiceRate"
-							:is-item-highlighted="isItemHighlighted"
-							:currency-symbol="currencySymbol"
-							:format-currency="memoizedFormatCurrency"
-							:format-number="memoizedFormatNumber"
-							:rate-precision="ratePrecision"
-							:is-negative="isNegative"
-							:no-items-title="__('No items found')"
-							:no-items-subtitle="__('Try adjusting your search or filters')"
-							:clear-search-label="__('Clear Search')"
-							@select-item="select_item"
-							@dragstart="onDragStart"
-							@dragend="onDragEnd"
-							@virtual-range-update="onVirtualRangeUpdate"
-							@clear-search="clearSearch"
-						/>
-						<ItemsSelectorTable
-							v-else
-							ref="itemsTable"
-							:headers="headers"
-							:displayed-items="displayedItems"
-							:header-props="headerProps"
-							:context="context"
-							:pos-profile="pos_profile"
-							:selected-currency="selected_currency"
-							:hide-qty-decimals="hide_qty_decimals"
-							:currency-symbol="currencySymbol"
-							:format-currency="memoizedFormatCurrency"
-							:format-number="memoizedFormatNumber"
-							:rate-precision="ratePrecision"
-							:get-last-invoice-rate="getLastInvoiceRate"
-							:is-negative="isNegative"
-							:item-class="getItemRowClass"
-							:row-props="getItemRowProps"
-							:no-data-text="__('No items found')"
-							@row-click="click_item_row"
-							@list-scroll="onListScroll"
-						/>
-					</v-col>
-				</v-row>
+				<v-card flat class="selector-section-card selector-results-card pos-themed-card">
+					<div class="section-card-heading section-card-heading--with-padding">
+						<h3 class="section-card-heading__title">{{ __("Available Items") }}</h3>
+					</div>
+					<v-row class="items">
+						<v-col cols="12" class="pt-0 mt-0">
+							<ItemsSelectorCards
+								v-if="items_view === 'card'"
+								ref="itemsContainer"
+								:displayed-items="displayedItems"
+								:is-loading="isLoadingOrSyncing"
+								:search-input="search_input"
+								:item-group="item_group"
+								:is-overflowing="isOverflowing"
+								:card-slot-height="cardSlotHeight"
+								:card-columns="cardColumns"
+								:card-slot-width="cardSlotWidth"
+								:card-column-width="cardColumnWidth"
+								:card-row-height="cardRowHeight"
+								:virtual-scroll-buffer="virtualScrollBuffer"
+								:pos-profile="pos_profile"
+								:context="context"
+								:selected-currency="selected_currency"
+								:hide-qty-decimals="hide_qty_decimals"
+								:get-last-invoice-rate="getLastInvoiceRate"
+								:is-item-highlighted="isItemHighlighted"
+								:currency-symbol="currencySymbol"
+								:format-currency="memoizedFormatCurrency"
+								:format-number="memoizedFormatNumber"
+								:rate-precision="ratePrecision"
+								:is-negative="isNegative"
+								:no-items-title="__('No items found')"
+								:no-items-subtitle="__('Try adjusting your search or filters')"
+								:clear-search-label="__('Clear Search')"
+								@select-item="select_item"
+								@dragstart="onDragStart"
+								@dragend="onDragEnd"
+								@virtual-range-update="onVirtualRangeUpdate"
+								@clear-search="clearSearch"
+							/>
+							<ItemsSelectorTable
+								v-else
+								ref="itemsTable"
+								:headers="headers"
+								:displayed-items="displayedItems"
+								:header-props="headerProps"
+								:context="context"
+								:pos-profile="pos_profile"
+								:selected-currency="selected_currency"
+								:hide-qty-decimals="hide_qty_decimals"
+								:currency-symbol="currencySymbol"
+								:format-currency="memoizedFormatCurrency"
+								:format-number="memoizedFormatNumber"
+								:rate-precision="ratePrecision"
+								:get-last-invoice-rate="getLastInvoiceRate"
+								:is-negative="isNegative"
+								:item-class="getItemRowClass"
+								:row-props="getItemRowProps"
+								:no-data-text="__('No items found')"
+								@row-click="click_item_row"
+								@list-scroll="onListScroll"
+							/>
+						</v-col>
+					</v-row>
+				</v-card>
 			</div>
 		</v-card>
 		<ItemActionToolbar
@@ -1122,6 +1132,45 @@ defineExpose({
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
 	padding: var(--dynamic-sm);
+	display: flex;
+	flex-direction: column;
+	gap: var(--dynamic-sm);
+}
+
+.selector-section-card {
+	background: var(--pos-card-bg) !important;
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	border-radius: var(--pos-radius-md, 18px);
+	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.section-card-heading {
+	padding: 14px 16px 0;
+}
+
+.section-card-heading--with-padding {
+	padding-bottom: 8px;
+}
+
+.section-card-heading__title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--pos-text-primary);
+}
+
+.selector-header-card {
+	padding: 0;
+	overflow: hidden;
+	position: sticky;
+	top: 0;
+	z-index: 8;
+}
+
+.selector-results-card {
+	padding: var(--dynamic-xs);
+	overflow: hidden;
 }
 
 .dynamic-scroll {
@@ -1195,7 +1244,7 @@ defineExpose({
 }
 
 .selection {
-	background-color: var(--surface-secondary) !important;
+	background-color: var(--pos-surface-muted) !important;
 }
 
 .item-selection-option {

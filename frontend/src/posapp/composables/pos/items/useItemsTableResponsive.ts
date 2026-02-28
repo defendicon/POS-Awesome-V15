@@ -112,8 +112,9 @@ export function useItemsTableResponsive(
 	};
 
 	const containerStyles = computed(() => ({
-		height: "calc(100% - 80px)",
-		maxHeight: "calc(100% - 80px)",
+		height: "100%",
+		maxHeight: "100%",
+		minHeight: "0",
 		"--container-width": containerWidth.value + "px",
 		"--container-height": containerHeight.value + "px",
 	}));

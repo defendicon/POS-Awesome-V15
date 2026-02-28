@@ -116,10 +116,13 @@ export async function show_payment(context: any) {
 
 		await context.$nextTick();
 
-		if (typeof context.paymentVisible !== "undefined") {
-			context.paymentVisible = true;
-		}
-		if (context.uiStore?.setActiveView) {
+		const useDesktopPaymentDialog =
+			typeof window !== "undefined" && window.innerWidth >= 992;
+
+		if (useDesktopPaymentDialog && context.uiStore?.openPaymentDialog) {
+			context.uiStore.openPaymentDialog();
+		} else if (context.uiStore?.setActiveView) {
+			context.uiStore.closePaymentDialog?.();
 			context.uiStore.setActiveView("payment");
 		}
 		context.eventBus.emit("show_payment", "true");
@@ -193,12 +196,18 @@ export function close_payments(context: any) {
 		return;
 	}
 
-	if (typeof context.paymentVisible !== "undefined" && !context.paymentVisible) {
+	if (
+		typeof context.paymentVisible !== "undefined" &&
+		!context.paymentVisible &&
+		!context.uiStore?.paymentDialogOpen
+	) {
 		return;
 	}
 
-	if (typeof context.paymentVisible !== "undefined") {
-		context.paymentVisible = false;
+	if (context.uiStore?.paymentDialogOpen && context.uiStore?.closePaymentDialog) {
+		context.uiStore.closePaymentDialog();
+	} else if (context.uiStore?.setActiveView) {
+		context.uiStore.setActiveView("items");
 	}
 
 	context.eventBus.emit("show_payment", "false");

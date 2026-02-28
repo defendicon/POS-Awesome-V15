@@ -1,6 +1,6 @@
 <template>
 	<!-- Main Invoice Wrapper -->
-	<div class="pa-0">
+	<div class="pa-0 invoice-shell">
 		<!-- Cancel Sale Confirmation Dialog -->
 		<CancelSaleDialog v-model="cancel_dialog" @confirm="cancel_invoice" />
 
@@ -13,7 +13,11 @@
 				resize: 'vertical',
 				overflow: 'auto',
 			}"
-			:class="['cards my-0 py-0 mt-3 resizable', 'pos-themed-card', { 'return-mode': isReturnInvoice }]"
+			:class="[
+				'cards my-0 py-0 mt-3 resizable invoice-main-card',
+				'pos-themed-card',
+				{ 'return-mode': isReturnInvoice },
+			]"
 			@mouseup="saveInvoiceHeight($refs.invoiceCard)"
 			@touchend="saveInvoiceHeight($refs.invoiceCard)"
 		>
@@ -22,150 +26,185 @@
 				<v-alert
 					type="info"
 					density="compact"
-					class="mb-2"
+					class="invoice-status-alert mb-0"
 					v-if="pos_profile.create_pos_invoice_instead_of_sales_invoice"
 				>
 					{{ __("Invoices saved as POS Invoices") }}
 				</v-alert>
-				<!-- Top Row: Customer Selection and Invoice Type -->
-				<InvoiceCustomerSection
-					ref="customerSection"
-					:pos_profile="pos_profile"
-					:invoiceTypes="invoiceTypes"
-					v-model="invoiceType"
-				/>
+				<div class="invoice-sections">
+					<div class="invoice-top-grid">
+						<v-card flat class="invoice-section-card pos-themed-card">
+							<div class="invoice-section-heading">
+								<h3 class="invoice-section-heading__title">{{ __("Customer Details") }}</h3>
+							</div>
+							<InvoiceCustomerSection
+								ref="customerSection"
+								:pos_profile="pos_profile"
+								:invoiceTypes="invoiceTypes"
+								v-model="invoiceType"
+							/>
+						</v-card>
 
-				<!-- Delivery Charges Section (Only if enabled in POS profile) -->
-				<DeliveryCharges
-					ref="deliveryChargesComponent"
-					:pos_profile="pos_profile"
-					:delivery_charges="delivery_charges"
-					:selected_delivery_charge="selected_delivery_charge"
-					:delivery_charges_rate="delivery_charges_rate"
-					:deliveryChargesFilter="deliveryChargesFilter"
-					:formatCurrency="formatCurrency"
-					:currencySymbol="currencySymbol"
-					:readonly="readonly"
-					@update:selected_delivery_charge="
-						(val) => {
-							selected_delivery_charge = val;
-							update_delivery_charges(conversion_rate, currency_precision);
-						}
-					"
-				/>
+						<v-card
+							v-if="pos_profile.posa_use_delivery_charges"
+							flat
+							class="invoice-section-card pos-themed-card"
+						>
+							<div class="invoice-section-heading">
+								<h3 class="invoice-section-heading__title">{{ __("Delivery Charges") }}</h3>
+							</div>
+							<DeliveryCharges
+								ref="deliveryChargesComponent"
+								:pos_profile="pos_profile"
+								:delivery_charges="delivery_charges"
+								:selected_delivery_charge="selected_delivery_charge"
+								:delivery_charges_rate="delivery_charges_rate"
+								:deliveryChargesFilter="deliveryChargesFilter"
+								:formatCurrency="formatCurrency"
+								:currencySymbol="currencySymbol"
+								:readonly="readonly"
+								@update:selected_delivery_charge="
+									(val) => {
+										selected_delivery_charge = val;
+										update_delivery_charges(conversion_rate, currency_precision);
+									}
+								"
+							/>
+						</v-card>
+					</div>
 
-				<!-- Posting Date and Customer Balance Section -->
-				<PostingDateRow
-					ref="postingDateComponent"
-					:pos_profile="pos_profile"
-					:posting_date_display="posting_date_display"
-					:customer_balance="customer_balance"
-					:price-list="selected_price_list"
-					:price-lists="price_lists"
-					:formatCurrency="formatCurrency"
-					@update:posting_date_display="
-						(val) => {
-							posting_date_display = val;
-						}
-					"
-					@update:priceList="
-						(val) => {
-							selected_price_list = val;
-						}
-					"
-				/>
+					<div class="invoice-meta-grid">
+						<v-card
+							v-if="pos_profile.posa_allow_change_posting_date"
+							flat
+							class="invoice-section-card pos-themed-card"
+						>
+							<div class="invoice-section-heading">
+								<h3 class="invoice-section-heading__title">{{ __("Posting and Price List") }}</h3>
+							</div>
+							<PostingDateRow
+								ref="postingDateComponent"
+								:pos_profile="pos_profile"
+								:posting_date_display="posting_date_display"
+								:customer_balance="customer_balance"
+								:price-list="selected_price_list"
+								:price-lists="price_lists"
+								:formatCurrency="formatCurrency"
+								@update:posting_date_display="
+									(val) => {
+										posting_date_display = val;
+									}
+								"
+								@update:priceList="
+									(val) => {
+										selected_price_list = val;
+									}
+								"
+							/>
+						</v-card>
 
-				<!-- Multi-Currency Section (Only if enabled in POS profile) -->
-				<MultiCurrencyRow
-					:pos_profile="pos_profile"
-					:selected_currency="selected_currency"
-					:plc_conversion_rate="exchange_rate"
-					:conversion_rate="conversion_rate"
-					:available_currencies="available_currencies"
-					:isNumber="isNumber"
-					:price_list_currency="price_list_currency"
-					@update:selected_currency="
-						(val) => {
-							selected_currency = val;
-							update_currency(val);
-						}
-					"
-					@update:plc_conversion_rate="
-						(val) => {
-							exchange_rate = val;
-							update_exchange_rate();
-						}
-					"
-					@update:conversion_rate="
-						(val) => {
-							conversion_rate = val;
-							update_conversion_rate();
-						}
-					"
-				/>
+						<v-card
+							v-if="pos_profile.posa_allow_multi_currency"
+							flat
+							class="invoice-section-card pos-themed-card"
+						>
+							<div class="invoice-section-heading">
+								<h3 class="invoice-section-heading__title">{{ __("Multi Currency") }}</h3>
+							</div>
+							<MultiCurrencyRow
+								:pos_profile="pos_profile"
+								:selected_currency="selected_currency"
+								:plc_conversion_rate="exchange_rate"
+								:conversion_rate="conversion_rate"
+								:available_currencies="available_currencies"
+								:isNumber="isNumber"
+								:price_list_currency="price_list_currency"
+								@update:selected_currency="
+									(val) => {
+										selected_currency = val;
+										update_currency(val);
+									}
+								"
+								@update:plc_conversion_rate="
+									(val) => {
+										exchange_rate = val;
+										update_exchange_rate();
+									}
+								"
+								@update:conversion_rate="
+									(val) => {
+										conversion_rate = val;
+										update_conversion_rate();
+									}
+								"
+							/>
+						</v-card>
+					</div>
 
-				<!-- Items Table Section (Main items list for invoice) -->
-				<div class="items-table-wrapper">
-					<!-- Refactored Action Toolbar -->
-					<InvoiceItemsActionToolbar
-						ref="actionToolbar"
-						:itemSearch="itemSearch"
-						:availableColumns="available_columns"
-						:selectedColumns="selected_columns"
-						@update:itemSearch="itemSearch = $event"
-						@update:selectedColumns="
-							(cols) => {
-								selected_columns = cols;
-								saveColumnPreferences();
-							}
-						"
-					/>
+					<v-card flat class="invoice-section-card invoice-items-card pos-themed-card">
+						<div class="invoice-section-heading">
+							<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
+						</div>
+						<div class="items-table-wrapper">
+							<InvoiceItemsActionToolbar
+								ref="actionToolbar"
+								:itemSearch="itemSearch"
+								:availableColumns="available_columns"
+								:selectedColumns="selected_columns"
+								@update:itemSearch="itemSearch = $event"
+								@update:selectedColumns="
+									(cols) => {
+										selected_columns = cols;
+										saveColumnPreferences();
+									}
+								"
+							/>
 
-					<!-- ItemsTable component with reorder event handler -->
-					<ItemsTable
-						ref="itemsTableRef"
-						:headers="items_headers"
-						v-model:expanded="expanded"
-						:itemsPerPage="itemsPerPage"
-						:itemSearch="itemSearch"
-						:pos_profile="pos_profile"
-						:invoiceType="invoiceType"
-						:stock_settings="stock_settings"
-						:displayCurrency="displayCurrency"
-						:formatFloat="formatFloat"
-						:formatCurrency="formatCurrency"
-						:currencySymbol="currencySymbol"
-						:isNumber="isNumber"
-						:setFormatedQty="setFormatedQty"
-						:setFormatedCurrency="setFormatedCurrency"
-						:calcPrices="calc_prices"
-						:calcUom="calc_uom"
-						:setSerialNo="set_serial_no"
-						:setBatchQty="set_batch_qty"
-						:validateDueDate="validate_due_date"
-						:removeItem="remove_item"
-						:subtractOne="subtract_one"
-						:addOne="add_one"
-						:toggleOffer="toggleOffer"
-						:changePriceListRate="change_price_list_rate"
-						:isNegative="isNegative"
-						@update:expanded="handleExpandedUpdate"
-						@reorder-items="handleItemReorder"
-						@add-item-from-drag="handleItemDrop"
-						@show-drop-feedback="(isDragging) => showDropFeedback(isDragging, itemsTableRef)"
-						@item-dropped="showDropFeedback(false, itemsTableRef)"
-						@view-packed="openPackedItems"
-					/>
+							<ItemsTable
+								ref="itemsTableRef"
+								:headers="items_headers"
+								v-model:expanded="expanded"
+								:itemsPerPage="itemsPerPage"
+								:itemSearch="itemSearch"
+								:pos_profile="pos_profile"
+								:invoiceType="invoiceType"
+								:stock_settings="stock_settings"
+								:displayCurrency="displayCurrency"
+								:formatFloat="formatFloat"
+								:formatCurrency="formatCurrency"
+								:currencySymbol="currencySymbol"
+								:isNumber="isNumber"
+								:setFormatedQty="setFormatedQty"
+								:setFormatedCurrency="setFormatedCurrency"
+								:calcPrices="calc_prices"
+								:calcUom="calc_uom"
+								:setSerialNo="set_serial_no"
+								:setBatchQty="set_batch_qty"
+								:validateDueDate="validate_due_date"
+								:removeItem="remove_item"
+								:subtractOne="subtract_one"
+								:addOne="add_one"
+								:toggleOffer="toggleOffer"
+								:changePriceListRate="change_price_list_rate"
+								:isNegative="isNegative"
+								@update:expanded="handleExpandedUpdate"
+								@reorder-items="handleItemReorder"
+								@add-item-from-drag="handleItemDrop"
+								@show-drop-feedback="(isDragging) => showDropFeedback(isDragging, itemsTableRef)"
+								@item-dropped="showDropFeedback(false, itemsTableRef)"
+								@view-packed="openPackedItems"
+							/>
 
-					<!-- Refactored Packed Items Dialog -->
-					<PackedItemsDialog
-						v-model="show_packed_dialog"
-						:items="packed_dialog_items"
-						:displayCurrency="displayCurrency"
-						:formatFloat="formatFloat"
-						:formatCurrency="formatCurrency"
-						:currencySymbol="currencySymbol"
-					/>
+							<PackedItemsDialog
+								v-model="show_packed_dialog"
+								:items="packed_dialog_items"
+								:displayCurrency="displayCurrency"
+								:formatFloat="formatFloat"
+								:formatCurrency="formatCurrency"
+								:currencySymbol="currencySymbol"
+							/>
+						</div>
+					</v-card>
 				</div>
 			</div>
 		</v-card>
@@ -369,7 +408,7 @@ export default {
 			},
 		},
 		paymentVisible() {
-			return this.activeView === "payment";
+			return this.activeView === "payment" || this.uiStore.paymentDialogOpen;
 		},
 		discount_amount: {
 			get() {
@@ -958,7 +997,20 @@ export default {
 <style scoped>
 /* Card background adjustments */
 .cards {
-	background-color: var(--surface-secondary) !important;
+	background-color: var(--pos-surface-muted) !important;
+}
+
+.invoice-shell {
+	display: flex;
+	flex-direction: column;
+	gap: var(--dynamic-sm);
+	min-height: 0;
+}
+
+.invoice-main-card {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden !important;
 }
 
 /* Style for selected checkbox button */
@@ -1020,13 +1072,91 @@ export default {
 .dynamic-padding {
 	/* Uniform spacing for better alignment */
 	padding: var(--dynamic-sm);
+	display: flex;
+	flex-direction: column;
+	gap: var(--dynamic-sm);
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.invoice-status-alert {
+	border-radius: 14px;
+	flex: 0 0 auto;
+}
+
+.invoice-sections {
+	display: flex;
+	flex-direction: column;
+	gap: var(--dynamic-sm);
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+	align-items: stretch;
+}
+
+.invoice-top-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--dynamic-sm);
+	flex: 0 0 auto;
+}
+
+.invoice-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--dynamic-sm);
+	flex: 0 0 auto;
+}
+
+.invoice-section-card {
+	background: var(--pos-card-bg) !important;
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	border-radius: var(--pos-radius-md, 18px);
+	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+	overflow: hidden;
+	flex: 0 0 auto;
+	min-height: fit-content;
+}
+
+.invoice-section-heading {
+	padding: 14px 16px 0;
+}
+
+.invoice-section-heading__title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--pos-text-primary);
+}
+
+.invoice-items-card {
+	padding-bottom: var(--dynamic-xs);
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
 }
 
 /* Responsive breakpoints */
 @media (max-width: 768px) {
+	.invoice-shell {
+		gap: var(--dynamic-xs);
+	}
+
+	.invoice-main-card {
+		height: auto !important;
+		max-height: none !important;
+		resize: none !important;
+		overflow: visible !important;
+	}
+
 	.dynamic-padding {
 		/* Smaller uniform padding on tablets */
 		padding: var(--dynamic-xs);
+		overflow: visible;
 	}
 
 	.dynamic-padding .v-row {
@@ -1037,12 +1167,30 @@ export default {
 		padding: 2px 4px;
 	}
 
+	.invoice-meta-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.invoice-top-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.invoice-sections {
+		overflow: visible;
+	}
+
+	.invoice-items-card {
+		flex: 0 0 auto;
+		min-height: 320px;
+	}
+
 	.items-table-wrapper {
 		/* Adjust for smaller padding on tablets */
 		margin-left: calc(-1 * var(--dynamic-xs));
 		margin-right: calc(-1 * var(--dynamic-xs));
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
+		min-height: 280px;
 	}
 
 	.item-search-field {
@@ -1051,6 +1199,10 @@ export default {
 }
 
 @media (max-width: 480px) {
+	.invoice-main-card {
+		margin-top: var(--dynamic-xs) !important;
+	}
+
 	.dynamic-padding {
 		padding: var(--dynamic-xs);
 	}
@@ -1063,12 +1215,21 @@ export default {
 		padding: 1px 2px;
 	}
 
+	.invoice-meta-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.invoice-top-grid {
+		grid-template-columns: 1fr;
+	}
+
 	.items-table-wrapper {
 		/* Adjust for smallest screens */
 		margin-left: calc(-1 * var(--dynamic-xs));
 		margin-right: calc(-1 * var(--dynamic-xs));
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
+		min-height: 240px;
 	}
 
 	.item-search-field {
@@ -1111,6 +1272,24 @@ export default {
 	width: calc(100% + 2 * var(--dynamic-sm));
 	max-width: calc(100% + 2 * var(--dynamic-sm));
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+:deep(.items-table-wrapper .column-selector-container) {
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	background: var(--pos-card-bg);
+}
+
+:deep(.items-table-wrapper .posa-items-table-container) {
+	flex: 1 1 auto;
+	min-height: 0;
+	height: 100% !important;
+	max-height: 100% !important;
 }
 
 /* New styles for improved column switches */

@@ -1,7 +1,6 @@
 <template>
 	<v-card
-		class="cards mb-0 mt-3 py-2 px-3 rounded-lg resizable pos-themed-card"
-		style="resize: vertical; overflow: auto"
+		class="cards sticky-summary-card mb-0 py-2 px-3 rounded-lg pos-themed-card"
 	>
 		<v-row dense>
 			<!-- Summary Info -->
@@ -118,7 +117,7 @@
 			</v-col>
 
 			<!-- Action Buttons -->
-			<v-col cols="12" md="5">
+			<v-col cols="12" md="5" class="invoice-summary-actions">
 				<InvoiceActionButtons
 					:pos_profile="pos_profile"
 					:saveLoading="saveLoading"
@@ -357,6 +356,18 @@ async function handleOpenCustomerDisplay() {
 	transition: all 0.3s ease;
 }
 
+.sticky-summary-card {
+	position: sticky;
+	bottom: 0;
+	z-index: 9;
+	box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.invoice-summary-actions {
+	position: sticky;
+	bottom: 0;
+}
+
 /* Enhanced field styling */
 .summary-field {
 	transition: all 0.2s ease;
@@ -368,6 +379,20 @@ async function handleOpenCustomerDisplay() {
 }
 
 @media (max-width: 768px) {
+	.sticky-summary-card {
+		position: static;
+		bottom: auto;
+		box-shadow: none;
+	}
+
+	.invoice-summary-actions {
+		position: static;
+	}
+
+	.cards {
+		padding: 10px 12px !important;
+	}
+
 	.summary-field {
 		font-size: 0.875rem;
 	}

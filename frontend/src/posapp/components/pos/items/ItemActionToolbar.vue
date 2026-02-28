@@ -84,20 +84,24 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 
 <style scoped>
 .action-btn-consistent {
-	height: 32px !important;
+	height: 36px !important;
 	margin-top: var(--dynamic-xs) !important;
-	padding: var(--dynamic-xs) var(--dynamic-sm) !important;
+	padding: var(--pos-space-2) var(--pos-space-3) !important;
 	transition: var(--transition-normal) !important;
+	border-radius: var(--pos-radius-sm) !important;
+	text-transform: none !important;
+	font-weight: 600 !important;
 }
 
 .action-btn-consistent:hover {
 	background-color: rgba(var(--v-theme-primary), 0.1) !important;
-	transform: translateY(-1px) !important;
+	transform: none !important;
 }
 
 .view-toggle-btn {
-	height: 32px;
-	border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+	height: 36px;
+	border: 1px solid var(--pos-border-light);
+	border-radius: var(--pos-radius-sm);
 }
 
 .dynamic-padding {
@@ -109,9 +113,12 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 }
 
 .cards {
-	background-color: var(--surface-secondary) !important;
+	background-color: var(--pos-surface-muted) !important;
 	margin-top: var(--dynamic-sm) !important;
 	padding: var(--dynamic-sm) !important;
+	border: 1px solid var(--pos-border-light);
+	border-radius: var(--pos-radius-md) !important;
+	box-shadow: none !important;
 }
 
 @media (max-width: 768px) {

@@ -9,17 +9,17 @@
 
 /* Main table container */
 .posa-cart-table {
-	border-radius: 8px;
+	border-radius: var(--pos-radius-md);
 	overflow: hidden;
-	box-shadow: 0 2px 8px var(--pos-shadow);
-	border: 1px solid var(--pos-border);
+	box-shadow: 0 12px 24px var(--pos-shadow-light);
+	border: 1px solid var(--pos-border-light);
 	height: 100%;
 	width: 100%;
 	max-width: 100%;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
-	background: var(--pos-card-bg);
+	background: var(--pos-surface-raised);
 	margin: 0;
 	padding: 0;
 }
@@ -89,12 +89,12 @@
 .posa-cart-table th {
 	font-weight: 600;
 	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.3px;
+	text-transform: none;
+	letter-spacing: 0.02em;
 	padding: 12px;
-	border-bottom: 1px solid var(--pos-border);
-	background-color: var(--pos-table-header-bg);
-	color: var(--pos-text-primary);
+	border-bottom: 1px solid var(--pos-border-light);
+	background-color: var(--pos-surface-muted);
+	color: var(--pos-text-secondary);
 	position: sticky;
 	top: 0;
 	z-index: 3;
@@ -125,9 +125,9 @@
 
 /* Header hover effects */
 .posa-cart-table th:hover {
-	background-color: var(--pos-hover-bg);
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px var(--pos-shadow);
+	background-color: var(--pos-surface-muted);
+	transform: none;
+	box-shadow: none;
 	z-index: 2;
 }
 
@@ -154,13 +154,13 @@
 	color: var(--pos-primary);
 	font-weight: 600;
 	letter-spacing: 0.02em;
-	text-shadow: 0 1px 2px var(--pos-shadow-light);
+	text-shadow: none;
 }
 
 /* Table rows */
 .posa-cart-table tr {
 	transition: background-color 0.2s ease;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+	border-bottom: 1px solid var(--pos-border-light);
 	width: 100% !important;
 	max-width: 100% !important;
 	margin: 0 !important;
@@ -169,12 +169,16 @@
 }
 
 .posa-cart-table tr:hover {
-	background-color: var(--pos-hover-bg);
+	background-color: rgba(25, 118, 210, 0.04);
+}
+
+.posa-cart-table tbody tr:nth-child(even) {
+	background-color: var(--pos-surface-muted);
 }
 
 /* Table cells */
 .posa-cart-table td {
-	padding: 16px 12px;
+	padding: 14px 12px;
 	vertical-align: middle;
 	height: 60px;
 	text-align: center;

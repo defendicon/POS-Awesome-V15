@@ -208,23 +208,27 @@ const showCustomerDisplayButton = computed(() =>
 /* Responsive optimizations */
 @media (max-width: 768px) {
 	.summary-btn {
-		font-size: 0.875rem !important;
-		padding: 8px 12px !important;
+		font-size: 0.8rem !important;
+		padding: 4px 8px !important;
+		min-height: 38px !important;
 	}
 
 	.pay-btn {
-		font-size: 1rem !important;
+		font-size: 0.95rem !important;
+		min-height: 42px !important;
 	}
 }
 
 @media (max-width: 480px) {
 	.summary-btn {
-		font-size: 0.8rem !important;
-		padding: 6px 8px !important;
+		font-size: 0.74rem !important;
+		padding: 3px 6px !important;
+		min-height: 34px !important;
 	}
 
 	.pay-btn {
-		font-size: 0.95rem !important;
+		font-size: 0.85rem !important;
+		min-height: 40px !important;
 	}
 }
 

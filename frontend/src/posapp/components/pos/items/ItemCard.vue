@@ -157,20 +157,21 @@ const onDragEnd = (event) => {
 
 <style scoped>
 .card-item-card {
-	background-color: rgb(var(--v-theme-surface));
-	border-radius: 12px;
-	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+	background: var(--pos-surface-raised);
+	border-radius: var(--pos-radius-md);
+	border: 1px solid var(--pos-border-light);
 	overflow: hidden;
 	transition:
 		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
 		box-shadow 0.2s ease,
-		border-color 0.2s ease;
+		border-color 0.2s ease,
+		background-color 0.2s ease;
 	cursor: pointer;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 	width: 100%;
-	box-shadow: 0 2px 8px rgba(var(--v-theme-on-surface), 0.06);
+	box-shadow: 0 10px 24px var(--pos-shadow-light);
 	will-change: transform;
 	backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
@@ -178,26 +179,26 @@ const onDragEnd = (event) => {
 }
 
 .card-item-card:hover {
-	transform: translate3d(0, -2px, 0);
-	box-shadow: 0 8px 24px rgba(var(--v-theme-on-surface), 0.12);
-	border-color: rgb(var(--v-theme-primary));
+	transform: translate3d(0, -3px, 0);
+	box-shadow: 0 16px 32px var(--pos-shadow);
+	border-color: rgba(var(--v-theme-primary), 0.35);
 }
 
 .card-item-card.item-highlighted {
 	border-color: rgb(var(--v-theme-primary));
 	box-shadow:
 		0 0 0 3px rgba(var(--v-theme-primary), 0.35),
-		0 8px 20px rgba(var(--v-theme-primary), 0.2);
+		0 12px 28px rgba(var(--v-theme-primary), 0.2);
 	transform: translate3d(0, -2px, 0);
 	background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .card-item-image-container {
 	position: relative;
-	height: 120px;
+	height: 132px;
 	flex-shrink: 0;
 	overflow: hidden;
-	background: rgb(var(--v-theme-surface-variant));
+	background: var(--pos-surface-muted);
 }
 
 .card-item-image {
@@ -218,23 +219,26 @@ const onDragEnd = (event) => {
 }
 
 .card-item-content {
-	padding: 12px;
+	padding: var(--pos-space-3);
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
 	justify-content: space-between;
+	gap: var(--pos-space-2);
 }
 
 .card-item-header {
-	margin-bottom: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: var(--pos-space-1);
 }
 
 .card-item-name {
-	font-size: 0.95rem;
-	font-weight: 600;
-	margin: 0 0 4px 0;
-	line-height: 1.3;
-	color: var(--text-primary);
+	font-size: 0.98rem;
+	font-weight: 700;
+	margin: 0;
+	line-height: 1.35;
+	color: var(--pos-text-primary);
 	overflow: hidden;
 	display: -webkit-box;
 	-webkit-line-clamp: 2;
@@ -243,44 +247,51 @@ const onDragEnd = (event) => {
 }
 
 .card-item-code {
-	font-size: 0.75rem;
-	color: var(--text-secondary);
+	font-size: 0.74rem;
+	color: var(--pos-text-secondary);
 	display: block;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	letter-spacing: 0.02em;
 }
 
 .card-item-details {
 	display: flex;
 	justify-content: space-between;
-	align-items: flex-end;
+	align-items: flex-start;
 	margin-top: auto; /* Push to bottom */
+	gap: var(--pos-space-2);
 }
 
 .card-item-price {
 	display: flex;
 	flex-direction: column;
+	gap: var(--pos-space-1);
+	min-width: 0;
 }
 
 .primary-price {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: var(--pos-space-1);
 	font-weight: 700;
 	color: rgb(var(--v-theme-primary));
-	font-size: 1rem;
+	font-size: 1.05rem;
 }
 
 .secondary-price {
 	font-size: 0.8rem;
-	color: var(--text-secondary);
+	color: var(--pos-text-secondary);
 }
 
 .last-rate-chip {
-	margin-top: 4px;
 	font-size: 0.75rem;
 	color: rgb(var(--v-theme-secondary));
 	background: rgba(var(--v-theme-on-surface), 0.08);
-	padding: 2px 6px;
-	border-radius: 4px;
+	padding: 4px 8px;
+	border-radius: var(--pos-radius-xs);
 	display: inline-flex;
 	align-items: center;
 	width: fit-content;
@@ -297,11 +308,16 @@ const onDragEnd = (event) => {
 
 .card-item-stock {
 	text-align: right;
-	font-size: 0.85rem;
-	color: var(--text-secondary);
+	font-size: 0.82rem;
+	color: var(--pos-text-secondary);
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: flex-end;
+	gap: 6px;
+	padding: 6px 8px;
+	border-radius: var(--pos-radius-xs);
+	background: rgba(var(--v-theme-on-surface), 0.06);
+	white-space: nowrap;
 }
 
 .stock-amount {
@@ -319,11 +335,11 @@ const onDragEnd = (event) => {
 
 @media (max-width: 768px) {
 	.card-item-image-container {
-		height: 100px;
+		height: 112px;
 	}
 
 	.card-item-content {
-		padding: 10px 12px 12px;
+		padding: var(--pos-space-2);
 	}
 
 	.card-item-name {

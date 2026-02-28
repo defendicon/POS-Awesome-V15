@@ -169,12 +169,24 @@ export function usePaymentSubmission(options: PaymentSubmissionOptions) {
 			return 0;
 		}
 
+		const requestedWriteOff = Math.max(
+			formatFloat(doc?.write_off_amount || 0),
+			0,
+		);
+
 		const writeOffLimit = getWriteOffLimit(profile);
 		if (writeOffLimit === null) {
-			return formatFloat(outstanding);
+			return formatFloat(
+				requestedWriteOff > 0 ? Math.min(requestedWriteOff, outstanding) : outstanding,
+			);
 		}
 
-		return formatFloat(Math.min(outstanding, writeOffLimit));
+		const cappedByLimit = Math.min(outstanding, writeOffLimit);
+		if (requestedWriteOff > 0) {
+			return formatFloat(Math.min(requestedWriteOff, cappedByLimit));
+		}
+
+		return formatFloat(cappedByLimit);
 	};
 
 	const validateDueDate = () => {

@@ -244,7 +244,10 @@ export async function findQzPrinters(): Promise<string[]> {
 		} else if (selectedQzPrinter.value && printers.includes(selectedQzPrinter.value)) {
 			setSelectedQzPrinter(selectedQzPrinter.value);
 		} else if (printers.length > 0) {
-			setSelectedQzPrinter(printers[0]);
+			const firstPrinter = printers[0];
+			if (firstPrinter) {
+				setSelectedQzPrinter(firstPrinter);
+			}
 		} else {
 			setSelectedQzPrinter("");
 		}
