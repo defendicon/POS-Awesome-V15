@@ -163,6 +163,7 @@ export async function saveItems(items, scope = "") {
 	try {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
+		const CHUNK_SIZE = 1000;
 		const incomingItems = Array.isArray(items)
 			? items.filter((it) => it?.item_code)
 			: [];
@@ -170,27 +171,36 @@ export async function saveItems(items, scope = "") {
 			return;
 		}
 
-		const itemCodes = Array.from(
-			new Set(incomingItems.map((it) => it.item_code).filter(Boolean)),
-		);
-		const existingRows = itemCodes.length
-			? await db.table("items").where("item_code").anyOf(itemCodes).toArray()
-			: [];
+		const itemCodes = Array.from(new Set(incomingItems.map((it) => it.item_code).filter(Boolean)));
+		const existingRows: any[] = [];
+		for (let i = 0; i < itemCodes.length; i += CHUNK_SIZE) {
+			const codeChunk = itemCodes.slice(i, i + CHUNK_SIZE);
+			if (!codeChunk.length) {
+				continue;
+			}
+			const rows = await db.table("items").where("item_code").anyOf(codeChunk).toArray();
+			if (Array.isArray(rows) && rows.length) {
+				existingRows.push(...rows);
+			}
+		}
 		const existingByCode = new Map(
 			existingRows.map((row: any) => [row.item_code, row]),
 		);
 
-		const scopedItems = incomingItems.map((it) => {
-			const existing = (existingByCode.get(it.item_code) ||
-				{}) as Record<string, any>;
-			return deriveItemSearchFields({
-				...existing,
-				...it,
-				profile_scope:
-					scope || it?.profile_scope || existing?.profile_scope || "",
+		for (let i = 0; i < incomingItems.length; i += CHUNK_SIZE) {
+			const itemChunk = incomingItems.slice(i, i + CHUNK_SIZE);
+			const scopedItems = itemChunk.map((it) => {
+				const existing = (existingByCode.get(it.item_code) ||
+					{}) as Record<string, any>;
+				return deriveItemSearchFields({
+					...existing,
+					...it,
+					profile_scope:
+						scope || it?.profile_scope || existing?.profile_scope || "",
+				});
 			});
-		});
-		await db.table("items").bulkPut(scopedItems);
+			await db.table("items").bulkPut(scopedItems);
+		}
 	} catch (e) {
 		console.error("Failed to save items", e);
 	}
