@@ -27,53 +27,86 @@
 		>
 			<Payments dialog-mode />
 		</v-dialog>
+		<div v-if="!dialog && useCompactPosSwitcher" class="compact-pos-switcher">
+			<v-btn-toggle
+				:model-value="compactPanel"
+				mandatory
+				divided
+				class="compact-pos-switcher__toggle pos-themed-card"
+			>
+				<v-btn
+					value="selector"
+					class="compact-pos-switcher__btn"
+					prepend-icon="mdi-view-grid-outline"
+					@click="setCompactPanel('selector')"
+				>
+					{{ __("Item Selector") }}
+				</v-btn>
+				<v-btn
+					value="invoice"
+					class="compact-pos-switcher__btn"
+					prepend-icon="mdi-receipt-text-outline"
+					@click="setCompactPanel('invoice')"
+				>
+					{{ __("Invoice") }}
+				</v-btn>
+			</v-btn-toggle>
+		</div>
 		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row">
 			<v-col
-				v-show="activeView === 'items'"
-				xl="5"
-				lg="5"
-				md="5"
-				sm="5"
+				v-show="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'items'"
+				:xl="useCompactPosSwitcher ? 12 : 5"
+				:lg="useCompactPosSwitcher ? 12 : 5"
+				:md="useCompactPosSwitcher ? 12 : 5"
+				:sm="useCompactPosSwitcher ? 12 : 5"
 				cols="12"
 				class="pos dynamic-col"
 			>
 				<ItemsSelector context="pos" />
 			</v-col>
 			<v-col
-				v-show="activeView === 'offers'"
-				xl="5"
-				lg="5"
-				md="5"
-				sm="5"
+				v-show="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'offers'"
+				:xl="useCompactPosSwitcher ? 12 : 5"
+				:lg="useCompactPosSwitcher ? 12 : 5"
+				:md="useCompactPosSwitcher ? 12 : 5"
+				:sm="useCompactPosSwitcher ? 12 : 5"
 				cols="12"
 				class="pos dynamic-col"
 			>
 				<PosOffers></PosOffers>
 			</v-col>
 			<v-col
-				v-show="activeView === 'coupons'"
-				xl="5"
-				lg="5"
-				md="5"
-				sm="5"
+				v-show="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'coupons'"
+				:xl="useCompactPosSwitcher ? 12 : 5"
+				:lg="useCompactPosSwitcher ? 12 : 5"
+				:md="useCompactPosSwitcher ? 12 : 5"
+				:sm="useCompactPosSwitcher ? 12 : 5"
 				cols="12"
 				class="pos dynamic-col"
 			>
 				<PosCoupons></PosCoupons>
 			</v-col>
 			<v-col
-				v-show="activeView === 'payment' && !usePaymentDialog"
-				xl="5"
-				lg="5"
-				md="5"
-				sm="5"
+				v-show="(!useCompactPosSwitcher || compactPanel === 'selector') && activeView === 'payment' && !usePaymentDialog"
+				:xl="useCompactPosSwitcher ? 12 : 5"
+				:lg="useCompactPosSwitcher ? 12 : 5"
+				:md="useCompactPosSwitcher ? 12 : 5"
+				:sm="useCompactPosSwitcher ? 12 : 5"
 				cols="12"
 				class="pos dynamic-col"
 			>
 				<Payments></Payments>
 			</v-col>
 
-			<v-col xl="7" lg="7" md="7" sm="7" cols="12" class="pos dynamic-col">
+			<v-col
+				v-show="!useCompactPosSwitcher || compactPanel === 'invoice'"
+				:xl="useCompactPosSwitcher ? 12 : 7"
+				:lg="useCompactPosSwitcher ? 12 : 7"
+				:md="useCompactPosSwitcher ? 12 : 7"
+				:sm="useCompactPosSwitcher ? 12 : 7"
+				cols="12"
+				class="pos dynamic-col"
+			>
 				<Invoice></Invoice>
 			</v-col>
 		</v-row>
@@ -120,8 +153,11 @@ export default {
 		const uiStore = useUIStore();
 		const invoiceStore = useInvoiceStore();
 		const itemsStore = useItemsStore();
+		const __ = window.__;
 		const { activeView, posProfile, paymentDialogOpen } = storeToRefs(uiStore);
 		const usePaymentDialog = computed(() => responsive.windowWidth.value >= 992);
+		const useCompactPosSwitcher = computed(() => responsive.windowWidth.value < 1280);
+		const compactPanel = ref("selector");
 
 		const handlePaymentDialogUpdate = (value) => {
 			if (value || !usePaymentDialog.value) {
@@ -131,6 +167,15 @@ export default {
 			nextTick(() => {
 				uiStore.triggerItemSearchFocus();
 			});
+		};
+
+		const setCompactPanel = (panel) => {
+			compactPanel.value = panel;
+			if (panel === "selector" && activeView.value === "items") {
+				nextTick(() => {
+					uiStore.triggerItemSearchFocus();
+				});
+			}
 		};
 
 		useCustomerDisplayPublisher({
@@ -165,6 +210,27 @@ export default {
 			}
 		});
 
+		watch(activeView, (view) => {
+			if (!useCompactPosSwitcher.value) {
+				return;
+			}
+
+			if (["items", "offers", "coupons", "payment"].includes(view)) {
+				compactPanel.value = "selector";
+			}
+		});
+
+		watch(useCompactPosSwitcher, (enabled) => {
+			if (!enabled) {
+				compactPanel.value = "selector";
+				return;
+			}
+
+			if (["offers", "coupons", "payment"].includes(activeView.value)) {
+				compactPanel.value = "selector";
+			}
+		});
+
 		return {
 			...responsive,
 			...rtl,
@@ -173,9 +239,13 @@ export default {
 			uiStore,
 			invoiceStore,
 			itemsStore,
+			__,
 			activeView,
 			paymentDialogOpen,
 			usePaymentDialog,
+			useCompactPosSwitcher,
+			compactPanel,
+			setCompactPanel,
 			handlePaymentDialogUpdate,
 			eventBus,
 			dialog,
@@ -300,6 +370,34 @@ export default {
 <style scoped>
 .payment-dialog :deep(.v-overlay__content) {
 	max-height: calc(100vh - 24px);
+}
+
+.compact-pos-switcher {
+	padding: 0 var(--dynamic-sm);
+	margin-top: var(--dynamic-sm);
+}
+
+.compact-pos-switcher__toggle {
+	display: grid !important;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	width: 100%;
+	padding: 4px;
+	border-radius: 18px;
+	background: var(--pos-card-bg) !important;
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.compact-pos-switcher__btn {
+	min-height: 44px;
+	text-transform: none !important;
+	letter-spacing: 0 !important;
+	font-weight: 600 !important;
+}
+
+.compact-pos-switcher__toggle :deep(.v-btn--active) {
+	background: rgba(var(--v-theme-primary), 0.12) !important;
+	color: rgb(var(--v-theme-primary)) !important;
 }
 </style>
 
