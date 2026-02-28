@@ -31,6 +31,10 @@
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
 				<v-card flat class="selector-section-card selector-header-card pos-themed-card">
+					<div class="section-card-heading">
+						<span class="section-card-heading__eyebrow">{{ __("Search") }}</span>
+						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
+					</div>
 					<ItemHeader
 						v-model:search-input="search_input"
 						v-model:qty-input="debounce_qty"
@@ -75,6 +79,10 @@
 				/>
 
 				<v-card flat class="selector-section-card selector-results-card pos-themed-card">
+					<div class="section-card-heading section-card-heading--with-padding">
+						<span class="section-card-heading__eyebrow">{{ __("Catalog") }}</span>
+						<h3 class="section-card-heading__title">{{ __("Available Items") }}</h3>
+					</div>
 					<v-row class="items">
 						<v-col cols="12" class="pt-0 mt-0">
 							<ItemsSelectorCards
@@ -1136,6 +1144,31 @@ defineExpose({
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	border-radius: var(--pos-radius-md, 18px);
 	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.section-card-heading {
+	padding: 14px 16px 0;
+}
+
+.section-card-heading--with-padding {
+	padding-bottom: 8px;
+}
+
+.section-card-heading__eyebrow {
+	display: block;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: rgba(var(--v-theme-on-surface), 0.58);
+}
+
+.section-card-heading__title {
+	margin: 2px 0 0;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--pos-text-primary);
 }
 
 .selector-header-card {
