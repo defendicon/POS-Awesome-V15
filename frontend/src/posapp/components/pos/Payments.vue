@@ -1417,8 +1417,18 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
+	.payment-shell {
+		display: flex;
+		flex-direction: column;
+		gap: var(--pos-space-2);
+		overflow: visible;
+	}
+
 	.payment-card {
 		padding: var(--pos-space-1);
+		height: auto !important;
+		max-height: none !important;
+		overflow: visible !important;
 	}
 
 	.payment-shell--dialog {
@@ -1428,6 +1438,13 @@ onBeforeUnmount(() => {
 	.payment-scroll {
 		padding: var(--pos-space-2);
 		gap: var(--pos-space-2);
+		overflow: visible !important;
+		min-height: auto;
+		max-height: none;
+	}
+
+	.payment-sections {
+		overflow: visible;
 	}
 
 	.payment-sections--dialog {
@@ -1441,6 +1458,11 @@ onBeforeUnmount(() => {
 	.payment-section {
 		padding: var(--pos-space-2);
 		gap: var(--pos-space-2);
+	}
+
+	.payment-footer {
+		position: static;
+		margin-top: 0;
 	}
 }
 </style>

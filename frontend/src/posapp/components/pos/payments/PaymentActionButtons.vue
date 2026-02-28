@@ -129,4 +129,37 @@ const __ = window.__;
 	opacity: 0 !important;
 	background: transparent !important;
 }
+
+@media (max-width: 768px) {
+	.cards {
+		margin-top: 0 !important;
+	}
+
+	.payment-footer-btn {
+		font-size: 0.82rem !important;
+	}
+
+	:deep(.payment-footer-btn.v-btn) {
+		min-height: 38px !important;
+	}
+
+	:deep(.payment-footer-btn .v-btn__content) {
+		font-size: 0.82rem !important;
+		line-height: 1.15;
+	}
+}
+
+@media (max-width: 480px) {
+	.payment-footer-btn {
+		font-size: 0.76rem !important;
+	}
+
+	:deep(.payment-footer-btn.v-btn) {
+		min-height: 34px !important;
+	}
+
+	:deep(.payment-footer-btn .v-btn__content) {
+		font-size: 0.76rem !important;
+	}
+}
 </style>
