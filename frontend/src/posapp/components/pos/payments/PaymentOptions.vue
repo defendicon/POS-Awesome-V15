@@ -99,12 +99,7 @@
 					</div>
 				</div>
 
-				<div v-else-if="redeemCustomerCredit" class="payment-options-panel__note">
-					<h4>{{ $frappe._("Customer Credit Enabled") }}</h4>
-					<p>{{ $frappe._("Credit redemption details are shown below in this section.") }}</p>
-				</div>
-
-				<div v-else-if="isWriteOffChange" class="payment-options-panel__content">
+				<div v-if="isWriteOffChange" class="payment-options-panel__content">
 					<v-text-field
 						class="sleek-field"
 						density="compact"
@@ -120,6 +115,11 @@
 					<p class="payment-options-panel__helper">
 						{{ $frappe._("This amount will be written off on submission.") }}
 					</p>
+				</div>
+
+				<div v-else-if="redeemCustomerCredit" class="payment-options-panel__note">
+					<h4>{{ $frappe._("Customer Credit Enabled") }}</h4>
+					<p>{{ $frappe._("Credit redemption details are shown below in this section.") }}</p>
 				</div>
 
 				<div v-else-if="invoiceDoc.is_return && isCreditReturn" class="payment-options-panel__note">
