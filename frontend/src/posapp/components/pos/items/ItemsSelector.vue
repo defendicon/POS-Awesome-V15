@@ -238,7 +238,7 @@ const toastStore = useToastStore();
 const uiStore = useUIStore();
 const invoiceStore = useInvoiceStore();
 const { selectedCustomer } = storeToRefs(customersStore);
-const { posProfile: uiPosProfile } = storeToRefs(uiStore);
+const { posProfile: uiPosProfile, searchFocusTrigger, activeView } = storeToRefs(uiStore);
 
 const __ = (window as any).__;
 
@@ -758,6 +758,7 @@ onMounted(async () => {
 			syncSelectorPriceList(priceList);
 		});
 		eventBus.on("update_invoice_type", handleInvoiceTypeUpdate);
+		eventBus.on("focus_item_search", requestItemSearchFocus);
 	}
 
 	// Watch UI Profile for initialization (Source of Truth)
@@ -828,6 +829,7 @@ onBeforeUnmount(() => {
 		eventBus.off("update_currency");
 		eventBus.off("update_customer_price_list");
 		eventBus.off("update_invoice_type", handleInvoiceTypeUpdate);
+		eventBus.off("focus_item_search", requestItemSearchFocus);
 	}
 	window.removeEventListener("resize", checkItemContainerOverflow);
 });
@@ -836,6 +838,16 @@ onBeforeUnmount(() => {
 watch(search_input, (val) => {
 	first_search.value = val;
 	itemSelection.clearHighlightedItem();
+});
+
+watch(searchFocusTrigger, () => {
+	requestItemSearchFocus();
+});
+
+watch(activeView, (view) => {
+	if (view === "items") {
+		requestItemSearchFocus();
+	}
 });
 
 watch(selectedCustomer, () => {
@@ -885,9 +897,17 @@ const handleSearchInput = (val) => {
 	search_input.value = val;
 };
 const handleSearchPaste = (e) => itemsSelectorFocus.handleSearchPaste(e);
+const requestItemSearchFocus = () => {
+	if (activeView.value !== "items") {
+		return;
+	}
+	nextTick(() => {
+		itemsSelectorFocus.focusItemSearch();
+	});
+};
 const handleItemSearchFocus = () => {
 	clearSearch();
-	itemsSelectorFocus.focusItemSearch();
+	requestItemSearchFocus();
 };
 const clearQty = () => {
 	qty.value = null as any;

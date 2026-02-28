@@ -516,10 +516,25 @@ const set_print_format = () => {
 	}
 };
 
+const releaseActiveFocus = () => {
+	if (typeof document === "undefined") {
+		return;
+	}
+	const active = document.activeElement;
+	if (active instanceof HTMLElement && active !== document.body) {
+		active.blur();
+	}
+};
+
 const back_to_invoice = () => {
+	releaseActiveFocus();
+	paymentVisible.value = false;
 	uiStore.setActiveView("items");
 	nextTick(() => {
 		uiStore.triggerItemSearchFocus();
+		if (eventBus && typeof eventBus.emit === "function") {
+			eventBus.emit("focus_item_search");
+		}
 	});
 };
 
@@ -963,6 +978,7 @@ watch(activeView, (newVal) => {
 	if (newVal === "payment") {
 		handleShowPayment();
 	} else {
+		releaseActiveFocus();
 		paymentVisible.value = false;
 		highlightSubmit.value = false;
 	}

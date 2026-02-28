@@ -4,6 +4,7 @@
 		<v-dialog
 			:model-value="customDaysDialog"
 			max-width="300px"
+			:retain-focus="false"
 			@update:model-value="$emit('update:customDaysDialog', $event)"
 		>
 			<v-card>
@@ -42,6 +43,7 @@
 		<v-dialog
 			:model-value="phoneDialog"
 			max-width="400px"
+			:retain-focus="false"
 			@update:model-value="$emit('update:phoneDialog', $event)"
 		>
 			<v-card v-if="invoiceDoc">

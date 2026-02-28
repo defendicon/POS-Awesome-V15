@@ -55,6 +55,36 @@ export function useItemsCache() {
 	const MEMORY_CLEANUP_INTERVAL = 1000;
 	let lastMemoryCleanup = 0;
 
+	const isQuotaExceededError = (error: unknown) => {
+		if (!error || typeof error !== "object") {
+			return false;
+		}
+		const name = String((error as { name?: unknown }).name || "");
+		const message = String((error as { message?: unknown }).message || "");
+		return (
+			name === "QuotaExceededError" ||
+			message.toLowerCase().includes("quota")
+		);
+	};
+
+	const disableSessionCache = (reason: unknown) => {
+		if (!cache.value.session.enabled) {
+			return;
+		}
+		cache.value.session.enabled = false;
+		console.warn("Disabling items session cache after storage failure:", reason);
+		try {
+			const keys = Object.keys(sessionStorage);
+			keys.forEach((key) => {
+				if (key.startsWith(cache.value.session.prefix)) {
+					sessionStorage.removeItem(key);
+				}
+			});
+		} catch (cleanupError) {
+			console.warn("Session cache cleanup failed:", cleanupError);
+		}
+	};
+
 	const assessCacheHealth = async () => {
 		try {
 			const health: CacheHealth = {
@@ -208,6 +238,9 @@ export function useItemsCache() {
 				);
 			} catch (e) {
 				console.warn("Session cache write failed:", e);
+				if (isQuotaExceededError(e)) {
+					disableSessionCache(e);
+				}
 			}
 		}
 

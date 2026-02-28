@@ -20,7 +20,59 @@ export const useItemsSelectorFocus = ({
 		return inputRef?.value ?? inputRef ?? null;
 	};
 
-	const focusItemSearch = () => {
+	const getFocusableTarget = () => {
+		const input = getSearchInputField();
+		if (!input) return null;
+		const nestedInput = input?.$el?.querySelector?.("input");
+		return nestedInput ?? input;
+	};
+
+	const isElementHiddenFromInteraction = (element: Element | null) => {
+		let current: Element | null = element;
+		while (current) {
+			if (current.getAttribute?.("aria-hidden") === "true") {
+				return true;
+			}
+			if ((current as HTMLElement).inert) {
+				return true;
+			}
+			if (typeof window !== "undefined") {
+				const style = window.getComputedStyle(current as HTMLElement);
+				if (style.display === "none" || style.visibility === "hidden") {
+					return true;
+				}
+			}
+			current = current.parentElement;
+		}
+		return false;
+	};
+
+	const releaseInaccessibleFocus = () => {
+		if (typeof document === "undefined") {
+			return;
+		}
+		const active = document.activeElement;
+		if (!(active instanceof HTMLElement) || active === document.body) {
+			return;
+		}
+		if (isElementHiddenFromInteraction(active)) {
+			active.blur();
+		}
+	};
+
+	const scheduleFocusAttempt = (attempt: number) => {
+		if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+			window.requestAnimationFrame(() => {
+				focusItemSearch(attempt + 1);
+			});
+			return;
+		}
+		setTimeout(() => {
+			focusItemSearch(attempt + 1);
+		}, 16);
+	};
+
+	const focusItemSearch = (attempt = 0) => {
 		const vm = getVm();
 		if (!vm || vm.cameraScannerActive) {
 			return;
@@ -33,9 +85,17 @@ export const useItemsSelectorFocus = ({
 				vm.queueManualScanFocus();
 				return;
 			}
-			const input = getSearchInputField();
+			releaseInaccessibleFocus();
+			const input = getFocusableTarget();
 			if (input && typeof input.focus === "function") {
 				input.focus();
+				if (
+					typeof document !== "undefined" &&
+					document.activeElement !== input &&
+					attempt < 3
+				) {
+					scheduleFocusAttempt(attempt);
+				}
 			}
 		});
 	};
