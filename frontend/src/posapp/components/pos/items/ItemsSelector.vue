@@ -32,7 +32,6 @@
 			<div class="dynamic-padding">
 				<v-card flat class="selector-section-card selector-header-card pos-themed-card">
 					<div class="section-card-heading">
-						<span class="section-card-heading__eyebrow">{{ __("Search") }}</span>
 						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
 					</div>
 					<ItemHeader
@@ -80,7 +79,6 @@
 
 				<v-card flat class="selector-section-card selector-results-card pos-themed-card">
 					<div class="section-card-heading section-card-heading--with-padding">
-						<span class="section-card-heading__eyebrow">{{ __("Catalog") }}</span>
 						<h3 class="section-card-heading__title">{{ __("Available Items") }}</h3>
 					</div>
 					<v-row class="items">
@@ -1154,17 +1152,8 @@ defineExpose({
 	padding-bottom: 8px;
 }
 
-.section-card-heading__eyebrow {
-	display: block;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: rgba(var(--v-theme-on-surface), 0.58);
-}
-
 .section-card-heading__title {
-	margin: 2px 0 0;
+	margin: 0;
 	font-size: 1rem;
 	font-weight: 700;
 	line-height: 1.25;

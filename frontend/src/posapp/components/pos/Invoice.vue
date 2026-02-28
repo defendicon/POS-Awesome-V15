@@ -34,7 +34,6 @@
 				<div class="invoice-sections">
 					<v-card flat class="invoice-section-card pos-themed-card">
 						<div class="invoice-section-heading">
-							<span class="invoice-section-heading__eyebrow">{{ __("Customer") }}</span>
 							<h3 class="invoice-section-heading__title">{{ __("Customer Details") }}</h3>
 						</div>
 						<InvoiceCustomerSection
@@ -51,7 +50,6 @@
 						class="invoice-section-card pos-themed-card"
 					>
 						<div class="invoice-section-heading">
-							<span class="invoice-section-heading__eyebrow">{{ __("Charges") }}</span>
 							<h3 class="invoice-section-heading__title">{{ __("Delivery Charges") }}</h3>
 						</div>
 						<DeliveryCharges
@@ -80,7 +78,6 @@
 							class="invoice-section-card pos-themed-card"
 						>
 							<div class="invoice-section-heading">
-								<span class="invoice-section-heading__eyebrow">{{ __("Order") }}</span>
 								<h3 class="invoice-section-heading__title">{{ __("Posting and Price List") }}</h3>
 							</div>
 							<PostingDateRow
@@ -110,7 +107,6 @@
 							class="invoice-section-card pos-themed-card"
 						>
 							<div class="invoice-section-heading">
-								<span class="invoice-section-heading__eyebrow">{{ __("Currency") }}</span>
 								<h3 class="invoice-section-heading__title">{{ __("Multi Currency") }}</h3>
 							</div>
 							<MultiCurrencyRow
@@ -145,7 +141,6 @@
 
 					<v-card flat class="invoice-section-card invoice-items-card pos-themed-card">
 						<div class="invoice-section-heading">
-							<span class="invoice-section-heading__eyebrow">{{ __("Cart") }}</span>
 							<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
 						</div>
 						<div class="items-table-wrapper">
@@ -1119,17 +1114,8 @@ export default {
 	padding: 14px 16px 0;
 }
 
-.invoice-section-heading__eyebrow {
-	display: block;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: rgba(var(--v-theme-on-surface), 0.58);
-}
-
 .invoice-section-heading__title {
-	margin: 2px 0 0;
+	margin: 0;
 	font-size: 1rem;
 	font-weight: 700;
 	line-height: 1.25;

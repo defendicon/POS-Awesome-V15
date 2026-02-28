@@ -661,4 +661,30 @@ const adjust_frappe_sidebar_offset = () => {
 	min-height: 100%;
 	height: 100%;
 }
+
+@media (max-width: 768px) {
+	.container1 {
+		height: auto;
+		max-height: none;
+		min-height: 100dvh;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+
+	.main-content {
+		height: auto;
+		min-height: 100dvh;
+	}
+
+	.page-content {
+		overflow: visible;
+		min-height: 0;
+	}
+
+	:deep(.v-main__wrap) {
+		height: auto;
+		min-height: 100%;
+		overflow: visible;
+	}
+}
 </style>
