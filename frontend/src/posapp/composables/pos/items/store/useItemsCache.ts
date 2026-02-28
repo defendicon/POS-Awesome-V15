@@ -23,10 +23,6 @@ export interface ItemStoreCache {
 		maxSize: number;
 		ttl: number;
 	};
-	session: {
-		enabled: boolean;
-		prefix: string;
-	};
 }
 
 export function useItemsCache() {
@@ -45,45 +41,11 @@ export function useItemsCache() {
 			maxSize: 500,
 			ttl: 5 * 60 * 1000, // 5 minutes
 		},
-		session: {
-			enabled: typeof sessionStorage !== "undefined",
-			prefix: "posa_items_",
-		},
 	});
 
 	// Throttle expensive cache cleanup to avoid iterating large Maps after every search write
 	const MEMORY_CLEANUP_INTERVAL = 1000;
 	let lastMemoryCleanup = 0;
-
-	const isQuotaExceededError = (error: unknown) => {
-		if (!error || typeof error !== "object") {
-			return false;
-		}
-		const name = String((error as { name?: unknown }).name || "");
-		const message = String((error as { message?: unknown }).message || "");
-		return (
-			name === "QuotaExceededError" ||
-			message.toLowerCase().includes("quota")
-		);
-	};
-
-	const disableSessionCache = (reason: unknown) => {
-		if (!cache.value.session.enabled) {
-			return;
-		}
-		cache.value.session.enabled = false;
-		console.warn("Disabling items session cache after storage failure:", reason);
-		try {
-			const keys = Object.keys(sessionStorage);
-			keys.forEach((key) => {
-				if (key.startsWith(cache.value.session.prefix)) {
-					sessionStorage.removeItem(key);
-				}
-			});
-		} catch (cleanupError) {
-			console.warn("Session cache cleanup failed:", cleanupError);
-		}
-	};
 
 	const assessCacheHealth = async () => {
 		try {
@@ -127,16 +89,6 @@ export function useItemsCache() {
 		cache.value.memory.searchResults.clear();
 		cache.value.memory.priceListData.clear();
 		cache.value.memory.itemDetails.clear();
-
-		// Clear session cache
-		if (cache.value.session.enabled) {
-			const keys = Object.keys(sessionStorage);
-			keys.forEach((key) => {
-				if (key.startsWith(cache.value.session.prefix)) {
-					sessionStorage.removeItem(key);
-				}
-			});
-		}
 
 		// Clear persistent cache
 		await clearPriceListCache();
@@ -195,28 +147,6 @@ export function useItemsCache() {
 			return memCache.data;
 		}
 
-		// Check session cache
-		if (cache.value.session.enabled) {
-			try {
-				const sessionData = sessionStorage.getItem(
-					cache.value.session.prefix + cacheKey,
-				);
-				if (sessionData) {
-					const parsed = JSON.parse(sessionData);
-					if (
-						Date.now() - parsed.timestamp <
-						cache.value.memory.ttl
-					) {
-						// Update memory cache
-						cache.value.memory.searchResults.set(cacheKey, parsed);
-						return parsed.data;
-					}
-				}
-			} catch (e) {
-				console.warn("Session cache read failed:", e);
-			}
-		}
-
 		return null;
 	};
 
@@ -228,21 +158,6 @@ export function useItemsCache() {
 
 		// Store in memory cache
 		cache.value.memory.searchResults.set(cacheKey, cacheData);
-
-		// Store in session cache
-		if (cache.value.session.enabled) {
-			try {
-				sessionStorage.setItem(
-					cache.value.session.prefix + cacheKey,
-					JSON.stringify(cacheData),
-				);
-			} catch (e) {
-				console.warn("Session cache write failed:", e);
-				if (isQuotaExceededError(e)) {
-					disableSessionCache(e);
-				}
-			}
-		}
 
 		// Cleanup old cache entries
 		cleanupMemoryCache();
