@@ -455,6 +455,14 @@ const itemsSelectorSearch = useItemsSelectorSearch({
 	getVM: () => vmInstance?.proxy,
 	scannerInput,
 	itemSelection,
+	getSearchInput: () => String(search_input.value || first_search.value || ""),
+	setSearchInput: (value) => {
+		search_input.value = value;
+		first_search.value = value;
+	},
+	isLimitSearchEnabled: () => usesLimitSearch.value,
+	runLimitSearch: (term) => itemsIntegration.searchItems(term),
+	clearHighlightedItem: () => itemSelection.clearHighlightedItem(),
 });
 const itemsSelectorSettings = useItemsSelectorSettings({ getVM: () => settingsContext, itemSync });
 const itemsSelectorFocus = useItemsSelectorFocus({

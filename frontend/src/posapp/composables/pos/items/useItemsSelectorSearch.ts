@@ -8,12 +8,22 @@ type SearchDeps = {
 	getVM?: () => any;
 	scannerInput?: any;
 	itemSelection?: any;
+	getSearchInput?: () => string;
+	setSearchInput?: (_value: string) => void;
+	isLimitSearchEnabled?: () => boolean;
+	runLimitSearch?: (_term: string) => Promise<unknown> | unknown;
+	clearHighlightedItem?: () => void;
 };
 
 export const useItemsSelectorSearch = ({
 	getVM,
 	scannerInput,
 	itemSelection,
+	getSearchInput,
+	setSearchInput,
+	isLimitSearchEnabled,
+	runLimitSearch,
+	clearHighlightedItem,
 }: SearchDeps) => {
 	const getVm = (): any => (typeof getVM === "function" ? getVM() : null);
 
@@ -29,6 +39,9 @@ export const useItemsSelectorSearch = ({
 	};
 
 	const usesLimitSearch = (vm: any): boolean => {
+		if (typeof isLimitSearchEnabled === "function") {
+			return isLimitSearchEnabled();
+		}
 		if (!vm) return false;
 		if (typeof vm.usesLimitSearch === "boolean") {
 			return vm.usesLimitSearch;
@@ -92,6 +105,34 @@ export const useItemsSelectorSearch = ({
 			return;
 		}
 		void enter_event();
+	};
+
+	const getCurrentSearchInput = (vm: any): string => {
+		if (typeof getSearchInput === "function") {
+			return String(getSearchInput() || "");
+		}
+		return typeof vm?.search_input === "string"
+			? vm.search_input
+			: vm?.first_search || "";
+	};
+
+	const syncSearchInput = (vm: any, value: string) => {
+		if (typeof setSearchInput === "function") {
+			setSearchInput(value);
+		}
+		if (vm) {
+			vm.search_input = value;
+		}
+	};
+
+	const clearHighlightedSelection = (vm: any) => {
+		if (typeof clearHighlightedItem === "function") {
+			clearHighlightedItem();
+			return;
+		}
+		if (typeof (itemSelection || vm?.itemSelection)?.clearHighlightedItem === "function") {
+			(itemSelection || vm.itemSelection).clearHighlightedItem();
+		}
 	};
 
 	const get_search = (first_search: string) => {
@@ -241,13 +282,12 @@ export const useItemsSelectorSearch = ({
 		}
 
 		// Prefer the visible input value so Enter uses the latest typed text.
-		const rawQuery =
-			typeof vm.search_input === "string" ? vm.search_input : vm.first_search || "";
+		const rawQuery = getCurrentSearchInput(vm);
 		const trimmedQuery = String(rawQuery || "").trim();
 
 		// Keep both search refs aligned with the value we are about to process.
 		vm.first_search = trimmedQuery;
-		vm.search_input = trimmedQuery;
+		syncSearchInput(vm, trimmedQuery);
 
 		// If the input is a numeric string 12 characters or longer, treat it as a barcode
 		if (/^\d{12,}$/.test(trimmedQuery)) {
@@ -276,14 +316,18 @@ export const useItemsSelectorSearch = ({
 		const fromScanner = vm.search_from_scanner;
 
 		if (usesLimitSearch(vm)) {
-			const searchItems = getSearchExecutor(vm);
-			if (searchItems) {
-				await searchItems(trimmedQuery);
+			if (typeof runLimitSearch === "function") {
+				await runLimitSearch(trimmedQuery);
 			} else {
-				const getItems = getItemsLoader(vm);
-				const shouldForceServer = !hasStorageAvailable(vm) || !isOffline();
-				if (getItems) {
-					await getItems(shouldForceServer);
+				const searchItems = getSearchExecutor(vm);
+				if (searchItems) {
+					await searchItems(trimmedQuery);
+				} else {
+					const getItems = getItemsLoader(vm);
+					const shouldForceServer = !hasStorageAvailable(vm) || !isOffline();
+					if (getItems) {
+						await getItems(shouldForceServer);
+					}
 				}
 			}
 		} else if (hasStorageAvailable(vm)) {
@@ -337,9 +381,7 @@ export const useItemsSelectorSearch = ({
 			if (event && typeof event.preventDefault === "function") {
 				event.preventDefault();
 			}
-			if (typeof (itemSelection || vm.itemSelection).clearHighlightedItem === "function") {
-				(itemSelection || vm.itemSelection).clearHighlightedItem();
-			}
+			clearHighlightedSelection(vm);
 			if (search_onchange.cancel) {
 				search_onchange.cancel();
 			}
