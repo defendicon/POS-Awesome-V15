@@ -196,18 +196,11 @@ export const useItemsSelectorSearch = ({
 		const fromScanner = vm.search_from_scanner;
 
 		if (vm.usesLimitSearch) {
-			const shouldForceServer =
-				!vm.pos_profile.posa_local_storage ||
-				!vm.storageAvailable ||
-				!isOffline();
+			const shouldForceServer = !vm.storageAvailable || !isOffline();
 			await vm.get_items(shouldForceServer);
-		} else if (vm.pos_profile && vm.pos_profile.posa_local_storage) {
-			if (vm.storageAvailable) {
-				await vm.loadVisibleItems(true);
-				vm.enter_event();
-			} else {
-				vm.get_items(true);
-			}
+		} else if (vm.storageAvailable) {
+			await vm.loadVisibleItems(true);
+			vm.enter_event();
 		} else {
 			// When local storage is disabled, always fetch items
 			// from the server so searches aren't limited to the
@@ -328,7 +321,7 @@ export const useItemsSelectorSearch = ({
 			return;
 		}
 
-		if (vm.pos_profile?.posa_local_storage && vm.storageAvailable) {
+		if (vm.storageAvailable) {
 			vm.loadVisibleItems(true);
 			if (!vm.isBackgroundLoading) {
 				vm.verifyServerItemCount();

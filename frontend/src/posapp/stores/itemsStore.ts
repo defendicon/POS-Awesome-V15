@@ -203,14 +203,14 @@ export const useItemsStore = defineStore("items", () => {
 		if (limitSearchEnabled.value) {
 			return false;
 		}
-		return Boolean(posProfile.value?.posa_local_storage);
+		return true;
 	};
 
 	const shouldPersistItems = () => {
 		if (limitSearchEnabled.value) {
 			return false;
 		}
-		return Boolean(posProfile.value?.posa_local_storage);
+		return true;
 	};
 
 	const getCacheScope = () => {

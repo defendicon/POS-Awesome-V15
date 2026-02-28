@@ -270,7 +270,8 @@ const itemSync = useItemSync();
 const itemDisplay = useItemDisplay();
 const itemsLoader = useItemsLoader();
 const itemCurrencyUtils = useItemCurrency();
-const { startItemWorker, itemWorker } = useItemStorageSafety();
+const { startItemWorker, itemWorker, storageAvailable, markStorageUnavailable } =
+	useItemStorageSafety();
 const {
 	ensureBarcodeIndex,
 	resetBarcodeIndex,
@@ -664,6 +665,45 @@ onMounted(async () => {
 		getDisplayedItems: () => displayedItems.value,
 		getFilteredItems: () => filteredItems.value,
 		updateItemsDetails: (its, opts) => itemDetailFetcher.update_items_details(its, opts),
+	});
+
+	itemDetailFetcher.registerContext({
+		get pos_profile() {
+			return pos_profile.value;
+		},
+		get active_price_list() {
+			return active_price_list.value;
+		},
+		get items() {
+			return items.value;
+		},
+		get displayedItems() {
+			return displayedItems.value;
+		},
+		itemAvailability,
+		itemCurrencyUtils,
+		get usesLimitSearch() {
+			return parseBooleanSetting(
+				pos_profile.value?.posa_use_limit_search ?? pos_profile.value?.pose_use_limit_search,
+			);
+		},
+		get storageAvailable() {
+			return storageAvailable.value;
+		},
+		markStorageUnavailable,
+		applyCurrencyConversionToItem: (item) => {
+			itemCurrencyUtils.applyCurrencyConversionToItem(item, {
+				pos_profile: pos_profile.value,
+				price_list_currency:
+					item?.original_currency || item?.currency || pos_profile.value?.currency,
+				selected_currency: selected_currency.value || pos_profile.value?.currency,
+				exchange_rate: selected_exchange_rate.value,
+				conversion_rate: selected_conversion_rate.value,
+				currency_precision: pos_profile.value?.currency_precision || 2,
+				flt: (window as any).frappe?.utils?.flt,
+			});
+		},
+		forceUpdate: () => vmInstance?.proxy?.$forceUpdate?.(),
 	});
 
 	itemDisplay.registerContext({

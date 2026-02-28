@@ -295,7 +295,6 @@ export function useItemDetailFetcher() {
 
 			if (
 				ctx.pos_profile &&
-				ctx.pos_profile.posa_local_storage &&
 				ctx.storageAvailable &&
 				!ctx.usesLimitSearch
 			) {
@@ -575,7 +574,6 @@ export function useItemDetailFetcher() {
 
 				if (
 					ctx.pos_profile &&
-					ctx.pos_profile.posa_local_storage &&
 					ctx.storageAvailable &&
 					!ctx.usesLimitSearch
 				) {
