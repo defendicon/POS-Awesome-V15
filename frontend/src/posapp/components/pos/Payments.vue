@@ -153,6 +153,7 @@
 							:credit-due-days="credit_due_days"
 							:credit-due-presets="credit_due_presets"
 							:write-off-amount="invoice_doc.write_off_amount || Math.max(diff_payment, 0)"
+							:write-off-max-amount="writeOffProfileLimit"
 							:redeem-customer-credit="redeem_customer_credit"
 							@update:is-write-off-change="is_write_off_change = $event"
 							@update:is-credit-sale="is_credit_sale = $event"
@@ -344,6 +345,34 @@ const validatePayment = computed(() => {
 	const doc = invoice_doc.value;
 	return !doc || !doc.posa_delivery_date;
 });
+
+const getWriteOffLimit = (profile) => {
+	if (!profile) return null;
+
+	const possibleLimitFields = [
+		"write_off_limit",
+		"posa_max_write_off_amount",
+		"max_write_off_amount",
+		"write_off_amount",
+		"posa_write_off_limit",
+	];
+
+	for (const field of possibleLimitFields) {
+		const rawValue = profile?.[field];
+		if (rawValue === undefined || rawValue === null || rawValue === "") {
+			continue;
+		}
+
+		const parsed = flt(rawValue, currency_precision.value);
+		if (parsed > 0) {
+			return parsed;
+		}
+	}
+
+	return null;
+};
+
+const writeOffProfileLimit = computed(() => getWriteOffLimit(pos_profile.value));
 
 const request_payment_field = computed(() => {
 	return (
@@ -618,10 +647,23 @@ const handleWriteOffAmountUpdate = (value) => {
 	if (!invoice_doc.value) return;
 
 	let nextAmount = flt(value || 0, currency_precision.value);
-	const maxAmount = Math.max(diff_payment.value || 0, 0);
+	const profileCap = writeOffProfileLimit.value;
+	const diffCap = Math.max(diff_payment.value || 0, 0);
+	const maxAmount =
+		profileCap && profileCap > 0 ? Math.min(diffCap, profileCap) : diffCap;
 
 	if (nextAmount < 0) {
 		nextAmount = 0;
+	}
+	if (profileCap && profileCap > 0 && nextAmount > profileCap) {
+		toastStore.show({
+			title: __(
+				"Write off amount cannot exceed the POS profile maximum of {0}",
+				[formatCurrency(profileCap)],
+			),
+			color: "error",
+		});
+		nextAmount = maxAmount;
 	}
 	if (nextAmount > maxAmount) {
 		nextAmount = maxAmount;

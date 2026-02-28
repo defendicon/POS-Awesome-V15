@@ -106,7 +106,7 @@
 						variant="solo"
 						type="number"
 						min="0"
-						:max="Math.max(diffPayment, 0)"
+						:max="writeOffEffectiveMax"
 						:model-value="writeOffAmountDisplay"
 						:label="$frappe._('Write Off Amount')"
 						hide-details
@@ -192,6 +192,10 @@ const props = defineProps({
 		type: [Number, String],
 		default: 0,
 	},
+	writeOffMaxAmount: {
+		type: [Number, String],
+		default: null,
+	},
 	redeemCustomerCredit: {
 		type: Boolean,
 		default: false,
@@ -234,6 +238,17 @@ const writeOffAmountDisplay = computed(() => {
 	}
 
 	return props.writeOffAmount;
+});
+
+const writeOffEffectiveMax = computed(() => {
+	const diffMax = Math.max(Number(props.diffPayment) || 0, 0);
+	const profileCap = Number(props.writeOffMaxAmount);
+
+	if (Number.isFinite(profileCap) && profileCap > 0) {
+		return Math.min(diffMax, profileCap);
+	}
+
+	return diffMax;
 });
 </script>
 
