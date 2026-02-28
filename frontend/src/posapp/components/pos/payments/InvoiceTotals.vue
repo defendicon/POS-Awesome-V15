@@ -1,5 +1,5 @@
 <template>
-	<v-row v-if="invoice_doc" class="pa-1">
+	<v-row v-if="invoice_doc" class="invoice-totals-grid">
 		<v-col cols="6">
 			<v-text-field
 				density="compact"
@@ -114,3 +114,20 @@ defineProps({
 
 const frappe = window.frappe;
 </script>
+
+<style scoped>
+.invoice-totals-grid {
+	margin: 0;
+	row-gap: var(--pos-space-2);
+}
+
+.invoice-totals-grid :deep(.v-col) {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.invoice-totals-grid :deep(.v-field) {
+	border-radius: var(--pos-radius-sm);
+	background: var(--pos-surface-raised);
+}
+</style>

@@ -958,7 +958,7 @@ export default {
 <style scoped>
 /* Card background adjustments */
 .cards {
-	background-color: var(--surface-secondary) !important;
+	background-color: var(--pos-surface-muted) !important;
 }
 
 /* Style for selected checkbox button */

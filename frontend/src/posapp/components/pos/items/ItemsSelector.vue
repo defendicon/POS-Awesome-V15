@@ -1195,7 +1195,7 @@ defineExpose({
 }
 
 .selection {
-	background-color: var(--surface-secondary) !important;
+	background-color: var(--pos-surface-muted) !important;
 }
 
 .item-selection-option {

@@ -69,6 +69,22 @@
 	--pos-button-bg: #ffffff;
 	--pos-menu-bg: #ffffff;
 	--pos-dialog-bg: #ffffff;
+	--pos-surface-raised: #ffffff;
+	--pos-surface-muted: #f4f7fb;
+
+	/* Shared Radius Scale */
+	--pos-radius-xs: 6px;
+	--pos-radius-sm: 10px;
+	--pos-radius-md: 14px;
+	--pos-radius-lg: 18px;
+
+	/* Shared Spacing Scale */
+	--pos-space-1: 4px;
+	--pos-space-2: 8px;
+	--pos-space-3: 12px;
+	--pos-space-4: 16px;
+	--pos-space-5: 24px;
+	--pos-space-6: 32px;
 
 	/* Special Use Cases */
 	--pos-navbar-bg: #ffffff;
@@ -155,6 +171,8 @@
 	--pos-button-bg: #2d2d2d;
 	--pos-menu-bg: #1e1e1e;
 	--pos-dialog-bg: #1e1e1e;
+	--pos-surface-raised: #242b33;
+	--pos-surface-muted: #1a2028;
 
 	/* Special Use Cases */
 	--pos-navbar-bg: #1e1e1e;
@@ -212,6 +230,8 @@
 		--pos-button-bg: #2d2d2d;
 		--pos-menu-bg: #1e1e1e;
 		--pos-dialog-bg: #1e1e1e;
+		--pos-surface-raised: #242b33;
+		--pos-surface-muted: #1a2028;
 		--pos-navbar-bg: #1e1e1e;
 		--pos-sidebar-bg: #121212;
 		--pos-invoice-bg: #1e1e1e;
@@ -233,6 +253,12 @@
 .posapp .pos-bg-card {
 	background-color: var(--pos-card-bg) !important;
 }
+.posapp .pos-bg-raised {
+	background-color: var(--pos-surface-raised) !important;
+}
+.posapp .pos-bg-muted {
+	background-color: var(--pos-surface-muted) !important;
+}
 
 .posapp .pos-text-primary {
 	color: var(--pos-text-primary) !important;
@@ -250,16 +276,18 @@
 
 /* Theme-aware component base styles - Scoped to POSApp */
 .posapp .pos-themed-card {
-	background-color: var(--pos-card-bg);
+	background-color: var(--pos-surface-raised);
 	color: var(--pos-text-primary);
-	border-color: var(--pos-border);
-	box-shadow: 0 2px 8px var(--pos-shadow);
+	border: 1px solid var(--pos-border);
+	border-radius: var(--pos-radius-md);
+	box-shadow: 0 10px 24px var(--pos-shadow-light);
 }
 
 .posapp .pos-themed-input {
 	background-color: var(--pos-input-bg);
 	color: var(--pos-text-primary);
 	border-color: var(--pos-border);
+	border-radius: var(--pos-radius-sm);
 }
 
 /* Ensure inputs adapt to the active theme without per-component overrides */

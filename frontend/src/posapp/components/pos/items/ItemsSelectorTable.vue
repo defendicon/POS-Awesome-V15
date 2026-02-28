@@ -191,9 +191,9 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 .sleek-data-table {
 	margin: 0;
 	background-color: transparent;
-	border-radius: 0;
+	border-radius: var(--pos-radius-md);
 	overflow: hidden;
-	border: none;
+	border: 1px solid var(--pos-border-light);
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -201,31 +201,26 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 }
 
 .sleek-data-table:hover {
-	box-shadow: 0 4px 12px rgba(var(--v-theme-on-surface), 0.15) !important;
+	box-shadow: 0 12px 24px var(--pos-shadow-light) !important;
 }
 
 .sleek-data-table :deep(th) {
 	font-weight: 700;
-	font-size: 0.875rem;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	padding: 16px 20px;
+	font-size: 0.8rem;
+	text-transform: none;
+	letter-spacing: 0.02em;
+	padding: 14px 16px;
 	transition: all 0.3s ease;
-	border-bottom: 3px solid rgb(var(--v-theme-primary));
-	background: linear-gradient(
-		135deg,
-		rgb(var(--v-theme-surface)) 0%,
-		rgb(var(--v-theme-surface-variant)) 50%,
-		rgb(var(--v-theme-surface)) 100%
-	);
-	color: rgb(var(--v-theme-on-surface));
+	border-bottom: 1px solid var(--pos-border-light);
+	background: var(--pos-surface-muted);
+	color: var(--pos-text-secondary);
 	position: sticky !important;
 	top: 0 !important;
 	z-index: 10 !important;
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	box-shadow: 0 2px 8px rgba(var(--v-theme-on-surface), 0.1);
-	text-shadow: 0 1px 2px rgba(var(--v-theme-on-surface), 0.2);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	box-shadow: none;
+	text-shadow: none;
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -240,21 +235,16 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 :deep([data-theme="dark"]) .sleek-data-table th,
 :deep(.v-theme--dark) .sleek-data-table th {
-	background: linear-gradient(
-		135deg,
-		rgb(var(--v-theme-surface)) 0%,
-		rgb(var(--v-theme-surface-variant)) 50%,
-		rgb(var(--v-theme-surface)) 100%
-	) !important;
-	border-bottom: 3px solid rgb(var(--v-theme-primary));
-	color: rgb(var(--v-theme-on-surface));
-	text-shadow: 0 1px 2px rgba(var(--v-theme-on-surface), 0.35);
-	box-shadow: 0 2px 8px rgba(var(--v-theme-on-surface), 0.3);
+	background: var(--pos-surface-muted) !important;
+	border-bottom: 1px solid var(--pos-border-light);
+	color: var(--pos-text-secondary);
+	text-shadow: none;
+	box-shadow: none;
 }
 
 .sleek-data-table :deep(.v-data-table__wrapper),
 .sleek-data-table :deep(.v-table__wrapper) {
-	border-radius: var(--border-radius-sm);
+	border-radius: var(--pos-radius-md);
 	height: 100%;
 	overflow-y: auto;
 	scrollbar-width: thin;
@@ -274,20 +264,24 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 .sleek-data-table :deep(tr) {
 	transition: all 0.2s ease;
-	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-	background-color: rgb(var(--v-theme-surface));
+	border-bottom: 1px solid var(--pos-border-light);
+	background-color: var(--pos-surface-raised);
 }
 
 .sleek-data-table :deep(tr:hover) {
-	background-color: rgba(var(--v-theme-on-surface), 0.06);
-	transform: translateY(-1px);
-	box-shadow: 0 2px 5px rgba(var(--v-theme-on-surface), 0.1);
+	background-color: rgba(var(--v-theme-primary), 0.05);
+	transform: none;
+	box-shadow: none;
+}
+
+.sleek-data-table :deep(tbody tr:nth-child(even)) {
+	background-color: rgba(var(--v-theme-on-surface), 0.015);
 }
 
 .sleek-data-table :deep(td) {
-	padding: 12px 16px;
+	padding: 14px 16px;
 	vertical-align: middle;
-	color: rgb(var(--v-theme-on-surface));
+	color: var(--pos-text-primary);
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;

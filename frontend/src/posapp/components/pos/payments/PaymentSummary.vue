@@ -1,5 +1,5 @@
 <template>
-	<v-row v-if="invoice_doc" class="pa-1" dense>
+	<v-row v-if="invoice_doc" class="payment-summary-grid" dense>
 		<v-col cols="7">
 			<v-text-field
 				variant="solo"
@@ -81,3 +81,20 @@ defineEmits(["show-paid-amount", "show-diff-payment", "show-paid-change", "updat
 
 const frappe = window.frappe;
 </script>
+
+<style scoped>
+.payment-summary-grid {
+	margin: 0;
+	row-gap: var(--pos-space-2);
+}
+
+.payment-summary-grid :deep(.v-col) {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.payment-summary-grid :deep(.v-field) {
+	border-radius: var(--pos-radius-sm);
+	background: var(--pos-surface-raised);
+}
+</style>
