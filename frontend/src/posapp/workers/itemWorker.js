@@ -182,9 +182,307 @@ const KEY_TABLE_MAP = {
 };
 
 const LARGE_KEYS = new Set(["items", "item_details_cache", "local_stock_cache"]);
+const QUERY_CACHE_TTL_MS = 5 * 60 * 1000;
+const QUERY_CACHE_MAX_ENTRIES = 300;
+const queryCache = new Map();
 
 function tableForKey(key) {
 	return KEY_TABLE_MAP[key] || "keyval";
+}
+
+function getCachedQuery(cacheKey) {
+	const entry = queryCache.get(cacheKey);
+	if (!entry) {
+		return null;
+	}
+	if (Date.now() - entry.timestamp > QUERY_CACHE_TTL_MS) {
+		queryCache.delete(cacheKey);
+		return null;
+	}
+	return entry.value;
+}
+
+function setCachedQuery(cacheKey, value) {
+	if (queryCache.size >= QUERY_CACHE_MAX_ENTRIES) {
+		const oldestKey = queryCache.keys().next().value;
+		if (oldestKey) {
+			queryCache.delete(oldestKey);
+		}
+	}
+	queryCache.set(cacheKey, {
+		value,
+		timestamp: Date.now(),
+	});
+}
+
+function invalidateQueryCache(prefix = "") {
+	if (!prefix) {
+		queryCache.clear();
+		return;
+	}
+	for (const key of queryCache.keys()) {
+		if (key.startsWith(prefix)) {
+			queryCache.delete(key);
+		}
+	}
+}
+
+function normalizeText(value) {
+	return String(value || "").trim().toLowerCase();
+}
+
+function normalizeScope(scope) {
+	return String(scope || "");
+}
+
+function hasScope(scope) {
+	return normalizeScope(scope).length > 0;
+}
+
+function matchesScope(item, scope) {
+	if (!hasScope(scope)) {
+		return true;
+	}
+	return normalizeScope(item?.profile_scope) === normalizeScope(scope);
+}
+
+function matchesGroup(item, itemGroup) {
+	const normalizedGroup = normalizeText(itemGroup);
+	if (!normalizedGroup || normalizedGroup === "all") {
+		return true;
+	}
+	return normalizeText(item?.item_group) === normalizedGroup;
+}
+
+function collectSearchableFields(item) {
+	const searchable = [];
+	const pushValue = (value) => {
+		const text = normalizeText(value);
+		if (text) {
+			searchable.push(text);
+		}
+	};
+	const pushArray = (source, extractor = null) => {
+		if (!Array.isArray(source)) {
+			return;
+		}
+		source.forEach((entry) => {
+			pushValue(extractor ? extractor(entry) : entry);
+		});
+	};
+
+	pushValue(item?.item_code);
+	pushValue(item?.item_name);
+	pushValue(item?.name);
+	pushValue(item?.description);
+	pushValue(item?.barcode);
+	pushValue(item?.brand);
+	pushValue(item?.item_group);
+	pushValue(item?.attributes);
+
+	if (Array.isArray(item?.item_barcode)) {
+		item.item_barcode.forEach((entry) => pushValue(entry?.barcode));
+	} else {
+		pushValue(item?.item_barcode);
+	}
+
+	pushArray(item?.barcodes);
+	pushArray(item?.name_keywords);
+	pushArray(item?.serial_no_data, (entry) => entry?.serial_no);
+	pushArray(item?.serials);
+	pushArray(item?.batch_no_data, (entry) => entry?.batch_no);
+	pushArray(item?.batches);
+
+	if (Array.isArray(item?.item_attributes)) {
+		item.item_attributes.forEach((entry) => {
+			pushValue(entry?.attribute);
+			pushValue(entry?.attribute_value);
+		});
+	}
+
+	return searchable;
+}
+
+function matchesSearchTerms(item, words) {
+	if (!words.length) {
+		return true;
+	}
+	const searchable = collectSearchableFields(item);
+	if (!searchable.length) {
+		return false;
+	}
+	return words.every((word) =>
+		searchable.some((field) => field.includes(word)),
+	);
+}
+
+function scoreItem(item, normalizedSearch) {
+	const itemName = normalizeText(item?.item_name);
+	const itemCode = normalizeText(item?.item_code);
+
+	if (itemName === normalizedSearch) return 1000;
+	if (itemCode === normalizedSearch) return 900;
+	if (itemName.startsWith(normalizedSearch)) return 500;
+	if (itemCode.startsWith(normalizedSearch)) return 400;
+	return 100;
+}
+
+async function searchStoredItems(payload = {}) {
+	const {
+		search = "",
+		itemGroup = "",
+		limit = 100,
+		offset = 0,
+		scope = "",
+	} = payload;
+
+	const normalizedSearch = normalizeText(search);
+	const normalizedGroup = normalizeText(itemGroup);
+	const numericLimit = Number.isFinite(limit) ? Number(limit) : 100;
+	const numericOffset = Number.isFinite(offset) ? Number(offset) : 0;
+	const cacheKey = JSON.stringify({
+		search: normalizedSearch,
+		itemGroup: normalizedGroup,
+		limit: numericLimit,
+		offset: numericOffset,
+		scope: normalizeScope(scope),
+	});
+	const cached = getCachedQuery(cacheKey);
+	if (cached) {
+		return cached;
+	}
+
+	if (!db.isOpen()) {
+		await db.open();
+	}
+
+	const words = Array.from(
+		new Set(normalizedSearch.split(/\s+/).filter(Boolean)),
+	);
+	const primaryWord = words.reduce(
+		(longest, word) => (word.length > longest.length ? word : longest),
+		words[0] || "",
+	);
+
+	const applyFilters = (rows) =>
+		rows.filter(
+			(item) =>
+				matchesScope(item, scope) &&
+				matchesGroup(item, normalizedGroup) &&
+				matchesSearchTerms(item, words),
+		);
+
+	let results = [];
+
+	if (!words.length) {
+		let collection = db.table("items");
+		if (normalizedGroup && normalizedGroup !== "all") {
+			collection = db
+				.table("items")
+				.where("item_group")
+				.equalsIgnoreCase(normalizedGroup);
+		}
+		if (hasScope(scope)) {
+			collection = collection.filter((item) => matchesScope(item, scope));
+		}
+		const paginated = await collection
+			.offset(numericOffset)
+			.limit(numericLimit)
+			.toArray();
+		setCachedQuery(cacheKey, paginated);
+		return paginated;
+	}
+
+	if (primaryWord) {
+		let collection = db
+			.table("items")
+			.where("item_code")
+			.startsWithIgnoreCase(primaryWord)
+			.or("item_name")
+			.startsWithIgnoreCase(primaryWord)
+			.or("barcodes")
+			.equalsIgnoreCase(primaryWord)
+			.or("name_keywords")
+			.startsWithIgnoreCase(primaryWord)
+			.or("serials")
+			.equalsIgnoreCase(primaryWord)
+			.or("batches")
+			.equalsIgnoreCase(primaryWord);
+
+		results = applyFilters(await collection.toArray());
+
+		if (!results.length) {
+			results = applyFilters(await db.table("items").toArray());
+		}
+
+		if (results.length) {
+			const deduped = Array.from(
+				new Map(results.map((item) => [item.item_code, item])).values(),
+			);
+			deduped.sort(
+				(a, b) => scoreItem(b, normalizedSearch) - scoreItem(a, normalizedSearch),
+			);
+			const sliced = deduped.slice(numericOffset, numericOffset + numericLimit);
+			setCachedQuery(cacheKey, sliced);
+			return sliced;
+		}
+
+		setCachedQuery(cacheKey, []);
+		return [];
+	}
+
+	results = await db.table("items").toArray();
+	results = applyFilters(results);
+	const sliced = results.slice(numericOffset, numericOffset + numericLimit);
+	setCachedQuery(cacheKey, sliced);
+	return sliced;
+}
+
+async function countStoredItems(payload = {}) {
+	const { scope = "" } = payload;
+	const cacheKey = JSON.stringify({
+		type: "count",
+		scope: normalizeScope(scope),
+	});
+	const cached = getCachedQuery(cacheKey);
+	if (typeof cached === "number") {
+		return cached;
+	}
+
+	if (!db.isOpen()) {
+		await db.open();
+	}
+
+	let total = 0;
+	if (!hasScope(scope)) {
+		total = await db.table("items").count();
+	} else {
+		total = await db
+			.table("items")
+			.filter((item) => matchesScope(item, scope))
+			.count();
+	}
+
+	setCachedQuery(cacheKey, total);
+	return total;
+}
+
+function postWorkerResponse(requestId, payload) {
+	self.postMessage({
+		type: "worker_response",
+		requestId,
+		payload,
+	});
+}
+
+function postWorkerError(requestId, error) {
+	self.postMessage({
+		type: "worker_error",
+		requestId,
+		payload: {
+			message: error?.message || String(error),
+		},
+	});
 }
 
 async function persist(key, value) {
@@ -222,6 +520,7 @@ async function bulkPutItems(items, syncedAt = Date.now()) {
 				await db.table("items").bulkPut(chunk);
 			}
 		});
+		invalidateQueryCache();
 	} catch (e) {
 		console.error("Worker bulkPut items failed", e);
 	}
@@ -317,6 +616,25 @@ self.onmessage = async (event) => {
 		} catch (err) {
 			console.log(err);
 			self.postMessage({ type: "error", error: err.message });
+		}
+	} else if (data.type === "SEARCH_STORED_ITEMS") {
+		try {
+			const result = await searchStoredItems(data.payload || {});
+			postWorkerResponse(data.requestId, result);
+		} catch (error) {
+			postWorkerError(data.requestId, error);
+		}
+	} else if (data.type === "COUNT_STORED_ITEMS") {
+		try {
+			const result = await countStoredItems(data.payload || {});
+			postWorkerResponse(data.requestId, result);
+		} catch (error) {
+			postWorkerError(data.requestId, error);
+		}
+	} else if (data.type === "INVALIDATE_QUERY_CACHE") {
+		invalidateQueryCache(data.payload?.prefix || "");
+		if (typeof data.requestId === "number") {
+			postWorkerResponse(data.requestId, true);
 		}
 	} else if (data.type === "persist") {
 		await persist(data.key, data.value);

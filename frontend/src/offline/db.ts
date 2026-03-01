@@ -85,16 +85,128 @@ db.version(9).stores(BASE_SCHEMA);
 db.version(10).stores(BASE_SCHEMA);
 
 let persistWorker: Worker | null = null;
+let workerRequestId = 0;
+const workerPendingRequests = new Map<
+	number,
+	{
+		resolve: (value: unknown) => void;
+		reject: (reason?: unknown) => void;
+		timeoutId: ReturnType<typeof setTimeout>;
+	}
+>();
+
+function rejectPendingWorkerRequests(error: unknown) {
+	for (const pending of workerPendingRequests.values()) {
+		clearTimeout(pending.timeoutId);
+		pending.reject(error);
+	}
+	workerPendingRequests.clear();
+}
+
+function disablePersistWorker(error: unknown) {
+	rejectPendingWorkerRequests(
+		error instanceof Error ? error : new Error("Item worker failed"),
+	);
+
+	if (!persistWorker) {
+		return;
+	}
+
+	try {
+		persistWorker.removeEventListener("message", handlePersistWorkerMessage);
+		persistWorker.removeEventListener("error", handlePersistWorkerFailure);
+		persistWorker.terminate();
+	} catch (terminateError) {
+		console.error("Failed to terminate broken item worker", terminateError);
+	} finally {
+		persistWorker = null;
+	}
+}
+
+function handlePersistWorkerMessage(event: MessageEvent) {
+	const payload = event.data || {};
+	const requestId = payload?.requestId;
+	if (typeof requestId !== "number") {
+		return;
+	}
+
+	const pending = workerPendingRequests.get(requestId);
+	if (!pending) {
+		return;
+	}
+
+	clearTimeout(pending.timeoutId);
+	workerPendingRequests.delete(requestId);
+
+	if (payload?.type === "worker_response") {
+		pending.resolve(payload.payload);
+		return;
+	}
+
+	const error =
+		payload?.payload?.message ||
+		payload?.error ||
+		"Item worker request failed";
+	pending.reject(new Error(String(error)));
+}
+
+function handlePersistWorkerFailure(error: unknown) {
+	disablePersistWorker(error);
+}
+
 if (typeof Worker !== "undefined") {
 	try {
 		// Use the plain URL so the service worker cache matches when offline
 		const workerUrl =
 			"/assets/posawesome/dist/js/posapp/workers/itemWorker.js";
 		persistWorker = new Worker(workerUrl, { type: "classic" });
+		persistWorker.addEventListener("message", handlePersistWorkerMessage);
+		persistWorker.addEventListener("error", handlePersistWorkerFailure);
 	} catch (e) {
 		console.error("Failed to init persist worker", e);
 		persistWorker = null;
 	}
+}
+
+export function hasItemWorker() {
+	return !!persistWorker;
+}
+
+export function sendItemWorkerRequest<T = unknown>(
+	type: string,
+	payload: Record<string, unknown> = {},
+	timeoutMs = 10000,
+): Promise<T> {
+	if (!persistWorker) {
+		return Promise.reject(new Error("Item worker unavailable"));
+	}
+
+	const requestId = ++workerRequestId;
+
+	return new Promise<T>((resolve, reject) => {
+		const timeoutId = setTimeout(() => {
+			workerPendingRequests.delete(requestId);
+			reject(new Error(`Item worker timed out for ${type}`));
+		}, timeoutMs);
+
+		workerPendingRequests.set(requestId, {
+			resolve: (value) => resolve(value as T),
+			reject,
+			timeoutId,
+		});
+
+		try {
+			persistWorker!.postMessage({
+				type,
+				requestId,
+				payload,
+			});
+		} catch (error) {
+			clearTimeout(timeoutId);
+			workerPendingRequests.delete(requestId);
+			reject(error);
+		}
+	});
 }
 
 export const memory: AnyRecord = {

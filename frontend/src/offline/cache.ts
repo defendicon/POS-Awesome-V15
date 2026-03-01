@@ -1,4 +1,11 @@
-import { memory, persist, db, checkDbHealth } from "./db";
+import {
+	memory,
+	persist,
+	db,
+	checkDbHealth,
+	sendItemWorkerRequest,
+	hasItemWorker,
+} from "./db";
 
 const normalizeScope = (scope: unknown): string => String(scope || "");
 const hasScope = (scope: unknown): boolean => normalizeScope(scope).length > 0;
@@ -10,6 +17,17 @@ const filterByScope = (collection: any, scope: unknown) => {
 		return collection;
 	}
 	return collection.filter((it: any) => isMatchingScope(it, scope));
+};
+
+const invalidateWorkerQueryCache = async () => {
+	if (!hasItemWorker()) {
+		return;
+	}
+	try {
+		await sendItemWorkerRequest("INVALIDATE_QUERY_CACHE", {}, 5000);
+	} catch (error) {
+		console.warn("Failed to invalidate item worker query cache", error);
+	}
 };
 
 type ItemBarcodeEntry = {
@@ -129,7 +147,7 @@ export async function searchStoredItems({
 	offset = 0,
 	scope = "",
 } = {}) {
-	try {
+	const fallbackSearch = async () => {
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
 		const normalizedGroup =
@@ -164,16 +182,47 @@ export async function searchStoredItems({
 			});
 		}
 
-		const res = await collection.offset(offset).limit(limit).toArray();
-		return res;
+		return await collection.offset(offset).limit(limit).toArray();
+	};
+
+	try {
+		if (hasItemWorker()) {
+			return await sendItemWorkerRequest("SEARCH_STORED_ITEMS", {
+				search,
+				itemGroup,
+				limit,
+				offset,
+				scope,
+			}, 15000);
+		}
+		return await fallbackSearch();
 	} catch (e) {
-		console.error("Failed to query stored items", e);
-		return [];
+		console.warn("Worker-backed stored item search failed, using fallback", e);
+		try {
+			return await fallbackSearch();
+		} catch (fallbackError) {
+			console.error("Failed to query stored items", fallbackError);
+			return [];
+		}
 	}
 }
 
 export async function getStoredItemsCount() {
 	try {
+		if (hasItemWorker()) {
+			try {
+				return await sendItemWorkerRequest<number>(
+					"COUNT_STORED_ITEMS",
+					{},
+					10000,
+				);
+			} catch (error) {
+				console.warn(
+					"Worker-backed item count failed, using fallback",
+					error,
+				);
+			}
+		}
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
 		return await db.table("items").count();
@@ -185,6 +234,20 @@ export async function getStoredItemsCount() {
 
 export async function getStoredItemsCountByScope(scope = "") {
 	try {
+		if (hasItemWorker()) {
+			try {
+				return await sendItemWorkerRequest<number>(
+					"COUNT_STORED_ITEMS",
+					{ scope },
+					10000,
+				);
+			} catch (error) {
+				console.warn(
+					"Worker-backed scoped item count failed, using fallback",
+					error,
+				);
+			}
+		}
 		await checkDbHealth();
 		if (!db.isOpen()) await db.open();
 		if (!hasScope(scope)) {
@@ -260,6 +323,7 @@ export async function saveItems(items, scope = "") {
 			});
 			await db.table("items").bulkPut(scopedItems);
 		}
+		await invalidateWorkerQueryCache();
 	} catch (e) {
 		console.error("Failed to save items", e);
 	}
@@ -274,9 +338,11 @@ export async function clearStoredItems(scope = "") {
 				"clearStoredItems called without scope; clearing all cached items.",
 			);
 			await db.table("items").clear();
+			await invalidateWorkerQueryCache();
 			return;
 		}
 		await filterByScope(db.table("items"), scope).delete();
+		await invalidateWorkerQueryCache();
 	} catch (e) {
 		console.error("Failed to clear stored items", e);
 	}
