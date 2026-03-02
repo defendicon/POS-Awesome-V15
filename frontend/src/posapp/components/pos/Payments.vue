@@ -250,6 +250,7 @@ import { usePaymentMethods } from "../../composables/pos/payments/usePaymentMeth
 import { useInvoiceDetails } from "../../composables/pos/invoice/useInvoiceDetails";
 import { useFormat } from "../../format";
 import { isOffline } from "../../../offline/index";
+import { initializePaymentLinesForDialog } from "../../utils/paymentInitialization";
 
 // Components
 import PaymentSummary from "./payments/PaymentSummary.vue";
@@ -607,11 +608,10 @@ const finishSubmissionNavigation = (clearInvoice = false) => {
 	back_to_invoice();
 	if (clearInvoice) {
 		addresses.value = [];
+		invoiceStore.clear();
+		invoiceStore.resetPostingDate();
 		if (eventBus && typeof eventBus.emit === "function") {
 			eventBus.emit("clear_invoice");
-		} else {
-			invoiceStore.clear();
-			invoiceStore.resetPostingDate();
 		}
 
 		if (submittedType === "Quotation") {
@@ -1127,33 +1127,20 @@ onMounted(() => {
 			paid_change.value = flt(doc.paid_change || 0, currency_precision.value);
 			credit_change.value = flt(doc.credit_change || 0, currency_precision.value);
 			last_payment_change_was_cash.value = null;
-			const default_payment = doc.payments.find((payment) => payment.default === 1);
-			const hasReturnPayments = doc.payments.some(
-				(payment) => Math.abs(flt(payment.amount || 0, currency_precision.value)) > 0,
-			);
 			is_credit_sale.value = false;
 			is_write_off_change.value = false;
+
+			const initializedPayment = initializePaymentLinesForDialog(
+				doc,
+				currency_precision.value,
+				isCashLikePayment,
+			);
 
 			if (doc.is_return) {
 				is_return.value = true;
 				is_credit_return.value = false;
-				if (!hasReturnPayments) {
-					doc.payments.forEach((payment) => {
-						payment.amount = 0;
-						payment.base_amount = 0;
-					});
-					if (default_payment) {
-						const amount = doc.rounded_total || doc.grand_total;
-						default_payment.amount = -Math.abs(amount);
-						if (default_payment.base_amount !== undefined) {
-							default_payment.base_amount = -Math.abs(amount);
-						}
-					}
-				} else {
-					ensureReturnPaymentsAreNegative();
-				}
-			} else if (default_payment) {
-				default_payment.amount = flt(doc.rounded_total || doc.grand_total, currency_precision.value);
+				ensureReturnPaymentsAreNegative();
+			} else if (initializedPayment) {
 				is_credit_return.value = false;
 			}
 			initializeReturnValidity(doc);
@@ -1208,7 +1195,8 @@ onMounted(() => {
 		});
 		eventBus.on("submit_payment_shortcut", handleSubmitPaymentShortcut);
 		eventBus.on("clear_invoice", () => {
-			invoiceStore.setInvoiceDoc({}); // Clear doc
+			invoiceStore.clear();
+			invoiceStore.resetPostingDate();
 			is_return.value = false;
 			is_credit_return.value = false;
 			return_valid_upto_date.value = null;
