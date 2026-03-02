@@ -314,6 +314,34 @@ export function useItemAvailability() {
 	};
 
 	const handleInvoiceStockAdjusted = async (payload: unknown = {}) => {
+		const payloadItems =
+			payload && typeof payload === "object" && Array.isArray((payload as any).items)
+				? (payload as any).items
+				: [];
+		const baseEntries = payloadItems
+			.map((entry: any) => {
+				if (!entry) return null;
+				const item_code =
+					entry.item_code !== undefined && entry.item_code !== null
+						? String(entry.item_code).trim()
+						: "";
+				const actual_qty = Number(entry.actual_qty);
+				if (!item_code || !Number.isFinite(actual_qty)) {
+					return null;
+				}
+				return {
+					item_code,
+					actual_qty,
+				};
+			})
+			.filter((entry): entry is { item_code: string; actual_qty: number } => !!entry);
+
+		if (baseEntries.length) {
+			stockCoordinator.updateBaseQuantities(baseEntries, {
+				source: "realtime",
+			});
+		}
+
 		const collectedCodes = new Set<string>();
 		const collectCode = (code: unknown) => {
 			if (code === undefined || code === null) return;

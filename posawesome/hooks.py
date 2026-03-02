@@ -117,6 +117,10 @@ doc_events = {
         "validate": "posawesome.posawesome.api.customer.validate",
         "after_insert": "posawesome.posawesome.api.customer.after_insert",
     },
+    "Bin": {
+        "after_insert": "posawesome.posawesome.stock_realtime.publish_bin_stock_change",
+        "on_update": "posawesome.posawesome.stock_realtime.publish_bin_stock_change",
+    },
 }
 
 # Scheduled Tasks

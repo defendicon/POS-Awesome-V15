@@ -677,6 +677,10 @@ const applyItemSettings = (settings) => {
 	itemsSelectorSettings.applyItemSettings(settings);
 };
 
+const handleRemoteStockAdjustment = (payload: unknown) => {
+	itemAvailability.handleInvoiceStockAdjusted(payload);
+};
+
 // 7. Lifecycle Hooks
 const openNewItemDialog = () => {
 	newItemDialog.value = true;
@@ -822,6 +826,7 @@ onMounted(async () => {
 		});
 		eventBus.on("update_invoice_type", handleInvoiceTypeUpdate);
 		eventBus.on("focus_item_search", requestItemSearchFocus);
+		eventBus.on("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
 
 	// Watch UI Profile for initialization (Source of Truth)
@@ -893,6 +898,7 @@ onBeforeUnmount(() => {
 		eventBus.off("update_customer_price_list");
 		eventBus.off("update_invoice_type", handleInvoiceTypeUpdate);
 		eventBus.off("focus_item_search", requestItemSearchFocus);
+		eventBus.off("remote_stock_adjustment", handleRemoteStockAdjustment);
 	}
 	window.removeEventListener("resize", checkItemContainerOverflow);
 });

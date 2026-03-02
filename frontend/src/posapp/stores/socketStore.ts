@@ -1,8 +1,11 @@
 import { defineStore } from "pinia";
 import { useToastStore } from "./toastStore";
+import { useUIStore } from "./uiStore";
+import { dispatchRealtimeStockPayload } from "../utils/realtimeStock";
 
 export const useSocketStore = defineStore("socket", () => {
   const toastStore = useToastStore();
+  const uiStore = useUIStore();
 
   function init() {
     if (typeof frappe === "undefined" || !frappe.realtime) return;
@@ -36,6 +39,12 @@ export const useSocketStore = defineStore("socket", () => {
         title: __("Invoice Submitted"),
         detail: __("Invoice {0} processed successfully", [invoice]),
         color: "success",
+      });
+    });
+
+    frappe.realtime.on("posa_stock_changed", (data: unknown) => {
+      dispatchRealtimeStockPayload(data, {
+        setLastStockAdjustment: uiStore.setLastStockAdjustment,
       });
     });
   }
