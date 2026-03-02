@@ -603,8 +603,12 @@ const toggleOpenCVProcessing = async () => {
 
 	if (openCVEnabled.value) {
 		try {
-			await opencvProcessor.ensureInitialized();
-			console.log("OpenCV processing enabled");
+			const isReady = await opencvProcessor.ensureInitialized();
+			if (!isReady) {
+				openCVEnabled.value = false;
+			} else {
+				console.log("OpenCV processing enabled");
+			}
 		} catch (error) {
 			console.error("Failed to initialize OpenCV:", error);
 			openCVEnabled.value = false;
@@ -672,8 +676,13 @@ onMounted(async () => {
 	}
 	// Initialize OpenCV
 	try {
-		await opencvProcessor.ensureInitialized();
-		console.log("OpenCV initialized in CameraScanner component");
+		const isReady = await opencvProcessor.ensureInitialized();
+		if (isReady) {
+			console.log("OpenCV initialized in CameraScanner component");
+		} else {
+			openCVEnabled.value = false;
+			console.warn("OpenCV initialization unavailable in CameraScanner component");
+		}
 	} catch (error) {
 		console.warn("OpenCV initialization failed:", error);
 		openCVEnabled.value = false;

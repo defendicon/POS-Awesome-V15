@@ -28,31 +28,55 @@ export interface ProcessOptions {
 	[key: string]: any;
 }
 
+interface OpenCVWorkerManagerOptions {
+	createWorker?: () => Worker;
+	messageTimeoutMs?: number;
+	logger?: Pick<Console, "log" | "warn" | "error">;
+}
+
 /**
  * OpenCV Worker Manager class for handling Web Worker communication.
  */
-class OpenCVWorkerManager {
+export class OpenCVWorkerManager {
 	private worker: Worker | null = null;
 	private initialized: boolean = false;
 	private messageId: number = 0;
 	private pendingMessages: Map<number, PendingMessage> = new Map();
 	private initPromise: Promise<any> | null = null;
+	private timedOutMessageIds: Set<number> = new Set();
+	private readonly createWorker: () => Worker;
+	private readonly messageTimeoutMs: number;
+	private readonly logger: Pick<Console, "log" | "warn" | "error">;
+
+	constructor(options: OpenCVWorkerManagerOptions = {}) {
+		this.createWorker =
+			options.createWorker ??
+			(() =>
+				new Worker("/assets/posawesome/dist/js/posapp/workers/opencvWorker.js"));
+		this.messageTimeoutMs = options.messageTimeoutMs ?? 10000;
+		this.logger = options.logger ?? console;
+	}
 
 	async initialize(): Promise<any> {
+		if (this.initialized && this.worker) {
+			return true;
+		}
+
 		if (this.initPromise) {
 			return this.initPromise;
 		}
 
-		this.initPromise = this._doInitialize();
+		this.initPromise = this._doInitialize().catch((error) => {
+			this.initPromise = null;
+			throw error;
+		});
 		return this.initPromise;
 	}
 
 	private async _doInitialize(): Promise<any> {
 		try {
-			// Create Web Worker using static URL to avoid build issues (non-module worker for importScripts compatibility)
-			this.worker = new Worker(
-				"/assets/posawesome/dist/js/posapp/workers/opencvWorker.js",
-			);
+			this._cleanupWorker();
+			this.worker = this.createWorker();
 
 			// Set up message handler
 			this.worker.onmessage = (e: MessageEvent) => {
@@ -60,7 +84,7 @@ class OpenCVWorkerManager {
 			};
 
 			this.worker.onerror = (error: ErrorEvent) => {
-				console.error("OpenCV Worker error details:", {
+				this.logger.error("OpenCV Worker error details:", {
 					message: error.message,
 					filename: error.filename,
 					lineno: error.lineno,
@@ -68,18 +92,23 @@ class OpenCVWorkerManager {
 					error: error.error,
 					type: error.type,
 				});
+				this.initialized = false;
+				this.initPromise = null;
+				this._cleanupWorker();
 				this._rejectAllPendingMessages(error);
 			};
 
 			// Initialize OpenCV in the worker
-			const initResult = await this._sendMessage("INIT");
+			await this._sendMessage("INIT");
 			this.initialized = true;
-			console.log("OpenCV Worker Manager initialized successfully");
+			this.logger.log("OpenCV Worker Manager initialized successfully");
 
-			return initResult;
+			return true;
 		} catch (error) {
-			console.error("Failed to initialize OpenCV Worker Manager:", error);
+			this.logger.error("Failed to initialize OpenCV Worker Manager:", error);
 			this.initialized = false;
+			this.initPromise = null;
+			this._cleanupWorker();
 			throw error;
 		}
 	}
@@ -103,7 +132,7 @@ class OpenCVWorkerManager {
 			});
 			return result;
 		} catch (error) {
-			console.error("Error processing image in worker:", error);
+			this.logger.error("Error processing image in worker:", error);
 			throw error;
 		}
 	}
@@ -123,7 +152,7 @@ class OpenCVWorkerManager {
 			});
 			return result;
 		} catch (error) {
-			console.error("Error in extreme image processing:", error);
+			this.logger.error("Error in extreme image processing:", error);
 			throw error;
 		}
 	}
@@ -147,7 +176,7 @@ class OpenCVWorkerManager {
 			});
 			return result;
 		} catch (error) {
-			console.error("Error in barcode detection:", error);
+			this.logger.error("Error in barcode detection:", error);
 			throw error;
 		}
 	}
@@ -161,9 +190,14 @@ class OpenCVWorkerManager {
 
 			const id = ++this.messageId;
 			const timeout = setTimeout(() => {
+				if (!this.pendingMessages.has(id)) {
+					return;
+				}
 				this.pendingMessages.delete(id);
+				this.timedOutMessageIds.add(id);
+				this._resetAfterTimeout(type);
 				reject(new Error(`Worker message timeout for ${type}`));
-			}, 10000); // 10 second timeout
+			}, this.messageTimeoutMs);
 
 			this.pendingMessages.set(id, { resolve, reject, timeout });
 
@@ -179,7 +213,11 @@ class OpenCVWorkerManager {
 	}: WorkerMessage): void {
 		const pending = this.pendingMessages.get(id);
 		if (!pending) {
-			console.warn("Received message for unknown ID:", id);
+			if (this.timedOutMessageIds.has(id)) {
+				this.timedOutMessageIds.delete(id);
+				return;
+			}
+			this.logger.warn("Received message for unknown ID:", id);
 			return;
 		}
 
@@ -192,7 +230,7 @@ class OpenCVWorkerManager {
 		} else if (type.endsWith("_SUCCESS")) {
 			resolve(data);
 		} else {
-			console.warn("Unknown worker message type:", type);
+			this.logger.warn("Unknown worker message type:", type);
 			reject(new Error(`Unknown message type: ${type}`));
 		}
 	}
@@ -205,22 +243,43 @@ class OpenCVWorkerManager {
 		this.pendingMessages.clear();
 	}
 
+	private _resetAfterTimeout(type: string): void {
+		if (type === "CLEANUP") {
+			return;
+		}
+
+		this.initialized = false;
+		this.initPromise = null;
+		this._cleanupWorker();
+		this._rejectAllPendingMessages(new Error(`Worker reset after ${type} timeout`));
+	}
+
+	private _cleanupWorker(): void {
+		if (!this.worker) {
+			return;
+		}
+
+		this.worker.onmessage = null;
+		this.worker.onerror = null;
+		this.worker.terminate();
+		this.worker = null;
+	}
+
 	async destroy(): Promise<void> {
 		if (this.worker) {
 			try {
 				// Send cleanup message to worker
 				await this._sendMessage("CLEANUP");
 			} catch (error) {
-				console.warn("Error during worker cleanup:", error);
+				this.logger.warn("Error during worker cleanup:", error);
 			}
 
-			// Terminate worker
-			this.worker.terminate();
-			this.worker = null;
+			this._cleanupWorker();
 		}
 
 		this.initialized = false;
 		this.initPromise = null;
+		this.timedOutMessageIds.clear();
 		this._rejectAllPendingMessages(new Error("Worker destroyed"));
 	}
 

@@ -91,11 +91,19 @@ class OpenCVProcessor {
     private fallbackMode: boolean = false;
 
     async init(): Promise<boolean> {
+        if (this.initialized) {
+            return true;
+        }
+
         if (this.initPromise) {
             return this.initPromise;
         }
 
-        this.initPromise = this._doInit();
+        this.initPromise = this._doInit().finally(() => {
+            if (!this.initialized) {
+                this.initPromise = null;
+            }
+        });
         return this.initPromise;
     }
 
@@ -103,6 +111,7 @@ class OpenCVProcessor {
         try {
             await this.workerManager.initialize();
             this.initialized = true;
+            this.fallbackMode = false;
             console.log("✅ OpenCV Processor with Web Worker initialized successfully");
             return true;
         } catch (error) {
@@ -604,6 +613,8 @@ class OpenCVProcessor {
      */
     async destroy(): Promise<void> {
         this.initialized = false;
+        this.fallbackMode = false;
+        this.initPromise = null;
         try {
             await this.workerManager.destroy();
         } catch (error) {
