@@ -1,18 +1,6 @@
 <template>
 	<div class="sticky-header">
 		<v-row class="items">
-			<v-col cols="12" class="pb-0 new-line-toggle-col" v-if="posProfile.posa_new_line">
-				<v-checkbox
-					:model-value="newLine"
-					@update:model-value="$emit('update:newLine', $event)"
-					color="accent"
-					value="true"
-					:label="__('Add on New Line')"
-					density="compact"
-					hide-details
-					class="new-line-checkbox"
-				></v-checkbox>
-			</v-col>
 			<v-col
 				class="pb-0"
 				cols="12"
@@ -64,6 +52,19 @@
 				</v-text-field>
 			</v-col>
 			<v-col cols="12" md="3" class="pb-0" v-if="posProfile.posa_input_qty">
+				<div class="qty-controls">
+					<v-checkbox
+						v-if="posProfile.posa_new_line"
+						:model-value="newLine"
+						@update:model-value="$emit('update:newLine', $event)"
+						color="accent"
+						value="true"
+						:label="__('Add on New Line')"
+						density="compact"
+						hide-details
+						class="new-line-checkbox"
+					></v-checkbox>
+				</div>
 				<v-text-field
 					density="compact"
 					variant="solo"
@@ -189,13 +190,13 @@ defineExpose({
 	margin: 0;
 }
 
-.new-line-toggle-col {
+.qty-controls {
 	display: flex;
-	align-items: center;
+	justify-content: flex-start;
 }
 
 .new-line-checkbox {
-	margin: 0;
+	margin: 0 0 4px 0;
 }
 
 :deep(.new-line-checkbox .v-selection-control) {
