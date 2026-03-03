@@ -616,7 +616,7 @@ const finishSubmissionNavigation = (clearInvoice = false) => {
 			eventBus.emit("clear_invoice");
 		}
 
-		if (submittedType === "Quotation") {
+		if (submittedType !== "Invoice") {
 			invoiceType.value = "Invoice";
 			if (eventBus && typeof eventBus.emit === "function") {
 				eventBus.emit("reset_invoice_type_to_invoice");
