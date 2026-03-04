@@ -7,7 +7,7 @@
 			:theme="isDarkTheme ? 'dark' : 'light'"
 			content-class="invoice-management-dialog-content"
 		>
-			<v-card class="pos-themed-card invoice-management-card" variant="flat">
+			<v-card :class="['pos-themed-card invoice-management-card', isDarkTheme ? 'invoice-management-card--dark' : 'invoice-management-card--light']" variant="flat">
 				<v-card-title class="invoice-management-header">
 					<div>
 						<div class="text-h5 text-primary">{{ __("Invoice Management") }}</div>
@@ -481,7 +481,7 @@
 	</v-row>
 
 	<v-dialog v-model="detailDialog" max-width="1040px" scrollable :theme="isDarkTheme ? 'dark' : 'light'">
-		<v-card>
+		<v-card :class="['invoice-detail-card', isDarkTheme ? 'invoice-detail-card--dark' : 'invoice-detail-card--light']">
 			<v-card-title class="d-flex align-center justify-space-between flex-wrap ga-3">
 				<div>
 					<div class="text-h6">{{ selectedInvoiceDetail?.name || __("Invoice Details") }}</div>
@@ -883,6 +883,13 @@ export default {
 	border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
+.invoice-management-card--dark {
+	background:
+		radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 28%),
+		radial-gradient(circle at top left, rgba(251, 191, 36, 0.08), transparent 24%),
+		var(--pos-surface-raised) !important;
+}
+
 .invoice-management-header {
 	display: flex;
 	align-items: center;
@@ -898,6 +905,10 @@ export default {
 	background: rgba(148, 163, 184, 0.08);
 	border-radius: 16px;
 	padding: 6px;
+}
+
+.invoice-management-card--dark .invoice-tabs {
+	background: rgba(15, 23, 42, 0.46);
 }
 
 .invoice-tab-label {
@@ -922,6 +933,7 @@ export default {
 	border: 1px solid rgba(148, 163, 184, 0.2);
 	background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.88));
 	box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+	color: var(--pos-text-primary);
 }
 
 .summary-tile--history { background: linear-gradient(145deg, rgba(239, 246, 255, 0.98), rgba(219, 234, 254, 0.88)); }
@@ -950,6 +962,37 @@ export default {
 	margin-top: 6px;
 	font-size: 0.76rem;
 	opacity: 0.72;
+	color: var(--pos-text-secondary);
+}
+
+.invoice-management-card--dark .summary-tile {
+	border-color: rgba(100, 116, 139, 0.38);
+	background: linear-gradient(145deg, rgba(36, 43, 51, 0.98), rgba(26, 32, 40, 0.94));
+	box-shadow: 0 18px 44px rgba(2, 6, 23, 0.34);
+}
+
+.invoice-management-card--dark .summary-tile--history {
+	background: linear-gradient(145deg, rgba(28, 52, 81, 0.98), rgba(23, 37, 84, 0.92));
+}
+
+.invoice-management-card--dark .summary-tile--primary {
+	background: linear-gradient(145deg, rgba(49, 46, 129, 0.98), rgba(30, 41, 59, 0.92));
+}
+
+.invoice-management-card--dark .summary-tile--success {
+	background: linear-gradient(145deg, rgba(20, 83, 45, 0.96), rgba(22, 101, 52, 0.88));
+}
+
+.invoice-management-card--dark .summary-tile--warning {
+	background: linear-gradient(145deg, rgba(120, 53, 15, 0.96), rgba(146, 64, 14, 0.88));
+}
+
+.invoice-management-card--dark .summary-tile--warning-strong {
+	background: linear-gradient(145deg, rgba(124, 45, 18, 0.98), rgba(154, 52, 18, 0.9));
+}
+
+.invoice-management-card--dark .summary-tile--danger {
+	background: linear-gradient(145deg, rgba(127, 29, 29, 0.98), rgba(153, 27, 27, 0.88));
 }
 
 .status-strip {
@@ -969,6 +1012,7 @@ export default {
 	border: 1px dashed rgba(148, 163, 184, 0.35);
 	border-radius: 18px;
 	background: rgba(248, 250, 252, 0.66);
+	color: var(--pos-text-primary);
 }
 
 .empty-state__title {
@@ -978,9 +1022,15 @@ export default {
 
 .empty-state__subtitle {
 	font-size: 0.86rem;
-	opacity: 0.72;
+	color: var(--pos-text-secondary);
 	text-align: center;
 	max-width: 420px;
+}
+
+.invoice-management-card--dark .tab-loader,
+.invoice-management-card--dark .empty-state {
+	border-color: rgba(100, 116, 139, 0.38);
+	background: rgba(15, 23, 42, 0.42);
 }
 
 .invoice-record-grid {
@@ -997,6 +1047,7 @@ export default {
 	border: 1px solid rgba(148, 163, 184, 0.18);
 	background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
 	box-shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
+	color: var(--pos-text-primary);
 }
 
 .invoice-record-card__hero {
@@ -1027,7 +1078,7 @@ export default {
 .invoice-record-card__subtitle {
 	margin-top: 6px;
 	font-size: 0.88rem;
-	opacity: 0.74;
+	color: var(--pos-text-secondary);
 }
 
 .invoice-record-card__amount-block { text-align: right; }
@@ -1059,6 +1110,42 @@ export default {
 	background: rgba(248, 250, 252, 0.76);
 }
 
+.invoice-management-card--dark .invoice-record-card {
+	border-color: rgba(100, 116, 139, 0.34);
+	background: linear-gradient(180deg, rgba(36, 43, 51, 0.98), rgba(26, 32, 40, 0.96));
+	box-shadow: 0 22px 48px rgba(2, 6, 23, 0.38);
+}
+
+.invoice-management-card--dark .invoice-record-card__hero {
+	border-bottom-color: rgba(100, 116, 139, 0.24);
+	background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(30, 64, 175, 0.34));
+}
+
+.invoice-management-card--dark .invoice-record-card__hero--warm {
+	background: linear-gradient(135deg, rgba(67, 20, 7, 0.96), rgba(120, 53, 15, 0.52));
+}
+
+.invoice-management-card--dark .invoice-record-card--success .invoice-record-card__hero {
+	background: linear-gradient(135deg, rgba(20, 83, 45, 0.96), rgba(22, 101, 52, 0.42));
+}
+
+.invoice-management-card--dark .invoice-record-card--warning .invoice-record-card__hero {
+	background: linear-gradient(135deg, rgba(120, 53, 15, 0.96), rgba(161, 98, 7, 0.42));
+}
+
+.invoice-management-card--dark .invoice-record-card--error .invoice-record-card__hero {
+	background: linear-gradient(135deg, rgba(127, 29, 29, 0.96), rgba(153, 27, 27, 0.42));
+}
+
+.invoice-management-card--dark .invoice-record-card--info .invoice-record-card__hero {
+	background: linear-gradient(135deg, rgba(12, 74, 110, 0.96), rgba(30, 64, 175, 0.4));
+}
+
+.invoice-management-card--dark .invoice-record-card__actions {
+	border-top-color: rgba(100, 116, 139, 0.22);
+	background: rgba(15, 23, 42, 0.32);
+}
+
 .meta-pair-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1079,7 +1166,7 @@ export default {
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	opacity: 0.58;
+	color: var(--pos-text-secondary);
 }
 
 .meta-pair__value {
@@ -1097,6 +1184,12 @@ export default {
 	border-radius: 16px;
 	background: rgba(255, 255, 255, 0.84);
 	border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.invoice-management-card--dark .meta-pair,
+.invoice-management-card--dark .payment-progress-block {
+	background: rgba(15, 23, 42, 0.34);
+	border-color: rgba(100, 116, 139, 0.26);
 }
 
 .payment-progress-block__labels {
@@ -1118,6 +1211,16 @@ export default {
 	font-size: 0.95rem;
 	font-weight: 700;
 	margin-bottom: 8px;
+}
+
+.invoice-detail-card {
+	background: var(--pos-surface-raised) !important;
+	color: var(--pos-text-primary) !important;
+}
+
+.invoice-detail-card--dark {
+	background: var(--pos-surface-raised) !important;
+	color: var(--pos-text-primary) !important;
 }
 
 @media (max-width: 960px) {
