@@ -910,6 +910,11 @@ export function useItemAddition() {
 		options: { preserveStickies?: boolean } = {},
 	) => {
 		const { preserveStickies = false } = options;
+		const previousInvoiceType = context.invoiceType;
+		const wasReturn =
+			previousInvoiceType === "Return" ||
+			Boolean(context?.invoice_doc?.is_return);
+		const wasQuotation = previousInvoiceType === "Quotation";
 
 		if (context.invoiceStore) {
 			context.invoiceStore.clear({ preserveStickies });
@@ -944,8 +949,7 @@ export function useItemAddition() {
 		context.customer = context.pos_profile.customer;
 
 		context.eventBus.emit("set_customer_readonly", false);
-		const wasQuotation = context.invoiceType === "Quotation";
-		context.invoiceType = wasQuotation
+		context.invoiceType = wasReturn || wasQuotation
 			? "Invoice"
 			: context.pos_profile.posa_default_sales_order
 				? "Order"
