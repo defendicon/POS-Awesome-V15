@@ -63,7 +63,8 @@ describe("useItemSync", () => {
 			},
 		);
 		expect(setItemsLastSync).not.toHaveBeenCalled();
-		expect(sync.last_background_sync_time.value).toBe(
+		expect(sync.last_background_sync_time.value).toBeTruthy();
+		expect(sync.last_background_sync_time.value).not.toBe(
 			"2026-03-06 15:27:28.166399",
 		);
 	});

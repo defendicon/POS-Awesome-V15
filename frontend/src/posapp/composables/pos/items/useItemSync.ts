@@ -229,13 +229,14 @@ export function useItemSync() {
 			// Delta-only background sync: avoid full catalog refresh.
 			// Detailed refresh is applied only to changed items above.
 
-			last_background_sync_time.value =
-				getItemsLastSync() || new Date().toISOString();
+			const completedAt = new Date().toISOString();
+			last_background_sync_time.value = completedAt;
 			console.debug(`${BG_SYNC_LOG} completed`, {
 				source,
 				modifiedCount,
 				durationMs: Date.now() - startedAt,
-				syncedAt: last_background_sync_time.value,
+				syncedAt: completedAt,
+				deltaCursor: getItemsLastSync(),
 			});
 		} catch (error) {
 			console.error(`${BG_SYNC_LOG} failed`, { source, error });
