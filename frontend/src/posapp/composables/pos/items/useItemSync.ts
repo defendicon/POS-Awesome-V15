@@ -192,7 +192,7 @@ export function useItemSync() {
 		const startedAt = Date.now();
 		let modifiedCount = 0;
 		try {
-			console.debug(`${BG_SYNC_LOG} started`, { source });
+			console.info(`${BG_SYNC_LOG} started`, { source });
 			await ensureBackgroundSyncBaseline();
 			const backgroundPriceList =
 				typeof ctx.getBackgroundSyncPriceList === "function"
@@ -205,7 +205,7 @@ export function useItemSync() {
 				modifiedCount = Array.isArray(updatedItems)
 					? updatedItems.length
 					: 0;
-				console.debug(`${BG_SYNC_LOG} modified items fetched`, {
+				console.info(`${BG_SYNC_LOG} modified items fetched`, {
 					source,
 					modifiedCount,
 				});
@@ -231,7 +231,7 @@ export function useItemSync() {
 
 			const completedAt = new Date().toISOString();
 			last_background_sync_time.value = completedAt;
-			console.debug(`${BG_SYNC_LOG} completed`, {
+			console.info(`${BG_SYNC_LOG} completed`, {
 				source,
 				modifiedCount,
 				durationMs: Date.now() - startedAt,

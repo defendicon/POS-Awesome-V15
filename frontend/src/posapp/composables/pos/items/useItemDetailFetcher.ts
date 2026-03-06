@@ -121,7 +121,9 @@ export function useItemDetailFetcher() {
 	async function fetchItemDetails(
 		items: any[],
 		priceListOverride: string | null = null,
+		options: { bypassRequestCache?: boolean } = {},
 	) {
+		const { bypassRequestCache = false } = options;
 		if (!items || items.length === 0) {
 			return [];
 		}
@@ -139,6 +141,7 @@ export function useItemDetailFetcher() {
 		const key = buildItemDetailsRequestKey(items, effectivePriceList);
 
 		if (
+			!bypassRequestCache &&
 			itemDetailsRequestCache.key === key &&
 			itemDetailsRequestCache.result
 		) {
@@ -146,6 +149,7 @@ export function useItemDetailFetcher() {
 		}
 
 		if (
+			!bypassRequestCache &&
 			itemDetailsRequestCache.key === key &&
 			itemDetailsRequestCache.promise
 		) {
@@ -501,6 +505,7 @@ export function useItemDetailFetcher() {
 			const details = await fetchItemDetails(
 				itemsToFetch,
 				effectivePriceList,
+				{ bypassRequestCache: forceRefresh },
 			);
 			if (details && details.length) {
 				itemDetailsRetryCount.value = 0;
