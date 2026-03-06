@@ -1063,8 +1063,31 @@ export const useItemsStore = defineStore("items", () => {
 			const existing = itemsMap.value.get(update.item_code);
 			if (existing) {
 				Object.assign(existing, update);
+				const syncedRate =
+					update.price_list_rate ?? update.rate;
+				if (syncedRate !== undefined && syncedRate !== null) {
+					existing.original_rate = syncedRate as any;
+				}
+				if (update.currency) {
+					existing.original_currency = update.currency as any;
+				}
 				touchedItems.push(existing);
 			} else {
+				const syncedRate =
+					update.price_list_rate ?? update.rate;
+				if (
+					syncedRate !== undefined &&
+					syncedRate !== null &&
+					update.original_rate === undefined
+				) {
+					(update as any).original_rate = syncedRate;
+				}
+				if (
+					update.currency &&
+					update.original_currency === undefined
+				) {
+					(update as any).original_currency = update.currency;
+				}
 				additions.push(update);
 			}
 		});

@@ -271,10 +271,12 @@ export function useItemDetailFetcher() {
 						if (force || price) {
 							upd.rate = price;
 							upd.price_list_rate = price;
+							upd.original_rate = price;
 						}
 					}
 					if (det.currency) {
 						upd.currency = det.currency;
+						upd.original_currency = det.currency;
 					}
 					updates.push({ item, upd });
 				}
@@ -309,10 +311,12 @@ export function useItemDetailFetcher() {
 						if (force || price) {
 							upd.rate = price;
 							upd.price_list_rate = price;
+							upd.original_rate = price;
 						}
 					}
 					if (updItem.currency) {
 						upd.currency = updItem.currency;
+						upd.original_currency = updItem.currency;
 					}
 					if (updItem.batch_no_data) {
 						upd.batch_no_data = updItem.batch_no_data;
@@ -411,10 +415,12 @@ export function useItemDetailFetcher() {
 					if (force || price) {
 						item.rate = price;
 						item.price_list_rate = price;
+						item.original_rate = price;
 					}
 				}
 				if (det.currency) {
 					item.currency = det.currency;
+					item.original_currency = det.currency;
 				}
 
 				if (ctx.itemAvailability) {
@@ -554,8 +560,18 @@ export function useItemDetailFetcher() {
 									updated_item.price_list_rate !== undefined
 										? updated_item.price_list_rate
 										: item.price_list_rate,
+								original_rate:
+									updated_item.price_list_rate !== undefined
+										? updated_item.price_list_rate
+										: updated_item.rate !== undefined
+											? updated_item.rate
+											: item.original_rate,
 								currency:
 									updated_item.currency || item.currency,
+								original_currency:
+									updated_item.currency ||
+									item.original_currency ||
+									item.currency,
 							},
 						});
 
