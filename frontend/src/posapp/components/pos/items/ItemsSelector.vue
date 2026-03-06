@@ -271,7 +271,11 @@ const itemsIntegration = useItemsIntegration({
 	debounceDelay: 300,
 });
 
-const { showOnlyBarcodeItems: showOnlyBarcodeItemsRef, filterAndPaginate } = useItemSearch();
+const {
+	showOnlyBarcodeItems: showOnlyBarcodeItemsRef,
+	filterAndPaginate,
+	fetchServerItemsTimestamp,
+} = useItemSearch();
 
 const scannerInput = useScannerInput();
 const itemAvailability = useItemAvailability();
@@ -810,9 +814,23 @@ onMounted(async () => {
 		get background_sync_interval() {
 			return background_sync_interval.value;
 		},
+		get usesLimitSearch() {
+			return usesLimitSearch.value;
+		},
+		get itemsPageLimit() {
+			return enable_custom_items_per_page.value
+				? items_per_page.value
+				: itemsPerPage.value;
+		},
 		refreshModifiedItems: () => itemsIntegration.refreshModifiedItems(),
 		backgroundSyncItems: (args) => itemsIntegration.backgroundSyncItems(args),
 		get_items: (force) => itemsIntegration.get_items(force),
+		search_onchange: (value, fromScanner) =>
+			itemsIntegration.search_onchange(value, fromScanner),
+		fetchServerItemsTimestamp,
+		eventBus,
+		getItems: () => items.value,
+		getDisplayedItems: () => displayedItems.value,
 		itemDetailFetcher,
 	});
 
@@ -877,9 +895,9 @@ onMounted(async () => {
 
 					isInitialized.value = true;
 					startItemWorker();
+					itemsSelectorSettings.loadItemSettings();
 					itemDetailFetcher.update_cur_items_details();
 					itemSync.startBackgroundSyncScheduler();
-					itemsSelectorSettings.loadItemSettings();
 				} catch (err: any) {
 					console.error("ItemsSelector: Initialization failed", err);
 					initError.value = err.message || err;

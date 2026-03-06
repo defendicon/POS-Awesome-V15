@@ -74,7 +74,14 @@ export function useItemSync() {
 	};
 
 	function registerContext(context: Partial<ItemSyncContext>) {
-		Object.assign(ctx, context);
+		if (!context || typeof context !== "object") {
+			return;
+		}
+
+		Object.defineProperties(
+			ctx,
+			Object.getOwnPropertyDescriptors(context),
+		);
 	}
 
 	function startBackgroundSyncScheduler() {

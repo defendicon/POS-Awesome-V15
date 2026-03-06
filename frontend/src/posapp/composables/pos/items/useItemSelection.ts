@@ -50,7 +50,14 @@ export function useItemSelection() {
 	};
 
 	function registerContext(context: Partial<ItemSelectionContext>) {
-		Object.assign(ctx, context);
+		if (!context || typeof context !== "object") {
+			return;
+		}
+
+		Object.defineProperties(
+			ctx,
+			Object.getOwnPropertyDescriptors(context),
+		);
 	}
 
 	// --- Highlighting Logic ---

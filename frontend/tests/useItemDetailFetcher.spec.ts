@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const getCachedItemDetails = vi.fn();
-const saveItemDetailsCache = vi.fn();
-const updateLocalStockCache = vi.fn();
+const { getCachedItemDetails, saveItemDetailsCache, updateLocalStockCache } =
+	vi.hoisted(() => ({
+		getCachedItemDetails: vi.fn(),
+		saveItemDetailsCache: vi.fn(),
+		updateLocalStockCache: vi.fn(),
+	}));
 
 vi.mock("../src/offline/index", () => ({
 	getCachedItemDetails,
@@ -75,6 +78,31 @@ describe("useItemDetailFetcher", () => {
 		expect(item.actual_qty).toBe(0);
 		expect(updateLocalStockCache).toHaveBeenCalledTimes(1);
 		expect(saveItemDetailsCache).toHaveBeenCalledTimes(1);
+	});
+
+	it("resolves context getters dynamically for POS profile", async () => {
+		const fetcher = useItemDetailFetcher();
+		let currentProfile: any = null;
+
+		fetcher.registerContext({
+			get pos_profile() {
+				return currentProfile;
+			},
+			active_price_list: "Standard Selling",
+			itemAvailability: null,
+			applyCurrencyConversionToItem: vi.fn(),
+			items: [],
+			displayedItems: [],
+			usesLimitSearch: false,
+			storageAvailable: false,
+		});
+
+		currentProfile = { name: "POS-TEST" };
+
+		const details = await fetcher.fetchItemDetails([{ item_code: "ITEM-1" }]);
+
+		expect((globalThis as any).frappe.call).toHaveBeenCalledTimes(1);
+		expect(details).toHaveLength(1);
 	});
 });
 
