@@ -13,3 +13,4 @@ posawesome.patches.reorganize_pos_profile_sections
 posawesome.patches.add_customer_display_settings
 posawesome.patches.add_dashboard_settings
 posawesome.patches.add_dashboard_global_settings
+posawesome.patches.fix_pos_settings_table
