@@ -1561,6 +1561,150 @@ def _collect_low_stock_items(warehouses: list[str], threshold: int, limit: int) 
     )
 
 
+def _collect_inventory_status_report(
+    profile_names: list[str],
+    company: str,
+    warehouses: list[str],
+    threshold: int,
+    date_from: str,
+    date_to: str,
+    limit: int = 20,
+) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "period": {"from": date_from, "to": date_to},
+        "threshold": threshold,
+        "summary": {
+            "total_items": 0,
+            "total_stock_qty": 0.0,
+            "low_stock_count": 0,
+            "out_of_stock_count": 0,
+            "negative_stock_count": 0,
+            "slow_moving_count": 0,
+            "dead_stock_count": 0,
+        },
+        "low_stock_items": [],
+        "out_of_stock_items": [],
+        "negative_stock_items": [],
+        "slow_moving_items": [],
+        "dead_stock_items": [],
+    }
+
+    if not warehouses or not frappe.db.exists("DocType", "Bin"):
+        return report
+    if not frappe.db.has_column("Bin", "actual_qty"):
+        return report
+
+    warehouse_filter, warehouse_params = _build_in_filter("bin.warehouse", warehouses)
+    if not warehouse_filter:
+        return report
+
+    stock_rows = frappe.db.sql(
+        f"""
+        select
+            bin.item_code as item_code,
+            max(item.item_name) as item_name,
+            max(item.stock_uom) as stock_uom,
+            sum(coalesce(bin.actual_qty, 0)) as actual_qty
+        from `tabBin` bin
+        inner join `tabItem` item on item.name = bin.item_code
+        where ifnull(item.disabled, 0) = 0
+          and ifnull(item.is_stock_item, 0) = 1
+          {warehouse_filter}
+        group by bin.item_code
+        """,
+        tuple(warehouse_params),
+        as_dict=True,
+    )
+
+    if not stock_rows:
+        return report
+
+    sales_by_item = _collect_item_totals(
+        profile_names=profile_names,
+        company=company,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    period_days = max(1, (getdate(date_to) - getdate(date_from)).days + 1)
+    page_limit = _coerce_limit(limit, default=20, minimum=1, maximum=100)
+
+    low_stock_items: list[dict[str, Any]] = []
+    out_of_stock_items: list[dict[str, Any]] = []
+    negative_stock_items: list[dict[str, Any]] = []
+    slow_moving_items: list[dict[str, Any]] = []
+    dead_stock_items: list[dict[str, Any]] = []
+
+    total_stock_qty = 0.0
+    for row in stock_rows:
+        item_code = cstr(row.get("item_code")).strip()
+        if not item_code:
+            continue
+        item_name = cstr(row.get("item_name") or item_code)
+        stock_uom = cstr(row.get("stock_uom"))
+        actual_qty = flt(row.get("actual_qty"))
+        total_stock_qty += actual_qty
+
+        sales_row = sales_by_item.get(item_code, {})
+        sold_qty = flt(sales_row.get("sold_qty"))
+        sales_amount = flt(sales_row.get("sales_amount"))
+        avg_daily_sales = flt(sold_qty / period_days) if period_days > 0 else 0.0
+        stock_cover_days = flt(actual_qty / avg_daily_sales) if avg_daily_sales > 0 and actual_qty > 0 else None
+
+        base_entry = {
+            "item_code": item_code,
+            "item_name": item_name,
+            "stock_uom": stock_uom,
+            "actual_qty": actual_qty,
+            "sold_qty": sold_qty,
+            "sales_amount": sales_amount,
+            "stock_cover_days": stock_cover_days,
+        }
+
+        if actual_qty < 0:
+            negative_stock_items.append(base_entry)
+        elif abs(actual_qty) <= 0.00001:
+            out_of_stock_items.append(base_entry)
+        elif actual_qty <= threshold:
+            low_stock_items.append(base_entry)
+
+        if actual_qty > 0:
+            if abs(sold_qty) <= 0.00001:
+                dead_stock_items.append(base_entry)
+            elif stock_cover_days is not None and stock_cover_days >= 45:
+                slow_moving_items.append(base_entry)
+
+    low_stock_items.sort(key=lambda row: (flt(row.get("actual_qty")), cstr(row.get("item_code"))))
+    out_of_stock_items.sort(key=lambda row: cstr(row.get("item_code")))
+    negative_stock_items.sort(key=lambda row: (flt(row.get("actual_qty")), cstr(row.get("item_code"))))
+    slow_moving_items.sort(
+        key=lambda row: (
+            flt(row.get("stock_cover_days") or 0),
+            flt(row.get("actual_qty")),
+        ),
+        reverse=True,
+    )
+    dead_stock_items.sort(
+        key=lambda row: (flt(row.get("actual_qty")), cstr(row.get("item_code"))),
+        reverse=True,
+    )
+
+    report["summary"] = {
+        "total_items": len(stock_rows),
+        "total_stock_qty": flt(total_stock_qty),
+        "low_stock_count": len(low_stock_items),
+        "out_of_stock_count": len(out_of_stock_items),
+        "negative_stock_count": len(negative_stock_items),
+        "slow_moving_count": len(slow_moving_items),
+        "dead_stock_count": len(dead_stock_items),
+    }
+    report["low_stock_items"] = low_stock_items[:page_limit]
+    report["out_of_stock_items"] = out_of_stock_items[:page_limit]
+    report["negative_stock_items"] = negative_stock_items[:page_limit]
+    report["slow_moving_items"] = slow_moving_items[:page_limit]
+    report["dead_stock_items"] = dead_stock_items[:page_limit]
+    return report
+
+
 def _collect_supplier_purchase_summary(
     company: str,
     date_from: str,
@@ -1613,6 +1757,7 @@ def get_dashboard_data(
     fast_moving_search=None,
     item_sales_limit: int = 20,
     category_report_limit: int = 12,
+    inventory_status_limit: int = 20,
     supplier_limit: int = 8,
     low_stock_limit: int = 20,
 ):
@@ -1653,6 +1798,7 @@ def get_dashboard_data(
     low_stock_limit = _coerce_limit(low_stock_limit, default=20, minimum=1, maximum=100)
     item_sales_limit = _coerce_limit(item_sales_limit, default=20, minimum=1, maximum=100)
     category_report_limit = _coerce_limit(category_report_limit, default=12, minimum=1, maximum=100)
+    inventory_status_limit = _coerce_limit(inventory_status_limit, default=20, minimum=1, maximum=100)
 
     company = cstr(current_profile_doc.get("company")).strip()
     company_profiles = _get_company_profiles(company)
@@ -1847,6 +1993,24 @@ def get_dashboard_data(
                 "top_variant": None,
             },
         },
+        "inventory_status_report": {
+            "period": {"from": str(month_start), "to": str(today)},
+            "threshold": threshold,
+            "summary": {
+                "total_items": 0,
+                "total_stock_qty": 0.0,
+                "low_stock_count": 0,
+                "out_of_stock_count": 0,
+                "negative_stock_count": 0,
+                "slow_moving_count": 0,
+                "dead_stock_count": 0,
+            },
+            "low_stock_items": [],
+            "out_of_stock_items": [],
+            "negative_stock_items": [],
+            "slow_moving_items": [],
+            "dead_stock_items": [],
+        },
         "inventory_insights": {
             "fast_moving_items": [],
             "fast_moving_period": {
@@ -1924,6 +2088,15 @@ def get_dashboard_data(
         date_from=str(month_start),
         date_to=str(today),
         limit=category_report_limit,
+    )
+    payload["inventory_status_report"] = _collect_inventory_status_report(
+        profile_names=selected_profile_names,
+        company=company,
+        warehouses=warehouses,
+        threshold=threshold,
+        date_from=str(month_start),
+        date_to=str(today),
+        limit=inventory_status_limit,
     )
 
     fast_moving_items, fast_moving_total_count = _collect_fast_moving_items(

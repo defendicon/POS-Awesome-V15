@@ -433,6 +433,166 @@
 					</v-col>
 				</v-row>
 
+				<v-row v-show="activeDashboardTab === 'inventory'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Inventory Status Report") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ inventoryStatusRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="warning" variant="tonal">
+										{{ __("Low Stock Threshold") }}: {{ inventoryStatusReport.threshold || lowStockThreshold }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div class="summary-grid">
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Total Items") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(inventoryStatusSummary.total_items || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Total Stock Qty") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(inventoryStatusSummary.total_stock_qty || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Low Stock") }}</div>
+									<div class="summary-metric__value summary-metric__value--danger">
+										{{ formatQuantity(Number(inventoryStatusSummary.low_stock_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Out of Stock") }}</div>
+									<div class="summary-metric__value summary-metric__value--danger">
+										{{ formatQuantity(Number(inventoryStatusSummary.out_of_stock_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Negative Stock") }}</div>
+									<div class="summary-metric__value summary-metric__value--danger">
+										{{ formatQuantity(Number(inventoryStatusSummary.negative_stock_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Slow Moving") }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(inventoryStatusSummary.slow_moving_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Dead Stock") }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(inventoryStatusSummary.dead_stock_count || 0)) }}
+									</div>
+								</div>
+							</div>
+
+							<div class="trend-grid">
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Low Stock Items") }}</div>
+									<div v-if="inventoryStatusLowStockItems.length" class="list-stack trend-list">
+										<div v-for="row in inventoryStatusLowStockItems" :key="`inv-low-${row.item_code}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<div class="insight-row__value">{{ formatQuantity(Number(row.actual_qty || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">{{ row.item_code }}</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.actual_qty || 0), inventoryStatusLowMax)"
+												color="warning"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No low stock items.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Out of Stock Items") }}</div>
+									<div v-if="inventoryStatusOutOfStockItems.length" class="list-stack trend-list">
+										<div v-for="row in inventoryStatusOutOfStockItems" :key="`inv-out-${row.item_code}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<v-chip size="x-small" color="error" variant="flat">0</v-chip>
+											</div>
+											<div class="insight-row__meta">{{ row.item_code }}</div>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No out-of-stock items.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Negative Stock Items") }}</div>
+									<div v-if="inventoryStatusNegativeItems.length" class="list-stack trend-list">
+										<div v-for="row in inventoryStatusNegativeItems" :key="`inv-neg-${row.item_code}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<div class="insight-row__value summary-metric__value--danger">
+													{{ formatQuantity(Number(row.actual_qty || 0)) }}
+												</div>
+											</div>
+											<div class="insight-row__meta">{{ row.item_code }}</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.actual_qty || 0), inventoryStatusNegativeMax)"
+												color="error"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No negative stock items.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Slow Moving Items") }}</div>
+									<div v-if="inventoryStatusSlowMovingItems.length" class="list-stack trend-list">
+										<div v-for="row in inventoryStatusSlowMovingItems" :key="`inv-slow-${row.item_code}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<div class="insight-row__value">{{ formatDays(row.stock_cover_days) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Stock") }}: {{ formatQuantity(Number(row.actual_qty || 0)) }} .
+												{{ __("Sold") }}: {{ formatQuantity(Number(row.sold_qty || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.stock_cover_days || 0), inventoryStatusSlowMax)"
+												color="info"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No slow moving items.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Dead Stock Items") }}</div>
+									<div v-if="inventoryStatusDeadStockItems.length" class="list-stack trend-list">
+										<div v-for="row in inventoryStatusDeadStockItems" :key="`inv-dead-${row.item_code}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+												<div class="insight-row__value">{{ formatQuantity(Number(row.actual_qty || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">{{ row.item_code }}</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.actual_qty || 0), inventoryStatusDeadMax)"
+												color="secondary"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No dead stock items.") }}</div>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
 				<v-row v-show="activeDashboardTab === 'inventory'" class="dashboard-grid">
 					<v-col cols="12" lg="6">
 						<v-card class="dashboard-card" elevation="2">
@@ -634,6 +794,7 @@ import {
 	type CategoryBrandVariantRow,
 	type DashboardResponse,
 	type FastMovingItem,
+	type InventoryStatusRow,
 	type ItemSalesRow,
 	type LowStockItem,
 	type SupplierSummaryRow,
@@ -663,6 +824,7 @@ const lowStockWarehouseFilter = ref("");
 const supplierSearch = ref("");
 const itemSalesLimit = ref(20);
 const categoryReportLimit = ref(12);
+const inventoryStatusLimit = ref(20);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -732,6 +894,24 @@ const createEmptyDashboard = (): DashboardResponse => ({
 			top_brand: null,
 			top_variant: null,
 		},
+	},
+	inventory_status_report: {
+		period: {},
+		threshold: 10,
+		summary: {
+			total_items: 0,
+			total_stock_qty: 0,
+			low_stock_count: 0,
+			out_of_stock_count: 0,
+			negative_stock_count: 0,
+			slow_moving_count: 0,
+			dead_stock_count: 0,
+		},
+		low_stock_items: [],
+		out_of_stock_items: [],
+		negative_stock_items: [],
+		slow_moving_items: [],
+		dead_stock_items: [],
 	},
 	inventory_insights: {
 		fast_moving_items: [],
@@ -1196,6 +1376,60 @@ const attributeSalesMax = computed(() => {
 	return maxValue > 0 ? maxValue : 1;
 });
 
+const inventoryStatusReport = computed(() => dashboardData.value.inventory_status_report || {});
+const inventoryStatusSummary = computed(() => inventoryStatusReport.value.summary || {});
+const inventoryStatusRangeLabel = computed(() => {
+	const from = inventoryStatusReport.value.period?.from || dashboardData.value.date_context?.month_start;
+	const to = inventoryStatusReport.value.period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+const inventoryStatusLowStockItems = computed<InventoryStatusRow[]>(
+	() => inventoryStatusReport.value.low_stock_items || [],
+);
+const inventoryStatusOutOfStockItems = computed<InventoryStatusRow[]>(
+	() => inventoryStatusReport.value.out_of_stock_items || [],
+);
+const inventoryStatusNegativeItems = computed<InventoryStatusRow[]>(
+	() => inventoryStatusReport.value.negative_stock_items || [],
+);
+const inventoryStatusSlowMovingItems = computed<InventoryStatusRow[]>(
+	() => inventoryStatusReport.value.slow_moving_items || [],
+);
+const inventoryStatusDeadStockItems = computed<InventoryStatusRow[]>(
+	() => inventoryStatusReport.value.dead_stock_items || [],
+);
+const inventoryStatusLowMax = computed(() => {
+	const maxValue = inventoryStatusLowStockItems.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.actual_qty || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+const inventoryStatusSlowMax = computed(() => {
+	const maxValue = inventoryStatusSlowMovingItems.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.stock_cover_days || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+const inventoryStatusDeadMax = computed(() => {
+	const maxValue = inventoryStatusDeadStockItems.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.actual_qty || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+const inventoryStatusNegativeMax = computed(() => {
+	const maxValue = inventoryStatusNegativeItems.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.actual_qty || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+
 const fastMovingItems = computed<FastMovingItem[]>(
 	() => dashboardData.value.inventory_insights.fast_moving_items || [],
 );
@@ -1350,6 +1584,13 @@ function formatPercent(value?: number | null, precision = 1) {
 	return `${Number(value).toFixed(precision)}%`;
 }
 
+function formatDays(value?: number | null) {
+	if (value === null || value === undefined || Number.isNaN(Number(value))) {
+		return __("N/A");
+	}
+	return `${Math.round(Number(value))} ${__("days")}`;
+}
+
 function progressFromQuantity(quantity: number) {
 	return Math.min(100, (Number(quantity || 0) / maxFastMovingQty.value) * 100);
 }
@@ -1419,6 +1660,10 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 			...(base.category_brand_variant_report || {}),
 			...(payload?.category_brand_variant_report || {}),
 		},
+		inventory_status_report: {
+			...(base.inventory_status_report || {}),
+			...(payload?.inventory_status_report || {}),
+		},
 		inventory_insights: {
 			...base.inventory_insights,
 			...(payload?.inventory_insights || {}),
@@ -1454,6 +1699,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("profit_method", response.sales_overview?.profit_method || null);
 	console.info("item_sales_count", response.item_sales_report?.items?.length || 0);
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
+	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
 	console.info("fast_moving_pagination", response.inventory_insights?.fast_moving_pagination || null);
 	console.groupEnd();
 }
@@ -1478,6 +1724,7 @@ async function loadDashboard() {
 			low_stock_threshold: configuredLowStockThreshold.value,
 			item_sales_limit: itemSalesLimit.value,
 			category_report_limit: categoryReportLimit.value,
+			inventory_status_limit: inventoryStatusLimit.value,
 			fast_moving_page: fastMovingPage.value,
 			fast_moving_page_size: fastMovingPageSize.value,
 			fast_moving_search: fastMovingSearch.value || undefined,

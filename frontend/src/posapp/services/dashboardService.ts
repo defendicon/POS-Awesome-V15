@@ -61,6 +61,16 @@ export interface CategoryBrandVariantRow {
 	variant_of?: string;
 }
 
+export interface InventoryStatusRow {
+	item_code: string;
+	item_name?: string;
+	stock_uom?: string;
+	actual_qty: number;
+	sold_qty?: number;
+	sales_amount?: number;
+	stock_cover_days?: number | null;
+}
+
 export interface DashboardResponse {
 	enabled: boolean;
 	profile?: string;
@@ -214,6 +224,27 @@ export interface DashboardResponse {
 			top_variant?: CategoryBrandVariantRow | null;
 		};
 	};
+	inventory_status_report?: {
+		period?: {
+			from?: string;
+			to?: string;
+		};
+		threshold?: number;
+		summary?: {
+			total_items?: number;
+			total_stock_qty?: number;
+			low_stock_count?: number;
+			out_of_stock_count?: number;
+			negative_stock_count?: number;
+			slow_moving_count?: number;
+			dead_stock_count?: number;
+		};
+		low_stock_items?: InventoryStatusRow[];
+		out_of_stock_items?: InventoryStatusRow[];
+		negative_stock_items?: InventoryStatusRow[];
+		slow_moving_items?: InventoryStatusRow[];
+		dead_stock_items?: InventoryStatusRow[];
+	};
 	inventory_insights: {
 		fast_moving_items: FastMovingItem[];
 		fast_moving_period?: {
@@ -251,6 +282,7 @@ export interface DashboardRequest {
 	fast_moving_search?: string | null;
 	item_sales_limit?: number;
 	category_report_limit?: number;
+	inventory_status_limit?: number;
 	supplier_limit?: number;
 	low_stock_limit?: number;
 }
