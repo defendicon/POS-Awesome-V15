@@ -458,6 +458,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.groupCollapsed(`${DASHBOARD_LOG_PREFIX} fetch:success`);
 	console.info("enabled", response.enabled);
 	console.info("disabled_reason", response.disabled_reason || null);
+	console.info("global_enabled", response.global_enabled ?? null);
 	console.info("scope", response.scope || null);
 	console.info("allow_all_profiles", response.allow_all_profiles ?? null);
 	console.info("selected_profiles", response.selected_profiles || []);

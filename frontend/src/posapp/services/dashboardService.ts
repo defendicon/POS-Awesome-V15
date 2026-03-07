@@ -37,6 +37,7 @@ export interface DashboardResponse {
 	profile?: string;
 	scope?: "all" | "current" | "specific";
 	default_scope?: "all" | "current" | "specific";
+	global_enabled?: boolean;
 	allow_all_profiles?: boolean;
 	profile_scope_enabled?: boolean;
 	disabled_reason?: "global_disabled" | "no_profiles_in_scope" | string;

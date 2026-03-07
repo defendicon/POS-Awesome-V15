@@ -625,13 +625,12 @@ def get_dashboard_data(
     today = getdate(nowdate())
     month_start = today.replace(day=1)
     global_enabled = bool(global_settings["enabled"])
+    # Keep dashboard operational whenever scoped profiles are available.
+    # Global toggle is returned for diagnostics but does not hard-block data.
+    enabled = bool(selected_profiles)
     disabled_reason = None
-    if not global_enabled:
-        disabled_reason = "global_disabled"
-    elif not selected_profiles:
+    if not selected_profiles:
         disabled_reason = "no_profiles_in_scope"
-
-    enabled = bool(global_enabled and selected_profiles)
     profile_label = single_profile.get("name") if single_profile else None
     warehouse_label = warehouses[0] if len(warehouses) == 1 else _("Multiple Warehouses")
 
@@ -640,6 +639,7 @@ def get_dashboard_data(
         "profile": profile_label,
         "scope": requested_scope,
         "default_scope": global_settings["default_scope"],
+        "global_enabled": global_enabled,
         "allow_all_profiles": allow_all_profiles,
         "profile_scope_enabled": profile_scope_enabled,
         "disabled_reason": disabled_reason,
