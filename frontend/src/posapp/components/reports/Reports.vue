@@ -73,16 +73,32 @@
 
 			<template v-if="canRenderDashboard">
 				<div class="dashboard-tabs mb-3">
-					<v-tabs v-model="activeDashboardTab" color="primary" class="dashboard-tab-bar" density="comfortable">
-						<v-tab value="sales">{{ __("Sales") }}</v-tab>
-						<v-tab value="staff">{{ __("Staff") }}</v-tab>
-						<v-tab value="customers">{{ __("Customers") }}</v-tab>
-						<v-tab value="finance">{{ __("Finance") }}</v-tab>
-						<v-tab value="branches">{{ __("Branches") }}</v-tab>
-						<v-tab value="products">{{ __("Products") }}</v-tab>
-						<v-tab value="inventory">{{ __("Inventory") }}</v-tab>
-						<v-tab value="procurement">{{ __("Procurement") }}</v-tab>
-					</v-tabs>
+					<div class="dashboard-tabs--desktop">
+						<v-tabs v-model="activeDashboardTab" color="primary" class="dashboard-tab-bar" density="comfortable">
+							<v-tab value="sales">{{ __("Sales") }}</v-tab>
+							<v-tab value="staff">{{ __("Staff") }}</v-tab>
+							<v-tab value="customers">{{ __("Customers") }}</v-tab>
+							<v-tab value="finance">{{ __("Finance") }}</v-tab>
+							<v-tab value="branches">{{ __("Branches") }}</v-tab>
+							<v-tab value="products">{{ __("Products") }}</v-tab>
+							<v-tab value="inventory">{{ __("Inventory") }}</v-tab>
+							<v-tab value="procurement">{{ __("Procurement") }}</v-tab>
+						</v-tabs>
+					</div>
+					<div class="dashboard-tabs--mobile">
+						<v-btn
+							v-for="tab in dashboardTabItems"
+							:key="`tab-card-${tab.value}`"
+							:block="true"
+							:variant="activeDashboardTab === tab.value ? 'flat' : 'tonal'"
+							:color="activeDashboardTab === tab.value ? 'primary' : 'secondary'"
+							class="tab-card-btn"
+							@click="activeDashboardTab = tab.value"
+						>
+							<v-icon size="16" start>{{ tab.icon }}</v-icon>
+							<span class="tab-card-label">{{ tab.label }}</span>
+						</v-btn>
+					</div>
 				</div>
 
 				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
@@ -1827,9 +1843,16 @@ const errorMessage = ref("");
 const isDashboardEnabledOnServer = ref(true);
 const lastUpdatedAt = ref<Date | null>(null);
 const allowAllProfiles = ref(false);
-const activeDashboardTab = ref<
-	"sales" | "staff" | "customers" | "finance" | "branches" | "products" | "inventory" | "procurement"
->("sales");
+type DashboardTab =
+	| "sales"
+	| "staff"
+	| "customers"
+	| "finance"
+	| "branches"
+	| "products"
+	| "inventory"
+	| "procurement";
+const activeDashboardTab = ref<DashboardTab>("sales");
 const dashboardScope = ref<"all" | "current" | "specific">("all");
 const selectedProfileFilter = ref("");
 const scopeInitialized = ref(false);
@@ -2123,6 +2146,18 @@ const dashboardData = ref<DashboardResponse>(createEmptyDashboard());
 
 const __ = (value: string) => (window.__ ? window.__(value) : value);
 const DASHBOARD_LOG_PREFIX = "[AwesomeDashboard]";
+const dashboardTabItems = computed<Array<{ value: DashboardTab; label: string; icon: string }>>(
+	() => [
+		{ value: "sales", label: __("Sales"), icon: "mdi-point-of-sale" },
+		{ value: "staff", label: __("Staff"), icon: "mdi-account-group-outline" },
+		{ value: "customers", label: __("Customers"), icon: "mdi-account-heart-outline" },
+		{ value: "finance", label: __("Finance"), icon: "mdi-finance" },
+		{ value: "branches", label: __("Branches"), icon: "mdi-storefront-outline" },
+		{ value: "products", label: __("Products"), icon: "mdi-package-variant-closed" },
+		{ value: "inventory", label: __("Inventory"), icon: "mdi-warehouse" },
+		{ value: "procurement", label: __("Procurement"), icon: "mdi-truck-delivery-outline" },
+	],
+);
 
 const posProfile = computed(() => uiStore.posProfile || {});
 const profileName = computed(() => String((posProfile.value as any)?.name || "").trim());
@@ -3575,8 +3610,29 @@ onMounted(() => {
 	border-bottom: 1px solid var(--pos-border);
 }
 
+.dashboard-tabs--desktop {
+	display: block;
+}
+
+.dashboard-tabs--mobile {
+	display: none;
+}
+
 .dashboard-tab-bar {
 	background: transparent;
+}
+
+.tab-card-btn {
+	text-transform: none;
+	justify-content: flex-start;
+	border-radius: 12px;
+	min-height: 42px;
+}
+
+.tab-card-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .dashboard-grid {
@@ -3629,6 +3685,7 @@ onMounted(() => {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	min-width: 0;
 }
 
 .dashboard-card__header {
@@ -3639,11 +3696,27 @@ onMounted(() => {
 	flex-wrap: wrap;
 }
 
+.dashboard-card__header > * {
+	min-width: 0;
+}
+
 .dashboard-chip-row {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	flex-wrap: wrap;
+	min-width: 0;
+}
+
+.dashboard-chip-row :deep(.v-chip) {
+	max-width: 100%;
+	height: auto;
+}
+
+.dashboard-chip-row :deep(.v-chip__content) {
+	white-space: normal;
+	word-break: break-word;
+	overflow-wrap: anywhere;
 }
 
 .summary-grid {
@@ -3667,6 +3740,7 @@ onMounted(() => {
 	border-radius: 10px;
 	padding: 10px;
 	background: var(--pos-card-bg);
+	min-width: 0;
 }
 
 .trend-list {
@@ -3678,6 +3752,7 @@ onMounted(() => {
 	border-radius: 10px;
 	padding: 10px;
 	background: var(--pos-card-bg);
+	min-width: 0;
 }
 
 .summary-metric__label {
@@ -3685,6 +3760,8 @@ onMounted(() => {
 	font-weight: 600;
 	color: var(--pos-text-secondary);
 	margin-bottom: 4px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .summary-metric__value {
@@ -3692,6 +3769,7 @@ onMounted(() => {
 	font-weight: 700;
 	color: var(--pos-text-primary);
 	word-break: break-word;
+	overflow-wrap: anywhere;
 }
 
 .summary-metric__value--success {
@@ -3742,32 +3820,44 @@ onMounted(() => {
 	border-radius: 10px;
 	padding: 10px;
 	background: var(--pos-card-bg);
+	min-width: 0;
 }
 
 .insight-row__top {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 8px;
 	margin-bottom: 4px;
+	flex-wrap: wrap;
 }
 
 .insight-row__title {
 	font-weight: 600;
 	color: var(--pos-text-primary);
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	min-width: 0;
+	flex: 1 1 180px;
 }
 
 .insight-row__value {
 	font-size: 0.86rem;
 	font-weight: 600;
 	color: var(--pos-text-secondary);
-	white-space: nowrap;
+	white-space: normal;
+	text-align: right;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	min-width: 0;
 }
 
 .insight-row__meta {
 	font-size: 0.78rem;
 	color: var(--pos-text-secondary);
 	margin-bottom: 6px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .supplier-row {
@@ -3812,6 +3902,20 @@ onMounted(() => {
 }
 
 @media (max-width: 960px) {
+	.dashboard-tabs {
+		border-bottom: none;
+	}
+
+	.dashboard-tabs--desktop {
+		display: none;
+	}
+
+	.dashboard-tabs--mobile {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+	}
+
 	.trend-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
@@ -3830,6 +3934,10 @@ onMounted(() => {
 }
 
 @media (max-width: 600px) {
+	.dashboard-tabs--mobile {
+		grid-template-columns: 1fr;
+	}
+
 	.trend-grid {
 		grid-template-columns: 1fr;
 	}
