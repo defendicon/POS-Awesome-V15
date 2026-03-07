@@ -20,6 +20,7 @@
 		<v-dialog
 			v-if="usePaymentDialog"
 			v-model="paymentDialogOpen"
+			:retain-focus="false"
 			width="96vw"
 			max-width="1480"
 			scrim="rgba(15, 23, 42, 0.55)"

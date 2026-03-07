@@ -588,6 +588,40 @@ const releaseActiveFocus = () => {
 	}
 };
 
+const queueSearchRefocusRecovery = () => {
+	if (typeof window === "undefined") {
+		return;
+	}
+
+	let recovered = false;
+	let fallbackTimer = null;
+	const recover = () => {
+		if (recovered) return;
+		recovered = true;
+		if (fallbackTimer) {
+			clearTimeout(fallbackTimer);
+			fallbackTimer = null;
+		}
+		nextTick(() => {
+			uiStore.triggerItemSearchFocus();
+			if (eventBus && typeof eventBus.emit === "function") {
+				eventBus.emit("focus_item_search");
+			}
+		});
+	};
+
+	const onWindowFocus = () => {
+		window.removeEventListener("focus", onWindowFocus);
+		recover();
+	};
+
+	window.addEventListener("focus", onWindowFocus, { once: true });
+	fallbackTimer = setTimeout(() => {
+		window.removeEventListener("focus", onWindowFocus);
+		recover();
+	}, 900);
+};
+
 const back_to_invoice = () => {
 	releaseActiveFocus();
 	paymentVisible.value = false;
@@ -597,12 +631,7 @@ const back_to_invoice = () => {
 	if (activeView.value === "payment") {
 		uiStore.setActiveView("items");
 	}
-	nextTick(() => {
-		uiStore.triggerItemSearchFocus();
-		if (eventBus && typeof eventBus.emit === "function") {
-			eventBus.emit("focus_item_search");
-		}
-	});
+	queueSearchRefocusRecovery();
 };
 
 const finishSubmissionNavigation = (clearInvoice = false) => {
