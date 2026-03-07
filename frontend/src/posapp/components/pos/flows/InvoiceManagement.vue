@@ -175,10 +175,11 @@
 							<v-data-table
 								v-else-if="viewMode === 'list'"
 								:headers="historyHeaders"
-								:items="filteredHistoryInvoices"
+								:items="paginatedHistoryInvoices"
 								item-value="name"
 								class="elevation-1"
-								:items-per-page="10"
+								:items-per-page="-1"
+								hide-default-footer
 							>
 								<template #item.posting_date="{ item }">{{ formatDateTime(item.posting_date, item.posting_time) }}</template>
 								<template #item.grand_total="{ item }">{{ currencySymbol(item.currency) }} {{ formatCurrency(item.grand_total) }}</template>
@@ -197,7 +198,7 @@
 
 							<div v-else class="invoice-record-grid invoice-record-grid--history">
 								<v-card
-									v-for="invoice in filteredHistoryInvoices"
+									v-for="invoice in paginatedHistoryInvoices"
 									:key="invoice.name"
 									:class="['invoice-record-card', `invoice-record-card--${toneFromStatus(invoice.status)}`]"
 									variant="flat"
@@ -267,6 +268,17 @@
 										/>
 									</div>
 								</v-card>
+							</div>
+
+							<div v-if="!loading && filteredHistoryInvoices.length && historyPageCount > 1" class="tab-pagination">
+								<div class="tab-pagination__meta">{{ paginationCaption(filteredHistoryInvoices.length, "history") }}</div>
+								<v-pagination
+									:model-value="tabPages.history"
+									:length="historyPageCount"
+									:total-visible="7"
+									density="comfortable"
+									@update:model-value="setTabPage('history', $event)"
+								/>
 							</div>
 						</v-window-item>
 
@@ -371,10 +383,11 @@
 							<v-data-table
 								v-else-if="viewMode === 'list'"
 								:headers="partialHeaders"
-								:items="filteredUnpaidInvoices"
+								:items="paginatedUnpaidInvoices"
 								item-value="name"
 								class="elevation-1"
-								:items-per-page="10"
+								:items-per-page="-1"
+								hide-default-footer
 							>
 								<template #item.posting_date="{ item }">{{ formatDateTime(item.posting_date, item.posting_time) }}</template>
 								<template #item.due_date="{ item }">{{ formatDateForDisplay(item.due_date) || "-" }}</template>
@@ -393,7 +406,7 @@
 
 							<div v-else class="invoice-record-grid invoice-record-grid--unpaid">
 								<v-card
-									v-for="invoice in filteredUnpaidInvoices"
+									v-for="invoice in paginatedUnpaidInvoices"
 									:key="invoice.name"
 									:class="['invoice-record-card', 'invoice-record-card--unpaid', `invoice-record-card--${toneFromStatus(invoice.status)}`]"
 									variant="flat"
@@ -465,6 +478,17 @@
 									</div>
 								</v-card>
 							</div>
+
+							<div v-if="!loading && filteredUnpaidInvoices.length && partialPageCount > 1" class="tab-pagination">
+								<div class="tab-pagination__meta">{{ paginationCaption(filteredUnpaidInvoices.length, "partial") }}</div>
+								<v-pagination
+									:model-value="tabPages.partial"
+									:length="partialPageCount"
+									:total-visible="7"
+									density="comfortable"
+									@update:model-value="setTabPage('partial', $event)"
+								/>
+							</div>
 						</v-window-item>
 
 						<v-window-item value="drafts">
@@ -510,7 +534,7 @@
 								<div class="empty-state__subtitle">{{ __("Saved draft invoices will appear here.") }}</div>
 							</div>
 
-							<v-data-table v-else-if="viewMode === 'list'" :headers="draftHeaders" :items="filteredDraftInvoices" item-value="name" class="elevation-1" :items-per-page="10">
+							<v-data-table v-else-if="viewMode === 'list'" :headers="draftHeaders" :items="paginatedDraftInvoices" item-value="name" class="elevation-1" :items-per-page="-1" hide-default-footer>
 								<template #item.posting_date="{ item }">{{ formatDateTime(item.posting_date, item.posting_time) }}</template>
 								<template #item.grand_total="{ item }">{{ currencySymbol(item.currency) }} {{ formatCurrency(item.grand_total) }}</template>
 								<template #item.actions="{ item }">
@@ -523,7 +547,7 @@
 
 							<div v-else class="invoice-record-grid invoice-record-grid--drafts">
 								<v-card
-									v-for="invoice in filteredDraftInvoices"
+									v-for="invoice in paginatedDraftInvoices"
 									:key="invoice.name"
 									class="invoice-record-card invoice-record-card--draft"
 									variant="flat"
@@ -564,6 +588,17 @@
 										<v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" :title="__('Delete Draft')" @click="deleteDraft(invoice)" />
 									</div>
 								</v-card>
+							</div>
+
+							<div v-if="!loading && filteredDraftInvoices.length && draftsPageCount > 1" class="tab-pagination">
+								<div class="tab-pagination__meta">{{ paginationCaption(filteredDraftInvoices.length, "drafts") }}</div>
+								<v-pagination
+									:model-value="tabPages.drafts"
+									:length="draftsPageCount"
+									:total-visible="7"
+									density="comfortable"
+									@update:model-value="setTabPage('drafts', $event)"
+								/>
 							</div>
 						</v-window-item>
 
@@ -610,7 +645,7 @@
 								<div class="empty-state__subtitle">{{ __("Completed returns will appear here.") }}</div>
 							</div>
 
-							<v-data-table v-else-if="viewMode === 'list'" :headers="returnHeaders" :items="filteredReturnInvoices" item-value="name" class="elevation-1" :items-per-page="10">
+							<v-data-table v-else-if="viewMode === 'list'" :headers="returnHeaders" :items="paginatedReturnInvoices" item-value="name" class="elevation-1" :items-per-page="-1" hide-default-footer>
 								<template #item.posting_date="{ item }">{{ formatDateTime(item.posting_date, item.posting_time) }}</template>
 								<template #item.grand_total="{ item }">{{ currencySymbol(item.currency) }} {{ formatCurrency(item.grand_total) }}</template>
 								<template #item.return_against="{ item }">{{ item.return_against || "-" }}</template>
@@ -624,7 +659,7 @@
 
 							<div v-else class="invoice-record-grid invoice-record-grid--returns">
 								<v-card
-									v-for="invoice in filteredReturnInvoices"
+									v-for="invoice in paginatedReturnInvoices"
 									:key="invoice.name"
 									class="invoice-record-card invoice-record-card--error"
 									variant="flat"
@@ -665,6 +700,17 @@
 										<v-btn icon="mdi-printer-outline" size="small" variant="text" :title="__('Print')" @click="printInvoice(invoice)" />
 									</div>
 								</v-card>
+							</div>
+
+							<div v-if="!loading && filteredReturnInvoices.length && returnsPageCount > 1" class="tab-pagination">
+								<div class="tab-pagination__meta">{{ paginationCaption(filteredReturnInvoices.length, "returns") }}</div>
+								<v-pagination
+									:model-value="tabPages.returns"
+									:length="returnsPageCount"
+									:total-visible="7"
+									density="comfortable"
+									@update:model-value="setTabPage('returns', $event)"
+								/>
 							</div>
 						</v-window-item>
 					</v-window>
@@ -728,7 +774,7 @@ import { appendDebugPrintParam, isDebugPrintEnabled, silentPrint, watchPrintWind
 import { printDocumentViaQz } from "../../../services/qzTray";
 import { isOffline } from "../../../../offline/index";
 
-const INVOICE_HISTORY_TAB_LIMIT = 100;
+const TAB_PAGE_SIZE = 10;
 
 export default {
 	mixins: [format],
@@ -747,6 +793,13 @@ export default {
 		activeTab: "history",
 		viewMode: "card",
 		loading: false,
+		pageSize: TAB_PAGE_SIZE,
+		tabPages: {
+			history: 1,
+			partial: 1,
+			drafts: 1,
+			returns: 1,
+		},
 		partialSearch: "",
 		partialStatus: "All",
 		partialDateFrom: "",
@@ -809,16 +862,94 @@ export default {
 				return accumulator;
 			}, { all: 0, partial: 0, unpaid: 0, overdue: 0 });
 		},
+		paginatedHistoryInvoices() {
+			return this.paginateCollection(this.filteredHistoryInvoices, "history");
+		},
+		paginatedUnpaidInvoices() {
+			return this.paginateCollection(this.filteredUnpaidInvoices, "partial");
+		},
+		paginatedDraftInvoices() {
+			return this.paginateCollection(this.filteredDraftInvoices, "drafts");
+		},
+		paginatedReturnInvoices() {
+			return this.paginateCollection(this.filteredReturnInvoices, "returns");
+		},
+		historyPageCount() {
+			return this.pageCount(this.filteredHistoryInvoices.length);
+		},
+		partialPageCount() {
+			return this.pageCount(this.filteredUnpaidInvoices.length);
+		},
+		draftsPageCount() {
+			return this.pageCount(this.filteredDraftInvoices.length);
+		},
+		returnsPageCount() {
+			return this.pageCount(this.filteredReturnInvoices.length);
+		},
 	},
 	watch: {
 		invoiceManagementDialog(value) {
 			if (value) this.refreshAll();
+			else this.resetPagination();
 		},
 		activeTab() {
 			this.refreshActiveTab();
 		},
+		filteredHistoryInvoices() {
+			this.resetTabPage("history");
+		},
+		filteredUnpaidInvoices() {
+			this.resetTabPage("partial");
+		},
+		filteredDraftInvoices() {
+			this.resetTabPage("drafts");
+		},
+		filteredReturnInvoices() {
+			this.resetTabPage("returns");
+		},
 	},
 	methods: {
+		resetPagination() {
+			this.tabPages = {
+				history: 1,
+				partial: 1,
+				drafts: 1,
+				returns: 1,
+			};
+		},
+		resetTabPage(tab) {
+			if (!this.tabPages || !Object.prototype.hasOwnProperty.call(this.tabPages, tab)) return;
+			this.tabPages[tab] = 1;
+		},
+		setTabPage(tab, value) {
+			if (!this.tabPages || !Object.prototype.hasOwnProperty.call(this.tabPages, tab)) return;
+			const page = Number(value) || 1;
+			this.tabPages[tab] = page > 0 ? page : 1;
+		},
+		pageCount(totalItems) {
+			const perPage = Number(this.pageSize) || TAB_PAGE_SIZE;
+			return Math.max(1, Math.ceil(Number(totalItems || 0) / perPage));
+		},
+		paginateCollection(items, tab) {
+			if (!Array.isArray(items) || !items.length) return [];
+			const perPage = Number(this.pageSize) || TAB_PAGE_SIZE;
+			const currentPage = Number(this.tabPages?.[tab]) || 1;
+			const maxPage = this.pageCount(items.length);
+			const page = Math.min(Math.max(currentPage, 1), maxPage);
+			const startIndex = (page - 1) * perPage;
+			return items.slice(startIndex, startIndex + perPage);
+		},
+		paginationCaption(totalItems, tab) {
+			const total = Number(totalItems || 0);
+			if (!total) return __("Showing 0 of 0");
+			const perPage = Number(this.pageSize) || TAB_PAGE_SIZE;
+			const maxPage = this.pageCount(total);
+			const currentPage = Number(this.tabPages?.[tab]) || 1;
+			const page = Math.min(Math.max(currentPage, 1), maxPage);
+			const start = (page - 1) * perPage + 1;
+			const end = Math.min(total, page * perPage);
+			return __("Showing {0}-{1} of {2}", [start, end, total]);
+		},
 		normalizeDate(value) { return value ? String(value).slice(0, 10) : ""; },
 		normalizePostingTime(value) {
 			const raw = String(value || "").split(".")[0].trim();
@@ -952,7 +1083,10 @@ export default {
 			if (Number.isFinite(Number(invoice?.items_count))) return Number(invoice.items_count);
 			return 0;
 		},
-		async refreshAll() { await Promise.all([this.loadUnpaidInvoices(), this.loadHistory(), this.loadDrafts()]); },
+		async refreshAll() {
+			this.resetPagination();
+			await Promise.all([this.loadUnpaidInvoices(), this.loadHistory(), this.loadDrafts()]);
+		},
 		async refreshActiveTab() {
 			if (!this.invoiceManagementDialog) return;
 			if (this.activeTab === "drafts") return this.loadDrafts();
@@ -963,14 +1097,23 @@ export default {
 			if (!this.posProfile?.name) return void (this.unpaidInvoices = []);
 			this.loading = true;
 			try {
+				const filters = {
+					pos_profile: this.posProfile.name,
+					docstatus: 1,
+					is_return: 0,
+					outstanding_amount: [">", 0],
+				};
+				if (this.posOpeningShift?.name) {
+					filters.posa_pos_opening_shift = this.posOpeningShift.name;
+				}
 				const { message } = await frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: this.currentInvoiceDoctype,
-						filters: { pos_profile: this.posProfile.name, docstatus: 1, is_return: 0, outstanding_amount: [">", 0] },
+						filters,
 						fields: ["name", "customer", "customer_name", "posting_date", "posting_time", "due_date", "grand_total", "paid_amount", "outstanding_amount", "status", "currency"],
 						order_by: "posting_date desc, posting_time desc, modified desc",
-						limit_page_length: INVOICE_HISTORY_TAB_LIMIT,
+						limit_page_length: 0,
 					},
 				});
 				this.unpaidInvoices = Array.isArray(message) ? message.map((entry) => ({ ...entry, doctype: this.currentInvoiceDoctype })) : [];
@@ -985,14 +1128,21 @@ export default {
 			if (!this.posProfile?.name) return void (this.historyInvoices = []);
 			this.loading = true;
 			try {
+				const filters = {
+					pos_profile: this.posProfile.name,
+					docstatus: 1,
+				};
+				if (this.posOpeningShift?.name) {
+					filters.posa_pos_opening_shift = this.posOpeningShift.name;
+				}
 				const { message } = await frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: this.currentInvoiceDoctype,
-						filters: { pos_profile: this.posProfile.name, docstatus: 1 },
+						filters,
 						fields: ["name", "customer", "customer_name", "posting_date", "posting_time", "grand_total", "paid_amount", "change_amount", "outstanding_amount", "status", "is_return", "return_against", "currency"],
 						order_by: "posting_date desc, posting_time desc, modified desc",
-						limit_page_length: INVOICE_HISTORY_TAB_LIMIT,
+						limit_page_length: 0,
 					},
 				});
 				this.historyInvoices = Array.isArray(message) ? message.map((entry) => ({ ...entry, doctype: this.currentInvoiceDoctype })) : [];
@@ -1012,7 +1162,7 @@ export default {
 					args: {
 						pos_opening_shift: this.posOpeningShift.name,
 						doctype: this.currentInvoiceDoctype,
-						limit_page_length: INVOICE_HISTORY_TAB_LIMIT,
+						limit_page_length: 0,
 					},
 				});
 				this.draftInvoices = Array.isArray(message) ? message.map((entry) => ({ ...entry, doctype: entry.doctype || this.currentInvoiceDoctype })) : [];
@@ -1329,6 +1479,20 @@ export default {
 .invoice-record-grid--drafts { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
 .invoice-record-grid--returns { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
 
+.tab-pagination {
+	margin-top: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.tab-pagination__meta {
+	font-size: 0.8rem;
+	color: var(--pos-text-secondary);
+}
+
 .invoice-record-card {
 	border-radius: 22px;
 	overflow: hidden;
@@ -1529,5 +1693,7 @@ export default {
 @media (max-width: 640px) {
 	.meta-pair-grid { grid-template-columns: 1fr; }
 	.invoice-record-card__actions { justify-content: stretch; }
+	.tab-pagination { justify-content: center; }
+	.tab-pagination__meta { width: 100%; text-align: center; }
 }
 </style>
