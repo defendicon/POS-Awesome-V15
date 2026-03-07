@@ -107,6 +107,12 @@ def _extra_parent_filter(parent_doctype: str, alias: str = "inv") -> str:
     return ""
 
 
+def _extra_sle_filter(alias: str = "sle") -> str:
+    if frappe.db.has_column("Stock Ledger Entry", "is_cancelled"):
+        return f" and ifnull({alias}.is_cancelled, 0) = 0"
+    return ""
+
+
 def _collect_sales_and_profit(
     parent_doctype: str,
     child_doctype: str,
@@ -116,13 +122,24 @@ def _collect_sales_and_profit(
     date_to: str,
 ) -> dict[str, float]:
     total_sales = 0.0
+    total_sales_for_profit = 0.0
     total_profit = 0.0
+    profit_method = "invoice_item"
 
     parent_amount_field = _pick_first_column(parent_doctype, ["base_grand_total", "grand_total"])
-    if parent_amount_field:
+    parent_net_field = _pick_first_column(parent_doctype, ["base_net_total", "net_total"])
+    if parent_amount_field or parent_net_field:
+        sales_expression = f"sum(coalesce(inv.{parent_amount_field}, 0))" if parent_amount_field else "0"
+        profit_sales_expression = (
+            f"sum(coalesce(inv.{parent_net_field}, 0))"
+            if parent_net_field
+            else sales_expression
+        )
         sales_row = frappe.db.sql(
             f"""
-            select sum(coalesce(inv.{parent_amount_field}, 0)) as total_sales
+            select
+                {sales_expression} as total_sales,
+                {profit_sales_expression} as total_sales_for_profit
             from `tab{parent_doctype}` inv
             where inv.docstatus = 1
               and inv.company = %s
@@ -134,6 +151,40 @@ def _collect_sales_and_profit(
             as_dict=True,
         )
         total_sales = flt((sales_row[0] or {}).get("total_sales"))
+        total_sales_for_profit = flt((sales_row[0] or {}).get("total_sales_for_profit"))
+
+    # Prefer stock-ledger-based COGS for a closer accounting-style gross profit.
+    if (
+        frappe.db.exists("DocType", "Stock Ledger Entry")
+        and frappe.db.has_column("Stock Ledger Entry", "voucher_type")
+        and frappe.db.has_column("Stock Ledger Entry", "voucher_no")
+        and frappe.db.has_column("Stock Ledger Entry", "stock_value_difference")
+    ):
+        cogs_row = frappe.db.sql(
+            f"""
+            select sum((-1) * coalesce(sle.stock_value_difference, 0)) as total_cogs
+            from `tabStock Ledger Entry` sle
+            inner join `tab{parent_doctype}` inv
+                on inv.name = sle.voucher_no
+               and sle.voucher_type = %s
+            where inv.docstatus = 1
+              and inv.company = %s
+              and inv.pos_profile = %s
+              and inv.posting_date between %s and %s
+              {_extra_sle_filter("sle")}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            """,
+            (parent_doctype, company, profile_name, date_from, date_to),
+            as_dict=True,
+        )
+        total_cogs = flt((cogs_row[0] or {}).get("total_cogs"))
+        total_profit = flt(total_sales_for_profit - total_cogs)
+        profit_method = "stock_ledger"
+        return {
+            "sales": total_sales,
+            "profit": total_profit,
+            "profit_method": profit_method,
+        }
 
     amount_field = _pick_first_column(child_doctype, ["base_net_amount", "net_amount", "amount"])
     qty_field = _pick_first_column(child_doctype, ["stock_qty", "qty"])
@@ -164,7 +215,11 @@ def _collect_sales_and_profit(
         )
         total_profit = flt((profit_row[0] or {}).get("total_profit"))
 
-    return {"sales": total_sales, "profit": total_profit}
+    return {
+        "sales": total_sales,
+        "profit": total_profit,
+        "profit_method": profit_method,
+    }
 
 
 def _collect_fast_moving_items(
@@ -357,6 +412,7 @@ def get_dashboard_data(
             "today_profit": 0.0,
             "monthly_sales": 0.0,
             "monthly_profit": 0.0,
+            "profit_method": "invoice_item",
         },
         "inventory_insights": {
             "fast_moving_items": [],
@@ -393,6 +449,11 @@ def get_dashboard_data(
         payload["sales_overview"]["today_profit"] += flt(today_stats.get("profit"))
         payload["sales_overview"]["monthly_sales"] += flt(monthly_stats.get("sales"))
         payload["sales_overview"]["monthly_profit"] += flt(monthly_stats.get("profit"))
+        if (
+            today_stats.get("profit_method") == "stock_ledger"
+            or monthly_stats.get("profit_method") == "stock_ledger"
+        ):
+            payload["sales_overview"]["profit_method"] = "stock_ledger"
 
     payload["inventory_insights"]["fast_moving_items"] = _collect_fast_moving_items(
         profile_name=profile_name,
