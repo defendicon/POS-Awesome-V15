@@ -659,6 +659,7 @@ def get_dashboard_data(
 
     today = getdate(nowdate())
     month_start = today.replace(day=1)
+    fast_moving_days = max(1, (today - month_start).days + 1)
     global_enabled = bool(global_settings["enabled"])
     # Keep dashboard operational whenever scoped profiles are available.
     # Global toggle is returned for diagnostics but does not hard-block data.
@@ -705,6 +706,11 @@ def get_dashboard_data(
         },
         "inventory_insights": {
             "fast_moving_items": [],
+            "fast_moving_period": {
+                "from": str(month_start),
+                "to": str(today),
+                "days": fast_moving_days,
+            },
             "fast_moving_pagination": {
                 "page": fast_moving_page,
                 "page_size": fast_moving_page_size,

@@ -89,9 +89,14 @@
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
 								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Fast Moving Items") }}</h2>
-								<v-chip size="small" color="success" variant="tonal">
-									{{ __("Total") }}: {{ fastMovingTotalCount }}
-								</v-chip>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ __("Age Bracket") }}: {{ fastMovingRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="success" variant="tonal">
+										{{ __("Total") }}: {{ fastMovingTotalCount }}
+									</v-chip>
+								</div>
 							</div>
 							<div class="card-filters">
 								<v-text-field
@@ -316,6 +321,11 @@ const createEmptyDashboard = (): DashboardResponse => ({
 	},
 	inventory_insights: {
 		fast_moving_items: [],
+		fast_moving_period: {
+			from: "",
+			to: "",
+			days: 0,
+		},
 		fast_moving_pagination: {
 			page: 1,
 			page_size: 10,
@@ -521,6 +531,29 @@ const monthRangeLabel = computed(() => {
 		return __("Current Month");
 	}
 	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+
+const fastMovingRangeLabel = computed(() => {
+	const period = dashboardData.value.inventory_insights.fast_moving_period;
+	const from = period?.from || dashboardData.value.date_context?.month_start;
+	const to = period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+
+	let days = Number(period?.days || 0);
+	if (!Number.isFinite(days) || days <= 0) {
+		const fromDate = new Date(from);
+		const toDate = new Date(to);
+		if (!Number.isNaN(fromDate.getTime()) && !Number.isNaN(toDate.getTime())) {
+			const msPerDay = 24 * 60 * 60 * 1000;
+			const computedDays = Math.floor((toDate.getTime() - fromDate.getTime()) / msPerDay) + 1;
+			days = computedDays > 0 ? computedDays : 0;
+		}
+	}
+
+	const daysLabel = days > 0 ? ` (${days} ${__("days")})` : "";
+	return `${formatDate(from)} - ${formatDate(to)}${daysLabel}`;
 });
 
 const lastUpdatedLabel = computed(() => {
@@ -856,6 +889,13 @@ onMounted(() => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.dashboard-chip-row {
+	display: flex;
+	align-items: center;
 	gap: 8px;
 	flex-wrap: wrap;
 }

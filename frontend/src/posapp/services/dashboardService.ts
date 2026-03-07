@@ -59,6 +59,11 @@ export interface DashboardResponse {
 	sales_overview: DashboardMetricPayload;
 	inventory_insights: {
 		fast_moving_items: FastMovingItem[];
+		fast_moving_period?: {
+			from?: string;
+			to?: string;
+			days?: number;
+		};
 		fast_moving_pagination?: {
 			page: number;
 			page_size: number;
