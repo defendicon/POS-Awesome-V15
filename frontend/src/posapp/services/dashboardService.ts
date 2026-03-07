@@ -100,6 +100,24 @@ export interface StockMovementRecentRow {
 	value_change?: number;
 }
 
+export interface ReorderSuggestionRow {
+	item_code: string;
+	item_name?: string;
+	stock_uom?: string;
+	current_qty: number;
+	sold_qty?: number;
+	avg_daily_sales?: number;
+	lead_time_days?: number;
+	reorder_level?: number;
+	target_stock?: number;
+	suggested_qty: number;
+	stock_cover_days?: number | null;
+	urgency?: "critical" | "high" | "medium" | "low" | string;
+	supplier?: string;
+	estimated_unit_cost?: number;
+	estimated_purchase_value?: number;
+}
+
 export interface DashboardResponse {
 	enabled: boolean;
 	profile?: string;
@@ -295,6 +313,23 @@ export interface DashboardResponse {
 		day_wise?: StockMovementDayRow[];
 		recent_movements?: StockMovementRecentRow[];
 	};
+	reorder_purchase_suggestions?: {
+		period?: {
+			from?: string;
+			to?: string;
+		};
+		summary?: {
+			candidate_items?: number;
+			suggestion_count?: number;
+			critical_count?: number;
+			high_count?: number;
+			medium_count?: number;
+			low_count?: number;
+			total_suggested_qty?: number;
+			estimated_purchase_value?: number;
+		};
+		suggestions?: ReorderSuggestionRow[];
+	};
 	inventory_insights: {
 		fast_moving_items: FastMovingItem[];
 		fast_moving_period?: {
@@ -334,6 +369,7 @@ export interface DashboardRequest {
 	category_report_limit?: number;
 	inventory_status_limit?: number;
 	stock_movement_limit?: number;
+	reorder_suggestion_limit?: number;
 	supplier_limit?: number;
 	low_stock_limit?: number;
 }

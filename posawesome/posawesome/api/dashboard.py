@@ -1956,6 +1956,256 @@ def _collect_stock_movement_report(
     return report
 
 
+def _collect_reorder_purchase_suggestions(
+    profile_names: list[str],
+    company: str,
+    warehouses: list[str],
+    threshold: int,
+    date_from: str,
+    date_to: str,
+    limit: int = 25,
+) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "period": {"from": date_from, "to": date_to},
+        "summary": {
+            "candidate_items": 0,
+            "suggestion_count": 0,
+            "critical_count": 0,
+            "high_count": 0,
+            "medium_count": 0,
+            "low_count": 0,
+            "total_suggested_qty": 0.0,
+            "estimated_purchase_value": 0.0,
+        },
+        "suggestions": [],
+    }
+
+    if not warehouses:
+        return report
+    if not frappe.db.exists("DocType", "Bin"):
+        return report
+    if not frappe.db.has_column("Bin", "actual_qty"):
+        return report
+
+    warehouse_filter, warehouse_params = _build_in_filter("bin.warehouse", warehouses)
+    if not warehouse_filter:
+        return report
+
+    valuation_expression = (
+        "max(coalesce(item.valuation_rate, 0))"
+        if frappe.db.has_column("Item", "valuation_rate")
+        else "0"
+    )
+    stock_rows = frappe.db.sql(
+        f"""
+        select
+            bin.item_code as item_code,
+            max(item.item_name) as item_name,
+            max(item.stock_uom) as stock_uom,
+            sum(coalesce(bin.actual_qty, 0)) as actual_qty,
+            {valuation_expression} as estimated_unit_cost
+        from `tabBin` bin
+        inner join `tabItem` item on item.name = bin.item_code
+        where ifnull(item.disabled, 0) = 0
+          and ifnull(item.is_stock_item, 0) = 1
+          {warehouse_filter}
+        group by bin.item_code
+        """,
+        tuple(warehouse_params),
+        as_dict=True,
+    )
+    if not stock_rows:
+        return report
+
+    period_days = max(1, (getdate(date_to) - getdate(date_from)).days + 1)
+    item_codes = sorted(
+        {
+            cstr(row.get("item_code")).strip()
+            for row in stock_rows
+            if cstr(row.get("item_code")).strip()
+        }
+    )
+    if not item_codes:
+        return report
+
+    sales_by_item = _collect_item_totals(
+        profile_names=profile_names,
+        company=company,
+        date_from=date_from,
+        date_to=date_to,
+    )
+
+    item_fields = ["name", "item_name", "stock_uom"]
+    if frappe.db.has_column("Item", "lead_time_days"):
+        item_fields.append("lead_time_days")
+    if frappe.db.has_column("Item", "default_supplier"):
+        item_fields.append("default_supplier")
+    elif frappe.db.has_column("Item", "supplier"):
+        item_fields.append("supplier")
+    item_rows = frappe.get_all(
+        "Item",
+        filters={"name": ["in", item_codes]},
+        fields=item_fields,
+    )
+    item_map = {
+        cstr(row.get("name")).strip(): row for row in item_rows if cstr(row.get("name")).strip()
+    }
+
+    reorder_map: dict[str, dict[str, float]] = {}
+    if frappe.db.exists("DocType", "Item Reorder"):
+        reorder_fields = ["parent"]
+        has_reorder_level = frappe.db.has_column("Item Reorder", "warehouse_reorder_level")
+        has_reorder_qty = frappe.db.has_column("Item Reorder", "warehouse_reorder_qty")
+        has_reorder_warehouse = frappe.db.has_column("Item Reorder", "warehouse")
+        if has_reorder_level:
+            reorder_fields.append("warehouse_reorder_level")
+        if has_reorder_qty:
+            reorder_fields.append("warehouse_reorder_qty")
+        if has_reorder_warehouse:
+            reorder_fields.append("warehouse")
+
+        reorder_rows = frappe.get_all(
+            "Item Reorder",
+            filters={"parent": ["in", item_codes]},
+            fields=reorder_fields,
+        )
+        for row in reorder_rows:
+            parent = cstr(row.get("parent")).strip()
+            if not parent:
+                continue
+            row_warehouse = cstr(row.get("warehouse")).strip() if has_reorder_warehouse else ""
+            if row_warehouse and row_warehouse not in warehouses:
+                continue
+            entry = reorder_map.setdefault(parent, {"reorder_level": 0.0, "reorder_qty": 0.0})
+            if has_reorder_level:
+                entry["reorder_level"] = max(
+                    flt(entry.get("reorder_level")),
+                    flt(row.get("warehouse_reorder_level")),
+                )
+            if has_reorder_qty:
+                entry["reorder_qty"] = max(
+                    flt(entry.get("reorder_qty")),
+                    flt(row.get("warehouse_reorder_qty")),
+                )
+
+    supplier_map: dict[str, str] = {}
+    if frappe.db.exists("DocType", "Item Supplier"):
+        supplier_fields = ["parent"]
+        if frappe.db.has_column("Item Supplier", "supplier"):
+            supplier_fields.append("supplier")
+        supplier_rows = frappe.get_all(
+            "Item Supplier",
+            filters={"parent": ["in", item_codes]},
+            fields=supplier_fields,
+            order_by="supplier asc",
+        )
+        for row in supplier_rows:
+            parent = cstr(row.get("parent")).strip()
+            supplier = cstr(row.get("supplier")).strip()
+            if parent and supplier and parent not in supplier_map:
+                supplier_map[parent] = supplier
+
+    urgency_rank = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    suggestions: list[dict[str, Any]] = []
+    for stock_row in stock_rows:
+        item_code = cstr(stock_row.get("item_code")).strip()
+        if not item_code:
+            continue
+
+        item_meta = item_map.get(item_code, {})
+        reorder_meta = reorder_map.get(item_code, {})
+        sales_meta = sales_by_item.get(item_code, {})
+
+        current_qty = flt(stock_row.get("actual_qty"))
+        sold_qty = max(0.0, flt(sales_meta.get("sold_qty")))
+        avg_daily_sales = flt(sold_qty / period_days) if period_days > 0 else 0.0
+
+        lead_time_days = flt(item_meta.get("lead_time_days"))
+        if lead_time_days <= 0:
+            lead_time_days = 7.0
+
+        reorder_level_config = flt(reorder_meta.get("reorder_level"))
+        reorder_qty_config = flt(reorder_meta.get("reorder_qty"))
+        demand_during_lead = flt(avg_daily_sales * lead_time_days)
+        reorder_level = max(flt(threshold), reorder_level_config, demand_during_lead)
+
+        safety_days = 7.0
+        target_stock = reorder_qty_config or flt(avg_daily_sales * (lead_time_days + safety_days))
+        target_stock = max(target_stock, reorder_level)
+
+        if current_qty > reorder_level:
+            continue
+
+        suggested_qty = max(0.0, flt(target_stock - current_qty))
+        if suggested_qty <= 0:
+            continue
+
+        if current_qty <= 0:
+            urgency = "critical"
+        else:
+            stock_cover_days = (
+                flt(current_qty / avg_daily_sales) if avg_daily_sales > 0 else None
+            )
+            if stock_cover_days is not None and stock_cover_days < lead_time_days:
+                urgency = "high"
+            elif current_qty <= threshold:
+                urgency = "medium"
+            else:
+                urgency = "low"
+
+        stock_cover_days = flt(current_qty / avg_daily_sales) if avg_daily_sales > 0 else None
+        unit_cost = flt(stock_row.get("estimated_unit_cost"))
+        supplier = (
+            cstr(item_meta.get("default_supplier")).strip()
+            or cstr(item_meta.get("supplier")).strip()
+            or supplier_map.get(item_code, "")
+        )
+
+        suggestions.append(
+            {
+                "item_code": item_code,
+                "item_name": cstr(item_meta.get("item_name") or stock_row.get("item_name") or item_code),
+                "stock_uom": cstr(item_meta.get("stock_uom") or stock_row.get("stock_uom") or ""),
+                "current_qty": current_qty,
+                "sold_qty": sold_qty,
+                "avg_daily_sales": avg_daily_sales,
+                "lead_time_days": lead_time_days,
+                "reorder_level": reorder_level,
+                "target_stock": target_stock,
+                "suggested_qty": suggested_qty,
+                "stock_cover_days": stock_cover_days,
+                "urgency": urgency,
+                "supplier": supplier,
+                "estimated_unit_cost": unit_cost,
+                "estimated_purchase_value": flt(suggested_qty * unit_cost),
+            }
+        )
+
+    suggestions.sort(
+        key=lambda row: (
+            urgency_rank.get(cstr(row.get("urgency")).strip(), 99),
+            flt(row.get("stock_cover_days")) if row.get("stock_cover_days") is not None else 999999,
+            -flt(row.get("suggested_qty")),
+        )
+    )
+
+    page_limit = _coerce_limit(limit, default=25, minimum=1, maximum=200)
+    limited = suggestions[:page_limit]
+    summary = report["summary"]
+    summary["candidate_items"] = len(stock_rows)
+    summary["suggestion_count"] = len(suggestions)
+    summary["critical_count"] = sum(1 for row in suggestions if row.get("urgency") == "critical")
+    summary["high_count"] = sum(1 for row in suggestions if row.get("urgency") == "high")
+    summary["medium_count"] = sum(1 for row in suggestions if row.get("urgency") == "medium")
+    summary["low_count"] = sum(1 for row in suggestions if row.get("urgency") == "low")
+    summary["total_suggested_qty"] = flt(sum(flt(row.get("suggested_qty")) for row in suggestions))
+    summary["estimated_purchase_value"] = flt(
+        sum(flt(row.get("estimated_purchase_value")) for row in suggestions)
+    )
+    report["suggestions"] = limited
+    return report
+
+
 def _collect_supplier_purchase_summary(
     company: str,
     date_from: str,
@@ -2010,6 +2260,7 @@ def get_dashboard_data(
     category_report_limit: int = 12,
     inventory_status_limit: int = 20,
     stock_movement_limit: int = 50,
+    reorder_suggestion_limit: int = 25,
     supplier_limit: int = 8,
     low_stock_limit: int = 20,
 ):
@@ -2052,6 +2303,7 @@ def get_dashboard_data(
     category_report_limit = _coerce_limit(category_report_limit, default=12, minimum=1, maximum=100)
     inventory_status_limit = _coerce_limit(inventory_status_limit, default=20, minimum=1, maximum=100)
     stock_movement_limit = _coerce_limit(stock_movement_limit, default=50, minimum=1, maximum=200)
+    reorder_suggestion_limit = _coerce_limit(reorder_suggestion_limit, default=25, minimum=1, maximum=200)
 
     company = cstr(current_profile_doc.get("company")).strip()
     company_profiles = _get_company_profiles(company)
@@ -2282,6 +2534,20 @@ def get_dashboard_data(
             "day_wise": [],
             "recent_movements": [],
         },
+        "reorder_purchase_suggestions": {
+            "period": {"from": str(month_start), "to": str(today)},
+            "summary": {
+                "candidate_items": 0,
+                "suggestion_count": 0,
+                "critical_count": 0,
+                "high_count": 0,
+                "medium_count": 0,
+                "low_count": 0,
+                "total_suggested_qty": 0.0,
+                "estimated_purchase_value": 0.0,
+            },
+            "suggestions": [],
+        },
         "inventory_insights": {
             "fast_moving_items": [],
             "fast_moving_period": {
@@ -2375,6 +2641,15 @@ def get_dashboard_data(
         date_from=str(month_start),
         date_to=str(today),
         limit=stock_movement_limit,
+    )
+    payload["reorder_purchase_suggestions"] = _collect_reorder_purchase_suggestions(
+        profile_names=selected_profile_names,
+        company=company,
+        warehouses=warehouses,
+        threshold=threshold,
+        date_from=str(month_start),
+        date_to=str(today),
+        limit=reorder_suggestion_limit,
     )
 
     fast_moving_items, fast_moving_total_count = _collect_fast_moving_items(

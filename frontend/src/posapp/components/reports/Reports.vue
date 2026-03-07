@@ -832,6 +832,61 @@
 					</v-col>
 				</v-row>
 
+				<v-row v-show="activeDashboardTab === 'procurement'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Reorder / Purchase Suggestions") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ reorderRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="error" variant="tonal">
+										{{ __("Critical") }}: {{ formatQuantity(Number(reorderSummary.critical_count || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="warning" variant="tonal">
+										{{ __("High") }}: {{ formatQuantity(Number(reorderSummary.high_count || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="success" variant="tonal">
+										{{ __("Suggested Qty") }}: {{ formatQuantity(Number(reorderSummary.total_suggested_qty || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="primary" variant="tonal">
+										{{ __("Est. Purchase") }}: {{ formatMoney(Number(reorderSummary.estimated_purchase_value || 0)) }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div v-if="reorderSuggestions.length" class="list-stack">
+								<div v-for="row in reorderSuggestions" :key="`reorder-${row.item_code}`" class="insight-row">
+									<div class="insight-row__top">
+										<div class="insight-row__title">{{ row.item_name || row.item_code }}</div>
+										<v-chip size="x-small" :color="urgencyColor(row.urgency)" variant="flat">
+											{{ urgencyLabel(row.urgency) }}
+										</v-chip>
+									</div>
+									<div class="insight-row__meta">
+										{{ row.item_code }} .
+										{{ __("Current") }}: {{ formatQuantity(Number(row.current_qty || 0)) }} .
+										{{ __("Suggested") }}: {{ formatQuantity(Number(row.suggested_qty || 0)) }}
+									</div>
+									<div class="insight-row__meta">
+										{{ __("Daily Sales") }}: {{ formatQuantity(Number(row.avg_daily_sales || 0)) }} .
+										{{ __("Lead Time") }}: {{ formatDays(row.lead_time_days) }} .
+										{{ __("Cover") }}: {{ formatDays(row.stock_cover_days) }}
+									</div>
+									<div class="insight-row__meta">
+										{{ __("Supplier") }}: {{ row.supplier || __("Not Set") }} .
+										{{ __("Est. Value") }}: {{ formatMoney(Number(row.estimated_purchase_value || 0)) }}
+									</div>
+								</div>
+							</div>
+							<div v-else class="empty-state">
+								{{ __("No reorder suggestions right now.") }}
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
 				<v-row v-show="activeDashboardTab === 'procurement'" class="dashboard-grid mt-1">
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
@@ -896,6 +951,7 @@ import {
 	type FastMovingItem,
 	type InventoryStatusRow,
 	type ItemSalesRow,
+	type ReorderSuggestionRow,
 	type StockMovementDayRow,
 	type StockMovementRecentRow,
 	type LowStockItem,
@@ -928,6 +984,7 @@ const itemSalesLimit = ref(20);
 const categoryReportLimit = ref(12);
 const inventoryStatusLimit = ref(20);
 const stockMovementLimit = ref(20);
+const reorderSuggestionLimit = ref(25);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -1033,6 +1090,20 @@ const createEmptyDashboard = (): DashboardResponse => ({
 		},
 		day_wise: [],
 		recent_movements: [],
+	},
+	reorder_purchase_suggestions: {
+		period: {},
+		summary: {
+			candidate_items: 0,
+			suggestion_count: 0,
+			critical_count: 0,
+			high_count: 0,
+			medium_count: 0,
+			low_count: 0,
+			total_suggested_qty: 0,
+			estimated_purchase_value: 0,
+		},
+		suggestions: [],
 	},
 	inventory_insights: {
 		fast_moving_items: [],
@@ -1609,6 +1680,30 @@ const stockMovementDayMax = computed(() => {
 	return maxValue > 0 ? maxValue : 1;
 });
 
+const reorderReport = computed(() => dashboardData.value.reorder_purchase_suggestions || {});
+const reorderSummary = computed(() => reorderReport.value.summary || {});
+const reorderSuggestions = computed<ReorderSuggestionRow[]>(() =>
+	[...(reorderReport.value.suggestions || [])]
+		.sort((a, b) => {
+			const order = { critical: 0, high: 1, medium: 2, low: 3 } as Record<string, number>;
+			const left = order[String(a.urgency || "").toLowerCase()] ?? 99;
+			const right = order[String(b.urgency || "").toLowerCase()] ?? 99;
+			if (left !== right) {
+				return left - right;
+			}
+			return Number(b.suggested_qty || 0) - Number(a.suggested_qty || 0);
+		})
+		.slice(0, Number(reorderSuggestionLimit.value || 25)),
+);
+const reorderRangeLabel = computed(() => {
+	const from = reorderReport.value.period?.from || dashboardData.value.date_context?.month_start;
+	const to = reorderReport.value.period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+
 const fastMovingItems = computed<FastMovingItem[]>(
 	() => dashboardData.value.inventory_insights.fast_moving_items || [],
 );
@@ -1793,6 +1888,40 @@ function formatMovementCategory(category?: string) {
 	return __("Other");
 }
 
+function urgencyLabel(value?: string) {
+	const normalized = String(value || "").trim().toLowerCase();
+	if (normalized === "critical") {
+		return __("Critical");
+	}
+	if (normalized === "high") {
+		return __("High");
+	}
+	if (normalized === "medium") {
+		return __("Medium");
+	}
+	if (normalized === "low") {
+		return __("Low");
+	}
+	return __("Unknown");
+}
+
+function urgencyColor(value?: string) {
+	const normalized = String(value || "").trim().toLowerCase();
+	if (normalized === "critical") {
+		return "error";
+	}
+	if (normalized === "high") {
+		return "warning";
+	}
+	if (normalized === "medium") {
+		return "info";
+	}
+	if (normalized === "low") {
+		return "success";
+	}
+	return "secondary";
+}
+
 function progressFromQuantity(quantity: number) {
 	return Math.min(100, (Number(quantity || 0) / maxFastMovingQty.value) * 100);
 }
@@ -1870,6 +1999,10 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 			...(base.stock_movement_report || {}),
 			...(payload?.stock_movement_report || {}),
 		},
+		reorder_purchase_suggestions: {
+			...(base.reorder_purchase_suggestions || {}),
+			...(payload?.reorder_purchase_suggestions || {}),
+		},
 		inventory_insights: {
 			...base.inventory_insights,
 			...(payload?.inventory_insights || {}),
@@ -1907,6 +2040,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
 	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
 	console.info("stock_movement_count", response.stock_movement_report?.summary?.movement_count || 0);
+	console.info("reorder_suggestion_count", response.reorder_purchase_suggestions?.summary?.suggestion_count || 0);
 	console.info("fast_moving_pagination", response.inventory_insights?.fast_moving_pagination || null);
 	console.groupEnd();
 }
@@ -1933,6 +2067,7 @@ async function loadDashboard() {
 			category_report_limit: categoryReportLimit.value,
 			inventory_status_limit: inventoryStatusLimit.value,
 			stock_movement_limit: stockMovementLimit.value,
+			reorder_suggestion_limit: reorderSuggestionLimit.value,
 			fast_moving_page: fastMovingPage.value,
 			fast_moving_page_size: fastMovingPageSize.value,
 			fast_moving_search: fastMovingSearch.value || undefined,
