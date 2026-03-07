@@ -43,6 +43,16 @@
 						class="dashboard-filter mr-2 mb-2 mb-sm-0"
 						:label="__('Profile')"
 					/>
+					<v-text-field
+						v-model="selectedReportMonth"
+						type="month"
+						:max="currentMonthToken"
+						density="compact"
+						variant="outlined"
+						hide-details
+						class="dashboard-filter mr-2 mb-2 mb-sm-0"
+						:label="__('Month')"
+					/>
 					<v-chip
 						v-if="lastUpdatedLabel"
 						size="small"
@@ -1855,6 +1865,9 @@ type DashboardTab =
 const activeDashboardTab = ref<DashboardTab>("sales");
 const dashboardScope = ref<"all" | "current" | "specific">("all");
 const selectedProfileFilter = ref("");
+const initialNow = new Date();
+const currentMonthToken = `${initialNow.getFullYear()}-${String(initialNow.getMonth() + 1).padStart(2, "0")}`;
+const selectedReportMonth = ref(currentMonthToken);
 const scopeInitialized = ref(false);
 const fastMovingPage = ref(1);
 const fastMovingPageSize = ref(10);
@@ -3371,6 +3384,7 @@ function logDashboardRequest() {
 	console.groupCollapsed(`${DASHBOARD_LOG_PREFIX} fetch:start`);
 	console.info("scope", dashboardScope.value);
 	console.info("profile_filter", selectedProfileFilter.value || null);
+	console.info("report_month", selectedReportMonth.value || null);
 	console.info("pos_profile", profileName.value || null);
 	console.info("threshold_override", configuredLowStockThreshold.value ?? null);
 	console.info("fast_moving_page", fastMovingPage.value);
@@ -3422,6 +3436,7 @@ async function loadDashboard() {
 			scope: dashboardScope.value,
 			profile_filter:
 				dashboardScope.value === "specific" ? selectedProfileFilter.value || undefined : undefined,
+			report_month: selectedReportMonth.value || undefined,
 			low_stock_threshold: configuredLowStockThreshold.value,
 			item_sales_limit: itemSalesLimit.value,
 			category_report_limit: categoryReportLimit.value,
@@ -3441,6 +3456,9 @@ async function loadDashboard() {
 		});
 		logDashboardResponse(response);
 		dashboardData.value = mergeDashboardPayload(response);
+		if (response.date_context?.report_month) {
+			selectedReportMonth.value = String(response.date_context.report_month);
+		}
 		isDashboardEnabledOnServer.value = response.enabled !== false;
 		allowAllProfiles.value = Boolean(response.allow_all_profiles);
 		if (!scopeInitialized.value) {
@@ -3496,6 +3514,20 @@ watch(
 			return;
 		}
 		if (newValue === oldValue) {
+			return;
+		}
+		void loadDashboard();
+	},
+);
+
+watch(
+	() => selectedReportMonth.value,
+	(newMonth, oldMonth) => {
+		if (newMonth === oldMonth) {
+			return;
+		}
+		if (fastMovingPage.value !== 1) {
+			fastMovingPage.value = 1;
 			return;
 		}
 		void loadDashboard();

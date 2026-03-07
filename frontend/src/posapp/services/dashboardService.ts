@@ -305,6 +305,7 @@ export interface DashboardResponse {
 	date_context?: {
 		today?: string;
 		month_start?: string;
+		report_month?: string;
 	};
 	sales_overview: DashboardMetricPayload;
 	daily_sales_summary?: {
@@ -669,6 +670,7 @@ export interface DashboardRequest {
 	pos_profile?: string | null;
 	scope?: "all" | "current" | "specific";
 	profile_filter?: string | null;
+	report_month?: string | null;
 	low_stock_threshold?: number;
 	fast_moving_limit?: number;
 	fast_moving_page?: number;

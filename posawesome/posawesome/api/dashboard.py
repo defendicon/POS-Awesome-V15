@@ -107,6 +107,29 @@ def _coerce_threshold(value: Any, fallback: Any, default: int = 10, maximum: int
     return min(int(threshold), maximum)
 
 
+def _resolve_report_month(report_month: Any, fallback_today) -> tuple[Any, Any, str]:
+    current_today = getdate(fallback_today)
+    current_month_start = current_today.replace(day=1)
+
+    month_token = cstr(report_month).strip()
+    if not month_token:
+        return current_month_start, current_today, str(current_month_start)[:7]
+
+    try:
+        selected_month_start = getdate(f"{month_token}-01")
+    except Exception:
+        return current_month_start, current_today, str(current_month_start)[:7]
+
+    selected_month_start = selected_month_start.replace(day=1)
+    if selected_month_start > current_month_start:
+        selected_month_start = current_month_start
+
+    next_month_start = getdate(add_months(selected_month_start, 1)).replace(day=1)
+    selected_month_end = next_month_start - timedelta(days=1)
+    selected_month_end = min(selected_month_end, current_today)
+    return selected_month_start, selected_month_end, str(selected_month_start)[:7]
+
+
 def _to_bool_setting(value: Any, default: bool = False) -> bool:
     if value in (None, ""):
         return default
@@ -4442,6 +4465,7 @@ def get_dashboard_data(
     pos_profile=None,
     scope=None,
     profile_filter=None,
+    report_month=None,
     low_stock_threshold=None,
     fast_moving_limit: int = 10,
     fast_moving_page: int = 1,
@@ -4592,9 +4616,9 @@ def get_dashboard_data(
     else:
         currency = company_currency or cstr(current_profile_doc.get("currency")).strip()
 
-    today = getdate(nowdate())
-    month_start = today.replace(day=1)
-    fast_moving_days = max(1, (today - month_start).days + 1)
+    current_today = getdate(nowdate())
+    month_start, report_to_date, selected_report_month = _resolve_report_month(report_month, current_today)
+    fast_moving_days = max(1, (report_to_date - month_start).days + 1)
     global_enabled = bool(global_settings["enabled"])
     # Keep dashboard operational whenever scoped profiles are available.
     # Global toggle is returned for diagnostics but does not hard-block data.
@@ -4629,8 +4653,9 @@ def get_dashboard_data(
         "currency": currency,
         "generated_at": now_datetime().isoformat(),
         "date_context": {
-            "today": str(today),
+            "today": str(report_to_date),
             "month_start": str(month_start),
+            "report_month": selected_report_month,
         },
         "sales_overview": {
             "today_sales": 0.0,
@@ -4640,7 +4665,7 @@ def get_dashboard_data(
             "profit_method": "invoice_item",
         },
         "daily_sales_summary": {
-            "period": {"from": str(today), "to": str(today)},
+            "period": {"from": str(report_to_date), "to": str(report_to_date)},
             "invoice_count": 0,
             "returns_count": 0,
             "gross_sales": 0.0,
@@ -4665,7 +4690,7 @@ def get_dashboard_data(
             "payment_methods": [],
         },
         "payment_method_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "totals": {
                 "invoice_count": 0,
                 "split_invoice_count": 0,
@@ -4684,7 +4709,7 @@ def get_dashboard_data(
             "day_wise": [],
         },
         "discount_void_return_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "totals": {
                 "discount_amount": 0.0,
                 "discounted_invoice_count": 0,
@@ -4698,7 +4723,7 @@ def get_dashboard_data(
             "day_wise": [],
         },
         "customer_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "summary": {
                 "customer_count": 0,
                 "repeat_customer_count": 0,
@@ -4713,7 +4738,7 @@ def get_dashboard_data(
             "recent_customers": [],
         },
         "staff_performance_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "summary": {
                 "cashier_count": 0,
                 "invoice_count": 0,
@@ -4732,7 +4757,7 @@ def get_dashboard_data(
             "risk_activity": [],
         },
         "profitability_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "summary": {
                 "invoice_count": 0,
                 "return_invoice_count": 0,
@@ -4752,7 +4777,7 @@ def get_dashboard_data(
             },
         },
         "branch_location_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "summary": {
                 "location_count": 0,
                 "total_invoices": 0,
@@ -4766,7 +4791,7 @@ def get_dashboard_data(
             "top_items_by_location": [],
         },
         "tax_charges_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "totals": {
                 "invoice_count": 0,
                 "return_invoice_count": 0,
@@ -4791,10 +4816,10 @@ def get_dashboard_data(
         "sales_trend": {
             "period": {
                 "day_from": str(month_start),
-                "day_to": str(today),
-                "week_from": str(today - timedelta(days=55)),
-                "month_from": str(getdate(add_months(today, -5)).replace(day=1)),
-                "to": str(today),
+                "day_to": str(report_to_date),
+                "week_from": str(report_to_date - timedelta(days=55)),
+                "month_from": str(getdate(add_months(report_to_date, -5)).replace(day=1)),
+                "to": str(report_to_date),
             },
             "day_wise": [],
             "week_wise": [],
@@ -4809,7 +4834,7 @@ def get_dashboard_data(
             },
         },
         "item_sales_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "items": [],
             "highlights": {
                 "best_seller": None,
@@ -4818,7 +4843,7 @@ def get_dashboard_data(
             },
         },
         "category_brand_variant_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "category_wise": [],
             "brand_wise": [],
             "variant_wise": [],
@@ -4830,7 +4855,7 @@ def get_dashboard_data(
             },
         },
         "inventory_status_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "threshold": threshold,
             "summary": {
                 "total_items": 0,
@@ -4848,7 +4873,7 @@ def get_dashboard_data(
             "dead_stock_items": [],
         },
         "stock_movement_report": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "summary": {
                 "movement_count": 0,
                 "sale_out_qty": 0.0,
@@ -4866,7 +4891,7 @@ def get_dashboard_data(
             "recent_movements": [],
         },
         "reorder_purchase_suggestions": {
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
             "summary": {
                 "candidate_items": 0,
                 "suggestion_count": 0,
@@ -4883,7 +4908,7 @@ def get_dashboard_data(
             "fast_moving_items": [],
             "fast_moving_period": {
                 "from": str(month_start),
-                "to": str(today),
+                "to": str(report_to_date),
                 "days": fast_moving_days,
             },
             "fast_moving_pagination": {
@@ -4898,7 +4923,7 @@ def get_dashboard_data(
         },
         "supplier_overview": {
             "purchase_summary": [],
-            "period": {"from": str(month_start), "to": str(today)},
+            "period": {"from": str(month_start), "to": str(report_to_date)},
         },
     }
 
@@ -4911,8 +4936,8 @@ def get_dashboard_data(
             child_doctype=child_doctype,
             profile_names=selected_profile_names,
             company=company,
-            date_from=str(today),
-            date_to=str(today),
+            date_from=str(report_to_date),
+            date_to=str(report_to_date),
         )
         monthly_stats = _collect_sales_and_profit(
             parent_doctype=parent_doctype,
@@ -4920,7 +4945,7 @@ def get_dashboard_data(
             profile_names=selected_profile_names,
             company=company,
             date_from=str(month_start),
-            date_to=str(today),
+            date_to=str(report_to_date),
         )
         payload["sales_overview"]["today_sales"] += flt(today_stats.get("sales"))
         payload["sales_overview"]["today_profit"] += flt(today_stats.get("profit"))
@@ -4935,48 +4960,48 @@ def get_dashboard_data(
     payload["daily_sales_summary"] = _collect_daily_sales_summary(
         profile_names=selected_profile_names,
         company=company,
-        date_value=str(today),
+        date_value=str(report_to_date),
     )
     payload["payment_method_report"] = _collect_payment_method_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=payment_report_limit,
     )
     payload["discount_void_return_report"] = _collect_discount_void_return_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=discount_report_limit,
     )
     payload["customer_report"] = _collect_customer_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=customer_report_limit,
     )
     payload["staff_performance_report"] = _collect_staff_cashier_performance_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=staff_report_limit,
     )
     payload["profitability_report"] = _collect_profitability_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=profitability_report_limit,
     )
     payload["branch_location_report"] = _collect_branch_location_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         threshold=threshold,
         limit=branch_report_limit,
     )
@@ -4984,27 +5009,27 @@ def get_dashboard_data(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=tax_report_limit,
     )
     payload["sales_trend"] = _collect_sales_trend(
         profile_names=selected_profile_names,
         company=company,
-        today=today,
+        today=report_to_date,
         month_start=month_start,
     )
     payload["item_sales_report"] = _collect_item_sales_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=item_sales_limit,
     )
     payload["category_brand_variant_report"] = _collect_category_brand_variant_report(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=category_report_limit,
     )
     payload["inventory_status_report"] = _collect_inventory_status_report(
@@ -5013,14 +5038,14 @@ def get_dashboard_data(
         warehouses=warehouses,
         threshold=threshold,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=inventory_status_limit,
     )
     payload["stock_movement_report"] = _collect_stock_movement_report(
         company=company,
         warehouses=warehouses,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=stock_movement_limit,
     )
     payload["reorder_purchase_suggestions"] = _collect_reorder_purchase_suggestions(
@@ -5029,7 +5054,7 @@ def get_dashboard_data(
         warehouses=warehouses,
         threshold=threshold,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=reorder_suggestion_limit,
     )
 
@@ -5037,7 +5062,7 @@ def get_dashboard_data(
         profile_names=selected_profile_names,
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=fast_moving_page_size,
         offset=fast_moving_offset,
         search_text=fast_moving_search,
@@ -5060,7 +5085,7 @@ def get_dashboard_data(
     payload["supplier_overview"]["purchase_summary"] = _collect_supplier_purchase_summary(
         company=company,
         date_from=str(month_start),
-        date_to=str(today),
+        date_to=str(report_to_date),
         limit=supplier_limit,
     )
 
