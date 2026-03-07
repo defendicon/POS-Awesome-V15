@@ -1000,6 +1000,397 @@ def _collect_payment_method_report(
     return report
 
 
+def _collect_discount_void_return_report(
+    profile_names: list[str],
+    company: str,
+    date_from: str,
+    date_to: str,
+    limit: int = 20,
+) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "period": {"from": date_from, "to": date_to},
+        "totals": {
+            "discount_amount": 0.0,
+            "discounted_invoice_count": 0,
+            "return_count": 0,
+            "return_amount": 0.0,
+            "void_count": 0,
+            "void_amount": 0.0,
+        },
+        "cashier_wise": [],
+        "top_return_items": [],
+        "day_wise": [],
+    }
+    if not profile_names:
+        return report
+
+    profile_filter, profile_filter_params = _build_in_filter("inv.pos_profile", profile_names)
+    row_limit = _coerce_limit(limit, default=20, minimum=1, maximum=200)
+    fetch_limit = _coerce_limit(limit * 5, default=100, minimum=20, maximum=500)
+    totals = report["totals"]
+
+    cashier_buckets: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {
+            "cashier": "",
+            "discount_amount": 0.0,
+            "discounted_invoice_count": 0,
+            "return_count": 0,
+            "return_amount": 0.0,
+            "void_count": 0,
+            "void_amount": 0.0,
+        }
+    )
+    day_buckets: dict[str, dict[str, Any]] = {}
+    top_return_items: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {
+            "item_code": "",
+            "item_name": "",
+            "stock_uom": "",
+            "return_qty": 0.0,
+            "return_amount": 0.0,
+            "return_invoice_count": 0,
+        }
+    )
+
+    for parent_doctype, child_doctype in _iter_invoice_sources():
+        amount_field = _pick_first_column(parent_doctype, ["base_grand_total", "grand_total"])
+        if not amount_field:
+            continue
+        amount_expression = f"coalesce(inv.{amount_field}, 0)"
+        discount_field = _pick_first_column(
+            parent_doctype,
+            [
+                "base_discount_amount",
+                "discount_amount",
+                "base_additional_discount_amount",
+                "additional_discount_amount",
+            ],
+        )
+        discount_expression = f"abs(coalesce(inv.{discount_field}, 0))" if discount_field else "0"
+        cashier_field = _pick_first_column(parent_doctype, ["owner", "cashier", "modified_by"])
+        cashier_expression = f"coalesce(inv.{cashier_field}, '')" if cashier_field else "''"
+        is_return_expression = (
+            "ifnull(inv.is_return, 0)" if frappe.db.has_column(parent_doctype, "is_return") else "0"
+        )
+
+        discount_rows = frappe.db.sql(
+            f"""
+            select
+                {cashier_expression} as cashier,
+                sum(
+                    case
+                        when {is_return_expression} = 1 then 0
+                        else {discount_expression}
+                    end
+                ) as discount_amount,
+                sum(
+                    case
+                        when {is_return_expression} = 1 then 0
+                        when {discount_expression} > 0.00001 then 1
+                        else 0
+                    end
+                ) as discounted_invoice_count
+            from `tab{parent_doctype}` inv
+            where inv.docstatus = 1
+              and inv.company = %s
+              and inv.posting_date between %s and %s
+              {profile_filter}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            group by {cashier_expression}
+            """,
+            (company, date_from, date_to, *profile_filter_params),
+            as_dict=True,
+        )
+        for row in discount_rows:
+            cashier = cstr(row.get("cashier")).strip() or _("Unknown")
+            entry = cashier_buckets[cashier]
+            entry["cashier"] = cashier
+            entry["discount_amount"] += flt(row.get("discount_amount"))
+            entry["discounted_invoice_count"] += cint(row.get("discounted_invoice_count"))
+            totals["discount_amount"] += flt(row.get("discount_amount"))
+            totals["discounted_invoice_count"] += cint(row.get("discounted_invoice_count"))
+
+        discount_day_rows = frappe.db.sql(
+            f"""
+            select
+                inv.posting_date as posting_date,
+                sum(
+                    case
+                        when {is_return_expression} = 1 then 0
+                        else {discount_expression}
+                    end
+                ) as discount_amount
+            from `tab{parent_doctype}` inv
+            where inv.docstatus = 1
+              and inv.company = %s
+              and inv.posting_date between %s and %s
+              {profile_filter}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            group by inv.posting_date
+            """,
+            (company, date_from, date_to, *profile_filter_params),
+            as_dict=True,
+        )
+        for row in discount_day_rows:
+            day_key = cstr(row.get("posting_date")).strip()
+            if not day_key:
+                continue
+            day_entry = day_buckets.setdefault(
+                day_key,
+                {
+                    "date": day_key,
+                    "discount_amount": 0.0,
+                    "return_count": 0,
+                    "return_amount": 0.0,
+                    "void_count": 0,
+                    "void_amount": 0.0,
+                },
+            )
+            day_entry["discount_amount"] += flt(row.get("discount_amount"))
+
+        if frappe.db.has_column(parent_doctype, "is_return"):
+            return_rows = frappe.db.sql(
+                f"""
+                select
+                    {cashier_expression} as cashier,
+                    count(inv.name) as return_count,
+                    sum(abs({amount_expression})) as return_amount
+                from `tab{parent_doctype}` inv
+                where inv.docstatus = 1
+                  and ifnull(inv.is_return, 0) = 1
+                  and inv.company = %s
+                  and inv.posting_date between %s and %s
+                  {profile_filter}
+                  {_extra_parent_filter(parent_doctype, "inv")}
+                group by {cashier_expression}
+                """,
+                (company, date_from, date_to, *profile_filter_params),
+                as_dict=True,
+            )
+            for row in return_rows:
+                cashier = cstr(row.get("cashier")).strip() or _("Unknown")
+                entry = cashier_buckets[cashier]
+                entry["cashier"] = cashier
+                entry["return_count"] += cint(row.get("return_count"))
+                entry["return_amount"] += flt(row.get("return_amount"))
+                totals["return_count"] += cint(row.get("return_count"))
+                totals["return_amount"] += flt(row.get("return_amount"))
+
+            return_day_rows = frappe.db.sql(
+                f"""
+                select
+                    inv.posting_date as posting_date,
+                    count(inv.name) as return_count,
+                    sum(abs({amount_expression})) as return_amount
+                from `tab{parent_doctype}` inv
+                where inv.docstatus = 1
+                  and ifnull(inv.is_return, 0) = 1
+                  and inv.company = %s
+                  and inv.posting_date between %s and %s
+                  {profile_filter}
+                  {_extra_parent_filter(parent_doctype, "inv")}
+                group by inv.posting_date
+                """,
+                (company, date_from, date_to, *profile_filter_params),
+                as_dict=True,
+            )
+            for row in return_day_rows:
+                day_key = cstr(row.get("posting_date")).strip()
+                if not day_key:
+                    continue
+                day_entry = day_buckets.setdefault(
+                    day_key,
+                    {
+                        "date": day_key,
+                        "discount_amount": 0.0,
+                        "return_count": 0,
+                        "return_amount": 0.0,
+                        "void_count": 0,
+                        "void_amount": 0.0,
+                    },
+                )
+                day_entry["return_count"] += cint(row.get("return_count"))
+                day_entry["return_amount"] += flt(row.get("return_amount"))
+
+            qty_field = _pick_first_column(child_doctype, ["stock_qty", "qty"])
+            item_amount_field = _pick_first_column(child_doctype, ["base_net_amount", "net_amount", "amount"])
+            item_name_field = _pick_first_column(child_doctype, ["item_name"])
+            stock_uom_field = _pick_first_column(child_doctype, ["stock_uom", "uom"])
+            if qty_field and item_amount_field:
+                item_name_expression = (
+                    f"coalesce(item.{item_name_field}, item.item_code)"
+                    if item_name_field
+                    else "item.item_code"
+                )
+                stock_uom_expression = (
+                    f"coalesce(item.{stock_uom_field}, '')"
+                    if stock_uom_field
+                    else "''"
+                )
+                return_item_rows = frappe.db.sql(
+                    f"""
+                    select
+                        item.item_code as item_code,
+                        max({item_name_expression}) as item_name,
+                        max({stock_uom_expression}) as stock_uom,
+                        sum(abs(coalesce(item.{qty_field}, 0))) as return_qty,
+                        sum(abs(coalesce(item.{item_amount_field}, 0))) as return_amount,
+                        count(distinct item.parent) as return_invoice_count
+                    from `tab{child_doctype}` item
+                    inner join `tab{parent_doctype}` inv on inv.name = item.parent
+                    where inv.docstatus = 1
+                      and ifnull(inv.is_return, 0) = 1
+                      and inv.company = %s
+                      and inv.posting_date between %s and %s
+                      {profile_filter}
+                      {_extra_parent_filter(parent_doctype, "inv")}
+                    group by item.item_code
+                    order by return_amount desc
+                    limit %s
+                    """,
+                    (company, date_from, date_to, *profile_filter_params, fetch_limit),
+                    as_dict=True,
+                )
+                for row in return_item_rows:
+                    item_code = cstr(row.get("item_code")).strip()
+                    item_name = cstr(row.get("item_name")).strip()
+                    item_key = item_code or item_name
+                    if not item_key:
+                        continue
+                    entry = top_return_items[item_key]
+                    entry["item_code"] = item_code
+                    entry["item_name"] = item_name
+                    if not entry.get("stock_uom"):
+                        entry["stock_uom"] = cstr(row.get("stock_uom")).strip()
+                    entry["return_qty"] += flt(row.get("return_qty"))
+                    entry["return_amount"] += flt(row.get("return_amount"))
+                    entry["return_invoice_count"] += cint(row.get("return_invoice_count"))
+
+        void_rows = frappe.db.sql(
+            f"""
+            select
+                {cashier_expression} as cashier,
+                count(inv.name) as void_count,
+                sum(abs({amount_expression})) as void_amount
+            from `tab{parent_doctype}` inv
+            where inv.docstatus = 2
+              and inv.company = %s
+              and inv.posting_date between %s and %s
+              {profile_filter}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            group by {cashier_expression}
+            """,
+            (company, date_from, date_to, *profile_filter_params),
+            as_dict=True,
+        )
+        for row in void_rows:
+            cashier = cstr(row.get("cashier")).strip() or _("Unknown")
+            entry = cashier_buckets[cashier]
+            entry["cashier"] = cashier
+            entry["void_count"] += cint(row.get("void_count"))
+            entry["void_amount"] += flt(row.get("void_amount"))
+            totals["void_count"] += cint(row.get("void_count"))
+            totals["void_amount"] += flt(row.get("void_amount"))
+
+        void_day_rows = frappe.db.sql(
+            f"""
+            select
+                inv.posting_date as posting_date,
+                count(inv.name) as void_count,
+                sum(abs({amount_expression})) as void_amount
+            from `tab{parent_doctype}` inv
+            where inv.docstatus = 2
+              and inv.company = %s
+              and inv.posting_date between %s and %s
+              {profile_filter}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            group by inv.posting_date
+            """,
+            (company, date_from, date_to, *profile_filter_params),
+            as_dict=True,
+        )
+        for row in void_day_rows:
+            day_key = cstr(row.get("posting_date")).strip()
+            if not day_key:
+                continue
+            day_entry = day_buckets.setdefault(
+                day_key,
+                {
+                    "date": day_key,
+                    "discount_amount": 0.0,
+                    "return_count": 0,
+                    "return_amount": 0.0,
+                    "void_count": 0,
+                    "void_amount": 0.0,
+                },
+            )
+            day_entry["void_count"] += cint(row.get("void_count"))
+            day_entry["void_amount"] += flt(row.get("void_amount"))
+
+    cashier_rows = []
+    for row in cashier_buckets.values():
+        discount_amount = flt(row.get("discount_amount"))
+        return_amount = flt(row.get("return_amount"))
+        void_amount = flt(row.get("void_amount"))
+        discounted_invoice_count = cint(row.get("discounted_invoice_count"))
+        return_count = cint(row.get("return_count"))
+        void_count = cint(row.get("void_count"))
+        if (
+            abs(discount_amount) <= 0.00001
+            and abs(return_amount) <= 0.00001
+            and abs(void_amount) <= 0.00001
+            and discounted_invoice_count <= 0
+            and return_count <= 0
+            and void_count <= 0
+        ):
+            continue
+        cashier_rows.append(
+            {
+                "cashier": row.get("cashier"),
+                "discount_amount": discount_amount,
+                "discounted_invoice_count": discounted_invoice_count,
+                "return_count": return_count,
+                "return_amount": return_amount,
+                "void_count": void_count,
+                "void_amount": void_amount,
+            }
+        )
+    cashier_rows.sort(
+        key=lambda row: (
+            abs(flt(row.get("void_amount"))),
+            abs(flt(row.get("return_amount"))),
+            abs(flt(row.get("discount_amount"))),
+            cint(row.get("void_count")) + cint(row.get("return_count")),
+        ),
+        reverse=True,
+    )
+
+    top_return_rows = []
+    for row in top_return_items.values():
+        if abs(flt(row.get("return_amount"))) <= 0.00001 and abs(flt(row.get("return_qty"))) <= 0.00001:
+            continue
+        top_return_rows.append(
+            {
+                "item_code": row.get("item_code"),
+                "item_name": row.get("item_name"),
+                "stock_uom": row.get("stock_uom"),
+                "return_qty": flt(row.get("return_qty")),
+                "return_amount": flt(row.get("return_amount")),
+                "return_invoice_count": cint(row.get("return_invoice_count")),
+            }
+        )
+    top_return_rows.sort(
+        key=lambda row: (abs(flt(row.get("return_amount"))), abs(flt(row.get("return_qty")))),
+        reverse=True,
+    )
+
+    day_rows = sorted(day_buckets.values(), key=lambda row: cstr(row.get("date")))
+    report["cashier_wise"] = cashier_rows[:row_limit]
+    report["top_return_items"] = top_return_rows[:row_limit]
+    report["day_wise"] = day_rows
+    return report
+
+
 def _pct_change(current: float, previous: float) -> float | None:
     current_value = flt(current)
     previous_value = flt(previous)
@@ -2530,6 +2921,7 @@ def get_dashboard_data(
     stock_movement_limit: int = 50,
     reorder_suggestion_limit: int = 25,
     payment_report_limit: int = 20,
+    discount_report_limit: int = 20,
     supplier_limit: int = 8,
     low_stock_limit: int = 20,
 ):
@@ -2574,6 +2966,7 @@ def get_dashboard_data(
     stock_movement_limit = _coerce_limit(stock_movement_limit, default=50, minimum=1, maximum=200)
     reorder_suggestion_limit = _coerce_limit(reorder_suggestion_limit, default=25, minimum=1, maximum=200)
     payment_report_limit = _coerce_limit(payment_report_limit, default=20, minimum=1, maximum=200)
+    discount_report_limit = _coerce_limit(discount_report_limit, default=20, minimum=1, maximum=200)
 
     company = cstr(current_profile_doc.get("company")).strip()
     company_profiles = _get_company_profiles(company)
@@ -2746,6 +3139,20 @@ def get_dashboard_data(
             "category_wise": [],
             "day_wise": [],
         },
+        "discount_void_return_report": {
+            "period": {"from": str(month_start), "to": str(today)},
+            "totals": {
+                "discount_amount": 0.0,
+                "discounted_invoice_count": 0,
+                "return_count": 0,
+                "return_amount": 0.0,
+                "void_count": 0,
+                "void_amount": 0.0,
+            },
+            "cashier_wise": [],
+            "top_return_items": [],
+            "day_wise": [],
+        },
         "sales_trend": {
             "period": {
                 "day_from": str(month_start),
@@ -2901,6 +3308,13 @@ def get_dashboard_data(
         date_from=str(month_start),
         date_to=str(today),
         limit=payment_report_limit,
+    )
+    payload["discount_void_return_report"] = _collect_discount_void_return_report(
+        profile_names=selected_profile_names,
+        company=company,
+        date_from=str(month_start),
+        date_to=str(today),
+        limit=discount_report_limit,
     )
     payload["sales_trend"] = _collect_sales_trend(
         profile_names=selected_profile_names,

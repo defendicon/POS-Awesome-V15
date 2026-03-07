@@ -142,6 +142,34 @@ export interface PaymentDaySummaryRow {
 	pending_amount?: number;
 }
 
+export interface DiscountVoidReturnCashierRow {
+	cashier?: string;
+	discount_amount?: number;
+	discounted_invoice_count?: number;
+	return_count?: number;
+	return_amount?: number;
+	void_count?: number;
+	void_amount?: number;
+}
+
+export interface DiscountVoidReturnItemRow {
+	item_code?: string;
+	item_name?: string;
+	stock_uom?: string;
+	return_qty?: number;
+	return_amount?: number;
+	return_invoice_count?: number;
+}
+
+export interface DiscountVoidReturnDayRow {
+	date?: string;
+	discount_amount?: number;
+	return_count?: number;
+	return_amount?: number;
+	void_count?: number;
+	void_amount?: number;
+}
+
 export interface DashboardResponse {
 	enabled: boolean;
 	profile?: string;
@@ -221,6 +249,23 @@ export interface DashboardResponse {
 		method_wise?: PaymentMethodSummaryRow[];
 		category_wise?: PaymentCategorySummaryRow[];
 		day_wise?: PaymentDaySummaryRow[];
+	};
+	discount_void_return_report?: {
+		period?: {
+			from?: string;
+			to?: string;
+		};
+		totals?: {
+			discount_amount?: number;
+			discounted_invoice_count?: number;
+			return_count?: number;
+			return_amount?: number;
+			void_count?: number;
+			void_amount?: number;
+		};
+		cashier_wise?: DiscountVoidReturnCashierRow[];
+		top_return_items?: DiscountVoidReturnItemRow[];
+		day_wise?: DiscountVoidReturnDayRow[];
 	};
 	sales_trend?: {
 		period?: {
@@ -417,6 +462,7 @@ export interface DashboardRequest {
 	stock_movement_limit?: number;
 	reorder_suggestion_limit?: number;
 	payment_report_limit?: number;
+	discount_report_limit?: number;
 	supplier_limit?: number;
 	low_stock_limit?: number;
 }

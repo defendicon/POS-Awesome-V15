@@ -97,6 +97,165 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Discount / Void / Return Report") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ discountVoidReturnRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="warning" variant="tonal">
+										{{ __("Discount") }}: {{ formatMoney(Number(discountVoidReturnTotals.discount_amount || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="primary" variant="tonal">
+										{{ __("Returns") }}: {{ formatMoney(Number(discountVoidReturnTotals.return_amount || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="error" variant="tonal">
+										{{ __("Voids") }}: {{ formatMoney(Number(discountVoidReturnTotals.void_amount || 0)) }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div class="summary-grid">
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Discounted Invoices") }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(discountVoidReturnTotals.discounted_invoice_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Return Count") }}</div>
+									<div class="summary-metric__value">
+										{{ formatQuantity(Number(discountVoidReturnTotals.return_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Void Count") }}</div>
+									<div class="summary-metric__value summary-metric__value--danger">
+										{{ formatQuantity(Number(discountVoidReturnTotals.void_count || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Discount Amount") }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(discountVoidReturnTotals.discount_amount || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Return Amount") }}</div>
+									<div class="summary-metric__value">
+										{{ formatMoney(Number(discountVoidReturnTotals.return_amount || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Void Amount") }}</div>
+									<div class="summary-metric__value summary-metric__value--danger">
+										{{ formatMoney(Number(discountVoidReturnTotals.void_amount || 0)) }}
+									</div>
+								</div>
+							</div>
+
+							<div class="trend-grid">
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Cashier-wise") }}</div>
+									<div v-if="discountCashierRows.length" class="list-stack trend-list">
+										<div v-for="row in discountCashierRows" :key="`dvr-cashier-${row.cashier}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.void_amount || 0) + Number(row.return_amount || 0)) }}
+												</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Discount") }}: {{ formatMoney(Number(row.discount_amount || 0)) }} .
+												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }} .
+												{{ __("Voids") }}: {{ formatQuantity(Number(row.void_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="
+													trendProgress(
+														Number(row.discount_amount || 0) +
+															Number(row.return_amount || 0) +
+															Number(row.void_amount || 0),
+														discountCashierMax,
+													)
+												"
+												color="error"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No cashier-wise discount/void/return activity.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Top Return Items") }}</div>
+									<div v-if="discountTopReturnItems.length" class="list-stack trend-list">
+										<div
+											v-for="row in discountTopReturnItems"
+											:key="`dvr-item-${row.item_code || row.item_name}`"
+											class="insight-row"
+										>
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.return_amount || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ row.item_code || "-" }} .
+												{{ __("Qty") }}: {{ formatQuantity(Number(row.return_qty || 0)) }} {{ row.stock_uom || "" }} .
+												{{ __("Invoices") }}: {{ formatQuantity(Number(row.return_invoice_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.return_amount || 0), discountReturnItemMax)"
+												color="primary"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No return item trend found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Last 14 Days Activity") }}</div>
+									<div v-if="discountDayRows.length" class="list-stack trend-list">
+										<div v-for="row in discountDayRows" :key="`dvr-day-${row.date}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
+												<div class="insight-row__value">
+													{{ formatMoney(Number(row.discount_amount || 0) + Number(row.return_amount || 0) + Number(row.void_amount || 0)) }}
+												</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Discount") }}: {{ formatMoney(Number(row.discount_amount || 0)) }} .
+												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }} .
+												{{ __("Voids") }}: {{ formatQuantity(Number(row.void_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="
+													trendProgress(
+														Number(row.discount_amount || 0) +
+															Number(row.return_amount || 0) +
+															Number(row.void_amount || 0),
+														discountDayMax,
+													)
+												"
+												color="warning"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No day-wise discount/void/return trend.") }}</div>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
 								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Payment Method Report") }}</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
@@ -1056,6 +1215,9 @@ import { useUIStore } from "@/posapp/stores/uiStore";
 import {
 	fetchDashboardData,
 	type CategoryBrandVariantRow,
+	type DiscountVoidReturnCashierRow,
+	type DiscountVoidReturnDayRow,
+	type DiscountVoidReturnItemRow,
 	type DashboardResponse,
 	type FastMovingItem,
 	type InventoryStatusRow,
@@ -1097,6 +1259,7 @@ const inventoryStatusLimit = ref(20);
 const stockMovementLimit = ref(20);
 const reorderSuggestionLimit = ref(25);
 const paymentReportLimit = ref(20);
+const discountReportLimit = ref(20);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -1149,6 +1312,20 @@ const createEmptyDashboard = (): DashboardResponse => ({
 		},
 		method_wise: [],
 		category_wise: [],
+		day_wise: [],
+	},
+	discount_void_return_report: {
+		period: {},
+		totals: {
+			discount_amount: 0,
+			discounted_invoice_count: 0,
+			return_count: 0,
+			return_amount: 0,
+			void_count: 0,
+			void_amount: 0,
+		},
+		cashier_wise: [],
+		top_return_items: [],
 		day_wise: [],
 	},
 	sales_trend: {
@@ -1487,6 +1664,69 @@ const paymentDayMax = computed(() => {
 		const value = Math.abs(Number(row.paid_amount || 0)) + Math.abs(Number(row.pending_amount || 0));
 		return Math.max(max, value);
 	}, 0);
+	return maxValue > 0 ? maxValue : 1;
+});
+
+const discountVoidReturnReport = computed(() => dashboardData.value.discount_void_return_report || {});
+const discountVoidReturnTotals = computed(() => discountVoidReturnReport.value.totals || {});
+const discountVoidReturnRangeLabel = computed(() => {
+	const from = discountVoidReturnReport.value.period?.from || dashboardData.value.date_context?.month_start;
+	const to = discountVoidReturnReport.value.period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+const discountCashierRows = computed<DiscountVoidReturnCashierRow[]>(() =>
+	[...(discountVoidReturnReport.value.cashier_wise || [])]
+		.sort((a, b) => {
+			const left =
+				Math.abs(Number(a.void_amount || 0)) +
+				Math.abs(Number(a.return_amount || 0)) +
+				Math.abs(Number(a.discount_amount || 0));
+			const right =
+				Math.abs(Number(b.void_amount || 0)) +
+				Math.abs(Number(b.return_amount || 0)) +
+				Math.abs(Number(b.discount_amount || 0));
+			return right - left;
+		})
+		.slice(0, Number(discountReportLimit.value || 20)),
+);
+const discountTopReturnItems = computed<DiscountVoidReturnItemRow[]>(() =>
+	[...(discountVoidReturnReport.value.top_return_items || [])]
+		.sort((a, b) => Math.abs(Number(b.return_amount || 0)) - Math.abs(Number(a.return_amount || 0)))
+		.slice(0, Number(discountReportLimit.value || 20)),
+);
+const discountDayRows = computed<DiscountVoidReturnDayRow[]>(() =>
+	[...(discountVoidReturnReport.value.day_wise || [])]
+		.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))
+		.slice(-14),
+);
+const discountDayMax = computed(() => {
+	const maxValue = discountDayRows.value.reduce((max, row) => {
+		const value =
+			Math.abs(Number(row.discount_amount || 0)) +
+			Math.abs(Number(row.return_amount || 0)) +
+			Math.abs(Number(row.void_amount || 0));
+		return Math.max(max, value);
+	}, 0);
+	return maxValue > 0 ? maxValue : 1;
+});
+const discountCashierMax = computed(() => {
+	const maxValue = discountCashierRows.value.reduce((max, row) => {
+		const value =
+			Math.abs(Number(row.discount_amount || 0)) +
+			Math.abs(Number(row.return_amount || 0)) +
+			Math.abs(Number(row.void_amount || 0));
+		return Math.max(max, value);
+	}, 0);
+	return maxValue > 0 ? maxValue : 1;
+});
+const discountReturnItemMax = computed(() => {
+	const maxValue = discountTopReturnItems.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.return_amount || 0))),
+		0,
+	);
 	return maxValue > 0 ? maxValue : 1;
 });
 
@@ -2142,6 +2382,10 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 			...(base.payment_method_report || {}),
 			...(payload?.payment_method_report || {}),
 		},
+		discount_void_return_report: {
+			...(base.discount_void_return_report || {}),
+			...(payload?.discount_void_return_report || {}),
+		},
 		sales_trend: {
 			...(base.sales_trend || {}),
 			...(payload?.sales_trend || {}),
@@ -2200,6 +2444,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("available_profiles_count", response.available_profiles?.length || 0);
 	console.info("profit_method", response.sales_overview?.profit_method || null);
 	console.info("payment_method_count", response.payment_method_report?.method_wise?.length || 0);
+	console.info("discount_cashier_count", response.discount_void_return_report?.cashier_wise?.length || 0);
 	console.info("item_sales_count", response.item_sales_report?.items?.length || 0);
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
 	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
@@ -2233,6 +2478,7 @@ async function loadDashboard() {
 			stock_movement_limit: stockMovementLimit.value,
 			reorder_suggestion_limit: reorderSuggestionLimit.value,
 			payment_report_limit: paymentReportLimit.value,
+			discount_report_limit: discountReportLimit.value,
 			fast_moving_page: fastMovingPage.value,
 			fast_moving_page_size: fastMovingPageSize.value,
 			fast_moving_search: fastMovingSearch.value || undefined,
