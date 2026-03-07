@@ -194,6 +194,7 @@ export function useItemSync() {
 		try {
 			console.info(`${BG_SYNC_LOG} started`, { source });
 			await ensureBackgroundSyncBaseline();
+			const syncCursorBefore = getItemsLastSync();
 			const backgroundPriceList =
 				typeof ctx.getBackgroundSyncPriceList === "function"
 					? ctx.getBackgroundSyncPriceList()
@@ -230,13 +231,22 @@ export function useItemSync() {
 			// Detailed refresh is applied only to changed items above.
 
 			const completedAt = new Date().toISOString();
+			let deltaCursor = getItemsLastSync();
+			if (!deltaCursor || deltaCursor === syncCursorBefore) {
+				let serverTimestamp: string | null = null;
+				if (ctx.fetchServerItemsTimestamp) {
+					serverTimestamp = await ctx.fetchServerItemsTimestamp();
+				}
+				deltaCursor = serverTimestamp || completedAt;
+				setItemsLastSync(deltaCursor);
+			}
 			last_background_sync_time.value = completedAt;
 			console.info(`${BG_SYNC_LOG} completed`, {
 				source,
 				modifiedCount,
 				durationMs: Date.now() - startedAt,
 				syncedAt: completedAt,
-				deltaCursor: getItemsLastSync(),
+				deltaCursor,
 			});
 		} catch (error) {
 			console.error(`${BG_SYNC_LOG} failed`, { source, error });
