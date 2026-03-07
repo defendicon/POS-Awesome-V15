@@ -170,6 +170,21 @@ export interface DiscountVoidReturnDayRow {
 	void_amount?: number;
 }
 
+export interface CustomerReportRow {
+	customer?: string;
+	customer_name?: string;
+	invoice_count?: number;
+	sales_amount?: number;
+	average_basket_size?: number;
+	purchase_frequency_days?: number | null;
+	last_purchase_date?: string | null;
+	first_purchase_date?: string | null;
+	return_count?: number;
+	return_amount?: number;
+	is_repeat?: boolean;
+	lifetime_value?: number;
+}
+
 export interface DashboardResponse {
 	enabled: boolean;
 	profile?: string;
@@ -266,6 +281,24 @@ export interface DashboardResponse {
 		cashier_wise?: DiscountVoidReturnCashierRow[];
 		top_return_items?: DiscountVoidReturnItemRow[];
 		day_wise?: DiscountVoidReturnDayRow[];
+	};
+	customer_report?: {
+		period?: {
+			from?: string;
+			to?: string;
+		};
+		summary?: {
+			customer_count?: number;
+			repeat_customer_count?: number;
+			repeat_customer_rate_pct?: number;
+			invoice_count?: number;
+			sales_amount?: number;
+			average_basket_size?: number;
+			average_purchase_frequency_days?: number | null;
+		};
+		top_customers?: CustomerReportRow[];
+		repeat_customers?: CustomerReportRow[];
+		recent_customers?: CustomerReportRow[];
 	};
 	sales_trend?: {
 		period?: {
@@ -463,6 +496,7 @@ export interface DashboardRequest {
 	reorder_suggestion_limit?: number;
 	payment_report_limit?: number;
 	discount_report_limit?: number;
+	customer_report_limit?: number;
 	supplier_limit?: number;
 	low_stock_limit?: number;
 }

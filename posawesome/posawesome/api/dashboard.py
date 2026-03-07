@@ -1391,6 +1391,223 @@ def _collect_discount_void_return_report(
     return report
 
 
+def _collect_customer_report(
+    profile_names: list[str],
+    company: str,
+    date_from: str,
+    date_to: str,
+    limit: int = 20,
+) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "period": {"from": date_from, "to": date_to},
+        "summary": {
+            "customer_count": 0,
+            "repeat_customer_count": 0,
+            "repeat_customer_rate_pct": 0.0,
+            "invoice_count": 0,
+            "sales_amount": 0.0,
+            "average_basket_size": 0.0,
+            "average_purchase_frequency_days": None,
+        },
+        "top_customers": [],
+        "repeat_customers": [],
+        "recent_customers": [],
+    }
+    if not profile_names:
+        return report
+
+    profile_filter, profile_filter_params = _build_in_filter("inv.pos_profile", profile_names)
+    row_limit = _coerce_limit(limit, default=20, minimum=1, maximum=200)
+    customer_buckets: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {
+            "customer": "",
+            "customer_name": "",
+            "invoice_count": 0,
+            "sales_amount": 0.0,
+            "return_count": 0,
+            "return_amount": 0.0,
+            "last_purchase_date": "",
+            "first_purchase_date": "",
+        }
+    )
+
+    for parent_doctype, _child_doctype in _iter_invoice_sources():
+        if not frappe.db.has_column(parent_doctype, "customer"):
+            continue
+
+        amount_field = _pick_first_column(parent_doctype, ["base_grand_total", "grand_total"])
+        if not amount_field:
+            continue
+        amount_expression = f"coalesce(inv.{amount_field}, 0)"
+        customer_name_expression = (
+            "coalesce(inv.customer_name, inv.customer)"
+            if frappe.db.has_column(parent_doctype, "customer_name")
+            else "inv.customer"
+        )
+        is_return_expression = (
+            "ifnull(inv.is_return, 0)" if frappe.db.has_column(parent_doctype, "is_return") else "0"
+        )
+
+        rows = frappe.db.sql(
+            f"""
+            select
+                inv.customer as customer,
+                max({customer_name_expression}) as customer_name,
+                sum(case when {is_return_expression} = 1 then 0 else 1 end) as invoice_count,
+                sum(
+                    case
+                        when {is_return_expression} = 1 then 0
+                        else abs({amount_expression})
+                    end
+                ) as sales_amount,
+                sum(case when {is_return_expression} = 1 then 1 else 0 end) as return_count,
+                sum(
+                    case
+                        when {is_return_expression} = 1 then abs({amount_expression})
+                        else 0
+                    end
+                ) as return_amount,
+                max(
+                    case
+                        when {is_return_expression} = 1 then null
+                        else inv.posting_date
+                    end
+                ) as last_purchase_date,
+                min(
+                    case
+                        when {is_return_expression} = 1 then null
+                        else inv.posting_date
+                    end
+                ) as first_purchase_date
+            from `tab{parent_doctype}` inv
+            where inv.docstatus = 1
+              and inv.company = %s
+              and inv.posting_date between %s and %s
+              {profile_filter}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            group by inv.customer
+            """,
+            (company, date_from, date_to, *profile_filter_params),
+            as_dict=True,
+        )
+        for row in rows:
+            customer_id = cstr(row.get("customer")).strip()
+            if not customer_id:
+                continue
+            entry = customer_buckets[customer_id]
+            entry["customer"] = customer_id
+            if not entry.get("customer_name"):
+                entry["customer_name"] = cstr(row.get("customer_name")).strip() or customer_id
+            entry["invoice_count"] += cint(row.get("invoice_count"))
+            entry["sales_amount"] += flt(row.get("sales_amount"))
+            entry["return_count"] += cint(row.get("return_count"))
+            entry["return_amount"] += flt(row.get("return_amount"))
+
+            first_purchase = cstr(row.get("first_purchase_date")).strip()
+            last_purchase = cstr(row.get("last_purchase_date")).strip()
+            existing_first = cstr(entry.get("first_purchase_date")).strip()
+            existing_last = cstr(entry.get("last_purchase_date")).strip()
+
+            if first_purchase and (not existing_first or first_purchase < existing_first):
+                entry["first_purchase_date"] = first_purchase
+            if last_purchase and (not existing_last or last_purchase > existing_last):
+                entry["last_purchase_date"] = last_purchase
+
+    customer_rows: list[dict[str, Any]] = []
+    total_invoices = 0
+    total_sales = 0.0
+    repeat_customer_count = 0
+    repeat_frequency_values: list[float] = []
+
+    for row in customer_buckets.values():
+        invoice_count = cint(row.get("invoice_count"))
+        sales_amount = flt(row.get("sales_amount"))
+        if invoice_count <= 0 and abs(sales_amount) <= 0.00001:
+            continue
+
+        first_purchase = cstr(row.get("first_purchase_date")).strip()
+        last_purchase = cstr(row.get("last_purchase_date")).strip()
+        purchase_frequency_days = None
+        if invoice_count > 1 and first_purchase and last_purchase:
+            span_days = max((getdate(last_purchase) - getdate(first_purchase)).days, 0)
+            purchase_frequency_days = flt(span_days / max(1, invoice_count - 1))
+            repeat_frequency_values.append(purchase_frequency_days)
+
+        is_repeat = invoice_count > 1
+        if is_repeat:
+            repeat_customer_count += 1
+
+        total_invoices += invoice_count
+        total_sales += sales_amount
+        customer_rows.append(
+            {
+                "customer": row.get("customer"),
+                "customer_name": row.get("customer_name") or row.get("customer"),
+                "invoice_count": invoice_count,
+                "sales_amount": sales_amount,
+                "average_basket_size": flt(sales_amount / invoice_count) if invoice_count > 0 else 0.0,
+                "purchase_frequency_days": purchase_frequency_days,
+                "last_purchase_date": last_purchase or None,
+                "first_purchase_date": first_purchase or None,
+                "return_count": cint(row.get("return_count")),
+                "return_amount": flt(row.get("return_amount")),
+                "is_repeat": is_repeat,
+                "lifetime_value": sales_amount,
+            }
+        )
+
+    customer_count = len(customer_rows)
+    repeat_customer_rate = (
+        flt((repeat_customer_count / customer_count) * 100) if customer_count > 0 else 0.0
+    )
+    average_purchase_frequency = (
+        flt(sum(repeat_frequency_values) / len(repeat_frequency_values))
+        if repeat_frequency_values
+        else None
+    )
+
+    report["summary"] = {
+        "customer_count": customer_count,
+        "repeat_customer_count": repeat_customer_count,
+        "repeat_customer_rate_pct": repeat_customer_rate,
+        "invoice_count": total_invoices,
+        "sales_amount": flt(total_sales),
+        "average_basket_size": flt(total_sales / total_invoices) if total_invoices > 0 else 0.0,
+        "average_purchase_frequency_days": average_purchase_frequency,
+    }
+
+    top_customers = sorted(
+        customer_rows,
+        key=lambda row: (
+            abs(flt(row.get("sales_amount"))),
+            cint(row.get("invoice_count")),
+            cstr(row.get("last_purchase_date")),
+        ),
+        reverse=True,
+    )
+    repeat_customers = sorted(
+        [row for row in customer_rows if row.get("is_repeat")],
+        key=lambda row: (
+            cint(row.get("invoice_count")),
+            abs(flt(row.get("sales_amount"))),
+        ),
+        reverse=True,
+    )
+    recent_customers = sorted(
+        customer_rows,
+        key=lambda row: (
+            cstr(row.get("last_purchase_date") or ""),
+            abs(flt(row.get("sales_amount"))),
+        ),
+        reverse=True,
+    )
+
+    report["top_customers"] = top_customers[:row_limit]
+    report["repeat_customers"] = repeat_customers[:row_limit]
+    report["recent_customers"] = recent_customers[:row_limit]
+    return report
+
+
 def _pct_change(current: float, previous: float) -> float | None:
     current_value = flt(current)
     previous_value = flt(previous)
@@ -2922,6 +3139,7 @@ def get_dashboard_data(
     reorder_suggestion_limit: int = 25,
     payment_report_limit: int = 20,
     discount_report_limit: int = 20,
+    customer_report_limit: int = 20,
     supplier_limit: int = 8,
     low_stock_limit: int = 20,
 ):
@@ -2967,6 +3185,7 @@ def get_dashboard_data(
     reorder_suggestion_limit = _coerce_limit(reorder_suggestion_limit, default=25, minimum=1, maximum=200)
     payment_report_limit = _coerce_limit(payment_report_limit, default=20, minimum=1, maximum=200)
     discount_report_limit = _coerce_limit(discount_report_limit, default=20, minimum=1, maximum=200)
+    customer_report_limit = _coerce_limit(customer_report_limit, default=20, minimum=1, maximum=200)
 
     company = cstr(current_profile_doc.get("company")).strip()
     company_profiles = _get_company_profiles(company)
@@ -3153,6 +3372,21 @@ def get_dashboard_data(
             "top_return_items": [],
             "day_wise": [],
         },
+        "customer_report": {
+            "period": {"from": str(month_start), "to": str(today)},
+            "summary": {
+                "customer_count": 0,
+                "repeat_customer_count": 0,
+                "repeat_customer_rate_pct": 0.0,
+                "invoice_count": 0,
+                "sales_amount": 0.0,
+                "average_basket_size": 0.0,
+                "average_purchase_frequency_days": None,
+            },
+            "top_customers": [],
+            "repeat_customers": [],
+            "recent_customers": [],
+        },
         "sales_trend": {
             "period": {
                 "day_from": str(month_start),
@@ -3315,6 +3549,13 @@ def get_dashboard_data(
         date_from=str(month_start),
         date_to=str(today),
         limit=discount_report_limit,
+    )
+    payload["customer_report"] = _collect_customer_report(
+        profile_names=selected_profile_names,
+        company=company,
+        date_from=str(month_start),
+        date_to=str(today),
+        limit=customer_report_limit,
     )
     payload["sales_trend"] = _collect_sales_trend(
         profile_names=selected_profile_names,

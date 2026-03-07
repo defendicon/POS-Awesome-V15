@@ -75,6 +75,7 @@
 				<div class="dashboard-tabs mb-3">
 					<v-tabs v-model="activeDashboardTab" color="primary" class="dashboard-tab-bar" density="comfortable">
 						<v-tab value="sales">{{ __("Sales") }}</v-tab>
+						<v-tab value="customers">{{ __("Customers") }}</v-tab>
 						<v-tab value="products">{{ __("Products") }}</v-tab>
 						<v-tab value="inventory">{{ __("Inventory") }}</v-tab>
 						<v-tab value="procurement">{{ __("Procurement") }}</v-tab>
@@ -523,6 +524,112 @@
 										</div>
 									</div>
 									<div v-else class="empty-state">{{ __("No hourly sales trend found for today.") }}</div>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+				<v-row v-show="activeDashboardTab === 'customers'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Customer Report") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ customerReportRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="primary" variant="tonal">
+										{{ __("Repeat Rate") }}: {{ formatPercent(customerSummary.repeat_customer_rate_pct, 1) }}
+									</v-chip>
+									<v-chip size="small" color="success" variant="tonal">
+										{{ __("Sales") }}: {{ formatMoney(Number(customerSummary.sales_amount || 0)) }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div class="summary-grid">
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Customers") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(customerSummary.customer_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Repeat Customers") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(customerSummary.repeat_customer_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Invoices") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(customerSummary.invoice_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Average Basket") }}</div>
+									<div class="summary-metric__value">{{ formatMoney(Number(customerSummary.average_basket_size || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Avg Purchase Frequency") }}</div>
+									<div class="summary-metric__value">{{ formatDays(customerSummary.average_purchase_frequency_days) }}</div>
+								</div>
+							</div>
+
+							<div class="trend-grid">
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Top Customers") }}</div>
+									<div v-if="topCustomerRows.length" class="list-stack trend-list">
+										<div v-for="row in topCustomerRows" :key="`cust-top-${row.customer}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.customer_name || row.customer || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ row.customer || "-" }} .
+												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Avg Bill") }}: {{ formatMoney(Number(row.average_basket_size || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.sales_amount || 0), customerSalesMax)"
+												color="primary"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No customer sales data found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Repeat Customers") }}</div>
+									<div v-if="repeatCustomerRows.length" class="list-stack trend-list">
+										<div v-for="row in repeatCustomerRows" :key="`cust-repeat-${row.customer}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.customer_name || row.customer || "-" }}</div>
+												<div class="insight-row__value">{{ formatQuantity(Number(row.invoice_count || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Sales") }}: {{ formatMoney(Number(row.sales_amount || 0)) }} .
+												{{ __("Frequency") }}: {{ formatDays(row.purchase_frequency_days) }} .
+												{{ __("Last") }}: {{ formatDate(row.last_purchase_date || undefined) }}
+											</div>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No repeat customers in this period.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Recently Active Customers") }}</div>
+									<div v-if="recentCustomerRows.length" class="list-stack trend-list">
+										<div v-for="row in recentCustomerRows" :key="`cust-recent-${row.customer}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.customer_name || row.customer || "-" }}</div>
+												<div class="insight-row__value">{{ formatDate(row.last_purchase_date || undefined) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Sales") }}: {{ formatMoney(Number(row.sales_amount || 0)) }} .
+												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }}
+											</div>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No recent customer activity found.") }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -1215,6 +1322,7 @@ import { useUIStore } from "@/posapp/stores/uiStore";
 import {
 	fetchDashboardData,
 	type CategoryBrandVariantRow,
+	type CustomerReportRow,
 	type DiscountVoidReturnCashierRow,
 	type DiscountVoidReturnDayRow,
 	type DiscountVoidReturnItemRow,
@@ -1242,7 +1350,7 @@ const errorMessage = ref("");
 const isDashboardEnabledOnServer = ref(true);
 const lastUpdatedAt = ref<Date | null>(null);
 const allowAllProfiles = ref(false);
-const activeDashboardTab = ref<"sales" | "products" | "inventory" | "procurement">("sales");
+const activeDashboardTab = ref<"sales" | "customers" | "products" | "inventory" | "procurement">("sales");
 const dashboardScope = ref<"all" | "current" | "specific">("all");
 const selectedProfileFilter = ref("");
 const scopeInitialized = ref(false);
@@ -1260,6 +1368,7 @@ const stockMovementLimit = ref(20);
 const reorderSuggestionLimit = ref(25);
 const paymentReportLimit = ref(20);
 const discountReportLimit = ref(20);
+const customerReportLimit = ref(20);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -1327,6 +1436,21 @@ const createEmptyDashboard = (): DashboardResponse => ({
 		cashier_wise: [],
 		top_return_items: [],
 		day_wise: [],
+	},
+	customer_report: {
+		period: {},
+		summary: {
+			customer_count: 0,
+			repeat_customer_count: 0,
+			repeat_customer_rate_pct: 0,
+			invoice_count: 0,
+			sales_amount: 0,
+			average_basket_size: 0,
+			average_purchase_frequency_days: null,
+		},
+		top_customers: [],
+		repeat_customers: [],
+		recent_customers: [],
 	},
 	sales_trend: {
 		period: {},
@@ -1725,6 +1849,39 @@ const discountCashierMax = computed(() => {
 const discountReturnItemMax = computed(() => {
 	const maxValue = discountTopReturnItems.value.reduce(
 		(max, row) => Math.max(max, Math.abs(Number(row.return_amount || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+
+const customerReport = computed(() => dashboardData.value.customer_report || {});
+const customerSummary = computed(() => customerReport.value.summary || {});
+const customerReportRangeLabel = computed(() => {
+	const from = customerReport.value.period?.from || dashboardData.value.date_context?.month_start;
+	const to = customerReport.value.period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+const topCustomerRows = computed<CustomerReportRow[]>(() =>
+	[...(customerReport.value.top_customers || [])]
+		.sort((a, b) => Math.abs(Number(b.sales_amount || 0)) - Math.abs(Number(a.sales_amount || 0)))
+		.slice(0, Number(customerReportLimit.value || 20)),
+);
+const repeatCustomerRows = computed<CustomerReportRow[]>(() =>
+	[...(customerReport.value.repeat_customers || [])]
+		.sort((a, b) => Number(b.invoice_count || 0) - Number(a.invoice_count || 0))
+		.slice(0, Number(customerReportLimit.value || 20)),
+);
+const recentCustomerRows = computed<CustomerReportRow[]>(() =>
+	[...(customerReport.value.recent_customers || [])]
+		.sort((a, b) => String(b.last_purchase_date || "").localeCompare(String(a.last_purchase_date || "")))
+		.slice(0, Number(customerReportLimit.value || 20)),
+);
+const customerSalesMax = computed(() => {
+	const maxValue = topCustomerRows.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.sales_amount || 0))),
 		0,
 	);
 	return maxValue > 0 ? maxValue : 1;
@@ -2386,6 +2543,10 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 			...(base.discount_void_return_report || {}),
 			...(payload?.discount_void_return_report || {}),
 		},
+		customer_report: {
+			...(base.customer_report || {}),
+			...(payload?.customer_report || {}),
+		},
 		sales_trend: {
 			...(base.sales_trend || {}),
 			...(payload?.sales_trend || {}),
@@ -2445,6 +2606,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("profit_method", response.sales_overview?.profit_method || null);
 	console.info("payment_method_count", response.payment_method_report?.method_wise?.length || 0);
 	console.info("discount_cashier_count", response.discount_void_return_report?.cashier_wise?.length || 0);
+	console.info("customer_top_count", response.customer_report?.top_customers?.length || 0);
 	console.info("item_sales_count", response.item_sales_report?.items?.length || 0);
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
 	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
@@ -2479,6 +2641,7 @@ async function loadDashboard() {
 			reorder_suggestion_limit: reorderSuggestionLimit.value,
 			payment_report_limit: paymentReportLimit.value,
 			discount_report_limit: discountReportLimit.value,
+			customer_report_limit: customerReportLimit.value,
 			fast_moving_page: fastMovingPage.value,
 			fast_moving_page_size: fastMovingPageSize.value,
 			fast_moving_search: fastMovingSearch.value || undefined,
