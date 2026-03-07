@@ -127,6 +127,222 @@
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Monthly Sales Summary") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ __("Month") }}: {{ monthlySummaryRangeLabel }}
+									</v-chip>
+									<v-chip
+										size="small"
+										:color="monthlySummary.has_closing_snapshot ? 'success' : 'warning'"
+										variant="tonal"
+									>
+										{{
+											monthlySummary.has_closing_snapshot
+												? __("Closing Snapshot Available")
+												: __("Live Snapshot")
+										}}
+									</v-chip>
+								</div>
+							</div>
+							<div class="summary-grid">
+								<div v-for="metric in monthlySummaryMetrics" :key="metric.key" class="summary-metric">
+									<div class="summary-metric__label">{{ metric.label }}</div>
+									<div class="summary-metric__value" :class="metric.valueClass">
+										{{ metric.value }}
+									</div>
+								</div>
+							</div>
+							<div v-if="monthlyPaymentMethods.length" class="payment-breakdown">
+								<div class="summary-metric__label">{{ __("Payment Methods") }}</div>
+								<div class="payment-chip-list">
+									<v-chip
+										v-for="payment in monthlyPaymentMethods"
+										:key="payment.mode_of_payment"
+										size="small"
+										:color="paymentCategoryColor(payment.category)"
+										variant="tonal"
+									>
+										{{ payment.mode_of_payment }}: {{ formatMoney(payment.amount) }}
+									</v-chip>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Daily Sales Summary") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ __("Date") }}: {{ dailySummaryRangeLabel }}
+									</v-chip>
+									<v-chip
+										size="small"
+										:color="dailySummary.has_closing_snapshot ? 'success' : 'warning'"
+										variant="tonal"
+									>
+										{{
+											dailySummary.has_closing_snapshot
+												? __("Shift Closed Snapshot")
+												: __("Live Snapshot")
+										}}
+									</v-chip>
+								</div>
+							</div>
+							<div class="summary-grid">
+								<div v-for="metric in dailySummaryMetrics" :key="metric.key" class="summary-metric">
+									<div class="summary-metric__label">{{ metric.label }}</div>
+									<div class="summary-metric__value" :class="metric.valueClass">
+										{{ metric.value }}
+									</div>
+								</div>
+							</div>
+							<div v-if="dailyPaymentMethods.length" class="payment-breakdown">
+								<div class="summary-metric__label">{{ __("Payment Methods") }}</div>
+								<div class="payment-chip-list">
+									<v-chip
+										v-for="payment in dailyPaymentMethods"
+										:key="payment.mode_of_payment"
+										size="small"
+										:color="paymentCategoryColor(payment.category)"
+										variant="tonal"
+									>
+										{{ payment.mode_of_payment }}: {{ formatMoney(payment.amount) }}
+									</v-chip>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Sales Trend Report") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ salesTrendRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="primary" variant="tonal">
+										{{ __("Best Day") }}: {{ bestDayLabel }}
+									</v-chip>
+									<v-chip size="small" color="primary" variant="tonal">
+										{{ __("Peak Hour") }}: {{ bestHourLabel }}
+									</v-chip>
+									<v-chip
+										v-for="chip in trendGrowthChips"
+										:key="chip.key"
+										size="small"
+										:color="chip.color"
+										variant="tonal"
+									>
+										{{ chip.label }}: {{ chip.value }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div class="trend-grid">
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Day-wise (MTD)") }}</div>
+									<div v-if="salesTrendDayPoints.length" class="list-stack trend-list">
+										<div v-for="point in salesTrendDayPoints" :key="`day-${point.date}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ formatDate(point.date) }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(point.sales || 0), salesTrendDayMax)"
+												color="primary"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No day-wise sales trend found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Week-wise") }}</div>
+									<div v-if="salesTrendWeekPoints.length" class="list-stack trend-list">
+										<div v-for="point in salesTrendWeekPoints" :key="`week-${point.label}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ point.label || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ formatDate(point.week_start) }} - {{ formatDate(point.week_end) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(point.sales || 0), salesTrendWeekMax)"
+												color="info"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No week-wise sales trend found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Month-wise") }}</div>
+									<div v-if="salesTrendMonthPoints.length" class="list-stack trend-list">
+										<div v-for="point in salesTrendMonthPoints" :key="`month-${point.month}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ point.label || point.month || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(point.sales || 0), salesTrendMonthMax)"
+												color="success"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No month-wise sales trend found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Hourly (Today)") }}</div>
+									<div v-if="salesTrendHourPoints.length" class="list-stack trend-list">
+										<div v-for="point in salesTrendHourPoints" :key="`hour-${point.hour}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ point.label || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(point.sales || 0), salesTrendHourMax)"
+												color="warning"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No hourly sales trend found for today.") }}</div>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
 								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Discount / Void / Return Report") }}</h2>
 								<div class="dashboard-chip-row">
 									<v-chip size="small" color="info" variant="tonal">
@@ -282,7 +498,7 @@
 					</v-col>
 				</v-row>
 
-				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
+<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
 					<v-col cols="12">
 						<v-card class="dashboard-card" elevation="2">
 							<div class="dashboard-card__header">
@@ -385,222 +601,6 @@
 										</div>
 									</div>
 									<div v-else class="empty-state">{{ __("No day-wise payment data found.") }}</div>
-								</div>
-							</div>
-						</v-card>
-					</v-col>
-				</v-row>
-
-				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
-					<v-col cols="12">
-						<v-card class="dashboard-card" elevation="2">
-							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Daily Sales Summary") }}</h2>
-								<div class="dashboard-chip-row">
-									<v-chip size="small" color="info" variant="tonal">
-										{{ __("Date") }}: {{ dailySummaryRangeLabel }}
-									</v-chip>
-									<v-chip
-										size="small"
-										:color="dailySummary.has_closing_snapshot ? 'success' : 'warning'"
-										variant="tonal"
-									>
-										{{
-											dailySummary.has_closing_snapshot
-												? __("Shift Closed Snapshot")
-												: __("Live Snapshot")
-										}}
-									</v-chip>
-								</div>
-							</div>
-							<div class="summary-grid">
-								<div v-for="metric in dailySummaryMetrics" :key="metric.key" class="summary-metric">
-									<div class="summary-metric__label">{{ metric.label }}</div>
-									<div class="summary-metric__value" :class="metric.valueClass">
-										{{ metric.value }}
-									</div>
-								</div>
-							</div>
-							<div v-if="dailyPaymentMethods.length" class="payment-breakdown">
-								<div class="summary-metric__label">{{ __("Payment Methods") }}</div>
-								<div class="payment-chip-list">
-									<v-chip
-										v-for="payment in dailyPaymentMethods"
-										:key="payment.mode_of_payment"
-										size="small"
-										:color="paymentCategoryColor(payment.category)"
-										variant="tonal"
-									>
-										{{ payment.mode_of_payment }}: {{ formatMoney(payment.amount) }}
-									</v-chip>
-								</div>
-							</div>
-						</v-card>
-					</v-col>
-				</v-row>
-
-				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
-					<v-col cols="12">
-						<v-card class="dashboard-card" elevation="2">
-							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Monthly Sales Summary") }}</h2>
-								<div class="dashboard-chip-row">
-									<v-chip size="small" color="info" variant="tonal">
-										{{ __("Month") }}: {{ monthlySummaryRangeLabel }}
-									</v-chip>
-									<v-chip
-										size="small"
-										:color="monthlySummary.has_closing_snapshot ? 'success' : 'warning'"
-										variant="tonal"
-									>
-										{{
-											monthlySummary.has_closing_snapshot
-												? __("Closing Snapshot Available")
-												: __("Live Snapshot")
-										}}
-									</v-chip>
-								</div>
-							</div>
-							<div class="summary-grid">
-								<div v-for="metric in monthlySummaryMetrics" :key="metric.key" class="summary-metric">
-									<div class="summary-metric__label">{{ metric.label }}</div>
-									<div class="summary-metric__value" :class="metric.valueClass">
-										{{ metric.value }}
-									</div>
-								</div>
-							</div>
-							<div v-if="monthlyPaymentMethods.length" class="payment-breakdown">
-								<div class="summary-metric__label">{{ __("Payment Methods") }}</div>
-								<div class="payment-chip-list">
-									<v-chip
-										v-for="payment in monthlyPaymentMethods"
-										:key="payment.mode_of_payment"
-										size="small"
-										:color="paymentCategoryColor(payment.category)"
-										variant="tonal"
-									>
-										{{ payment.mode_of_payment }}: {{ formatMoney(payment.amount) }}
-									</v-chip>
-								</div>
-							</div>
-						</v-card>
-					</v-col>
-				</v-row>
-
-				<v-row v-show="activeDashboardTab === 'sales'" class="dashboard-grid mb-2">
-					<v-col cols="12">
-						<v-card class="dashboard-card" elevation="2">
-							<div class="dashboard-card__header">
-								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Sales Trend Report") }}</h2>
-								<div class="dashboard-chip-row">
-									<v-chip size="small" color="info" variant="tonal">
-										{{ salesTrendRangeLabel }}
-									</v-chip>
-									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Best Day") }}: {{ bestDayLabel }}
-									</v-chip>
-									<v-chip size="small" color="primary" variant="tonal">
-										{{ __("Peak Hour") }}: {{ bestHourLabel }}
-									</v-chip>
-									<v-chip
-										v-for="chip in trendGrowthChips"
-										:key="chip.key"
-										size="small"
-										:color="chip.color"
-										variant="tonal"
-									>
-										{{ chip.label }}: {{ chip.value }}
-									</v-chip>
-								</div>
-							</div>
-
-							<div class="trend-grid">
-								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Day-wise (MTD)") }}</div>
-									<div v-if="salesTrendDayPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendDayPoints" :key="`day-${point.date}`" class="insight-row">
-											<div class="insight-row__top">
-												<div class="insight-row__title">{{ formatDate(point.date) }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
-											</div>
-											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
-											</div>
-											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendDayMax)"
-												color="primary"
-												height="5"
-												rounded
-											/>
-										</div>
-									</div>
-									<div v-else class="empty-state">{{ __("No day-wise sales trend found.") }}</div>
-								</div>
-
-								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Week-wise") }}</div>
-									<div v-if="salesTrendWeekPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendWeekPoints" :key="`week-${point.label}`" class="insight-row">
-											<div class="insight-row__top">
-												<div class="insight-row__title">{{ point.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
-											</div>
-											<div class="insight-row__meta">
-												{{ formatDate(point.week_start) }} - {{ formatDate(point.week_end) }}
-											</div>
-											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendWeekMax)"
-												color="info"
-												height="5"
-												rounded
-											/>
-										</div>
-									</div>
-									<div v-else class="empty-state">{{ __("No week-wise sales trend found.") }}</div>
-								</div>
-
-								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Month-wise") }}</div>
-									<div v-if="salesTrendMonthPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendMonthPoints" :key="`month-${point.month}`" class="insight-row">
-											<div class="insight-row__top">
-												<div class="insight-row__title">{{ point.label || point.month || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
-											</div>
-											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
-											</div>
-											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendMonthMax)"
-												color="success"
-												height="5"
-												rounded
-											/>
-										</div>
-									</div>
-									<div v-else class="empty-state">{{ __("No month-wise sales trend found.") }}</div>
-								</div>
-
-								<div class="trend-panel">
-									<div class="summary-metric__label">{{ __("Hourly (Today)") }}</div>
-									<div v-if="salesTrendHourPoints.length" class="list-stack trend-list">
-										<div v-for="point in salesTrendHourPoints" :key="`hour-${point.hour}`" class="insight-row">
-											<div class="insight-row__top">
-												<div class="insight-row__title">{{ point.label || "-" }}</div>
-												<div class="insight-row__value">{{ formatMoney(Number(point.sales || 0)) }}</div>
-											</div>
-											<div class="insight-row__meta">
-												{{ __("Invoices") }}: {{ formatQuantity(Number(point.invoice_count || 0)) }}
-											</div>
-											<v-progress-linear
-												:model-value="trendProgress(Number(point.sales || 0), salesTrendHourMax)"
-												color="warning"
-												height="5"
-												rounded
-											/>
-										</div>
-									</div>
-									<div v-else class="empty-state">{{ __("No hourly sales trend found for today.") }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -4085,3 +4085,4 @@ onMounted(() => {
 	}
 }
 </style>
+
