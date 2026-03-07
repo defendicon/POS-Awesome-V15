@@ -64,7 +64,7 @@
 				variant="tonal"
 				class="mb-4"
 			>
-				{{ __("Awesome Dashboard is disabled in global settings or for the selected scope.") }}
+				{{ disabledReasonText }}
 			</v-alert>
 
 			<v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4">
@@ -254,6 +254,7 @@ const createEmptyDashboard = (): DashboardResponse => ({
 const dashboardData = ref<DashboardResponse>(createEmptyDashboard());
 
 const __ = (value: string) => (window.__ ? window.__(value) : value);
+const DASHBOARD_LOG_PREFIX = "[AwesomeDashboard]";
 
 const posProfile = computed(() => uiStore.posProfile || {});
 const profileName = computed(() => String((posProfile.value as any)?.name || "").trim());
@@ -288,6 +289,16 @@ const profileFilterItems = computed(() =>
 );
 
 const canRenderDashboard = computed(() => isDashboardEnabledOnServer.value);
+const disabledReasonText = computed(() => {
+	const reason = dashboardData.value.disabled_reason;
+	if (reason === "global_disabled") {
+		return __("Awesome Dashboard is disabled in POS Settings.");
+	}
+	if (reason === "no_profiles_in_scope") {
+		return __("No profiles found for selected scope. Falling back to current profile failed.");
+	}
+	return __("Awesome Dashboard is disabled in global settings or for the selected scope.");
+});
 const selectedProfilesCount = computed(
 	() => Number(dashboardData.value.selected_profiles?.length || 0),
 );
@@ -434,9 +445,37 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 	};
 }
 
+function logDashboardRequest() {
+	console.groupCollapsed(`${DASHBOARD_LOG_PREFIX} fetch:start`);
+	console.info("scope", dashboardScope.value);
+	console.info("profile_filter", selectedProfileFilter.value || null);
+	console.info("pos_profile", profileName.value || null);
+	console.info("threshold_override", configuredLowStockThreshold.value ?? null);
+	console.groupEnd();
+}
+
+function logDashboardResponse(response: DashboardResponse) {
+	console.groupCollapsed(`${DASHBOARD_LOG_PREFIX} fetch:success`);
+	console.info("enabled", response.enabled);
+	console.info("disabled_reason", response.disabled_reason || null);
+	console.info("scope", response.scope || null);
+	console.info("allow_all_profiles", response.allow_all_profiles ?? null);
+	console.info("selected_profiles", response.selected_profiles || []);
+	console.info("available_profiles_count", response.available_profiles?.length || 0);
+	console.info("profit_method", response.sales_overview?.profit_method || null);
+	console.groupEnd();
+}
+
+function logDashboardError(error: any) {
+	console.groupCollapsed(`${DASHBOARD_LOG_PREFIX} fetch:error`);
+	console.error(error);
+	console.groupEnd();
+}
+
 async function loadDashboard() {
 	loading.value = true;
 	errorMessage.value = "";
+	logDashboardRequest();
 
 	try {
 		const response = await fetchDashboardData({
@@ -446,6 +485,7 @@ async function loadDashboard() {
 				dashboardScope.value === "specific" ? selectedProfileFilter.value || undefined : undefined,
 			low_stock_threshold: configuredLowStockThreshold.value,
 		});
+		logDashboardResponse(response);
 		dashboardData.value = mergeDashboardPayload(response);
 		isDashboardEnabledOnServer.value = response.enabled !== false;
 		allowAllProfiles.value = Boolean(response.allow_all_profiles);
@@ -466,6 +506,7 @@ async function loadDashboard() {
 		}
 		lastUpdatedAt.value = new Date();
 	} catch (error: any) {
+		logDashboardError(error);
 		errorMessage.value = error?.message || __("Failed to load dashboard data.");
 	} finally {
 		loading.value = false;

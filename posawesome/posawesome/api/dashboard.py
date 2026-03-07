@@ -585,11 +585,22 @@ def get_dashboard_data(
             selected_profiles = [current_profile_fallback]
             selected_profile_names = [current_profile_name]
 
+    selected_profiles_before_override = list(selected_profiles)
     profile_override_enabled = [
         profile for profile in selected_profiles if _is_dashboard_enabled(profile)
     ]
     selected_profiles = profile_override_enabled
     selected_profile_names = [profile.get("name") for profile in selected_profiles]
+
+    # Global dashboard should not be blocked only because profile-level flags are off
+    # for all records in the selected scope. Fall back to scope-selected profiles.
+    if not selected_profiles and selected_profiles_before_override and global_settings["enabled"]:
+        selected_profiles = selected_profiles_before_override
+        selected_profile_names = [
+            cstr(profile.get("name")).strip()
+            for profile in selected_profiles
+            if cstr(profile.get("name")).strip()
+        ]
 
     single_profile = selected_profiles[0] if len(selected_profiles) == 1 else None
     profile_threshold = single_profile.get("posa_low_stock_alert_threshold") if single_profile else None
