@@ -611,35 +611,21 @@
 									</div>
 								</div>
 								<div class="summary-metric">
-									<div class="summary-metric__label">{{ __("Sale Out Qty") }}</div>
+									<div class="summary-metric__label">{{ __("Total Out") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(stockMovementSummary.sale_out_qty || 0)) }}
+										{{ formatQuantity(Number(stockMovementOutgoingQty || 0)) }}
 									</div>
 								</div>
 								<div class="summary-metric">
-									<div class="summary-metric__label">{{ __("Return Qty") }}</div>
+									<div class="summary-metric__label">{{ __("Total In") }}</div>
 									<div class="summary-metric__value summary-metric__value--success">
-										{{ formatQuantity(Number(stockMovementSummary.return_in_qty || 0)) }}
-									</div>
-								</div>
-								<div class="summary-metric">
-									<div class="summary-metric__label">{{ __("Adjustment In/Out") }}</div>
-									<div class="summary-metric__value">
-										{{ formatQuantity(Number(stockMovementSummary.adjustment_in_qty || 0)) }} /
-										{{ formatQuantity(Number(stockMovementSummary.adjustment_out_qty || 0)) }}
-									</div>
-								</div>
-								<div class="summary-metric">
-									<div class="summary-metric__label">{{ __("Transfer In/Out") }}</div>
-									<div class="summary-metric__value">
-										{{ formatQuantity(Number(stockMovementSummary.transfer_in_qty || 0)) }} /
-										{{ formatQuantity(Number(stockMovementSummary.transfer_out_qty || 0)) }}
+										{{ formatQuantity(Number(stockMovementIncomingQty || 0)) }}
 									</div>
 								</div>
 								<div class="summary-metric">
 									<div class="summary-metric__label">{{ __("Net Qty") }}</div>
 									<div class="summary-metric__value">
-										{{ formatQuantity(Number(stockMovementSummary.net_qty || 0)) }}
+										{{ formatSignedQuantity(Number(stockMovementSummary.net_qty || 0)) }}
 									</div>
 								</div>
 								<div class="summary-metric">
@@ -653,32 +639,21 @@
 							<div class="trend-grid trend-grid--two">
 								<div class="trend-panel">
 									<div class="summary-metric__label">{{ __("Day-wise Movement") }}</div>
-									<div v-if="stockMovementDayWise.length" class="list-stack trend-list">
-										<div v-for="row in stockMovementDayWise" :key="`move-day-${row.date}`" class="insight-row">
+									<div v-if="stockMovementDaySimple.length" class="list-stack trend-list">
+										<div v-for="row in stockMovementDaySimple" :key="`move-day-${row.date}`" class="insight-row">
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
 												<div class="insight-row__value">
-													{{ __("Net") }}: {{ formatQuantity(Number(row.net_qty || 0)) }}
+													{{ __("Net") }}: {{ formatSignedQuantity(Number(row.net || 0)) }}
 												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ __("Sale") }}: {{ formatQuantity(Number(row.sale_out_qty || 0)) }} .
-												{{ __("Return") }}: {{ formatQuantity(Number(row.return_in_qty || 0)) }} .
-												{{ __("Transfer") }}:
-												{{ formatQuantity(Number(row.transfer_in_qty || 0)) }}/{{ formatQuantity(Number(row.transfer_out_qty || 0)) }}
+												{{ __("In") }}: {{ formatQuantity(Number(row.incoming || 0)) }} .
+												{{ __("Out") }}: {{ formatQuantity(Number(row.outgoing || 0)) }} .
+												{{ __("Entries") }}: {{ formatQuantity(Number(row.movement_count || 0)) }}
 											</div>
 											<v-progress-linear
-												:model-value="
-													trendProgress(
-														Number(row.sale_out_qty || 0) +
-															Number(row.return_in_qty || 0) +
-															Number(row.adjustment_in_qty || 0) +
-															Number(row.adjustment_out_qty || 0) +
-															Number(row.transfer_in_qty || 0) +
-															Number(row.transfer_out_qty || 0),
-														stockMovementDayMax,
-													)
-												"
+												:model-value="trendProgress(Number(row.incoming || 0) + Number(row.outgoing || 0), stockMovementDayMax)"
 												color="primary"
 												height="5"
 												rounded
@@ -699,17 +674,15 @@
 											<div class="insight-row__top">
 												<div class="insight-row__title">{{ row.item_name || row.item_code || "-" }}</div>
 												<div class="insight-row__value">
-													{{ formatQuantity(Number(row.qty || 0)) }}
+													{{ formatSignedQuantity(Number(row.qty || 0)) }}
 												</div>
 											</div>
 											<div class="insight-row__meta">
-												{{ formatDate(row.posting_date) }} .
-												{{ row.voucher_type || "-" }} .
-												{{ row.voucher_no || "-" }}
+												{{ formatDate(row.posting_date) }} . {{ formatMovementCategory(row.category) }} .
+												{{ row.direction || "-" }}
 											</div>
 											<div class="insight-row__meta">
-												{{ formatMovementCategory(row.category) }} ({{ row.direction || "-" }}) .
-												{{ row.warehouse || "-" }}
+												{{ row.warehouse || "-" }} . {{ row.voucher_type || "-" }} {{ row.voucher_no || "-" }}
 											</div>
 										</div>
 									</div>
@@ -954,7 +927,7 @@ const supplierSearch = ref("");
 const itemSalesLimit = ref(20);
 const categoryReportLimit = ref(12);
 const inventoryStatusLimit = ref(20);
-const stockMovementLimit = ref(50);
+const stockMovementLimit = ref(20);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -1594,17 +1567,43 @@ const stockMovementDayWise = computed<StockMovementDayRow[]>(() =>
 		.slice(-31),
 );
 const stockMovementRecent = computed<StockMovementRecentRow[]>(() =>
-	[...(stockMovementReport.value.recent_movements || [])].slice(0, Number(stockMovementLimit.value || 50)),
+	[...(stockMovementReport.value.recent_movements || [])].slice(0, Number(stockMovementLimit.value || 20)),
+);
+const stockMovementIncomingQty = computed(
+	() =>
+		Number(stockMovementSummary.value.return_in_qty || 0) +
+		Number(stockMovementSummary.value.adjustment_in_qty || 0) +
+		Number(stockMovementSummary.value.transfer_in_qty || 0) +
+		Number(stockMovementSummary.value.other_in_qty || 0),
+);
+const stockMovementOutgoingQty = computed(
+	() =>
+		Number(stockMovementSummary.value.sale_out_qty || 0) +
+		Number(stockMovementSummary.value.adjustment_out_qty || 0) +
+		Number(stockMovementSummary.value.transfer_out_qty || 0) +
+		Number(stockMovementSummary.value.other_out_qty || 0),
+);
+const stockMovementDaySimple = computed<
+	Array<StockMovementDayRow & { incoming: number; outgoing: number; net: number }>
+>(() =>
+	stockMovementDayWise.value.map((row) => {
+		const incoming =
+			Number(row.return_in_qty || 0) +
+			Number(row.adjustment_in_qty || 0) +
+			Number(row.transfer_in_qty || 0) +
+			Number(row.other_in_qty || 0);
+		const outgoing =
+			Number(row.sale_out_qty || 0) +
+			Number(row.adjustment_out_qty || 0) +
+			Number(row.transfer_out_qty || 0) +
+			Number(row.other_out_qty || 0);
+		const net = Number(row.net_qty || 0);
+		return { ...row, incoming, outgoing, net };
+	}),
 );
 const stockMovementDayMax = computed(() => {
-	const maxValue = stockMovementDayWise.value.reduce((max, row) => {
-		const magnitude =
-			Math.abs(Number(row.sale_out_qty || 0)) +
-			Math.abs(Number(row.return_in_qty || 0)) +
-			Math.abs(Number(row.adjustment_in_qty || 0)) +
-			Math.abs(Number(row.adjustment_out_qty || 0)) +
-			Math.abs(Number(row.transfer_in_qty || 0)) +
-			Math.abs(Number(row.transfer_out_qty || 0));
+	const maxValue = stockMovementDaySimple.value.reduce((max, row) => {
+		const magnitude = Math.abs(Number(row.incoming || 0)) + Math.abs(Number(row.outgoing || 0));
 		return Math.max(max, magnitude);
 	}, 0);
 	return maxValue > 0 ? maxValue : 1;
@@ -1744,6 +1743,12 @@ function formatQuantity(value: number) {
 	return new Intl.NumberFormat(undefined, {
 		maximumFractionDigits: 2,
 	}).format(Number(value || 0));
+}
+
+function formatSignedQuantity(value: number) {
+	const numeric = Number(value || 0);
+	const prefix = numeric > 0 ? "+" : "";
+	return `${prefix}${formatQuantity(numeric)}`;
 }
 
 function formatDate(value?: string) {
