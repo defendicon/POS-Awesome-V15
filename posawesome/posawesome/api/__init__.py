@@ -1,6 +1,7 @@
 """Expose API functions for POS Awesome."""
 
 from .bundles import get_bundle_components
+from .dashboard import get_dashboard_data
 from .customers import (
     create_customer,
     get_customer_addresses,

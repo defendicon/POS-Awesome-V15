@@ -21,6 +21,11 @@ const routes = [
 		meta: { title: "Payments", layout: "default" },
 	},
 	{
+		path: "/dashboard",
+		component: () => import("@/posapp/components/reports/Reports.vue"),
+		meta: { title: "Awesome Dashboard", layout: "default" },
+	},
+	{
 		path: "/reports",
 		component: () => import("@/posapp/components/reports/Reports.vue"),
 		meta: { title: "Reports", layout: "default" },

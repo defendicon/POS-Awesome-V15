@@ -45,6 +45,12 @@ SECTION_FIELDS = [
         "fieldtype": "Section Break",
         "collapsible": 1,
     },
+    {
+        "fieldname": "posa_section_awesome_dashboard",
+        "label": "Awesome Dashboard",
+        "fieldtype": "Section Break",
+        "collapsible": 1,
+    },
 ]
 
 
@@ -139,6 +145,10 @@ ORDERED_CHAIN = [
     "posa_section_customer_display",
     "posa_enable_customer_display",
     "posa_auto_open_customer_display",
+    "posa_section_awesome_dashboard",
+    "posa_enable_awesome_dashboard",
+    "posa_allow_company_dashboard_scope",
+    "posa_low_stock_alert_threshold",
     "pos_awesome_payments",
     "posa_use_pos_awesome_payments",
     "posa_allow_partial_payment",
