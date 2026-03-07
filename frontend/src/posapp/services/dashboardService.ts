@@ -185,6 +185,23 @@ export interface CustomerReportRow {
 	lifetime_value?: number;
 }
 
+export interface StaffPerformanceRow {
+	cashier?: string;
+	invoice_count?: number;
+	sales_amount?: number;
+	average_bill?: number;
+	items_sold?: number;
+	items_per_invoice?: number;
+	return_count?: number;
+	return_amount?: number;
+	return_qty?: number;
+	discount_amount?: number;
+	void_count?: number;
+	void_amount?: number;
+	return_rate_pct?: number;
+	void_rate_pct?: number;
+}
+
 export interface DashboardResponse {
 	enabled: boolean;
 	profile?: string;
@@ -299,6 +316,28 @@ export interface DashboardResponse {
 		top_customers?: CustomerReportRow[];
 		repeat_customers?: CustomerReportRow[];
 		recent_customers?: CustomerReportRow[];
+	};
+	staff_performance_report?: {
+		period?: {
+			from?: string;
+			to?: string;
+		};
+		summary?: {
+			cashier_count?: number;
+			invoice_count?: number;
+			sales_amount?: number;
+			items_sold?: number;
+			average_bill?: number;
+			average_items_per_invoice?: number;
+			return_count?: number;
+			return_amount?: number;
+			discount_amount?: number;
+			void_count?: number;
+			void_amount?: number;
+		};
+		cashier_wise?: StaffPerformanceRow[];
+		top_by_invoices?: StaffPerformanceRow[];
+		risk_activity?: StaffPerformanceRow[];
 	};
 	sales_trend?: {
 		period?: {
@@ -497,6 +536,7 @@ export interface DashboardRequest {
 	payment_report_limit?: number;
 	discount_report_limit?: number;
 	customer_report_limit?: number;
+	staff_report_limit?: number;
 	supplier_limit?: number;
 	low_stock_limit?: number;
 }

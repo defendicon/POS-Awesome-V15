@@ -75,6 +75,7 @@
 				<div class="dashboard-tabs mb-3">
 					<v-tabs v-model="activeDashboardTab" color="primary" class="dashboard-tab-bar" density="comfortable">
 						<v-tab value="sales">{{ __("Sales") }}</v-tab>
+						<v-tab value="staff">{{ __("Staff") }}</v-tab>
 						<v-tab value="customers">{{ __("Customers") }}</v-tab>
 						<v-tab value="products">{{ __("Products") }}</v-tab>
 						<v-tab value="inventory">{{ __("Inventory") }}</v-tab>
@@ -524,6 +525,120 @@
 										</div>
 									</div>
 									<div v-else class="empty-state">{{ __("No hourly sales trend found for today.") }}</div>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+				<v-row v-show="activeDashboardTab === 'staff'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Staff / Cashier Performance Report") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ staffReportRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="success" variant="tonal">
+										{{ __("Sales") }}: {{ formatMoney(Number(staffSummary.sales_amount || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="warning" variant="tonal">
+										{{ __("Discounts") }}: {{ formatMoney(Number(staffSummary.discount_amount || 0)) }}
+									</v-chip>
+									<v-chip size="small" color="error" variant="tonal">
+										{{ __("Voids") }}: {{ formatQuantity(Number(staffSummary.void_count || 0)) }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div class="summary-grid">
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Cashiers") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.cashier_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Invoices") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.invoice_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Items Sold") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.items_sold || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Avg Bill") }}</div>
+									<div class="summary-metric__value">{{ formatMoney(Number(staffSummary.average_bill || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Returns") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(staffSummary.return_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Voids") }}</div>
+									<div class="summary-metric__value summary-metric__value--danger">
+										{{ formatQuantity(Number(staffSummary.void_count || 0)) }}
+									</div>
+								</div>
+							</div>
+
+							<div class="trend-grid">
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Top Sales by Cashier") }}</div>
+									<div v-if="staffCashierRows.length" class="list-stack trend-list">
+										<div v-for="row in staffCashierRows" :key="`staff-sales-${row.cashier}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.sales_amount || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }} .
+												{{ __("Items") }}: {{ formatQuantity(Number(row.items_sold || 0)) }} .
+												{{ __("Avg Bill") }}: {{ formatMoney(Number(row.average_bill || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.sales_amount || 0), staffSalesMax)"
+												color="success"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No staff sales activity found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Most Active Cashiers") }}</div>
+									<div v-if="staffInvoiceRows.length" class="list-stack trend-list">
+										<div v-for="row in staffInvoiceRows" :key="`staff-inv-${row.cashier}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
+												<div class="insight-row__value">{{ formatQuantity(Number(row.invoice_count || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Sales") }}: {{ formatMoney(Number(row.sales_amount || 0)) }} .
+												{{ __("Items/Invoice") }}: {{ Number(row.items_per_invoice || 0).toFixed(2) }}
+											</div>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No invoice activity found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Returns / Voids / Discounts") }}</div>
+									<div v-if="staffRiskRows.length" class="list-stack trend-list">
+										<div v-for="row in staffRiskRows" :key="`staff-risk-${row.cashier}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.cashier || __("Unknown") }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.void_amount || 0) + Number(row.return_amount || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Returns") }}: {{ formatQuantity(Number(row.return_count || 0)) }} .
+												{{ __("Voids") }}: {{ formatQuantity(Number(row.void_count || 0)) }} .
+												{{ __("Discount") }}: {{ formatMoney(Number(row.discount_amount || 0)) }}
+											</div>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No risk activity found.") }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -1333,6 +1448,7 @@ import {
 	type PaymentDaySummaryRow,
 	type PaymentMethodSummaryRow,
 	type ReorderSuggestionRow,
+	type StaffPerformanceRow,
 	type StockMovementDayRow,
 	type StockMovementRecentRow,
 	type LowStockItem,
@@ -1350,7 +1466,9 @@ const errorMessage = ref("");
 const isDashboardEnabledOnServer = ref(true);
 const lastUpdatedAt = ref<Date | null>(null);
 const allowAllProfiles = ref(false);
-const activeDashboardTab = ref<"sales" | "customers" | "products" | "inventory" | "procurement">("sales");
+const activeDashboardTab = ref<
+	"sales" | "staff" | "customers" | "products" | "inventory" | "procurement"
+>("sales");
 const dashboardScope = ref<"all" | "current" | "specific">("all");
 const selectedProfileFilter = ref("");
 const scopeInitialized = ref(false);
@@ -1369,6 +1487,7 @@ const reorderSuggestionLimit = ref(25);
 const paymentReportLimit = ref(20);
 const discountReportLimit = ref(20);
 const customerReportLimit = ref(20);
+const staffReportLimit = ref(20);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -1451,6 +1570,25 @@ const createEmptyDashboard = (): DashboardResponse => ({
 		top_customers: [],
 		repeat_customers: [],
 		recent_customers: [],
+	},
+	staff_performance_report: {
+		period: {},
+		summary: {
+			cashier_count: 0,
+			invoice_count: 0,
+			sales_amount: 0,
+			items_sold: 0,
+			average_bill: 0,
+			average_items_per_invoice: 0,
+			return_count: 0,
+			return_amount: 0,
+			discount_amount: 0,
+			void_count: 0,
+			void_amount: 0,
+		},
+		cashier_wise: [],
+		top_by_invoices: [],
+		risk_activity: [],
 	},
 	sales_trend: {
 		period: {},
@@ -1849,6 +1987,44 @@ const discountCashierMax = computed(() => {
 const discountReturnItemMax = computed(() => {
 	const maxValue = discountTopReturnItems.value.reduce(
 		(max, row) => Math.max(max, Math.abs(Number(row.return_amount || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+
+const staffReport = computed(() => dashboardData.value.staff_performance_report || {});
+const staffSummary = computed(() => staffReport.value.summary || {});
+const staffReportRangeLabel = computed(() => {
+	const from = staffReport.value.period?.from || dashboardData.value.date_context?.month_start;
+	const to = staffReport.value.period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+const staffCashierRows = computed<StaffPerformanceRow[]>(() =>
+	[...(staffReport.value.cashier_wise || [])]
+		.sort((a, b) => Math.abs(Number(b.sales_amount || 0)) - Math.abs(Number(a.sales_amount || 0)))
+		.slice(0, Number(staffReportLimit.value || 20)),
+);
+const staffInvoiceRows = computed<StaffPerformanceRow[]>(() =>
+	[...(staffReport.value.top_by_invoices || [])]
+		.sort((a, b) => Number(b.invoice_count || 0) - Number(a.invoice_count || 0))
+		.slice(0, Number(staffReportLimit.value || 20)),
+);
+const staffRiskRows = computed<StaffPerformanceRow[]>(() =>
+	[...(staffReport.value.risk_activity || [])]
+		.sort(
+			(a, b) =>
+				Math.abs(Number(b.void_amount || 0)) +
+				Math.abs(Number(b.return_amount || 0)) -
+				(Math.abs(Number(a.void_amount || 0)) + Math.abs(Number(a.return_amount || 0))),
+		)
+		.slice(0, Number(staffReportLimit.value || 20)),
+);
+const staffSalesMax = computed(() => {
+	const maxValue = staffCashierRows.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.sales_amount || 0))),
 		0,
 	);
 	return maxValue > 0 ? maxValue : 1;
@@ -2547,6 +2723,10 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 			...(base.customer_report || {}),
 			...(payload?.customer_report || {}),
 		},
+		staff_performance_report: {
+			...(base.staff_performance_report || {}),
+			...(payload?.staff_performance_report || {}),
+		},
 		sales_trend: {
 			...(base.sales_trend || {}),
 			...(payload?.sales_trend || {}),
@@ -2607,6 +2787,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("payment_method_count", response.payment_method_report?.method_wise?.length || 0);
 	console.info("discount_cashier_count", response.discount_void_return_report?.cashier_wise?.length || 0);
 	console.info("customer_top_count", response.customer_report?.top_customers?.length || 0);
+	console.info("staff_cashier_count", response.staff_performance_report?.cashier_wise?.length || 0);
 	console.info("item_sales_count", response.item_sales_report?.items?.length || 0);
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
 	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
@@ -2642,6 +2823,7 @@ async function loadDashboard() {
 			payment_report_limit: paymentReportLimit.value,
 			discount_report_limit: discountReportLimit.value,
 			customer_report_limit: customerReportLimit.value,
+			staff_report_limit: staffReportLimit.value,
 			fast_moving_page: fastMovingPage.value,
 			fast_moving_page_size: fastMovingPageSize.value,
 			fast_moving_search: fastMovingSearch.value || undefined,
