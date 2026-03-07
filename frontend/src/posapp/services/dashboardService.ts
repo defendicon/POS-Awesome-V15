@@ -202,6 +202,38 @@ export interface StaffPerformanceRow {
 	void_rate_pct?: number;
 }
 
+export interface ProfitabilityItemRow {
+	item_code?: string;
+	item_name?: string;
+	stock_uom?: string;
+	sold_qty?: number;
+	revenue?: number;
+	cogs?: number;
+	gross_profit?: number;
+	gross_margin_pct?: number | null;
+}
+
+export interface ProfitabilityCategoryRow {
+	category?: string;
+	label?: string;
+	revenue?: number;
+	cogs?: number;
+	gross_profit?: number;
+	gross_margin_pct?: number | null;
+	sold_qty?: number;
+	item_count?: number;
+}
+
+export interface ProfitabilityDayRow {
+	date?: string;
+	invoice_count?: number;
+	return_invoice_count?: number;
+	revenue?: number;
+	cogs?: number;
+	gross_profit?: number;
+	gross_margin_pct?: number | null;
+}
+
 export interface DashboardResponse {
 	enabled: boolean;
 	profile?: string;
@@ -338,6 +370,29 @@ export interface DashboardResponse {
 		cashier_wise?: StaffPerformanceRow[];
 		top_by_invoices?: StaffPerformanceRow[];
 		risk_activity?: StaffPerformanceRow[];
+	};
+	profitability_report?: {
+		period?: {
+			from?: string;
+			to?: string;
+		};
+		summary?: {
+			invoice_count?: number;
+			return_invoice_count?: number;
+			item_line_count?: number;
+			revenue?: number;
+			cogs?: number;
+			gross_profit?: number;
+			gross_margin_pct?: number | null;
+			average_invoice_profit?: number;
+		};
+		item_wise?: ProfitabilityItemRow[];
+		category_wise?: ProfitabilityCategoryRow[];
+		day_wise?: ProfitabilityDayRow[];
+		highlights?: {
+			top_profit_item?: ProfitabilityItemRow | null;
+			lowest_margin_item?: ProfitabilityItemRow | null;
+		};
 	};
 	sales_trend?: {
 		period?: {
@@ -537,6 +592,7 @@ export interface DashboardRequest {
 	discount_report_limit?: number;
 	customer_report_limit?: number;
 	staff_report_limit?: number;
+	profitability_report_limit?: number;
 	supplier_limit?: number;
 	low_stock_limit?: number;
 }

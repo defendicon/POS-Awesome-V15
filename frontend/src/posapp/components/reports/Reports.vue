@@ -77,6 +77,7 @@
 						<v-tab value="sales">{{ __("Sales") }}</v-tab>
 						<v-tab value="staff">{{ __("Staff") }}</v-tab>
 						<v-tab value="customers">{{ __("Customers") }}</v-tab>
+						<v-tab value="finance">{{ __("Finance") }}</v-tab>
 						<v-tab value="products">{{ __("Products") }}</v-tab>
 						<v-tab value="inventory">{{ __("Inventory") }}</v-tab>
 						<v-tab value="procurement">{{ __("Procurement") }}</v-tab>
@@ -745,6 +746,126 @@
 										</div>
 									</div>
 									<div v-else class="empty-state">{{ __("No recent customer activity found.") }}</div>
+								</div>
+							</div>
+						</v-card>
+					</v-col>
+				</v-row>
+
+				<v-row v-show="activeDashboardTab === 'finance'" class="dashboard-grid mb-2">
+					<v-col cols="12">
+						<v-card class="dashboard-card" elevation="2">
+							<div class="dashboard-card__header">
+								<h2 class="text-subtitle-1 font-weight-bold mb-0">{{ __("Profitability Report") }}</h2>
+								<div class="dashboard-chip-row">
+									<v-chip size="small" color="info" variant="tonal">
+										{{ profitabilityRangeLabel }}
+									</v-chip>
+									<v-chip size="small" color="success" variant="tonal">
+										{{ __("Top Profit Item") }}: {{ topProfitItemLabel }}
+									</v-chip>
+									<v-chip size="small" color="warning" variant="tonal">
+										{{ __("Lowest Margin") }}: {{ lowestMarginItemLabel }}
+									</v-chip>
+								</div>
+							</div>
+
+							<div class="summary-grid">
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Revenue") }}</div>
+									<div class="summary-metric__value">{{ formatMoney(Number(profitabilitySummary.revenue || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("COGS") }}</div>
+									<div class="summary-metric__value">{{ formatMoney(Number(profitabilitySummary.cogs || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Gross Profit") }}</div>
+									<div class="summary-metric__value" :class="Number(profitabilitySummary.gross_profit || 0) < 0 ? 'summary-metric__value--danger' : ''">
+										{{ formatMoney(Number(profitabilitySummary.gross_profit || 0)) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Gross Margin") }}</div>
+									<div class="summary-metric__value">
+										{{ formatPercent(profitabilitySummary.gross_margin_pct, 1) }}
+									</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Invoices") }}</div>
+									<div class="summary-metric__value">{{ formatQuantity(Number(profitabilitySummary.invoice_count || 0)) }}</div>
+								</div>
+								<div class="summary-metric">
+									<div class="summary-metric__label">{{ __("Avg Invoice Profit") }}</div>
+									<div class="summary-metric__value">{{ formatMoney(Number(profitabilitySummary.average_invoice_profit || 0)) }}</div>
+								</div>
+							</div>
+
+							<div class="trend-grid">
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Item-wise Profitability") }}</div>
+									<div v-if="profitabilityItemRows.length" class="list-stack trend-list">
+										<div v-for="row in profitabilityItemRows" :key="`profit-item-${row.item_code}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.item_name || row.item_code || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.gross_profit || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Revenue") }}: {{ formatMoney(Number(row.revenue || 0)) }} .
+												{{ __("COGS") }}: {{ formatMoney(Number(row.cogs || 0)) }} .
+												{{ __("Margin") }}: {{ formatPercent(row.gross_margin_pct, 1) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.gross_profit || 0), profitabilityItemMax)"
+												color="success"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No item profitability data found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Category-wise Margin") }}</div>
+									<div v-if="profitabilityCategoryRows.length" class="list-stack trend-list">
+										<div v-for="row in profitabilityCategoryRows" :key="`profit-cat-${row.category || row.label}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ row.label || row.category || "-" }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.gross_profit || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Revenue") }}: {{ formatMoney(Number(row.revenue || 0)) }} .
+												{{ __("Margin") }}: {{ formatPercent(row.gross_margin_pct, 1) }} .
+												{{ __("Items") }}: {{ formatQuantity(Number(row.item_count || 0)) }}
+											</div>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No category profitability data found.") }}</div>
+								</div>
+
+								<div class="trend-panel">
+									<div class="summary-metric__label">{{ __("Last 14 Days Gross Profit") }}</div>
+									<div v-if="profitabilityDayRows.length" class="list-stack trend-list">
+										<div v-for="row in profitabilityDayRows" :key="`profit-day-${row.date}`" class="insight-row">
+											<div class="insight-row__top">
+												<div class="insight-row__title">{{ formatDate(row.date) }}</div>
+												<div class="insight-row__value">{{ formatMoney(Number(row.gross_profit || 0)) }}</div>
+											</div>
+											<div class="insight-row__meta">
+												{{ __("Revenue") }}: {{ formatMoney(Number(row.revenue || 0)) }} .
+												{{ __("COGS") }}: {{ formatMoney(Number(row.cogs || 0)) }} .
+												{{ __("Invoices") }}: {{ formatQuantity(Number(row.invoice_count || 0)) }}
+											</div>
+											<v-progress-linear
+												:model-value="trendProgress(Number(row.gross_profit || 0), profitabilityDayMax)"
+												color="primary"
+												height="5"
+												rounded
+											/>
+										</div>
+									</div>
+									<div v-else class="empty-state">{{ __("No day-wise profitability trend found.") }}</div>
 								</div>
 							</div>
 						</v-card>
@@ -1448,6 +1569,9 @@ import {
 	type PaymentDaySummaryRow,
 	type PaymentMethodSummaryRow,
 	type ReorderSuggestionRow,
+	type ProfitabilityCategoryRow,
+	type ProfitabilityDayRow,
+	type ProfitabilityItemRow,
 	type StaffPerformanceRow,
 	type StockMovementDayRow,
 	type StockMovementRecentRow,
@@ -1467,7 +1591,7 @@ const isDashboardEnabledOnServer = ref(true);
 const lastUpdatedAt = ref<Date | null>(null);
 const allowAllProfiles = ref(false);
 const activeDashboardTab = ref<
-	"sales" | "staff" | "customers" | "products" | "inventory" | "procurement"
+	"sales" | "staff" | "customers" | "finance" | "products" | "inventory" | "procurement"
 >("sales");
 const dashboardScope = ref<"all" | "current" | "specific">("all");
 const selectedProfileFilter = ref("");
@@ -1488,6 +1612,7 @@ const paymentReportLimit = ref(20);
 const discountReportLimit = ref(20);
 const customerReportLimit = ref(20);
 const staffReportLimit = ref(20);
+const profitabilityReportLimit = ref(20);
 let fastMovingSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
 const createEmptyDashboard = (): DashboardResponse => ({
@@ -1589,6 +1714,26 @@ const createEmptyDashboard = (): DashboardResponse => ({
 		cashier_wise: [],
 		top_by_invoices: [],
 		risk_activity: [],
+	},
+	profitability_report: {
+		period: {},
+		summary: {
+			invoice_count: 0,
+			return_invoice_count: 0,
+			item_line_count: 0,
+			revenue: 0,
+			cogs: 0,
+			gross_profit: 0,
+			gross_margin_pct: null,
+			average_invoice_profit: 0,
+		},
+		item_wise: [],
+		category_wise: [],
+		day_wise: [],
+		highlights: {
+			top_profit_item: null,
+			lowest_margin_item: null,
+		},
 	},
 	sales_trend: {
 		period: {},
@@ -2028,6 +2173,69 @@ const staffSalesMax = computed(() => {
 		0,
 	);
 	return maxValue > 0 ? maxValue : 1;
+});
+
+const profitabilityReport = computed(() => dashboardData.value.profitability_report || {});
+const profitabilitySummary = computed(() => profitabilityReport.value.summary || {});
+const profitabilityHighlights = computed(() => profitabilityReport.value.highlights || {});
+const profitabilityRangeLabel = computed(() => {
+	const from = profitabilityReport.value.period?.from || dashboardData.value.date_context?.month_start;
+	const to = profitabilityReport.value.period?.to || dashboardData.value.date_context?.today;
+	if (!from || !to) {
+		return __("Current Month");
+	}
+	return `${formatDate(from)} - ${formatDate(to)}`;
+});
+const profitabilityItemRows = computed<ProfitabilityItemRow[]>(() =>
+	[...(profitabilityReport.value.item_wise || [])]
+		.sort((a, b) => Number(b.gross_profit || 0) - Number(a.gross_profit || 0))
+		.slice(0, Number(profitabilityReportLimit.value || 20)),
+);
+const profitabilityCategoryRows = computed<ProfitabilityCategoryRow[]>(() =>
+	[...(profitabilityReport.value.category_wise || [])]
+		.sort((a, b) => Number(b.gross_profit || 0) - Number(a.gross_profit || 0))
+		.slice(0, Number(profitabilityReportLimit.value || 20)),
+);
+const profitabilityDayRows = computed<ProfitabilityDayRow[]>(() =>
+	[...(profitabilityReport.value.day_wise || [])]
+		.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))
+		.slice(-14),
+);
+const profitabilityItemMax = computed(() => {
+	const maxValue = profitabilityItemRows.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.gross_profit || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+const profitabilityDayMax = computed(() => {
+	const maxValue = profitabilityDayRows.value.reduce(
+		(max, row) => Math.max(max, Math.abs(Number(row.gross_profit || 0))),
+		0,
+	);
+	return maxValue > 0 ? maxValue : 1;
+});
+const topProfitItemLabel = computed(() => {
+	const row = profitabilityHighlights.value.top_profit_item;
+	if (!row) {
+		return __("N/A");
+	}
+	const name = String(row.item_name || row.item_code || "").trim();
+	if (!name) {
+		return __("N/A");
+	}
+	return `${name} . ${formatMoney(Number(row.gross_profit || 0))}`;
+});
+const lowestMarginItemLabel = computed(() => {
+	const row = profitabilityHighlights.value.lowest_margin_item;
+	if (!row) {
+		return __("N/A");
+	}
+	const name = String(row.item_name || row.item_code || "").trim();
+	if (!name) {
+		return __("N/A");
+	}
+	return `${name} . ${formatPercent(row.gross_margin_pct, 1)}`;
 });
 
 const customerReport = computed(() => dashboardData.value.customer_report || {});
@@ -2727,6 +2935,10 @@ function mergeDashboardPayload(payload?: Partial<DashboardResponse>): DashboardR
 			...(base.staff_performance_report || {}),
 			...(payload?.staff_performance_report || {}),
 		},
+		profitability_report: {
+			...(base.profitability_report || {}),
+			...(payload?.profitability_report || {}),
+		},
 		sales_trend: {
 			...(base.sales_trend || {}),
 			...(payload?.sales_trend || {}),
@@ -2788,6 +3000,7 @@ function logDashboardResponse(response: DashboardResponse) {
 	console.info("discount_cashier_count", response.discount_void_return_report?.cashier_wise?.length || 0);
 	console.info("customer_top_count", response.customer_report?.top_customers?.length || 0);
 	console.info("staff_cashier_count", response.staff_performance_report?.cashier_wise?.length || 0);
+	console.info("profit_item_count", response.profitability_report?.item_wise?.length || 0);
 	console.info("item_sales_count", response.item_sales_report?.items?.length || 0);
 	console.info("category_report_count", response.category_brand_variant_report?.category_wise?.length || 0);
 	console.info("inventory_status_total_items", response.inventory_status_report?.summary?.total_items || 0);
@@ -2824,6 +3037,7 @@ async function loadDashboard() {
 			discount_report_limit: discountReportLimit.value,
 			customer_report_limit: customerReportLimit.value,
 			staff_report_limit: staffReportLimit.value,
+			profitability_report_limit: profitabilityReportLimit.value,
 			fast_moving_page: fastMovingPage.value,
 			fast_moving_page_size: fastMovingPageSize.value,
 			fast_moving_search: fastMovingSearch.value || undefined,

@@ -1922,6 +1922,275 @@ def _collect_staff_cashier_performance_report(
     return report
 
 
+def _collect_profitability_report(
+    profile_names: list[str],
+    company: str,
+    date_from: str,
+    date_to: str,
+    limit: int = 20,
+) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "period": {"from": date_from, "to": date_to},
+        "summary": {
+            "invoice_count": 0,
+            "return_invoice_count": 0,
+            "item_line_count": 0,
+            "revenue": 0.0,
+            "cogs": 0.0,
+            "gross_profit": 0.0,
+            "gross_margin_pct": None,
+            "average_invoice_profit": 0.0,
+        },
+        "item_wise": [],
+        "category_wise": [],
+        "day_wise": [],
+        "highlights": {
+            "top_profit_item": None,
+            "lowest_margin_item": None,
+        },
+    }
+    if not profile_names:
+        return report
+
+    grouped_items = _collect_item_totals(
+        profile_names=profile_names,
+        company=company,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    if not grouped_items:
+        return report
+
+    row_limit = _coerce_limit(limit, default=20, minimum=1, maximum=200)
+    item_codes = sorted(grouped_items.keys())
+    item_meta: dict[str, dict[str, Any]] = {}
+    if item_codes:
+        item_rows = frappe.get_all(
+            "Item",
+            filters={"name": ["in", item_codes]},
+            fields=["name", "item_group"],
+        )
+        item_meta = {
+            cstr(row.get("name")).strip(): row for row in item_rows if cstr(row.get("name")).strip()
+        }
+
+    summary = report["summary"]
+    item_rows_out: list[dict[str, Any]] = []
+    category_buckets: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {
+            "category": "",
+            "label": "",
+            "revenue": 0.0,
+            "cogs": 0.0,
+            "gross_profit": 0.0,
+            "sold_qty": 0.0,
+            "item_codes": set(),
+        }
+    )
+
+    for item_code, row in grouped_items.items():
+        revenue = flt(row.get("sales_amount"))
+        cogs = flt(row.get("estimated_cost"))
+        gross_profit = flt(revenue - cogs)
+        sold_qty = flt(row.get("sold_qty"))
+        line_count = cint(row.get("total_lines"))
+        gross_margin_pct = flt((gross_profit / revenue) * 100) if abs(revenue) > 0.00001 else None
+        category = cstr((item_meta.get(item_code) or {}).get("item_group")).strip() or _("Uncategorized")
+
+        summary["revenue"] += revenue
+        summary["cogs"] += cogs
+        summary["gross_profit"] += gross_profit
+        summary["item_line_count"] += line_count
+
+        item_rows_out.append(
+            {
+                "item_code": item_code,
+                "item_name": row.get("item_name") or item_code,
+                "stock_uom": row.get("stock_uom"),
+                "sold_qty": sold_qty,
+                "revenue": revenue,
+                "cogs": cogs,
+                "gross_profit": gross_profit,
+                "gross_margin_pct": gross_margin_pct,
+            }
+        )
+
+        category_row = category_buckets[category]
+        category_row["category"] = category
+        category_row["label"] = category
+        category_row["revenue"] += revenue
+        category_row["cogs"] += cogs
+        category_row["gross_profit"] += gross_profit
+        category_row["sold_qty"] += sold_qty
+        category_row["item_codes"].add(item_code)
+
+    summary["gross_margin_pct"] = (
+        flt((flt(summary["gross_profit"]) / flt(summary["revenue"])) * 100)
+        if abs(flt(summary["revenue"])) > 0.00001
+        else None
+    )
+
+    profile_filter, profile_filter_params = _build_in_filter("inv.pos_profile", profile_names)
+    day_buckets: dict[str, dict[str, Any]] = {}
+    for parent_doctype, child_doctype in _iter_invoice_sources():
+        is_return_expression = (
+            "ifnull(inv.is_return, 0)" if frappe.db.has_column(parent_doctype, "is_return") else "0"
+        )
+        amount_field = _pick_first_column(child_doctype, ["base_net_amount", "net_amount", "amount"])
+        qty_field = _pick_first_column(child_doctype, ["stock_qty", "qty"])
+        if amount_field and qty_field:
+            cost_field = _pick_first_column(child_doctype, ["incoming_rate", "valuation_rate"])
+            qty_base_expression = f"coalesce(item.{qty_field}, 0)"
+            amount_base_expression = f"coalesce(item.{amount_field}, 0)"
+            cost_rate_expression = f"coalesce(item.{cost_field}, 0)" if cost_field else "0"
+            qty_expression = (
+                f"case when {is_return_expression} = 1 then -abs({qty_base_expression}) "
+                f"else abs({qty_base_expression}) end"
+            )
+            amount_expression = (
+                f"case when {is_return_expression} = 1 then -abs({amount_base_expression}) "
+                f"else abs({amount_base_expression}) end"
+            )
+
+            day_rows = frappe.db.sql(
+                f"""
+                select
+                    inv.posting_date as posting_date,
+                    sum({amount_expression}) as revenue,
+                    sum(({qty_expression}) * ({cost_rate_expression})) as cogs
+                from `tab{child_doctype}` item
+                inner join `tab{parent_doctype}` inv on inv.name = item.parent
+                where inv.docstatus = 1
+                  and inv.company = %s
+                  and inv.posting_date between %s and %s
+                  {profile_filter}
+                  {_extra_parent_filter(parent_doctype, "inv")}
+                group by inv.posting_date
+                """,
+                (company, date_from, date_to, *profile_filter_params),
+                as_dict=True,
+            )
+            for row in day_rows:
+                day_key = cstr(row.get("posting_date")).strip()
+                if not day_key:
+                    continue
+                day_entry = day_buckets.setdefault(
+                    day_key,
+                    {
+                        "date": day_key,
+                        "invoice_count": 0,
+                        "return_invoice_count": 0,
+                        "revenue": 0.0,
+                        "cogs": 0.0,
+                        "gross_profit": 0.0,
+                        "gross_margin_pct": None,
+                    },
+                )
+                day_entry["revenue"] += flt(row.get("revenue"))
+                day_entry["cogs"] += flt(row.get("cogs"))
+
+        invoice_rows = frappe.db.sql(
+            f"""
+            select
+                inv.posting_date as posting_date,
+                sum(case when {is_return_expression} = 1 then 0 else 1 end) as invoice_count,
+                sum(case when {is_return_expression} = 1 then 1 else 0 end) as return_invoice_count
+            from `tab{parent_doctype}` inv
+            where inv.docstatus = 1
+              and inv.company = %s
+              and inv.posting_date between %s and %s
+              {profile_filter}
+              {_extra_parent_filter(parent_doctype, "inv")}
+            group by inv.posting_date
+            """,
+            (company, date_from, date_to, *profile_filter_params),
+            as_dict=True,
+        )
+        for row in invoice_rows:
+            day_key = cstr(row.get("posting_date")).strip()
+            if not day_key:
+                continue
+            day_entry = day_buckets.setdefault(
+                day_key,
+                {
+                    "date": day_key,
+                    "invoice_count": 0,
+                    "return_invoice_count": 0,
+                    "revenue": 0.0,
+                    "cogs": 0.0,
+                    "gross_profit": 0.0,
+                    "gross_margin_pct": None,
+                },
+            )
+            day_entry["invoice_count"] += cint(row.get("invoice_count"))
+            day_entry["return_invoice_count"] += cint(row.get("return_invoice_count"))
+            summary["invoice_count"] += cint(row.get("invoice_count"))
+            summary["return_invoice_count"] += cint(row.get("return_invoice_count"))
+
+    summary["average_invoice_profit"] = (
+        flt(flt(summary["gross_profit"]) / cint(summary["invoice_count"]))
+        if cint(summary["invoice_count"]) > 0
+        else 0.0
+    )
+
+    for day_entry in day_buckets.values():
+        day_entry["gross_profit"] = flt(flt(day_entry.get("revenue")) - flt(day_entry.get("cogs")))
+        revenue = flt(day_entry.get("revenue"))
+        day_entry["gross_margin_pct"] = (
+            flt((flt(day_entry.get("gross_profit")) / revenue) * 100) if abs(revenue) > 0.00001 else None
+        )
+
+    category_rows = []
+    for category, bucket in category_buckets.items():
+        revenue = flt(bucket.get("revenue"))
+        cogs = flt(bucket.get("cogs"))
+        gross_profit = flt(bucket.get("gross_profit"))
+        category_rows.append(
+            {
+                "category": category,
+                "label": bucket.get("label"),
+                "revenue": revenue,
+                "cogs": cogs,
+                "gross_profit": gross_profit,
+                "gross_margin_pct": flt((gross_profit / revenue) * 100) if abs(revenue) > 0.00001 else None,
+                "sold_qty": flt(bucket.get("sold_qty")),
+                "item_count": len(bucket.get("item_codes", set())),
+            }
+        )
+
+    sorted_item_rows = sorted(
+        item_rows_out,
+        key=lambda row: (flt(row.get("gross_profit")), flt(row.get("revenue"))),
+        reverse=True,
+    )
+    sorted_category_rows = sorted(
+        category_rows,
+        key=lambda row: (flt(row.get("gross_profit")), flt(row.get("revenue"))),
+        reverse=True,
+    )
+    sorted_day_rows = sorted(day_buckets.values(), key=lambda row: cstr(row.get("date")))
+
+    low_margin_candidates = [
+        row
+        for row in item_rows_out
+        if flt(row.get("revenue")) > 0.00001 and row.get("gross_margin_pct") is not None
+    ]
+    lowest_margin_item = (
+        min(low_margin_candidates, key=lambda row: flt(row.get("gross_margin_pct")))
+        if low_margin_candidates
+        else None
+    )
+
+    report["item_wise"] = sorted_item_rows[:row_limit]
+    report["category_wise"] = sorted_category_rows[:row_limit]
+    report["day_wise"] = sorted_day_rows
+    report["highlights"] = {
+        "top_profit_item": sorted_item_rows[0] if sorted_item_rows else None,
+        "lowest_margin_item": lowest_margin_item,
+    }
+    return report
+
+
 def _pct_change(current: float, previous: float) -> float | None:
     current_value = flt(current)
     previous_value = flt(previous)
@@ -3455,6 +3724,7 @@ def get_dashboard_data(
     discount_report_limit: int = 20,
     customer_report_limit: int = 20,
     staff_report_limit: int = 20,
+    profitability_report_limit: int = 20,
     supplier_limit: int = 8,
     low_stock_limit: int = 20,
 ):
@@ -3502,6 +3772,9 @@ def get_dashboard_data(
     discount_report_limit = _coerce_limit(discount_report_limit, default=20, minimum=1, maximum=200)
     customer_report_limit = _coerce_limit(customer_report_limit, default=20, minimum=1, maximum=200)
     staff_report_limit = _coerce_limit(staff_report_limit, default=20, minimum=1, maximum=200)
+    profitability_report_limit = _coerce_limit(
+        profitability_report_limit, default=20, minimum=1, maximum=200
+    )
 
     company = cstr(current_profile_doc.get("company")).strip()
     company_profiles = _get_company_profiles(company)
@@ -3722,6 +3995,26 @@ def get_dashboard_data(
             "top_by_invoices": [],
             "risk_activity": [],
         },
+        "profitability_report": {
+            "period": {"from": str(month_start), "to": str(today)},
+            "summary": {
+                "invoice_count": 0,
+                "return_invoice_count": 0,
+                "item_line_count": 0,
+                "revenue": 0.0,
+                "cogs": 0.0,
+                "gross_profit": 0.0,
+                "gross_margin_pct": None,
+                "average_invoice_profit": 0.0,
+            },
+            "item_wise": [],
+            "category_wise": [],
+            "day_wise": [],
+            "highlights": {
+                "top_profit_item": None,
+                "lowest_margin_item": None,
+            },
+        },
         "sales_trend": {
             "period": {
                 "day_from": str(month_start),
@@ -3898,6 +4191,13 @@ def get_dashboard_data(
         date_from=str(month_start),
         date_to=str(today),
         limit=staff_report_limit,
+    )
+    payload["profitability_report"] = _collect_profitability_report(
+        profile_names=selected_profile_names,
+        company=company,
+        date_from=str(month_start),
+        date_to=str(today),
+        limit=profitability_report_limit,
     )
     payload["sales_trend"] = _collect_sales_trend(
         profile_names=selected_profile_names,
