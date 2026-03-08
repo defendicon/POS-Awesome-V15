@@ -124,7 +124,7 @@ DocType: POS Closing Shift,Sales Manager,Gestor de Vendas
 DocType: POS Offer,Sales Master Manager,Gerente Mestre de Vendas
 apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Sales Summary,Resumo de Vendas
 DocType: POS Offer,Sales User,Usuário de Vendas
-Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number,Procurar por Numero de Serie
+Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number,Procurar por Número de Serie
 apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Selected POS Opening Shift should be open.,Abertura de Turno do POS selecionado deve estar aberto.
 Custom Field - description: POS Profile-posa_allow_submissions_in_background_job,Send invoice to submit after printing,Enviar Factura para Submeter depois de Imprimir
 DocType: POS Opening Shift,Set Posting Date,Definir Data de Postagem
@@ -183,20 +183,20 @@ Cannot change language - same language selected,Não é possível alterar o idio
 Language changed successfully! Reloading...,Idioma alterado com sucesso! Recarregando...
 Failed to change language,Falha ao alterar o idioma
 Unknown error,Erro desconhecido
-* Required,Obrigatorio
+* Required,Obrigatório
 - Total Outstanding,Total Pendente
-- Total Unallocated,Total Nao Alocado
+- Total Unallocated,Total Não Alocado
 Add,Adicionar
 Add Payment,Adicionar Pagamento
 Additional Notes,Notas Adicionais
-Address,Endereco
+Address,Endereço
 All,Todos
 All Synchronized,Tudo Sincronizado
 All Warehouses,Todos os Armazens
 All pending invoices are up to date,Todas as faturas pendentes estao atualizadas
 Amount must be greater than zero.,O valor deve ser maior que zero.
 Apply Offer,Aplicar Oferta
-Authorization Code,Codigo de Autorizacao
+Authorization Code,Codigo de Autorização
 Auto Reconcile,Conciliacao Automatica
 Available Credit,Credito Disponivel
 Available Items,Itens Disponiveis
@@ -358,7 +358,7 @@ Loading server CPU/memory usage...,Carregando uso de CPU/memoria do servidor...
 Loading suppliers...,Carregando fornecedores...
 Loading unpaid invoices...,Carregando faturas nao pagas...
 Loading...,Carregando...
-Location Performance,Desempenho da Localizacao
+Location Performance,Desempenho da Localização
 Locations,Localizacoes
 Low,Baixo
 Low Stock,Estoque Baixo
@@ -369,7 +369,7 @@ Medium,Medio
 Method-wise Collections,Cobrancas por Metodo
 Minimum Qty,Qtd Minima
 Missing Dependency,Dependencia Faltante
-Mobile Number,Numero de Celular
+Mobile Number,Número de Celular
 Mode of Payment is required,Modo de pagamento obrigatorio
 Month,Mes
 Monthly Profit,Lucro Mensal
@@ -405,13 +405,13 @@ No items to receive. Please enter received quantities.,Nenhum item para receber.
 No notifications yet,Nenhuma notificacao ainda
 No outstanding invoices available for allocation of credit note {0},Nenhuma fatura disponivel para alocacao de nota de credito {0}
 No outstanding invoices available for allocation of payment {0},Nenhuma fatura disponivel para alocacao de pagamento {0}
-No outstanding invoices were available to reconcile Credit Note {0}.,Nao havia faturas disponiveis para conciliar nota de credito {0}.
-No outstanding invoices were available to reconcile Journal Entry {0}.,Nao havia faturas disponiveis para conciliar lancamento {0}.
-No outstanding invoices were available to reconcile Payment Entry {0}.,Nao havia faturas disponiveis para conciliar pagamento {0}.
+No outstanding invoices were available to reconcile Credit Note {0}.,Não havia faturas disponiveis para conciliar nota de credito {0}.
+No outstanding invoices were available to reconcile Journal Entry {0}.,Não havia faturas disponiveis para conciliar lancamento {0}.
+No outstanding invoices were available to reconcile Payment Entry {0}.,Não havia faturas disponiveis para conciliar pagamento {0}.
 No outstanding invoices were found for {0}.,Nenhuma fatura pendente encontrada para {0}.
 No response from server,Sem resposta do servidor
 No return invoices found,Nenhuma fatura de devolucao encontrada
-Not Set,Nao Definido
+Not Set,Não Definido
 Notifications,Notificacoes
 OK,OK
 Offer Item,Item de Oferta
@@ -459,7 +459,7 @@ Peak Memory:,Memoria de Pico:
 Peak Server:,Servidor de Pico:
 Peak:,Pico:
 Pending Amount,Valor Pendente
-Pending Sync,Sincronizacao Pendente
+Pending Sync,Sincronização Pendente
 Per Page,Por Pagina
 Please add at least one item.,Por favor adicione pelo menos um item.
 Please enter payment amount,Por favor insira valor do pagamento
@@ -471,16 +471,16 @@ Please set Default Payable Account in Company {0},Por favor configure Conta Paga
 Please set default account for Mode of Payment {0} in company {1},Por favor configure conta padrao para Metodo de Pagamento {0} na empresa {1}
 Please try again or enter the item manually.,Por favor tente novamente ou insira o item manualmente.
 Popup blocked. Please allow popups.,Popup bloqueado.
-Posting,Publicacao
-Posting and Price List,Publicacao e Lista de Precos
+Posting,Publicação
+Posting and Price List,Publicação e Lista de Precos
 Previous unit of measure,Unidade de medida anterior
 Price List Rate,Taxa de Lista de Precos
 Price List is required,Lista de precos obrigatoria
 Pricing Rule,Regra de Precos
 Print,Imprimir
-Print Format,Formato de Impressao
-Print Format (Invoice),Formato de Impressao (Fatura)
-Print Format (Order),Formato de Impressao (Pedido)
+Print Format,Formato de Impressão
+Print Format (Invoice),Formato de Impressão (Fatura)
+Print Format (Order),Formato de Impressão (Pedido)
 Print Purchase Invoice instead of PO,Imprimir Fatura de Compra em vez de PC
 Printer,Impressora
 Processed returns impacting the shift totals,Devolucoes processadas que afetam os totais do turno
@@ -501,7 +501,7 @@ Purchase order requires at least one item.,O pedido de compra requer pelo menos 
 Purchase orders,Pedidos de Compra
 QZ Certificate Missing,Certificado QZ Faltante
 QZ Certificate Ready,Certificado QZ Pronto
-QZ Tray Setup,Configuracao do QZ Tray
+QZ Tray Setup,Configuração do QZ Tray
 QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate.,Certificado QZ nao encontrado.
 QZ Tray connected.,QZ Tray conectado.
 QZ Tray is not connected.,QZ Tray nao conectado.
@@ -612,7 +612,7 @@ Specific Profile,Perfil Especifico
 Split Invoices,Dividir Faturas
 Staff,Equipe
 Stock,Estoque
-Stock Information,Informacao de Estoque
+Stock Information,Informação de Estoque
 Stock UOM is required.,UOM de estoque obrigatoria.
 Submit Deposit,Enviar Deposito
 Submit Expense,Enviar Despesa
@@ -655,7 +655,7 @@ Toggle navigation drawer,Alternar gaveta de navegacao
 Top Brand,Melhor Marca
 Top Category,Melhor Categoria
 Top Customers,Melhores Clientes
-Top Items by Location,Melhores Itens por Localizacao
+Top Items by Location,Melhores Itens por Localização
 Top Margin,Melhor Margem
 Top Profit Item,Item de Maior Lucro
 Top Return Items,Melhores Itens Devolvidos
@@ -680,37 +680,37 @@ Trans Amount is required,Valor de transacao obrigatorio
 Transfer,Transferir
 Try adjusting your search or filters,Tente ajustar sua busca ou filtros
 Try changing the date range or status filter.,Tente alterar o intervalo de datas ou filtro de status.
-Unable to add offer item. Please refresh and try again.,Nao e possivel adicionar item de oferta.
-Unable to add scanned item.,Nao e possivel adicionar item lido.
-Unable to create Journal Entry for customer credit.,Nao e possivel criar lancamento para credito do cliente.
-Unable to create purchase order,Nao e possivel criar pedido de compra
-Unable to delete draft invoice,Nao e possivel excluir fatura de rascunho
-Unable to determine cash account for change payment entry.,Nao e possivel determinar conta de dinheiro.
-Unable to determine customer receivable account for change payment entry.,Nao e possivel determinar conta a receber.
-Unable to fetch M-Pesa payments,Nao e possivel obter pagamentos M-Pesa
-Unable to fetch draft invoices,Nao e possivel obter faturas de rascunho
-Unable to fetch draft orders,Nao e possivel obter pedidos de rascunho
-Unable to fetch invoice history,Nao e possivel obter historico de faturas
-Unable to fetch sales orders,Nao e possivel obter pedidos de venda
-Unable to fetch unpaid invoices,Nao e possivel obter faturas nao pagas
-Unable to generate scale barcode,Nao e possivel gerar codigo de barras de balanca
-Unable to load Credit Note {0}: {1},Nao e possivel carregar nota de credito {0}: {1}
-Unable to load Payment Entry {0}: {1},Nao e possivel carregar pagamento {0}: {1}
-Unable to load draft invoice,Nao e possivel carregar fatura de rascunho
-Unable to load invoice details,Nao e possivel carregar detalhes da fatura
-Unable to load the selected sales order,Nao e possivel carregar o pedido de venda selecionado
-Unable to prepare return invoice,Nao e possivel preparar fatura de devolucao
-Unable to print draft invoice,Nao e possivel imprimir fatura de rascunho
-Unable to resolve POS Opening Shift.,Nao e possivel resolver turno de abertura POS.
-Unable to resolve POS cash account from POS Profile cash mode of payment.,Nao e possivel resolver conta de dinheiro.
-Unable to submit the selected payment,Nao e possivel enviar o pagamento selecionado
+Unable to add offer item. Please refresh and try again.,Não e possivel adicionar item de oferta.
+Unable to add scanned item.,Não e possivel adicionar item lido.
+Unable to create Journal Entry for customer credit.,Não e possivel criar lancamento para credito do cliente.
+Unable to create purchase order,Não e possivel criar pedido de compra
+Unable to delete draft invoice,Não e possivel excluir fatura de rascunho
+Unable to determine cash account for change payment entry.,Não e possivel determinar conta de dinheiro.
+Unable to determine customer receivable account for change payment entry.,Não e possivel determinar conta a receber.
+Unable to fetch M-Pesa payments,Não e possivel obter pagamentos M-Pesa
+Unable to fetch draft invoices,Não e possivel obter faturas de rascunho
+Unable to fetch draft orders,Não e possivel obter pedidos de rascunho
+Unable to fetch invoice history,Não e possivel obter historico de faturas
+Unable to fetch sales orders,Não e possivel obter pedidos de venda
+Unable to fetch unpaid invoices,Não e possivel obter faturas nao pagas
+Unable to generate scale barcode,Não e possivel gerar codigo de barras de balanca
+Unable to load Credit Note {0}: {1},Não e possivel carregar nota de credito {0}: {1}
+Unable to load Payment Entry {0}: {1},Não e possivel carregar pagamento {0}: {1}
+Unable to load draft invoice,Não e possivel carregar fatura de rascunho
+Unable to load invoice details,Não e possivel carregar detalhes da fatura
+Unable to load the selected sales order,Não e possivel carregar o pedido de venda selecionado
+Unable to prepare return invoice,Não e possivel preparar fatura de devolucao
+Unable to print draft invoice,Não e possivel imprimir fatura de rascunho
+Unable to resolve POS Opening Shift.,Não e possivel resolver turno de abertura POS.
+Unable to resolve POS cash account from POS Profile cash mode of payment.,Não e possivel resolver conta de dinheiro.
+Unable to submit the selected payment,Não e possivel enviar o pagamento selecionado
 Unbranded,Sem Marca
 Uncategorized,Sem Categoria
 Unknown,Desconhecido
 Unknown Item,Item Desconhecido
-Unknown Warehouse,Armazem Desconhecido
+Unknown Warehouse,Armazém Desconhecido
 Unlabeled Charge,Encargo Sem Rotulo
-Unpaid,Nao Pago
+Unpaid,Não Pago
 Update Price List Rate,Atualizar Taxa de Lista de Precos
 Update available,Atualizacao disponivel
 Updated,Atualizado
@@ -764,324 +764,324 @@ this item,este item
 {0} must belong to company {1}.,{0} deve pertencer a empresa {1}.
 {0} payment(s) were skipped.,{0} pagamento(s) foram ignorados.
 {0} {1} must be submitted before creating change payment entries.,{0} {1} deve ser enviado antes de criar entradas de pagamento de troco.
-Account,Account
-Acknowledge the error to resume scanning,Acknowledge the error to resume scanning
-Across,Across
-Action,Action
+Account,Conta
+Acknowledge the error to resume scanning,Reconheça o erro para retomar a digitalização
+Across,Através
+Action,Ação
 Add New Address,Add New Address
-Add on New Line,Add on New Line
-Address Line 1,Address Line 1
-Address not found,Address not found
-Adjustment,Adjustment
-After returns,After returns
-Against,Against
-Against Name,Against Name
-Age Bracket,Age Bracket
-All Caught Up!,All Caught Up!
-All Profiles,All Profiles
-All invoices are synchronized,All invoices are synchronized
-All visible invoices are fully settled.,All visible invoices are fully settled.
-Allocated {0} across {1} payment(s).,Allocated {0} across {1} payment(s).
-Allocation amount for payment {0} exceeds outstanding invoices,Allocation amount for payment {0} exceeds outstanding invoices
-Always fetch items from server (ignore local cache),Always fetch items from server (ignore local cache)
-Amount,Amount
-Amount already received,Amount already received
-Amount exceeds POS Profile cash movement max amount.,Amount exceeds POS Profile cash movement max amount.
-Amount exceeds profile cash movement max amount.,Amount exceeds profile cash movement max amount.
-Amount received from customer,Amount received from customer
+Add on New Line,Adicionar em Nova Linha
+Address Line 1,Endereço Linha 1
+Address not found,Endereço não encontrado
+Adjustment,Ajuste
+After returns,Após devoluções
+Against,Contra
+Against Name,Nome Contra
+Age Bracket,Faixa Etária
+All Caught Up!,Tudo em Dia!
+All Profiles,Todos os Perfis
+All invoices are synchronized,Todas as faturas estão sincronizadas
+All visible invoices are fully settled.,Todas as faturas visíveis estão totalmente liquidadas.
+Allocated {0} across {1} payment(s).,Alocado {0} através de {1} pagamento(s).
+Allocation amount for payment {0} exceeds outstanding invoices,O valor de alocação para o pagamento {0} excede as faturas pendentes
+Always fetch items from server (ignore local cache),Sempre buscar itens do servidor (ignorar cache local)
+Amount,Valor
+Amount already received,Valor já recebido
+Amount exceeds POS Profile cash movement max amount.,O valor excede o valor máximo de movimento de dinheiro do perfil POS.
+Amount exceeds profile cash movement max amount.,O valor excede o valor máximo de movimento de dinheiro do perfil.
+Amount received from customer,Valor recebido do cliente
 Applied,Applied
-Apply,Apply
+Apply,Aplicar
 Apply On,Apply On
-Apps,Apps
-Are you sure you want to close? All entered data will be lost.,Are you sure you want to close? All entered data will be lost.
-Attributes (Size/Color),Attributes (Size/Color)
+Apps,Aplicativos
+Are you sure you want to close? All entered data will be lost.,Tem certeza de que deseja fechar? Todos os dados inseridos serão perdidos.
+Attributes (Size/Color),Atributos (Tamanho/Cor)
 Available QTY,Available QTY
-Available:,Available:
-Average Basket,Average Basket
-Average Bill,Average Bill
-Average Ticket,Average Ticket
-Avg Bill,Avg Bill
-Avg Invoice,Avg Invoice
-Avg Invoice Profit,Avg Invoice Profit
-Avg Invoice Value,Avg Invoice Value
-Avg Purchase Frequency,Avg Purchase Frequency
-Awesome,Awesome
-Awesome Dashboard,Awesome Dashboard
-Awesome Dashboard is disabled in POS Settings.,Awesome Dashboard is disabled in POS Settings.
-Awesome Dashboard is disabled in global settings or for the selected scope.,Awesome Dashboard is disabled in global settings or for the selected scope.
+Available:,Disponível:
+Average Basket,Média de Carrinho
+Average Bill,Fatura Média
+Average Ticket,Ticket Médio
+Avg Bill,Média Fatura
+Avg Invoice,Fatura Média
+Avg Invoice Profit,Lucro Médio por Fatura
+Avg Invoice Value,Valor Médio de Fatura
+Avg Purchase Frequency,Frequência de Compra Média
+Awesome,Incrível
+Awesome Dashboard,Painel Awesome
+Awesome Dashboard is disabled in POS Settings.,O Painel Awesome está desabilitado nas configurações de POS.
+Awesome Dashboard is disabled in global settings or for the selected scope.,O Painel Awesome está des configurações globais ou para o escopoabilitado em selecionado.
 Back,Back
-Back Office Cash Account,Back Office Cash Account
-Back Office Cash Account (Optional Override),Back Office Cash Account (Optional Override)
-Back Office Cash Account is fixed by POS Profile and cannot be overridden.,Back Office Cash Account is fixed by POS Profile and cannot be overridden.
-Back Office Cash Account is required for cash deposit.,Back Office Cash Account is required for cash deposit.
-Back office cash account is required.,Back office cash account is required.
-Background Submission Failed,Background Submission Failed
-Background sync interval (seconds),Background sync interval (seconds)
-Balances still pending,Balances still pending
-Barcode Label Printing,Barcode Label Printing
-Barcode {0} already exists.,Barcode {0} already exists.
-Basic Information,Basic Information
-Batch Information,Batch Information
-Before any return workflow,Before any return workflow
-Before returns,Before returns
-Best Day,Best Day
-Best Seller,Best Seller
-Book expense or deposit from active shift.,Book expense or deposit from active shift.
-Branch / Location-wise Report,Branch / Location-wise Report
-Branches,Branches
-Brand-wise,Brand-wise
-Breakdown,Breakdown
-Build Time:,Build Time:
-Built with Frappe,Built with Frappe
-Bundle,Bundle
+Back Office Cash Account,Conta de Dinheiro do Escritório
+Back Office Cash Account (Optional Override),Conta de Dinheiro do Escritório (Substituição Opcional)
+Back Office Cash Account is fixed by POS Profile and cannot be overridden.,A conta de dinheiro do escritório é fixada pelo perfil POS e não pode ser substituída.
+Back Office Cash Account is required for cash deposit.,Conta de dinheiro do escritório é necessária para depósito em dinheiro.
+Back office cash account is required.,Conta de dinheiro do escritório é necessária.
+Background Submission Failed,Envio em Segundo Plano Falhou
+Background sync interval (seconds),Intervalo de sincronização em segundo plano (segundos)
+Balances still pending,Saldos ainda pendentes
+Barcode Label Printing,Impressão de Etiquetas de Código de Barras
+Barcode {0} already exists.,O código de barras {0} já existe.
+Basic Information,Informação Básica
+Batch Information,Informação de Lote
+Before any return workflow,Antes de qualquer fluxo de devolução
+Before returns,Antes de devoluções
+Best Day,Melhor Dia
+Best Seller,Melhor Vendedor
+Book expense or deposit from active shift.,Registrar gasto ou depósito do turno ativo.
+Branch / Location-wise Report,Relatório por Filial/Localização
+Branches,Filiais
+Brand-wise,Por Marca
+Breakdown,Detalhamento
+Build Time:,Tempo de Construção:
+Built with Frappe,Construído com Frappe
+Bundle,Pacote
 COGS,COGS
-CPU Cores:,CPU Cores:
-CPU Load,CPU Load
-Cache Usage,Cache Usage
-Cache cleared successfully,Cache cleared successfully
-Camera Access Required,Camera Access Required
-Camera access was aborted. Please try again.,Camera access was aborted. Please try again.
-Cancel Payment,Cancel Payment
-Cancel Sale,Cancel Sale
-Cancelled,Cancelled
-Cancelling submitted cash movements is disabled for this POS Profile.,Cancelling submitted cash movements is disabled for this POS Profile.
+CPU Cores:,Núcleos de CPU:
+CPU Load,Carga de CPU
+Cache Usage,Uso de Cache
+Cache cleared successfully,Cache limpa com sucesso
+Camera Access Required,Acesso à Câmera Necessário
+Camera access was aborted. Please try again.,O acesso à câmera foi abortado. Por favor tente novamente.
+Cancel Payment,Cancelar Pagamento
+Cancel Sale,Cancelar Venda
+Cancelled,Cancelado
+Cancelling submitted cash movements is disabled for this POS Profile.,Cancelar movimentos de dinheiro enviados está desabilitado para este perfil POS.
 Cannot Save Offline Invoice: ,Cannot Save Offline Invoice: 
 Cannot Save Offline Payment: ,Cannot Save Offline Payment: 
-Cannot clear cache while offline,Cannot clear cache while offline
-Cannot redeem customer credit more than invoice total,Cannot redeem customer credit more than invoice total
+Cannot clear cache while offline,Não é possível limpar cache enquanto offline
+Cannot redeem customer credit more than invoice total,Não é possível resgatar crédito do cliente mais que o total da fatura
 Card,Card
-Cards,Cards
-Cash Deposit is disabled for this POS Profile.,Cash Deposit is disabled for this POS Profile.
-Cash Drawer Snapshot,Cash Drawer Snapshot
-Cash In Hand,Cash In Hand
-Cash Movement is disabled for this POS Profile.,Cash Movement is disabled for this POS Profile.
-Cash Movement is disabled in current POS Profile.,Cash Movement is disabled in current POS Profile.
-Cash Movements,Cash Movements
-Cash back to customers,Cash back to customers
-Cash movement cancelled,Cash movement cancelled
-Cash movement deduction applied,Cash movement deduction applied
-Cash movement deleted,Cash movement deleted
-Cash movement is disabled for this POS Profile.,Cash movement is disabled for this POS Profile.
-Cash movement saved offline,Cash movement saved offline
-Cash movement submitted,Cash movement submitted
-Cashiers,Cashiers
-Category / Brand / Variant Report,Category / Brand / Variant Report
-Category-wise,Category-wise
-Category-wise Margin,Category-wise Margin
-Certificate is missing or not trusted. QZ may show confirmation dialogs.,Certificate is missing or not trusted. QZ may show confirmation dialogs.
-Certificate is trusted. Silent QZ printing is active.,Certificate is trusted. Silent QZ printing is active.
-Change Price,Change Price
-Change Return,Change Return
-Change Returned,Change Returned
-Charge Heads,Charge Heads
-Charges not found,Charges not found
-Check for new commits,Check for new commits
-City,City
-Clear,Clear
-Clear Search,Clear Search
-Clearing local cache...,Clearing local cache...
-Click to refresh,Click to refresh
-Client CPU Lag:,Client CPU Lag:
-Client Memory Usage:,Client Memory Usage:
-Client Metrics,Client Metrics
-Close Scanner,Close Scanner
+Cards,Cartões
+Cash Deposit is disabled for this POS Profile.,Depósito em dinheiro está desabilitado para este perfil POS.
+Cash Drawer Snapshot,Instantânea da Gaveta de Dinheiro
+Cash In Hand,Dinheiro em Mão
+Cash Movement is disabled for this POS Profile.,Movimento de dinheiro está desabilitado para este perfil POS.
+Cash Movement is disabled in current POS Profile.,Movimento de dinheiro está desabilitado no perfil POS atual.
+Cash Movements,Movimentos de Dinheiro
+Cash back to customers,Dinheiro de volta para clientes
+Cash movement cancelled,Movimento de dinheiro cancelado
+Cash movement deduction applied,Desconto de movimento de dinheiro aplicado
+Cash movement deleted,Movimento de dinheiro excluído
+Cash movement is disabled for this POS Profile.,Movimento de dinheiro está desabilitado para este perfil POS.
+Cash movement saved offline,Movimento de dinheiro salvo offline
+Cash movement submitted,Movimento de dinheiro enviado
+Cashiers,Caixas
+Category / Brand / Variant Report,Relatório por Categoria/Marca/Variante
+Category-wise,Por Categoria
+Category-wise Margin,Margem por Categoria
+Certificate is missing or not trusted. QZ may show confirmation dialogs.,O certificado está faltando ou não é confiável. QZ pode mostrar diálogos de confirmação.
+Certificate is trusted. Silent QZ printing is active.,O certificado é confiável. Impressão silenciosa do QZ está ativa.
+Change Price,Alterar Preço
+Change Return,Alterar Devolução
+Change Returned,Troco Alterado
+Charge Heads,Cabeçalhos de Encargo
+Charges not found,Encargos não encontrados
+Check for new commits,Verificar novos commits
+City,Cidade
+Clear,Limpar
+Clear Search,Limpar Busca
+Clearing local cache...,Limpando cache local...
+Click to refresh,Clique para atualizar
+Client CPU Lag:,Atraso de CPU do Cliente:
+Client Memory Usage:,Uso de Memória do Cliente:
+Client Metrics,Métricas do Cliente
+Close Scanner,Fechar Scanner
 Closing Amount,Closing Amount
 Closing POS Shift,Closing POS Shift
-Closing Snapshot Available,Closing Snapshot Available
-Code,Code
-Code scanned successfully,Code scanned successfully
-Cols,Cols
-Columns,Columns
-Company,Company
-Company is required.,Company is required.
-Company must match the selected POS Opening Shift company.,Company must match the selected POS Opening Shift company.
-Company must match the selected POS Profile company.,Company must match the selected POS Profile company.
-Completed returns will appear here.,Completed returns will appear here.
-Confirm Close,Confirm Close
-Confirm Mobile Number,Confirm Mobile Number
-Connect printer and manage certificate,Connect printer and manage certificate
-Connecting to QZ Tray...,Connecting to QZ Tray...
-Context is required,Context is required
-Continue Editing,Continue Editing
-Cost Center is not set in pos profile {},Cost Center is not set in pos profile {}
-Could not fetch latest balance from server,Could not fetch latest balance from server
-Count,Count
-Country,Country
-Coupon,Coupon
-Coupons,Coupons
-Cover,Cover
-Create Customer,Create Customer
+Closing Snapshot Available,Instantânea de Fechamento Disponível
+Code,Código
+Code scanned successfully,Código escaneado com sucesso
+Cols,Colunas
+Columns,Colunas
+Company,Empresa
+Company is required.,Empresa é necessária.
+Company must match the selected POS Opening Shift company.,A empresa deve coincidir com a empresa do turno de abertura POS selecionado.
+Company must match the selected POS Profile company.,A empresa deve coincidir com a empresa do perfil POS selecionado.
+Completed returns will appear here.,As devoluções concluídas aparecerão aqui.
+Confirm Close,Confirmar Fechamento
+Confirm Mobile Number,Confirmar Número de Celular
+Connect printer and manage certificate,Conectar impressora e gerenciar certificado
+Connecting to QZ Tray...,Conectando ao QZ Tray...
+Context is required,Contexto é necessário
+Continue Editing,Continuar Editando
+Cost Center is not set in pos profile {},Centro de custos não definido no perfil POS {}
+Could not fetch latest balance from server,Não foi possível obter o último saldo do servidor
+Count,Contagem
+Country,País
+Coupon,Cupom
+Coupons,Cupons
+Cover,Capa
+Create Customer,Criar Cliente
 Create POS Opening Shift,Create POS Opening Shift
-Create items,Create items
-Create suppliers,Create suppliers
-Credit Note {0} has no remaining balance to allocate.,Credit Note {0} has no remaining balance to allocate.
-Credit Outstanding,Credit Outstanding
-Credit and Output,Credit and Output
-Credit note {0} is already fully allocated,Credit note {0} is already fully allocated
-Credit note {0} still has an unapplied balance of {1},Credit note {0} still has an unapplied balance of {1}
-Credit sales remaining to be collected,Credit sales remaining to be collected
-Critical,Critical
-Custom Due Days,Custom Due Days
-Custom items per page,Custom items per page
-Customer Balance,Customer Balance
-Customer Name is required,Customer Name is required
-Customer Screen,Customer Screen
-Customer already selected,Customer already selected
-Customer balance unavailable offline,Customer balance unavailable offline
-Customer created successfully.,Customer created successfully.
-Customer creation failed.,Customer creation failed.
-Customer display channel is missing,Customer display channel is missing
-Customer group is required,Customer group is required
-Customer is required to add payment,Customer is required to add payment
-Customer not selected,Customer not selected
-Customer saved offline,Customer saved offline
-Customer territory is required,Customer territory is required
-Customer updated successfully.,Customer updated successfully.
-Customers not found,Customers not found
-Daily Sales Summary,Daily Sales Summary
-Database Health,Database Health
-Database Info,Database Info
-Database health affects overall system speed and reliability.,Database health affects overall system speed and reliability.
-Date,Date
-Day Δ,Day Δ
-Day-wise (MTD),Day-wise (MTD)
-Day-wise Movement,Day-wise Movement
-Dead Stock,Dead Stock
-Dead Stock Items,Dead Stock Items
-Default Rate is required,Default Rate is required
-Delete Invoice,Delete Invoice
-Deleting cancelled cash movements is disabled for this POS Profile.,Deleting cancelled cash movements is disabled for this POS Profile.
-Delivery Charges,Delivery Charges
-Delivery Information,Delivery Information
-Description,Description
-Detailed Supplier Breakdown,Detailed Supplier Breakdown
-Difference (In Company Currency),Difference (In Company Currency)
-Discount %,Discount %
-Discount / Void / Return Report,Discount / Void / Return Report
+Create items,Criar itens
+Create suppliers,Criar fornecedores
+Credit Note {0} has no remaining balance to allocate.,A nota de crédito {0} não tem saldo restante para alocar.
+Credit Outstanding,Crédito Pendente
+Credit and Output,Crédito e Saída
+Credit note {0} is already fully allocated,A nota de crédito {0} já está totalmente alocada
+Credit note {0} still has an unapplied balance of {1},A nota de crédito {0} ainda tem um saldo não aplicado de {1}
+Credit sales remaining to be collected,Vendas a crédito pendentes de cobrança
+Critical,Crítico
+Custom Due Days,Dias de Vencimento Personalizados
+Custom items per page,Itens personalizados por página
+Customer Balance,Saldo do Cliente
+Customer Name is required,Nome do cliente é necessário
+Customer Screen,Tela do Cliente
+Customer already selected,Cliente já selecionado
+Customer balance unavailable offline,Saldo do cliente indisponível offline
+Customer created successfully.,Cliente criado com sucesso.
+Customer creation failed.,Falha ao criar cliente.
+Customer display channel is missing,Canal de visualização do cliente está faltando
+Customer group is required,Grupo de clientes é necessário
+Customer is required to add payment,Cliente é necessário para adicionar pagamento
+Customer not selected,Cliente não selecionado
+Customer saved offline,Cliente salvo offline
+Customer territory is required,Território do cliente é necessário
+Customer updated successfully.,Cliente atualizado com sucesso.
+Customers not found,Clientes não encontrados
+Daily Sales Summary,Resumo de Vendas Diárias
+Database Health,Saúde do Banco de Dados
+Database Info,Info do Banco de Dados
+Database health affects overall system speed and reliability.,A saúde do banco de dados afeta a velocidade e confiabilidade geral do sistema.
+Date,Data
+Day Δ,Dia Δ
+Day-wise (MTD),Diário (MTD)
+Day-wise Movement,Movimento Diário
+Dead Stock,Estoque Morto
+Dead Stock Items,Itens de Estoque Morto
+Default Rate is required,Taxa padrão é necessária
+Delete Invoice,Excluir Fatura
+Deleting cancelled cash movements is disabled for this POS Profile.,Excluir movimentos de dinheiro cancelados está desabilitado para este perfil POS.
+Delivery Charges,Encargos de Entrega
+Delivery Information,Informação de Entrega
+Description,Descrição
+Detailed Supplier Breakdown,Detalhamento de Fornecedor
+Difference (In Company Currency),Diferença (Em Moeda da Empresa)
+Discount %,Desconto %
+Discount / Void / Return Report,Relatório de Desconto/Anulação/Devolução
 Discount Amount,Discount Amount
-Discount limited by POS Profile,Discount limited by POS Profile
-Discounted Invoices,Discounted Invoices
-Draft,Draft
+Discount limited by POS Profile,Desconto limitado pelo perfil POS
+Discounted Invoices,Faturas com Desconto
+Draft,Rascunho
 Due Date,Due Date
-Enable Customer Display in POS Profile first.,Enable Customer Display in POS Profile first.
-Enter a valid grams value,Enter a valid grams value
-Enter new price list rate,Enter new price list rate
-Enter valid grams for scale barcode,Enter valid grams for scale barcode
-Entries,Entries
-Error Loading Data,Error Loading Data
-Error calculating prices,Error calculating prices
-Error fetching customer balance,Error fetching customer balance
-Error processing payment,Error processing payment
-Error searching invoices,Error searching invoices
+Enable Customer Display in POS Profile first.,Habilite a tela do cliente no perfil POS primeiro.
+Enter a valid grams value,Digite um valor válido em gramas
+Enter new price list rate,Digite nova taxa de lista de preços
+Enter valid grams for scale barcode,Digite gramas válidas para código de barras de balança
+Entries,Entradas
+Error Loading Data,Erro ao Carregar Dados
+Error calculating prices,Erro ao calcular preços
+Error fetching customer balance,Erro ao obter saldo do cliente
+Error processing payment,Erro ao processar pagamento
+Error searching invoices,Erro ao buscar faturas
 Error submitting invoice: ,Error submitting invoice: 
-Error updating item details,Error updating item details
-Est. Purchase,Est. Purchase
-Est. Value,Est. Value
-Event-loop lag measures how busy your browser is. Lower is better.,Event-loop lag measures how busy your browser is. Lower is better.
-Expected Amount (In Company Currency),Expected Amount (In Company Currency)
-Expected Cash,Expected Cash
-Expected cash on hand grouped by currency,Expected cash on hand grouped by currency
-Expense Account (Optional Override),Expense Account (Optional Override)
-Expense Account is required for expense entries.,Expense Account is required for expense entries.
-Expense account is required for POS Expense.,Expense account is required for POS Expense.
-Expense account is required.,Expense account is required.
-Expense target account must match Expense Account.,Expense target account must match Expense Account.
-Expenses and deposits posted during this shift,Expenses and deposits posted during this shift
-Failed to auto reconcile payments.,Failed to auto reconcile payments.
-Failed to clear cache,Failed to clear cache
-Failed to generate scale barcode. Using item barcode only.,Failed to generate scale barcode. Using item barcode only.
-Failed to load cash movement context.,Failed to load cash movement context.
-Failed to load dashboard data.,Failed to load dashboard data.
-Failed to reconcile Credit Note {0}: {1},Failed to reconcile Credit Note {0}: {1}
-Failed to reconcile Journal Entry {0}: {1},Failed to reconcile Journal Entry {0}: {1}
-Failed to reconcile Payment Entry {0}: {1},Failed to reconcile Payment Entry {0}: {1}
-Failed to reload invoice from server,Failed to reload invoice from server
-Failed to sync offline cash movements,Failed to sync offline cash movements
-Flash Off,Flash Off
-Flash On,Flash On
-Fulfillment Details,Fulfillment Details
-Full Name,Full Name
-Get Payments,Get Payments
-Grand Total,Grand Total
-Group not found,Group not found
-Grouped totals for each payment method and currency,Grouped totals for each payment method and currency
-Hide Non Essential Fields,Hide Non Essential Fields
-Hide quantity decimals,Hide quantity decimals
-Hide zero rated items,Hide zero rated items
-Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Import the certificate into QZ Tray and restart QZ Tray on each POS machine.
-Include Batch / Serial,Include Batch / Serial
-Include Price,Include Price
+Error updating item details,Erro ao atualizar detalhes do item
+Est. Purchase,Compra Est.
+Est. Value,Valor Est.
+Event-loop lag measures how busy your browser is. Lower is better.,O atraso do loop de eventos mede quão ocupado seu navegador é. Menor é melhor.
+Expected Amount (In Company Currency),Valor Esperado (Em Moeda da Empresa)
+Expected Cash,Dinheiro Esperado
+Expected cash on hand grouped by currency,Dinheiro esperado em mãos agrupado por moeda
+Expense Account (Optional Override),Conta de Despesas (Substituição Opcional)
+Expense Account is required for expense entries.,Conta de despesas é necessária para entradas de despesas.
+Expense account is required for POS Expense.,Conta de despesas é necessária para Despesa POS.
+Expense account is required.,Conta de despesas é necessária.
+Expense target account must match Expense Account.,A conta de despesas alvo deve coincidir com a Conta de Despesas.
+Expenses and deposits posted during this shift,Despesas e depósitos publicados durante este turno
+Failed to auto reconcile payments.,Falha ao conciliar pagamentos automaticamente.
+Failed to clear cache,Falha ao limpar cache
+Failed to generate scale barcode. Using item barcode only.,Falha ao gerar código de barras de balança. Usando apenas código de barras do item.
+Failed to load cash movement context.,Falha ao carregar contexto de movimento de dinheiro.
+Failed to load dashboard data.,Falha ao carregar dados do painel.
+Failed to reconcile Credit Note {0}: {1},Falha ao conciliar nota de crédito {0}: {1}
+Failed to reconcile Journal Entry {0}: {1},Falha ao conciliar lançamento {0}: {1}
+Failed to reconcile Payment Entry {0}: {1},Falha ao conciliar entrada de pagamento {0}: {1}
+Failed to reload invoice from server,Falha ao recarregar fatura do servidor
+Failed to sync offline cash movements,Falha ao sincronizar movimentos de dinheiro offline
+Flash Off,Flash Desligado
+Flash On,Flash Ligado
+Fulfillment Details,Detalhes de Cumprimento
+Full Name,Nome Completo
+Get Payments,Obter Pagamentos
+Grand Total,Total Geral
+Group not found,Grupo não encontrado
+Grouped totals for each payment method and currency,Totais agrupados para cada método de pagamento e moeda
+Hide Non Essential Fields,Ocultar Campos Não Essenciais
+Hide quantity decimals,Ocultar decimais de quantidade
+Hide zero rated items,Ocultar itens com taxa zero
+Import the certificate into QZ Tray and restart QZ Tray on each POS machine.,Importe o certificado para o QZ Tray e reinicie o QZ Tray em cada máquina POS.
+Include Batch / Serial,Incluir Lote / Serial
+Include Price,Incluir Preço
 IndexedDB,IndexedDB
-Initialize your shift with opening balances,Initialize your shift with opening balances
-Initializing application...,Initializing application...
-Installed Applications,Installed Applications
-Invalid Opening Entry,Invalid Opening Entry
-Invalid POS Opening Shift data provided.,Invalid POS Opening Shift data provided.
-Invalid Period,Invalid Period
-Invalid movement type for journal entry.,Invalid movement type for journal entry.
-Invalid movement type.,Invalid movement type.
-Invalid posting date.,Invalid posting date.
-Invalid rate,Invalid rate
-Invalid {0} filter,Invalid {0} filter
-Inventory Status Report,Inventory Status Report
-Invoice Change,Invoice Change
-Invoice Mgmt,Invoice Mgmt
-Invoice is still in draft after background submission.,Invoice is still in draft after background submission.
-Invoice saved offline,Invoice saved offline
-Invoice submission failed,Invoice submission failed
-Invoice {0} Deleted,Invoice {0} Deleted
-Invoices,Invoices
-Item / Product Sales Report,Item / Product Sales Report
-Item Code,Item Code
-Item Code and Price List are required,Item Code and Price List are required
-Item Price has been added or updated,Item Price has been added or updated
-Item Selector Settings,Item Selector Settings
-Item is out of stock,Item is out of stock
-Item not found,Item not found
-Item order updated,Item order updated
-Item-wise Profitability,Item-wise Profitability
-Items,Items
-Items added in POS will appear here automatically.,Items added in POS will appear here automatically.
-Items added to invoice,Items added to invoice
-Items per page,Items per page
-Items/Invoice,Items/Invoice
-Journal Entry {0} has no unallocated amount remaining.,Journal Entry {0} has no unallocated amount remaining.
-Last 14 Days (Paid vs Pending),Last 14 Days (Paid vs Pending)
-Last 14 Days Activity,Last 14 Days Activity
-Last 14 Days Gross Profit,Last 14 Days Gross Profit
-Last 14 Days Purchases,Last 14 Days Purchases
-Last 14 Days Tax/Charges,Last 14 Days Tax/Charges
-Lead Time,Lead Time
-List,List
-Load Drafts,Load Drafts
-Load More Invoices,Load More Invoices
-Load Sales Invoice,Load Sales Invoice
-Load previously saved invoices,Load previously saved invoices
-Loading customer database...,Loading customer database...
-Loading product catalog...,Loading product catalog...
-Low Stock Threshold,Low Stock Threshold
-Low Stock Total,Low Stock Total
-Lowest Margin,Lowest Margin
-Manage and synchronize your offline transactions,Manage and synchronize your offline transactions
-Mobile No,Mobile No
-Mode,Mode
-Mode of Payment,Mode of Payment
-Mode of Payments,Mode of Payments
-Month Δ,Month Δ
-Month-wise,Month-wise
-Monthly Sales Summary,Monthly Sales Summary
-Most Active Cashiers,Most Active Cashiers
-Name,Name
-Negative Stock Items,Negative Stock Items
-Negative values not allowed,Negative values not allowed
-Net Total,Net Total
+Initialize your shift with opening balances,Inicie seu turno com saldos de abertura
+Initializing application...,Inicializando aplicação...
+Installed Applications,Aplicativos Instalados
+Invalid Opening Entry,Entrada de Abertura Inválida
+Invalid POS Opening Shift data provided.,Dados de turno de abertura POS inválidos fornecidos.
+Invalid Period,Período Inválido
+Invalid movement type for journal entry.,Tipo de movimento inválido para lançamento.
+Invalid movement type.,Tipo de movimento inválido.
+Invalid posting date.,Data de publicação inválida.
+Invalid rate,Taxa inválida
+Invalid {0} filter,Filtro {0} inválido
+Inventory Status Report,Relatório de Status de Estoque
+Invoice Change,Troco de Fatura
+Invoice Mgmt,Gerenciamento de Faturas
+Invoice is still in draft after background submission.,A fatura ainda está em rascunho após envio em segundo plano.
+Invoice saved offline,Fatura salva offline
+Invoice submission failed,Envio de fatura falhou
+Invoice {0} Deleted,Fatura {0} Excluída
+Invoices,Faturas
+Item / Product Sales Report,Relatório de Vendas de Item/Produto
+Item Code,Código do Item
+Item Code and Price List are required,Código do item e lista de preços são necessários
+Item Price has been added or updated,O preço do item foi adicionado ou atualizado
+Item Selector Settings,Configurações do Seletor de Itens
+Item is out of stock,O item está fora de estoque
+Item not found,Item não encontrado
+Item order updated,Ordem do item atualizada
+Item-wise Profitability,Lucratividade por Item
+Items,Itens
+Items added in POS will appear here automatically.,Os itens adicionados no POS aparecerão aqui automaticamente.
+Items added to invoice,Itens adicionados à fatura
+Items per page,Itens por página
+Items/Invoice,Itens/Fatura
+Journal Entry {0} has no unallocated amount remaining.,O lançamento {0} não tem valor não alocado restante.
+Last 14 Days (Paid vs Pending),Últimos 14 Dias (Pago vs Pendente)
+Last 14 Days Activity,Atividade dos Últimos 14 Dias
+Last 14 Days Gross Profit,Lucro Bruto dos Últimos 14 Dias
+Last 14 Days Purchases,Compras dos Últimos 14 Dias
+Last 14 Days Tax/Charges,Impostos/Encargos dos Últimos 14 Dias
+Lead Time,Tempo de Entrega
+List,Lista
+Load Drafts,Carregar Rascunhos
+Load More Invoices,Carregar Mais Faturas
+Load Sales Invoice,Carregar Fatura de Venda
+Load previously saved invoices,Carregar faturas salvas anteriormente
+Loading customer database...,Carregando banco de dados de clientes...
+Loading product catalog...,Carregando catálogo de produtos...
+Low Stock Threshold,Limite de Estoque Baixo
+Low Stock Total,Total de Estoque Baixo
+Lowest Margin,Margem Mais Baixa
+Manage and synchronize your offline transactions,Gerencie e sincronize suas transações offline
+Mobile No,Nº Celular
+Mode,Modo
+Mode of Payment,Modo de Pagamento
+Mode of Payments,Modos de Pagamento
+Month Δ,Mês Δ
+Month-wise,Mensal
+Monthly Sales Summary,Resumo de Vendas Mensais
+Most Active Cashiers,Caixas Mais Ativos
+Name,Nome
+Negative Stock Items,Itens com Estoque Negativo
+Negative values not allowed,Valores negativos não permitidos
+Net Total,Total Líquido
 New Offer Available,New Offer Available
-No allocation made for credit note {0},No allocation made for credit note {0}
-No allocation made for payment {0},No allocation made for payment {0}
-No allocation was recorded for Credit Note {0}.,No allocation was recorded for Credit Note {0}.
-No allocation was recorded for Journal Entry {0}.,No allocation was recorded for Journal Entry {0}.
-No allocation was recorded for Payment Entry {0}.,No allocation was recorded for Payment Entry {0}.
-No allocations were made.,No allocations were made.
+No allocation made for credit note {0},Nenhuma alocação feita para nota de crédito {0}
+No allocation made for payment {0},Nenhuma alocação feita para pagamento {0}
+No allocation was recorded for Credit Note {0}.,Nenhuma alocação foi registrada para nota de crédito {0}.
+No allocation was recorded for Journal Entry {0}.,Nenhuma alocação foi registrada para lançamento {0}.
+No allocation was recorded for Payment Entry {0}.,Nenhuma alocação foi registrada para entrada de pagamento {0}.
+No allocations were made.,Nenhuma alocação foi feita.
 No batches available in {0} for {1}.,No batches available in {0} for {1}.
 No branch/location data found.,No branch/location data found.
 No brand data found.,No brand data found.
@@ -1330,8 +1330,8 @@ Week Δ,Semana Δ
 Yes,Sim
 add,adicionar
 localStorage,localStorage
-"Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.","Atualização de estoque: {0} tem {1} disponível. Adicionar {2}ará o estoque ficar negativo."
-"{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.","{0} tem apenas {1} em estoque. Você solicitou {2}. Ajuste a quantidade ou reabasteça."
+Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Atualização de estoque: {0} tem {1} disponível. Adicionar {2}ará o estoque ficar negativo.
+{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} tem apenas {1} em estoque. Você solicitou {2}. Ajuste a quantidade ou reabasteça.
 Account Head,Conta Principal
 Accounts Manager,Gerente de Contas
 Accounts User,Usuário de Contas
