@@ -2,6 +2,38 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { POSProfile } from "../types/models";
 
+const DENSITY_STORAGE_KEY = "posa_ui_density";
+const DENSITY_COMPACT_CLASS = "pos-density-compact";
+const DENSITY_COMFORTABLE_CLASS = "pos-density-comfortable";
+
+type DensityMode = "comfortable" | "compact";
+
+function readDensityMode(): DensityMode {
+  if (typeof window === "undefined") return "comfortable";
+  try {
+    const stored = window.localStorage.getItem(DENSITY_STORAGE_KEY);
+    return stored === "compact" ? "compact" : "comfortable";
+  } catch {
+    return "comfortable";
+  }
+}
+
+function persistDensityMode(mode: DensityMode) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DENSITY_STORAGE_KEY, mode);
+  } catch {
+    // Ignore localStorage write errors
+  }
+}
+
+function applyDensityClass(mode: DensityMode) {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.classList.remove(DENSITY_COMPACT_CLASS, DENSITY_COMFORTABLE_CLASS);
+  root.classList.add(mode === "compact" ? DENSITY_COMPACT_CLASS : DENSITY_COMFORTABLE_CLASS);
+}
+
 export const useUIStore = defineStore("ui", () => {
   // Loading Overlay State
   const isLoading = ref(false);
@@ -217,6 +249,33 @@ export const useUIStore = defineStore("ui", () => {
     forceReloadTrigger.value++;
   }
 
+  // UI Density
+  const densityMode = ref<DensityMode>(readDensityMode());
+  const setDensityMode = (mode: DensityMode) => {
+    const normalized: DensityMode = mode === "compact" ? "compact" : "comfortable";
+    densityMode.value = normalized;
+    persistDensityMode(normalized);
+    applyDensityClass(normalized);
+  };
+  const toggleDensityMode = () => {
+    setDensityMode(densityMode.value === "compact" ? "comfortable" : "compact");
+  };
+
+  // Keyboard Shortcuts Help
+  const shortcutHelpOpen = ref(false);
+  const openShortcutHelp = () => {
+    shortcutHelpOpen.value = true;
+  };
+  const closeShortcutHelp = () => {
+    shortcutHelpOpen.value = false;
+  };
+  const toggleShortcutHelp = () => {
+    shortcutHelpOpen.value = !shortcutHelpOpen.value;
+  };
+
+  // Ensure initial density class is applied at store creation time.
+  applyDensityClass(densityMode.value);
+
   return {
     isLoading,
     loadingText,
@@ -292,5 +351,12 @@ export const useUIStore = defineStore("ui", () => {
     triggerForceReloadItems,
     lastStockAdjustment,
     setLastStockAdjustment,
+    densityMode,
+    setDensityMode,
+    toggleDensityMode,
+    shortcutHelpOpen,
+    openShortcutHelp,
+    closeShortcutHelp,
+    toggleShortcutHelp,
   };
 });

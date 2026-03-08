@@ -289,6 +289,44 @@
 						</div>
 					</v-list-item>
 
+					<!-- Density toggle -->
+					<v-list-item @click="toggleDensity" class="menu-item-compact secondary-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact secondary-icon">
+								<v-icon color="white" size="16">mdi-view-compact</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								uiStore.densityMode === "compact"
+									? __("Comfortable Density")
+									: __("Compact Density")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								uiStore.densityMode === "compact"
+									? __("Switch to roomier spacing")
+									: __("Fit more content on screen")
+							}}</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
+					<!-- Keyboard shortcuts help -->
+					<v-list-item @click="openKeyboardShortcuts" class="menu-item-compact neutral-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact neutral-icon">
+								<v-icon color="white" size="16">mdi-keyboard-outline</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">{{
+								__("Keyboard Shortcuts")
+							}}</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">{{
+								__("Press F1 or ? to open help")
+							}}</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
 					<v-list-item @click="$emit('logout')" class="menu-item-compact danger-action">
 						<template v-slot:prepend>
 							<div class="menu-icon-wrapper-compact danger-icon">
@@ -421,6 +459,7 @@ const FALLBACK_LANGUAGES = [
 
 import { useLastInvoicePrinting } from "../../composables/core/useLastInvoicePrinting";
 import { useUpdateStore } from "../../stores/updateStore";
+import { useUIStore } from "../../stores/uiStore";
 import QzTrayDialog from "./QzTrayDialog.vue";
 
 export default {
@@ -437,7 +476,8 @@ export default {
 	setup() {
 		const { printLastInvoice } = useLastInvoicePrinting();
 		const updateStore = useUpdateStore();
-		return { printLastInvoice, updateStore };
+		const uiStore = useUIStore();
+		return { printLastInvoice, updateStore, uiStore };
 	},
 	data() {
 		return {
@@ -669,6 +709,19 @@ export default {
 					"error",
 				);
 			}
+		},
+
+		toggleDensity() {
+			this.uiStore.toggleDensityMode();
+			const densityLabel =
+				this.uiStore.densityMode === "compact"
+					? this.__("Compact density enabled")
+					: this.__("Comfortable density enabled");
+			this.showNotification(densityLabel, "success");
+		},
+
+		openKeyboardShortcuts() {
+			this.uiStore.openShortcutHelp();
 		},
 
 		__(text) {

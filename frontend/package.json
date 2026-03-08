@@ -8,6 +8,7 @@
 		"serve": "vite preview",
 		"build": "vue-tsc --noEmit && vite build",
 		"type-check": "vue-tsc --noEmit",
+		"audit:contrast": "node scripts/contrast-audit.mjs",
 		"format": "prettier --write \"**/*.{js,vue,css,scss,html}\"",
 		"test": "vitest",
 		"test:smoke": "playwright test --config=playwright.config.ts",

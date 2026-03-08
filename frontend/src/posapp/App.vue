@@ -13,11 +13,13 @@
 			</transition>
 		</component>
 	</router-view>
+	<KeyboardShortcutsDialog />
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent } from "vue";
+import { computed, defineAsyncComponent, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
+import { useUIStore } from "./stores/uiStore";
 import {
 	isStandaloneCustomerDisplayMode,
 } from "./utils/customerDisplay";
@@ -31,6 +33,10 @@ const CustomerDisplayLayout = defineAsyncComponent(
 const CustomerDisplay = defineAsyncComponent(
 	() => import("./components/customer_display/CustomerDisplay.vue"),
 );
+const KeyboardShortcutsDialog = defineAsyncComponent(
+	() => import("./components/ui/KeyboardShortcutsDialog.vue"),
+);
+const uiStore = useUIStore();
 
 const standaloneCustomerDisplayMode = computed(() =>
 	isStandaloneCustomerDisplayMode(),
@@ -49,6 +55,40 @@ const layoutComponent = computed(() => {
 });
 
 const layoutName = computed(() => route.meta.layout || "default");
+
+const isEditableElement = (target) => {
+	if (!(target instanceof HTMLElement)) return false;
+	if (target.isContentEditable) return true;
+	const tag = target.tagName.toLowerCase();
+	return ["input", "textarea", "select"].includes(tag);
+};
+
+const handleGlobalShortcuts = (event) => {
+	if (isEditableElement(event.target)) {
+		return;
+	}
+
+	const key = String(event.key || "").toLowerCase();
+	const isQuestionMark = key === "?" || (event.shiftKey && key === "/");
+	if (event.key === "F1" || isQuestionMark) {
+		event.preventDefault();
+		uiStore.toggleShortcutHelp();
+		return;
+	}
+
+	if ((event.ctrlKey || event.metaKey) && event.shiftKey && key === "d") {
+		event.preventDefault();
+		uiStore.toggleDensityMode();
+	}
+};
+
+onMounted(() => {
+	window.addEventListener("keydown", handleGlobalShortcuts);
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener("keydown", handleGlobalShortcuts);
+});
 </script>
 
 <style>

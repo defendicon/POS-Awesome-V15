@@ -69,7 +69,7 @@ export default defineConfig({
 				"offline/index": path.resolve(__dirname, "src/offline/index.ts"),
 				loader: path.resolve(__dirname, "src/loader.ts"),
 			},
-			external: ["socket.io-client"],
+			external: ["socket.io-client", "qz-tray"],
 			output: {
 				format: "es",
 				entryFileNames: "[name].js",

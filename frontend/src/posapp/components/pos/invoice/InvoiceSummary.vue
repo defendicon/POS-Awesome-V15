@@ -142,6 +142,17 @@
 				/>
 			</v-col>
 		</v-row>
+		<div class="mobile-quick-actions">
+			<v-btn color="success" variant="flat" class="mobile-quick-btn" @click="handleShowPayment">
+				{{ frappe._("Pay") }}
+			</v-btn>
+			<v-btn color="accent" variant="flat" class="mobile-quick-btn" @click="handleSaveAndClear">
+				{{ frappe._("Save") }}
+			</v-btn>
+			<v-btn color="error" variant="tonal" class="mobile-quick-btn" @click="handleCancelSale">
+				{{ frappe._("Cancel") }}
+			</v-btn>
+		</div>
 	</v-card>
 </template>
 
@@ -375,6 +386,10 @@ async function handleOpenCustomerDisplay() {
 	row-gap: 2px;
 }
 
+.mobile-quick-actions {
+	display: none;
+}
+
 /* Enhanced field styling */
 .summary-field {
 	transition: all 0.2s ease;
@@ -410,6 +425,24 @@ async function handleOpenCustomerDisplay() {
 
 	.summary-field :deep(.v-field) {
 		min-height: 46px;
+	}
+
+	.mobile-quick-actions {
+		position: sticky;
+		bottom: 0;
+		z-index: 10;
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		gap: 8px;
+		padding-top: 8px;
+		margin-top: 4px;
+		background: linear-gradient(to top, var(--pos-card-bg), rgba(255, 255, 255, 0));
+	}
+
+	.mobile-quick-btn {
+		min-height: 44px !important;
+		font-weight: 700 !important;
+		letter-spacing: 0.01em !important;
 	}
 }
 </style>

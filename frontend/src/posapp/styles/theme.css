@@ -106,6 +106,24 @@
 	--pos-padding-end: 0;
 }
 
+:root.pos-density-compact {
+	--pos-space-2: 8px;
+	--pos-space-3: 10px;
+	--pos-space-4: 14px;
+	--pos-radius-xs: 6px;
+	--pos-radius-sm: 10px;
+	--pos-radius-md: 14px;
+}
+
+:root.pos-density-comfortable {
+	--pos-space-2: 10px;
+	--pos-space-3: 14px;
+	--pos-space-4: 18px;
+	--pos-radius-xs: 8px;
+	--pos-radius-sm: 12px;
+	--pos-radius-md: 16px;
+}
+
 /* Dark Theme Override */
 [data-theme="dark"],
 [data-theme-mode="dark"],
@@ -385,6 +403,20 @@
 	text-transform: none !important;
 	letter-spacing: 0.01em !important;
 	font-weight: 600;
+}
+
+:root.pos-density-compact .posapp .v-btn {
+	min-height: 38px;
+	font-size: 0.9rem;
+}
+
+:root.pos-density-compact .posapp .v-btn--icon {
+	min-width: 36px;
+	min-height: 36px;
+}
+
+:root.pos-density-compact .posapp .v-field {
+	--v-input-control-height: 36px;
 }
 
 .posapp .v-btn--icon {
