@@ -82,8 +82,7 @@ Use Customer Credit,Usar Crédito del Cliente
 Is Credit Sale,Es Venta a Crédito
 Due Date,Fecha de Vencimiento
 Menu,Menú
-Actions,Acciónes
-Close Shift,Cerrar Turno
+Actions,Acciones
 End current session,Finalizar sesión actual
 Print Last Invoice,Imprimir Última Factura
 Reprint previous transaction,Reimprimir transacción anterior
@@ -109,7 +108,6 @@ Choose your preferred language for the POS interface,Elige tu idioma preferido p
 Language will be changed to,El idioma se cambiará a
 Cancel,Cancelar
 Change Language,Cambiar Idioma
-Close,Cerrar
 Cannot change language - same language selected,No se puede cambiar el idioma - mismo idioma seleccionado
 Language changed successfully! Reloading...,¡Idioma cambiado exitosamente! Recargando...
 Failed to change language,Error al cambiar el idioma
@@ -158,7 +156,7 @@ Company is required,Se requiere empresa
 Completed and active sales in this range,Ventas completadas y activas en este rango
 Connect,Conectar
 Connecting,Conectando
-Connections:,Conexiónes:
+Connections:,Conexiones:
 Create,Crear
 Create Bill,Crear Factura
 Create New Item,Crear Nuevo Artículo
@@ -298,7 +296,7 @@ Medium,Medio
 Method-wise Collections,Cobros por Metodo
 Minimum Qty,Cant. Minima
 Missing Dependency,Dependencia Faltante
-Mobile Number,Número de Movil
+Mobile Number,Número de Móvil
 Mode of Payment is required,Se requiere modo de pago
 Month,Mes
 Monthly Profit,Ganancia Mensual
@@ -443,7 +441,7 @@ Quantity,Cantidad
 Quantity exceeds available stock,La cantidad excede el inventario disponible
 Rate adjusted to maximum allowed discount,Tasa ajustada al maximo descuento permitido
 Ready,Listo
-Real-time POS insights for retail operations.,Informacion de POS en tiempo real para operaciónes minoristas.
+Real-time POS insights for retail operations.,Informacion de POS en tiempo real para operaciones minoristas.
 Receive now,Recibir ahora
 Receive stock,Recibir inventario
 Received,Recibido
@@ -478,7 +476,7 @@ Reset,Restablecer
 Reset item name,Restablecer nombre del articulo
 Return Amount,Monto de Devolucion
 Return Count,Conteo de Devolucion
-Return Valid Until,Devolucion Valida Hasta
+Return Valid Until,Devolución Válida Hasta
 Return count,Conteo de Devolucion
 Return value will be settled back through payment methods.,El valor de devolucion se liquidara a traves de metodos de pago.
 Return window passed,Ventana de devolucion pasada
@@ -681,7 +679,7 @@ Your Cart,Su Carrito
 actual_qty,cant_real
 cache used,cache usado
 commits,commits
-days,dias
+days,días
 modified_after must be a valid ISO datetime,modified_after debe ser una fecha ISO valida
 sales,ventas
 this item,este articulo
@@ -1133,7 +1131,6 @@ Profile switching is not available yet,El cambio de perfil aún no está disponi
 Profit: Invoice Item Estimate,Ganancia: Estimación de Artículo de Factura
 Profit: Stock Ledger (COGS),Ganancia: Libro de Stock (COGS)
 Prorated return discount,Descuento prorrateado de devolución
-QTY,Cantidad
 Rate,Tarifa
 Ready!,¡Listo!
 Reconcile payment methods and close shift,Conciliar métodos de pago y cerrar turno
@@ -1160,7 +1157,6 @@ Search Mpesa Payments,Buscar Pagos Mpesa
 Select,Seleccionar
 Select Columns to Display,Seleccionar Columnas a Mostrar
 Select Payment,Seleccionar Pago
-Select Return Invoice,Seleccionar Factura de Devolución
 Select S.O,Seleccionar O.S.
 Select Sales Orders,Seleccionar Pedidos de Venta
 Select a customer to use coupon,Seleccione un cliente para usar cupón
@@ -1240,7 +1236,6 @@ Account Head,Cuenta Principal
 Accounts Manager,Gerente de Cuentas
 Accounts User,Usuario de Cuentas
 Add/Edit Coupon Conditions,Agregar/Editar Condiciones del Cupón
-Additional Notes,Notas Adicionales
 Administrator,Administrador
 All Synced,Todo Sincronizado
 Allow Create Sales Order,Permitir Crear Pedido de Venta
@@ -1276,7 +1271,6 @@ Cannot Save Offline Invoice,No se puede guardar factura offline
 Cannot Save Offline Invoice:,No se puede guardar factura offline:
 Cannot Save Offline Payment,No se puede guardar pago offline
 Cannot Save Offline Payment:,No se puede guardar pago offline:
-Card,Tarjeta
 Cash Mode of Payment,Modo de Pago en Efectivo
 Cashier,Cajero
 Client CPU Lag,Retraso de CPU del Cliente
@@ -1284,170 +1278,7 @@ Client Memory Usage,Uso de Memoria del Cliente
 Closed,Cerrado
 Closing,Cierre
 Connected to Server,Conectado al Servidor
-Connections,Conexiónes
-Cost Center is required,Se requiere Centro de Costos
-Create Only Sales Order,Crear Solo Pedidos de Venta
-Credit Change,Cambio de Crédito
-Current Event Loop Lag,Retraso Actual del Bucle de Eventos
-Customer ID,ID de Cliente
-Decrease,Disminuir
-Default Loyalty Program,Programa de Lealtad Predeterminado
-Delivery Date,Fecha de Entrega
-Details,Detalles
-Detecting formats,Detectando formatos
-Device Memory,Memoria del Dispositivo
-Disable,Desactivar
-Discount Type,Tipo de Descuento
-Email Id,ID de Correo
-Error accessing camera,Error al acceder a la cámara
-Error adding offer to items,Error al agregar oferta a artículos
-Error deleting offer from items,Error al eliminar oferta de artículos
-Error loading currencies,Error al cargar monedas
-Error removing price offer,Error al eliminar oferta de precio
-Error submitting invoice,Error al enviar factura
-Error submitting invoice No response from server,Error al enviar factura Sin respuesta del servidor
-Error submitting invoice:,Error al enviar factura:
-Error toggling item details,Error al alternar detalles del artículo
-Failed to load items. Please try again.,Error al cargar artículos. Por favor intente de nuevo.
-Fixing payment amounts for return invoice,Corregir montos de pago para factura de devolución
-For POS Closing Shift Payment Reconciliation,Para Conciliación de Pagos al Cerrar Turno POS
-Gender,Género
-Give Item Row ID,ID de Fila del Artículo a Dar
-Give Product,Producto a Dar
-Given Quantity,Cantidad Dada
-Go Online/Offline,Conectar/Desconectar
-Hide Close Shift,Ocultar Cierre de Turno
-Hide Unavailable Items,Ocultar Artículos No Disponibles
-Hide Variants Items,Ocultar Variantes de Artículos
-Increase,Aumentar
-Invalid closing amount,Monto de cierre inválido
-Is Offer,Es Oferta
-Is Offer Replace For item Row ID,Es Oferta Reemplazo para ID de Fila de Artículo
-It is best not to use more than four numbers,Es mejor no usar más de cuatro números
-Item Price,Precio del Artículo
-Item Rate Should Less Then,La Tarifa del Artículo Debe Ser Menor Que
-Item price updated,Precio del artículo actualizado
-LOAD SALE,CARGAR VENTA
-Light/Dark Mode,Modo Claro/Oscuro
-Linked Invoices,Facturas Vinculadas
-List Rate,Lista de Tarifas
-Loading,Cargando
-Loading,Cargando
-Loading cache,Cargando caché
-Loading database stats,Cargando estadísticas de base de datos
-Loading server CPU/memory usage,Cargando uso de CPU/memoria del servidor
-Loyalty Point,Punto de Lealtad
-Loyalty Point Scheme,Programa de Puntos de Lealtad
-MB,MB
-Manage your offline transactions,Administrar transacciones offline
-Max Amount,Monto Máximo
-Max Discount Percentage Allowed,Porcentaje Máximo de Descuento Permitido
-Max Quantity,Cantidad Máxima
-Min Amount,Monto Mínimo
-Min Quantity,Cantidad Mínima
-Mobile Number,Número de Móvil
-Modes of Payment,Modos de Pago
-Multiple Items Found,Múltiples Artículos Encontrados
-New Price List Rate,Nueva Tarifa de Lista de Precios
-No Item has this barcode,Ningún artículo tiene este código de barras
-No camera found on this device.,No se encontró cámara en este dispositivo.
-Offer Name,Nombre de la Oferta
-Open,Abierto
-Opening Balance Details,Detalles de Saldo de Apertura
-POS Awesome Advance Settings,Configuración Avanzada de POS Awesome
-POS Awesome Settings,Configuración de POS Awesome
-POS Closing Shift,Cierre de Turno POS
-POS Closing Shift Detail,Detalle de Cierre de Turno POS
-POS Closing Shift Taxes,Impuestos de Cierre de Turno POS
-POS Closing Shift {} against {} between selected period,Cierre de Turno POS {} contra {} entre el período seleccionado
-POS Offer,Oferta POS
-POS Offer Detail,Detalle de Oferta POS
-POS Offers Detail,Detalle de Ofertas POS
-POS Opening Shift,Apertura de Turno POS
-POS Opening Shift Detail,Detalle de Apertura de Turno POS
-POS Profile {} does not belongs to company {},El Perfil POS {} no pertenece a la empresa {}
-POS Shift,Turno POS
-POS Transactions,Transacciónes POS
-Paid Change,Cambio Pagado
-Payment Request took too long to respond. Please try requesting for payment again,La solicitud de pago tardó demasiado en responder. Por favor intente de nuevo.
-Payment name not found. Cannot open print view.,Nombre de pago no encontrado. No se puede abrir vista de impresión.
-Payment request failed,Solicitud de pago fallida
-Payment submitted but print function could not be executed. Payment name not found.,Pago enviado pero función de impresión no pudo ejecutarse. Nombre de pago no encontrado.
-Peak,Máximo
-Peak Memory,Máximo de Memoria
-Peak Server,Máximo de Servidor
-Period End Date,Fecha de Fin de Período
-Period Start Date,Fecha de Inicio de Período
-Please configure a POS Profile first,Por favor configure un Perfil POS primero
-Please request phone payment or use another payment method,Por favor solicite pago por teléfono o use otro método de pago
-Please set the customer's mobile number,Por favor establezca el número de móvil del cliente
-Price,Precio
-Price Discount Scheme,Esquema de Descuento de Precio
-Printed,Impreso
-Product Discount Scheme,Esquema de Descuento de Producto
-Promo Type,Tipo de Promoción
-Qualifying Transaction / Item,Transacción / Artículo Calificador
-Quantity and Amount Conditions,Condiciones de Cantidad y Monto
-Quick Actions,Acciónes Rápidas
-Referral Code,Código de Referencia
-Replace Cheapest Item,Reemplazar Artículo Más Barato
-Replace Same Item,Reemplazar Mismo Artículo
-Return Valid Until,Devolución Válida Hasta
-Rounded Total,Total Redondeado
-Row ID,ID de Fila
-STOCK UOM,UdM de Stock
-Sales Invoice,F
-Stock update: {0} has {1} available. Adding {2} will bring the stock below zero.,Actualización de stock: {0} tiene {1} disponible. Agregar {2} llevará el stock por debajo de cero.
-{0} has only {1} in stock. You requested {2}. Adjust quantity or restock.,{0} solo tiene {1} en stock. Solicitó {2}. Ajuste la cantidad o reabastezca.
-Account Head,Cuenta Principal
-Accounts Manager,Gerente de Cuentas
-Accounts User,Usuario de Cuentas
-Add/Edit Coupon Conditions,Agregar/Editar Condiciones del Cupón
-Additional Notes,Notas Adicionales
-Administrator,Administrador
-All Synced,Todo Sincronizado
-Allow Create Sales Order,Permitir Crear Pedido de Venta
-Allow Credit Sale,Permitir Venta a Crédito
-Allow Delete Offline Invoice,Permitir Eliminar Factura Offline
-Allow Partial Payment,Permitir Pago Parcial
-Allow Price List Rate Change,Permitir Cambio de Tarifa de Lista
-Allow Return,Permitir Devolución
-Allow Submissions in background job,Permitir Envíos en Trabajo en Segundo Plano
-Allow User to Edit Item Discount,Permitir Usuario Editar Descuento de Artículo
-Allow user to edit Additional Discount,Permitir Usuario Editar Descuento Adicional
-Allow user to edit Rate,Permitir Usuario Editar Tarifa
-Always fetch items from server,Siempre Obtener Artículos del Servidor
-Amended From,Enmendado De
-Apply Customer Discount,Aplicar Descuento de Cliente
-Apply For,Aplicar Para
-Apply Rule On Brand,Aplicar Regla en Marca
-Apply Rule On Item Code,Aplicar Regla en Código de Artículo
-Apply Rule On Item Group,Aplicar Regla en Grupo de Artículo
-Apply Type,Tipo de Aplicación
-Auto Apply,Aplicar Automáticamente
-Auto Delete Draft Invoice,Auto Eliminar Factura Borrador
-Auto Set Batch,Auto Establecer Lote
-Available,Disponible
-Balance will be updated when connection is restored,El saldo se actualizará cuando se restaure la conexión
-Brand,Marca
-CPU Cores,Núcleos de CPU
-Calculating,Calculando
-Camera access aborted.,Acceso a cámara abortado.
-Camera access is required to scan barcodes.,Se requiere acceso a la cámara para escanear códigos de barras.
-Camera permission denied. Please allow camera access in your browser settings.,Permiso de cámara denegado. Por favor permita el acceso a la cámara en la configuración del navegador.
-Cannot Save Offline Invoice,No se puede guardar factura offline
-Cannot Save Offline Invoice:,No se puede guardar factura offline:
-Cannot Save Offline Payment,No se puede guardar pago offline
-Cannot Save Offline Payment:,No se puede guardar pago offline:
-Card,Tarjeta
-Cash Mode of Payment,Modo de Pago en Efectivo
-Cashier,Cajero
-Client CPU Lag,Retraso de CPU del Cliente
-Client Memory Usage,Uso de Memoria del Cliente
-Closed,Cerrado
-Closing,Cierre
-Connected to Server,Conectado al Servidor
-Connections,Conexiónes
+Connections,Conexiones
 Cost Center is required,Se requiere Centro de Costos
 Create Only Sales Order,Crear Solo Pedidos de Venta
 Credit Change,Cambio de Crédito
@@ -1507,7 +1338,6 @@ Max Discount Percentage Allowed,Porcentaje Máximo de Descuento Permitido
 Max Quantity,Cantidad Máxima
 Min Amount,Monto Mínimo
 Min Quantity,Cantidad Mínima
-Mobile Number,Número de Móvil
 Modes of Payment,Modos de Pago
 Multiple Items Found,Múltiples Artículos Encontrados
 New Price List Rate,Nueva Tarifa de Lista de Precios
@@ -1529,7 +1359,7 @@ POS Opening Shift,Apertura de Turno POS
 POS Opening Shift Detail,Detalle de Apertura de Turno POS
 POS Profile {} does not belongs to company {},El Perfil POS {} no pertenece a la empresa {}
 POS Shift,Turno POS
-POS Transactions,Transacciónes POS
+POS Transactions,Transacciones POS
 Paid Change,Cambio Pagado
 Payment Request took too long to respond. Please try requesting for payment again,La solicitud de pago tardó demasiado en responder. Por favor intente de nuevo.
 Payment name not found. Cannot open print view.,Nombre de pago no encontrado. No se puede abrir vista de impresión.
@@ -1550,11 +1380,10 @@ Product Discount Scheme,Esquema de Descuento de Producto
 Promo Type,Tipo de Promoción
 Qualifying Transaction / Item,Transacción / Artículo Calificador
 Quantity and Amount Conditions,Condiciones de Cantidad y Monto
-Quick Actions,Acciónes Rápidas
+Quick Actions,Acciones Rápidas
 Referral Code,Código de Referencia
 Replace Cheapest Item,Reemplazar Artículo Más Barato
 Replace Same Item,Reemplazar Mismo Artículo
-Return Valid Until,Devolución Válida Hasta
 Rounded Total,Total Redondeado
 Row ID,ID de Fila
 STOCK UOM,UdM de Stock
@@ -1592,11 +1421,9 @@ Total Selected,Total Seleccionado
 Total Unallocated,Total Sin Asignar
 Track recent sales,Rastrear ventas recientes
 Transaction,Transacción
-Unknown error,Error desconocido
 Update,Actualizar
 Use Browser Local Storage,Usar Almacenamiento Local del Navegador
 Use Cashback,Usar Efectivo de Vuelta
-Use Customer Credit,Usar Crédito del Cliente
 Used,Usado
 User {} has been disabled. Please select valid user/cashier,El usuario {} ha sido deshabilitado. Por favor seleccione usuario/cajero válido
 Valid From,Válido Desde
@@ -1604,11 +1431,8 @@ Valid Upto,Válido Hasta
 Waiting for payment,Esperando pago
 Warning High cache usage may affect performance.,Advertencia: Uso alto de caché puede afectar el rendimiento.
 Warning High lag may indicate heavy processing or browser slowness.,Advertencia: Alto retraso puede indicar procesamiento pesado o lentitud del navegador.
-Yes,Sí
-days,días
 his item,este artículo
 ms,ms
-Account,Cuenta
 Max Discount Percentage Allowed ,Porcentaje Máximo de Descuento Permitido
 Price Discount Scheme ,Esquema de Descuento de Precio
 Sorry,Lo siento
