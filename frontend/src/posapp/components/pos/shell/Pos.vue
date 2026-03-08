@@ -374,11 +374,12 @@ export default {
 <style scoped>
 .payment-dialog :deep(.v-overlay__content) {
 	max-height: calc(100vh - 24px);
+	border-radius: var(--pos-radius-lg);
 }
 
 .compact-pos-switcher {
-	padding: 0 var(--dynamic-sm);
-	margin-top: var(--dynamic-sm);
+	padding: 0 var(--dynamic-md);
+	margin-top: var(--dynamic-md);
 }
 
 .compact-pos-switcher__toggle {
@@ -393,7 +394,7 @@ export default {
 }
 
 .compact-pos-switcher__btn {
-	min-height: 44px;
+	min-height: 46px;
 	text-transform: none !important;
 	letter-spacing: 0 !important;
 	font-weight: 600 !important;
@@ -411,18 +412,22 @@ export default {
 	/*padding-top: calc(25px + var(--dynamic-lg));*/
 	/* Navbar height (25px) + larger spacing */
 	transition: all 0.3s ease;
+	min-height: 0;
 }
 
 .dynamic-main-row {
-	padding: 0;
+	padding: 0 var(--dynamic-sm) var(--dynamic-sm);
 	margin: 0;
+	row-gap: var(--dynamic-sm);
 }
 
 .dynamic-col {
-	padding: var(--dynamic-sm);
+	padding: 0;
 	transition: padding 0.3s ease;
-	margin-top: var(--dynamic-sm);
-	/* Add top margin for better separation */
+	margin-top: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
 @media (max-width: 768px) {
@@ -432,8 +437,17 @@ export default {
 	}
 
 	.dynamic-col {
-		padding: var(--dynamic-xs);
+		padding: 0;
 		margin-top: var(--dynamic-xs);
+	}
+
+	.dynamic-main-row {
+		padding: 0 var(--dynamic-xs) var(--dynamic-xs);
+		row-gap: var(--dynamic-xs);
+	}
+
+	.compact-pos-switcher {
+		padding: 0 var(--dynamic-xs);
 	}
 }
 </style>

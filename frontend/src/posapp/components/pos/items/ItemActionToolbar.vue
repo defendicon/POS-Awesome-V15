@@ -23,7 +23,7 @@
 					readonly
 				></v-text-field>
 			</v-col>
-			<v-col cols="3" class="dynamic-margin-xs">
+			<v-col cols="12" sm="4" class="dynamic-margin-xs">
 				<v-btn-toggle
 					:model-value="itemsView"
 					@update:model-value="$emit('update:itemsView', $event)"
@@ -33,13 +33,12 @@
 					rounded
 					class="view-toggle-btn"
 				>
-					<v-btn size="small" value="list">{{ __("List") }}</v-btn>
-					<v-btn size="small" value="card">{{ __("Card") }}</v-btn>
+					<v-btn value="list">{{ __("List") }}</v-btn>
+					<v-btn value="card">{{ __("Card") }}</v-btn>
 				</v-btn-toggle>
 			</v-col>
-			<v-col cols="5" class="dynamic-margin-xs">
+			<v-col cols="12" sm="4" class="dynamic-margin-xs">
 				<v-btn
-					size="small"
 					block
 					color="warning"
 					variant="text"
@@ -49,9 +48,8 @@
 					{{ offersCount }} {{ __("Offers") }}
 				</v-btn>
 			</v-col>
-			<v-col cols="4" class="dynamic-margin-xs">
+			<v-col cols="12" sm="4" class="dynamic-margin-xs">
 				<v-btn
-					size="small"
 					block
 					color="primary"
 					variant="text"
@@ -84,7 +82,7 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 
 <style scoped>
 .action-btn-consistent {
-	height: 36px !important;
+	min-height: 44px !important;
 	margin-top: var(--dynamic-xs) !important;
 	padding: var(--pos-space-2) var(--pos-space-3) !important;
 	transition: var(--transition-normal) !important;
@@ -99,9 +97,15 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 }
 
 .view-toggle-btn {
-	height: 36px;
+	min-height: 44px;
 	border: 1px solid var(--pos-border-light);
 	border-radius: var(--pos-radius-sm);
+	width: 100%;
+}
+
+.view-toggle-btn :deep(.v-btn) {
+	min-height: 40px !important;
+	flex: 1 1 0;
 }
 
 .dynamic-padding {
@@ -133,6 +137,7 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 	.action-btn-consistent {
 		padding: var(--dynamic-xs) !important;
 		font-size: 0.875rem !important;
+		min-height: 44px !important;
 	}
 }
 

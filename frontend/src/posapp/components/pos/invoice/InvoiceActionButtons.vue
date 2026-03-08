@@ -1,6 +1,6 @@
 <template>
 	<v-row dense>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="accent"
@@ -13,7 +13,7 @@
 				{{ __("Save & Clear") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="warning"
@@ -26,7 +26,7 @@
 				{{ __("Load Drafts") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
+		<v-col cols="12" sm="6" v-if="pos_profile.custom_allow_select_sales_order == 1">
 			<v-btn
 				block
 				color="info"
@@ -39,10 +39,10 @@
 				{{ __("Select S.O") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
-				color="deep-purple"
+				color="info"
 				theme="dark"
 				prepend-icon="mdi-folder-search-outline"
 				@click="$emit('open-invoice-management')"
@@ -52,7 +52,7 @@
 				{{ __("Invoice Mgmt") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6">
+		<v-col cols="12" sm="6">
 			<v-btn
 				block
 				color="error"
@@ -66,7 +66,7 @@
 			</v-btn>
 		</v-col>
 
-		<v-col cols="6" v-if="pos_profile.posa_allow_return == 1">
+		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_return == 1">
 			<v-btn
 				block
 				color="secondary"
@@ -79,7 +79,7 @@
 				{{ __("Sales Return") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="pos_profile.posa_allow_print_draft_invoices">
+		<v-col cols="12" sm="6" v-if="pos_profile.posa_allow_print_draft_invoices">
 			<v-btn
 				block
 				color="primary"
@@ -92,7 +92,7 @@
 				{{ __("Print Draft") }}
 			</v-btn>
 		</v-col>
-		<v-col cols="6" v-if="showCustomerDisplayButton">
+		<v-col cols="12" sm="6" v-if="showCustomerDisplayButton">
 			<v-btn
 				block
 				color="indigo"
@@ -175,11 +175,15 @@ const showCustomerDisplayButton = computed(() =>
 	transition: all 0.2s ease !important;
 	position: relative;
 	overflow: hidden;
+	min-height: 44px !important;
+	border-radius: var(--pos-radius-sm) !important;
 }
 
 .summary-btn :deep(.v-btn__content) {
 	white-space: normal !important;
 	transition: all 0.2s ease;
+	line-height: 1.2;
+	text-align: center;
 }
 
 .summary-btn:hover {
@@ -194,41 +198,42 @@ const showCustomerDisplayButton = computed(() =>
 /* Special styling for the PAY button */
 .pay-btn {
 	font-weight: 600 !important;
-	font-size: 1.1rem !important;
-	background: linear-gradient(135deg, #4caf50, #45a049) !important;
-	box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+	font-size: 1rem !important;
+	background: linear-gradient(135deg, #16a34a, #15803d) !important;
+	box-shadow: 0 6px 14px rgba(22, 163, 74, 0.34) !important;
+	min-height: 50px !important;
 }
 
 .pay-btn:hover {
-	background: linear-gradient(135deg, #45a049, #3d8b40) !important;
-	box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4) !important;
+	background: linear-gradient(135deg, #15803d, #166534) !important;
+	box-shadow: 0 8px 18px rgba(22, 163, 74, 0.4) !important;
 	transform: translateY(-2px);
 }
 
 /* Responsive optimizations */
 @media (max-width: 768px) {
 	.summary-btn {
-		font-size: 0.8rem !important;
-		padding: 4px 8px !important;
-		min-height: 38px !important;
+		font-size: 0.88rem !important;
+		padding: 8px 10px !important;
+		min-height: 46px !important;
 	}
 
 	.pay-btn {
-		font-size: 0.95rem !important;
-		min-height: 42px !important;
+		font-size: 1rem !important;
+		min-height: 52px !important;
 	}
 }
 
 @media (max-width: 480px) {
 	.summary-btn {
-		font-size: 0.74rem !important;
-		padding: 3px 6px !important;
-		min-height: 34px !important;
+		font-size: 0.86rem !important;
+		padding: 8px !important;
+		min-height: 44px !important;
 	}
 
 	.pay-btn {
-		font-size: 0.85rem !important;
-		min-height: 40px !important;
+		font-size: 0.96rem !important;
+		min-height: 50px !important;
 	}
 }
 
@@ -246,5 +251,10 @@ const showCustomerDisplayButton = computed(() =>
 :deep([data-theme="dark"]) .summary-btn:hover,
 :deep(.v-theme--dark) .summary-btn:hover {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.summary-btn:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
 }
 </style>

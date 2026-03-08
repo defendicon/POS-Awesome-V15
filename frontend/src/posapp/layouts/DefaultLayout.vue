@@ -643,12 +643,16 @@ const adjust_frappe_sidebar_offset = () => {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
+	background:
+		radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 42%),
+		var(--pos-bg-secondary);
 }
 
 .page-content {
 	flex: 1;
 	overflow: hidden;
-	padding-top: 8px;
+	min-height: 0;
+	padding: 12px 12px 10px;
 }
 
 /* Ensure proper spacing and prevent layout shifts */
@@ -676,6 +680,7 @@ const adjust_frappe_sidebar_offset = () => {
 	.page-content {
 		overflow: visible;
 		min-height: 0;
+		padding: 8px;
 	}
 
 	:deep(.v-main__wrap) {

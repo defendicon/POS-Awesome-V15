@@ -6,35 +6,35 @@
 :root {
 	/* Primary Background Colors */
 	--pos-bg-primary: #ffffff;
-	--pos-bg-secondary: #f8f9fa;
-	--pos-bg-tertiary: #e3f2fd;
+	--pos-bg-secondary: #f5f8fe;
+	--pos-bg-tertiary: #eaf1ff;
 
 	/* Surface Colors */
 	--pos-surface: #ffffff;
-	--pos-surface-variant: #f5f5f5;
-	--pos-surface-container: #fafafa;
+	--pos-surface-variant: #f3f6fb;
+	--pos-surface-container: #f8fbff;
 
 	/* Text Colors */
-	--pos-text-primary: #212121;
-	--pos-text-secondary: #666666;
+	--pos-text-primary: #0f172a;
+	--pos-text-secondary: #334155;
 	--pos-text-disabled: #9e9e9e;
 	--pos-text-hint: #bdbdbd;
 
-	/* Primary Colors - Original Light Mode */
-	--pos-primary: #0097a7;
-	--pos-primary-variant: #00838f;
-	--pos-primary-container: #e0f7fa;
+	/* Primary Colors - Data-Dense Dashboard Direction */
+	--pos-primary: #1e40af;
+	--pos-primary-variant: #1d4ed8;
+	--pos-primary-container: #dbeafe;
 	--pos-on-primary: #ffffff;
 
-	/* Secondary Colors - Original Light Mode */
-	--pos-secondary: #00bcd4;
-	--pos-secondary-variant: #0097a7;
-	--pos-secondary-container: #e0f7fa;
+	/* Secondary Colors */
+	--pos-secondary: #3b82f6;
+	--pos-secondary-variant: #2563eb;
+	--pos-secondary-container: #dbeafe;
 	--pos-on-secondary: #ffffff;
 
-	/* Accent Colors - Modern Orange (Light Mode) */
-	--pos-accent: #ff6b35;
-	--pos-accent-variant: #e55a2b;
+	/* Accent Colors */
+	--pos-accent: #f59e0b;
+	--pos-accent-variant: #d97706;
 
 	/* Semantic Colors */
 	--pos-success: #66bb6a;
@@ -65,26 +65,30 @@
 
 	/* Card and Component Backgrounds */
 	--pos-card-bg: #ffffff;
-	--pos-input-bg: #f5f5f5;
+	--pos-input-bg: #f8fafc;
 	--pos-button-bg: #ffffff;
 	--pos-menu-bg: #ffffff;
 	--pos-dialog-bg: #ffffff;
 	--pos-surface-raised: #ffffff;
-	--pos-surface-muted: #f4f7fb;
+	--pos-surface-muted: #f1f5fb;
 
 	/* Shared Radius Scale */
-	--pos-radius-xs: 6px;
-	--pos-radius-sm: 10px;
-	--pos-radius-md: 14px;
-	--pos-radius-lg: 18px;
+	--pos-radius-xs: 8px;
+	--pos-radius-sm: 12px;
+	--pos-radius-md: 16px;
+	--pos-radius-lg: 20px;
 
 	/* Shared Spacing Scale */
 	--pos-space-1: 4px;
-	--pos-space-2: 8px;
-	--pos-space-3: 12px;
-	--pos-space-4: 16px;
+	--pos-space-2: 10px;
+	--pos-space-3: 14px;
+	--pos-space-4: 18px;
 	--pos-space-5: 24px;
 	--pos-space-6: 32px;
+
+	/* Focus/Depth */
+	--pos-focus-ring: rgba(59, 130, 246, 0.42);
+	--pos-shadow-elevated: 0 14px 34px rgba(15, 23, 42, 0.08);
 
 	/* Special Use Cases */
 	--pos-navbar-bg: #ffffff;
@@ -122,21 +126,21 @@
 	--pos-text-disabled: #9e9e9e;
 	--pos-text-hint: #bdbdbd;
 
-	/* Primary Colors - High Contrast Blue-Cyan */
-	--pos-primary: #00d4ff;
-	--pos-primary-variant: #00a0cc;
-	--pos-primary-container: #003344;
-	--pos-on-primary: #000000;
+	/* Primary Colors */
+	--pos-primary: #60a5fa;
+	--pos-primary-variant: #3b82f6;
+	--pos-primary-container: #1e3a8a;
+	--pos-on-primary: #0b1220;
 
-	/* Secondary Colors - High Contrast Cyan-Green */
-	--pos-secondary: #00e5b8;
-	--pos-secondary-variant: #00b894;
-	--pos-secondary-container: #004433;
-	--pos-on-secondary: #000000;
+	/* Secondary Colors */
+	--pos-secondary: #38bdf8;
+	--pos-secondary-variant: #0ea5e9;
+	--pos-secondary-container: #0c4a6e;
+	--pos-on-secondary: #0b1220;
 
 	/* Accent Colors - Modern Orange */
-	--pos-accent: #ff6b35;
-	--pos-accent-variant: #e55a2b;
+	--pos-accent: #fbbf24;
+	--pos-accent-variant: #f59e0b;
 
 	/* Semantic Colors - High Contrast */
 	--pos-success: #4caf50;
@@ -173,6 +177,8 @@
 	--pos-dialog-bg: #1e1e1e;
 	--pos-surface-raised: #242b33;
 	--pos-surface-muted: #1a2028;
+	--pos-focus-ring: rgba(96, 165, 250, 0.5);
+	--pos-shadow-elevated: 0 16px 36px rgba(0, 0, 0, 0.34);
 
 	/* Special Use Cases */
 	--pos-navbar-bg: #1e1e1e;
@@ -267,6 +273,22 @@
 	color: var(--pos-text-secondary) !important;
 }
 
+.posapp {
+	color: var(--pos-text-primary);
+	line-height: 1.45;
+	font-feature-settings:
+		"tnum" 1,
+		"lnum" 1;
+}
+
+.posapp h1,
+.posapp h2,
+.posapp h3,
+.posapp h4 {
+	letter-spacing: 0.01em;
+	line-height: 1.25;
+}
+
 .posapp .pos-border {
 	border-color: var(--pos-border) !important;
 }
@@ -280,7 +302,7 @@
 	color: var(--pos-text-primary);
 	border: 1px solid var(--pos-border);
 	border-radius: var(--pos-radius-md);
-	box-shadow: 0 10px 24px var(--pos-shadow-light);
+	box-shadow: var(--pos-shadow-elevated);
 }
 
 .posapp .pos-themed-input {
@@ -355,6 +377,39 @@
 	background-color: var(--pos-menu-bg);
 	color: var(--pos-text-primary);
 	border-color: var(--pos-border);
+}
+
+.posapp .v-btn {
+	min-height: 42px;
+	border-radius: var(--pos-radius-sm);
+	text-transform: none !important;
+	letter-spacing: 0.01em !important;
+	font-weight: 600;
+}
+
+.posapp .v-btn--icon {
+	min-width: 40px;
+	min-height: 40px;
+}
+
+.posapp .v-field {
+	border-radius: var(--pos-radius-sm);
+}
+
+.posapp :is(button, [role="button"], a, input, textarea, select, .v-btn, .card-item-card):focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.posapp .v-btn {
+		min-height: 44px;
+	}
+
+	.posapp .v-btn--icon {
+		min-width: 44px;
+		min-height: 44px;
+	}
 }
 
 /* Optimized fast theme transitions - scoped to POSApp only */

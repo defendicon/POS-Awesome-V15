@@ -1,8 +1,8 @@
 <template>
 	<v-card
-		class="cards sticky-summary-card mb-0 py-2 px-3 rounded-lg pos-themed-card"
+		class="cards sticky-summary-card mb-0 py-3 px-4 rounded-lg pos-themed-card"
 	>
-		<v-row dense>
+		<v-row dense class="invoice-summary-grid">
 			<!-- Summary Info -->
 			<v-col cols="12" md="7">
 				<v-row dense>
@@ -29,7 +29,7 @@
 						</v-alert>
 					</v-col>
 					<!-- Total Qty -->
-					<v-col cols="6">
+					<v-col cols="12" sm="6">
 						<v-text-field
 							:model-value="formatFloat(total_qty, hide_qty_decimals ? 0 : undefined)"
 							:label="frappe._('Total Qty')"
@@ -41,7 +41,7 @@
 						/>
 					</v-col>
 					<!-- Additional Discount (Amount or Percentage) -->
-					<v-col cols="6" v-if="!pos_profile.posa_use_percentage_discount">
+					<v-col cols="12" sm="6" v-if="!pos_profile.posa_use_percentage_discount">
 						<v-text-field
 							ref="additionalDiscountField"
 							v-model="additionalDiscountDisplay"
@@ -62,7 +62,7 @@
 						/>
 					</v-col>
 
-					<v-col cols="6" v-else>
+					<v-col cols="12" sm="6" v-else>
 						<v-text-field
 							ref="additionalDiscountField"
 							v-model="additionalDiscountPercentageDisplay"
@@ -85,7 +85,7 @@
 						/>
 					</v-col>
 					<!-- Items Discount -->
-					<v-col cols="6">
+					<v-col cols="12" sm="6">
 						<v-text-field
 							:model-value="formatCurrency(total_items_discount_amount)"
 							:prefix="currencySymbol(displayCurrency)"
@@ -100,7 +100,7 @@
 					</v-col>
 
 					<!-- Total (moved to maintain row alignment) -->
-					<v-col cols="6">
+					<v-col cols="12" sm="6">
 						<v-text-field
 							:model-value="formatCurrency(subtotal)"
 							:prefix="currencySymbol(displayCurrency)"
@@ -361,6 +361,9 @@ async function handleOpenCustomerDisplay() {
 	bottom: 0;
 	z-index: 9;
 	box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	border-radius: var(--pos-radius-md) !important;
+	backdrop-filter: blur(6px);
 }
 
 .invoice-summary-actions {
@@ -368,9 +371,17 @@ async function handleOpenCustomerDisplay() {
 	bottom: 0;
 }
 
+.invoice-summary-grid {
+	row-gap: 2px;
+}
+
 /* Enhanced field styling */
 .summary-field {
 	transition: all 0.2s ease;
+}
+
+.summary-field :deep(.v-field) {
+	min-height: 44px;
 }
 
 .summary-field:hover {
@@ -395,6 +406,10 @@ async function handleOpenCustomerDisplay() {
 
 	.summary-field {
 		font-size: 0.875rem;
+	}
+
+	.summary-field :deep(.v-field) {
+		min-height: 46px;
 	}
 }
 </style>

@@ -1198,33 +1198,36 @@ defineExpose({
 /* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
-	padding: var(--dynamic-sm);
+	padding: var(--dynamic-md);
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--dynamic-md);
+	min-height: 0;
 }
 
 .selector-section-card {
 	background: var(--pos-card-bg) !important;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	border-radius: var(--pos-radius-md, 18px);
-	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+	box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
 }
 
 .section-card-heading {
-	padding: 14px 16px 0;
+	padding: 14px 18px 8px;
+	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
 
 .section-card-heading--with-padding {
-	padding-bottom: 8px;
+	padding-bottom: 10px;
 }
 
 .section-card-heading__title {
 	margin: 0;
-	font-size: 1rem;
+	font-size: 1.02rem;
 	font-weight: 700;
 	line-height: 1.25;
 	color: var(--pos-text-primary);
+	letter-spacing: 0.01em;
 }
 
 .selector-header-card {
@@ -1236,8 +1239,20 @@ defineExpose({
 }
 
 .selector-results-card {
-	padding: var(--dynamic-xs);
+	padding: var(--dynamic-sm);
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.items {
+	margin: 0;
+	min-height: 0;
+}
+
+.items > .v-col {
+	min-height: 0;
 }
 
 .dynamic-scroll {
@@ -1346,7 +1361,8 @@ defineExpose({
 @media (max-width: 768px) {
 	.dynamic-padding {
 		/* Reduce spacing uniformly on smaller screens */
-		padding: var(--dynamic-xs);
+		padding: var(--dynamic-sm);
+		gap: var(--dynamic-sm);
 	}
 
 	.items-card-grid {
@@ -1358,6 +1374,10 @@ defineExpose({
 
 @media (max-width: 480px) {
 	.dynamic-padding {
+		padding: var(--dynamic-xs);
+	}
+
+	.selector-results-card {
 		padding: var(--dynamic-xs);
 	}
 }

@@ -1058,7 +1058,7 @@ export default {
 .invoice-shell {
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--dynamic-md);
 	min-height: 0;
 }
 
@@ -1126,10 +1126,10 @@ export default {
 /* Dynamic padding for responsive layout */
 .dynamic-padding {
 	/* Uniform spacing for better alignment */
-	padding: var(--dynamic-sm);
+	padding: var(--dynamic-md);
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--dynamic-md);
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
@@ -1143,7 +1143,7 @@ export default {
 .invoice-sections {
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--dynamic-md);
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
@@ -1153,14 +1153,14 @@ export default {
 .invoice-top-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-sm);
+	gap: var(--dynamic-md);
 	flex: 0 0 auto;
 }
 
 .invoice-meta-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-sm);
+	gap: var(--dynamic-md);
 	flex: 0 0 auto;
 }
 
@@ -1168,22 +1168,24 @@ export default {
 	background: var(--pos-card-bg) !important;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	border-radius: var(--pos-radius-md, 18px);
-	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
 	overflow: hidden;
 	flex: 0 0 auto;
 	min-height: fit-content;
 }
 
 .invoice-section-heading {
-	padding: 14px 16px 0;
+	padding: 14px 18px 8px;
+	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
 
 .invoice-section-heading__title {
 	margin: 0;
-	font-size: 1rem;
+	font-size: 1.02rem;
 	font-weight: 700;
 	line-height: 1.25;
 	color: var(--pos-text-primary);
+	letter-spacing: 0.01em;
 }
 
 .invoice-items-card {
@@ -1210,7 +1212,7 @@ export default {
 
 	.dynamic-padding {
 		/* Smaller uniform padding on tablets */
-		padding: var(--dynamic-xs);
+		padding: var(--dynamic-sm);
 		overflow: visible;
 	}
 
@@ -1236,7 +1238,7 @@ export default {
 
 	.invoice-items-card {
 		flex: 0 0 auto;
-		min-height: 320px;
+		min-height: 340px;
 	}
 
 	.items-table-wrapper {
@@ -1246,6 +1248,7 @@ export default {
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
 		min-height: 280px;
+		overflow-x: auto;
 	}
 
 	.item-search-field {
@@ -1285,6 +1288,7 @@ export default {
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
 		min-height: 240px;
+		overflow-x: auto;
 	}
 
 	.item-search-field {
@@ -1331,6 +1335,7 @@ export default {
 	flex-direction: column;
 	flex: 1 1 auto;
 	min-height: 0;
+	overflow-x: auto;
 }
 
 :deep(.items-table-wrapper .column-selector-container) {

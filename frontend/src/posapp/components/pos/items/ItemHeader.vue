@@ -41,6 +41,7 @@
 							variant="text"
 							:disabled="scannerLocked"
 							@click="$emit('start-camera')"
+							class="camera-trigger-btn"
 							:title="
 								scannerLocked
 									? __('Acknowledge the error to resume scanning')
@@ -165,8 +166,8 @@ defineExpose({
 	position: sticky;
 	top: 0;
 	z-index: 5;
-	background: rgb(var(--v-theme-surface));
-	padding: 12px 12px 0 12px;
+	background: var(--pos-card-bg);
+	padding: 14px 14px 4px;
 	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	margin-bottom: 0;
 }
@@ -178,7 +179,9 @@ defineExpose({
 .settings-container {
 	display: flex;
 	align-items: center;
-	padding: 4px 0;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 6px 0 4px;
 }
 
 .settings-btn {
@@ -186,14 +189,32 @@ defineExpose({
 	letter-spacing: normal !important;
 	font-weight: 500 !important;
 	background-color: transparent !important;
+	min-height: 40px;
+	padding-inline: 10px !important;
+	border-radius: var(--pos-radius-sm);
+}
+
+.camera-trigger-btn {
+	min-width: 40px !important;
+	min-height: 40px !important;
 }
 
 .last-sync-label {
-	white-space: nowrap;
-	font-size: 0.75rem;
+	white-space: normal;
+	font-size: 0.78rem;
 }
 
 .dynamic-margin-xs {
 	margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+	.sticky-header {
+		padding: 12px 12px 4px;
+	}
+
+	.settings-btn {
+		min-height: 42px;
+	}
 }
 </style>

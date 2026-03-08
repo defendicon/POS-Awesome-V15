@@ -944,14 +944,14 @@ export default {
 }
 
 .mobile-navbar .mobile-btn {
-	min-width: 36px !important;
-	min-height: 36px !important;
+	min-width: 40px !important;
+	min-height: 40px !important;
 	padding: 6px !important;
 }
 
 .mobile-navbar .nav-icon {
-	min-width: 36px !important;
-	min-height: 36px !important;
+	min-width: 40px !important;
+	min-height: 40px !important;
 	padding: 6px !important;
 }
 
@@ -985,9 +985,9 @@ export default {
 
 	.mobile-navbar .mobile-btn,
 	.mobile-navbar .nav-icon {
-		min-width: 32px !important;
-		min-height: 32px !important;
-		padding: 4px !important;
+		min-width: 40px !important;
+		min-height: 40px !important;
+		padding: 6px !important;
 	}
 
 	/* Hide hamburger icon text on very small screens */
@@ -1082,8 +1082,15 @@ export default {
 
 	.mobile-navbar .mobile-btn,
 	.mobile-navbar .nav-icon {
-		min-width: 28px !important;
-		min-height: 28px !important;
+		min-width: 40px !important;
+		min-height: 40px !important;
 	}
+}
+
+.nav-icon:focus-visible,
+.offline-invoices-btn:focus-visible,
+.pos-navbar-title:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
 }
 </style>
