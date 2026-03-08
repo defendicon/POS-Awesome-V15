@@ -50,6 +50,7 @@ const model = computed({
 const shortcuts = [
 	{ key: "F1 or ?", description: __("Open keyboard shortcuts help") },
 	{ key: "Ctrl/Cmd + Shift + D", description: __("Toggle compact/comfortable density") },
+	{ key: "Ctrl/Cmd + Shift + L", description: __("Cycle cashier/manager/kiosk layout profile") },
 	{ key: "Esc", description: __("Close dialogs or clear active search fields") },
 	{ key: "Enter", description: __("Confirm focused action (search/add/select)") },
 	{ key: "Arrow Keys", description: __("Navigate item lists and menus") },

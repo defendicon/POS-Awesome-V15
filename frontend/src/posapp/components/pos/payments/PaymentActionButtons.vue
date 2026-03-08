@@ -67,11 +67,14 @@ const __ = window.__;
 
 .compact :deep(.v-btn),
 :deep(.compact .v-btn) {
-	min-height: 42px;
+	min-height: var(--pos-touch-target, 42px);
 }
 
 .payment-footer-btn {
 	--v-theme-overlay-multiplier: 0 !important;
+	min-height: var(--pos-touch-target, 42px);
+	font-weight: 700 !important;
+	letter-spacing: 0.01em !important;
 	transition:
 		box-shadow 0.18s ease,
 		background-color 0.18s ease,
@@ -136,30 +139,30 @@ const __ = window.__;
 	}
 
 	.payment-footer-btn {
-		font-size: 0.82rem !important;
+		font-size: 0.86rem !important;
 	}
 
 	:deep(.payment-footer-btn.v-btn) {
-		min-height: 38px !important;
+		min-height: max(42px, var(--pos-touch-target, 42px)) !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {
-		font-size: 0.82rem !important;
+		font-size: 0.86rem !important;
 		line-height: 1.15;
 	}
 }
 
 @media (max-width: 480px) {
 	.payment-footer-btn {
-		font-size: 0.76rem !important;
+		font-size: 0.82rem !important;
 	}
 
 	:deep(.payment-footer-btn.v-btn) {
-		min-height: 34px !important;
+		min-height: 40px !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {
-		font-size: 0.76rem !important;
+		font-size: 0.82rem !important;
 	}
 }
 </style>

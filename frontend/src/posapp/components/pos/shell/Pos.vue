@@ -378,8 +378,12 @@ export default {
 }
 
 .compact-pos-switcher {
+	position: sticky;
+	top: 8px;
+	z-index: 7;
 	padding: 0 var(--dynamic-md);
-	margin-top: var(--dynamic-md);
+	margin-top: var(--dynamic-sm);
+	margin-bottom: var(--dynamic-xs);
 }
 
 .compact-pos-switcher__toggle {
@@ -394,7 +398,7 @@ export default {
 }
 
 .compact-pos-switcher__btn {
-	min-height: 46px;
+	min-height: max(46px, var(--pos-touch-target, 42px));
 	text-transform: none !important;
 	letter-spacing: 0 !important;
 	font-weight: 600 !important;
@@ -416,9 +420,10 @@ export default {
 }
 
 .dynamic-main-row {
-	padding: 0 var(--dynamic-sm) var(--dynamic-sm);
+	padding: 0 var(--pos-layout-surface-padding, var(--dynamic-sm))
+		var(--pos-layout-surface-padding, var(--dynamic-sm));
 	margin: 0;
-	row-gap: var(--dynamic-sm);
+	row-gap: var(--pos-layout-gap, var(--dynamic-sm));
 }
 
 .dynamic-col {
@@ -442,11 +447,12 @@ export default {
 	}
 
 	.dynamic-main-row {
-		padding: 0 var(--dynamic-xs) var(--dynamic-xs);
+		padding: 0 var(--dynamic-xs) calc(var(--dynamic-xs) + env(safe-area-inset-bottom, 0px));
 		row-gap: var(--dynamic-xs);
 	}
 
 	.compact-pos-switcher {
+		top: calc(56px + var(--dynamic-xs));
 		padding: 0 var(--dynamic-xs);
 	}
 }

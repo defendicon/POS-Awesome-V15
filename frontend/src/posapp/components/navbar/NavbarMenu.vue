@@ -310,6 +310,23 @@
 						</div>
 					</v-list-item>
 
+					<!-- Layout profile toggle -->
+					<v-list-item @click="cycleLayoutProfile" class="menu-item-compact secondary-action">
+						<template v-slot:prepend>
+							<div class="menu-icon-wrapper-compact secondary-icon">
+								<v-icon color="white" size="16">mdi-view-dashboard-edit-outline</v-icon>
+							</div>
+						</template>
+						<div class="menu-content-compact">
+							<v-list-item-title class="menu-item-title-compact">
+								{{ __("Layout Profile") }}: {{ currentLayoutProfileLabel }}
+							</v-list-item-title>
+							<v-list-item-subtitle class="menu-item-subtitle-compact">
+								{{ __("Switch to") }} {{ nextLayoutProfileLabel }}
+							</v-list-item-subtitle>
+						</div>
+					</v-list-item>
+
 					<!-- Keyboard shortcuts help -->
 					<v-list-item @click="openKeyboardShortcuts" class="menu-item-compact neutral-action">
 						<template v-slot:prepend>
@@ -525,6 +542,12 @@ export default {
 		isDesktop() {
 			return this.windowWidth >= 1024;
 		},
+		currentLayoutProfileLabel() {
+			return this.layoutProfileLabel(this.uiStore.layoutProfile);
+		},
+		nextLayoutProfileLabel() {
+			return this.layoutProfileLabel(this.getNextLayoutProfile());
+		},
 		// Display name for mobile menu
 		displayUserName() {
 			// Show POS profile name if available, otherwise show user name
@@ -718,6 +741,25 @@ export default {
 					? this.__("Compact density enabled")
 					: this.__("Comfortable density enabled");
 			this.showNotification(densityLabel, "success");
+		},
+		getNextLayoutProfile() {
+			const current = this.uiStore.layoutProfile;
+			if (current === "manager") return "kiosk";
+			if (current === "kiosk") return "cashier";
+			return "manager";
+		},
+		layoutProfileLabel(profile) {
+			if (profile === "manager") return this.__("Manager");
+			if (profile === "kiosk") return this.__("Kiosk");
+			return this.__("Cashier");
+		},
+		cycleLayoutProfile() {
+			this.uiStore.cycleLayoutProfile();
+			this.uiStore.trackWorkflowStep("layout_profile_change");
+			this.showNotification(
+				`${this.__("Layout profile set to")} ${this.layoutProfileLabel(this.uiStore.layoutProfile)}`,
+				"success",
+			);
 		},
 
 		openKeyboardShortcuts() {

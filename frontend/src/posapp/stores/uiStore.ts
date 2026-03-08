@@ -1,12 +1,17 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import type { POSProfile } from "../types/models";
 
 const DENSITY_STORAGE_KEY = "posa_ui_density";
 const DENSITY_COMPACT_CLASS = "pos-density-compact";
 const DENSITY_COMFORTABLE_CLASS = "pos-density-comfortable";
+const LAYOUT_PROFILE_STORAGE_KEY = "posa_layout_profile";
+const LAYOUT_CASHIER_CLASS = "pos-layout-cashier";
+const LAYOUT_MANAGER_CLASS = "pos-layout-manager";
+const LAYOUT_KIOSK_CLASS = "pos-layout-kiosk";
 
 type DensityMode = "comfortable" | "compact";
+type LayoutProfile = "cashier" | "manager" | "kiosk";
 
 function readDensityMode(): DensityMode {
   if (typeof window === "undefined") return "comfortable";
@@ -32,6 +37,41 @@ function applyDensityClass(mode: DensityMode) {
   const root = document.documentElement;
   root.classList.remove(DENSITY_COMPACT_CLASS, DENSITY_COMFORTABLE_CLASS);
   root.classList.add(mode === "compact" ? DENSITY_COMPACT_CLASS : DENSITY_COMFORTABLE_CLASS);
+}
+
+function readLayoutProfile(): LayoutProfile {
+  if (typeof window === "undefined") return "cashier";
+  try {
+    const stored = window.localStorage.getItem(LAYOUT_PROFILE_STORAGE_KEY);
+    if (stored === "manager" || stored === "kiosk") return stored;
+    return "cashier";
+  } catch {
+    return "cashier";
+  }
+}
+
+function persistLayoutProfile(profile: LayoutProfile) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LAYOUT_PROFILE_STORAGE_KEY, profile);
+  } catch {
+    // Ignore localStorage write errors
+  }
+}
+
+function applyLayoutProfileClass(profile: LayoutProfile) {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.classList.remove(LAYOUT_CASHIER_CLASS, LAYOUT_MANAGER_CLASS, LAYOUT_KIOSK_CLASS);
+  if (profile === "manager") {
+    root.classList.add(LAYOUT_MANAGER_CLASS);
+    return;
+  }
+  if (profile === "kiosk") {
+    root.classList.add(LAYOUT_KIOSK_CLASS);
+    return;
+  }
+  root.classList.add(LAYOUT_CASHIER_CLASS);
 }
 
 export const useUIStore = defineStore("ui", () => {
@@ -273,8 +313,86 @@ export const useUIStore = defineStore("ui", () => {
     shortcutHelpOpen.value = !shortcutHelpOpen.value;
   };
 
+  // Layout Profile
+  const layoutProfile = ref<LayoutProfile>(readLayoutProfile());
+  const setLayoutProfile = (profile: LayoutProfile) => {
+    const normalized: LayoutProfile =
+      profile === "manager" || profile === "kiosk" ? profile : "cashier";
+    layoutProfile.value = normalized;
+    persistLayoutProfile(normalized);
+    applyLayoutProfileClass(normalized);
+  };
+  const cycleLayoutProfile = () => {
+    const next: LayoutProfile =
+      layoutProfile.value === "cashier"
+        ? "manager"
+        : layoutProfile.value === "manager"
+          ? "kiosk"
+          : "cashier";
+    setLayoutProfile(next);
+  };
+
+  // Workflow heatmap metrics
+  const workflowStepCounts = ref<Record<string, number>>({
+    item_search: 0,
+    item_select: 0,
+    invoice_save: 0,
+    checkout_open: 0,
+    payment_submit: 0,
+    sync_action: 0,
+    error_event: 0,
+  });
+  const workflowLastStepAt = ref<Record<string, number>>({});
+  const workflowStepDurations = ref<Record<string, number[]>>({});
+  const trackWorkflowStep = (step: string) => {
+    const key = String(step || "").trim();
+    if (!key) return;
+    const now = Date.now();
+    workflowStepCounts.value[key] = Number(workflowStepCounts.value[key] || 0) + 1;
+    const prev = workflowLastStepAt.value[key];
+    if (Number.isFinite(prev)) {
+      const delta = Math.max(0, now - Number(prev));
+      const bucket = workflowStepDurations.value[key] || [];
+      bucket.push(delta);
+      if (bucket.length > 100) {
+        bucket.splice(0, bucket.length - 100);
+      }
+      workflowStepDurations.value[key] = bucket;
+    }
+    workflowLastStepAt.value[key] = now;
+  };
+  const resetWorkflowMetrics = () => {
+    workflowStepCounts.value = {
+      item_search: 0,
+      item_select: 0,
+      invoice_save: 0,
+      checkout_open: 0,
+      payment_submit: 0,
+      sync_action: 0,
+      error_event: 0,
+    };
+    workflowLastStepAt.value = {};
+    workflowStepDurations.value = {};
+  };
+
+  watch(activeView, (view, previous) => {
+    if (view === previous) return;
+    if (view === "payment") {
+      trackWorkflowStep("checkout_open");
+      return;
+    }
+    if (view === "items") {
+      trackWorkflowStep("item_search");
+      return;
+    }
+    if (view === "offers" || view === "coupons") {
+      trackWorkflowStep("promo_browse");
+    }
+  });
+
   // Ensure initial density class is applied at store creation time.
   applyDensityClass(densityMode.value);
+  applyLayoutProfileClass(layoutProfile.value);
 
   return {
     isLoading,
@@ -358,5 +476,12 @@ export const useUIStore = defineStore("ui", () => {
     openShortcutHelp,
     closeShortcutHelp,
     toggleShortcutHelp,
+    layoutProfile,
+    setLayoutProfile,
+    cycleLayoutProfile,
+    workflowStepCounts,
+    workflowStepDurations,
+    trackWorkflowStep,
+    resetWorkflowMetrics,
   };
 });

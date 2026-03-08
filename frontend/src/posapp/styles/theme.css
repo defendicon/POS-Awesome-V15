@@ -124,6 +124,30 @@
 	--pos-radius-md: 16px;
 }
 
+:root.pos-layout-cashier {
+	--pos-layout-gap: var(--pos-space-3);
+	--pos-layout-surface-padding: var(--pos-space-3);
+	--pos-layout-card-radius: var(--pos-radius-md);
+	--pos-touch-target: 42px;
+	--pos-heading-scale: 1;
+}
+
+:root.pos-layout-manager {
+	--pos-layout-gap: var(--pos-space-2);
+	--pos-layout-surface-padding: var(--pos-space-2);
+	--pos-layout-card-radius: var(--pos-radius-sm);
+	--pos-touch-target: 40px;
+	--pos-heading-scale: 0.96;
+}
+
+:root.pos-layout-kiosk {
+	--pos-layout-gap: var(--pos-space-4);
+	--pos-layout-surface-padding: var(--pos-space-4);
+	--pos-layout-card-radius: var(--pos-radius-lg);
+	--pos-touch-target: 52px;
+	--pos-heading-scale: 1.06;
+}
+
 /* Dark Theme Override */
 [data-theme="dark"],
 [data-theme-mode="dark"],
@@ -319,7 +343,7 @@
 	background-color: var(--pos-surface-raised);
 	color: var(--pos-text-primary);
 	border: 1px solid var(--pos-border);
-	border-radius: var(--pos-radius-md);
+	border-radius: var(--pos-layout-card-radius, var(--pos-radius-md));
 	box-shadow: var(--pos-shadow-elevated);
 }
 
@@ -398,7 +422,7 @@
 }
 
 .posapp .v-btn {
-	min-height: 42px;
+	min-height: var(--pos-touch-target, 42px);
 	border-radius: var(--pos-radius-sm);
 	text-transform: none !important;
 	letter-spacing: 0.01em !important;
@@ -406,7 +430,7 @@
 }
 
 :root.pos-density-compact .posapp .v-btn {
-	min-height: 38px;
+	min-height: calc(var(--pos-touch-target, 42px) - 4px);
 	font-size: 0.9rem;
 }
 
@@ -420,12 +444,29 @@
 }
 
 .posapp .v-btn--icon {
-	min-width: 40px;
-	min-height: 40px;
+	min-width: var(--pos-touch-target, 42px);
+	min-height: var(--pos-touch-target, 42px);
 }
 
 .posapp .v-field {
+	--v-input-control-height: var(--pos-touch-target, 42px);
 	border-radius: var(--pos-radius-sm);
+}
+
+.posapp .invoice-section-heading__title,
+.posapp .section-card-heading__title,
+.posapp .menu-item-title-compact {
+	font-size: calc(1rem * var(--pos-heading-scale, 1));
+}
+
+:root.pos-layout-manager .posapp .v-btn {
+	font-size: 0.88rem;
+	font-weight: 600;
+}
+
+:root.pos-layout-kiosk .posapp .v-btn {
+	font-size: 1rem;
+	font-weight: 700;
 }
 
 .posapp :is(button, [role="button"], a, input, textarea, select, .v-btn, .card-item-card):focus-visible {

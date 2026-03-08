@@ -243,12 +243,18 @@ const __ = window.__;
 	border-radius: var(--pos-radius-sm);
 	text-transform: none;
 	font-weight: 600;
+	min-height: 38px;
+	padding-inline: 12px;
 }
 
 @media (max-width: 768px) {
 	.payment-method-card {
 		padding: var(--pos-space-2);
 		gap: var(--pos-space-2);
+	}
+
+	.payment-denominations__btn {
+		min-height: max(40px, var(--pos-touch-target, 42px) - 2px);
 	}
 }
 </style>

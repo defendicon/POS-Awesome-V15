@@ -1058,7 +1058,7 @@ export default {
 .invoice-shell {
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-md);
+	gap: var(--pos-layout-gap, var(--dynamic-md));
 	min-height: 0;
 }
 
@@ -1126,10 +1126,10 @@ export default {
 /* Dynamic padding for responsive layout */
 .dynamic-padding {
 	/* Uniform spacing for better alignment */
-	padding: var(--dynamic-md);
+	padding: var(--pos-layout-surface-padding, var(--dynamic-md));
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-md);
+	gap: var(--pos-layout-gap, var(--dynamic-md));
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
@@ -1143,7 +1143,7 @@ export default {
 .invoice-sections {
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-md);
+	gap: var(--pos-layout-gap, var(--dynamic-md));
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
@@ -1153,14 +1153,14 @@ export default {
 .invoice-top-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-md);
+	gap: var(--pos-layout-gap, var(--dynamic-md));
 	flex: 0 0 auto;
 }
 
 .invoice-meta-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-md);
+	gap: var(--pos-layout-gap, var(--dynamic-md));
 	flex: 0 0 auto;
 }
 
@@ -1175,13 +1175,13 @@ export default {
 }
 
 .invoice-section-heading {
-	padding: 14px 18px 8px;
+	padding: 14px 18px 10px;
 	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
 
 .invoice-section-heading__title {
 	margin: 0;
-	font-size: 1.02rem;
+	font-size: calc(1.02rem * var(--pos-heading-scale, 1));
 	font-weight: 700;
 	line-height: 1.25;
 	color: var(--pos-text-primary);
@@ -1326,10 +1326,10 @@ export default {
 	position: relative;
 	margin-top: var(--dynamic-sm);
 	/* Override parent padding to make table full-width */
-	margin-left: calc(-1 * var(--dynamic-sm));
-	margin-right: calc(-1 * var(--dynamic-sm));
-	width: calc(100% + 2 * var(--dynamic-sm));
-	max-width: calc(100% + 2 * var(--dynamic-sm));
+	margin-left: calc(-1 * var(--pos-layout-surface-padding, var(--dynamic-sm)));
+	margin-right: calc(-1 * var(--pos-layout-surface-padding, var(--dynamic-sm)));
+	width: calc(100% + 2 * var(--pos-layout-surface-padding, var(--dynamic-sm)));
+	max-width: calc(100% + 2 * var(--pos-layout-surface-padding, var(--dynamic-sm)));
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;

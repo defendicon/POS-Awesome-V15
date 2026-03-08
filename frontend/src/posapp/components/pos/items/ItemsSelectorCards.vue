@@ -144,6 +144,11 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 </script>
 
 <style scoped>
+.items-card-container {
+	height: 100%;
+	min-height: 0;
+}
+
 .item-container {
 	overflow-y: auto;
 	scrollbar-gutter: stable;
@@ -152,9 +157,9 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 .items-card-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 16px;
-	padding: 16px;
-	height: calc(100% - 80px);
+	gap: var(--pos-layout-gap, 16px);
+	padding: var(--pos-layout-surface-padding, 16px);
+	height: calc(100% - 72px);
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(var(--v-theme-on-surface), 0.2) transparent;
@@ -164,7 +169,7 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 }
 
 .virtual-scroller {
-	height: calc(100% - 80px);
+	height: calc(100% - 72px);
 	overflow-y: auto;
 	position: relative;
 }
@@ -192,7 +197,7 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 }
 
 .virtual-scroller :deep(.items-virtual-list) {
-	padding: 16px;
+	padding: var(--pos-layout-surface-padding, 16px);
 	contain: layout style;
 	box-sizing: border-box;
 }
@@ -204,8 +209,12 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 }
 
 @media (max-width: 768px) {
+	.virtual-scroller {
+		height: 100%;
+	}
+
 	.virtual-scroller :deep(.items-virtual-list) {
-		padding: 10px;
+		padding: var(--dynamic-xs);
 	}
 }
 </style>

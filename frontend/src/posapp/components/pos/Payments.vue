@@ -623,6 +623,7 @@ const queueSearchRefocusRecovery = () => {
 };
 
 const back_to_invoice = () => {
+	uiStore.trackWorkflowStep("checkout_close");
 	releaseActiveFocus();
 	paymentVisible.value = false;
 	if (paymentDialogOpen.value) {
@@ -766,6 +767,7 @@ const restorePaymentLinesAfterFailedSubmit = () => {
 };
 
 const handleShowPayment = () => {
+	uiStore.trackWorkflowStep("checkout_open");
 	paymentVisible.value = true;
 	nextTick(() => {
 		setTimeout(() => {
@@ -999,8 +1001,10 @@ const submitInvoiceWrapper = async (print, callbackOverrides = {}, options = {})
 			},
 			...callbackOverrides,
 		});
+		uiStore.trackWorkflowStep("payment_submit");
 	} catch (error) {
 		console.error("Submission failed propagate:", error);
+		uiStore.trackWorkflowStep("error_event");
 		restorePaymentLinesAfterFailedSubmit();
 
 		if (error?.message) {
@@ -1060,6 +1064,11 @@ const queueShortcutSubmit = (payload = {}) => {
 			}, 150);
 		});
 	}
+};
+
+const triggerSyncPendingInvoices = () => {
+	uiStore.trackWorkflowStep("sync_action");
+	syncStore.syncPendingInvoices();
 };
 
 // Watchers
@@ -1291,9 +1300,9 @@ onMounted(() => {
 	_shortcutHandlers.value.handlePaymentShortcut = handlePaymentShortcut.bind(this);
 	document.addEventListener("keydown", _shortcutHandlers.value.handlePaymentShortcut);
 
-	syncStore.syncPendingInvoices();
-	eventBus.on("network-online", () => syncStore.syncPendingInvoices());
-	eventBus.on("server-online", () => syncStore.syncPendingInvoices());
+	triggerSyncPendingInvoices();
+	eventBus.on("network-online", triggerSyncPendingInvoices);
+	eventBus.on("server-online", triggerSyncPendingInvoices);
 
 	if (eventBus) {
 		eventBus.on("send_invoice_doc_payment", (doc) => {
@@ -1388,8 +1397,8 @@ onBeforeUnmount(() => {
 	eventBus.off("queue_submit_payment_shortcut", queueShortcutSubmit);
 	eventBus.off("submit_payment_shortcut", handleSubmitPaymentShortcut);
 	eventBus.off("clear_invoice");
-	eventBus.off("network-online");
-	eventBus.off("server-online");
+	eventBus.off("network-online", triggerSyncPendingInvoices);
+	eventBus.off("server-online", triggerSyncPendingInvoices);
 	clearBackgroundStatusCheck();
 
 	if (_shortcutHandlers.value.handlePaymentShortcut) {
@@ -1414,6 +1423,8 @@ onBeforeUnmount(() => {
 
 .payment-shell {
 	padding: 0;
+	background: var(--pos-bg-secondary);
+	border-radius: var(--pos-layout-card-radius, var(--pos-radius-md));
 }
 
 .payment-shell--dialog {
@@ -1424,7 +1435,7 @@ onBeforeUnmount(() => {
 }
 
 .payment-card {
-	padding: var(--pos-space-2);
+	padding: var(--pos-layout-surface-padding, var(--pos-space-2));
 }
 
 .payment-card--dialog {
@@ -1438,10 +1449,10 @@ onBeforeUnmount(() => {
 }
 
 .payment-scroll {
-	padding: var(--pos-space-3);
+	padding: var(--pos-layout-surface-padding, var(--pos-space-3));
 	display: flex;
 	flex-direction: column;
-	gap: var(--pos-space-3);
+	gap: var(--pos-layout-gap, var(--pos-space-3));
 	flex: 1 1 auto;
 	min-height: 0;
 }
@@ -1449,7 +1460,7 @@ onBeforeUnmount(() => {
 .payment-sections {
 	display: flex;
 	flex-direction: column;
-	gap: var(--pos-space-3);
+	gap: var(--pos-layout-gap, var(--pos-space-3));
 }
 
 .payment-sections--dialog {
@@ -1467,11 +1478,12 @@ onBeforeUnmount(() => {
 .payment-section {
 	background: var(--pos-surface-muted);
 	border: 1px solid var(--pos-border-light);
-	border-radius: var(--pos-radius-md);
-	padding: var(--pos-space-3);
+	border-radius: var(--pos-layout-card-radius, var(--pos-radius-md));
+	padding: var(--pos-layout-surface-padding, var(--pos-space-3));
 	display: flex;
 	flex-direction: column;
-	gap: var(--pos-space-3);
+	gap: var(--pos-layout-gap, var(--pos-space-3));
+	box-shadow: 0 8px 20px var(--pos-shadow-light);
 }
 
 .payment-sections--dialog .payment-section {
@@ -1523,7 +1535,7 @@ onBeforeUnmount(() => {
 
 .payment-section__title {
 	margin: 0;
-	font-size: 1rem;
+	font-size: calc(1rem * var(--pos-heading-scale, 1));
 	font-weight: 700;
 	line-height: 1.2;
 	color: var(--pos-text-primary);
@@ -1554,7 +1566,7 @@ onBeforeUnmount(() => {
 }
 
 :deep(.payment-footer--dialog .v-btn) {
-	min-height: 42px;
+	min-height: var(--pos-touch-target, 42px);
 }
 
 :deep(.payment-shell--dialog .payment-methods) {
@@ -1640,7 +1652,7 @@ onBeforeUnmount(() => {
 	}
 
 	.payment-scroll {
-		padding: var(--pos-space-2);
+		padding: var(--pos-space-2) var(--pos-space-2) calc(var(--pos-space-2) + env(safe-area-inset-bottom, 0px));
 		gap: var(--pos-space-2);
 		overflow: visible !important;
 		min-height: auto;
@@ -1665,8 +1677,18 @@ onBeforeUnmount(() => {
 	}
 
 	.payment-footer {
-		position: static;
+		position: sticky;
+		bottom: 0;
+		z-index: 6;
 		margin-top: 0;
+		background: linear-gradient(to top, var(--pos-bg-secondary), transparent);
+		padding-top: 4px;
+	}
+}
+
+@media (hover: none) and (pointer: coarse) {
+	:deep(.payment-section .v-btn) {
+		min-height: max(44px, var(--pos-touch-target, 42px));
 	}
 }
 </style>

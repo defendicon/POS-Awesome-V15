@@ -3944,20 +3944,33 @@ onMounted(() => {
 
 .dashboard-shell {
 	min-height: 100%;
+	padding: var(--pos-layout-surface-padding, 16px) !important;
 }
 
 .dashboard-toolbar {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 12px;
+	gap: var(--pos-layout-gap, 12px);
 	flex-wrap: wrap;
+	position: sticky;
+	top: 0;
+	z-index: 8;
+	background: linear-gradient(to bottom, var(--dashboard-bg-base), transparent);
+	padding-top: 2px;
+	padding-bottom: 2px;
 }
 
 .dashboard-actions {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.dashboard-actions :deep(.v-btn) {
+	min-height: var(--pos-touch-target, 42px);
+	border-radius: var(--pos-radius-sm);
 }
 
 .dashboard-meta {
@@ -3977,6 +3990,10 @@ onMounted(() => {
 	border-radius: 14px;
 	padding: 6px;
 	border-bottom: 1px solid var(--pos-border);
+	position: sticky;
+	top: 54px;
+	z-index: 7;
+	backdrop-filter: blur(6px);
 }
 
 .dashboard-tabs--desktop {
@@ -3998,7 +4015,7 @@ onMounted(() => {
 .dashboard-tab-bar :deep(.v-tab) {
 	border-radius: 10px;
 	color: var(--pos-text-secondary);
-	min-height: 40px;
+	min-height: var(--pos-touch-target, 42px);
 	transition: background-color 0.18s ease, color 0.18s ease;
 }
 
@@ -4020,10 +4037,11 @@ onMounted(() => {
 	text-transform: none;
 	justify-content: flex-start;
 	border-radius: 12px;
-	min-height: 42px;
+	min-height: var(--pos-touch-target, 42px);
 	border: 1px solid var(--pos-border);
 	background: var(--dashboard-tabs-bg);
 	color: var(--pos-text-primary);
+	touch-action: manipulation;
 }
 
 .tab-card-label {
@@ -4037,8 +4055,8 @@ onMounted(() => {
 }
 
 .metric-card {
-	border-radius: 14px;
-	padding: 14px;
+	border-radius: var(--pos-layout-card-radius, 14px);
+	padding: var(--pos-layout-surface-padding, 14px);
 	background: var(--pos-card-bg);
 	border: 1px solid var(--pos-border);
 }
@@ -4075,8 +4093,8 @@ onMounted(() => {
 
 .dashboard-card {
 	height: 100%;
-	border-radius: 14px;
-	padding: 14px;
+	border-radius: var(--pos-layout-card-radius, 14px);
+	padding: var(--pos-layout-surface-padding, 14px);
 	background: var(--pos-card-bg);
 	border: 1px solid var(--pos-border);
 	display: flex;
@@ -4135,7 +4153,7 @@ onMounted(() => {
 .trend-panel {
 	border: 1px solid var(--pos-border);
 	border-radius: 10px;
-	padding: 10px;
+	padding: max(10px, var(--pos-space-2));
 	background: var(--pos-card-bg);
 	min-width: 0;
 }
@@ -4147,7 +4165,7 @@ onMounted(() => {
 .summary-metric {
 	border: 1px solid var(--pos-border);
 	border-radius: 10px;
-	padding: 10px;
+	padding: max(10px, var(--pos-space-2));
 	background: var(--pos-card-bg);
 	min-width: 0;
 }
@@ -4215,7 +4233,7 @@ onMounted(() => {
 .insight-row {
 	border: 1px solid var(--pos-border);
 	border-radius: 10px;
-	padding: 10px;
+	padding: max(10px, var(--pos-space-2));
 	background: var(--pos-card-bg);
 	min-width: 0;
 }
@@ -4312,8 +4330,15 @@ onMounted(() => {
 }
 
 @media (max-width: 960px) {
+	.dashboard-toolbar {
+		position: static;
+		background: transparent;
+	}
+
 	.dashboard-tabs {
 		border-bottom: none;
+		position: static;
+		backdrop-filter: none;
 	}
 
 	.dashboard-tabs--desktop {
@@ -4344,6 +4369,10 @@ onMounted(() => {
 }
 
 @media (max-width: 600px) {
+	.dashboard-shell {
+		padding: var(--dynamic-xs) !important;
+	}
+
 	.dashboard-tabs--mobile {
 		grid-template-columns: 1fr;
 	}
@@ -4353,12 +4382,17 @@ onMounted(() => {
 	}
 
 	.dashboard-filter {
-		min-width: 150px;
-		max-width: 180px;
+		min-width: 100%;
+		max-width: 100%;
 	}
 
 	.metric-card__value {
 		font-size: 1.15rem;
+	}
+
+	.metric-card,
+	.dashboard-card {
+		padding: 10px;
 	}
 
 	.supplier-row {

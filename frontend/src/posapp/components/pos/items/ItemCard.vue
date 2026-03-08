@@ -176,12 +176,23 @@ const onDragEnd = (event) => {
 	backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
 	position: relative;
+	min-height: 210px;
+	touch-action: manipulation;
 }
 
 .card-item-card:hover {
 	transform: translate3d(0, -3px, 0);
 	box-shadow: 0 16px 32px var(--pos-shadow);
 	border-color: rgba(var(--v-theme-primary), 0.35);
+}
+
+.card-item-card:active {
+	transform: translate3d(0, -1px, 0) scale(0.995);
+}
+
+.card-item-card:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
 }
 
 .card-item-card.item-highlighted {
@@ -234,10 +245,10 @@ const onDragEnd = (event) => {
 }
 
 .card-item-name {
-	font-size: 0.98rem;
+	font-size: 1rem;
 	font-weight: 700;
 	margin: 0;
-	line-height: 1.35;
+	line-height: 1.3;
 	color: var(--pos-text-primary);
 	overflow: hidden;
 	display: -webkit-box;
@@ -334,6 +345,10 @@ const onDragEnd = (event) => {
 }
 
 @media (max-width: 768px) {
+	.card-item-card {
+		min-height: 198px;
+	}
+
 	.card-item-image-container {
 		height: 112px;
 	}
@@ -348,6 +363,16 @@ const onDragEnd = (event) => {
 
 	.card-item-code {
 		font-size: 0.7rem;
+	}
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.card-item-card {
+		min-height: 216px;
+	}
+
+	.card-item-content {
+		padding: var(--pos-space-4);
 	}
 }
 </style>

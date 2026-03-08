@@ -1,4 +1,3 @@
-import qz from "qz-tray";
 import { ref } from "vue";
 
 declare const frappe: any;
@@ -22,6 +21,11 @@ export interface QzPrintDocumentOptions extends QzPrintHtmlOptions {
 const PRINTER_STORAGE_KEY = "posa_qz_printer_name";
 const CERT_READY_STORAGE_KEY = "posa_qz_cert_ready";
 const DEFAULT_PRINT_FORMAT = "Standard";
+const QZ_SCRIPT_CANDIDATES = [
+	"/assets/posawesome/dist/js/libs/qz-tray.js",
+	"/assets/posawesome/dist/js/libs/qz-tray.min.js",
+	"https://cdn.jsdelivr.net/npm/qz-tray@2.2.5/qz-tray.js",
+];
 
 export const qzConnected = ref(false);
 export const qzConnecting = ref(false);
@@ -35,6 +39,8 @@ let cachedCertificate: string | null = null;
 let certificateProvided = false;
 let connectPromise: Promise<boolean> | null = null;
 let certificateChecked = false;
+let qzApi: any = null;
+let qzLoadPromise: Promise<any> | null = null;
 
 function extractMessage<T>(value: any): T {
 	if (value && typeof value === "object" && "message" in value) {
@@ -82,11 +88,91 @@ function saveCertReady(value: boolean) {
 	}
 }
 
-function setupSecurity() {
+function loadExternalScript(src: string): Promise<void> {
+	return new Promise((resolve, reject) => {
+		if (typeof document === "undefined") {
+			reject(new Error("Document is unavailable."));
+			return;
+		}
+		const existing = document.querySelector(`script[data-qz-src="${src}"]`) as HTMLScriptElement | null;
+		if (existing) {
+			if (existing.dataset.loaded === "1") {
+				resolve();
+				return;
+			}
+			existing.addEventListener("load", () => resolve(), { once: true });
+			existing.addEventListener("error", () => reject(new Error(`Failed to load script: ${src}`)), {
+				once: true,
+			});
+			return;
+		}
+
+		const script = document.createElement("script");
+		script.src = src;
+		script.async = true;
+		script.defer = true;
+		script.dataset.qzSrc = src;
+		script.addEventListener(
+			"load",
+			() => {
+				script.dataset.loaded = "1";
+				resolve();
+			},
+			{ once: true },
+		);
+		script.addEventListener(
+			"error",
+			() => {
+				reject(new Error(`Failed to load script: ${src}`));
+			},
+			{ once: true },
+		);
+		document.head.appendChild(script);
+	});
+}
+
+async function resolveQzApi() {
+	if (qzApi) {
+		return qzApi;
+	}
+	const globalQz = (window as any)?.qz;
+	if (globalQz) {
+		qzApi = globalQz;
+		return qzApi;
+	}
+
+	if (qzLoadPromise) {
+		return qzLoadPromise;
+	}
+
+	qzLoadPromise = (async () => {
+		for (const src of QZ_SCRIPT_CANDIDATES) {
+			try {
+				await loadExternalScript(src);
+				const loaded = (window as any)?.qz;
+				if (loaded) {
+					qzApi = loaded;
+					return qzApi;
+				}
+			} catch {
+				// try next candidate
+			}
+		}
+		throw new Error("QZ Tray browser library was not found.");
+	})();
+
+	try {
+		return await qzLoadPromise;
+	} finally {
+		qzLoadPromise = null;
+	}
+}
+
+function setupSecurity(qzClient: any) {
 	if (securityInitialized) return;
 	securityInitialized = true;
 
-	qz.security.setCertificatePromise((resolve) => {
+	qzClient.security.setCertificatePromise((resolve: (value?: string) => void) => {
 		if (cachedCertificate) {
 			certificateProvided = true;
 			resolve(cachedCertificate);
@@ -114,8 +200,8 @@ function setupSecurity() {
 			});
 	});
 
-	qz.security.setSignatureAlgorithm("SHA512");
-	qz.security.setSignaturePromise((toSign) => {
+	qzClient.security.setSignatureAlgorithm("SHA512");
+	qzClient.security.setSignaturePromise((toSign: string) => {
 		return (resolve) => {
 			callServer<string>("posawesome.posawesome.api.qz.sign_message", {
 				message: toSign,
@@ -165,7 +251,16 @@ export function setSelectedQzPrinter(name: string) {
 }
 
 export async function connectQzTray(): Promise<boolean> {
-	if (qz.websocket.isActive()) {
+	let qzClient: any;
+	try {
+		qzClient = await resolveQzApi();
+	} catch (error) {
+		console.warn("QZ Tray JS bridge is not available", error);
+		qzConnected.value = false;
+		return false;
+	}
+
+	if (qzClient.websocket.isActive()) {
 		qzConnected.value = true;
 		return true;
 	}
@@ -175,19 +270,19 @@ export async function connectQzTray(): Promise<boolean> {
 	}
 
 	connectPromise = (async () => {
-		setupSecurity();
+		setupSecurity(qzClient);
 		qzConnecting.value = true;
 
-		qz.websocket.setClosedCallbacks(() => {
+		qzClient.websocket.setClosedCallbacks(() => {
 			qzConnected.value = false;
 			qzConnecting.value = false;
 			qzCertStatus.value = "unknown";
 		});
 
 		try {
-			await qz.websocket.connect();
+			await qzClient.websocket.connect();
 			qzConnected.value = true;
-			qz.printers.find().catch(() => undefined);
+			qzClient.printers.find().catch(() => undefined);
 			return true;
 		} catch (error) {
 			console.warn("Unable to connect to QZ Tray", error);
@@ -206,13 +301,21 @@ export async function connectQzTray(): Promise<boolean> {
 }
 
 export async function disconnectQzTray() {
-	if (!qz.websocket.isActive()) {
+	let qzClient: any;
+	try {
+		qzClient = await resolveQzApi();
+	} catch {
+		qzConnected.value = false;
+		return;
+	}
+
+	if (!qzClient.websocket.isActive()) {
 		qzConnected.value = false;
 		return;
 	}
 
 	try {
-		await qz.websocket.disconnect();
+		await qzClient.websocket.disconnect();
 	} catch (error) {
 		console.warn("Unable to disconnect from QZ Tray", error);
 	} finally {
@@ -221,7 +324,16 @@ export async function disconnectQzTray() {
 }
 
 export async function findQzPrinters(): Promise<string[]> {
-	if (!qz.websocket.isActive()) {
+	let qzClient: any;
+	try {
+		qzClient = await resolveQzApi();
+	} catch (error) {
+		console.warn("QZ Tray JS bridge is not available", error);
+		qzPrinters.value = [];
+		return [];
+	}
+
+	if (!qzClient.websocket.isActive()) {
 		const connected = await connectQzTray();
 		if (!connected) {
 			return [];
@@ -229,7 +341,7 @@ export async function findQzPrinters(): Promise<string[]> {
 	}
 
 	try {
-		const result = await qz.printers.find();
+		const result = await qzClient.printers.find();
 		const printers = Array.isArray(result)
 			? result
 			: result
@@ -318,7 +430,8 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 		throw new Error("Nothing to print.");
 	}
 
-	if (!qz.websocket.isActive()) {
+	const qzClient = await resolveQzApi();
+	if (!qzClient.websocket.isActive()) {
 		const connected = await connectQzTray();
 		if (!connected) {
 			throw new Error("QZ Tray is not available.");
@@ -339,7 +452,7 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 		throw new Error("No QZ printer selected.");
 	}
 
-	const config = qz.configs.create(printer, {
+	const config = qzClient.configs.create(printer, {
 		size: {
 			width: options.widthMm || 80,
 			height: null,
@@ -360,7 +473,7 @@ export async function printHtmlViaQz(html: string, options: QzPrintHtmlOptions =
 		},
 	];
 
-	await qz.print(config, data);
+	await qzClient.print(config, data);
 }
 
 export async function printDocumentViaQz(options: QzPrintDocumentOptions) {

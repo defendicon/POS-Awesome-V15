@@ -79,6 +79,12 @@ const handleGlobalShortcuts = (event) => {
 	if ((event.ctrlKey || event.metaKey) && event.shiftKey && key === "d") {
 		event.preventDefault();
 		uiStore.toggleDensityMode();
+		return;
+	}
+
+	if ((event.ctrlKey || event.metaKey) && event.shiftKey && key === "l") {
+		event.preventDefault();
+		uiStore.cycleLayoutProfile();
 	}
 };
 
