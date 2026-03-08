@@ -3919,12 +3919,27 @@ onMounted(() => {
 
 <style scoped>
 .awesome-dashboard-view {
+	--dashboard-bg-base: var(--pos-surface-muted, var(--pos-surface, #f4f6f8));
+	--dashboard-glow-primary: rgba(25, 118, 210, 0.08);
+	--dashboard-glow-secondary: rgba(76, 175, 80, 0.08);
+	--dashboard-tabs-bg: var(--pos-surface-raised, var(--pos-card-bg, #ffffff));
+	--dashboard-tab-active-bg: var(--pos-card-bg, #ffffff);
+	--dashboard-tab-hover-bg: var(--pos-surface-container, rgba(0, 0, 0, 0.04));
 	height: 100%;
 	overflow: auto;
 	background:
-		radial-gradient(circle at top right, rgba(25, 118, 210, 0.08), transparent 40%),
-		radial-gradient(circle at bottom left, rgba(76, 175, 80, 0.08), transparent 45%),
-		var(--pos-background, #f4f6f8);
+		radial-gradient(circle at top right, var(--dashboard-glow-primary), transparent 40%),
+		radial-gradient(circle at bottom left, var(--dashboard-glow-secondary), transparent 45%),
+		var(--dashboard-bg-base);
+}
+
+:deep(.v-theme--dark) .awesome-dashboard-view {
+	--dashboard-bg-base: var(--pos-surface-muted, #1a2028);
+	--dashboard-glow-primary: rgba(66, 165, 245, 0.18);
+	--dashboard-glow-secondary: rgba(102, 187, 106, 0.14);
+	--dashboard-tabs-bg: rgba(255, 255, 255, 0.04);
+	--dashboard-tab-active-bg: rgba(255, 255, 255, 0.08);
+	--dashboard-tab-hover-bg: rgba(255, 255, 255, 0.06);
 }
 
 .dashboard-shell {
@@ -3957,6 +3972,10 @@ onMounted(() => {
 }
 
 .dashboard-tabs {
+	background: var(--dashboard-tabs-bg);
+	border: 1px solid var(--pos-border);
+	border-radius: 14px;
+	padding: 6px;
 	border-bottom: 1px solid var(--pos-border);
 }
 
@@ -3972,11 +3991,39 @@ onMounted(() => {
 	background: transparent;
 }
 
+.dashboard-tab-bar :deep(.v-slide-group__content) {
+	gap: 4px;
+}
+
+.dashboard-tab-bar :deep(.v-tab) {
+	border-radius: 10px;
+	color: var(--pos-text-secondary);
+	min-height: 40px;
+	transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.dashboard-tab-bar :deep(.v-tab:hover) {
+	background: var(--dashboard-tab-hover-bg);
+	color: var(--pos-text-primary);
+}
+
+.dashboard-tab-bar :deep(.v-tab.v-tab--selected) {
+	background: var(--dashboard-tab-active-bg);
+	color: var(--pos-text-primary);
+}
+
+.dashboard-tab-bar :deep(.v-tab__slider) {
+	opacity: 0.9;
+}
+
 .tab-card-btn {
 	text-transform: none;
 	justify-content: flex-start;
 	border-radius: 12px;
 	min-height: 42px;
+	border: 1px solid var(--pos-border);
+	background: var(--dashboard-tabs-bg);
+	color: var(--pos-text-primary);
 }
 
 .tab-card-label {
