@@ -33,9 +33,16 @@
 				</v-alert>
 				<div class="invoice-sections">
 					<div class="invoice-top-grid">
-						<v-card flat class="invoice-section-card pos-themed-card">
+						<v-card
+							flat
+							class="invoice-section-card pos-themed-card"
+							role="region"
+							aria-labelledby="invoice-customer-details-title"
+						>
 							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Customer Details") }}</h3>
+								<h3 id="invoice-customer-details-title" class="invoice-section-heading__title">
+									{{ __("Customer Details") }}
+								</h3>
 							</div>
 							<InvoiceCustomerSection
 								ref="customerSection"
@@ -49,9 +56,13 @@
 							v-if="pos_profile.posa_use_delivery_charges"
 							flat
 							class="invoice-section-card pos-themed-card"
+							role="region"
+							aria-labelledby="invoice-delivery-charges-title"
 						>
 							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Delivery Charges") }}</h3>
+								<h3 id="invoice-delivery-charges-title" class="invoice-section-heading__title">
+									{{ __("Delivery Charges") }}
+								</h3>
 							</div>
 							<DeliveryCharges
 								ref="deliveryChargesComponent"
@@ -78,9 +89,13 @@
 							v-if="pos_profile.posa_allow_change_posting_date"
 							flat
 							class="invoice-section-card pos-themed-card"
+							role="region"
+							aria-labelledby="invoice-posting-price-list-title"
 						>
 							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Posting and Price List") }}</h3>
+								<h3 id="invoice-posting-price-list-title" class="invoice-section-heading__title">
+									{{ __("Posting and Price List") }}
+								</h3>
 							</div>
 							<PostingDateRow
 								ref="postingDateComponent"
@@ -107,9 +122,13 @@
 							v-if="pos_profile.posa_allow_multi_currency"
 							flat
 							class="invoice-section-card pos-themed-card"
+							role="region"
+							aria-labelledby="invoice-multi-currency-title"
 						>
 							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Multi Currency") }}</h3>
+								<h3 id="invoice-multi-currency-title" class="invoice-section-heading__title">
+									{{ __("Multi Currency") }}
+								</h3>
 							</div>
 							<MultiCurrencyRow
 								:pos_profile="pos_profile"
@@ -141,9 +160,16 @@
 						</v-card>
 					</div>
 
-					<v-card flat class="invoice-section-card invoice-items-card pos-themed-card">
+					<v-card
+						flat
+						class="invoice-section-card invoice-items-card pos-themed-card"
+						role="region"
+						aria-labelledby="invoice-items-title"
+					>
 						<div class="invoice-section-heading">
-							<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
+							<h3 id="invoice-items-title" class="invoice-section-heading__title">
+								{{ __("Invoice Items") }}
+							</h3>
 						</div>
 						<div class="items-table-wrapper">
 							<InvoiceItemsActionToolbar
@@ -1066,6 +1092,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	overflow: hidden !important;
+	overscroll-behavior: contain;
 }
 
 /* Style for selected checkbox button */
@@ -1168,14 +1195,22 @@ export default {
 	background: var(--pos-card-bg) !important;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	border-radius: var(--pos-radius-md, 18px);
-	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 	overflow: hidden;
 	flex: 0 0 auto;
 	min-height: fit-content;
+	transition:
+		border-color 0.18s ease,
+		box-shadow 0.18s ease;
+}
+
+.invoice-section-card:focus-within {
+	border-color: var(--pos-focus-ring);
+	box-shadow: 0 0 0 2px var(--pos-focus-ring);
 }
 
 .invoice-section-heading {
-	padding: 14px 18px 10px;
+	padding: 14px 16px 10px;
 	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
 
@@ -1186,6 +1221,7 @@ export default {
 	line-height: 1.25;
 	color: var(--pos-text-primary);
 	letter-spacing: 0.01em;
+	overflow-wrap: anywhere;
 }
 
 .invoice-items-card {
@@ -1336,6 +1372,8 @@ export default {
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow-x: auto;
+	overscroll-behavior: contain;
+	scrollbar-gutter: stable both-edges;
 }
 
 :deep(.items-table-wrapper .column-selector-container) {

@@ -10,9 +10,11 @@
 			class="item-search-field pos-themed-input"
 			:label="__('Search items or barcode')"
 			prepend-inner-icon="mdi-magnify"
-			hide-details
+			hide-details="auto"
 			clearable
 			autocomplete="off"
+			inputmode="search"
+			spellcheck="false"
 		></v-text-field>
 		<v-btn
 			density="compact"
@@ -120,3 +122,39 @@ defineExpose({
 	focusSearch,
 });
 </script>
+
+<style scoped>
+.column-selector-container {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.item-search-field {
+	width: 100%;
+	max-width: 360px;
+	flex: 1 1 260px;
+	margin-right: auto;
+}
+
+.column-selector-btn {
+	min-height: max(44px, var(--pos-touch-target, 42px));
+	padding-inline: 12px !important;
+	border-radius: var(--pos-radius-sm);
+	text-transform: none !important;
+	font-weight: 600 !important;
+}
+
+@media (max-width: 768px) {
+	.item-search-field {
+		max-width: 100%;
+		flex-basis: 100%;
+	}
+
+	.column-selector-btn {
+		min-height: 44px;
+	}
+}
+</style>

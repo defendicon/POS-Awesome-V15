@@ -1,6 +1,8 @@
 <template>
 	<v-card
 		class="cards sticky-summary-card mb-0 py-3 px-4 rounded-lg pos-themed-card"
+		role="region"
+		:aria-label="__('Invoice summary and actions')"
 	>
 		<v-row dense class="invoice-summary-grid">
 			<!-- Summary Info -->
@@ -36,6 +38,7 @@
 							prepend-inner-icon="mdi-format-list-numbered"
 							variant="solo"
 							density="compact"
+							hide-details="auto"
 							readonly
 							color="accent"
 						/>
@@ -52,6 +55,9 @@
 							prepend-inner-icon="mdi-cash-minus"
 							variant="solo"
 							density="compact"
+							hide-details="auto"
+							autocomplete="off"
+							inputmode="decimal"
 							color="warning"
 							:prefix="currencySymbol(pos_profile.currency)"
 							:disabled="
@@ -76,6 +82,9 @@
 							prepend-inner-icon="mdi-percent"
 							variant="solo"
 							density="compact"
+							hide-details="auto"
+							autocomplete="off"
+							inputmode="decimal"
 							color="warning"
 							:disabled="
 								!pos_profile.posa_allow_user_to_edit_additional_discount ||
@@ -93,6 +102,7 @@
 							prepend-inner-icon="mdi-tag-minus"
 							variant="solo"
 							density="compact"
+							hide-details="auto"
 							color="warning"
 							readonly
 							class="summary-field"
@@ -108,6 +118,7 @@
 							prepend-inner-icon="mdi-cash"
 							variant="solo"
 							density="compact"
+							hide-details="auto"
 							readonly
 							color="success"
 							class="summary-field"
@@ -383,7 +394,7 @@ async function handleOpenCustomerDisplay() {
 }
 
 .invoice-summary-grid {
-	row-gap: 2px;
+	row-gap: 8px;
 }
 
 .mobile-quick-actions {
@@ -435,6 +446,7 @@ async function handleOpenCustomerDisplay() {
 		grid-template-columns: 1fr 1fr 1fr;
 		gap: 8px;
 		padding-top: 8px;
+		padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
 		margin-top: 4px;
 		background: linear-gradient(to top, var(--pos-card-bg), rgba(255, 255, 255, 0));
 	}
@@ -443,6 +455,21 @@ async function handleOpenCustomerDisplay() {
 		min-height: 44px !important;
 		font-weight: 700 !important;
 		letter-spacing: 0.01em !important;
+	}
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.summary-field:hover {
+		transform: none;
+		box-shadow: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cards,
+	.summary-field,
+	.summary-field :deep(.v-field) {
+		transition: none !important;
 	}
 }
 </style>

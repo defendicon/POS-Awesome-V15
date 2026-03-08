@@ -1,5 +1,5 @@
 <template>
-	<v-row dense>
+	<v-row dense class="invoice-action-grid">
 		<v-col cols="12" sm="6">
 			<v-btn
 				block
@@ -175,7 +175,7 @@ const showCustomerDisplayButton = computed(() =>
 	transition: all 0.2s ease !important;
 	position: relative;
 	overflow: hidden;
-	min-height: 44px !important;
+	min-height: max(44px, var(--pos-touch-target, 42px)) !important;
 	border-radius: var(--pos-radius-sm) !important;
 }
 
@@ -256,5 +256,21 @@ const showCustomerDisplayButton = computed(() =>
 .summary-btn:focus-visible {
 	outline: 2px solid var(--pos-focus-ring);
 	outline-offset: 2px;
+}
+
+.invoice-action-grid {
+	row-gap: 6px;
+}
+
+@media (max-width: 768px) {
+	.invoice-action-grid {
+		row-gap: 8px;
+	}
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.summary-btn {
+		min-height: 46px !important;
+	}
 }
 </style>
