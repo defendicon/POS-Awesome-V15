@@ -1,4 +1,3 @@
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Sales Summary
 DocType: POS Closing Shift Taxes,Rate
 DocType: POS Offer,Warehouse
 Custom Field - label: Sales Invoice-posa_additional_notes_section,Additional Notes
@@ -27,17 +26,14 @@ Custom Field - description: POS Profile-posa_cash_mode_of_payment,For POS Closin
 Custom Field - label: POS Profile-posa_hide_closing_shift,Hide Close Shift
 Custom Field - label: POS Profile-posa_display_items_in_stock,Hide Unavailable Items
 Custom Field - label: POS Profile-posa_hide_variants_items,Hide Variants Items
-apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Selected POS Opening Shift should be open.
 Custom Field - label: Sales Invoice Item-posa_is_offer,Is Offer
 Custom Field - label: Sales Invoice Item-posa_is_replace,Is Offer Replace For item Row ID
 Custom Field - label: POS Profile-posa_max_discount_allowed,Max Discount Percentage Allowed 
-,POS Awesome
 Custom Field - label: POS Profile-posa_pos_awesome_advance_settings,POS Awesome Advance Settings
 Custom Field - label: POS Profile-posa_pos_awesome_settings,POS Awesome Settings
 Custom Field - label: Sales Invoice Item-posa_offers,POS Offers
 Custom Field - label: Sales Invoice-posa_offers,POS Offers Detail
 DocType: POS Opening Shift Detail,POS Opening Shift Detail
-apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,User {} has been disabled. Please select valid user/cashier
 Custom Field - label: Sales Invoice-posa_pos_opening_shift,POS Shift
 Custom Field - label: POS Invoice-posa_pos_opening_shift,POS Shift
 Custom Field - label: Batch-posa_batch_price,Price
@@ -46,14 +42,11 @@ Custom Field - label: POS Invoice-posa_is_printed,Printed
 Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number
 Custom Field - description: POS Profile-posa_allow_submissions_in_background_job,Send invoice to submit after printing
 Custom Field - label: POS Profile-posa_show_template_items,Show Template Items
-apps/posawesome/posawesome/posawesome/api/status_updater.py,Status must be one of {0}
-apps/posawesome/posawesome/posawesome/api/posapp.py,Invoice {0} Deleted
 Custom Field - label: Item Barcode-posa_uom,UOM
 Custom Field - label: POS Profile-posa_local_storage,Use Browser Local Storage
 Custom Field - label: POS Profile-posa_force_server_items,Fetch Items Directly from Server
 Custom Field - label: POS Profile-use_cashback,Use Cashback
 Custom Field - label: POS Profile-use_customer_credit,Use Customer Credit
-apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Total Qty
 Menu,Menu
 Actions,Ações
 Close Shift,Fechar Turno
@@ -1457,6 +1450,5 @@ Tip Close unused tabs or apps to reduce lag.,Dica: Feche abas ou aplicativos nã
 Tip Monitor slow queries and table size for optimal performance.,Dica: Monitore consultas lentas e tamanho de tabelas para um desempenho ideal.
 Total Qty,Qtd Total
 Total Selected ,Total Selecionado
-﻿Account,Conta
 Search Items,Buscar Itens
 Tax and Charges,Impostos e Taxas
