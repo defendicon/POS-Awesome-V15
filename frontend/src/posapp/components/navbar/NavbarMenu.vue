@@ -1134,13 +1134,25 @@ export default {
 
 /* Compact Focus States */
 .menu-item-compact:focus-visible {
-	outline: 1px solid #1976d2;
-	outline-offset: 1px;
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
 }
 
 .menu-btn-compact:focus-visible {
-	outline: 1px solid #1976d2;
+	outline: 2px solid var(--pos-focus-ring);
 	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.menu-item-compact,
+	.menu-item-compact::before,
+	.menu-icon-wrapper-compact,
+	.menu-btn-compact,
+	.v-overlay__content {
+		animation: none !important;
+		transition: none !important;
+		transform: none !important;
+	}
 }
 
 /* Dark Theme Adjustments */

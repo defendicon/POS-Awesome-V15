@@ -766,17 +766,44 @@ const restorePaymentLinesAfterFailedSubmit = () => {
 	is_credit_sale.value = false;
 };
 
+const focusPrimaryPaymentField = () => {
+	const root = paymentContainer.value?.$el || paymentContainer.value;
+	if (!root || typeof root.querySelector !== "function") {
+		return false;
+	}
+
+	const selectors = [
+		".payment-methods input:not([disabled])",
+		".payment-summary-grid input:not([disabled])",
+		".payment-method-action-btn:not([disabled])",
+		".payment-footer-btn:not([disabled])",
+	];
+
+	for (const selector of selectors) {
+		const candidate = root.querySelector(selector);
+		if (candidate && typeof candidate.focus === "function") {
+			candidate.focus({ preventScroll: true });
+			return true;
+		}
+	}
+
+	return false;
+};
+
 const handleShowPayment = () => {
 	uiStore.trackWorkflowStep("checkout_open");
 	paymentVisible.value = true;
 	nextTick(() => {
 		setTimeout(() => {
-			const btn = submitButton.value;
-			const el = btn && btn.$el ? btn.$el : btn;
-			if (el) {
-				el.scrollIntoView({ behavior: "smooth", block: "center" });
-				el.focus();
-				highlightSubmit.value = true;
+			const focusedPrimaryField = focusPrimaryPaymentField();
+			if (!focusedPrimaryField) {
+				const btn = submitButton.value;
+				const el = btn && btn.$el ? btn.$el : btn;
+				if (el) {
+					el.scrollIntoView({ behavior: "smooth", block: "center" });
+					el.focus();
+					highlightSubmit.value = true;
+				}
 			}
 			if (eventBus && typeof eventBus.emit === "function") {
 				eventBus.emit("payment_ui_ready");

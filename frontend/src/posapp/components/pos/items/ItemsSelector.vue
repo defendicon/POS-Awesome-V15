@@ -1014,6 +1014,7 @@ const {
 } = scannerInput;
 const { responsiveStyles } = responsive;
 const { rtlClasses } = rtl;
+const lastTrackedSearchTerm = ref("");
 
 // Proxy functions for template
 const esc_event = () => clearSearch();
@@ -1022,6 +1023,13 @@ const handleSearchKeydown = (e) => itemsSelectorFocus.handleSearchKeydown(e);
 const handleSearchInput = (val) => {
 	search_input.value = val;
 	first_search.value = String(val ?? "");
+	const normalizedTerm = first_search.value.trim().toLowerCase();
+	if (!normalizedTerm) {
+		lastTrackedSearchTerm.value = "";
+	} else if (normalizedTerm.length >= 2 && normalizedTerm !== lastTrackedSearchTerm.value) {
+		uiStore.trackWorkflowStep("item_search");
+		lastTrackedSearchTerm.value = normalizedTerm;
+	}
 	if (scannerInput.handleSearchInput) {
 		scannerInput.handleSearchInput(first_search.value);
 	}
@@ -1067,8 +1075,14 @@ const onBarcodeScanned = async (code: string) => {
 	}
 };
 
-const select_item = (e, item) => itemSelection.handleItemSelection(e, item);
-const click_item_row = (e, data) => itemSelection.handleRowClick(e, data);
+const select_item = (e, item) => {
+	uiStore.trackWorkflowStep("item_select");
+	itemSelection.handleItemSelection(e, item);
+};
+const click_item_row = (e, data) => {
+	uiStore.trackWorkflowStep("item_select");
+	itemSelection.handleRowClick(e, data);
+};
 const onVirtualRangeUpdate = (s, e, vs, ve) => itemsLoader.onVirtualRangeUpdate(s, e, vs, ve);
 const onListScroll = (e) => handleListScroll(e);
 const onScannerOpened = () => {

@@ -51,8 +51,10 @@ const shortcuts = [
 	{ key: "F1 or ?", description: __("Open keyboard shortcuts help") },
 	{ key: "Ctrl/Cmd + Shift + D", description: __("Toggle compact/comfortable density") },
 	{ key: "Ctrl/Cmd + Shift + L", description: __("Cycle cashier/manager/kiosk layout profile") },
+	{ key: "Tab / Shift + Tab", description: __("Move focus between actions and fields") },
+	{ key: "Enter / Space", description: __("Activate focused item card or action button") },
 	{ key: "Esc", description: __("Close dialogs or clear active search fields") },
-	{ key: "Enter", description: __("Confirm focused action (search/add/select)") },
+	{ key: "Alt + X / Alt + P", description: __("Submit payment or submit & print in payment view") },
 	{ key: "Arrow Keys", description: __("Navigate item lists and menus") },
 ];
 </script>

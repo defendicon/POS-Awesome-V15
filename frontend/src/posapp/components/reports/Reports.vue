@@ -4044,6 +4044,11 @@ onMounted(() => {
 	touch-action: manipulation;
 }
 
+.tab-card-btn:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
+}
+
 .tab-card-label {
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -4401,6 +4406,18 @@ onMounted(() => {
 
 	.supplier-row__amount {
 		text-align: right;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dashboard-tab-bar :deep(.v-tab),
+	.tab-card-btn,
+	.metric-card,
+	.dashboard-card,
+	.summary-metric,
+	.insight-row {
+		transition: none !important;
+		animation: none !important;
 	}
 }
 </style>

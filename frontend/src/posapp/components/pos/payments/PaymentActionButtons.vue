@@ -102,6 +102,11 @@ const __ = window.__;
 	transform: translateY(-1px);
 }
 
+.payment-footer-btn:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: 2px;
+}
+
 .payment-submit-btn:hover,
 .payment-submit-btn:focus,
 .payment-submit-btn:focus-visible,
@@ -163,6 +168,19 @@ const __ = window.__;
 
 	:deep(.payment-footer-btn .v-btn__content) {
 		font-size: 0.82rem !important;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.payment-footer-btn {
+		transition: none !important;
+	}
+
+	.payment-footer-btn:hover,
+	.payment-footer-btn:focus,
+	.payment-footer-btn:focus-visible,
+	.payment-footer-btn:active {
+		transform: none !important;
 	}
 }
 </style>

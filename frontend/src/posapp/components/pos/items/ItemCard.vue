@@ -1,7 +1,12 @@
 <template>
 	<div
 		:class="['card-item-card', { 'item-highlighted': isItemHighlighted }]"
+		role="button"
+		tabindex="0"
+		:aria-label="itemAriaLabel"
 		@click="onClick"
+		@keydown.enter.prevent="onKeyboardActivate"
+		@keydown.space.prevent="onKeyboardActivate"
 		:draggable="true"
 		@dragstart="onDragStart"
 		@dragend="onDragEnd"
@@ -142,7 +147,20 @@ const formattedActualQty = computed(() => {
 	return props.formatNumber(numericQty, 4);
 });
 
+const itemAriaLabel = computed(() => {
+	const itemName = String(props.item?.item_name || props.item?.item_code || "Item");
+	const price = String(
+		props.formatCurrency(primaryRate.value, primaryCurrency.value, primaryPrecision.value),
+	);
+	const currency = String(props.currencySymbol(primaryCurrency.value) || "");
+	return `${itemName}. ${currency} ${price}`;
+});
+
 const onClick = (event) => {
+	emit("click", event, props.item);
+};
+
+const onKeyboardActivate = (event) => {
 	emit("click", event, props.item);
 };
 
