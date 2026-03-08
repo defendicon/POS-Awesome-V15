@@ -34,14 +34,14 @@ export function useItemsTableResponsive(
 			string,
 			{ min: number; max: number; ratio: number }
 		> = {
-			item_name: { min: 200, max: 250, ratio: 0.3 },
-			qty: { min: 140, max: 160, ratio: 0.12 },
-			rate: { min: 100, max: 130, ratio: 0.12 },
-			amount: { min: 100, max: 130, ratio: 0.12 },
-			discount_value: { min: 90, max: 120, ratio: 0.1 },
-			discount_amount: { min: 90, max: 120, ratio: 0.11 },
+			item_name: { min: 170, max: 250, ratio: 0.32 },
+			qty: { min: 116, max: 156, ratio: 0.115 },
+			rate: { min: 92, max: 128, ratio: 0.11 },
+			amount: { min: 96, max: 132, ratio: 0.115 },
+			discount_value: { min: 88, max: 118, ratio: 0.095 },
+			discount_amount: { min: 88, max: 118, ratio: 0.1 },
 			price_list_rate: { min: 120, max: 140, ratio: 0.13 },
-			actions: { min: 80, max: 100, ratio: 0.08 },
+			actions: { min: 72, max: 96, ratio: 0.075 },
 			posa_is_offer: { min: 70, max: 90, ratio: 0.06 },
 		};
 
@@ -56,14 +56,14 @@ export function useItemsTableResponsive(
 
 	const calculateMinColumnWidth = (header: TableHeader) => {
 		const minWidths: Record<string, number> = {
-			item_name: 200,
-			qty: 140,
-			rate: 100,
-			amount: 100,
-			discount_value: 90,
-			discount_amount: 90,
+			item_name: 170,
+			qty: 116,
+			rate: 92,
+			amount: 96,
+			discount_value: 88,
+			discount_amount: 88,
 			price_list_rate: 120,
-			actions: 80,
+			actions: 72,
 			posa_is_offer: 70,
 		};
 		return minWidths[header.key] || 80;
@@ -85,11 +85,11 @@ export function useItemsTableResponsive(
 					return true;
 				}
 
-				if (width < 450) {
+				if (width < 560) {
 					return ["item_name", "qty", "amount", "actions"].includes(
 						header.key,
 					);
-				} else if (width < 650) {
+				} else if (width < 820) {
 					return ![
 						"discount_value",
 						"discount_amount",

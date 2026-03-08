@@ -10,7 +10,7 @@
 	>
 		<!-- Item Name Column -->
 		<td class="text-start" :data-column-key="'item_name'">
-			<div class="d-flex align-center">
+			<div class="d-flex align-center cart-item-name-cell">
 				<span>{{ item.item_name }}</span>
 				<v-chip v-if="item.is_bundle" color="secondary" size="x-small" class="ml-1">
 					{{ __("Bundle") }}
@@ -58,7 +58,7 @@
 					icon
 					size="x-small"
 					variant="text"
-					class="ml-1"
+					class="ml-1 cart-item-action-icon"
 					@click.stop="$emit('open-name-dialog', item)"
 					:aria-label="__('Edit item name')"
 				>
@@ -69,7 +69,7 @@
 					icon
 					size="x-small"
 					variant="text"
-					class="ml-1"
+					class="ml-1 cart-item-action-icon"
 					@click.stop="$emit('reset-item-name', item)"
 					:aria-label="__('Reset item name')"
 				>
@@ -115,12 +115,15 @@
 					density="compact"
 					variant="outlined"
 					class="posa-cart-table__qty-input"
+					hide-details="auto"
 					@blur="closeQtyEdit"
 					@keydown.enter.prevent="closeQtyEdit"
 					@click.stop
 					ref="qtyInput"
 					:autofocus="true"
 					type="number"
+					autocomplete="off"
+					inputmode="decimal"
 					:disabled="disableInput"
 				></v-text-field>
 				<v-btn
@@ -234,12 +237,15 @@
 					density="compact"
 					variant="outlined"
 					class="posa-cart-table__editor-input"
+					hide-details="auto"
 					@blur="closeDiscountPercentEdit"
 					@keydown.enter.prevent="closeDiscountPercentEdit"
 					@click.stop
 					ref="discountPercentInput"
 					:autofocus="true"
 					type="number"
+					autocomplete="off"
+					inputmode="decimal"
 					:disabled="disableDiscountEdit"
 				></v-text-field>
 			</div>
@@ -269,12 +275,15 @@
 					density="compact"
 					variant="outlined"
 					class="posa-cart-table__editor-input"
+					hide-details="auto"
 					@blur="closeDiscountAmountEdit"
 					@keydown.enter.prevent="closeDiscountAmountEdit"
 					@click.stop
 					ref="discountAmountInput"
 					:autofocus="true"
 					type="number"
+					autocomplete="off"
+					inputmode="decimal"
 					:disabled="disableDiscountEdit"
 				></v-text-field>
 			</div>
@@ -304,12 +313,15 @@
 					density="compact"
 					variant="outlined"
 					class="posa-cart-table__editor-input"
+					hide-details="auto"
 					@blur="closeRateEdit"
 					@keydown.enter.prevent="closeRateEdit"
 					@click.stop
 					ref="rateInput"
 					:autofocus="true"
 					type="number"
+					autocomplete="off"
+					inputmode="decimal"
 					:disabled="disableRateEdit"
 				></v-text-field>
 			</div>
@@ -331,7 +343,7 @@
 				size="x-small"
 				color="primary"
 				variant="tonal"
-				class="ma-0 pa-0"
+				class="ma-0 pa-0 cart-item-offer-btn"
 				@click.stop="$emit('toggle-offer', item)"
 			>
 				{{ item.posa_offer_applied ? __("Remove Offer") : __("Apply Offer") }}
@@ -344,7 +356,7 @@
 				:disabled="!!item.posa_is_replace"
 				size="small"
 				variant="flat"
-				class="posa-cart-table__delete-btn delete-action-btn"
+				class="posa-cart-table__delete-btn delete-action-btn cart-item-delete-btn"
 				@click.stop="$emit('remove-item', item)"
 				:aria-label="__('Remove item')"
 			>
@@ -442,12 +454,6 @@ const memoDeps = computed(() => {
 		isEditingDiscountPercent.value,
 		isEditingDiscountAmount.value,
 	];
-	console.log(`[CartItemRow] memoDeps updated for ${props.item.item_code}`, {
-		uom: props.item.uom,
-		rate: props.item.rate,
-		price_list_rate: props.item.price_list_rate,
-		qty: props.item.qty,
-	});
 	return deps;
 });
 
@@ -536,12 +542,6 @@ function changeUom(direction) {
 	}
 
 	const newUom = uoms[newIndex];
-	console.log("[CartItemRow] changeUom", {
-		item: props.item.item_code,
-		direction,
-		old_uom: props.item.uom,
-		new_uom: newUom,
-	});
 	if (newUom !== props.item.uom) {
 		emit("calc-uom", props.item, newUom);
 	}
@@ -549,11 +549,6 @@ function changeUom(direction) {
 
 function handleUomSelect(newUom) {
 	if (disableUomEdit.value) return;
-	console.log("[CartItemRow] handleUomSelect", {
-		item: props.item.item_code,
-		old_uom: props.item.uom,
-		new_uom: newUom,
-	});
 	if (newUom && newUom !== props.item.uom) {
 		emit("calc-uom", props.item, newUom);
 	}
@@ -670,6 +665,27 @@ function closeDiscountAmountEdit() {
 	font-size: 0.85em;
 }
 
+.cart-item-name-cell {
+	flex-wrap: wrap;
+	gap: 4px;
+	justify-content: flex-start;
+}
+
+.cart-item-action-icon {
+	min-width: 30px !important;
+	min-height: 30px !important;
+}
+
+.cart-item-offer-btn {
+	min-height: 30px !important;
+	padding-inline: 8px !important;
+}
+
+.cart-item-delete-btn {
+	min-width: 34px !important;
+	min-height: 34px !important;
+}
+
 .negative-number {
 	color: var(--pos-error) !important;
 	font-weight: 600;
@@ -689,8 +705,25 @@ td {
 /* Keyboard focus styles */
 .posa-cart-table__qty-display:focus-visible,
 .posa-cart-table__editor-display:focus-visible {
-	outline: 2px solid var(--pos-primary);
+	outline: 2px solid var(--pos-focus-ring);
 	outline-offset: 2px;
 	z-index: 10;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.cart-item-action-icon {
+		min-width: 36px !important;
+		min-height: 36px !important;
+	}
+
+	.cart-item-offer-btn {
+		min-height: 36px !important;
+		padding-inline: 10px !important;
+	}
+
+	.cart-item-delete-btn {
+		min-width: 40px !important;
+		min-height: 40px !important;
+	}
 }
 </style>

@@ -816,3 +816,34 @@
 	border: none !important;
 	background: transparent !important;
 }
+
+@media (max-width: 768px) {
+	.posa-cart-table th {
+		padding: 10px 8px;
+		height: 44px;
+		font-size: 0.72rem;
+	}
+
+	.posa-cart-table td {
+		padding: 10px 8px;
+		height: auto;
+		min-height: 52px;
+	}
+
+	.posa-cart-table__editor-display {
+		min-height: 34px;
+		padding: 4px 6px;
+	}
+}
+
+@media (max-width: 480px) {
+	.posa-cart-table th {
+		font-size: 0.68rem;
+		padding: 8px 6px;
+	}
+
+	.posa-cart-table td {
+		padding: 8px 6px;
+		min-height: 50px;
+	}
+}
