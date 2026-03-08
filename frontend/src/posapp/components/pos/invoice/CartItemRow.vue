@@ -1,5 +1,13 @@
 <template>
-	<tr class="posa-cart-item-row" v-memo="memoDeps">
+	<tr
+		class="posa-cart-item-row"
+		v-memo="memoDeps"
+		tabindex="0"
+		role="button"
+		:aria-label="`${__('Invoice item row')}: ${item.item_name || item.item_code || ''}`"
+		@keydown.enter.prevent="$event.currentTarget && $event.currentTarget.click()"
+		@keydown.space.prevent="$event.currentTarget && $event.currentTarget.click()"
+	>
 		<!-- Item Name Column -->
 		<td class="text-start" :data-column-key="'item_name'">
 			<div class="d-flex align-center">

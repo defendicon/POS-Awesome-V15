@@ -1102,10 +1102,33 @@ const getItemRowClass = (item) => ({
 	highlighted: isItemHighlighted(items.value.indexOf(item)),
 });
 
-const getItemRowProps = (item) => ({
-	"data-item-code": item.item_code,
-	draggable: true,
-});
+const resolveRowItem = (rowPayload: any) => {
+	if (rowPayload?.item?.raw) return rowPayload.item.raw;
+	if (rowPayload?.item) return rowPayload.item;
+	if (rowPayload?.raw) return rowPayload.raw;
+	return rowPayload;
+};
+
+const getItemRowProps = (rowPayload: any) => {
+	const item = resolveRowItem(rowPayload);
+	const itemCode = item?.item_code || "";
+	const itemName = item?.item_name || itemCode || __("Item");
+
+	return {
+		"data-item-code": itemCode,
+		draggable: true,
+		tabindex: 0,
+		role: "button",
+		"aria-label": `${__("Select item")}: ${itemName}`,
+		onKeydown: (event: KeyboardEvent) => {
+			const key = String(event.key || "").toLowerCase();
+			if (key === "enter" || key === " ") {
+				event.preventDefault();
+				click_item_row(event as any, { item });
+			}
+		},
+	};
+};
 
 const handleItemCreated = (_item) => {
 	newItemDialog.value = false;

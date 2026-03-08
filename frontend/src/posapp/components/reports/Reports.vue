@@ -4193,11 +4193,11 @@ onMounted(() => {
 }
 
 .summary-metric__value--success {
-	color: #2e7d32;
+	color: var(--pos-success);
 }
 
 .summary-metric__value--danger {
-	color: #c62828;
+	color: var(--pos-error);
 }
 
 .payment-breakdown {

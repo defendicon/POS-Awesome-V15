@@ -13,7 +13,7 @@
 			:no-data-text="noDataText"
 			@click:row="handleRowClick"
 			:item-class="itemClass"
-			:row-props="rowProps"
+			:row-props="accessibleRowProps"
 			@scroll.passive="handleListScroll"
 		>
 			<template v-slot:item.rate="{ item }">
@@ -124,6 +124,52 @@ const handleRowClick = (event, data) => {
 
 const handleListScroll = (event) => {
 	emit("list-scroll", event);
+};
+
+const resolvePayloadItem = (rowPayload) => {
+	if (rowPayload?.item?.raw) return rowPayload.item.raw;
+	if (rowPayload?.item) return rowPayload.item;
+	if (rowPayload?.raw) return rowPayload.raw;
+	return rowPayload;
+};
+
+const resolveBaseRowProps = (rowPayload) => {
+	if (typeof props.rowProps === "function") {
+		return props.rowProps(rowPayload) || {};
+	}
+	if (props.rowProps && typeof props.rowProps === "object") {
+		return props.rowProps;
+	}
+	return {};
+};
+
+const accessibleRowProps = (rowPayload) => {
+	const item = resolvePayloadItem(rowPayload);
+	const baseProps = resolveBaseRowProps(rowPayload);
+	const itemName = item?.item_name || item?.item_code || "Item";
+	const originalOnKeydown =
+		typeof baseProps?.onKeydown === "function" ? baseProps.onKeydown : null;
+	const className = [baseProps?.class, "items-selector-table__row"]
+		.filter(Boolean)
+		.join(" ");
+
+	return {
+		...baseProps,
+		class: className,
+		tabindex: baseProps?.tabindex ?? 0,
+		role: baseProps?.role || "button",
+		"aria-label": baseProps?.["aria-label"] || `${window.__("Select item")}: ${itemName}`,
+		onKeydown: (event) => {
+			if (originalOnKeydown) {
+				originalOnKeydown(event);
+			}
+			const key = String(event?.key || "").toLowerCase();
+			if (key === "enter" || key === " ") {
+				event.preventDefault();
+				emit("row-click", event, { item });
+			}
+		},
+	};
 };
 
 const formatActualQty = (value) => {
@@ -276,6 +322,12 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 .sleek-data-table :deep(tbody tr:nth-child(even)) {
 	background-color: rgba(var(--v-theme-on-surface), 0.015);
+}
+
+.sleek-data-table :deep(.items-selector-table__row:focus-visible) {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: -2px;
+	background-color: rgba(var(--v-theme-primary), 0.08) !important;
 }
 
 .sleek-data-table :deep(td) {

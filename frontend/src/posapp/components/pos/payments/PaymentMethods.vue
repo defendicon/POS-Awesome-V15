@@ -19,7 +19,7 @@
 						color="primary"
 						:label="frappe._('Amount')"
 						class="sleek-field pos-themed-input"
-						hide-details
+						hide-details="auto"
 						:model-value="formatCurrency(payment.amount)"
 						@change="$emit('update-amount', payment, $event)"
 						:rules="[isNumber]"

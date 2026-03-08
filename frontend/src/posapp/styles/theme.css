@@ -474,6 +474,16 @@
 	outline-offset: 2px;
 }
 
+.posapp .v-messages__message {
+	color: var(--pos-text-secondary);
+	font-weight: 500;
+}
+
+.posapp .v-input--error .v-messages__message {
+	color: var(--pos-error);
+	font-weight: 700;
+}
+
 @media (hover: none) and (pointer: coarse) {
 	.posapp .v-btn {
 		min-height: 44px;

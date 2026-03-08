@@ -172,6 +172,12 @@
 	background-color: rgba(25, 118, 210, 0.04);
 }
 
+.posa-cart-table tr.posa-cart-item-row:focus-visible {
+	outline: 2px solid var(--pos-focus-ring);
+	outline-offset: -2px;
+	background-color: rgba(25, 118, 210, 0.08);
+}
+
 .posa-cart-table tbody tr:nth-child(even) {
 	background-color: var(--pos-surface-muted);
 }
