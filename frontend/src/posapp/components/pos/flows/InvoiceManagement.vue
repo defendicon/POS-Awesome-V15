@@ -1363,6 +1363,15 @@ export default {
 	gap: 12px;
 }
 
+.invoice-management-card :deep(.filter-grid .v-field) {
+	--v-input-control-height: max(42px, var(--pos-touch-target, 42px));
+}
+
+.invoice-management-card :deep(.v-data-table .v-btn[icon]) {
+	min-width: 36px;
+	min-height: 36px;
+}
+
 .summary-tile {
 	border-radius: 18px;
 	padding: 16px 18px;
@@ -1564,6 +1573,11 @@ export default {
 	background: rgba(248, 250, 252, 0.76);
 }
 
+.invoice-record-card__actions :deep(.v-btn) {
+	min-width: 38px;
+	min-height: 38px;
+}
+
 .invoice-management-card--dark .invoice-record-card {
 	border-color: rgba(100, 116, 139, 0.34);
 	background: linear-gradient(180deg, rgba(36, 43, 51, 0.98), rgba(26, 32, 40, 0.96));
@@ -1691,9 +1705,33 @@ export default {
 }
 
 @media (max-width: 640px) {
+	.filter-grid { grid-template-columns: 1fr; }
 	.meta-pair-grid { grid-template-columns: 1fr; }
-	.invoice-record-card__actions { justify-content: stretch; }
+	.invoice-record-card__actions {
+		justify-content: stretch;
+		gap: 10px;
+	}
+	.invoice-record-card__actions :deep(.v-btn) {
+		min-width: 42px;
+		min-height: 42px;
+	}
+	.invoice-management-card :deep(.v-data-table .v-btn[icon]) {
+		min-width: 40px;
+		min-height: 40px;
+	}
 	.tab-pagination { justify-content: center; }
 	.tab-pagination__meta { width: 100%; text-align: center; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.invoice-management-card :deep(.v-data-table .v-btn[icon]) {
+		min-width: 42px;
+		min-height: 42px;
+	}
+
+	.invoice-record-card__actions :deep(.v-btn) {
+		min-width: 44px;
+		min-height: 44px;
+	}
 }
 </style>

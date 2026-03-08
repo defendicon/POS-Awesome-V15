@@ -1,5 +1,5 @@
 <template>
-	<div class="selection-fields">
+	<div class="selection-fields" role="region" :aria-label="$__('Sales and print settings')">
 		<!-- Sales Person Selection -->
 		<v-row class="pb-0 mb-2" align="start">
 			<v-col cols="12">
@@ -19,7 +19,7 @@
 					item-value="value"
 					class="sleek-field pos-themed-input"
 					:no-data-text="$__('Sales Person not found')"
-					hide-details
+					hide-details="auto"
 					:disabled="readonly"
 					@update:model-value="$emit('update:sales-person', $event)"
 				></v-select>
@@ -38,9 +38,13 @@
 					:items="printFormats"
 					class="sleek-field pos-themed-input"
 					:no-data-text="$__('No Print Formats Found')"
-					hide-details
+					hide-details="auto"
+					autocomplete="off"
 					@update:model-value="$emit('update:print-format', $event)"
 				></v-select>
+				<p class="selection-fields__hint text-caption mt-1 mb-0">
+					{{ printFormats?.length ? `${printFormats.length} ${__('formats available')}` : __('No formats configured') }}
+				</p>
 			</v-col>
 		</v-row>
 	</div>
@@ -81,5 +85,25 @@ const $__ = inject("__", window.__);
 <style scoped>
 .pos-themed-input :deep(.v-field__input) {
 	font-weight: 500;
+}
+
+.selection-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.selection-fields :deep(.v-field) {
+	--v-input-control-height: max(42px, var(--pos-touch-target, 42px));
+}
+
+.selection-fields__hint {
+	color: var(--pos-text-secondary);
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.selection-fields :deep(.v-field) {
+		--v-input-control-height: 44px;
+	}
 }
 </style>

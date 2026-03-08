@@ -18,7 +18,7 @@
 							color="primary"
 							:label="frappe._('Paid Amount')"
 							class="sleek-field pos-themed-input"
-							hide-details
+							hide-details="auto"
 							:model-value="formatCurrency(paidAmount, currency)"
 							readonly
 							:prefix="currencySymbol(currency)"
@@ -31,7 +31,7 @@
 							color="primary"
 							:label="remainingAmount > 0 ? __('To Be Paid') : __('Change')"
 							class="sleek-field pos-themed-input"
-							hide-details
+							hide-details="auto"
 							:model-value="formatCurrency(Math.abs(remainingAmount), currency)"
 							:prefix="currencySymbol(currency)"
 							density="compact"
@@ -58,12 +58,13 @@
 								color="primary"
 								:label="frappe._(payment.mode_of_payment)"
 								class="sleek-field pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatCurrency(payment.amount, currency)"
 								@change="handlePaymentAmountChange(payment, $event)"
 								:prefix="currencySymbol(currency)"
 								@focus="set_rest_amount(payment)"
 								inputmode="decimal"
+								autocomplete="off"
 							></v-text-field>
 						</v-col>
 						<v-col cols="6">
@@ -116,7 +117,7 @@
 							:model-value="formatCurrency(totalAmount, currency)"
 							readonly
 							:prefix="currencySymbol(currency)"
-							hide-details
+							hide-details="auto"
 						></v-text-field>
 					</v-col>
 					<v-col cols="6">
@@ -126,7 +127,7 @@
 							color="primary"
 							:label="frappe._('Total Amount')"
 							class="sleek-field pos-themed-input"
-							hide-details
+							hide-details="auto"
 							:model-value="formatCurrency(totalAmount, currency)"
 							readonly
 							:prefix="currencySymbol(currency)"
@@ -135,7 +136,7 @@
 				</v-row>
 
 				<!-- Print Format Selection -->
-				<v-row class="pa-3 ma-0" dense>
+				<v-row class="pa-3 ma-0 print-options-row" dense role="region" :aria-label="__('Print options')">
 					<v-col cols="12" v-if="createInvoice">
 						<v-switch
 							v-model="printInvoice"
@@ -154,10 +155,15 @@
 							density="compact"
 							variant="solo"
 							color="primary"
-							hide-details
+							hide-details="auto"
 							class="sleek-field pos-themed-input"
 							clearable
+							autocomplete="off"
+							prepend-inner-icon="mdi-printer-settings"
 						></v-select>
+						<p class="print-options-row__hint text-caption mt-1 mb-0">
+							{{ printFormats.length ? `${printFormats.length} ${__('formats available')}` : __('No print formats available') }}
+						</p>
 					</v-col>
 				</v-row>
 			</v-card-text>
@@ -495,11 +501,20 @@ async function fetchPrintFormats() {
 	border-radius: 12px;
 }
 
+.print-options-row {
+	border-top: 1px dashed var(--pos-border-light);
+}
+
+.print-options-row__hint {
+	color: var(--pos-text-secondary);
+}
+
 /* Payment method button styling - matches Payments.vue */
 .payment-method-btn {
 	position: relative;
 	text-transform: none;
 	font-weight: 500;
+	min-height: max(42px, var(--pos-touch-target, 42px));
 }
 
 .payment-method-btn:hover,
@@ -522,6 +537,7 @@ async function fetchPrintFormats() {
 /* Submit button styling - matches Payments.vue */
 .submit-btn {
 	position: relative;
+	min-height: max(44px, var(--pos-touch-target, 42px));
 }
 
 .submit-btn:hover,
@@ -561,6 +577,10 @@ async function fetchPrintFormats() {
 	margin-bottom: 8px;
 }
 
+.v-card-actions :deep(.v-btn) {
+	min-height: max(44px, var(--pos-touch-target, 42px));
+}
+
 /* Denomination buttons container */
 .d-flex.flex-wrap {
 	display: flex;
@@ -588,5 +608,28 @@ async function fetchPrintFormats() {
 .v-dialog .v-card-text::-webkit-scrollbar-thumb {
 	background-color: rgb(var(--v-theme-primary));
 	border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+	.v-card-title {
+		padding-top: 12px !important;
+		padding-bottom: 12px !important;
+	}
+
+	.v-card-text {
+		max-height: 66vh !important;
+	}
+
+	.payment-method-btn,
+	.submit-btn {
+		min-height: 44px !important;
+	}
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.payment-method-btn,
+	.v-card-actions :deep(.v-btn) {
+		min-height: 46px !important;
+	}
 }
 </style>
