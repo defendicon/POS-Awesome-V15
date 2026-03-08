@@ -589,7 +589,7 @@
 }
 
 .posa-expanded-content {
-	padding: 24px;
+	padding: max(16px, var(--pos-space-3));
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box;
@@ -603,6 +603,7 @@
 	margin: 0;
 	position: relative;
 	overflow: visible;
+	overscroll-behavior: contain;
 }
 
 @keyframes expandIn {
@@ -619,7 +620,7 @@
 
 .posa-form-section {
 	width: 100%;
-	padding: 24px;
+	padding: max(14px, var(--pos-space-3));
 	box-sizing: border-box;
 	background: var(--pos-card-bg);
 	border-radius: 12px;
@@ -633,19 +634,24 @@
 	transform: translateY(-2px);
 }
 
+.posa-form-section:focus-within {
+	border-color: var(--pos-focus-ring);
+	box-shadow: 0 0 0 2px var(--pos-focus-ring);
+}
+
 .posa-item-details-form {
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 14px;
 }
 
 .posa-section-header {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	margin-bottom: 20px;
-	padding-bottom: 16px;
+	margin-bottom: 14px;
+	padding-bottom: 12px;
 	border-bottom: 2px solid var(--pos-primary);
 	position: relative;
 }
@@ -672,16 +678,79 @@
 .posa-form-row {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16px;
-	margin-bottom: 16px;
+	gap: 12px;
+	margin-bottom: 12px;
 	width: 100%;
 }
 
 .posa-form-field {
 	flex: 1;
-	min-width: 250px;
+	min-width: 220px;
 	max-width: 100%;
 	box-sizing: border-box;
+}
+
+.posa-form-field.full-width {
+	min-width: 100%;
+}
+
+@media (max-width: 900px) {
+	.posa-expanded-content {
+		padding: var(--pos-space-2);
+	}
+
+	.posa-form-section {
+		padding: var(--pos-space-2);
+		border-radius: 10px;
+	}
+
+	.posa-form-field {
+		min-width: 180px;
+	}
+}
+
+@media (max-width: 768px) {
+	.posa-expanded-content {
+		padding: 10px;
+	}
+
+	.posa-section-header {
+		gap: 8px;
+		margin-bottom: 10px;
+		padding-bottom: 8px;
+	}
+
+	.posa-section-title {
+		font-size: 0.82rem;
+		letter-spacing: 0.03em;
+	}
+
+	.posa-form-row {
+		gap: 10px;
+		margin-bottom: 10px;
+	}
+
+	.posa-form-field {
+		min-width: 100%;
+	}
+
+	.posa-form-section :is(.v-btn) {
+		min-height: max(44px, var(--pos-touch-target, 42px));
+	}
+
+	.posa-form-section :is(.v-field) {
+		--v-input-control-height: max(42px, var(--pos-touch-target, 42px));
+	}
+}
+
+@media (max-width: 480px) {
+	.posa-expanded-content {
+		padding: 8px;
+	}
+
+	.posa-section-header::after {
+		width: 40px;
+	}
 }
 
 /* =================================================================
@@ -764,6 +833,11 @@
 		min-width: 56px;
 		height: 34px;
 		font-size: 0.86rem;
+	}
+
+	.posa-form-section:hover {
+		transform: none;
+		box-shadow: 0 2px 8px var(--pos-shadow);
 	}
 }
 

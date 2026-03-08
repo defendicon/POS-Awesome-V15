@@ -21,7 +21,7 @@
 								color="primary"
 								:label="frappe._('Item Code')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								v-model="item.item_code"
 								disabled
 								prepend-inner-icon="mdi-barcode"
@@ -34,12 +34,14 @@
 								color="primary"
 								:label="frappe._('QTY')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatFloat(item.qty, hide_qty_decimals ? 0 : undefined)"
 								@change="onQtyChange(item, $event)"
 								:rules="[isNumber]"
 								:disabled="!!item.posa_is_replace"
 								prepend-inner-icon="mdi-numeric"
+								autocomplete="off"
+								inputmode="decimal"
 							></v-text-field>
 							<div v-if="item.max_qty !== undefined" class="text-caption mt-1">
 								{{
@@ -59,7 +61,7 @@
 								variant="outlined"
 								item-title="uom"
 								item-value="uom"
-								hide-details
+								hide-details="auto"
 								@update:model-value="calcUom(item, $event)"
 								:disabled="
 									!!item.posa_is_replace || (isReturnInvoice && invoice_doc.return_against)
@@ -85,7 +87,7 @@
 								id="rate"
 								:label="frappe._('Rate')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatCurrency(item.rate)"
 								@change="[
 									setFormatedCurrency(item, 'rate', null, false, $event),
@@ -96,6 +98,8 @@
 									!!item.posa_is_replace
 								"
 								prepend-inner-icon="mdi-currency-usd"
+								autocomplete="off"
+								inputmode="decimal"
 							></v-text-field>
 						</div>
 						<div class="posa-form-field">
@@ -106,7 +110,7 @@
 								id="discount_percentage"
 								:label="frappe._('Discount %')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatFloat(Math.abs(item.discount_percentage || 0))"
 								@change="[
 									setFormatedCurrency(item, 'discount_percentage', null, false, $event),
@@ -118,6 +122,8 @@
 									!!item.posa_offer_applied
 								"
 								prepend-inner-icon="mdi-percent"
+								autocomplete="off"
+								inputmode="decimal"
 							></v-text-field>
 						</div>
 						<div class="posa-form-field">
@@ -128,7 +134,7 @@
 								id="discount_amount"
 								:label="frappe._('Discount Amount')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatCurrency(Math.abs(item.discount_amount || 0))"
 								@change="[
 									setFormatedCurrency(item, 'discount_amount', null, false, $event),
@@ -140,6 +146,8 @@
 									!!item.posa_offer_applied
 								"
 								prepend-inner-icon="mdi-tag-minus"
+								autocomplete="off"
+								inputmode="decimal"
 							></v-text-field>
 						</div>
 					</div>
@@ -151,7 +159,7 @@
 								color="primary"
 								:label="frappe._('Price List Rate')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatCurrency(item.price_list_rate ?? 0)"
 								:disabled="!pos_profile.posa_allow_price_list_rate_change"
 								readonly
@@ -166,7 +174,7 @@
 								color="primary"
 								:label="frappe._('Total Amount')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatCurrency(item.qty * item.rate)"
 								disabled
 								prepend-inner-icon="mdi-calculator"
@@ -201,7 +209,7 @@
 								color="primary"
 								:label="frappe._('Available QTY')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatFloat(item._base_actual_qty)"
 								disabled
 								prepend-inner-icon="mdi-package-variant"
@@ -214,7 +222,7 @@
 								color="primary"
 								:label="frappe._('Stock QTY')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatFloat(item.stock_qty)"
 								disabled
 								prepend-inner-icon="mdi-scale-balance"
@@ -227,7 +235,7 @@
 								color="primary"
 								:label="frappe._('Stock UOM')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								v-model="item.stock_uom"
 								disabled
 								prepend-inner-icon="mdi-weight-pound"
@@ -242,7 +250,7 @@
 								color="primary"
 								:label="frappe._('Warehouse')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								v-model="item.warehouse"
 								disabled
 								prepend-inner-icon="mdi-warehouse"
@@ -255,7 +263,7 @@
 								color="primary"
 								:label="frappe._('Group')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								v-model="item.item_group"
 								disabled
 								prepend-inner-icon="mdi-folder-outline"
@@ -267,7 +275,7 @@
 								:label="frappe._('Offer Applied')"
 								v-model="item.posa_offer_applied"
 								readonly
-								hide-details
+								hide-details="auto"
 								class="mt-1"
 								color="success"
 							></v-checkbox>
@@ -289,7 +297,7 @@
 								color="primary"
 								:label="frappe._('Serial No QTY')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								v-model="item.serial_no_selected_count"
 								type="number"
 								disabled
@@ -332,7 +340,7 @@
 								color="primary"
 								:label="frappe._('Batch No. Available QTY')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								:model-value="formatFloat(item.actual_batch_qty)"
 								disabled
 								prepend-inner-icon="mdi-package-variant"
@@ -345,7 +353,7 @@
 								color="primary"
 								:label="frappe._('Batch No Expiry Date')"
 								class="pos-themed-input"
-								hide-details
+								hide-details="auto"
 								v-model="item.batch_no_expiry_date"
 								disabled
 								prepend-inner-icon="mdi-calendar-clock"
@@ -362,7 +370,7 @@
 								class="pos-themed-input"
 								:label="frappe._('Batch No')"
 								@update:model-value="setBatchQty(item, $event)"
-								hide-details
+								hide-details="auto"
 								prepend-inner-icon="mdi-package-variant-closed"
 							>
 								<template v-slot:item="{ props, item }">
@@ -478,5 +486,22 @@ const getRaw = (item: any) => item?.raw || {};
 </script>
 
 <style scoped>
-/* Local styles specific to the expanded content component only */
+.section-icon {
+	color: rgb(var(--v-theme-primary));
+	opacity: 0.86;
+}
+
+.change-price-btn {
+	min-height: max(42px, var(--pos-touch-target, 42px));
+	border-radius: var(--pos-radius-sm);
+	text-transform: none !important;
+	font-weight: 600;
+}
+
+@media (max-width: 768px) {
+	.change-price-btn {
+		width: 100%;
+		min-height: 44px;
+	}
+}
 </style>
