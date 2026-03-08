@@ -451,7 +451,9 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     # Ensure item name overrides are respected on submit
     _apply_item_name_overrides(invoice_doc)
-    if invoice.get("posa_delivery_date"):
+    # Preserve explicit update_stock from client payload (e.g. Invoice generated
+    # from Sales Order). Only auto-disable stock when the flag was not provided.
+    if invoice.get("posa_delivery_date") and invoice.get("update_stock") is None:
         invoice_doc.update_stock = 0
     mop_cash_list = [
         i.mode_of_payment

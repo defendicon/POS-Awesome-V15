@@ -91,6 +91,21 @@ export function get_invoice_doc(context: any) {
 	doc.posa_show_custom_name_marker_on_print =
 		context.pos_profile?.posa_show_custom_name_marker_on_print ?? null;
 
+	// Keep stock update explicit for invoice doctypes so submit-time checks are predictable.
+	if (doc.doctype === "Sales Invoice" || doc.doctype === "POS Invoice") {
+		const profileUpdateStock = context.pos_profile?.update_stock;
+		const defaultUpdateStock =
+			profileUpdateStock === 0 ||
+			profileUpdateStock === "0" ||
+			profileUpdateStock === false
+				? 0
+				: 1;
+		const isOrderInvoiceFlow =
+			context.invoiceType === "Order" &&
+			!context.pos_profile?.posa_create_only_sales_order;
+		doc.update_stock = isOrderInvoiceFlow ? 0 : defaultUpdateStock;
+	}
+
 	// Currency related fields
 	doc.currency =
 		context.selected_currency || context.pos_profile?.currency || null;
