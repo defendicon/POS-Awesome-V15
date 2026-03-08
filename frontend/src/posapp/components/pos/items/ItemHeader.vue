@@ -14,7 +14,9 @@
 					color="primary"
 					:label="frappe._('Search Items')"
 					hint="Search by item code, serial number, batch no or barcode"
-					hide-details
+					hide-details="auto"
+					autocomplete="off"
+					spellcheck="false"
 					:model-value="searchInput"
 					@update:model-value="
 						(val) => {
@@ -58,7 +60,9 @@
 					variant="solo"
 					color="primary"
 					:label="frappe._('QTY')"
-					hide-details
+					hide-details="auto"
+					autocomplete="off"
+					inputmode="decimal"
 					:model-value="qtyInput"
 					@update:model-value="$emit('update:qtyInput', $event)"
 					type="text"
@@ -96,12 +100,16 @@
 					<span
 						v-if="syncStatus"
 						class="text-caption text-info font-weight-bold sync-status-label mx-2"
+						role="status"
+						aria-live="polite"
 					>
 						{{ syncStatus }}
 					</span>
 					<span
 						v-if="enableBackgroundSync && !syncStatus"
 						class="text-caption text-medium-emphasis last-sync-label"
+						role="status"
+						aria-live="polite"
 					>
 						{{ __("Last sync:") }} {{ lastSyncTime }}
 					</span>
@@ -189,14 +197,14 @@ defineExpose({
 	letter-spacing: normal !important;
 	font-weight: 500 !important;
 	background-color: transparent !important;
-	min-height: 40px;
+	min-height: 42px;
 	padding-inline: 10px !important;
 	border-radius: var(--pos-radius-sm);
 }
 
 .camera-trigger-btn {
-	min-width: 40px !important;
-	min-height: 40px !important;
+	min-width: 42px !important;
+	min-height: 42px !important;
 }
 
 .last-sync-label {
@@ -214,7 +222,18 @@ defineExpose({
 	}
 
 	.settings-btn {
-		min-height: 42px;
+		min-height: 44px;
+	}
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.settings-btn {
+		min-height: 44px;
+	}
+
+	.camera-trigger-btn {
+		min-width: 44px !important;
+		min-height: 44px !important;
 	}
 }
 </style>

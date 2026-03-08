@@ -22,7 +22,9 @@
 							class="sleek-field pos-themed-input"
 							:model-value="customDaysValue"
 							:label="$frappe._('Days')"
-							hide-details
+							hide-details="auto"
+							autocomplete="off"
+							inputmode="numeric"
 							@update:model-value="$emit('update:customDaysValue', parseFloat($event))"
 						></v-text-field>
 					</v-container>
@@ -58,9 +60,11 @@
 							color="primary"
 							:label="$frappe._('Mobile Number')"
 							class="sleek-field pos-themed-input"
-							hide-details
+							hide-details="auto"
 							v-model="invoiceDoc.contact_mobile"
-							type="number"
+							type="tel"
+							autocomplete="tel"
+							inputmode="tel"
 						></v-text-field>
 					</v-container>
 				</v-card-text>

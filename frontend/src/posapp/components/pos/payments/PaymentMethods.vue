@@ -20,6 +20,8 @@
 						:label="frappe._('Amount')"
 						class="sleek-field pos-themed-input"
 						hide-details="auto"
+						autocomplete="off"
+						inputmode="decimal"
 						:model-value="formatCurrency(payment.amount)"
 						@change="$emit('update-amount', payment, $event)"
 						:rules="[isNumber]"
@@ -243,7 +245,7 @@ const __ = window.__;
 	border-radius: var(--pos-radius-sm);
 	text-transform: none;
 	font-weight: 600;
-	min-height: 38px;
+	min-height: 42px;
 	padding-inline: 12px;
 }
 
@@ -254,7 +256,7 @@ const __ = window.__;
 	}
 
 	.payment-denominations__btn {
-		min-height: max(40px, var(--pos-touch-target, 42px) - 2px);
+		min-height: max(44px, var(--pos-touch-target, 42px));
 	}
 }
 </style>

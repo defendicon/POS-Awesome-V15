@@ -1,6 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-	<div :class="['payment-shell', { 'payment-shell--dialog': dialogMode }]">
+	<div
+		:class="['payment-shell', { 'payment-shell--dialog': dialogMode }]"
+		:aria-busy="loading ? 'true' : 'false'"
+	>
 		<v-card
 			:class="[
 				'selection mx-auto my-0 pos-themed-card payment-card',
@@ -13,15 +16,24 @@
 				absolute
 				location="top"
 				color="info"
+				role="status"
+				:aria-label="__('Processing payment request')"
+				aria-live="polite"
 			></v-progress-linear>
 			<div
 				ref="paymentContainer"
 				class="overflow-y-auto payment-scroll"
 			>
 				<div :class="['payment-sections', { 'payment-sections--dialog': dialogMode }]">
-					<section class="payment-section payment-section--summary">
+					<section
+						class="payment-section payment-section--summary"
+						role="region"
+						aria-labelledby="payment-summary-title"
+					>
 						<div class="payment-section__header">
-							<h3 class="payment-section__title">{{ __("Payment Summary") }}</h3>
+							<h3 id="payment-summary-title" class="payment-section__title">
+								{{ __("Payment Summary") }}
+							</h3>
 						</div>
 						<PaymentSummary
 							:invoice_doc="invoice_doc"
@@ -44,9 +56,13 @@
 					<section
 						v-if="is_cashback && invoice_doc"
 						class="payment-section payment-section--methods"
+						role="region"
+						aria-labelledby="payment-methods-title"
 					>
 						<div class="payment-section__header">
-							<h3 class="payment-section__title">{{ __("Payment Methods") }}</h3>
+							<h3 id="payment-methods-title" class="payment-section__title">
+								{{ __("Payment Methods") }}
+							</h3>
 						</div>
 						<PaymentMethods
 							:payments="invoice_doc.payments"
@@ -68,9 +84,15 @@
 						/>
 					</section>
 
-					<section class="payment-section payment-section--adjustments">
+					<section
+						class="payment-section payment-section--adjustments"
+						role="region"
+						aria-labelledby="payment-adjustments-title"
+					>
 						<div class="payment-section__header">
-							<h3 class="payment-section__title">{{ __("Redemption and Totals") }}</h3>
+							<h3 id="payment-adjustments-title" class="payment-section__title">
+								{{ __("Redemption and Totals") }}
+							</h3>
 						</div>
 						<PaymentRedemption
 							:invoice-doc="invoice_doc"
@@ -136,9 +158,15 @@
 						/>
 					</section>
 
-					<section class="payment-section payment-section--settlement">
+					<section
+						class="payment-section payment-section--settlement"
+						role="region"
+						aria-labelledby="payment-settlement-title"
+					>
 						<div class="payment-section__header">
-							<h3 class="payment-section__title">{{ __("Credit and Output") }}</h3>
+							<h3 id="payment-settlement-title" class="payment-section__title">
+								{{ __("Credit and Output") }}
+							</h3>
 						</div>
 						<PaymentOptions
 							:invoice-doc="invoice_doc"
@@ -185,9 +213,15 @@
 					/>
 				</section>
 
-				<section class="payment-section payment-section--meta">
+				<section
+					class="payment-section payment-section--meta"
+					role="region"
+					aria-labelledby="payment-meta-title"
+				>
 					<div class="payment-section__header">
-						<h3 class="payment-section__title">{{ __("Sales Person and Print") }}</h3>
+						<h3 id="payment-meta-title" class="payment-section__title">
+							{{ __("Sales Person and Print") }}
+						</h3>
 					</div>
 					<PaymentSelectionFields
 						:sales-persons="sales_persons"
@@ -1482,6 +1516,7 @@ onBeforeUnmount(() => {
 	gap: var(--pos-layout-gap, var(--pos-space-3));
 	flex: 1 1 auto;
 	min-height: 0;
+	overscroll-behavior: contain;
 }
 
 .payment-sections {

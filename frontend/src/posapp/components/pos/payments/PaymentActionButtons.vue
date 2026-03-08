@@ -72,7 +72,7 @@ const __ = window.__;
 
 .payment-footer-btn {
 	--v-theme-overlay-multiplier: 0 !important;
-	min-height: var(--pos-touch-target, 42px);
+	min-height: max(44px, var(--pos-touch-target, 42px));
 	font-weight: 700 !important;
 	letter-spacing: 0.01em !important;
 	transition:
@@ -148,7 +148,7 @@ const __ = window.__;
 	}
 
 	:deep(.payment-footer-btn.v-btn) {
-		min-height: max(42px, var(--pos-touch-target, 42px)) !important;
+		min-height: max(44px, var(--pos-touch-target, 42px)) !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {
@@ -163,7 +163,7 @@ const __ = window.__;
 	}
 
 	:deep(.payment-footer-btn.v-btn) {
-		min-height: 40px !important;
+		min-height: 44px !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {
