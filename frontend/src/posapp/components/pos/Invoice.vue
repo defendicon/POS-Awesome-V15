@@ -6,20 +6,16 @@
 
 		<!-- Main Invoice Card (contains all invoice content) -->
 		<v-card
-			ref="invoiceCard"
 			:style="{
-				height: invoiceHeight || 'var(--container-height)',
-				maxHeight: invoiceHeight || 'var(--container-height)',
-				resize: 'vertical',
+				height: 'var(--container-height)',
+				maxHeight: 'var(--container-height)',
 				overflow: 'auto',
 			}"
 			:class="[
-				'cards my-0 py-0 mt-3 resizable invoice-main-card',
+				'cards my-0 py-0 mt-3 invoice-main-card',
 				'pos-themed-card',
 				{ 'return-mode': isReturnInvoice },
 			]"
-			@mouseup="saveInvoiceHeight($refs.invoiceCard)"
-			@touchend="saveInvoiceHeight($refs.invoiceCard)"
 		>
 			<!-- Dynamic padding wrapper -->
 			<div class="dynamic-padding">
@@ -879,7 +875,6 @@ export default {
 	mounted() {
 		this.setUpdateItemDetail(this.update_item_detail);
 		this.loadColumnPreferences();
-		this.loadInvoiceHeight();
 
 		this.$watch(
 			() => this.uiStore.posProfile,

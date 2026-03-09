@@ -4,7 +4,7 @@
 			icon
 			:title="statusText"
 			:aria-label="statusText"
-			class="status-btn-enhanced"
+			class="status-btn-enhanced pos-touch-target pos-focus-ring"
 			:color="statusColor"
 		>
 			<v-icon :color="statusColor">{{ statusIcon }}</v-icon>

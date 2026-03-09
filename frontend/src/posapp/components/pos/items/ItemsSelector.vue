@@ -9,13 +9,12 @@
 		/>
 		<v-card
 			:class="[
-				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card resizable pos-themed-card',
+				'selection mx-auto my-0 py-0 mt-3 pos-card dynamic-card pos-themed-card',
 				rtlClasses,
 			]"
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
-				resize: 'vertical',
 				overflow: 'auto',
 				position: 'relative',
 			}"

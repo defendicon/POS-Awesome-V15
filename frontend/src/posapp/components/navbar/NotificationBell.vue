@@ -7,7 +7,7 @@
 					icon
 					variant="elevated"
 					size="small"
-					class="pos-themed-button notification-bell-trigger"
+					class="pos-themed-button notification-bell-trigger pos-touch-target pos-focus-ring"
 					:aria-label="__('View notifications') + (unreadCount ? ` (${unreadCount})` : '')"
 				>
 					<v-badge

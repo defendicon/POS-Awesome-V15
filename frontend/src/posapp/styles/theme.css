@@ -277,6 +277,17 @@
 	border-color: var(--pos-border-light) !important;
 }
 
+.posapp .pos-touch-target {
+	min-width: var(--pos-touch-target-min);
+	min-height: var(--pos-touch-target-min);
+}
+
+.posapp .pos-focus-ring:focus-visible {
+	outline: 2px solid rgba(var(--v-theme-primary), 0.85);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.16);
+}
+
 /* Theme-aware component base styles - Scoped to POSApp */
 .posapp .pos-themed-card {
 	background-color: var(--pos-surface-raised);

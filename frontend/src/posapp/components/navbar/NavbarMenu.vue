@@ -12,7 +12,7 @@
 				:variant="isMobile ? 'text' : 'elevated'"
 				:icon="isMobile"
 				:class="[
-					'menu-btn-compact pos-themed-button',
+					'menu-btn-compact pos-themed-button pos-focus-ring',
 					isMobile ? 'mobile-menu-btn' : 'desktop-menu-btn',
 				]"
 			>

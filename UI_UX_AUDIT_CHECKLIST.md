@@ -115,7 +115,7 @@ Audit baseline used:
   - Done when:
     - RTL mode feels consistent across all navbar gadgets.
 
-- [ ] `P1` Replace desktop-only manual panel resizing with predictable responsive behavior.
+- [x] `P1` Replace desktop-only manual panel resizing with predictable responsive behavior.
   - Why it matters: `resize: vertical` is low-discoverability on desktop and effectively useless on touch devices, yet it is applied to the main working panels.
   - Evidence:
     - `frontend/src/posapp/components/pos/Invoice.vue:13`
@@ -148,7 +148,7 @@ Audit baseline used:
     - `frontend/src/posapp/components/navbar/DatabaseUsageGadget.vue`
     - `frontend/src/posapp/components/navbar/ServerUsageGadget.vue`
 
-- [ ] Add a shared focus-ring and touch-target utility layer.
+- [x] Add a shared focus-ring and touch-target utility layer.
   - Suggested implementation:
     - Define reusable CSS tokens for focus ring, target size, and interactive spacing.
     - Apply them to navbar buttons, table controls, dialogs, and toolbars.

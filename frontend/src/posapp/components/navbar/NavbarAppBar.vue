@@ -17,7 +17,7 @@
 				@click="$emit('nav-click')"
 				:aria-label="__('Toggle navigation drawer')"
 				:size="isMobile ? 'default' : 'large'"
-				:class="['pos-text-primary nav-icon', isRtl ? 'rtl-nav-icon' : 'ltr-nav-icon']"
+				:class="['pos-text-primary nav-icon pos-touch-target pos-focus-ring', isRtl ? 'rtl-nav-icon' : 'ltr-nav-icon']"
 			/>
 
 			<v-img
@@ -70,7 +70,7 @@
 						icon
 						size="small"
 						:class="[
-							'offline-invoices-btn mobile-btn pos-themed-button',
+							'offline-invoices-btn mobile-btn pos-themed-button pos-touch-target pos-focus-ring',
 							isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
 							{ 'has-pending': pendingInvoices > 0 },
 						]"
@@ -154,7 +154,7 @@
 					<v-btn
 						icon
 						:class="[
-							'offline-invoices-btn pos-themed-button',
+							'offline-invoices-btn pos-themed-button pos-touch-target pos-focus-ring',
 							isRtl ? 'rtl-offline-btn' : 'ltr-offline-btn',
 							{ 'has-pending': pendingInvoices > 0 },
 						]"
