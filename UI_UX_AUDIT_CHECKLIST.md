@@ -138,7 +138,7 @@ Audit baseline used:
     - `frontend/src/posapp/components/navbar/NavbarAppBar.vue`
     - `frontend/src/posapp/components/navbar/NavbarMenu.vue`
 
-- [ ] Convert navbar diagnostics into progressive disclosure.
+- [x] Convert navbar diagnostics into progressive disclosure.
   - Suggested implementation:
     - Show a compact single health chip in the app bar.
     - Open cache/database/server details inside a unified diagnostics panel.
