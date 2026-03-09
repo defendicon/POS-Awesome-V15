@@ -86,6 +86,9 @@
 	--pos-space-5: 24px;
 	--pos-space-6: 32px;
 
+	/* Shared Interaction Scale */
+	--pos-touch-target-min: 44px;
+
 	/* Special Use Cases */
 	--pos-navbar-bg: #ffffff;
 	--pos-sidebar-bg: #f8f9fa;
@@ -512,8 +515,8 @@ body[data-page-route="posapp"] .container1 {
 
 /* Ensure content fills the entire viewport */
 body[data-page-route="posapp"] .main-content {
-    width: 100vw !important;
-    max-width: 100vw !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 /* Hide any remaining Frappe UI elements that might appear */
@@ -526,8 +529,9 @@ body[data-page-route="posapp"] .content.page-wrapper {
 /* Override Frappe's layout constraints */
 body[data-page-route="posapp"] #body {
     display: block !important;
-    height: 100vh !important;
-    overflow: hidden !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
 
 /* Ensure no residual sidebar space */

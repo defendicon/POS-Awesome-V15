@@ -706,7 +706,8 @@ export default {
 	border: 1px solid rgba(25, 118, 210, 0.12);
 	backdrop-filter: blur(8px);
 	min-width: 90px;
-	height: 36px;
+	min-height: var(--pos-touch-target-min);
+	height: auto;
 	color: #1976d2 !important;
 }
 
@@ -715,10 +716,10 @@ export default {
 	margin: 0 !important;
 	padding: 6px !important;
 	border-radius: 12px !important;
-	min-width: 36px !important;
-	max-width: 36px !important;
-	width: 36px !important;
-	height: 36px !important;
+	min-width: var(--pos-touch-target-min) !important;
+	max-width: var(--pos-touch-target-min) !important;
+	width: var(--pos-touch-target-min) !important;
+	height: var(--pos-touch-target-min) !important;
 	background: rgba(25, 118, 210, 0.08) !important;
 	border: 1px solid rgba(25, 118, 210, 0.12) !important;
 }
@@ -993,7 +994,8 @@ export default {
 		margin-left: 6px;
 		padding: 5px 14px;
 		min-width: 85px;
-		height: 34px;
+		min-height: var(--pos-touch-target-min);
+		height: auto;
 		font-size: 12px;
 	}
 }
@@ -1016,7 +1018,8 @@ export default {
 
 	.menu-btn-compact {
 		min-width: 80px;
-		height: 32px;
+		min-height: var(--pos-touch-target-min);
+		height: auto;
 	}
 }
 

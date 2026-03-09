@@ -6,6 +6,13 @@ export function useInvoiceUI() {
 	let payment_confirmation_resolver: ((_result: boolean) => void) | null =
 		null;
 
+	const shouldUseFixedInvoiceHeight = () => {
+		if (typeof window === "undefined") {
+			return true;
+		}
+		return window.innerWidth > 768;
+	};
+
 	const getViewportHeight = () => {
 		if (typeof window === "undefined") {
 			return 768;
@@ -55,6 +62,11 @@ export function useInvoiceUI() {
 	};
 
 	const saveInvoiceHeight = (element: HTMLElement | null) => {
+		if (!shouldUseFixedInvoiceHeight()) {
+			invoiceHeight.value = null;
+			return;
+		}
+
 		if (element) {
 			const defaultHeight = getDefaultInvoiceHeight();
 			invoiceHeight.value = clampInvoiceHeight(
@@ -73,6 +85,11 @@ export function useInvoiceUI() {
 	};
 
 	const loadInvoiceHeight = () => {
+		if (!shouldUseFixedInvoiceHeight()) {
+			invoiceHeight.value = null;
+			return;
+		}
+
 		const defaultHeight = getDefaultInvoiceHeight();
 		try {
 			const saved = localStorage.getItem("posawesome_invoice_height");

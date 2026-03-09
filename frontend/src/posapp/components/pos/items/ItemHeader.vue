@@ -40,6 +40,11 @@
 							color="primary"
 							variant="text"
 							:disabled="scannerLocked"
+							:aria-label="
+								scannerLocked
+									? __('Acknowledge the error to resume scanning')
+									: __('Scan with Camera')
+							"
 							@click="$emit('start-camera')"
 							:title="
 								scannerLocked

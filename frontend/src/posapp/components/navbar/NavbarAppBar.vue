@@ -598,8 +598,8 @@ export default {
 	border-radius: 12px;
 	padding: 8px;
 	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	min-width: 40px;
-	min-height: 40px;
+	min-width: var(--pos-touch-target-min);
+	min-height: var(--pos-touch-target-min);
 	color: #1976d2 !important;
 	background: rgba(25, 118, 210, 0.08) !important;
 	border: 1px solid rgba(25, 118, 210, 0.12);
@@ -741,8 +741,8 @@ export default {
 	position: relative;
 	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	padding: 4px;
-	min-width: 40px;
-	min-height: 40px;
+	min-width: var(--pos-touch-target-min);
+	min-height: var(--pos-touch-target-min);
 	background: rgba(25, 118, 210, 0.08) !important;
 	border: 1px solid rgba(25, 118, 210, 0.12);
 	border-radius: 12px;
@@ -944,14 +944,14 @@ export default {
 }
 
 .mobile-navbar .mobile-btn {
-	min-width: 36px !important;
-	min-height: 36px !important;
+	min-width: var(--pos-touch-target-min) !important;
+	min-height: var(--pos-touch-target-min) !important;
 	padding: 6px !important;
 }
 
 .mobile-navbar .nav-icon {
-	min-width: 36px !important;
-	min-height: 36px !important;
+	min-width: var(--pos-touch-target-min) !important;
+	min-height: var(--pos-touch-target-min) !important;
 	padding: 6px !important;
 }
 
@@ -985,8 +985,8 @@ export default {
 
 	.mobile-navbar .mobile-btn,
 	.mobile-navbar .nav-icon {
-		min-width: 32px !important;
-		min-height: 32px !important;
+		min-width: var(--pos-touch-target-min) !important;
+		min-height: var(--pos-touch-target-min) !important;
 		padding: 4px !important;
 	}
 
@@ -1082,8 +1082,8 @@ export default {
 
 	.mobile-navbar .mobile-btn,
 	.mobile-navbar .nav-icon {
-		min-width: 28px !important;
-		min-height: 28px !important;
+		min-width: var(--pos-touch-target-min) !important;
+		min-height: var(--pos-touch-target-min) !important;
 	}
 }
 </style>

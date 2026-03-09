@@ -227,9 +227,9 @@
 
 .qty-control-btn,
 .posa-cart-table__qty-btn {
-	width: 24px !important;
-	height: 24px !important;
-	min-width: 24px !important;
+	width: var(--pos-touch-target-min) !important;
+	height: var(--pos-touch-target-min) !important;
+	min-width: var(--pos-touch-target-min) !important;
 	border-radius: 6px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
@@ -302,7 +302,7 @@
 }
 
 .posa-cart-table__qty-display {
-	min-width: 40px;
+	min-width: 44px;
 	max-width: 80px;
 	width: auto;
 	flex: 1 1 auto;
@@ -327,7 +327,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 24px;
+	min-height: var(--pos-touch-target-min);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -432,9 +432,9 @@
 }
 
 .uom-arrow {
-	width: 20px !important;
-	height: 20px !important;
-	min-width: 20px !important;
+	width: var(--pos-touch-target-min) !important;
+	height: var(--pos-touch-target-min) !important;
+	min-width: var(--pos-touch-target-min) !important;
 	padding: 0 !important;
 	border-radius: 4px;
 	background: transparent;
@@ -733,9 +733,9 @@
 }
 
 .posa-responsive-table-container.compact-view .qty-control-btn {
-	width: 20px !important;
-	height: 20px !important;
-	min-width: 20px !important;
+	width: var(--pos-touch-target-min) !important;
+	height: var(--pos-touch-target-min) !important;
+	min-width: var(--pos-touch-target-min) !important;
 }
 
 /* =================================================================

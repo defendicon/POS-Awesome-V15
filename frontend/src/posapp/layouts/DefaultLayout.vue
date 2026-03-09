@@ -631,23 +631,22 @@ const adjust_frappe_sidebar_offset = () => {
 <style scoped>
 .container1 {
 	/* Use dynamic viewport units for better mobile support */
-	height: 100dvh;
-	max-height: 100dvh;
-	overflow: hidden;
+	min-height: 100dvh;
 	padding-inline-start: var(--posa-desk-sidebar-width, 0px);
 	box-sizing: border-box;
 }
 
 .main-content {
 	/* Fill the available height of the container */
-	height: 100%;
+	min-height: 100dvh;
 	display: flex;
 	flex-direction: column;
 }
 
 .page-content {
 	flex: 1;
-	overflow: hidden;
+	min-height: 0;
+	overflow: auto;
 	padding-top: 8px;
 }
 
@@ -664,8 +663,6 @@ const adjust_frappe_sidebar_offset = () => {
 		height: auto;
 		max-height: none;
 		min-height: 100dvh;
-		overflow-y: auto;
-		overflow-x: hidden;
 	}
 
 	.main-content {

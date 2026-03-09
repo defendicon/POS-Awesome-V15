@@ -144,6 +144,8 @@ function formatTimestamp(ts: string | number | Date) {
 }
 
 .notification-bell-trigger {
+	min-width: var(--pos-touch-target-min) !important;
+	min-height: var(--pos-touch-target-min) !important;
 	box-shadow: 0 4px 12px var(--pos-shadow, rgba(0, 0, 0, 0.18)) !important;
 }
 

@@ -84,7 +84,7 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 
 <style scoped>
 .action-btn-consistent {
-	height: 36px !important;
+	min-height: var(--pos-touch-target-min) !important;
 	margin-top: var(--dynamic-xs) !important;
 	padding: var(--pos-space-2) var(--pos-space-3) !important;
 	transition: var(--transition-normal) !important;
@@ -99,7 +99,7 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 }
 
 .view-toggle-btn {
-	height: 36px;
+	min-height: var(--pos-touch-target-min);
 	border: 1px solid var(--pos-border-light);
 	border-radius: var(--pos-radius-sm);
 }
