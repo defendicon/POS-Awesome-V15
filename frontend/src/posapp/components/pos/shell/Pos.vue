@@ -29,7 +29,7 @@
 		>
 			<Payments dialog-mode />
 		</v-dialog>
-		<div v-if="!dialog && useCompactPosSwitcher" class="compact-pos-switcher">
+		<div v-if="!dialog && useCompactPosSwitcher && !useMobileActionBar" class="compact-pos-switcher">
 			<v-btn-toggle
 				:model-value="compactPanel"
 				mandatory
@@ -52,7 +52,36 @@
 				>
 					{{ __("Invoice") }}
 				</v-btn>
-			</v-btn-toggle>
+				</v-btn-toggle>
+		</div>
+		<div v-if="!dialog && useMobileActionBar" class="mobile-action-bar pos-themed-card">
+			<button
+				type="button"
+				class="mobile-action-bar__item"
+				:class="{ 'mobile-action-bar__item--active': activeMobileAction === 'search' }"
+				@click="activateMobileAction('search')"
+			>
+				<v-icon size="18">mdi-magnify</v-icon>
+				<span>{{ __("Search") }}</span>
+			</button>
+			<button
+				type="button"
+				class="mobile-action-bar__item"
+				:class="{ 'mobile-action-bar__item--active': activeMobileAction === 'invoice' }"
+				@click="activateMobileAction('invoice')"
+			>
+				<v-icon size="18">mdi-receipt-text-outline</v-icon>
+				<span>{{ __("Invoice") }}</span>
+			</button>
+			<button
+				type="button"
+				class="mobile-action-bar__item"
+				:class="{ 'mobile-action-bar__item--active': activeMobileAction === 'pay' }"
+				@click="activateMobileAction('pay')"
+			>
+				<v-icon size="18">mdi-credit-card-outline</v-icon>
+				<span>{{ __("Pay") }}</span>
+			</button>
 		</div>
 		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row">
 			<v-col
@@ -159,8 +188,18 @@ export default {
 		const __ = window.__;
 		const { activeView, posProfile, paymentDialogOpen } = storeToRefs(uiStore);
 		const usePaymentDialog = computed(() => responsive.windowWidth.value >= 992);
+		const useMobileActionBar = computed(() => responsive.windowWidth.value < 768);
 		const useCompactPosSwitcher = computed(() => responsive.windowWidth.value < 1280);
 		const compactPanel = ref("selector");
+		const activeMobileAction = computed(() => {
+			if (compactPanel.value === "invoice") {
+				return "invoice";
+			}
+			if (activeView.value === "payment") {
+				return "pay";
+			}
+			return "search";
+		});
 
 		const handlePaymentDialogUpdate = (value) => {
 			if (value || !usePaymentDialog.value) {
@@ -179,6 +218,35 @@ export default {
 					uiStore.triggerItemSearchFocus();
 				});
 			}
+		};
+
+		const activateMobileAction = (action) => {
+			if (action === "invoice") {
+				uiStore.closePaymentDialog();
+				setCompactPanel("invoice");
+				return;
+			}
+
+			if (action === "pay") {
+				if (usePaymentDialog.value) {
+					uiStore.openPaymentDialog();
+					uiStore.setActiveView("items");
+					return;
+				}
+				uiStore.closePaymentDialog();
+				uiStore.setActiveView("payment");
+				setCompactPanel("selector");
+				return;
+			}
+
+			uiStore.closePaymentDialog();
+			if (activeView.value !== "items") {
+				uiStore.setActiveView("items");
+			}
+			setCompactPanel("selector");
+			nextTick(() => {
+				uiStore.triggerItemSearchFocus();
+			});
 		};
 
 		useCustomerDisplayPublisher({
@@ -246,9 +314,12 @@ export default {
 			activeView,
 			paymentDialogOpen,
 			usePaymentDialog,
+			useMobileActionBar,
 			useCompactPosSwitcher,
 			compactPanel,
+			activeMobileAction,
 			setCompactPanel,
+			activateMobileAction,
 			handlePaymentDialogUpdate,
 			eventBus,
 			dialog,
@@ -381,6 +452,57 @@ export default {
 	margin-top: var(--dynamic-sm);
 }
 
+.mobile-action-bar {
+	position: sticky;
+	bottom: max(12px, env(safe-area-inset-bottom));
+	z-index: 12;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+	margin: var(--dynamic-sm) var(--dynamic-sm) 0;
+	padding: 8px;
+	border-radius: 20px;
+	background: color-mix(in srgb, var(--pos-card-bg) 92%, white 8%) !important;
+	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+	box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
+	backdrop-filter: blur(18px);
+}
+
+.mobile-action-bar__item {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 4px;
+	min-height: 52px;
+	padding: 8px 6px;
+	border: 0;
+	border-radius: 16px;
+	background: transparent;
+	color: var(--pos-text-secondary);
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.mobile-action-bar__item--active {
+	background: rgba(var(--v-theme-primary), 0.12);
+	color: rgb(var(--v-theme-primary));
+}
+
+.mobile-action-bar__item:focus-visible {
+	outline: 2px solid rgba(var(--v-theme-primary), 0.85);
+	outline-offset: 2px;
+}
+
+.mobile-action-bar__item:active {
+	transform: translateY(1px);
+}
+
 .compact-pos-switcher__toggle {
 	display: grid !important;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -428,6 +550,7 @@ export default {
 @media (max-width: 768px) {
 	.dynamic-container {
 		padding-top: calc(56px + var(--dynamic-md));
+		padding-bottom: calc(92px + env(safe-area-inset-bottom));
 		/* Consistent navbar height + medium spacing */
 	}
 

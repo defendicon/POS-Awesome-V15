@@ -129,7 +129,7 @@ Audit baseline used:
 
 ## Improvements And Enhancements
 
-- [ ] Introduce a mobile-first action hierarchy for POS flows.
+- [x] Introduce a mobile-first action hierarchy for POS flows.
   - Suggested implementation:
     - Keep only `Search`, `Invoice`, and `Pay` as persistent mobile anchors.
     - Move secondary utilities into one overflow sheet.
