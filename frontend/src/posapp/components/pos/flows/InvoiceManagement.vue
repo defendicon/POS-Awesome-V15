@@ -160,15 +160,39 @@
 							</div>
 
 							<div v-if="loading && activeTab === 'history'" class="tab-loader">
-								<v-progress-circular indeterminate color="primary" size="28" width="3" />
-								<span>{{ __("Loading invoice history...") }}</span>
+								<div class="tab-loader__headline">
+									<v-progress-circular indeterminate color="primary" size="28" width="3" />
+									<div>
+										<div class="tab-loader__title">{{ __("Loading invoice history...") }}</div>
+										<div class="tab-loader__subtitle">{{ __("Recent sales and totals are being prepared.") }}</div>
+									</div>
+								</div>
+								<div class="tab-loader__skeletons">
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+								</div>
 							</div>
 
 							<div v-else-if="!filteredHistoryInvoices.length" class="empty-state">
 								<v-icon size="42" color="medium-emphasis">mdi-receipt-text-clock-outline</v-icon>
 								<div class="empty-state__title">{{ __("No invoices found") }}</div>
 								<div class="empty-state__subtitle">
-									{{ __("Try changing the date range or status filter.") }}
+									{{ hasActiveFilters("history") ? __("Your current filters are hiding invoice history. Reset them or refresh to reload the latest records.") : __("Completed sales will appear here once invoices are synced for this shift.") }}
+								</div>
+								<div class="empty-state__actions">
+									<v-btn
+										v-if="hasActiveFilters('history')"
+										variant="flat"
+										color="primary"
+										size="small"
+										@click="resetFilters('history')"
+									>
+										{{ __("Reset Filters") }}
+									</v-btn>
+									<v-btn variant="text" size="small" prepend-icon="mdi-refresh" @click="refreshActiveTab">
+										{{ __("Refresh") }}
+									</v-btn>
 								</div>
 							</div>
 
@@ -371,14 +395,40 @@
 							</v-alert>
 
 							<div v-if="loading && activeTab === 'partial'" class="tab-loader">
-								<v-progress-circular indeterminate color="warning" size="28" width="3" />
-								<span>{{ __("Loading unpaid invoices...") }}</span>
+								<div class="tab-loader__headline">
+									<v-progress-circular indeterminate color="warning" size="28" width="3" />
+									<div>
+										<div class="tab-loader__title">{{ __("Loading unpaid invoices...") }}</div>
+										<div class="tab-loader__subtitle">{{ __("Outstanding balances and due dates are being checked.") }}</div>
+									</div>
+								</div>
+								<div class="tab-loader__skeletons">
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+								</div>
 							</div>
 
 							<div v-else-if="!filteredUnpaidInvoices.length" class="empty-state">
 								<v-icon size="42" color="success">mdi-cash-check</v-icon>
 								<div class="empty-state__title">{{ __("No unpaid invoices") }}</div>
-								<div class="empty-state__subtitle">{{ __("All visible invoices are fully settled.") }}</div>
+								<div class="empty-state__subtitle">
+									{{ hasActiveFilters("partial") ? __("The current unpaid filters returned no results. Reset them to review all open balances again.") : __("All visible invoices are fully settled.") }}
+								</div>
+								<div class="empty-state__actions">
+									<v-btn
+										v-if="hasActiveFilters('partial')"
+										variant="flat"
+										color="warning"
+										size="small"
+										@click="resetFilters('partial')"
+									>
+										{{ __("Reset Filters") }}
+									</v-btn>
+									<v-btn variant="text" size="small" prepend-icon="mdi-refresh" @click="refreshActiveTab">
+										{{ __("Refresh") }}
+									</v-btn>
+								</div>
 							</div>
 
 							<v-data-table
@@ -525,14 +575,40 @@
 							</div>
 
 							<div v-if="loading && activeTab === 'drafts'" class="tab-loader">
-								<v-progress-circular indeterminate color="secondary" size="28" width="3" />
-								<span>{{ __("Loading drafts...") }}</span>
+								<div class="tab-loader__headline">
+									<v-progress-circular indeterminate color="secondary" size="28" width="3" />
+									<div>
+										<div class="tab-loader__title">{{ __("Loading drafts...") }}</div>
+										<div class="tab-loader__subtitle">{{ __("Saved work is being restored for this shift.") }}</div>
+									</div>
+								</div>
+								<div class="tab-loader__skeletons">
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+								</div>
 							</div>
 
 							<div v-else-if="!filteredDraftInvoices.length" class="empty-state">
 								<v-icon size="42" color="secondary">mdi-file-document-edit-outline</v-icon>
 								<div class="empty-state__title">{{ __("No drafts found") }}</div>
-								<div class="empty-state__subtitle">{{ __("Saved draft invoices will appear here.") }}</div>
+								<div class="empty-state__subtitle">
+									{{ hasActiveFilters("drafts") ? __("Your draft filters returned no results. Reset them to see every saved draft again.") : __("Saved draft invoices will appear here when work is paused before checkout.") }}
+								</div>
+								<div class="empty-state__actions">
+									<v-btn
+										v-if="hasActiveFilters('drafts')"
+										variant="flat"
+										color="secondary"
+										size="small"
+										@click="resetFilters('drafts')"
+									>
+										{{ __("Reset Filters") }}
+									</v-btn>
+									<v-btn variant="text" size="small" prepend-icon="mdi-refresh" @click="refreshActiveTab">
+										{{ __("Refresh") }}
+									</v-btn>
+								</div>
 							</div>
 
 							<v-data-table v-else-if="viewMode === 'list'" :headers="draftHeaders" :items="paginatedDraftInvoices" item-value="name" class="elevation-1" :items-per-page="-1" hide-default-footer>
@@ -636,14 +712,40 @@
 							</div>
 
 							<div v-if="loading && activeTab === 'returns'" class="tab-loader">
-								<v-progress-circular indeterminate color="error" size="28" width="3" />
-								<span>{{ __("Loading return invoices...") }}</span>
+								<div class="tab-loader__headline">
+									<v-progress-circular indeterminate color="error" size="28" width="3" />
+									<div>
+										<div class="tab-loader__title">{{ __("Loading return invoices...") }}</div>
+										<div class="tab-loader__subtitle">{{ __("Recent return activity is being collected.") }}</div>
+									</div>
+								</div>
+								<div class="tab-loader__skeletons">
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+									<v-skeleton-loader type="article" class="tab-loader__skeleton" />
+								</div>
 							</div>
 
 							<div v-else-if="!filteredReturnInvoices.length" class="empty-state">
 								<v-icon size="42" color="error">mdi-backup-restore</v-icon>
 								<div class="empty-state__title">{{ __("No return invoices found") }}</div>
-								<div class="empty-state__subtitle">{{ __("Completed returns will appear here.") }}</div>
+								<div class="empty-state__subtitle">
+									{{ hasActiveFilters("returns") ? __("No returns match the current search or date range. Reset the filters to review all return activity.") : __("Completed returns will appear here after a sale is reversed.") }}
+								</div>
+								<div class="empty-state__actions">
+									<v-btn
+										v-if="hasActiveFilters('returns')"
+										variant="flat"
+										color="error"
+										size="small"
+										@click="resetFilters('returns')"
+									>
+										{{ __("Reset Filters") }}
+									</v-btn>
+									<v-btn variant="text" size="small" prepend-icon="mdi-refresh" @click="refreshActiveTab">
+										{{ __("Refresh") }}
+									</v-btn>
+								</div>
 							</div>
 
 							<v-data-table v-else-if="viewMode === 'list'" :headers="returnHeaders" :items="paginatedReturnInvoices" item-value="name" class="elevation-1" :items-per-page="-1" hide-default-footer>
@@ -1094,6 +1196,66 @@ export default {
 			if (this.activeTab === "partial") return this.loadUnpaidInvoices();
 			return this.loadHistory();
 		},
+		hasActiveFilters(tab) {
+			if (tab === "history") {
+				return Boolean(
+					String(this.historySearch || "").trim() ||
+					(this.historyStatus && this.historyStatus !== "All") ||
+					this.historyDateFrom ||
+					this.historyDateTo,
+				);
+			}
+			if (tab === "partial") {
+				return Boolean(
+					String(this.partialSearch || "").trim() ||
+					(this.partialStatus && this.partialStatus !== "All") ||
+					this.partialDateFrom ||
+					this.partialDateTo,
+				);
+			}
+			if (tab === "drafts") {
+				return Boolean(
+					String(this.draftSearch || "").trim() ||
+					this.draftDateFrom ||
+					this.draftDateTo,
+				);
+			}
+			if (tab === "returns") {
+				return Boolean(
+					String(this.returnSearch || "").trim() ||
+					this.returnDateFrom ||
+					this.returnDateTo,
+				);
+			}
+			return false;
+		},
+		resetFilters(tab) {
+			if (tab === "history") {
+				this.historySearch = "";
+				this.historyStatus = "All";
+				this.historyDateFrom = "";
+				this.historyDateTo = "";
+				return;
+			}
+			if (tab === "partial") {
+				this.partialSearch = "";
+				this.partialStatus = "All";
+				this.partialDateFrom = "";
+				this.partialDateTo = "";
+				return;
+			}
+			if (tab === "drafts") {
+				this.draftSearch = "";
+				this.draftDateFrom = "";
+				this.draftDateTo = "";
+				return;
+			}
+			if (tab === "returns") {
+				this.returnSearch = "";
+				this.returnDateFrom = "";
+				this.returnDateTo = "";
+			}
+		},
 		async loadUnpaidInvoices() {
 			if (!this.posProfile?.name) return void (this.unpaidInvoices = []);
 			this.loading = true;
@@ -1448,8 +1610,43 @@ export default {
 	min-height: 280px;
 	border: 1px dashed rgba(148, 163, 184, 0.35);
 	border-radius: 18px;
-	background: rgba(248, 250, 252, 0.66);
+	background:
+		radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 55%),
+		rgba(248, 250, 252, 0.72);
 	color: var(--pos-text-primary);
+	padding: 28px 18px;
+	text-align: center;
+}
+
+.tab-loader__headline {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+}
+
+.tab-loader__title {
+	font-size: 1rem;
+	font-weight: 700;
+}
+
+.tab-loader__subtitle {
+	margin-top: 4px;
+	font-size: 0.84rem;
+	color: var(--pos-text-secondary);
+}
+
+.tab-loader__skeletons {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px;
+	width: min(100%, 920px);
+	margin-top: 6px;
+}
+
+.tab-loader__skeleton {
+	border-radius: 18px;
+	overflow: hidden;
 }
 
 .empty-state__title {
@@ -1464,10 +1661,21 @@ export default {
 	max-width: 420px;
 }
 
+.empty-state__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 4px;
+}
+
 .invoice-management-card--dark .tab-loader,
 .invoice-management-card--dark .empty-state {
 	border-color: rgba(100, 116, 139, 0.38);
-	background: rgba(15, 23, 42, 0.42);
+	background:
+		radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 55%),
+		rgba(15, 23, 42, 0.42);
 }
 
 .invoice-record-grid {

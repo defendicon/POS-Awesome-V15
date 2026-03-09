@@ -108,14 +108,14 @@
 								:format-number="memoizedFormatNumber"
 								:rate-precision="ratePrecision"
 								:is-negative="isNegative"
-								:no-items-title="__('No items found')"
-								:no-items-subtitle="__('Try adjusting your search or filters')"
-								:clear-search-label="__('Clear Search')"
+								:no-items-title="emptyStateTitle"
+								:no-items-subtitle="emptyStateSubtitle"
+								:clear-search-label="clearFiltersLabel"
 								@select-item="select_item"
 								@dragstart="onDragStart"
 								@dragend="onDragEnd"
 								@virtual-range-update="onVirtualRangeUpdate"
-								@clear-search="clearSearch"
+								@clear-search="resetItemFilters"
 							/>
 							<ItemsSelectorTable
 								v-else
@@ -444,6 +444,34 @@ const syncStatus = computed(() => {
 	return "";
 });
 
+const hasSearchFilter = computed(() => Boolean(String(search_input.value || "").trim()));
+const hasGroupFilter = computed(() => item_group.value && item_group.value !== "ALL");
+
+const emptyStateTitle = computed(() => {
+	if (hasSearchFilter.value) return __("No items match this search");
+	if (hasGroupFilter.value) return __("No items in this group");
+	return __("No items available yet");
+});
+
+const emptyStateSubtitle = computed(() => {
+	if (hasSearchFilter.value && hasGroupFilter.value) {
+		return __("Try a different keyword or reset the group filter to see more items.");
+	}
+	if (hasSearchFilter.value) {
+		return __("Check the spelling, scan again, or clear the search to browse the full catalog.");
+	}
+	if (hasGroupFilter.value) {
+		return __("Switch back to all items or choose another group to continue selling.");
+	}
+	return __("Items will appear here after the catalog sync completes or when products are added to this profile.");
+});
+
+const clearFiltersLabel = computed(() => {
+	if (hasSearchFilter.value && hasGroupFilter.value) return __("Clear Search and Filters");
+	if (hasGroupFilter.value) return __("Show All Items");
+	return __("Clear Search");
+});
+
 const lastSyncTimeLabel = computed(() => {
 	const lastSync = itemSync.last_background_sync_time?.value;
 	if (!lastSync) return __("Never");
@@ -649,6 +677,11 @@ const clearSearch = () => {
 const clearSearchAndQty = () => {
 	clearSearch();
 	clearQty();
+};
+
+const resetItemFilters = () => {
+	clearSearch();
+	item_group.value = "ALL";
 };
 
 const onDragStart = (event, item) => {
@@ -1117,6 +1150,7 @@ defineExpose({
 		newItemDialog.value = true;
 	},
 	clearSearch,
+	resetItemFilters,
 	onDragStart,
 	onDragEnd,
 	select_item,

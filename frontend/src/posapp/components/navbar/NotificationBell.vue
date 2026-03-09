@@ -31,7 +31,7 @@
 							{{
 								notifications.length
 									? __("Recent updates about your invoices")
-									: __("You have no notifications right now")
+									: __("Everything is quiet right now")
 							}}
 						</div>
 					</div>
@@ -51,10 +51,14 @@
 
 				<div class="notification-list">
 					<div v-if="!notifications.length" class="empty-state">
-						<v-icon size="36" class="empty-icon">mdi-bell-off-outline</v-icon>
+						<div class="empty-pill">
+							<v-icon size="16">mdi-check-circle-outline</v-icon>
+							<span>{{ __("All caught up") }}</span>
+						</div>
+						<v-icon size="40" class="empty-icon">mdi-bell-off-outline</v-icon>
 						<div class="empty-title">{{ __("No notifications yet") }}</div>
 						<div class="empty-subtitle">
-							{{ __("We'll let you know if an invoice fails to submit") }}
+							{{ __("Invoice failures and retry issues will appear here when they need your attention.") }}
 						</div>
 					</div>
 					<v-list v-else density="compact" class="notification-items">
@@ -235,14 +239,30 @@ function formatTimestamp(ts: string | number | Date) {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 24px 12px;
+	padding: 28px 16px;
 	text-align: center;
 	color: var(--pos-text-secondary);
+	background:
+		radial-gradient(circle at top, rgba(var(--v-theme-primary), 0.08), transparent 58%),
+		linear-gradient(180deg, rgba(var(--v-theme-surface), 0.88), rgba(var(--v-theme-surface), 0.72));
 }
 
 .empty-icon {
 	color: var(--pos-text-secondary);
-	margin-bottom: 8px;
+	margin-bottom: 10px;
+}
+
+.empty-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	margin-bottom: 10px;
+	border-radius: 999px;
+	background: rgba(var(--v-theme-success), 0.12);
+	color: rgb(var(--v-theme-success));
+	font-size: 0.78rem;
+	font-weight: 700;
 }
 
 .empty-title {

@@ -157,7 +157,7 @@ Audit baseline used:
     - `frontend/src/posapp/components/pos/invoice/items-table-styles.css`
     - `frontend/src/posapp/components/navbar/NavbarAppBar.vue`
 
-- [ ] Improve empty, loading, and zero-state polish in high-frequency panels.
+- [x] Improve empty, loading, and zero-state polish in high-frequency panels.
   - Suggested implementation:
     - Add clearer empty-state copy and next actions in invoice/history/notifications areas.
     - Use skeletons or reserved space to reduce jumpiness during sync/loading.
@@ -166,13 +166,15 @@ Audit baseline used:
     - `frontend/src/posapp/components/navbar/NotificationBell.vue`
     - `frontend/src/posapp/components/pos/items/ItemsSelector.vue`
 
-- [ ] Add explicit responsive QA checkpoints before future UI merges.
+- [x] Add explicit responsive QA checkpoints before future UI merges.
   - Suggested checklist:
     - `375px`, `768px`, `1024px`, and wide desktop
     - touch target audit
     - keyboard-only pass
     - RTL pass
     - dark/light contrast check
+  - Implemented in:
+    - `UI_RESPONSIVE_QA_CHECKLIST.md`
 
 ## Recommended Fix Order
 

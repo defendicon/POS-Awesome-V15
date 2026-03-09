@@ -5,25 +5,47 @@
 		</div>
 		<div
 			v-else-if="displayedItems.length === 0"
-			class="d-flex flex-column align-center justify-center text-center fill-height pa-4"
-			style="height: 100%; min-height: 200px"
+			class="items-empty-state"
 		>
-			<v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-package-variant-closed</v-icon>
-			<div class="text-h6 text-medium-emphasis mb-1">
-				{{ noItemsTitle }}
+			<div class="items-empty-state__panel">
+				<div class="items-empty-state__icon-wrap">
+					<v-icon size="36" class="items-empty-state__icon">mdi-package-variant-closed</v-icon>
+				</div>
+				<div class="items-empty-state__title">{{ noItemsTitle }}</div>
+				<div class="items-empty-state__subtitle">{{ noItemsSubtitle }}</div>
+				<div
+					v-if="showClearButton"
+					class="items-empty-state__meta"
+				>
+					<v-chip
+						v-if="searchInput"
+						size="small"
+						variant="tonal"
+						color="primary"
+						class="items-empty-state__chip"
+					>
+						{{ searchInput }}
+					</v-chip>
+					<v-chip
+						v-if="itemGroup && itemGroup !== 'ALL'"
+						size="small"
+						variant="tonal"
+						color="secondary"
+						class="items-empty-state__chip"
+					>
+						{{ itemGroup }}
+					</v-chip>
+				</div>
+				<v-btn
+					v-if="showClearButton"
+					variant="flat"
+					color="primary"
+					class="items-empty-state__action"
+					@click="handleClearSearch"
+				>
+					{{ clearSearchLabel }}
+				</v-btn>
 			</div>
-			<div class="text-body-2 text-medium-emphasis">
-				{{ noItemsSubtitle }}
-			</div>
-			<v-btn
-				v-if="showClearButton"
-				variant="text"
-				color="primary"
-				class="mt-4"
-				@click="handleClearSearch"
-			>
-				{{ clearSearchLabel }}
-			</v-btn>
 		</div>
 		<RecycleScroller
 			v-else
@@ -167,6 +189,75 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	height: calc(100% - 80px);
 	overflow-y: auto;
 	position: relative;
+}
+
+.items-empty-state {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 240px;
+	height: calc(100% - 80px);
+	padding: 20px 16px 28px;
+}
+
+.items-empty-state__panel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 10px;
+	width: min(420px, 100%);
+	padding: 28px 24px;
+	border-radius: 24px;
+	border: 1px dashed rgba(var(--v-theme-on-surface), 0.16);
+	background:
+		radial-gradient(circle at top, rgba(var(--v-theme-primary), 0.08), transparent 58%),
+		rgba(var(--v-theme-surface), 0.72);
+}
+
+.items-empty-state__icon-wrap {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 72px;
+	height: 72px;
+	border-radius: 22px;
+	background: rgba(var(--v-theme-on-surface), 0.05);
+}
+
+.items-empty-state__icon {
+	color: rgba(var(--v-theme-on-surface), 0.5);
+}
+
+.items-empty-state__title {
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: rgba(var(--v-theme-on-surface), 0.88);
+}
+
+.items-empty-state__subtitle {
+	max-width: 34ch;
+	font-size: 0.93rem;
+	line-height: 1.5;
+	color: rgba(var(--v-theme-on-surface), 0.68);
+}
+
+.items-empty-state__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.items-empty-state__chip {
+	max-width: 100%;
+}
+
+.items-empty-state__action {
+	margin-top: 4px;
+	text-transform: none;
+	font-weight: 700;
 }
 
 .virtual-scroller .items-card-grid {
