@@ -288,6 +288,91 @@
 	box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.16);
 }
 
+.posapp .pos-dialog-shell {
+	width: min(var(--pos-dialog-max-width, 720px), calc(100vw - 24px));
+	max-height: min(88dvh, var(--pos-dialog-max-height, 900px));
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--pos-dialog-bg);
+	border: 1px solid var(--pos-border);
+	border-radius: var(--pos-radius-lg);
+	box-shadow:
+		0 24px 48px var(--pos-shadow),
+		0 8px 18px var(--pos-shadow-light);
+}
+
+.posapp .pos-dialog-header {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--pos-space-4);
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--pos-border-light);
+	background: var(--pos-dialog-bg);
+}
+
+.posapp .pos-dialog-header__main {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--pos-space-4);
+	flex: 1 1 auto;
+	min-width: 0;
+	padding-inline-end: 56px;
+}
+
+.posapp .pos-dialog-close {
+	position: absolute !important;
+	top: 12px;
+	inset-inline-end: 12px;
+	color: var(--pos-text-secondary) !important;
+}
+
+.posapp .pos-dialog-body {
+	padding: 20px 24px;
+	min-height: 0;
+}
+
+.posapp .pos-dialog-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px 24px;
+	border-top: 1px solid var(--pos-border-light);
+	background: var(--pos-surface-muted);
+}
+
+.posapp .pos-dialog-actions--split {
+	justify-content: space-between;
+}
+
+.posapp .pos-dialog-action-btn {
+	min-height: var(--pos-touch-target-min);
+	border-radius: var(--pos-radius-sm);
+	text-transform: none;
+	font-weight: 600;
+}
+
+@media (max-width: 700px) {
+	.posapp .pos-dialog-shell {
+		width: calc(100vw - 16px);
+		max-height: min(92dvh, var(--pos-dialog-max-height, 900px));
+	}
+
+	.posapp .pos-dialog-header {
+		padding: 18px 18px 16px;
+	}
+
+	.posapp .pos-dialog-body,
+	.posapp .pos-dialog-actions {
+		padding-inline: 18px;
+	}
+
+	.posapp .pos-dialog-actions {
+		flex-wrap: wrap;
+	}
+}
+
 /* Theme-aware component base styles - Scoped to POSApp */
 .posapp .pos-themed-card {
 	background-color: var(--pos-surface-raised);

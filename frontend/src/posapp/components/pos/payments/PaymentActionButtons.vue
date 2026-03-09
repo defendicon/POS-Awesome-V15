@@ -8,7 +8,7 @@
 					size="large"
 					color="primary"
 					variant="flat"
-					class="payment-submit-btn payment-footer-btn"
+					class="payment-submit-btn payment-footer-btn pos-touch-target pos-focus-ring"
 					@click="$emit('submit')"
 					:loading="loading"
 					:disabled="loading || validatePayment"
@@ -23,7 +23,7 @@
 					size="large"
 					color="success"
 					variant="flat"
-					class="payment-submit-print-btn payment-footer-btn"
+					class="payment-submit-print-btn payment-footer-btn pos-touch-target pos-focus-ring"
 					@click="$emit('submit-and-print')"
 					:loading="loading"
 					:disabled="loading || validatePayment"
@@ -37,7 +37,7 @@
 					size="large"
 					color="error"
 					variant="flat"
-					class="mt-2 pa-1 payment-cancel-btn payment-footer-btn"
+					class="mt-2 pa-1 payment-cancel-btn payment-footer-btn pos-touch-target pos-focus-ring"
 					@click="$emit('cancel')"
 				>
 					{{ __("Cancel Payment") }}
@@ -67,16 +67,19 @@ const __ = window.__;
 
 .compact :deep(.v-btn),
 :deep(.compact .v-btn) {
-	min-height: 42px;
+	min-height: var(--pos-touch-target-min);
 }
 
 .payment-footer-btn {
 	--v-theme-overlay-multiplier: 0 !important;
+	min-height: var(--pos-touch-target-min) !important;
 	transition:
 		box-shadow 0.18s ease,
 		background-color 0.18s ease,
 		transform 0.18s ease !important;
 	color: #ffffff !important;
+	text-transform: none;
+	font-weight: 700;
 }
 
 .payment-submit-btn {
@@ -139,10 +142,6 @@ const __ = window.__;
 		font-size: 0.82rem !important;
 	}
 
-	:deep(.payment-footer-btn.v-btn) {
-		min-height: 38px !important;
-	}
-
 	:deep(.payment-footer-btn .v-btn__content) {
 		font-size: 0.82rem !important;
 		line-height: 1.15;
@@ -152,10 +151,6 @@ const __ = window.__;
 @media (max-width: 480px) {
 	.payment-footer-btn {
 		font-size: 0.76rem !important;
-	}
-
-	:deep(.payment-footer-btn.v-btn) {
-		min-height: 34px !important;
 	}
 
 	:deep(.payment-footer-btn .v-btn__content) {

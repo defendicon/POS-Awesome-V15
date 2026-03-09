@@ -1,22 +1,33 @@
 ﻿<template>
 	<v-dialog v-model="visible" max-width="460" persistent>
-		<v-card class="pos-update-dialog pos-themed-card">
-			<v-card-title class="d-flex align-start">
-				<div class="update-icon">
+		<v-card
+			class="pos-update-dialog pos-themed-card pos-dialog-shell"
+			style="--pos-dialog-max-width: 460px; --pos-dialog-max-height: 640px"
+		>
+			<v-card-title class="pos-dialog-header">
+				<div class="pos-dialog-header__main">
+					<div class="update-icon">
 					<v-icon size="20">mdi-update</v-icon>
-				</div>
-				<div class="ml-3">
-					<div class="text-subtitle-1 font-weight-semibold">
-						{{ __("Update available") }}
 					</div>
-					<div class="text-caption text-medium-emphasis">
-						{{ __("New changes are ready to load") }}
+					<div class="ml-3">
+						<div class="text-subtitle-1 font-weight-semibold">
+							{{ __("Update available") }}
+						</div>
+						<div class="text-caption text-medium-emphasis">
+							{{ __("New changes are ready to load") }}
+						</div>
 					</div>
+					<span class="update-pill" v-if="label">{{ label }}</span>
 				</div>
-				<v-spacer></v-spacer>
-				<span class="update-pill" v-if="label">{{ label }}</span>
+				<v-btn
+					icon="mdi-close"
+					variant="text"
+					class="pos-dialog-close pos-touch-target pos-focus-ring"
+					:aria-label="__('Dismiss update prompt')"
+					@click="dismiss"
+				/>
 			</v-card-title>
-			<v-card-text class="pt-2">
+			<v-card-text class="pt-2 pos-dialog-body">
 				<div class="text-body-2">
 					{{ __("Reload to apply the latest changes. Your current session will be refreshed.") }}
 				</div>
@@ -46,17 +57,23 @@
 					</ul>
 				</div>
 			</v-card-text>
-			<v-card-actions class="update-actions">
+			<v-card-actions class="update-actions pos-dialog-actions">
 				<v-spacer></v-spacer>
 				<v-btn
 					variant="flat"
 					color="primary"
 					:loading="updateStore.reloading"
 					@click="reloadNow"
+					class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
 				>
 					{{ __("Reload Now") }}
 				</v-btn>
-				<v-btn variant="elevated" color="primary" @click="dismiss">
+				<v-btn
+					variant="elevated"
+					color="primary"
+					@click="dismiss"
+					class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+				>
 					{{ __("Dismiss") }}
 				</v-btn>
 			</v-card-actions>

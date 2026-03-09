@@ -127,6 +127,66 @@ Audit baseline used:
   - Done when:
     - Panel behavior is intentional on desktop and touch-friendly on tablets.
 
+- [x] `P1` Remove remaining viewport-locked sizing and undersized controls from payment dialogs.
+  - Why it matters: checkout still has one legacy `100vh`-style shell and mobile footer controls that shrink below the `44px` touch baseline, so payment submission can feel cramped on smaller devices.
+  - Evidence:
+    - `frontend/src/posapp/components/pos/Payments.vue:1420`
+    - `frontend/src/posapp/components/pos/Payments.vue:1557`
+    - `frontend/src/posapp/components/pos/Payments.vue:1591`
+    - `frontend/src/posapp/components/pos/payments/PaymentActionButtons.vue:70`
+    - `frontend/src/posapp/components/pos/payments/PaymentActionButtons.vue:143`
+    - `frontend/src/posapp/components/pos/payments/PaymentActionButtons.vue:158`
+    - `frontend/src/posapp/components/pos/purchase/PurchasePaymentDialog.vue:3`
+    - `frontend/src/posapp/components/pos/purchase/PurchasePaymentDialog.vue:12`
+  - Fix direction:
+    - Replace hard viewport math with flexible dialog sizing and one intentional scroll region.
+    - Keep payment action buttons and compact field inputs at or above `44px` on touch breakpoints.
+    - Recheck purchase-payment dialog behavior on phone-height viewports.
+  - Done when:
+    - Payment dialogs no longer feel height-trapped on short screens.
+    - Submit, print, and cancel actions remain comfortably tappable on phones.
+
+- [x] `P1` Make legacy support/payment dialogs viewport-aware instead of fixed desktop widths and table heights.
+  - Why it matters: several fallback/support dialogs still assume desktop widths, which can force awkward scaling or clipped content on tablets and handheld POS screens.
+  - Evidence:
+    - `frontend/src/posapp/components/pos/payments/Mpesa-Payments.vue:3`
+    - `frontend/src/posapp/components/pos/shift/OpeningDialog.vue:3`
+    - `frontend/src/posapp/components/pos/shift/OpeningDialog.vue:72`
+    - `frontend/src/posapp/components/pos/shift/OpeningDialog.vue:180`
+  - Fix direction:
+    - Convert fixed `800px` assumptions to `min(...)`/`clamp(...)` sizing.
+    - Let opening-shift tables size from available viewport height instead of a hard `300px`.
+    - Add breakpoint-specific layout tuning before these dialogs hit mobile widths.
+  - Done when:
+    - M-Pesa and opening-shift flows fit within tablet and phone viewports without horizontal pressure.
+    - Tables and actions stay visible without excessive internal scrolling.
+
+- [x] `P1` Finish accessible naming for the remaining legacy icon-only actions.
+  - Why it matters: a few older dialogs still rely on icon affordance or tooltip text instead of explicit accessible names, which leaves screen readers and touch users with weaker feedback.
+  - Evidence:
+    - `frontend/src/posapp/components/OfflineInvoices.vue:50-59`
+    - `frontend/src/posapp/components/OfflineInvoices.vue:138-147`
+    - `frontend/src/posapp/components/navbar/AboutDialog.vue:30-35`
+    - `frontend/src/posapp/components/pos/purchase/PurchaseItemsTable.vue:147`
+  - Fix direction:
+    - Add `aria-label` to every close/delete icon button in legacy dialogs and purchase tables.
+    - Keep tooltips as secondary affordances only.
+  - Done when:
+    - Close and delete actions announce themselves correctly in all reviewed legacy surfaces.
+
+- [x] `P1` Raise purchase workflow steppers and inline editors to ergonomic size.
+  - Why it matters: the purchase item table still uses `24px` controls and narrow editable chips, which requires precision tapping and weakens the otherwise improved touch baseline.
+  - Evidence:
+    - `frontend/src/posapp/components/pos/purchase/PurchaseItemsTable.vue:256-283`
+    - `frontend/src/posapp/components/pos/purchase/PurchaseItemsTable.vue:325-405`
+  - Fix direction:
+    - Apply the shared touch-target token to purchase qty/UOM/rate controls and the delete action.
+    - Preserve dense visuals by keeping icons compact while expanding the hit area.
+    - Reuse invoice-table focus treatment for editable purchase cells.
+  - Done when:
+    - Purchase qty/UOM/rate editing works comfortably on touch devices.
+    - Purchase-table inline editors have visible focus and non-tiny hit areas.
+
 ## Improvements And Enhancements
 
 - [x] Introduce a mobile-first action hierarchy for POS flows.
@@ -175,6 +235,31 @@ Audit baseline used:
     - dark/light contrast check
   - Implemented in:
     - `UI_RESPONSIVE_QA_CHECKLIST.md`
+
+- [x] Add explicit no-results and recovery states to the M-Pesa lookup flow.
+  - Suggested implementation:
+    - Show a neutral empty state when search completes without matches instead of falling back to a blank table region.
+    - Keep error, loading, and no-result states visually distinct with a clear next action.
+  - Likely files:
+    - `frontend/src/posapp/components/pos/payments/Mpesa-Payments.vue`
+
+- [x] Add `prefers-reduced-motion` coverage to remaining animated legacy surfaces.
+  - Suggested implementation:
+    - Disable decorative pulse/scan animations when reduced motion is requested.
+    - Keep static visual affordances for offline and scanner surfaces after motion is removed.
+  - Likely files:
+    - `frontend/src/posapp/components/OfflineInvoices.vue`
+    - `frontend/src/posapp/components/pos/items/CameraScanner.vue`
+
+- [x] Normalize legacy dialog chrome onto one shared accessible pattern.
+  - Suggested implementation:
+    - Reuse one header/footer primitive for close buttons, action hierarchy, spacing, and max-width behavior.
+    - Start with `About`, `Offline Invoices`, `UpdatePrompt`, and M-Pesa/payment support dialogs.
+  - Likely files:
+    - `frontend/src/posapp/components/navbar/AboutDialog.vue`
+    - `frontend/src/posapp/components/OfflineInvoices.vue`
+    - `frontend/src/posapp/components/ui/UpdatePrompt.vue`
+    - `frontend/src/posapp/components/pos/payments/Mpesa-Payments.vue`
 
 ## Recommended Fix Order
 

@@ -22,9 +22,10 @@
 				<v-btn
 					size="x-small"
 					variant="flat"
-					class="pos-table__editor-btn uom-arrow"
+					class="pos-table__editor-btn uom-arrow pos-touch-target pos-focus-ring"
 					@click.stop="changeUom(item, -1)"
 					:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+					:aria-label="__('Previous unit of measure')"
 				>
 					<v-icon size="small">mdi-chevron-left</v-icon>
 				</v-btn>
@@ -41,13 +42,15 @@
 					hide-details
 					@focus="item._isEditingUom = true"
 					@blur="item._isEditingUom = false"
+					:aria-label="__('Unit of measure')"
 				></v-select>
 				<v-btn
 					size="x-small"
 					variant="flat"
-					class="pos-table__editor-btn uom-arrow"
+					class="pos-table__editor-btn uom-arrow pos-touch-target pos-focus-ring"
 					@click.stop="changeUom(item, 1)"
 					:disabled="!item.item_uoms || item.item_uoms.length <= 1"
+					:aria-label="__('Next unit of measure')"
 				>
 					<v-icon size="small">mdi-chevron-right</v-icon>
 				</v-btn>
@@ -59,8 +62,9 @@
 				<v-btn
 					size="small"
 					variant="flat"
-					class="pos-table__qty-btn minus-btn qty-control-btn"
+					class="pos-table__qty-btn minus-btn qty-control-btn pos-touch-target pos-focus-ring"
 					@click.stop="$emit('update-qty', { item, value: item.qty - 1 })"
+					:aria-label="__('Decrease quantity')"
 				>
 					<v-icon size="small">mdi-minus</v-icon>
 				</v-btn>
@@ -68,6 +72,11 @@
 					v-if="!item._isEditingQty"
 					class="pos-table__qty-display"
 					@click.stop="openQtyEdit(item)"
+					role="button"
+					tabindex="0"
+					:aria-label="__('Edit quantity')"
+					@keydown.enter.prevent="openQtyEdit(item)"
+					@keydown.space.prevent="openQtyEdit(item)"
 				>
 					{{ formatNumber(item.qty) }}
 				</div>
@@ -83,12 +92,14 @@
 					autofocus
 					type="number"
 					min="0"
+					:aria-label="__('Quantity')"
 				></v-text-field>
 				<v-btn
 					size="small"
 					variant="flat"
-					class="pos-table__qty-btn plus-btn qty-control-btn"
+					class="pos-table__qty-btn plus-btn qty-control-btn pos-touch-target pos-focus-ring"
 					@click.stop="$emit('update-qty', { item, value: item.qty + 1 })"
+					:aria-label="__('Increase quantity')"
 				>
 					<v-icon size="small">mdi-plus</v-icon>
 				</v-btn>
@@ -101,6 +112,11 @@
 					v-if="!item._isEditingRate"
 					class="pos-table__editor-display"
 					@click.stop="openRateEdit(item)"
+					role="button"
+					tabindex="0"
+					:aria-label="__('Edit rate')"
+					@keydown.enter.prevent="openRateEdit(item)"
+					@keydown.space.prevent="openRateEdit(item)"
 				>
 					<span class="currency-symbol">{{ currencySymbol }}</span>
 					<span class="amount-value">{{ formatCurrency(item.rate) }}</span>
@@ -117,6 +133,7 @@
 					autofocus
 					type="number"
 					min="0"
+					:aria-label="__('Rate')"
 				></v-text-field>
 			</div>
 		</template>
@@ -148,7 +165,9 @@
 				variant="text"
 				color="error"
 				size="small"
+				class="pos-touch-target pos-focus-ring"
 				@click="$emit('remove-item', item)"
+				:aria-label="__('Remove purchase item')"
 			></v-btn>
 		</template>
 
@@ -230,14 +249,14 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 2px;
-	padding: 2px;
-	min-width: 60px;
-	max-width: 100px;
+	gap: 6px;
+	padding: 4px;
+	min-width: 168px;
+	max-width: 196px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
-	border-radius: 8px;
+	border-radius: 12px;
 	backdrop-filter: blur(10px);
 	border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
@@ -253,35 +272,41 @@ export default {
 }
 
 .pos-table__qty-display {
-	min-width: 15px;
-	max-width: 40px;
+	min-width: 56px;
+	max-width: 84px;
 	width: auto;
 	flex: 1 1 auto;
 	text-align: center;
 	font-weight: 600;
-	padding: 0 2px;
-	border-radius: 4px;
+	padding: 0 10px;
+	border-radius: 8px;
 	background: var(--pos-primary-container);
 	border: 1px solid var(--pos-primary-variant);
 	color: var(--pos-primary);
-	font-size: 0.75rem;
+	font-size: 0.875rem;
 	transition: all 0.2s ease;
 	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 24px;
+	min-height: var(--pos-touch-target-min);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	cursor: pointer;
 }
 
+.pos-table__qty-display:focus-visible,
+.pos-table__editor-display:focus-visible {
+	outline: none;
+	box-shadow: var(--pos-focus-ring-shadow, 0 0 0 3px rgba(25, 118, 210, 0.24));
+}
+
 .qty-control-btn {
-	width: 24px !important;
-	height: 24px !important;
-	min-width: 24px !important;
-	border-radius: 6px !important;
+	width: var(--pos-touch-target-min) !important;
+	height: var(--pos-touch-target-min) !important;
+	min-width: var(--pos-touch-target-min) !important;
+	border-radius: 10px !important;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 	box-shadow:
 		0 2px 8px var(--pos-shadow-light),
@@ -306,12 +331,13 @@ export default {
 }
 
 .pos-table__qty-input {
-	max-width: 80px;
+	max-width: 96px;
 	margin: 0 auto;
 }
 .pos-table__qty-input :deep(input) {
 	text-align: center;
 	font-weight: 600;
+	font-size: 0.875rem;
 	-moz-appearance: textfield;
 	appearance: textfield;
 }
@@ -322,30 +348,30 @@ export default {
 	margin: 0;
 }
 .pos-table__qty-input :deep(.v-input__control) {
-	height: 24px;
+	min-height: var(--pos-touch-target-min);
 }
 .pos-table__qty-input :deep(.v-field__field) {
-	height: 24px;
-	padding: 0 4px;
+	min-height: var(--pos-touch-target-min);
+	padding: 0 8px;
 }
 .pos-table__qty-input :deep(.v-field__input) {
 	padding: 0;
-	min-height: 24px;
-	font-size: 0.75rem;
+	min-height: var(--pos-touch-target-min);
+	font-size: 0.875rem;
 }
 
 .pos-table__editor-box {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 2px;
-	padding: 2px;
-	min-width: 60px;
-	max-width: 100px;
+	gap: 6px;
+	padding: 4px;
+	min-width: 180px;
+	max-width: 228px;
 	width: auto;
 	height: auto;
 	background: var(--pos-surface-variant);
-	border-radius: 8px;
+	border-radius: 12px;
 	border: 1px solid var(--pos-border-light);
 	transition: all 0.3s ease;
 	margin: 0 auto;
@@ -360,24 +386,24 @@ export default {
 }
 
 .pos-table__editor-display {
-	min-width: 40px;
-	max-width: 80px;
+	min-width: 72px;
+	max-width: 116px;
 	width: auto;
 	flex: 1 1 auto;
 	text-align: center;
 	font-weight: 600;
-	padding: 0 2px;
-	border-radius: 4px;
+	padding: 0 10px;
+	border-radius: 8px;
 	background: var(--pos-primary-container);
 	border: 1px solid var(--pos-primary-variant);
 	color: var(--pos-primary);
-	font-size: 0.75rem;
+	font-size: 0.875rem;
 	transition: all 0.2s ease;
 	box-shadow: 0 1px 3px var(--pos-shadow-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 24px;
+	min-height: var(--pos-touch-target-min);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -385,38 +411,38 @@ export default {
 }
 
 .pos-table__editor-btn {
-	width: 24px !important;
-	height: 24px !important;
-	min-width: 24px !important;
-	border-radius: 6px !important;
+	width: var(--pos-touch-target-min) !important;
+	height: var(--pos-touch-target-min) !important;
+	min-width: var(--pos-touch-target-min) !important;
+	border-radius: 10px !important;
 }
 .pos-table__editor-input {
-	max-width: 80px;
+	max-width: 116px;
 }
 .pos-table__editor-input :deep(.v-input__control) {
-	height: 24px;
+	min-height: var(--pos-touch-target-min);
 }
 .pos-table__editor-input :deep(.v-field__field) {
-	height: 24px;
-	padding: 0 4px;
+	min-height: var(--pos-touch-target-min);
+	padding: 0 8px;
 }
 .pos-table__editor-input :deep(.v-field__input) {
 	padding: 0;
-	min-height: 24px;
-	font-size: 0.75rem;
+	min-height: var(--pos-touch-target-min);
+	font-size: 0.875rem;
 }
 .pos-table__editor-input :deep(input) {
 	text-align: center;
 }
 
 .uom-editor {
-	gap: 2px;
+	gap: 6px;
 }
 .uom-arrow {
 	flex-shrink: 0;
 }
 .uom-select {
-	min-width: 40px;
+	min-width: 92px;
 }
 
 .uom-display-mode :deep(.v-field__outline) {
@@ -436,8 +462,8 @@ export default {
 .uom-display-mode :deep(.v-select__selection-text) {
 	text-align: center;
 	color: var(--pos-primary);
-	font-size: 0.65rem;
-	letter-spacing: -0.05em;
+	font-size: 0.75rem;
+	letter-spacing: -0.02em;
 	white-space: nowrap;
 	overflow: visible;
 }

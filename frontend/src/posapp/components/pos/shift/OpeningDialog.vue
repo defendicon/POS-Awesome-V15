@@ -1,6 +1,6 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="isOpen" persistent max-width="800px" max-height="90vh">
+		<v-dialog v-model="isOpen" persistent max-width="800">
 			<v-card elevation="8" class="opening-dialog-card">
 				<!-- Header Section - White Background with Blue Text -->
 				<v-card-title class="opening-dialog-header">
@@ -69,7 +69,7 @@
 									:items-per-page="itemsPerPage"
 									hide-default-footer
 									density="compact"
-									:height="'300px'"
+									:height="paymentMethodsTableHeight"
 									fixed-header
 								>
 									<template v-slot:item.amount="{ item }">
@@ -96,7 +96,7 @@
 					<v-btn
 						theme="dark"
 						@click="logout"
-						class="pos-action-btn logout-action-btn"
+						class="pos-action-btn logout-action-btn pos-touch-target pos-focus-ring"
 						size="large"
 						elevation="2"
 					>
@@ -107,7 +107,7 @@
 					<v-btn
 						theme="dark"
 						@click="go_desk"
-						class="pos-action-btn cancel-action-btn"
+						class="pos-action-btn cancel-action-btn pos-touch-target pos-focus-ring"
 						size="large"
 						elevation="2"
 					>
@@ -119,7 +119,7 @@
 						:disabled="is_loading"
 						:loading="is_loading"
 						@click="submit_dialog"
-						class="pos-action-btn submit-action-btn"
+						class="pos-action-btn submit-action-btn pos-touch-target pos-focus-ring"
 						size="large"
 						elevation="2"
 					>
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import {
 	getOpeningDialogStorage,
 	setOpeningDialogStorage,
@@ -177,8 +177,11 @@ const payments_methods_headers = [
 		sortable: false,
 	},
 ];
-const itemsPerPage = ref(100);
+const itemsPerPage = -1;
 const max25chars = (v) => v.length <= 12 || "Input too long!";
+const paymentMethodsTableHeight = computed(() =>
+	payments_methods.value.length > 6 ? "min(42vh, 360px)" : "auto",
+);
 
 const currencySymbol = (currency) => get_currency_symbol?.(currency);
 
@@ -309,7 +312,8 @@ onMounted(() => {
 	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
 	border: 1px solid rgba(25, 118, 210, 0.1);
 	transition: all 0.3s ease;
-	max-height: 90vh;
+	width: min(800px, calc(100vw - 24px));
+	max-height: min(88dvh, 900px);
 	display: flex;
 	flex-direction: column;
 }
@@ -566,6 +570,10 @@ onMounted(() => {
 		padding: 16px;
 	}
 
+	.opening-dialog-card {
+		width: min(800px, calc(100vw - 16px));
+	}
+
 	.opening-dialog-actions-compact {
 		padding: 12px 16px;
 	}
@@ -636,6 +644,7 @@ onMounted(() => {
 	border-top: 1px solid #e0e0e0;
 	padding: 16px 24px;
 	gap: 12px;
+	flex-wrap: wrap;
 }
 
 .pos-action-btn {
@@ -644,6 +653,7 @@ onMounted(() => {
 	font-weight: 600;
 	padding: 12px 32px;
 	min-width: 120px;
+	min-height: var(--pos-touch-target-min);
 	transition: all 0.3s ease;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -702,5 +712,16 @@ onMounted(() => {
 
 .dialog-actions-container {
 	border-top: 1px solid var(--pos-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.opening-dialog-card,
+	.header-icon-wrapper,
+	.enhanced-field,
+	.pos-action-btn {
+		transition: none !important;
+		animation: none !important;
+		transform: none !important;
+	}
 }
 </style>

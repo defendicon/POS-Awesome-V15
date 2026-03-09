@@ -23,6 +23,8 @@
 					variant="text"
 					size="large"
 					:title="__('Close Scanner')"
+					:aria-label="__('Close scanner dialog')"
+					class="pos-touch-target pos-focus-ring"
 				></v-btn>
 			</v-card-title>
 
@@ -235,6 +237,18 @@
 }
 .scanner-container .scanning-overlay {
 	transition: opacity 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.scan-line,
+	.corner,
+	.scanner-container .scanning-overlay,
+	.status-messages :deep(.v-alert),
+	.camera-scanner-dialog :deep(.v-card) {
+		animation: none !important;
+		transition: none !important;
+		transform: none !important;
+	}
 }
 </style>
 

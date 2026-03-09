@@ -1,11 +1,14 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="dialog" max-width="1200px" persistent transition="fade-transition">
-			<v-card class="pos-card offline-invoices-card elevation-12">
+		<v-dialog v-model="dialog" max-width="1200" persistent transition="fade-transition">
+			<v-card
+				class="pos-card offline-invoices-card elevation-12 pos-dialog-shell"
+				style="--pos-dialog-max-width: 1200px; --pos-dialog-max-height: 920px"
+			>
 				<!-- Revamped Modern Header -->
-				<v-card-title class="offline-header pa-8">
+				<v-card-title class="offline-header pa-8 pos-dialog-header">
 					<div class="header-content-wrapper">
-						<div class="header-main-content">
+						<div class="header-main-content pos-dialog-header__main">
 							<div class="header-icon-wrapper-revamped">
 								<div class="icon-background">
 									<v-icon class="header-icon-revamped" size="32"
@@ -51,7 +54,8 @@
 								variant="text"
 								size="large"
 								color="error"
-								class="header-close-btn"
+								class="header-close-btn pos-dialog-close pos-touch-target pos-focus-ring"
+								:aria-label="__('Close offline invoices dialog')"
 								@click="dialog = false"
 							>
 								<v-tooltip activator="parent" location="bottom">
@@ -64,7 +68,7 @@
 
 				<v-divider class="header-divider"></v-divider>
 
-				<v-card-text class="pa-0 white-background">
+				<v-card-text class="pa-0 white-background pos-dialog-body">
 					<v-container fluid class="pa-6">
 						<!-- Enhanced Empty State -->
 						<div v-if="!invoices.length" class="empty-state text-center py-12">
@@ -139,6 +143,7 @@
 										color="error"
 										size="small"
 										variant="text"
+										:aria-label="__('Delete offline invoice')"
 										@click="removeInvoice(index)"
 										class="delete-btn"
 									>
@@ -155,14 +160,14 @@
 
 				<!-- Revamped Modern Footer -->
 				<v-divider class="footer-divider"></v-divider>
-				<v-card-actions class="dialog-actions-container-revamped">
+				<v-card-actions class="dialog-actions-container-revamped pos-dialog-actions pos-dialog-actions--split">
 					<div class="actions-left-section">
 						<v-btn
 							v-if="invoices.length > 0"
 							variant="elevated"
 							prepend-icon="mdi-sync"
 							@click="$emit('sync-all')"
-							class="sync-action-btn-revamped"
+							class="sync-action-btn-revamped pos-dialog-action-btn pos-touch-target pos-focus-ring"
 							size="large"
 							elevation="3"
 						>
@@ -180,7 +185,7 @@
 							variant="outlined"
 							color="error"
 							@click="dialog = false"
-							class="close-action-btn-revamped"
+							class="close-action-btn-revamped pos-dialog-action-btn pos-touch-target pos-focus-ring"
 							size="large"
 							prepend-icon="mdi-close"
 						>
@@ -690,16 +695,9 @@ function removeInvoice(index) {
 		align-items: flex-start;
 	}
 
-	.header-close-section {
-		align-self: flex-end;
-		position: absolute;
-		top: 16px;
-		right: 16px;
-	}
-
 	.header-main-content {
 		width: 100%;
-		padding-right: 60px;
+		padding-right: 0;
 	}
 }
 
@@ -815,5 +813,19 @@ function removeInvoice(index) {
 .sync-status-indicator span {
 	font-size: 15px;
 	letter-spacing: 0.3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.icon-background,
+	.icon-glow,
+	.status-chip-revamped,
+	.header-close-btn,
+	.delete-btn,
+	.sync-action-btn-revamped,
+	.close-action-btn-revamped {
+		transition: none !important;
+		animation: none !important;
+		transform: none !important;
+	}
 }
 </style>

@@ -1,8 +1,11 @@
 <template>
 	<v-dialog v-model="dialogOpen" max-width="650" persistent>
-		<v-card class="about-dialog-card-improved">
-			<v-card-title class="about-header-improved pa-5">
-				<div class="header-content-improved">
+		<v-card
+			class="about-dialog-card-improved pos-dialog-shell"
+			style="--pos-dialog-max-width: 650px; --pos-dialog-max-height: 820px"
+		>
+			<v-card-title class="about-header-improved pa-5 pos-dialog-header">
+				<div class="header-content-improved pos-dialog-header__main">
 					<div class="header-icon-wrapper-improved">
 						<v-icon size="22" class="header-icon">mdi-information-outline</v-icon>
 					</div>
@@ -32,11 +35,12 @@
 					variant="text"
 					size="default"
 					@click="close"
-					class="close-btn-improved"
+					class="close-btn-improved pos-dialog-close pos-touch-target pos-focus-ring"
+					:aria-label="__('Close about dialog')"
 				></v-btn>
 			</v-card-title>
 
-			<v-card-text class="pa-0 white-background">
+			<v-card-text class="pa-0 white-background pos-dialog-body">
 				<div class="content-container-improved">
 					<!-- Loading State -->
 					<div v-if="loadingAppInfo" class="empty-state-improved text-center">
@@ -75,7 +79,7 @@
 				</div>
 			</v-card-text>
 
-			<v-card-actions class="dialog-actions-improved pa-4">
+			<v-card-actions class="dialog-actions-improved pa-4 pos-dialog-actions">
 				<div class="footer-info-improved">
 					<span class="footer-text-improved">
 						<v-icon start size="16" color="error">mdi-heart</v-icon>
@@ -83,7 +87,7 @@
 					</span>
 				</div>
 				<v-spacer></v-spacer>
-				<v-btn color="primary" @click="close" class="close-btn-action-improved">
+				<v-btn color="primary" @click="close" class="close-btn-action-improved pos-dialog-action-btn pos-touch-target pos-focus-ring">
 					{{ __("Close") }}
 				</v-btn>
 			</v-card-actions>
@@ -360,7 +364,7 @@ function loadAppInfo() {
 	border-radius: 10px;
 	font-weight: 600;
 	text-transform: none;
-	height: 36px;
+	min-height: var(--pos-touch-target-min);
 	padding: 0 20px;
 }
 

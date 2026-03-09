@@ -1417,7 +1417,8 @@ onBeforeUnmount(() => {
 }
 
 .payment-shell--dialog {
-	height: calc(100vh - 48px);
+	max-height: min(calc(100dvh - 48px), 100%);
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	gap: var(--pos-space-2);
@@ -1554,7 +1555,7 @@ onBeforeUnmount(() => {
 }
 
 :deep(.payment-footer--dialog .v-btn) {
-	min-height: 42px;
+	min-height: var(--pos-touch-target-min);
 }
 
 :deep(.payment-shell--dialog .payment-methods) {
@@ -1588,7 +1589,7 @@ onBeforeUnmount(() => {
 }
 
 :deep(.payment-shell--dialog .payment-section .v-field__input) {
-	min-height: 34px;
+	min-height: var(--pos-touch-target-min);
 	padding-top: 4px;
 	padding-bottom: 4px;
 }
@@ -1636,7 +1637,7 @@ onBeforeUnmount(() => {
 	}
 
 	.payment-shell--dialog {
-		height: auto;
+		max-height: none;
 	}
 
 	.payment-scroll {

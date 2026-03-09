@@ -1,6 +1,6 @@
 <template>
-	<v-dialog v-model="dialog" max-width="600px" persistent>
-		<v-card class="pos-themed-card" style="max-height: 80vh; overflow: hidden">
+	<v-dialog v-model="dialog" max-width="600" persistent>
+		<v-card class="pos-themed-card purchase-payment-dialog-card">
 			<v-card-title class="bg-primary text-white d-flex align-center py-3">
 				<span class="text-h6">{{ __("Payment") }}</span>
 				<v-spacer></v-spacer>
@@ -9,7 +9,7 @@
 				</span>
 			</v-card-title>
 
-			<v-card-text class="pa-0 overflow-y-auto" style="max-height: 60vh">
+			<v-card-text class="pa-0 overflow-y-auto purchase-payment-dialog__content">
 				<!-- Payment Summary -->
 				<v-row v-if="totalAmount > 0" class="pa-3 ma-0" dense>
 					<v-col cols="6">
@@ -71,7 +71,7 @@
 								block
 								color="primary"
 								theme="dark"
-								class="payment-method-btn"
+								class="payment-method-btn pos-touch-target pos-focus-ring"
 								@click="set_full_amount(payment)"
 								size="small"
 							>
@@ -90,7 +90,7 @@
 									v-for="d in getVisibleDenominations(payment)"
 									:key="d"
 									size="x-small"
-									class="mr-1 mb-1"
+									class="mr-1 mb-1 purchase-denomination-btn pos-focus-ring"
 									color="secondary"
 									variant="tonal"
 									@click="setPaymentToDenomination(payment, d)"
@@ -170,7 +170,7 @@
 							size="large"
 							color="primary"
 							theme="dark"
-							class="submit-btn"
+							class="submit-btn pos-touch-target pos-focus-ring"
 							@click="submit(false)"
 							:loading="loading"
 							:disabled="loading || !isPaymentValid"
@@ -184,6 +184,7 @@
 							size="large"
 							color="success"
 							theme="dark"
+							class="pos-touch-target pos-focus-ring"
 							@click="submit(true)"
 							:loading="loading"
 							:disabled="loading || !isPaymentValid"
@@ -198,6 +199,7 @@
 							color="error"
 							theme="dark"
 							variant="outlined"
+							class="pos-touch-target pos-focus-ring"
 							@click="close"
 						>
 							{{ __("Cancel Payment") }}
@@ -495,11 +497,25 @@ async function fetchPrintFormats() {
 	border-radius: 12px;
 }
 
+.purchase-payment-dialog-card {
+	width: min(600px, calc(100vw - 24px));
+	max-height: min(82dvh, 760px);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.purchase-payment-dialog__content {
+	flex: 1 1 auto;
+	max-height: none;
+}
+
 /* Payment method button styling - matches Payments.vue */
 .payment-method-btn {
 	position: relative;
 	text-transform: none;
 	font-weight: 500;
+	min-height: var(--pos-touch-target-min);
 }
 
 .payment-method-btn:hover,
@@ -571,6 +587,12 @@ async function fetchPrintFormats() {
 	gap: 8px;
 }
 
+.purchase-denomination-btn {
+	min-height: var(--pos-touch-target-min);
+	text-transform: none;
+	font-weight: 700;
+}
+
 /* Dialog specific adjustments */
 .v-dialog .v-card-text {
 	scrollbar-width: thin;
@@ -588,5 +610,12 @@ async function fetchPrintFormats() {
 .v-dialog .v-card-text::-webkit-scrollbar-thumb {
 	background-color: rgb(var(--v-theme-primary));
 	border-radius: 3px;
+}
+
+@media (max-width: 600px) {
+	.purchase-payment-dialog-card {
+		width: min(600px, calc(100vw - 16px));
+		max-height: min(88dvh, 760px);
+	}
 }
 </style>
