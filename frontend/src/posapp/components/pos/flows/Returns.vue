@@ -1,11 +1,31 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="invoicesDialog" max-width="800px" min-width="800px">
-			<v-card>
-				<v-card-title>
-					<span class="text-h5 text-primary">{{ __("Select Return Invoice") }}</span>
+		<v-dialog v-model="invoicesDialog" max-width="960">
+			<v-card
+				class="returns-dialog-card pos-themed-card pos-dialog-shell"
+				style="--pos-dialog-max-width: 960px; --pos-dialog-max-height: 900px"
+			>
+				<v-card-title class="pos-dialog-header">
+					<div class="pos-dialog-header__main">
+						<div class="returns-dialog-icon">
+							<v-icon size="22">mdi-keyboard-return</v-icon>
+						</div>
+						<div>
+							<div class="text-h5 text-primary">{{ __("Select Return Invoice") }}</div>
+							<div class="text-body-2 text-medium-emphasis">
+								{{ __("Search eligible invoices before creating a return") }}
+							</div>
+						</div>
+					</div>
+					<v-btn
+						icon="mdi-close"
+						variant="text"
+						class="pos-dialog-close pos-touch-target pos-focus-ring"
+						:aria-label="__('Close return invoices dialog')"
+						@click="close_dialog"
+					/>
 				</v-card-title>
-				<v-container>
+				<v-container class="pos-dialog-body returns-dialog-body">
 					<!-- Invoice ID and Date Range search -->
 					<v-row class="mb-2">
 						<v-col cols="12">
@@ -148,7 +168,7 @@
 						<v-spacer></v-spacer>
 						<v-btn
 							variant="text"
-							class="ml-2"
+							class="ml-2 pos-dialog-action-btn pos-touch-target pos-focus-ring"
 							color="primary"
 							theme="dark"
 							@click="search_invoices"
@@ -156,14 +176,20 @@
 							<v-icon start>mdi-magnify</v-icon>
 							{{ __("Search") }}
 						</v-btn>
-						<v-btn variant="text" class="ml-2" color="warning" theme="dark" @click="clear_search">
+						<v-btn
+							variant="text"
+							class="ml-2 pos-dialog-action-btn pos-touch-target pos-focus-ring"
+							color="warning"
+							theme="dark"
+							@click="clear_search"
+						>
 							<v-icon start>mdi-refresh</v-icon>
 							{{ __("Clear") }}
 						</v-btn>
 						<v-btn
 							v-if="pos_profile.posa_allow_return_without_invoice == 1"
 							variant="text"
-							class="ml-2"
+							class="ml-2 pos-dialog-action-btn pos-touch-target pos-focus-ring"
 							color="secondary"
 							theme="dark"
 							@click="return_without_invoice"
@@ -223,6 +249,7 @@
 									variant="outlined"
 									:loading="loading_more"
 									@click="load_more_invoices"
+									class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
 								>
 									{{ __("Load More Invoices") }}
 								</v-btn>
@@ -233,16 +260,41 @@
 							class="text-center"
 							v-else-if="searched_once && (!dialog_data || dialog_data.length === 0)"
 						>
-							<v-alert type="warning" text>
-								{{ __("No invoices found. Try different search criteria.") }}
-							</v-alert>
+							<div class="returns-empty-state">
+								<v-icon size="40" color="warning">mdi-file-search-outline</v-icon>
+								<div class="returns-empty-state__title">
+									{{ __("No invoices found") }}
+								</div>
+								<div class="returns-empty-state__subtitle">
+									{{ __("Try a different invoice ID, customer filter, or date range.") }}
+								</div>
+								<v-btn
+									color="primary"
+									variant="text"
+									class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+									@click="clear_search"
+								>
+									{{ __("Reset Filters") }}
+								</v-btn>
+							</div>
 						</v-col>
 					</v-row>
 				</v-container>
-				<v-card-actions class="mt-1">
+				<v-card-actions class="mt-1 pos-dialog-actions">
 					<v-spacer></v-spacer>
-					<v-btn color="error mx-2" theme="dark" @click="close_dialog">{{ __("Close") }}</v-btn>
-					<v-btn v-if="selected.length" color="success" theme="dark" @click="submit_dialog">{{
+					<v-btn
+						color="error mx-2"
+						theme="dark"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+						@click="close_dialog"
+					>{{ __("Close") }}</v-btn>
+					<v-btn
+						v-if="selected.length"
+						color="success"
+						theme="dark"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+						@click="submit_dialog"
+					>{{
 						__("Select")
 					}}</v-btn>
 				</v-card-actions>
@@ -746,7 +798,56 @@ export default {
 </script>
 
 <style scoped>
+.returns-dialog-card {
+	width: min(960px, calc(100vw - 24px));
+}
+
+.returns-dialog-body {
+	overflow-y: auto;
+}
+
+.returns-dialog-icon {
+	width: 44px;
+	height: 44px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(25, 118, 210, 0.16), rgba(66, 165, 245, 0.12));
+	color: var(--pos-primary);
+}
+
+.returns-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-height: 220px;
+	padding: 24px 16px;
+	border: 1px dashed var(--pos-border);
+	border-radius: 18px;
+	background: var(--pos-surface-muted);
+}
+
+.returns-empty-state__title {
+	font-weight: 700;
+	font-size: 1rem;
+	color: var(--pos-text-primary);
+}
+
+.returns-empty-state__subtitle {
+	max-width: 40ch;
+	color: var(--pos-text-secondary);
+}
+
 .return-expired-row {
 	background-color: #ffebee !important;
+}
+
+@media (max-width: 600px) {
+	.returns-dialog-card {
+		width: calc(100vw - 16px);
+	}
 }
 </style>

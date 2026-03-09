@@ -2,7 +2,7 @@
 	<v-row justify="center">
 		<v-dialog
 			v-model="draftsDialog"
-			max-width="900px"
+			max-width="900"
 			:theme="isDarkTheme ? 'dark' : 'light'"
 			content-class="drafts-dialog-content"
 		>
@@ -13,21 +13,37 @@
 				variant="flat"
 				:theme="isDarkTheme ? 'dark' : 'light'"
 				:class="[
-					'pos-themed-card drafts-dialog-card',
+					'pos-themed-card drafts-dialog-card pos-dialog-shell',
 					isDarkTheme ? 'drafts-dialog-card--dark' : 'drafts-dialog-card--light',
 				]"
+				style="--pos-dialog-max-width: 900px; --pos-dialog-max-height: 820px"
 			>
-				<v-card-title>
-					<span class="text-h5 text-primary">{{ __("Load Sales Invoice") }}</span>
+				<v-card-title class="pos-dialog-header">
+					<div class="pos-dialog-header__main">
+						<div class="drafts-dialog-icon">
+							<v-icon size="22">mdi-content-save-outline</v-icon>
+						</div>
+						<div>
+							<div class="text-h5 text-primary">{{ __("Load Sales Invoice") }}</div>
+							<div class="text-body-2 text-medium-emphasis">
+								{{ __("Load previously saved invoices") }}
+							</div>
+						</div>
+					</div>
+					<v-btn
+						icon="mdi-close"
+						variant="text"
+						class="pos-dialog-close pos-touch-target pos-focus-ring"
+						:aria-label="__('Close drafts dialog')"
+						@click="close_dialog"
+					/>
 				</v-card-title>
-				<v-card-subtitle>
-					<span class="text-primary">{{ __("Load previously saved invoices") }}</span>
-				</v-card-subtitle>
-				<v-card-text class="pa-0">
-					<v-container>
+				<v-card-text class="pa-0 pos-dialog-body">
+					<v-container class="drafts-dialog-body">
 						<v-row no-gutters>
 							<v-col cols="12" class="pa-1">
 								<v-data-table
+									v-if="draftsData.length"
 									:headers="headers"
 									:items="draftsData"
 									item-value="name"
@@ -49,14 +65,34 @@
 										{{ formatCurrency(item.grand_total) }}
 									</template>
 								</v-data-table>
+								<div v-else class="drafts-empty-state">
+									<v-icon size="40" color="primary">mdi-invoice-text-clock-outline</v-icon>
+									<div class="drafts-empty-state__title">
+										{{ __("No saved invoices available") }}
+									</div>
+									<div class="drafts-empty-state__subtitle">
+										{{ __("Draft invoices will appear here once a sale is saved for later.") }}
+									</div>
+								</div>
 							</v-col>
 						</v-row>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="pos-dialog-actions">
 					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
-					<v-btn color="success" theme="dark" @click="submit_dialog">Load Sale</v-btn>
+					<v-btn
+						color="error"
+						theme="dark"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+						@click="close_dialog"
+					>{{ __("Close") }}</v-btn>
+					<v-btn
+						color="success"
+						theme="dark"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+						:disabled="!selected.length"
+						@click="submit_dialog"
+					>{{ __("Load Sale") }}</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -193,11 +229,52 @@ export default {
 .drafts-dialog-card {
 	background: var(--pos-surface-raised) !important;
 	color: var(--pos-text-primary) !important;
+	width: min(900px, calc(100vw - 24px));
 }
 
 .drafts-dialog-table {
 	background: var(--pos-surface) !important;
 	color: var(--pos-text-primary) !important;
+}
+
+.drafts-dialog-body {
+	overflow-y: auto;
+}
+
+.drafts-dialog-icon {
+	width: 44px;
+	height: 44px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(25, 118, 210, 0.16), rgba(66, 165, 245, 0.12));
+	color: var(--pos-primary);
+}
+
+.drafts-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-height: 220px;
+	padding: 24px 16px;
+	border: 1px dashed var(--pos-border);
+	border-radius: 18px;
+	background: var(--pos-surface-muted);
+	text-align: center;
+}
+
+.drafts-empty-state__title {
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--pos-text-primary);
+}
+
+.drafts-empty-state__subtitle {
+	max-width: 36ch;
+	color: var(--pos-text-secondary);
 }
 
 .drafts-dialog-card--light {
@@ -250,5 +327,11 @@ export default {
 .drafts-dialog-card--dark :deep(.v-card-text),
 .drafts-dialog-card--dark :deep(.v-card-actions) {
 	color: #ffffff !important;
+}
+
+@media (max-width: 600px) {
+	.drafts-dialog-card {
+		width: calc(100vw - 16px);
+	}
 }
 </style>

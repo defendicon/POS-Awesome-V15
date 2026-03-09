@@ -261,6 +261,17 @@ Audit baseline used:
     - `frontend/src/posapp/components/ui/UpdatePrompt.vue`
     - `frontend/src/posapp/components/pos/payments/Mpesa-Payments.vue`
 
+- [x] Extend the responsive dialog pattern to secondary transaction flows.
+  - Implemented in:
+    - `frontend/src/posapp/components/pos/flows/Returns.vue`
+    - `frontend/src/posapp/components/pos/flows/SalesOrders.vue`
+    - `frontend/src/posapp/components/pos/flows/Drafts.vue`
+    - `frontend/src/posapp/components/navbar/QzTrayDialog.vue`
+  - Outcome:
+    - Removed fixed desktop assumptions from returns flow.
+    - Added explicit empty states and recovery actions where result tables were previously blank.
+    - Brought secondary dialogs onto the same close/action hierarchy and touch-target baseline.
+
 ## Recommended Fix Order
 
 - [ ] Fix layout/overflow locking first.

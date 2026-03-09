@@ -1,12 +1,31 @@
 <template>
 	<v-dialog v-model="dialogModel" max-width="760">
-		<v-card class="qz-dialog-card">
-			<v-card-title class="d-flex align-center">
-				<v-icon start color="primary">mdi-printer-wireless</v-icon>
-				{{ __("QZ Tray Setup") }}
+		<v-card
+			class="qz-dialog-card pos-themed-card pos-dialog-shell"
+			style="--pos-dialog-max-width: 760px; --pos-dialog-max-height: 760px"
+		>
+			<v-card-title class="pos-dialog-header">
+				<div class="pos-dialog-header__main">
+					<div class="qz-dialog-card__icon">
+						<v-icon size="22">mdi-printer-wireless</v-icon>
+					</div>
+					<div>
+						<div class="text-h6 text-primary">{{ __("QZ Tray Setup") }}</div>
+						<div class="text-body-2 text-medium-emphasis">
+							{{ __("Connect printing services and manage the silent-print certificate") }}
+						</div>
+					</div>
+				</div>
+				<v-btn
+					icon="mdi-close"
+					variant="text"
+					class="pos-dialog-close pos-touch-target pos-focus-ring"
+					:aria-label="__('Close QZ Tray setup dialog')"
+					@click="dialogModel = false"
+				/>
 			</v-card-title>
 
-			<v-card-text>
+			<v-card-text class="pos-dialog-body qz-dialog-card__body">
 				<v-alert
 					class="mb-4"
 					:type="qzConnecting ? 'warning' : qzConnected ? 'success' : 'error'"
@@ -22,13 +41,26 @@
 						:loading="qzConnecting"
 						:disabled="qzConnected && !qzConnecting"
 						@click="handleConnect"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
 					>
 						{{ __("Connect") }}
 					</v-btn>
-					<v-btn color="secondary" variant="outlined" :loading="loadingPrinters" @click="refreshPrinters">
+					<v-btn
+						color="secondary"
+						variant="outlined"
+						:loading="loadingPrinters"
+						@click="refreshPrinters"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+					>
 						{{ __("Refresh Printers") }}
 					</v-btn>
-					<v-btn color="default" variant="text" :disabled="!qzConnected" @click="handleDisconnect">
+					<v-btn
+						color="default"
+						variant="text"
+						:disabled="!qzConnected"
+						@click="handleDisconnect"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+					>
 						{{ __("Disconnect") }}
 					</v-btn>
 				</div>
@@ -56,7 +88,12 @@
 				</v-alert>
 
 				<div class="d-flex flex-wrap ga-2">
-					<v-btn color="warning" :loading="certificateLoading" @click="handleGenerateCertificate">
+					<v-btn
+						color="warning"
+						:loading="certificateLoading"
+						@click="handleGenerateCertificate"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+					>
 						{{ __("Generate Certificate") }}
 					</v-btn>
 					<v-btn
@@ -64,6 +101,7 @@
 						variant="outlined"
 						:disabled="!qzCertReady"
 						@click="handleDownloadCertificate"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
 					>
 						{{ __("Download Certificate") }}
 					</v-btn>
@@ -74,9 +112,13 @@
 				</div>
 			</v-card-text>
 
-			<v-card-actions>
+			<v-card-actions class="pos-dialog-actions">
 				<v-spacer />
-				<v-btn variant="text" @click="dialogModel = false">{{ __("Close") }}</v-btn>
+				<v-btn
+					variant="text"
+					class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+					@click="dialogModel = false"
+				>{{ __("Close") }}</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -289,5 +331,27 @@ watch(
 .qz-dialog-card {
 	background-color: rgb(var(--v-theme-surface));
 	color: rgb(var(--v-theme-on-surface));
+	width: min(760px, calc(100vw - 24px));
+}
+
+.qz-dialog-card__body {
+	overflow-y: auto;
+}
+
+.qz-dialog-card__icon {
+	width: 44px;
+	height: 44px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(25, 118, 210, 0.16), rgba(66, 165, 245, 0.12));
+	color: var(--pos-primary);
+}
+
+@media (max-width: 600px) {
+	.qz-dialog-card {
+		width: calc(100vw - 16px);
+	}
 }
 </style>

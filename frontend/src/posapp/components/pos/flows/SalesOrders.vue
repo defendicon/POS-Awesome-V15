@@ -1,15 +1,35 @@
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="ordersDialog" max-width="900px">
+		<v-dialog v-model="ordersDialog" max-width="900">
 			<!-- <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
             </template>-->
-			<v-card>
-				<v-card-title>
-					<span class="text-h5 text-primary">{{ __("Select Sales Orders") }}</span>
+			<v-card
+				class="sales-orders-dialog pos-themed-card pos-dialog-shell"
+				style="--pos-dialog-max-width: 900px; --pos-dialog-max-height: 820px"
+			>
+				<v-card-title class="pos-dialog-header">
+					<div class="pos-dialog-header__main">
+						<div class="sales-orders-dialog__icon">
+							<v-icon size="22">mdi-cart-arrow-down</v-icon>
+						</div>
+						<div>
+							<div class="text-h5 text-primary">{{ __("Select Sales Orders") }}</div>
+							<div class="text-body-2 text-medium-emphasis">
+								{{ __("Search and load a sales order into the current invoice") }}
+							</div>
+						</div>
+					</div>
+					<v-btn
+						icon="mdi-close"
+						variant="text"
+						class="pos-dialog-close pos-touch-target pos-focus-ring"
+						:aria-label="__('Close sales orders dialog')"
+						@click="close_dialog"
+					/>
 				</v-card-title>
-				<v-card-text class="pa-0">
-					<v-container>
+				<v-card-text class="pa-0 pos-dialog-body">
+					<v-container class="sales-orders-dialog__body">
 						<v-row class="mb-4">
 							<v-text-field
 								color="primary"
@@ -22,7 +42,7 @@
 							></v-text-field>
 							<v-btn
 								variant="text"
-								class="ml-2"
+								class="ml-2 pos-dialog-action-btn pos-touch-target pos-focus-ring"
 								color="primary"
 								theme="dark"
 								:loading="isLoading"
@@ -41,6 +61,7 @@
 						<v-row no-gutters>
 							<v-col cols="12" class="pa-1">
 								<v-data-table
+									v-if="dialog_data.length"
 									:headers="headers"
 									:items="dialog_data"
 									item-key="name"
@@ -58,21 +79,47 @@
 										{{ formatCurrency(item.grand_total) }}
 									</template>
 								</v-data-table>
+								<div
+									v-else-if="searchedOnce && !isLoading && !errorMessage"
+									class="sales-orders-empty-state"
+								>
+									<v-icon size="40" color="primary">mdi-text-box-search-outline</v-icon>
+									<div class="sales-orders-empty-state__title">
+										{{ __("No sales orders found") }}
+									</div>
+									<div class="sales-orders-empty-state__subtitle">
+										{{ __("Try another order ID, then search again.") }}
+									</div>
+									<v-btn
+										color="primary"
+										variant="text"
+										class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+										@click="clearSearch"
+									>
+										{{ __("Clear Search") }}
+									</v-btn>
+								</div>
 							</v-col>
 						</v-row>
 					</v-container>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="pos-dialog-actions">
 					<v-spacer></v-spacer>
-					<v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
+					<v-btn
+						color="error"
+						theme="dark"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
+						@click="close_dialog"
+					>{{ __("Close") }}</v-btn>
 					<v-btn
 						v-if="selected.length"
 						color="success"
 						theme="dark"
+						class="pos-dialog-action-btn pos-touch-target pos-focus-ring"
 						:loading="isSubmitting"
 						:disabled="isSubmitting"
 						@click="submit_dialog"
-						>Select</v-btn
+						>{{ __("Select") }}</v-btn
 					>
 				</v-card-actions>
 			</v-card>
@@ -110,6 +157,7 @@ export default {
 		selected: [],
 		dialog_data: [],
 		order_name: "",
+		searchedOnce: false,
 		isLoading: false,
 		isSubmitting: false,
 		errorMessage: "",
@@ -156,11 +204,20 @@ export default {
 			this.selected = [];
 		},
 
+		clearSearch() {
+			this.order_name = "";
+			this.dialog_data = [];
+			this.clearSelected();
+			this.errorMessage = "";
+			this.searchedOnce = false;
+		},
+
 		async search_orders() {
 			if (this.isLoading || this.isSubmitting) {
 				return;
 			}
 
+			this.searchedOnce = true;
 			this.errorMessage = "";
 			this.isLoading = true;
 
@@ -261,6 +318,7 @@ export default {
 				this.clearSelected();
 				this.dialog_data = data || [];
 				this.order_name = "";
+				this.searchedOnce = false;
 				this.errorMessage = "";
 				this.isLoading = false;
 				this.isSubmitting = false;
@@ -273,3 +331,55 @@ export default {
 	// },
 };
 </script>
+
+<style scoped>
+.sales-orders-dialog {
+	width: min(900px, calc(100vw - 24px));
+}
+
+.sales-orders-dialog__body {
+	overflow-y: auto;
+}
+
+.sales-orders-dialog__icon {
+	width: 44px;
+	height: 44px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(25, 118, 210, 0.16), rgba(66, 165, 245, 0.12));
+	color: var(--pos-primary);
+}
+
+.sales-orders-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-height: 220px;
+	padding: 24px 16px;
+	border: 1px dashed var(--pos-border);
+	border-radius: 18px;
+	background: var(--pos-surface-muted);
+	text-align: center;
+}
+
+.sales-orders-empty-state__title {
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--pos-text-primary);
+}
+
+.sales-orders-empty-state__subtitle {
+	max-width: 32ch;
+	color: var(--pos-text-secondary);
+}
+
+@media (max-width: 600px) {
+	.sales-orders-dialog {
+		width: calc(100vw - 16px);
+	}
+}
+</style>
