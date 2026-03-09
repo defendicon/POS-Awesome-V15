@@ -177,7 +177,8 @@ function formatBytes(bytes: number) {
 
 .cache-tooltip-content {
 	padding: 12px;
-	min-width: 200px;
+	width: min(260px, calc(100vw - 32px));
+	min-width: min(200px, calc(100vw - 32px));
 }
 
 .cache-tooltip-title {

@@ -72,7 +72,7 @@ Audit baseline used:
 
 ## High Priority Issues
 
-- [ ] `P1` Restore visible focus treatment in the invoice table instead of suppressing outlines.
+- [x] `P1` Restore visible focus treatment in the invoice table instead of suppressing outlines.
   - Why it matters: keyboard users lose orientation inside one of the densest areas of the app.
   - Evidence:
     - `frontend/src/posapp/components/pos/invoice/items-table-styles.css:116`
@@ -83,7 +83,7 @@ Audit baseline used:
   - Done when:
     - Tabbing through invoice items clearly shows current focus.
 
-- [ ] `P1` Remove rigid navbar and menu widths that will crowd smaller breakpoints.
+- [x] `P1` Remove rigid navbar and menu widths that will crowd smaller breakpoints.
   - Why it matters: fixed-width gadgets fight the available header space and encourage overflow, truncation, and hidden actions.
   - Evidence:
     - `frontend/src/posapp/components/navbar/NotificationBell.vue:151-152`
@@ -101,7 +101,7 @@ Audit baseline used:
     - Navbar remains stable at tablet widths.
     - Popovers never exceed viewport width.
 
-- [ ] `P1` Stop forcing the database health widget into LTR when the app is in RTL.
+- [x] `P1` Stop forcing the database health widget into LTR when the app is in RTL.
   - Why it matters: this creates a visibly inconsistent navbar and breaks the otherwise intentional RTL support.
   - Evidence:
     - `frontend/src/posapp/components/navbar/DatabaseUsageGadget.vue:111-112`

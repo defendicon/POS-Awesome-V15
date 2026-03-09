@@ -9,7 +9,7 @@
 				{{ __("Database Health") }}
 			</div>
 		</div>
-		<div class="db-tooltip-content p-3 min-w-[220px]">
+		<div class="db-tooltip-content p-3">
 			<div v-if="loading" class="db-tooltip-detail">{{ __("Loading database stats...") }}</div>
 			<div v-else-if="error" class="db-tooltip-warning">{{ error }}</div>
 			<div v-else>
@@ -105,19 +105,12 @@ const sparklinePoints = computed(() => {
 </script>
 
 <style scoped>
-/* Force LTR formatting for database gadget */
-.db-gadget-section,
-.db-gadget-section * {
-	direction: ltr !important;
-	text-align: left !important;
-}
-
 .db-gadget-section {
 	display: flex;
 	align-items: center;
 	margin: 0 8px;
-	direction: ltr;
-	text-align: left;
+	direction: inherit;
+	text-align: start;
 }
 .db-meter-container {
 	cursor: pointer;
@@ -137,12 +130,14 @@ const sparklinePoints = computed(() => {
 	min-width: 48px;
 	text-align: right;
 	direction: ltr;
+	unicode-bidi: plaintext;
 }
 .db-tooltip-content {
 	padding: 14px;
-	min-width: 220px;
-	direction: ltr;
-	text-align: left;
+	width: min(320px, calc(100vw - 32px));
+	min-width: min(220px, calc(100vw - 32px));
+	direction: inherit;
+	text-align: start;
 }
 .db-tooltip-title {
 	font-weight: 600;
@@ -154,8 +149,7 @@ const sparklinePoints = computed(() => {
 	font-size: 12px;
 	margin-bottom: 8px;
 	line-height: 1.5;
-	direction: ltr;
-	text-align: left;
+	text-align: start;
 }
 .db-tooltip-section-title {
 	font-weight: 600;
@@ -163,8 +157,7 @@ const sparklinePoints = computed(() => {
 	margin-bottom: 4px;
 	/* Removed hardcoded color */
 	opacity: 0.85;
-	direction: ltr;
-	text-align: left;
+	text-align: start;
 }
 .db-tooltip-subtitle {
 	font-size: 12px;
@@ -181,8 +174,7 @@ const sparklinePoints = computed(() => {
 	margin-bottom: 2px;
 	display: flex;
 	align-items: center;
-	direction: ltr;
-	text-align: left;
+	text-align: start;
 }
 .db-tooltip-warning {
 	color: #d32f2f;
@@ -190,23 +182,27 @@ const sparklinePoints = computed(() => {
 	display: flex;
 	align-items: center;
 	margin-bottom: 4px;
-	direction: ltr;
-	text-align: left;
+	text-align: start;
 }
 .db-tooltip-tip {
 	/* Removed hardcoded color */
 	font-size: 12px;
 	display: flex;
 	align-items: center;
-	direction: ltr;
-	text-align: left;
+	text-align: start;
 }
 .db-tooltip-explanation {
 	/* Removed hardcoded color */
 	font-size: 12px;
 	display: flex;
 	align-items: center;
-	direction: ltr;
-	text-align: left;
+	text-align: start;
+}
+
+.db-tooltip-detail b,
+.db-top-tables b,
+.db-tooltip-sparkline,
+.db-tooltip-detail span {
+	unicode-bidi: plaintext;
 }
 </style>

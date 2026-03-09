@@ -150,8 +150,9 @@ function formatTimestamp(ts: string | number | Date) {
 }
 
 .notification-card {
-	min-width: 320px;
-	max-width: 400px;
+	width: min(400px, calc(100vw - 32px));
+	min-width: min(320px, calc(100vw - 32px));
+	max-width: min(400px, calc(100vw - 32px));
 }
 
 .notification-card__header {

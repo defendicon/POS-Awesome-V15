@@ -113,7 +113,8 @@
 	cursor: default;
 	will-change: background-color, transform, box-shadow;
 	border: none;
-	outline: none;
+	outline: 2px solid transparent;
+	outline-offset: -2px;
 	box-sizing: border-box;
 	border-right: 1px solid var(--pos-border-light);
 	contain: layout style;
@@ -155,6 +156,12 @@
 	font-weight: 600;
 	letter-spacing: 0.02em;
 	text-shadow: none;
+}
+
+.posa-cart-table th:focus-within {
+	outline-color: rgba(var(--v-theme-primary), 0.75);
+	background-color: rgba(var(--v-theme-primary), 0.08);
+	box-shadow: inset 0 0 0 1px rgba(var(--v-theme-primary), 0.12);
 }
 
 /* Table rows */
@@ -265,6 +272,18 @@
 .posa-cart-table__qty-btn .v-icon {
 	position: relative;
 	z-index: 1;
+}
+
+.qty-control-btn:focus-visible,
+.posa-cart-table__qty-btn:focus-visible,
+.uom-arrow:focus-visible,
+.posa-cart-table__delete-btn:focus-visible,
+.posa-cart-table__editor-display:focus-visible {
+	outline: 2px solid rgba(var(--v-theme-primary), 0.85);
+	outline-offset: 2px;
+	box-shadow:
+		0 0 0 3px rgba(var(--v-theme-primary), 0.18),
+		0 4px 16px var(--pos-shadow-light) !important;
 }
 
 .qty-control-btn.minus-btn,
@@ -417,6 +436,12 @@
 	text-align: center;
 	font-weight: 600;
 	font-size: 0.9rem;
+}
+
+.posa-cart-table__editor-input :deep(.v-field:focus-within),
+.posa-cart-table__qty-input :deep(.v-field:focus-within) {
+	box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.16);
+	border-color: rgba(var(--v-theme-primary), 0.75) !important;
 }
 
 /* UOM specific styles */
