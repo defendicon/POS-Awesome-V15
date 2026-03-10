@@ -77,7 +77,6 @@ const tableContainer = ref(null);
 const viewportWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1280);
 const containerWidth = ref(viewportWidth.value);
 let resizeObserver = null;
-const isDesktopViewport = computed(() => viewportWidth.value >= 1024);
 
 const effectiveWidth = computed(() => {
 	const measuredWidth = Number(containerWidth.value || 0);
@@ -89,12 +88,11 @@ const effectiveWidth = computed(() => {
 });
 
 const breakpoint = computed(() => {
-	if (isDesktopViewport.value) return "desktop";
-	if (effectiveWidth.value >= 1100) return "xl";
+	if (effectiveWidth.value >= 980) return "xl";
+	if (effectiveWidth.value >= 820) return "lg";
+	if (effectiveWidth.value >= 680) return "md";
+	if (effectiveWidth.value >= 560) return "sm";
 	if (effectiveWidth.value < 560) return "xs";
-	if (effectiveWidth.value < 760) return "sm";
-	if (effectiveWidth.value < 980) return "md";
-	if (effectiveWidth.value < 1100) return "lg";
 	return "xl";
 });
 
@@ -103,27 +101,19 @@ const responsiveHeaders = computed(() => {
 	if (sourceHeaders.length === 0) return [];
 
 	const visibleKeysByBreakpoint = {
-		desktop: sourceHeaders.map((header) => header?.key),
-		xs: ["item_name", "actual_qty"],
-		sm: ["item_name", "actual_qty", "rate"],
-		md: ["item_name", "actual_qty", "rate", "stock_uom"],
-		lg: ["item_name", "item_code", "actual_qty", "rate", "stock_uom"],
+		xs: ["item_name", "rate"],
+		sm: ["item_name", "rate"],
+		md: ["item_name", "actual_qty", "rate"],
+		lg: ["item_name", "item_code", "actual_qty", "rate"],
 		xl: ["item_name", "item_code", "actual_qty", "rate", "stock_uom"],
 	};
 
 	const widthMaps = {
-		desktop: {
-			item_name: "34%",
-			item_code: "22%",
-			actual_qty: "14%",
-			rate: "18%",
-			stock_uom: "12%",
-		},
-		xs: { item_name: "74%", actual_qty: "26%" },
-		sm: { item_name: "50%", actual_qty: "18%", rate: "32%" },
-		md: { item_name: "42%", actual_qty: "16%", rate: "24%", stock_uom: "18%" },
-		lg: { item_name: "32%", item_code: "22%", actual_qty: "14%", rate: "20%", stock_uom: "12%" },
-		xl: { item_name: "30%", item_code: "22%", actual_qty: "14%", rate: "22%", stock_uom: "12%" },
+		xs: { item_name: "64%", rate: "36%" },
+		sm: { item_name: "62%", rate: "38%" },
+		md: { item_name: "52%", actual_qty: "18%", rate: "30%" },
+		lg: { item_name: "38%", item_code: "24%", actual_qty: "14%", rate: "24%" },
+		xl: { item_name: "32%", item_code: "22%", actual_qty: "14%", rate: "20%", stock_uom: "12%" },
 	};
 
 	const activeBreakpoint = breakpoint.value;
@@ -139,7 +129,7 @@ const responsiveHeaders = computed(() => {
 });
 
 const tableStyles = computed(() => ({
-	minWidth: isDesktopViewport.value ? "760px" : "100%",
+	minWidth: "100%",
 }));
 
 const formatActualQty = (value) => {

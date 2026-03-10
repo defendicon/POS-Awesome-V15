@@ -76,10 +76,13 @@ describe("UI regression coverage", () => {
 	it("keeps desktop item selector tables fully expanded", () => {
 		const source = itemsSelectorTableSource;
 
-		expect(source).toContain('const isDesktopViewport = computed(() => viewportWidth.value >= 1024);');
-		expect(source).toContain('if (isDesktopViewport.value) return "desktop";');
-		expect(source).toContain('desktop: sourceHeaders.map((header) => header?.key),');
-		expect(source).toContain('minWidth: isDesktopViewport.value ? "760px" : "100%",');
+		expect(source).toContain('if (effectiveWidth.value >= 980) return "xl";');
+		expect(source).toContain('if (effectiveWidth.value >= 820) return "lg";');
+		expect(source).toContain('if (effectiveWidth.value >= 680) return "md";');
+		expect(source).toContain('xs: ["item_name", "rate"],');
+		expect(source).toContain('md: ["item_name", "actual_qty", "rate"],');
+		expect(source).toContain('lg: ["item_name", "item_code", "actual_qty", "rate"],');
+		expect(source).toContain('minWidth: "100%",');
 	});
 
 	it("keeps invoice management loaders and reset actions in each tab", () => {
