@@ -2,7 +2,7 @@
 	<div
 		class="pos-main-container dynamic-container"
 		:class="rtlClasses"
-		:style="[responsiveStyles, rtlStyles]"
+		:style="[responsiveStyles, layoutStyleOverrides, rtlStyles]"
 	>
 		<Drafts></Drafts>
 		<InvoiceManagement></InvoiceManagement>
@@ -92,7 +92,7 @@
 				<Invoice ref="invoicePanel"></Invoice>
 			</v-col>
 		</v-row>
-		<div v-if="showBottomDock" class="mobile-pos-stack">
+		<div v-if="showBottomDock" ref="mobileDock" class="mobile-pos-stack">
 			<div class="mobile-sale-dock">
 				<div class="mobile-sale-dock__copy">
 					<span class="mobile-sale-dock__eyebrow">{{ __("Active sale") }}</span>
@@ -230,6 +230,7 @@ export default {
 		const dialog = ref(false);
 		const invoicePanel = ref(null);
 		const additionalDiscountField = ref(null);
+		const mobileDock = ref(null);
 		const responsive = useResponsive();
 		const rtl = useRtl();
 		const shift = usePosShift(() => {
@@ -257,6 +258,8 @@ export default {
 		const showBottomDock = computed(
 			() => !dialog.value && responsive.windowWidth.value < 1100,
 		);
+		const bottomDockHeight = ref(0);
+		let mobileDockObserver = null;
 		const isEditingAdditionalDiscount = ref(false);
 		const isEditingAdditionalDiscountPercentage = ref(false);
 		const invoiceTotal = computed(() => {
@@ -384,6 +387,28 @@ export default {
 		};
 		const isSelectorViewActive = (view) =>
 			compactPanel.value === "selector" && activeView.value === view;
+		const getFallbackBottomSpace = () => {
+			const rawValue = responsive.responsiveStyles.value["--bottom-safe-space"];
+			const parsed = Number.parseFloat(String(rawValue || "0"));
+			return Number.isFinite(parsed) ? parsed : 24;
+		};
+		const updateBottomDockHeight = () => {
+			const dockElement = mobileDock.value;
+			if (!showBottomDock.value || !dockElement) {
+				bottomDockHeight.value = 0;
+				return;
+			}
+			bottomDockHeight.value = dockElement.offsetHeight + 20;
+		};
+		const layoutStyleOverrides = computed(() => {
+			const fallbackBottomSpace = getFallbackBottomSpace();
+			const effectiveBottomSpace = showBottomDock.value
+				? Math.max(bottomDockHeight.value, fallbackBottomSpace)
+				: fallbackBottomSpace;
+			return {
+				"--bottom-safe-space": `${effectiveBottomSpace}px`,
+			};
+		});
 		const handleAdditionalDiscountUpdate = (value) => {
 			invoiceStore.setAdditionalDiscount(value);
 		};
@@ -418,15 +443,30 @@ export default {
 		});
 
 		onMounted(() => {
+			if (typeof window !== "undefined" && "ResizeObserver" in window) {
+				mobileDockObserver = new ResizeObserver(() => {
+					updateBottomDockHeight();
+				});
+			}
 			if (eventBus) {
 				eventBus.on("submit_closing_pos", (data) => {
 					shift.submit_closing_pos(data);
 				});
 				eventBus.on("focus_additional_discount", focusAdditionalDiscountField);
 			}
+			nextTick(() => {
+				updateBottomDockHeight();
+				if (mobileDockObserver && mobileDock.value) {
+					mobileDockObserver.observe(mobileDock.value);
+				}
+			});
 		});
 
 		onBeforeUnmount(() => {
+			if (mobileDockObserver) {
+				mobileDockObserver.disconnect();
+				mobileDockObserver = null;
+			}
 			if (eventBus) {
 				eventBus.off("submit_closing_pos");
 				eventBus.off("focus_additional_discount", focusAdditionalDiscountField);
@@ -467,6 +507,22 @@ export default {
 			}
 		});
 
+		watch(
+			[showBottomDock, () => responsive.windowWidth.value, () => responsive.windowHeight.value],
+			() => {
+				nextTick(() => {
+					if (mobileDockObserver) {
+						mobileDockObserver.disconnect();
+						if (showBottomDock.value && mobileDock.value) {
+							mobileDockObserver.observe(mobileDock.value);
+						}
+					}
+					updateBottomDockHeight();
+				});
+			},
+			{ immediate: true },
+		);
+
 		return {
 			...responsive,
 			...rtl,
@@ -492,7 +548,9 @@ export default {
 			usePaymentDialog,
 			useCompactPosSwitcher,
 			showBottomDock,
+			layoutStyleOverrides,
 			compactPanel,
+			mobileDock,
 			setCompactPanel,
 			setSelectorView,
 			showInvoicePanel,
