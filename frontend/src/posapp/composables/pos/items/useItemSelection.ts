@@ -243,8 +243,15 @@ export function useItemSelection() {
 
 	async function handleRowClick(
 		event: MouseEvent,
-		{ item }: { item: SelectableItem },
+		payload: { item?: SelectableItem } | SelectableItem,
 	) {
+		const item =
+			payload && typeof payload === "object" && "item" in payload
+				? payload.item
+				: (payload as SelectableItem);
+		if (!item) {
+			return;
+		}
 		triggerFlyAnimation(event, true);
 		if (ctx.addItem) await ctx.addItem(item);
 	}
