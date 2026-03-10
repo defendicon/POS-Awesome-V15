@@ -30,10 +30,27 @@
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
+				<ItemSettingsDialog
+					v-model="show_item_settings"
+					:allow-new-line-setting="!!pos_profile?.posa_new_line"
+					:initial-settings="{
+						new_line,
+						hide_qty_decimals,
+						hide_zero_rate_items,
+						show_last_invoice_rate,
+						enable_background_sync,
+						background_sync_interval,
+						enable_custom_items_per_page,
+						items_per_page,
+						force_server_items: temp_force_server_items,
+					}"
+					@save="applyItemSettings"
+				/>
+
 				<v-card
 					flat
-					class="selector-section-card selector-header-card pos-themed-card"
-					:class="{ 'selector-header-card--scrolled': selectorScrolled }"
+					class="selector-section-card selector-shell-card pos-themed-card"
+					:class="{ 'selector-shell-card--scrolled': selectorScrolled }"
 				>
 					<div class="section-card-heading selector-search-heading">
 						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
@@ -64,30 +81,11 @@
 						@reload-items="forceReloadItems"
 						ref="itemHeader"
 					/>
-				</v-card>
-
-				<ItemSettingsDialog
-					v-model="show_item_settings"
-					:allow-new-line-setting="!!pos_profile?.posa_new_line"
-					:initial-settings="{
-						new_line,
-						hide_qty_decimals,
-						hide_zero_rate_items,
-						show_last_invoice_rate,
-						enable_background_sync,
-						background_sync_interval,
-						enable_custom_items_per_page,
-						items_per_page,
-						force_server_items: temp_force_server_items,
-					}"
-					@save="applyItemSettings"
-				/>
-
-				<v-card flat class="selector-section-card selector-results-card pos-themed-card">
-					<div class="section-card-heading section-card-heading--with-padding">
+					<div class="section-card-heading section-card-heading--with-padding selector-results-heading">
 						<h3 class="section-card-heading__title">{{ __("Available Items") }}</h3>
 					</div>
-					<v-row class="items">
+					<div class="selector-results-body">
+						<v-row class="items">
 						<v-col cols="12" class="pt-0 mt-0">
 							<ItemsSelectorCards
 								v-if="items_view === 'card'"
@@ -147,7 +145,8 @@
 								@list-scroll="onListScroll"
 							/>
 						</v-col>
-					</v-row>
+						</v-row>
+					</div>
 				</v-card>
 			</div>
 		</v-card>
@@ -1279,12 +1278,15 @@ defineExpose({
 	color: var(--pos-text-primary);
 }
 
-.selector-header-card {
+.selector-shell-card {
 	padding: 0;
 	overflow: hidden;
 	position: relative;
 	z-index: 2;
-	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
 	background: var(--pos-card-bg) !important;
 }
 
@@ -1297,23 +1299,27 @@ defineExpose({
 		transform 0.2s ease;
 }
 
-.selector-header-card--scrolled .selector-search-heading {
+.selector-shell-card--scrolled .selector-search-heading {
 	opacity: 0;
 	transform: translateY(-6px);
 	pointer-events: none;
 	visibility: hidden;
 }
 
-.selector-results-card {
+.selector-results-heading {
+	border-top: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+}
+
+.selector-results-body {
 	padding: var(--dynamic-xs);
-	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
 	min-height: 240px;
+	overflow: hidden;
 }
 
-.selector-results-card .items {
+.selector-results-body .items {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
@@ -1322,7 +1328,7 @@ defineExpose({
 	overflow: hidden;
 }
 
-.selector-results-card .items > .v-col {
+.selector-results-body .items > .v-col {
 	display: flex;
 	flex: 1 1 auto;
 	min-height: 0;
@@ -1455,7 +1461,7 @@ defineExpose({
 		min-height: max(var(--container-min-height, 380px), 64vh);
 	}
 
-	.selector-results-card {
+	.selector-results-body {
 		min-height: 320px;
 	}
 
@@ -1475,7 +1481,7 @@ defineExpose({
 		min-height: max(var(--container-min-height, 380px), 60vh);
 	}
 
-	.selector-results-card {
+	.selector-results-body {
 		min-height: 280px;
 	}
 }
