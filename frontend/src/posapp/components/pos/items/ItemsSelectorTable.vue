@@ -99,11 +99,11 @@ const responsiveHeaders = computed(() => {
 	if (sourceHeaders.length === 0) return [];
 
 	const widthMaps = {
-		item_name: { width: "320px", minWidth: 220 },
-		item_code: { width: "190px", minWidth: 150 },
-		actual_qty: { width: "130px", minWidth: 110 },
-		rate: { width: "170px", minWidth: 130 },
-		stock_uom: { width: "100px", minWidth: 90 },
+		item_name: { width: "260px", minWidth: 180 },
+		item_code: { width: "150px", minWidth: 120 },
+		actual_qty: { width: "110px", minWidth: 96 },
+		rate: { width: "140px", minWidth: 112 },
+		stock_uom: { width: "84px", minWidth: 72 },
 	};
 
 	return sourceHeaders
@@ -261,9 +261,9 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	position: sticky;
 	top: 0;
 	z-index: 2;
-	padding: 8px 10px;
+	padding: 6px 8px;
 	text-align: left;
-	font-size: 0.74rem;
+	font-size: 0.72rem;
 	font-weight: 700;
 	color: var(--pos-text-secondary);
 	background: var(--pos-surface-muted);
@@ -274,7 +274,7 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 }
 
 :deep(.items-table td) {
-	padding: 8px 10px;
+	padding: 6px 8px;
 	border-bottom: 1px solid var(--pos-border-light);
 	vertical-align: middle;
 	overflow: hidden;
@@ -302,12 +302,12 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 .item-name-cell {
 	font-weight: 600;
-	font-size: 0.86rem;
+	font-size: 0.82rem;
 }
 
 .item-code-cell,
 .rate-primary-line {
-	font-size: 0.8rem;
+	font-size: 0.76rem;
 }
 
 .items-table-empty {

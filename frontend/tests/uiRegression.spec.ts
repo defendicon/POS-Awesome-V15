@@ -85,11 +85,11 @@ describe("UI regression coverage", () => {
 		expect(source).toContain('density="compact"');
 		expect(source).toContain(':item-height="56"');
 		expect(source).toContain('@scroll.passive="handleListScroll"');
-		expect(source).toContain('item_name: { width: "320px", minWidth: 220 },');
-		expect(source).toContain('item_code: { width: "190px", minWidth: 150 },');
-		expect(source).toContain('actual_qty: { width: "130px", minWidth: 110 },');
-		expect(source).toContain('rate: { width: "170px", minWidth: 130 },');
-		expect(source).toContain('stock_uom: { width: "100px", minWidth: 90 },');
+		expect(source).toContain('item_name: { width: "260px", minWidth: 180 },');
+		expect(source).toContain('item_code: { width: "150px", minWidth: 120 },');
+		expect(source).toContain('actual_qty: { width: "110px", minWidth: 96 },');
+		expect(source).toContain('rate: { width: "140px", minWidth: 112 },');
+		expect(source).toContain('stock_uom: { width: "84px", minWidth: 72 },');
 		expect(source).toContain('minWidth: `${tableMinWidth.value}px`,');
 		expect(selectorSource).toContain('@list-scroll="onListScroll"');
 	});
