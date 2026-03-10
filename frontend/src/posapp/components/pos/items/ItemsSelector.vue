@@ -298,6 +298,7 @@ const {
 
 // 2. Local State & Settings
 const newItemDialog = ref(false);
+const itemsContainer = ref(null);
 const qty = ref(1);
 const search_input = ref("");
 const first_search = ref("");
@@ -551,6 +552,7 @@ const {
 } = useItemSelectorLayout({
 	resizeDebounce: 100,
 	loadVisibleItems: () => itemsLoader.loadVisibleItems(),
+	containerRef: itemsContainer,
 });
 
 // 5. Core Methods

@@ -172,6 +172,7 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	flex-direction: column;
 	min-height: 0;
 	overflow: hidden;
+	scrollbar-gutter: stable both-edges;
 }
 
 .item-container {
@@ -204,6 +205,7 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	-webkit-overflow-scrolling: touch;
 	overscroll-behavior: contain;
 	position: relative;
+	scrollbar-gutter: stable both-edges;
 }
 
 .items-empty-state {
@@ -302,6 +304,7 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	padding: 16px;
 	contain: layout style;
 	box-sizing: border-box;
+	width: 100%;
 }
 
 @media (max-width: 1200px) {

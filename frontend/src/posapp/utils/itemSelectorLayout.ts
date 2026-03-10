@@ -6,10 +6,10 @@
  * Calculates the number of columns based on container width.
  */
 export const getCardColumns = (width: number): number => {
-    if (width <= 768) {
+    if (width <= 420) {
         return 1;
     }
-    if (width <= 1200) {
+    if (width <= 860) {
         return 2;
     }
     return 3;
@@ -19,10 +19,10 @@ export const getCardColumns = (width: number): number => {
  * Calculates the gap between cards based on container width.
  */
 export const getCardGap = (width: number): number => {
-    if (width <= 768) {
+    if (width <= 420) {
         return 10;
     }
-    if (width <= 1200) {
+    if (width <= 860) {
         return 12;
     }
     return 16;
@@ -32,10 +32,10 @@ export const getCardGap = (width: number): number => {
  * Calculates the padding for the card container based on container width.
  */
 export const getCardPadding = (width: number): number => {
-    if (width <= 768) {
+    if (width <= 420) {
         return 10;
     }
-    if (width <= 1200) {
+    if (width <= 860) {
         return 12;
     }
     return 16;
