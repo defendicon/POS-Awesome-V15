@@ -1252,9 +1252,9 @@ defineExpose({
 	display: flex;
 	flex-direction: column;
 	gap: var(--dynamic-sm);
-	flex: 1 1 auto;
-	min-height: 0;
-	overflow: hidden;
+	flex: 0 0 auto;
+	min-height: max-content;
+	overflow: visible;
 }
 
 .selector-section-card {
@@ -1287,8 +1287,8 @@ defineExpose({
 	z-index: 2;
 	display: flex;
 	flex-direction: column;
-	flex: 1 1 auto;
-	min-height: 0;
+	flex: 0 0 auto;
+	min-height: auto;
 	border: none !important;
 	box-shadow: none !important;
 	border-radius: 0 !important;
@@ -1419,12 +1419,9 @@ defineExpose({
 
 :deep(.items-table-container),
 :deep(.items-card-container) {
-	display: flex;
-	flex: 1 1 auto;
-	flex-direction: column;
-	min-height: 0;
+	display: block;
 	width: 100%;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .item-selection-option {

@@ -74,10 +74,11 @@ const props = defineProps({
 const emit = defineEmits(["row-click"]);
 
 const tableContainer = ref(null);
-const containerWidth = ref(0);
+const containerWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1280);
 let resizeObserver = null;
 
 const breakpoint = computed(() => {
+	if (!containerWidth.value || containerWidth.value >= 1080) return "xl";
 	if (containerWidth.value < 460) return "xs";
 	if (containerWidth.value < 680) return "sm";
 	if (containerWidth.value < 860) return "md";
