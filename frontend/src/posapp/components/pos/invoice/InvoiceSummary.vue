@@ -1,6 +1,7 @@
 <template>
 	<v-card
 		class="cards sticky-summary-card mb-0 py-2 px-3 rounded-lg pos-themed-card"
+		:class="{ 'sticky-summary-card--dock-safe': useCompactSaleDock }"
 	>
 		<v-row dense class="summary-content">
 			<v-col
@@ -349,6 +350,10 @@ defineExpose({
 	box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
 }
 
+.sticky-summary-card--dock-safe {
+	margin-bottom: calc(var(--bottom-safe-space) + 8px);
+}
+
 .summary-content {
 	row-gap: 6px;
 }
@@ -433,6 +438,12 @@ defineExpose({
 	}
 }
 
+@media (max-width: 1099px) {
+	.sticky-summary-card--dock-safe {
+		margin-bottom: calc(var(--bottom-safe-space) + 12px);
+	}
+}
+
 @media (max-width: 768px) {
 	.sticky-summary-card {
 		position: static;
@@ -460,6 +471,10 @@ defineExpose({
 
 	.summary-field {
 		font-size: 0.875rem;
+	}
+
+	.sticky-summary-card--dock-safe {
+		margin-bottom: calc(var(--bottom-safe-space) + 8px);
 	}
 }
 </style>

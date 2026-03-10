@@ -1065,6 +1065,12 @@ export default {
 	overflow: auto;
 }
 
+@media (max-width: 1099px) {
+	.invoice-shell {
+		padding-bottom: calc(var(--bottom-safe-space) + var(--dynamic-xs));
+	}
+}
+
 .invoice-main-card {
 	display: flex;
 	flex-direction: column;
