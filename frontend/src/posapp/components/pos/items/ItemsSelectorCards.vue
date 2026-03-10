@@ -35,36 +35,54 @@
 				</v-btn>
 			</div>
 		</div>
-		<div v-else class="items-card-grid">
-			<ItemCard
-				v-for="item in displayedItems"
-				:key="item.item_code"
-				:item="item"
-				:pos-profile="posProfile"
-				:context="context"
-				:selected-currency="selectedCurrency"
-				:hide-qty-decimals="hideQtyDecimals"
-				:last-invoice-rate="getLastInvoiceRate(item)"
-				:is-item-highlighted="isItemHighlighted(item)"
-				:currency-symbol="currencySymbol"
-				:format-currency="formatCurrency"
-				:format-number="formatNumber"
-				:rate-precision="ratePrecision"
-				:is-negative="isNegative"
-				:style="{
-					width: cardColumnWidth + 'px',
-					height: cardRowHeight + 'px',
-				}"
-				@click="emit('select-item', $event, item)"
-				@dragstart="emit('dragstart', $event, item)"
-				@dragend="emit('dragend', $event)"
-			/>
-		</div>
+		<RecycleScroller
+			v-else
+			ref="scrollerRef"
+			:items="displayedItems"
+			key-field="item_code"
+			class="virtual-scroller"
+			:class="{ 'item-container': isOverflowing }"
+			list-class="items-virtual-list"
+			:item-size="cardSlotHeight"
+			:grid-items="cardColumns"
+			:item-secondary-size="cardSlotWidth"
+			:buffer="virtualScrollBuffer"
+			:emit-update="true"
+			@update="handleRangeUpdate"
+		>
+			<template #default="{ item }">
+				<ItemCard
+					v-if="item"
+					:key="item.item_code"
+					:item="item"
+					:pos-profile="posProfile"
+					:context="context"
+					:selected-currency="selectedCurrency"
+					:hide-qty-decimals="hideQtyDecimals"
+					:last-invoice-rate="getLastInvoiceRate(item)"
+					:is-item-highlighted="isItemHighlighted(item)"
+					:currency-symbol="currencySymbol"
+					:format-currency="formatCurrency"
+					:format-number="formatNumber"
+					:rate-precision="ratePrecision"
+					:is-negative="isNegative"
+					:style="{
+						width: cardColumnWidth + 'px',
+						height: cardRowHeight + 'px',
+					}"
+					@click="handleItemClick"
+					@dragstart="handleDragStart"
+					@dragend="handleDragEnd"
+				/>
+			</template>
+		</RecycleScroller>
 	</div>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { RecycleScroller } from "vue-virtual-scroller";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import ItemCard from "./ItemCard.vue";
 import Skeleton from "../../ui/Skeleton.vue";
 
@@ -101,12 +119,49 @@ const emit = defineEmits(["select-item", "dragstart", "dragend", "virtual-range-
 const showClearButton = computed(() => {
 	return Boolean(props.searchInput) || (props.itemGroup && props.itemGroup !== "ALL");
 });
+
+const handleItemClick = (event, item) => {
+	emit("select-item", event, item);
+};
+
+const handleDragStart = (event, item) => {
+	emit("dragstart", event, item);
+};
+
+const handleDragEnd = (event) => {
+	emit("dragend", event);
+};
+
+const handleRangeUpdate = (...args) => {
+	emit("virtual-range-update", ...args);
+};
+
+const scrollerRef = ref(null);
+
+const scrollToItem = (index) => {
+	scrollerRef.value?.scrollToItem?.(index);
+};
+
+const getScrollerElement = () => {
+	const refValue = scrollerRef.value;
+	return refValue?.$el || refValue;
+};
+
+defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 </script>
 
 <style scoped>
 .items-card-container {
-	display: block;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
 	width: 100%;
+}
+
+.item-container {
+	overflow-y: auto;
+	scrollbar-gutter: stable;
 }
 
 .items-card-grid {
@@ -116,11 +171,21 @@ const showClearButton = computed(() => {
 	padding: 0;
 }
 
+.virtual-scroller {
+	height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	position: relative;
+}
+
 .items-empty-state {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	min-height: 240px;
+	height: 100%;
+	flex: 1 1 auto;
 	padding: 20px 16px 28px;
 }
 
@@ -184,17 +249,25 @@ const showClearButton = computed(() => {
 	font-weight: 700;
 }
 
+:deep(.items-virtual-list) {
+	padding: 0;
+	box-sizing: border-box;
+	contain: layout style;
+}
+
+.virtual-scroller :deep(.vue-recycle-scroller__item-wrapper) {
+	display: contents;
+}
+
 @media (max-width: 1200px) {
-	.items-card-grid {
-		grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-		gap: 12px;
+	:deep(.items-virtual-list) {
+		padding: 0;
 	}
 }
 
 @media (max-width: 768px) {
-	.items-card-grid {
-		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-		gap: 10px;
+	:deep(.items-virtual-list) {
+		padding: 0;
 	}
 }
 </style>

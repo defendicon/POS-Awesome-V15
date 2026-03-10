@@ -135,6 +135,7 @@
 								:row-props="getItemRowProps"
 								:no-data-text="__('No items found')"
 								@row-click="click_item_row"
+								@list-scroll="onListScroll"
 							/>
 						</v-col>
 						</v-row>

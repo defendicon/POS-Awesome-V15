@@ -4,21 +4,25 @@
 			{{ noDataText }}
 		</div>
 		<div v-else class="items-table-shell">
-			<table class="items-table" :style="tableStyles">
-				<thead>
-					<tr>
-						<th v-for="header in responsiveHeaders" :key="header.key" :style="{ width: header.width }">
-							{{ header.title }}
-						</th>
-					</tr>
-				</thead>
-				<tbody>
+			<v-data-table-virtual
+				ref="tableRef"
+				:headers="responsiveHeaders"
+				:items="displayedItems"
+				item-value="item_code"
+				fixed-header
+				height="100%"
+				hide-default-footer
+				class="items-table"
+				:style="tableStyles"
+				:header-props="headerProps"
+				:no-data-text="noDataText"
+				@scroll.passive="handleListScroll"
+			>
+				<template #item="{ item }">
 					<tr
-						v-for="item in displayedItems"
-						:key="item.item_code"
 						:class="resolveRowClass(item)"
 						v-bind="resolveRowProps(item)"
-						@click="emit('row-click', $event, item)"
+						@click="handleRowClick($event, item)"
 					>
 						<td v-for="header in responsiveHeaders" :key="header.key">
 							<template v-if="header.key === 'item_name'">
@@ -43,8 +47,8 @@
 							</template>
 						</td>
 					</tr>
-				</tbody>
-			</table>
+				</template>
+			</v-data-table-virtual>
 		</div>
 	</div>
 </template>
@@ -71,9 +75,10 @@ const props = defineProps({
 	noDataText: { type: String, default: "" },
 });
 
-const emit = defineEmits(["row-click"]);
+const emit = defineEmits(["row-click", "list-scroll"]);
 
 const tableContainer = ref(null);
+const tableRef = ref(null);
 const viewportWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1280);
 const containerWidth = ref(viewportWidth.value);
 let resizeObserver = null;
@@ -156,6 +161,14 @@ const resolveRowProps = (item) => {
 	return props.rowProps || {};
 };
 
+const handleRowClick = (event, item) => {
+	emit("row-click", event, item);
+};
+
+const handleListScroll = (event) => {
+	emit("list-scroll", event);
+};
+
 const updateContainerWidth = () => {
 	const el = tableContainer.value;
 	if (!el) {
@@ -193,28 +206,79 @@ onBeforeUnmount(() => {
 		window.removeEventListener("resize", updateViewportWidth);
 	}
 });
+
+const getTableElement = () => {
+	const refValue = tableRef.value;
+	return refValue?.$el || refValue;
+};
+
+const scrollToIndex = (index) => {
+	const refValue = tableRef.value;
+	const scrollToIndexFn = refValue?.scrollToIndex || refValue?.$?.exposed?.scrollToIndex;
+	if (typeof scrollToIndexFn === "function") {
+		scrollToIndexFn(index);
+		return true;
+	}
+
+	const tableEl = getTableElement();
+	const wrapper = tableEl?.querySelector?.(".v-table__wrapper");
+	const rows = tableEl?.querySelectorAll?.("tbody tr");
+	if (wrapper && rows && rows.length > 0) {
+		const targetRow = rows[index];
+		if (targetRow) {
+			wrapper.scrollTop = targetRow.offsetTop;
+		}
+		return true;
+	}
+
+	return false;
+};
+
+defineExpose({ scrollToIndex, getTableElement, tableRef });
 </script>
 
 <style scoped>
 .items-table-container {
-	display: block;
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
 	width: 100%;
 }
 
 .items-table-shell {
 	border: 1px solid var(--pos-border-light);
 	border-radius: var(--pos-radius-md);
-	overflow: auto;
+	overflow: hidden;
 	background: var(--pos-surface-raised);
+	height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
 }
 
 .items-table {
-	width: 100%;
-	table-layout: fixed;
-	border-collapse: collapse;
+	margin: 0;
+	height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
+	background: transparent;
 }
 
-.items-table th {
+:deep(.items-table .v-data-table),
+:deep(.items-table .v-data-table-virtual),
+:deep(.items-table .v-table) {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+:deep(.items-table .v-table__wrapper) {
+	height: 100%;
+	overflow-y: auto;
+}
+
+:deep(.items-table th) {
 	position: sticky;
 	top: 0;
 	z-index: 2;
@@ -230,7 +294,7 @@ onBeforeUnmount(() => {
 	text-overflow: ellipsis;
 }
 
-.items-table td {
+:deep(.items-table td) {
 	padding: 14px;
 	border-bottom: 1px solid var(--pos-border-light);
 	vertical-align: middle;
@@ -238,11 +302,11 @@ onBeforeUnmount(() => {
 	height: 68px;
 }
 
-.items-table tbody tr:nth-child(even) {
+:deep(.items-table tbody tr:nth-child(even)) {
 	background-color: rgba(var(--v-theme-on-surface), 0.015);
 }
 
-.items-table tbody tr:hover {
+:deep(.items-table tbody tr:hover) {
 	background-color: rgba(var(--v-theme-primary), 0.05);
 }
 

@@ -65,6 +65,9 @@ describe("UI regression coverage", () => {
 		const source = itemsSelectorCardsSource;
 
 		expect(source).toContain('<Skeleton v-for="n in 8"');
+		expect(source).toContain("<RecycleScroller");
+		expect(source).toContain('import { RecycleScroller } from "vue-virtual-scroller"');
+		expect(source).toContain('@update="handleRangeUpdate"');
 		expect(source).toContain('v-if="searchInput"');
 		expect(source).toContain("{{ searchInput }}");
 		expect(source).toContain("itemGroup && itemGroup !== 'ALL'");
@@ -75,7 +78,11 @@ describe("UI regression coverage", () => {
 
 	it("keeps desktop item selector tables fully expanded", () => {
 		const source = itemsSelectorTableSource;
+		const selectorSource = itemsSelectorSource;
 
+		expect(source).toContain("<v-data-table-virtual");
+		expect(source).toContain('item-value="item_code"');
+		expect(source).toContain('@scroll.passive="handleListScroll"');
 		expect(source).toContain("const responsiveWidth = computed(() => {");
 		expect(source).toContain("if (viewportWidth.value >= 1024) {");
 		expect(source).toContain('if (responsiveWidth.value >= 1280) return "xl";');
@@ -85,6 +92,7 @@ describe("UI regression coverage", () => {
 		expect(source).toContain('md: ["item_name", "actual_qty", "rate"],');
 		expect(source).toContain('lg: ["item_name", "item_code", "actual_qty", "rate"],');
 		expect(source).toContain('minWidth: "100%",');
+		expect(selectorSource).toContain('@list-scroll="onListScroll"');
 	});
 
 	it("keeps invoice management loaders and reset actions in each tab", () => {
