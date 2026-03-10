@@ -9,6 +9,7 @@
 			:style="{
 				height: 'var(--container-height)',
 				maxHeight: 'var(--container-height)',
+				minHeight: 'var(--container-min-height)',
 				overflow: 'auto',
 			}"
 			:class="[
@@ -1061,6 +1062,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	overflow: hidden !important;
+	min-height: var(--container-min-height, 440px);
 }
 
 /* Style for selected checkbox button */
@@ -1197,10 +1199,11 @@ export default {
 	}
 
 	.invoice-main-card {
-		height: auto !important;
-		max-height: none !important;
+		height: var(--container-height) !important;
+		max-height: var(--container-height) !important;
+		min-height: var(--container-min-height, 380px) !important;
 		resize: none !important;
-		overflow: visible !important;
+		overflow: hidden !important;
 	}
 
 	.dynamic-padding {
@@ -1230,8 +1233,8 @@ export default {
 	}
 
 	.invoice-items-card {
-		flex: 0 0 auto;
-		min-height: 320px;
+		flex: 1 1 auto;
+		min-height: 0;
 	}
 
 	.items-table-wrapper {
@@ -1240,7 +1243,8 @@ export default {
 		margin-right: calc(-1 * var(--dynamic-xs));
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
-		min-height: 280px;
+		flex: 1 1 auto;
+		min-height: 320px;
 	}
 
 	.item-search-field {
@@ -1279,7 +1283,7 @@ export default {
 		margin-right: calc(-1 * var(--dynamic-xs));
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
-		min-height: 240px;
+		min-height: 300px;
 	}
 
 	.item-search-field {
@@ -1337,7 +1341,7 @@ export default {
 
 :deep(.items-table-wrapper .posa-items-table-container) {
 	flex: 1 1 auto;
-	min-height: 0;
+	min-height: 100%;
 	height: 100% !important;
 	max-height: 100% !important;
 }

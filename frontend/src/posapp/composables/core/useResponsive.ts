@@ -32,6 +32,7 @@ export function useResponsive() {
 
 	const responsiveStyles = computed(() => {
 		const isCompactViewport = windowWidth.value <= 768;
+		const isTabletViewport = windowWidth.value <= 1024;
 		let cardHeightVh;
 		if (windowWidth.value <= 480) {
 			cardHeightVh = Math.round(45 * heightScale.value);
@@ -43,16 +44,21 @@ export function useResponsive() {
 
 		cardHeightVh = Math.max(30, Math.min(cardHeightVh, 70));
 		let containerHeightVh = 68;
-		if (windowHeight.value <= 800) {
-			containerHeightVh = 48;
-		} else if (windowHeight.value <= 900) {
+		if (isCompactViewport) {
+			containerHeightVh = windowHeight.value <= 700 ? 64 : 72;
+		} else if (isTabletViewport) {
+			containerHeightVh = windowHeight.value <= 800 ? 62 : 68;
+		} else if (windowHeight.value <= 800) {
 			containerHeightVh = 56;
+		} else if (windowHeight.value <= 900) {
+			containerHeightVh = 62;
 		}
 
-		// Keep small-width layouts usable while still protecting short-height screens.
-		if (isCompactViewport) {
-			containerHeightVh = Math.min(containerHeightVh, 55);
-		}
+		const containerMinHeightPx = isCompactViewport
+			? 380
+			: isTabletViewport
+				? 440
+				: 520;
 
 		return {
 			"--dynamic-xs": `${dynamicSpacing.value.xs}px`,
@@ -60,9 +66,8 @@ export function useResponsive() {
 			"--dynamic-md": `${dynamicSpacing.value.md}px`,
 			"--dynamic-lg": `${dynamicSpacing.value.lg}px`,
 			"--dynamic-xl": `${dynamicSpacing.value.xl}px`,
-			"--container-height": isCompactViewport
-				? "auto"
-				: `${containerHeightVh}vh`,
+			"--container-height": `${containerHeightVh}vh`,
+			"--container-min-height": `${containerMinHeightPx}px`,
 			"--card-height": `${cardHeightVh}vh`,
 			"--font-scale": averageScale.value.toFixed(2),
 		};

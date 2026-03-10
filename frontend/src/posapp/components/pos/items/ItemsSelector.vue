@@ -15,6 +15,7 @@
 			:style="{
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
+				minHeight: responsiveStyles['--container-min-height'],
 				overflow: 'auto',
 				position: 'relative',
 			}"
@@ -1235,6 +1236,9 @@ defineExpose({
 	display: flex;
 	flex-direction: column;
 	gap: var(--dynamic-sm);
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
 }
 
 .selector-section-card {
@@ -1271,6 +1275,21 @@ defineExpose({
 .selector-results-card {
 	padding: var(--dynamic-xs);
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.selector-results-card .items {
+	flex: 1 1 auto;
+	min-height: 0;
+	margin: 0;
+}
+
+.selector-results-card .items > .v-col {
+	display: flex;
+	min-height: 0;
 }
 
 .dynamic-scroll {
@@ -1345,6 +1364,18 @@ defineExpose({
 
 .selection {
 	background-color: var(--pos-surface-muted) !important;
+	display: flex;
+	flex-direction: column;
+	min-height: var(--container-min-height, 380px);
+}
+
+:deep(.items-table-container),
+:deep(.items-card-container) {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	width: 100%;
 }
 
 .item-selection-option {
@@ -1382,6 +1413,10 @@ defineExpose({
 		padding: var(--dynamic-xs);
 	}
 
+	.selection {
+		min-height: max(var(--container-min-height, 380px), 64vh);
+	}
+
 	.items-card-grid {
 		grid-template-columns: 1fr;
 		gap: 10px;
@@ -1392,6 +1427,10 @@ defineExpose({
 @media (max-width: 480px) {
 	.dynamic-padding {
 		padding: var(--dynamic-xs);
+	}
+
+	.selection {
+		min-height: max(var(--container-min-height, 380px), 60vh);
 	}
 }
 

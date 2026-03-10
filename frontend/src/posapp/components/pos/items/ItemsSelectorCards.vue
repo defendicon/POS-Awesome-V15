@@ -166,6 +166,13 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 </script>
 
 <style scoped>
+.items-card-container {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+}
+
 .item-container {
 	overflow-y: auto;
 	scrollbar-gutter: stable;
@@ -176,7 +183,8 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	grid-template-columns: repeat(3, 1fr);
 	gap: 16px;
 	padding: 16px;
-	height: calc(100% - 80px);
+	height: 100%;
+	min-height: 0;
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(var(--v-theme-on-surface), 0.2) transparent;
@@ -186,7 +194,9 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 }
 
 .virtual-scroller {
-	height: calc(100% - 80px);
+	height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow-y: auto;
 	position: relative;
 }
@@ -196,7 +206,8 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	align-items: center;
 	justify-content: center;
 	min-height: 240px;
-	height: calc(100% - 80px);
+	height: 100%;
+	flex: 1 1 auto;
 	padding: 20px 16px 28px;
 }
 

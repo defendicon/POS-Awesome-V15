@@ -5,7 +5,7 @@
 			:headers="headers"
 			:items="displayedItems"
 			class="sleek-data-table overflow-y-auto"
-			:style="{ height: 'calc(100% - 80px)' }"
+			:style="{ height: '100%' }"
 			item-key="item_code"
 			fixed-header
 			height="100%"
@@ -169,6 +169,13 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 </script>
 
 <style scoped>
+.items-table-container {
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
+	width: 100%;
+}
+
 :deep(.item-row-highlighted) {
 	background-color: rgba(var(--v-theme-primary), 0.32);
 }
@@ -195,6 +202,8 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	overflow: hidden;
 	border: 1px solid var(--pos-border-light);
 	height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	transition: all 0.3s ease;
@@ -255,6 +264,17 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	height: 100%;
 	display: flex;
 	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.sleek-data-table :deep(.v-data-table-virtual),
+.sleek-data-table :deep(.v-table) {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
 }
 
 .sleek-data-table :deep(.v-data-table__wrapper tbody) {
