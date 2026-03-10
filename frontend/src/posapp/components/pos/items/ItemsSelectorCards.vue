@@ -3,27 +3,15 @@
 		<div v-if="isLoading" class="items-card-grid">
 			<Skeleton v-for="n in 8" :key="n" class="mb-4" height="120" />
 		</div>
-		<div
-			v-else-if="displayedItems.length === 0"
-			class="items-empty-state"
-		>
+		<div v-else-if="displayedItems.length === 0" class="items-empty-state">
 			<div class="items-empty-state__panel">
 				<div class="items-empty-state__icon-wrap">
 					<v-icon size="36" class="items-empty-state__icon">mdi-package-variant-closed</v-icon>
 				</div>
 				<div class="items-empty-state__title">{{ noItemsTitle }}</div>
 				<div class="items-empty-state__subtitle">{{ noItemsSubtitle }}</div>
-				<div
-					v-if="showClearButton"
-					class="items-empty-state__meta"
-				>
-					<v-chip
-						v-if="searchInput"
-						size="small"
-						variant="tonal"
-						color="primary"
-						class="items-empty-state__chip"
-					>
+				<div v-if="showClearButton" class="items-empty-state__meta">
+					<v-chip v-if="searchInput" size="small" variant="tonal" color="primary" class="items-empty-state__chip">
 						{{ searchInput }}
 					</v-chip>
 					<v-chip
@@ -41,60 +29,42 @@
 					variant="flat"
 					color="primary"
 					class="items-empty-state__action"
-					@click="handleClearSearch"
+					@click="emit('clear-search')"
 				>
 					{{ clearSearchLabel }}
 				</v-btn>
 			</div>
 		</div>
-		<RecycleScroller
-			v-else
-			ref="scrollerRef"
-			class="virtual-scroller"
-			:list-class="['items-virtual-list', { 'item-container': isOverflowing }]"
-			:items="displayedItems"
-			key-field="item_code"
-			:item-size="cardSlotHeight"
-			:grid-items="cardColumns"
-			:item-secondary-size="cardSlotWidth"
-			:buffer="virtualScrollBuffer"
-			:emit-update="true"
-			@update="handleRangeUpdate"
-			@scroll.passive="handleScrollerScroll"
-		>
-			<template #default="{ item }">
-				<ItemCard
-					v-if="item"
-					:key="item.item_code"
-					:item="item"
-					:pos-profile="posProfile"
-					:context="context"
-					:selected-currency="selectedCurrency"
-					:hide-qty-decimals="hideQtyDecimals"
-					:last-invoice-rate="getLastInvoiceRate(item)"
-					:is-item-highlighted="isItemHighlighted(item)"
-					:currency-symbol="currencySymbol"
-					:format-currency="formatCurrency"
-					:format-number="formatNumber"
-					:rate-precision="ratePrecision"
-					:is-negative="isNegative"
-					:style="{
-						width: cardColumnWidth + 'px',
-						height: cardRowHeight + 'px',
-					}"
-					@click="handleItemClick"
-					@dragstart="handleDragStart"
-					@dragend="handleDragEnd"
-				/>
-			</template>
-		</RecycleScroller>
+		<div v-else class="items-card-grid">
+			<ItemCard
+				v-for="item in displayedItems"
+				:key="item.item_code"
+				:item="item"
+				:pos-profile="posProfile"
+				:context="context"
+				:selected-currency="selectedCurrency"
+				:hide-qty-decimals="hideQtyDecimals"
+				:last-invoice-rate="getLastInvoiceRate(item)"
+				:is-item-highlighted="isItemHighlighted(item)"
+				:currency-symbol="currencySymbol"
+				:format-currency="formatCurrency"
+				:format-number="formatNumber"
+				:rate-precision="ratePrecision"
+				:is-negative="isNegative"
+				:style="{
+					width: cardColumnWidth + 'px',
+					height: cardRowHeight + 'px',
+				}"
+				@click="emit('select-item', $event, item)"
+				@dragstart="emit('dragstart', $event, item)"
+				@dragend="emit('dragend', $event)"
+			/>
+		</div>
 	</div>
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-import { RecycleScroller } from "vue-virtual-scroller";
-import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import { computed } from "vue";
 import ItemCard from "./ItemCard.vue";
 import Skeleton from "../../ui/Skeleton.vue";
 
@@ -126,99 +96,24 @@ const props = defineProps({
 	clearSearchLabel: { type: String, default: "" },
 });
 
-const emit = defineEmits([
-	"select-item",
-	"dragstart",
-	"dragend",
-	"virtual-range-update",
-	"clear-search",
-	"scroll-state-change",
-]);
+const emit = defineEmits(["select-item", "dragstart", "dragend", "virtual-range-update", "clear-search"]);
 
 const showClearButton = computed(() => {
 	return Boolean(props.searchInput) || (props.itemGroup && props.itemGroup !== "ALL");
 });
-
-const handleItemClick = (event, item) => {
-	emit("select-item", event, item);
-};
-
-const handleDragStart = (event, item) => {
-	emit("dragstart", event, item);
-};
-
-const handleDragEnd = (event) => {
-	emit("dragend", event);
-};
-
-const handleRangeUpdate = (...args) => {
-	emit("virtual-range-update", ...args);
-};
-
-const handleClearSearch = () => {
-	emit("clear-search");
-};
-
-const handleScrollerScroll = (event) => {
-	const target = event?.target;
-	emit("scroll-state-change", (target?.scrollTop || 0) > 8);
-};
-
-const scrollerRef = ref(null);
-
-const scrollToItem = (index) => {
-	scrollerRef.value?.scrollToItem?.(index);
-};
-
-const getScrollerElement = () => {
-	const ref = scrollerRef.value;
-	return ref?.$el || ref;
-};
-
-defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 </script>
 
 <style scoped>
 .items-card-container {
-	display: flex;
-	flex: 1 1 auto;
-	flex-direction: column;
-	min-height: 0;
-	overflow: hidden;
-	scrollbar-gutter: stable both-edges;
-}
-
-.item-container {
-	overflow-y: auto;
-	scrollbar-gutter: stable;
+	display: block;
+	width: 100%;
 }
 
 .items-card-grid {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 	gap: 16px;
-	padding: 16px;
-	height: 100%;
-	min-height: 0;
-	overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
-	overscroll-behavior: contain;
-	scrollbar-width: thin;
-	scrollbar-color: rgba(var(--v-theme-on-surface), 0.2) transparent;
-	contain: layout style;
-	will-change: scroll-position;
-	transform: translate3d(0, 0, 0);
-}
-
-.virtual-scroller {
-	height: 100%;
-	flex: 1 1 auto;
-	min-height: 0;
-	overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
-	overscroll-behavior: contain;
-	position: relative;
-	scrollbar-gutter: stable both-edges;
+	padding: 0;
 }
 
 .items-empty-state {
@@ -226,8 +121,6 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	align-items: center;
 	justify-content: center;
 	min-height: 240px;
-	height: 100%;
-	flex: 1 1 auto;
 	padding: 20px 16px 28px;
 }
 
@@ -291,51 +184,17 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	font-weight: 700;
 }
 
-.virtual-scroller .items-card-grid {
-	height: auto;
-	overflow: visible;
-}
-
-.virtual-scroller .vue-recycle-scroller__item-wrapper {
-	display: contents;
-}
-
-.virtual-scroller :deep(.vue-recycle-scroller__item-view) {
-	width: 100% !important;
-	max-width: 100% !important;
-	min-width: 0 !important;
-	box-sizing: border-box;
-}
-
-.items-card-grid::-webkit-scrollbar {
-	width: 8px;
-}
-
-.items-card-grid::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-.items-card-grid::-webkit-scrollbar-thumb {
-	background-color: rgba(var(--v-theme-on-surface), 0.2);
-	border-radius: 4px;
-}
-
-.virtual-scroller :deep(.items-virtual-list) {
-	padding: 16px;
-	contain: layout style;
-	box-sizing: border-box;
-	width: 100%;
-}
-
 @media (max-width: 1200px) {
-	.virtual-scroller :deep(.items-virtual-list) {
-		padding: 12px;
+	.items-card-grid {
+		grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+		gap: 12px;
 	}
 }
 
 @media (max-width: 768px) {
-	.virtual-scroller :deep(.items-virtual-list) {
-		padding: 10px;
+	.items-card-grid {
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 10px;
 	}
 }
 </style>

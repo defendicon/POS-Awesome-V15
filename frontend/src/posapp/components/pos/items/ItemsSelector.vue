@@ -49,8 +49,10 @@
 
 				<v-card
 					flat
+					ref="selectorShell"
 					class="selector-section-card selector-shell-card pos-themed-card"
 					:class="{ 'selector-shell-card--scrolled': selectorScrolled }"
+					@scroll.passive="onSelectorShellScroll"
 				>
 					<div class="section-card-heading selector-search-heading">
 						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
@@ -120,7 +122,6 @@
 								@dragend="onDragEnd"
 								@virtual-range-update="onVirtualRangeUpdate"
 								@clear-search="resetItemFilters"
-								@scroll-state-change="handleSelectorScrollState"
 							/>
 							<ItemsSelectorTable
 								v-else
@@ -142,7 +143,6 @@
 								:row-props="getItemRowProps"
 								:no-data-text="__('No items found')"
 								@row-click="click_item_row"
-								@list-scroll="onListScroll"
 							/>
 						</v-col>
 						</v-row>
@@ -304,6 +304,7 @@ const {
 // 2. Local State & Settings
 const newItemDialog = ref(false);
 const itemsContainer = ref(null);
+const selectorShell = ref(null);
 const selectorScrolled = ref(false);
 const qty = ref(1);
 const search_input = ref("");
@@ -1114,6 +1115,10 @@ const onVirtualRangeUpdate = (s, e, vs, ve) => itemsLoader.onVirtualRangeUpdate(
 const handleSelectorScrollState = (isScrolled) => {
 	selectorScrolled.value = !!isScrolled;
 };
+const onSelectorShellScroll = (e) => {
+	handleSelectorScrollState((e?.target?.scrollTop || 0) > 8);
+	handleListScroll(e);
+};
 const onListScroll = (e) => {
 	handleSelectorScrollState((e?.target?.scrollTop || 0) > 8);
 	handleListScroll(e);
@@ -1280,7 +1285,8 @@ defineExpose({
 
 .selector-shell-card {
 	padding: 0;
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 	position: relative;
 	z-index: 2;
 	display: flex;
@@ -1314,25 +1320,25 @@ defineExpose({
 	padding: var(--dynamic-xs);
 	display: flex;
 	flex-direction: column;
-	flex: 1 1 auto;
+	flex: 0 0 auto;
 	min-height: 240px;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .selector-results-body .items {
 	display: flex;
 	flex-direction: column;
-	flex: 1 1 auto;
-	min-height: 0;
+	flex: 0 0 auto;
+	min-height: auto;
 	margin: 0;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .selector-results-body .items > .v-col {
 	display: flex;
-	flex: 1 1 auto;
-	min-height: 0;
-	overflow: hidden;
+	flex: 0 0 auto;
+	min-height: auto;
+	overflow: visible;
 }
 
 .dynamic-scroll {
