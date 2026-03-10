@@ -77,7 +77,10 @@
 			</v-row>
 		</div>
 
-		<v-row class="items item-header__actions">
+		<v-row
+			class="items item-header__actions"
+			:class="{ 'item-header__actions--hidden': collapsed }"
+		>
 			<v-col
 				cols="12"
 			>
@@ -145,6 +148,7 @@ defineProps({
 	lastSyncTime: { type: String, default: "" },
 	syncStatus: { type: String, default: "" },
 	context: { type: String, default: "pos" },
+	collapsed: { type: Boolean, default: false },
 });
 
 defineEmits([
@@ -194,6 +198,23 @@ defineExpose({
 
 .item-header__actions {
 	padding: 4px 12px 8px;
+	max-height: 120px;
+	overflow: hidden;
+	opacity: 1;
+	transform: translateY(0);
+	transition:
+		max-height 0.2s ease,
+		opacity 0.2s ease,
+		transform 0.2s ease,
+		padding 0.2s ease;
+}
+
+.item-header__actions--hidden {
+	max-height: 0;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	transform: translateY(-8px);
 }
 
 .settings-container {

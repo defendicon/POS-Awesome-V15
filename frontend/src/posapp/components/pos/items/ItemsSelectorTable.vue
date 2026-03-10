@@ -9,6 +9,7 @@
 			item-key="item_code"
 			fixed-header
 			height="100%"
+			:item-height="tableItemHeight"
 			:header-props="headerProps"
 			:no-data-text="noDataText"
 			@click:row="handleRowClick"
@@ -28,7 +29,7 @@
 			</template>
 			<template v-slot:item.rate="{ item }">
 				<div v-if="context !== 'purchase'">
-					<div class="text-primary">
+					<div class="text-primary rate-primary-line">
 						{{
 							currencySymbol(
 								item.original_currency ||
@@ -49,7 +50,7 @@
 						}}
 					</div>
 					<div
-						v-if="getLastInvoiceRate(item)"
+						v-if="showExtendedRateMeta && getLastInvoiceRate(item)"
 						class="text-caption d-flex align-center last-rate-inline"
 					>
 						<v-icon size="14" class="mr-1" color="secondary">mdi-history</v-icon>
@@ -70,6 +71,7 @@
 					</div>
 					<div
 						v-if="
+							showExtendedRateMeta &&
 							posProfile.posa_allow_multi_currency &&
 							selectedCurrency &&
 							selectedCurrency !==
@@ -138,6 +140,17 @@ const breakpoint = computed(() => {
 	if (containerWidth.value < 860) return "md";
 	if (containerWidth.value < 1080) return "lg";
 	return "xl";
+});
+
+const tableItemHeight = computed(() => {
+	if (breakpoint.value === "xs") return 52;
+	if (breakpoint.value === "sm") return 56;
+	if (breakpoint.value === "md") return 60;
+	return 68;
+});
+
+const showExtendedRateMeta = computed(() => {
+	return breakpoint.value === "lg" || breakpoint.value === "xl";
 });
 
 const responsiveHeaders = computed(() => {
@@ -312,6 +325,15 @@ onBeforeUnmount(() => {
 	font-weight: 600;
 }
 
+.rate-primary-line {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .item-name-cell,
 .item-code-cell,
 .last-rate-inline,
@@ -424,6 +446,7 @@ onBeforeUnmount(() => {
 	transition: all 0.2s ease;
 	border-bottom: 1px solid var(--pos-border-light);
 	background-color: var(--pos-surface-raised);
+	height: 68px;
 }
 
 .sleek-data-table :deep(tr:hover) {
@@ -452,6 +475,10 @@ onBeforeUnmount(() => {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	letter-spacing: 0.01em;
+}
+
+.sleek-data-table :deep(td > div) {
+	min-width: 0;
 }
 
 .sleek-data-table :deep(th),

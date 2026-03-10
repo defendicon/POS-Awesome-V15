@@ -30,8 +30,12 @@
 
 			<!-- Add dynamic-padding wrapper like Invoice component -->
 			<div class="dynamic-padding">
-				<v-card flat class="selector-section-card selector-header-card pos-themed-card">
-					<div class="section-card-heading">
+				<v-card
+					flat
+					class="selector-section-card selector-header-card pos-themed-card"
+					:class="{ 'selector-header-card--scrolled': selectorScrolled }"
+				>
+					<div class="section-card-heading selector-search-heading">
 						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
 					</div>
 					<ItemHeader
@@ -43,6 +47,7 @@
 						:last-sync-time="lastSyncTimeLabel"
 						:sync-status="syncStatus"
 						:context="context"
+						:collapsed="selectorScrolled"
 						@esc="esc_event"
 						@enter="onEnter"
 						@search-keydown="handleSearchKeydown"
@@ -117,6 +122,7 @@
 								@dragend="onDragEnd"
 								@virtual-range-update="onVirtualRangeUpdate"
 								@clear-search="resetItemFilters"
+								@scroll-state-change="handleSelectorScrollState"
 							/>
 							<ItemsSelectorTable
 								v-else
@@ -299,6 +305,7 @@ const {
 // 2. Local State & Settings
 const newItemDialog = ref(false);
 const itemsContainer = ref(null);
+const selectorScrolled = ref(false);
 const qty = ref(1);
 const search_input = ref("");
 const first_search = ref("");
@@ -1105,7 +1112,13 @@ const onBarcodeScanned = async (code: string) => {
 const select_item = (e, item) => itemSelection.handleItemSelection(e, item);
 const click_item_row = (e, data) => itemSelection.handleRowClick(e, data);
 const onVirtualRangeUpdate = (s, e, vs, ve) => itemsLoader.onVirtualRangeUpdate(s, e, vs, ve);
-const onListScroll = (e) => handleListScroll(e);
+const handleSelectorScrollState = (isScrolled) => {
+	selectorScrolled.value = !!isScrolled;
+};
+const onListScroll = (e) => {
+	handleSelectorScrollState((e?.target?.scrollTop || 0) > 8);
+	handleListScroll(e);
+};
 const onScannerOpened = () => {
 	scannerInput.cameraScannerActive.value = true;
 };
@@ -1273,6 +1286,23 @@ defineExpose({
 	z-index: 2;
 	flex: 0 0 auto;
 	background: var(--pos-card-bg) !important;
+}
+
+.selector-search-heading {
+	max-height: 72px;
+	overflow: hidden;
+	opacity: 1;
+	transition:
+		max-height 0.2s ease,
+		opacity 0.2s ease,
+		padding 0.2s ease;
+}
+
+.selector-header-card--scrolled .selector-search-heading {
+	max-height: 0;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 .selector-results-card {
