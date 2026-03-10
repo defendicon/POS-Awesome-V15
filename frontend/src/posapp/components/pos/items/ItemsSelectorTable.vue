@@ -174,6 +174,7 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	flex: 1 1 auto;
 	min-height: 0;
 	width: 100%;
+	overflow: hidden;
 }
 
 :deep(.item-row-highlighted) {
@@ -256,6 +257,8 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	border-radius: var(--pos-radius-md);
 	height: 100%;
 	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
 	scrollbar-width: thin;
 	position: relative;
 }

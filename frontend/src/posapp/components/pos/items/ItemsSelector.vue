@@ -16,7 +16,7 @@
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
 				minHeight: responsiveStyles['--container-min-height'],
-				overflow: 'auto',
+				overflow: 'hidden',
 				position: 'relative',
 			}"
 		>
@@ -1283,14 +1283,19 @@ defineExpose({
 }
 
 .selector-results-card .items {
+	display: flex;
+	flex-direction: column;
 	flex: 1 1 auto;
 	min-height: 0;
 	margin: 0;
+	overflow: hidden;
 }
 
 .selector-results-card .items > .v-col {
 	display: flex;
+	flex: 1 1 auto;
 	min-height: 0;
+	overflow: hidden;
 }
 
 .dynamic-scroll {
@@ -1377,6 +1382,7 @@ defineExpose({
 	flex-direction: column;
 	min-height: 0;
 	width: 100%;
+	overflow: hidden;
 }
 
 .item-selection-option {
