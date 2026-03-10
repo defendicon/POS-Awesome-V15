@@ -287,6 +287,13 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	display: contents;
 }
 
+.virtual-scroller :deep(.vue-recycle-scroller__item-view) {
+	width: 100% !important;
+	max-width: 100% !important;
+	min-width: 0 !important;
+	box-sizing: border-box;
+}
+
 .items-card-grid::-webkit-scrollbar {
 	width: 8px;
 }

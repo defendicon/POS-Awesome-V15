@@ -2,7 +2,7 @@
 	<div class="items-table-container">
 		<v-data-table-virtual
 			ref="tableRef"
-			:headers="headers"
+			:headers="normalizedHeaders"
 			:items="displayedItems"
 			class="sleek-data-table overflow-y-auto"
 			:style="{ height: '100%' }"
@@ -16,6 +16,16 @@
 			:row-props="rowProps"
 			@scroll.passive="handleListScroll"
 		>
+			<template v-slot:item.item_name="{ item }">
+				<div class="item-name-cell" :title="item.item_name">
+					{{ item.item_name }}
+				</div>
+			</template>
+			<template v-slot:item.item_code="{ item }">
+				<div class="item-code-cell" :title="item.item_code">
+					{{ item.item_code }}
+				</div>
+			</template>
 			<template v-slot:item.rate="{ item }">
 				<div v-if="context !== 'purchase'">
 					<div class="text-primary">
@@ -95,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
 	displayedItems: { type: Array, default: () => [] },
@@ -117,6 +127,29 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["row-click", "list-scroll"]);
+
+const normalizedHeaders = computed(() => {
+	const visibleKeys = (props.headers || []).map((header) => header?.key).filter(Boolean);
+	const widthMap = visibleKeys.includes("item_code")
+		? {
+				item_name: "34%",
+				item_code: "22%",
+				rate: "20%",
+				actual_qty: "14%",
+				stock_uom: "10%",
+			}
+		: {
+				item_name: "46%",
+				rate: "24%",
+				actual_qty: "18%",
+				stock_uom: "12%",
+			};
+
+	return (props.headers || []).map((header) => ({
+		...header,
+		width: header?.width || widthMap[header?.key] || "16%",
+	}));
+});
 
 const handleRowClick = (event, data) => {
 	emit("row-click", event, data);
@@ -190,6 +223,20 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 .last-rate-inline {
 	color: rgba(var(--v-theme-on-surface), 0.6);
 	white-space: nowrap;
+}
+
+.item-name-cell,
+.item-code-cell {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.item-name-cell {
+	font-weight: 600;
 }
 
 :deep(.v-theme--dark) .last-rate-inline {
@@ -271,6 +318,11 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	min-height: 0;
 }
 
+.sleek-data-table :deep(table) {
+	table-layout: fixed !important;
+	width: 100% !important;
+}
+
 .sleek-data-table :deep(.v-data-table-virtual),
 .sleek-data-table :deep(.v-table) {
 	height: 100%;
@@ -305,6 +357,7 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	padding: 14px 16px;
 	vertical-align: middle;
 	color: var(--pos-text-primary);
+	overflow: hidden;
 	font-family:
 		"SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans Arabic", "Tahoma",
 		sans-serif;
@@ -316,5 +369,11 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	letter-spacing: 0.01em;
+}
+
+.sleek-data-table :deep(th),
+.sleek-data-table :deep(td) {
+	min-width: 0;
+	max-width: 0;
 }
 </style>

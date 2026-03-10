@@ -160,6 +160,7 @@ const onDragEnd = (event) => {
 	background: var(--pos-surface-raised);
 	border-radius: var(--pos-radius-md);
 	border: 1px solid var(--pos-border-light);
+	box-sizing: border-box;
 	overflow: hidden;
 	transition:
 		transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -176,6 +177,8 @@ const onDragEnd = (event) => {
 	backface-visibility: hidden;
 	transform: translate3d(0, 0, 0);
 	position: relative;
+	min-width: 0;
+	max-width: 100%;
 }
 
 .card-item-card:hover {
@@ -225,12 +228,14 @@ const onDragEnd = (event) => {
 	flex-grow: 1;
 	justify-content: space-between;
 	gap: var(--pos-space-2);
+	min-width: 0;
 }
 
 .card-item-header {
 	display: flex;
 	flex-direction: column;
 	gap: var(--pos-space-1);
+	min-width: 0;
 }
 
 .card-item-name {
@@ -244,12 +249,19 @@ const onDragEnd = (event) => {
 	-webkit-line-clamp: 2;
 	line-clamp: 2;
 	-webkit-box-orient: vertical;
+	min-width: 0;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	hyphens: auto;
 }
 
 .card-item-code {
 	font-size: 0.74rem;
 	color: var(--pos-text-secondary);
 	display: block;
+	max-width: 100%;
+	min-width: 0;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -262,6 +274,7 @@ const onDragEnd = (event) => {
 	align-items: flex-start;
 	margin-top: auto; /* Push to bottom */
 	gap: var(--pos-space-2);
+	min-width: 0;
 }
 
 .card-item-price {
@@ -279,11 +292,13 @@ const onDragEnd = (event) => {
 	font-weight: 700;
 	color: rgb(var(--v-theme-primary));
 	font-size: 1.05rem;
+	min-width: 0;
 }
 
 .secondary-price {
 	font-size: 0.8rem;
 	color: var(--pos-text-secondary);
+	min-width: 0;
 }
 
 .last-rate-chip {
@@ -295,6 +310,9 @@ const onDragEnd = (event) => {
 	display: inline-flex;
 	align-items: center;
 	width: fit-content;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .v-theme--dark .last-rate-chip {
@@ -304,6 +322,10 @@ const onDragEnd = (event) => {
 .last-rate-value {
 	margin-left: 4px;
 	font-weight: 500;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .card-item-stock {
@@ -318,6 +340,9 @@ const onDragEnd = (event) => {
 	border-radius: var(--pos-radius-xs);
 	background: rgba(var(--v-theme-on-surface), 0.06);
 	white-space: nowrap;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .stock-amount {
