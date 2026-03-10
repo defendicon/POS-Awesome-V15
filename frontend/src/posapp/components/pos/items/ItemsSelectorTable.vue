@@ -142,12 +142,7 @@ const breakpoint = computed(() => {
 	return "xl";
 });
 
-const tableItemHeight = computed(() => {
-	if (breakpoint.value === "xs") return 52;
-	if (breakpoint.value === "sm") return 56;
-	if (breakpoint.value === "md") return 60;
-	return 68;
-});
+const tableItemHeight = 68;
 
 const showExtendedRateMeta = computed(() => {
 	return breakpoint.value === "lg" || breakpoint.value === "xl";
@@ -359,7 +354,7 @@ onBeforeUnmount(() => {
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
-	transition: all 0.3s ease;
+	transition: box-shadow 0.2s ease;
 }
 
 .sleek-data-table:hover {
@@ -443,7 +438,7 @@ onBeforeUnmount(() => {
 }
 
 .sleek-data-table :deep(tr) {
-	transition: all 0.2s ease;
+	transition: background-color 0.15s ease;
 	border-bottom: 1px solid var(--pos-border-light);
 	background-color: var(--pos-surface-raised);
 	height: 68px;

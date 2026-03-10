@@ -1293,16 +1293,15 @@ defineExpose({
 	overflow: hidden;
 	opacity: 1;
 	transition:
-		max-height 0.2s ease,
 		opacity 0.2s ease,
-		padding 0.2s ease;
+		transform 0.2s ease;
 }
 
 .selector-header-card--scrolled .selector-search-heading {
-	max-height: 0;
 	opacity: 0;
-	padding-top: 0;
-	padding-bottom: 0;
+	transform: translateY(-6px);
+	pointer-events: none;
+	visibility: hidden;
 }
 
 .selector-results-card {

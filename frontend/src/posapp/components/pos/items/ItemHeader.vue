@@ -203,17 +203,14 @@ defineExpose({
 	opacity: 1;
 	transform: translateY(0);
 	transition:
-		max-height 0.2s ease,
 		opacity 0.2s ease,
-		transform 0.2s ease,
-		padding 0.2s ease;
+		transform 0.2s ease;
 }
 
 .item-header__actions--hidden {
-	max-height: 0;
 	opacity: 0;
-	padding-top: 0;
-	padding-bottom: 0;
+	pointer-events: none;
+	visibility: hidden;
 	transform: translateY(-8px);
 }
 
