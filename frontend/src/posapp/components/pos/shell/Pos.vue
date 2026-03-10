@@ -93,23 +93,6 @@
 					</span>
 				</span>
 			</button>
-			<button
-				type="button"
-				class="mobile-action-bar__item"
-				:class="{ 'mobile-action-bar__item--active': activeMobileAction === 'pay' }"
-				@click="activateMobileAction('pay')"
-			>
-				<v-icon size="18">mdi-credit-card-outline</v-icon>
-				<span class="mobile-action-bar__label">
-					<span>{{ __("Pay") }}</span>
-					<span
-						v-if="hasCartBadge"
-						:class="['tab-count-badge', { 'tab-count-badge--pulse': cartBadgePulse }]"
-					>
-						{{ cartBadgeLabel }}
-					</span>
-				</span>
-			</button>
 		</div>
 		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row">
 			<v-col
@@ -250,11 +233,8 @@ export default {
 		};
 		const compactPanel = ref("selector");
 		const activeMobileAction = computed(() => {
-			if (compactPanel.value === "invoice") {
+			if (compactPanel.value === "invoice" || activeView.value === "payment") {
 				return "invoice";
-			}
-			if (activeView.value === "payment") {
-				return "pay";
 			}
 			return "search";
 		});
