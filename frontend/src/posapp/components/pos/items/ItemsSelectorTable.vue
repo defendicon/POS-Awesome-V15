@@ -87,12 +87,19 @@ const effectiveWidth = computed(() => {
 	return measuredWidth || screenWidth || 1280;
 });
 
+const responsiveWidth = computed(() => {
+	if (viewportWidth.value >= 1024) {
+		return viewportWidth.value;
+	}
+	return effectiveWidth.value;
+});
+
 const breakpoint = computed(() => {
-	if (effectiveWidth.value >= 980) return "xl";
-	if (effectiveWidth.value >= 820) return "lg";
-	if (effectiveWidth.value >= 680) return "md";
-	if (effectiveWidth.value >= 560) return "sm";
-	if (effectiveWidth.value < 560) return "xs";
+	if (responsiveWidth.value >= 1280) return "xl";
+	if (responsiveWidth.value >= 1100) return "lg";
+	if (responsiveWidth.value >= 900) return "md";
+	if (responsiveWidth.value >= 560) return "sm";
+	if (responsiveWidth.value < 560) return "xs";
 	return "xl";
 });
 

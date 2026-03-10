@@ -76,9 +76,11 @@ describe("UI regression coverage", () => {
 	it("keeps desktop item selector tables fully expanded", () => {
 		const source = itemsSelectorTableSource;
 
-		expect(source).toContain('if (effectiveWidth.value >= 980) return "xl";');
-		expect(source).toContain('if (effectiveWidth.value >= 820) return "lg";');
-		expect(source).toContain('if (effectiveWidth.value >= 680) return "md";');
+		expect(source).toContain("const responsiveWidth = computed(() => {");
+		expect(source).toContain("if (viewportWidth.value >= 1024) {");
+		expect(source).toContain('if (responsiveWidth.value >= 1280) return "xl";');
+		expect(source).toContain('if (responsiveWidth.value >= 1100) return "lg";');
+		expect(source).toContain('if (responsiveWidth.value >= 900) return "md";');
 		expect(source).toContain('xs: ["item_name", "rate"],');
 		expect(source).toContain('md: ["item_name", "actual_qty", "rate"],');
 		expect(source).toContain('lg: ["item_name", "item_code", "actual_qty", "rate"],');
