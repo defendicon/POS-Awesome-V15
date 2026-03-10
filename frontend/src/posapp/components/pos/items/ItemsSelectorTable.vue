@@ -9,7 +9,8 @@
 				:headers="responsiveHeaders"
 				:items="displayedItems"
 				item-value="item_code"
-				:item-height="68"
+				:item-height="56"
+				density="compact"
 				fixed-header
 				height="100%"
 				hide-default-footer
@@ -93,49 +94,41 @@ const responsiveWidth = computed(() => {
 	return effectiveWidth.value;
 });
 
-const breakpoint = computed(() => {
-	if (responsiveWidth.value >= 1280) return "xl";
-	if (responsiveWidth.value >= 1100) return "lg";
-	if (responsiveWidth.value >= 900) return "md";
-	if (responsiveWidth.value >= 560) return "sm";
-	if (responsiveWidth.value < 560) return "xs";
-	return "xl";
-});
-
 const responsiveHeaders = computed(() => {
 	const sourceHeaders = props.headers || [];
 	if (sourceHeaders.length === 0) return [];
 
-	const visibleKeysByBreakpoint = {
-		xs: ["item_name", "rate"],
-		sm: ["item_name", "rate"],
-		md: ["item_name", "actual_qty", "rate"],
-		lg: ["item_name", "item_code", "actual_qty", "rate"],
-		xl: ["item_name", "item_code", "actual_qty", "rate", "stock_uom"],
-	};
-
 	const widthMaps = {
-		xs: { item_name: "64%", rate: "36%" },
-		sm: { item_name: "62%", rate: "38%" },
-		md: { item_name: "52%", actual_qty: "18%", rate: "30%" },
-		lg: { item_name: "38%", item_code: "24%", actual_qty: "14%", rate: "24%" },
-		xl: { item_name: "32%", item_code: "22%", actual_qty: "14%", rate: "20%", stock_uom: "12%" },
+		item_name: { width: "320px", minWidth: 220 },
+		item_code: { width: "190px", minWidth: 150 },
+		actual_qty: { width: "130px", minWidth: 110 },
+		rate: { width: "170px", minWidth: 130 },
+		stock_uom: { width: "100px", minWidth: 90 },
 	};
-
-	const activeBreakpoint = breakpoint.value;
-	const visibleKeys = visibleKeysByBreakpoint[activeBreakpoint] || visibleKeysByBreakpoint.xl;
-	const widthMap = widthMaps[activeBreakpoint] || widthMaps.xl;
 
 	return sourceHeaders
-		.filter((header) => visibleKeys.includes(header?.key))
 		.map((header) => ({
 			...header,
-			width: widthMap[header?.key] || header?.width || "16%",
+			width: widthMaps[header?.key]?.width || header?.width || "160px",
+			minWidth: widthMaps[header?.key]?.minWidth || 120,
 		}));
 });
 
+const tableMinWidth = computed(() => {
+	const totalWidth = responsiveHeaders.value.reduce((sum, header) => {
+		const explicitWidth = Number.parseInt(String(header?.width || ""), 10);
+		if (Number.isFinite(explicitWidth)) {
+			return sum + explicitWidth;
+		}
+		return sum + Number(header?.minWidth || 120);
+	}, 0);
+
+	return Math.max(totalWidth + 24, Math.min(Math.max(responsiveWidth.value, 0), totalWidth + 24));
+});
+
 const tableStyles = computed(() => ({
-	minWidth: "100%",
+	minWidth: `${tableMinWidth.value}px`,
+	width: "100%",
 }));
 
 const formatActualQty = (value) => {
@@ -232,7 +225,7 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 .items-table-shell {
 	border: 1px solid var(--pos-border-light);
 	border-radius: var(--pos-radius-md);
-	overflow: hidden;
+	overflow: auto;
 	background: var(--pos-surface-raised);
 	height: 100%;
 	flex: 1 1 auto;
@@ -259,6 +252,8 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 :deep(.items-table .v-table__wrapper) {
 	height: 100%;
+	min-width: 100%;
+	overflow-x: auto;
 	overflow-y: auto;
 }
 
@@ -266,9 +261,9 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 	position: sticky;
 	top: 0;
 	z-index: 2;
-	padding: 12px 14px;
+	padding: 8px 10px;
 	text-align: left;
-	font-size: 0.8rem;
+	font-size: 0.74rem;
 	font-weight: 700;
 	color: var(--pos-text-secondary);
 	background: var(--pos-surface-muted);
@@ -279,11 +274,11 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 }
 
 :deep(.items-table td) {
-	padding: 14px;
+	padding: 8px 10px;
 	border-bottom: 1px solid var(--pos-border-light);
 	vertical-align: middle;
 	overflow: hidden;
-	height: 68px;
+	height: 56px;
 }
 
 :deep(.items-table tbody tr:nth-child(even)) {
@@ -307,6 +302,12 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 .item-name-cell {
 	font-weight: 600;
+	font-size: 0.86rem;
+}
+
+.item-code-cell,
+.rate-primary-line {
+	font-size: 0.8rem;
 }
 
 .items-table-empty {

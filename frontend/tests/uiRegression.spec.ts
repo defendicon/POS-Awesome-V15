@@ -82,16 +82,15 @@ describe("UI regression coverage", () => {
 
 		expect(source).toContain("<v-data-table-virtual");
 		expect(source).toContain('item-value="item_code"');
+		expect(source).toContain('density="compact"');
+		expect(source).toContain(':item-height="56"');
 		expect(source).toContain('@scroll.passive="handleListScroll"');
-		expect(source).toContain("const responsiveWidth = computed(() => {");
-		expect(source).toContain("if (viewportWidth.value >= 1024) {");
-		expect(source).toContain('if (responsiveWidth.value >= 1280) return "xl";');
-		expect(source).toContain('if (responsiveWidth.value >= 1100) return "lg";');
-		expect(source).toContain('if (responsiveWidth.value >= 900) return "md";');
-		expect(source).toContain('xs: ["item_name", "rate"],');
-		expect(source).toContain('md: ["item_name", "actual_qty", "rate"],');
-		expect(source).toContain('lg: ["item_name", "item_code", "actual_qty", "rate"],');
-		expect(source).toContain('minWidth: "100%",');
+		expect(source).toContain('item_name: { width: "320px", minWidth: 220 },');
+		expect(source).toContain('item_code: { width: "190px", minWidth: 150 },');
+		expect(source).toContain('actual_qty: { width: "130px", minWidth: 110 },');
+		expect(source).toContain('rate: { width: "170px", minWidth: 130 },');
+		expect(source).toContain('stock_uom: { width: "100px", minWidth: 90 },');
+		expect(source).toContain('minWidth: `${tableMinWidth.value}px`,');
 		expect(selectorSource).toContain('@list-scroll="onListScroll"');
 	});
 
