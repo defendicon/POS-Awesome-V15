@@ -53,9 +53,6 @@
 					class="selector-section-card selector-shell-card pos-themed-card"
 					:class="{ 'selector-shell-card--scrolled': selectorScrolled }"
 				>
-					<div class="section-card-heading selector-search-heading">
-						<h3 class="section-card-heading__title">{{ __("Item Search") }}</h3>
-					</div>
 					<ItemHeader
 						v-model:search-input="search_input"
 						v-model:qty-input="debounce_qty"
@@ -82,9 +79,6 @@
 						@reload-items="forceReloadItems"
 						ref="itemHeader"
 					/>
-					<div class="section-card-heading section-card-heading--with-padding selector-results-heading">
-						<h3 class="section-card-heading__title">{{ __("Available Items") }}</h3>
-					</div>
 					<div class="selector-results-body">
 						<v-row class="items">
 						<v-col cols="12" class="pt-0 mt-0">
@@ -1293,26 +1287,6 @@ defineExpose({
 	box-shadow: none !important;
 	border-radius: 0 !important;
 	background: transparent !important;
-}
-
-.selector-search-heading {
-	max-height: 72px;
-	overflow: hidden;
-	opacity: 1;
-	transition:
-		opacity 0.2s ease,
-		transform 0.2s ease;
-}
-
-.selector-shell-card--scrolled .selector-search-heading {
-	opacity: 0;
-	transform: translateY(-6px);
-	pointer-events: none;
-	visibility: hidden;
-}
-
-.selector-results-heading {
-	border-top: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
 
 .selector-results-body {

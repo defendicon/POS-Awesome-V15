@@ -1,5 +1,5 @@
 <template>
-	<div class="items-table-container">
+	<div ref="tableContainer" class="items-table-container">
 		<div v-if="displayedItems.length === 0" class="items-table-empty">
 			{{ noDataText }}
 		</div>
@@ -74,15 +74,25 @@ const props = defineProps({
 const emit = defineEmits(["row-click"]);
 
 const tableContainer = ref(null);
-const containerWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1280);
+const viewportWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1280);
+const containerWidth = ref(viewportWidth.value);
 let resizeObserver = null;
 
+const effectiveWidth = computed(() => {
+	const measuredWidth = Number(containerWidth.value || 0);
+	const screenWidth = Number(viewportWidth.value || 0);
+	if (measuredWidth > 0 && screenWidth > 0) {
+		return Math.min(measuredWidth, screenWidth);
+	}
+	return measuredWidth || screenWidth || 1280;
+});
+
 const breakpoint = computed(() => {
-	if (!containerWidth.value || containerWidth.value >= 1080) return "xl";
-	if (containerWidth.value < 460) return "xs";
-	if (containerWidth.value < 680) return "sm";
-	if (containerWidth.value < 860) return "md";
-	if (containerWidth.value < 1080) return "lg";
+	if (effectiveWidth.value >= 1100) return "xl";
+	if (effectiveWidth.value < 560) return "xs";
+	if (effectiveWidth.value < 760) return "sm";
+	if (effectiveWidth.value < 980) return "md";
+	if (effectiveWidth.value < 1100) return "lg";
 	return "xl";
 });
 
@@ -99,11 +109,11 @@ const responsiveHeaders = computed(() => {
 	};
 
 	const widthMaps = {
-		xs: { item_name: "72%", actual_qty: "28%" },
-		sm: { item_name: "50%", actual_qty: "20%", rate: "30%" },
-		md: { item_name: "42%", actual_qty: "18%", rate: "24%", stock_uom: "16%" },
-		lg: { item_name: "32%", item_code: "24%", actual_qty: "14%", rate: "20%", stock_uom: "10%" },
-		xl: { item_name: "30%", item_code: "24%", actual_qty: "14%", rate: "20%", stock_uom: "12%" },
+		xs: { item_name: "74%", actual_qty: "26%" },
+		sm: { item_name: "50%", actual_qty: "18%", rate: "32%" },
+		md: { item_name: "42%", actual_qty: "16%", rate: "24%", stock_uom: "18%" },
+		lg: { item_name: "32%", item_code: "22%", actual_qty: "14%", rate: "20%", stock_uom: "12%" },
+		xl: { item_name: "30%", item_code: "22%", actual_qty: "14%", rate: "22%", stock_uom: "12%" },
 	};
 
 	const activeBreakpoint = breakpoint.value;
@@ -137,16 +147,29 @@ const resolveRowProps = (item) => {
 
 const updateContainerWidth = () => {
 	const el = tableContainer.value;
-	if (!el) return;
+	if (!el) {
+		containerWidth.value = viewportWidth.value;
+		return;
+	}
 	const nextWidth = Math.floor(el.clientWidth || el.getBoundingClientRect().width || 0);
-	if (nextWidth > 0) containerWidth.value = nextWidth;
+	containerWidth.value = nextWidth > 0 ? nextWidth : viewportWidth.value;
+};
+
+const updateViewportWidth = () => {
+	if (typeof window === "undefined") return;
+	viewportWidth.value = window.innerWidth || 1280;
+	updateContainerWidth();
 };
 
 onMounted(() => {
+	updateViewportWidth();
 	updateContainerWidth();
 	if (tableContainer.value && typeof ResizeObserver !== "undefined") {
 		resizeObserver = new ResizeObserver(() => updateContainerWidth());
 		resizeObserver.observe(tableContainer.value);
+	}
+	if (typeof window !== "undefined") {
+		window.addEventListener("resize", updateViewportWidth);
 	}
 });
 
@@ -154,6 +177,9 @@ onBeforeUnmount(() => {
 	if (resizeObserver) {
 		resizeObserver.disconnect();
 		resizeObserver = null;
+	}
+	if (typeof window !== "undefined") {
+		window.removeEventListener("resize", updateViewportWidth);
 	}
 });
 </script>

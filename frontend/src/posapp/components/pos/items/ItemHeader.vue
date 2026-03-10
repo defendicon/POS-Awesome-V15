@@ -185,7 +185,7 @@ defineExpose({
 .sticky-search-row {
 	position: sticky;
 	top: 0;
-	z-index: 5;
+	z-index: 8;
 	padding: 12px 12px 8px;
 	background: var(--pos-card-bg, rgb(var(--v-theme-surface)));
 	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
@@ -203,11 +203,16 @@ defineExpose({
 	opacity: 1;
 	transform: translateY(0);
 	transition:
+		max-height 0.2s ease,
+		padding 0.2s ease,
 		opacity 0.2s ease,
 		transform 0.2s ease;
 }
 
 .item-header__actions--hidden {
+	max-height: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 	opacity: 0;
 	pointer-events: none;
 	visibility: hidden;

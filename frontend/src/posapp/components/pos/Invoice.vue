@@ -31,9 +31,6 @@
 				<div class="invoice-sections">
 					<div class="invoice-top-grid">
 						<v-card flat class="invoice-section-card pos-themed-card">
-							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Customer Details") }}</h3>
-							</div>
 							<InvoiceCustomerSection
 								ref="customerSection"
 								:pos_profile="pos_profile"
@@ -47,9 +44,6 @@
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
-							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Delivery Charges") }}</h3>
-							</div>
 							<DeliveryCharges
 								ref="deliveryChargesComponent"
 								:pos_profile="pos_profile"
@@ -76,9 +70,6 @@
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
-							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Posting and Price List") }}</h3>
-							</div>
 							<PostingDateRow
 								ref="postingDateComponent"
 								:pos_profile="pos_profile"
@@ -105,9 +96,6 @@
 							flat
 							class="invoice-section-card pos-themed-card"
 						>
-							<div class="invoice-section-heading">
-								<h3 class="invoice-section-heading__title">{{ __("Multi Currency") }}</h3>
-							</div>
 							<MultiCurrencyRow
 								:pos_profile="pos_profile"
 								:selected_currency="selected_currency"
@@ -139,9 +127,6 @@
 					</div>
 
 					<v-card flat class="invoice-section-card invoice-items-card pos-themed-card">
-						<div class="invoice-section-heading">
-							<h3 class="invoice-section-heading__title">{{ __("Invoice Items") }}</h3>
-						</div>
 						<div class="items-table-wrapper">
 							<InvoiceItemsActionToolbar
 								ref="actionToolbar"
@@ -1171,18 +1156,6 @@ export default {
 	min-height: fit-content;
 }
 
-.invoice-section-heading {
-	padding: 14px 16px 0;
-}
-
-.invoice-section-heading__title {
-	margin: 0;
-	font-size: 1rem;
-	font-weight: 700;
-	line-height: 1.25;
-	color: var(--pos-text-primary);
-}
-
 .invoice-items-card {
 	padding-bottom: var(--dynamic-xs);
 	display: flex;
@@ -1321,7 +1294,7 @@ export default {
 
 .items-table-wrapper {
 	position: relative;
-	margin-top: var(--dynamic-sm);
+	margin-top: 0;
 	/* Override parent padding to make table full-width */
 	margin-left: calc(-1 * var(--dynamic-sm));
 	margin-right: calc(-1 * var(--dynamic-sm));
