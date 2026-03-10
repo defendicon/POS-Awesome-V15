@@ -64,7 +64,7 @@
 				</v-btn>
 				</v-btn-toggle>
 		</div>
-		<div v-if="!dialog && useMobileActionBar" class="mobile-action-bar pos-themed-card">
+		<div v-if="!dialog && useMobileActionBar" class="mobile-action-bar mobile-action-bar--two-items pos-themed-card">
 			<button
 				type="button"
 				class="mobile-action-bar__item"
@@ -501,8 +501,8 @@ export default {
 }
 
 .compact-pos-switcher {
-	padding: 0 var(--dynamic-sm);
-	margin-top: var(--dynamic-sm);
+	padding: 0 var(--terminal-panel-gap, var(--dynamic-sm));
+	margin-top: var(--terminal-panel-gap, var(--dynamic-sm));
 }
 
 .mobile-action-bar {
@@ -510,7 +510,6 @@ export default {
 	bottom: max(12px, env(safe-area-inset-bottom));
 	z-index: 12;
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 8px;
 	margin: var(--dynamic-sm) var(--dynamic-sm) 0;
 	padding: 8px;
@@ -519,6 +518,10 @@ export default {
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
 	backdrop-filter: blur(18px);
+}
+
+.mobile-action-bar--two-items {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .mobile-action-bar__item {
@@ -577,7 +580,7 @@ export default {
 }
 
 .compact-pos-switcher__btn {
-	min-height: 44px;
+	min-height: var(--terminal-control-height-lg, 44px);
 	text-transform: none !important;
 	letter-spacing: 0 !important;
 	font-weight: 600 !important;
@@ -648,9 +651,9 @@ export default {
 }
 
 .dynamic-col {
-	padding: var(--dynamic-sm);
+	padding: var(--terminal-panel-gap, var(--dynamic-sm));
 	transition: padding 0.3s ease;
-	margin-top: var(--dynamic-sm);
+	margin-top: var(--terminal-panel-gap, var(--dynamic-sm));
 	/* Add top margin for better separation */
 }
 

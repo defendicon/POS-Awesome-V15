@@ -84,13 +84,14 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 
 <style scoped>
 .action-btn-consistent {
-	min-height: var(--pos-touch-target-min) !important;
+	min-height: var(--terminal-control-height, var(--pos-touch-target-min)) !important;
 	margin-top: var(--dynamic-xs) !important;
 	padding: var(--pos-space-2) var(--pos-space-3) !important;
 	transition: var(--transition-normal) !important;
 	border-radius: var(--pos-radius-sm) !important;
 	text-transform: none !important;
 	font-weight: 600 !important;
+	font-size: var(--terminal-body-font-size, 0.875rem) !important;
 }
 
 .action-btn-consistent:hover {
@@ -99,25 +100,25 @@ defineEmits(["update:modelValue", "update:itemsView", "open-offers", "open-coupo
 }
 
 .view-toggle-btn {
-	min-height: var(--pos-touch-target-min);
+	min-height: var(--terminal-control-height, var(--pos-touch-target-min));
 	border: 1px solid var(--pos-border-light);
 	border-radius: var(--pos-radius-sm);
 }
 
 .dynamic-padding {
-	padding: var(--dynamic-sm);
+	padding: var(--terminal-section-padding, var(--dynamic-sm));
 }
 
 .dynamic-spacing-sm {
-	padding: var(--dynamic-sm) !important;
+	padding: var(--terminal-section-padding, var(--dynamic-sm)) !important;
 }
 
 .cards {
 	background-color: var(--pos-surface-muted) !important;
-	margin-top: var(--dynamic-sm) !important;
-	padding: var(--dynamic-sm) !important;
+	margin-top: var(--terminal-panel-gap, var(--dynamic-sm)) !important;
+	padding: var(--terminal-section-padding, var(--dynamic-sm)) !important;
 	border: 1px solid var(--pos-border-light);
-	border-radius: var(--pos-radius-md) !important;
+	border-radius: var(--terminal-card-radius, var(--pos-radius-md)) !important;
 	box-shadow: none !important;
 }
 

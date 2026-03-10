@@ -1039,7 +1039,7 @@ export default {
 .invoice-shell {
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--terminal-shell-gap, var(--dynamic-sm));
 	min-height: 0;
 }
 
@@ -1108,24 +1108,24 @@ export default {
 /* Dynamic padding for responsive layout */
 .dynamic-padding {
 	/* Uniform spacing for better alignment */
-	padding: var(--dynamic-sm);
+	padding: var(--terminal-section-padding, var(--dynamic-sm));
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--terminal-shell-gap, var(--dynamic-sm));
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
 }
 
 .invoice-status-alert {
-	border-radius: 14px;
+	border-radius: var(--terminal-card-radius, 14px);
 	flex: 0 0 auto;
 }
 
 .invoice-sections {
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--terminal-shell-gap, var(--dynamic-sm));
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
@@ -1135,21 +1135,21 @@ export default {
 .invoice-top-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-sm);
+	gap: var(--terminal-panel-gap, var(--dynamic-sm));
 	flex: 0 0 auto;
 }
 
 .invoice-meta-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--dynamic-sm);
+	gap: var(--terminal-panel-gap, var(--dynamic-sm));
 	flex: 0 0 auto;
 }
 
 .invoice-section-card {
 	background: var(--pos-card-bg) !important;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-	border-radius: var(--pos-radius-md, 18px);
+	border-radius: var(--terminal-card-radius, var(--pos-radius-md, 18px));
 	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 	overflow: hidden;
 	flex: 0 0 auto;
@@ -1273,33 +1273,34 @@ export default {
 	align-items: center;
 	justify-content: flex-end;
 	flex-wrap: wrap;
-	gap: 8px;
-	padding: 8px 16px;
+	gap: var(--terminal-panel-gap, 8px);
+	padding: var(--terminal-inner-padding, 8px) var(--terminal-section-padding, 16px);
 	background-color: var(--pos-card-bg);
-	border-radius: 8px 8px 0 0;
+	border-radius: var(--terminal-card-radius, 8px) var(--terminal-card-radius, 8px) 0 0;
 	box-sizing: border-box;
-	margin-bottom: 8px;
+	margin-bottom: var(--terminal-inner-padding, 8px);
 }
 
 .item-search-field {
 	width: 100%;
-	max-width: 320px;
+	max-width: var(--terminal-search-max-width, 320px);
 	flex: 1 1 240px;
 	margin-right: auto;
 }
 
 .column-selector-btn {
-	font-size: 0.875rem;
+	font-size: var(--terminal-body-font-size, 0.875rem);
+	min-height: var(--terminal-control-height, 38px);
 }
 
 .items-table-wrapper {
 	position: relative;
 	margin-top: 0;
 	/* Override parent padding to make table full-width */
-	margin-left: calc(-1 * var(--dynamic-sm));
-	margin-right: calc(-1 * var(--dynamic-sm));
-	width: calc(100% + 2 * var(--dynamic-sm));
-	max-width: calc(100% + 2 * var(--dynamic-sm));
+	margin-left: calc(-1 * var(--terminal-section-padding, var(--dynamic-sm)));
+	margin-right: calc(-1 * var(--terminal-section-padding, var(--dynamic-sm)));
+	width: calc(100% + 2 * var(--terminal-section-padding, var(--dynamic-sm)));
+	max-width: calc(100% + 2 * var(--terminal-section-padding, var(--dynamic-sm)));
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;

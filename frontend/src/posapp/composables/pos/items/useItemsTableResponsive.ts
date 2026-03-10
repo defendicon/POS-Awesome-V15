@@ -34,15 +34,16 @@ export function useItemsTableResponsive(
 			string,
 			{ min: number; max: number; ratio: number }
 		> = {
-			item_name: { min: 200, max: 250, ratio: 0.3 },
-			qty: { min: 140, max: 160, ratio: 0.12 },
-			rate: { min: 100, max: 130, ratio: 0.12 },
-			amount: { min: 100, max: 130, ratio: 0.12 },
-			discount_value: { min: 90, max: 120, ratio: 0.1 },
-			discount_amount: { min: 90, max: 120, ratio: 0.11 },
-			price_list_rate: { min: 120, max: 140, ratio: 0.13 },
-			actions: { min: 80, max: 100, ratio: 0.08 },
-			posa_is_offer: { min: 70, max: 90, ratio: 0.06 },
+			item_name: { min: 170, max: 220, ratio: 0.24 },
+			qty: { min: 110, max: 132, ratio: 0.1 },
+			uom: { min: 72, max: 88, ratio: 0.08 },
+			rate: { min: 88, max: 108, ratio: 0.1 },
+			amount: { min: 92, max: 112, ratio: 0.1 },
+			discount_value: { min: 76, max: 92, ratio: 0.08 },
+			discount_amount: { min: 88, max: 104, ratio: 0.09 },
+			price_list_rate: { min: 96, max: 116, ratio: 0.1 },
+			actions: { min: 56, max: 68, ratio: 0.055 },
+			posa_is_offer: { min: 84, max: 104, ratio: 0.09 },
 		};
 
 		const config = baseWidths[header.key] || {
@@ -56,15 +57,16 @@ export function useItemsTableResponsive(
 
 	const calculateMinColumnWidth = (header: TableHeader) => {
 		const minWidths: Record<string, number> = {
-			item_name: 200,
-			qty: 140,
-			rate: 100,
-			amount: 100,
-			discount_value: 90,
-			discount_amount: 90,
-			price_list_rate: 120,
-			actions: 80,
-			posa_is_offer: 70,
+			item_name: 170,
+			qty: 110,
+			uom: 72,
+			rate: 88,
+			amount: 92,
+			discount_value: 76,
+			discount_amount: 88,
+			price_list_rate: 96,
+			actions: 56,
+			posa_is_offer: 84,
 		};
 		return minWidths[header.key] || 80;
 	};
@@ -140,7 +142,7 @@ export function useItemsTableResponsive(
 	const tableDensity = computed(() => {
 		if (containerWidth.value < 500) return "compact";
 		if (containerWidth.value < 800) return "default";
-		return "comfortable";
+		return "default";
 	});
 
 	const setupResizeObserver = () => {

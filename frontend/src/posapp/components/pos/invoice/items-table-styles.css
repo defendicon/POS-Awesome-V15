@@ -88,10 +88,10 @@
 /* Table headers */
 .posa-cart-table th {
 	font-weight: 600;
-	font-size: 0.8rem;
+	font-size: var(--header-font-size, 0.8rem);
 	text-transform: none;
 	letter-spacing: 0.02em;
-	padding: 12px;
+	padding: var(--cell-padding, 12px);
 	border-bottom: 1px solid var(--pos-border-light);
 	background-color: var(--pos-surface-muted);
 	color: var(--pos-text-secondary);
@@ -105,7 +105,7 @@
 	text-align: center;
 	vertical-align: middle !important;
 	line-height: 1.2 !important;
-	height: 48px;
+	height: var(--header-height, 48px);
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	background-clip: padding-box;
 	border-radius: 0;
@@ -185,9 +185,9 @@
 
 /* Table cells */
 .posa-cart-table td {
-	padding: 14px 12px;
+	padding: var(--cell-padding, 14px 12px);
 	vertical-align: middle;
-	height: 60px;
+	height: var(--cell-height, 60px);
 	text-align: center;
 	color: var(--pos-text-primary);
 	position: relative;
@@ -729,17 +729,19 @@
 }
 
 .posa-responsive-table-container.breakpoint-lg {
-	--table-padding: 16px;
-	--header-font-size: 0.8rem;
-	--cell-padding: 16px 12px;
-	--cell-height: 60px;
+	--table-padding: 14px;
+	--header-font-size: 0.76rem;
+	--cell-padding: 10px 8px;
+	--header-height: 42px;
+	--cell-height: 54px;
 }
 
 .posa-responsive-table-container.breakpoint-xl {
-	--table-padding: 20px;
-	--header-font-size: 0.85rem;
-	--cell-padding: 18px 12px;
-	--cell-height: 64px;
+	--table-padding: 16px;
+	--header-font-size: 0.78rem;
+	--cell-padding: 11px 8px;
+	--header-height: 44px;
+	--cell-height: 56px;
 }
 
 /* Container-aware responsive adjustments */
@@ -761,6 +763,35 @@
 	width: var(--pos-touch-target-min) !important;
 	height: var(--pos-touch-target-min) !important;
 	min-width: var(--pos-touch-target-min) !important;
+}
+
+.posa-responsive-table-container.large-view .posa-cart-table__qty-counter {
+	min-width: 112px;
+	max-width: 132px;
+	gap: 4px;
+	padding: 2px;
+}
+
+.posa-responsive-table-container.large-view .qty-control-btn,
+.posa-responsive-table-container.large-view .posa-cart-table__qty-btn,
+.posa-responsive-table-container.large-view .uom-arrow,
+.posa-responsive-table-container.large-view .posa-cart-table__delete-btn {
+	width: 36px !important;
+	height: 36px !important;
+	min-width: 36px !important;
+}
+
+.posa-responsive-table-container.large-view .posa-cart-table__qty-display {
+	min-width: 38px;
+	max-width: 68px;
+	min-height: 36px;
+	font-size: 0.72rem;
+}
+
+.posa-responsive-table-container.large-view .posa-cart-table__editor-display {
+	height: 30px;
+	padding: 3px 6px;
+	font-size: 0.82rem;
 }
 
 /* =================================================================

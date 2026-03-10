@@ -1241,10 +1241,10 @@ defineExpose({
 /* "dynamic-card" no longer composes from pos-card; the pos-card class is added directly in the template */
 .dynamic-padding {
 	/* Equal spacing on all sides for consistent alignment */
-	padding: var(--dynamic-sm);
+	padding: var(--terminal-section-padding, var(--dynamic-sm));
 	display: flex;
 	flex-direction: column;
-	gap: var(--dynamic-sm);
+	gap: var(--terminal-shell-gap, var(--dynamic-sm));
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
@@ -1253,14 +1253,14 @@ defineExpose({
 .selector-section-card {
 	background: var(--pos-card-bg) !important;
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-	border-radius: var(--pos-radius-md, 18px);
+	border-radius: var(--terminal-card-radius, var(--pos-radius-md, 18px));
 	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 	flex: 1 1 auto;
 	min-height: 0;
 }
 
 .section-card-heading {
-	padding: 14px 16px 0;
+	padding: var(--terminal-section-heading-padding, 14px 16px 0);
 }
 
 .section-card-heading--with-padding {
@@ -1269,7 +1269,7 @@ defineExpose({
 
 .section-card-heading__title {
 	margin: 0;
-	font-size: 1rem;
+	font-size: var(--terminal-title-size, 1rem);
 	font-weight: 700;
 	line-height: 1.25;
 	color: var(--pos-text-primary);
@@ -1291,7 +1291,7 @@ defineExpose({
 }
 
 .selector-results-body {
-	padding: var(--dynamic-xs);
+	padding: var(--terminal-inner-padding, var(--dynamic-xs));
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
@@ -1416,10 +1416,10 @@ defineExpose({
 }
 
 .item-selection-image {
-	width: 50px;
-	height: 50px;
+	width: var(--terminal-image-size, 50px);
+	height: var(--terminal-image-size, 50px);
 	object-fit: cover;
-	margin-right: 15px;
+	margin-right: var(--terminal-panel-gap, 15px);
 	background-color: rgb(var(--v-theme-surface-variant));
 }
 
