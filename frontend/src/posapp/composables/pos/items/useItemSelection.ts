@@ -6,6 +6,9 @@ import {
 
 type SelectableItem = {
 	item_code?: string | null;
+	item_name?: string | null;
+	image?: string | null;
+	stock_uom?: string | null;
 	raw?: SelectableItem;
 	item?: SelectableItem;
 	[key: string]: unknown;
@@ -50,6 +53,146 @@ const findVisibleTarget = (selectors: string[]) => {
 	}
 
 	return null;
+};
+
+const resolveThemeHost = (element: Element | null) => {
+	return (
+		element?.closest(
+			".v-theme--dark, .v-theme--light, [data-theme='dark'], [data-theme='light'], [data-theme-mode='dark'], [data-theme-mode='light'], .v-application",
+		) || document.body
+	);
+};
+
+const isDarkThemeHost = (element: Element | null) => {
+	return Boolean(
+		element?.closest(".v-theme--dark, [data-theme='dark'], [data-theme-mode='dark']"),
+	);
+};
+
+const getItemMonogram = (item: SelectableItem) => {
+	const label = String(item.item_name || item.item_code || "").trim();
+	if (!label) {
+		return "+";
+	}
+	return label
+		.split(/\s+/)
+		.slice(0, 2)
+		.map((part) => part.charAt(0).toUpperCase())
+		.join("");
+};
+
+const createFlyChip = (
+	item: SelectableItem,
+	event: MouseEvent,
+	anchor: Element | null,
+) => {
+	const themeHost = resolveThemeHost(anchor || (event.currentTarget as Element | null));
+	const hostStyles = window.getComputedStyle(themeHost as Element);
+	const primaryRgb = hostStyles.getPropertyValue("--v-theme-primary").trim() || "59, 130, 246";
+	const surface =
+		hostStyles.getPropertyValue("--pos-surface-raised").trim() ||
+		hostStyles.getPropertyValue("--pos-card-bg").trim() ||
+		(isDarkThemeHost(themeHost as Element) ? "#1f2933" : "#ffffff");
+	const textPrimary =
+		hostStyles.getPropertyValue("--pos-text-primary").trim() ||
+		(isDarkThemeHost(themeHost as Element) ? "#ffffff" : "#111827");
+	const textSecondary =
+		hostStyles.getPropertyValue("--pos-text-secondary").trim() ||
+		(isDarkThemeHost(themeHost as Element) ? "#cbd5e1" : "#4b5563");
+	const chip = document.createElement("div");
+	const avatar = document.createElement(item.image ? "img" : "div");
+	const content = document.createElement("div");
+	const title = document.createElement("div");
+	const subtitle = document.createElement("div");
+	const qtyBadge = document.createElement("div");
+	const isDarkTheme = isDarkThemeHost(themeHost as Element);
+
+	chip.style.position = "fixed";
+	chip.style.left = `${event.clientX - 84}px`;
+	chip.style.top = `${event.clientY - 32}px`;
+	chip.style.width = "168px";
+	chip.style.minHeight = "64px";
+	chip.style.display = "flex";
+	chip.style.alignItems = "center";
+	chip.style.gap = "10px";
+	chip.style.padding = "10px 12px";
+	chip.style.borderRadius = "18px";
+	chip.style.background = surface;
+	chip.style.border = `1px solid rgba(${primaryRgb}, ${isDarkTheme ? "0.48" : "0.2"})`;
+	chip.style.boxShadow = isDarkTheme
+		? `0 0 0 1px rgba(${primaryRgb}, 0.18), 0 0 22px rgba(${primaryRgb}, 0.22), 0 18px 42px rgba(0, 0, 0, 0.45)`
+		: `0 12px 34px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(${primaryRgb}, 0.1)`;
+	chip.style.backdropFilter = "blur(10px)";
+	chip.style.pointerEvents = "none";
+	chip.style.zIndex = "2600";
+	chip.style.color = textPrimary;
+	chip.style.overflow = "hidden";
+
+	avatar.style.width = "42px";
+	avatar.style.height = "42px";
+	avatar.style.borderRadius = "12px";
+	avatar.style.flex = "0 0 42px";
+	avatar.style.objectFit = "cover";
+	avatar.style.background = `rgba(${primaryRgb}, ${isDarkTheme ? "0.22" : "0.12"})`;
+	avatar.style.border = `1px solid rgba(${primaryRgb}, ${isDarkTheme ? "0.35" : "0.16"})`;
+	avatar.style.display = "flex";
+	avatar.style.alignItems = "center";
+	avatar.style.justifyContent = "center";
+	avatar.style.fontSize = "0.82rem";
+	avatar.style.fontWeight = "800";
+	avatar.style.color = `rgb(${primaryRgb})`;
+
+	if (avatar instanceof HTMLImageElement && item.image) {
+		avatar.src = String(item.image);
+		avatar.alt = String(item.item_name || item.item_code || "Item");
+	} else {
+		avatar.textContent = getItemMonogram(item);
+	}
+
+	content.style.display = "flex";
+	content.style.flexDirection = "column";
+	content.style.minWidth = "0";
+	content.style.flex = "1";
+
+	title.style.fontSize = "0.82rem";
+	title.style.fontWeight = "700";
+	title.style.lineHeight = "1.25";
+	title.style.whiteSpace = "nowrap";
+	title.style.overflow = "hidden";
+	title.style.textOverflow = "ellipsis";
+	title.textContent = String(item.item_name || item.item_code || "Item added");
+
+	subtitle.style.fontSize = "0.72rem";
+	subtitle.style.fontWeight = "600";
+	subtitle.style.lineHeight = "1.2";
+	subtitle.style.whiteSpace = "nowrap";
+	subtitle.style.overflow = "hidden";
+	subtitle.style.textOverflow = "ellipsis";
+	subtitle.style.color = textSecondary;
+	subtitle.textContent = String(item.item_code || item.stock_uom || "Added to cart");
+
+	qtyBadge.style.display = "inline-flex";
+	qtyBadge.style.alignItems = "center";
+	qtyBadge.style.justifyContent = "center";
+	qtyBadge.style.height = "26px";
+	qtyBadge.style.minWidth = "32px";
+	qtyBadge.style.padding = "0 10px";
+	qtyBadge.style.borderRadius = "999px";
+	qtyBadge.style.background = `rgb(${primaryRgb})`;
+	qtyBadge.style.color = isDarkTheme ? "#03131a" : "#ffffff";
+	qtyBadge.style.fontSize = "0.76rem";
+	qtyBadge.style.fontWeight = "800";
+	qtyBadge.style.flex = "0 0 auto";
+	qtyBadge.textContent = "+1";
+
+	content.appendChild(title);
+	content.appendChild(subtitle);
+	chip.appendChild(avatar);
+	chip.appendChild(content);
+	chip.appendChild(qtyBadge);
+	(themeHost as HTMLElement).appendChild(chip);
+
+	return chip;
 };
 
 /**
@@ -220,7 +363,7 @@ export function useItemSelection() {
 
 	// --- Mouse Interaction ---
 
-	function triggerFlyAnimation(event: MouseEvent, isRow = false) {
+	function triggerFlyAnimation(event: MouseEvent, item: SelectableItem) {
 		if (!ctx.fly) return;
 
 		const target = findVisibleTarget([
@@ -233,42 +376,19 @@ export function useItemSelection() {
 
 		if (!target) return;
 
-		let source: Element | null | undefined;
-		if (isRow) {
-			// For row click, we create a placeholder
-			const placeholder = document.createElement("div");
-			placeholder.className = "item-fly-placeholder";
-			placeholder.style.width = "40px";
-			placeholder.style.height = "40px";
-			placeholder.style.borderRadius = "50%";
-			placeholder.style.position = "fixed";
-			placeholder.style.top = `${event.clientY - 20}px`;
-			placeholder.style.left = `${event.clientX - 20}px`;
-			document.body.appendChild(placeholder);
-
-			ctx.fly(placeholder, target, ctx.flyConfig);
-
-			// Cleanup placeholder after animation starts?
-			// The original code does `placeholder.remove()` immediately?
-			// "this.fly(placeholder, target, this.flyConfig); placeholder.remove();"
-			// Wait, if removed immediately, does it animate?
-			// `useFlyAnimation` likely clones it or uses it as start pos.
-			// Let's assume original code works.
-			placeholder.remove();
-		} else {
-			// For card click
-			const currentTarget = event.currentTarget as Element | null;
-			source =
-				currentTarget?.querySelector?.(".card-item-image") ||
-				currentTarget;
-			if (source) {
-				ctx.fly(source, target, ctx.flyConfig);
-			}
+		const source = createFlyChip(
+			item,
+			event,
+			(event.currentTarget as Element | null) || target,
+		);
+		if (source) {
+			ctx.fly(source, target, ctx.flyConfig);
+			source.remove();
 		}
 	}
 
 	function handleItemSelection(event: MouseEvent, item: SelectableItem) {
-		triggerFlyAnimation(event, false);
+		triggerFlyAnimation(event, item);
 		if (ctx.addItem) ctx.addItem(item);
 	}
 
@@ -283,7 +403,7 @@ export function useItemSelection() {
 		if (!item) {
 			return;
 		}
-		triggerFlyAnimation(event, true);
+		triggerFlyAnimation(event, item);
 		if (ctx.addItem) await ctx.addItem(item);
 	}
 
