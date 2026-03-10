@@ -26,6 +26,32 @@ type ItemSelectionContext = {
 	items_view: "card" | "list";
 };
 
+const isVisibleElement = (element: Element | null): element is HTMLElement => {
+	if (!(element instanceof HTMLElement)) {
+		return false;
+	}
+
+	const rect = element.getBoundingClientRect();
+	if (rect.width <= 0 || rect.height <= 0) {
+		return false;
+	}
+
+	const styles = window.getComputedStyle(element);
+	return styles.display !== "none" && styles.visibility !== "hidden" && styles.opacity !== "0";
+};
+
+const findVisibleTarget = (selectors: string[]) => {
+	for (const selector of selectors) {
+		const matches = Array.from(document.querySelectorAll(selector));
+		const visibleMatch = matches.find((candidate) => isVisibleElement(candidate));
+		if (visibleMatch) {
+			return visibleMatch;
+		}
+	}
+
+	return null;
+};
+
 /**
  * useItemSelection
  *
@@ -197,8 +223,13 @@ export function useItemSelection() {
 	function triggerFlyAnimation(event: MouseEvent, isRow = false) {
 		if (!ctx.fly) return;
 
-		const targets = document.querySelectorAll(".items-table-container");
-		const target = targets[targets.length - 1]; // The Cart table container
+		const target = findVisibleTarget([
+			"[data-fly-target='invoice-tab-badge']",
+			"[data-fly-target='invoice-tab']",
+			"[data-fly-target='cart-surface']",
+			".posa-items-table-container",
+			".invoice-main-card",
+		]);
 
 		if (!target) return;
 

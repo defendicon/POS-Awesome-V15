@@ -47,10 +47,20 @@
 				<v-btn
 					value="invoice"
 					class="compact-pos-switcher__btn"
+					data-fly-target="invoice-tab"
 					prepend-icon="mdi-receipt-text-outline"
 					@click="setCompactPanel('invoice')"
 				>
-					{{ __("Invoice") }}
+					<span class="compact-pos-switcher__btn-content">
+						<span>{{ __("Invoice") }}</span>
+						<span
+							v-if="hasCartBadge"
+							:class="['tab-count-badge', { 'tab-count-badge--pulse': cartBadgePulse }]"
+							data-fly-target="invoice-tab-badge"
+						>
+							{{ cartBadgeLabel }}
+						</span>
+					</span>
 				</v-btn>
 				</v-btn-toggle>
 		</div>
@@ -68,10 +78,20 @@
 				type="button"
 				class="mobile-action-bar__item"
 				:class="{ 'mobile-action-bar__item--active': activeMobileAction === 'invoice' }"
+				data-fly-target="invoice-tab"
 				@click="activateMobileAction('invoice')"
 			>
 				<v-icon size="18">mdi-receipt-text-outline</v-icon>
-				<span>{{ __("Invoice") }}</span>
+				<span class="mobile-action-bar__label">
+					<span>{{ __("Invoice") }}</span>
+					<span
+						v-if="hasCartBadge"
+						:class="['tab-count-badge', { 'tab-count-badge--pulse': cartBadgePulse }]"
+						data-fly-target="invoice-tab-badge"
+					>
+						{{ cartBadgeLabel }}
+					</span>
+				</span>
 			</button>
 			<button
 				type="button"
@@ -80,7 +100,15 @@
 				@click="activateMobileAction('pay')"
 			>
 				<v-icon size="18">mdi-credit-card-outline</v-icon>
-				<span>{{ __("Pay") }}</span>
+				<span class="mobile-action-bar__label">
+					<span>{{ __("Pay") }}</span>
+					<span
+						v-if="hasCartBadge"
+						:class="['tab-count-badge', { 'tab-count-badge--pulse': cartBadgePulse }]"
+					>
+						{{ cartBadgeLabel }}
+					</span>
+				</span>
 			</button>
 		</div>
 		<v-row v-show="!dialog" dense class="ma-0 dynamic-main-row">
@@ -187,9 +215,39 @@ export default {
 		const itemsStore = useItemsStore();
 		const __ = window.__;
 		const { activeView, posProfile, paymentDialogOpen } = storeToRefs(uiStore);
+		const { itemsCount, totalQty } = storeToRefs(invoiceStore);
 		const usePaymentDialog = computed(() => responsive.windowWidth.value >= 992);
 		const useMobileActionBar = computed(() => responsive.windowWidth.value < 768);
 		const useCompactPosSwitcher = computed(() => responsive.windowWidth.value < 1280);
+		const cartBadgePulse = ref(false);
+		let cartBadgePulseTimeout = null;
+		const hasCartBadge = computed(() => Math.abs(Number(totalQty.value || 0)) > 0);
+		const cartBadgeLabel = computed(() => {
+			const qty = Math.abs(Number(totalQty.value || itemsCount.value || 0));
+			if (!qty) {
+				return "";
+			}
+			if (qty >= 100) {
+				return "99+";
+			}
+			if (Number.isInteger(qty)) {
+				return String(qty);
+			}
+			return qty.toFixed(qty < 10 ? 1 : 0).replace(/\.0$/, "");
+		});
+		const triggerCartBadgePulse = () => {
+			cartBadgePulse.value = false;
+			if (cartBadgePulseTimeout) {
+				clearTimeout(cartBadgePulseTimeout);
+			}
+			requestAnimationFrame(() => {
+				cartBadgePulse.value = true;
+				cartBadgePulseTimeout = setTimeout(() => {
+					cartBadgePulse.value = false;
+					cartBadgePulseTimeout = null;
+				}, 520);
+			});
+		};
 		const compactPanel = ref("selector");
 		const activeMobileAction = computed(() => {
 			if (compactPanel.value === "invoice") {
@@ -263,6 +321,10 @@ export default {
 		});
 
 		onBeforeUnmount(() => {
+			if (cartBadgePulseTimeout) {
+				clearTimeout(cartBadgePulseTimeout);
+				cartBadgePulseTimeout = null;
+			}
 			if (eventBus) {
 				eventBus.off("submit_closing_pos");
 			}
@@ -302,6 +364,14 @@ export default {
 			}
 		});
 
+		watch(totalQty, (next, previous) => {
+			const currentQty = Math.abs(Number(next || 0));
+			const previousQty = Math.abs(Number(previous || 0));
+			if (currentQty > previousQty && currentQty > 0) {
+				triggerCartBadgePulse();
+			}
+		});
+
 		return {
 			...responsive,
 			...rtl,
@@ -316,6 +386,9 @@ export default {
 			usePaymentDialog,
 			useMobileActionBar,
 			useCompactPosSwitcher,
+			cartBadgePulse,
+			hasCartBadge,
+			cartBadgeLabel,
 			compactPanel,
 			activeMobileAction,
 			setCompactPanel,
@@ -489,6 +562,15 @@ export default {
 		transform 0.2s ease;
 }
 
+.mobile-action-bar__label,
+.compact-pos-switcher__btn-content {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-width: 0;
+}
+
 .mobile-action-bar__item--active {
 	background: rgba(var(--v-theme-primary), 0.12);
 	color: rgb(var(--v-theme-primary));
@@ -519,6 +601,51 @@ export default {
 	text-transform: none !important;
 	letter-spacing: 0 !important;
 	font-weight: 600 !important;
+}
+
+.tab-count-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 22px;
+	height: 22px;
+	padding: 0 7px;
+	border-radius: 999px;
+	background: rgb(var(--v-theme-primary));
+	color: rgb(var(--v-theme-on-primary));
+	font-size: 0.72rem;
+	font-weight: 800;
+	line-height: 1;
+	box-shadow: 0 8px 18px rgba(var(--v-theme-primary), 0.24);
+}
+
+.tab-count-badge--pulse {
+	animation: tab-count-badge-pulse 0.52s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes tab-count-badge-pulse {
+	0% {
+		transform: scale(1);
+		box-shadow: 0 8px 18px rgba(var(--v-theme-primary), 0.18);
+	}
+
+	35% {
+		transform: scale(1.22);
+		box-shadow:
+			0 0 0 10px rgba(var(--v-theme-primary), 0.12),
+			0 12px 26px rgba(var(--v-theme-primary), 0.3);
+	}
+
+	100% {
+		transform: scale(1);
+		box-shadow: 0 8px 18px rgba(var(--v-theme-primary), 0.24);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tab-count-badge--pulse {
+		animation: none;
+	}
 }
 
 .compact-pos-switcher__toggle :deep(.v-btn--active) {

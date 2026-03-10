@@ -2,6 +2,7 @@
 	<div
 		ref="tableContainer"
 		class="my-0 py-0 overflow-y-auto posa-items-table-container posa-responsive-table-container pos-themed-card"
+		data-fly-target="cart-surface"
 		:style="containerStyles"
 		:class="containerClasses"
 		@dragover="onDragOverFromSelector($event)"

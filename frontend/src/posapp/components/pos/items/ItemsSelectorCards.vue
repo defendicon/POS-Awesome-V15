@@ -29,7 +29,7 @@
 					variant="flat"
 					color="primary"
 					class="items-empty-state__action"
-					@click="emit('clear-search')"
+					@click='emit("clear-search")'
 				>
 					{{ clearSearchLabel }}
 				</v-btn>

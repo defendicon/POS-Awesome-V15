@@ -16,10 +16,9 @@
 				height: responsiveStyles['--container-height'],
 				maxHeight: responsiveStyles['--container-height'],
 				minHeight: responsiveStyles['--container-min-height'],
-				overflow: 'auto',
+				overflow: 'hidden',
 				position: 'relative',
 			}"
-			@scroll.passive="onSelectorScroll"
 		>
 			<v-progress-linear
 				:active="isLoadingOrSyncing"
@@ -79,7 +78,7 @@
 						@reload-items="forceReloadItems"
 						ref="itemHeader"
 					/>
-					<div class="selector-results-body">
+					<div class="selector-results-body" @scroll.passive="onSelectorScroll">
 						<v-row class="items">
 						<v-col cols="12" class="pt-0 mt-0">
 							<ItemsSelectorCards
@@ -1246,9 +1245,9 @@ defineExpose({
 	display: flex;
 	flex-direction: column;
 	gap: var(--dynamic-sm);
-	flex: 0 0 auto;
-	min-height: max-content;
-	overflow: visible;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
 }
 
 .selector-section-card {
@@ -1256,6 +1255,8 @@ defineExpose({
 	border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 	border-radius: var(--pos-radius-md, 18px);
 	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+	flex: 1 1 auto;
+	min-height: 0;
 }
 
 .section-card-heading {
@@ -1281,8 +1282,8 @@ defineExpose({
 	z-index: 2;
 	display: flex;
 	flex-direction: column;
-	flex: 0 0 auto;
-	min-height: auto;
+	flex: 1 1 auto;
+	min-height: 0;
 	border: none !important;
 	box-shadow: none !important;
 	border-radius: 0 !important;
@@ -1293,24 +1294,26 @@ defineExpose({
 	padding: var(--dynamic-xs);
 	display: flex;
 	flex-direction: column;
-	flex: 0 0 auto;
+	flex: 1 1 auto;
 	min-height: 240px;
-	overflow: visible;
+	overflow: auto;
+	overscroll-behavior: contain;
+	scrollbar-gutter: stable;
 }
 
 .selector-results-body .items {
 	display: flex;
 	flex-direction: column;
-	flex: 0 0 auto;
-	min-height: auto;
+	flex: 1 1 auto;
+	min-height: 100%;
 	margin: 0;
 	overflow: visible;
 }
 
 .selector-results-body .items > .v-col {
 	display: flex;
-	flex: 0 0 auto;
-	min-height: auto;
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow: visible;
 }
 
@@ -1389,12 +1392,14 @@ defineExpose({
 	display: flex;
 	flex-direction: column;
 	min-height: var(--container-min-height, 380px);
+	overflow: hidden;
 }
 
 :deep(.items-table-container),
 :deep(.items-card-container) {
 	display: block;
 	width: 100%;
+	min-height: 100%;
 	overflow: visible;
 }
 
