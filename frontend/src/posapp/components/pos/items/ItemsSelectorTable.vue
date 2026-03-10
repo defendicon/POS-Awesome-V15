@@ -1,8 +1,8 @@
 <template>
-	<div class="items-table-container">
+	<div ref="tableContainer" class="items-table-container">
 		<v-data-table-virtual
 			ref="tableRef"
-			:headers="normalizedHeaders"
+			:headers="responsiveHeaders"
 			:items="displayedItems"
 			class="sleek-data-table overflow-y-auto"
 			:style="{ height: '100%' }"
@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 const props = defineProps({
 	displayedItems: { type: Array, default: () => [] },
@@ -128,27 +128,74 @@ const props = defineProps({
 
 const emit = defineEmits(["row-click", "list-scroll"]);
 
-const normalizedHeaders = computed(() => {
-	const visibleKeys = (props.headers || []).map((header) => header?.key).filter(Boolean);
-	const widthMap = visibleKeys.includes("item_code")
-		? {
-				item_name: "34%",
-				item_code: "22%",
-				rate: "20%",
-				actual_qty: "14%",
-				stock_uom: "10%",
-			}
-		: {
-				item_name: "46%",
-				rate: "24%",
-				actual_qty: "18%",
-				stock_uom: "12%",
-			};
+const tableContainer = ref(null);
+const containerWidth = ref(0);
+let resizeObserver = null;
 
-	return (props.headers || []).map((header) => ({
-		...header,
-		width: header?.width || widthMap[header?.key] || "16%",
-	}));
+const breakpoint = computed(() => {
+	if (containerWidth.value < 460) return "xs";
+	if (containerWidth.value < 680) return "sm";
+	if (containerWidth.value < 860) return "md";
+	if (containerWidth.value < 1080) return "lg";
+	return "xl";
+});
+
+const responsiveHeaders = computed(() => {
+	const sourceHeaders = props.headers || [];
+	if (sourceHeaders.length === 0) {
+		return [];
+	}
+
+	const visibleKeysByBreakpoint = {
+		xs: ["item_name", "actual_qty"],
+		sm: ["item_name", "actual_qty", "rate"],
+		md: ["item_name", "actual_qty", "rate", "stock_uom"],
+		lg: ["item_name", "item_code", "actual_qty", "rate", "stock_uom"],
+		xl: ["item_name", "item_code", "actual_qty", "rate", "stock_uom"],
+	};
+
+	const widthMaps = {
+		xs: {
+			item_name: "72%",
+			actual_qty: "28%",
+		},
+		sm: {
+			item_name: "50%",
+			actual_qty: "20%",
+			rate: "30%",
+		},
+		md: {
+			item_name: "42%",
+			actual_qty: "18%",
+			rate: "24%",
+			stock_uom: "16%",
+		},
+		lg: {
+			item_name: "32%",
+			item_code: "24%",
+			actual_qty: "14%",
+			rate: "20%",
+			stock_uom: "10%",
+		},
+		xl: {
+			item_name: "30%",
+			item_code: "24%",
+			actual_qty: "14%",
+			rate: "20%",
+			stock_uom: "12%",
+		},
+	};
+
+	const activeBreakpoint = breakpoint.value;
+	const visibleKeys = visibleKeysByBreakpoint[activeBreakpoint] || visibleKeysByBreakpoint.xl;
+	const widthMap = widthMaps[activeBreakpoint] || widthMaps.xl;
+
+	return sourceHeaders
+		.filter((header) => visibleKeys.includes(header?.key))
+		.map((header) => ({
+			...header,
+			width: widthMap[header?.key] || header?.width || "16%",
+		}));
 });
 
 const handleRowClick = (event, data) => {
@@ -199,6 +246,32 @@ const scrollToIndex = (index) => {
 };
 
 defineExpose({ scrollToIndex, getTableElement, tableRef });
+
+const updateContainerWidth = () => {
+	const el = tableContainer.value;
+	if (!el) return;
+	const nextWidth = Math.floor(el.clientWidth || el.getBoundingClientRect().width || 0);
+	if (nextWidth > 0) {
+		containerWidth.value = nextWidth;
+	}
+};
+
+onMounted(() => {
+	updateContainerWidth();
+	if (tableContainer.value && typeof ResizeObserver !== "undefined") {
+		resizeObserver = new ResizeObserver(() => {
+			updateContainerWidth();
+		});
+		resizeObserver.observe(tableContainer.value);
+	}
+});
+
+onBeforeUnmount(() => {
+	if (resizeObserver) {
+		resizeObserver.disconnect();
+		resizeObserver = null;
+	}
+});
 </script>
 
 <style scoped>
@@ -237,6 +310,16 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 
 .item-name-cell {
 	font-weight: 600;
+}
+
+.item-name-cell,
+.item-code-cell,
+.last-rate-inline,
+:deep(.text-primary),
+:deep(.text-success),
+:deep(.golden--text) {
+	min-width: 0;
+	max-width: 100%;
 }
 
 :deep(.v-theme--dark) .last-rate-inline {
@@ -375,5 +458,11 @@ defineExpose({ scrollToIndex, getTableElement, tableRef });
 .sleek-data-table :deep(td) {
 	min-width: 0;
 	max-width: 0;
+}
+
+.sleek-data-table :deep(.v-data-table-header__content) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 </style>
