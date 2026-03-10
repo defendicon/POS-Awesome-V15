@@ -38,42 +38,40 @@
 		<RecycleScroller
 			v-else
 			ref="scrollerRef"
-			:items="displayedItems"
-			key-field="item_code"
+			:items="virtualRows"
+			key-field="id"
 			class="virtual-scroller"
 			:class="{ 'item-container': isOverflowing }"
 			list-class="items-virtual-list"
 			:item-size="cardSlotHeight"
-			:grid-items="cardColumns"
-			:item-secondary-size="cardSlotWidth"
+			:style="scrollerVars"
 			:buffer="virtualScrollBuffer"
 			:emit-update="true"
 			@update="handleRangeUpdate"
 		>
-			<template #default="{ item }">
-				<ItemCard
-					v-if="item"
-					:key="item.item_code"
-					:item="item"
-					:pos-profile="posProfile"
-					:context="context"
-					:selected-currency="selectedCurrency"
-					:hide-qty-decimals="hideQtyDecimals"
-					:last-invoice-rate="getLastInvoiceRate(item)"
-					:is-item-highlighted="isItemHighlighted(item)"
-					:currency-symbol="currencySymbol"
-					:format-currency="formatCurrency"
-					:format-number="formatNumber"
-					:rate-precision="ratePrecision"
-					:is-negative="isNegative"
-					:style="{
-						width: cardColumnWidth + 'px',
-						height: cardRowHeight + 'px',
-					}"
-					@click="handleItemClick"
-					@dragstart="handleDragStart"
-					@dragend="handleDragEnd"
-				/>
+			<template #default="{ item: row }">
+				<div class="items-card-row" :style="getRowStyle(row)">
+					<ItemCard
+						v-for="item in row.items"
+						:key="item.item_code"
+						:item="item"
+						:pos-profile="posProfile"
+						:context="context"
+						:selected-currency="selectedCurrency"
+						:hide-qty-decimals="hideQtyDecimals"
+						:last-invoice-rate="getLastInvoiceRate(item)"
+						:is-item-highlighted="isItemHighlighted(item)"
+						:currency-symbol="currencySymbol"
+						:format-currency="formatCurrency"
+						:format-number="formatNumber"
+						:rate-precision="ratePrecision"
+						:is-negative="isNegative"
+						:style="{ height: cardRowHeight + 'px' }"
+						@click="handleItemClick"
+						@dragstart="handleDragStart"
+						@dragend="handleDragEnd"
+					/>
+				</div>
 			</template>
 		</RecycleScroller>
 	</div>
@@ -94,6 +92,8 @@ const props = defineProps({
 	isOverflowing: { type: Boolean, default: false },
 	cardSlotHeight: { type: Number, default: 0 },
 	cardColumns: { type: Number, default: 1 },
+	cardGap: { type: Number, default: 16 },
+	cardPadding: { type: Number, default: 16 },
 	cardSlotWidth: { type: Number, default: 0 },
 	cardColumnWidth: { type: Number, default: 0 },
 	cardRowHeight: { type: Number, default: 0 },
@@ -120,6 +120,24 @@ const showClearButton = computed(() => {
 	return Boolean(props.searchInput) || (props.itemGroup && props.itemGroup !== "ALL");
 });
 
+const normalizedColumns = computed(() => Math.max(1, Number(props.cardColumns) || 1));
+
+const virtualRows = computed(() => {
+	const rows = [];
+	for (let index = 0; index < props.displayedItems.length; index += normalizedColumns.value) {
+		rows.push({
+			id: `row-${Math.floor(index / normalizedColumns.value)}`,
+			items: props.displayedItems.slice(index, index + normalizedColumns.value),
+		});
+	}
+	return rows;
+});
+
+const scrollerVars = computed(() => ({
+	"--card-gap": `${props.cardGap || 16}px`,
+	"--card-padding": `${props.cardPadding || 16}px`,
+}));
+
 const handleItemClick = (event, item) => {
 	emit("select-item", event, item);
 };
@@ -133,19 +151,37 @@ const handleDragEnd = (event) => {
 };
 
 const handleRangeUpdate = (...args) => {
-	emit("virtual-range-update", ...args);
+	const [startRow, endRow, visibleStartRow, visibleEndRow] = args;
+	const columns = normalizedColumns.value;
+	const lastIndex = Math.max(props.displayedItems.length - 1, 0);
+	const toStartIndex = (rowIndex) => Math.max(0, Number(rowIndex || 0) * columns);
+	const toEndIndex = (rowIndex) =>
+		Math.min(lastIndex, Math.max(0, (Number(rowIndex || 0) + 1) * columns - 1));
+
+	emit(
+		"virtual-range-update",
+		toStartIndex(startRow),
+		toEndIndex(endRow),
+		toStartIndex(visibleStartRow),
+		toEndIndex(visibleEndRow),
+	);
 };
 
 const scrollerRef = ref(null);
 
 const scrollToItem = (index) => {
-	scrollerRef.value?.scrollToItem?.(index);
+	const rowIndex = Math.floor(Math.max(0, index) / normalizedColumns.value);
+	scrollerRef.value?.scrollToItem?.(rowIndex);
 };
 
 const getScrollerElement = () => {
 	const refValue = scrollerRef.value;
 	return refValue?.$el || refValue;
 };
+
+const getRowStyle = (row) => ({
+	gridTemplateColumns: `repeat(${normalizedColumns.value}, minmax(0, 1fr))`,
+});
 
 defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 </script>
@@ -177,6 +213,15 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 	min-height: 0;
 	overflow-y: auto;
 	position: relative;
+}
+
+.items-card-row {
+	display: grid;
+	gap: var(--card-gap);
+	height: 100%;
+	padding: 0 var(--card-padding);
+	box-sizing: border-box;
+	align-items: start;
 }
 
 .items-empty-state {
@@ -250,24 +295,26 @@ defineExpose({ scrollToItem, getScrollerElement, scrollerRef });
 }
 
 :deep(.items-virtual-list) {
-	padding: 0;
+	padding-top: var(--card-padding);
 	box-sizing: border-box;
 	contain: layout style;
 }
 
 .virtual-scroller :deep(.vue-recycle-scroller__item-wrapper) {
-	display: contents;
+	width: 100%;
 }
 
 @media (max-width: 1200px) {
-	:deep(.items-virtual-list) {
-		padding: 0;
+	.items-card-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
 	}
 }
 
 @media (max-width: 768px) {
-	:deep(.items-virtual-list) {
-		padding: 0;
+	.items-card-grid {
+		grid-template-columns: 1fr;
+		gap: 10px;
 	}
 }
 </style>

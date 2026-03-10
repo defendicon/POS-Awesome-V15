@@ -91,6 +91,8 @@
 								:is-overflowing="isOverflowing"
 								:card-slot-height="cardSlotHeight"
 								:card-columns="cardColumns"
+								:card-gap="cardGap"
+								:card-padding="cardPadding"
 								:card-slot-width="cardSlotWidth"
 								:card-column-width="cardColumnWidth"
 								:card-row-height="cardRowHeight"
@@ -541,6 +543,8 @@ const { getLastInvoiceRate, scheduleLastInvoiceRateRefresh, clearLastInvoiceRate
 const {
 	isOverflowing,
 	cardColumns,
+	cardGap,
+	cardPadding,
 	cardRowHeight,
 	cardSlotHeight,
 	cardSlotWidth,

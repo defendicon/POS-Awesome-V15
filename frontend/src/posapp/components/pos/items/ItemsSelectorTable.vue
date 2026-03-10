@@ -9,6 +9,7 @@
 				:headers="responsiveHeaders"
 				:items="displayedItems"
 				item-value="item_code"
+				:item-height="68"
 				fixed-header
 				height="100%"
 				hide-default-footer
@@ -16,37 +17,30 @@
 				:style="tableStyles"
 				:header-props="headerProps"
 				:no-data-text="noDataText"
+				:item-class="itemClass"
+				:row-props="rowProps"
+				@click:row="handleRowClick"
 				@scroll.passive="handleListScroll"
 			>
-				<template #item="{ item }">
-					<tr
-						:class="resolveRowClass(item)"
-						v-bind="resolveRowProps(item)"
-						@click="handleRowClick($event, item)"
-					>
-						<td v-for="header in responsiveHeaders" :key="header.key">
-							<template v-if="header.key === 'item_name'">
-								<div class="item-name-cell" :title="item.item_name">{{ item.item_name }}</div>
-							</template>
-							<template v-else-if="header.key === 'item_code'">
-								<div class="item-code-cell" :title="item.item_code">{{ item.item_code }}</div>
-							</template>
-							<template v-else-if="header.key === 'rate'">
-								<div class="rate-primary-line">
-									{{ currencySymbol(item.original_currency || item.currency || item.price_list_currency || posProfile.currency) }}
-									{{ formatCurrency(item.original_rate ?? item.rate ?? 0, item.original_currency || item.currency || item.price_list_currency || posProfile.currency, ratePrecision(item.original_rate ?? item.rate ?? 0)) }}
-								</div>
-							</template>
-							<template v-else-if="header.key === 'actual_qty'">
-								<span class="golden--text" :class="{ 'negative-number': isNegative(item.actual_qty) }">
-									{{ formatActualQty(item.actual_qty) }}
-								</span>
-							</template>
-							<template v-else-if="header.key === 'stock_uom'">
-								{{ item.stock_uom || "" }}
-							</template>
-						</td>
-					</tr>
+				<template #item.item_name="{ item }">
+					<div class="item-name-cell" :title="item.item_name">{{ item.item_name }}</div>
+				</template>
+				<template #item.item_code="{ item }">
+					<div class="item-code-cell" :title="item.item_code">{{ item.item_code }}</div>
+				</template>
+				<template #item.rate="{ item }">
+					<div class="rate-primary-line">
+						{{ currencySymbol(item.original_currency || item.currency || item.price_list_currency || posProfile.currency) }}
+						{{ formatCurrency(item.original_rate ?? item.rate ?? 0, item.original_currency || item.currency || item.price_list_currency || posProfile.currency, ratePrecision(item.original_rate ?? item.rate ?? 0)) }}
+					</div>
+				</template>
+				<template #item.actual_qty="{ item }">
+					<span class="golden--text" :class="{ 'negative-number': isNegative(item.actual_qty) }">
+						{{ formatActualQty(item.actual_qty) }}
+					</span>
+				</template>
+				<template #item.stock_uom="{ item }">
+					{{ item.stock_uom || "" }}
 				</template>
 			</v-data-table-virtual>
 		</div>
@@ -151,18 +145,8 @@ const formatActualQty = (value) => {
 	return props.formatNumber(numericQty, 4);
 };
 
-const resolveRowClass = (item) => {
-	if (typeof props.itemClass === "function") return props.itemClass(item);
-	return props.itemClass;
-};
-
-const resolveRowProps = (item) => {
-	if (typeof props.rowProps === "function") return props.rowProps(item) || {};
-	return props.rowProps || {};
-};
-
-const handleRowClick = (event, item) => {
-	emit("row-click", event, item);
+const handleRowClick = (event, data) => {
+	emit("row-click", event, data);
 };
 
 const handleListScroll = (event) => {
