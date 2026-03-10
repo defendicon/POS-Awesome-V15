@@ -4,7 +4,7 @@
 			{{ noDataText }}
 		</div>
 		<div v-else class="items-table-shell">
-			<table class="items-table">
+			<table class="items-table" :style="tableStyles">
 				<thead>
 					<tr>
 						<th v-for="header in responsiveHeaders" :key="header.key" :style="{ width: header.width }">
@@ -77,6 +77,7 @@ const tableContainer = ref(null);
 const viewportWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1280);
 const containerWidth = ref(viewportWidth.value);
 let resizeObserver = null;
+const isDesktopViewport = computed(() => viewportWidth.value >= 1024);
 
 const effectiveWidth = computed(() => {
 	const measuredWidth = Number(containerWidth.value || 0);
@@ -88,6 +89,7 @@ const effectiveWidth = computed(() => {
 });
 
 const breakpoint = computed(() => {
+	if (isDesktopViewport.value) return "desktop";
 	if (effectiveWidth.value >= 1100) return "xl";
 	if (effectiveWidth.value < 560) return "xs";
 	if (effectiveWidth.value < 760) return "sm";
@@ -101,6 +103,7 @@ const responsiveHeaders = computed(() => {
 	if (sourceHeaders.length === 0) return [];
 
 	const visibleKeysByBreakpoint = {
+		desktop: sourceHeaders.map((header) => header?.key),
 		xs: ["item_name", "actual_qty"],
 		sm: ["item_name", "actual_qty", "rate"],
 		md: ["item_name", "actual_qty", "rate", "stock_uom"],
@@ -109,6 +112,13 @@ const responsiveHeaders = computed(() => {
 	};
 
 	const widthMaps = {
+		desktop: {
+			item_name: "34%",
+			item_code: "22%",
+			actual_qty: "14%",
+			rate: "18%",
+			stock_uom: "12%",
+		},
 		xs: { item_name: "74%", actual_qty: "26%" },
 		sm: { item_name: "50%", actual_qty: "18%", rate: "32%" },
 		md: { item_name: "42%", actual_qty: "16%", rate: "24%", stock_uom: "18%" },
@@ -127,6 +137,10 @@ const responsiveHeaders = computed(() => {
 			width: widthMap[header?.key] || header?.width || "16%",
 		}));
 });
+
+const tableStyles = computed(() => ({
+	minWidth: isDesktopViewport.value ? "760px" : "100%",
+}));
 
 const formatActualQty = (value) => {
 	const numericQty = Number(value ?? 0);
@@ -193,7 +207,7 @@ onBeforeUnmount(() => {
 .items-table-shell {
 	border: 1px solid var(--pos-border-light);
 	border-radius: var(--pos-radius-md);
-	overflow: hidden;
+	overflow: auto;
 	background: var(--pos-surface-raised);
 }
 
@@ -254,5 +268,11 @@ onBeforeUnmount(() => {
 	padding: 24px 12px;
 	text-align: center;
 	color: var(--pos-text-secondary);
+}
+
+@media (min-width: 1024px) {
+	.items-table-shell {
+		scrollbar-gutter: stable both-edges;
+	}
 }
 </style>

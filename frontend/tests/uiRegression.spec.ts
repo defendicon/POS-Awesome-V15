@@ -8,6 +8,7 @@ import notificationBellSource from "../src/posapp/components/navbar/Notification
 import invoiceManagementSource from "../src/posapp/components/pos/flows/InvoiceManagement.vue?raw";
 import itemsSelectorSource from "../src/posapp/components/pos/items/ItemsSelector.vue?raw";
 import itemsSelectorCardsSource from "../src/posapp/components/pos/items/ItemsSelectorCards.vue?raw";
+import itemsSelectorTableSource from "../src/posapp/components/pos/items/ItemsSelectorTable.vue?raw";
 
 describe("UI regression coverage", () => {
 	beforeEach(() => {
@@ -70,6 +71,15 @@ describe("UI regression coverage", () => {
 		expect(source).toContain("{{ itemGroup }}");
 		expect(source).toContain('class="items-empty-state__action"');
 		expect(source).toContain('emit("clear-search")');
+	});
+
+	it("keeps desktop item selector tables fully expanded", () => {
+		const source = itemsSelectorTableSource;
+
+		expect(source).toContain('const isDesktopViewport = computed(() => viewportWidth.value >= 1024);');
+		expect(source).toContain('if (isDesktopViewport.value) return "desktop";');
+		expect(source).toContain('desktop: sourceHeaders.map((header) => header?.key),');
+		expect(source).toContain('minWidth: isDesktopViewport.value ? "760px" : "100%",');
 	});
 
 	it("keeps invoice management loaders and reset actions in each tab", () => {
