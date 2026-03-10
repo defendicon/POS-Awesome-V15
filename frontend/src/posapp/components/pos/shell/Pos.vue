@@ -186,7 +186,7 @@
 					type="button"
 					class="mobile-pos-dock__item mobile-pos-dock__item--pay"
 					:class="{ 'mobile-pos-dock__item--active': activeView === 'payment' }"
-					@click="showPaymentPanel"
+					@click="triggerInvoicePay"
 				>
 					<v-icon icon="mdi-credit-card-outline" size="20" />
 					<span>{{ __("Pay") }}</span>
@@ -369,6 +369,17 @@ export default {
 			}
 			uiStore.setActiveView("payment");
 		};
+		const triggerInvoicePay = () => {
+			if (typeof invoicePanel.value?.handleShowPaymentRequest === "function") {
+				invoicePanel.value.handleShowPaymentRequest();
+				return;
+			}
+			if (typeof invoicePanel.value?.show_payment === "function") {
+				invoicePanel.value.show_payment();
+				return;
+			}
+			showPaymentPanel();
+		};
 		const isSelectorViewActive = (view) =>
 			compactPanel.value === "selector" && activeView.value === view;
 		const handleAdditionalDiscountUpdate = (value) => {
@@ -484,6 +495,7 @@ export default {
 			setSelectorView,
 			showInvoicePanel,
 			showPaymentPanel,
+			triggerInvoicePay,
 			isSelectorViewActive,
 			handleAdditionalDiscountUpdate,
 			handleAdditionalDiscountFocus,

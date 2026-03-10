@@ -232,6 +232,8 @@ defineExpose({
 
 @media (max-width: 768px) {
 	.sticky-header {
+		top: 0;
+		z-index: 13;
 		padding: 12px 12px 2px;
 	}
 

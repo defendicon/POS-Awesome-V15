@@ -1005,14 +1005,15 @@ const {
 const { responsiveStyles } = responsive;
 const { rtlClasses } = rtl;
 const isPhone = computed(() => responsive.isPhone.value);
+const phoneSelectorHeight = "calc(var(--viewport-height) - var(--bottom-safe-space) - 24px)";
 const selectorCardStyle = computed<CSSProperties>(() => ({
-	height: isPhone.value ? "auto" : responsiveStyles.value["--container-height"],
-	maxHeight: isPhone.value ? "none" : responsiveStyles.value["--container-height"],
+	height: isPhone.value ? phoneSelectorHeight : responsiveStyles.value["--container-height"],
+	maxHeight: isPhone.value ? phoneSelectorHeight : responsiveStyles.value["--container-height"],
 	minHeight: isPhone.value
 		? "calc(var(--viewport-height) * 0.46)"
 		: responsiveStyles.value["--container-height"],
 	resize: isPhone.value ? "none" : "vertical",
-	overflow: isPhone.value ? "visible" : "auto",
+	overflow: "auto",
 	position: "relative",
 }));
 
@@ -1360,6 +1361,12 @@ defineExpose({
 
 	.selection-card {
 		margin-top: var(--dynamic-xs) !important;
+	}
+
+	.selector-header-card {
+		top: max(4px, env(safe-area-inset-top));
+		z-index: 12;
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 	}
 
 	.items-card-grid {
