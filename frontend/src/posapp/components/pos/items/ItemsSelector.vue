@@ -1267,9 +1267,10 @@ defineExpose({
 .selector-header-card {
 	padding: 0;
 	overflow: hidden;
-	position: sticky;
-	top: 0;
-	z-index: 8;
+	position: relative;
+	z-index: 2;
+	flex: 0 0 auto;
+	background: var(--pos-card-bg) !important;
 }
 
 .selector-results-card {
@@ -1278,7 +1279,7 @@ defineExpose({
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
-	min-height: 0;
+	min-height: 240px;
 }
 
 .selector-results-card .items {
@@ -1417,6 +1418,10 @@ defineExpose({
 		min-height: max(var(--container-min-height, 380px), 64vh);
 	}
 
+	.selector-results-card {
+		min-height: 320px;
+	}
+
 	.items-card-grid {
 		grid-template-columns: 1fr;
 		gap: 10px;
@@ -1431,6 +1436,10 @@ defineExpose({
 
 	.selection {
 		min-height: max(var(--container-min-height, 380px), 60vh);
+	}
+
+	.selector-results-card {
+		min-height: 280px;
 	}
 }
 

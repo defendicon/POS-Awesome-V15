@@ -1203,7 +1203,7 @@ export default {
 		max-height: var(--container-height) !important;
 		min-height: var(--container-min-height, 380px) !important;
 		resize: none !important;
-		overflow: hidden !important;
+		overflow: auto !important;
 	}
 
 	.dynamic-padding {
@@ -1233,7 +1233,7 @@ export default {
 	}
 
 	.invoice-items-card {
-		flex: 1 1 auto;
+		flex: 0 0 auto;
 		min-height: 0;
 	}
 
@@ -1243,7 +1243,8 @@ export default {
 		margin-right: calc(-1 * var(--dynamic-xs));
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
-		flex: 1 1 auto;
+		flex: 0 0 auto;
+		height: min(44vh, 420px);
 		min-height: 320px;
 	}
 
@@ -1283,6 +1284,7 @@ export default {
 		margin-right: calc(-1 * var(--dynamic-xs));
 		width: calc(100% + 2 * var(--dynamic-xs));
 		max-width: calc(100% + 2 * var(--dynamic-xs));
+		height: min(42vh, 360px);
 		min-height: 300px;
 	}
 
@@ -1341,9 +1343,10 @@ export default {
 
 :deep(.items-table-wrapper .posa-items-table-container) {
 	flex: 1 1 auto;
-	min-height: 100%;
+	min-height: 0;
 	height: 100% !important;
 	max-height: 100% !important;
+	overflow-y: auto !important;
 }
 
 /* New styles for improved column switches */

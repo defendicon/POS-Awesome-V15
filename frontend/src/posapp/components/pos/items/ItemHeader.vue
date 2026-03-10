@@ -1,79 +1,86 @@
 <template>
-	<div class="sticky-header">
-		<v-row class="items">
-			<v-col
-				class="pb-0"
-				cols="12"
-				:md="posProfile.posa_input_qty ? 9 : 12"
-			>
-				<v-text-field
-					density="compact"
-					clearable
-					autofocus
-					variant="solo"
-					color="primary"
-					:label="frappe._('Search Items')"
-					hint="Search by item code, serial number, batch no or barcode"
-					hide-details
-					:model-value="searchInput"
-					@update:model-value="
-						(val) => {
-							$emit('update:searchInput', val);
-							$emit('search-input', val);
-						}
-					"
-					@keydown.esc="$emit('esc')"
-					@keydown.enter="$emit('enter')"
-					@keydown="$emit('search-keydown', $event)"
-					@click:clear="$emit('clear-search')"
-					@click:prepend-inner="$emit('focus')"
-					@paste="$emit('search-paste', $event)"
-					prepend-inner-icon="mdi-magnify"
-					@focus="$emit('focus')"
-					ref="debounce_search"
+	<div class="item-header">
+		<div class="sticky-search-row">
+			<v-row class="items">
+				<v-col
+					class="pb-0"
+					cols="12"
+					:md="posProfile.posa_input_qty ? 9 : 12"
 				>
-					<template v-slot:append-inner>
-						<v-btn
-							v-if="posProfile.posa_enable_camera_scanning"
-							icon="mdi-camera"
-							size="small"
-							color="primary"
-							variant="text"
-							:disabled="scannerLocked"
-							:aria-label="
-								scannerLocked
-									? __('Acknowledge the error to resume scanning')
-									: __('Scan with Camera')
-							"
-							@click="$emit('start-camera')"
-							:title="
-								scannerLocked
-									? __('Acknowledge the error to resume scanning')
-									: __('Scan with Camera')
-							"
-						>
-						</v-btn>
-					</template>
-				</v-text-field>
-			</v-col>
-			<v-col cols="12" md="3" class="pb-0" v-if="posProfile.posa_input_qty">
-				<v-text-field
-					density="compact"
-					variant="solo"
-					color="primary"
-					:label="frappe._('QTY')"
-					hide-details
-					:model-value="qtyInput"
-					@update:model-value="$emit('update:qtyInput', $event)"
-					type="text"
-					@keydown.enter="$emit('enter')"
-					@keydown.esc="$emit('esc')"
-					@focus="$emit('clear-qty')"
-					@click="$emit('clear-qty')"
-					@blur="$emit('blur-qty')"
-				></v-text-field>
-			</v-col>
-			<v-col cols="12" class="dynamic-margin-xs">
+					<v-text-field
+						density="compact"
+						clearable
+						autofocus
+						variant="solo"
+						color="primary"
+						:label="frappe._('Search Items')"
+						hint="Search by item code, serial number, batch no or barcode"
+						hide-details
+						:model-value="searchInput"
+						@update:model-value="
+							(val) => {
+								$emit('update:searchInput', val);
+								$emit('search-input', val);
+							}
+						"
+						@keydown.esc="$emit('esc')"
+						@keydown.enter="$emit('enter')"
+						@keydown="$emit('search-keydown', $event)"
+						@click:clear="$emit('clear-search')"
+						@click:prepend-inner="$emit('focus')"
+						@paste="$emit('search-paste', $event)"
+						prepend-inner-icon="mdi-magnify"
+						@focus="$emit('focus')"
+						ref="debounce_search"
+					>
+						<template v-slot:append-inner>
+							<v-btn
+								v-if="posProfile.posa_enable_camera_scanning"
+								icon="mdi-camera"
+								size="small"
+								color="primary"
+								variant="text"
+								:disabled="scannerLocked"
+								:aria-label="
+									scannerLocked
+										? __('Acknowledge the error to resume scanning')
+										: __('Scan with Camera')
+								"
+								@click="$emit('start-camera')"
+								:title="
+									scannerLocked
+										? __('Acknowledge the error to resume scanning')
+										: __('Scan with Camera')
+								"
+							>
+							</v-btn>
+						</template>
+					</v-text-field>
+				</v-col>
+				<v-col cols="12" md="3" class="pb-0" v-if="posProfile.posa_input_qty">
+					<v-text-field
+						density="compact"
+						variant="solo"
+						color="primary"
+						:label="frappe._('QTY')"
+						hide-details
+						:model-value="qtyInput"
+						@update:model-value="$emit('update:qtyInput', $event)"
+						type="text"
+						@keydown.enter="$emit('enter')"
+						@keydown.esc="$emit('esc')"
+						@focus="$emit('clear-qty')"
+						@click="$emit('clear-qty')"
+						@blur="$emit('blur-qty')"
+					></v-text-field>
+				</v-col>
+			</v-row>
+		</div>
+
+		<v-row class="items item-header__actions">
+			<v-col
+				cols="12"
+			>
 				<div class="settings-container">
 					<v-btn
 						v-if="context === 'purchase'"
@@ -166,24 +173,33 @@ defineExpose({
 </script>
 
 <style scoped>
-.sticky-header {
+.item-header {
+	display: flex;
+	flex-direction: column;
+}
+
+.sticky-search-row {
 	position: sticky;
 	top: 0;
 	z-index: 5;
-	background: rgb(var(--v-theme-surface));
-	padding: 12px 12px 0 12px;
+	padding: 12px 12px 8px;
+	background: var(--pos-card-bg, rgb(var(--v-theme-surface)));
 	border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-	margin-bottom: 0;
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 
 .items {
 	margin: 0;
 }
 
+.item-header__actions {
+	padding: 4px 12px 8px;
+}
+
 .settings-container {
 	display: flex;
 	align-items: center;
-	padding: 4px 0;
+	padding: 0;
 }
 
 .settings-btn {
