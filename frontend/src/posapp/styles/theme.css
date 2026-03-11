@@ -484,6 +484,8 @@ body[data-page-route="posapp"] .v-tooltip > .v-overlay__content,
 body[data-page-route="posapp"] .v-overlay-container .v-tooltip > .v-overlay__content,
 body[data-page-route="posapp"] .v-tooltip .v-overlay__content,
 body[data-page-route="posapp"] .v-overlay__content.posa-theme-tooltip {
+	--v-theme-on-surface: 33, 33, 33;
+	--v-theme-on-surface-variant: 33, 33, 33;
 	background: var(--pos-tooltip-bg) !important;
 	color: var(--pos-text-primary) !important;
 	-webkit-text-fill-color: var(--pos-text-primary) !important;
@@ -493,6 +495,16 @@ body[data-page-route="posapp"] .v-overlay__content.posa-theme-tooltip {
 	padding: 10px 12px !important;
 	backdrop-filter: blur(12px);
 	opacity: 1 !important;
+}
+
+[data-theme="dark"] body[data-page-route="posapp"] .v-overlay-container .v-tooltip > .v-overlay__content,
+[data-theme="dark"] body[data-page-route="posapp"] .v-tooltip .v-overlay__content,
+[data-theme="dark"] body[data-page-route="posapp"] .v-overlay__content.posa-theme-tooltip,
+[data-theme-mode="dark"] body[data-page-route="posapp"] .v-overlay-container .v-tooltip > .v-overlay__content,
+[data-theme-mode="dark"] body[data-page-route="posapp"] .v-tooltip .v-overlay__content,
+[data-theme-mode="dark"] body[data-page-route="posapp"] .v-overlay__content.posa-theme-tooltip {
+	--v-theme-on-surface: 255, 255, 255;
+	--v-theme-on-surface-variant: 255, 255, 255;
 }
 
 body[data-page-route="posapp"] .v-overlay-container .v-tooltip > .v-overlay__content *,

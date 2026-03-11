@@ -150,6 +150,12 @@ export function useTheme() {
 
 			root.style.setProperty("--pos-card-bg", "#1E1E1E");
 			root.style.setProperty("--pos-input-bg", "#2d2d2d");
+			root.style.setProperty("--pos-tooltip-bg", "#202833");
+			root.style.setProperty(
+				"--pos-tooltip-border",
+				"rgba(148, 163, 184, 0.2)",
+			);
+			root.style.setProperty("--pos-tooltip-shadow", "rgba(0, 0, 0, 0.4)");
 			root.style.setProperty(
 				"--pos-hover-bg",
 				"rgba(255, 255, 255, 0.12)",
@@ -178,6 +184,15 @@ export function useTheme() {
 
 			root.style.setProperty("--pos-card-bg", "#ffffff");
 			root.style.setProperty("--pos-input-bg", "#f5f5f5");
+			root.style.setProperty("--pos-tooltip-bg", "#ffffff");
+			root.style.setProperty(
+				"--pos-tooltip-border",
+				"rgba(15, 23, 42, 0.12)",
+			);
+			root.style.setProperty(
+				"--pos-tooltip-shadow",
+				"rgba(15, 23, 42, 0.14)",
+			);
 			root.style.setProperty(
 				"--pos-hover-bg",
 				"rgba(25, 118, 210, 0.04)",
